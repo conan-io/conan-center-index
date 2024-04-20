@@ -8,3 +8,7 @@ patches:
     - patch_file: "patches/0002-fix-for-mingw-and-empty-literal-for-vc.patch"
     - patch_file: "patches/0003-export-extern-symbols-for-msvc.patch"
     - patch_file: "patches/0004-minizip-no-crypt-header.patch"
+    - patch_file: "patches/0005-cpp17-compatibility.patch"
+      patch_description: "Rmove unnecessary std::unary_function for C++17 compatibility"
+      patch_type: "portability"
+      patch_source: "https://github.com/libkml/libkml/pull/275"

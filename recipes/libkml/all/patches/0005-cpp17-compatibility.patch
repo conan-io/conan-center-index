@@ -1,0 +1,22 @@
+From b6db3d2e2b916f692bf9d65ca15e3e32926bbfd7 Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Sat, 20 Apr 2024 16:40:54 +0300
+Subject: [PATCH] Remove unnecessary std::unary_function for C++17 support
+
+---
+ src/kml/xsd/xsd_file.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/kml/xsd/xsd_file.cc b/src/kml/xsd/xsd_file.cc
+index ac8d184a..30ef6e32 100644
+--- a/src/kml/xsd/xsd_file.cc
++++ b/src/kml/xsd/xsd_file.cc
+@@ -50,7 +50,7 @@ XsdFile* XsdFile::CreateFromParse(const string& xsd_data,
+ 
+ // TODO: mem_fun might help avoid this functor
+ typedef std::pair<string, XsdElementPtr> NameElementPair;
+-struct GetElement : public std::unary_function<NameElementPair, void> {
++struct GetElement {
+   GetElement(XsdElementVector* elements)
+     : elements_(elements) {
+   }
