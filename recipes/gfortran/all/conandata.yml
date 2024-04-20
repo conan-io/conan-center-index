@@ -1,7 +1,11 @@
 sources:
   "13.2.0":
-    url:
-      - "https://mirrors.dotsrc.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz"
-      - "https://ftpmirror.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz"
-      - "https://gcc.gnu.org/ftp/gcc/releases/gcc-13.2.0/gcc-13.2.0.tar.xz"
-    sha256: "e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da"
+    sources:
+      url:
+        - "https://mirrors.dotsrc.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz"
+        - "https://ftpmirror.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz"
+        - "https://gcc.gnu.org/ftp/gcc/releases/gcc-13.2.0/gcc-13.2.0.tar.xz"
+      sha256: "e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da"
+    homebrew-patches:
+      url: "https://raw.githubusercontent.com/Homebrew/formula-patches/3c5cbc8e9cf444a1967786af48e430588e1eb481/gcc/gcc-13.2.0.diff"
+      sha256: "2df7ef067871a30b2531a2013b3db661ec9e61037341977bfc451e30bf2c1035"

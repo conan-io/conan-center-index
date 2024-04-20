@@ -2,10 +2,9 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import XCRun
-from conan.tools.build import cross_building
+from conan.tools.apple import XCRun, is_apple_os
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, replace_in_file, rmdir, rm, chdir
+from conan.tools.files import copy, get, replace_in_file, rmdir, rm, chdir, download, patch
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
@@ -53,18 +52,6 @@ class GFortranConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Windows builds aren't currently supported. Contributions to support this are welcome."
             )
-        if self.settings.os == "Macos":
-            # FIXME: This recipe should largely support Macos, however the following
-            # errors are present when building using the c3i CI:
-            # clang: error: unsupported option '-print-multi-os-directory'
-            # clang: error: no input files
-            raise ConanInvalidConfiguration(
-                "Macos builds aren't currently supported. Contributions to support this are welcome."
-            )
-        if cross_building(self):
-            raise ConanInvalidConfiguration(
-                "Cross builds are not current supported. Contributions to support this are welcome"
-            )
 
     def build_requirements(self):
         if self.settings.os == "Linux":
@@ -74,7 +61,8 @@ class GFortranConan(ConanFile):
         self.tool_requires("flex/2.6.4")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version]["sources"], strip_root=True)
+        download(self, **self.conan_data["sources"][self.version]["homebrew-patches"], filename="homebrew.patch")
 
     def generate(self):
         # Ensure binutils and flex are on the path.
@@ -113,14 +101,12 @@ class GFortranConan(ConanFile):
         # additional $LIBS to the test compilation
 
     def build(self):
+        if is_apple_os(self):
+            patch(self, patch_file=os.path.join(self.source_folder, "homebrew.patch"), base_path=self.source_folder)
+
         # If building on x86_64, change the default directory name for 64-bit libraries to "lib":
         replace_in_file(self, os.path.join(self.source_folder, "gcc", "config", "i386", "t-linux64"),
                         "m64=../lib64", "m64=../lib", strict=False)
-
-        # Ensure correct install names when linking against libgcc_s;
-        # see discussion in https://github.com/Homebrew/legacy-homebrew/pull/34303
-        replace_in_file(self, os.path.join(self.source_folder, "libgcc", "config", "t-slibgcc-darwin"),
-                        "@shlib_slibdir@", os.path.join(self.package_folder, "lib"), strict=False)
 
         autotools = Autotools(self)
         autotools.configure()
