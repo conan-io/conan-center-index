@@ -52,6 +52,8 @@ class LibkmlConan(ConanFile):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f"{self.ref} shared with Visual Studio and MT runtime is not supported")
         if conan_version.major >= 2:
+            # FIXME: linter complains, but function is there
+            # https://docs.conan.io/2.0/reference/tools/build.html?highlight=check_min_cppstd#conan-tools-build-check-max-cppstd
             import sys
             check_max_cppstd = getattr(sys.modules['conan.tools.build'], 'check_max_cppstd')
             # INFO: error: no template named 'unary_function' in namespace 'std'. Removed in C++17.
