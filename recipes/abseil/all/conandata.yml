@@ -1,4 +1,7 @@
 sources:
+  "20240116.2":
+    url: "https://github.com/abseil/abseil-cpp/archive/20240116.2.tar.gz"
+    sha256: "733726b8c3a6d39a4120d7e45ea8b41a434cdacde401cba500f14236c49b39dc"
   "20240116.1":
     url: "https://github.com/abseil/abseil-cpp/archive/20240116.1.tar.gz"
     sha256: "3c743204df78366ad2eaf236d6631d83f6bc928d1705dd0000b872e53b73dc6a"
@@ -15,6 +18,15 @@ sources:
     url: "https://github.com/abseil/abseil-cpp/archive/20211102.0.tar.gz"
     sha256: "dcf71b9cba8dc0ca9940c4b316a0c796be8fab42b070bb6b7cab62b48f0e66c4"
 patches:
+  "20240116.2":
+    - patch_file: "patches/0003-absl-string-libm-20240116.patch"
+      patch_description: "link libm to absl string"
+      patch_type: "portability"
+      patch_source: "https://github.com/abseil/abseil-cpp/issues/1100"
+    - patch_file: "patches/20240116.1-0001-fix-filesystem-include.patch"
+      patch_description: "Fix GCC 7 including <filesystem> in C++17 mode when it is not available (until GCC 8)"
+      patch_type: "portability"
+      patch_source: "https://github.com/abseil/abseil-cpp/commit/bb83aceacb554e79e7cd2404856f0be30bd00303"
   "20240116.1":
     - patch_file: "patches/0003-absl-string-libm-20240116.patch"
       patch_description: "link libm to absl string"

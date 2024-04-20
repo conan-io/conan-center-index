@@ -1,0 +1,13 @@
+diff --git a/src/libmbedcrypto.c b/src/libmbedcrypto.c
+index caa3b6e9..69910a24 100644
+--- a/src/libmbedcrypto.c
++++ b/src/libmbedcrypto.c
+@@ -119,7 +119,7 @@ int hmac_update(HMACCTX c, const void *data, size_t len)
+ int hmac_final(HMACCTX c, unsigned char *hashmacbuf, size_t *len)
+ {
+     int rc;
+-    *len = (unsigned int)mbedtls_md_get_size(c->md_info);
++    *len = (unsigned int)mbedtls_md_get_size(c->MBEDTLS_PRIVATE(md_info));
+     rc = !mbedtls_md_hmac_finish(c, hashmacbuf);
+     mbedtls_md_free(c);
+     SAFE_FREE(c);

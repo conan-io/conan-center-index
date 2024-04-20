@@ -163,6 +163,8 @@ class RocksDBConan(ConanFile):
         if self.options.with_jemalloc:
             deps.set_property("jemalloc", "cmake_file_name", "JeMalloc")
             deps.set_property("jemalloc", "cmake_target_name", "JeMalloc::JeMalloc")
+        if self.options.with_zstd:
+            deps.set_property("zstd", "cmake_target_name", "zstd::zstd")
         deps.generate()
 
     def build(self):
