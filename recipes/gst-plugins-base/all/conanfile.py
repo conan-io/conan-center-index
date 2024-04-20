@@ -84,7 +84,7 @@ class GStPluginsBaseConan(ConanFile):
 
     def requirements(self):
         self.requires("gstreamer/1.22.6", transitive_headers=True, transitive_libs=True)
-        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True, force=True)  # FIXME: remove force
+        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.10")
@@ -118,7 +118,6 @@ class GStPluginsBaseConan(ConanFile):
             self.requires("vorbis/1.3.7")
         if self.options.with_pango:
             self.requires("pango/1.51.0")
-        self.requires("fontconfig/2.15.0", override=True) # FIXME
 
     def validate(self):
         if not self.dependencies["glib"].options.shared and self.options.shared:
