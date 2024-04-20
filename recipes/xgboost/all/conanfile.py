@@ -90,7 +90,7 @@ class XgboostConan(ConanFile):
             self.requires("llvm-openmp/17.0.6")
         if self.options.plugin_rmm:
             self.requires("rmm/24.04.00")
-        if self.options.plugin_federated:
+        if self.options.get_safe("plugin_federated"):
             self.requires("grpc/1.54.3")
             self.requires("protobuf/3.21.12")
 
@@ -108,12 +108,12 @@ class XgboostConan(ConanFile):
             raise ConanInvalidConfiguration("`nccl` must be enabled with `cuda` option.")
         if self.options.cuda and not self.options.plugin_rmm:
             raise ConanInvalidConfiguration("`plugin_rmm` must be enabled with `cuda` option.")
-        if self.options.plugin_federated and not self.options.shared:
+        if self.options.get_safe("plugin_federated") and not self.options.shared:
             raise ConanInvalidConfiguration("Cannot build static lib with federated learning support")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18 <4]")
-        if self.options.plugin_federated:
+        if self.options.get_safe("plugin_federated"):
             self.tool_requires("protobuf/<host_version>")
 
     def source(self):
