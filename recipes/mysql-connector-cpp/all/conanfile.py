@@ -46,7 +46,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
         self.requires("lz4/1.9.4")
         self.requires("zstd/1.5.5")
         self.requires("protobuf/3.21.12")
-        self.requires("boost/1.84.0")git 
+        self.requires("boost/1.84.0")
         self.requires("openssl/[>=1.1.1 <4]")
         self.requires("libmysqlclient/8.1.0")
 
