@@ -66,7 +66,7 @@ class XkbcommonConan(ConanFile):
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.options.get_safe("xkbregistry"):
-            self.requires("libxml2/2.12.3")
+            self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0")
 
@@ -95,6 +95,8 @@ class XkbcommonConan(ConanFile):
             env.generate(scope="build")
 
         tc = MesonToolchain(self)
+        if Version(self.version) >= "1.6":
+            tc.project_options["enable-bash-completion"] = False
         tc.project_options["enable-docs"] = False
         tc.project_options["enable-wayland"] = self.options.get_safe("with_wayland", False)
         tc.project_options["enable-x11"] = self.options.with_x11

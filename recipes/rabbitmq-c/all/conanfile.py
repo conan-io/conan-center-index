@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
+from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.53.0"
@@ -9,10 +10,10 @@ required_conan_version = ">=1.53.0"
 
 class RabbitmqcConan(ConanFile):
     name = "rabbitmq-c"
+    description = "This is a C-language AMQP client library for use with v2.0+ of the RabbitMQ broker."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/alanxz/rabbitmq-c"
-    description = "This is a C-language AMQP client library for use with v2.0+ of the RabbitMQ broker."
     topics = ("rabbitmq", "message queue")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -41,6 +42,10 @@ class RabbitmqcConan(ConanFile):
         if self.options.ssl:
             self.requires("openssl/[>=1.1 <4]")
 
+    def build_requirements(self):
+        if Version(self.version) >= "0.14.0":
+            self.tool_requires("cmake/[>=3.22 <4]")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -67,6 +72,10 @@ class RabbitmqcConan(ConanFile):
         if self.options.ssl:
             deps = CMakeDeps(self)
             deps.generate()
+
+        if Version(self.version) >= "0.14.0":
+            venv = VirtualBuildEnv(self)
+            venv.generate(scope="build")
 
     def build(self):
         cmake = CMake(self)
