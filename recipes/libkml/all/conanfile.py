@@ -1,8 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc_static_runtime
 import os
 import textwrap
 
@@ -49,7 +50,9 @@ class LibkmlConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 98)
+        if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f"{self.ref} shared with Visual Studio and MT runtime is not supported")
 
     def source(self):
