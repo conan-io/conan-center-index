@@ -9,7 +9,7 @@ from conan.tools.files import chdir, copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, check_min_vs
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -191,38 +191,41 @@ class GStPluginsBaseConan(ConanFile):
         if is_msvc(self):
             add_linker_flag("-lws2_32")
             add_compiler_flag(f"-{msvc_runtime_flag(self)}")
-            if int(str(self.settings.compiler.version)) < 14:
+            if not check_min_vs(self, 190, raise_invalid=False):
                 add_compiler_flag("-Dsnprintf=_snprintf")
             if msvc_runtime_flag(self):
                 tc.project_options["b_vscrt"] = msvc_runtime_flag(self).lower()
 
         gl_api, gl_platform, gl_winsys = self._gl_config()
 
+        def _enabled(value):
+            return "enabled" if value else "disabled"
+
         tc.project_options["tools"] = "disabled"
         tc.project_options["examples"] = "disabled"
         tc.project_options["tests"] = "disabled"
         tc.project_options["wrap_mode"] = "nofallback"
-        tc.project_options["introspection"] = "enabled" if self.options.with_introspection else "disabled"
+        tc.project_options["introspection"] = _enabled(self.options.with_introspection)
         tc.project_options["orc"] = "disabled"  # TODO: orc
-        tc.project_options["gl"] = "enabled" if self.options.with_gl else "disabled"
-        tc.project_options["gl-graphene"] = "enabled" if self.options.with_gl and self.options.with_graphene else "disabled"
-        tc.project_options["gl-png"] = "enabled" if self.options.with_gl and self.options.with_libpng else "disabled"
-        tc.project_options["gl-jpeg"] = "enabled" if self.options.with_gl and self.options.with_libjpeg else "disabled"
+        tc.project_options["gl"] = _enabled(self.options.with_gl)
+        tc.project_options["gl-graphene"] = _enabled(self.options.with_gl and self.options.with_graphene)
+        tc.project_options["gl-png"] = _enabled(self.options.with_gl and self.options.with_libpng)
+        tc.project_options["gl-jpeg"] = _enabled(self.options.with_gl and self.options.with_libjpeg)
         tc.project_options["gl_api"] = gl_api
         tc.project_options["gl_platform"] = gl_platform
         tc.project_options["gl_winsys"] = gl_winsys
-        tc.project_options["alsa"] = "enabled" if self.options.get_safe("with_libalsa") else "disabled"
-        tc.project_options["cdparanoia"] = "disabled"  # "enabled" if self.options.with_cdparanoia else "disabled" # TODO: cdparanoia
-        tc.project_options["libvisual"] = "disabled"  # "enabled" if self.options.with_libvisual else "disabled" # TODO: libvisual
-        tc.project_options["ogg"] = "enabled" if self.options.with_ogg else "disabled"
-        tc.project_options["opus"] = "enabled" if self.options.with_opus else "disabled"
-        tc.project_options["pango"] = "enabled" if self.options.with_pango else "disabled"
-        tc.project_options["theora"] = "enabled" if self.options.with_theora else "disabled"
-        tc.project_options["tremor"] = "disabled"  # "enabled" if self.options.with_tremor else "disabled" # TODO: tremor - only useful on machines without floating-point support
-        tc.project_options["vorbis"] = "enabled" if self.options.with_vorbis else "disabled"
-        tc.project_options["x11"] = "enabled" if self.options.get_safe("with_xorg") else "disabled"
-        tc.project_options["xshm"] = "enabled" if self.options.get_safe("with_xorg") else "disabled"
-        tc.project_options["xvideo"] = "enabled" if self.options.get_safe("with_xorg") else "disabled"
+        tc.project_options["alsa"] = _enabled(self.options.get_safe("with_libalsa"))
+        tc.project_options["cdparanoia"] = "disabled"  # enabled_disabled(self.options.with_cdparanoia) # TODO: cdparanoia
+        tc.project_options["libvisual"] = "disabled"  # enabled_disabled(self.options.with_libvisual) # TODO: libvisual
+        tc.project_options["ogg"] = _enabled(self.options.with_ogg)
+        tc.project_options["opus"] = _enabled(self.options.with_opus)
+        tc.project_options["pango"] = _enabled(self.options.with_pango)
+        tc.project_options["theora"] = _enabled(self.options.with_theora)
+        tc.project_options["tremor"] = "disabled"  # enabled_disabled(self.options.with_tremor) # TODO: tremor - only useful on machines without floating-point support
+        tc.project_options["vorbis"] = _enabled(self.options.with_vorbis)
+        tc.project_options["x11"] = _enabled(self.options.get_safe("with_xorg"))
+        tc.project_options["xshm"] = _enabled(self.options.get_safe("with_xorg"))
+        tc.project_options["xvideo"] = _enabled(self.options.get_safe("with_xorg"))
         tc.generate()
 
         tc = PkgConfigDeps(self)
