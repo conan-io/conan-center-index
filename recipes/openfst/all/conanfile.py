@@ -161,18 +161,6 @@ class OpenFstConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", lib_dir, recursive=True)
 
-    @property
-    def _get_const_fsts_libs(self):
-        return [f"const{n}-fst" for n in [8, 16, 64]]
-
-    @property
-    def _get_compact_fsts_libs(self):
-        return [f"compact{n}_{fst}-fst"
-                for n, fst in product(
-                    [8, 16, 64],
-                    ["acceptor", "string", "unweighted_acceptor", "unweighted", "weighted_string"]
-                )]
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenFst")
         self.cpp_info.set_property("cmake_target_name", "OpenFst::OpenFst")
@@ -199,10 +187,6 @@ class OpenFstConan(ConanFile):
             self.cpp_info.libs.append("fstscript")
             if self.options.enable_compress:
                 self.cpp_info.libs.append("fstcompressscript")
-            if self.options.enable_compact_fsts:
-                self.cpp_info.libs.extend(self._get_compact_fsts_libs)
-            if self.options.enable_const_fsts:
-                self.cpp_info.libs.extend(self._get_const_fsts_libs)
             if self.options.enable_far or self.options.enable_grm:
                 self.cpp_info.libs.append("fstfarscript")
             if self.options.enable_linear_fsts:
