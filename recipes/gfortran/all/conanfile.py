@@ -138,10 +138,9 @@ class GFortranConan(ConanFile):
         autotools.install(target="install-strip")
         rm(self, "*.la", self.package_folder, recursive=True)
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "libexec"))
 
         # Don't export static libraries.
-        # This removes only libssp_nonshared.a as of v13.2.
+        # This only removes libssp_nonshared.a as of v13.2.
         rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
         # Drop ar, nm, ranlib, cpp, etc. to not clash with the existing C/C++ toolchain
@@ -171,9 +170,18 @@ class GFortranConan(ConanFile):
         # libssp.so: Stack Smashing Protector library
         self.cpp_info.components["libssp"].libs = ["ssp"]
 
+        self.cpp_info.components["executables"].bindirs = ["bin", "libexec"]
+        self.cpp_info.components["executables"].requires = [
+            "mpc::mpc",
+            "mpfr::mpfr",
+            "gmp::gmp",
+            "zlib::zlib",
+            "isl::isl",
+        ]
+
         gfortran_path = os.path.join(self.package_folder, "bin", self._gfortran_full_executable)
         self.buildenv_info.define_path("FC", gfortran_path)
 
         # TODO: Legacy, remove when Conan v1 support is dropped
-        self.env_info.PATH = os.path.join(self.package_folder, "bin")
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
         self.env_info.FC = gfortran_path
