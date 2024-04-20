@@ -1,0 +1,10 @@
+sources:
+  "1.0.0":
+    release:
+      url: "https://github.com/dzcode-io/kuliya/releases/download/c-v1.0.0/c-release.tar.gz"
+      sha256: "a0e064d29358e40245dc8b7b35160a6b15e10059e4bd42d9dc4f0af76d031e5f"
+    # Old versions don't have the license embed in the release tar, download it separatedly for now
+    # from the commit of the upstream tag
+    license:
+      url: "https://raw.githubusercontent.com/dzcode-io/kuliya/c-v1.0.0/LICENSE"
+      sha256: "70884fb7eff4f91c8d776f8cf7bd93cce0c93213f57153956189b488cfd911be"
