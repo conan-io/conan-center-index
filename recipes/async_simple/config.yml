@@ -1,4 +1,5 @@
 versions:
-  # Newer versions at the top
+  "1.2":
+    folder: all
   "1.0.0":
     folder: all
