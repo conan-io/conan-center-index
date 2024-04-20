@@ -89,7 +89,7 @@ class XgboostConan(ConanFile):
         if self.options.openmp and self.settings.compiler in ["clang", "apple-clang"]:
             self.requires("llvm-openmp/17.0.6")
         if self.options.plugin_rmm:
-            self.requires("rmm/23.10.00")
+            self.requires("rmm/24.04.00")
         if self.options.plugin_federated:
             self.requires("grpc/1.54.3")
             self.requires("protobuf/3.21.12")
