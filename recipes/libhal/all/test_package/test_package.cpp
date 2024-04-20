@@ -20,7 +20,8 @@ private:
   }
 };
 
-int main()
+int
+main()
 {
   test_pwm pwm;
   auto rc_servo = hal::rc_servo::create(pwm).value();
@@ -34,15 +35,20 @@ int main()
 #else
 
 #include <libhal/pwm.hpp>
+#include <libhal/timeout.hpp>
+#include <libhal/timer.hpp>
 
-class test_pwm : public hal::pwm {
+class test_pwm : public hal::pwm
+{
 private:
-  virtual hal::result<frequency_t> driver_frequency(hal::hertz p_frequency) {
+  hal::result<frequency_t> driver_frequency(hal::hertz p_frequency) override
+  {
     std::printf("frequency = %f Hz\n", p_frequency);
 
     return frequency_t{};
   }
-  virtual hal::result<duty_cycle_t> driver_duty_cycle(float p_position) {
+  hal::result<duty_cycle_t> driver_duty_cycle(float p_position) override
+  {
     error_count_down--;
     if (error_count_down == 0) {
       return hal::new_error(std::errc::io_error);
@@ -55,19 +61,44 @@ private:
   int error_count_down = 2;
 };
 
-int main() {
+class test_timer : public hal::timer
+{
+private:
+  hal::result<hal::timer::is_running_t> driver_is_running() override
+  {
+    return is_running_t{};
+  }
+  hal::result<hal::timer::cancel_t> driver_cancel() override
+  {
+    return cancel_t{};
+  }
+  hal::result<hal::timer::schedule_t> driver_schedule(
+    hal::callback<void(void)>,
+    hal::time_duration) override
+  {
+    return schedule_t{};
+  }
+};
+
+int
+main()
+{
   using namespace hal::literals;
+  using namespace std::literals;
 
   int status = 0;
   test_pwm pwm;
+  test_timer timer;
   hal::attempt_all(
-    [&pwm]() -> hal::status {
+    [&pwm, &timer]() -> hal::status {
       HAL_CHECK(pwm.frequency(10.0_kHz));
 
       HAL_CHECK(pwm.duty_cycle(0.25));
       HAL_CHECK(pwm.duty_cycle(0.50));
       HAL_CHECK(pwm.duty_cycle(-0.25));
       HAL_CHECK(pwm.duty_cycle(-1.0));
+
+      HAL_CHECK(timer.schedule([]() {}, 1ms));
 
       return hal::success();
     },
