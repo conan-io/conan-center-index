@@ -1,12 +1,11 @@
 import os
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get
-from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.60.0 <2 || >=2.0.5"
@@ -60,10 +59,6 @@ class DaggyConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.options["qt"].shared = True
-        if conan_version.major == 1 and is_msvc(self) and self.options.shared:
-            # test_package fails with libssh2 linker errors:
-            # Ssh2Client.obj : error LNK2019: unresolved external symbol __imp_libssh2_exit
-            self.options.with_ssh2 = False
 
     def layout(self):
         cmake_layout(self, src_folder="src")
