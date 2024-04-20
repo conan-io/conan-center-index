@@ -120,7 +120,7 @@ class OgreConanFile(ConanFile):
         "build_plugin_cg": False,
         "build_plugin_dot_scene": True,
         "build_plugin_exrcodec": True,
-        "build_plugin_freeimage": True,
+        "build_plugin_freeimage": False, # FIXME: set to true after https://github.com/conan-io/conan-center-index/pull/23138 is merged
         "build_plugin_octree": True,
         "build_plugin_pcz": True,
         "build_plugin_pfx": True,
