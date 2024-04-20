@@ -1,0 +1,11 @@
+sources:
+  "2.0.3":
+    xgboost:
+      url: "https://github.com/dmlc/xgboost/archive/refs/tags/v2.0.3.tar.gz"
+      sha256: "94e5deb27133459ec4172f3fed83971383366ad2a7d646b6f0b51f63484c5138"
+    dmlc-core:
+      url: "https://github.com/dmlc/dmlc-core/archive/ea21135fbb141ae103fb5fc960289b5601b468f2.zip"
+      sha256: "f5bc8789556752d268f0939d4dfd86288954b273e2e35b375649cd062d79c8ee"
+    gputreeshap:
+      url: "https://github.com/rapidsai/gputreeshap/archive/787259b412c18ab8d5f24bf2b8bd6a59ff8208f3.zip"
+      sha256: "071f9aacd0c55ac85059fe7b08768e2e410540e402c55594f7bdc5acd46e3fce"
