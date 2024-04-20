@@ -1,6 +1,7 @@
 #include <xgboost/c_api.h>
 
 int main() {
-    BoosterHandle booster;
-    XGBoosterSetParam(booster, "objective", "binary:logistic");
+    int silent = 0;
+    DMatrixHandle dtrain;
+    XGDMatrixCreateFromFile("missing.txt", silent, &dtrain);
 }
