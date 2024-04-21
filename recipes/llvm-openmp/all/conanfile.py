@@ -65,6 +65,8 @@ class LLVMOpenMpConan(ConanFile):
             del self.options.fPIC
         if is_apple_os(self) or self.settings.os == "Windows":
             del self.options.build_libomptarget
+        if self.settings.os == "Windows":
+            self.options.shared = True
 
     def configure(self):
         if self.options.shared:
