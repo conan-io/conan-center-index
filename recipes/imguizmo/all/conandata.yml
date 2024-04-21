@@ -1,4 +1,7 @@
 sources:
+  "cci.20231114":
+    url: "https://github.com/CedricGuillemet/ImGuizmo/archive/ba662b119d64f9ab700bb2cd7b2781f9044f5565.zip"
+    sha256: "5a63baebb5bce96d83e5e3d6daa4598844ba8d5d0e3cb1ee385fcc54cf996115"
   "1.83":
     url: "https://github.com/CedricGuillemet/ImGuizmo/archive/refs/tags/1.83.tar.gz"
     sha256: "e6d05c5ebde802df7f6c342a06bc675bd2aa1c754d2d96755399a182187098a8"
