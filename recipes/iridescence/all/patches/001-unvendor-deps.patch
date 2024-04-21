@@ -9,7 +9,7 @@
  find_package(OpenGL REQUIRED)
  
  # find_package(PCL)
-@@ -29,50 +29,43 @@
+@@ -29,54 +29,47 @@
  find_package(Eigen3 REQUIRED)
  find_package(PNG REQUIRED)
  find_package(JPEG REQUIRED)
@@ -30,7 +30,8 @@
  add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GL3W)
  add_definitions(-DDATA_PATH_GUESS="${CMAKE_SOURCE_DIR}/data")
  
- add_library(gl_imgui SHARED
+-add_library(gl_imgui SHARED
++add_library(gl_imgui
    thirdparty/gl3w/gl3w.cpp
 -  thirdparty/imgui/imgui.cpp
 -  thirdparty/imgui/imgui_demo.cpp
@@ -76,6 +77,11 @@
    list(APPEND EXTRA_SOURCE src/glk/io/mesh_io.cpp)
  endif()
  
+-add_library(iridescence SHARED
++add_library(iridescence
+   src/glk/path_std.cpp
+   src/glk/mesh.cpp
+   src/glk/mesh_model.cpp
 @@ -143,23 +136,18 @@
  )
  target_include_directories(iridescence PUBLIC
