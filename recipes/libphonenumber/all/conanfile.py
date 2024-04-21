@@ -81,7 +81,7 @@ class LibphonenumberConan(ConanFile):
             self.requires("boost/1.84.0", transitive_headers=True, transitive_libs=True)
         if self.options.use_icu_regexp or self.options.build_geocoder:
             # https://github.com/google/libphonenumber/blob/v8.13.35/cpp/src/phonenumbers/geocoding/phonenumber_offline_geocoder.h#L23
-            transitive_icu = self.options.build_geocoder
+            transitive_icu = bool(self.options.build_geocoder)
             self.requires("icu/74.2", transitive_headers=transitive_icu, transitive_libs=transitive_icu)
         if self.options.use_re2:
             # FIXME: compilation with re2 fails currently with
