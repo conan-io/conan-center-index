@@ -92,11 +92,7 @@ class LibCVDConan(ConanFile):
             self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_opengl", True):
             # https://github.com/edrosten/libcvd/blob/RELEASE_2_5_0/cvd/videodisplay.h#L18-L20
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.requires("libglvnd/1.7.0", transitive_headers=True, transitive_libs=True)
-                self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
-            else:
-                self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
+            self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
