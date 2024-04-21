@@ -44,7 +44,7 @@ class CPythonConan(ConanFile):
         "env_vars": [True, False],  # set environment variables
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "optimizations": False,
         "lto": False,
@@ -79,6 +79,9 @@ class CPythonConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            # Static mode does not work in 3.10+, and there are no
+            # extension modules in static mode in the versions that do work.
+            self.options.shared = True
         if is_msvc(self):
             del self.options.lto
             del self.options.docstrings
