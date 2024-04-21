@@ -70,6 +70,8 @@ class IridescenceConan(ConanFile):
         self.requires("implot/0.16")
         self.requires("glfw/3.4", transitive_headers=True, transitive_libs=True)
         self.requires("opengl/system")
+        # https://github.com/koide3/iridescence/blob/15c5a8787759e104f21cf85fdaeefe64c418d99f/thirdparty/gl3w/GL/glcorearb.h#L82
+        self.requires("khrplatform/cci.20200529", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
