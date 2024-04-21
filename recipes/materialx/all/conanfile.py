@@ -2,9 +2,8 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
+from conan.tools.files import copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.apple import is_apple_os
 from conan.tools.scm import Version
 import os
 
@@ -23,11 +22,13 @@ class MaterialXConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_openimageio": [True, False],
+        "build_gen_msl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_openimageio": False
+        "with_openimageio": False,
+        "build_gen_msl": True
     }
 
     short_paths = True
@@ -78,6 +79,9 @@ class MaterialXConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -86,16 +90,13 @@ class MaterialXConan(ConanFile):
         tc.variables["MATERIALX_BUILD_TESTS"] = False
         tc.variables["MATERIALX_TEST_RENDER"] = False
         tc.variables["MATERIALX_BUILD_SHARED_LIBS"] = self.options.shared
+        tc.variables["MATERIALX_BUILD_GEN_MSL"] = self.options.build_gen_msl and is_apple_os
         tc.generate()
 
         tc = CMakeDeps(self)
         tc.generate()
 
-    def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "VERSION 3.16", "VERSION 3.15")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -117,8 +118,12 @@ class MaterialXConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.append("dl")
+
         self.cpp_info.components["MaterialXCore"].libs = ["MaterialXCore"]
-        
+
         self.cpp_info.components["MaterialXFormat"].libs = ["MaterialXFormat"]
         self.cpp_info.components["MaterialXFormat"].requires = ["MaterialXCore"]
 
@@ -146,11 +151,38 @@ class MaterialXConan(ConanFile):
         self.cpp_info.components["MaterialXRenderGlsl"].requires = ["MaterialXRenderHw", "MaterialXGenGlsl"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["MaterialXRenderGlsl"].requires.append("opengl::opengl")
-            
+        elif self.settings.os in ["Macos", "iOS"]:
+            self.cpp_info.frameworks.extend(["Foundation", "Cocoa", "OpenGL"])
+            if self.settings.os == "Macos":
+                self.cpp_info.includedirs.extend(["include/compat/osx"])
+            else:
+                self.cpp_info.includedirs.extend(["include/compat/ios"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("opengl32")
+
         self.cpp_info.components["MaterialXRenderHw"].libs = ["MaterialXRenderHw"]
         self.cpp_info.components["MaterialXRenderHw"].requires = ["MaterialXRender"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["MaterialXRenderHw"].requires.append("xorg::xorg")
+        elif self.settings.os in ["Macos", "iOS"]:
+            self.cpp_info.frameworks.extend(["Foundation", "Cocoa", "AppKit", "Metal"])
+            if self.settings.os == "Macos":
+                self.cpp_info.includedirs.extend(["include/compat/osx"])
+            else:
+                self.cpp_info.includedirs.extend(["include/compat/ios"])
 
         self.cpp_info.components["MaterialXRenderOsl"].libs = ["MaterialXRenderOsl"]
         self.cpp_info.components["MaterialXRenderOsl"].requires = ["MaterialXRender"]
+
+        if self.options.build_gen_msl:
+            self.cpp_info.components["MaterialXGenMsl"].libs = ["MaterialXGenMsl"]
+            self.cpp_info.components["MaterialXGenMsl"].requires = ["MaterialXCore", "MaterialXGenShader"]
+            
+        if self.options.build_gen_msl and self.settings.os == "Macos":
+            self.cpp_info.components["MaterialXRenderMsl"].libs = ["MaterialXRenderMsl"]
+            self.cpp_info.components["MaterialXRenderMsl"].requires = ["MaterialXRenderHw", "MaterialXGenMsl"]
+            self.cpp_info.frameworks.extend(["CoreFoundation", "OpenGL", "AppKit", "Metal"])
+            if self.settings.os == "Macos":
+                self.cpp_info.includedirs.extend(["include/compat/osx"])
+            else:
+                self.cpp_info.includedirs.extend(["include/compat/ios"])
