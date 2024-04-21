@@ -65,12 +65,13 @@ class LLVMOpenMpConan(ConanFile):
             del self.options.fPIC
         if is_apple_os(self) or self.settings.os == "Windows":
             del self.options.build_libomptarget
-        if self.settings.os == "Windows":
-            self.options.shared = True
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if self.settings.os == "Windows":
+            del self.options.shared
+            self.package_type = "shared-library"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -81,8 +82,6 @@ class LLVMOpenMpConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Windows":
-            if not self.options.shared:
-                raise ConanInvalidConfiguration("llvm-openmp can only be built as shared on Windows")
             if self._version_major < 17:
                 #  fatal error LNK1181: cannot open input file 'build\runtime\src\omp.dll.lib'
                 raise ConanInvalidConfiguration(f"{self.ref} build is broken on MSVC for versions < 17")
@@ -133,7 +132,7 @@ class LLVMOpenMpConan(ConanFile):
         env.generate()
         tc = CMakeToolchain(self)
         tc.variables["OPENMP_STANDALONE_BUILD"] = True
-        tc.variables["LIBOMP_ENABLE_SHARED"] = self.options.shared
+        tc.variables["LIBOMP_ENABLE_SHARED"] = self.options.get_safe("shared", True)
         tc.variables["OPENMP_ENABLE_LIBOMPTARGET"] = self.options.get_safe("build_libomptarget", False)
         # Do not build OpenMP Tools Interface (OMPT)
         tc.variables["LIBOMP_OMPT_SUPPORT"] = False
