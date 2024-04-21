@@ -28,7 +28,8 @@ class CppcheckConan(ConanFile):
         return 11
 
     def validate(self):
-        check_min_cppstd(self, self._min_cppstd)
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
     def export_sources(self):
         export_conandata_patches(self)
