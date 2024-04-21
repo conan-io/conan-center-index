@@ -59,12 +59,13 @@ class IridescenceConan(ConanFile):
 
     def requirements(self):
         self.requires("eigen/3.4.0", transitive_headers=True)
-        if not is_msvc(self):
-            # '#pragma omp' is used in public headers
-            self.requires("llvm-openmp/17.0.6", transitive_headers=True, transitive_libs=True)
+        # '#pragma omp' is used in public headers
+        # Note: native MSVC OpenMP is not compatible
+        self.requires("llvm-openmp/17.0.6", transitive_headers=True, transitive_libs=True)
         if self.options.with_tbb:
             self.requires("onetbb/2021.12.0", transitive_headers=True, transitive_libs=True)
         # The project vendors nanoflann, but it has been heavily extended and should be kept intact
+        # Also uses some fragments from Sophus
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -128,7 +129,7 @@ class IridescenceConan(ConanFile):
         elif self.settings.compiler == "sun-cc":
             return ["-xopenmp"]
         if is_msvc(self):
-            return ["-openmp"]
+            return ["-openmp:llvm"]
         return None
 
     def package_info(self):
@@ -147,3 +148,5 @@ class IridescenceConan(ConanFile):
             self.cpp_info.system_libs.extend(["dl", "pthread", "rt"])
         self.cpp_info.cflags = self._openmp_flags
         self.cpp_info.cxxflags = self._openmp_flags
+        self.cpp_info.sharedlinkflags = self._openmp_flags
+        self.cpp_info.exelinkflags = self._openmp_flags
