@@ -73,7 +73,8 @@ class LibphonenumberConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("abseil/20240116.2")
+        # https://github.com/google/libphonenumber/blob/v8.13.35/cpp/src/phonenumbers/phonenumberutil.h#L33-L34
+        self.requires("abseil/20240116.2", transitive_headers=True)
         self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
         if self.options.use_boost:
             # https://github.com/google/libphonenumber/blob/v8.13.35/cpp/src/phonenumbers/base/synchronization/lock_boost.h
@@ -96,6 +97,10 @@ class LibphonenumberConan(ConanFile):
 
         if self.options.use_protobuf_lite and not self.dependencies["protobuf"].options.lite:
             raise ConanInvalidConfiguration("use_protobuf_lite=True requires protobuf/*:lite=True")
+
+        if not self.options.use_icu_regexp:
+            # Fails with 'undefined reference to `vtable for i18n::phonenumbers::ICURegExpFactory''
+            raise ConanInvalidConfiguration("use_icu_regexp=False is not supported")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
@@ -121,7 +126,11 @@ class LibphonenumberConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_TOOLS_ONLY"] = False
         tc.variables["REGENERATE_METADATA"] = False  # Requires a Java runtime
+        # Otherwise tries to use <tr1/unordered_map>, and requires the recipe to export a define accordingly.
+        # The define can be set based only on a compilation test.
+        tc.variables["USE_STD_MAP"] = True
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
