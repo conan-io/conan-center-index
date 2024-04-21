@@ -1,15 +1,16 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -21,7 +21,7 @@
+@@ -21,62 +21,57 @@
    set(CMAKE_CXX_FLAGS "-march=native ${CMAKE_CXX_FLAGS}")
  endif()
  
 -find_package(GLM REQUIRED)
 +find_package(glm REQUIRED)
  find_package(OpenGL REQUIRED)
++find_package(khrplatform REQUIRED)
  
  # find_package(PCL)
-@@ -29,54 +29,47 @@
+ find_package(Boost REQUIRED filesystem program_options)
  find_package(Eigen3 REQUIRED)
  find_package(PNG REQUIRED)
  find_package(JPEG REQUIRED)
@@ -65,6 +66,7 @@
 +  OpenGL::GL
    glfw
 -  dl
++  khrplatform::khrplatform
 +  imgui::imgui
 +  imguizmo::imguizmo
 +  implot::implot
@@ -82,7 +84,7 @@
    src/glk/path_std.cpp
    src/glk/mesh.cpp
    src/glk/mesh_model.cpp
-@@ -143,23 +136,18 @@
+@@ -143,23 +138,18 @@
  )
  target_include_directories(iridescence PUBLIC
    include
@@ -115,7 +117,7 @@
    ${EXTRA_LIBRARIES}
  )
  
-@@ -224,8 +212,4 @@
+@@ -224,8 +214,4 @@
  install(TARGETS gl_imgui iridescence DESTINATION lib)
  install(DIRECTORY include/ DESTINATION include/iridescence)
  install(DIRECTORY thirdparty/gl3w/GL/ DESTINATION include/iridescence/GL)
