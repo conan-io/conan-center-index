@@ -1,4 +1,4 @@
-#include <mlpack.hpp>
+#include <mlpack/methods/random_forest.hpp>
 
 using namespace mlpack;
 

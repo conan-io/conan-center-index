@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.files import copy, get, replace_in_file, rm
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -21,9 +20,12 @@ class MlpackConan(ConanFile):
 
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
     def _min_cppstd(self):
+        if is_msvc(self):
+            return 17
         return 14
 
     @property
@@ -49,8 +51,6 @@ class MlpackConan(ConanFile):
         # TODO: MSVC OpenMP is not compatible, enable for MSVC after #22353
         if not is_msvc(self):
             self.requires("llvm-openmp/[*]")
-        # Should match the version used by Armadillo
-        self.requires("openblas/[*]")
 
     def package_id(self):
         self.info.clear()
@@ -70,38 +70,16 @@ class MlpackConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["USE_OPENMP"] = not is_msvc(self)
-        tc.variables["BUILD_CLI_EXECUTABLES"] = False
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-        tc.generate()
-        deps = CMakeDeps(self)
-        deps.set_property("armadillo", "cmake_file_name", "Armadillo")
-        deps.set_property("cereal", "cmake_file_name", "cereal")
-        deps.set_property("ensmallen", "cmake_file_name", "Ensmallen")
-        deps.set_property("stb", "cmake_file_name", "StbImage")
-        deps.generate()
-
-    def _patch_sources(self):
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        # Do not download dependencies when cross-compiling
-        replace_in_file(self, cmakelists, "set(DOWNLOAD_DEPENDENCIES ON)", "")
-        replace_in_file(self, cmakelists, "ARMADILLO_", "Armadillo_")
-        replace_in_file(self, cmakelists, "CEREAL_", "cereal_")
-        replace_in_file(self, cmakelists, "ENSMALLEN_", "Ensmallen_")
-
-    def build(self):
-        self._patch_sources()
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
+    def _configure_headers(self):
+        # https://github.com/mlpack/mlpack/blob/4.3.0/src/mlpack/config.hpp
+        config_hpp = os.path.join(self.package_folder, "include", "mlpack", "config.hpp")
+        replace_in_file(self, config_hpp, "// #define MLPACK_HAS_STB", "#define MLPACK_HAS_STB")
+        replace_in_file(self, config_hpp, "// #define MLPACK_HAS_NO_STB_DIR", "// #define MLPACK_HAS_NO_STB_DIR")
 
     def package(self):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        cmake = CMake(self)
-        cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib"))
+        copy(self, "*", os.path.join(self.source_folder, "src"), os.path.join(self.package_folder, "include"))
+        self._configure_headers()
 
     @property
     def _openmp_flags(self):
@@ -136,3 +114,10 @@ class MlpackConan(ConanFile):
 
         self.cpp_info.cflags = self._openmp_flags
         self.cpp_info.cxxflags = self._openmp_flags
+
+        # https://github.com/mlpack/mlpack/blob/4.3.0/CMakeLists.txt#L164-L175
+        if is_msvc(self):
+            self.cpp_info.cxxflags.extend(["/bigobj", "/Zm200", "/Zc:__cplusplus"])
+        elif self.settings.os == "Windows" and self.settings.compiler == "gcc":
+            self.cpp_info.cflags.append("-Wa,-mbig-obj")
+            self.cpp_info.cxxflags.append("-Wa,-mbig-obj")
