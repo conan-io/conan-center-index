@@ -14,6 +14,7 @@ class TlExpectedConan(ConanFile):
     description = "C++11/14/17 std::expected with functional-style extensions"
     topics = ("cpp11", "cpp14", "cpp17", "expected")
     license = "CC0-1.0"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 

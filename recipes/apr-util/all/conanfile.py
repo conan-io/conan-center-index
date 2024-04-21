@@ -88,9 +88,9 @@ class AprUtilConan(ConanFile):
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.1.0")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.44.2")
+            self.requires("sqlite3/3.45.0")
         if self.options.with_expat:
-            self.requires("expat/2.5.0")
+            self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_postgresql:
             self.requires("libpq/15.4")
 

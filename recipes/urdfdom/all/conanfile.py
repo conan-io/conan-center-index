@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -45,7 +46,10 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("tinyxml/2.6.2", transitive_headers=True)
+        if Version(self.version) >= "4.0":
+            self.requires("tinyxml2/10.0.0", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("tinyxml/2.6.2", transitive_headers=True, transitive_libs=True)
         self.requires("console_bridge/1.0.2")
 
     def validate(self):
@@ -68,6 +72,8 @@ class PackageConan(ConanFile):
         tc.variables["BUILD_APPS"] = False
         if not self.options.shared:
             tc.preprocessor_definitions["URDFDOM_STATIC"] = "1"
+        # Need to set CMP0077 because CMake policy version is too old (3.5 as of v4.0.0)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         CMakeDeps(self).generate()
 
@@ -84,11 +90,13 @@ class PackageConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        # Copy urdfdom_headers
+        copy(self, "*",
+             src=os.path.join(self.source_folder, "urdf_parser", "include"),
+             dst=os.path.join(self.package_folder, "include"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "urdfdom"))
         rmdir(self, os.path.join(self.package_folder, "CMake"))
