@@ -1,0 +1,4 @@
+sources:
+  "cci.20240314":
+    url: "https://github.com/jnk0le/Ring-Buffer/archive/08faac65bf530d055eb358305d8888167b27c93a.tar.gz"
+    sha256: "b43a4567fbad935e2972cddd81fcebf063af09d7b91ce96647c31b45c272b8da"
