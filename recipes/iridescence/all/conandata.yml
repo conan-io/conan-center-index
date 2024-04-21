@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/001-unvendor-deps.patch"
       patch_description: "Use dependencies from Conan"
       patch_type: "conan"
+    - patch_file: "patches/002-fix-libpng-include.patch"
+      patch_description: "Fix incorrect libpng include"
+      patch_type: "bugfix"
