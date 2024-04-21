@@ -69,11 +69,7 @@ class IridescenceConan(ConanFile):
         self.requires("imguizmo/1.83")
         self.requires("implot/0.16")
         self.requires("glfw/3.4", transitive_headers=True, transitive_libs=True)
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("libglvnd/1.7.0")
-            self.requires("xorg/system")
-        else:
-            self.requires("opengl/system")
+        self.requires("opengl/system")
 
     def validate(self):
         if self.settings.compiler.cppstd:
