@@ -66,7 +66,7 @@ class IridescenceConan(ConanFile):
             # '#pragma omp' is used in public headers
             self.requires("llvm-openmp/17.0.6", transitive_headers=True, transitive_libs=True)
         if self.options.with_tbb:
-            self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
+            self.requires("onetbb/2021.12.0", transitive_headers=True, transitive_libs=True)
         # The project vendors nanoflann, but it has been heavily extended and should be kept intact
 
     def validate(self):
