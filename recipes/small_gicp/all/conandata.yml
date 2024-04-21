@@ -1,10 +1,4 @@
 sources:
-  "cci.20240417":
-    url: "https://github.com/koide3/small_gicp/archive/b85d2469d3456ef18a92e677a3bbfe85536135d9.zip"
-    sha256: "2521d12c60010952eca302d54ad71bfe6ce4522ff8718ed5ce0e03935e2eddb7"
-patches:
-  "cci.20240417":
-    - patch_file: "patches/001-fix-missing-include.patch"
-      patch_type: "portability"
-      patch_description: "Fix a missing include"
-      patch_source: "https://github.com/koide3/small_gicp/pull/32"
+  "cci.20240421":
+    url: "https://github.com/koide3/small_gicp/archive/b6b57e03269ca3adb020b23cdf1bc44b40fb968a.zip"
+    sha256: "f27a3f1e36ff6f3d1151dc4400efbb26190f3010be9850699a85c9ffb5adb81b"
