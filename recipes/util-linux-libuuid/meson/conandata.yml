@@ -11,4 +11,13 @@ patches:
     # Do not merge this patch!
     # It is a hack to build but needs verification that it actually works properly.
     - patch_file: "patches/2.40-0001-Add-patch-to-workaround-alias-on-macOS.patch"
-    - patch_file: "patches/2.40-0002-test.patch"
+    - patch_file: "patches/0001-meson-Add-build-blkpr-option.patch"
+    - patch_file: "patches/0002-meson-Add-build-blkzone-option.patch"
+    - patch_file: "patches/0003-meson-Add-build-fsfreeze-option.patch"
+    - patch_file: "patches/0004-meson-Add-build-blkdiscard-option.patch"
+    - patch_file: "patches/0005-meson-Add-build-ldattach-option.patch"
+    - patch_file: "patches/0006-meson-Add-build-rtcwake-option.patch"
+    - patch_file: "patches/0007-meson-Add-build-setarch-option.patch"
+    - patch_file: "patches/0008-meson-Use-has_type-instead-of-sizeof-to-detect-cpu_s.patch"
+    - patch_file: "patches/0009-meson-Add-build-chcpu-option.patch"
+    - patch_file: "patches/0010-meson-Add-build-blockdev-option.patch"

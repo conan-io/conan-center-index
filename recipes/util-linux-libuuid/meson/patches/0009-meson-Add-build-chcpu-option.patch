@@ -1,0 +1,59 @@
+From 6b8ea9f6657aeb69e5c186b19cddfb6d9abf41a0 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Mon, 22 Apr 2024 09:14:26 -0500
+Subject: [PATCH 09/10] meson: Add build-chcpu option
+
+The cpu_set_t type does not exist on macOS.
+
+Signed-off-by: Jordan Williams <jordan@jwillikers.com>
+(cherry picked from commit 52252a5f430eb486f5c21aaf15888b1c279de047)
+---
+ meson.build       | 12 ++++++++----
+ meson_options.txt |  2 ++
+ 2 files changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index d48774b3fc..0784d762d8 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1890,16 +1890,20 @@ if not is_disabler(exe)
+   bashcompletions += ['lscpu']
+ endif
+ 
++opt = get_option('build-chcpu').require(have_cpu_set_t).allowed()
+ exe = executable(
+   'chcpu',
+   chcpu_sources,
+   include_directories : includes,
+   link_with : [lib_common],
+   install_dir : sbindir,
+-  install : true)
+-exes += exe
+-manadocs += ['sys-utils/chcpu.8.adoc']
+-bashcompletions += ['chcpu']
++  install : opt,
++  build_by_default : opt)
++if opt and not is_disabler(exe)
++  exes += exe
++  manadocs += ['sys-utils/chcpu.8.adoc']
++  bashcompletions += ['chcpu']
++endif
+ 
+ exe = executable(
+   'wdctl',
+diff --git a/meson_options.txt b/meson_options.txt
+index 28c0da8064..b60e46a00a 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -57,6 +57,8 @@ option('build-swapon', type : 'feature',
+        description : 'build swapon')
+ option('build-swapoff', type : 'feature',
+        description : 'build swapoff')
++option('build-chcpu', type : 'feature',
++       description : 'build chcpu')
+ option('build-losetup', type : 'feature',
+        description : 'build losetup')
+ option('build-zramctl', type : 'feature',
+-- 
+2.44.0
+

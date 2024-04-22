@@ -1,0 +1,59 @@
+From 72ae8f0f3f3ecd4d65506a0c48ad8183d4d056f1 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Mon, 22 Apr 2024 09:05:42 -0500
+Subject: [PATCH 07/10] meson: Add build-setarch option
+
+The sys/personality.h header does not exist on macOS.
+
+Signed-off-by: Jordan Williams <jordan@jwillikers.com>
+(cherry picked from commit cdcfc11739469d58d6c2f5b4f759040d3b9615a6)
+---
+ meson.build       | 12 ++++++++----
+ meson_options.txt |  2 ++
+ 2 files changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index b6b296606e..c1598c68d3 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1655,16 +1655,20 @@ if opt and not is_disabler(exe)
+   bashcompletions += ['rtcwake']
+ endif
+ 
++opt = get_option('build-setarch').require(cc.has_header('sys/personality.h')).allowed()
+ exe = executable(
+   'setarch',
+   setarch_sources,
+   include_directories : includes,
+   link_with : [lib_common],
+   install_dir : usrbin_exec_dir,
+-  install : true)
+-exes += exe
+-manadocs += ['sys-utils/setarch.8.adoc']
+-bashcompletions += ['setarch']
++  install : opt,
++  build_by_default : opt)
++if opt and not is_disabler(exe)
++  exes += exe
++  manadocs += ['sys-utils/setarch.8.adoc']
++  bashcompletions += ['setarch']
++endif
+ 
+ setarch_links = ['uname26', 'linux32', 'linux64']
+ setarch_links_arch = {
+diff --git a/meson_options.txt b/meson_options.txt
+index 1cbe168444..28c0da8064 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -153,6 +153,8 @@ option('build-ldattach', type : 'feature',
+        description : 'build ldattach')
+ option('build-rtcwake', type : 'feature',
+        description : 'build rtcwake')
++option('build-setarch', type : 'feature',
++       description : 'build setarch')
+ option('build-kill', type : 'feature',
+        description : 'build kill')
+ option('build-last', type : 'feature',
+-- 
+2.44.0
+
