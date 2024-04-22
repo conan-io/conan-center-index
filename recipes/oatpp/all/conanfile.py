@@ -74,8 +74,11 @@ class OatppConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "oatpp")
 
-        include_dir = os.path.join("include", f"oatpp-{self.version}", "oatpp")
-        lib_dir = os.path.join("lib", f"oatpp-{self.version}")
+        version = str(self.version)
+        if version.endswith("-latest"):
+            version = version[:-len("-latest")]
+        include_dir = os.path.join("include", f"oatpp-{version}", "oatpp")
+        lib_dir = os.path.join("lib", f"oatpp-{version}")
 
         # oatpp
         self.cpp_info.components["_oatpp"].names["cmake_find_package"] = "oatpp"
