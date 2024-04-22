@@ -53,7 +53,7 @@ class OpenldapConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} is only supported on Unix platforms")
         if is_apple_os(self) and cross_building(self):
             # Produces linkage errors: Undefined symbols for architecture x86_64: "_lutil_memcmp", referenced from: ...
-            raise ConanInvalidConfiguration(f"{self.ref} recipe does not support cross-building static libraries on macOS. Contributions are welcome!")
+            raise ConanInvalidConfiguration(f"{self.ref} recipe does not support cross-building on macOS. Contributions are welcome!")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -80,6 +80,7 @@ class OpenldapConan(ConanFile):
             # https://git.openldap.org/openldap/openldap/-/blob/OPENLDAP_REL_ENG_2_5/configure.ac#L1636
             tc.configure_args.append("--with-yielding_select=yes")
         if is_apple_os(self):
+            # macOS Ventura does not have soelim, but mandoc_soelim
             tc.make_args.append("SOELIM=soelim" if shutil.which("soelim") else "SOELIM=mandoc_soelim")
         tc.generate()
         tc = AutotoolsDeps(self)
