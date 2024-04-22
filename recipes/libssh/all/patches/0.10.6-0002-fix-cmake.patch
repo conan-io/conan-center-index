@@ -1,0 +1,123 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a64b7708..6647076b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -48,15 +48,15 @@ if (WITH_ZLIB)
+ endif (WITH_ZLIB)
+ 
+ if (WITH_GCRYPT)
+-  find_package(GCrypt 1.5.0 REQUIRED)
+-  if (NOT GCRYPT_FOUND)
++  find_package(libgcrypt 1.5.0 REQUIRED)
++  if (NOT libgcrypt_FOUND)
+     message(FATAL_ERROR "Could not find GCrypt")
+-  endif (NOT GCRYPT_FOUND)
++  endif (NOT libgcrypt_FOUND)
+ elseif(WITH_MBEDTLS)
+     find_package(MbedTLS REQUIRED)
+-    if (NOT MBEDTLS_FOUND)
++    if (NOT MbedTLS_FOUND)
+       message(FATAL_ERROR "Could not find mbedTLS")
+-    endif (NOT MBEDTLS_FOUND)
++    endif (NOT MbedTLS_FOUND)
+ else (WITH_GCRYPT)
+   find_package(OpenSSL 1.0.1)
+   if (OPENSSL_FOUND)
+@@ -66,13 +66,13 @@ else (WITH_GCRYPT)
+       set(OPENSSL_CRYPTO_LIBRARIES ${OPENSSL_CRYPTO_LIBRARY})
+     endif (NOT DEFINED OPENSSL_CRYPTO_LIBRARIES)
+   else (OPENSSL_FOUND)
+-    find_package(GCrypt)
+-    if (NOT GCRYPT_FOUND)
++    find_package(libgcrypt)
++    if (NOT libgcrypt_FOUND)
+       find_package(MbedTLS)
+-      if (NOT MBEDTLS_FOUND)
++      if (NOT MbedTLS_FOUND)
+         message(FATAL_ERROR "Could not find OpenSSL, GCrypt or mbedTLS")
+-      endif (NOT MBEDTLS_FOUND)
+-    endif (NOT GCRYPT_FOUND)
++      endif (NOT MbedTLS_FOUND)
++    endif (NOT libgcrypt_FOUND)
+   endif (OPENSSL_FOUND)
+ endif(WITH_GCRYPT)
+ 
+diff --git a/ConfigureChecks.cmake b/ConfigureChecks.cmake
+index 6f881775..12585117 100644
+--- a/ConfigureChecks.cmake
++++ b/ConfigureChecks.cmake
+@@ -267,27 +267,27 @@ if (OPENSSL_FOUND)
+   set(HAVE_LIBCRYPTO 1)
+ endif (OPENSSL_FOUND)
+ 
+-if (GCRYPT_FOUND)
++if (libgcrypt_FOUND)
+     set(HAVE_LIBGCRYPT 1)
+-    if (GCRYPT_VERSION VERSION_GREATER "1.4.6")
++    if (libgcrypt_VERSION VERSION_GREATER "1.4.6")
+         set(HAVE_GCRYPT_ECC 1)
+         set(HAVE_ECC 1)
+-    endif (GCRYPT_VERSION VERSION_GREATER "1.4.6")
+-    if (NOT GCRYPT_VERSION VERSION_LESS "1.7.0")
++    endif (libgcrypt_VERSION VERSION_GREATER "1.4.6")
++    if (NOT libgcrypt_VERSION VERSION_LESS "1.7.0")
+         set(HAVE_GCRYPT_CHACHA_POLY 1)
+-    endif (NOT GCRYPT_VERSION VERSION_LESS "1.7.0")
+-endif (GCRYPT_FOUND)
++    endif (NOT libgcrypt_VERSION VERSION_LESS "1.7.0")
++endif (libgcrypt_FOUND)
+ 
+-if (MBEDTLS_FOUND)
++if (MbedTLS_FOUND)
+     set(HAVE_LIBMBEDCRYPTO 1)
+     set(HAVE_ECC 1)
+ 
+-    set(CMAKE_REQUIRED_INCLUDES "${MBEDTLS_INCLUDE_DIR}/mbedtls")
++    set(CMAKE_REQUIRED_INCLUDES "${MbedTLS_INCLUDE_DIR}/mbedtls")
+     check_include_file(chacha20.h HAVE_MBEDTLS_CHACHA20_H)
+     check_include_file(poly1305.h HAVE_MBEDTLS_POLY1305_H)
+     unset(CMAKE_REQUIRED_INCLUDES)
+ 
+-endif (MBEDTLS_FOUND)
++endif (MbedTLS_FOUND)
+ 
+ if (CMAKE_USE_PTHREADS_INIT)
+     set(HAVE_PTHREAD 1)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 91f85094..839271ad 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -21,27 +21,13 @@ if (OPENSSL_CRYPTO_LIBRARIES)
+   )
+ endif (OPENSSL_CRYPTO_LIBRARIES)
+ 
+-if (MBEDTLS_CRYPTO_LIBRARY)
+-    set(LIBSSH_PRIVATE_INCLUDE_DIRS
+-      ${LIBSSH_PRIVATE_INCLUDE_DIRS}
+-      ${MBEDTLS_INCLUDE_DIR}
+-    )
+-  set(LIBSSH_LINK_LIBRARIES
+-    ${LIBSSH_LINK_LIBRARIES}
+-    ${MBEDTLS_CRYPTO_LIBRARY}
+-  )
+-endif (MBEDTLS_CRYPTO_LIBRARY)
+-
+-if (GCRYPT_LIBRARIES)
+-  set(LIBSSH_PRIVATE_INCLUDE_DIRS
+-    ${LIBSSH_PRIVATE_INCLUDE_DIRS}
+-    ${GCRYPT_INCLUDE_DIR}
+-  )
++if (TARGET MbedTLS::mbedcrypto)
++    list(APPEND LIBSSH_LINK_LIBRARIES MbedTLS::mbedcrypto)
++endif ()
+ 
+-  set(LIBSSH_LINK_LIBRARIES
+-    ${LIBSSH_LINK_LIBRARIES}
+-    ${GCRYPT_LIBRARIES})
+-endif()
++if (TARGET libgcrypt::libgcrypt)
++    list(APPEND LIBSSH_LINK_LIBRARIES libgcrypt::libgcrypt)
++endif ()
+ 
+ if (WITH_ZLIB)
+   set(LIBSSH_PRIVATE_INCLUDE_DIRS

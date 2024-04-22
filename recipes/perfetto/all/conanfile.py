@@ -101,7 +101,7 @@ class PerfettoConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["perfetto"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["pthread", "m"])
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
         if is_msvc(self):

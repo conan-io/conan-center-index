@@ -132,7 +132,7 @@ class PackageConan(ConanFile):
         # --enable/disable-shared is automatically managed when 'shared' option is declared
         tc = AutotoolsToolchain(self)
         # autotools usually uses 'yes' and 'no' to enable/disable options
-        yes_no = lambda v: "yes" if v else "no"
+        def yes_no(v): return "yes" if v else "no"
         tc.configure_args.extend([
             f"--with-foobar={yes_no(self.options.with_foobar)}",
             "--enable-tools=no",
