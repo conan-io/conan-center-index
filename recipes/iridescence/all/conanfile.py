@@ -38,8 +38,8 @@ class IridescenceConan(ConanFile):
             "gcc": "7",
             "clang": "7",
             "apple-clang": "10",
-            "Visual Studio": "15",
-            "msvc": "191",
+            "Visual Studio": "17",
+            "msvc": "193",
         }
 
     def export_sources(self):
