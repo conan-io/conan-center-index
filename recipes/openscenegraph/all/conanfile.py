@@ -1,5 +1,6 @@
 import os
 import re
+from pathlib import Path
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -250,7 +251,11 @@ class OpenSceneGraphConanFile(ConanFile):
         for package in ["Fontconfig", "Freetype", "GDAL", "GIFLIB", "GTA", "Jasper", "OpenEXR"]:
             # Prefer conan's find package scripts over osg's
             os.unlink(os.path.join(self.source_folder, "CMakeModules", f"Find{package}.cmake"))
-        for path in self.source_path.joinpath("src", "osgPlugins").rglob("CMakeLists.txt"):
+        plugins_root = Path(self.source_path.joinpath("src", "osgPlugins"))
+        for path in plugins_root.rglob("CMakeLists.txt"):
+            if path.parent == plugins_root:
+                # Don't replace in the root dir
+                continue
             content = path.read_text()
             # Correct usage of *_LIBRARY variables to *_LIBRARIES
             content = content.replace("_LIBRARY", "_LIBRARIES")
