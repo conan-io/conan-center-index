@@ -1,9 +1,9 @@
 import os
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
@@ -64,6 +64,9 @@ class LibphonenumberConan(ConanFile):
             del self.options.fPIC
             # TODO: could use pthread4w
             del self.options.use_posix_thread
+        if not can_run(self):
+            # otherwise fails when trying to build and run generate_geocoding_data
+            del self.options.build_geocoder
 
     def configure(self):
         if self.options.shared:
@@ -79,9 +82,9 @@ class LibphonenumberConan(ConanFile):
         if self.options.use_boost:
             # https://github.com/google/libphonenumber/blob/v8.13.35/cpp/src/phonenumbers/base/synchronization/lock_boost.h
             self.requires("boost/1.84.0", transitive_headers=True, transitive_libs=True)
-        if self.options.use_icu_regexp or self.options.build_geocoder:
+        if self.options.use_icu_regexp or self.options.get_safe("build_geocoder"):
             # https://github.com/google/libphonenumber/blob/v8.13.35/cpp/src/phonenumbers/geocoding/phonenumber_offline_geocoder.h#L23
-            transitive_icu = bool(self.options.build_geocoder)
+            transitive_icu = bool(self.options.get_safe("build_geocoder"))
             self.requires("icu/74.2", transitive_headers=transitive_icu, transitive_libs=transitive_icu)
         if self.options.use_re2:
             # FIXME: compilation with re2 fails currently with
@@ -102,6 +105,10 @@ class LibphonenumberConan(ConanFile):
             # Fails with 'undefined reference to `vtable for i18n::phonenumbers::ICURegExpFactory''
             raise ConanInvalidConfiguration("use_icu_regexp=False is not supported")
 
+        if conan_version.major == 1:
+            # "Can't find Google Protocol Buffers: can't locate protobuf."
+            raise ConanInvalidConfiguration("Conan 1.x is not supported. Contributions are welcome!")
+
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
@@ -114,7 +121,7 @@ class LibphonenumberConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_STATIC_LIB"] = not self.options.shared
-        tc.variables["BUILD_GEOCODER"] = self.options.build_geocoder
+        tc.variables["BUILD_GEOCODER"] = self.options.get_safe("build_geocoder", False)
         tc.variables["USE_ALTERNATE_FORMATS"] = self.options.use_alternate_formats
         tc.variables["USE_BOOST"] = self.options.use_boost
         tc.variables["USE_ICU_REGEXP"] = self.options.use_icu_regexp
@@ -180,7 +187,7 @@ class LibphonenumberConan(ConanFile):
             requires.append("re2::re2")
         self.cpp_info.components["phonenumber"].requires = requires
 
-        if self.options.build_geocoder:
+        if self.options.get_safe("build_geocoder"):
             self.cpp_info.components["geocoding"].set_property("cmake_target_name", "libphonenumber::geocoding")
             if self.options.shared:
                 self.cpp_info.components["geocoding"].set_property("cmake_target_aliases", ["libphonenumber::geocoding-shared"])
