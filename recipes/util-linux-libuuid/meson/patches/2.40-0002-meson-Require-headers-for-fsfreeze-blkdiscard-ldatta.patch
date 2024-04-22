@@ -1,0 +1,146 @@
+From 1bb5e621c72666634e243048afde3e959156ea73 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Mon, 22 Apr 2024 08:33:29 -0500
+Subject: [PATCH] meson: Require headers for fsfreeze, blkdiscard, ldattach,
+ and setarch
+
+These executable require specific headers that are not always available.
+
+Signed-off-by: Jordan Williams <jordan@jwillikers.com>
+(cherry picked from commit eef87df041f4d2d0371e066f24734b0aa42a1ff5)
+---
+ meson.build | 108 ++++++++++++++++++++++++++++------------------------
+ 1 file changed, 58 insertions(+), 50 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 8213d3e21f..2c4dcc9f26 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1564,27 +1564,29 @@ exes += exe
+ manadocs += ['sys-utils/ctrlaltdel.8.adoc']
+ bashcompletions += ['ctrlaltdel']
+ 
+-exe = executable(
+-  'fsfreeze',
+-  fsfreeze_sources,
+-  include_directories : includes,
+-  install_dir : sbindir,
+-  install : true)
+-exes += exe
+-manadocs += ['sys-utils/fsfreeze.8.adoc']
+-bashcompletions += ['fsfreeze']
++if cc.has_header('linux/fs.h')
++  exe = executable(
++    'fsfreeze',
++    fsfreeze_sources,
++    include_directories : includes,
++    install_dir : sbindir,
++    install : true)
++  exes += exe
++  manadocs += ['sys-utils/fsfreeze.8.adoc']
++  bashcompletions += ['fsfreeze']
+ 
+-exe = executable(
+-  'blkdiscard',
+-  blkdiscard_sources,
+-  include_directories : includes,
+-  link_with : [lib_common],
+-  dependencies : [blkid_dep],
+-  install_dir : sbindir,
+-  install : true)
+-exes += exe
+-manadocs += ['sys-utils/blkdiscard.8.adoc']
+-bashcompletions += ['blkdiscard']
++  exe = executable(
++    'blkdiscard',
++    blkdiscard_sources,
++    include_directories : includes,
++    link_with : [lib_common],
++    dependencies : [blkid_dep],
++    install_dir : sbindir,
++    install : true)
++  exes += exe
++  manadocs += ['sys-utils/blkdiscard.8.adoc']
++  bashcompletions += ['blkdiscard']
++endif
+ 
+ if cc.has_header('linux/blkzoned.h')
+   exe = executable(
+@@ -1611,38 +1613,44 @@ if cc.has_header('linux/pr.h')
+   manadocs += ['sys-utils/blkpr.8.adoc']
+ endif
+ 
+-exe = executable(
+-  'ldattach',
+-  ldattach_sources,
+-  include_directories : includes,
+-  link_with : [lib_common],
+-  install_dir : usrsbin_exec_dir,
+-  install : true)
+-exes += exe
+-manadocs += ['sys-utils/ldattach.8.adoc']
+-bashcompletions += ['ldattach']
++if cc.has_header('linux/if.h')
++  exe = executable(
++    'ldattach',
++    ldattach_sources,
++    include_directories : includes,
++    link_with : [lib_common],
++    install_dir : usrsbin_exec_dir,
++    install : true)
++  exes += exe
++  manadocs += ['sys-utils/ldattach.8.adoc']
++  bashcompletions += ['ldattach']
++endif
+ 
+-exe = executable(
+-  'rtcwake',
+-  rtcwake_sources,
+-  include_directories : includes,
+-  link_with : [lib_common],
+-  install_dir : usrsbin_exec_dir,
+-  install : true)
+-exes += exe
+-manadocs += ['sys-utils/rtcwake.8.adoc']
+-bashcompletions += ['rtcwake']
++if cc.has_header('linux/rtc.h')
++  exe = executable(
++    'rtcwake',
++    rtcwake_sources,
++    include_directories : includes,
++    link_with : [lib_common],
++    install_dir : usrsbin_exec_dir,
++    install : true)
++  exes += exe
++  manadocs += ['sys-utils/rtcwake.8.adoc']
++  bashcompletions += ['rtcwake']
++endif
+ 
+-exe = executable(
+-  'setarch',
+-  setarch_sources,
+-  include_directories : includes,
+-  link_with : [lib_common],
+-  install_dir : usrbin_exec_dir,
+-  install : true)
+-exes += exe
+-manadocs += ['sys-utils/setarch.8.adoc']
+-bashcompletions += ['setarch']
++if cc.has_header('sys/personality.h')
++  exe = executable(
++    'setarch',
++    setarch_sources,
++    include_directories : includes,
++    link_with : [lib_common],
++    install_dir : usrbin_exec_dir,
++    install : true)
++  exes += exe
++  manadocs += ['sys-utils/setarch.8.adoc']
++  bashcompletions += ['setarch']
++endif
+ 
+ setarch_links = ['uname26', 'linux32', 'linux64']
+ setarch_links_arch = {
+-- 
+2.44.0
+

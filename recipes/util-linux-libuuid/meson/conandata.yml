@@ -11,3 +11,4 @@ patches:
     # Do not merge this patch!
     # It is a hack to build but needs verification that it actually works properly.
     - patch_file: "patches/2.40-0001-Add-patch-to-workaround-alias-on-macOS.patch"
+    - patch_file: "patches/2.40-0002-meson-Require-headers-for-fsfreeze-blkdiscard-ldatta.patch"
