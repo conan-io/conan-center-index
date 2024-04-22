@@ -15,7 +15,6 @@ from conan.tools.microsoft import unix_path
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     test_type = "explicit"
-    win_bash = True
 
     @property
     def _settings_build(self):
