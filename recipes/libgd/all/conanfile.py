@@ -15,7 +15,7 @@ class LibgdConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libgd.github.io"
     topics = ("images", "graphics")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -24,6 +24,10 @@ class LibgdConan(ConanFile):
         "with_jpeg": [True, False],
         "with_tiff": [True, False],
         "with_freetype": [True, False],
+        "with_xpm": [True, False],
+        "with_webp": [True, False],
+        "with_heif": [True, False],
+        "with_avif": [True, False],
     }
     default_options = {
         "shared": False,
@@ -32,6 +36,10 @@ class LibgdConan(ConanFile):
         "with_jpeg": False,
         "with_tiff": False,
         "with_freetype": False,
+        "with_xpm": False,
+        "with_webp": False,
+        "with_heif": False,
+        "with_avif": False,
     }
 
     def export_sources(self):
@@ -40,6 +48,9 @@ class LibgdConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "2.3.2":
+            del self.options.with_heif
+            del self.options.with_avif
 
     def configure(self):
         if self.options.shared:
@@ -53,7 +64,7 @@ class LibgdConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
             if is_msvc(self):
                 self.requires("getopt-for-visual-studio/20200201")
         if self.options.with_jpeg:
@@ -62,6 +73,14 @@ class LibgdConan(ConanFile):
             self.requires("libtiff/4.6.0")
         if self.options.with_freetype:
             self.requires("freetype/2.13.2")
+        if self.options.with_xpm:
+            self.requires("libxpm/3.5.13")
+        if self.options.with_webp:
+            self.requires("libwebp/1.3.2")
+        if self.options.get_safe("with_heif"):
+            self.requires("libheif/1.16.2")
+        if self.options.get_safe("with_avif"):
+            self.requires("libavif/1.0.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -77,19 +96,23 @@ class LibgdConan(ConanFile):
         tc.variables["ENABLE_JPEG"] = self.options.with_jpeg
         tc.variables["ENABLE_TIFF"] = self.options.with_tiff
         tc.variables["ENABLE_ICONV"] = False
-        tc.variables["ENABLE_XPM"] = False
+        tc.variables["ENABLE_XPM"] =  self.options.with_xpm
         tc.variables["ENABLE_FREETYPE"] = self.options.with_freetype
         tc.variables["ENABLE_FONTCONFIG"] = False
-        tc.variables["ENABLE_WEBP"] = False
+        tc.variables["ENABLE_WEBP"] = self.options.with_webp
         if Version(self.version) >= "2.3.2":
-            tc.variables["ENABLE_HEIF"] = False
-            tc.variables["ENABLE_AVIF"] = False
+            tc.variables["ENABLE_HEIF"] = self.options.get_safe("with_heif", False)
+            tc.variables["ENABLE_AVIF"] = self.options.get_safe("with_avif", False)
         if Version(self.version) >= "2.3.0":
             tc.variables["ENABLE_RAQM"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("libheif", "cmake_file_name", "HEIF")
+        deps.set_property("webp", "cmake_file_name", "WEBP")
+        deps.set_property("libxpm", "cmake_file_name", "XPM")
+        deps.set_property("freetype", "cmake_file_name", "FREETYPE")
         deps.generate()
 
     def _patch(self):

@@ -1143,6 +1143,9 @@ class BoostConan(ConanFile):
         if self._with_zstd:
             add_defines("zstd")
 
+        for define in self.conf.get("tools.build:defines", default=[], check_type=list):
+            flags.append(f"define={define}")
+
         if is_msvc(self):
             flags.append(f"runtime-link={'static' if is_msvc_static_runtime(self) else 'shared'}")
             flags.append(f"runtime-debugging={'on' if 'd' in msvc_runtime_flag(self) else 'off'}")
@@ -1745,6 +1748,8 @@ class BoostConan(ConanFile):
                 libs = []
                 for name in names:
                     if name in ("boost_stacktrace_windbg", "boost_stacktrace_windbg_cached") and self.settings.os != "Windows":
+                        continue
+                    if name in ("boost_math_c99l", "boost_math_tr1l") and str(self.settings.arch).startswith("ppc"):
                         continue
                     if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic",) and self.settings.os == "Windows":
                         continue
