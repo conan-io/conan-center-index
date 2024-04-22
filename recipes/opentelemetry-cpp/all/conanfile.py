@@ -395,7 +395,7 @@ class OpenTelemetryCppConan(ConanFile):
             self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_ABSEIL")
             self.cpp_info.components["opentelemetry_common"].requires.append("abseil::abseil")
 
-        if self.options.with_otlp_http or self.options.with_otlp_grpc:
+        if self.options.with_otlp_http or self.options.with_otlp_grpc or self.options.get_safe("with_otlp_file", False):
             self.cpp_info.components["opentelemetry_proto"].requires.append("protobuf::protobuf")
             self.cpp_info.components["opentelemetry_otlp_recordable"].requires.extend([
                 "opentelemetry_proto",
@@ -436,6 +436,14 @@ class OpenTelemetryCppConan(ConanFile):
         ):
             self.cpp_info.components[self._http_client_name].requires.append("libcurl::libcurl")
             self.cpp_info.components[self._http_client_name].requires.append("openssl::openssl")
+
+        if Version(self.version) >= "1.15" and (
+            self.options.with_otlp_http or
+            self.options.with_elasticsearch or
+            self.options.with_zipkin or 
+            self.options.get_safe("with_otlp_http_compression", False)
+        ):
+            self.cpp_info.components[self._http_client_name].requires.append("zlib::zlib")
 
         if self.options.with_otlp_http:
             self.cpp_info.components["opentelemetry_exporter_otlp_http_client"].requires.extend([
