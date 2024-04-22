@@ -261,8 +261,8 @@ class GoogleCloudCppConan(ConanFile):
 
     # The compute librar(ies) do not use gRPC, and they have many components
     # with dependencies between them
-    def _add_compute_component(self, component):
-        SHARED_REQUIRES=["compute_protos", "rest_protobuf_internal", "rest_internal", "common"]
+    def _add_compute_component(self, component, protos):
+        SHARED_REQUIRES=["rest_protobuf_internal", "rest_internal", "common"]
         # Common components shared by other compute components
         COMPUTE_COMMON_COMPONENTS = [
             'compute_global_operations',
@@ -270,7 +270,7 @@ class GoogleCloudCppConan(ConanFile):
             'compute_region_operations',
             'compute_zone_operations',
         ]
-        requires = []
+        requires = [protos]
         if component not in COMPUTE_COMMON_COMPONENTS:
             requires = requires + COMPUTE_COMMON_COMPONENTS
         self.cpp_info.components[component].requires = requires + SHARED_REQUIRES
@@ -324,7 +324,11 @@ class GoogleCloudCppConan(ConanFile):
             protos=f"{component}_protos"
             # `compute` components do not depend on gRPC
             if component.startswith("compute_"):
-                self._add_compute_component(component)
+                # Individual compute proto libraries were replaced with a single
+                # `compute_protos` library.
+                if Version(self.version) >= '2.23.0':
+                    protos = "compute_protos"
+                self._add_compute_component(component, protos)
                 continue
             # `storage` is the only component that does not depend on a matching `*_protos` library
             if component in self._REQUIRES_CUSTOM_DEPENDENCIES:
