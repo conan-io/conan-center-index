@@ -1,9 +1,14 @@
 #include <iostream>
-#include "ftp/client.hpp"
+#include "ftp/ftp.hpp"
 
 int main(void) {
     try {
-        ftp::client client;
+        /* Test that libftp provides OpenSSL routines. */
+        ftp::ssl::context_ptr ssl_context
+            = std::make_unique<ftp::ssl::context>(ftp::ssl::context::tlsv13_client);
+        SSL_CTX_set_session_cache_mode(ssl_context->native_handle(), SSL_SESS_CACHE_CLIENT);
+
+        ftp::client client(std::move(ssl_context));
         client.get_current_directory();
         client.disconnect();
     }
