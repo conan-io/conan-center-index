@@ -46,7 +46,6 @@ class OpenTelemetryCppConan(ConanFile):
     default_options = {
         "fPIC": True,
         "shared": False,
-
         "with_no_deprecated_code": False,
         "with_stl": False,
         "with_gsl": False,
@@ -119,7 +118,7 @@ class OpenTelemetryCppConan(ConanFile):
         if self.options.with_abseil:
             self.requires("abseil/20230125.3", transitive_headers=True)
 
-        if self.options.with_otlp_grpc or self.options.with_otlp_http:
+        if self.options.with_otlp_grpc or self.options.with_otlp_http or self.options.get_safe("with_otlp_file", False):
             self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
 
         if self.options.with_otlp_grpc:
@@ -145,6 +144,14 @@ class OpenTelemetryCppConan(ConanFile):
         if self.options.get_safe("with_jaeger"):
             self.requires("thrift/0.17.0")
             self.requires("boost/1.84.0")
+
+        if Version(self.version) >= "1.15" and (
+            self.options.with_otlp_http or
+            self.options.with_elasticsearch or
+            self.options.with_zipkin or 
+            self.options.get_safe("with_otlp_http_compression", False)
+        ):
+            self.requires("zlib/[>=1.2.11 <2]")
 
     @property
     def _required_boost_components(self):
