@@ -2,9 +2,3 @@ sources:
   "0.59.0":
     url: "https://github.com/abedra/libvault/archive/refs/tags/0.59.0.zip"
     sha256: 668e71e1689f6142735387989042945e42fd6e0483f223ce3a08121887a335ce
-  "0.52.0":
-    url: "https://github.com/abedra/libvault/archive/refs/tags/0.52.0.zip"
-    sha256: 49058ac9a1d3d1d08ac165f5f7b50e3a2a2ab0d3f9b8bb8194fa7a8de36edcf8
-  "0.51.0":
-    url: "https://github.com/abedra/libvault/archive/refs/tags/0.51.0.zip"
-    sha256: 570ccc6451cf8e93b1c585bbf6ab5212ff9290b3a9b477752cf0651414b3d026
