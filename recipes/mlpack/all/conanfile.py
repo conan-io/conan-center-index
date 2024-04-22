@@ -44,13 +44,13 @@ class MlpackConan(ConanFile):
     def requirements(self):
         # Using version ranges since this is a header-only library
         # Minimum versions based on https://github.com/mlpack/mlpack/blob/4.3.0/CMakeLists.txt#L21-L28
-        self.requires("armadillo/[>=9.800 <13]")
-        self.requires("cereal/[>=1.1.2 <2]")
-        self.requires("ensmallen/[>=2.10.0 <3]")
-        self.requires("stb/[*]")
+        self.requires("armadillo/12.6.4")
+        self.requires("cereal/1.3.2")
+        self.requires("ensmallen/2.21.0")
+        self.requires("stb/cci.20230920")
         # TODO: MSVC OpenMP is not compatible, enable for MSVC after #22353
         if not is_msvc(self):
-            self.requires("llvm-openmp/[*]")
+            self.requires("llvm-openmp/17.0.6")
 
     def package_id(self):
         self.info.clear()
