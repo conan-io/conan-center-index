@@ -1,4 +1,7 @@
 sources:
+  "1.3.6":
+    url: "https://github.com/astro-informatics/so3/archive/v1.3.6.tar.gz"
+    sha256: "9a8536b9998d54e7b61313548df01e989f07e15116ad49b471d7e321999f5f35"
   "1.3.4":
     url: "https://github.com/astro-informatics/so3/archive/refs/tags/v1.3.4.zip"
     sha256: "383431c3078faa073c3017ceb3e0108885ab7628e81af13488f9aa021b95bbc7"
