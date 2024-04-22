@@ -18,7 +18,7 @@ class LibphonenumberConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/libphonenumber"
-    topics = ("phone-numbers",)
+    topics = ("phone-numbers", "phone")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
