@@ -1389,11 +1389,11 @@ Examples = bin/datadir/examples""")
                 _create_module("MultimediaGstTools", ["Multimedia", "MultimediaWidgets", "Gui", "gst-plugins-base::gst-plugins-base"])
                 if self.options.get_safe("with_libalsa", False):
                     self.cpp_info.components["qtMultimediaGstTools"].requires.append("libalsa::libalsa")
-                _create_plugin("QGstreamerAudioDecoderServicePlugin", "gstaudiodecoder", "mediaservice", [])
-                _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
-                _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
+                _create_plugin("QGstreamerAudioDecoderServicePlugin", "gstaudiodecoder", "mediaservice", ["gst-plugins-base::gst-plugins-base"])
+                _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", ["gst-plugins-base::gst-plugins-base"])
+                _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", ["gst-plugins-base::gst-plugins-base"])
+                _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", ["gst-plugins-base::gst-plugins-base"])
             if self.settings.os == "Linux":
-                _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
                 if self.options.get_safe("with_libalsa", False):
                     _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", ["libalsa::libalsa"])
             if self.settings.os == "Windows":
