@@ -7,7 +7,7 @@ from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.53.0"
@@ -51,8 +51,8 @@ class OpenldapConan(ConanFile):
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration(f"{self.name} is only supported on Unix platforms")
-        if is_apple_os(self) and cross_building(self) and not self.options.shared:
-            # Produces linkage errors in test_package: Undefined symbols for architecture x86_64: "_lutil_memcmp", referenced from: ...
+        if is_apple_os(self) and cross_building(self):
+            # Produces linkage errors: Undefined symbols for architecture x86_64: "_lutil_memcmp", referenced from: ...
             raise ConanInvalidConfiguration(f"{self.ref} recipe does not support cross-building static libraries on macOS. Contributions are welcome!")
 
     def source(self):
@@ -108,6 +108,7 @@ class OpenldapConan(ConanFile):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         rm(self, "*.la", self.package_folder, recursive=True)
+        fix_apple_shared_install_name(self)
         for folder in ["var", "share", "etc", os.path.join("lib", "pkgconfig"), "home", "Users"]:
             rmdir(self, os.path.join(self.package_folder, folder))
 
