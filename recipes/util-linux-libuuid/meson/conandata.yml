@@ -21,3 +21,7 @@ patches:
     - patch_file: "patches/0008-meson-Use-has_type-instead-of-sizeof-to-detect-cpu_s.patch"
     - patch_file: "patches/0009-meson-Add-build-chcpu-option.patch"
     - patch_file: "patches/0010-meson-Add-build-blockdev-option.patch"
+    - patch_file: "patches/0011-meson-Add-have_pty-variable-to-check-if-pty-is-avail.patch"
+    - patch_file: "patches/0012-meson-Require-pty-for-the-su-and-runuser-executables.patch"
+    - patch_file: "patches/0013-meson-Add-build-script-option.patch"
+    - patch_file: "patches/0014-meson-Add-build-scriptlive-option.patch"

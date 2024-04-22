@@ -1,0 +1,58 @@
+From 535986f39424e54c025012627c25d8295c12d76c Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Mon, 22 Apr 2024 11:08:26 -0500
+Subject: [PATCH 14/14] meson: Add build-scriptlive option
+
+Signed-off-by: Jordan Williams <jordan@jwillikers.com>
+(cherry picked from commit 6e358c18001f5154f7cc7632de44674766273201)
+---
+ meson.build       | 12 ++++++++----
+ meson_options.txt |  2 ++
+ 2 files changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index f5f003e0e4..18272665d2 100644
+--- a/meson.build
++++ b/meson.build
+@@ -2489,6 +2489,7 @@ if opt and not is_disabler(exe)
+   exes += exe
+ endif
+ 
++opt = get_option('build-scriptlive').require(have_pty).allowed()
+ exe = executable(
+   'scriptlive',
+   scriptlive_sources,
+@@ -2498,10 +2499,13 @@ exe = executable(
+                   realtime_libs,
+                   math_libs],
+   install_dir : usrbin_exec_dir,
+-  install : true)
+-exes += exe
+-manadocs += ['term-utils/scriptlive.1.adoc']
+-bashcompletions += ['scriptlive']
++  install : opt,
++  build_by_default : opt)
++if opt and not is_disabler(exe)
++  exes += exe
++  manadocs += ['term-utils/scriptlive.1.adoc']
++  bashcompletions += ['scriptlive']
++endif
+ 
+ exe = executable(
+   'scriptreplay',
+diff --git a/meson_options.txt b/meson_options.txt
+index 65b43fdb6d..77da35d99a 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -71,6 +71,8 @@ option('build-partx', type : 'feature',
+        description : 'build addpart, delpart, partx')
+ option('build-script', type : 'feature',
+        description : 'build script')
++option('build-scriptlive', type : 'feature',
++       description : 'build scriptlive')
+ 
+ option('build-uuidd', type : 'feature',
+        description : 'build the uuid daemon')
+-- 
+2.44.0
+

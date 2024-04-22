@@ -1,7 +1,7 @@
 From 59e9e3a8aa3bae044ce820be22e65b9438a485b5 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 09:42:25 -0500
-Subject: [PATCH 10/10] meson: Add build-blockdev option
+Subject: [PATCH 10/14] meson: Add build-blockdev option
 
 Only build blockdev on Linux.
 The BLKROSET macro is used in blockdev.c from blkdev.h.
