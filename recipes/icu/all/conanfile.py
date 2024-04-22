@@ -75,6 +75,9 @@ class ICUConan(ConanFile):
             if not os.path.exists(str(self.options.dat_package_file)):
                 raise ConanInvalidConfiguration("Non-existent dat_package_file specified")
 
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 17)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
