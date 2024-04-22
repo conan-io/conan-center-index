@@ -1094,12 +1094,8 @@ Examples = bin/datadir/examples""")
             gui_reqs = []
             if self.options.with_dbus:
                 gui_reqs.append("DBus")
-            if self.options.with_freetype:
-                gui_reqs.append("freetype::freetype")
             if self.options.with_libpng:
                 gui_reqs.append("libpng::libpng")
-            if self.options.get_safe("with_fontconfig", False):
-                gui_reqs.append("fontconfig::fontconfig")
             if self.settings.os in ["Linux", "FreeBSD"]:
                 if self.options.qtwayland or self.options.get_safe("with_x11", False):
                     gui_reqs.append("xkbcommon::xkbcommon")
@@ -1214,6 +1210,8 @@ Examples = bin/datadir/examples""")
                     xcb_qpa_reqs.append("VulkanSupport")
                 if self.options.get_safe("with_x11", False):
                     _create_module("XcbQpa", xcb_qpa_reqs, has_include_dir=False)
+                    if self.options.get_safe("with_fontconfig", False):
+                        self.cpp_info.components["qtXcbQpa"].requires.append("fontconfig::fontconfig")
                     _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpa"])
 
         if self.options.with_sqlite3:
