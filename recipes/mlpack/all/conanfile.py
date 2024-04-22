@@ -78,7 +78,10 @@ class MlpackConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(self, "*", os.path.join(self.source_folder, "src"), os.path.join(self.package_folder, "include"))
+        copy(self, "*",
+             os.path.join(self.source_folder, "src"),
+             os.path.join(self.package_folder, "include"),
+             excludes=["mlpack/bindings/*", "mlpack/tests/*", "mlpack/CMakeLists.txt"])
         self._configure_headers()
 
     @property
