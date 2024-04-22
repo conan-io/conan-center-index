@@ -1,7 +1,7 @@
 From cc7502947655f504ad8ecb8a722641a5bf00c4db Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 11:02:39 -0500
-Subject: [PATCH 11/14] meson: Add have_pty variable to check if pty is
+Subject: [PATCH 11/19] meson: Add have_pty variable to check if pty is
  available
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>

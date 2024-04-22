@@ -1,7 +1,7 @@
 From 6b8ea9f6657aeb69e5c186b19cddfb6d9abf41a0 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 09:14:26 -0500
-Subject: [PATCH 09/14] meson: Add build-chcpu option
+Subject: [PATCH 09/19] meson: Add build-chcpu option
 
 The cpu_set_t type does not exist on macOS.
 

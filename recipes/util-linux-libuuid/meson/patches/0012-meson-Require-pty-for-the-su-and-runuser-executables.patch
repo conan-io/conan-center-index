@@ -1,7 +1,7 @@
 From 20b0e11993ef97794950627c7969fa703e999257 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 11:04:36 -0500
-Subject: [PATCH 12/14] meson: Require pty for the su and runuser executables
+Subject: [PATCH 12/19] meson: Require pty for the su and runuser executables
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
 (cherry picked from commit 9400b8c5c84ab382dde3d37acc0a2938a5f848d2)

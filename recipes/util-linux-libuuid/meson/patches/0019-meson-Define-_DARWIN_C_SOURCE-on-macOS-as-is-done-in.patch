@@ -1,0 +1,30 @@
+From a4561c845ef7ad7a22db162ef59da3b6bc448c97 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Mon, 22 Apr 2024 15:03:50 -0500
+Subject: [PATCH 19/19] meson: Define _DARWIN_C_SOURCE on macOS as is done in
+ Autotools
+
+Signed-off-by: Jordan Williams <jordan@jwillikers.com>
+(cherry picked from commit 9bb92185f6828b025672c76adac83c87a9227339)
+---
+ meson.build | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/meson.build b/meson.build
+index bf7e86aec0..78aad6c9a8 100644
+--- a/meson.build
++++ b/meson.build
+@@ -41,6 +41,10 @@ vendordir = get_option('vendordir')
+ 
+ add_project_arguments('-D_GNU_SOURCE', language : 'c')
+ 
++if host_machine.system() == 'darwin'
++  add_project_arguments('-D_DARWIN_C_SOURCE', language : 'c')
++endif
++
+ cc = meson.get_compiler('c')
+ 
+ conf = configuration_data()
+-- 
+2.44.0
+

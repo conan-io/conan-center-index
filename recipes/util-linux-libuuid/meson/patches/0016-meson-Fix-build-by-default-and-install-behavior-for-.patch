@@ -1,0 +1,37 @@
+From 4bc23000270696265e6457ebdda49c5c869dcee7 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Mon, 22 Apr 2024 14:35:50 -0500
+Subject: [PATCH 16/19] meson: Fix build by default and install behavior for
+ build-pipesz option
+
+Signed-off-by: Jordan Williams <jordan@jwillikers.com>
+(cherry picked from commit 41e7a18f9677b3b0f2a9e841d21a40a3db41a26a)
+---
+ meson.build | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 914f9f9e71..bf7e86aec0 100644
+--- a/meson.build
++++ b/meson.build
+@@ -3033,14 +3033,15 @@ if not is_disabler(exe)
+   bashcompletions += ['hardlink']
+ endif
+ 
+-opt = not get_option('build-pipesz').disabled()
++opt = get_option('build-pipesz').allowed()
+ exe = executable(
+   'pipesz',
+   pipesz_sources,
+   include_directories : includes,
+   link_with : [lib_common],
+   install_dir : usrbin_exec_dir,
+-  install : true)
++  install : opt,
++  build_by_default : opt)
+ if opt and not is_disabler(exe)
+   exes += exe
+   manadocs += ['misc-utils/pipesz.1.adoc']
+-- 
+2.44.0
+

@@ -1,7 +1,7 @@
 From 09bb6f55935a1c02fb89aec4daf6701d75205a51 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 08:48:27 -0500
-Subject: [PATCH 02/14] meson: Add build-blkzone option
+Subject: [PATCH 02/19] meson: Add build-blkzone option
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
 (cherry picked from commit ca42082d60de44534836571e109e14f3a47fcb61)

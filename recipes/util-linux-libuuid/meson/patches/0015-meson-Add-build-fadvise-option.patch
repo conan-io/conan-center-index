@@ -1,0 +1,53 @@
+From f72ec6aa3e3acc2a2d8ae13d695b8a53e7d4de4b Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Mon, 22 Apr 2024 14:33:49 -0500
+Subject: [PATCH 15/19] meson: Add build-fadvise option
+
+Signed-off-by: Jordan Williams <jordan@jwillikers.com>
+(cherry picked from commit 509616220e23c488de7722eae368f82565ded240)
+---
+ meson.build       | 8 ++++++--
+ meson_options.txt | 2 ++
+ 2 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 18272665d2..914f9f9e71 100644
+--- a/meson.build
++++ b/meson.build
+@@ -3060,14 +3060,18 @@ if not is_disabler(exe)
+   exes += exe
+ endif
+ 
++have_posix_fadvise = conf.get('HAVE_POSIX_FADVISE').to_string() == '1'
++
++opt = get_option('build-fadvise').require(have_posix_fadvise).allowed()
+ exe = executable(
+   'fadvise',
+   fadvise_sources,
+   include_directories : includes,
+   link_with : [lib_common],
+   install_dir : usrbin_exec_dir,
+-  install : true)
+-if not is_disabler(exe)
++  install : opt,
++  build_by_default : opt)
++if opt and not is_disabler(exe)
+   exes += exe
+   manadocs += ['misc-utils/fadvise.1.adoc']
+   bashcompletions += ['fadvise']
+diff --git a/meson_options.txt b/meson_options.txt
+index 77da35d99a..1850d1d174 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -201,6 +201,8 @@ option('build-pg', type : 'feature',
+        description : 'build pg')
+ option('build-pipesz', type : 'feature',
+        description : 'build pipesz')
++option('build-fadvise', type : 'feature',
++       description : 'build fadvise')
+ option('build-setterm', type : 'feature',
+        description : 'build setterm')
+ option('build-schedutils', type : 'feature',
+-- 
+2.44.0
+

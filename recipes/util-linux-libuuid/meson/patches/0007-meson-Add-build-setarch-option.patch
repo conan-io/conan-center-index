@@ -1,7 +1,7 @@
 From 72ae8f0f3f3ecd4d65506a0c48ad8183d4d056f1 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 09:05:42 -0500
-Subject: [PATCH 07/14] meson: Add build-setarch option
+Subject: [PATCH 07/19] meson: Add build-setarch option
 
 The sys/personality.h header does not exist on macOS.
 

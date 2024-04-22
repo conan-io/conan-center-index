@@ -25,3 +25,8 @@ patches:
     - patch_file: "patches/0012-meson-Require-pty-for-the-su-and-runuser-executables.patch"
     - patch_file: "patches/0013-meson-Add-build-script-option.patch"
     - patch_file: "patches/0014-meson-Add-build-scriptlive-option.patch"
+    - patch_file: "patches/0015-meson-Add-build-fadvise-option.patch"
+    - patch_file: "patches/0016-meson-Fix-build-by-default-and-install-behavior-for-.patch"
+    - patch_file: "patches/0017-xalloc.h-Include-stdio.h-header-for-vasprintf-functi.patch"
+    - patch_file: "patches/0018-strutils.h-Include-strings.h-header-for-strncasecmp-.patch"
+    - patch_file: "patches/0019-meson-Define-_DARWIN_C_SOURCE-on-macOS-as-is-done-in.patch"
