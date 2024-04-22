@@ -67,7 +67,8 @@ class OpenldapConan(ConanFile):
             return "yes" if v else "no"
 
         tc = AutotoolsToolchain(self)
-        tc.make_args = self._soelim()
+        if is_apple_os(self):
+            tc.make_args.append("SOELIM=soelim" if shutil.which("soelim") else "SOELIM=mandoc_soelim")
         tc.configure_args += [
             "--with-cyrus_sasl={}".format(yes_no(self.options.with_cyrus_sasl)),
             "--without-fetch",
