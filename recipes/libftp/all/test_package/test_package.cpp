@@ -9,8 +9,6 @@ int main(void) {
         SSL_CTX_set_session_cache_mode(ssl_context->native_handle(), SSL_SESS_CACHE_CLIENT);
 
         ftp::client client(std::move(ssl_context));
-        client.get_current_directory();
-        client.disconnect();
     }
     catch (const std::exception & ex) {
         std::cerr << ex.what() << std::endl;
