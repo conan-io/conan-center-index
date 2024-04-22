@@ -4,6 +4,8 @@ sources:
     sha256: "aea196550f02974d6d09291c5d83b51ca6a03b3767e234a8c0e21322927d1e12"
 patches:
   3.6.5:
+    - patch_file: patches/0001-fix-to_cmake_path-usage.patch
+    - patch_file: patches/0005-use-JPEG-target-for-plugin.patch
     - patch_file: patches/0006-Declare-result-as-LONG-for-Mingw-build.patch
       base_path: source_subfolder
     - patch_file: patches/0007-fix-msvc-with-std-c++17.patch
