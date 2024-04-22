@@ -233,9 +233,6 @@ class VtkConan(ConanFile):
         #  But there aren't many conditions and these are just hand-rolled tests to suit.
         if not is_msvc(self):
             _check_condition("NOT WIN32", "can only be enabled with the MSVC compiler")
-        # note: this test is something we added as a condition on some of our 'fake' modules to add conan-package dependencies
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            _check_condition("conan_Linux_FreeBSD", "{mod} can only be enabled on the Linux or FreeBSD platform")
         return default_overrides
 
 
@@ -1132,7 +1129,7 @@ class VtkConan(ConanFile):
         # first, init with our recipe options for individual modules and groups
         # print(self.options)
 
-        # print("*** Setting module-enabled based on Groups and build_all_modules ***")
+        print("*** Setting module-enabled based on Groups and build_all_modules ***")
 
         for mod_with_prefix in modules_info["modules"]:
             mod = _module_remove_prefix(mod_with_prefix)
@@ -1159,7 +1156,8 @@ class VtkConan(ConanFile):
                     mod_enabled = "DONT_WANT"
             # we have our answer for this module, it will be YES/NO/WANT/DONT_WANT
             base_modules_enabled[mod_with_prefix] = mod_enabled
-            # if message: print(message)
+            if message:
+                print(message)
 
         # We now have a lot of YES/NO/WANT/DONT_WANT
         # We now want to resolve the WANT/DONT_WANT into YES/NO
@@ -1194,18 +1192,18 @@ class VtkConan(ConanFile):
                 # note: always check dependencies to catch NO-YES problems
                 if recurse_depends_has_NO(visited, dep, last_yes_parent, f"{chain_txt} --> {dep}"):
                     if not any_no:
-                        # print(f"Setting {mod} to NO, due to dependency {dep} (NO)")
+                        print(f"Setting {mod} to NO, due to dependency {dep} (NO)")
                         any_no = True
             if any_no:
                 base_modules_enabled[mod] = "NO"
             visited.add(mod)
             return any_no
 
-        # print("*** Setting modules to NO if dependencies are NO ***")
+        print("*** Setting modules to NO if dependencies are NO ***")
         for mod in base_modules_enabled:
             recurse_depends_has_NO(set(), mod, "", mod)
 
-        # print("*** For all YES and WANT modules, setting all dependencies to YES ***")
+        print("*** For all YES and WANT modules, setting all dependencies to YES ***")
         # find all modules that are tagged as YES, and tag all dependencies as YES
         # iterate multiple times rather than building a tree,
         # tagging those whose dependencies have been visited with YES-DONE
@@ -1228,7 +1226,7 @@ class VtkConan(ConanFile):
                         base_modules_enabled[dep] = "YES" # will process dependencies in future pass
                         mod_todo.add(dep)   # re-add to todo list, if not already in there (may have already been checked while it was still a "WANT" or other)
 
-        # print("*** Setting all WANT / DONT_WANT modules to YES / NO ***")
+        print("*** Setting all WANT / DONT_WANT modules to YES / NO ***")
         # find all modules that are not tagged YES or NO (ie WANT_*) and tag appropriately
         final_modules_enabled = {}
         for mod_with_prefix in base_modules_enabled:
@@ -1300,8 +1298,6 @@ class VtkConan(ConanFile):
                     "zlib":              [False, "zlib/[>=1.2.13]",             "zlib::zlib"        ],
                     "tiff":              [False, "libtiff/[>=4.4.0]",           "libtiff::libtiff"  ],
 
-                    "xorg-system":       [False, "xorg/system",                 "xorg::xorg"        ],
-
                     # TODO what module depends on boost?
                     # "boost":             [False, "boost/[>=1.82.0]"],
 
@@ -1324,6 +1320,11 @@ class VtkConan(ConanFile):
                 parties["QtOpenGL"] = [False, "qt/[>=5.15.9]", "qt::qtOpenGLWidgets"]
             else:
                 parties["QtOpenGL"] = [False, "qt/[>=6.5.0]", "qt::qtOpenGLWidgets"]
+
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                parties["stub-system-display"] = [False, "xorg/system", "xorg::xorg"]
+            else:
+                pass # nothing required for other platforms
             return parties
 
 
@@ -1371,8 +1372,6 @@ class VtkConan(ConanFile):
                     "zlib":              [False, "zlib/[>=1.2.13]",             "zlib::zlib"        ],
                     "tiff":              [False, "libtiff/[>=4.4.0]",           "libtiff::libtiff"  ],
 
-                    "xorg-system":       [False, "xorg/system",                 "xorg::xorg"        ],
-
                     # TODO what module depends on boost?
                     # "boost":             [False, "boost/[>=1.82.0]"],
 
@@ -1395,6 +1394,12 @@ class VtkConan(ConanFile):
                 parties["QtOpenGL"] = [False, "qt/[>=5.15.9]", "qt::qtOpenGLWidgets"]
             else:
                 parties["QtOpenGL"] = [False, "qt/[>=6.5.0]", "qt::qtOpenGLWidgets"]
+
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                parties["stub-system-display"] = [False, "xorg/system", "xorg::xorg"]
+            else:
+                pass # nothing required for other platforms
+
             return parties
 
         raise ConanInvalidConfiguration(f"{self.version} not supported by recipe (update _third_party(self))")
@@ -1452,7 +1457,7 @@ class VtkConan(ConanFile):
         # TODO consider changing these to eg conan_QtOpenGL
         # GUISupportQt requires Qt6::QtOpenGL as a dependency
         add_missing("VTK::QtOpenGL",    ["VTK::GUISupportQt"],                     "")
-        add_missing("VTK::xorg-system", ["VTK::RenderingCore"],                    "conan_Linux_FreeBSD")  # my own special condition
+        add_missing("VTK::stub-system-display", ["VTK::RenderingCore"],            "")
         add_missing("VTK::openvr",      ["VTK::RenderingOpenVR"],                  "")
         add_missing("VTK::qt",          ["VTK::RenderingQt", "VTK::GUISupportQt"], "")
 
