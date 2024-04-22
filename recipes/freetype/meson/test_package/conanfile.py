@@ -9,6 +9,7 @@ class TestPackageConan(ConanFile):
     generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     test_type = "explicit"
     license = "OFL-1.1-no-RFN"
+    short_paths = True
 
     def layout(self):
         cmake_layout(self)
