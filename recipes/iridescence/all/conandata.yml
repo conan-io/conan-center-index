@@ -13,3 +13,6 @@ patches:
     - patch_file: "patches/003-fix-guik-includes.patch"
       patch_description: "Fix a missing include in guik/screen_capture.cpp"
       patch_type: "bugfix"
+    - patch_file: "patches/004-fix-windows-defines.patch"
+      patch_description: "Undef conflicting windows.h macros"
+      patch_type: "bugfix"

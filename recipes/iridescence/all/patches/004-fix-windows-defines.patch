@@ -1,0 +1,148 @@
+Subject: [PATCH] Replace 'near' and 'far' that conflict with windows.h
+
+--- a/include/guik/camera/basic_projection_control.hpp
++++ b/include/guik/camera/basic_projection_control.hpp
+@@ -38,8 +38,8 @@
+ 
+   float fovy;   // Perstictive projection FoV (vertical)
+   float width;  // Orthogonal perojection width
+-  float near;   // Near clipping plane distance
+-  float far;    // Far clipping plane distance
++  float near_;   // Near clipping plane distance
++  float far_;    // Far clipping plane distance
+ };
+ 
+ }  // namespace guik
+--- a/include/guik/camera/fps_camera_control.hpp
++++ b/include/guik/camera/fps_camera_control.hpp
+@@ -57,8 +57,8 @@
+ 
+   Eigen::Vector2i size;
+   double fovy;
+-  double near;
+-  double far;
++  double near_;
++  double far_;
+ 
+   double mouse_sensitivity_yaw;
+   double mouse_sensitivity_pitch;
+--- a/include/guik/camera/static_projection_control.hpp
++++ b/include/guik/camera/static_projection_control.hpp
+@@ -30,8 +30,8 @@
+ 
+   int projection_mode;
+ 
+-  float near;
+-  float far;
++  float near_;
++  float far_;
+   Eigen::Matrix4f proj;
+   Eigen::Matrix3f camera_matrix;
+ };
+--- a/src/guik/camera/basic_projection_control.cpp
++++ b/src/guik/camera/basic_projection_control.cpp
+@@ -10,7 +10,7 @@
+ 
+ namespace guik {
+ 
+-BasicProjectionControl::BasicProjectionControl(const Eigen::Vector2i& size) : size(size), projection_mode(0), fovy(30.0f), width(10.0f), near(1.0f), far(1000.0f) {}
++BasicProjectionControl::BasicProjectionControl(const Eigen::Vector2i& size) : size(size), projection_mode(0), fovy(30.0f), width(10.0f), near_(1.0f), far_(1000.0f) {}
+ 
+ BasicProjectionControl::~BasicProjectionControl() {}
+ 
+@@ -27,10 +27,10 @@
+ }
+ 
+ void BasicProjectionControl::set_depth_range(const Eigen::Vector2f& range) {
+-  this->near = range[0];
+-  this->far = range[1];
++  this->near_ = range[0];
++  this->far_ = range[1];
+ 
+-  width = (this->far - this->near) * 0.1;
++  width = (this->far_ - this->near_) * 0.1;
+ }
+ 
+ Eigen::Matrix4f BasicProjectionControl::projection_matrix() const {
+@@ -38,9 +38,9 @@
+ 
+   glm::mat4 proj;
+   if (projection_mode == 0) {
+-    proj = glm::perspective<float>(fovy * M_PI / 180.0, aspect_ratio, near, far);
++    proj = glm::perspective<float>(fovy * M_PI / 180.0, aspect_ratio, near_, far_);
+   } else {
+-    proj = glm::ortho<float>(-width / 2.0f, width / 2.0f, -width / 2.0f / aspect_ratio, width / 2.0 / aspect_ratio, near, far);
++    proj = glm::ortho<float>(-width / 2.0f, width / 2.0f, -width / 2.0f / aspect_ratio, width / 2.0 / aspect_ratio, near_, far_);
+   }
+ 
+   return Eigen::Map<Eigen::Matrix4f>(glm::value_ptr(proj));
+@@ -74,17 +74,17 @@
+   std::cout << token << std::endl;
+   ist >> token >> width;
+   std::cout << token << std::endl;
+-  ist >> token >> near;
++  ist >> token >> near_;
+   std::cout << token << std::endl;
+-  ist >> token >> far;
++  ist >> token >> far_;
+   std::cout << token << std::endl;
+ }
+ 
+ void BasicProjectionControl::save(std::ostream& ost) const {
+   ost << "fovy: " << fovy << std::endl;
+   ost << "width: " << width << std::endl;
+-  ost << "near: " << near << std::endl;
+-  ost << "far: " << far << std::endl;
++  ost << "near: " << near_ << std::endl;
++  ost << "far: " << far_ << std::endl;
+ }
+ 
+ }  // namespace guik
+\ No newline at end of file
+--- a/src/guik/camera/fps_camera_control.cpp
++++ b/src/guik/camera/fps_camera_control.cpp
+@@ -19,8 +19,8 @@
+   fovy_locked(false),
+   size(canvas_size),
+   fovy(default_fovy),
+-  near(0.1),
+-  far(1000.0),
++  near_(0.1),
++  far_(1000.0),
+   mouse_sensitivity_yaw(0.01),
+   mouse_sensitivity_pitch(0.01),
+   translation_speed(0.1),
+@@ -71,7 +71,7 @@
+ Eigen::Matrix4f FPSCameraControl::projection_matrix() const {
+   double aspect_ratio = size[0] / static_cast<float>(size[1]);
+ 
+-  glm::mat4 proj = glm::perspective<float>(fovy * M_PI / 180.0, aspect_ratio, near, far);
++  glm::mat4 proj = glm::perspective<float>(fovy * M_PI / 180.0, aspect_ratio, near_, far_);
+ 
+   return Eigen::Map<Eigen::Matrix4f>(glm::value_ptr(proj));
+ }
+@@ -177,7 +177,7 @@
+ }
+ 
+ Eigen::Vector2f FPSCameraControl::depth_range() const {
+-  return Eigen::Vector2f(near,  far);
++  return Eigen::Vector2f(near_,  far_);
+ }
+ 
+ Eigen::Matrix4f FPSCameraControl::view_matrix() const {
+--- a/src/guik/viewer/light_viewer.cpp
++++ b/src/guik/viewer/light_viewer.cpp
+@@ -725,10 +725,10 @@
+ 
+   if (real_scale) {
+     const Eigen::Vector2f depth_range = canvas->camera_control->depth_range();
+-    const float near = depth_range[0];
+-    const float far = depth_range[1];
++    const float near_range = depth_range[0];
++    const float far_range = depth_range[1];
+     for (auto& depth : flipped) {
+-      depth = 2.0 * near * far / (far + near - depth * (far - near));
++      depth = 2.0f * near_range * far_range / (far_range + near_range - depth * (far_range - near_range));
+     }
+   }
+ 
