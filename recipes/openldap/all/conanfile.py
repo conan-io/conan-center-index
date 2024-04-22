@@ -51,6 +51,9 @@ class OpenldapConan(ConanFile):
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration(f"{self.name} is only supported on Unix platforms")
+        if is_apple_os(self) and cross_building(self) and not self.options.shared:
+            # Produces linkage errors in test_package: Undefined symbols for architecture x86_64: "_lutil_memcmp", referenced from: ...
+            raise ConanInvalidConfiguration(f"{self.ref} recipe does not support cross-building static libraries on macOS. Contributions are welcome!")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -73,6 +76,10 @@ class OpenldapConan(ConanFile):
             "--libexecdir=${prefix}/bin",
             f"systemdsystemunitdir={os.path.join(self.package_folder, 'res')}",
         ]
+        if cross_building(self):
+            # When cross-building, yielding_select should be explicit:
+            # https://git.openldap.org/openldap/openldap/-/blob/OPENLDAP_REL_ENG_2_5/configure.ac#L1636
+            tc.configure_args.append("--with-yielding_select=yes")
         tc.generate()
         tc = AutotoolsDeps(self)
         tc.generate()
