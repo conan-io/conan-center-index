@@ -1,0 +1,10 @@
+sources:
+  # Newer versions at the top
+  "0.1.2-dev":
+    url: "https://github.com/eclipse-uprotocol/up-cpp/archive/refs/tags/v0.1.2-dev.tar.gz"
+    sha256: "1c1006256d0e5fd385732767e0e3b0b4867342e29e4c74e11a0d8a9a763c1288"
+proto:
+  "0.1.2-dev":
+    ssh: "git@github.com:eclipse-uprotocol/up-core-api.git"
+    https: "https://github.com/eclipse-uprotocol/up-core-api.git"
+    tag: "uprotocol-core-api-1.5.7"
