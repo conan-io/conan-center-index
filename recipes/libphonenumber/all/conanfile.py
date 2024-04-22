@@ -84,8 +84,7 @@ class LibphonenumberConan(ConanFile):
             self.requires("boost/1.84.0", transitive_headers=True, transitive_libs=True)
         if self.options.use_icu_regexp or self.options.get_safe("build_geocoder"):
             # https://github.com/google/libphonenumber/blob/v8.13.35/cpp/src/phonenumbers/geocoding/phonenumber_offline_geocoder.h#L23
-            transitive_icu = bool(self.options.get_safe("build_geocoder"))
-            self.requires("icu/74.2", transitive_headers=transitive_icu, transitive_libs=transitive_icu)
+            self.requires("icu/74.2", transitive_headers=True, transitive_libs=True)
         if self.options.use_re2:
             # FIXME: compilation with re2 fails currently with
             # error: ‘StringPiece’ was not declared in this scope; did you mean ‘re2::StringPiece’
