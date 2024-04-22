@@ -67,8 +67,6 @@ class OpenldapConan(ConanFile):
             return "yes" if v else "no"
 
         tc = AutotoolsToolchain(self)
-        if is_apple_os(self):
-            tc.make_args.append("SOELIM=soelim" if shutil.which("soelim") else "SOELIM=mandoc_soelim")
         tc.configure_args += [
             "--with-cyrus_sasl={}".format(yes_no(self.options.with_cyrus_sasl)),
             "--without-fetch",
@@ -81,6 +79,8 @@ class OpenldapConan(ConanFile):
             # When cross-building, yielding_select should be explicit:
             # https://git.openldap.org/openldap/openldap/-/blob/OPENLDAP_REL_ENG_2_5/configure.ac#L1636
             tc.configure_args.append("--with-yielding_select=yes")
+        if is_apple_os(self):
+            tc.make_args.append("SOELIM=soelim" if shutil.which("soelim") else "SOELIM=mandoc_soelim")
         tc.generate()
         tc = AutotoolsDeps(self)
         tc.generate()
@@ -88,12 +88,6 @@ class OpenldapConan(ConanFile):
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "configure"),
                         "WITH_SYSTEMD=no\nsystemdsystemunitdir=", "WITH_SYSTEMD=no")
-
-    def _soelim(self):
-        # INFO: macOS Ventura does not have soelim, but mandoc_soelim
-        if is_apple_os(self):
-            return ["SOELIM=soelim"] if shutil.which("soelim") else ["SOELIM=mandoc_soelim"]
-        return []
 
     def build(self):
         self._patch_sources()
