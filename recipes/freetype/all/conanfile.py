@@ -115,13 +115,13 @@ class FreetypeConan(ConanFile):
             replace_in_file(self, cmakelists, "if (BZIP2_FOUND)", "if(0)")
         # the custom FindBrotliDec of upstream is too fragile
         replace_in_file(self, cmakelists,
-                                "find_package(BrotliDec REQUIRED)",
-                                "find_package(Brotli REQUIRED)\n"
-                                "set(BROTLIDEC_FOUND 1)\n"
-                                "set(BROTLIDEC_LIBRARIES \"brotli::brotli\")")
-            if not self.options.with_brotli:
-                replace_in_file(self, cmakelists, "find_package(BrotliDec)", "")
-                replace_in_file(self, cmakelists, "if (BROTLIDEC_FOUND)", "if(0)")
+                              "find_package(BrotliDec REQUIRED)",
+                              "find_package(Brotli REQUIRED)\n"
+                              "set(BROTLIDEC_FOUND 1)\n"
+                              "set(BROTLIDEC_LIBRARIES \"brotli::brotli\")")
+        if not self.options.with_brotli:
+            replace_in_file(self, cmakelists, "find_package(BrotliDec)", "")
+            replace_in_file(self, cmakelists, "if (BROTLIDEC_FOUND)", "if(0)")
 
         config_h = os.path.join(self.source_folder, "include", "freetype", "config", "ftoption.h")
         if self.options.subpixel:
