@@ -30,6 +30,8 @@ class OpenTelemetryCppConan(ConanFile):
         "with_otlp": ["deprecated", True, False],
         "with_otlp_grpc": [True, False],
         "with_otlp_http": [True, False],
+        "with_otlp_http_compression": [True, False],
+        "with_otlp_file": [True, False],
         "with_zipkin": [True, False],
         "with_prometheus": [True, False],
         "with_elasticsearch": [True, False],
@@ -52,6 +54,8 @@ class OpenTelemetryCppConan(ConanFile):
         "with_otlp": "deprecated",
         "with_otlp_grpc": True,
         "with_otlp_http": True,
+        "with_otlp_http_compression": False,
+        "with_otlp_file": False,
         "with_zipkin": True,
         "with_prometheus": False,
         "with_elasticsearch": False,
@@ -94,6 +98,9 @@ class OpenTelemetryCppConan(ConanFile):
             del self.options.with_jaeger
         if Version(self.version) >= "1.11":
             del self.options.with_logs_preview
+        if Version(self.version) < "1.15":
+            del self.options.with_otlp_http_compression
+            del self.options.with_otlp_file
 
     def configure(self):
         if self.options.shared:
@@ -229,10 +236,12 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["OPENTELEMETRY_INSTALL"] = True
         if not self.settings.compiler.cppstd:
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        if Version(self.version) >= "1.15":
+            tc.cache_variables["WITH_OTLP_HTTP_COMPRESSION"] = self.options.with_otlp_http_compression
+            tc.cache_variables["WITH_OTLP_FILE"] = self.options.with_otlp_file
         tc.generate()
 
         deps = CMakeDeps(self)
-
         deps.generate()
 
     def _patch_sources(self):
