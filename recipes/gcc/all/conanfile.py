@@ -50,6 +50,9 @@ class GccConan(ConanFile):
     def validate_build(self):
         if is_msvc(self):
             raise ConanInvalidConfiguration("GCC can't be built with MSVC")
+        if self.settings.compiler.cppstd != "11":
+            # https://github.com/gcc-mirror/gcc/blob/6b5248d15c6d10325c6cbb92a0e0a9eb04e3f122/libcody/configure#L2505C11-L2505C25
+            raise ConanInvalidConfiguration("GCC needs exactly c++11")
 
     def validate(self):
         if self.settings.os == "Windows":
