@@ -16,7 +16,7 @@ class LibFTPConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/deniskovalchuk/libftp"
-    topics = ("ftp", "boost")
+    topics = ("ftp", "ftps", "boost", "ssl", "tls", "openssl")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
