@@ -14,7 +14,7 @@ class ReflectCppConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/getml/reflect-cpp"
-    topics = ("reflection", "serialization", "memory", "json", "xml", "flatbuffers", "header-only")
+    topics = ("reflection", "serialization", "memory", "json", "xml", "flatbuffers", "yaml", "toml", "msgpack", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -22,12 +22,16 @@ class ReflectCppConan(ConanFile):
         "with_xml" : [True, False],
         "with_flatbuffers" : [True, False],
         "with_yaml": [True, False],
+        "with_toml": [True, False],
+        "with_msgpack": [True, False],
     }
     default_options = {
         "with_json" : False,
         "with_xml" : False,
         "with_flatbuffers" : False,
         "with_yaml" : False,
+        "with_toml" : False,
+        "with_msgpack" : False,
     }
 
     @property
@@ -47,6 +51,11 @@ class ReflectCppConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def config_options(self):
+        if Version(self.version) < "9.0.0":
+            del self.options.with_toml
+            del self.options.with_msgpack
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -59,6 +68,10 @@ class ReflectCppConan(ConanFile):
             self.requires("flatbuffers/24.3.7", transitive_headers=True)
         if self.options.with_yaml:
             self.requires("yaml-cpp/0.8.0", transitive_headers=True)
+        if self.options.get_safe("with_toml"):
+            self.requires("tomlplusplus/3.4.0", transitive_headers=True)
+        if self.options.get_safe("with_msgpack"):
+            self.requires("msgpack-c/6.0.0", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()
