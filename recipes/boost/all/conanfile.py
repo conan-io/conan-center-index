@@ -494,6 +494,11 @@ class BoostConan(ConanFile):
             return False
         return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
 
+    @property
+    def _stacktrace_from_exception_available(self):
+        if Version(self.version) >= "1.85.0":
+            return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
+
     def configure(self):
         if self.options.header_only:
             self.options.rm_safe("shared")
@@ -1242,6 +1247,8 @@ class BoostConan(ConanFile):
                 cxx_flags.append("-fembed-bitcode")
         if self._with_stacktrace_backtrace:
             flags.append(f"-sLIBBACKTRACE_PATH={self.dependencies['libbacktrace'].package_folder}")
+        if self._stacktrace_from_exception_available:
+            flags.append("define=BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK=1")
         if self._with_iconv:
             flags.append(f"-sICONV_PATH={self.dependencies['libiconv'].package_folder}")
         if self._with_icu:
@@ -1755,7 +1762,7 @@ class BoostConan(ConanFile):
                         continue
                     if name in ("boost_math_c99l", "boost_math_tr1l") and str(self.settings.arch).startswith("ppc"):
                         continue
-                    if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic",) and self.settings.os == "Windows":
+                    if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic", "boost_stacktrace_from_exception",) and self.settings.os == "Windows":
                         continue
                     if name == "boost_stacktrace_addr2line" and not self._stacktrace_addr2line_available:
                         continue
@@ -1839,12 +1846,18 @@ class BoostConan(ConanFile):
                         self.cpp_info.components["stacktrace_addr2line"].system_libs.append("dl")
                     if self._with_stacktrace_backtrace:
                         self.cpp_info.components["stacktrace_backtrace"].system_libs.append("dl")
+                    if self._stacktrace_from_exception_available:
+                        self.cpp_info.components["stacktrace_from_exception"].system_libs.append("dl")
 
                 if self._stacktrace_addr2line_available:
                     self.cpp_info.components["stacktrace_addr2line"].defines.extend([
                         f"BOOST_STACKTRACE_ADDR2LINE_LOCATION=\"{self.options.addr2line_location}\"",
                         "BOOST_STACKTRACE_USE_ADDR2LINE",
                     ])
+
+                if self._stacktrace_from_exception_available:
+                    self.cpp_info.components["stacktrace_from_exception"].defines.append("BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK")
+
 
                 if self._with_stacktrace_backtrace:
                     self.cpp_info.components["stacktrace_backtrace"].defines.append("BOOST_STACKTRACE_USE_BACKTRACE")
