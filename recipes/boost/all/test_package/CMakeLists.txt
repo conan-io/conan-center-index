@@ -101,14 +101,6 @@ if(NOT HEADER_ONLY)
         add_test(NAME boost_stacktrace_backtrace COMMAND stacktrace_backtrace_exe)
     endif()
 
-    if(WITH_STACKTRACE_FROM_EXCEPTION)
-        add_executable(stacktrace_from_exception_exe stacktrace.cpp)
-        target_compile_definitions(stacktrace_from_exception_exe PRIVATE TEST_STACKTRACE_IMPL=7)
-        target_link_libraries(stacktrace_from_exception_exe PRIVATE Boost::stacktrace_from_exception)
-        set_property(TARGET stacktrace_from_exception_exe PROPERTY CXX_STANDARD 11)
-        add_test(NAME boost_stacktrace_from_exception_exe COMMAND stacktrace_from_exception_exe)
-    endif()
-
     if(WITH_STACKTRACE)
         find_package(Boost COMPONENTS stacktrace REQUIRED)
 

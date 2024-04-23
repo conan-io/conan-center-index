@@ -136,8 +136,6 @@ dependencies:
   - stacktrace
   stacktrace_windbg_cached:
   - stacktrace
-  stacktrace_from_exception:
-  - stacktrace
   system: []
   test:
   - exception
@@ -253,8 +251,6 @@ libs:
   - boost_stacktrace_windbg
   stacktrace_windbg_cached:
   - boost_stacktrace_windbg_cached
-  stacktrace_from_exception:
-  - boost_stacktrace_from_exception
   system:
   - boost_system
   test: []

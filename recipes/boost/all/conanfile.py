@@ -1247,7 +1247,8 @@ class BoostConan(ConanFile):
                 cxx_flags.append("-fembed-bitcode")
         if self._with_stacktrace_backtrace:
             flags.append(f"-sLIBBACKTRACE_PATH={self.dependencies['libbacktrace'].package_folder}")
-        if self._stacktrace_from_exception_available:
+        if self._stacktrace_from_exception_available and is_apple_os(self) and str(self.settings.compiler.libcxx) == "libc++":
+            # https://github.com/boostorg/stacktrace/blob/boost-1.85.0/src/from_exception.cpp#L29
             flags.append("define=BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK=1")
         if self._with_iconv:
             flags.append(f"-sICONV_PATH={self.dependencies['libiconv'].package_folder}")
@@ -1855,10 +1856,6 @@ class BoostConan(ConanFile):
                         "BOOST_STACKTRACE_USE_ADDR2LINE",
                     ])
 
-                if self._stacktrace_from_exception_available:
-                    self.cpp_info.components["stacktrace_from_exception"].defines.append("BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK")
-
-
                 if self._with_stacktrace_backtrace:
                     self.cpp_info.components["stacktrace_backtrace"].defines.append("BOOST_STACKTRACE_USE_BACKTRACE")
                     self.cpp_info.components["stacktrace_backtrace"].requires.append("libbacktrace::libbacktrace")
@@ -1913,4 +1910,3 @@ class BoostConan(ConanFile):
         #TODO: remove in the future, user_info deprecated in conan2, but kept for compatibility while recipe is cross-compatible.
         self.user_info.stacktrace_addr2line_available = self._stacktrace_addr2line_available
         self.conf_info.define("user.boost:stacktrace_addr2line_available", self._stacktrace_addr2line_available)
-        self.conf_info.define("user.boost:stacktrace_from_exception_available", self._stacktrace_from_exception_available)
