@@ -42,8 +42,6 @@ class MlpackConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # Using version ranges since this is a header-only library
-        # Minimum versions based on https://github.com/mlpack/mlpack/blob/4.3.0/CMakeLists.txt#L21-L28
         self.requires("armadillo/12.6.4")
         self.requires("cereal/1.3.2")
         self.requires("ensmallen/2.21.0")
