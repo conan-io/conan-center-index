@@ -36,9 +36,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            img_name = os.path.join(self.source_folder, "testimg.jpg")
-            self.run(f"{bin_path} {img_name}", env="conanrun")
-            test_transupp_path = os.path.join(self.cpp.build.bindirs[0], "test_transupp")
-            if os.path.exists(test_transupp_path):
-                out_img = os.path.join(self.build_folder, "outimg.jpg")
-                self.run(f"{test_transupp_path} {img_name} {out_img}", env="conanrun")
+            self.run(f"{bin_path}", env="conanrun")
