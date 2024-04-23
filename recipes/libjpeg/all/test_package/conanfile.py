@@ -7,26 +7,14 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeDeps", "VirtualRunEnv", "CMakeToolchain"
     test_type = "explicit"
-
-    @property
-    def _build_transupp(self):
-        # transupp+libjpeg makes use of stdio of the C library. This cannot be used when using a dll libjpeg, built with a static c library.
-        return not (self.dependencies["libjpeg"].options.shared and is_msvc(self) and is_msvc_static_runtime(self))
 
     def layout(self):
         cmake_layout(self)
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.variables["BUILD_TRANSUPP"] = self._build_transupp
-        if self._build_transupp:
-            tc.variables["LIBJPEG_RES_DIR"] = self.dependencies["libjpeg"].cpp_info.resdirs[0].replace("\\", "/")
-        tc.generate()
 
     def build(self):
         cmake = CMake(self)

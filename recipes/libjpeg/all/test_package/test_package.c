@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "jpeglib.h"
+#include "transupp.h"
 
 int main() {
     struct jpeg_decompress_struct info;
