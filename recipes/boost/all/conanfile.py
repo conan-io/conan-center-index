@@ -1913,3 +1913,4 @@ class BoostConan(ConanFile):
         #TODO: remove in the future, user_info deprecated in conan2, but kept for compatibility while recipe is cross-compatible.
         self.user_info.stacktrace_addr2line_available = self._stacktrace_addr2line_available
         self.conf_info.define("user.boost:stacktrace_addr2line_available", self._stacktrace_addr2line_available)
+        self.conf_info.define("user.boost:stacktrace_from_exception_available", self._stacktrace_from_exception_available)

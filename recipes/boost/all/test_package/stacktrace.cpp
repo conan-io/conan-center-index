@@ -24,6 +24,7 @@ void f1() {
 #define TEST_STACKTRACE_NOOP 4
 #define TEST_STACKTRACE_WINDBG 5
 #define TEST_STACKTRACE_WINDBG_CACHED 6
+#define TEST_STACKTRACE_FROM_EXCEPTION 7
 
 static const char *stacktrace_impls[] = {
     "addr2line",
@@ -32,6 +33,7 @@ static const char *stacktrace_impls[] = {
     "noop",
     "windbg",
     "windbg_cached",
+    "from_exception"
 };
 
 bool check_used_defined()
@@ -64,6 +66,12 @@ bool check_used_defined()
 #if TEST_STACKTRACE_IMPL == TEST_STACKTRACE_WINDBG_CACHED
 #   if !defined(BOOST_STACKTRACE_USE_WINDBG_CACHED)
         std::cerr << "testing stacktrace_windbg_cached but BOOST_STACKTRACE_USE_WINDBG_CACHED not defined\n";
+        success = false;
+#   endif
+#endif
+#if TEST_STACKTRACE_IMPL == TEST_STACKTRACE_FROM_EXCEPTION
+#   if !defined(BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK)
+        std::cerr << "testing stacktrace_from but BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK not defined\n";
         success = false;
 #   endif
 #endif
@@ -104,6 +112,12 @@ bool check_unused_undefined()
 #   if defined(BOOST_STACKTRACE_USE_WINDBG_CACHED)
 #       if TEST_STACKTRACE_IMPL != TEST_STACKTRACE_WINDBG_CACHED
             std::cerr << "BOOST_STACKTRACE_USE_WINDBG_CACHED defined but not testing stacktrace_windbg_cached\n";
+            success = false;
+#       endif
+#   endif
+#   if defined(BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK)
+#       if TEST_STACKTRACE_IMPL != TEST_STACKTRACE_FROM_EXCEPTION
+            std::cerr << "BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK defined but not testing stacktrace_from_exception\n";
             success = false;
 #       endif
 #   endif
