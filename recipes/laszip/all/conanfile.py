@@ -11,7 +11,7 @@ required_conan_version = ">=1.54.0"
 class LaszipConan(ConanFile):
     name = "laszip"
     description = "C++ library for lossless LiDAR compression."
-    license = "LGPL-2.1"
+    license = "Apache-2.0"
     topics = ("las", "laz", "lidar", "compression", "decompression")
     homepage = "https://github.com/LASzip/LASzip"
     url = "https://github.com/conan-io/conan-center-index"
