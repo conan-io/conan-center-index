@@ -278,6 +278,9 @@ class OpenSceneGraphConanFile(ConanFile):
                         "find_package(Fontconfig MODULE)", "find_package(Fontconfig CONFIG REQUIRED)")
         replace_in_file(self, os.path.join(self.source_folder, "src", "osgPlugins", "freetype", "CMakeLists.txt"),
                         "SET(TARGET_EXTERNAL_LIBRARIES ${FREETYPE_LIBRARIES} )", "SET(TARGET_EXTERNAL_LIBRARIES Freetype::Freetype)")
+        # Find png, gif, jpeg also on macos
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "FIND_PACKAGE(AVFoundation)", "FIND_PACKAGE(AVFoundation)\nFIND_PACKAGE(GIFLIB)\nFIND_PACKAGE(JPEG)\nFIND_PACKAGE(PNG)")
 
     def build(self):
         self._patch_sources()
