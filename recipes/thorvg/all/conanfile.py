@@ -115,8 +115,7 @@ class ThorvgConan(ConanFile):
             "vector": bool(self.options.with_vector),
             "examples": bool(self.options.with_examples),
             "tests": False,
-            "log": is_debug,
-            "default_library": "shared" if self.options.shared else "static"
+            "log": is_debug
         })
         tc.generate()
         tc = PkgConfigDeps(self)
@@ -145,3 +144,7 @@ class ThorvgConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libthorvg")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread"])
+        if not self.options.shared:
+            self.cpp_info.defines = ["TVG_STATIC"]
+        else:
+            self.cpp_info.defines = ["TVG_EXPORT", "TVG_BUILD"]
