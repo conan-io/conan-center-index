@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
@@ -49,6 +50,9 @@ class CppcheckConan(ConanFile):
         if Version(self.version) >= "2.11.0":
             tc.variables["DISABLE_DMAKE"] = True
         tc.variables["FILESDIR"] = "bin"
+        # TODO: Remove when Conan 1 support is dropped
+        if not self.settings.get_safe("compiler.cppstd"):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
 
         deps = CMakeDeps(self)
