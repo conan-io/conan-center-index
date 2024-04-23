@@ -24,14 +24,6 @@ class CppcheckConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -50,9 +42,6 @@ class CppcheckConan(ConanFile):
         if Version(self.version) >= "2.11.0":
             tc.variables["DISABLE_DMAKE"] = True
         tc.variables["FILESDIR"] = "bin"
-        # TODO: Remove when Conan 1 support is dropped
-        if not self.settings.get_safe("compiler.cppstd"):
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
 
         deps = CMakeDeps(self)
