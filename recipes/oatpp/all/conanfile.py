@@ -24,11 +24,20 @@ class OatppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_test_library": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_test_library": False,
     }
+
+    @property
+    def _version(self):
+        version = str(self.version)
+        if version.endswith("-latest"):
+            version = version[:-len("-latest")]
+        return version
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,7 +60,7 @@ class OatppConan(ConanFile):
             raise ConanInvalidConfiguration("oatpp requires GCC >=5")
 
     def build_requirements(self):
-        if Version(self.version) >= "1.3.0":
+        if Version(self._version) >= "1.3.0":
             self.tool_requires("cmake/[>=3.20 <4]")
 
     def source(self):
@@ -63,6 +72,7 @@ class OatppConan(ConanFile):
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if is_msvc(self) and Version(self.version) >= "1.3.0":
             tc.variables["OATPP_MSVC_LINK_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        tc.variables["OATPP_LINK_TEST_LIBRARY"] = self.options.with_test_library
         tc.generate()
         venv = VirtualBuildEnv(self)
         venv.generate(scope="build")
@@ -81,11 +91,8 @@ class OatppConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "oatpp")
 
-        version = str(self.version)
-        if version.endswith("-latest"):
-            version = version[:-len("-latest")]
-        include_dir = os.path.join("include", f"oatpp-{version}", "oatpp")
-        lib_dir = os.path.join("lib", f"oatpp-{version}")
+        include_dir = os.path.join("include", f"oatpp-{self._version}", "oatpp")
+        lib_dir = os.path.join("lib", f"oatpp-{self._version}")
 
         # oatpp
         self.cpp_info.components["_oatpp"].names["cmake_find_package"] = "oatpp"
@@ -100,13 +107,14 @@ class OatppConan(ConanFile):
             self.cpp_info.components["_oatpp"].system_libs = ["ws2_32", "wsock32"]
 
         # oatpp-test
-        self.cpp_info.components["oatpp-test"].names["cmake_find_package"] = "oatpp-test"
-        self.cpp_info.components["oatpp-test"].names["cmake_find_package_multi"] = "oatpp-test"
-        self.cpp_info.components["oatpp-test"].set_property("cmake_target_name", "oatpp-test::oatpp-test")
-        self.cpp_info.components["oatpp-test"].includedirs = [include_dir]
-        self.cpp_info.components["oatpp-test"].libdirs = [lib_dir]
-        self.cpp_info.components["oatpp-test"].libs = ["oatpp-test"]
-        self.cpp_info.components["oatpp-test"].requires = ["_oatpp"]
+        if self.options.with_test_library:
+            self.cpp_info.components["oatpp-test"].names["cmake_find_package"] = "oatpp-test"
+            self.cpp_info.components["oatpp-test"].names["cmake_find_package_multi"] = "oatpp-test"
+            self.cpp_info.components["oatpp-test"].set_property("cmake_target_name", "oatpp-test::oatpp-test")
+            self.cpp_info.components["oatpp-test"].includedirs = [include_dir]
+            self.cpp_info.components["oatpp-test"].libdirs = [lib_dir]
+            self.cpp_info.components["oatpp-test"].libs = ["oatpp-test"]
+            self.cpp_info.components["oatpp-test"].requires = ["_oatpp"]
 
         # workaround to have all components in the global target
         self.cpp_info.set_property("cmake_target_name", "oatpp::oatpp-test")
