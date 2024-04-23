@@ -6,8 +6,7 @@ index cfc19ae..921b9b6 100644
        std::map<std::string, schema::Type> _values = {}) {
      using Type = schema::Type;
      using T = NamedTuple<FieldTypes...>;
--    constexpr size_t size = T::size();
-+    constexpr size_t size = NamedTuple<FieldTypes...>::size();
+     constexpr size_t size = T::size();
      if constexpr (_i == size) {
        return Type{Type::Object{_values}};
      } else {

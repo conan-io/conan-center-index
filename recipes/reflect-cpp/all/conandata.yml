@@ -10,4 +10,3 @@ patches:
     - patch_file: "patches/9.0.0-fix-msvc-error.patch"
       patch_description: "fix MSVC compilation error"
       patch_type: "portability"
-
