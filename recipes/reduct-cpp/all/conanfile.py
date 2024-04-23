@@ -33,7 +33,8 @@ class ReductCPPConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "11.2",
-            "clang": "7",
+            # spaceship operator(<=>) in std lib has been supported since clang 14
+            "clang": "14",
             "apple-clang": "10",
             "Visual Studio": "16",
             "msvc": "192",
