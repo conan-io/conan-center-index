@@ -176,7 +176,7 @@ class WestonConan(ConanFile):
             self.requires("libwebp/1.3.2")
 
         if self.options.backend_pipewire or self.options.pipewire:
-            self.requires("pipewire/1.0.4")
+            self.requires("pipewire/1.0.5")
 
         # if self.options.backend_rdp:
         #     self.requires("freerdp/3.3.0")
@@ -275,12 +275,12 @@ class WestonConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.2")
+        self.tool_requires("meson/1.4.0")
         if self._has_build_profile:
             self.tool_requires("wayland/<host_version>")
         self.tool_requires("wayland-protocols/1.33")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/2.2.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
