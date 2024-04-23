@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import stdcpp_library, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -205,6 +206,10 @@ class AssimpConan(ConanFile):
         if Version(self.version) < "5.3.0" and self._depends_on_clipper and Version(self.dependencies["clipper"].ref.version).major != "4":
             raise ConanInvalidConfiguration("Only 'clipper/4.x' is supported")
 
+    def build_requirements(self):
+        if Version(self.version) >= "5.4.0":
+            self.tool_requires("cmake/[>=3.22 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -229,7 +234,8 @@ class AssimpConan(ConanFile):
                 tc.variables[definition] = value
         if self.settings.os == "Windows":
             tc.preprocessor_definitions["NOMINMAX"] = 1
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW" # to avoid warnings
+        if Version(self.version) < "5.4.0":
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         tc.cache_variables["CMAKE_PROJECT_Assimp_INCLUDE"] = "conan_deps.cmake"
         tc.cache_variables["WITH_CLIPPER"] = self._depends_on_clipper
@@ -245,6 +251,9 @@ class AssimpConan(ConanFile):
         cd.set_property("rapidjson", "cmake_target_name", "rapidjson::rapidjson")
         cd.set_property("utfcpp", "cmake_target_name", "utf8cpp::utf8cpp")
         cd.generate()
+
+        venv = VirtualBuildEnv(self)
+        venv.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -298,6 +307,8 @@ class AssimpConan(ConanFile):
         ]:
             save(self, os.path.join(self.source_folder, "contrib", contrib_header),
                  f"#include <{include}>\n")
+        if Version(self.version) >= "5.4.0":
+            rmdir(self, self.source_path.joinpath("contrib", "utf8cpp"))
 
         # minizip is provided via conan_deps.cmake, no need to use pkgconfig
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
