@@ -284,6 +284,10 @@ class OpenSceneGraphConanFile(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "src", "osgPlugins", "CMakeLists.txt"),
                         "PNG_FOUND", "PNG_FOUND AND OSG_WITH_PNG")
 
+        # Only add curl plugin if actually requested.
+        replace_in_file(self, os.path.join(self.source_folder, "src", "osgPlugins", "CMakeLists.txt"),
+                        "CURL_FOUND", "CURL_FOUND AND OSG_WITH_CURL")
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
