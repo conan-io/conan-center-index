@@ -1344,6 +1344,9 @@ class BoostConan(ConanFile):
 
         def create_library_config(deps_name, name):
             aggregated_cpp_info = self.dependencies[deps_name].cpp_info.aggregated_components()
+            if len(aggregated_cpp_info.libs) == 0:
+                return ""
+
             includedir = aggregated_cpp_info.includedirs[0].replace("\\", "/")
             includedir = f"\"{includedir}\""
             libdir = aggregated_cpp_info.libdirs[0].replace("\\", "/")
