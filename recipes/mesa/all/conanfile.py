@@ -825,7 +825,7 @@ class MesaConan(ConanFile):
             self.requires("libdrm/2.4.119")
 
         if self._requires_expat:
-            self.requires("expat/2.6.0")
+            self.requires("expat/[>=2.6.2 <3]")
 
         if self.options.get_safe("platform_wayland"):
             self.requires("wayland/1.22.0")
@@ -1133,10 +1133,10 @@ class MesaConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.2")
-        self.tool_requires("cpython/3.10.0")
+        self.tool_requires("meson/1.4.0")
+        self.tool_requires("cpython/3.12.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/2.2.0")
         if self.options.get_safe("platform_wayland"):
             self.tool_requires("wayland/<host_version>")
             self.tool_requires("wayland-protocols/1.33")
