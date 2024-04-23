@@ -58,6 +58,8 @@ class RotorConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) < "0.26":
             del self.options.enable_ev
+        if Version(self.version) < "0.30":
+            del self.options.enable_fltk
 
     def configure(self):
         if self.options.shared:
@@ -136,5 +138,6 @@ class RotorConan(ConanFile):
         if self.options.get_safe("enable_fltk", False):
             self.cpp_info.components["fltk"].libs = ["rotor_fltk"]
             self.cpp_info.components["fltk"].requires = ["core", "fltk::fltk"]
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["core"].system_libs.append("m")
