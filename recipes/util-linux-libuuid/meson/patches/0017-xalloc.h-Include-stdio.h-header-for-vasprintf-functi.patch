@@ -1,10 +1,10 @@
-From 3f263f0ae451ce88949654b6fcb52d801d49e733 Mon Sep 17 00:00:00 2001
+From ba196761d6a0f27d9c0301ed8dfd646e223597d4 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 14:51:09 -0500
 Subject: [PATCH 17/21] xalloc.h: Include stdio.h header for vasprintf function
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
-(cherry picked from commit 130ee25cc93a67e35ee55d44bd6d824b54680f81)
+(cherry picked from commit ccff74b0eb42ad69722f749f29188f6269783c8c)
 ---
  include/xalloc.h | 1 +
  1 file changed, 1 insertion(+)

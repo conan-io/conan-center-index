@@ -1,17 +1,17 @@
-From 4944a6688f39b6199855eaad2af661452477163a Mon Sep 17 00:00:00 2001
+From a0d43a0d8851124a222463c907546928997b5e13 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Tue, 23 Apr 2024 07:45:24 -0500
 Subject: [PATCH 21/21] meson: Add build-lsclocks option
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
-(cherry picked from commit ce04cb6b0dff9f0d60316d6be7e4146ad7c7596e)
+(cherry picked from commit 0b30b8d465f61438a00186e24cd6e7cd1a928f32)
 ---
  meson.build       | 10 +++++++---
  meson_options.txt |  2 ++
  2 files changed, 9 insertions(+), 3 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index 347b36453f..b40269e5c3 100644
+index 55e1ecde6e..05653611e5 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -1643,7 +1643,9 @@ if opt and not is_disabler(exe)
@@ -25,7 +25,7 @@ index 347b36453f..b40269e5c3 100644
  exe = executable(
    'rtcwake',
    rtcwake_sources,
-@@ -3122,14 +3124,16 @@ if opt and not is_disabler(exe)
+@@ -3124,14 +3126,16 @@ if opt and not is_disabler(exe)
    bashcompletions += ['enosys']
  endif
  

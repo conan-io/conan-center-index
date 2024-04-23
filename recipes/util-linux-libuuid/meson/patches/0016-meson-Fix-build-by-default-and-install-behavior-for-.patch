@@ -1,20 +1,20 @@
-From 4bc23000270696265e6457ebdda49c5c869dcee7 Mon Sep 17 00:00:00 2001
+From 09a74cb8df22dbacef8888e9cb431cf7aec70809 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 14:35:50 -0500
 Subject: [PATCH 16/21] meson: Fix build by default and install behavior for
  build-pipesz option
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
-(cherry picked from commit 41e7a18f9677b3b0f2a9e841d21a40a3db41a26a)
+(cherry picked from commit 205a065ced57659cc629c65bf6353afe1cb40030)
 ---
  meson.build | 5 +++--
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index 914f9f9e71..bf7e86aec0 100644
+index 9c713bb015..c4aec5db92 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -3033,14 +3033,15 @@ if not is_disabler(exe)
+@@ -3035,14 +3035,15 @@ if not is_disabler(exe)
    bashcompletions += ['hardlink']
  endif
  

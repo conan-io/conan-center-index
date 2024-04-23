@@ -1,20 +1,20 @@
-From e8f61ed03b490b1b9190b07f9dd41720dcd9646e Mon Sep 17 00:00:00 2001
+From 4fa6e13a891bfcd8a3e52706a39051949fe8efa0 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 11:06:48 -0500
 Subject: [PATCH 13/21] meson: Add build-script option
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
-(cherry picked from commit 8790450794ddbec35f811604b0075617ee58c9b7)
+(cherry picked from commit 44494e3ce327b17f9b5628501aaf544bd091673e)
 ---
  meson.build       | 18 ++++++++++++------
  meson_options.txt |  2 ++
  2 files changed, 14 insertions(+), 6 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index e724de34b1..f5f003e0e4 100644
+index 499ab75869..57581c5a6d 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -2455,6 +2455,7 @@ endif
+@@ -2457,6 +2457,7 @@ endif
  
  ############################################################
  
@@ -22,7 +22,7 @@ index e724de34b1..f5f003e0e4 100644
  exe = executable(
    'script',
    script_sources,
-@@ -2465,10 +2466,13 @@ exe = executable(
+@@ -2467,10 +2468,13 @@ exe = executable(
                    realtime_libs,
                    math_libs],
    install_dir : usrbin_exec_dir,
@@ -40,7 +40,7 @@ index e724de34b1..f5f003e0e4 100644
  
  exe = executable(
    'test_script',
-@@ -2480,8 +2484,10 @@ exe = executable(
+@@ -2482,8 +2486,10 @@ exe = executable(
                    lib_utempter,
                    realtime_libs,
                    math_libs],

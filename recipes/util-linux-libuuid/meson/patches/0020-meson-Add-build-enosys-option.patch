@@ -1,4 +1,4 @@
-From bd7371d0e0cfc68cfec9681537e850a0bfffde10 Mon Sep 17 00:00:00 2001
+From 0ddc34c88813f514982f439056824b4b5972ff57 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Tue, 23 Apr 2024 07:43:00 -0500
 Subject: [PATCH 20/21] meson: Add build-enosys option
@@ -6,17 +6,17 @@ Subject: [PATCH 20/21] meson: Add build-enosys option
 Add a check to ensure that the linux/audit.h header exists for enosys.
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
-(cherry picked from commit 32118b8105af28c9388b2e8eb450f3e0932821a4)
+(cherry picked from commit de62df14e1fb94302a330bf18b4ff9f89a32b7fa)
 ---
  meson.build       | 29 ++++++++++++++++-------------
  meson_options.txt |  2 ++
  2 files changed, 18 insertions(+), 13 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index 78aad6c9a8..347b36453f 100644
+index 8ba03ca760..55e1ecde6e 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -3104,19 +3104,22 @@ syscalls_h = custom_target('syscalls.h',
+@@ -3106,19 +3106,22 @@ syscalls_h = custom_target('syscalls.h',
               cc.cmd_array(), get_option('c_args')],
  )
  

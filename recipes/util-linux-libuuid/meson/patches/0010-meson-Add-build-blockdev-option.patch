@@ -1,4 +1,4 @@
-From 59e9e3a8aa3bae044ce820be22e65b9438a485b5 Mon Sep 17 00:00:00 2001
+From 330c72640d1d9a5037b79c1b81a1fde982f0b61d Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 09:42:25 -0500
 Subject: [PATCH 10/21] meson: Add build-blockdev option
@@ -11,17 +11,17 @@ Add blockdev to the list of executables, which appears to have been
 omitted previously.
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
-(cherry picked from commit f7183e50b432caeca0a89e6c23de67675fb495db)
+(cherry picked from commit 02e8e3367f8c175acb77918b9ed4b0f928bd5a52)
 ---
  meson.build       | 11 ++++++++---
  meson_options.txt |  2 ++
  2 files changed, 10 insertions(+), 3 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index 0784d762d8..82dd00b27a 100644
+index eaf0b79bff..4e22b26905 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -2301,15 +2301,20 @@ if opt and not is_disabler(exe)
+@@ -2303,15 +2303,20 @@ if opt and not is_disabler(exe)
    bashcompletions += ['fdformat']
  endif
  

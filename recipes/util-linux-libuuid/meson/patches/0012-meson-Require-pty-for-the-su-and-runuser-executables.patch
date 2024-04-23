@@ -1,16 +1,16 @@
-From 20b0e11993ef97794950627c7969fa703e999257 Mon Sep 17 00:00:00 2001
+From 3b33402e338819b56313ad194ce2450465b21ed5 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 11:04:36 -0500
 Subject: [PATCH 12/21] meson: Require pty for the su and runuser executables
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
-(cherry picked from commit 9400b8c5c84ab382dde3d37acc0a2938a5f848d2)
+(cherry picked from commit 51913e0044a31fe8b09ebb78ffc0f04cc8394952)
 ---
  meson.build | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index 1bd58a006b..e724de34b1 100644
+index 0d5f7c6208..499ab75869 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -1081,7 +1081,7 @@ if opt and not is_disabler(exe)
