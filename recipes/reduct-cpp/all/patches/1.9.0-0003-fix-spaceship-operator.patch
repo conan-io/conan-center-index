@@ -1,0 +1,13 @@
+diff --git a/src/reduct/http_options.h b/src/reduct/http_options.h
+index 7e45c7a..a44fc06 100644
+--- a/src/reduct/http_options.h
++++ b/src/reduct/http_options.h
+@@ -13,7 +13,7 @@ struct HttpOptions {
+   std::string api_token;  // API token, if empty anonymous access
+   bool ssl_verification;  // check ssl certificate if it is true
+ 
+-  bool operator<=>(const HttpOptions&) const = default;
++  auto operator<=>(const HttpOptions&) const = default;
+ };
+ 
+ const std::string_view kApiPrefix = "/api/v1";

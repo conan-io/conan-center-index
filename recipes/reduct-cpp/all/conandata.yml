@@ -10,3 +10,6 @@ patches:
     - patch_file: "patches/1.9.0-0002-disable-fpic.patch"
       patch_description: "disable hardcoded fPIC"
       patch_type: "conan"
+    - patch_file: "patches/1.9.0-0003-fix-spaceship-operator.patch"
+      patch_description: "fix spaceship operator for msvc"
+      patch_type: "portability"
