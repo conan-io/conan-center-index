@@ -279,6 +279,11 @@ class OpenSceneGraphConanFile(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "src", "osgPlugins", "freetype", "CMakeLists.txt"),
                         "SET(TARGET_EXTERNAL_LIBRARIES ${FREETYPE_LIBRARIES} )", "SET(TARGET_EXTERNAL_LIBRARIES Freetype::Freetype)")
 
+        # osg uses imageio on Apple platforms. PNG_FOUND will be set by `FIND_PACKAGE(Freetype)`
+        # in the OSG cmake code and without this patch the png plugin will be included even though it shouldn't.
+        replace_in_file(self, os.path.join(self.source_folder, "src", "osgPlugins", "CMakeLists.txt"),
+                        "PNG_FOUND", "PNG_FOUND AND OSG_WITH_PNG")
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
