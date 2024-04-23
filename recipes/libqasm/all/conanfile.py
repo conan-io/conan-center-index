@@ -106,6 +106,10 @@ class LibqasmConan(ConanFile):
     def _patch_sources(self):
         if is_msvc(self):
             replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "/WX", "")
+            replace_in_file(self, os.path.join(self.source_folder, "test", "CMakeLists.txt"), "/WX", "")
+        else:
+            replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "-Werror", "")
+            replace_in_file(self, os.path.join(self.source_folder, "test", "CMakeLists.txt"), "-Werror", "")
 
     def build(self):
         self._patch_sources()
