@@ -1,3 +1,133 @@
+diff --git a/src/reduct/bucket.h b/src/reduct/bucket.h
+index 73eb52a..c6c0802 100644
+--- a/src/reduct/bucket.h
++++ b/src/reduct/bucket.h
+@@ -40,7 +40,7 @@ class IBucket {
+     std::optional<size_t> quota_size;
+     std::optional<size_t> max_block_records;
+ 
+-    bool operator<=>(const Settings&) const noexcept = default;
++    auto operator<=>(const Settings&) const noexcept = default;
+     friend std::ostream& operator<<(std::ostream& os, const Settings& settings);
+   };
+ 
+@@ -57,7 +57,7 @@ class IBucket {
+     Time latest_record;   // timestamp of the latest record in the bucket
+     bool is_provisioned;  // is bucket provisioned, you can't remove it or change settings
+ 
+-    bool operator<=>(const BucketInfo&) const noexcept = default;
++    auto operator<=>(const BucketInfo&) const noexcept = default;
+     friend std::ostream& operator<<(std::ostream& os, const BucketInfo& info);
+   };
+ 
+@@ -72,7 +72,7 @@ class IBucket {
+     Time oldest_record;   // timestamp of the oldest record in the entry
+     Time latest_record;   // timestamp of the latest record in the entry
+ 
+-    bool operator<=>(const EntryInfo&) const noexcept = default;
++    auto operator<=>(const EntryInfo&) const noexcept = default;
+     friend std::ostream& operator<<(std::ostream& os, const EntryInfo& info);
+   };
+ 
+diff --git a/src/reduct/client.h b/src/reduct/client.h
+index 5a01a2e..bd6d93f 100644
+--- a/src/reduct/client.h
++++ b/src/reduct/client.h
+@@ -47,7 +47,7 @@ class IClient {
+       uint64_t disk_quota;      // Disk quota in TB (0 for unlimited)
+       std::string fingerprint;  // License fingerprint
+ 
+-      bool operator<=>(const License&) const = default;
++      auto operator<=>(const License&) const = default;
+     };
+ 
+     std::optional<License> license;  // License information. If empty, then it is BUSL-1.1
+@@ -55,12 +55,12 @@ class IClient {
+     struct Defaults {
+       IBucket::Settings bucket;  // default settings for a new bucket
+ 
+-      bool operator<=>(const IClient::ServerInfo::Defaults&) const = default;
++      auto operator<=>(const IClient::ServerInfo::Defaults&) const = default;
+     };
+ 
+     Defaults defaults;
+ 
+-    bool operator<=>(const IClient::ServerInfo&) const = default;
++    auto operator<=>(const IClient::ServerInfo&) const = default;
+   };
+ 
+   /**
+@@ -106,7 +106,7 @@ class IClient {
+     std::string name;  // name of token
+     Time created_at;   // creation time
+ 
+-    bool operator<=>(const IClient::Token&) const = default;
++    auto operator<=>(const IClient::Token&) const = default;
+   };
+ 
+   /**
+@@ -117,7 +117,7 @@ class IClient {
+     std::vector<std::string> read;   // list of buckets with read access
+     std::vector<std::string> write;  // list of buckets with write access
+ 
+-    bool operator<=>(const IClient::Permissions&) const = default;
++    auto operator<=>(const IClient::Permissions&) const = default;
+   };
+ 
+   /**
+@@ -130,7 +130,7 @@ class IClient {
+ 
+     Permissions permissions;
+ 
+-    bool operator<=>(const IClient::FullTokenInfo&) const = default;
++    auto operator<=>(const IClient::FullTokenInfo&) const = default;
+   };
+ 
+   /**
+@@ -181,7 +181,7 @@ class IClient {
+     bool is_provisioned;       // Replication settings
+     uint64_t pending_records;  // Number of records pending replication
+ 
+-    bool operator<=>(const ReplicationInfo&) const = default;
++    auto operator<=>(const ReplicationInfo&) const = default;
+   };
+ 
+   /**
+@@ -197,7 +197,7 @@ class IClient {
+     IBucket::LabelMap include;  // Labels to include
+     IBucket::LabelMap exclude;  // Labels to exclude
+ 
+-    bool operator<=>(const ReplicationSettings&) const = default;
++    auto operator<=>(const ReplicationSettings&) const = default;
+   };
+ 
+   /**
+diff --git a/src/reduct/diagnostics.h b/src/reduct/diagnostics.h
+index 4d36cbb..315f9b4 100644
+--- a/src/reduct/diagnostics.h
++++ b/src/reduct/diagnostics.h
+@@ -12,7 +12,7 @@ struct DiagnosticsError {
+   uint64_t count;            // Count of errors
+   std::string last_message;  // Last error message
+ 
+-  bool operator<=>(const DiagnosticsError&) const = default;
++  auto operator<=>(const DiagnosticsError&) const = default;
+ };
+ 
+ struct DiagnosticsItem {
+diff --git a/src/reduct/error.h b/src/reduct/error.h
+index 3caca49..7c21b16 100644
+--- a/src/reduct/error.h
++++ b/src/reduct/error.h
+@@ -17,7 +17,7 @@ struct [[nodiscard]] Error { // NOLINT
+ 
+   std::string ToString() const;
+ 
+-  bool operator<=>(const Error& rhs) const  = default;
++  auto operator<=>(const Error& rhs) const  = default;
+   friend std::ostream& operator<<(std::ostream& os, const Error& error);
+ 
+   static const Error kOk;
 diff --git a/src/reduct/http_options.h b/src/reduct/http_options.h
 index 7e45c7a..a44fc06 100644
 --- a/src/reduct/http_options.h
