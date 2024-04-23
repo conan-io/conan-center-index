@@ -1,7 +1,7 @@
 From 535986f39424e54c025012627c25d8295c12d76c Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 11:08:26 -0500
-Subject: [PATCH 14/19] meson: Add build-scriptlive option
+Subject: [PATCH 14/21] meson: Add build-scriptlive option
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
 (cherry picked from commit 6e358c18001f5154f7cc7632de44674766273201)

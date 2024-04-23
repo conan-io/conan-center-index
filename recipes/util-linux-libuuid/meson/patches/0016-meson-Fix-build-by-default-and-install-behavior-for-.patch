@@ -1,7 +1,7 @@
 From 4bc23000270696265e6457ebdda49c5c869dcee7 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 14:35:50 -0500
-Subject: [PATCH 16/19] meson: Fix build by default and install behavior for
+Subject: [PATCH 16/21] meson: Fix build by default and install behavior for
  build-pipesz option
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>

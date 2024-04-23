@@ -1,7 +1,7 @@
 From ea4b49a29466171fed1445ddf2529d649434591d Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 08:51:23 -0500
-Subject: [PATCH 03/19] meson: Add build-fsfreeze option
+Subject: [PATCH 03/21] meson: Add build-fsfreeze option
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
 (cherry picked from commit dc3454c86b51f83fea27f22a98902a1ed64b9f78)

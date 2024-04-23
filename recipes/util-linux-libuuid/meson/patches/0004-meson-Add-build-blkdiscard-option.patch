@@ -1,7 +1,7 @@
 From 7d7fcb43ef640b5e8316a375d7f4be161f288df0 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 08:54:59 -0500
-Subject: [PATCH 04/19] meson: Add build-blkdiscard option
+Subject: [PATCH 04/21] meson: Add build-blkdiscard option
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
 (cherry picked from commit b6741a82739f777b2eaf57563fd187ede42c6f1d)

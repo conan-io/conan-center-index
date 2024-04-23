@@ -1,7 +1,7 @@
 From a4561c845ef7ad7a22db162ef59da3b6bc448c97 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 15:03:50 -0500
-Subject: [PATCH 19/19] meson: Define _DARWIN_C_SOURCE on macOS as is done in
+Subject: [PATCH 19/21] meson: Define _DARWIN_C_SOURCE on macOS as is done in
  Autotools
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>

@@ -1,7 +1,7 @@
 From 42d9f948b3954c555c1d5f5578fe3bbc7cf87b4e Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 09:03:52 -0500
-Subject: [PATCH 06/19] meson: Add build-rtcwake option
+Subject: [PATCH 06/21] meson: Add build-rtcwake option
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
 (cherry picked from commit d645de3fdec9e26e24546895fe74721f6ab19579)

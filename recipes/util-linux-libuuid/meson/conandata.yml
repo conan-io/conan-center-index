@@ -30,3 +30,5 @@ patches:
     - patch_file: "patches/0017-xalloc.h-Include-stdio.h-header-for-vasprintf-functi.patch"
     - patch_file: "patches/0018-strutils.h-Include-strings.h-header-for-strncasecmp-.patch"
     - patch_file: "patches/0019-meson-Define-_DARWIN_C_SOURCE-on-macOS-as-is-done-in.patch"
+    - patch_file: "patches/0020-meson-Add-build-enosys-option.patch"
+    - patch_file: "patches/0021-meson-Add-build-lsclocks-option.patch"

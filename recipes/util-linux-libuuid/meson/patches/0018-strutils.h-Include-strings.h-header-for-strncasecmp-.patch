@@ -1,7 +1,7 @@
 From b5a096b94fa13f1de013af286777a1c816cbd3e9 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
 Date: Mon, 22 Apr 2024 14:51:40 -0500
-Subject: [PATCH 18/19] strutils.h: Include strings.h header for strncasecmp
+Subject: [PATCH 18/21] strutils.h: Include strings.h header for strncasecmp
  function
 
 Signed-off-by: Jordan Williams <jordan@jwillikers.com>
