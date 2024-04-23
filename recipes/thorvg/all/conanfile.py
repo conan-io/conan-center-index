@@ -103,13 +103,9 @@ class ThorvgConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        if is_msvc(self):
-            tc = MesonToolchain(self, backend="vs")
-        else:
-            tc = MesonToolchain(self)
+        tc = MesonToolchain(self, backend=("vs" if is_msvc(self) else None))
         is_debug = self.settings.get_safe("build_type") == "Debug"
         tc.project_options.update({
-            "static": not bool(self.options.shared),
             "engines": str(self.options.with_engines),
             "loaders": str(self.options.with_loaders) if self.options.with_loaders else '',
             "savers": str(self.options.with_savers) if self.options.with_savers else '',
@@ -119,7 +115,8 @@ class ThorvgConan(ConanFile):
             "vector": bool(self.options.with_vector),
             "examples": bool(self.options.with_examples),
             "tests": False,
-            "log": is_debug
+            "log": is_debug,
+            "default_library": "shared" if self.options.shared else "static"
         })
         tc.generate()
         tc = PkgConfigDeps(self)
