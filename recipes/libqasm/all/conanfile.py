@@ -66,7 +66,7 @@ class LibqasmConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("tree-gen/1.0.7")
-        self.tool_requires("zulu-openjdk/11.0.19")
+        self.tool_requires("zulu-openjdk/21.0.1")
         if self.settings.arch == "wasm":
             self.tool_requires("emsdk/3.1.50")
         if self._should_build_test:
@@ -80,7 +80,7 @@ class LibqasmConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd},"
                                             f"which your compiler does not support.")
 
-        if self.dependencies["antlr4-cppruntime"].options.shared != self.options.shared:
+        if self.settings.arch != "wasm" and self.dependencies["antlr4-cppruntime"].options.shared != self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires antlr4-cppruntime to be built with the same shared option value.")
 
     def requirements(self):
