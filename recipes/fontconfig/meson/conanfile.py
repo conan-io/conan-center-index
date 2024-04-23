@@ -11,7 +11,7 @@ from conan.tools.meson import Meson, MesonToolchain
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.64.0 <2 || >=2.2.0"
 
 
 class FontconfigConan(ConanFile):
@@ -75,8 +75,8 @@ class FontconfigConan(ConanFile):
             "nls": "disabled",
             "tests": "disabled",
             "tools": "disabled",
-            "sysconfdir": os.path.join(self.package_folder, "res", "etc"),
-            "datadir": os.path.join(self.package_folder, "res", "share"),
+            "sysconfdir": os.path.join("res", "etc"),
+            "datadir": os.path.join("res", "share"),
         })
         tc.generate()
 
