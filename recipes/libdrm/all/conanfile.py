@@ -118,6 +118,7 @@ class LibdrmConan(ConanFile):
 
         tc.project_options["datadir"] = "res"
         tc.project_options["mandir"] = os.path.join("res", "man")
+        tc.project_options["man-pages"] = "disabled" if Version(self.version) >= "2.4.113" else "false"
         tc.generate()
 
     def build(self):
