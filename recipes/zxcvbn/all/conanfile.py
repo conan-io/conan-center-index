@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain
-from conan.tools.files import copy, download, export_conandata_patches, get, patch, rm
+from conan.tools.files import apply_conandata_patches, copy, download, get, patch, rm
 import os
 
 required_conan_version = ">=1.54.0"
@@ -29,7 +29,7 @@ class ZxcvbnConan(ConanFile):
             self.tool_requires(f"{self.name}/{self.version}")
 
     def export_sources(self):
-        export_conandata_patches(self)
+        copy(self, f"{self.version}-*.patch", dst=os.path.join(self.export_sources_folder, "patches"), src=os.path.join(self.recipe_folder, "patches"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -53,15 +53,20 @@ class ZxcvbnConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.generate()
 
+    def _patch_if_exists(self, patch_name):
+        patch_file=os.path.join(self.export_sources_folder, "patches", f"{self.version}-{patch_name}.patch")
+        if os.path.exists(patch_file):
+            print(f"Applying the '{patch_name}' patch...")
+            patch(self, patch_file=patch_file)
+
     def _patch_sources(self):
-        for it in self.conan_data.get("patches", {}).get(self.version, []):
-            if "windows" in it["patch_file"] and self.settings.os not in ["Windows", "Emscripten"]:
-                continue
-            if "crossbuilding" in it["patch_file"] and not cross_building(self):
-                continue
-            entry = it.copy()
-            patch_file_path = os.path.join(self.export_sources_folder, entry.pop("patch_file"))
-            patch(self, patch_file=patch_file_path, **entry)
+        apply_conandata_patches(self)
+        if cross_building(self):
+            self._patch_if_exists("no-dictgen")
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            self._patch_if_exists("no-libm")
+        if self.settings.os == "Windows":
+            self._patch_if_exists("windows-portability")
 
     def build(self):
         self._patch_sources()

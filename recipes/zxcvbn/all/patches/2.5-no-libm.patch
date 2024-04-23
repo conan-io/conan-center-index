@@ -1,19 +1,6 @@
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -6,10 +6,10 @@
- target_compile_features(dictgen PUBLIC cxx_std_11)
- target_compile_options(dictgen PRIVATE "-O3")
- 
--add_compile_options("-Wall" "-Wextra")
- 
--find_library(LIBM m)
- 
-+
-+
- # list of dictionaries
- set(WORDS words-eng_wiki.txt words-female.txt words-male.txt words-passwd.txt words-surname.txt words-tv_film.txt)
- list(TRANSFORM WORDS PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/)
-@@ -23,18 +23,18 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -23,7 +23,7 @@ add_custom_command(OUTPUT dict-crc.h zxcvbn.dict COMMAND dictgen -b -o ${CMAKE_C
  add_library(zxcvbn-shared SHARED zxcvbn.c dict-crc.h dict-src.h)
  target_include_directories(zxcvbn-shared PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
  target_include_directories(zxcvbn-shared PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -22,11 +9,7 @@
  set_target_properties(zxcvbn-shared PROPERTIES 
  	POSITION_INDEPENDENT_CODE ON
  	OUTPUT_NAME zxcvbn
- 	VERSION ${CMAKE_PROJECT_VERSION}
- 	SOVERSION ${PROJECT_VERSION_MAJOR}
--)
-+	WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
- 
+@@ -34,7 +34,7 @@ set_target_properties(zxcvbn-shared PROPERTIES
  # build static version of library
  add_library(zxcvbn-static STATIC zxcvbn.c dict-crc.h dict-src.h)
  target_include_directories(zxcvbn-static PRIVATE ${CMAKE_CURRENT_BINARY_DIR} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

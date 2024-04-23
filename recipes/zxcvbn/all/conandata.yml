@@ -8,12 +8,6 @@ sources:
       sha256: "8a5f3c6a7afd203fc3e5e877ec06252a0823473a976e0db910334425005affaa"
 patches:
   "2.5":
-    - patch_file: "patches/2.5-0001-tests.patch"
+    - patch_file: "patches/2.5-0001-no-tests.patch"
       patch_description: "disable building of tests which are broken in the CMakeLists.txt"
-      patch_type: "portability"
-    - patch_file: "patches/2.5-0002-windows.patch"
-      patch_description: "add Windows/Emscripten portability by disabling libm linking and unsupported compile options"
-      patch_type: "portability"
-    - patch_file: "patches/2.5-0003-crossbuilding.patch"
-      patch_description: "crossbuilding: disable the dictgen executable building"
       patch_type: "portability"
