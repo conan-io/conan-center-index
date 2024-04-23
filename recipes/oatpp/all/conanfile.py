@@ -102,7 +102,7 @@ class OatppConan(ConanFile):
         self.cpp_info.components["_oatpp"].libdirs = [lib_dir]
         self.cpp_info.components["_oatpp"].libs = ["oatpp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["_oatpp"].system_libs = ["pthread"]
+            self.cpp_info.components["_oatpp"].system_libs = ["pthread", "m"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["_oatpp"].system_libs = ["ws2_32", "wsock32"]
 
