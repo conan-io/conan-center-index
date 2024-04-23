@@ -66,7 +66,7 @@ class UpCppConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
         self.folders.build = os.path.join("build", str(self.settings.build_type))
         self.folders.install = "install"
 
