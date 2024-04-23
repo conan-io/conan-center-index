@@ -1,0 +1,18 @@
+diff --git a/include/rfl/parsing/NamedTupleParser.hpp b/include/rfl/parsing/NamedTupleParser.hpp
+index cfc19ae..921b9b6 100644
+--- a/include/rfl/parsing/NamedTupleParser.hpp
++++ b/include/rfl/parsing/NamedTupleParser.hpp
+@@ -92,11 +92,11 @@ struct NamedTupleParser {
+       std::map<std::string, schema::Type> _values = {}) {
+     using Type = schema::Type;
+     using T = NamedTuple<FieldTypes...>;
+-    constexpr size_t size = T::size();
++    constexpr size_t size = NamedTuple<FieldTypes...>::size();
+     if constexpr (_i == size) {
+       return Type{Type::Object{_values}};
+     } else {
+-      using F = std::tuple_element_t<_i, typename T::Fields>;
++      using F = std::tuple_element_t<_i, typename NamedTuple<FieldTypes...>::Fields>;
+       _values[std::string(F::name())] =
+           Parser<R, W, typename F::Type>::to_schema(_definitions);
+       return to_schema<_i + 1>(_definitions, _values);

@@ -5,3 +5,9 @@ sources:
   "0.6.0":
     url: "https://github.com/getml/reflect-cpp/archive/v0.6.0.tar.gz"
     sha256: "D8231B91989397A67E841B56A0673FDCDF969DBE956D54BB629F14100B030664"
+patches:
+  "0.9.0":
+    - patch_file: "patches/9.0.0-fix-msvc-error.patch"
+      patch_description: "fix MSVC compilation error"
+      patch_type: "portability"
+
