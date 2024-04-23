@@ -136,3 +136,5 @@ class RotorConan(ConanFile):
         if self.options.get_safe("enable_fltk", False):
             self.cpp_info.components["fltk"].libs = ["rotor_fltk"]
             self.cpp_info.components["fltk"].requires = ["core", "fltk::fltk"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["core"].system_libs.append("m")
