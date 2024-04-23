@@ -23,6 +23,7 @@ required_for_references:
 - andreasbuhr-cppcoro
 - android-ndk
 - angelscript
+- annoy
 - antlr4
 - antlr4-cppruntime
 - any-lite
@@ -86,6 +87,7 @@ required_for_references:
 - baical-p7
 - bandit
 - base64
+- basu
 - bazel
 - bdwgc
 - bear
@@ -136,6 +138,7 @@ required_for_references:
 - c-dbg-macro
 - c4core
 - caf
+- cairo
 - cairomm
 - cajun-jsonapi
 - calceph
@@ -150,6 +153,7 @@ required_for_references:
 - ccache
 - cccl
 - ccfits
+- cctag
 - cctz
 - cd3-boost-unit-definitions
 - celero
@@ -209,6 +213,8 @@ required_for_references:
 - cose-c
 - cotila
 - coz
+- cpp-channel
+- cpp-dump
 - cpp-httplib
 - cpp-ipc
 - cpp-jwt
@@ -558,6 +564,7 @@ required_for_references:
 - intx
 - inversify-cpp
 - iowow
+- ipaddress
 - iqa
 - irrxml
 - isa-l
@@ -605,6 +612,7 @@ required_for_references:
 - kmod
 - ktx
 - kuba-zip
+- kuliya
 - lager
 - laslib
 - laszip
@@ -614,6 +622,7 @@ required_for_references:
 - lefticus-tools
 - lely-core
 - lemon
+- leopard
 - leptonica
 - lerc
 - lest
@@ -632,6 +641,7 @@ required_for_references:
 - libbacktrace
 - libbasisu
 - libbigwig
+- libboxes
 - libbpf
 - libbsd
 - libcap
@@ -647,6 +657,7 @@ required_for_references:
 - libcpuid
 - libcuckoo
 - libcurl
+- libcvd
 - libdaemon
 - libdb
 - libdc1394
@@ -677,6 +688,7 @@ required_for_references:
 - libfreenect
 - libfreenect2
 - libftdi
+- libftp
 - libfuse
 - libgcrypt
 - libgd
@@ -694,6 +706,8 @@ required_for_references:
 - libiberty
 - libiconv
 - libid3tag
+- libidn
+- libidn2
 - libinput
 - libinterpolate
 - libipt
@@ -772,6 +786,7 @@ required_for_references:
 - libspng
 - libsquish
 - libsrtp
+- libssh
 - libssh2
 - libsvm
 - libsvtav1
@@ -835,6 +850,7 @@ required_for_references:
 - log.c
 - log4cplus
 - log4cxx
+- logfault
 - logr
 - loguru
 - ls-qpack
@@ -852,6 +868,7 @@ required_for_references:
 - lzma_sdk
 - lzo
 - m4
+- macdylibbundler
 - maddy
 - magic_enum
 - mailio
@@ -909,6 +926,7 @@ required_for_references:
 - minizip-ng
 - mio
 - mm_file
+- mocknetworkaccessmanager
 - modern-cpp-kafka
 - mold
 - moltenvk
@@ -924,6 +942,7 @@ required_for_references:
 - mpdecimal
 - mpfr
 - mpg123
+- mpir
 - mpmcqueue
 - mppp
 - ms-gsl
@@ -1030,9 +1049,11 @@ required_for_references:
 - openimageio
 - openjdk
 - openjpeg
+- openldap
 - openmesh
 - openmvg
 - openpam
+- openssh
 - openssl
 - opensubdiv
 - opentdf-client
@@ -1050,6 +1071,7 @@ required_for_references:
 - orcania
 - osmanip
 - osqp
+- ouster_sdk
 - out_ptr
 - outcome
 - ozz-animation
@@ -1110,6 +1132,7 @@ required_for_references:
 - plutovg
 - pngpp
 - poco
+- podofo
 - poly2tri
 - polylabel
 - polylineencoder
@@ -1131,6 +1154,7 @@ required_for_references:
 - protobuf-c
 - protopuf
 - protozero
+- proxy
 - psimd
 - psyinf-gmtl
 - ptex
@@ -1151,6 +1175,7 @@ required_for_references:
 - qr-code-generator
 - qt
 - qtawesome
+- qtxlsxwriter
 - quantlib
 - quaternions
 - quazip
@@ -1283,6 +1308,7 @@ required_for_references:
 - span-lite
 - spdlog
 - spectra
+- speedb
 - spirv-cross
 - spirv-headers
 - spirv-tools
@@ -1309,6 +1335,7 @@ required_for_references:
 - stduuid
 - stlab
 - strawberryperl
+- streaming-percentiles
 - streamvbyte
 - string-view-lite
 - stringtoolbox
@@ -1390,6 +1417,7 @@ required_for_references:
 - tng
 - toml11
 - tomlplusplus
+- toon
 - tqdm-cpp
 - tracy
 - transwarp
@@ -1537,6 +1565,7 @@ required_for_references:
 - z3
 - zbar
 - zeromq
+- zeus_expected
 - zfp
 - zimg
 - zint
