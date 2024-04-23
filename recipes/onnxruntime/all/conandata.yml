@@ -1,7 +1,7 @@
 sources:
-  "1.17.1":
-    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.17.1.tar.gz"
-    sha256: "88335a1ccbccccb35d5d3aaadee090a9745cf90d97ca87c4a3ac5c4b694b7b17"
+  "1.17.3":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.17.3.tar.gz"
+    sha256: "4112f6552c17216311be013b9a2621a3c1a17ed9e1268a1142599b6a494517c2"
   "1.16.3":
     url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.16.3.tar.gz"
     sha256: "d26b8a7eed1df4440aa3d8eac5049980cbe585514ccedfda809712051a4b1721"
@@ -12,8 +12,8 @@ sources:
     url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.14.1.tar.gz"
     sha256: "f998352b131bb89fa7dd1f1d87ddbafe647dfaddd11929b6b5168b3f4ef857de"
 patches:
-  "1.17.1":
-    - patch_file: "patches/1.17.1-0001-patch-macos-cpp20-date-compat.patch"
+  "1.17.3":
+    - patch_file: "patches/1.17.3-0001-patch-macos-cpp20-date-compat.patch"
       patch_description: "allow to build with macos c++20 support"
       patch_type: "portability"
       patch_source: "https://github.com/microsoft/onnxruntime/commit/7303a90f4916dcf6f66236d40b8917344c27420a.patch"
