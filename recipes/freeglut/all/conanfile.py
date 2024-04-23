@@ -85,8 +85,6 @@ class freeglutConan(ConanFile):
             self.options["libglvnd"].gles2 = True
         if self._requires_libglvnd_glx:
             self.options["libglvnd"].glx = True
-        if self.options.get_safe("with_wayland"):
-            self.options["xkbcommon"].with_wayland = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -126,8 +124,6 @@ class freeglutConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires the gles2 option of libglvnd to be enabled when the gles option is enabled")
         if self._requires_libglvnd_glx and not self.dependencies["libglvnd"].options.glx:
             raise ConanInvalidConfiguration(f"{self.ref} requires the glx option of libglvnd to be enabled when the gles option is disabled")
-        if self.options.get_safe("with_wayland") and not self.dependencies["xkbcommon"].options.with_wayland:
-            raise ConanInvalidConfiguration(f"{self.ref} requires the with_wayland option of xkbcommon to be enabled when the with_wayland option is enabled")
 
 
     def source(self):
