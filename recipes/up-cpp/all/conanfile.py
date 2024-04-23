@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, collect_libs
@@ -89,6 +89,10 @@ class UpCppConan(ConanFile):
             )
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
+        self.output.info(f"self.settings.compiler: {self.settings.compiler}")
+        self.output.info(f"stdcpp_library(self): {stdcpp_library(self)}")
+        if self.settings.compiler == "clang" and stdcpp_library(self) == "c++":
+            raise ConanInvalidConfiguration(f"{self.ref} Experiencing some interference between math.h and the protobuf generated udiscovery.pb.h when compiling with libc++ for some reason.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
