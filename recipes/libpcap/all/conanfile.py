@@ -119,7 +119,7 @@ class LibPcapConan(ConanFile):
             ])
             
             snf = self.options.get_safe("with_snf")
-            if snf:
+            if snf is not None:
                 tc.configure_args.append(f"--with-snf={yes_no(snf)}")
             
             if cross_building(self):
