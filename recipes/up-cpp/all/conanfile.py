@@ -70,6 +70,9 @@ class UpCppConan(ConanFile):
         self.folders.build = os.path.join("build", str(self.settings.build_type))
         self.folders.install = "install"
 
+    def build_requirements(self):
+        self.build_requires("cmake/[>=3.18.0]")
+
     def requirements(self):
         self.requires("protobuf/3.21.12")
         self.requires("spdlog/1.13.0")
