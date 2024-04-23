@@ -15,5 +15,3 @@ versions:
   # arrow requires 1.7.6
   "1.7.6":
     folder: all
-  "1.6.7":
-    folder: all
