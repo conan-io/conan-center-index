@@ -5,7 +5,7 @@
 int main() {
     const void *handle;
     int ret;
-    ret = freexl_open(NULL, &handle);
+    ret = freexl_open("", &handle);
     freexl_close(handle);
 
 }
