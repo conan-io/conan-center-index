@@ -88,11 +88,14 @@ class UpCppConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
         if is_msvc(self):
-            raise ConanInvalidConfiguration(f"{self.ref} need to have paths in CMake files updated to handle both \ and /.")
-        self.output.info(f"self.settings.compiler: {self.settings.compiler}")
-        self.output.info(f"stdcpp_library(self): {stdcpp_library(self)}")
+            raise ConanInvalidConfiguration(
+                f"{self.ref} need to have paths in CMake files updated to handle both \ and /."
+            )
         if self.settings.compiler == "clang" and stdcpp_library(self) == "c++":
-            raise ConanInvalidConfiguration(f"{self.ref} Experiencing some interference between math.h and the protobuf generated udiscovery.pb.h when compiling with libc++ for some reason.")
+            raise ConanInvalidConfiguration(
+                f"{self.ref} Experiencing some interference between math.h and the protobuf generated udiscovery.pb.h"
+                  "when compiling with libc++ for some reason."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
