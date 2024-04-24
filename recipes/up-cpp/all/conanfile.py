@@ -127,7 +127,7 @@ class UpCppConan(ConanFile):
         apply_conandata_patches(self)
 
     def build(self):
-        self._patch_sources()  # It can be apply_conandata_patches(self) only in case no more patches are needed
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -137,7 +137,6 @@ class UpCppConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
@@ -147,12 +146,6 @@ class UpCppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["up-cpp"]
-
-        # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("dl")
 
         self.cpp_info.set_property("cmake_file_name", "up-cpp")
         self.cpp_info.set_property("cmake_target_name", "up-cpp::up-cpp")
