@@ -183,7 +183,8 @@ class OpenblasConan(ConanFile):
         self.cpp_info.components["openblas_component"].set_property("cmake_target_name", f"OpenBLAS::{cmake_component_name}")
         self.cpp_info.components["openblas_component"].set_property("pkg_config_name", "openblas")
         self.cpp_info.components["openblas_component"].includedirs.append(os.path.join("include", "openblas"))
-        self.cpp_info.components["openblas_component"].libs = ["openblas"]
+        suffix = "_d" if self.settings.build_type == "Debug" else ""
+        self.cpp_info.components["openblas_component"].libs = ["openblas" + suffix]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["openblas_component"].system_libs.append("m")
             if self.options.use_thread:
