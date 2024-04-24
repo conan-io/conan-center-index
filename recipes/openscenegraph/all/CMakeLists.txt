@@ -1,8 +1,4 @@
 cmake_minimum_required(VERSION 3.15)
-
-# Disable tracker since it causes issues with long paths
-set(CMAKE_VS_GLOBALS "TrackFileAccess=false")
-
 project(cmake_wrapper)
 
 macro(custom_find_package name variable)
