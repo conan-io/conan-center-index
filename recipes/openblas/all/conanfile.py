@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.errors import ConanInvalidConfiguration
 import os
-import functools
+import textwrap
 
 required_conan_version = ">=1.53.0"
 
@@ -18,6 +18,7 @@ class OpenblasConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.openblas.net"
     topics = ("blas", "lapack")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -34,12 +35,11 @@ class OpenblasConan(ConanFile):
         "dynamic_arch": False,
     }
     short_paths = True
-    package_type = "library"
 
     @property
     def _fortran_compiler(self):
         comp_exe = self.conf.get("tools.build:compiler_executables")
-        if comp_exe and 'fortran' in comp_exe:
+        if comp_exe and "fortran" in comp_exe:
             return comp_exe["fortran"]
         return None
 
@@ -65,26 +65,24 @@ class OpenblasConan(ConanFile):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
     def source(self):
-        get(self,
-            **self.conan_data["sources"][self.version],
-            strip_root=True,
-            destination=self.source_folder
-        )
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
         if Version(self.version) <= "0.3.15":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "utils.cmake"),
-                            "set(obj_defines ${defines_in})", "set(obj_defines ${defines_in})\r\n\r\n" +
-                            "list(FIND obj_defines \"RC\" def_idx)\r\n" + "if (${def_idx} GREATER -1) \r\n\t" +
-                            "list (REMOVE_ITEM obj_defines \"RC\")\r\n\t" + "list(APPEND obj_defines  \"RC=RC\")\r\n" +
-                            "endif ()\r\n" + "list(FIND obj_defines \"CR\" def_idx)\r\n" +
-                            "if (${def_idx} GREATER -1) \r\n\t" + "list (REMOVE_ITEM obj_defines \"CR\")\r\n\t" +
-                            "list(APPEND obj_defines  \"CR=CR\")\r\n" + "endif ()")
+                "set(obj_defines ${defines_in})", textwrap.dedent("""\
+                 set(obj_defines ${defines_in})
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+                 list(FIND obj_defines "RC" def_idx)
+                 if (${def_idx} GREATER -1)
+                   list(REMOVE_ITEM obj_defines "RC")
+                   list(APPEND obj_defines "RC=RC")
+                 endif ()
+                 list(FIND obj_defines "CR" def_idx)
+                 if (${def_idx} GREATER -1)
+                   list(REMOVE_ITEM obj_defines "CR")
+                   list(APPEND obj_defines "CR=CR")
+                 endif ()""")
+            )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -121,35 +119,31 @@ class OpenblasConan(ConanFile):
 
     def build(self):
         if Version(self.version) < "0.3.21":
+            f_check_cmake = os.path.join(self.source_folder, "cmake", "f_check.cmake")
             if Version(self.version) >= "0.3.12":
-                search = """message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")"""
-                replace = (
-                    """message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")"""
-                )
+                replace_in_file(self, f_check_cmake,
+                    'message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")',
+                    'message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")')
             else:
-                search = "enable_language(Fortran)"
-                replace = """include(CheckLanguage)
-check_language(Fortran)
-if(CMAKE_Fortran_COMPILER)
-  enable_language(Fortran)
-else()
-  message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")
-  set (NOFORTRAN 1)
-  set (NO_LAPACK 1)
-endif()"""
-
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, self.source_folder, "cmake", "f_check.cmake"),
-                search,
-                replace,
-            )
-        cmake = self._configure_cmake()
+                replace_in_file(self, f_check_cmake,
+                    "enable_language(Fortran)",
+                    textwrap.dedent("""\
+                        include(CheckLanguage)
+                        check_language(Fortran)
+                        if(CMAKE_Fortran_COMPILER)
+                          enable_language(Fortran)
+                        else()
+                          message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")
+                          set (NOFORTRAN 1)
+                          set (NO_LAPACK 1)
+                        endif()"""))
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -168,9 +162,7 @@ endif()"""
         self.cpp_info.components["openblas_component"].set_property(
             "cmake_target_name", "OpenBLAS::" + cmake_component_name)  # 'pthread' causes issues without namespace
         self.cpp_info.components["openblas_component"].set_property("pkg_config_name", "openblas")
-        self.cpp_info.components["openblas_component"].includedirs.append(
-            os.path.join("include", "openblas")
-        )
+        self.cpp_info.components["openblas_component"].includedirs.append(os.path.join("include", "openblas"))
         self.cpp_info.components["openblas_component"].libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["openblas_component"].system_libs.append("m")
@@ -179,9 +171,6 @@ endif()"""
             if self.options.build_lapack and self._fortran_compiler:
                 self.cpp_info.components["openblas_component"].system_libs.append("gfortran")
 
-        self.output.info(
-            "Setting OpenBLAS_HOME environment variable: {}".format(self.package_folder)
-        )
         self.env_info.OpenBLAS_HOME = self.package_folder
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
