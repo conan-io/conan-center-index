@@ -92,33 +92,31 @@ class OpenblasConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
-        tc.cache_variables["NOFORTRAN"] = not self.options.build_lapack
+        tc.variables["NOFORTRAN"] = not self.options.build_lapack
         # This checks explicit user-specified fortran compiler
-        if self.options.build_lapack:
-            if not self._fortran_compiler:
-                if Version(self.version) < "0.3.21":
-                    self.output.warning(
-                        "Building with LAPACK support requires a Fortran compiler.")
-                else:
-                    tc.cache_variables["C_LAPACK"] = True
-                    tc.cache_variables["NOFORTRAN"] = True
-                    self.output.info(
-                        "Building LAPACK without Fortran compiler")
+        if self.options.build_lapack and not self._fortran_compiler:
+            if Version(self.version) < "0.3.21":
+                self.output.warning("Building with LAPACK support requires a Fortran compiler.")
+            else:
+                tc.variables["C_LAPACK"] = True
+                tc.variables["NOFORTRAN"] = True
+                self.output.info("Building LAPACK without a Fortran compiler")
 
-        tc.cache_variables["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
-        tc.cache_variables["DYNAMIC_ARCH"] = self.options.dynamic_arch
-        tc.cache_variables["USE_THREAD"] = self.options.use_thread
+        tc.variables["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
+        tc.variables["DYNAMIC_ARCH"] = self.options.dynamic_arch
+        tc.variables["USE_THREAD"] = self.options.use_thread
 
         # Required for safe concurrent calls to OpenBLAS routines
-        tc.cache_variables["USE_LOCKING"] = not self.options.use_thread
+        tc.variables["USE_LOCKING"] = not self.options.use_thread
 
         # don't, may lie to consumer, /MD or /MT is managed by conan
-        tc.cache_variables["MSVC_STATIC_CRT"] = False
+        tc.variables["MSVC_STATIC_CRT"] = False
 
         # This is a workaround to add the libm dependency on linux,
         # which is required to successfully compile on older gcc versions.
-        tc.cache_variables["ANDROID"] = self.settings.os in ["Linux", "Android"]
+        tc.variables["ANDROID"] = self.settings.os in ["Linux", "Android"]
 
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):
