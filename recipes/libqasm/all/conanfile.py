@@ -122,13 +122,7 @@ class LibqasmConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         fix_apple_shared_install_name(self)
-        rm(self, "*.interp", os.path.join(self.package_folder, "include"), recursive=True)
         rm(self, "*.pdb", self.package_folder, recursive=True)
-        rm(self, "*.tokens", os.path.join(self.package_folder, "include"), recursive=True)
-        rm(self, "cmake_install.cmake", os.path.join(self.package_folder, "include"), recursive=True)
-        rm(self, "Makefile", os.path.join(self.package_folder, "include"), recursive=True)
-        rmdir(self, os.path.join(os.path.join(self.package_folder, "include", "CMakeFiles")))
-        rmdir(self, os.path.join(os.path.join(self.package_folder, "include", "v3x", "CMakeFiles")))
 
     def package_info(self):
         self.cpp_info.libs = ["cqasm"]
