@@ -13,7 +13,7 @@ index 3aa3bb2..90d71e3 100755
  set(CMAKE_CXX_FLAGS "-fpermissive")
  if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
    if (IS_ARM)
-@@ -56,7 +55,7 @@ list(APPEND DIR_ALL ${DIR_utility}
+@@ -56,12 +55,12 @@
                      ${DIR_fusion})
  
  # library
@@ -22,6 +22,13 @@ index 3aa3bb2..90d71e3 100755
  target_link_libraries(${PROJECT_NAME} 
                        rtklib
                        vikit_common
+                       svo
+-                      glog
++                      glog::glog
+                       ${OpenCV_LIBS})
+ target_include_directories(${PROJECT_NAME}
+     PUBLIC ${PROJECT_SOURCE_DIR}/include
+
 diff --git a/ros_wrapper/src/gici/CMakeLists.txt b/ros_wrapper/src/gici/CMakeLists.txt
 index 2dd2200..7ea3481 100755
 --- a/ros_wrapper/src/gici/CMakeLists.txt
@@ -77,7 +84,8 @@ index d9ab61c..066d722 100755
 +ADD_LIBRARY(${PROJECT_NAME} ${SOURCEFILES})
  TARGET_LINK_LIBRARIES(${PROJECT_NAME}
                        vikit_common
-                       glog
+-                      glog
++                      glog::glog
 diff --git a/third_party/rpg_vikit/vikit_common/CMakeLists.txt b/third_party/rpg_vikit/vikit_common/CMakeLists.txt
 index 3401ab4..889d80a 100755
 --- a/third_party/rpg_vikit/vikit_common/CMakeLists.txt
