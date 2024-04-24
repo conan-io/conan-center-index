@@ -171,10 +171,12 @@ class OpenblasConan(ConanFile):
             if self.options.build_lapack and self._fortran_compiler:
                 self.cpp_info.components["openblas_component"].system_libs.append("gfortran")
 
-        self.env_info.OpenBLAS_HOME = self.package_folder
+        self.buildenv_info.define_path("OpenBLAS_HOME", self.package_folder)
+        self.runenv_info.define_path("OpenBLAS_HOME", self.package_folder)
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "OpenBLAS"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenBLAS"
         self.cpp_info.components["openblas_component"].names["cmake_find_package"] = cmake_component_name
         self.cpp_info.components["openblas_component"].names["cmake_find_package_multi"] = cmake_component_name
+        self.env_info.OpenBLAS_HOME = self.package_folder
