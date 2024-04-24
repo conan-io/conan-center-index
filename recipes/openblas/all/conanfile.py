@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir, collect_libs
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.build import cross_building
 from conan.tools.scm import Version
 from conan.tools.apple import fix_apple_shared_install_name
@@ -158,12 +158,12 @@ class OpenblasConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "OpenBLAS")
         self.cpp_info.set_property("cmake_target_name", "OpenBLAS::OpenBLAS")
         self.cpp_info.set_property("pkg_config_name", "openblas")
+        # 'pthread' causes issues without namespace
         cmake_component_name = "pthread" if self.options.use_thread else "serial"  # TODO: how to model this in CMakeDeps?
-        self.cpp_info.components["openblas_component"].set_property(
-            "cmake_target_name", "OpenBLAS::" + cmake_component_name)  # 'pthread' causes issues without namespace
+        self.cpp_info.components["openblas_component"].set_property("cmake_target_name", f"OpenBLAS::{cmake_component_name}")
         self.cpp_info.components["openblas_component"].set_property("pkg_config_name", "openblas")
         self.cpp_info.components["openblas_component"].includedirs.append(os.path.join("include", "openblas"))
-        self.cpp_info.components["openblas_component"].libs = collect_libs(self)
+        self.cpp_info.components["openblas_component"].libs = ["openblas"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["openblas_component"].system_libs.append("m")
             if self.options.use_thread:
