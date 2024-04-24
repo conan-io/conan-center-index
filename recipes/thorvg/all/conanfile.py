@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, rmdir, rename
+from conan.tools.files import copy, get, rmdir, rename, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -117,13 +117,22 @@ class ThorvgConan(ConanFile):
             "tests": False,
             "log": is_debug
         })
+        # Workaround to avoid: error D8016: '/O1' and '/RTC1' command-line options are incompatible
+        if is_msvc(self) and is_debug:
+            tc.project_options["optimization"] = "plain"
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
         venv = VirtualBuildEnv(self)
         venv.generate()
 
+    def _patch_sources(self):
+        # Workaround to avoid: Stripping target 'src\\thorvg-0.dll'.
+        if is_msvc(self) and self.options.shared:
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"), ", 'strip=true'", "")
+
     def build(self):
+        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
