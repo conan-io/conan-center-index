@@ -4,7 +4,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
-from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -170,6 +170,12 @@ class OpenblasConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
 
+    @property
+    def _lib_name(self):
+        if self.options.shared and self.settings.build_type == "Debug" and not is_msvc(self):
+            return "openblas_d"
+        return "openblas"
+
     def package_info(self):
         # CMake config file:
         # - OpenBLAS always has one and only one of these components: openmp, pthread or serial.
@@ -183,8 +189,7 @@ class OpenblasConan(ConanFile):
         self.cpp_info.components["openblas_component"].set_property("cmake_target_name", f"OpenBLAS::{cmake_component_name}")
         self.cpp_info.components["openblas_component"].set_property("pkg_config_name", "openblas")
         self.cpp_info.components["openblas_component"].includedirs.append(os.path.join("include", "openblas"))
-        suffix = "_d" if self.settings.build_type == "Debug" else ""
-        self.cpp_info.components["openblas_component"].libs = ["openblas" + suffix]
+        self.cpp_info.components["openblas_component"].libs = [self._lib_name]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["openblas_component"].system_libs.append("m")
             if self.options.use_thread:
