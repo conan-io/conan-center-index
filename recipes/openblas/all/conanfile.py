@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.build import cross_building
+from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.errors import ConanInvalidConfiguration
@@ -24,15 +25,26 @@ class OpenblasConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "build_lapack": [True, False],
+        "build_relapack": [True, False],
         "use_thread": [True, False],
+        "use_locking": [True, False],
         "dynamic_arch": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_lapack": False,
+        "build_lapack": True,
+        "build_relapack": True,
         "use_thread": True,
+        "use_locking": True,
         "dynamic_arch": False,
+    }
+    options_description = {
+        "build_lapack": "Build LAPACK and LAPACKE",
+        "build_relapack": "Build with ReLAPACK (recursive implementation of several LAPACK functions on top of standard LAPACK)",
+        "use_thread": "Enable threads support",
+        "use_locking": "Use locks even in single-threaded builds to make them callable from multiple threads",
+        "dynamic_arch": "Include support for multiple CPU targets, with automatic selection at runtime (x86/x86_64, aarch64 or ppc only)",
     }
     short_paths = True
 
@@ -46,9 +58,11 @@ class OpenblasConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) >= "0.3.21":
-            # INFO: When no Fortran compiler is available, OpenBLAS builds LAPACK from an f2c-converted copy of LAPACK unless the NO_LAPACK option is specified
-            self.options.build_lapack = True
+        # When no Fortran compiler is available, OpenBLAS builds LAPACK from an f2c-converted copy of LAPACK unless the NO_LAPACK option is specified.
+        # This is not available before v0.3.21.
+        if Version(self.version) < "0.3.21":
+            self.options.build_lapack = False
+            self.options.build_relapack = False
 
     def configure(self):
         if self.options.shared:
@@ -64,6 +78,9 @@ class OpenblasConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
+        if self.options.build_relapack and not self.options.build_lapack:
+            raise ConanInvalidConfiguration("build_relapack option requires build_lapack")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -72,6 +89,9 @@ class OpenblasConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.variables["BUILD_TESTING"] = False
 
         tc.variables["NOFORTRAN"] = not self.options.build_lapack
         # This checks explicit user-specified fortran compiler
@@ -84,14 +104,13 @@ class OpenblasConan(ConanFile):
                 self.output.info("Building LAPACK without a Fortran compiler")
 
         tc.variables["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
+        tc.variables["BUILD_RELAPACK"] = self.options.build_relapack
+
         tc.variables["DYNAMIC_ARCH"] = self.options.dynamic_arch
         tc.variables["USE_THREAD"] = self.options.use_thread
+        tc.variables["USE_LOCKING"] = self.options.use_locking
 
-        # Required for safe concurrent calls to OpenBLAS routines
-        tc.variables["USE_LOCKING"] = not self.options.use_thread
-
-        # don't, may lie to consumer, /MD or /MT is managed by conan
-        tc.variables["MSVC_STATIC_CRT"] = False
+        tc.variables["MSVC_STATIC_CRT"] = is_msvc_static_runtime(self)
 
         # This is a workaround to add the libm dependency on linux,
         # which is required to successfully compile on older gcc versions.
