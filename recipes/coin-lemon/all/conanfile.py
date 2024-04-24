@@ -54,9 +54,9 @@ class CoinLemonConan(ConanFile):
             except ImportError:
                 # Handle Conan 1.x (check_max_cppstd is not available)
                 if self.settings.compiler.cppstd not in ["98", "gnu98", "11", "gnu11", "14", "gnu14"]:
-                                    raise ConanInvalidConfiguration(f'Current cppstd {self.settings.compiler.cppstd} is'
-                                                ' higher than supported (C++14)\n'
-                                                ' Unverified support is available with the "coin-lemon/*:unsupported_modern_cpp=True" option')
+                    raise ConanInvalidConfiguration(f'Current cppstd {self.settings.compiler.cppstd} is'
+                                ' higher than supported (C++14)\n'
+                                ' Unverified support is available with the "coin-lemon/*:unsupported_modern_cpp=True" option')
         if self.options.unsupported_modern_cpp:
             self.output.warning("coin-lemon: Unsupported modern C++ patches are enabled. These are unverified.")
 
