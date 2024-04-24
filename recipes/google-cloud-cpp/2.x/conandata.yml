@@ -24,3 +24,6 @@ patches:
     - patch_file: "patches/2.23.0/001-add-find-package-threads.patch"
       patch_description: "Missing find_package() in CMake files"
       patch_type: conan
+    - patch_file: "patches/2.23.0/002-gcs-missing-include.patch"
+      patch_description: "Missing #include <sstream>"
+      patch_type: conan

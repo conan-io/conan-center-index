@@ -1,0 +1,21 @@
+diff --git a/google/cloud/storage/internal/retry_object_read_source.cc b/google/cloud/storage/internal/retry_object_read_source.cc
+index 56a7b598..f52d8079 100644
+--- a/google/cloud/storage/internal/retry_object_read_source.cc
++++ b/google/cloud/storage/internal/retry_object_read_source.cc
+@@ -14,6 +14,7 @@
+ 
+ #include "google/cloud/storage/internal/retry_object_read_source.h"
+ #include <algorithm>
++#include <sstream>
+ #include <string>
+ #include <thread>
+ 
+@@ -99,7 +100,7 @@ StatusOr<ReadSourceResult> RetryObjectReadSource::Read(char* buf,
+   if (HandleResult(result)) return result;
+   // We have exhausted the retry policy, return the error.
+   auto status = std::move(result).status();
+-  std::stringstream os;
++  std::ostringstream os;
+   if (internal::StatusTraits::IsPermanentFailure(status)) {
+     os << "Permanent error in Read(): " << status.message();
+   } else {
