@@ -101,6 +101,10 @@ class OpenvinoConan(ConanFile):
         return self.settings.os in ["Linux", "Windows"] and self._target_x86_64 and Version(self.version) < "2024.0.0"
 
     @property
+    def _npu_option_available(self):
+        return self.settings.os in ["Linux", "Windows"] and self._target_x86_64 and Version(self.version) >= "2024.0.0"
+
+    @property
     def _gpu_option_available(self):
         return self.settings.os != "Macos" and self._target_x86_64
 
@@ -205,6 +209,8 @@ class OpenvinoConan(ConanFile):
             toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = self.options.shared or not self.options.enable_cpu
         if self._gna_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GNA"] = False
+        if self._npu_option_available:
+            toolchain.cache_variables["ENABLE_INTEL_NPU"] = False
         # SW plugins
         toolchain.cache_variables["ENABLE_AUTO"] = self.options.enable_auto
         toolchain.cache_variables["ENABLE_MULTI"] = self.options.enable_auto
