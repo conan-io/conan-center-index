@@ -46,7 +46,6 @@ class OpenTelemetryCppConan(ConanFile):
     default_options = {
         "fPIC": True,
         "shared": False,
-
         "with_no_deprecated_code": False,
         "with_stl": False,
         "with_gsl": False,
@@ -141,7 +140,7 @@ class OpenTelemetryCppConan(ConanFile):
         if self.options.with_abseil:
             self.requires("abseil/20230125.3", transitive_headers=True)
 
-        if self.options.with_otlp_grpc or self.options.with_otlp_http:
+        if self.options.with_otlp_grpc or self.options.with_otlp_http or self.options.get_safe("with_otlp_file", False):
             self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
 
         if self.options.with_otlp_grpc:
