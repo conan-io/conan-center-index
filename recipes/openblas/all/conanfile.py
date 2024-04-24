@@ -67,23 +67,6 @@ class OpenblasConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-        if Version(self.version) <= "0.3.15":
-            replace_in_file(self, os.path.join(self.source_folder, "cmake", "utils.cmake"),
-                "set(obj_defines ${defines_in})", textwrap.dedent("""\
-                 set(obj_defines ${defines_in})
-
-                 list(FIND obj_defines "RC" def_idx)
-                 if (${def_idx} GREATER -1)
-                   list(REMOVE_ITEM obj_defines "RC")
-                   list(APPEND obj_defines "RC=RC")
-                 endif ()
-                 list(FIND obj_defines "CR" def_idx)
-                 if (${def_idx} GREATER -1)
-                   list(REMOVE_ITEM obj_defines "CR")
-                   list(APPEND obj_defines "CR=CR")
-                 endif ()""")
-            )
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -117,13 +100,28 @@ class OpenblasConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
+        if Version(self.version) <= "0.3.15":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "utils.cmake"),
+                "set(obj_defines ${defines_in})", textwrap.dedent("""\
+                 set(obj_defines ${defines_in})
+
+                 list(FIND obj_defines "RC" def_idx)
+                 if (${def_idx} GREATER -1)
+                   list(REMOVE_ITEM obj_defines "RC")
+                   list(APPEND obj_defines "RC=RC")
+                 endif ()
+                 list(FIND obj_defines "CR" def_idx)
+                 if (${def_idx} GREATER -1)
+                   list(REMOVE_ITEM obj_defines "CR")
+                   list(APPEND obj_defines "CR=CR")
+                 endif ()"""))
         if Version(self.version) < "0.3.21":
             f_check_cmake = os.path.join(self.source_folder, "cmake", "f_check.cmake")
             if Version(self.version) >= "0.3.12":
                 replace_in_file(self, f_check_cmake,
-                    'message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")',
-                    'message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")')
+                                'message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")',
+                                'message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")')
             else:
                 replace_in_file(self, f_check_cmake,
                     "enable_language(Fortran)",
@@ -137,6 +135,9 @@ class OpenblasConan(ConanFile):
                           set (NOFORTRAN 1)
                           set (NO_LAPACK 1)
                         endif()"""))
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
