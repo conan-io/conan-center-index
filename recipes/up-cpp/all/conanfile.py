@@ -87,8 +87,8 @@ class UpCppConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} need to have paths in CMake files updated to handle both \ and /.")
         self.output.info(f"self.settings.compiler: {self.settings.compiler}")
         self.output.info(f"stdcpp_library(self): {stdcpp_library(self)}")
         if self.settings.compiler == "clang" and stdcpp_library(self) == "c++":
