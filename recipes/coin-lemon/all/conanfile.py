@@ -1,6 +1,7 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.files import copy, export_conandata_patches, get, patch, replace_in_file, rmdir
 import os
 
 required_conan_version = ">=1.53.0"
@@ -19,10 +20,12 @@ class CoinLemonConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "unsupported_modern_cpp": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "unsupported_modern_cpp": False, # Do not set to True
     }
 
     def export_sources(self):
@@ -35,6 +38,27 @@ class CoinLemonConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd") and not self.options.unsupported_modern_cpp:
+            # This library does not support C++17 or higher, 
+            # see: https://lemon.cs.elte.hu/trac/lemon/ticket/631
+            #      it appears this library is no longer maintained
+            try:
+                from conan.tools.build import check_max_cppstd
+                check_max_cppstd(self, 14)
+            except ConanInvalidConfiguration:
+                raise ConanInvalidConfiguration(f'Current cppstd {self.settings.compiler.cppstd} is'
+                                                ' higher than supported (C++14)\n'
+                                                ' Unverified support is available with the "coin-lemon/*:unsupported_modern_cpp=True" option')
+            except ImportError:
+                # Handle Conan 1.x (check_max_cppstd is not available)
+                if self.settings.compiler.cppstd not in ["98", "gnu98", "11", "gnu11", "14", "gnu14"]:
+                                    raise ConanInvalidConfiguration(f'Current cppstd {self.settings.compiler.cppstd} is'
+                                                ' higher than supported (C++14)\n'
+                                                ' Unverified support is available with the "coin-lemon/*:unsupported_modern_cpp=True" option')
+        if self.options.unsupported_modern_cpp:
+            self.output.warning("coin-lemon: Unsupported modern C++ patches are enabled. These are unverified.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -57,7 +81,11 @@ class CoinLemonConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
+        # Apply patches - note that some are conditional 
+        for item in self.conan_data.get("patches", {}).get(self.version, []):
+            if ('condition' in item and getattr(self.options, item['condition'])) or not 'condition' in item:
+                patch(self, patch_file=item["patch_file"], patch_string=item.get("patch_description"))
+        
         # Disable demo, tools, doc & test
         replace_in_file(
             self,
