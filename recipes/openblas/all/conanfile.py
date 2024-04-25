@@ -34,7 +34,7 @@ class OpenblasConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "build_lapack": True,
-        "build_relapack": True,
+        "build_relapack": False,
         "use_thread": True,
         "use_locking": True,
         "dynamic_arch": False,
@@ -78,8 +78,12 @@ class OpenblasConan(ConanFile):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building not implemented")
 
-        if self.options.build_relapack and not self.options.build_lapack:
-            raise ConanInvalidConfiguration("build_relapack option requires build_lapack")
+        if self.options.build_relapack:
+            if not self.options.build_lapack:
+                raise ConanInvalidConfiguration("build_relapack option requires build_lapack")
+            if self.settings.compiler not in ["gcc", "clang"]:
+                # ld: unknown option: --allow-multiple-definition on apple-clang
+                raise ConanInvalidConfiguration("build_relapack option is only supported for GCC and Clang")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -154,11 +158,6 @@ class OpenblasConan(ConanFile):
                           set (NOFORTRAN 1)
                           set (NO_LAPACK 1)
                         endif()"""))
-
-        # Fix for apple-clang
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "-Wl,-allow-multiple-definition",
-                        "-Wl,--allow-multiple-definition")
 
     def build(self):
         self._patch_sources()
