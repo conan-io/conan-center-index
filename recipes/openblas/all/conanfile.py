@@ -155,6 +155,11 @@ class OpenblasConan(ConanFile):
                           set (NO_LAPACK 1)
                         endif()"""))
 
+        # Fix for apple-clang
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "-Wl,-allow-multiple-definition",
+                        "-Wl,--allow-multiple-definition")
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
