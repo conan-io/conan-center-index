@@ -153,7 +153,7 @@ class ThorvgConan(ConanFile):
 
         self.cpp_info.set_property("pkg_config_name", "libthorvg")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread"])
+            self.cpp_info.system_libs.extend(["pthread", "m"])
         if not self.options.shared:
             self.cpp_info.defines = ["TVG_STATIC"]
         else:
