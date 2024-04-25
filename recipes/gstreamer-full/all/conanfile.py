@@ -501,7 +501,7 @@ class PackageConan(ConanFile):
 
         # Other options
         tc.project_options["build-tools-source"] = "system" # Use conan's flex and bison
-        tc.project_options["orc-source"] = "subproject" # Conan doens't provide orc
+        tc.project_options["orc-source"] = "subproject" # Conan doesn't provide orc
 
         # Common options
         tc.project_options["introspection"] = "enabled" if self.options.with_introspection else "disabled"
