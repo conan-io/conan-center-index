@@ -88,6 +88,10 @@ class GiciConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+        if self.settings.os != "Linux":
+            # stream/streamer.cpp includes linux/videodev2.h
+            raise ConanInvalidConfiguration(f"{self.name} only supports Linux")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
