@@ -42,7 +42,7 @@ class PackageConan(ConanFile):
         self.info.clear()
 
     def requirements(self):
-        self.requires("tsl-robin-map/1.2.2")
+        self.requires("tsl-robin-map/1.3.0")
 
     def validate(self):
         if self.settings.compiler.cppstd:
