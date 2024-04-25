@@ -273,34 +273,6 @@ class PackageConan(ConanFile):
             self.options.rm_safe('with_egl')
             self.options.rm_safe('with_xorg')
 
-        if not self.options.get_safe("with_xorg"):
-            self.options.rm_safe('gst_base_x11')
-            self.options.rm_safe('gst_base_xshm')
-            self.options.rm_safe('gst_base_xi')
-            self.options.rm_safe('gst_base_ximage')
-            self.options.rm_safe('gst_base_xvimage')
-
-        if not self.options.with_base:
-            for option in GST_BASE_MESON_OPTIONS:
-                delattr(self.options, f'gst_base_{option}')
-            for option in GST_BASE_MESON_OPTIONS_WITH_EXT_DEPS:
-                delattr(self.options, f'gst_base_{option}')
-            for option in GST_BASE_MESON_OPTIONS_GL:
-                delattr(self.options, f'gst_base_{option}')
-            delattr(self.options, "gst_base_gl_jpeg")
-        if not self.options.with_good:
-            for option in GST_GOOD_MESON_OPTIONS:
-                delattr(self.options, f'gst_good_{option}')
-        if not self.options.with_bad:
-            for option in GST_BAD_MESON_OPTIONS:
-                delattr(self.options, f'gst_bad_{option}')
-        if not self.options.with_ugly:
-            for option in GST_UGLY_MESON_OPTIONS:
-                delattr(self.options, f'gst_ugly_{option}')
-        if not self.options.with_rtsp_server:
-            for option in GST_RTSP_SERVER_MESON_OPTIONS:
-                delattr(self.options, f'gst_rtsp_server_{option}')
-
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
@@ -577,6 +549,35 @@ class PackageConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+
+    def package_id(self):
+        if not self.info.options.get_safe("with_xorg"):
+            self.info.options.rm_safe('gst_base_x11')
+            self.info.options.rm_safe('gst_base_xshm')
+            self.info.options.rm_safe('gst_base_xi')
+            self.info.options.rm_safe('gst_base_ximage')
+            self.info.options.rm_safe('gst_base_xvimage')
+
+        if not self.info.options.with_base:
+            for option in GST_BASE_MESON_OPTIONS:
+                delattr(self.info.options, f'gst_base_{option}')
+            for option in GST_BASE_MESON_OPTIONS_WITH_EXT_DEPS:
+                delattr(self.info.options, f'gst_base_{option}')
+            for option in GST_BASE_MESON_OPTIONS_GL:
+                delattr(self.info.options, f'gst_base_{option}')
+            delattr(self.info.options, "gst_base_gl_jpeg")
+        if not self.info.options.with_good:
+            for option in GST_GOOD_MESON_OPTIONS:
+                delattr(self.info.options, f'gst_good_{option}')
+        if not self.info.options.with_bad:
+            for option in GST_BAD_MESON_OPTIONS:
+                delattr(self.info.options, f'gst_bad_{option}')
+        if not self.info.options.with_ugly:
+            for option in GST_UGLY_MESON_OPTIONS:
+                delattr(self.info.options, f'gst_ugly_{option}')
+        if not self.info.options.with_rtsp_server:
+            for option in GST_RTSP_SERVER_MESON_OPTIONS:
+                delattr(self.info.options, f'gst_rtsp_server_{option}')
 
     def _add_components(self, name, requires, system_libs = None):
         self.cpp_info.components[name].libs = [name]
