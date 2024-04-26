@@ -79,7 +79,7 @@ class DispensoPackage(ConanFile):
             # TODO: Missing $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fvisibility=hidden> equivalent?
             tc.preprocessor_definitions["NOMINMAX"] = 1
             tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = 1
-        if not valid_min_cppstd(self, self._min_cppstd):
+        if self.settings.get_safe("compiler.cppstd") is None:
             # TODO: Remove once Conan 1 is deprecated, this is needed so apple-clang
             # can compile, as it defaults to C++98
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
