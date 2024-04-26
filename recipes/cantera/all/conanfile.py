@@ -6,8 +6,8 @@ from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, save, load, chdir, rename, rmdir, mkdir, replace_in_file
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import VCVars
-from conan.tools.microsoft.visual import msvs_toolset
+from conan.tools.microsoft import VCVars, msvs_toolset
+from conan.tools.apple import is_apple_os
 
 class canteraRecipe(ConanFile):
     name = "cantera"
@@ -147,8 +147,13 @@ class canteraRecipe(ConanFile):
         if self._is_gnu_pre11_stdlib:
             replace_in_file(self, os.path.join(self.source_folder, "SConstruct"), "env['CPPDEFINES'] = {}", "env['CPPDEFINES'] = {'_GLIBCXX_USE_CXX11_ABI' : 0}")
 
+        if is_apple_os(self):
+            options["cxx_flags"] = f"-std=c++17 -mmacosx-version-min={Version(self.info.settings.compiler.version)}"
+            options["cc_flags"] = f"-mmacosx-version-min={Version(self.info.settings.compiler.version)}"
+
         # Write args file
-        escape_str = lambda x: f'"{x}"'
+        def escape_str(x):
+            return f'"{x}"'
         scons_args = ' '.join([f"{key}={escape_str(option)}" for key, option in options.items()])
         save(self, os.path.join(self.source_folder, "scons_args"), scons_args)
 
