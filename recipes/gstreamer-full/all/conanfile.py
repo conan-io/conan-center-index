@@ -579,24 +579,6 @@ class PackageConan(ConanFile):
             for option in GST_RTSP_SERVER_MESON_OPTIONS:
                 delattr(self.info.options, f'gst_rtsp_server_{option}')
 
-    def _add_components(self, name, requires, system_libs = None):
-        self.cpp_info.components[name].libs = [name]
-        self.cpp_info.components[name].libdirs = [os.path.join(self.package_folder, "lib", "gstreamer-1.0")]
-        self.cpp_info.components[name].requires = requires
-        self.cpp_info.components[name].defines = ["GST_STATIC_COMPILATION"]
-        if system_libs:
-            self.cpp_info.components[name].system_libs = system_libs
-        self.libraries.append(name)
-
-    def _quick(self, lib, is_gst_lib = True):
-        GST_LIB_PATH = os.path.join(self.package_folder, "lib", "gstreamer-1.0")
-        LIB_PATH = os.path.join(self.package_folder, "lib")
-
-        if f"gst{lib}" not in self.cpp_info.components:
-            self.cpp_info.components[f"gst{lib}"].libs = [f"gst{lib}"]
-            self.cpp_info.components[f"gst{lib}"].libdirs = [GST_LIB_PATH if is_gst_lib else LIB_PATH]
-            self.libraries.append(f"gst{lib}")
-
     def _add_plugin_components(self, lib, requires = [], system_libs = []):
         self.cpp_info.components[f"gst{lib}"].libs = [f"gst{lib}"]
         self.cpp_info.components[f"gst{lib}"].libdirs = [os.path.join(self.package_folder, "lib", "gstreamer-1.0")]
@@ -768,15 +750,15 @@ class PackageConan(ConanFile):
                         self._add_plugin_components("alpha", video_dep + gst_dep, libm)
                         self._add_plugin_components("alphacolor", video_dep + gst_dep)
                     if lib is "debugutils":
-                        self._quick("navigationtest")
-                        self._quick("debug")
+                        self._add_plugin_components("navigationtest")
+                        self._add_plugin_components("debug")
                     elif lib is "law":
-                        self._quick("alaw")
-                        self._quick("mulaw")
-                    elif lib is "flx": self._quick("flxdec")
-                    elif lib is "y4m": self._quick("y4menc")
+                        self._add_plugin_components("alaw")
+                        self._add_plugin_components("mulaw")
+                    elif lib is "flx": self._add_plugin_components("flxdec")
+                    elif lib is "y4m": self._add_plugin_components("y4menc")
                     else:
-                        self._quick(lib)
+                        self._add_plugin_components(lib)
 
         if self.options.with_bad:
             for lib in GST_BAD_MESON_OPTIONS:
@@ -797,21 +779,21 @@ class PackageConan(ConanFile):
                     self.libraries.append(f"gst{lib}")
 
                     if lib is "camerabin":
-                            self._quick("basecamerabinsrc-1.0", False)
-                            self._quick("photography-1.0", False)
+                            self._add_library_components("basecamerabinsrc")
+                            self._add_library_components("photography")
                             self.cpp_info.components[f"gst{lib}"].requires = ["gstbasecamerabinsrc-1.0"]
                             self.cpp_info.components[f"gst{lib}"].requires = ["gstphotography-1.0"]
                     if lib is "insertbin":
-                        self._quick("insertbin-1.0", False)
+                        self._add_library_components("insertbin")
                         self.cpp_info.components[f"gst{lib}"].requires = ["gstinsertbin-1.0"]
                     if lib in ["jpegformat", "videoparsersbad"]:
-                            self._quick("codecparsers-1.0", False)
+                            self._add_library_components("codecparsers")
                             self.cpp_info.components[f"gst{lib}"].requires = ["gstcodecparsers-1.0"]
                     if lib in ["mpegtsdemux", "mpegtsmux"]:
-                        self._quick("mpegts-1.0", False)
+                        self._add_library_components("mpegts")
                         self.cpp_info.components[f"gst{lib}"].requires = ["gstmpegts-1.0"]
                     if lib is "mse":
-                            self._quick("mse-1.0", False)
+                            self._add_library_components("mse")
                             self.cpp_info.components[f"gst{lib}"].requires = ["gstmse-1.0"]
 
                     if lib is "unixfd":
@@ -821,7 +803,7 @@ class PackageConan(ConanFile):
             for lib in GST_UGLY_MESON_OPTIONS:
                 if self.options.get_safe(f'gst_ugly_{lib}'):
                         if lib is "asfdemux": lib = "asf"
-                        self._quick(lib)
+                        self._add_plugin_components(lib)
 
         if self.options.with_libav:
             libav_deps = ["ffmpeg::avfilter", "ffmpeg::avformat", "ffmpeg::avcodec", "ffmpeg::avutil"]
@@ -829,11 +811,11 @@ class PackageConan(ConanFile):
             self._add_plugin_components("libav", libav_deps)
 
         if self.options.with_rtsp_server:
-            self._quick('rtspserver-1.0', False)
+            self._add_library_components("rtspserver")
 
             for lib in GST_RTSP_SERVER_MESON_OPTIONS:
                 if self.options.get_safe(f'gst_rtsp_server_{lib}'):
-                        self._quick(lib)
+                        self._add_plugin_components(lib)
                         if lib is "rtspclientsink":
                             self.cpp_info.components["gstrtspclientsink"].requires = ["gstrtspserver-1.0"]
 
