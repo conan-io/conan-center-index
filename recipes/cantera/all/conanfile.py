@@ -6,6 +6,7 @@ from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, save, load, chdir, rename, rmdir, mkdir, replace_in_file
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import VCVars
 
 class canteraRecipe(ConanFile):
     name = "cantera"
@@ -145,6 +146,8 @@ class canteraRecipe(ConanFile):
         escape_str = lambda x: f'"{x}"'
         scons_args = ' '.join([f"{key}={escape_str(option)}" for key, option in options.items()])
         save(self, os.path.join(self.source_folder, "scons_args"), scons_args)
+
+        VCVars(self).generate()
 
     def build(self):
         with chdir(self, self.source_folder):
