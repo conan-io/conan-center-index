@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
@@ -71,6 +71,10 @@ class GoogleCloudCppConan(ConanFile):
     _REQUIRES_CUSTOM_DEPENDENCIES = {
         "bigquery", "bigtable", "iam", "oauth2", "pubsub", "spanner", "storage",
     }
+
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -157,7 +161,8 @@ class GoogleCloudCppConan(ConanFile):
 
     def build_requirements(self):
         # For the `grpc-cpp-plugin` executable, and indirectly `protoc`
-        self.tool_requires("grpc/<host_version>")
+        if not self._is_legacy_one_profile:
+            self.tool_requires("grpc/<host_version>")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -166,7 +171,9 @@ class GoogleCloudCppConan(ConanFile):
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE_WERROR"] = False
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE"] = ",".join(self._components())
         tc.generate()
-        VirtualRunEnv(self).generate(scope="build")
+        VirtualBuildEnv(self).generate()
+        if self._is_legacy_one_profile:
+            VirtualRunEnv(self).generate(scope="build")
         deps = CMakeDeps(self)
         deps.generate()
 
