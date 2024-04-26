@@ -1,8 +1,21 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7af1b8a..05c86a6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -48,8 +48,6 @@ elseif (THREAD_SANITIZER)
+   add_link_options(-fsanitize=thread)
+ endif()
+ 
+-set(CMAKE_CXX_STANDARD 14 CACHE STRING "the C++ standard to use for this project")
+-
+ ###########################################################
+ # Targets
+ add_subdirectory(dispenso)
 diff --git a/dispenso/CMakeLists.txt b/dispenso/CMakeLists.txt
-index e318529..62641e4 100644
+index 24a8c48..9231949 100644
 --- a/dispenso/CMakeLists.txt
 +++ b/dispenso/CMakeLists.txt
-@@ -28,16 +28,15 @@ target_compile_options(dispenso PRIVATE
+@@ -33,16 +33,15 @@ endif()
  target_include_directories(dispenso
  PUBLIC
    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/..>
@@ -19,5 +32,5 @@ index e318529..62641e4 100644
 +find_package(concurrentqueue REQUIRED)
 +target_link_libraries(dispenso PUBLIC Threads::Threads concurrentqueue::concurrentqueue)
  
- if(WIN32)
-   target_link_libraries(dispenso PUBLIC Synchronization)
+ check_cxx_source_compiles("
+ #include <atomic>
