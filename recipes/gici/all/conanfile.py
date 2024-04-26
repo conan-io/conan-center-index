@@ -65,7 +65,7 @@ class GiciConan(ConanFile):
         # Used in a public header in gici/imu/imu_types.h
         self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
         # svo/common/types.h
-        self.requires("opencv/4.8.1", transitive_headers=True, transitive_libs=True)
+        self.requires("opencv/4.9.0", transitive_headers=True, transitive_libs=True)
         # gici/utility/option.h
         self.requires("yaml-cpp/0.8.0", transitive_headers=True, transitive_libs=True)
         # gici/utility/option.h
