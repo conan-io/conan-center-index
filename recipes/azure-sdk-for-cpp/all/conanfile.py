@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -86,6 +86,8 @@ class AzureSDKForCppConan(ConanFile):
              src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "AzureSDK")
