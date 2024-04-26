@@ -154,7 +154,7 @@ class FreetypeConan(ConanFile):
             rename(self, os.path.join(self.package_folder, "lib", "libfreetype.a"), os.path.join(self.package_folder, "lib", "freetype.lib"))
 
         ver = Version(self.version)
-        if self.settings.os == "Windows" and self.options.shared and ver in ["2.13.0", "2.13.2"]:
+        if self.settings.os == "Windows" and self.options.shared and ver >= "2.13.0" and ver < "2.14.0":
             # Duplicate DLL name for backwards compatibility with earlier recipe revisions
             # See https://github.com/conan-io/conan-center-index/issues/23768
             suffix = "d" if self.settings.build_type == "Debug" else ""
