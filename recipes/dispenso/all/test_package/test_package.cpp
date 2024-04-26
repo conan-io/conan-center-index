@@ -1,9 +1,9 @@
 #include <iostream>
-#include "dispenso/platform.h"
+#include "dispenso/parallel_for.h"
 
 
 int main(void) {
-    std::cout << DISPENSO_MAJOR_VERSION << "." << DISPENSO_MINOR_VERSION << std::endl;
-
-    return EXIT_SUCCESS;
+    dispenso::parallel_for(0, 5, [] (size_t j) {
+        std::cout << j << std::endl;
+   });
 }
