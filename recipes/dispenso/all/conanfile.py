@@ -113,6 +113,7 @@ class DispensoPackage(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["synchronization", "winmm"])
+            self.cpp_info.defines.append("NOMINMAX")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "dispenso"
