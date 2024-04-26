@@ -1,14 +1,12 @@
 #include <stdio.h>
+#include <string.h>
 #include <hb.h>
 
 int main() {
-    hb_buffer_t *buffer = hb_buffer_create();
-    if (buffer) {
-        printf("HarfBuzz has been initialized successfully.\n");
-        hb_buffer_destroy(buffer);
-    } else {
-        printf("Error: Unable to initialize HarfBuzz correctly.\n");
-    }
+    const char *my_string = "my-string";
+    size_t length = strlen(my_string);
+
+    hb_blob_t* blob = hb_blob_create(my_string, length, HB_MEMORY_MODE_READONLY, NULL, NULL);
 
     return 0;
 }
