@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches, rm, rmdir
 from conan.tools.scm import Version
@@ -79,6 +79,10 @@ class DispensoPackage(ConanFile):
             # TODO: Missing $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fvisibility=hidden> equivalent?
             tc.preprocessor_definitions["NOMINMAX"] = 1
             tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = 1
+        if not valid_min_cppstd(self, self._min_cppstd):
+            # TODO: Remove once Conan 1 is deprecated, this is needed so apple-clang
+            # can compile, as it defaults to C++98
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
