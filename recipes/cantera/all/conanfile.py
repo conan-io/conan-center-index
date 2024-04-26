@@ -7,6 +7,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, save, load, chdir, rename, rmdir, mkdir, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import VCVars
+from conan.tools.microsoft.visual import msvs_toolset
 
 class canteraRecipe(ConanFile):
     name = "cantera"
@@ -117,6 +118,10 @@ class canteraRecipe(ConanFile):
 
         if self.settings.os == "Windows":
             options["toolchain"] = "msvc"
+
+        toolset = msvs_toolset(self)
+        if toolset:
+            options["msvc_toolset_version"] = msvs_toolset(self)
 
         if self.settings.build_type == "Debug":
             # Will never be called since debug build will raise InvalidConfiguration error. Just to keep some ideas for the future.
