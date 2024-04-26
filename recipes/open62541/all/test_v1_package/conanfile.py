@@ -13,8 +13,6 @@ class TestPackageV1Conan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["open62541_NODESET_DIR"] = self.deps_user_info["ua-nodeset"].nodeset_dir
-        cmake.definitions["open62541_TOOLS_DIR"] = self.deps_user_info["open62541"].tools_dir
         cmake.configure()
         cmake.build()
 
