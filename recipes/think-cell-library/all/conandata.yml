@@ -1,0 +1,6 @@
+sources:
+  # Newer versions at the top
+  "cci.20240426":
+    url: "https://github.com/think-cell/think-cell-library/archive/9b334a494d66c76352e66d6440c0116be7bce8a1.tar.gz"
+    sha256: "ea69abae802c2d8ad029f6c5ed8be35bb562b8fd2ac74798c4e834411ecc40da"
+
