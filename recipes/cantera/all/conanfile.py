@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, save, load, chdir, rename, rmdir, mkdir, replace_in_file
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import VCVars, msvs_toolset
+from conan.tools.microsoft import VCVars, msvs_toolset, is_msvc
 from conan.tools.apple import is_apple_os
 
 class canteraRecipe(ConanFile):
@@ -31,6 +31,14 @@ class canteraRecipe(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
 
     @property
+    def _is_windows(self):
+        return self.settings.os == "Windows"
+
+    @property
+    def _is_debug(self):
+        return self.settings.build_type == "Debug"
+
+    @property
     def _minimum_cpp_standard(self):
         return 17
 
@@ -45,17 +53,13 @@ class canteraRecipe(ConanFile):
         }
     
     @property
-    def _is_msvc(self):
-        return self.info.settings.get_safe('compiler') in ["msvc", "Visual Studio"]
-    
-    @property
     def _is_clang(self):
         return self.info.settings.get_safe('compiler') == 'clang'
     
     @property
     def _is_gnu_pre11_stdlib(self):
         return (
-            not self._is_msvc and
+            not is_msvc(self) and
             self.info.settings.get_safe('compiler.libcxx') == 'libstdc++'
         )
 
@@ -71,7 +75,7 @@ class canteraRecipe(ConanFile):
             self.output.warn(f"{self.ref} requires C++{self._minimum_cpp_standard}. Your compiler is unknown. Assuming it supports C++{self._minimum_cpp_standard}")
 
         # Disable debug packages
-        if self.settings.build_type == "Debug":
+        if self._is_debug:
             raise ConanInvalidConfiguration(f"{self.ref} recipe does not support debug build type. Contributions are welcome.")
 
     def requirements(self):
@@ -116,14 +120,14 @@ class canteraRecipe(ConanFile):
             "sundials_libdir": sundials_info.libdirs[0]
         }
 
-        if self.settings.os == "Windows":
-            options["toolchain"] = "msvc"
+        if self._is_windows:
+            options["toolchain"] = "msvc" if is_msvc(self) else "mingw"
 
-        toolset = msvs_toolset(self)
+        toolset: str = msvs_toolset(self)
         if toolset:
-            options["msvc_toolset_version"] = msvs_toolset(self)
+            options["msvc_toolset_version"] = toolset.removeprefix("v")
 
-        if self.settings.build_type == "Debug":
+        if self._is_debug:
             # Will never be called since debug build will raise InvalidConfiguration error. Just to keep some ideas for the future.
             options["debug"] = "yes"
             options["optimize"] = "no"
@@ -138,6 +142,7 @@ class canteraRecipe(ConanFile):
         compiler = str(self.settings.compiler)
         cc_compiler = {"msvc": "cl", "Visual Studio": "cl", "intel-cc": "icx", "apple-clang": "clang"}.get(compiler, compiler) # Map conans compiler names to canteras compiler names
         options["CC"] = cc_compiler
+
 
         # Set flags depending on the selected standard library
         if self._is_clang:
@@ -168,13 +173,13 @@ class canteraRecipe(ConanFile):
         with chdir(self, self.source_folder):
             self.run(f'scons install -Y "{self.source_folder}"')
 
-            doc_dir = os.path.join(self.package_folder,"doc") if self.settings.os == "Windows" else os.path.join(self.package_folder,"share","cantera","doc")
-            data_dir = os.path.join(self.package_folder, "data") if self.settings.os == "Windows" else os.path.join(self.package_folder, "share","cantera","data")
+            doc_dir = os.path.join(self.package_folder,"doc") if self._is_windows else os.path.join(self.package_folder,"share","cantera","doc")
+            data_dir = os.path.join(self.package_folder, "data") if self._is_windows else os.path.join(self.package_folder, "share","cantera","data")
             rename(self, doc_dir, os.path.join(self.package_folder,"licenses"))
             mkdir(self, os.path.join(self.package_folder,"res"))
             rename(self, data_dir, os.path.join(self.package_folder,"res","data"))
 
-            if self.settings.os == "Windows":
+            if self._is_windows:
                 rmdir(self, os.path.join(self.package_folder,"samples"))
             else:
                 rmdir(self, os.path.join(self.package_folder,"share"))
@@ -186,6 +191,6 @@ class canteraRecipe(ConanFile):
         self.cpp_info.resdirs = [os.path.join("res","data")]
 
         if self.options.shared:
-            self.cpp_info.libdirs = ["bin"] if self.settings.os == "Windows" else ["lib"]
+            self.cpp_info.libdirs = ["bin"] if self._is_windows else ["lib"]
         else:
             self.cpp_info.libdirs = ["lib"]
