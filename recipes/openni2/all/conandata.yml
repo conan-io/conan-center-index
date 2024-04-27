@@ -1,0 +1,28 @@
+sources:
+  "2.2.0.33":
+    url: "https://github.com/structureio/OpenNI2/archive/refs/tags/v2.2.0-debian.tar.gz"
+    sha256: "08f6842f20d1098ab2ebafadaac0130ffae5abd34cdf464bb6100cbe01ed95a8"
+patches:
+  "2.2.0.33":
+    - patch_file: "patches/0003-Use-system-wide-libjpeg.patch"
+      patch_description: "Use libjpeg from Conan"
+      patch_type: "conan"
+      patch_source: "https://salsa.debian.org/multimedia-team/openni2/-/blob/master/debian/patches/0003-Use-system-wide-libjpeg.patch"
+    - patch_file: "patches/0006-rpi-Added-Armv6l-as-new-target-platform-and-created-missing-OniPlatformLinux-Arm.h-header.patch"
+      patch_description: "Add support for armv6l"
+      patch_type: "portability"
+      patch_source: "https://salsa.debian.org/multimedia-team/openni2/-/blob/master/debian/patches/0006-rpi-Added-Armv6l-as-new-target-platform-and-created-missing-OniPlatformLinux-Arm.h-header.patch"
+    - patch_file: "patches/0014-fix-format-overflow-for-GCC7.patch"
+      patch_description: "Fix format overflow for GCC7"
+      patch_type: "portability"
+      patch_source: "https://salsa.debian.org/multimedia-team/openni2/-/blob/master/debian/patches/0014-fix-format-overflow-for-GCC7.patch"
+    - patch_file: "patches/0018-Don-t-allocate-m_errorBuffer-on-TLS.patch"
+      patch_description: "Don't allocate m_errorBuffer on TLS"
+      patch_type: "bugfix"
+      patch_source: "https://salsa.debian.org/multimedia-team/openni2/-/blob/master/debian/patches/0018-Don-t-allocate-m_errorBuffer-on-TLS.patch"
+    - patch_file: "patches/0019-disable-samples-jni-tools.patch"
+      patch_description: "Disable building of samples, JNI wrappers and tools"
+      patch_type: "conan"
+    - patch_file: "patches/0020-honor-cppflags.patch"
+      patch_description: "Use CPPFLAGS set by Conan"
+      patch_type: "conan"

@@ -1,0 +1,41 @@
+From 9ae6d6ca4e8a3e17149d307bf97e5d0ac0f931d0 Mon Sep 17 00:00:00 2001
+From: Hauke Wintjen <hwintjen@rimpl-consulting.de>
+Date: Wed, 30 Jan 2013 21:38:18 +0100
+Subject: [PATCH] Added Armv6l as new target platform
+
+---
+ ThirdParty/PSCommon/BuildSystem/CommonDefs.mak  |    2 +
+ ThirdParty/PSCommon/BuildSystem/Platform.Armv6l |   14 ++++
+ 3 files changed, 118 insertions(+)
+ create mode 100644 ThirdParty/PSCommon/BuildSystem/Platform.Armv6l
+
+--- a/ThirdParty/PSCommon/BuildSystem/CommonDefs.mak
++++ b/ThirdParty/PSCommon/BuildSystem/CommonDefs.mak
+@@ -16,6 +16,8 @@
+ 	HOST_PLATFORM = x86
+ else ifneq (,$(findstring i386,$(MACHINE)))
+ 	HOST_PLATFORM = x86
++else ifneq (,$(findstring armv6l,$(MACHINE)))
++	HOST_PLATFORM = Armv6l
+ else ifneq (,$(findstring arm,$(MACHINE)))
+ 	HOST_PLATFORM = Arm
+ else
+--- /dev/null
++++ b/ThirdParty/PSCommon/BuildSystem/Platform.Armv6l
+@@ -0,0 +1,16 @@
++# Platform defs for Raspberry PI Hard floats
++export GLUT_SUPPORTED=1
++
++ifeq "$(CFG)" "Release"
++
++    # Hardware specifying flags
++    # hardfp is now default, so no extra flags needed
++    # CFLAGS += -mtune=arm1176jzf-s -mfpu=vfp -mfloat-abi=hard
++
++    # Optimization level, minus currently buggy optimizing methods (which break bit-exact)
++    CFLAGS += -O3 -fno-tree-pre -fno-strict-aliasing
++
++    # More optimization flags
++    CFLAGS += -ftree-vectorize -ffast-math -funsafe-math-optimizations -fsingle-precision-constant
++
++endif
