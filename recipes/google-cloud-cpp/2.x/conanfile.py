@@ -239,6 +239,8 @@ class GoogleCloudCppConan(ConanFile):
             # `components_*.py` files, so we manually skip the protos in here.
             result.remove('logging_type_type_protos')
             result.remove('devtools_source_v1_source_context_protos')
+        if self.settings.os == "Windows" and Version(self.version) >= '2.23.0':
+            result.remove('securitycenter_protos')
         return result
 
     def package(self):
