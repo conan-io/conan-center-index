@@ -13,12 +13,11 @@ required_conan_version = ">=1.53.0"
 
 class BeautyConan(ConanFile):
     name = "beauty"
-    homepage = "https://github.com/dfleury2/beauty"
     description = "HTTP Server above Boost.Beast"
-    topics = ("http", "server", "boost.beast")
-    url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/dfleury2/beauty"
+    topics = ("http", "server", "boost.beast")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {

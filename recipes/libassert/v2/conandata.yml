@@ -1,0 +1,22 @@
+sources:
+  # Newer versions at the top
+  "2.0.1":
+    url:
+      - "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.0.1.tar.gz"
+    sha256: "405a44c14c5e40de5b81b01538ba12ef9d7c1f57e2c29f81b929e7e179847d4c"
+  "2.0.0":
+    url:
+      - "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "d4b2da2179a94637b34d18813a814531a1eceb0ddc6dd6db6098050dd638f4a1"
+
+patches:
+  "2.0.1":
+    - patch_file: "patches/2.0.1/0001-fix-string_view-detection.patch"
+      patch_type: "portability"
+      patch_source: https://github.com/jeremy-rifkin/libassert/commit/1825976ebc7ccb34687d75aaaaf2a961dafc5450
+      patch_description: "Update #if checks for string_view support"
+  "2.0.0":
+    - patch_file: "patches/2.0.0/0001-fix-export-and-include.patch"
+      patch_type: "bugfix"
+      patch_source: https://github.com/jeremy-rifkin/libassert/commit/25c1f3e43737ab18490a0d9430cb1c70f976a662
+      patch_description: "Fix export header and an incorrect #include"

@@ -52,7 +52,7 @@ class AwsCHttp(ConanFile):
         elif Version(self.version) <= "0.6.22":
             self.requires("aws-c-io/0.13.4", transitive_headers=True, transitive_libs=True)
         else:
-            self.requires("aws-c-io/0.13.32", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-io/0.13.35", transitive_headers=True, transitive_libs=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

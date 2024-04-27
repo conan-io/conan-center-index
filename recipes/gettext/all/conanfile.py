@@ -50,7 +50,8 @@ class GetTextConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        if is_msvc(self):
+        
+        if self.version >= Version("0.22") or is_msvc(self):
             self.build_requires("automake/1.16.5")
 
     def source(self):
@@ -83,6 +84,12 @@ class GetTextConan(ConanFile):
         if is_msvc(self):
             if check_min_vs(self, "180", raise_invalid=False):
                 tc.extra_cflags.append("-FS") #TODO: reference github issue
+
+            # prevent redefining compiler instrinsic functions
+            tc.configure_args.extend([
+                'ac_cv_func_memmove=yes',
+                'ac_cv_func_memset=yes'
+            ])
 
             # The flag above `--with-libiconv-prefix` fails to correctly detect libiconv on windows+msvc
             # so it needs an extra nudge. We could use `AutotoolsDeps` but it's currently affected by the
