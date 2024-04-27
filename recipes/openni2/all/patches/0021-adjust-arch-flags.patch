@@ -1,0 +1,28 @@
+--- ThirdParty/PSCommon/BuildSystem/Platform.x86
++++ ThirdParty/PSCommon/BuildSystem/Platform.x86
+@@ -3,12 +3,6 @@
+ 
+ ifndef SSE_GENERATION
+ 	SSE_GENERATION = 3
+-endif
+-
+-ifeq ("$(OSTYPE)","Darwin")
+-	# Making the binary a universal one (x86 + x64)
+-	CFLAGS += -arch i386 -arch x86_64
+-	LDFLAGS += -arch i386 -arch x86_64
+ endif
+ 
+ ifeq ($(SSE_GENERATION), 2)
+--- ThirdParty/PSCommon/BuildSystem/Platform.Arm
++++ ThirdParty/PSCommon/BuildSystem/Platform.Arm
+@@ -1,8 +1,6 @@
++export GLUT_SUPPORTED=1
++
+ ifeq "$(CFG)" "Release"
+-
+-    # Hardware specifying flags
+-    CFLAGS += -march=armv7-a -mtune=cortex-a9 -mfpu=neon -mfloat-abi=softfp #-mcpu=cortex-a8
+-
+     # Optimization level, minus currently buggy optimizing methods (which break bit-exact)
+     CFLAGS += -O3 -fno-tree-pre -fno-strict-aliasing
+ 

@@ -21,10 +21,10 @@ class Openni2Conan(ConanFile):
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"]
+        "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"],
     }
     default_options = {
-        "with_jpeg": "libjpeg"
+        "with_jpeg": "libjpeg",
     }
 
     def export_sources(self):
@@ -54,7 +54,7 @@ class Openni2Conan(ConanFile):
         if self.settings.os != "Linux":
             # The library should also support Windows via MSBuild and macOS via Makefiles.
             raise ConanInvalidConfiguration("Only Linux builds are currently supported. Contributions are welcome!")
-        if self.settings.arch not in ["x86", "x86_64", "armv6", "armv7"]:
+        if self.settings.arch not in ["x86", "x86_64"] and not self.settings.arch.startswith("arm"):
             raise ConanInvalidConfiguration(f"{self.settings.arch} architecture is not supported.")
 
     def source(self):
@@ -66,13 +66,12 @@ class Openni2Conan(ConanFile):
 
     @property
     def _platform(self):
-        return {
-            "x86": "x86",
-            "x86_64": "x64",
-            "armv6": "Armv6l",
-            "armv7": "Arm",
-        }[str(self.settings.arch)]
-
+        if self.settings.arch == "x86":
+            return "x86"
+        if self.settings.arch == "x86_64":
+            return "x64"
+        if self.settings.arch.startswith("arm"):
+            return "Arm"
 
     def generate(self):
         tc = AutotoolsToolchain(self)
