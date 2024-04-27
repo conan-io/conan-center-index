@@ -1,11 +1,6 @@
 # Custom find_package() wrapper because CMakeDeps does not support upper-case CMake var output expected by the project.
 macro(custom_find_package name)
-    find_package(${name} ${ARGN}
-        QUIET CONFIG
-        # Allow only Conan packages
-        NO_DEFAULT_PATH
-        PATHS ${CMAKE_PREFIX_PATH}
-    )
+    find_package(${name} ${ARGN} QUIET)
     string(TOUPPER ${name} name_upper)
     set(${name_upper}_FOUND TRUE)
     set(${name_upper}_VERSION_STRING ${${name}_VERSION_STRING})
