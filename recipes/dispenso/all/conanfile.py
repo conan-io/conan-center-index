@@ -112,7 +112,7 @@ class DispensoPackage(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "Dispenso::dispenso")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["pthread", "m"])
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["synchronization", "winmm"])
