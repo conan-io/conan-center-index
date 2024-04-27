@@ -187,6 +187,10 @@ class PangolinConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+        if self.settings.os == "Windows" and self.options.shared:
+            # Fails with linker errors for internal symbols
+            raise ConanInvalidConfiguration("Shared library is not supported on Windows")
+
         if self.options.with_ffmpeg:
             ffmpeg_opts = self.dependencies["ffmpeg"].options
             if not ffmpeg_opts.avdevice or not ffmpeg_opts.avformat:
