@@ -526,5 +526,4 @@ class OpenTelemetryCppConan(ConanFile):
                 "nlohmann_json::nlohmann_json",
             )
 
-        self.conf_info.define("user.opentelemetry-cpp:min_cpp", self._min_cppstd)
-
+        self.conf_info.define("user.opentelemetry-cpp:min_cpp", str(self._min_cppstd))
