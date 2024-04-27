@@ -78,7 +78,7 @@ class Openni2Conan(ConanFile):
             return "x64"
         if str(self.settings.arch).startswith("arm"):
             return "Arm"
-    
+
     @property
     def _default_compiler(self):
         if self.settings.compiler == "gcc":
@@ -88,7 +88,7 @@ class Openni2Conan(ConanFile):
         elif is_msvc(self):
             return "cl.exe"
         return None
-    
+
     @property
     def _cxx(self):
         compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
@@ -109,7 +109,7 @@ class Openni2Conan(ConanFile):
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
-    
+
     def _patch_sources(self):
         apply_conandata_patches(self)
         rmdir(self, os.path.join(self.source_folder, "ThirdParty", "LibJPEG"))
@@ -145,6 +145,6 @@ class Openni2Conan(ConanFile):
         self.cpp_info.bindirs.append(os.path.join("lib", "OpenNI2", "Drivers"))
         self.cpp_info.resdirs = ["res"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread", "m", "dl"])
+            self.cpp_info.system_libs.extend(["pthread", "m", "dl", "rt"])
         elif is_apple_os(self):
             self.cpp_info.frameworks.extend(["CoreFoundation", "IOKit"])
