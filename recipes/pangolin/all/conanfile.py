@@ -251,6 +251,8 @@ class PangolinConan(ConanFile):
             venv.generate()
 
     def _patch_sources(self):
+        rm(self, "Find*.cmake", os.path.join(self.source_folder, "cmake"))
+
         # Unvendor sigslot
         rmdir(self, os.path.join(self.source_folder, "components", "pango_core", "include", "sigslot"))
 
