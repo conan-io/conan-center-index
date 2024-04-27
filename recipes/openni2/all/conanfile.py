@@ -109,11 +109,8 @@ class Openni2Conan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libopenni2")
 
         self.cpp_info.libs = ["OpenNI2"]
-        self.cpp_info.includedirs = ["include", os.path.join("include", "openni2")]
-        self.cpp_info.libdirs = ["lib", os.path.join("lib", "OpenNI2", "Drivers")]
+        self.cpp_info.includedirs.append(os.path.join("include", "openni2"))
+        self.cpp_info.bindirs.append(os.path.join("lib", "OpenNI2", "Drivers"))
         self.cpp_info.resdirs = ["res"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread", "m", "dl"])
-
-        # Do not link against the driver dynamic libs in lib/OpenNI2/Drivers.
-        # self.cpp_info.libs = ["DummyDevice", "OniFile", "PS1080", "PSLink"]
