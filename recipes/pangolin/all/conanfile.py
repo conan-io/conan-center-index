@@ -74,7 +74,6 @@ class PangolinConan(ConanFile):
         "with_jpeg": "Support JPEG image input",
         "with_lz4": "Support LZ4 compression",
         "with_openexr": "Support EXR image input",
-        # "with_openni": "Support OpenNI video input",
         # "with_openni2": "Support OpenNI2 video input",
         # "with_pleora": "Support Pleora video input",
         "with_png": "Support PNG image input",
@@ -241,7 +240,6 @@ class PangolinConan(ConanFile):
         deps.set_property("tinyobjloader", "cmake_target_name", "tinyobj")
         # deps.set_property("depthsense", "cmake_file_name", "DepthSense")
         # deps.set_property("mediafoundation", "cmake_file_name", "MediaFoundation")
-        # deps.set_property("openni", "cmake_file_name", "OpenNI")
         # deps.set_property("openni2", "cmake_file_name", "OpenNI2")
         # deps.set_property("pleora", "cmake_file_name", "Pleora")
         # deps.set_property("telicam", "cmake_file_name", "TeliCam")
