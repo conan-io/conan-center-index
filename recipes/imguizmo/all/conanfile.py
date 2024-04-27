@@ -42,8 +42,7 @@ class ImGuizmoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # 1.89 is the newest imgui version compatible with imguizmo
-        self.requires("imgui/1.90.4", transitive_headers=True)
+        self.requires("imgui/1.90.5", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
