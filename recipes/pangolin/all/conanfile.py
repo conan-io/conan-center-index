@@ -129,7 +129,8 @@ class PangolinConan(ConanFile):
         self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
         self.requires("glew/2.2.0", transitive_headers=True, transitive_libs=True)
         self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
-        self.requires("egl/system", transitive_headers=True, transitive_libs=True)
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.requires("egl/system", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_wayland"):
             # Wayland 1.20+ is not compatible as of v0.9.1
             self.requires("wayland/1.19.0")
@@ -342,7 +343,9 @@ class PangolinConan(ConanFile):
         if self.options.with_uvc:
             pango_video.requires.extend(["libuvc::libuvc", "libusb::libusb"])
 
-        pango_windowing = _add_component("pango_windowing", requires=["pango_core", "pango_opengl", "egl::egl"])
+        pango_windowing = _add_component("pango_windowing", requires=["pango_core", "pango_opengl"])
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            pango_windowing.requires.append("egl::egl")
         if is_apple_os(self):
             pango_windowing.frameworks.append("Cocoa")
         if self.options.get_safe("with_wayland"):
