@@ -299,6 +299,19 @@ class PangolinConan(ConanFile):
         pango_core.defines = ["HAVE_EIGEN", "HAVE_GLEW"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             pango_core.system_libs.extend(["pthread", "rt", "dl"])
+        # https://github.com/stevenlovegrove/Pangolin/blob/v0.9.1/components/pango_core/CMakeLists.txt#L3-L11
+        if is_apple_os(self):
+            pango_core.defines.append("_OSX_")
+            if self.settings.os == "iOS":
+                pango_core.defines.append("_APPLE_IOS_")
+        elif self.settings.os == "Windows":
+            pango_core.defines.append("_WIN_")
+        elif self.settings.os == "Emscripten":
+            pango_core.defines.append("_EMSCRIPTEN_")
+        else:
+            pango_core.defines.append("_LINUX_")
+            if self.settings.os == "Android":
+                pango_core.defines.append("_ANDROID_")
 
         _add_component("pango_display", requires=["pango_core", "pango_opengl", "pango_windowing", "pango_vars"])
         _add_component("pango_geometry", requires=["pango_core", "pango_image", "tinyobjloader::tinyobjloader"])
