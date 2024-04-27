@@ -109,7 +109,7 @@ class LibwebsocketsConan(ConanFile):
         "fPIC": True,
         "with_libuv": False,
         "with_libevent": False,
-        "with_zlib": False,
+        "with_zlib": "zlib",
         "with_ssl": "openssl",
         "with_sqlite3": False,
         "with_libmount": False,
@@ -225,7 +225,7 @@ class LibwebsocketsConan(ConanFile):
 
         if self.options.with_ssl == "openssl":
             # Cannot add the [>=1.1 <4] range, as it seems openssl3 makes it fail
-            self.requires("openssl/1.1.1w", transitive_headers=True)
+            self.requires("openssl/[>=1.1.1w <4]", transitive_headers=True)
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/3.5.0")
         elif self.options.with_ssl == "wolfssl":
@@ -245,6 +245,11 @@ class LibwebsocketsConan(ConanFile):
         if self.options.with_hubbub:
             raise ConanInvalidConfiguration("Library hubbub not implemented (yet) in CCI")
             # TODO - Add hubbub package when available.
+
+        if self.options.with_ssl == "openssl":
+            no_zlib = self.dependencies["openssl"].options.get_safe("no_zlib")
+            if not no_zlib and self.options.with_zlib != "zlib":
+                raise ConanInvalidConfiguration(f"{self.name} needs option with_zlib=zlib, as its dependency openssl links with it")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
