@@ -2,10 +2,13 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import cmake_layout
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -45,17 +48,20 @@ class Openni2Conan(ConanFile):
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.5")
         if self.settings.os == "Linux":
-            self.requires("libusb/1.0.26")
             self.requires("libudev/system")
+        if self.settings.os != "Windows":
+            self.requires("libusb/1.0.26")
 
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
-        if self.settings.os != "Linux":
-            # The library should also support Windows via MSBuild and macOS via Makefiles.
-            raise ConanInvalidConfiguration("Only Linux builds are currently supported. Contributions are welcome!")
-        if self.settings.arch not in ["x86", "x86_64"] and not self.settings.arch.startswith("arm"):
+        if self.settings.os != "Linux" and not is_apple_os(self):
+            # The library should also support Windows via MSBuild.
+            raise ConanInvalidConfiguration("Only Linux and macOS builds are currently supported. Contributions are welcome!")
+        if self.settings.arch not in ["x86", "x86_64"] and not str(self.settings.arch).startswith("arm"):
             raise ConanInvalidConfiguration(f"{self.settings.arch} architecture is not supported.")
+        if cross_building(self) and is_apple_os(self):
+            raise ConanInvalidConfiguration("Cross-building on Apple OS-s is not supported.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -70,24 +76,50 @@ class Openni2Conan(ConanFile):
             return "x86"
         if self.settings.arch == "x86_64":
             return "x64"
-        if self.settings.arch.startswith("arm"):
+        if str(self.settings.arch).startswith("arm"):
             return "Arm"
+    
+    @property
+    def _default_compiler(self):
+        if self.settings.compiler == "gcc":
+            return "g++"
+        elif self.settings.compiler in ["clang", "apple-clang"]:
+            return "clang++"
+        elif is_msvc(self):
+            return "cl.exe"
+        return None
+    
+    @property
+    def _cxx(self):
+        compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+        buildenv_vars = VirtualBuildEnv(self).vars()
+        return compilers_from_conf.get("cpp", buildenv_vars.get("CXX", self._default_compiler))
 
     def generate(self):
         tc = AutotoolsToolchain(self)
         tc.make_args.extend([
             f"CFG={self._build_type}",
+            # For cross-compilation
             f"PLATFORM={self._platform}",
+            f"{self._platform.upper()}_CXX={self._cxx}",
+            f"{self._platform.upper()}_STAGING={self.build_folder}",
             # Disable -Werror
             "ALLOW_WARNINGS=1",
         ])
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
-
-    def build(self):
+    
+    def _patch_sources(self):
         apply_conandata_patches(self)
         rmdir(self, os.path.join(self.source_folder, "ThirdParty", "LibJPEG"))
+        replace_in_file(self, os.path.join(self.source_folder, "Source", "Drivers", "PS1080", "Sensor", "Bayer.cpp"), "register ", "")
+        if is_apple_os(self):
+            for makefile in self.source_path.joinpath("Source", "Drivers").rglob("Makefile"):
+                replace_in_file(self, makefile, "usb-1.0.0", "usb-1.0", strict=False)
+
+    def build(self):
+        self._patch_sources()
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
             autotools.make()
@@ -97,6 +129,7 @@ class Openni2Conan(ConanFile):
         copy(self, "*", os.path.join(self.source_folder, "Include"), os.path.join(self.package_folder, "include", "openni2"))
         bin_dir = os.path.join(self.source_folder, "Bin", f"{self._platform}-{self._build_type}")
         copy(self, "*.so*", bin_dir, os.path.join(self.package_folder, "lib"))
+        copy(self, "*.dylib", bin_dir, os.path.join(self.package_folder, "lib"))
         copy(self, "*.ini", os.path.join(self.source_folder, "Config"), os.path.join(self.package_folder, "res"))
 
     def package_info(self):
@@ -113,3 +146,5 @@ class Openni2Conan(ConanFile):
         self.cpp_info.resdirs = ["res"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread", "m", "dl"])
+        elif is_apple_os(self):
+            self.cpp_info.frameworks.extend(["CoreFoundation", "IOKit"])
