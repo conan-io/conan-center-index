@@ -40,6 +40,7 @@ class PangolinConan(ConanFile):
         "with_tiff": [True, False],
         "with_toon": [True, False],
         "with_uvc": [True, False],
+        "with_v4l": [True, False],
         "with_wayland": [True, False],
         "with_x11": [True, False],
         "with_zstd": [True, False],
@@ -60,6 +61,7 @@ class PangolinConan(ConanFile):
         "with_tiff": False,
         "with_toon": False,
         "with_uvc": False,
+        "with_v4l": False,
         "with_wayland": False,
         "with_x11": True,
         "with_zstd": False,
@@ -83,7 +85,7 @@ class PangolinConan(ConanFile):
         "with_toon": "Support TooN numerics library",
         "with_uvc": "Support USB Video Devices input",
         # "with_uvc_mediafoundation": "Support MediaFoundation UVC input",
-        # "with_v4l": "Support Video4Linux input",
+        "with_v4l": "Support Video4Linux input",
         "with_wayland": "Support Wayland windowing system",
         "with_x11": "Support X11 windowing system",
         "with_zstd": "Support Zstd compression",
@@ -113,6 +115,7 @@ class PangolinConan(ConanFile):
             del self.options.with_x11
         if self.settings.os != "Linux":
             del self.options.with_wayland
+            del self.options.with_v4l
 
     def configure(self):
         if self.options.shared:
@@ -218,7 +221,7 @@ class PangolinConan(ConanFile):
         tc.variables["BUILD_PANGOLIN_REALSENSE2"] = self.options.with_realsense
         tc.variables["BUILD_PANGOLIN_TELICAM"] = False
         tc.variables["BUILD_PANGOLIN_UVC_MEDIAFOUNDATION"] = False
-        tc.variables["BUILD_PANGOLIN_V4L"] = False
+        tc.variables["BUILD_PANGOLIN_V4L"] = self.options.get_safe("with_v4l", False)
         tc.variables["BUILD_PANGOLIN_ZSTD"] = self.options.with_zstd
         tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_TOOLS"] = self.options.tools
