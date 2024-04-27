@@ -34,6 +34,7 @@ class PangolinConan(ConanFile):
         "with_jpeg": [True, False],
         "with_lz4": [True, False],
         "with_openexr": [True, False],
+        "with_openni2": [True, False],
         "with_png": [True, False],
         "with_raw": [True, False],
         "with_realsense": [True, False],
@@ -55,6 +56,7 @@ class PangolinConan(ConanFile):
         "with_jpeg": True,
         "with_lz4": False,
         "with_openexr": False,
+        "with_openni2": False,
         "with_png": True,
         "with_raw": False,
         "with_realsense": False,
@@ -74,7 +76,7 @@ class PangolinConan(ConanFile):
         "with_jpeg": "Support JPEG image input",
         "with_lz4": "Support LZ4 compression",
         "with_openexr": "Support EXR image input",
-        # "with_openni2": "Support OpenNI2 video input",
+        "with_openni2": "Support OpenNI2 video input",
         # "with_pleora": "Support Pleora video input",
         "with_png": "Support PNG image input",
         "with_raw": "Support raw images",
@@ -151,6 +153,8 @@ class PangolinConan(ConanFile):
             self.requires("lz4/1.9.4")
         if self.options.with_openexr:
             self.requires("openexr/2.5.7")
+        if self.options.with_openni2:
+            self.requires("openni2/2.2.0.33")
         if self.options.with_png:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.python_bindings:
@@ -218,7 +222,7 @@ class PangolinConan(ConanFile):
         tc.variables["BUILD_PANGOLIN_LIBUVC"] = self.options.with_uvc
         tc.variables["BUILD_PANGOLIN_LZ4"] = self.options.with_lz4
         tc.variables["BUILD_PANGOLIN_OPENNI"] = False
-        tc.variables["BUILD_PANGOLIN_OPENNI2"] = False
+        tc.variables["BUILD_PANGOLIN_OPENNI2"] = self.options.with_openni2
         tc.variables["BUILD_PANGOLIN_PLEORA"] = False
         tc.variables["BUILD_PANGOLIN_PYTHON"] = self.options.python_bindings
         tc.variables["BUILD_PANGOLIN_REALSENSE"] = False
@@ -242,10 +246,10 @@ class PangolinConan(ConanFile):
         deps.set_property("libusb", "cmake_file_name", "libusb1")
         deps.set_property("libuvc", "cmake_file_name", "uvc")
         deps.set_property("lz4", "cmake_file_name", "Lz4")
+        deps.set_property("openni2", "cmake_file_name", "OpenNI2")
         deps.set_property("tinyobjloader", "cmake_target_name", "tinyobj")
         # deps.set_property("depthsense", "cmake_file_name", "DepthSense")
         # deps.set_property("mediafoundation", "cmake_file_name", "MediaFoundation")
-        # deps.set_property("openni2", "cmake_file_name", "OpenNI2")
         # deps.set_property("pleora", "cmake_file_name", "Pleora")
         # deps.set_property("telicam", "cmake_file_name", "TeliCam")
         deps.generate()
@@ -355,6 +359,8 @@ class PangolinConan(ConanFile):
             pango_video.requires.append("libdc1394::libdc1394")
         if self.options.with_ffmpeg:
             pango_video.requires.extend(["ffmpeg::avcodec", "ffmpeg::avdevice", "ffmpeg::avformat", "ffmpeg::avutil"])
+        if self.options.with_openni2:
+            pango_video.requires.append("openni2::openni2")
         if self.options.with_realsense:
             pango_video.requires.append("librealsense::librealsense")
         if self.options.with_uvc:
