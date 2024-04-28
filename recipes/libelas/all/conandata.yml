@@ -1,0 +1,8 @@
+sources:
+  "cci.20150630":
+    sources:
+      url: "https://www.cvlibs.net/downloads/libelas_omp.zip"
+      sha256: "636db6e10a053c84d3b1de3baa8224e0ded6caf4bae27021a5293ead37894ad3"
+    license:
+      url: "https://raw.githubusercontent.com/kou1okada/libelas/master/README.TXT"
+      sha256: "627924f4cb0fe790de303fe721233d227a6d0c1734ed39fa4641923dcb9c5b8f"
