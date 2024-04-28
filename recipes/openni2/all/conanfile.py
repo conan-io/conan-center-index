@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -131,6 +131,7 @@ class Openni2Conan(ConanFile):
         copy(self, "*.so*", bin_dir, os.path.join(self.package_folder, "lib"))
         copy(self, "*.dylib", bin_dir, os.path.join(self.package_folder, "lib"))
         copy(self, "*.ini", os.path.join(self.source_folder, "Config"), os.path.join(self.package_folder, "res"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         # The CMake file and target names are unofficial since the project does not provide them,
