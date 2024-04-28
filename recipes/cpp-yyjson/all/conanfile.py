@@ -28,8 +28,8 @@ class CppYyjsonConan(ConanFile):
         return {
             "gcc": "11",
             "clang": "15",
-            "apple-clang": "13",
-            "Visual Studio": "16",
+            "apple-clang": "14",
+            "Visual Studio": "17",
             "msvc": "193",
         }
 
