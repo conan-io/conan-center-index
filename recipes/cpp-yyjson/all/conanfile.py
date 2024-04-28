@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.52.0"
@@ -68,6 +69,8 @@ class CppYyjsonConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        if is_msvc(self):
+            self.cpp_info.cxxflags.append("/Zc:preprocessor")
 
         self.cpp_info.set_property("cmake_file_name", "cpp_yyjson")
         self.cpp_info.set_property("cmake_target_name", "cpp_yyjson::cpp_yyjson")
