@@ -71,7 +71,11 @@ class mFASTConan(ConanFile):
 
     def requirements(self):
         # transitive_headers=True because mfast/mfast_export.h includes boost/config.hpp
-        self.requires("boost/1.84.0", transitive_headers=True)
+        if Version(self.version) >= "1.2.2":
+            self.requires("boost/1.84.0", transitive_headers=True)
+        else:
+            # mfast 1.2.1 does not build with boost >= 1.76.0
+            self.requires("boost/1.75.0", transitive_headers=True)
         self.requires("tinyxml2/10.0.0")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.45.3")
