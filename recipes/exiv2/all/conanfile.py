@@ -76,7 +76,7 @@ class Exiv2Conan(ConanFile):
             self.requires("libpng/[>=1.6 <2]")
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_xmp == "bundled":
-            self.requires("expat/2.5.0")
+            self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_curl:
             self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.get_safe("with_brotli"):
