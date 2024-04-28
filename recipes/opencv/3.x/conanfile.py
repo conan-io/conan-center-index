@@ -82,11 +82,11 @@ class OpenCVConan(ConanFile):
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.2")
         elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.3")
+            self.requires("mozjpeg/4.1.5")
         if self.options.with_png:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_jasper:
-            self.requires("jasper/4.1.1")
+            self.requires("jasper/4.2.0")
         if self.options.with_openexr:
             # opencv 3.x doesn't support openexr >= 3
             self.requires("openexr/2.5.7")
@@ -98,10 +98,10 @@ class OpenCVConan(ConanFile):
             # opencv 3.x doesn't support onetbb >= 2021
             self.requires("onetbb/2020.3.3")
         if self.options.with_webp:
-            self.requires("libwebp/1.3.2")
+            self.requires("libwebp/1.4.0")
         if self.options.contrib:
             self.requires("freetype/2.13.2")
-            self.requires("harfbuzz/8.2.2")
+            self.requires("harfbuzz/8.3.0")
             self.requires("gflags/2.2.2")
             self.requires("glog/0.6.0")
         if self.options.get_safe("with_gtk"):
