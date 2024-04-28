@@ -22,6 +22,13 @@ class MrcalConan(ConanFile):
 
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "with_libelas": [True, False],
+    }
+    default_options = {
+        # Disabled by default due to being GPL-licensed
+        "with_libelas": False,
+    }
 
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")
@@ -34,6 +41,8 @@ class MrcalConan(ConanFile):
         # https://github.com/dkogan/libdogleg/blob/master/dogleg.h#L8
         self.requires("suitesparse-cholmod/5.2.1", transitive_headers=True, transitive_libs=True)
         self.requires("freeimage/3.18.0")
+        if self.options.with_libelas:
+            self.requires("libelas/cci.20150630")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"] and not is_apple_os(self):
@@ -55,8 +64,8 @@ class MrcalConan(ConanFile):
         env = VirtualRunEnv(self)
         env.generate(scope="build")
         tc = AutotoolsToolchain(self)
-        # TODO: add libelas to CCI
-        # tc.make_args.append("USE_LIBELAS=1")
+        if self.options.with_libelas:
+            tc.make_args.append("USE_LIBELAS=1")
         tc.extra_cflags.append("-Ilibdogleg")
         tc.extra_ldflags.append("-Llibdogleg")
         tc.generate()
