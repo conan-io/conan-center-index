@@ -109,7 +109,11 @@ class AsyncSimpleConan(ConanFile):
         if not self.options.header_only:
             hCopyExcludes = ("test", "executors")
             if self.options.shared:
-                copy(self, pattern="*.so*",
+                if self.settings.os == "Macos":
+                    sharedLibExt = "*.dylib*"
+                else:
+                    sharedLibExt = "*.so*"
+                copy(self, pattern=sharedLibExt,
                     dst=os.path.join(self.package_folder, "lib"),
                     src=os.path.join(self.build_folder, "async_simple")
                 )
