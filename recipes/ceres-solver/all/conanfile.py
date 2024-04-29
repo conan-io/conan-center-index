@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -41,7 +41,6 @@ class CeresSolverConan(ConanFile):
         # Unavailable since v2.0.0
         "use_CXX11": [True, False],
         "use_CXX11_threads": [True, False],
-        "use_OpenMP": [True, False],
         "use_TBB": [True, False],
     }
     default_options = {
@@ -52,13 +51,12 @@ class CeresSolverConan(ConanFile):
         "use_glog": True,
         "use_lapack": True,
         "use_eigen_sparse": True,
-        "use_suitesparse": False, # TODO: enable after #23556 is merged
+        "use_suitesparse": False, # TODO: enable after #23553
         "use_accelerate": True,
         "use_custom_blas": True,
         "use_schur_specializations": True,
         "use_CXX11": False,
         "use_CXX11_threads": False,
-        "use_OpenMP": True,
         "use_TBB": False,
     }
     options_description = {
@@ -102,19 +100,18 @@ class CeresSolverConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-        copy(self, "ceres-conan-cuda-support.cmake", self.recipe_folder, self.export_sources_folder)
-        copy(self, "FindSuiteSparse.cmake", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if Version(self.version) >= "2.0":
             del self.options.use_TBB
-            del self.options.use_OpenMP
             del self.options.use_CXX11_threads
             del self.options.use_CXX11
         if Version(self.version) < "2.2.0":
             del self.options.use_eigen_metis
+            # the SuiteSparse version on CCI is too new for older Ceres versions
+            self.options.use_suitesparse = False
         if Version(self.version) < "2.1.0":
             del self.options.use_cuda
 
@@ -143,21 +140,21 @@ class CeresSolverConan(ConanFile):
     def requirements(self):
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.get_safe("use_glog"):
-            # COLMAP requires v0.6 as of v3.10
             self.requires("glog/0.6.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("use_suitesparse"):
             self.requires("suitesparse-cholmod/5.2.1")
             self.requires("suitesparse-spqr/4.3.3")
-            if Version(self.version) < "2.2.0":
-                self.requires("suitesparse-cxsparse/4.4.0")
         if self.options.get_safe("use_lapack"):
-            self.requires("openblas/0.3.27")
+            self.requires("openblas/0.3.26")
         if self._require_metis:
             self.requires("metis/5.2.1")
         if self.options.get_safe("use_TBB"):
             self.requires("onetbb/2020.3")
-        if self.options.get_safe("use_OpenMP"):
-            self.requires("llvm-openmp/18.1.3")
+
+    @property
+    def _cuda_libs(self):
+        # also uses Thrust, but it is header-only
+        return ["cublas", "cudart", "cusolver", "cusparse"]
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -170,7 +167,7 @@ class CeresSolverConan(ConanFile):
             )
 
         if self.options.get_safe("use_cuda"):
-            self.output.warning("CUDA support requires CUDA to be present on the system.")
+            self.output.warning("CUDA support requires CUDA to be present on the system with the following components: " + ", ".join(self._cuda_libs))
 
         if self.options.get_safe("use_eigen_metis") and not self.options.use_eigen_sparse:
             raise ConanInvalidConfiguration("use_eigen_metis requires use_eigen_sparse=True")
@@ -184,7 +181,7 @@ class CeresSolverConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "2.2.0":
-            self.tool_requires("cmake/[>=3.18 <4]")
+            self.tool_requires("cmake/[>=3.17 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -205,6 +202,14 @@ class CeresSolverConan(ConanFile):
         tc.variables["SCHUR_SPECIALIZATIONS"] = self.options.use_schur_specializations
         tc.variables["SUITESPARSE"] = self.options.get_safe("use_suitesparse", False)
 
+        if self.options.get_safe("use_suitesparse"):
+            tc.variables["CMAKE_FIND_LIBRARY_PREFIXES"] = ";".join([
+                dep.package_folder.replace("\\", "/")
+                for dep_name, dep in self.dependencies.items() if dep_name.ref.name.startswith("suitesparse-")
+            ])
+            # CHOLMOD on CCI uses vendored METIS with renamed symbols, which Ceres fails to detect
+            tc.variables["SuiteSparse_CHOLMOD_USES_METIS"] = True
+
         # IOS_DEPLOYMENT_TARGET variable was added to iOS.cmake file in 1.12.0 version
         if self.settings.os == "iOS":
             tc.variables["IOS_DEPLOYMENT_TARGET"] = self.settings.os.version
@@ -220,14 +225,14 @@ class CeresSolverConan(ConanFile):
             tc.variables["ACCELERATESPARSE"] = self.options.get_safe("use_accelerate", False)
 
         if ceres_version < "2.2.0":
-            tc.variables["CXSPARSE"] = self.options.get_safe("use_suitesparse", False)
+            tc.variables["CXSPARSE"] = False
             tc.variables["MSVC_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         if ceres_version < "2.1.0":
             tc.variables["LIB_SUFFIX"] = ""
         if ceres_version < "2.0.0":
             tc.variables["CXX11"] = self.options.use_CXX11
-            tc.variables["OPENMP"] = self.options.use_OpenMP
+            tc.variables["OPENMP"] = False
             tc.variables["TBB"] = self.options.use_TBB
             tc.variables["CXX11_THREADS"] = self.options.use_CXX11_threads
         tc.generate()
@@ -236,15 +241,10 @@ class CeresSolverConan(ConanFile):
         deps.set_property("openblas", "cmake_file_name", "LAPACK")
         deps.set_property("metis", "cmake_file_name", "METIS")
         deps.set_property("metis", "cmake_target_name", "METIS::METIS")
-        deps.set_property("suitesparse-cxsparse", "cmake_target_name", "CXSparse::CXSparse")
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        copy(self, "FindSuiteSparse.cmake", self.export_sources_folder, os.path.join(self.source_folder, "cmake"))
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -255,7 +255,6 @@ class CeresSolverConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "CMake"))
-        copy(self, "ceres-conan-cuda-support.cmake", self.export_sources_folder, os.path.join(self.package_folder, "lib", "cmake"))
         self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_variables_file_rel_path))
 
     def _create_cmake_module_variables(self, module_file):
@@ -277,10 +276,11 @@ class CeresSolverConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Ceres")
+        # see https://github.com/ceres-solver/ceres-solver/blob/2.2.0/cmake/CeresConfig.cmake.in#L334-L340
+        self.cpp_info.set_property("cmake_build_modules", [self._module_variables_file_rel_path])
 
         libsuffix = "-debug" if self.settings.build_type == "Debug" else ""
         self.cpp_info.components["ceres"].set_property("cmake_target_name", "Ceres::ceres")
-        # see https://github.com/ceres-solver/ceres-solver/blob/2.2.0/cmake/CeresConfig.cmake.in#L334-L340
         self.cpp_info.components["ceres"].set_property("cmake_target_aliases", ["ceres"])
         self.cpp_info.components["ceres"].libs = [f"ceres{libsuffix}"]
         if not self.options.use_glog:
@@ -296,16 +296,12 @@ class CeresSolverConan(ConanFile):
         if self.options.get_safe("use_suitesparse"):
             requires.append("suitesparse-cholmod::suitesparse-cholmod")
             requires.append("suitesparse-spqr::suitesparse-spqr")
-            if Version(self.version) < "2.2.0":
-                requires.append("suitesparse-cxsparse::suitesparse-cxsparse")
         if self.options.get_safe("use_lapack"):
             requires.append("openblas::openblas")
         if self._require_metis:
             requires.append("metis::metis")
         if self.options.get_safe("use_TBB"):
             requires.append("onetbb::onetbb")
-        if self.options.get_safe("use_OpenMP"):
-            requires.append("llvm-openmp::llvm-openmp")
         self.cpp_info.components["ceres"].requires = requires
 
         if not self.options.shared:
@@ -314,19 +310,16 @@ class CeresSolverConan(ConanFile):
                 self.cpp_info.components["ceres"].system_libs.append(libcxx)
 
         if self.options.get_safe("use_cuda"):
+            self.cpp_info.components["ceres"].system_libs.extend(self._cuda_libs)
             if Version(self.version) >= "2.2.0":
+                # A small static library that gets exported as a separate target in the official CMake config.
+                # It is also already linked into the main ceres target.
                 self.cpp_info.components["ceres_cuda_kernels"].set_property("cmake_target_name", "Ceres::ceres_cuda_kernels")
                 self.cpp_info.components["ceres_cuda_kernels"].libs.append(f"ceres_cuda_kernels{libsuffix}")
-                if not self.options.shared:
-                    self.cpp_info.components["ceres"].requires.append("ceres_cuda_kernels")
-
-        cmake_modules = [self._module_variables_file_rel_path]
-        if self.options.get_safe("use_cuda"):
-            cmake_modules.append(os.path.join("lib", "cmake", "ceres-conan-cuda-support.cmake"))
-        self.cpp_info.set_property("cmake_build_modules", cmake_modules)
+                self.cpp_info.components["ceres_cuda_kernels"].requires = self._cuda_libs
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Ceres"
         self.cpp_info.names["cmake_find_package_multi"] = "Ceres"
-        self.cpp_info.components["ceres"].build_modules["cmake_find_package"] = cmake_modules
-        self.cpp_info.components["ceres"].build_modules["cmake_find_package_multi"] = cmake_modules
+        self.cpp_info.components["ceres"].build_modules["cmake_find_package"] = [self._module_variables_file_rel_path]
+        self.cpp_info.components["ceres"].build_modules["cmake_find_package_multi"] = [self._module_variables_file_rel_path]
