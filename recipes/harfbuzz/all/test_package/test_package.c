@@ -2,7 +2,7 @@
 #include <string.h>
 #include <hb.h>
 
-int main() {
+void main() {
     const char *version = hb_version_string();
     printf("harfbuzz version: %s", version);
     return;
