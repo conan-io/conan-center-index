@@ -49,7 +49,7 @@ class FastDDSConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        if Version(self.version) < "2.11.0"
+        if Version(self.version) < "2.11.0":
             return {
                 "gcc": "8",
                 "clang": "12",
