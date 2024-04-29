@@ -1,0 +1,30 @@
+During ./configure, the "intl" configure step tests this condition:
+checking whether printf supports the 'n' directive...
+
+This (correctly) fail the test on MSVC, which is fine on Release builds.
+
+However, in MSVC Debug builds, a GUI Dialog box pops up telling the user about an assert failure,
+and would the user like to Abort,Retry,Ignore.
+
+This blocks the configuration until the user manually presses a button.
+This behaviour has been confirmed on a "Proof-of-conan" build test.
+
+In gettext-runtime/intl/configure (in the tarball release),
+line 29702 has a call to _set_invalid_parameter_handler()
+This almost does the job, but not quite.
+adding the line: _CrtSetReportMode(_CRT_ASSERT, 0);
+changes the behaviour to fail without the dialog box.
+
+Adding a _CrtSetReportMode() call specifies the assert behaviour to simply crash.
+./configure will work correctly and not block.
+
+--- gettext-runtime/intl/configure	2023-06-17 19:53:51.000000000 +0800
++++ gettext-runtime/intl/configure	2024-04-29 10:52:53.723390500 +0800
+@@ -29700,6 +29700,7 @@
+   int count = -1;
+ #ifdef _MSC_VER
+   _set_invalid_parameter_handler (invalid_parameter_handler);
++  _CrtSetReportMode(_CRT_ASSERT, 0);
+ #endif
+   /* Copy the format string.  Some systems (glibc with _FORTIFY_SOURCE=2)
+      support %n in format strings in read-only memory but not in writable
