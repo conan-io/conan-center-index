@@ -76,7 +76,6 @@ class DispensoPackage(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["DISPENSO_SHARED_LIB"] = self.options.shared
         if self.settings.os == "Windows":
-            # TODO: Missing $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-fvisibility=hidden> equivalent?
             tc.preprocessor_definitions["NOMINMAX"] = 1
             tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = 1
         if self.settings.get_safe("compiler.cppstd") is None:
