@@ -1,5 +1,9 @@
 sources:
   # Newer versions at the top
+  "0.5.3":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.2.tar.gz"
+    sha256: "d148998e175b9c69ffb4383ab321a0d27487392e4eee3f39441d35b6856c8f78"
   "0.5.2":
     url:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.2.tar.gz"
@@ -33,6 +37,11 @@ sources:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.2.1.tar.gz"
     sha256: "3184f404c61b6b8ba6fe7c64fc40d1c3d6d87df59bcacf1845d846101bc22f9a"
 patches:
+  "0.5.3":
+    - patch_file: "patches/0.5.3/0001.patch"
+      patch_type: "official"
+      patch_source: "foo"
+      patch_description: "bar"
   "0.5.2":
     - patch_file: "patches/0.5.2/0001-msvc-bug.patch"
       patch_type: "official"
