@@ -1,0 +1,6 @@
+
+*.pyc
+
+.ccls-cache
+.vscode
+build
