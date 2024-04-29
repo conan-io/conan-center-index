@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm, rmdir, save, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rm, rmdir, save, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -42,6 +42,8 @@ class G2oConan(ConanFile):
         "sse4_2": [True, False],
         "sse4_a": [True, False],
         "with_openmp": [True, False],
+        "with_cholmod": [True, False],
+        "with_csparse": [True, False],
     }
     default_options = {
         "shared": False,
@@ -66,6 +68,8 @@ class G2oConan(ConanFile):
         "sse4_2": True,
         "sse4_a": False,
         "with_openmp": False,
+        "with_cholmod": False,
+        "with_csparse": False,
     }
 
     @property
@@ -120,16 +124,16 @@ class G2oConan(ConanFile):
         self.requires("spdlog/1.13.0", transitive_headers=True, transitive_libs=True)
         # Used in stuff/opengl_wrapper.h
         self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
-        self.requires("glu/system", transitive_headers=True, transitive_libs=True)
-        if self.options.build_slam2d_types and self.options.build_data_types:
-            self.requires("freeglut/3.4.0")
+        self.requires("freeglut/3.4.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_openmp and self.settings.compiler in ["clang", "apple-clang"]:
             # Used in core/openmp_mutex.h, also '#pragma omp' is used in several core public headers
             self.requires("llvm-openmp/17.0.6", transitive_headers=True, transitive_libs=True)
+        if self.options.with_cholmod:
+            self.requires("suitesparse-cholmod/5.2.1")
+        if self.options.with_csparse:
+            self.requires("suitesparse-cxsparse/4.4.0")
 
         # TODO: optional dependencies
-        # self.requires("suitesparse/x.y.z")
-        # self.requires("csparse/x.y.z")
         # self.requires("qt/5.15.12")
         # self.requires("libqglviewer/x.y.z")
 
@@ -154,8 +158,8 @@ class G2oConan(ConanFile):
         tc.variables["G2O_BUILD_EXAMPLES"] = False
         tc.variables["G2O_BUILD_APPS"] = False
         tc.variables["G2O_USE_OPENMP"] = self.options.with_openmp
-        tc.variables["G2O_USE_CHOLMOD"] = False # not available in CCI yet
-        tc.variables["G2O_USE_CSPARSE"] = False # not available in CCI yet
+        tc.variables["G2O_USE_CHOLMOD"] = self.options.with_cholmod
+        tc.variables["G2O_USE_CSPARSE"] = self.options.with_csparse
         tc.variables["G2O_USE_OPENGL"] = True
         tc.variables["G2O_USE_LOGGING"] = True
         tc.variables["G2O_BUILD_SLAM2D_TYPES"] = self.options.build_slam2d_types
@@ -175,15 +179,31 @@ class G2oConan(ConanFile):
         tc.variables["DISABLE_SSE4_1"] = not self.options.sse4_1
         tc.variables["DISABLE_SSE4_2"] = not self.options.sse4_2
         tc.variables["DISABLE_SSE4_A"] = not self.options.sse4_a
+
+        if self.options.with_cholmod:
+            tc.variables["CMAKE_FIND_LIBRARY_PREFIXES"] = ";".join([
+                dep.package_folder.replace("\\", "/")
+                for dep_name, dep in self.dependencies.items() if dep_name.ref.name.startswith("suitesparse-")
+            ])
+            # Newest CHOLMOD uses vendored METIS with renamed symbols, which FindSuiteSparse.cmake fails to detect
+            tc.variables["SuiteSparse_CHOLMOD_USES_METIS"] = True
+
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.set_property("freeglut", "cmake_target_name", "FreeGLUT::freeglut")
+        # CXSparse is a compatible extension of CSparse
+        deps.set_property("suitesparse-cxsparse", "cmake_file_name", "CSPARSE")
         deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
         save(self, os.path.join(self.source_folder, "g2o", "EXTERNAL", "CMakeLists.txt"), "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "find_package(CSparse)", "find_package(CSPARSE)")
+        replace_in_file(self, os.path.join(self.source_folder, "g2o", "solvers", "csparse", "CMakeLists.txt"),
+                        "$<BUILD_INTERFACE:${CSPARSE_INCLUDE_DIR}>",
+                        '"$<BUILD_INTERFACE:${CSPARSE_INCLUDE_DIR}>"')
 
     def build(self):
         self._patch_sources()
@@ -200,9 +220,11 @@ class G2oConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        #  https://github.com/RainerKuemmerle/g2o/blob/20230806_git/cmake_modules/FindG2O.cmake
+        self.cpp_info.set_property("cmake_module_file_name", "G2O")
+        # https://github.com/RainerKuemmerle/g2o/blob/20230806_git/CMakeLists.txt#L495
         self.cpp_info.set_property("cmake_file_name", "g2o")
-        # The project does not export an official aggregate target
-        self.cpp_info.set_property("cmake_target_name", "g2o::g2o")
 
         def _add_component(name, requires=None):
             self.cpp_info.components[name].set_property("cmake_target_name", f"g2o::{name}")
@@ -213,7 +235,7 @@ class G2oConan(ConanFile):
         self.cpp_info.components["g2o_ceres_ad"].set_property("cmake_target_name", "g2o::g2o_ceres_ad")
         _add_component("stuff", requires=["spdlog::spdlog", "eigen::eigen"])
         _add_component("core", requires=["stuff", "eigen::eigen", "g2o_ceres_ad"])
-        _add_component("opengl_helper", requires=["opengl::opengl", "glu::glu", "eigen::eigen"])
+        _add_component("opengl_helper", requires=["opengl::opengl", "freeglut::freeglut", "eigen::eigen"])
 
         # Solvers
         _add_component("solver_dense", requires=["core"])
@@ -222,10 +244,10 @@ class G2oConan(ConanFile):
         _add_component("solver_structure_only", requires=["core"])
         if self.options.build_slam2d_types:
             _add_component("solver_slam2d_linear", requires=["core", "solver_eigen", "types_slam2d"])
-        if self.options.get_safe("with_suitesparse"):
-            _add_component("solver_cholmod", requires=["core", "SuiteSparse::CHOLMOD"])
-        if self.options.get_safe("with_csparse"):
-            _add_component("csparse_extension", requires=["stuff", "csparse::csparse", "eigen::eigen"])
+        if self.options.with_cholmod:
+            _add_component("solver_cholmod", requires=["core", "suitesparse-cholmod::suitesparse-cholmod"])
+        if self.options.with_csparse:
+            _add_component("csparse_extension", requires=["stuff", "suitesparse-cxsparse::suitesparse-cxsparse", "eigen::eigen"])
             _add_component("solver_csparse", requires=["core", "csparse_extension"])
 
         # Types
@@ -236,7 +258,7 @@ class G2oConan(ConanFile):
             if self.options.build_sclam2d_types:
                 _add_component("types_sclam2d", requires=["core", "opengl_helper", "types_slam2d"])
             if self.options.build_data_types:
-                _add_component("types_data", requires=["core", "types_slam2d", "opengl_helper", "freeglut::freeglut"])
+                _add_component("types_data", requires=["core", "types_slam2d", "opengl_helper"])
         if self.options.build_slam3d_types:
             _add_component("types_slam3d", requires=["core", "opengl_helper"])
             if self.options.build_slam3d_addon_types:
