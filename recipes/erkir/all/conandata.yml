@@ -1,4 +1,7 @@
 sources:
+  "2.1.1":
+    url: "https://github.com/vahancho/erkir/archive/refs/tags/v2.1.1.tar.gz"
+    sha256: "b314824c126bf933e2f08e5335e12b7ef3ded9ceb341d542276455d991e7e85d"
   "2.0.0":
     url: "https://github.com/vahancho/erkir/archive/refs/tags/v2.0.0.tar.gz"
     sha256: "98d095adcf0f2f11e3ba345bd5bbe890568cde69de9680b2c2a424f0008453ac"
@@ -6,6 +9,16 @@ sources:
     url: "https://github.com/vahancho/erkir/archive/refs/tags/1.0.0.tar.gz"
     sha256: "0bc5122fe2fef0f9036de275483af7f8adb947f6e8dd63fc18ac085ef31e9421"
 patches:
+  "2.1.1":
+    - patch_file: "patches/2.0.0-0001-remove-specify-architecture.patch"
+      patch_description: "fix supported architectures limited to x86/x86_64"
+      patch_type: "conan"
+    - patch_file: "patches/2.1.1-0002-fix-cmake.patch"
+      patch_description: "disable shared and fPIC options"
+      patch_type: "conan"
+    - patch_file: "patches/2.1.1-0003-fix-erkir_export.patch"
+      patch_description: "define ERKIR_EXPORT as empty on static build"
+      patch_type: "conan"
   "2.0.0":
     - patch_file: "patches/2.0.0-0001-remove-specify-architecture.patch"
       patch_description: "fix supported architectures limited to x86/x86_64"

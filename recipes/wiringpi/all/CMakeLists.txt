@@ -20,6 +20,10 @@ if(WIRINGPI_WITH_DEV_LIB)
                                                      ${WIRINGPI_SRC_DIR}/wiringPi)
 endif()
 
+if(WIRINGPI_LINUX_HEADERS_DIR)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${WIRINGPI_LINUX_HEADERS_DIR})
+endif()
+
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib

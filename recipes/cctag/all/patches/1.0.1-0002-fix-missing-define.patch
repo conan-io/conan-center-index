@@ -1,0 +1,29 @@
+From b49d710ab6870a865c20c943a65bd6dca906a184 Mon Sep 17 00:00:00 2001
+From: Simone Gasparini <simone.gasparini@gmail.com>
+Date: Fri, 7 Oct 2022 23:37:33 +0200
+Subject: [PATCH] [cctag] add osx fix _GNU_SOURCE
+
+as per
+https://github.com/boostorg/stacktrace/issues/88
+---
+ src/cctag/utils/Exceptions.hpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/cctag/utils/Exceptions.hpp b/src/cctag/utils/Exceptions.hpp
+index 1e16b9b5..46067cff 100644
+--- a/src/cctag/utils/Exceptions.hpp
++++ b/src/cctag/utils/Exceptions.hpp
+@@ -7,6 +7,13 @@
+  */
+ #ifndef _CCTAG_EXCEPTIONS_HPP_
+ #define _CCTAG_EXCEPTIONS_HPP_
++
++// This fix is necessary on Apple and on Windows using cygwin to avoid the compilation error
++// #error "Boost.Stacktrace requires `_Unwind_Backtrace` function.
++// see https://github.com/boostorg/stacktrace/issues/88
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE
++#endif
+ 
+ #include <boost/exception/diagnostic_information.hpp>
+ #include <boost/exception/errinfo_file_name.hpp>

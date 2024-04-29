@@ -197,6 +197,8 @@ class MinizipNgConan(ConanFile):
             self.cpp_info.components["minizip"].requires.append("openssl::openssl")
         elif is_apple_os(self):
             self.cpp_info.components["minizip"].frameworks.extend(["CoreFoundation", "Security"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["minizip"].system_libs.append("crypt32")
         if self.settings.os != "Windows" and self.options.with_iconv:
             self.cpp_info.components["minizip"].requires.append("libiconv::libiconv")
 
