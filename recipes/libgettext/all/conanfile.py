@@ -198,7 +198,6 @@ class GetTextConan(ConanFile):
         autotools = Autotools(self)
         autotools.configure("gettext-runtime")
         autotools.make()
-        self.run("exit 1")
 
     def package(self):
         dest_lib_dir = os.path.join(self.package_folder, "lib")
