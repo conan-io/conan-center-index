@@ -1,6 +1,56 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -209,43 +209,43 @@
+@@ -245,7 +245,7 @@
+ endif (EIGEN_FOUND)
+ 
+ if (LAPACK)
+-  find_package(LAPACK QUIET)
++  find_package(LAPACK REQUIRED)
+   if (LAPACK_FOUND)
+     message("-- Found LAPACK library: ${LAPACK_LIBRARIES}")
+   else (LAPACK_FOUND)
+@@ -263,7 +263,7 @@
+   # built with SuiteSparse support.
+ 
+   # Check for SuiteSparse and dependencies.
+-  find_package(SuiteSparse)
+-  if (SUITESPARSE_FOUND)
++  find_package(SuiteSparse REQUIRED)
++  if (1)
+     # On Ubuntu the system install of SuiteSparse (v3.4.0) up to at least
+     # Ubuntu 13.10 cannot be used to link shared libraries.
+@@ -300,7 +300,7 @@
+ # CXSparse.
+ if (CXSPARSE)
+   # Don't search with REQUIRED as we can continue without CXSparse.
+-  find_package(CXSparse)
+-  if (CXSPARSE_FOUND)
++  find_package(CXSparse REQUIRED)
++  if (CXSPARSE_FOUND)
+     # By default, if CXSparse and all dependencies are found, Ceres is
+     # built with CXSparse support.
+@@ -336,7 +336,7 @@
+ # GFlags.
+ if (GFLAGS)
+   # Don't search with REQUIRED as we can continue without gflags.
+-  find_package(Gflags)
+-  if (GFLAGS_FOUND)
++  find_package(Gflags REQUIRED)
++  if (1)
+     message("-- Found Google Flags header in: ${GFLAGS_INCLUDE_DIRS}, "
+       "in namespace: ${GFLAGS_NAMESPACE}")
+@@ -409,7 +409,7 @@
+ 
+ if (OPENMP)
+   # Find quietly, as we can continue without OpenMP if it is not found.
+-  find_package(OpenMP QUIET)
++  find_package(OpenMP REQUIRED)
+   if (OPENMP_FOUND)
+     message("-- Building with OpenMP.")
+     list(APPEND CERES_COMPILE_OPTIONS CERES_USE_OPENMP)
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -209,39 +209,39 @@ endif (IOS)
  unset(CERES_COMPILE_OPTIONS)
  
  # Eigen.
@@ -52,43 +102,7 @@
 +endif ()
  
  if (LAPACK)
--  find_package(LAPACK QUIET)
-+  find_package(LAPACK REQUIRED)
-   if (LAPACK_FOUND)
-     message("-- Found LAPACK library: ${LAPACK_LIBRARIES}")
-   else (LAPACK_FOUND)
-@@ -263,8 +263,8 @@
-   # built with SuiteSparse support.
- 
-   # Check for SuiteSparse and dependencies.
--  find_package(SuiteSparse)
--  if (SUITESPARSE_FOUND)
-+  find_package(SuiteSparse REQUIRED)
-+  if (1)
-     # On Ubuntu the system install of SuiteSparse (v3.4.0) up to at least
-     # Ubuntu 13.10 cannot be used to link shared libraries.
-     if (BUILD_SHARED_LIBS AND
-@@ -300,7 +300,7 @@
- # CXSparse.
- if (CXSPARSE)
-   # Don't search with REQUIRED as we can continue without CXSparse.
--  find_package(CXSparse)
-+  find_package(CXSparse REQUIRED)
-   if (CXSPARSE_FOUND)
-     # By default, if CXSparse and all dependencies are found, Ceres is
-     # built with CXSparse support.
-@@ -336,8 +336,8 @@
- # GFlags.
- if (GFLAGS)
-   # Don't search with REQUIRED as we can continue without gflags.
--  find_package(Gflags)
--  if (GFLAGS_FOUND)
-+  find_package(Gflags REQUIRED)
-+  if (1)
-     message("-- Found Google Flags header in: ${GFLAGS_INCLUDE_DIRS}, "
-       "in namespace: ${GFLAGS_NAMESPACE}")
-     add_definitions(-DCERES_GFLAGS_NAMESPACE=${GFLAGS_NAMESPACE})
-@@ -376,13 +376,14 @@
+@@ -376,13 +376,14 @@ else (MINIGLOG)
    unset(MINIGLOG_MAX_LOG_LEVEL CACHE)
    # Don't search with REQUIRED so that configuration continues if not found and
    # we can output an error messages explaining MINIGLOG option.
@@ -106,7 +120,7 @@
    # By default, assume gflags was found, updating the message if it was not.
    set(GLOG_GFLAGS_DEPENDENCY_MESSAGE
      " Assuming glog was built with gflags support as gflags was found. "
-@@ -395,7 +396,8 @@
+@@ -395,7 +396,8 @@ else (MINIGLOG)
        "Otherwise, Ceres may fail to link due to missing gflags symbols.")
    endif(NOT GFLAGS_FOUND)
    message("-- Found Google Log (glog)." ${GLOG_GFLAGS_DEPENDENCY_MESSAGE})
@@ -116,29 +130,7 @@
  
  if (NOT SCHUR_SPECIALIZATIONS)
    list(APPEND CERES_COMPILE_OPTIONS CERES_RESTRICT_SCHUR_SPECIALIZATION)
-@@ -409,18 +411,9 @@
- 
- if (OPENMP)
-   # Find quietly, as we can continue without OpenMP if it is not found.
--  find_package(OpenMP QUIET)
--  if (OPENMP_FOUND)
--    message("-- Building with OpenMP.")
--    list(APPEND CERES_COMPILE_OPTIONS CERES_USE_OPENMP)
--    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
--    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
--  else (OPENMP_FOUND)
--    message("-- Failed to find OpenMP, disabling. This is expected on "
--      "Clang < 3.8, and at least Xcode <= 8.  See Ceres documentation for "
--      "instructions to build with LLVM from Homebrew to enable OpenMP on OS X.")
--    update_cache_variable(OPENMP OFF)
--  endif (OPENMP_FOUND)
-+  find_package(OpenMP REQUIRED)
-+  list(APPEND CERES_COMPILE_OPTIONS CERES_USE_OPENMP)
-+  link_libraries(OpenMP::OpenMP_CXX)
- else (OPENMP)
-   message("-- Building without OpenMP, disabling.")
- endif (OPENMP)
-@@ -526,7 +519,7 @@
+@@ -526,7 +528,7 @@ if (CXX11 AND (TBB OR CXX11_THREADS))
  endif()
  
  if (CXX11 AND TBB)
@@ -149,7 +141,7 @@
      list(APPEND CERES_COMPILE_OPTIONS CERES_USE_TBB)
 --- a/internal/ceres/CMakeLists.txt
 +++ b/internal/ceres/CMakeLists.txt
-@@ -152,9 +152,10 @@
+@@ -152,9 +152,10 @@ else (SCHUR_SPECIALIZATIONS)
  endif (SCHUR_SPECIALIZATIONS)
  
  # Build the list of dependencies for Ceres based on the current configuration.
@@ -163,7 +155,7 @@
      # If glog & gflags are both found, we assume that glog was built with
      # gflags, as it is awkward to perform a try_compile() to verify this
      # when gflags is an imported target (as it is in newer versions).
-@@ -162,7 +163,7 @@
+@@ -162,7 +163,7 @@ if (NOT MINIGLOG AND GLOG_FOUND)
      # gflags, it is thus a public dependency for Ceres in this case.
      list(APPEND CERES_LIBRARY_PUBLIC_DEPENDENCIES ${GFLAGS_LIBRARIES})
    endif()
@@ -172,27 +164,16 @@
  
  if (SUITESPARSE AND SUITESPARSE_FOUND)
    # Define version information for use in Solver::FullReport.
-@@ -180,18 +181,8 @@
-   list(APPEND CERES_LIBRARY_PRIVATE_DEPENDENCIES ${LAPACK_LIBRARIES})
- endif ()
+@@ -191,7 +192,7 @@ if (OPENMP_FOUND)
+ endif (OPENMP_FOUND)
  
--if (OPENMP_FOUND)
--  # OpenMP support in Clang requires a non-GNU OpenMP library.
--  if (CMAKE_COMPILER_IS_GNUCXX)
--    list(APPEND CERES_LIBRARY_PRIVATE_DEPENDENCIES gomp)
--  endif()
--  if (NOT MSVC)
--    list(APPEND CERES_LIBRARY_PRIVATE_DEPENDENCIES ${CMAKE_THREAD_LIBS_INIT})
--  endif()
--endif (OPENMP_FOUND)
--
  if (TBB_FOUND)
 -  list(APPEND CERES_LIBRARY_PRIVATE_DEPENDENCIES ${TBB_LIBRARIES})
 +  list(APPEND CERES_LIBRARY_PRIVATE_DEPENDENCIES TBB::tbb)
    if (NOT MSVC)
      list(APPEND CERES_LIBRARY_PRIVATE_DEPENDENCIES ${CMAKE_THREAD_LIBS_INIT})
    endif (NOT MSVC)
-@@ -241,8 +232,8 @@
+@@ -241,8 +242,8 @@ if (BUILD_SHARED_LIBS)
    # When building a shared library, mark all external libraries as
    # PRIVATE so they don't show up as a dependency.
    target_link_libraries(ceres
@@ -203,7 +184,7 @@
  else (BUILD_SHARED_LIBS)
    # When building a static library, all external libraries are
    # PUBLIC(default) since the user needs to link to them.
-@@ -250,7 +241,9 @@
+@@ -250,7 +251,9 @@ else (BUILD_SHARED_LIBS)
    set(CERES_LIBRARY_DEPENDENCIES
          ${CERES_LIBRARY_PUBLIC_DEPENDENCIES}
          ${CERES_LIBRARY_PRIVATE_DEPENDENCIES})
