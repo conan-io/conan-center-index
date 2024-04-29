@@ -72,7 +72,7 @@ class LibGit2Conan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("http_parser/2.9.4")
         if self.options.with_libssh2:
             self.requires("libssh2/1.11.0")
@@ -122,7 +122,7 @@ class LibGit2Conan(ConanFile):
         "winhttp": "WinHTTP",
         "security": "SecureTransport",
         "mbedtls": "mbedTLS",
-        False: "OFF",
+        "False": "OFF",
     }
 
     _cmake_sha1 = {
@@ -132,6 +132,7 @@ class LibGit2Conan(ConanFile):
         "mbedtls": "mbedTLS",
         "generic": "Generic",
         "win32": "Win32",
+        "False": "OFF",
     }
 
     def generate(self):
@@ -150,6 +151,8 @@ class LibGit2Conan(ConanFile):
         tc.variables["REGEX_BACKEND"] = self.options.with_regex
         if is_msvc(self):
             tc.variables["STATIC_CRT"] = is_msvc_static_runtime(self)
+        # REGEX_BACKEND is SET(), avoid options overriding it
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
