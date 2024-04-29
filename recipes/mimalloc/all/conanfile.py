@@ -105,6 +105,7 @@ class MimallocConan(ConanFile):
         tc.variables["MI_BUILD_OBJECT"] = self.options.get_safe("single_object", False)
         tc.variables["MI_OVERRIDE"] = "ON" if self.options.override else "OFF"
         tc.variables["MI_SECURE"] = "ON" if self.options.secure else "OFF"
+        tc.variables["MI_WIN_REDIRECT"] = "OFF"
         if Version(self.version) >= "1.7.0":
             tc.variables["MI_INSTALL_TOPLEVEL"] = "ON"
         tc.generate()
