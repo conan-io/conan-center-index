@@ -23,7 +23,6 @@ import yaml
 
 required_conan_version = ">=1.53.0"
 
-
 # When adding (or removing) an option, also add this option to the list in
 # `rebuild-dependencies.yml` and re-run that script.
 CONFIGURE_OPTIONS = (
@@ -235,6 +234,21 @@ class BoostConan(ConanFile):
         }.get(str(self.settings.compiler))
 
     @property
+    def _min_compiler_version_default_cxx14(self):
+        """ Minimum compiler version having c++ standard >= 14
+        https://gcc.gnu.org/gcc-6/changes.html
+        https://releases.llvm.org/6.0.0/tools/clang/docs/ReleaseNotes.html#id9
+        https://learn.microsoft.com/en-us/cpp/build/reference/std-specify-language-standard-version?view=msvc-150#remarks
+        """
+        return {
+            "gcc": 6,
+            "clang": 6,
+            "apple-clang": 99,  # still uses C++98 by default. XCode does not reflect apple-clang
+            "Visual Studio": 15,  # guess
+            "msvc": 191,  # guess
+        }.get(str(self.settings.compiler))
+
+    @property
     def _min_compiler_version_default_cxx20(self):
         return {
             "gcc": 99,
@@ -252,6 +266,16 @@ class BoostConan(ConanFile):
         compiler_version = self._min_compiler_version_default_cxx11
         if compiler_version:
             return (Version(self.settings.compiler.version) >= compiler_version) or "11" in supported_cppstd(self)
+
+    @property
+    def _has_cppstd_14_supported(self):
+        cppstd = self.settings.compiler.get_safe("cppstd")
+        if cppstd:
+            return valid_min_cppstd(self, 14)
+        compiler_version = self._min_compiler_version_default_cxx14
+        if compiler_version:
+            return (Version(self.settings.compiler.version) >= compiler_version) or "14" in supported_cppstd(self)
+
 
     @property
     def _min_compiler_version_nowide(self):
@@ -366,6 +390,8 @@ class BoostConan(ConanFile):
                 self.options.without_json = True
                 self.options.without_nowide = True
                 self.options.without_url = True
+        if not self._has_cppstd_14_supported:
+            self.options.without_math = True
 
         # iconv is off by default on Windows and Solaris
         if self._is_windows_platform or self.settings.os == "SunOS":
@@ -475,6 +501,30 @@ class BoostConan(ConanFile):
             if is_msvc(self):
                 self.options.without_fiber = True
 
+        if Version(self.version) >= "1.85.0":
+            # Starting from 1.85.0, Boost.Math requires a c++14 capable compiler
+            # https://github.com/boostorg/math/blob/boost-1.85.0/README.md
+            # ==> disable it by default for older compilers or c++ standards
+
+            def disable_math():
+                super_modules = self._all_super_modules("math")
+                for smod in super_modules:
+                    try:
+                        setattr(self.options, f"without_{smod}", True)
+                    except ConanException:
+                        pass
+
+            if self.settings.compiler.get_safe("cppstd"):
+                if not valid_min_cppstd(self, 14):
+                    disable_math()
+            else:
+                min_compiler_version = self._min_compiler_version_default_cxx14
+                if min_compiler_version is None:
+                    self.output.warning("Assuming the compiler supports c++14 by default")
+                elif not self._has_cppstd_14_supported:
+                    disable_math()
+
+
     @property
     def _configure_options(self):
         return self._dependencies["configure_options"]
@@ -563,6 +613,15 @@ class BoostConan(ConanFile):
         libraries.sort()
         return filter(lambda library: f"without_{library}" in self.options, libraries)
 
+    @property
+    def _cxx14_boost_libraries(self):
+        libraries = []
+        if Version(self.version) >= "1.85.0":
+            # https://github.com/boostorg/math/blob/develop/README.md#boost-math-library
+            libraries.append("math")
+        libraries.sort()
+        return filter(lambda library: f"without_{library}" in self.options, libraries)
+
     def validate(self):
         if not self.options.multithreading:
             # * For the reason 'thread' is deactivate look at https://stackoverflow.com/a/20991533
@@ -610,6 +669,16 @@ class BoostConan(ConanFile):
                 if not self._has_cppstd_11_supported:
                     raise ConanInvalidConfiguration(
                         f"Boost.{{{','.join(self._cxx11_boost_libraries)}}} requires a c++11 compiler "
+                        "(please set compiler.cppstd or use a newer compiler)"
+                    )
+
+        if any([not self.options.get_safe(f"without_{library}", True) for library in self._cxx14_boost_libraries]):
+            if self.settings.compiler.get_safe("cppstd"):
+                check_min_cppstd(self, 14)
+            else:
+                if not self._has_cppstd_14_supported:
+                    raise ConanInvalidConfiguration(
+                        f"Boost.{{{','.join(self._cxx14_boost_libraries)}}} requires a c++14 compiler "
                         "(please set compiler.cppstd or use a newer compiler)"
                     )
 
@@ -1178,6 +1247,9 @@ class BoostConan(ConanFile):
             flags.append(f"cxxstd={cppstd_version}")
             if "gnu" in safe_cppstd:
                 flags.append("cxxstd-dialect=gnu")
+        elif Version(self.version) >= "1.85.0" and self._has_cppstd_14_supported:
+            cppstd_version = self._cppstd_flag("14")
+            flags.append(f"cxxstd={cppstd_version}")
         elif self._has_cppstd_11_supported:
             cppstd_version = self._cppstd_flag("11")
             flags.append(f"cxxstd={cppstd_version}")
