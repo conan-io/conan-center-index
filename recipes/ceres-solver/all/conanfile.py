@@ -51,7 +51,7 @@ class CeresSolverConan(ConanFile):
         "use_glog": True,
         "use_lapack": True,
         "use_eigen_sparse": True,
-        "use_suitesparse": False, # TODO: enable after #23553
+        "use_suitesparse": False, # TODO: enable after #23556
         "use_accelerate": True,
         "use_custom_blas": True,
         "use_schur_specializations": True,
@@ -110,8 +110,6 @@ class CeresSolverConan(ConanFile):
             del self.options.use_CXX11
         if Version(self.version) < "2.2.0":
             del self.options.use_eigen_metis
-            # the SuiteSparse version on CCI is too new for older Ceres versions
-            self.options.use_suitesparse = False
         if Version(self.version) < "2.1.0":
             del self.options.use_cuda
 

@@ -1,0 +1,23 @@
+From 9cca671273c2f205ca7350422f48b7b119c5dd78 Mon Sep 17 00:00:00 2001
+From: Mark Shachkov <markshachkov@gmail.com>
+Date: Sun, 17 Sep 2023 20:57:43 +0200
+Subject: [PATCH] Enable compatibility with SuiteSparse 7.2.0
+
+Change-Id: I072dc3f7c245fc2ebbdffed715ac4def20f7dccd
+---
+ internal/ceres/covariance_impl.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/internal/ceres/covariance_impl.cc b/internal/ceres/covariance_impl.cc
+index d7a7c0790..1679f234b 100644
+--- a/internal/ceres/covariance_impl.cc
++++ b/internal/ceres/covariance_impl.cc
+@@ -671,7 +671,7 @@
+   const SuiteSparse_long rank =
+       SuiteSparseQR<double>(SPQR_ORDERING_BESTAMD,
+                             SPQR_DEFAULT_TOL,
+-                            cholmod_jacobian.ncol,
++                            static_cast<int64_t>(cholmod_jacobian.ncol),
+                             &cholmod_jacobian,
+                             &R,
+                             &permutation,
