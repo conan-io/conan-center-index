@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <libintl.h>
-#include <locale.h>
 
 int main() {
-    setlocale(LC_ALL, "");
+    gettext("Hello, world!");
 
     return 0;
 }
