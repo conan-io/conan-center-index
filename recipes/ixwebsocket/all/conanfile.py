@@ -58,9 +58,9 @@ class IXWebSocketConan(ConanFile):
         if self.options.get_safe("with_zlib", True):
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.tls == "openssl":
-            self.requires("openssl/[>=1.1.1w <=3.2.1]")
+            self.requires("openssl/[>=1.1 <4]")
         elif self.options.tls == "mbedtls":
-            self.requires("mbedtls/[>=2.25.0 <3]")
+            self.requires("mbedtls/2.28.4")
 
     @property
     def _can_use_openssl(self):
