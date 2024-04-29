@@ -527,4 +527,3 @@ class OpenTelemetryCppConan(ConanFile):
             )
 
         self.conf_info.define("user.opentelemetry-cpp:min_cpp", self._min_cppstd)
-
