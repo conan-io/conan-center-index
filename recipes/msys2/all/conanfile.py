@@ -47,13 +47,15 @@ class MSYS2Conan(ConanFile):
         "exclude_files": ["ANY"],
         "packages": ["ANY"],
         "additional_packages": [None, "ANY"],
-        "no_kill": [True, False]
+        "no_kill": [True, False],
+        "pacman_source": [None, "ANY"]
     }
     default_options = {
         "exclude_files": "*/link.exe",
         "packages": "base-devel,binutils,gcc",
         "additional_packages": None,
         "no_kill": False,
+        "pacman_source": None
     }
 
     short_paths = True
@@ -78,7 +80,8 @@ class MSYS2Conan(ConanFile):
         with chdir(self, os.path.join(self._msys_dir, "usr", "bin")):
             try:
                 self._kill_pacman()
-
+                if self.options.pacman_source:
+                    self.run(f'bash -l -c "sed -i \\\"s#https\?://mirror.msys2.org/#{self.options.pacman_source}/#g\\\" /etc/pacman.d/mirrorlist*"')
                 # https://www.msys2.org/docs/ci/
                 self.run('bash -l -c "pacman --debug --noconfirm --ask 20 -Syuu"')  # Core update (in case any core packages are outdated)
                 self._kill_pacman()
