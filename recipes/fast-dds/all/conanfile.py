@@ -107,10 +107,8 @@ class FastDDSConan(ConanFile):
             raise ConanInvalidConfiguration("Mixing a dll {} library with a static runtime is not supported".format(self.name))
 
     def build_requirements(self):
-        if Version(self.version) < "2.12.0":
-            self.tool_requires("cmake/[>=3.16.3 <3.21.0]")
-        else:
-            self.tool_requires("cmake/[>=3.20 <4]")
+        if Version(self.version) >= "2.7.0":
+            self.tool_requires("cmake/[>=3.16.3 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
