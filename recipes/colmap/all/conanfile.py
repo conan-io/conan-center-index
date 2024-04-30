@@ -6,6 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file, load, save
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -83,7 +84,8 @@ class ColmapConan(ConanFile):
         self.requires("sqlite3/3.45.3", transitive_headers=True, transitive_libs=True)
         self.requires("lz4/1.9.4")
         if self.options.openmp:
-            self.requires("llvm-openmp/17.0.6", transitive_headers=True, transitive_libs=True)
+            if self.settings.compiler in ["clang", "apple-clang"]:
+                self.requires("llvm-openmp/17.0.6", transitive_headers=True, transitive_libs=True)
         if self.options.cgal:
             self.requires("cgal/5.6.1")
         if self.options.gui:
@@ -185,6 +187,22 @@ class ColmapConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
         self._write_cmake_module()
 
+    @property
+    def _openmp_flags(self):
+        if self.settings.compiler == "clang":
+            return ["-fopenmp=libomp"]
+        elif self.settings.compiler == "apple-clang":
+            return ["-Xclang", "-fopenmp"]
+        elif self.settings.compiler == "gcc":
+            return ["-fopenmp"]
+        elif self.settings.compiler == "intel-cc":
+            return ["-Qopenmp"]
+        elif self.settings.compiler == "sun-cc":
+            return ["-xopenmp"]
+        elif is_msvc(self):
+            return ["-openmp"]
+        return None
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "colmap")
         self.cpp_info.set_property("cmake_target_name", "colmap::colmap")
@@ -231,8 +249,15 @@ class ColmapConan(ConanFile):
             exe.requires.extend(["ui"])
 
         if self.options.openmp:
-            poisson_recon.requires.append("llvm-openmp::llvm-openmp")
-            vlfeat.requires.append("llvm-openmp::llvm-openmp")
+            if self.settings.compiler in ["clang", "apple-clang"]:
+                poisson_recon.requires.append("llvm-openmp::llvm-openmp")
+                vlfeat.requires.append("llvm-openmp::llvm-openmp")
+            # TODO: these can be dropped after #22353 is merged
+            openmp_flags = self._openmp_flags
+            poisson_recon.cflags = openmp_flags
+            poisson_recon.cxxflags = openmp_flags
+            vlfeat.cflags = openmp_flags
+            vlfeat.cxxflags = openmp_flags
 
         if self.options.cuda:
             # CUDA dependencies are exported in the CMake module
