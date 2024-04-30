@@ -83,7 +83,7 @@ class OpenblasConan(ConanFile):
                 raise ConanInvalidConfiguration(f'"{self.name}/*:build_relapack=True" option requires "{self.name}/*:build_lapack=True"')
             if self.settings.compiler not in ["gcc", "clang"]:
                 # ld: unknown option: --allow-multiple-definition on apple-clang
-                raise ConanInvalidConfiguration("build_relapack option is only supported for GCC and Clang")
+                raise ConanInvalidConfiguration(f'"{self.name}/*:build_relapack=True" option is only supported for GCC and Clang')
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
