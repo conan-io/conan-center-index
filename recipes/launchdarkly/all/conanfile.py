@@ -55,9 +55,9 @@ class LaunchDarklyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.83.0", override=True)
+        self.requires("boost/1.84.0", override=True)
         self.requires("certify/cci.20201114")
-        self.requires("openssl/3.1.4", transitive_headers=True)
+        self.requires("openssl/3.2.1", transitive_headers=True)
         self.requires("tl-expected/1.1.0", transitive_headers=True)
 
     def validate(self):
