@@ -14,8 +14,8 @@ class GdalcppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/joto/gdalcpp"
     topics = ("gdal", "osgeo", "geospatial", "raster", "vector", "gis", "header-only")
-    package_type = "header-library"
 
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
