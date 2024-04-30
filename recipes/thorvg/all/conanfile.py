@@ -80,6 +80,7 @@ class ThorvgConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        # Renamed to simd in higher versions
         if Version(self.version) > "0.13.0":
             del self.options.with_vector
         else:
