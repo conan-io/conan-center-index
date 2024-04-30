@@ -4,7 +4,7 @@ from conan.tools.build import stdcpp_library, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir, save
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
@@ -215,19 +215,30 @@ class AssimpConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ASSIMP_HUNTER_ENABLED"] = False
-        tc.variables["ASSIMP_IGNORE_GIT_HASH"] = True
-        tc.variables["ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR"] = False
         tc.variables["ASSIMP_ANDROID_JNIIOSYSTEM"] = False
         tc.variables["ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT"] = False
         tc.variables["ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT"] = False
         tc.variables["ASSIMP_BUILD_ASSIMP_TOOLS"] = False
+        tc.variables["ASSIMP_BUILD_DOCS"] = False
+        tc.variables["ASSIMP_BUILD_DRACO"] = False
+        tc.variables["ASSIMP_BUILD_FRAMEWORK"] = False
+        tc.variables["ASSIMP_BUILD_MINIZIP"] = False
         tc.variables["ASSIMP_BUILD_SAMPLES"] = False
         tc.variables["ASSIMP_BUILD_TESTS"] = False
+        tc.variables["ASSIMP_BUILD_ZLIB"] = False
         tc.variables["ASSIMP_DOUBLE_PRECISION"] = self.options.double_precision
+        tc.variables["ASSIMP_HUNTER_ENABLED"] = False
+        tc.variables["ASSIMP_IGNORE_GIT_HASH"] = True
+        tc.variables["ASSIMP_INJECT_DEBUG_POSTFIX"] = False
+        tc.variables["ASSIMP_INSTALL"] = True
         tc.variables["ASSIMP_INSTALL_PDB"] = False
         tc.variables["ASSIMP_NO_EXPORT"] = False
-        tc.variables["ASSIMP_BUILD_MINIZIP"] = False
+        tc.variables["ASSIMP_OPT_BUILD_PACKAGES"] = False
+        tc.variables["ASSIMP_RAPIDJSON_NO_MEMBER_ITERATOR"] = False
+        tc.variables["ASSIMP_UBSAN"] = False
+        tc.variables["ASSIMP_WARNINGS_AS_ERRORS"] = False
+        tc.variables["USE_STATIC_CRT"] = is_msvc_static_runtime(self)
+
         for option, (definition, _) in self._format_option_map.items():
             value = self.options.get_safe(option)
             if value is not None:
