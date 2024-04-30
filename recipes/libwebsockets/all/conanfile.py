@@ -249,7 +249,7 @@ class LibwebsocketsConan(ConanFile):
         if self.options.with_ssl == "openssl":
             no_zlib = self.dependencies["openssl"].options.get_safe("no_zlib")
             if not no_zlib and self.options.with_zlib != "zlib":
-                raise ConanInvalidConfiguration(f"{self.name} needs option with_zlib=zlib, as its dependency openssl links with it")
+                raise ConanInvalidConfiguration(f'{self.name} needs option "{self.name}/*:with_zlib=zlib", as its dependency openssl links with it')
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
