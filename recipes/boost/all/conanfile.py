@@ -274,7 +274,8 @@ class BoostConan(ConanFile):
             return valid_min_cppstd(self, 14)
         compiler_version = self._min_compiler_version_default_cxx14
         if compiler_version:
-            return (Version(self.settings.compiler.version) >= compiler_version) or "14" in supported_cppstd(self)
+            # supported_cppstd: lists GCC 5 due partial support for C++14, but not enough for Boost
+            return (Version(self.settings.compiler.version) >= compiler_version) and "14" in supported_cppstd(self)
 
 
     @property
@@ -610,6 +611,8 @@ class BoostConan(ConanFile):
             libraries.append("stacktrace")
             libraries.append("test")
             libraries.append("thread")
+        if Version(self.version) >= "1.85.0":
+            libraries.append("system")
         libraries.sort()
         return filter(lambda library: f"without_{library}" in self.options, libraries)
 
