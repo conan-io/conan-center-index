@@ -65,7 +65,7 @@ class ICUConan(ConanFile):
             "msvc": "192",
             "gcc": "8",
             "clang": "9",
-            "apple-clang": "12" if Version(self.version) >= "6.5.0" else "11"
+            "apple-clang": "11"
         }
 
     def export_sources(self):
