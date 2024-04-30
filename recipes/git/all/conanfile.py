@@ -45,11 +45,12 @@ class PackageConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("expat/[>=2.6.2 <3]") #TODO
+        self.requires("expat/[>=2.6.2 <3]")
         self.requires("libcurl/[>=7.78.0 <9]")
-        self.requires("libiconv/1.17") #TODO
+        self.requires("libiconv/1.17")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("pcre2/10.43")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
@@ -75,9 +76,12 @@ class PackageConan(ConanFile):
 #        def yes_no(v): return "yes" if v else "no"
         print(self.dependencies['openssl'].package_folder)
         tc.configure_args.extend([
-            f"--with-openssl={self.dependencies['openssl'].package_folder}",
             f"--with-curl={self.dependencies['libcurl'].package_folder}",
+            f"--with-expat={self.dependencies['expat'].package_folder}",
+            #f"--with-iconv={self.dependencies['libiconv'].package_folder}", # FIXME: breaks in shared mode
             f"--with-libpcre2={self.dependencies['pcre2'].package_folder}",
+            f"--with-openssl={self.dependencies['openssl'].package_folder}",
+            f"--with-zlib={self.dependencies['zlib'].package_folder}",
             # This could probably easily be supported as an option, but it would likely never be useful in a conan recipe.
             "--with-tcltk=no"
         ])
