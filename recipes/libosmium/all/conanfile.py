@@ -61,7 +61,7 @@ class LibosmiumConan(ConanFile):
         if self.options.geos:
             self.requires("geos/3.12.0")
         if self.options.gdal:
-            self.requires("gdal/3.8.3")
+            self.requires("gdalcpp/1.3.0")
         if self.options.proj:
             self.requires("proj/9.3.1")
         if self.options.lz4:
@@ -87,7 +87,7 @@ class LibosmiumConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(self, "*", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
+        copy(self, "*", os.path.join(self.source_folder, "include", "osmium"), os.path.join(self.package_folder, "include", "osmium"))
         copy(self, "libosmium-official-vars.cmake", self.source_folder, os.path.join(self.package_folder, self._modules_rel_dir))
 
     def package_info(self):
@@ -122,7 +122,7 @@ class LibosmiumConan(ConanFile):
         if self.options.geos:
             _add_component("geos", ["geos::geos"])
         if self.options.gdal:
-            _add_component("gdal", ["gdal::gdal"])
+            _add_component("gdal", ["gdalcpp::gdalcpp"])
         if self.options.proj:
             _add_component("proj", ["proj::proj"])
         if self.options.lz4:
