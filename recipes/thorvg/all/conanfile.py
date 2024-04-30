@@ -82,6 +82,8 @@ class ThorvgConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) > "0.13.0":
             del self.options.with_vector
+        else:
+            del self.options.with_simd
 
     def configure(self):
         if self.options.shared:
