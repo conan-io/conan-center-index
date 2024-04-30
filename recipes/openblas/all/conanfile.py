@@ -80,7 +80,7 @@ class OpenblasConan(ConanFile):
 
         if self.options.build_relapack:
             if not self.options.build_lapack:
-                raise ConanInvalidConfiguration("build_relapack option requires build_lapack")
+                raise ConanInvalidConfiguration(f'"{self.name}/*:build_relapack=True" option requires "{self.name}/*:build_lapack=True"')
             if self.settings.compiler not in ["gcc", "clang"]:
                 # ld: unknown option: --allow-multiple-definition on apple-clang
                 raise ConanInvalidConfiguration("build_relapack option is only supported for GCC and Clang")
