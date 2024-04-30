@@ -1,0 +1,19 @@
+sources:
+  "1.155.1133":
+    source:
+      url: "https://github.com/openhome/ohPipeline/archive/refs/tags/ohMediaPlayer_1.155.1133.tar.gz"
+      sha256: "507bdf70fc6b9bf8e4605546a5c7ae99abbe537cce4b74b3e091764323939fae"
+    helpers:
+      url: "https://github.com/openhome/ohWafHelpers/archive/refs/tags/ohWafHelpers_0.2.127.tar.gz"
+      sha256: "4d2365622eb6ccf883a14c1c02687d7f0560e0bbac31cbf48382b3e1c8ae6b60"
+patches:
+  "1.155.1133":
+    - patch_file: "patches/0001-disable-raat.patch"
+      patch_type: "build"
+      patch_description: "Disable proprietary SDK"
+    - patch_file: "patches/0002-remove-msvs.patch"
+      patch_type: "build"
+      patch_description: "Remove msvs"
+    - patch_file: "patches/0003-fix-ohwafhelpers.patch"
+      patch_type: "build"
+      patch_description: "Fix ohWafHelpers"

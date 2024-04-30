@@ -1,0 +1,189 @@
+diff --git a/dependencies/AnyPlatform/ohWafHelpers/utilfuncs.py b/dependencies/AnyPlatform/ohWafHelpers/utilfuncs.py
+index c7e860f..37ea6f7 100644
+--- a/dependencies/AnyPlatform/ohWafHelpers/utilfuncs.py
++++ b/dependencies/AnyPlatform/ohWafHelpers/utilfuncs.py
+@@ -55,25 +55,29 @@ def invoke_test(tsk):
+ 
+ def guess_dest_platform():
+     # literally copied (for consistency) from default_platform.py in ohdevtools
+     import platform
+     if platform.system() == 'Windows':
+         return 'Windows-x86'
+     if platform.system() == 'Linux' and platform.architecture()[0] == '32bit' and platform.machine()[0:3] == 'ppc':
+         return 'Linux-ppc32'
+     if platform.system() == 'Linux' and platform.architecture()[0] == '32bit':
+         return 'Linux-x86'
+-    if platform.system() == 'Linux' and platform.architecture()[0] == '64bit':
++    if platform.system() == 'Linux' and platform.architecture()[0] == '64bit' and platform.machine() == 'AMD64':
+         return 'Linux-x64'
+-    if platform.system() == 'Darwin':
++    if platform.system() == 'Linux' and platform.architecture()[0] == '64bit' and platform.machine() in ['arm64', 'aarch64']:
++        return 'Linux-arm64'
++    if platform.system() == 'Darwin' and platform.architecture()[0] == '64bit' and platform.machine() == 'AMD64':
+         # 32bit Mac support no longer supported on Apple platforms
+         return 'Mac-x64'
++    if platform.system() == 'Darwin' and platform.architecture()[0] == '64bit' and platform.machine() in ['arm64', 'aarch64']:
++        return 'Mac-arm64'
+     return None
+ 
+ def is_core_platform(conf):
+     return conf.options.dest_platform in ['Core-ppc32', 'Core-armv5', 'Core-armv6']
+ 
+ def configure_toolchain(conf):
+     import os, sys
+     import platform as platform_arch
+     platform_info = get_platform_info(conf.options.dest_platform)
+     if platform_info['build_platform'] != sys.platform:
+@@ -100,31 +104,31 @@ def configure_toolchain(conf):
+         conf.env.append_value('CXXFLAGS', [
+                 '-pipe', '-D_GNU_SOURCE', '-D_REENTRANT', '-DDEFINE_TRACE',
+                 '-DDEFINE_'+platform_info['endian']+'_ENDIAN', '-fvisibility=hidden',])
+         if conf.options.debugmode == 'Debug':
+             conf.env.append_value('CXXFLAGS',['-O0', '-DDEFINE_DEBUG'])
+         else:
+             conf.env.append_value('CXXFLAGS',['-O2'])
+         conf.env.append_value('CFLAGS', conf.env['CXXFLAGS'])
+         # C++11 support is only relevant to C++ code.
+         # ...but does seem to have some effect on the level of C supported by C++ files.
+-        if conf.options.dest_platform in ['Mac-x64']:
++        if conf.options.dest_platform in ['Mac-x64', 'Mac-arm64']:
+             conf.env.append_value('CFLAGS', ['-std=gnu89'])
+             conf.env.append_value('CXXFLAGS', ['-std=c++11', '-D_POSIX_C_SOURCE=199309', '-stdlib=libc++'])
+         else:
+             conf.env.append_value('CXXFLAGS', ['-std=c++0x'])
+             conf.env.append_value('LINKFLAGS', '-Wl,--fatal-warnings')
+         # Enable exceptions for all C code
+         conf.env.append_value('CFLAGS', ['-fexceptions'])
+         # Don't enable warnings for C code as its typically third party and written to different standards
+         conf.env.append_value('CXXFLAGS', [
+-                '-fexceptions', '-Wall', '-Werror'])
++                '-fexceptions', '-Wall'])
+ 
+ 
+         if hasattr(conf, 'use_staging_tree'):
+             sysroot = os.path.abspath('./dependencies/' + conf.options.dest_platform + '/staging/')
+             conf.env.append_value('CFLAGS', '--sysroot='+sysroot)
+             conf.env.append_value('CXXFLAGS', '--sysroot='+sysroot)
+             conf.env.append_value('LINKFLAGS', '--sysroot='+sysroot)
+ 
+         if conf.options.dest_platform == 'Linux-mipsel':
+             conf.env.append_value('LINKFLAGS', '-EL')
+@@ -148,20 +152,27 @@ def configure_toolchain(conf):
+             else:
+                 conf.env.append_value('CXXFLAGS',['-Wno-psabi', '-fPIC'])
+                 conf.env.append_value('CFLAGS',['-fPIC'])
+         elif conf.options.dest_platform in ['Mac-x64']:
+             conf.env.append_value('CXXFLAGS', ['-arch', 'x86_64'])
+             conf.env.append_value('CFLAGS', ['-arch', 'x86_64'])
+             conf.env.append_value('LINKFLAGS', ['-arch', 'x86_64'])
+             conf.env.append_value('CXXFLAGS',['-fPIC', '-mmacosx-version-min=10.7', '-DPLATFORM_MACOSX_GNU'])
+             conf.env.append_value('CFLAGS',['-fPIC'])
+             conf.env.append_value('LINKFLAGS',['-stdlib=libc++', '-framework', 'CoreFoundation', '-framework', 'SystemConfiguration', '-framework', 'IOKit'])
++        elif conf.options.dest_platform in ['Mac-arm64']:
++            conf.env.append_value('CXXFLAGS', ['-arch', 'arm64'])
++            conf.env.append_value('CFLAGS', ['-arch', 'arm64'])
++            conf.env.append_value('LINKFLAGS', ['-arch', 'arm64'])
++            conf.env.append_value('CXXFLAGS',['-fPIC', '-mmacosx-version-min=10.7', '-DPLATFORM_MACOSX_GNU'])
++            conf.env.append_value('CFLAGS',['-fPIC'])
++            conf.env.append_value('LINKFLAGS',['-stdlib=libc++', '-framework', 'CoreFoundation', '-framework', 'SystemConfiguration', '-framework', 'IOKit'])
+         # Options for Core-ppc32 and Core-armv5 / Core-armv6
+         if conf.options.dest_platform in ['Core-ppc32', 'Core-armv5', 'Core-armv6']:
+ 
+             platform = conf.options.dest_platform
+ 
+             if platform == 'Core-ppc32':
+                 default_cross = '/opt/rtems-4.11-rsb/bin/powerpc-rtems4.11-'
+                 cpu = '405'
+             if platform == 'Core-armv5':
+                 default_cross = '/opt/rtems-4.11-rsb/bin/arm-rtems4.11-'
+@@ -295,40 +306,25 @@ def guess_ohnet_location(conf):
+     set_env_verbose(conf, 'STLIBPATH_OHNET', match_path(
+         conf,
+         [
+             '{options.ohnet_lib_dir}',
+             '{options.ohnet}/Build/Obj/{platform_info[ohnet_plat_dir]}/{options.debugmode}',
+             'dependencies/{options.dest_platform}/ohNet-{options.dest_platform}-{debugmode_lc}-dev/lib',
+             'dependencies/{options.dest_platform}/ohNet-{options.dest_platform}-{debugmode_tc}/lib',
+         ],
+         message='Specify --ohnet-lib-dir or --ohnet')
+     )
+-    set_env_verbose(conf, 'TEXT_TRANSFORM_PATH', match_path(
+-        conf,
+-        [
+-            '{options.ohnet}/Build/Tools',
+-            'dependencies/{options.dest_platform}/ohNet-{options.dest_platform}-{debugmode_tc}/lib/t4',
+-        ],
+-        message='Specify --ohnet')
+-    )
+-    set_env_verbose(conf, 'T4_TEMPLATE_PATH', match_path(
+-        conf,
+-        [
+-            '{options.ohnet}/OpenHome/Net/T4/Templates',
+-            'dependencies/{options.dest_platform}/ohNet-{options.dest_platform}-{debugmode_tc}/lib/t4',
+-        ],
+-        message='Specify --ohnet')
+-    )
+     set_env_verbose(conf, 'SERVICE_GEN_DIR', match_path(
+         conf,
+         [
+             '{options.ohnet}/OpenHome/Net/ServiceGen',
++            '{options.ohnet}/lib/ServiceGen',
+             'dependencies/{options.dest_platform}/ohNet-{options.dest_platform}-{debugmode_tc}/lib/ServiceGen',
+         ],
+         message='Specify --ohnet')
+     )
+ 
+ def guess_location(conf, repo):
+     set_env_verbose(conf, 'INCLUDES_' + repo.upper(), match_path(
+         conf,
+         [
+             '{options.' + repo.lower() + '_include_dir}',
+@@ -377,21 +373,21 @@ def guess_ssl_location(conf):
+     )
+     set_env_verbose(conf, 'STLIBPATH_SSL', match_path(
+         conf,
+         [
+             '{options.ssl}/build/{options.dest_platform}/lib',
+             '{options.ssl}/lib',
+             'dependencies/{options.dest_platform}/libressl/lib',
+         ],
+         message='Specify --ssl')
+     )
+-    conf.env.STLIB_SSL = ['ssl', 'crypto']
++    conf.env.STLIB_SSL = ['ssl', 'crypto', 'z']
+     if conf.options.dest_platform in ['Windows-x86', 'Windows-x64']:
+         conf.env.LIB_SSL = ['advapi32']
+     elif conf.options.dest_platform.startswith('Linux-'):
+         conf.env.LIB_SSL = ['dl']
+ 
+ def get_ros_tool_path(ctx):
+     import os
+     from filetasks import find_resource_or_fail
+ 
+     host_platform = guess_dest_platform()
+@@ -440,23 +436,25 @@ def create_ros_from_dir_tree(bld, src_path, ros_name):
+             fh.write(line)
+     fh.write('</ros>')
+     fh.close()
+     create_ros(bld, ros_src, ros_name + '.ros')
+ 
+ def get_platform_info(dest_platform):
+     platforms = {
+         'Linux-x86': dict(endian='LITTLE',   build_platform='linux2', ohnet_plat_dir='Posix'),
+         'Linux-x64': dict(endian='LITTLE',   build_platform='linux2', ohnet_plat_dir='Posix'),
+         'Linux-ARM': dict(endian='LITTLE',   build_platform='linux2', ohnet_plat_dir='Posix'),
++        'Linux-arm64': dict(endian='LITTLE', build_platform='linux2', ohnet_plat_dir='Posix'),
+         'Linux-armhf': dict(endian='LITTLE', build_platform='linux2', ohnet_plat_dir='Posix'),
+         'Linux-rpi': dict(endian='LITTLE',   build_platform='linux2', ohnet_plat_dir='Posix'),
+         'Linux-mipsel': dict(endian='LITTLE',build_platform='linux2', ohnet_plat_dir='Posix'),
+         'Linux-ppc32': dict(endian='BIG',    build_platform='linux2', ohnet_plat_dir='Posix'),
+         'Windows-x86': dict(endian='LITTLE', build_platform='win32',  ohnet_plat_dir='Windows'),
+         'Windows-x64': dict(endian='LITTLE', build_platform='win32',  ohnet_plat_dir='Windows'),
+         'Core-ppc32': dict(endian='BIG',     build_platform='linux2', ohnet_plat_dir='Core-ppc32'),
+         'Core-armv5': dict(endian='LITTLE',  build_platform='linux2', ohnet_plat_dir='Core-armv5'),
+         'Core-armv6': dict(endian='LITTLE',  build_platform='linux2', ohnet_plat_dir='Core-armv6'),
+         'Mac-x64': dict(endian='LITTLE',     build_platform='darwin', ohnet_plat_dir='Mac-x64'),
++        'Mac-arm64': dict(endian='LITTLE',   build_platform='darwin', ohnet_plat_dir='Mac-arm64'),
+         'iOs-ARM': dict(endian='LITTLE',     build_platform='darwin', ohnet_plat_dir='Mac/arm'),
+     }
+     return platforms[dest_platform]
