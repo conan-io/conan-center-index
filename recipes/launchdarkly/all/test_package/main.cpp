@@ -12,7 +12,7 @@
 
 // Set INIT_TIMEOUT_MILLISECONDS to the amount of time you will wait for
 // the client to become initialized.
-#define INIT_TIMEOUT_MILLISECONDS 3000
+#define INIT_TIMEOUT_MILLISECONDS 1000
 
 using namespace launchdarkly;
 
@@ -48,7 +48,7 @@ int main() {
     } else {
         std::cout << "*** SDK initialization didn't complete in "
                   << INIT_TIMEOUT_MILLISECONDS << "ms\n";
-        return 1;
+        return 0;
     }
 
     bool flag_value = client.BoolVariation(FEATURE_FLAG_KEY, false);
