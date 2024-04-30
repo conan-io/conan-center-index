@@ -391,7 +391,7 @@ class BoostConan(ConanFile):
                 self.options.without_json = True
                 self.options.without_nowide = True
                 self.options.without_url = True
-        if not self._has_cppstd_14_supported:
+        if Version(self.version) >= "1.85.0" and not self._has_cppstd_14_supported:
             self.options.without_math = True
 
         # iconv is off by default on Windows and Solaris
@@ -410,18 +410,17 @@ class BoostConan(ConanFile):
             if dep_name not in self._configure_options:
                 delattr(self.options, f"without_{dep_name}")
 
+        def disable_math():
+            super_modules = self._all_super_modules("math")
+            for smod in super_modules:
+                try:
+                    setattr(self.options, f"without_{smod}", True)
+                except ConanException:
+                    pass
+
         if Version(self.version) >= "1.76.0":
             # Starting from 1.76.0, Boost.Math requires a c++11 capable compiler
             # ==> disable it by default for older compilers or c++ standards
-
-            def disable_math():
-                super_modules = self._all_super_modules("math")
-                for smod in super_modules:
-                    try:
-                        setattr(self.options, f"without_{smod}", True)
-                    except ConanException:
-                        pass
-
             if self.settings.compiler.get_safe("cppstd"):
                 if not valid_min_cppstd(self, 11):
                     disable_math()
@@ -506,15 +505,6 @@ class BoostConan(ConanFile):
             # Starting from 1.85.0, Boost.Math requires a c++14 capable compiler
             # https://github.com/boostorg/math/blob/boost-1.85.0/README.md
             # ==> disable it by default for older compilers or c++ standards
-
-            def disable_math():
-                super_modules = self._all_super_modules("math")
-                for smod in super_modules:
-                    try:
-                        setattr(self.options, f"without_{smod}", True)
-                    except ConanException:
-                        pass
-
             if self.settings.compiler.get_safe("cppstd"):
                 if not valid_min_cppstd(self, 14):
                     disable_math()
