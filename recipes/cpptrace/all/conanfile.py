@@ -21,10 +21,12 @@ class CpptraceConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "unwind_with_libunwind": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "unwind_with_libunwind": False,
     }
 
     @property
@@ -47,6 +49,8 @@ class CpptraceConan(ConanFile):
             self.requires("libdwarf/0.9.1")
         else:
             self.requires("libdwarf/0.8.0")
+        if self.options.unwind_with_libunwind:
+            self.requires("libunwind/1.8.0")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -70,6 +74,8 @@ class CpptraceConan(ConanFile):
             if not self.options.shared:
                 tc.variables["CPPTRACE_STATIC"] = True
             tc.variables["CPPTRACE_USE_SYSTEM_LIBDWARF"] = True
+        if self.options.unwind_with_libunwind:
+            tc.variables["CPPTRACE_UNWIND_WITH_LIBUNWIND"] = True
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
