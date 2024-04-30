@@ -21,12 +21,12 @@ class CpptraceConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "unwind_with_libunwind": [True, False],
+        "unwind": ["default", "libunwind"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "unwind_with_libunwind": False,
+        "unwind": "default",
     }
 
     @property
@@ -49,7 +49,7 @@ class CpptraceConan(ConanFile):
             self.requires("libdwarf/0.9.1")
         else:
             self.requires("libdwarf/0.8.0")
-        if self.options.unwind_with_libunwind:
+        if self.options.unwind == "libunwind":
             self.requires("libunwind/1.8.0")
 
     def validate(self):
@@ -74,7 +74,7 @@ class CpptraceConan(ConanFile):
             if not self.options.shared:
                 tc.variables["CPPTRACE_STATIC"] = True
             tc.variables["CPPTRACE_USE_SYSTEM_LIBDWARF"] = True
-        if self.options.unwind_with_libunwind:
+        if self.options.unwind == "libunwind":
             tc.variables["CPPTRACE_UNWIND_WITH_LIBUNWIND"] = True
         tc.generate()
         tc = CMakeDeps(self)
@@ -116,3 +116,9 @@ class CpptraceConan(ConanFile):
 
         if not self.options.shared:
             self.cpp_info.defines.append("CPPTRACE_STATIC_DEFINE")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "CPPTRACE"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "cpptrace"
+        self.cpp_info.names["cmake_find_package"] = "CPPTRACE"
+        self.cpp_info.names["cmake_find_package_multi"] = "cpptrace"
