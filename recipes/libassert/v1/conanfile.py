@@ -140,3 +140,9 @@ class LibassertConan(ConanFile):
                 self.cpp_info.system_libs.append("dl")
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs.append("dbghelp")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.filenames["cmake_find_package"] = "assert"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "assert"
+        self.cpp_info.names["cmake_find_package"] = "assert"
+        self.cpp_info.names["cmake_find_package_multi"] = "assert"
