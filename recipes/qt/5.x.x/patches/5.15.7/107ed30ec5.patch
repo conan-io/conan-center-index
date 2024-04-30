@@ -1,0 +1,35 @@
+From 107ed30ec505f20f166cf7df3b99c5c73a680796 Mon Sep 17 00:00:00 2001
+From: Peter Varga <pvarga@inf.u-szeged.hu>
+Date: Fri, 4 Mar 2022 10:42:25 +0100
+Subject: [PATCH] [Backport] Fix for non-constant SIGSTKSZ
+
+On glibc > 2.33, `SIGSTKSZ` might not be constant (in which case
+it expands to a call to `sysconf` which returns a `long int`); see
+https://sourceware.org/pipermail/libc-alpha/2020-October/118513.html
+
+Pass unsigned explicitly to std::max, to avoid relying on template
+argument deduction. This works both with the old-style constant
+`SIGSTKSZ` and the new configurable one.
+
+Initially based on https://chromium-review.googlesource.com/c/2776379
+
+Change-Id: I2279e8423aa70987ce4537674c7291216d23062f
+Review-URL: https://chromium-review.googlesource.com/c/breakpad/breakpad/+/3340721
+Reviewed-by: Allan Sandfeld Jensen <allan.jensen@qt.io>
+---
+ .../breakpad/src/client/linux/handler/exception_handler.cc      | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/chromium/third_party/breakpad/breakpad/src/client/linux/handler/exception_handler.cc b/chromium/third_party/breakpad/breakpad/src/client/linux/handler/exception_handler.cc
+index ca353c40997..4c73053c513 100644
+--- a/chromium/third_party/breakpad/breakpad/src/client/linux/handler/exception_handler.cc
++++ b/chromium/third_party/breakpad/breakpad/src/client/linux/handler/exception_handler.cc
+@@ -138,7 +138,7 @@ void InstallAlternateStackLocked() {
+   // SIGSTKSZ may be too small to prevent the signal handlers from overrunning
+   // the alternative stack. Ensure that the size of the alternative stack is
+   // large enough.
+-  static const unsigned kSigStackSize = std::max(16384, SIGSTKSZ);
++  static const unsigned kSigStackSize = std::max<unsigned>(16384, SIGSTKSZ);
+ 
+   // Only set an alternative stack if there isn't already one, or if the current
+   // one is too small.

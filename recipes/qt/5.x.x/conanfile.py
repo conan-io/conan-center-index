@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.android import android_abi
 from conan.tools.apple import is_apple_os
 from conan.tools.build import build_jobs, check_min_cppstd, cross_building
@@ -26,6 +26,8 @@ class QtConan(ConanFile):
     "qtquickcontrols2", "qtpurchasing", "qtcharts", "qtdatavis3d", "qtvirtualkeyboard", "qtgamepad", "qtscxml",
     "qtspeech", "qtnetworkauth", "qtremoteobjects", "qtwebglplugin", "qtlottie", "qtquicktimeline", "qtquick3d",
     "qtknx", "qtmqtt", "qtcoap", "qtopcua"]
+
+    _module_statuses = ["essential", "addon", "deprecated", "preview"]
 
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
@@ -79,6 +81,7 @@ class QtConan(ConanFile):
         "multiconfiguration": [True, False]
     }
     options.update({module: [True, False] for module in _submodules})
+    options.update({f"{status}_modules": [True, False] for status in _module_statuses})
 
     default_options = {
         "shared": False,
@@ -119,8 +122,10 @@ class QtConan(ConanFile):
         "cross_compile": None,
         "sysroot": None,
         "config": None,
-        "multiconfiguration": False
+        "multiconfiguration": False,
+        "essential_modules": not os.getenv('CONAN_CENTER_BUILD_SERVICE')
     }
+    default_options.update({f"{status}_modules": False for status in _module_statuses if status != "essential"})
 
     no_copy_source = True
     short_paths = True
@@ -208,35 +213,26 @@ class QtConan(ConanFile):
     def configure(self):
         version = Version(self.version)
         if version.minor == "12":
-            del self.options.with_zstd
-            del self.options.with_gssapi
-            del self.options.with_md4c
+            self.options.rm_safe("with_zstd")
+            self.options.rm_safe("with_gssapi")
+            self.options.rm_safe("with_md4c")
 
-        if not self.options.gui:
-            del self.options.opengl
-            del self.options.with_vulkan
-            del self.options.with_freetype
-            del self.options.with_fontconfig
-            del self.options.with_harfbuzz
-            del self.options.with_libjpeg
-            del self.options.with_libpng
-            del self.options.with_md4c
-            del self.options.with_x11
         # if self.settings.os != "Linux":
         #         self.options.with_libiconv = False # QTBUG-84708
 
+        if not self.options.gui:
+            self.options.rm_safe("opengl")
+            self.options.rm_safe("with_vulkan")
+            self.options.rm_safe("with_freetype")
+            self.options.rm_safe("with_fontconfig")
+            self.options.rm_safe("with_harfbuzz")
+            self.options.rm_safe("with_libjpeg")
+            self.options.rm_safe("with_libpng")
+            self.options.rm_safe("with_md4c")
+            self.options.rm_safe("with_x11")
+
         if not self.options.with_dbus:
-            del self.options.with_atspi
-
-        if not self.options.qtmultimedia:
-            self.options.rm_safe("with_libalsa")
-            del self.options.with_openal
-            del self.options.with_gstreamer
-            del self.options.with_pulseaudio
-
-        if self.settings.os in ("FreeBSD", "Linux"):
-            if self.options.qtwebengine:
-                self.options.with_fontconfig = True
+            self.options.rm_safe("with_atspi")
 
         if self.options.multiconfiguration:
             del self.settings.build_type
@@ -252,6 +248,8 @@ class QtConan(ConanFile):
             modulename = section[section.find('"') + 1: section.rfind('"')]
             status = str(config.get(section, "status"))
             if status not in ("obsolete", "ignore"):
+                if status not in self._module_statuses:
+                    raise ConanException(f"module {modulename} has status {status} which is not in self._module_statuses {self._module_statuses}")
                 submodules_tree[modulename] = {"status": status,
                                 "path": str(config.get(section, "path")), "depends": []}
                 if config.has_option(section, "depends"):
@@ -266,17 +264,35 @@ class QtConan(ConanFile):
 
         def _enablemodule(mod):
             if mod != "qtbase":
-                setattr(self.options, mod, True)
-            for req in submodules_tree[mod]["depends"]:
-                _enablemodule(req)
+                if getattr(self.options, mod) not in [True, False]:
+                    setattr(self.options, mod, True)
+                if getattr(self.options, mod):
+                    for req in submodules_tree[mod]["depends"]:
+                        _enablemodule(req)
 
         for module in self._submodules:
             if self.options.get_safe(module):
                 _enablemodule(module)
+            else:
+                if module in submodules_tree:
+                    for status in self._module_statuses:
+                        if getattr(self.options, f"{status}_modules") and submodules_tree[module]['status'] == status:
+                            _enablemodule(module)
+                            break
 
         for module in self._submodules:
             if module in self.options and not self.options.get_safe(module):
                 setattr(self.options, module, False)
+
+        if not self.options.qtmultimedia:
+            self.options.rm_safe("with_libalsa")
+            self.options.rm_safe("with_openal")
+            self.options.rm_safe("with_gstreamer")
+            self.options.rm_safe("with_pulseaudio")
+
+        if self.settings.os in ("FreeBSD", "Linux"):
+            if self.options.qtwebengine:
+                self.options.with_fontconfig = True
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -433,6 +449,8 @@ class QtConan(ConanFile):
                 self.info.settings.compiler.runtime_type = "Release/Debug"
         if self.info.settings.os == "Android":
             del self.info.options.android_sdk
+        for status in self._module_statuses:
+            delattr(self.info.options, f"{status}_modules")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and is_msvc(self):
@@ -687,6 +705,7 @@ class QtConan(ConanFile):
             args.append("-dbus-linked")
         else:
             args.append("-no-dbus")
+        args.append("-bundled-xcb-xinput")
 
         conf_args = [
             ("with_doubleconversion", "doubleconversion"),
@@ -694,7 +713,8 @@ class QtConan(ConanFile):
             ("with_harfbuzz", "harfbuzz"),
             ("with_libjpeg", "libjpeg"),
             ("with_libpng", "libpng"),
-            ("with_sqlite3", "sqlite")
+            ("with_sqlite3", "sqlite"),
+            ("with_md4c", "libmd4c")
         ]
         version = Version(self.version)
         if version.minor > "12":
@@ -1180,11 +1200,11 @@ Examples = bin/datadir/examples""")
                     cocoa_reqs.append("PrintSupport")
                 _create_plugin("QCocoaIntegrationPlugin", "qcocoa", "platforms", cocoa_reqs)
                 _create_plugin("QMacStylePlugin", "qmacstyle", "styles", cocoa_reqs)
-                self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = ["AppKit", "Carbon", "CoreServices", "CoreVideo",
+                self.cpp_info.components["qtQCocoaIntegrationPlugin"].frameworks = ["AppKit", "Carbon", "CoreServices", "CoreVideo",
                     "IOKit", "IOSurface", "Metal", "QuartzCore"]
             elif self.settings.os in ["iOS", "tvOS"]:
                 _create_plugin("QIOSIntegrationPlugin", "qios", "platforms", ["ClipboardSupport", "FontDatabaseSupport", "GraphicsSupport"])
-                self.cpp_info.components["QIOSIntegrationPlugin"].frameworks = ["AudioToolbox", "Foundation", "Metal",
+                self.cpp_info.components["qtQIOSIntegrationPlugin"].frameworks = ["AudioToolbox", "Foundation", "Metal",
                     "MobileCoreServices", "OpenGLES", "QuartzCore", "UIKit"]
             elif self.settings.os == "watchOS":
                 _create_plugin("QMinimalIntegrationPlugin", "qminimal", "platforms", ["EventDispatcherSupport", "FontDatabaseSupport"])
@@ -1196,22 +1216,17 @@ Examples = bin/datadir/examples""")
                     service_support_reqs.append("DBus")
                 _create_module("ServiceSupport", service_support_reqs)
                 _create_module("EdidSupport")
-                xcb_qpa_reqs = []
-                version = Version(self.version)
-                if version.minor > "12":
-                    if self.options.get_safe("with_x11", False):
-                        _create_module("XkbCommonSupport", ["Core", "Gui", "xkbcommon::libxkbcommon-x11"])
-                        xcb_qpa_reqs.append("XkbCommonSupport")
-                    elif self.options.qtwayland:
-                        _create_module("XkbCommonSupport", ["Core", "Gui", "xkbcommon::libxkbcommon"])
+                if self.options.get_safe("with_x11", False):
+                    _create_module("XkbCommonSupport", ["Core", "Gui", "xkbcommon::libxkbcommon-x11"])
+                    xcb_qpa_reqs = ["Core", "Gui", "ServiceSupport", "ThemeSupport", "FontDatabaseSupport", "EdidSupport", "XkbCommonSupport", "xorg::xorg"]
+                elif self.options.qtwayland:
+                    _create_module("XkbCommonSupport", ["Core", "Gui", "xkbcommon::libxkbcommon"])
                 if self.options.with_dbus and self.options.with_atspi:
                     _create_module("LinuxAccessibilitySupport", ["Core", "DBus", "Gui", "AccessibilitySupport", "at-spi2-core::at-spi2-core"])
                     xcb_qpa_reqs.append("LinuxAccessibilitySupport")
                 if self.options.get_safe("with_vulkan"):
                     xcb_qpa_reqs.append("VulkanSupport")
                 if self.options.get_safe("with_x11", False):
-                    xcb_qpa_reqs += ["Core", "Gui", "ServiceSupport", "ThemeSupport", "FontDatabaseSupport",
-                                    "EdidSupport", "xorg::xorg"]
                     _create_module("XcbQpa", xcb_qpa_reqs, has_include_dir=False)
                     _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpa"])
 
@@ -1311,7 +1326,7 @@ Examples = bin/datadir/examples""")
                                       "nss::nss", "libdrm::libdrm", "egl::egl"])
             _create_module("WebEngineCore", webenginereqs)
             if self.settings.os != "Windows":
-                self.cpp_info.components["WebEngineCore"].system_libs.append("resolv")
+                self.cpp_info.components["qtWebEngineCore"].system_libs.append("resolv")
             _create_module("WebEngine", ["WebEngineCore"])
             _create_module("WebEngineWidgets", ["WebEngineCore", "Quick", "PrintSupport", "Widgets", "Gui", "Network"])
 
@@ -1395,7 +1410,8 @@ Examples = bin/datadir/examples""")
                 _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
             if self.settings.os == "Linux":
                 _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
-                _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
+                if self.options.get_safe("with_libalsa", False):
+                    _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
             if self.settings.os == "Windows":
                 _create_plugin("AudioCaptureServicePlugin", "qtmedia_audioengine", "mediaservice", [])
                 _create_plugin("DSServicePlugin", "dsengine", "mediaservice", [])

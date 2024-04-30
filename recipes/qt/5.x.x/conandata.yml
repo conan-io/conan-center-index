@@ -1,55 +1,50 @@
 sources:
-  "5.12.3":
+  "5.15.7":
     url:
-      - "https://download.qt.io/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
-      - "https://mirrors.ukfast.co.uk/sitesqt.io/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
-      - "https://ftp1.nluug.nl/languages/qt/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
-      - "https://ftp2.nluug.nl/languages/qt/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
-      - "https://mirror.netcologne.de/qtproject/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
-      - "https://qt-mirror.dannhauer.de/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
-      - "https://ftp.fau.de/qtproject/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
-      - "https://mirrors.dotsrc.org/qtproject/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
-      - "https://ftp.acc.umu.se/mirror/qt.io/qtproject/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
-      - "https://master.qt.io/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
-      - "https://www.nic.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
-      - "https://qt.mirror.constant.com/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
-      - "https://mirrors.sjtug.sjtu.edu.cn/qt/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
-      - "https://ftp.jaist.ac.jp/pub/qtproject/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
-      - "https://ftp.yz.yamagata-u.ac.jp/pub/qtproject/archive/qt/5.12/5.12.3/single/qt-everywhere-src-5.12.3.tar.xz"
-    sha256: "6462ac74c00ff466487d8ef8d0922971aa5b1d5b33c0753308ec9d57711f5a42"
+      - "https://download.qt.io/archive/qt/5.15/5.15.7/single/qt-everywhere-opensource-src-5.15.7.tar.xz"
+      - "https://qt-mirror.dannhauer.de/archive/qt/5.15/5.15.7/single/qt-everywhere-opensource-src-5.15.7.tar.xz"
+      - "https://www.funet.fi/pub/mirrors/download.qt-project.org/archive/qt/5.15/5.15.7/single/qt-everywhere-opensource-src-5.15.7.tar.xz"
+      - "https://ftp.fau.de/qtproject/archive/qt/5.15/5.15.7/single/qt-everywhere-opensource-src-5.15.7.tar.xz"
+    sha256: "8a71986676a3f37a198a9113acedbfd5bc5606a459b6b85816d951458adbe9a0"
 patches:
-  "5.12.3":
-    - base_path: qt5/qtbase
-      patch_file: patches/5.12.3/0000-missing-limits-header.patch
-      patch_type: portability
-      patch_description: fixes compilation error due to missing c++ stdlib header
-
-    - base_path: qt5/qtbase
-      patch_file: patches/5.12.3/0001-fix-configure-libs-var.patch
-      patch_type: bugfix
-      patch_description: fix parsing of <LIBNAME>_LIBS variables when configuring Qt. Backported from 5.15.13
-      patch_source: https://codereview.qt-project.org/c/qt/qtbase/+/281892
-
-    - base_path: qt5/qtbase
-      patch_description: Fix qmake build with apple-clang>=15
-      patch_file: patches/5.12.3/0002-fix-qmake-default-libdirs-apple-clang-15.patch
-      patch_source: https://codereview.qt-project.org/c/qt/qtbase/+/503916
-      patch_type: portability
-
-    - base_path: qt5/qtbase
-      patch_description: Dont error with features that aren't supported on Macos < 10.13
-      patch_file: patches/5.12.3/0003-futimens-warning-only-macos.patch
-      patch_source: https://codereview.qt-project.org/c/qt/qtbase/+/295266
-      patch_type: portability
-
-    - base_path: qt5/qtbase
-      patch_description: Add missing header from cocoa plugin
-      patch_file: patches/5.12.3/0004-missing-coregraphics-header.patch
-      patch_source: https://codereview.qt-project.org/c/qt/qtbase/+/378706
-      patch_type: portability
-
-    - base_path: qt5/qtbase
-      patch_description: Fix missing freetype dependencies
-      patch_file: patches/5.12.3/0005-freetype-dependencies.patch
-      patch_source: https://codereview.qt-project.org/c/qt/qtbase/+/273939
-      patch_type: portability
+  "5.15.7":
+    - patch_file: "patches/5.15.7/337f28c9ab.patch"
+      base_path: "qt5/qtbase"
+    - patch_file: "patches/5.15.7/aa2a39dea5.diff"
+      base_path: "qt5/qtbase"
+    - patch_file: "patches/5.15.7/c72097e.diff"
+      base_path: "qt5/qtwebengine"
+    - patch_file: "patches/5.15.7/fix-macdeployqt.diff"
+      base_path: "qt5/qttools"
+    - patch_file: "patches/5.15.7/dece6f5.diff"
+      base_path: "qt5/qtbase"
+    - patch_file: "patches/5.15.7/QTBUG-98813.patch"
+      base_path: "qt5/qtwebengine/src/3rdparty"
+    - patch_file: "patches/5.15.7/d3396fb6fc.patch"
+      base_path: "qt5/qtwebengine/src/3rdparty"
+    - patch_file: "patches/5.15.7/107ed30ec5.patch"
+      base_path: "qt5/qtwebengine/src/3rdparty"
+    - patch_file: "patches/5.15.7/chromium-v8-missing-constexpr.patch"
+      base_path: "qt5/qtwebengine/src/3rdparty/chromium/v8"
+    - patch_file: "patches/5.15.7/chromium-skia-missing-iterator-include.patch"
+      base_path: "qt5/qtwebengine/src/3rdparty"
+    - patch_file: "patches/5.15.7/skia-cd397f3.diff"
+      base_path: "qt5/qtwebengine/src/3rdparty/chromium/third_party/skia"
+    - patch_file: "patches/5.15.7/0001-Find-fontconfig-using-pkg-config.patch"
+      base_path: "qt5/qtwebengine/src/3rdparty"
+    - patch_file: "patches/5.15.7/android-backtrace.diff"
+      base_path: "qt5/qtbase"
+    - patch_file: "patches/5.15.7/android-openssl.diff"
+      base_path: "qt5/qtbase"
+    - patch_file: "patches/5.15.7/android-new-ndk.diff"
+      base_path: "qt5/qtbase"
+    - patch_file: "patches/5.15.7/5.15.7-fix-qmake-default-libdirs-apple-clang-15.patch"
+      base_path: "qt5/qtbase"
+      patch_description: "Fix build with apple-clang 15"
+      patch_type: "portability"
+      patch_source: "https://codereview.qt-project.org/c/qt/qtbase/+/503916"
+    - patch_file: "patches/5.15.7/5.15.7-fix-macos-cpp-lib-memory-resource.patch"
+      base_path: "qt5/qtbase"
+      patch_description: "Fix usage of memory_resource with apple-clang>=15 and deployment target of macOS < 14"
+      patch_type: "portability"
+      patch_source: "https://codereview.qt-project.org/c/qt/qtbase/+/482392"

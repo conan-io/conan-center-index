@@ -1,8 +1,6 @@
-diff --git a/mkspecs/features/toolchain.prf b/mkspecs/features/toolchain.prf
-index 9c3a64aa8b..5fa2594f0a 100644
 --- a/mkspecs/features/toolchain.prf
 +++ b/mkspecs/features/toolchain.prf
-@@ -275,9 +275,12 @@ isEmpty($${target_prefix}.INCDIRS) {
+@@ -283,9 +283,12 @@ isEmpty($${target_prefix}.INCDIRS) {
                  }
              }
          }
@@ -17,7 +15,7 @@ index 9c3a64aa8b..5fa2594f0a 100644
          QMAKE_DEFAULT_LIBDIRS = $$unique(QMAKE_DEFAULT_LIBDIRS)
      } else: ghs {
          cmd = $$QMAKE_CXX $$QMAKE_CXXFLAGS -$${LITERAL_HASH} -o /tmp/fake_output /tmp/fake_input.cpp
-@@ -391,7 +394,7 @@ isEmpty($${target_prefix}.INCDIRS) {
+@@ -407,7 +410,7 @@ isEmpty($${target_prefix}.INCDIRS) {
          QMAKE_DEFAULT_INCDIRS = $$split(INCLUDE, $$QMAKE_DIRLIST_SEP)
      }
  
