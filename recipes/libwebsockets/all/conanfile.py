@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.tools.files import get, replace_in_file, rmdir, copy, save, collect_libs
-from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -296,7 +295,12 @@ class LibwebsocketsConan(ConanFile):
         tc.variables["LWS_WITH_STATIC"] = not self.options.shared
         tc.variables["LWS_WITH_SSL"] = bool(self.options.with_ssl)
 
+        # Allow forwarding project targets to try_compile and derivatives
         tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
+
+        # Prevent using PkgConfig to locate OpenSSL (may find system's)
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_PkgConfig"] = True
+
         if self.options.with_ssl == "mbedtls":
             tc.variables["LWS_WITH_MBEDTLS"] = True
             tc.variables["LWS_MBEDTLS_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("mbedtls"))
@@ -423,9 +427,6 @@ class LibwebsocketsConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-        pkgconfigdeps = PkgConfigDeps(self)
-        pkgconfigdeps.generate()
-
     def _patch_sources(self):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         replace_in_file(self,
@@ -435,10 +436,13 @@ class LibwebsocketsConan(ConanFile):
         )
 
         # The find_package call is nested, but the results are referenced outside
-        replace_in_file(self, 
-                        os.path.join(self.source_folder, "lib", "tls", "CMakeLists.txt"),
+        tls_cmakelists = os.path.join(self.source_folder, "lib", "tls", "CMakeLists.txt")
+        replace_in_file(self, tls_cmakelists,
                         "find_package(OpenSSL REQUIRED)",
                         "find_package(OpenSSL REQUIRED GLOBAL)")
+        
+        # Don't attempt to locate OpenSSL with PkgConfig (may find system's)
+        replace_in_file(self, tls_cmakelists, "pkg_check_modules", "#pkg_check_modules")
 
         if Version(self.version) == "4.0.15" and self.options.with_ssl:
             replace_in_file(self,
