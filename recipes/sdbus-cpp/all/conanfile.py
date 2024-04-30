@@ -38,8 +38,16 @@ class SdbusCppConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
+        if Version(self.version) < "2.0.0":
+            return {
+                "gcc": "7",
+                "clang": "6",
+            }
+
+        # non-trivial designated initializers are not supported in gcc < 8
+        # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55606
         return {
-            "gcc": "7",
+            "gcc": "8",
             "clang": "6",
         }
 
@@ -90,6 +98,7 @@ class SdbusCppConan(ConanFile):
         tc.variables["BUILD_DOC"] = False
         tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_LIBSYSTEMD"] = False
+        tc.variables["SDBUSCPP_BUILD_DOCS"] = False
         tc.generate()
 
         # workaround for https://gitlab.kitware.com/cmake/cmake/-/issues/18150
