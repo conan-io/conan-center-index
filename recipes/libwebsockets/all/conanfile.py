@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
-from conan.tools.files import get, replace_in_file, rmdir, copy, save, collect_libs
+from conan.tools.files import get, replace_in_file, rmdir, copy, save, collect_libs, save
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -298,8 +298,8 @@ class LibwebsocketsConan(ConanFile):
         # Allow forwarding project targets to try_compile and derivatives
         tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
 
-        # Prevent using PkgConfig to locate OpenSSL (may find system's)
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_PkgConfig"] = True
+        # Ensure find_package(OpenSSL) is called early
+        tc.variables["CMAKE_PROJECT_libwebsockets_INCLUDE"] = os.path.join(self.source_folder, "project_include.cmake")
 
         if self.options.with_ssl == "mbedtls":
             tc.variables["LWS_WITH_MBEDTLS"] = True
@@ -435,14 +435,10 @@ class LibwebsocketsConan(ConanFile):
             "",
         )
 
-        # The find_package call is nested, but the results are referenced outside
-        tls_cmakelists = os.path.join(self.source_folder, "lib", "tls", "CMakeLists.txt")
-        replace_in_file(self, tls_cmakelists,
-                        "find_package(OpenSSL REQUIRED)",
-                        "find_package(OpenSSL REQUIRED GLOBAL)")
-        
-        # Don't attempt to locate OpenSSL with PkgConfig (may find system's)
-        replace_in_file(self, tls_cmakelists, "pkg_check_modules", "#pkg_check_modules")
+        # Early call to find_package(OpenSSL) because its referenced in different places
+        if self.options.with_ssl == "openssl":
+            project_include_file = os.path.join(self.source_folder, "project_include.cmake")
+            save(self, project_include_file, "find_package(OpenSSL REQUIRED)")
 
         if Version(self.version) == "4.0.15" and self.options.with_ssl:
             replace_in_file(self,
