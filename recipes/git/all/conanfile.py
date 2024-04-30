@@ -86,7 +86,7 @@ class PackageConan(ConanFile):
             "--with-tcltk=no"
         ])
         if self.settings.os in ("Linux", "FreeBSD"):
-            tc.ldflags.append("-ldl")
+            tc.extra_ldflags.append("-ldl")
         tc.generate()
 
         # If Visual Studio is supported
