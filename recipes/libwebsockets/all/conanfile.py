@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.tools.files import get, replace_in_file, rmdir, copy, save, collect_libs
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -224,8 +225,7 @@ class LibwebsocketsConan(ConanFile):
             self.requires("sqlite3/3.44.2")
 
         if self.options.with_ssl == "openssl":
-            # Cannot add the [>=1.1 <4] range, as it seems openssl3 makes it fail
-            self.requires("openssl/1.1.1w", transitive_headers=True)
+            self.requires("openssl/[>=1.1.1w <4]", transitive_headers=True)
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/3.5.0")
         elif self.options.with_ssl == "wolfssl":
@@ -296,10 +296,8 @@ class LibwebsocketsConan(ConanFile):
         tc.variables["LWS_WITH_STATIC"] = not self.options.shared
         tc.variables["LWS_WITH_SSL"] = bool(self.options.with_ssl)
 
-        if self.options.with_ssl == "openssl":
-            tc.variables["LWS_OPENSSL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("openssl"))
-            tc.variables["LWS_OPENSSL_INCLUDE_DIRS"] = self._cmakify_path_list(self.dependencies["openssl"].cpp_info.includedirs)
-        elif self.options.with_ssl == "mbedtls":
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
+        if self.options.with_ssl == "mbedtls":
             tc.variables["LWS_WITH_MBEDTLS"] = True
             tc.variables["LWS_MBEDTLS_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("mbedtls"))
             tc.variables["LWS_MBEDTLS_INCLUDE_DIRS"] = self._cmakify_path_list(self.dependencies["mbedtls"].cpp_info.includedirs)
@@ -425,6 +423,9 @@ class LibwebsocketsConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
+        pkgconfigdeps = PkgConfigDeps(self)
+        pkgconfigdeps.generate()
+
     def _patch_sources(self):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         replace_in_file(self,
@@ -432,6 +433,13 @@ class LibwebsocketsConan(ConanFile):
             "SET(CMAKE_INSTALL_NAME_DIR \"${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}${LIB_SUFFIX}\")",
             "",
         )
+
+        # The find_package call is nested, but the results are referenced outside
+        replace_in_file(self, 
+                        os.path.join(self.source_folder, "lib", "tls", "CMakeLists.txt"),
+                        "find_package(OpenSSL REQUIRED)",
+                        "find_package(OpenSSL REQUIRED GLOBAL)")
+
         if Version(self.version) == "4.0.15" and self.options.with_ssl:
             replace_in_file(self,
                 cmakelists,
