@@ -52,15 +52,15 @@ class ThorvgConan(ConanFile):
     }
     # See more here: https://github.com/thorvg/thorvg/blob/main/meson_options.txt
     options_description = {
-        "engines": "Enable Rasterizer Engine in thorvg",
-        "loaders": "Enable File Loaders in thorvg",
-        "savers": "Enable File Savers in thorvg",
-        "threads": "Enable the multi-threading task scheduler in thorvg",
-        "vector": "Enable CPU Vectorization(SIMD) in thorvg (renamed in 0.13.1 to 'simd')",
-        "simd": "Enable CPU Vectorization(SIMD) in thorvg",
-        "bindings": "Enable API bindings",
-        "tools": "Enable building thorvg tools",
-        "examples": "Enable building examples",
+        "with_engines": "Enable Rasterizer Engine in thorvg",
+        "with_loaders": "Enable File Loaders in thorvg",
+        "with_savers": "Enable File Savers in thorvg",
+        "with_threads": "Enable the multi-threading task scheduler in thorvg",
+        "with_vector": "Enable CPU Vectorization(SIMD) in thorvg (renamed in 0.13.1 to 'simd')",
+        "with_simd": "Enable CPU Vectorization(SIMD) in thorvg",
+        "with_bindings": "Enable API bindings",
+        "with_tools": "Enable building thorvg tools",
+        "with_examples": "Enable building examples",
     }
 
     @property
