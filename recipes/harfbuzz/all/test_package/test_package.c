@@ -2,8 +2,8 @@
 #include <string.h>
 #include <hb.h>
 
-void main() {
+int main() {
     const char *version = hb_version_string();
-    printf("harfbuzz version: %s", version);
-    return;
+    printf("harfbuzz version: %s\n", version);
+    return 0;
 }
