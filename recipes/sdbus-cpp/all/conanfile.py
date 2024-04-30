@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.51.0"
@@ -38,23 +38,15 @@ class SdbusCppConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        if Version(self.version) < "2.0.0":
-            return {
-                "gcc": "7",
-                "clang": "6",
-            }
-
         # non-trivial designated initializers are not supported in gcc < 8
         # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55606
         return {
-            "gcc": "8",
+            "gcc": "7" if Version(self.version) < "2.0.0" else "8",
             "clang": "6",
         }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder,
-                 self.export_sources_folder)
+        export_conandata_patches(self)
 
     def configure(self):
         if Version(self.version) < "0.9.0":
@@ -144,5 +136,4 @@ class SdbusCppConan(ConanFile):
             "libsystemd::libsystemd")
         if self.options.with_code_gen:
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH env var with : {bin_path}")
             self.env_info.PATH.append(bin_path)
