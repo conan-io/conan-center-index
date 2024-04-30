@@ -438,7 +438,7 @@ class LibwebsocketsConan(ConanFile):
         # Early call to find_package(OpenSSL) because its referenced in different places
         if self.options.with_ssl == "openssl":
             project_include_file = os.path.join(self.source_folder, "project_include.cmake")
-            save(self, project_include_file, "find_package(OpenSSL REQUIRED)")
+            save(self, project_include_file, 'find_package(OpenSSL REQUIRED)\nset(OPENSSL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})')
 
         if Version(self.version) == "4.0.15" and self.options.with_ssl:
             replace_in_file(self,
