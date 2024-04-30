@@ -402,11 +402,8 @@ class PclConan(ConanFile):
         if self._is_enabled("zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
         if self._is_enabled("openmp"):
-            if self._is_enabled("openmp"):
-                if self.settings.compiler in ["clang", "apple-clang"]:
-                    self.requires("llvm-openmp/17.0.4", transitive_headers=True, transitive_libs=True)
-                else:
-                    self.output.info("Using system OpenMP")
+            if self.settings.compiler in ["clang", "apple-clang"]:
+                self.requires("llvm-openmp/17.0.4", transitive_headers=True, transitive_libs=True)
         # TODO:
         # self.requires("vtk/9.x.x", transitive_headers=True)
         # self.requires("openni/x.x.x", transitive_headers=True)
@@ -501,6 +498,8 @@ class PclConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        if Version(self.version) < "1.14.0":
+            deps.set_property("eigen", "cmake_file_name", "EIGEN")
         deps.set_property("flann", "cmake_file_name", "FLANN")
         deps.set_property("flann", "cmake_target_name", "FLANN::FLANN")
         deps.set_property("libpcap", "cmake_file_name", "PCAP")
@@ -513,10 +512,10 @@ class PclConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        packages = ["Eigen", "FLANN", "GLEW", "Pcap", "Qhull", "libusb"]
-        if Version(self.version) >= "1.14.0":
-            packages.remove("Eigen")
-        for mod in packages:
+        find_modules_to_remove = ["FLANN", "GLEW", "Pcap", "Qhull", "libusb"]
+        if Version(self.version) < "1.14.0":
+            find_modules_to_remove.append("Eigen")
+        for mod in find_modules_to_remove:
             os.remove(os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake"))
 
     def build(self):
@@ -606,13 +605,6 @@ class PclConan(ConanFile):
                 openmp_flags = ["/Qopenmp"] if self.settings.os == "Windows" else ["-Qopenmp"]
             self.cpp_info.cflags += openmp_flags
             self.cpp_info.cxxflags += openmp_flags
-            self.cpp_info.sharedlinkflags += openmp_flags
-            self.cpp_info.exelinkflags += openmp_flags
-            if self.settings.os == "Windows":
-                if is_msvc(self):
-                    self.cpp_info.system_libs.append("delayimp")
-                elif self.settings.compiler == "gcc":
-                    self.cpp_info.system_libs.append("gomp")
 
         # TODO: Legacy, to be removed on Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "PCL"
