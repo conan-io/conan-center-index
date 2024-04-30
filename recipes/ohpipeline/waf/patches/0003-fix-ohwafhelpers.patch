@@ -14,12 +14,12 @@ index c7e860f..37ea6f7 100644
      if platform.system() == 'Linux' and platform.architecture()[0] == '32bit':
          return 'Linux-x86'
 -    if platform.system() == 'Linux' and platform.architecture()[0] == '64bit':
-+    if platform.system() == 'Linux' and platform.architecture()[0] == '64bit' and platform.machine() == 'AMD64':
++    if platform.system() == 'Linux' and platform.architecture()[0] == '64bit' and platform.machine() in ['AMD64', 'x86_64']:
          return 'Linux-x64'
 -    if platform.system() == 'Darwin':
 +    if platform.system() == 'Linux' and platform.architecture()[0] == '64bit' and platform.machine() in ['arm64', 'aarch64']:
 +        return 'Linux-arm64'
-+    if platform.system() == 'Darwin' and platform.architecture()[0] == '64bit' and platform.machine() == 'AMD64':
++    if platform.system() == 'Darwin' and platform.architecture()[0] == '64bit' and platform.machine() in ['AMD64', 'x86_64']:
          # 32bit Mac support no longer supported on Apple platforms
          return 'Mac-x64'
 +    if platform.system() == 'Darwin' and platform.architecture()[0] == '64bit' and platform.machine() in ['arm64', 'aarch64']:
