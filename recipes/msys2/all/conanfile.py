@@ -33,6 +33,7 @@ class lock:
 
     __del__ = close
 
+
 class MSYS2Conan(ConanFile):
     name = "msys2"
     description = "MSYS2 is a software distro and building platform for Windows"
@@ -74,14 +75,12 @@ class MSYS2Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=False) # Preserve tarball root dir (msys64/)
+            destination=self.source_folder, strip_root=False)  # Preserve tarball root dir (msys64/)
 
     def _update_pacman(self):
         with chdir(self, os.path.join(self._msys_dir, "usr", "bin")):
             try:
                 self._kill_pacman()
-                if self.options.pacman_source:
-                    self.run(f'bash -l -c "sed -i \\\"s#https\?://mirror.msys2.org/#{self.options.pacman_source}/#g\\\" /etc/pacman.d/mirrorlist*"')
                 # https://www.msys2.org/docs/ci/
                 self.run('bash -l -c "pacman --debug --noconfirm --ask 20 -Syuu"')  # Core update (in case any core packages are outdated)
                 self._kill_pacman()
@@ -125,7 +124,7 @@ class MSYS2Conan(ConanFile):
 
     @property
     def _msys_dir(self):
-        subdir = "msys64" # top-level directoy in tarball
+        subdir = "msys64"  # top-level directoy in tarball
         return os.path.join(self.source_folder, subdir)
 
     def build(self):
@@ -138,6 +137,13 @@ class MSYS2Conan(ConanFile):
             packages.extend(str(self.options.packages).split(","))
         if self.options.additional_packages:
             packages.extend(str(self.options.additional_packages).split(","))
+
+        if self.options.pacman_source:
+            pacman_dir = os.path.join(self._msys_dir, "etc/pacman.d")
+            for file in os.listdir(pacman_dir):
+                if file.startswith("mirrorlist"):
+                    replace_in_file(self, os.path.join(pacman_dir, file), "https://mirror.msys2.org", str(self.options.pacman_source), strict=False)
+                    replace_in_file(self, os.path.join(pacman_dir, file), "http://mirror.msys2.org", str(self.options.pacman_source), strict=False)
 
         self._update_pacman()
 
@@ -160,7 +166,7 @@ class MSYS2Conan(ConanFile):
 
         # Prepend the PKG_CONFIG_PATH environment variable with an eventual PKG_CONFIG_PATH environment variable
         replace_in_file(self, os.path.join(self._msys_dir, "etc", "profile"),
-                              'PKG_CONFIG_PATH="', 'PKG_CONFIG_PATH="$PKG_CONFIG_PATH:')
+                        'PKG_CONFIG_PATH="', 'PKG_CONFIG_PATH="$PKG_CONFIG_PATH:')
 
     def package(self):
         excludes = None
