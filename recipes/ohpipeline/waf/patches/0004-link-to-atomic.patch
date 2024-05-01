@@ -1,5 +1,5 @@
 diff --git a/wscript b/wscript
-index d83690c0..ac9e1820 100755
+index d83690c0..3d9977cb 100755
 --- a/wscript
 +++ b/wscript
 @@ -58,20 +58,22 @@ def configure(conf):
@@ -13,7 +13,7 @@ index d83690c0..ac9e1820 100755
      if conf.options.dest_platform.startswith('Windows'):
          conf.env.LIB_OHNET=['ws2_32', 'iphlpapi', 'dbghelp', 'psapi', 'userenv']
      conf.env.STLIB_OHNET=['TestFramework', 'ohNetCore']
-+    if conf.options.dest_platform.startswith('Linux'):
++    if conf.options.dest_platform.startswith('Linux') and 'clang' in conf.env.CC[0]:
 +        conf.env.append_value('STLIB_OHNET', ['atomic'])
  
      if is_core_platform(conf):
