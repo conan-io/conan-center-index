@@ -81,7 +81,7 @@ class OhPipelineConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         with chdir(self, self.source_folder):
-            self.run(f"waf configure --ohnet-include-dir={self.dependencies['ohnet'].cpp_info.includedirs[0]} --ohnet-lib-dir={self.dependencies['ohnet'].cpp_info.libdirs[0]} --ohnet={self.dependencies['ohnet'].cpp_info.libdirs[0]}/.. --ssl={self.dependencies['openssl'].cpp_info.libdirs[0]}/.. --with-default-fpm")
+            self.run(f"LDFLAGS=-L{self.dependencies['zlib'].cpp_info.libdirs[0]} waf configure --ohnet-include-dir={self.dependencies['ohnet'].cpp_info.includedirs[0]} --ohnet-lib-dir={self.dependencies['ohnet'].cpp_info.libdirs[0]} --ohnet={self.dependencies['ohnet'].cpp_info.libdirs[0]}/.. --ssl={self.dependencies['openssl'].cpp_info.libdirs[0]}/.. --with-default-fpm")
             self.run("waf build")
 
     def package(self):
