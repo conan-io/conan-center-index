@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, copy, get, export_conandata_patches, apply_conandata_patches, unzip
+from conan.tools.files import chdir, copy, get, export_conandata_patches, apply_conandata_patches, rm, unzip
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -88,7 +88,8 @@ class OhPipelineConan(ConanFile):
         copy(self, "License.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         with chdir(self, self.source_folder):
             self.run("waf bundle")
-            unzip(self, 'build/ohMediaPlayer.tar.gz', self.package_folder, strip_root=True)
+            unzip(self, "build/ohMediaPlayer.tar.gz", self.package_folder, strip_root=True)
+            rm(self, "dependencies.json", self.package_folder)
 
     def package_info(self):
         self.cpp_info.libs = [
