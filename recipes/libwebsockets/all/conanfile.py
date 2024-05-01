@@ -443,6 +443,11 @@ class LibwebsocketsConan(ConanFile):
             project_include_file = os.path.join(self.source_folder, "project_include.cmake")
             save(self, project_include_file, 'find_package(OpenSSL REQUIRED)\nset(OPENSSL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})')
 
+        # Prevent locating and copying OpenSSL binaries (not needed by the recipe)
+        replace_in_file(self, 
+                        os.path.join(self.source_folder, "cmake", "FindOpenSSLbins.cmake"),
+                        "if(OPENSSL_FOUND)", "if(FALSE)")
+
         if Version(self.version) == "4.0.15" and self.options.with_ssl:
             replace_in_file(self,
                 cmakelists,
