@@ -8,9 +8,6 @@ sources:
   "9d":
     url: "https://ijg.org/files/jpegsrc.v9d.tar.gz"
     sha256: "2303a6acfb6cc533e0e86e8a9d29f7e6079e118b9de3f96e07a71a11c082fa6a"
-  "9c":
-    url: "https://ijg.org/files/jpegsrc.v9c.tar.gz"
-    sha256: "682aee469c3ca857c4c38c37a6edadbfca4b04d42e56613b11590ec6aa4a278d"
 patches:
   "9f":
     - patch_file: "patches/0001-9f-libjpeg-add-msvc-dll-support.patch"

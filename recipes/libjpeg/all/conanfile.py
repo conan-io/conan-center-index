@@ -1,14 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, MSBuild, MSBuildToolchain
 import os
 import re
-import shutil
 
 
 required_conan_version = ">=1.55.0"
@@ -87,7 +86,7 @@ class LibjpegConan(ConanFile):
         apply_conandata_patches(self)
         if is_msvc(self):
             with chdir(self, self.source_folder):
-                self.run(f"nmake /f makefile.vs setupcopy-v16")
+                self.run("nmake /f makefile.vs setupcopy-v16")
 
                 # Rename target to 'libjpeg.lib' to match legacy behaviour (otherwise we break backwards compatibility)
                 jpeg_vcxproj = os.path.join(self.source_folder, "jpeg.vcxproj")
