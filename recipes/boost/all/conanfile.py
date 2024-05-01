@@ -272,10 +272,15 @@ class BoostConan(ConanFile):
         cppstd = self.settings.compiler.get_safe("cppstd")
         if cppstd:
             return valid_min_cppstd(self, 14)
-        compiler_version = self._min_compiler_version_default_cxx14
-        if compiler_version:
+        required_compiler_version = self._min_compiler_version_default_cxx14        
+        if required_compiler_version:
+            msvc_versions = {14: 190, 15: 191, 16: 192, 17: 193}
+            compiler_version = Version(self.settings.compiler.version)
+            is_visual_studio = str(self.settings.compiler) == "Visual Studio"
+            # supported_cppstd only supports msvc, but not Visual Studio as compiler
+            supported_cxx14 = "14" in supported_cppstd(self, "msvc", msvc_versions.get(compiler_version)) if is_visual_studio else "14" in supported_cppstd(self)
             # supported_cppstd: lists GCC 5 due partial support for C++14, but not enough for Boost
-            return (Version(self.settings.compiler.version) >= compiler_version) and "14" in supported_cppstd(self)
+            return (compiler_version >= required_compiler_version) and supported_cxx14
 
 
     @property
