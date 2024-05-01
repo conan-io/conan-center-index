@@ -161,7 +161,10 @@ index c7e860f..37ea6f7 100644
      from filetasks import find_resource_or_fail
  
      host_platform = guess_dest_platform()
-@@ -440,23 +436,25 @@ def create_ros_from_dir_tree(bld, src_path, ros_name):
+@@ -437,26 +433,28 @@ def create_ros_from_dir_tree(bld, src_path, ros_name):
+             key = key_path + '/' + f
+             src_file = os.path.join(rel_path, f)
+             line = '  <entry    type=\"file\"   key=\"{0}\">{1}</entry>\n'.format(key, src_file)
              fh.write(line)
      fh.write('</ros>')
      fh.close()
@@ -169,19 +172,29 @@ index c7e860f..37ea6f7 100644
  
  def get_platform_info(dest_platform):
      platforms = {
-         'Linux-x86': dict(endian='LITTLE',   build_platform='linux2', ohnet_plat_dir='Posix'),
-         'Linux-x64': dict(endian='LITTLE',   build_platform='linux2', ohnet_plat_dir='Posix'),
-         'Linux-ARM': dict(endian='LITTLE',   build_platform='linux2', ohnet_plat_dir='Posix'),
-+        'Linux-arm64': dict(endian='LITTLE', build_platform='linux2', ohnet_plat_dir='Posix'),
-         'Linux-armhf': dict(endian='LITTLE', build_platform='linux2', ohnet_plat_dir='Posix'),
-         'Linux-rpi': dict(endian='LITTLE',   build_platform='linux2', ohnet_plat_dir='Posix'),
-         'Linux-mipsel': dict(endian='LITTLE',build_platform='linux2', ohnet_plat_dir='Posix'),
-         'Linux-ppc32': dict(endian='BIG',    build_platform='linux2', ohnet_plat_dir='Posix'),
+-        'Linux-x86': dict(endian='LITTLE',   build_platform='linux2', ohnet_plat_dir='Posix'),
+-        'Linux-x64': dict(endian='LITTLE',   build_platform='linux2', ohnet_plat_dir='Posix'),
+-        'Linux-ARM': dict(endian='LITTLE',   build_platform='linux2', ohnet_plat_dir='Posix'),
+-        'Linux-armhf': dict(endian='LITTLE', build_platform='linux2', ohnet_plat_dir='Posix'),
+-        'Linux-rpi': dict(endian='LITTLE',   build_platform='linux2', ohnet_plat_dir='Posix'),
+-        'Linux-mipsel': dict(endian='LITTLE',build_platform='linux2', ohnet_plat_dir='Posix'),
+-        'Linux-ppc32': dict(endian='BIG',    build_platform='linux2', ohnet_plat_dir='Posix'),
++        'Linux-x86': dict(endian='LITTLE',   build_platform='linux', ohnet_plat_dir='Posix'),
++        'Linux-x64': dict(endian='LITTLE',   build_platform='linux', ohnet_plat_dir='Posix'),
++        'Linux-ARM': dict(endian='LITTLE',   build_platform='linux', ohnet_plat_dir='Posix'),
++        'Linux-arm64': dict(endian='LITTLE', build_platform='linux', ohnet_plat_dir='Posix'),
++        'Linux-armhf': dict(endian='LITTLE', build_platform='linux', ohnet_plat_dir='Posix'),
++        'Linux-rpi': dict(endian='LITTLE',   build_platform='linux', ohnet_plat_dir='Posix'),
++        'Linux-mipsel': dict(endian='LITTLE',build_platform='linux', ohnet_plat_dir='Posix'),
++        'Linux-ppc32': dict(endian='BIG',    build_platform='linux', ohnet_plat_dir='Posix'),
          'Windows-x86': dict(endian='LITTLE', build_platform='win32',  ohnet_plat_dir='Windows'),
          'Windows-x64': dict(endian='LITTLE', build_platform='win32',  ohnet_plat_dir='Windows'),
-         'Core-ppc32': dict(endian='BIG',     build_platform='linux2', ohnet_plat_dir='Core-ppc32'),
-         'Core-armv5': dict(endian='LITTLE',  build_platform='linux2', ohnet_plat_dir='Core-armv5'),
-         'Core-armv6': dict(endian='LITTLE',  build_platform='linux2', ohnet_plat_dir='Core-armv6'),
+-        'Core-ppc32': dict(endian='BIG',     build_platform='linux2', ohnet_plat_dir='Core-ppc32'),
+-        'Core-armv5': dict(endian='LITTLE',  build_platform='linux2', ohnet_plat_dir='Core-armv5'),
+-        'Core-armv6': dict(endian='LITTLE',  build_platform='linux2', ohnet_plat_dir='Core-armv6'),
++        'Core-ppc32': dict(endian='BIG',     build_platform='linux', ohnet_plat_dir='Core-ppc32'),
++        'Core-armv5': dict(endian='LITTLE',  build_platform='linux', ohnet_plat_dir='Core-armv5'),
++        'Core-armv6': dict(endian='LITTLE',  build_platform='linux', ohnet_plat_dir='Core-armv6'),
          'Mac-x64': dict(endian='LITTLE',     build_platform='darwin', ohnet_plat_dir='Mac-x64'),
 +        'Mac-arm64': dict(endian='LITTLE',   build_platform='darwin', ohnet_plat_dir='Mac-arm64'),
          'iOs-ARM': dict(endian='LITTLE',     build_platform='darwin', ohnet_plat_dir='Mac/arm'),
