@@ -4,31 +4,10 @@ sources:
     # Refer to https://github.com/util-linux/util-linux/issues/2875.
     # url: "https://github.com/util-linux/util-linux/archive/refs/tags/v2.40.tar.gz"
     # sha256: "f7ff8573289313e38ee3378cbc2938f34444a8cb546e1236e46151834be69784"
-    url: "https://github.com/util-linux/util-linux/archive/a0df678b5ce6a671fea13b47a3121f4cc97b2fb5.tar.gz"
-    sha256: "3a632264e2385cf1751431411fa640cf494035c413e90acb1d4d0ca06ed329c3"
+    url: "https://github.com/util-linux/util-linux/archive/4c55f993bdaaae31d2b0475d40821cf56af5cb2e.tar.gz"
+    sha256: "6983965d90bdf74388eea4977d54dec43c19bd2f5f5a47fe3927a5616c357d6a"
 patches:
   "2.40":
     # Do not merge this patch!
     # It is a hack to build but needs verification that it actually works properly.
     - patch_file: "patches/2.40-0001-Add-patch-to-workaround-alias-on-macOS.patch"
-    - patch_file: "patches/0001-meson-Add-build-blkpr-option.patch"
-    - patch_file: "patches/0002-meson-Add-build-blkzone-option.patch"
-    - patch_file: "patches/0003-meson-Add-build-fsfreeze-option.patch"
-    - patch_file: "patches/0004-meson-Add-build-blkdiscard-option.patch"
-    - patch_file: "patches/0005-meson-Add-build-ldattach-option.patch"
-    - patch_file: "patches/0006-meson-Add-build-rtcwake-option.patch"
-    - patch_file: "patches/0007-meson-Add-build-setarch-option.patch"
-    - patch_file: "patches/0008-meson-Use-has_type-instead-of-sizeof-to-detect-cpu_s.patch"
-    - patch_file: "patches/0009-meson-Add-build-chcpu-option.patch"
-    - patch_file: "patches/0010-meson-Add-build-blockdev-option.patch"
-    - patch_file: "patches/0011-meson-Add-have_pty-variable-to-check-if-pty-is-avail.patch"
-    - patch_file: "patches/0012-meson-Require-pty-for-the-su-and-runuser-executables.patch"
-    - patch_file: "patches/0013-meson-Add-build-script-option.patch"
-    - patch_file: "patches/0014-meson-Add-build-scriptlive-option.patch"
-    - patch_file: "patches/0015-meson-Add-build-fadvise-option.patch"
-    - patch_file: "patches/0016-meson-Fix-build-by-default-and-install-behavior-for-.patch"
-    - patch_file: "patches/0017-xalloc.h-Include-stdio.h-header-for-vasprintf-functi.patch"
-    - patch_file: "patches/0018-strutils.h-Include-strings.h-header-for-strncasecmp-.patch"
-    - patch_file: "patches/0019-meson-Define-_DARWIN_C_SOURCE-on-macOS-as-is-done-in.patch"
-    - patch_file: "patches/0020-meson-Add-build-enosys-option.patch"
-    - patch_file: "patches/0021-meson-Add-build-lsclocks-option.patch"
