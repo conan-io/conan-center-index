@@ -1,11 +1,11 @@
 diff --git a/wscript b/wscript
-index 9995097f..0f9a3b4f 100755
+index d83690c0..ac9e1820 100755
 --- a/wscript
 +++ b/wscript
-@@ -61,20 +61,22 @@ def configure(conf):
+@@ -58,20 +58,22 @@ def configure(conf):
+     configure_toolchain(conf)
      guess_ohnet_location(conf)
      guess_ssl_location(conf)
-     guess_raat_location(conf)
  
      conf.env.dest_platform = conf.options.dest_platform
      conf.env.testharness_dir = os.path.abspath(conf.options.testharness_dir)
