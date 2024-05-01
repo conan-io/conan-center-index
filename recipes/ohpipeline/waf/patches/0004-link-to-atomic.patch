@@ -1,0 +1,27 @@
+diff --git a/wscript b/wscript
+index 9995097f..0f9a3b4f 100755
+--- a/wscript
++++ b/wscript
+@@ -61,20 +61,22 @@ def configure(conf):
+     guess_ohnet_location(conf)
+     guess_ssl_location(conf)
+     guess_raat_location(conf)
+ 
+     conf.env.dest_platform = conf.options.dest_platform
+     conf.env.testharness_dir = os.path.abspath(conf.options.testharness_dir)
+ 
+     if conf.options.dest_platform.startswith('Windows'):
+         conf.env.LIB_OHNET=['ws2_32', 'iphlpapi', 'dbghelp', 'psapi', 'userenv']
+     conf.env.STLIB_OHNET=['TestFramework', 'ohNetCore']
++    if conf.options.dest_platform.startswith('Linux'):
++        conf.env.append_value('STLIB_OHNET', ['atomic'])
+ 
+     if is_core_platform(conf):
+         conf.env.prepend_value('STLIB_OHNET', ['target', 'platform'])
+         conf.env.append_value('DEFINES', ['DEFINE_TRACE', 'NETWORK_NTOHL_LOCAL', 'NOTERMIOS']) # Tell FLAC to use local ntohl implementation
+ 
+     conf.env.INCLUDES = [
+         '.',
+         conf.path.find_node('.').abspath()
+         ]
+ 

@@ -17,3 +17,6 @@ patches:
     - patch_file: "patches/0003-fix-ohwafhelpers.patch"
       patch_type: "build"
       patch_description: "Fix ohWafHelpers"
+    - patch_file: "patches/0004-link-to-atomic.patch"
+      patch_type: "build"
+      patch_description: "Link to atomic"
