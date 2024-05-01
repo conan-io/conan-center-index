@@ -138,30 +138,30 @@ index c7e860f..37ea6f7 100644
          conf,
          [
              '{options.' + repo.lower() + '_include_dir}',
-@@ -377,21 +373,21 @@ def guess_ssl_location(conf):
-     )
-     set_env_verbose(conf, 'STLIBPATH_SSL', match_path(
-         conf,
-         [
-             '{options.ssl}/build/{options.dest_platform}/lib',
+@@ -382,20 +378,22 @@ def guess_ssl_location(conf):
              '{options.ssl}/lib',
              'dependencies/{options.dest_platform}/libressl/lib',
          ],
          message='Specify --ssl')
      )
--    conf.env.STLIB_SSL = ['ssl', 'crypto']
-+    conf.env.STLIB_SSL = ['ssl', 'crypto', 'z']
+     conf.env.STLIB_SSL = ['ssl', 'crypto']
      if conf.options.dest_platform in ['Windows-x86', 'Windows-x64']:
          conf.env.LIB_SSL = ['advapi32']
      elif conf.options.dest_platform.startswith('Linux-'):
          conf.env.LIB_SSL = ['dl']
++    elif conf.options.dest_platform.startswith('Mac-'):
++        conf.env.STLIB_SSL.append('z')
  
  def get_ros_tool_path(ctx):
      import os
      from filetasks import find_resource_or_fail
  
      host_platform = guess_dest_platform()
-@@ -437,26 +433,28 @@ def create_ros_from_dir_tree(bld, src_path, ros_name):
+     ros_path = os.path.join('dependencies', host_platform, 'libplatform', 'libplatform', 'bin', 'ros')
+     if host_platform in ['Windows-x86', 'Windows-x64']:
+         ros_path += '.exe'
+     ros_node = find_resource_or_fail(ctx, ctx.path, ros_path)
+@@ -437,26 +435,28 @@ def create_ros_from_dir_tree(bld, src_path, ros_name):
              key = key_path + '/' + f
              src_file = os.path.join(rel_path, f)
              line = '  <entry    type=\"file\"   key=\"{0}\">{1}</entry>\n'.format(key, src_file)
