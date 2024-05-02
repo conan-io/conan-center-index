@@ -1,12 +1,18 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
+from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
 from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
+
+AZURE_SDK_MODULES = (
+    "azure-storage-common",
+    "azure-storage-blobs",
+    "azure-storage-files-shares"
+)
 
 class AzureSDKForCppConan(ConanFile):
     name = "azure-sdk-for-cpp"
@@ -17,24 +23,13 @@ class AzureSDKForCppConan(ConanFile):
     topics = ("azure", "cpp", "cross-platform", "microsoft", "cloud")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    _sdks = (
-        "azure-core",
-        "azure-template",
-        "azure-security-keyvault-administration",
-        "azure-security-keyvault-certificates",
-        "azure-security-keyvault-secrets",
-        "azure-security-attestation",
-        "azure-security-keyvault-keys",
-        "azure-data-tables",
-        "azure-identity",
-        "azure-storage-common",
-        "azure-storage-queues",
-        "azure-storage-files-shares",
-        "azure-storage-blobs",
-        "azure-storage-files-datalake"
-    )
     options = {"shared": [True, False], "fPIC": [True, False]}
+    options.update({_name: [True, False] for _name in AZURE_SDK_MODULES})
     default_options = {"shared": False, "fPIC": True}
+    default_options.update({_name: True for _name in AZURE_SDK_MODULES})
+
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -68,16 +63,27 @@ class AzureSDKForCppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+
+        build_list = ["azure-core"]
+        for sdk in AZURE_SDK_MODULES:
+            if self.options.get_safe(sdk):
+                build_list.append(sdk)
+        tc.cache_variables["BUILD_LIST"] = ";".join(build_list)
+
+        tc.variables["AZ_ALL_LIBRARIES"] = "ON"
+        tc.variables["FETCH_SOURCE_DEPS"] = "OFF"
         tc.cache_variables["BUILD_TESTING"] = "OFF"
-        tc.cache_variables["BUILD_SAMPLES"] = "OFF"
         tc.cache_variables["BUILD_WINDOWS_UWP"] = "ON"
         tc.cache_variables["DISABLE_AZURE_CORE_OPENTELEMETRY"] = "ON"
         tc.cache_variables["BUILD_TRANSPORT_CURL"] = "ON"
         tc.generate()
 
+        deps = CMakeDeps(self)
+        deps.generate()
+
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=self.export_sources_folder)
         cmake.build()
 
     def package(self):
@@ -92,14 +98,19 @@ class AzureSDKForCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "AzureSDK")
 
-        for sdk in self._sdks:
+        # core component
+        self.cpp_info.components["azure-core"].set_property("cmake_target_name", "Azure::azure-core")
+        self.cpp_info.components["azure-core"].libs = ["azure-core"]
+        self.cpp_info.components["azure-core"].requires.extend(["libcurl::curl", "libxml2::libxml2"])
+
+        enabled_sdks = [sdk for sdk in AZURE_SDK_MODULES if self.options.get_safe(sdk)]
+        for sdk in enabled_sdks:
             self.cpp_info.components[sdk].set_property("cmake_target_name", f"Azure::{sdk}")
             self.cpp_info.components[sdk].libs = [sdk]
 
             # TODO: to remove in conan v2 once cmake_find_package_* generators removed
             self.cpp_info.components[sdk].names["cmake_find_package"] = sdk
             self.cpp_info.components[sdk].names["cmake_find_package_multi"] = sdk
-            self.cpp_info.components[sdk].requires.extend(["libcurl::curl", "libxml2::libxml2"])
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "AzureSDK"

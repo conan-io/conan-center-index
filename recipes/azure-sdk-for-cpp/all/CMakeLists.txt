@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.15)
+project(cmake_wrapper)
+
+foreach(sdk ${BUILD_LIST})
+    if(${sdk} STREQUAL azure-core)
+        # Always build Core
+        add_subdirectory("src/sdk/core")
+    elseif(${sdk} STREQUAL azure-storage-common)
+        add_subdirectory("src/sdk/storage/azure-storage-common")
+    elseif(${sdk} STREQUAL azure-storage-blobs)
+        add_subdirectory("src/sdk/storage/azure-storage-blobs")
+    elseif(${sdk} STREQUAL azure-storage-files-shares)
+        add_subdirectory("src/sdk/storage/azure-storage-files-shares")
+    endif()
+endforeach()
