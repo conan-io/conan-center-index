@@ -1,21 +1,13 @@
 sources:
   3.3.0:
-    url:
-      - "https://www.openssl.org/source/openssl-3.3.0.tar.gz"
-      - "https://github.com/openssl/openssl/releases/download/openssl-3.3.0/openssl-3.3.0.tar.gz"
+    url: "https://github.com/openssl/openssl/releases/download/openssl-3.3.0/openssl-3.3.0.tar.gz"
     sha256: 53e66b043322a606abf0087e7699a0e033a37fa13feb9742df35c3a33b18fb02
   3.2.1:
-    url:
-      - "https://www.openssl.org/source/openssl-3.2.1.tar.gz"
-      - "https://github.com/openssl/openssl/releases/download/openssl-3.2.1/openssl-3.2.1.tar.gz"
+    url: "https://github.com/openssl/openssl/releases/download/openssl-3.2.1/openssl-3.2.1.tar.gz"
     sha256: 83c7329fe52c850677d75e5d0b0ca245309b97e8ecbcfdc1dfdc4ab9fac35b39
   3.1.5:
-    url:
-      - "https://www.openssl.org/source/openssl-3.1.5.tar.gz"
-      - "https://github.com/openssl/openssl/releases/download/openssl-3.1.5/openssl-3.1.5.tar.gz"
+    url: "https://github.com/openssl/openssl/releases/download/openssl-3.1.5/openssl-3.1.5.tar.gz"
     sha256: 6ae015467dabf0469b139ada93319327be24b98251ffaeceda0221848dc09262
   3.0.13:
-    url:
-      - "https://www.openssl.org/source/openssl-3.0.13.tar.gz"
-      - "https://github.com/openssl/openssl/releases/download/openssl-3.0.13/openssl-3.0.13.tar.gz"
+    url: "https://github.com/openssl/openssl/releases/download/openssl-3.0.13/openssl-3.0.13.tar.gz"
     sha256: 88525753f79d3bec27d2fa7c66aa0b92b3aa9498dafd93d7cfa4b3780cdae313
