@@ -72,4 +72,4 @@ class PackageConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package"] = "parlay"
         self.cpp_info.filenames["cmake_find_package_multi"] = "parlay"
         self.cpp_info.names["cmake_find_package"] = "parlay"
-        self.cpp_info.names["cmake_find_package_multi"] = "parlay".#hash_table.h
+        self.cpp_info.names["cmake_find_package_multi"] = "parlay"
