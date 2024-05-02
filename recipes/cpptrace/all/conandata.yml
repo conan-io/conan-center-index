@@ -1,5 +1,9 @@
 sources:
   # Newer versions at the top
+  "0.5.3":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.3.tar.gz"
+    sha256: "fb84b8b021bf8c1265e650b4cc19ae8acc9c07b980eb1e34d9806acf15bb4fdf"
   "0.5.2":
     url:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.2.tar.gz"

@@ -1,16 +1,16 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir, rename, replace_in_file, rm
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
-from conan.tools.env import VirtualBuildEnv
-import os
-
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.64.0 <2 || >=2.2.0"
 
@@ -33,7 +33,8 @@ class ThorvgConan(ConanFile):
         "with_bindings": [False, 'capi', 'wasm_beta'],
         "with_tools": [False, 'svg2tvg', 'svg2png', 'lottie2gif', 'all'],
         "with_threads": [True, False],
-        "with_vector": [True, False],
+        "with_vector": [True, False],  # removed in thorvg 0.13.1. Renamed to simd
+        "with_simd": [True, False],  # legacy with_vector
         "with_examples": [True, False]
     }
     default_options = {
@@ -46,18 +47,20 @@ class ThorvgConan(ConanFile):
         "with_tools": False,
         "with_threads": True,
         "with_vector": False,
+        "with_simd": False,
         "with_examples": False
     }
     # See more here: https://github.com/thorvg/thorvg/blob/main/meson_options.txt
     options_description = {
-        "engines": "Enable Rasterizer Engine in thorvg",
-        "loaders": "Enable File Loaders in thorvg",
-        "savers": "Enable File Savers in thorvg",
-        "threads": "Enable the multi-threading task scheduler in thorvg",
-        "vector": "Enable CPU Vectorization(SIMD) in thorvg",
-        "bindings": "Enable API bindings",
-        "tools": "Enable building thorvg tools",
-        "examples": "Enable building examples",
+        "with_engines": "Enable Rasterizer Engine in thorvg",
+        "with_loaders": "Enable File Loaders in thorvg",
+        "with_savers": "Enable File Savers in thorvg",
+        "with_threads": "Enable the multi-threading task scheduler in thorvg",
+        "with_vector": "Enable CPU Vectorization(SIMD) in thorvg (renamed in 0.13.1 to 'simd')",
+        "with_simd": "Enable CPU Vectorization(SIMD) in thorvg",
+        "with_bindings": "Enable API bindings",
+        "with_tools": "Enable building thorvg tools",
+        "with_examples": "Enable building examples",
     }
 
     @property
@@ -77,6 +80,11 @@ class ThorvgConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        # Renamed to simd in higher versions
+        if Version(self.version) > "0.13.0":
+            del self.options.with_vector
+        else:
+            del self.options.with_simd
 
     def configure(self):
         if self.options.shared:
@@ -93,6 +101,15 @@ class ThorvgConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+
+    def requirements(self):
+        loaders_opt = str(self.options.with_loaders)
+        if loaders_opt in ("all", "jpg"):
+            self.requires("libjpeg-turbo/3.0.2")
+        if loaders_opt in ("all", "png"):
+            self.requires("libpng/1.6.43")
+        if loaders_opt in ("all", "webp"):
+            self.requires("libwebp/1.4.0")
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.0")
@@ -112,7 +129,6 @@ class ThorvgConan(ConanFile):
             "bindings": str(self.options.with_bindings) if self.options.with_bindings else '',
             "tools": str(self.options.with_tools )if self.options.with_tools else '',
             "threads": bool(self.options.with_threads),
-            "vector": bool(self.options.with_vector),
             "examples": bool(self.options.with_examples),
             "tests": False,
             "log": is_debug
@@ -120,6 +136,11 @@ class ThorvgConan(ConanFile):
         # Workaround to avoid: error D8016: '/O1' and '/RTC1' command-line options are incompatible
         if is_msvc(self) and is_debug:
             tc.project_options["optimization"] = "plain"
+        # vector option renamed to simd
+        if Version(self.version) > "0.13.0":
+            tc.project_options["simd"] = bool(self.options.with_simd)
+        else:
+            tc.project_options["vector"] = bool(self.options.with_vector)
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()

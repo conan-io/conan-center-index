@@ -582,6 +582,7 @@ required_for_references:
 - jerryscript
 - jfalcou-eve
 - jinja2cpp
+- jnk0le_ringbuffer
 - joltphysics
 - jom
 - jpcre2
@@ -879,6 +880,7 @@ required_for_references:
 - mariadb-connector-c
 - marisa
 - matchit
+- materialx
 - mathfu
 - mathter
 - matio
@@ -925,6 +927,7 @@ required_for_references:
 - minizip
 - minizip-ng
 - mio
+- mlpack
 - mm_file
 - mocknetworkaccessmanager
 - modern-cpp-kafka
@@ -1015,6 +1018,7 @@ required_for_references:
 - ogdf
 - ogg
 - ohnet
+- ohpipeline
 - ois
 - onedpl
 - onetbb
@@ -1379,6 +1383,7 @@ required_for_references:
 - tgbot
 - tgc
 - thelink2012-any
+- thorvg
 - threadpool
 - thrift
 - thrust
