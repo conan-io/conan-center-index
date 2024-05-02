@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, rm
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
@@ -48,6 +48,9 @@ class PackageConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        rm(self, "#hash_table.h#", os.path.join(self.source_folder, "include", "parlay"))
+        rm(self, "#primitives.h#", os.path.join(self.source_folder, "include", "parlay"))
+        rm(self, ".#hash_table.h", os.path.join(self.source_folder, "include", "parlay"))
 
     def build(self):
         pass
@@ -69,4 +72,4 @@ class PackageConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package"] = "parlay"
         self.cpp_info.filenames["cmake_find_package_multi"] = "parlay"
         self.cpp_info.names["cmake_find_package"] = "parlay"
-        self.cpp_info.names["cmake_find_package_multi"] = "parlay"
+        self.cpp_info.names["cmake_find_package_multi"] = "parlay".#hash_table.h
