@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, download, get
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.54.0"
 
@@ -30,7 +31,8 @@ class ZserioConanFile(ConanFile):
         return 11
 
     def export_sources(self):
-        copy(self, "zserio_compiler.cmake", self.recipe_folder, self.export_sources_folder)
+        if self.version < Version("2.14.0"):
+            copy(self, "zserio_compiler.cmake", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -65,6 +67,8 @@ class ZserioConanFile(ConanFile):
         cmake.build()
         sources = self.conan_data["sources"][self.version]
         get(self, **sources["compiler"], pattern="zserio.jar")
+        if self.version >= Version("2.14.0"):
+            get(self, **sources["compiler"], pattern="cmake/zserio_compiler.cmake")
 
     @property
     def _cmake_module_path(self):
@@ -80,8 +84,13 @@ class ZserioConanFile(ConanFile):
         copy(self, "*.a", self.build_folder, lib_dir, keep_path=False)
 
         copy(self, "zserio.jar", self.build_folder, os.path.join(self.package_folder, "bin"))
-        copy(self, "zserio_compiler.cmake", self.export_sources_folder,
-             os.path.join(self.package_folder, self._cmake_module_path))
+        if self.version >= Version("2.14.0"):
+            # from 2.14.0 the cmake script is available directly in zserio repository
+            copy(self, "zserio_compiler.cmake", os.path.join(self.build_folder, "cmake"),
+                os.path.join(self.package_folder, self._cmake_module_path))
+        else:
+            copy(self, "zserio_compiler.cmake", self.export_sources_folder,
+                os.path.join(self.package_folder, self._cmake_module_path))
 
     def package_info(self):
         self.cpp_info.libs = ["ZserioCppRuntime"]
