@@ -30,8 +30,9 @@ class ZserioConanFile(ConanFile):
     def _compilers_minimum_version(self):
         # https://github.com/ndsev/zserio/tree/master/compiler/extensions/cpp#supported-compilers
         return {
+            "apple-clang": "11",
             "clang": "11",
-            "gcc": "7",
+            "gcc": "5",
             "msvc": "191",
             "Visual Studio": "15",
         }
@@ -76,6 +77,7 @@ class ZserioConanFile(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
 
     def build(self):
