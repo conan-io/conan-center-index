@@ -145,5 +145,6 @@ class NumpyConan(ConanFile):
 
         self.cpp_info.components["numpy"].libdirs = [os.path.join(self._rel_pkg_root, "core")]
         self.cpp_info.components["numpy"].requires = ["openblas::openblas", "cpython::cpython", "npymath"]
+        self.cpp_info.components["numpy"].includedirs = []
 
         self.runenv_info.prepend_path("PYTHONPATH", os.path.join(self.package_folder, self._rel_site_packages))
