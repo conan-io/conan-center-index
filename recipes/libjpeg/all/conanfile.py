@@ -136,7 +136,9 @@ class LibjpegConan(ConanFile):
 
                 msbuild = MSBuild(self)
                 if self.settings.arch == "x86":
-                    msbuild.platform = "Win32" # TODO: undocumented attribute, check if this is a Conan bug
+                    # This .sln uses "Win32" instead of the usual "x86"
+                    # as the solution platform, so need to override this
+                    msbuild.platform = "Win32"
                 msbuild.build(sln="jpeg.sln")
         else:
             autotools = Autotools(self)
