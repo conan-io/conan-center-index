@@ -27,11 +27,21 @@ class ZserioConanFile(ConanFile):
     }
 
     @property
+    def _compilers_minimum_version(self):
+        # https://github.com/ndsev/zserio/tree/master/compiler/extensions/cpp#supported-compilers
+        return {
+            "clang": "11",
+            "gcc": "7",
+            "msvc": "191",
+            "Visual Studio": "15",
+        }
+
+    @property
     def _min_cppstd(self):
         return 11
 
     def export_sources(self):
-        if self.version < Version("2.14.0"):
+        if Version(self.version) < "2.14.0":
             copy(self, "zserio_compiler.cmake", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
@@ -52,6 +62,13 @@ class ZserioConanFile(ConanFile):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
 
+        minimum_compiler_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_compiler_version and Version(self.settings.compiler.version) < minimum_compiler_version:
+            raise ConanInvalidConfiguration(
+                f"Compiler version '{self.settings.compiler.version}' not supported, "
+                f"minumum is '{minimum_compiler_version}'!"
+            )
+
     def source(self):
         sources = self.conan_data["sources"][self.version]
         get(self, **sources["runtime"], strip_root=True)
@@ -67,7 +84,7 @@ class ZserioConanFile(ConanFile):
         cmake.build()
         sources = self.conan_data["sources"][self.version]
         get(self, **sources["compiler"], pattern="zserio.jar")
-        if self.version >= Version("2.14.0"):
+        if Version(self.version) >= "2.14.0":
             get(self, **sources["compiler"], pattern="cmake/zserio_compiler.cmake")
 
     @property
@@ -84,7 +101,7 @@ class ZserioConanFile(ConanFile):
         copy(self, "*.a", self.build_folder, lib_dir, keep_path=False)
 
         copy(self, "zserio.jar", self.build_folder, os.path.join(self.package_folder, "bin"))
-        if self.version >= Version("2.14.0"):
+        if Version(self.version) >= "2.14.0":
             # from 2.14.0 the cmake script is available directly in zserio repository
             copy(self, "zserio_compiler.cmake", os.path.join(self.build_folder, "cmake"),
                 os.path.join(self.package_folder, self._cmake_module_path))
