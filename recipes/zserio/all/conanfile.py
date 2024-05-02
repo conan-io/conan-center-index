@@ -32,7 +32,7 @@ class ZserioConanFile(ConanFile):
         return {
             "apple-clang": "11",
             "clang": "11",
-            "gcc": "5",
+            "gcc": "7",
             "msvc": "191",
             "Visual Studio": "15",
         }
