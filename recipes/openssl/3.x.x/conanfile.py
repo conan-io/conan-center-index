@@ -151,7 +151,7 @@ class OpenSSLConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             if not self.options.no_asm:
-                self.tool_requires("nasm/2.15.05")
+                self.tool_requires("nasm/2.16.01")
             if self._use_nmake:
                 self.tool_requires("strawberryperl/5.32.1.1")
             else:
