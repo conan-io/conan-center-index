@@ -2,6 +2,7 @@ import os
 import textwrap
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import copy, get, save
 from conan.tools.gnu import PkgConfigDeps
@@ -37,6 +38,11 @@ class NumpyConan(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+    
+    def validate(self):
+        # https://github.com/numpy/numpy/blob/v1.26.4/meson.build#L28
+        if self.settings.compiler == "gcc" and self.settings.compiler.version < Version("8.4"):
+            raise ConanInvalidConfiguration(f"{self.ref} requires GCC 8.4+")
 
     def layout(self):
         basic_layout(self, src_folder="src")
