@@ -102,20 +102,13 @@ class LibjpegConan(ConanFile):
                     )
 
                 # Inject conan-generated .props file
+                # Note: importing it right before Microsoft.Cpp.props also ensures we correctly
+                #       handle the toolset setting
                 conantoolchain_props = os.path.join(self.generators_folder, MSBuildToolchain.filename)
                 replace_in_file(
                     self, jpeg_vcxproj,
-                    """<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />""",
-                    f"""<Import Project="{conantoolchain_props}" /><Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />""",
-                )
-
-                # Fix toolset 
-                toolset_before = "v142" if self.version in ["9d", "9e"] else "$(DefaultPlatformToolset)"
-                toolset_after = MSBuildToolchain(self).toolset
-                replace_in_file(
-                    self, jpeg_vcxproj,
-                    f"<PlatformToolset>{toolset_before}</PlatformToolset>",
-                    f"<PlatformToolset>{toolset_after}</PlatformToolset>",
+                    """<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.props" />""",
+                    f"""<Import Project="{conantoolchain_props}" /><Import Project="$(VCTargetsPath)\\Microsoft.Cpp.props" />""",
                 )
 
                 # Patch settings for a different build type
