@@ -15,7 +15,7 @@ class SimdConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ermig1979/Simd"
-    topics = ("simd", "sse", "avx", "avx-512", "amx", "vmx", "vsx", "neon")
+    topics = ("sse", "avx", "avx-512", "amx", "vmx", "vsx", "neon")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
