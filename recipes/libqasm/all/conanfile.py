@@ -72,7 +72,7 @@ class LibqasmConan(ConanFile):
         if self._should_build_test:
             self.test_requires("gtest/1.14.0")
         if self.options.build_python:
-            self.tools_requires("cpython/3.12.2")
+            self.tool_requires("cpython/3.12.2")
 
     def validate(self):
         if self.settings.compiler.cppstd:
