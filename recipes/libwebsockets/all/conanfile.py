@@ -237,8 +237,8 @@ class LibwebsocketsConan(ConanFile):
             # https://github.com/conan-io/conan-center-index/pull/5321#issuecomment-826367276
             raise ConanInvalidConfiguration("{}/{} shared=True with gcc<5 does not build. Please submit a PR with a fix.".format(self.name, self.version))
         if Version(self.version) >= "4.3.2":
-            if ("Visual" in str(self.settings.compiler.version) and Version(self.settings.compiler.version) < 16) or  \
-                    ("msvc" == str(self.settings.compiler.version) and Version(self.settings.compiler.version) < 192):
+            if ("Visual" in str(self.settings.compiler) and Version(self.settings.compiler.version) < 16) or  \
+                    ("msvc" == str(self.settings.compiler) and Version(self.settings.compiler.version) < 192):
                 raise ConanInvalidConfiguration ("{}/{} requires at least Visual Studio 2019".format(self.name, self.version))
 
         if self.options.with_hubbub:
