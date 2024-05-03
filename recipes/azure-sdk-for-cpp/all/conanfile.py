@@ -26,7 +26,7 @@ class AzureSDKForCppConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     options.update({_name: [True, False] for _name in AZURE_SDK_MODULES})
     default_options = {"shared": False, "fPIC": True}
-    default_options.update({_name: True for _name in AZURE_SDK_MODULES})
+    default_options.update({_name: True for _name in AZURE_SDK_MODULES}) # Build all modules by default, let users pick what they do not want
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
@@ -53,11 +53,11 @@ class AzureSDKForCppConan(ConanFile):
         # Open to contributions for windows and apple
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
-                f"{self.ref} is not supported on {self.settings.os}.")
+                f"{self.ref} Conan recipe in ConanCenter still does not support {self.settings.os}, contributions to the recipe welcome.")
 
         if self.settings.compiler != "gcc":
             raise ConanInvalidConfiguration(
-                f"{self.ref} is not supported on {self.settings.compiler}.")
+                f"{self.ref} Conan recipe in ConanCenter still does not support {self.settings.compiler}, contributions to the recipe welcome.")
 
         if self.settings.compiler == 'gcc' and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("Building requires GCC >= 6")
@@ -108,15 +108,4 @@ class AzureSDKForCppConan(ConanFile):
         for sdk in enabled_sdks:
             self.cpp_info.components[sdk].set_property("cmake_target_name", f"Azure::{sdk}")
             self.cpp_info.components[sdk].libs = [sdk]
-
-            # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-            self.cpp_info.components[sdk].names["cmake_find_package"] = sdk
-            self.cpp_info.components[sdk].names["cmake_find_package_multi"] = sdk
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "AzureSDK"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "AzureSDK"
-        self.cpp_info.names["cmake_find_package"] = "Azure"
-        self.cpp_info.names["cmake_find_package_multi"] = "Azure"
-        self.cpp_info.components["azure-core"].names["cmake_find_package"] = "azure-core"
-        self.cpp_info.components["azure-core"].names["cmake_find_package_multi"] = "azure-core"
+            

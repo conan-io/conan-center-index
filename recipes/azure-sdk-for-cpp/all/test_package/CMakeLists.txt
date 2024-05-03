@@ -4,5 +4,7 @@ project(test_package LANGUAGES CXX)
 
 find_package(AzureSDK CONFIG REQUIRED)
 
-add_executable(${PROJECT_NAME} test_package.cc)
-target_link_libraries(${PROJECT_NAME} PRIVATE azure-sdk-for-cpp::azure-sdk-for-cpp)
+foreach(_module ${TEST_LIST})
+    add_executable(test_${_module} test_${_module}.cc)
+    target_link_libraries(test_${_module} PRIVATE Azure::${_module})
+endforeach()

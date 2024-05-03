@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 project(cmake_wrapper)
 
+# The cmake_wrapper allows users to build only modules they want and not the entire sdk,
+# the CMakeLists.txt from source does not provide this modularity to users (it's all or nothing).
+
 foreach(sdk ${BUILD_LIST})
     if(${sdk} STREQUAL azure-core)
         # Always build Core
