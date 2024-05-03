@@ -65,12 +65,14 @@ class LibqasmConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("tree-gen/1.0.7")
+        self.tool_requires("tree-gen/<host_version>")
         self.tool_requires("zulu-openjdk/21.0.1")
         if self.settings.arch == "wasm":
             self.tool_requires("emsdk/3.1.50")
         if self._should_build_test:
             self.test_requires("gtest/1.14.0")
+        if self.options.build_python:
+            self.tools_requires("cpython/3.12.2")
 
     def validate(self):
         if self.settings.compiler.cppstd:
