@@ -39,6 +39,7 @@ class AzureSDKForCppConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("libcurl/[>=7.78 <9]")
         self.requires("libxml2/[>=2.12.5 <3]")
 
@@ -101,7 +102,7 @@ class AzureSDKForCppConan(ConanFile):
         # core component
         self.cpp_info.components["azure-core"].set_property("cmake_target_name", "Azure::azure-core")
         self.cpp_info.components["azure-core"].libs = ["azure-core"]
-        self.cpp_info.components["azure-core"].requires.extend(["libcurl::curl", "libxml2::libxml2"])
+        self.cpp_info.components["azure-core"].requires.extend(["openssl::openssl", "libcurl::curl", "libxml2::libxml2"])
 
         enabled_sdks = [sdk for sdk in AZURE_SDK_MODULES if self.options.get_safe(sdk)]
         for sdk in enabled_sdks:
