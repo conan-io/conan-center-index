@@ -89,10 +89,16 @@ class LibjpegConan(ConanFile):
                 self.run("nmake /f makefile.vs setupcopy-v16")
 
                 # Rename target to 'libjpeg.lib' to match legacy behaviour (otherwise we break backwards compatibility)
+                # static: "libjpeg.lib"
+                # shared: "libjpeg.lib" (import), "libjpeg-9.dll" (DLL)
                 jpeg_vcxproj = os.path.join(self.source_folder, "jpeg.vcxproj")
+                target_name = "libjpeg-9" if self.options.shared else "libjpeg"
                 replace_in_file(self, jpeg_vcxproj, """<PropertyGroup Label="UserMacros" />""", 
-                                """ <PropertyGroup Label="UserMacros" /><PropertyGroup Label="TargetName"> <TargetName>libjpeg</TargetName></PropertyGroup>
+                                f""" <PropertyGroup Label="UserMacros" /><PropertyGroup Label="TargetName"> <TargetName>{target_name}</TargetName></PropertyGroup>
                                 """)
+                if self.options.shared:
+                    replace_in_file(self, jpeg_vcxproj, "</SubSystem>",
+                                    "</SubSystem><ImportLibrary>$(OutDir)libjpeg.lib</ImportLibrary>")
                 
                 # Support static/shared
                 if self.options.shared:
