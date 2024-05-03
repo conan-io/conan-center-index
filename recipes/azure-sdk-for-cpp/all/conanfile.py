@@ -108,4 +108,3 @@ class AzureSDKForCppConan(ConanFile):
         for sdk in enabled_sdks:
             self.cpp_info.components[sdk].set_property("cmake_target_name", f"Azure::{sdk}")
             self.cpp_info.components[sdk].libs = [sdk]
-            
