@@ -367,7 +367,7 @@ class OpenSSLConan(ConanFile):
         ]
 
         if self.settings.os == "Android":
-            args.append(" -D__ANDROID_API__=%s" % str(self.settings.os.api_level))  # see NOTES.ANDROID
+            args.append(f" -D__ANDROID_API__={str(self.settings.os.api_level)}")  # see NOTES.ANDROID
         if self.settings.os == "Emscripten":
             args.append("-D__STDC_NO_ATOMICS__=1")
         if self.settings.os == "Windows":
@@ -445,16 +445,16 @@ class OpenSSLConan(ConanFile):
 
         perlasm_scheme = ""
         if self._perlasm_scheme:
-            perlasm_scheme = 'perlasm_scheme => "%s",' % self._perlasm_scheme
+            perlasm_scheme = f'perlasm_scheme => "{self._perlasm_scheme}",'
 
         defines = '", "'.join(defines)
         defines = 'defines => add("%s"),' % defines if defines else ""
         targets = "my %targets"
 
         if self._asm_target:
-            ancestor = '[ "%s", asm("%s") ]' % (self._ancestor_target, self._asm_target)
+            ancestor = f'[ "{self._ancestor_target}", asm("{self._asm_target}") ]'
         else:
-            ancestor = '[ "%s" ]' % self._ancestor_target
+            ancestor = f'[ "{self._ancestor_target}" ]'
         shared_cflag = ""
         shared_extension = ""
         shared_target = ""
@@ -482,7 +482,7 @@ class OpenSSLConan(ConanFile):
             shared_cflag=shared_cflag,
             lflags=" ".join(ldflags)
         )
-        self.output.info("using target: %s -> %s" % (self._target, self._ancestor_target))
+        self.output.info(f"using target: {self._target} -> {self._ancestor_target}")
         self.output.info(config)
 
         save(self, os.path.join(self.source_folder, "Configurations", "20-conan.conf"), config)
@@ -494,7 +494,7 @@ class OpenSSLConan(ConanFile):
         if targets:
             command.extend(targets)
         if not self._use_nmake:
-            command.append(("-j%s" % build_jobs(self)) if parallel else "-j1")
+            command.append(f"-j{build_jobs(self)}" if parallel else "-j1")
         self.run(" ".join(command), env="conanbuild")
 
     @property
@@ -510,7 +510,7 @@ class OpenSSLConan(ConanFile):
             if self._use_nmake:
                 self._replace_runtime_in_file(os.path.join("Configurations", "10-main.conf"))
 
-            self.run("{perl} ./Configure {args}".format(perl=self._perl, args=args), env="conanbuild")
+            self.run(f"{self._perl} ./Configure {args}", env="conanbuild")
             if self._use_nmake:
                 # When `--prefix=/`, the scripts derive `\` without escaping, which
                 # causes issues on Windows
@@ -616,7 +616,7 @@ class OpenSSLConan(ConanFile):
     @property
     def _module_file_rel_path(self):
         return os.path.join(self._module_subfolder,
-                            "conan-official-{}-variables.cmake".format(self.name))
+                            f"conan-official-{self.name}-variables.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenSSL")
