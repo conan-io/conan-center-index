@@ -441,7 +441,7 @@ class QtConan(ConanFile):
             self.requires("egl/system")
         if self.options.get_safe("with_x11") or self.options.qtwayland:
             self.requires("xkbcommon/1.5.0")
-        if self.options.get_safe("opengl", "no") != "no" and not self.settings.os in ["FreeBSD", "Linux"]:
+        if self.options.get_safe("opengl", "no") != "no" and self.settings.os not in ["FreeBSD", "Linux"]:
             self.requires("opengl/system")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
@@ -1139,6 +1139,8 @@ Prefix = ..""")
                     gui_reqs.append("xorg::xorg")
                     if self.options.get_safe("opengl", "no") != "no":
                         gui_reqs.append("opengl::opengl")
+                elif self.options.get_safe("opengl", "no") != "no":
+                    gui_reqs.append("egl::egl")
             if self.options.get_safe("opengl", "no") != "no" and self.settings.os not in ["FreeBSD", "Linux"]:
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
