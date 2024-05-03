@@ -6,7 +6,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
 
     @property
     def _tested_modules(self):
@@ -20,11 +20,6 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.cache_variables["TEST_LIST"] = ";".join(self._tested_modules)
-        tc.generate()
 
     def build(self):
         cmake = CMake(self)
