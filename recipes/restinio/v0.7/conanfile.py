@@ -40,7 +40,7 @@ class RestinioConan(ConanFile):
         self.requires("expected-lite/0.6.3")
 
         if self.options.asio == "standalone":
-            self.requires("asio/1.29.0")
+            self.requires("asio/1.30.2")
         else:
             self.requires("boost/1.85.0")
 
