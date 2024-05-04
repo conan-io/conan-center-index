@@ -8,9 +8,19 @@ sources:
   "11.1.0":
     url: https://github.com/llvm/llvm-project/releases/download/llvmorg-11.1.0/llvm-11.1.0.src.tar.xz
     sha256: ce8508e318a01a63d4e8b3090ab2ded3c598a50258cc49e2625b9120d4c03ea5
+  "18.1.5":
+    "llvm":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.5/llvm-18.1.5.src.tar.xz
+      sha256: 8a134e58cb98061b6b8f312fe9c174a646fa0c8691b5511c43795dc980dfd226
+    "cmake":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.5/cmake-18.1.5.src.tar.xz
+      sha256: dfe1eb2d464168eefdfda72bbaaf1ec9b8314f5a6e68652b49699e7cb618304d
+    "third-party":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.5/third-party-18.1.5.src.tar.xz
+      sha256: c7f60186a8e140d50f02f4cf426d800991cf37b99f5d40503cecb417291a25ed
 
 patches:
-  "18.1.1":
+  "18.1.5":
     - patch_file: patches/18x/0000-cmake-dependencies.patch
       patch_description: fix references to third party libs to match conan variables and targets
       patch_type: conan
