@@ -6,9 +6,10 @@ from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.53"
+required_conan_version = ">=1.53.0"
 
-class PackageConan(ConanFile):
+
+class ParlayHashConan(ConanFile):
     name = "parlayhash"
     description = "A Header-Only Scalable Concurrent Hash Map."
     license = "MIT"
@@ -39,6 +40,11 @@ class PackageConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
+    def requirements(self):
+        # TODO: Upstream mentions jemalloc in https://github.com/cmuparlay/parlayhash/blob/main/CMakeLists.txt#L45
+        #     but it's not ported to Conan 2 yet. Add it here if needed in the future.
+        pass
+
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
@@ -65,11 +71,6 @@ class PackageConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
 
-        self.cpp_info.set_property("cmake_file_name", "parlay")
-        self.cpp_info.set_property("cmake_target_name", "parlay::parlay")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "parlay"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "parlay"
-        self.cpp_info.names["cmake_find_package"] = "parlay"
-        self.cpp_info.names["cmake_find_package_multi"] = "parlay"
+        # This one is a best-effort guess, as the library is header-only it does not mention a target explicitly
+        self.cpp_info.set_property("cmake_file_name", "parlay_hash")
+        self.cpp_info.set_property("cmake_target_name", "parlay")
