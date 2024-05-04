@@ -14,9 +14,11 @@ class libqConan(ConanFile):
     name = "libq"
     description = "A platform-independent promise library for C++, implementing asynchronous continuations."
     license = "Apache-2.0"
+    topics = ("async", "promises")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/grantila/q"
     settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -94,7 +96,7 @@ class libqConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = ["package_lib"]
+        self.cpp_info.libs = ["libq"]
 
         self.cpp_info.set_property("cmake_module_file_name", "LIBQ")
         self.cpp_info.set_property("cmake_module_target_name", "LIBQ::LIBQ")
@@ -105,9 +107,3 @@ class libqConan(ConanFile):
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
             self.cpp_info.system_libs.append("dl")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "LIBQ"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "libq"
-        self.cpp_info.names["cmake_find_package"] = "LIBQ"
-        self.cpp_info.names["cmake_find_package_multi"] = "libq"
