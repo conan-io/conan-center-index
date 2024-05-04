@@ -38,9 +38,9 @@ class CppYyjsonConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("yyjson/0.9.0", transitive_headers=True)
-        self.requires("fmt/10.2.1", transitive_headers=True)
-        self.requires("nameof/0.10.4", transitive_headers=True)
+        self.requires("yyjson/0.9.0")
+        self.requires("fmt/10.2.1")
+        self.requires("nameof/0.10.4")
 
     def package_id(self):
         self.info.clear()
