@@ -72,5 +72,5 @@ class ParlayHashConan(ConanFile):
             self.cpp_info.system_libs.append("pthread")
 
         # This one is a best-effort guess, as the library is header-only it does not mention a target explicitly
-        self.cpp_info.set_property("cmake_file_name", "parlay_hash")
+        self.cpp_info.set_property("cmake_file_name", "parlayhash")
         self.cpp_info.set_property("cmake_target_name", "parlay")
