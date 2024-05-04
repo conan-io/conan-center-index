@@ -3,5 +3,5 @@ project(test_package LANGUAGES CXX)
 
 find_package(Lielab REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} test_lielab_lt_0_3_0.cpp)
+add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE Lielab::Lielab)
