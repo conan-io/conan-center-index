@@ -1,5 +1,5 @@
 sources:
-  "0.0.19":
+  "0.0.21":
     url: "https://github.com/nodejs/uvwasi/archive/refs/tags/v0.0.19.tar.gz"
     sha256: "b04983b6707e822115184ead2c0b0e2c3b2cd409a4300999967e026ad988d867"
 patches:
