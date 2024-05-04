@@ -1,12 +1,12 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
-import os
 
 required_conan_version = ">=1.53.0"
 
@@ -21,13 +21,11 @@ class libqConan(ConanFile):
     package_type = "library"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
-        "qtest": [True, False]
+        "fPIC": [True, False]
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
-        "qtest": False
+        "fPIC": True
     }
 
     @property
@@ -43,7 +41,11 @@ class libqConan(ConanFile):
             "msvc": "191",
             "Visual Studio": "15",
         }
-    
+
+    @property
+    def _build_tests(self):
+        return not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -54,6 +56,10 @@ class libqConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        if self._build_tests:
+            self.test_requires("gtest/1.14.0")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -72,13 +78,23 @@ class libqConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["q_BUILD_TESTS"] = self.options.qtest
+        tc.variables["q_BUILD_TESTS"] = self._build_tests
+        tc.variables["q_BUILD_APPS"] = False
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        
+
         tc.generate()
 
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'include_directories( "3rdparty/gtest-1.8.0/include/" )',
+                        "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'add_subdirectory( "3rdparty/gtest-1.8.0" )',
+                        "find_package(GTest REQUIRED)\n")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -96,10 +112,11 @@ class libqConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = ["libq"]
+        if self.options.shared:
+            self.cpp_info.libs = ["libq"]
+        else:
+            self.cpp_info.libs = ["libq.a"]
 
-        self.cpp_info.set_property("cmake_module_file_name", "LIBQ")
-        self.cpp_info.set_property("cmake_module_target_name", "LIBQ::LIBQ")
         self.cpp_info.set_property("cmake_file_name", "libq")
         self.cpp_info.set_property("cmake_target_name", "libq::libq")
 
