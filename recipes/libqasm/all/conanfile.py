@@ -10,7 +10,7 @@ from conan.tools.files import copy, get, rm, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2 || >=2.0.6"
 
 
 class LibqasmConan(ConanFile):
@@ -58,8 +58,8 @@ class LibqasmConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # https://github.com/QuTech-Delft/libqasm/blob/0.6.3/src/CMakeLists.txt#L234
-        self.options["antlr4-cppruntime"].shared = self.options.shared
+        if self.settings.arch == "wasm":
+            self.options["antlr4-cppruntime"].shared = self.options.shared
 
     def layout(self):
         cmake_layout(self, src_folder="src")
