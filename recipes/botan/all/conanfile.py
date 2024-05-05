@@ -457,7 +457,7 @@ class BotanConan(ConanFile):
                          ' --extra-cxxflags="{cxxflags}"'
                          ' --cc={compiler}'
                          ' --cpu={cpu}'
-                         ' --prefix={prefix}'
+                         ' --prefix="{prefix}"'
                          ' --os={os}'
                          ' {build_flags}').format(
                              python_call=call_python,
@@ -516,6 +516,8 @@ class BotanConan(ConanFile):
         # https://github.com/conan-io/conan-center-index/pull/18079#issuecomment-1919206949
         # https://github.com/conan-io/conan-center-index/pull/18079#issuecomment-1919486839
 
+        if self.settings.os != 'Linux':
+            return False
         libver = platform.libc_ver()
         return (
             self.settings.os == 'Linux' and
