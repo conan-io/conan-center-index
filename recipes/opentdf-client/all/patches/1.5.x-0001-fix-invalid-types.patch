@@ -1,27 +1,39 @@
-From 20f19d19c4903a606d32e6313c7609f3436fe138 Mon Sep 17 00:00:00 2001
+From b172bdd69b85cd2da068621c0795afa76c44eb0a Mon Sep 17 00:00:00 2001
 From: mayeut <mayeut@users.noreply.github.com>
 Date: Sat, 20 Apr 2024 13:43:28 +0200
-Subject: [PATCH] fix: use `xmlError cont*` instead of xmlErrorPtr
+Subject: [PATCH] fix: use `xmlError const*` instead of xmlErrorPtr for libxml
+ 2.12+
 
 This fixes issues on Xcode15 (at least) when building against libxml 2.12+
 ---
- src/lib/src/tdf_xml_validator.cpp | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ src/lib/src/tdf_xml_validator.cpp | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
 
 diff --git a/src/lib/src/tdf_xml_validator.cpp b/src/lib/src/tdf_xml_validator.cpp
-index bbf0390..57670e0 100644
+index bbf0390..343ab86 100644
 --- a/src/lib/src/tdf_xml_validator.cpp
 +++ b/src/lib/src/tdf_xml_validator.cpp
-@@ -19,7 +19,7 @@ using namespace virtru;
+@@ -11,6 +11,7 @@
+ #include "tdf_xml_validator.h"
+ #include "tdf_exception.h"
+ #include "logger.h"
++#include "libxml/xmlversion.h"
+ #include <string>
+ #include <sstream>
+ 
+@@ -19,7 +20,11 @@ using namespace virtru;
  // Based on https://stackoverflow.com/questions/54124989/libxml2-get-xsd-validation-errors
  
  // This routine is a callback for the parser, used when there is an error validating the supplied XML against the schema
--static void schemaParseErrorHandler(void *arg, xmlErrorPtr error)
++#if LIBXML_VERSION >= 21200
 +static void schemaParseErrorHandler(void *arg, xmlError const* error)
++#else
+ static void schemaParseErrorHandler(void *arg, xmlErrorPtr error)
++#endif
  {
      std::ostringstream errorMsg;
  
-@@ -95,7 +95,7 @@ bool TDFXMLValidator::validate(xmlTextReaderPtr reader) {
+@@ -95,7 +100,7 @@ bool TDFXMLValidator::validate(xmlTextReaderPtr reader) {
  
                  if (moreToRead != 0) {
                      // There was an error parsing the supplied XML
@@ -30,7 +42,7 @@ index bbf0390..57670e0 100644
                      std::ostringstream errorMsg;
                      errorMsg << "Schema validation error " << error->file << "(" << error->line << ") " << error->int2 << " " << error->code << " " << error->message;
                      ThrowException(errorMsg.str(), VIRTRU_TDF_FORMAT_ERROR);
-@@ -107,4 +107,4 @@ bool TDFXMLValidator::validate(xmlTextReaderPtr reader) {
+@@ -107,4 +112,4 @@ bool TDFXMLValidator::validate(xmlTextReaderPtr reader) {
          }
      }
      return retval;
