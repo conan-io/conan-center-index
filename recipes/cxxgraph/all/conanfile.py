@@ -31,10 +31,10 @@ class CxxgraphConan(ConanFile):
             "gcc": "8",
             "clang": "7",
             "apple-clang": "12",
-            "Visual Studio": "16",
-            "msvc": "192",
+            "Visual Studio": "17",
+            "msvc": "193",
         }
-    
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
