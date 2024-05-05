@@ -1,0 +1,2836 @@
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/graph/serialization/binary_buffer.hpp b/src/plugins/intel_gpu/include/intel_gpu/graph/serialization/binary_buffer.hpp
+index 9386e52400..05972d7a97 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/graph/serialization/binary_buffer.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/graph/serialization/binary_buffer.hpp
+@@ -104,12 +104,10 @@ public:
+ 
+ #define ASSIGN_TYPE_NAME(cls_name) \
+             namespace cldnn {                            \
+-            const std::string cls_name::type_for_serialization = #cls_name; \
+             }
+ 
+ #define BIND_BINARY_BUFFER_WITH_TYPE(cls_name) \
+             namespace cldnn {                            \
+-            const std::string cls_name::type_for_serialization = #cls_name; \
+             BIND_TO_BUFFER(BinaryOutputBuffer, cls_name) \
+             BIND_TO_BUFFER(BinaryInputBuffer, cls_name)  \
+             }
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/graph/serialization/bind.hpp b/src/plugins/intel_gpu/include/intel_gpu/graph/serialization/bind.hpp
+index 85ed3fa803..e2a673f0ba 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/graph/serialization/bind.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/graph/serialization/bind.hpp
+@@ -11,9 +11,12 @@
+ #include "buffer.hpp"
+ #include "static_instance.hpp"
+ 
+-#define DECLARE_OBJECT_TYPE_SERIALIZATION \
+-    static const std::string type_for_serialization; \
+-    std::string get_type() const override { return type_for_serialization; }
++#define DECLARE_OBJECT_TYPE_SERIALIZATION(cls_name)                        \
++    static const std::string& get_type_info_s() {                               \
++        static const std::string type_name = #cls_name;                    \
++        return type_name;                                                  \
++    }                                                                      \
++    const std::string& get_type_info() const override {  return get_type_info_s(); }
+ 
+ #define BIND_TO_BUFFER(buffer, type)                                                       \
+         template <>                                                                        \
+@@ -101,7 +104,7 @@ public:
+ 
+ private:
+     buffer_binder() {
+-        saver_storage<BufferType>::instance().set_save_function({T::type_for_serialization, save});
++        saver_storage<BufferType>::instance().set_save_function({T::get_type_info_s(), save});
+     }
+ 
+     buffer_binder(const buffer_binder&) = delete;
+@@ -130,7 +133,7 @@ public:
+ private:
+     buffer_binder() {
+         def<BufferType>::instance().set_load_function(
+-                {T::type_for_serialization, [](BufferType& buffer, std::unique_ptr<void, void_deleter<void>>& result_ptr) {
++                {T::get_type_info_s(), [](BufferType& buffer, std::unique_ptr<void, void_deleter<void>>& result_ptr) {
+             std::unique_ptr<T> derived_ptr = std::unique_ptr<T>(new T());
+             derived_ptr->load(buffer);
+             result_ptr.reset(derived_ptr.release());
+@@ -153,7 +156,7 @@ public:
+ private:
+     buffer_binder() {
+         dif<BufferType>::instance().set_load_function(
+-                {T::type_for_serialization, [](BufferType& buffer, std::unique_ptr<void, void_deleter<void>>& result_ptr, engine& engine) {
++                {T::get_type_info_s(), [](BufferType& buffer, std::unique_ptr<void, void_deleter<void>>& result_ptr, engine& engine) {
+             std::unique_ptr<T> derived_ptr = std::unique_ptr<T>(new T(engine));
+             derived_ptr->load(buffer);
+             result_ptr.reset(derived_ptr.release());
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/graph/serialization/polymorphic_serializer.hpp b/src/plugins/intel_gpu/include/intel_gpu/graph/serialization/polymorphic_serializer.hpp
+index 023045b9bd..1792f5489c 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/graph/serialization/polymorphic_serializer.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/graph/serialization/polymorphic_serializer.hpp
+@@ -18,7 +18,7 @@ template <typename BufferType, typename T>
+ class Serializer<BufferType, std::unique_ptr<T>, typename std::enable_if<std::is_base_of<OutputBuffer<BufferType>, BufferType>::value>::type> {
+ public:
+     static void save(BufferType& buffer, const std::unique_ptr<T>& ptr) {
+-        const auto& type = ptr->get_type();
++        const auto& type = ptr->get_type_info();
+         buffer << type;
+         const auto save_func = saver_storage<BufferType>::instance().get_save_function(type);
+         save_func(buffer, ptr.get());
+@@ -51,7 +51,7 @@ template <typename BufferType, typename T>
+ class Serializer<BufferType, std::shared_ptr<T>, typename std::enable_if<std::is_base_of<OutputBuffer<BufferType>, BufferType>::value>::type> {
+ public:
+     static void save(BufferType& buffer, const std::shared_ptr<T>& ptr) {
+-        const std::string& type = ptr->get_type();
++        const std::string& type = ptr->get_type_info();
+         buffer << type;
+         if (type.compare("NONE") != 0) {
+             const auto save_func = saver_storage<BufferType>::instance().get_save_function(type);
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/activation.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/activation.hpp
+index 09a3f96a98..771f1b9191 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/activation.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/activation.hpp
+@@ -82,8 +82,6 @@ struct activation : public primitive_base<activation> {
+                    activation_function(activation_func::none),
+                    additional_params({0.f, 0.f}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs Relu primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/adaptive_pooling.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/adaptive_pooling.hpp
+index e54b055312..f80d7b3c62 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/adaptive_pooling.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/adaptive_pooling.hpp
+@@ -20,8 +20,6 @@ struct adaptive_pooling : public primitive_base<adaptive_pooling> {
+                          mode{adaptive_pooling_mode::average},
+                          output_size{} {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs AdaptiveAvgPooling primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/arg_max_min.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/arg_max_min.hpp
+index 16ca38e746..418f8df90d 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/arg_max_min.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/arg_max_min.hpp
+@@ -27,8 +27,6 @@ struct arg_max_min : public primitive_base<arg_max_min> {
+                     values_first(false),
+                     stable(false) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs arg_max_min primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/assign.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/assign.hpp
+index 1c4021a77d..4134614504 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/assign.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/assign.hpp
+@@ -17,8 +17,6 @@ struct assign : public primitive_base<assign> {
+ 
+     assign() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs Assign primitive.
+     /// @param id This primitive id
+     /// @param inputs Input parameters ids
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/batch_to_space.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/batch_to_space.hpp
+index fab49940fb..246853a5f3 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/batch_to_space.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/batch_to_space.hpp
+@@ -42,8 +42,6 @@ struct batch_to_space : public primitive_base<batch_to_space> {
+ 
+     batch_to_space() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs batch_to_space primitive.
+     /// @param id This primitive id.
+     /// @param input Input data primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/binary_convolution.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/binary_convolution.hpp
+index 268f78e73a..5ba028bda7 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/binary_convolution.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/binary_convolution.hpp
+@@ -16,8 +16,6 @@ struct binary_convolution : public primitive_base<binary_convolution> {
+ 
+     binary_convolution() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs binary_convolution primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/border.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/border.hpp
+index def9b956ff..81ad97a196 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/border.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/border.hpp
+@@ -26,8 +26,6 @@ struct border : public primitive_base<border> {
+ 
+     border() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief whether the input is const or not
+     enum PAD_NON_CONST_INPUT {
+         BEGIN = 0x1,
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/broadcast.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/broadcast.hpp
+index 3b210c7b94..d3b17919a4 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/broadcast.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/broadcast.hpp
+@@ -56,8 +56,6 @@ struct broadcast : public primitive_base<broadcast> {
+ 
+     broadcast() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs broadcast primitive / layer.
+     ///
+     /// @param id              An identifier of new primitive.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/bucketize.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/bucketize.hpp
+index 11e7f8752e..dd5b8f3d93 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/bucketize.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/bucketize.hpp
+@@ -13,8 +13,6 @@ struct bucketize : primitive_base<bucketize> {
+ 
+     bucketize() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs bucketize primitive.
+     /// @param id This primitive id.
+     /// @param inputs Input primitives ids.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/concatenation.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/concatenation.hpp
+index 184dbf9ceb..5f187c7422 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/concatenation.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/concatenation.hpp
+@@ -35,8 +35,6 @@ struct concatenation : public primitive_base<concatenation> {
+ 
+     concatenation() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @li Constructs concatenation primitive.
+     /// @param id This primitive id.
+     /// @param input Vector of input primitives ids.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/convert_color.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/convert_color.hpp
+index f1cd6e1934..f71e73310a 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/convert_color.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/convert_color.hpp
+@@ -14,8 +14,6 @@ struct convert_color : public primitive_base<convert_color> {
+ 
+     convert_color() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     enum color_format : uint32_t {
+         RGB,       ///< RGB color format
+         BGR,       ///< BGR color format, default in OpenVINO
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/convolution.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/convolution.hpp
+index 01291816b1..0a15e6a146 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/convolution.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/convolution.hpp
+@@ -15,8 +15,6 @@ struct convolution : public primitive_base<convolution> {
+ 
+     convolution() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs convolution primitive
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+@@ -313,8 +311,6 @@ struct deformable_interp : public primitive_base<deformable_interp> {
+ 
+     deformable_interp() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     deformable_interp(const primitive_id& id,
+                       const std::vector<input_info>& inputs,
+                       uint32_t groups,
+@@ -430,8 +426,6 @@ struct deformable_conv : public primitive_base<deformable_conv> {
+ 
+     deformable_conv() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     deformable_conv(const primitive_id& id,
+                     const input_info& input,
+                     const std::vector<primitive_id>& weights,
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/crop.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/crop.hpp
+index 5c944b75d1..b8935695b2 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/crop.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/crop.hpp
+@@ -46,8 +46,6 @@ struct crop : public primitive_base<crop> {
+ 
+     crop() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs crop primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/ctc_greedy_decoder.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/ctc_greedy_decoder.hpp
+index 9c911243d5..2cf19ca58c 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/ctc_greedy_decoder.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/ctc_greedy_decoder.hpp
+@@ -13,8 +13,6 @@ struct ctc_greedy_decoder : public primitive_base<ctc_greedy_decoder> {
+ 
+     ctc_greedy_decoder() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs ctc_greedy_decoder primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id (input, sequence_indicators, second_output(optional)).
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/ctc_loss.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/ctc_loss.hpp
+index 0d63027cf7..55cc934195 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/ctc_loss.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/ctc_loss.hpp
+@@ -15,8 +15,6 @@ struct ctc_loss : primitive_base<ctc_loss> {
+ 
+     ctc_loss() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs ctc_loss primitive.
+     /// @param id This primitive id.
+     /// @param inputs Input primitives ids.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/cum_sum.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/cum_sum.hpp
+index 4a038714d7..11bd653d4c 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/cum_sum.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/cum_sum.hpp
+@@ -6,15 +6,11 @@
+ #include "primitive.hpp"
+ 
+ namespace cldnn {
+-
+-
+ struct cum_sum : public primitive_base<cum_sum> {
+     CLDNN_DECLARE_PRIMITIVE(cum_sum)
+ 
+     cum_sum() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs cum_sum primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/custom_gpu_primitive.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/custom_gpu_primitive.hpp
+index a938e2c0ff..62dafc4ce4 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/custom_gpu_primitive.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/custom_gpu_primitive.hpp
+@@ -18,8 +18,6 @@ struct custom_gpu_primitive : public primitive_base<custom_gpu_primitive> {
+ 
+     custom_gpu_primitive() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Custom primitive kernel argument type
+     enum arg_type {
+         arg_input,
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/data.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/data.hpp
+index 8a89005102..177fbf99b7 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/data.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/data.hpp
+@@ -17,8 +17,6 @@ struct data : public primitive_base<data> {
+ 
+     data() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs data primitive.
+     /// @param id This primitive id.
+     /// @param mem @ref memory object which contains data.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/deconvolution.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/deconvolution.hpp
+index b149539bb6..5c507a2360 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/deconvolution.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/deconvolution.hpp
+@@ -20,8 +20,6 @@ struct deconvolution : public primitive_base<deconvolution> {
+ 
+     deconvolution() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs deconvolution primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/depth_to_space.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/depth_to_space.hpp
+index 6d1c430d91..577be63765 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/depth_to_space.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/depth_to_space.hpp
+@@ -22,8 +22,6 @@ struct depth_to_space : public primitive_base<depth_to_space> {
+ 
+     depth_to_space() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs depth_to_space primitive.
+     /// @param id This primitive id.
+     /// @param input Input dictionary primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/detection_output.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/detection_output.hpp
+index 7437106428..3c39a83963 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/detection_output.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/detection_output.hpp
+@@ -42,8 +42,6 @@ struct detection_output : public primitive_base<detection_output> {
+           clip_after_nms(false),
+           objectness_score(0.0f) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs detection output primitive.
+     /// @param id This primitive id.
+     /// @param inputs Inputs for primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/dft.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/dft.hpp
+index 45042ad94b..329794e088 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/dft.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/dft.hpp
+@@ -29,8 +29,6 @@ struct dft : public primitive_base<dft> {
+ 
+     dft() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs DFT primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/eltwise.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/eltwise.hpp
+index de1e4138c3..b4b9e8932d 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/eltwise.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/eltwise.hpp
+@@ -71,8 +71,6 @@ struct eltwise : public primitive_base<eltwise> {
+ 
+     eltwise() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs eltwise primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/embedding_bag.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/embedding_bag.hpp
+index c749c3b5e2..29b3259b50 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/embedding_bag.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/embedding_bag.hpp
+@@ -14,8 +14,6 @@ struct embedding_bag : public primitive_base<embedding_bag> {
+ 
+     embedding_bag() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Select type of embedding_bag operation
+     enum embedding_bag_type {
+         packed_sum,
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_detection_output.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_detection_output.hpp
+index cb47ec86f5..f87b161e48 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_detection_output.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_detection_output.hpp
+@@ -16,8 +16,6 @@ struct experimental_detectron_detection_output : public primitive_base<experimen
+ 
+     experimental_detectron_detection_output() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs experimental_detectron_detection_output primitive
+     /// @param id This primitive id
+     /// @param input_rois input rois
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_generate_proposals_single_image.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_generate_proposals_single_image.hpp
+index 355fb75ea9..a0d024b8e5 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_generate_proposals_single_image.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_generate_proposals_single_image.hpp
+@@ -15,8 +15,6 @@ struct experimental_detectron_generate_proposals_single_image
+ 
+     experimental_detectron_generate_proposals_single_image() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs experimental_detectron_generate_proposals_single_image primitive
+     /// @param id This primitive id
+     /// @param input_im_info image size info
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_prior_grid_generator.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_prior_grid_generator.hpp
+index 52491c76be..0a3fe91165 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_prior_grid_generator.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_prior_grid_generator.hpp
+@@ -8,8 +8,6 @@
+ 
+ namespace cldnn {
+ 
+-
+-
+ /// @brief Constructs experimental_detectron_prior_grid_generator primitive.
+ struct experimental_detectron_prior_grid_generator
+     : public primitive_base<experimental_detectron_prior_grid_generator> {
+@@ -17,8 +15,6 @@ struct experimental_detectron_prior_grid_generator
+ 
+     experimental_detectron_prior_grid_generator() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     experimental_detectron_prior_grid_generator(const primitive_id& id,
+                                                 const std::vector<input_info>& inputs,
+                                                 bool flatten,
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_roi_feature_extractor.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_roi_feature_extractor.hpp
+index a9b27fd16f..3a1e229171 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_roi_feature_extractor.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_roi_feature_extractor.hpp
+@@ -14,8 +14,6 @@ struct experimental_detectron_roi_feature_extractor : public primitive_base<expe
+ 
+     experimental_detectron_roi_feature_extractor() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs experimental_detectron_roi_feature_extractor primitive
+     /// @param id This primitive id
+     /// @param inputs Inputs for primitive id (ROIs, {pyramid levels, ...}, second_output)
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_topk_rois.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_topk_rois.hpp
+index 0f61e985fa..63dc492fd5 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_topk_rois.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/experimental_detectron_topk_rois.hpp
+@@ -10,8 +10,6 @@
+ 
+ namespace cldnn {
+ 
+-
+-
+ /// @brief ExperimentalDetectronTopKROIs-6 primitive
+ /// @details
+ struct experimental_detectron_topk_rois : public primitive_base<experimental_detectron_topk_rois> {
+@@ -19,8 +17,6 @@ struct experimental_detectron_topk_rois : public primitive_base<experimental_det
+ 
+     experimental_detectron_topk_rois() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /**
+      * Construct ExperimentalDetectronTopKROIs privitive.
+      * @param id primitive id
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/extract_image_patches.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/extract_image_patches.hpp
+index e1aeb25f81..69045cd218 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/extract_image_patches.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/extract_image_patches.hpp
+@@ -23,8 +23,6 @@ struct extract_image_patches : public primitive_base<extract_image_patches> {
+ 
+     extract_image_patches() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs select primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id containing input 4-D tensor.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/eye.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/eye.hpp
+index 4137aaa2ec..9cc2c9e083 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/eye.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/eye.hpp
+@@ -14,8 +14,6 @@ struct eye : public primitive_base<eye> {
+ 
+     eye() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs eye primitive.
+     /// @param id This primitive id.
+     /// @param inputs List of primitive ids.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/fully_connected.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/fully_connected.hpp
+index d71afd76f1..ba05829539 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/fully_connected.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/fully_connected.hpp
+@@ -35,8 +35,6 @@ struct fully_connected : public primitive_base<fully_connected> {
+ 
+     fully_connected() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs fully connected layer.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/gather.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/gather.hpp
+index f754d47667..2a7dad7fe4 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/gather.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/gather.hpp
+@@ -16,8 +16,6 @@ struct gather : public primitive_base<gather> {
+ 
+     gather() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs gather primitive.
+     /// @param id This primitive id.
+     /// @param dict Input dictionary primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/gather_elements.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/gather_elements.hpp
+index 0287a76877..455a40a9ea 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/gather_elements.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/gather_elements.hpp
+@@ -14,8 +14,6 @@ struct gather_elements : public primitive_base<gather_elements> {
+ 
+     gather_elements() : primitive_base("", {}), output_format({}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs gather_elements primitive.
+     /// @param id This primitive id.
+     /// @param data Input data primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/gather_nd.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/gather_nd.hpp
+index 932fe0b167..a2c26b0545 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/gather_nd.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/gather_nd.hpp
+@@ -14,8 +14,6 @@ struct gather_nd : public primitive_base<gather_nd> {
+ 
+     gather_nd() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs gather_nd primitive.
+     ///
+     /// @param id                   This primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/gather_tree.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/gather_tree.hpp
+index 5ec3339801..082b4113ab 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/gather_tree.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/gather_tree.hpp
+@@ -15,8 +15,6 @@ struct gather_tree : public primitive_base<gather_tree> {
+ 
+     gather_tree() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs gather tree primitive / layer.
+     ///
+     /// @param id                      An identifier of new primitive.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/gemm.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/gemm.hpp
+index 104b92571c..cef11bbb0b 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/gemm.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/gemm.hpp
+@@ -27,8 +27,6 @@ struct gemm : public primitive_base<gemm> {
+ 
+     gemm() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs gemm layer.
+     /// @brief Primitive id containing first matrix
+     /// @brief Primitive id containing second matrix
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/generate_proposals.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/generate_proposals.hpp
+index ab57e07d0d..3524c104fd 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/generate_proposals.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/generate_proposals.hpp
+@@ -15,8 +15,6 @@ struct generate_proposals
+ 
+     generate_proposals() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs generate_proposals primitive
+     /// @param id This primitive id
+     /// @param input_im_info image size info
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/grid_sample.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/grid_sample.hpp
+index 700140c9d2..20e308e4aa 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/grid_sample.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/grid_sample.hpp
+@@ -10,8 +10,6 @@
+ #include "primitive.hpp"
+ 
+ namespace cldnn {
+-
+-
+ using GridSampleOp = ov::op::v9::GridSample;
+ 
+ /// @brief GridSample-9 primitive.
+@@ -20,8 +18,6 @@ struct grid_sample : primitive_base<grid_sample> {
+ 
+     grid_sample() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs grid_sample primitive.
+     /// @param id This primitive id.
+     /// @param inputs Input primitives ids.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/grn.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/grn.hpp
+index cda1ebe160..3b629bad91 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/grn.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/grn.hpp
+@@ -13,8 +13,6 @@ struct grn : public primitive_base<grn> {
+ 
+     grn() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs grn primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/input_layout.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/input_layout.hpp
+index c13e89a3a5..5cbba06ca4 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/input_layout.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/input_layout.hpp
+@@ -20,8 +20,6 @@ struct input_layout : public primitive_base<input_layout> {
+ 
+     input_layout() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs input layout primitive.
+     /// @param id This primitive id.
+     /// @param layout Defines layout for the data will be passed to network.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/loop.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/loop.hpp
+index 49af132862..c27a88e197 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/loop.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/loop.hpp
+@@ -55,8 +55,6 @@ struct loop : public primitive_base<loop> {
+     loop() : primitive_base("", {}),
+              max_iteration(0) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     struct io_primitive_map {
+         /// @brief Constructs a mapping from external input/output primitive to input/output primitive in body topology
+         ///
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/lrn.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/lrn.hpp
+index 28bcf69147..f8cc1672e7 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/lrn.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/lrn.hpp
+@@ -6,8 +6,6 @@
+ #include "primitive.hpp"
+ 
+ namespace cldnn {
+-
+-
+ typedef enum { /*:int32_t*/
+     lrn_norm_region_across_channel,
+     lrn_norm_region_within_channel
+@@ -29,8 +27,6 @@ struct lrn : public primitive_base<lrn> {
+ 
+     lrn() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs LRN primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm.hpp
+index 7c601158d8..71922acd21 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm.hpp
+@@ -53,8 +53,6 @@ struct lstm : public primitive_base<lstm> {
+ 
+     lstm() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs lstm layer.
+     /// @param id This primitive id.
+     /// @param input Vector of primitive id.
+@@ -230,8 +228,6 @@ struct lstm_gemm : public primitive_base<lstm_gemm> {
+     lstm_gemm() : primitive_base("", {}),
+                   direction(0) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs lstm layer.
+     /// @param id This primitive id.
+     /// @param input input primitive id.
+@@ -319,8 +315,6 @@ struct lstm_elt : public primitive_base<lstm_elt> {
+ 
+     lstm_elt() : primitive_base("", {}), clip(0), input_forget(0), offset_order(lstm_weights_order::iofz), direction(0) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     using vec_activation = std::vector<activation_func>;
+     using vec_activation_param = std::vector<activation_additional_params>;
+ 
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm_dynamic.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm_dynamic.hpp
+index fd7e7c4a26..d459754ebc 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm_dynamic.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm_dynamic.hpp
+@@ -22,8 +22,6 @@ struct lstm_dynamic : public primitive_base<lstm_dynamic> {
+ 
+     lstm_dynamic() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs lstm_dynamic layer.
+     /// @param id This primitive id.
+     /// @param input Primitive id of input layer.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm_dynamic_input.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm_dynamic_input.hpp
+index bf0ddb2d43..6a8e90d9a4 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm_dynamic_input.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm_dynamic_input.hpp
+@@ -22,8 +22,6 @@ struct lstm_dynamic_input : public primitive_base<lstm_dynamic_input> {
+ 
+     lstm_dynamic_input() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs lstm_dynamic layer.
+     /// @param id This primitive id.
+     /// @param input Primitive id of input layer.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm_dynamic_timeloop.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm_dynamic_timeloop.hpp
+index e5b5ea7661..ef184707f9 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm_dynamic_timeloop.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/lstm_dynamic_timeloop.hpp
+@@ -23,8 +23,6 @@ struct lstm_dynamic_timeloop
+ 
+     lstm_dynamic_timeloop() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs lstm_dynamic layer.
+     /// @param id This primitive id.
+     /// @param input Primitive id of input layer.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/matrix_nms.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/matrix_nms.hpp
+index 72c95cae70..d4efea1d59 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/matrix_nms.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/matrix_nms.hpp
+@@ -16,8 +16,6 @@ struct matrix_nms : public primitive_base<matrix_nms> {
+ 
+     matrix_nms() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     enum decay_function { gaussian, linear };
+ 
+     enum sort_result_type {
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/multiclass_nms.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/multiclass_nms.hpp
+index 5218488f1b..92ea0d371b 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/multiclass_nms.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/multiclass_nms.hpp
+@@ -18,8 +18,6 @@ struct multiclass_nms : public primitive_base<multiclass_nms> {
+ 
+     multiclass_nms() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     enum class sort_result_type : int32_t {
+         classid,  // sort selected boxes by class id (ascending) in each batch element
+         score,    // sort selected boxes by score (descending) in each batch element
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/mutable_data.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/mutable_data.hpp
+index 54c46bf785..105711b58d 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/mutable_data.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/mutable_data.hpp
+@@ -18,8 +18,6 @@ struct mutable_data : public primitive_base<mutable_data> {
+ 
+     mutable_data() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Enum type to specify function for data filling.
+     enum filler_type { no_fill, zero, one, xavier };
+ 
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/mvn.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/mvn.hpp
+index 72daa005b6..72e5cd67d9 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/mvn.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/mvn.hpp
+@@ -14,8 +14,6 @@ struct mvn : public primitive_base<mvn> {
+ 
+     mvn() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs mvn primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/non_max_suppression.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/non_max_suppression.hpp
+index b7aafffb55..b9614cd472 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/non_max_suppression.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/non_max_suppression.hpp
+@@ -22,8 +22,6 @@ struct non_max_suppression : public primitive_base<non_max_suppression> {
+                             center_point_box(false),
+                             sort_result_descending(false) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Creates non max suppression primitive.
+     /// @param id This primitive id.
+     /// @param boxes_positions Id of primitive with bounding boxes.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/non_zero.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/non_zero.hpp
+index d243058bad..0fa4b35ff7 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/non_zero.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/non_zero.hpp
+@@ -13,8 +13,6 @@ struct count_nonzero : public primitive_base<count_nonzero> {
+ 
+     count_nonzero() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs count_nonzero primitive.
+     /// @param id This primitive id.
+     /// @param data Input data primitive id.
+@@ -33,8 +31,6 @@ struct gather_nonzero : public primitive_base<gather_nonzero> {
+ 
+     gather_nonzero() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs gather_nonzero primitive.
+     /// @param id This primitive id.
+     /// @param data Input data primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/normalize.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/normalize.hpp
+index b17c659d76..0f25272bce 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/normalize.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/normalize.hpp
+@@ -29,8 +29,6 @@ struct normalize : public primitive_base<normalize> {
+ 
+     normalize() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs normalize primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/one_hot.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/one_hot.hpp
+index 3a2958a0fb..b94e069fc2 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/one_hot.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/one_hot.hpp
+@@ -35,8 +35,6 @@ struct one_hot : public primitive_base<one_hot> {
+ 
+     one_hot() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs one-hot primitive layer.
+     /// @param id              An identifier of new primitive.
+     /// @param input           An identifier of primitive which is an input for newly created one-hot primitive.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/permute.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/permute.hpp
+index 587427e6a8..91bc12df87 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/permute.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/permute.hpp
+@@ -21,8 +21,6 @@ struct permute : public primitive_base<permute> {
+ 
+     permute() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs permute primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/pooling.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/pooling.hpp
+index 0db15d2278..df49ba46a9 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/pooling.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/pooling.hpp
+@@ -34,8 +34,6 @@ struct pooling : public primitive_base<pooling> {
+ 
+     pooling() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs pooling primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/primitive.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/primitive.hpp
+index f68aa5f6c3..0bbf589b0d 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/primitive.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/primitive.hpp
+@@ -203,7 +203,7 @@ public:
+ 
+     size_t num_outputs;
+ 
+-    virtual std::string get_type() const { return "NONE"; }
++    virtual const std::string& get_type_info() const = 0;
+     virtual void save(BinaryOutputBuffer& ob) const {
+         ob << type_string();
+         ob << id;
+@@ -313,6 +313,7 @@ struct primitive_info {
+     }
+ 
+ #define CLDNN_DECLARE_PRIMITIVE(PType)       \
++    DECLARE_OBJECT_TYPE_SERIALIZATION(PType) \
+     CLDNN_DEFINE_TYPE_ID(PType)              \
+     CLDNN_DEFINE_TYPE_STRING(PType)
+ 
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/prior_box.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/prior_box.hpp
+index 959e6b14f0..3f78605f49 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/prior_box.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/prior_box.hpp
+@@ -23,8 +23,6 @@ struct prior_box : public primitive_base<prior_box> {
+ 
+     prior_box() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     using PriorBoxV0Op = ov::op::v0::PriorBox;
+     using PriorBoxV8Op = ov::op::v8::PriorBox;
+     using PriorBoxClusteredOp = ov::op::v0::PriorBoxClustered;
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/proposal.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/proposal.hpp
+index 1278d4ff6f..a1e6768276 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/proposal.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/proposal.hpp
+@@ -10,8 +10,6 @@
+ #include "intel_gpu/graph/serialization/vector_serializer.hpp"
+ 
+ namespace cldnn {
+-
+-
+ #define CLDNN_ROI_VECTOR_SIZE 5
+ 
+ struct proposal : public primitive_base<proposal> {
+@@ -37,8 +35,6 @@ struct proposal : public primitive_base<proposal> {
+                  shift_anchors(false),
+                  normalize(false) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     proposal(const primitive_id& id,
+              const input_info& cls_scores,
+              const input_info& bbox_pred,
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/pyramid_roi_align.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/pyramid_roi_align.hpp
+index 6d9842227a..123faf83f2 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/pyramid_roi_align.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/pyramid_roi_align.hpp
+@@ -26,8 +26,6 @@ struct pyramid_roi_align : public primitive_base<pyramid_roi_align> {
+ 
+     pyramid_roi_align() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @param id This primitive id.
+     /// @param rois Input RoI boxes as tuple [x1, y1, x2, y2] describing two opposite corners of the region.
+     /// @param P2 First level of the image pyramid.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/quantize.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/quantize.hpp
+index bb5de80742..a2bb5ae3cf 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/quantize.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/quantize.hpp
+@@ -38,8 +38,6 @@ struct quantize : public primitive_base<quantize> {
+ 
+     quantize() : primitive_base("", {}), levels(0) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief levels The number of quantization levels.
+     int levels;
+ 
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/random_uniform.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/random_uniform.hpp
+index 02c86cb80d..598d8171b5 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/random_uniform.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/random_uniform.hpp
+@@ -10,8 +10,6 @@
+ 
+ namespace cldnn {
+ 
+-
+-
+ /// @brief RandomUniform-8 primitive
+ /// @details
+ struct random_uniform : public primitive_base<random_uniform> {
+@@ -22,8 +20,6 @@ struct random_uniform : public primitive_base<random_uniform> {
+                        op_seed(0),
+                        output_shape{} {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /**
+      * Construct Random Uniform privitive.
+      * @param id primitive id
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/range.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/range.hpp
+index 005d74a6c8..3d68fd2815 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/range.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/range.hpp
+@@ -12,8 +12,6 @@ struct range: public primitive_base<range> {
+ 
+     range() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs range primitive.
+     /// @param id This primitive id.
+     /// @param inputs Input primitive id vector.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/read_value.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/read_value.hpp
+index 9523b416cd..095c845d07 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/read_value.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/read_value.hpp
+@@ -17,8 +17,6 @@ struct read_value : public primitive_base<read_value> {
+ 
+     read_value() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs ReadValue primitive.
+     /// @param id This primitive id
+     /// @param inputs Input parameters ids
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/reduce.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/reduce.hpp
+index 7af0ad1dd9..c1f687e48a 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/reduce.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/reduce.hpp
+@@ -44,8 +44,6 @@ struct reduce : public primitive_base<reduce> {
+ 
+     reduce() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs reduce primitive
+     /// @param id This primitive id
+     /// @param input Input primitive id
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/region_yolo.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/region_yolo.hpp
+index 7efddc3fb4..d9040d1dc2 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/region_yolo.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/region_yolo.hpp
+@@ -16,8 +16,6 @@ struct region_yolo : public primitive_base<region_yolo> {
+ 
+     region_yolo() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs region_yolo primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/reorder.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/reorder.hpp
+index 1c59eebe65..7b2ada5d77 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/reorder.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/reorder.hpp
+@@ -69,8 +69,6 @@ struct reorder : public primitive_base<reorder> {
+                 output_format(format::any),
+                 mean_mode(reorder_mean_mode::subtract) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief reorder memory types
+     enum class memory_type {
+         buffer,
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/reorg_yolo.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/reorg_yolo.hpp
+index b5d76e9353..96eff0012e 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/reorg_yolo.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/reorg_yolo.hpp
+@@ -16,8 +16,6 @@ struct reorg_yolo : public primitive_base<reorg_yolo> {
+ 
+     reorg_yolo() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs region_yolo primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/resample.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/resample.hpp
+index b95ce3c5e0..59f58c986b 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/resample.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/resample.hpp
+@@ -17,8 +17,6 @@ struct resample : public primitive_base<resample> {
+ 
+     resample() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     using InterpolateOp = ov::op::util::InterpolateBase;
+ 
+     /// @brief Constructs Resample primitive.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/reshape.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/reshape.hpp
+index 0f9869a2f7..00e8d9a093 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/reshape.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/reshape.hpp
+@@ -17,8 +17,6 @@ struct reshape : public primitive_base<reshape> {
+ 
+     reshape() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     enum reshape_mode : uint32_t {
+         base,
+         squeeze,
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/reverse.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/reverse.hpp
+index 0ecb598550..70864a9f1e 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/reverse.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/reverse.hpp
+@@ -15,8 +15,6 @@ struct reverse : public primitive_base<reverse> {
+ 
+     reverse() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs reverse primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/reverse_sequence.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/reverse_sequence.hpp
+index 8058bd3a45..714e0f4a49 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/reverse_sequence.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/reverse_sequence.hpp
+@@ -15,8 +15,6 @@ struct reverse_sequence : public primitive_base<reverse_sequence> {
+ 
+     reverse_sequence() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs reverse_sequence primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/roi_align.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/roi_align.hpp
+index 14b031d87f..0813c960f0 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/roi_align.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/roi_align.hpp
+@@ -15,8 +15,6 @@ struct roi_align : public primitive_base<roi_align> {
+ 
+     roi_align() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Pooling mode for the @ref roi_align
+     enum PoolingMode { max, avg };
+ 
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/roi_pooling.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/roi_pooling.hpp
+index ef7fc25664..2dd22e52d3 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/roi_pooling.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/roi_pooling.hpp
+@@ -8,8 +8,6 @@
+ #include <vector>
+ 
+ namespace cldnn {
+-
+-
+ struct roi_pooling : public primitive_base<roi_pooling> {
+     CLDNN_DECLARE_PRIMITIVE(roi_pooling)
+ 
+@@ -27,8 +25,6 @@ struct roi_pooling : public primitive_base<roi_pooling> {
+                     spatial_bins_x(1),
+                     spatial_bins_y(1) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     roi_pooling(const primitive_id& id,
+                 const input_info& input_data,
+                 const input_info& input_rois,
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/roll.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/roll.hpp
+index 3ae8fc634e..3db154bf47 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/roll.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/roll.hpp
+@@ -15,8 +15,6 @@ struct roll : primitive_base<roll> {
+ 
+     roll() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs roll primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/scatter_elements_update.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/scatter_elements_update.hpp
+index fa2cd6e07b..4b823a165c 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/scatter_elements_update.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/scatter_elements_update.hpp
+@@ -14,8 +14,6 @@ struct scatter_elements_update : public primitive_base<scatter_elements_update>
+ 
+     scatter_elements_update() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs scatter_elements_update primitive.
+     /// @param id This primitive id.
+     /// @param dict Input data primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/scatter_nd_update.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/scatter_nd_update.hpp
+index f21691c3c7..1cc8746e9e 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/scatter_nd_update.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/scatter_nd_update.hpp
+@@ -14,8 +14,6 @@ struct scatter_nd_update : public primitive_base<scatter_nd_update> {
+ 
+     scatter_nd_update() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs scatter_nd_update primitive.
+     /// @param id This primitive id.
+     /// @param dict Input data primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/scatter_update.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/scatter_update.hpp
+index 9563fe079e..17c09a8d8e 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/scatter_update.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/scatter_update.hpp
+@@ -14,8 +14,6 @@ struct scatter_update : public primitive_base<scatter_update> {
+ 
+     scatter_update() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     enum scatter_update_axis {
+         along_b,
+         along_f,
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/select.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/select.hpp
+index 310c5ff2cb..0959fa2709 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/select.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/select.hpp
+@@ -22,8 +22,6 @@ struct select : public primitive_base<select> {
+ 
+     select() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs select primitive.
+     /// @param id This primitive id.
+     /// @param mask Input primitive id with values needed for select computation.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/shape_of.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/shape_of.hpp
+index e7573ed04e..7ec01f8c8b 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/shape_of.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/shape_of.hpp
+@@ -14,8 +14,6 @@ struct shape_of : public primitive_base<shape_of> {
+ 
+     shape_of() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs shape_of primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/shuffle_channels.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/shuffle_channels.hpp
+index b138517f8a..06cf612a39 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/shuffle_channels.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/shuffle_channels.hpp
+@@ -15,8 +15,6 @@ struct shuffle_channels : public primitive_base<shuffle_channels> {
+ 
+     shuffle_channels() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs shuffle_channels primitive.
+     /// @param id This primitive id.
+     /// @param input Input dictionary primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/slice.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/slice.hpp
+index 667bd2fde7..04a1852e51 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/slice.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/slice.hpp
+@@ -14,8 +14,6 @@ struct slice : public primitive_base<slice> {
+ 
+     slice() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs slice primitive.
+     /// @param id This primitive id.
+     /// @param inputs List of primitive ids.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/softmax.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/softmax.hpp
+index e059b25687..6861c9fc1d 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/softmax.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/softmax.hpp
+@@ -20,8 +20,6 @@ struct softmax : public primitive_base<softmax> {
+ 
+     softmax() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs softmax primitive.
+     /// @param id This primitive id.
+     /// @param input Input primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/space_to_batch.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/space_to_batch.hpp
+index d7cf654bab..89704a718f 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/space_to_batch.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/space_to_batch.hpp
+@@ -38,8 +38,6 @@ struct space_to_batch : public primitive_base<space_to_batch> {
+ 
+     space_to_batch() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs space_to_batch primitive.
+     /// @param id This primitive id.
+     /// @param input Input data primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/space_to_depth.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/space_to_depth.hpp
+index 5e06676444..91c2ff3bdc 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/space_to_depth.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/space_to_depth.hpp
+@@ -44,8 +44,6 @@ struct space_to_depth : public primitive_base<space_to_depth> {
+ 
+     space_to_depth() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     enum depth_mode {
+         depth_first,
+         blocks_first
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/strided_slice.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/strided_slice.hpp
+index ae89725285..47fe4fde1e 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/strided_slice.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/strided_slice.hpp
+@@ -16,8 +16,6 @@ struct strided_slice : public primitive_base<strided_slice> {
+ 
+     strided_slice() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs strided_slice primitive.
+     /// @param id This primitive id.
+     /// @param input Input data primitive id.
+diff --git a/src/plugins/intel_gpu/include/intel_gpu/primitives/tile.hpp b/src/plugins/intel_gpu/include/intel_gpu/primitives/tile.hpp
+index 17b3d97a69..b2f3deb521 100644
+--- a/src/plugins/intel_gpu/include/intel_gpu/primitives/tile.hpp
++++ b/src/plugins/intel_gpu/include/intel_gpu/primitives/tile.hpp
+@@ -14,8 +14,6 @@ struct tile : public primitive_base<tile> {
+ 
+     tile() : primitive_base("", {}) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
+-
+     /// @brief Constructs tile primitive with static input.
+     /// @param id This primitive id.
+     /// @param repeats Per-dimension replication factor.
+diff --git a/src/plugins/intel_gpu/src/graph/impls/common/condition.cpp b/src/plugins/intel_gpu/src/graph/impls/common/condition.cpp
+index dadd65e138..4a1a8b414f 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/common/condition.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/common/condition.cpp
+@@ -13,7 +13,7 @@ namespace cldnn {
+ namespace common {
+ 
+ struct condition_impl : typed_primitive_impl<condition> {
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::common::condition_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<condition_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/common/loop.cpp b/src/plugins/intel_gpu/src/graph/impls/common/loop.cpp
+index 907c359a14..81f244051a 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/common/loop.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/common/loop.cpp
+@@ -16,7 +16,7 @@ struct loop_impl : typed_primitive_impl<loop> {
+     using parent = typed_primitive_impl<loop>;
+     using parent::parent;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::common::loop_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<loop_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/common/wait_for_events.cpp b/src/plugins/intel_gpu/src/graph/impls/common/wait_for_events.cpp
+index d2af63c550..b08831e0aa 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/common/wait_for_events.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/common/wait_for_events.cpp
+@@ -23,7 +23,7 @@ public:
+ 
+     wait_for_events_impl() : primitive_impl() {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::common::wait_for_events_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<wait_for_events_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/activation.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/activation.cpp
+index 60c31dafcd..0caa272a09 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/activation.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/activation.cpp
+@@ -58,7 +58,7 @@ struct activation_impl : public typed_primitive_impl<activation> {
+ 
+     std::shared_ptr<ov::op::Op> op;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::activation_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<activation_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/assign.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/assign.cpp
+index 97a530eefc..4a02f716ce 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/assign.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/assign.cpp
+@@ -16,7 +16,7 @@ struct assign_impl : public typed_primitive_impl<assign> {
+ 
+     std::string variable_id;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::assign_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<assign_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/broadcast.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/broadcast.cpp
+index 810b90ff6d..fe8c30f3cd 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/broadcast.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/broadcast.cpp
+@@ -23,7 +23,7 @@ struct broadcast_impl : public typed_primitive_impl<broadcast> {
+ 
+     std::shared_ptr<ov::op::v3::Broadcast> op;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::broadcast_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<broadcast_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/concat.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/concat.cpp
+index 9254ef1bc2..73e58b9aaa 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/concat.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/concat.cpp
+@@ -21,7 +21,7 @@ struct concatenation_impl : public typed_primitive_impl<concatenation> {
+ 
+     std::shared_ptr<ov::op::v0::Concat> op;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::concatenation_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<concatenation_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/crop.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/crop.cpp
+index 3b1872f83a..97f6f2a6ae 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/crop.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/crop.cpp
+@@ -21,7 +21,7 @@ struct crop_impl : public typed_primitive_impl<crop> {
+ 
+     std::shared_ptr<ov::op::Op> op;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::crop_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<crop_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/detection_output.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/detection_output.cpp
+index 7b28294d55..9e9cd8b1c9 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/detection_output.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/detection_output.cpp
+@@ -43,7 +43,7 @@ public:
+     enum NMSType {CAFFE, MXNET};
+     NMSType nms_type = NMSType::CAFFE;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::detection_output_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<detection_output_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/eltwise.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/eltwise.cpp
+index b313bfefb7..ef336d81e6 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/eltwise.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/eltwise.cpp
+@@ -44,7 +44,7 @@ struct eltwise_impl : public typed_primitive_impl<eltwise> {
+ 
+     std::shared_ptr<ov::op::Op> op;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::eltwise_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<eltwise_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/gather.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/gather.cpp
+index 4fea93b59b..8daef9d220 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/gather.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/gather.cpp
+@@ -22,7 +22,7 @@ struct gather_impl : public typed_primitive_impl<gather> {
+ 
+     std::shared_ptr<ov::op::v8::Gather> op;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::gather_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<gather_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/non_max_suppression.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/non_max_suppression.cpp
+index d34861648c..7afca0cb91 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/non_max_suppression.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/non_max_suppression.cpp
+@@ -394,7 +394,7 @@ void run(non_max_suppression_inst& instance) {
+ struct non_max_suppression_impl : typed_primitive_impl<non_max_suppression> {
+     using parent = typed_primitive_impl<non_max_suppression>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::non_max_suppression_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<non_max_suppression_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/proposal.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/proposal.cpp
+index 1170d6a469..154467aa4c 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/proposal.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/proposal.cpp
+@@ -191,7 +191,7 @@ struct proposal_impl : typed_primitive_impl<proposal> {
+ 
+     explicit proposal_impl(const proposal_node& arg) {}
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::proposal_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<proposal_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/range.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/range.cpp
+index e4318334b1..a959d1903c 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/range.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/range.cpp
+@@ -19,7 +19,7 @@ struct range_impl : public typed_primitive_impl<range> {
+ 
+     std::shared_ptr<ov::op::v4::Range> op;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::range_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<range_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/read_value.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/read_value.cpp
+index d5481ac106..02b4a1f38f 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/read_value.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/read_value.cpp
+@@ -16,7 +16,7 @@ struct read_value_impl : public typed_primitive_impl<read_value> {
+ 
+     std::string variable_id;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::read_value_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<read_value_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/reorder.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/reorder.cpp
+index 99641ec300..09ae3f6da1 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/reorder.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/reorder.cpp
+@@ -19,7 +19,7 @@ struct reorder_impl : public typed_primitive_impl<reorder> {
+ 
+     std::shared_ptr<ov::op::v0::Convert> op;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::reorder_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<reorder_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/scatter_update.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/scatter_update.cpp
+index dab57eee24..e30c172402 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/scatter_update.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/scatter_update.cpp
+@@ -21,7 +21,7 @@ struct scatter_update_impl : public typed_primitive_impl<scatter_update> {
+ 
+     std::shared_ptr<ov::op::v3::ScatterUpdate> op;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::scatter_update_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<scatter_update_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/shape_of.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/shape_of.cpp
+index 141cf9b24e..8e7da0f9a6 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/shape_of.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/shape_of.cpp
+@@ -20,7 +20,7 @@ struct shape_of_impl : public typed_primitive_impl<shape_of> {
+     std::string variable_id;
+     bool calculated = false;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::shape_of_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<shape_of_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/strided_slice.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/strided_slice.cpp
+index 37b50eff46..50babdecc9 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/strided_slice.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/strided_slice.cpp
+@@ -29,7 +29,7 @@ struct strided_slice_impl : public typed_primitive_impl<strided_slice> {
+ 
+     std::shared_ptr<ov::op::v1::StridedSlice> op;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::strided_slice_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<strided_slice_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/cpu/tile.cpp b/src/plugins/intel_gpu/src/graph/impls/cpu/tile.cpp
+index 10507931e5..d045699057 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/cpu/tile.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/cpu/tile.cpp
+@@ -21,7 +21,7 @@ struct tile_impl : public typed_primitive_impl<tile> {
+ 
+     std::shared_ptr<ov::op::v0::Tile> op;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::cpu::tile_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<tile_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/activation.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/activation.cpp
+index 006f65dcbb..cd56a28b5c 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/activation.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/activation.cpp
+@@ -25,7 +25,7 @@ struct activation_impl : typed_primitive_impl_ocl<activation> {
+     using kernel_selector_t = kernel_selector::activation_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::activation_params, kernel_selector::activation_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::activation_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<activation_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/adaptive_pooling.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/adaptive_pooling.cpp
+index 254cf3bb74..fc4c6d9af0 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/adaptive_pooling.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/adaptive_pooling.cpp
+@@ -16,7 +16,7 @@ struct adaptive_pooling_impl : public typed_primitive_impl_ocl<adaptive_pooling>
+     using kernel_selector_t = kernel_selector::adaptive_pooling_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::adaptive_pooling_params, kernel_selector::adaptive_pooling_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::adaptive_pooling_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<adaptive_pooling_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/arg_max_min.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/arg_max_min.cpp
+index 8eb3083375..1816aa8f9e 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/arg_max_min.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/arg_max_min.cpp
+@@ -39,7 +39,7 @@ struct arg_max_min_impl : typed_primitive_impl_ocl<arg_max_min> {
+     using kernel_selector_t = kernel_selector::arg_max_min_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::arg_max_min_params, kernel_selector::arg_max_min_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::arg_max_min_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<arg_max_min_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/batch_to_space.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/batch_to_space.cpp
+index 629930b85d..90d2b3c3a9 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/batch_to_space.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/batch_to_space.cpp
+@@ -15,7 +15,7 @@ struct batch_to_space_impl : typed_primitive_impl_ocl<batch_to_space> {
+     using kernel_selector_t = kernel_selector::batch_to_space_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::batch_to_space_params, kernel_selector::batch_to_space_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::batch_to_space_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<batch_to_space_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/binary_convolution.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/binary_convolution.cpp
+index a1d64f2f8b..48bc709ce3 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/binary_convolution.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/binary_convolution.cpp
+@@ -17,7 +17,7 @@ struct binary_convolution_impl : typed_primitive_impl_ocl<binary_convolution> {
+     using kernel_selector_t = kernel_selector::binary_convolution_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::binary_convolution_params, kernel_selector::binary_convolution_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::binary_convolution_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<binary_convolution_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/border.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/border.cpp
+index 9265f345e2..97a3410d86 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/border.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/border.cpp
+@@ -18,7 +18,7 @@ struct border_impl : typed_primitive_impl_ocl<border> {
+     using kernel_selector_t = kernel_selector::border_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::border_params, kernel_selector::border_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::border_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<border_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/broadcast.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/broadcast.cpp
+index 92561d0680..03dc67176f 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/broadcast.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/broadcast.cpp
+@@ -17,7 +17,7 @@ struct broadcast_impl : typed_primitive_impl_ocl<broadcast> {
+     using kernel_selector_t = kernel_selector::broadcast_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::broadcast_params, kernel_selector::broadcast_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::broadcast_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<broadcast_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/bucketize.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/bucketize.cpp
+index cd0efecfeb..46d5f81af6 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/bucketize.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/bucketize.cpp
+@@ -17,7 +17,7 @@ struct bucketize_impl : typed_primitive_impl_ocl<bucketize> {
+     using kernel_selector_t = kernel_selector::bucketize_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::bucketize_params, kernel_selector::bucketize_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::bucketize_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<bucketize_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/concatenation.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/concatenation.cpp
+index 653fecca64..539c6b8304 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/concatenation.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/concatenation.cpp
+@@ -47,7 +47,7 @@ struct concatenation_impl : typed_primitive_impl_ocl<concatenation> {
+     using kernel_selector_t = kernel_selector::concatenation_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::concatenation_params, kernel_selector::concatenation_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::concatenation_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<concatenation_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/convert_color.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/convert_color.cpp
+index 95b2441710..d44ef3f53e 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/convert_color.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/convert_color.cpp
+@@ -16,7 +16,7 @@ struct convert_color_impl : typed_primitive_impl_ocl<convert_color> {
+     using kernel_selector_t = kernel_selector::convert_color_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::convert_color_params, kernel_selector::convert_color_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::convert_color_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<convert_color_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/convolution.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/convolution.cpp
+index 6a34307c42..d62cd34bf5 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/convolution.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/convolution.cpp
+@@ -18,7 +18,7 @@ struct convolution_impl : typed_primitive_impl_ocl<convolution> {
+     using kernel_selector_t = kernel_selector::convolution_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::convolution_params, kernel_selector::convolution_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::convolution_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<convolution_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/crop.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/crop.cpp
+index 142d3438f5..7e71b214e6 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/crop.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/crop.cpp
+@@ -17,7 +17,7 @@ struct crop_impl : typed_primitive_impl_ocl<crop> {
+     using kernel_selector_t = kernel_selector::eltwise_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::eltwise_params, kernel_selector::eltwise_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::crop_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<crop_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/ctc_greedy_decoder.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/ctc_greedy_decoder.cpp
+index ae4ab33a36..3d00be5740 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/ctc_greedy_decoder.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/ctc_greedy_decoder.cpp
+@@ -17,7 +17,7 @@ struct ctc_greedy_decoder_impl : typed_primitive_impl_ocl<ctc_greedy_decoder> {
+     using kernel_selector_t = kernel_selector::ctc_greedy_decoder_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::ctc_greedy_decoder_params, kernel_selector::ctc_greedy_decoder_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::ctc_greedy_decoder_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<ctc_greedy_decoder_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/ctc_loss.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/ctc_loss.cpp
+index 9cb1316553..b9e3965ecb 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/ctc_loss.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/ctc_loss.cpp
+@@ -17,7 +17,7 @@ struct ctc_loss_impl : typed_primitive_impl_ocl<ctc_loss> {
+     using kernel_selector_t = kernel_selector::ctc_loss_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::ctc_loss_params, kernel_selector::ctc_loss_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::ctc_loss_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<ctc_loss_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/cum_sum.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/cum_sum.cpp
+index a6af02942a..b17b52cba1 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/cum_sum.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/cum_sum.cpp
+@@ -50,7 +50,7 @@ struct cum_sum_impl : typed_primitive_impl_ocl<cum_sum> {
+     using kernel_selector_t = kernel_selector::cum_sum_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::cum_sum_params, kernel_selector::cum_sum_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::cum_sum_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<cum_sum_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/custom_primitive.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/custom_primitive.cpp
+index 32cdfcfbae..5b0cc7e5b6 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/custom_primitive.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/custom_primitive.cpp
+@@ -24,7 +24,7 @@ struct custom_gpu_primitive_impl : typed_primitive_impl<custom_gpu_primitive> {
+     using parent = typed_primitive_impl<custom_gpu_primitive>;
+     using parent::parent;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::custom_gpu_primitive_impl)
+ 
+     std::shared_ptr<kernel_selector::cl_kernel_data> cl_kernel;
+     std::vector<kernel::ptr> _kernels;
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/deconvolution.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/deconvolution.cpp
+index eff51c3df0..1a19234d41 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/deconvolution.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/deconvolution.cpp
+@@ -17,7 +17,7 @@ struct deconvolution_impl : typed_primitive_impl_ocl<deconvolution> {
+     using kernel_selector_t = kernel_selector::deconvolution_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::deconvolution_params, kernel_selector::deconvolution_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::deconvolution_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<deconvolution_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/deformable_convolution.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/deformable_convolution.cpp
+index 9184701b8e..d988665cda 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/deformable_convolution.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/deformable_convolution.cpp
+@@ -17,7 +17,7 @@ struct deformable_conv_impl : typed_primitive_impl_ocl<deformable_conv> {
+     using kernel_selector_t = kernel_selector::deformable_conv_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::convolution_params, kernel_selector::convolution_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::deformable_conv_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<deformable_conv_impl>(*this);
+@@ -61,7 +61,7 @@ struct deformable_interp_impl : typed_primitive_impl_ocl<deformable_interp> {
+     using kernel_selector_t = kernel_selector::deformable_interp_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::convolution_params, kernel_selector::convolution_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::deformable_interp_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<deformable_interp_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/depth_to_space.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/depth_to_space.cpp
+index cbce96db63..81c25cad92 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/depth_to_space.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/depth_to_space.cpp
+@@ -16,7 +16,7 @@ struct depth_to_space_impl : typed_primitive_impl_ocl<depth_to_space> {
+     using kernel_selector_t = kernel_selector::depth_to_space_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::depth_to_space_params, kernel_selector::depth_to_space_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::depth_to_space_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<depth_to_space_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/detection_output.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/detection_output.cpp
+index 55779736f0..cdcc442e45 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/detection_output.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/detection_output.cpp
+@@ -17,7 +17,7 @@ struct detection_output_impl : typed_primitive_impl_ocl<detection_output> {
+     using kernel_selector_t = kernel_selector::detection_output_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::detection_output_params, kernel_selector::detection_output_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::detection_output_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<detection_output_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/dft.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/dft.cpp
+index e5d75699cd..4c7a6293b7 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/dft.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/dft.cpp
+@@ -16,7 +16,7 @@ struct dft_impl : typed_primitive_impl_ocl<dft> {
+     using kernel_selector_t = kernel_selector::dft_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::dft_params, kernel_selector::dft_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::dft_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<dft_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/eltwise.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/eltwise.cpp
+index ab9942f9e7..08ebd9351e 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/eltwise.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/eltwise.cpp
+@@ -17,7 +17,7 @@ struct eltwise_impl : typed_primitive_impl_ocl<eltwise> {
+     using kernel_selector_t = kernel_selector::eltwise_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::eltwise_params, kernel_selector::eltwise_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::eltwise_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<eltwise_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/embedding_bag.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/embedding_bag.cpp
+index 02b2ec46ac..65dfe62bb6 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/embedding_bag.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/embedding_bag.cpp
+@@ -16,7 +16,7 @@ struct embedding_bag_impl : typed_primitive_impl_ocl<embedding_bag> {
+     using kernel_selector_t = kernel_selector::embedding_bag_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::embedding_bag_params, kernel_selector::embedding_bag_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::embedding_bag_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<embedding_bag_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_detection_output.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_detection_output.cpp
+index 5050e1ea3a..72b9d05d65 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_detection_output.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_detection_output.cpp
+@@ -18,7 +18,7 @@ struct experimental_detectron_detection_output_impl
+     using kernel_params_t = std::pair<kernel_selector::experimental_detectron_detection_output_params,
+                                       kernel_selector::experimental_detectron_detection_output_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::experimental_detectron_detection_output_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<experimental_detectron_detection_output_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_generate_proposals_single_image.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_generate_proposals_single_image.cpp
+index a3d2108a3a..992061818a 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_generate_proposals_single_image.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_generate_proposals_single_image.cpp
+@@ -18,7 +18,7 @@ struct experimental_detectron_generate_proposals_single_image_impl
+     using kernel_params_t = std::pair<kernel_selector::experimental_detectron_generate_proposals_single_image_params,
+                                       kernel_selector::experimental_detectron_generate_proposals_single_image_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::experimental_detectron_generate_proposals_single_image_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<experimental_detectron_generate_proposals_single_image_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_prior_grid_generator.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_prior_grid_generator.cpp
+index 88a5bf33c5..717ac6556e 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_prior_grid_generator.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_prior_grid_generator.cpp
+@@ -19,7 +19,7 @@ struct experimental_detectron_prior_grid_generator_impl
+     using kernel_params_t = std::pair<kernel_selector::experimental_detectron_prior_grid_generator_params,
+                                       kernel_selector::experimental_detectron_prior_grid_generator_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::experimental_detectron_prior_grid_generator_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<experimental_detectron_prior_grid_generator_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_roi_feature_extractor.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_roi_feature_extractor.cpp
+index a7f34dec7a..cbe0fb8983 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_roi_feature_extractor.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_roi_feature_extractor.cpp
+@@ -17,7 +17,7 @@ struct experimental_detectron_roi_feature_extractor_impl : public typed_primitiv
+     using kernel_params_t = std::pair<kernel_selector::experimental_detectron_roi_feature_extractor_params,
+                                       kernel_selector::experimental_detectron_roi_feature_extractor_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::experimental_detectron_roi_feature_extractor_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<experimental_detectron_roi_feature_extractor_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_topk_rois.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_topk_rois.cpp
+index df351deee5..51111c6694 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_topk_rois.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/experimental_detectron_topk_rois.cpp
+@@ -18,7 +18,7 @@ struct experimental_detectron_topk_rois_impl : typed_primitive_impl_ocl<experime
+     using kernel_params_t = std::pair<kernel_selector::experimental_detectron_topk_roi_params,
+                                       kernel_selector::experimental_detectron_topk_roi_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::experimental_detectron_topk_rois_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<experimental_detectron_topk_rois_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/extract_image_patches.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/extract_image_patches.cpp
+index 93f357a831..a8c3f14066 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/extract_image_patches.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/extract_image_patches.cpp
+@@ -17,7 +17,7 @@ struct extract_image_patches_impl : typed_primitive_impl_ocl<extract_image_patch
+     using kernel_selector_t = kernel_selector::extract_image_patches_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::extract_image_patches_params, kernel_selector::extract_image_patches_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::extract_image_patches_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<extract_image_patches_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/eye.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/eye.cpp
+index b8346c7f6f..11136bf2c6 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/eye.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/eye.cpp
+@@ -17,7 +17,7 @@ struct eye_impl : typed_primitive_impl_ocl<eye> {
+     using kernel_selector_t = kernel_selector::eye_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::eye_params, kernel_selector::eye_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::eye_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<eye_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/fully_connected.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/fully_connected.cpp
+index f6c4e19133..adcea8a408 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/fully_connected.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/fully_connected.cpp
+@@ -17,7 +17,7 @@ struct fully_connected_impl : typed_primitive_impl_ocl<fully_connected> {
+     using kernel_selector_t = kernel_selector::fully_connected_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::fully_connected_params, kernel_selector::fully_connected_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::fully_connected_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<fully_connected_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/gather.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/gather.cpp
+index 1799fc85d5..44842bb4aa 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/gather.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/gather.cpp
+@@ -61,7 +61,7 @@ struct gather_impl : typed_primitive_impl_ocl<gather> {
+     using kernel_selector_t = kernel_selector::gather_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::gather_params, kernel_selector::gather_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::gather_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<gather_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/gather_elements.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/gather_elements.cpp
+index 9f1a21b08f..94a528bb49 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/gather_elements.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/gather_elements.cpp
+@@ -48,7 +48,7 @@ struct gather_elements_impl : typed_primitive_impl_ocl<gather_elements> {
+     using kernel_selector_t = kernel_selector::gather_elements_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::gather_elements_params, kernel_selector::gather_elements_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::gather_elements_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<gather_elements_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/gather_nd.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/gather_nd.cpp
+index 5f2cc60143..c3461c3c22 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/gather_nd.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/gather_nd.cpp
+@@ -17,7 +17,7 @@ struct gather_nd_impl : typed_primitive_impl_ocl<gather_nd> {
+     using kernel_selector_t = kernel_selector::gather_nd_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::gather_nd_params, kernel_selector::gather_nd_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::gather_nd_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<gather_nd_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/gather_tree.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/gather_tree.cpp
+index 885998e319..fe3568acd1 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/gather_tree.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/gather_tree.cpp
+@@ -17,7 +17,7 @@ struct gather_tree_impl : typed_primitive_impl_ocl<gather_tree> {
+     using kernel_selector_t = kernel_selector::gather_tree_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::gather_tree_params, kernel_selector::gather_tree_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::gather_tree_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<gather_tree_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/gemm.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/gemm.cpp
+index 82010e7856..1b61437cb1 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/gemm.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/gemm.cpp
+@@ -17,7 +17,7 @@ struct gemm_impl : typed_primitive_impl_ocl<gemm> {
+     using kernel_selector_t = kernel_selector::gemm_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::gemm_params, kernel_selector::gemm_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::gemm_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<gemm_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/generate_proposals.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/generate_proposals.cpp
+index b83ceebbd9..843992b035 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/generate_proposals.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/generate_proposals.cpp
+@@ -17,7 +17,7 @@ struct generate_proposals_impl
+     using kernel_selector_t = kernel_selector::generate_proposals_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::generate_proposals_params, kernel_selector::generate_proposals_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::generate_proposals_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<generate_proposals_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/grid_sample.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/grid_sample.cpp
+index 9017db3f08..ff371a28a7 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/grid_sample.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/grid_sample.cpp
+@@ -46,7 +46,7 @@ struct grid_sample_impl : public typed_primitive_impl_ocl<grid_sample> {
+     using kernel_params_t = std::pair<kernel_selector::grid_sample_params, kernel_selector::grid_sample_optional_params>;
+ 
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::grid_sample_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<grid_sample_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/grn.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/grn.cpp
+index f976962127..63955fd0c0 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/grn.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/grn.cpp
+@@ -17,7 +17,7 @@ struct grn_impl : typed_primitive_impl_ocl<grn> {
+     using kernel_selector_t = kernel_selector::grn_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::grn_params, kernel_selector::grn_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::grn_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<grn_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/lrn.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/lrn.cpp
+index bcd4c57110..fff07fdbcb 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/lrn.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/lrn.cpp
+@@ -17,7 +17,7 @@ struct lrn_impl : typed_primitive_impl_ocl<lrn> {
+     using kernel_selector_t = kernel_selector::lrn_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::lrn_params, kernel_selector::lrn_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::lrn_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<lrn_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_dynamic_input.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_dynamic_input.cpp
+index bd9b54b734..8bf8ba0a8f 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_dynamic_input.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_dynamic_input.cpp
+@@ -17,7 +17,7 @@ struct lstm_dynamic_input_impl : typed_primitive_impl_ocl<lstm_dynamic_input> {
+     using kernel_selector_t = kernel_selector::lstm_dynamic_input_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::lstm_dynamic_input_params, kernel_selector::lstm_dynamic_input_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::lstm_dynamic_input_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<lstm_dynamic_input_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_dynamic_timeloop.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_dynamic_timeloop.cpp
+index 9ad9ddfb6c..18e39d0e76 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_dynamic_timeloop.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_dynamic_timeloop.cpp
+@@ -17,7 +17,7 @@ struct lstm_dynamic_timeloop_impl : typed_primitive_impl_ocl<lstm_dynamic_timelo
+     using kernel_selector_t = kernel_selector::lstm_dynamic_timeloop_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::lstm_dynamic_timeloop_params, kernel_selector::lstm_dynamic_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::lstm_dynamic_timeloop_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<lstm_dynamic_timeloop_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_elt.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_elt.cpp
+index ea43b71730..faa210c545 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_elt.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_elt.cpp
+@@ -17,7 +17,7 @@ struct lstm_elt_impl : typed_primitive_impl_ocl<lstm_elt> {
+     using kernel_selector_t = kernel_selector::lstm_elt_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::lstm_elt_params, kernel_selector::lstm_elt_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::lstm_elt_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<lstm_elt_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_gemm.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_gemm.cpp
+index 1dcde13dd2..47809d63dc 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_gemm.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/lstm_gemm.cpp
+@@ -17,7 +17,7 @@ struct lstm_gemm_impl : typed_primitive_impl_ocl<lstm_gemm> {
+     using kernel_selector_t = kernel_selector::lstm_gemm_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::lstm_gemm_params, kernel_selector::lstm_gemm_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::lstm_gemm_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<lstm_gemm_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/matrix_nms.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/matrix_nms.cpp
+index bb1d9e68b3..791e60f822 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/matrix_nms.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/matrix_nms.cpp
+@@ -41,7 +41,7 @@ struct matrix_nms_impl : typed_primitive_impl_ocl<matrix_nms> {
+     using kernel_selector_t = kernel_selector::matrix_nms_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::matrix_nms_params, kernel_selector::matrix_nms_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::matrix_nms_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<matrix_nms_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/multiclass_nms.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/multiclass_nms.cpp
+index 4ac0ac5d00..5e5f4cb85d 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/multiclass_nms.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/multiclass_nms.cpp
+@@ -51,7 +51,7 @@ struct multiclass_nms_impl : public typed_primitive_impl_ocl<multiclass_nms> {
+     using kernel_selector_t = kernel_selector::multiclass_nms_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::multiclass_nms_params, kernel_selector::multiclass_nms_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::multiclass_nms_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<multiclass_nms_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/mutable_data.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/mutable_data.cpp
+index 6dcada720b..419d68b7a6 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/mutable_data.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/mutable_data.cpp
+@@ -13,7 +13,7 @@ struct mutable_data_impl : public typed_primitive_impl_ocl<mutable_data> {
+     using parent = typed_primitive_impl_ocl<mutable_data>;
+     using parent::parent;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::mutable_data_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<mutable_data_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/mvn.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/mvn.cpp
+index c1bca69346..48e2b68e91 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/mvn.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/mvn.cpp
+@@ -17,7 +17,7 @@ struct mvn_impl : typed_primitive_impl_ocl<mvn> {
+     using kernel_selector_t = kernel_selector::mvn_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::mvn_params, kernel_selector::mvn_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::mvn_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<mvn_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/non_max_suppression.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/non_max_suppression.cpp
+index 8aef7f107d..e444462918 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/non_max_suppression.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/non_max_suppression.cpp
+@@ -17,7 +17,7 @@ struct non_max_suppression_impl : typed_primitive_impl_ocl<non_max_suppression>
+     using kernel_selector_t = kernel_selector::non_max_suppression_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::non_max_suppression_params, kernel_selector::non_max_suppression_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::non_max_suppression_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<non_max_suppression_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/non_zero.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/non_zero.cpp
+index 72a446332a..7adc4bae0f 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/non_zero.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/non_zero.cpp
+@@ -19,7 +19,7 @@ struct count_nonzero_impl : typed_primitive_impl_ocl<count_nonzero> {
+     using kernel_selector_t = kernel_selector::count_nonzero_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::count_nonzero_params, kernel_selector::count_nonzero_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::count_nonzero_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<count_nonzero_impl>(*this);
+@@ -43,7 +43,7 @@ struct gather_nonzero_impl : typed_primitive_impl_ocl<gather_nonzero> {
+     using kernel_selector_t = kernel_selector::gather_nonzero_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::gather_nonzero_params, kernel_selector::gather_nonzero_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::gather_nonzero_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<gather_nonzero_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/normalize.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/normalize.cpp
+index dc5854271e..6bb6900997 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/normalize.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/normalize.cpp
+@@ -17,7 +17,7 @@ struct normalize_impl : typed_primitive_impl_ocl<normalize> {
+     using kernel_selector_t = kernel_selector::normalize_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::normalize_params, kernel_selector::normalize_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::normalize_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<normalize_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/one_hot.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/one_hot.cpp
+index 0be91b98e9..62c18e8d69 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/one_hot.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/one_hot.cpp
+@@ -17,7 +17,7 @@ struct one_hot_impl : typed_primitive_impl_ocl<one_hot> {
+     using kernel_selector_t = kernel_selector::one_hot_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::one_hot_params, kernel_selector::one_hot_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::one_hot_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<one_hot_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/permute.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/permute.cpp
+index 2d5f1007aa..c18f7f33fa 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/permute.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/permute.cpp
+@@ -44,7 +44,7 @@ struct permute_impl : typed_primitive_impl_ocl<permute> {
+     using kernel_selector_t = kernel_selector::permute_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::permute_params, kernel_selector::permute_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::permute_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<permute_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/pooling.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/pooling.cpp
+index 335100277f..6695de698d 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/pooling.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/pooling.cpp
+@@ -48,7 +48,7 @@ struct pooling_impl : typed_primitive_impl_ocl<pooling> {
+     using kernel_selector_t = kernel_selector::pooling_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::pooling_params, kernel_selector::pooling_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::pooling_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<pooling_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/prior_box.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/prior_box.cpp
+index 28be44637e..98f05be334 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/prior_box.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/prior_box.cpp
+@@ -17,7 +17,7 @@ struct prior_box_impl : typed_primitive_impl_ocl<prior_box> {
+     using kernel_selector_t = kernel_selector::prior_box_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::prior_box_params, kernel_selector::prior_box_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::prior_box_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<prior_box_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/pyramid_roi_align.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/pyramid_roi_align.cpp
+index 51e5826643..cf0b2f7e47 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/pyramid_roi_align.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/pyramid_roi_align.cpp
+@@ -19,7 +19,7 @@ struct pyramid_roi_align_impl : typed_primitive_impl_ocl<pyramid_roi_align> {
+     using kernel_selector_t = kernel_selector::PyramidROIAlign_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::PyramidROIAlign_params, kernel_selector::PyramidROIAlign_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::pyramid_roi_align_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<pyramid_roi_align_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/quantize.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/quantize.cpp
+index 88624da50d..2d4ad3ac69 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/quantize.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/quantize.cpp
+@@ -17,7 +17,7 @@ struct quantize_impl : typed_primitive_impl_ocl<quantize> {
+     using kernel_selector_t = kernel_selector::quantize_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::quantize_params, kernel_selector::quantize_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::quantize_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<quantize_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/random_uniform.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/random_uniform.cpp
+index e28e04735c..1f192ee1f8 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/random_uniform.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/random_uniform.cpp
+@@ -17,7 +17,7 @@ struct random_uniform_impl : typed_primitive_impl_ocl<random_uniform> {
+     using kernel_selector_t = kernel_selector::random_uniform_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::random_uniform_params, kernel_selector::random_uniform_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::random_uniform_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<random_uniform_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/range.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/range.cpp
+index fa956f16e5..e1ef0c4d22 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/range.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/range.cpp
+@@ -17,7 +17,7 @@ struct range_impl : typed_primitive_impl_ocl<range> {
+     using kernel_selector_t = kernel_selector::range_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::range_params, kernel_selector::range_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::range_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<range_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/reduce.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/reduce.cpp
+index 0a6f0dc23b..715d88b26d 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/reduce.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/reduce.cpp
+@@ -66,7 +66,7 @@ struct reduce_impl : typed_primitive_impl_ocl<reduce> {
+     using kernel_selector_t = kernel_selector::reduce_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::reduce_params, kernel_selector::reduce_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::reduce_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<reduce_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/region_yolo.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/region_yolo.cpp
+index fe3c433edf..5d3b0cb11c 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/region_yolo.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/region_yolo.cpp
+@@ -17,7 +17,7 @@ struct region_yolo_impl : typed_primitive_impl_ocl<region_yolo> {
+     using kernel_selector_t = kernel_selector::region_yolo_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::region_yolo_params, kernel_selector::region_yolo_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::region_yolo_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<region_yolo_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/reorder.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/reorder.cpp
+index 7ae0271fcd..af825934d0 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/reorder.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/reorder.cpp
+@@ -18,7 +18,7 @@ struct reorder_impl : typed_primitive_impl_ocl<reorder> {
+     using kernel_selector_t = kernel_selector::reorder_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::reorder_params, kernel_selector::reorder_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::reorder_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<reorder_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/reorg_yolo.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/reorg_yolo.cpp
+index 42806e8f25..084bcd089c 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/reorg_yolo.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/reorg_yolo.cpp
+@@ -17,7 +17,7 @@ struct reorg_yolo_impl : typed_primitive_impl_ocl<reorg_yolo> {
+     using kernel_selector_t = kernel_selector::reorg_yolo_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::reorg_yolo_params, kernel_selector::reorg_yolo_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::reorg_yolo_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<reorg_yolo_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/resample.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/resample.cpp
+index 1bee208218..f088dcb2e1 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/resample.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/resample.cpp
+@@ -134,7 +134,7 @@ struct resample_impl : typed_primitive_impl_ocl<resample> {
+     using kernel_selector_t = kernel_selector::resample_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::resample_params, kernel_selector::resample_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::resample_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<resample_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/reshape.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/reshape.cpp
+index 0bdc421f9d..dd29281640 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/reshape.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/reshape.cpp
+@@ -17,7 +17,7 @@ struct reshape_impl : public typed_primitive_impl_ocl<reshape> {
+     using kernel_selector_t = kernel_selector::reshape_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::reshape_params, kernel_selector::reshape_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::reshape_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<reshape_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/reverse.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/reverse.cpp
+index 3f71995a02..9b46c94213 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/reverse.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/reverse.cpp
+@@ -17,7 +17,7 @@ struct reverse_impl : typed_primitive_impl_ocl<reverse> {
+     using kernel_selector_t = kernel_selector::reverse_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::reverse_params, kernel_selector::reverse_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::reverse_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<reverse_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/reverse_sequence.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/reverse_sequence.cpp
+index ad162a2ba6..98fc07cff4 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/reverse_sequence.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/reverse_sequence.cpp
+@@ -16,7 +16,7 @@ struct reverse_sequence_impl : typed_primitive_impl_ocl<reverse_sequence> {
+     using kernel_selector_t = kernel_selector::reverse_sequence_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::reverse_sequence_params, kernel_selector::reverse_sequence_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::reverse_sequence_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<reverse_sequence_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/roi_align.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/roi_align.cpp
+index d9703acbde..4eb0b11251 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/roi_align.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/roi_align.cpp
+@@ -41,7 +41,7 @@ struct roi_align_impl : typed_primitive_impl_ocl<roi_align> {
+     using kernel_selector_t = kernel_selector::roi_align_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::roi_align_params, kernel_selector::roi_align_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::roi_align_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<roi_align_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/roi_pooling.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/roi_pooling.cpp
+index d3d7ff7248..1ae3a0ef1f 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/roi_pooling.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/roi_pooling.cpp
+@@ -37,7 +37,7 @@ struct roi_pooling_impl : typed_primitive_impl_ocl<roi_pooling> {
+     using kernel_selector_t = kernel_selector::roi_pooling_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::roi_pooling_params, kernel_selector::roi_pooling_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::roi_pooling_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<roi_pooling_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/roll.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/roll.cpp
+index 5ac809dc1d..cf179d25d9 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/roll.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/roll.cpp
+@@ -17,7 +17,7 @@ struct roll_impl : typed_primitive_impl_ocl<roll> {
+     using kernel_selector_t = kernel_selector::roll_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::roll_params, kernel_selector::roll_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::roll_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<roll_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/scatter_elements_update.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/scatter_elements_update.cpp
+index bdc3bdf77c..251d494034 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/scatter_elements_update.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/scatter_elements_update.cpp
+@@ -43,7 +43,7 @@ struct scatter_elements_update_impl : typed_primitive_impl_ocl<scatter_elements_
+     using kernel_selector_t = kernel_selector::scatter_elements_update_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::scatter_elements_update_params, kernel_selector::scatter_elements_update_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::scatter_elements_update_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<scatter_elements_update_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/scatter_nd_update.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/scatter_nd_update.cpp
+index 5f41769f96..729237f6fa 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/scatter_nd_update.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/scatter_nd_update.cpp
+@@ -17,7 +17,7 @@ struct scatter_nd_update_impl : typed_primitive_impl_ocl<scatter_nd_update> {
+     using kernel_selector_t = kernel_selector::scatter_nd_update_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::scatter_nd_update_params, kernel_selector::scatter_nd_update_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::scatter_nd_update_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<scatter_nd_update_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/scatter_update.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/scatter_update.cpp
+index 0aa4644f8c..aa5d3dbe33 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/scatter_update.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/scatter_update.cpp
+@@ -42,7 +42,7 @@ struct scatter_update_impl : typed_primitive_impl_ocl<scatter_update> {
+     using kernel_selector_t = kernel_selector::scatter_update_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::scatter_update_params, kernel_selector::scatter_update_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::scatter_update_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<scatter_update_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/select.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/select.cpp
+index eddd63c533..f4996cba0e 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/select.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/select.cpp
+@@ -17,7 +17,7 @@ struct select_impl : typed_primitive_impl_ocl<select> {
+     using kernel_selector_t = kernel_selector::select_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::select_params, kernel_selector::select_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::select_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<select_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/shape_of.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/shape_of.cpp
+index 02efeee00f..b2efd25f67 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/shape_of.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/shape_of.cpp
+@@ -17,7 +17,7 @@ struct shape_of_impl : typed_primitive_impl_ocl<shape_of> {
+     using kernel_selector_t = kernel_selector::shape_of_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::shape_of_params, kernel_selector::shape_of_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::shape_of_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<shape_of_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/shuffle_channels.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/shuffle_channels.cpp
+index 57ac2437f4..e40b1b99b8 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/shuffle_channels.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/shuffle_channels.cpp
+@@ -17,7 +17,7 @@ struct shuffle_channels_impl : typed_primitive_impl_ocl<shuffle_channels> {
+     using kernel_selector_t = kernel_selector::shuffle_channels_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::shuffle_channels_params, kernel_selector::shuffle_channels_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::shuffle_channels_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<shuffle_channels_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/slice.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/slice.cpp
+index 07ea912d06..d7f7f9ba74 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/slice.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/slice.cpp
+@@ -72,7 +72,7 @@ struct slice_impl : typed_primitive_impl_ocl<slice> {
+         kInputsNum
+     };
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::slice_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<slice_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/softmax.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/softmax.cpp
+index b4029ac3b3..6ad4e1d087 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/softmax.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/softmax.cpp
+@@ -39,7 +39,7 @@ struct softmax_impl : typed_primitive_impl_ocl<softmax> {
+     using kernel_selector_t = kernel_selector::softmax_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::softmax_params, kernel_selector::softmax_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::softmax_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<softmax_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/space_to_batch.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/space_to_batch.cpp
+index 141116e04b..c9db851175 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/space_to_batch.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/space_to_batch.cpp
+@@ -16,7 +16,7 @@ struct space_to_batch_impl : typed_primitive_impl_ocl<space_to_batch> {
+     using kernel_selector_t = kernel_selector::space_to_batch_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::space_to_batch_params, kernel_selector::space_to_batch_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::space_to_batch_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<space_to_batch_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/space_to_depth.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/space_to_depth.cpp
+index ec87100f89..5b72a5572c 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/space_to_depth.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/space_to_depth.cpp
+@@ -16,7 +16,7 @@ struct space_to_depth_impl : typed_primitive_impl_ocl<space_to_depth> {
+     using kernel_selector_t = kernel_selector::space_to_depth_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::space_to_depth_params, kernel_selector::space_to_depth_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::space_to_depth_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<space_to_depth_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/strided_slice.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/strided_slice.cpp
+index f06ae1b72d..e64498f73f 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/strided_slice.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/strided_slice.cpp
+@@ -46,7 +46,7 @@ struct strided_slice_impl : typed_primitive_impl_ocl<strided_slice> {
+     using kernel_selector_t = kernel_selector::strided_slice_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::strided_slice_params, kernel_selector::strided_slice_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::strided_slice_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<strided_slice_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/tile.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/tile.cpp
+index 16d2dd91cb..bc95a18f54 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/tile.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/tile.cpp
+@@ -17,7 +17,7 @@ struct tile_impl : typed_primitive_impl_ocl<tile> {
+     using kernel_selector_t = kernel_selector::tile_kernel_selector;
+     using kernel_params_t = std::pair<kernel_selector::tile_params, kernel_selector::tile_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::tile_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<tile_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/ocl/unique.cpp b/src/plugins/intel_gpu/src/graph/impls/ocl/unique.cpp
+index 7018ae66a2..604619c30b 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/ocl/unique.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/ocl/unique.cpp
+@@ -17,7 +17,7 @@ struct unique_count_impl : typed_primitive_impl_ocl<unique_count> {
+     using kernel_params_t =
+         std::pair<kernel_selector::unique_count_params, kernel_selector::unique_count_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::unique_count_impl)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<unique_count_impl>(*this);
+@@ -88,7 +88,7 @@ struct unique_gather_impl : typed_primitive_impl_ocl<unique_gather> {
+     using kernel_params_t =
+         std::pair<kernel_selector::unique_gather_params, kernel_selector::unique_gather_optional_params>;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::ocl::unique_gather)
+ 
+     std::unique_ptr<primitive_impl> clone() const override {
+         return make_unique<unique_gather_impl>(*this);
+diff --git a/src/plugins/intel_gpu/src/graph/impls/onednn/concatenation_onednn.cpp b/src/plugins/intel_gpu/src/graph/impls/onednn/concatenation_onednn.cpp
+index ed5565504f..325afd5f3c 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/onednn/concatenation_onednn.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/onednn/concatenation_onednn.cpp
+@@ -21,7 +21,7 @@ struct concatenation_onednn : typed_primitive_onednn_impl<concatenation, dnnl::c
+     using parent = typed_primitive_onednn_impl<concatenation, dnnl::concat::primitive_desc, dnnl::concat>;
+     using parent::parent;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::onednn::concatenation_onednn)
+ 
+ protected:
+     std::unique_ptr<primitive_impl> clone() const override {
+diff --git a/src/plugins/intel_gpu/src/graph/impls/onednn/convolution_onednn.cpp b/src/plugins/intel_gpu/src/graph/impls/onednn/convolution_onednn.cpp
+index 1a27f3ae29..f1d1ab0a6c 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/onednn/convolution_onednn.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/onednn/convolution_onednn.cpp
+@@ -26,7 +26,7 @@ struct convolution_onednn : typed_primitive_onednn_impl<convolution> {
+     using parent = typed_primitive_onednn_impl<convolution>;
+     using parent::parent;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::onednn::convolution_onednn)
+ 
+ protected:
+     std::unique_ptr<primitive_impl> clone() const override {
+diff --git a/src/plugins/intel_gpu/src/graph/impls/onednn/deconvolution_onednn.cpp b/src/plugins/intel_gpu/src/graph/impls/onednn/deconvolution_onednn.cpp
+index 439b74feff..1702738598 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/onednn/deconvolution_onednn.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/onednn/deconvolution_onednn.cpp
+@@ -22,7 +22,7 @@ struct deconvolution_onednn : typed_primitive_onednn_impl<deconvolution> {
+     using parent = typed_primitive_onednn_impl<deconvolution>;
+     using parent::parent;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::onednn::deconvolution_onednn)
+ 
+ protected:
+     std::unique_ptr<primitive_impl> clone() const override {
+diff --git a/src/plugins/intel_gpu/src/graph/impls/onednn/fully_connected_onednn.cpp b/src/plugins/intel_gpu/src/graph/impls/onednn/fully_connected_onednn.cpp
+index 4aacb2ebd5..8ee6979dec 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/onednn/fully_connected_onednn.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/onednn/fully_connected_onednn.cpp
+@@ -19,7 +19,7 @@ struct fully_connected_onednn : typed_primitive_onednn_impl<fully_connected> {
+     using parent = typed_primitive_onednn_impl<fully_connected>;
+     using parent::parent;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::onednn::fully_connected_onednn)
+ 
+ private:
+     static std::vector<int64_t> reshape_to_2d(const ov::PartialShape& shape, int64_t feature) {
+diff --git a/src/plugins/intel_gpu/src/graph/impls/onednn/gemm_onednn.cpp b/src/plugins/intel_gpu/src/graph/impls/onednn/gemm_onednn.cpp
+index 7410f79961..87e7decb34 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/onednn/gemm_onednn.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/onednn/gemm_onednn.cpp
+@@ -19,7 +19,7 @@ struct gemm_onednn : typed_primitive_onednn_impl<gemm> {
+     using parent = typed_primitive_onednn_impl<gemm>;
+     using parent::parent;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::onednn::gemm_onednn)
+ 
+ protected:
+     std::unique_ptr<primitive_impl> clone() const override {
+diff --git a/src/plugins/intel_gpu/src/graph/impls/onednn/pooling_onednn.cpp b/src/plugins/intel_gpu/src/graph/impls/onednn/pooling_onednn.cpp
+index 52f0edc797..1dc686331b 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/onednn/pooling_onednn.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/onednn/pooling_onednn.cpp
+@@ -19,7 +19,7 @@ struct pooling_onednn : typed_primitive_onednn_impl<pooling> {
+     using parent = typed_primitive_onednn_impl<pooling>;
+     using parent::parent;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::onednn::pooling_onednn)
+ 
+ protected:
+     std::unique_ptr<primitive_impl> clone() const override {
+diff --git a/src/plugins/intel_gpu/src/graph/impls/onednn/reduction_onednn.cpp b/src/plugins/intel_gpu/src/graph/impls/onednn/reduction_onednn.cpp
+index 581c37c015..635d465fc5 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/onednn/reduction_onednn.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/onednn/reduction_onednn.cpp
+@@ -41,7 +41,7 @@ struct reduction_onednn : typed_primitive_onednn_impl<reduce> {
+     using parent = typed_primitive_onednn_impl<reduce>;
+     using parent::parent;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::onednn::reduction_onednn)
+ 
+ protected:
+     std::unique_ptr<primitive_impl> clone() const override {
+diff --git a/src/plugins/intel_gpu/src/graph/impls/onednn/reorder_onednn.cpp b/src/plugins/intel_gpu/src/graph/impls/onednn/reorder_onednn.cpp
+index 284dd8b166..433e043067 100644
+--- a/src/plugins/intel_gpu/src/graph/impls/onednn/reorder_onednn.cpp
++++ b/src/plugins/intel_gpu/src/graph/impls/onednn/reorder_onednn.cpp
+@@ -19,7 +19,7 @@ struct reorder_onednn : typed_primitive_onednn_impl<reorder, dnnl::reorder::prim
+     using parent = typed_primitive_onednn_impl<reorder, dnnl::reorder::primitive_desc, dnnl::reorder>;
+     using parent::parent;
+ 
+-    DECLARE_OBJECT_TYPE_SERIALIZATION
++    DECLARE_OBJECT_TYPE_SERIALIZATION(cldnn::onednn::reorder_onednn)
+ 
+ protected:
+     std::unique_ptr<primitive_impl> clone() const override {
+diff --git a/src/plugins/intel_gpu/src/graph/include/primitive_inst.h b/src/plugins/intel_gpu/src/graph/include/primitive_inst.h
+index 3244ad20b4..454c92ac97 100644
+--- a/src/plugins/intel_gpu/src/graph/include/primitive_inst.h
++++ b/src/plugins/intel_gpu/src/graph/include/primitive_inst.h
+@@ -54,7 +54,7 @@ struct primitive_impl {
+ 
+     virtual std::vector<layout> get_internal_buffer_layouts() const = 0;
+     virtual void set_node_params(const program_node&) {}
+-    virtual std::string get_type() const = 0;
++    virtual const std::string& get_type_info() const = 0;
+     virtual void set_arguments(primitive_inst& instance) = 0;
+     virtual void set_arguments(primitive_inst& instance, kernel_arguments_data& args) = 0;
+     virtual kernel_arguments_data get_arguments(const primitive_inst& instance) const = 0;

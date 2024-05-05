@@ -45,7 +45,7 @@ class LibZipppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         if Version(self.version) == "4.0":
             self.requires("libzip/1.7.3")
         else:
@@ -64,6 +64,9 @@ class LibZipppConan(ConanFile):
         if self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") == "libc++":
             raise ConanInvalidConfiguration(f"{self.ref} does not support clang with libc++. Use libstdc++ instead.")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -74,15 +77,17 @@ class LibZipppConan(ConanFile):
         tc.variables["LIBZIPPP_INSTALL_HEADERS"] = True
         tc.variables["LIBZIPPP_BUILD_TESTS"] = False
         tc.variables["LIBZIPPP_ENABLE_ENCRYPTION"] = self.options.with_encryption
+        tc.variables["LIBZIPPP_CMAKE_CONFIG_MODE"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
     def _patch_source(self):
-        replace_in_file(self, os.path.join(self.source_folder, 'CMakeLists.txt'),
-                        'find_package(LIBZIP MODULE REQUIRED)',
-                        'find_package(libzip REQUIRED CONFIG)')
+        if Version(self.version) <= "6.0":
+            replace_in_file(self, os.path.join(self.source_folder, 'CMakeLists.txt'),
+                            'find_package(LIBZIP MODULE REQUIRED)',
+                            'find_package(libzip REQUIRED CONFIG)')
 
     def build(self):
         self._patch_source()

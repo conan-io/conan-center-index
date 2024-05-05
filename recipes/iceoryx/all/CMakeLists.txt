@@ -1,7 +1,9 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.12)
 project(cmake_wrapper)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(acl)
+if(acl_FOUND)
+  link_libraries(acl::acl)
+endif()
 
-add_subdirectory("source_subfolder/iceoryx_meta")
+add_subdirectory(src/iceoryx_meta)

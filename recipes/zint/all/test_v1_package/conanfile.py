@@ -1,5 +1,4 @@
 from conans import ConanFile, CMake, tools
-import os
 
 
 class TestPackageConan(ConanFile):
@@ -14,8 +13,4 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
-            if self.options["zint"].with_qt:
-                bin_path = os.path.join("bin", "test_package_cpp")
-                self.run(bin_path, run_environment=True)
+            self.run(f"ctest --output-on-failure -C {self.settings.build_type}", run_environment=True)

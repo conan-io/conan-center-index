@@ -1,4 +1,7 @@
 sources:
+  "13.2.1":
+    url: "https://github.com/redboltz/mqtt_cpp/archive/v13.2.1.tar.gz"
+    sha256: "7607536cb7e0e4d32831ef068c48d3d62707df80ba35c5a3fdc31851e7876a9d"
   "13.0.0":
     url: "https://github.com/redboltz/mqtt_cpp/archive/refs/tags/v13.0.0.tar.gz"
     sha256: "5d06caa1218feb23d0a63892ced7b0edfd1f686002676175f6e384275a27a1e7"

@@ -1,0 +1,13 @@
+diff --git a/win/makefile.vc b/win/makefile.vc
+index 6371f0f4b..b548f827d 100644
+--- a/win/makefile.vc
++++ b/win/makefile.vc
+@@ -651,7 +651,7 @@ install-binaries:
+ 	@$(CPY) "$(TKSTUBLIB)" "$(LIB_INSTALL_DIR)\"
+ !if !$(STATIC_BUILD)
+ 	@echo creating package index
+-	@type << > $(OUT_DIR)\pkgIndex.tcl
++	@type <<$(OUT_DIR)\pkgIndex.tcl
+ if {[catch {package present Tcl 8.6.0}]} { return }
+ if {($$::tcl_platform(platform) eq "unix") && ([info exists ::env(DISPLAY)]
+ 	|| ([info exists ::argv] && ("-display" in $$::argv)))} {

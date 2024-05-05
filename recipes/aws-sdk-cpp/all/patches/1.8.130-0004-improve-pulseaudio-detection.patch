@@ -24,7 +24,7 @@ index b1054515d5..d1a34ddfc5 100644
          message(STATUS "Pulse audio header files have been detected, included pulse audio as a possible sound driver implementation.")
          add_definitions("-DPULSE")
 -        set(PLATFORM_LIBS ${PLATFORM_LIBS} pulse pulse-simple)
-+        set(PLATFORM_LIBS ${PLATFORM_LIBS} "CONAN_PKG::pulseaudio")
++        set(PLATFORM_LIBS ${PLATFORM_LIBS} "pulseaudio::pulseaudio")
      else()
          message(WARNING "We've detected that you are building on linux, but the header files for pulseaudio are not available.\
                  If you are providing your own audio implementation or you will not be using the text-to-speech library, this is fine.\

@@ -1,4 +1,13 @@
 sources:
+  "0.78.1":
+    url: "https://github.com/uncrustify/uncrustify/archive/uncrustify-0.78.1.tar.gz"
+    sha256: "ecaf4c0adca14c36dfffa30bc28e69865115ecd602c90eb16a8cddccb41caad2"
+  "0.78.0":
+    url: "https://github.com/uncrustify/uncrustify/archive/refs/tags/uncrustify-0.78.0.tar.gz"
+    sha256: "377efec187c26c7ad77900d94032fa51b029831c69442d607a6e53ef2115928f"
+  "0.77.1":
+    url: "https://github.com/uncrustify/uncrustify/archive/refs/tags/uncrustify-0.77.1.tar.gz"
+    sha256: "414bbc9f7860eb18a53074f9af14ed04638a633b2216a73f2629291300d37c1b"
   "0.75.1":
     url: "https://github.com/uncrustify/uncrustify/archive/refs/tags/uncrustify-0.75.1.tar.gz"
     sha256: "fd14acc0a31ed88b33137bdc26d32964327488c835f885696473ef07caf2e182"

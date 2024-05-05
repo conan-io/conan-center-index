@@ -1,9 +1,12 @@
 import os
+
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
-from conan.errors import ConanInvalidConfiguration
+
+required_conan_version = ">=1.50.0"
 
 
 class EarcutPackage(ConanFile):
@@ -13,8 +16,9 @@ class EarcutPackage(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "ISC"
     topics = ("algorithm", "cpp", "geometry", "rendering", "triangulation",
-              "polygon", "header-only", "tessellation", "earcut")
-    settings = "compiler"
+              "polygon", "header-only", "tessellation")
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -29,35 +33,35 @@ class EarcutPackage(ConanFile):
             "gcc": "4.9",
             "intel": "15",
             "sun-cc": "5.14",
-            "Visual Studio": "12"
+            "Visual Studio": "12",
+            "msvc": "180",
         }
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 11
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
 
-        def lazy_lt_semver(v1, v2):
+        def loose_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        min_version = self._minimum_compilers_version.get(
-            str(self.settings.compiler))
-        if not min_version:
-            self.output.warning(
-                f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
-        else:
-            if lazy_lt_semver(str(self.settings.compiler.version), min_version):
-                raise ConanInvalidConfiguration(
-                    f"{self.name} requires C++{self._minimum_cpp_standard} support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if min_version and loose_lt_semver(str(self.settings.compiler.version), min_version):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -68,5 +72,12 @@ class EarcutPackage(ConanFile):
         copy(self, "LICENSE", self.source_folder,
              os.path.join(self.package_folder, "licenses"))
 
-    def package_id(self):
-        self.info.clear()
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "earcut_hpp")
+        self.cpp_info.set_property("cmake_target_name", "earcut_hpp::earcut_hpp")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
+        # TODO: to remove in conan v2 once cmake_find_package* generators removed
+        self.cpp_info.names["cmake_find_package"] = "earcut_hpp"
+        self.cpp_info.names["cmake_find_package_multi"] = "earcut_hpp"

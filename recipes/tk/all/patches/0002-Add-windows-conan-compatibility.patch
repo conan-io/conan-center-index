@@ -1,0 +1,145 @@
+Subject: [PATCH] Add windows conan compatibility
+
+* Disable whole program optimization to be portable across different MSVC
+  versions. See conan-io/conan-center-index#4811 and
+  conan-io/conan-center-index#4094.
+---
+ win/rules-ext.vc |  8 ++++----
+ win/rules.vc     | 23 +++++++----------------
+ 2 files changed, 11 insertions(+), 20 deletions(-)
+
+diff --git a/win/rules-ext.vc b/win/rules-ext.vc
+index 58c70fa26..e7f953b4c 100644
+--- a/win/rules-ext.vc
++++ b/win/rules-ext.vc
+@@ -37,7 +37,7 @@ macro to the name of the project makefile.
+ # First locate the Tcl directory that we are working with.
+ !ifdef TCLDIR
+ 
+-_RULESDIR = $(TCLDIR:/=\)
++_RULESDIR = .
+ 
+ !else
+ 
+@@ -49,7 +49,7 @@ _RULESDIR=$(INSTALLDIR:/=\)
+ # Locate Tcl sources
+ !if [echo _RULESDIR = \> nmakehlp.out] \
+    || [nmakehlp -L generic\tcl.h >> nmakehlp.out]
+-_RULESDIR = ..\..\tcl
++_RULESDIR = .
+ !else
+ !include nmakehlp.out
+ !endif
+@@ -61,9 +61,9 @@ _RULESDIR = ..\..\tcl
+ # Now look for the targets.vc file under the Tcl root. Note we check this
+ # file and not rules.vc because the latter also exists on older systems.
+ !if exist("$(_RULESDIR)\lib\nmake\targets.vc") # Building against installed Tcl
+-_RULESDIR = $(_RULESDIR)\lib\nmake
++_RULESDIR = .
+ !elseif exist("$(_RULESDIR)\win\targets.vc")   # Building against Tcl sources
+-_RULESDIR = $(_RULESDIR)\win
++_RULESDIR = .
+ !else
+ # If we have not located Tcl's targets file, most likely we are compiling
+ # against an older version of Tcl and so must use our own support files.
+diff --git a/win/rules.vc b/win/rules.vc
+index cf80c9122..fe4a95dc9 100644
+--- a/win/rules.vc
++++ b/win/rules.vc
+@@ -262,7 +262,7 @@ TCLINSTALL = 0 # Tk always builds against Tcl source, not an installed Tcl
+ !endif # TCLDIR == ""
+ 
+ _TCLDIR	= $(TCLDIR:/=\)
+-_TCL_H  = $(_TCLDIR)\generic\tcl.h
++_TCL_H  = $(_TCLDIR)\include\tcl.h
+ !if !exist("$(_TCL_H)")
+ !error Could not locate tcl.h. Please set the TCLDIR macro to point to the Tcl *source* directory.
+ !endif
+@@ -283,9 +283,9 @@ _TCLDIR	= $(TCLDIR:/=\)
+ !if exist("$(_TCLDIR)\include\tcl.h") # Case 2(c) with TCLDIR defined
+ TCLINSTALL	= 1
+ _TCL_H          = $(_TCLDIR)\include\tcl.h
+-!elseif exist("$(_TCLDIR)\generic\tcl.h") # Case 2(d) with TCLDIR defined
++!elseif exist("$(_TCLDIR)\include\tcl.h") # Case 2(d) with TCLDIR defined
+ TCLINSTALL	= 0
+-_TCL_H          = $(_TCLDIR)\generic\tcl.h
++_TCL_H          = $(_TCLDIR)\include\tcl.h
+ !endif
+ 
+ !else  #  # Case 2(c) for extensions with TCLDIR undefined
+@@ -311,7 +311,7 @@ _TCL_H          = $(_TCLDIR)\include\tcl.h
+ !include nmakehlp.out
+ TCLINSTALL      = 0
+ TCLDIR         = $(_TCLDIR)
+-_TCL_H          = $(_TCLDIR)\generic\tcl.h
++_TCL_H          = $(_TCLDIR)\include\tcl.h
+ 
+ !endif # exist(...) && ! $(NEED_TCL_SOURCE)
+ 
+@@ -619,7 +619,7 @@ OPTIMIZATIONS  = $(OPTIMIZATIONS) -GS
+ # generated libraries only usable by the specific VC++ version that
+ # created it. Requires /LTCG linker option
+ !if [nmakehlp -c -GL]
+-OPTIMIZATIONS  = $(OPTIMIZATIONS) -GL
++
+ CC_GL_OPT_ENABLED = 1
+ !else
+ # In newer compilers -GL and -YX are incompatible.
+@@ -1085,12 +1085,9 @@ STUBPREFIX      = $(PROJECT)stub
+ 
+ TCLSHNAME       = $(PROJECT)sh$(VERSION)$(SUFX).exe
+ TCLSH		= $(OUT_DIR)\$(TCLSHNAME)
+-TCLIMPLIB	= $(OUT_DIR)\$(PROJECT)$(VERSION)$(SUFX).lib
+ TCLLIBNAME	= $(PROJECT)$(VERSION)$(SUFX).$(EXT)
+ TCLLIB		= $(OUT_DIR)\$(TCLLIBNAME)
+ 
+-TCLSTUBLIBNAME	= $(STUBPREFIX)$(VERSION).lib
+-TCLSTUBLIB	= $(OUT_DIR)\$(TCLSTUBLIBNAME)
+ TCL_INCLUDES    = -I"$(WIN_DIR)" -I"$(GENERICDIR)"
+ 
+ !else # ! $(DOING_TCL)
+@@ -1105,12 +1102,9 @@ TCLSH		= $(_TCLDIR)\bin\tclsh$(TCL_VERSION)$(SUFX:t=).exe
+ TCLSH           = $(_TCLDIR)\bin\tclsh$(TCL_VERSION)t$(SUFX:t=).exe
+ !endif
+ 
+-TCLSTUBLIB	= $(_TCLDIR)\lib\tclstub$(TCL_VERSION).lib
+-TCLIMPLIB	= $(_TCLDIR)\lib\tcl$(TCL_VERSION)$(SUFX:t=).lib
+ # When building extensions, may be linking against Tcl that does not add
+ # "t" suffix (e.g. 8.5 or 8.7). If lib not found check for that possibility.
+ !if !exist("$(TCLIMPLIB)")
+-TCLIMPLIB	= $(_TCLDIR)\lib\tcl$(TCL_VERSION)t$(SUFX:t=).lib
+ !endif
+ TCL_LIBRARY	= $(_TCLDIR)\lib
+ TCLREGLIB	= $(_TCLDIR)\lib\tclreg13$(SUFX:t=).lib
+@@ -1124,18 +1118,15 @@ TCLSH		= $(_TCLDIR)\win\$(BUILDDIRTOP)\tclsh$(TCL_VERSION)$(SUFX:t=).exe
+ !if !exist($(TCLSH))
+ TCLSH		= $(_TCLDIR)\win\$(BUILDDIRTOP)\tclsh$(TCL_VERSION)t$(SUFX:t=).exe
+ !endif
+-TCLSTUBLIB	= $(_TCLDIR)\win\$(BUILDDIRTOP)\tclstub$(TCL_VERSION).lib
+-TCLIMPLIB	= $(_TCLDIR)\win\$(BUILDDIRTOP)\tcl$(TCL_VERSION)$(SUFX:t=).lib
+ # When building extensions, may be linking against Tcl that does not add
+ # "t" suffix (e.g. 8.5 or 8.7). If lib not found check for that possibility.
+ !if !exist("$(TCLIMPLIB)")
+-TCLIMPLIB	= $(_TCLDIR)\win\$(BUILDDIRTOP)\tcl$(TCL_VERSION)t$(SUFX:t=).lib
+ !endif
+ TCL_LIBRARY	= $(_TCLDIR)\library
+ TCLREGLIB	= $(_TCLDIR)\win\$(BUILDDIRTOP)\tclreg13$(SUFX:t=).lib
+ TCLDDELIB	= $(_TCLDIR)\win\$(BUILDDIRTOP)\tcldde14$(SUFX:t=).lib
+ TCLTOOLSDIR	= $(_TCLDIR)\tools
+-TCL_INCLUDES	= -I"$(_TCLDIR)\generic" -I"$(_TCLDIR)\win"
++TCL_INCLUDES	= -I"$(_TCLDIR)\include" -I"$(_TCLDIR)\win"
+ 
+ !endif # TCLINSTALL
+ 
+@@ -1393,7 +1384,7 @@ carch =
+ 
+ !if $(DEBUG)
+ # Turn warnings into errors
+-cwarn = $(cwarn) -WX
++
+ !endif
+ 
+ INCLUDES = $(TCL_INCLUDES) $(TK_INCLUDES) $(PRJ_INCLUDES)
+-- 
+2.40.0
+

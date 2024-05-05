@@ -6,4 +6,3 @@ sources:
 patches:
   "cci.20201009":
     - patch_file: "patches/001-use-system-python.patch"
-      base_path: "source_subfolder"

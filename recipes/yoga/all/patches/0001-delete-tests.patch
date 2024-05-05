@@ -1,0 +1,9 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f4ce73cc..9f414127 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -10,4 +10,3 @@ set(CMAKE_VERBOSE_MAKEFILE on)
+ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/project-defaults.cmake)
+ 
+ add_subdirectory(yoga)
+-add_subdirectory(tests)

@@ -1,4 +1,10 @@
 sources:
+  "0.9.1":
+    url: "https://github.com/recp/cglm/archive/v0.9.1.tar.gz"
+    sha256: "ba16ee484c9d5e808ef01e55008a156831e8ff5297f10bbca307adeb827a0913"
+  "0.8.9":
+    url: "https://github.com/recp/cglm/archive/refs/tags/v0.8.9.tar.gz"
+    sha256: "9561c998eb2a86dca5f8596b5cd290d76f56b7735c8a2486c585c43c196ceedd"
   "0.8.5":
     url: "https://github.com/recp/cglm/archive/refs/tags/v0.8.5.tar.gz"
     sha256: "baefa21342d228a83c90708459a745d5aa9b0ebb381555eea42db1f37fdf7a5a"

@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 3.15)
-project(PackageTest CXX)
+cmake_minimum_required(VERSION 3.8)
+project(test_package CXX)
 
 find_package(rpclib REQUIRED CONFIG)
 
-add_executable(example example.cpp)
-set_target_properties(example PROPERTIES CXX_STANDARD 14)
-target_link_libraries(example rpclib::rpc)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE rpclib::rpc)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)

@@ -1,33 +1,39 @@
-from conans import ConanFile, tools
 import os
 import shutil
+
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.files import mkdir, rm
+from conan.tools.layout import basic_layout
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-
-    exports_sources = "hello.c", "text.s"
+    generators = "VirtualRunEnv", "VirtualBuildEnv"
+    test_type = "explicit"
 
     _targets = ("c64", "apple2")
 
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
+
+    def layout(self):
+        basic_layout(self)
+
     def build(self):
-        if not tools.cross_building(self.settings):
-            for src in self.exports_sources:
+        if can_run(self):
+            for src in ["hello.c", "text.s"]:
                 shutil.copy(os.path.join(self.source_folder, src), os.path.join(self.build_folder, src))
             for target in self._targets:
-                output = "hello_{}".format(target)
-                tools.mkdir(target)
-                try:
-                    # Try removing the output file to give confidence it is created by cc65
-                    os.unlink(output)
-                except FileNotFoundError:
-                    pass
-                self.run("{p} -O -t {t} hello.c -o {t}/hello.s".format(p=os.environ["CC65"], t=target))
-                self.run("{p} -t {t} {t}/hello.s -o {t}/hello.o".format(p=os.environ["AS65"], t=target))
-                self.run("{p} -t {t} text.s -o {t}/text.o".format(p=os.environ["AS65"], t=target))
-                self.run("{p} -o {o} -t {t} {t}/hello.o {t}/text.o {t}.lib".format(o=output, p=os.environ["LD65"], t=target))
+                output = f"hello_{target}"
+                mkdir(self, target)
+                rm(self, output, self.build_folder)
+                self.run(f"cc65 -O -t {target} hello.c -o {target}/hello.s")
+                self.run(f"ca65 -t {target} {target}/hello.s -o {target}/hello.o")
+                self.run(f"ca65 -t {target} text.s -o {target}/text.o")
+                self.run(f"ld65 -o {output} -t {target} {target}/hello.o {target}/text.o {target}.lib")
 
     def test(self):
-        if not tools.cross_building(self.settings):
+        if can_run(self):
             for target in self._targets:
-                assert os.path.isfile("hello_{}".format(target))
+                assert os.path.isfile(f"hello_{target}")

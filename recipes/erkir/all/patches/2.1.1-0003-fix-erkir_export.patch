@@ -1,0 +1,28 @@
+diff --git a/include/export.h b/include/export.h
+index edcb0b3..e090174 100644
+--- a/include/export.h
++++ b/include/export.h
+@@ -1,7 +1,7 @@
+ #ifndef __EXPORT_H_
+ #define __EXPORT_H_
+ 
+-#ifdef _WIN32
++#if defined(_WIN32) && defined(ERKIR_SHARED)
+     #ifdef MAKEDLL
+     #   define ERKIR_EXPORT __declspec(dllexport)
+     #else
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index ad88fd6..519a300 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -38,6 +38,10 @@ if (MSVC)
+     target_compile_definitions(${TARGET} PUBLIC MAKEDLL)
+ endif()
+ 
++if (BUILD_SHARED_LIBS)
++    target_compile_definitions(${TARGET} PUBLIC ERKIR_SHARED)
++endif()
++
+ ###############################################################################
+ # The installation and packaging
+ #

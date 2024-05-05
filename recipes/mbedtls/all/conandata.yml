@@ -1,19 +1,43 @@
 sources:
+  "3.6.0":
+    url: "https://github.com/Mbed-TLS/mbedtls/releases/download/v3.6.0/mbedtls-3.6.0.tar.bz2"
+    sha256: "3ecf94fcfdaacafb757786a01b7538a61750ebd85c4b024f56ff8ba1490fcd38"
+  "3.5.2":
+    url: "https://github.com/Mbed-TLS/mbedtls/archive/mbedtls-3.5.2.tar.gz"
+    sha256: "eedecc468b3f8d052ef05a9d42bf63f04c8a1c50d1c5a94c251c681365a2c723"
+  "3.5.1":
+    url: "https://github.com/Mbed-TLS/mbedtls/archive/mbedtls-3.5.1.tar.gz"
+    sha256: "0da345cda55ec6f6d71afa84cfae55632a16ba0b8b4644f4d0e8a32c9d1117b0"
+  "3.5.0":
+    url: "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.5.0.tar.gz"
+    sha256: "bdee0e3e45bbf360541306cac0cc27e00402c7a46b9bdf2d24787d5107f008f2"
+  "3.4.1":
+    url: "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.4.1.tar.gz"
+    sha256: "a420fcf7103e54e775c383e3751729b8fb2dcd087f6165befd13f28315f754f5"
   "3.2.1":
-    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-3.2.1.tar.gz"
+    url: "https://github.com/Mbed-TLS/mbedtls/archive/mbedtls-3.2.1.tar.gz"
     sha256: "5850089672560eeaca03dc36678ee8573bb48ef6e38c94f5ce349af60c16da33"
   "3.1.0":
-    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-3.1.0.tar.gz"
+    url: "https://github.com/Mbed-TLS/mbedtls/archive/mbedtls-3.1.0.tar.gz"
     sha256: "64d01a3b22b91cf3a25630257f268f11bc7bfa37981ae6d397802dd4ccec4690"
   "3.0.0":
-    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-3.0.0.tar.gz"
+    url: "https://github.com/Mbed-TLS/mbedtls/archive/mbedtls-3.0.0.tar.gz"
     sha256: "377d376919be19f07c7e7adeeded088a525be40353f6d938a78e4f986bce2ae0"
+  "2.28.8":
+    url: "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v2.28.8.tar.gz"
+    sha256: "4fef7de0d8d542510d726d643350acb3cdb9dc76ad45611b59c9aa08372b4213"
+  "2.28.4":
+    url: "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v2.28.4.tar.gz"
+    sha256: "578c4dcd15bbff3f5cd56aa07cd4f850fc733634e3d5947be4f7157d5bfd81ac"
   "2.25.0":
     url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.25.0.tar.gz"
     sha256: "ea2049c2dd4868693998d5a9780e198194be5aea1706ff4a9d4f882f18c0a101"
   "2.24.0":
-    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.24.0.tar.gz"
+    url: "https://github.com/Mbed-TLS/mbedtls/archive/mbedtls-2.24.0.tar.gz"
     sha256: "b5a779b5f36d5fc4cba55faa410685f89128702423ad07b36c5665441a06a5f3"
   "2.23.0":
-    url: "https://github.com/ARMmbed/mbedtls/archive/mbedtls-2.23.0.tar.gz"
+    url: "https://github.com/Mbed-TLS/mbedtls/archive/mbedtls-2.23.0.tar.gz"
     sha256: "5c8998217402aa1fc734f4afaeac38fad2421470fac4b3abc112bd46391054fe"
+  "2.16.12":
+    url: "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/mbedtls-2.16.12.tar.gz"
+    sha256: "0afb4a4ce5b771f2fb86daee786362fbe48285f05b73cd205f46a224ec031783"
