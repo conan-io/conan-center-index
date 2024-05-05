@@ -111,6 +111,7 @@ patches:
       "patch_description": "Fix QDir::entryInfoList() on Android when nameFilters used"
       "patch_file": "patches/5.15.13-android-qdir-entryinfolist.patch"
       "patch_source": "https://codereview.qt-project.org/c/qt/qtbase/+/476884"
+      "patch_type": "bugfix"
     - "base_path": "qt5/qtbase"
       "patch_description": "Fix qmake build with apple-clang>=15"
       "patch_file": "patches/5.15.8-fix-qmake-default-libdirs-apple-clang-15.patch"
