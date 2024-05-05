@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -49,6 +50,12 @@ class CxxgraphConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+
+        # TODO: remove this check once the bug is fixed
+        # https://github.com/ZigRazor/CXXGraph/pull/416
+        # https://github.com/ZigRazor/CXXGraph/pull/417
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio due to fold expression bug")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
