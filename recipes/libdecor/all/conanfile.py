@@ -27,7 +27,7 @@ class libdecorConan(ConanFile):
     }
     default_options = {
         "with_dbus": True,
-        "with_gtk": True,
+        "with_gtk": False,
     }
 
     @property
