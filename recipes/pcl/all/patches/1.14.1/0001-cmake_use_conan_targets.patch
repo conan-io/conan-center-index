@@ -9,15 +9,6 @@
  endif()
  if(OpenMP_FOUND)
    string(APPEND CMAKE_C_FLAGS " ${OpenMP_C_FLAGS}")
-@@ -319,7 +319,7 @@
- find_package(Threads REQUIRED)
- 
- # Eigen3 (required)
--find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-+find_package(Eigen3 REQUIRED CONFIG)
- if(NOT EIGEN3_FOUND AND Eigen3_FOUND)
-     set(EIGEN3_FOUND ${Eigen3_FOUND})
- endif()
 @@ -365,7 +365,7 @@
  # LibPNG
  option(WITH_PNG "PNG file support" TRUE)
@@ -26,8 +17,8 @@
 +  find_package(PNG REQUIRED CONFIG)
    if(PNG_FOUND)
      set(HAVE_PNG ON)
-     include_directories(SYSTEM "${PNG_INCLUDE_DIR}")
-@@ -375,7 +375,7 @@
+   endif()
+@@ -374,7 +374,7 @@
  # Qhull
  option(WITH_QHULL "Include convex-hull operations" TRUE)
  if(WITH_QHULL)
@@ -36,7 +27,7 @@
    if(NOT (${QHULL_LIBRARY_TYPE} MATCHES ${PCL_QHULL_REQUIRED_TYPE}) AND NOT (${PCL_QHULL_REQUIRED_TYPE} MATCHES "DONTCARE"))
      message(FATAL_ERROR "Qhull was selected with ${PCL_QHULL_REQUIRED_TYPE} but found as ${QHULL_LIBRARY_TYPE}")
    endif()
-@@ -410,7 +410,7 @@
+@@ -409,7 +409,7 @@
  #Find PCAP
  option(WITH_PCAP "pcap file capabilities in Velodyne HDL driver" TRUE)
  if(WITH_PCAP)
