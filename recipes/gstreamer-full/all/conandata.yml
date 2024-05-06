@@ -4,3 +4,6 @@ sources:
     url:
     - "https://github.com/GStreamer/gstreamer/archive/refs/tags/1.24.3.tar.gz"
     sha256: "ed10e1ce7144ed1791712d32afa485423015b5264f05280653b37724fe382089"
+patches:
+  "1.24.3":
+    - patch_file: "patches/0001-Add-support-for-conan.patch"

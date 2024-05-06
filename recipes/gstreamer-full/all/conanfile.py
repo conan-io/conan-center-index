@@ -1,11 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+import glob
 import os
+import shutil
 
 required_conan_version = ">=2.3.0"
 
@@ -243,7 +245,7 @@ class PackageConan(ConanFile):
         "with_introspection": False, # 1.72 is not yet compatible with conan 2.0
         "with_coretracers": False,
 
-        "with_tools": False,
+        "with_tools": False, # Fails on windows due to LNK1170: line in command file contains maximum-length or more characters
 
         "gst_base_audioresample_format": "auto",
         "gst_base_gl_jpeg": "libjpeg",
@@ -265,17 +267,49 @@ class PackageConan(ConanFile):
 
     def config_options(self):
         if self.settings.os != "Linux":
-            self.options.rm_safe('with_wayland')
-            self.options.rm_safe('with_alsa')
-            self.options.rm_safe('gst_base_x11')
-            self.options.rm_safe('gst_base_xvideo')
+            del self.options.with_wayland
+            del self.options.gst_base_alsa
+            del self.options.gst_base_x11
+            del self.options.gst_base_xvideo
         if self.settings.os not in ["Linux", "FreeBSD"]:
-            self.options.rm_safe('with_egl')
-            self.options.rm_safe('with_xorg')
+            del self.options.gst_base_drm
+            del self.options.with_egl
+            del self.options.with_xorg
+
+        if self.settings.os == "Windows": # TODO fix with_orc on windows
+            del self.options.with_orc
 
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+
+        if not self.options.get_safe("with_xorg"):
+            self.options.rm_safe('gst_base_x11')
+            self.options.rm_safe('gst_base_xshm')
+            self.options.rm_safe('gst_base_xi')
+            self.options.rm_safe('gst_base_ximage')
+            self.options.rm_safe('gst_base_xvimage')
+
+        if not self.options.with_base:
+            for option in GST_BASE_MESON_OPTIONS:
+                delattr(self.options, f'gst_base_{option}')
+            for option in GST_BASE_MESON_OPTIONS_WITH_EXT_DEPS:
+                delattr(self.options, f'gst_base_{option}')
+            for option in GST_BASE_MESON_OPTIONS_GL:
+                delattr(self.options, f'gst_base_{option}')
+            delattr(self.options, "gst_base_gl_jpeg")
+        if not self.options.with_good:
+            for option in GST_GOOD_MESON_OPTIONS:
+                delattr(self.options, f'gst_good_{option}')
+        if not self.options.with_bad:
+            for option in GST_BAD_MESON_OPTIONS:
+                delattr(self.options, f'gst_bad_{option}')
+        if not self.options.with_ugly:
+            for option in GST_UGLY_MESON_OPTIONS:
+                delattr(self.options, f'gst_ugly_{option}')
+        if not self.options.with_rtsp_server:
+            for option in GST_RTSP_SERVER_MESON_OPTIONS:
+                delattr(self.options, f'gst_rtsp_server_{option}')
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -285,12 +319,13 @@ class PackageConan(ConanFile):
 
         if self.options.with_base:
             self.requires("zlib/1.3.1", transitive_headers=True, transitive_libs=True)
-            self.requires("libdrm/2.4.120", transitive_headers=True, transitive_libs=True)
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.requires("libdrm/2.4.120", transitive_headers=True, transitive_libs=True)
 
         if self.options.with_libav:
             self.requires("ffmpeg/6.1", transitive_headers=True, transitive_libs=True)
 
-        if self.options.get_safe("gst_base_alsa"):
+        if self.options.get_safe("gst_base_alsa") and self.options.get_safe("with_alsa"):
             self.requires("libalsa/1.2.10")
         if self.options.get_safe("gst_base_ogg"):
             self.requires("ogg/1.3.5")
@@ -340,6 +375,7 @@ class PackageConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/1.3.1")
+        self.tool_requires("glib/<host_version>") # we need glib-mkenums
 
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
@@ -458,6 +494,12 @@ class PackageConan(ConanFile):
             raise ConanInvalidConfiguration("with_wayland requires with_egl")
 
     def generate(self):
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
+
+        pkg_config_deps = PkgConfigDeps(self)
+        pkg_config_deps.generate()
+
         tc = MesonToolchain(self)
         tc.project_options["auto_features"] = "disabled"
         tc.project_options["default_library"] = "static" # gstreamer-full is only in static
@@ -477,9 +519,21 @@ class PackageConan(ConanFile):
 
         # Common options
         tc.project_options["introspection"] = "enabled" if self.options.with_introspection else "disabled"
-        tc.project_options["orc"] = "enabled" if self.options.with_orc else "disabled"
+        tc.project_options["orc"] = "enabled" if self.options.get_safe('with_orc') else "disabled"
 
         tc.project_options["tools"] = "enabled" if self.options.with_tools else "disabled"
+
+        if self.settings.compiler == "msvc":
+            tc.project_options["c_args"] = "-%s" % self.settings.compiler.runtime
+            tc.project_options["cpp_args"] = "-%s" % self.settings.compiler.runtime
+            tc.project_options["c_link_args"] = "-lws2_32"
+            tc.project_options["cpp_link_args"] = "-lws2_32"
+            if int(str(self.settings.compiler.version)) < 14:
+                    tc.project_options["c_args"].append(" -Dsnprintf=_snprintf")
+                    tc.project_options["cpp_args"].append(" -Dsnprintf=_snprintf")
+
+        if self.settings.get_safe("compiler.runtime"):
+            tc.project_options["b_vscrt"] = str(self.settings.compiler.runtime).lower()
 
         # Enable all plugins by default
         tc.project_options["gst-full-plugins"] = '*'
@@ -528,56 +582,34 @@ class PackageConan(ConanFile):
 
         tc.generate()
 
-        tc = PkgConfigDeps(self)
-        tc.generate()
-
-        tc = VirtualBuildEnv(self)
-        tc.generate()
-
     def build(self):
+        apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
         meson.build()
+
+    def _fix_library_names(self, path):
+        # regression in 1.16
+        if self.settings.compiler == "msvc":
+            with chdir(self, path):
+                for filename_old in glob.glob("*.a"):
+                    filename_new = filename_old[3:-2] + ".lib"
+                    self.output.info("rename %s into %s" % (filename_old, filename_new))
+                    shutil.move(filename_old, filename_new)
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
 
+        self._fix_library_names(os.path.join(self.package_folder, "lib"))
+        self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
+
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-
-    def package_id(self):
-        if not self.info.options.get_safe("with_xorg"):
-            self.info.options.rm_safe('gst_base_x11')
-            self.info.options.rm_safe('gst_base_xshm')
-            self.info.options.rm_safe('gst_base_xi')
-            self.info.options.rm_safe('gst_base_ximage')
-            self.info.options.rm_safe('gst_base_xvimage')
-
-        if not self.info.options.with_base:
-            for option in GST_BASE_MESON_OPTIONS:
-                delattr(self.info.options, f'gst_base_{option}')
-            for option in GST_BASE_MESON_OPTIONS_WITH_EXT_DEPS:
-                delattr(self.info.options, f'gst_base_{option}')
-            for option in GST_BASE_MESON_OPTIONS_GL:
-                delattr(self.info.options, f'gst_base_{option}')
-            delattr(self.info.options, "gst_base_gl_jpeg")
-        if not self.info.options.with_good:
-            for option in GST_GOOD_MESON_OPTIONS:
-                delattr(self.info.options, f'gst_good_{option}')
-        if not self.info.options.with_bad:
-            for option in GST_BAD_MESON_OPTIONS:
-                delattr(self.info.options, f'gst_bad_{option}')
-        if not self.info.options.with_ugly:
-            for option in GST_UGLY_MESON_OPTIONS:
-                delattr(self.info.options, f'gst_ugly_{option}')
-        if not self.info.options.with_rtsp_server:
-            for option in GST_RTSP_SERVER_MESON_OPTIONS:
-                delattr(self.info.options, f'gst_rtsp_server_{option}')
 
     def _add_plugin_components(self, lib, requires = [], system_libs = []):
         self.cpp_info.components[f"gst{lib}"].libs = [f"gst{lib}"]
@@ -599,7 +631,7 @@ class PackageConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "gstreamer-full-1.0")
         self.cpp_info.set_property("cmake_target_name", "gstreamer-full-1.0::gstreamer-full-1.0")
 
-        if self.options.with_orc:
+        if self.options.get_safe('with_orc'):
             orc_dep = ["orc"]
             self.cpp_info.components["orc"].libs = ["orc-0.4"]
             self.cpp_info.components["orc"].includedirs = [os.path.join(self.package_folder, "include", "orc-0.4")]
@@ -630,6 +662,7 @@ class PackageConan(ConanFile):
         zlib_dep = ["zlib::zlib"]
         gio_dep = ["glib::gio-2.0"]
         gmodule_dep = ["glib::gmodule-2.0"]
+        libdrm_dep = ["libdrm::libdrm"] if self.settings.os in ["Linux"] else []
 
         self._add_library_components("base", gst_dep)
         self._add_library_components("controller", gst_dep, libm)
@@ -640,8 +673,7 @@ class PackageConan(ConanFile):
         gst_net_dep = ["gstreamer-net-1.0"]
 
         if self.options.with_base:
-            #self._add_library_components("plugins-base", ["libdrm::libdrm"] + gst_dep)
-            self._add_library_components("allocators", ["libdrm::libdrm"] + gst_dep); allocators_dep = ["gstreamer-allocators-1.0"]
+            self._add_library_components("allocators", libdrm_dep + gst_dep); allocators_dep = ["gstreamer-allocators-1.0"]
             self._add_library_components("app", gst_base_dep); app_dep = ["gstreamer-app-1.0"]
             self._add_library_components("tag", gst_base_dep + zlib_dep, libm); tag_dep = ["gstreamer-tag-1.0"]
             self._add_library_components("audio", tag_dep + gst_base_dep + orc_dep, libm); audio_dep = ["gstreamer-audio-1.0"]
