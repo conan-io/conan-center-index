@@ -12,11 +12,11 @@ required_conan_version = ">=1.53.0"
 
 class LibFTPConan(ConanFile):
     name = "libftp"
-    description = "A cross-platform FTP client library based on Boost.Asio"
+    description = "A cross-platform FTP/FTPS client library based on Boost.Asio"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/deniskovalchuk/libftp"
-    topics = ("ftp", "boost")
+    topics = ("ftp", "ftps", "boost", "ssl", "tls", "openssl")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
