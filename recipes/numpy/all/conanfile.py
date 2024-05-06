@@ -49,7 +49,7 @@ class NumpyConan(ConanFile):
 
     def requirements(self):
         self.requires("openblas/0.3.26")
-        self.requires("cpython/3.10.0", transitive_headers=True, transitive_libs=True)
+        self.requires("cpython/3.10.14", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         self.tool_requires("cpython/<host_version>")
