@@ -125,8 +125,11 @@ class NumpyConan(ConanFile):
 
     @property
     def _rel_site_packages(self):
-        python_minor = Version(self.dependencies["cpython"].ref.version).minor
-        return os.path.join("lib", f"python3.{python_minor}", "site-packages")
+        if self.settings.os == "Windows":
+            return os.path.join("Lib", "site-packages")
+        else:
+            python_minor = Version(self.dependencies["cpython"].ref.version).minor
+            return os.path.join("lib", f"python3.{python_minor}", "site-packages")
 
     @property
     def _rel_pkg_root(self):
