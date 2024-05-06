@@ -32,9 +32,12 @@ class SuiteSparseCholmodConan(ConanFile):
         "cuda": False,
     }
     options_description = {
-        "gpl": "Enable GPL-licensed modules",
+        "gpl": "Enable GPL-licensed modules: MatrixOps, Modify, Supernodal and CUDA",
         "cuda": "Enable CUDA acceleration",
     }
+
+    def export_sources(self):
+        copy(self, "cholmod-conan-cuda-support.cmake", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -66,7 +69,7 @@ class SuiteSparseCholmodConan(ConanFile):
 
     def validate(self):
         if self.options.cuda and not self.options.gpl:
-            raise ConanInvalidConfiguration("CUDA acceleration requires GPL-licensed modules")
+            raise ConanInvalidConfiguration("CUDA acceleration requires GPL-licensed modules. Set suitesparse-cholmod/*:gpl=True.")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22 <4]")
@@ -104,6 +107,8 @@ class SuiteSparseCholmodConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
+        if self.options.cuda:
+            copy(self, "cholmod-conan-cuda-support.cmake", self.export_sources_folder, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CHOLMOD")
@@ -111,6 +116,10 @@ class SuiteSparseCholmodConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.set_property("cmake_target_aliases", ["SuiteSparse::CHOLMOD_static"])
         self.cpp_info.set_property("pkg_config_name", "CHOLMOD")
+
+        if self.options.cuda:
+            self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
+            self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "cholmod-conan-cuda-support.cmake")])
 
         self.cpp_info.libs = ["cholmod"]
         self.cpp_info.includedirs.append(os.path.join("include", "suitesparse"))
