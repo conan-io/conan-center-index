@@ -223,6 +223,8 @@ class PangoConan(ConanFile):
             self.cpp_info.components["pangowin32"].set_property("pkg_config_name", "pangowin32")
             self.cpp_info.components["pangowin32"].requires = ["pango_"]
             self.cpp_info.components["pangowin32"].system_libs.append("gdi32")
+            if Version(self.version) >= "1.50.12":
+                self.cpp_info.components["pangowin32"].system_libs.append("dwrite")
 
         if self.options.with_cairo:
             self.cpp_info.components["pangocairo"].libs = ["pangocairo-1.0"]
