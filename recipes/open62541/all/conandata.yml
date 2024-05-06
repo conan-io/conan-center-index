@@ -1,10 +1,10 @@
 sources:
+  "1.4.0":
+    url: "https://github.com/open62541/open62541/archive/v1.4.0.tar.gz"
+    sha256: "22a7a1f821b26f541feb96cc5879e0c76cb3b968e508209b5bf98f2869b11a89"
   "1.3.9":
     url: "https://github.com/open62541/open62541/archive/v1.3.9.tar.gz"
     sha256: "71764d4a060cfa07eae7aaabd176da38b155ef01c63103513339699fd8026e2f"
-  "1.3.8":
-    url: "https://github.com/open62541/open62541/archive/v1.3.8.tar.gz"
-    sha256: "b6943b564787c4953b77ca8d7f987c4b896b3f3e91f45d9f13e9056b6148bc1d"
   "1.2.6":
     url: "https://github.com/open62541/open62541/archive/v1.2.6.tar.gz"
     sha256: "7470c1e2f97d0e7dad9632ced7b62f0add66a3c689532204ef85b0556d129106"
@@ -15,11 +15,11 @@ sources:
     url: "https://github.com/open62541/open62541/archive/v1.0.6.tar.gz"
     sha256: "299940025c14929533064abe0044d5805ea50d52b32d05ad9bc0e6996569c2a6"
 patches:
-  "1.3.9":
+  "1.4.0":
     - patch_file: "patches/0001-disable-sanitizers-1_3_x.patch"
       patch_description: "Disable static code analysis"
       patch_type: "conan"
-  "1.3.8":
+  "1.3.9":
     - patch_file: "patches/0001-disable-sanitizers-1_3_x.patch"
       patch_description: "Disable static code analysis"
       patch_type: "conan"
