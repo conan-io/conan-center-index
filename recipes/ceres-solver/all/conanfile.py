@@ -100,6 +100,7 @@ class CeresSolverConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "ceres-conan-cuda-support.cmake", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -149,11 +150,6 @@ class CeresSolverConan(ConanFile):
         if self.options.get_safe("use_TBB"):
             self.requires("onetbb/2020.3")
 
-    @property
-    def _cuda_libs(self):
-        # also uses Thrust, but it is header-only
-        return ["cublas", "cudart", "cusolver", "cusparse"]
-
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
@@ -165,7 +161,7 @@ class CeresSolverConan(ConanFile):
             )
 
         if self.options.get_safe("use_cuda"):
-            self.output.warning("CUDA support requires CUDA to be present on the system with the following components: " + ", ".join(self._cuda_libs))
+            self.output.warning("CUDA support requires CUDA to be present on the system.")
 
         if self.options.get_safe("use_eigen_metis") and not self.options.use_eigen_sparse:
             raise ConanInvalidConfiguration("use_eigen_metis requires use_eigen_sparse=True")
@@ -179,7 +175,7 @@ class CeresSolverConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "2.2.0":
-            self.tool_requires("cmake/[>=3.17 <4]")
+            self.tool_requires("cmake/[>=3.18 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -253,6 +249,7 @@ class CeresSolverConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "CMake"))
+        copy(self, "ceres-conan-cuda-support.cmake", self.export_sources_folder, os.path.join(self.package_folder, "lib", "cmake"))
         self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_variables_file_rel_path))
 
     def _create_cmake_module_variables(self, module_file):
@@ -274,11 +271,10 @@ class CeresSolverConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Ceres")
-        # see https://github.com/ceres-solver/ceres-solver/blob/2.2.0/cmake/CeresConfig.cmake.in#L334-L340
-        self.cpp_info.set_property("cmake_build_modules", [self._module_variables_file_rel_path])
 
         libsuffix = "-debug" if self.settings.build_type == "Debug" else ""
         self.cpp_info.components["ceres"].set_property("cmake_target_name", "Ceres::ceres")
+        # see https://github.com/ceres-solver/ceres-solver/blob/2.2.0/cmake/CeresConfig.cmake.in#L334-L340
         self.cpp_info.components["ceres"].set_property("cmake_target_aliases", ["ceres"])
         self.cpp_info.components["ceres"].libs = [f"ceres{libsuffix}"]
         if not self.options.use_glog:
@@ -308,16 +304,19 @@ class CeresSolverConan(ConanFile):
                 self.cpp_info.components["ceres"].system_libs.append(libcxx)
 
         if self.options.get_safe("use_cuda"):
-            self.cpp_info.components["ceres"].system_libs.extend(self._cuda_libs)
             if Version(self.version) >= "2.2.0":
-                # A small static library that gets exported as a separate target in the official CMake config.
-                # It is also already linked into the main ceres target.
                 self.cpp_info.components["ceres_cuda_kernels"].set_property("cmake_target_name", "Ceres::ceres_cuda_kernels")
                 self.cpp_info.components["ceres_cuda_kernels"].libs.append(f"ceres_cuda_kernels{libsuffix}")
-                self.cpp_info.components["ceres_cuda_kernels"].requires = self._cuda_libs
+                if not self.options.shared:
+                    self.cpp_info.components["ceres"].requires.append("ceres_cuda_kernels")
+
+        cmake_modules = [self._module_variables_file_rel_path]
+        if self.options.get_safe("use_cuda"):
+            cmake_modules.append(os.path.join("lib", "cmake", "ceres-conan-cuda-support.cmake"))
+        self.cpp_info.set_property("cmake_build_modules", cmake_modules)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Ceres"
         self.cpp_info.names["cmake_find_package_multi"] = "Ceres"
-        self.cpp_info.components["ceres"].build_modules["cmake_find_package"] = [self._module_variables_file_rel_path]
-        self.cpp_info.components["ceres"].build_modules["cmake_find_package_multi"] = [self._module_variables_file_rel_path]
+        self.cpp_info.components["ceres"].build_modules["cmake_find_package"] = cmake_modules
+        self.cpp_info.components["ceres"].build_modules["cmake_find_package_multi"] = cmake_modules
