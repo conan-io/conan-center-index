@@ -198,6 +198,8 @@ class G2oConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "g2o", "solvers", "csparse", "CMakeLists.txt"),
                         "$<BUILD_INTERFACE:${CSPARSE_INCLUDE_DIR}>",
                         '"$<BUILD_INTERFACE:${CSPARSE_INCLUDE_DIR}>"')
+        replace_in_file(self, os.path.join(self.source_folder, "g2o", "solvers", "csparse", "CMakeLists.txt"),
+                        "${CSPARSE_LIBRARY}", "${CSPARSE_LIBRARIES}")
 
     def build(self):
         self._patch_sources()
