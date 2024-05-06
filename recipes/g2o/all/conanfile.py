@@ -88,6 +88,7 @@ class G2oConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "FindSuiteSparse.cmake", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -180,14 +181,6 @@ class G2oConan(ConanFile):
         tc.variables["DISABLE_SSE4_2"] = not self.options.sse4_2
         tc.variables["DISABLE_SSE4_A"] = not self.options.sse4_a
 
-        if self.options.with_cholmod:
-            tc.variables["CMAKE_FIND_LIBRARY_PREFIXES"] = ";".join([
-                dep.package_folder.replace("\\", "/")
-                for dep_name, dep in self.dependencies.items() if dep_name.ref.name.startswith("suitesparse-")
-            ])
-            # Newest CHOLMOD uses vendored METIS with renamed symbols, which FindSuiteSparse.cmake fails to detect
-            tc.variables["SuiteSparse_CHOLMOD_USES_METIS"] = True
-
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -198,6 +191,7 @@ class G2oConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        copy(self, "FindSuiteSparse.cmake", self.export_sources_folder, os.path.join(self.source_folder, "cmake_modules"))
         save(self, os.path.join(self.source_folder, "g2o", "EXTERNAL", "CMakeLists.txt"), "")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "find_package(CSparse)", "find_package(CSPARSE)")
