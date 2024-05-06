@@ -101,6 +101,7 @@ class CeresSolverConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "ceres-conan-cuda-support.cmake", self.recipe_folder, self.export_sources_folder)
+        copy(self, "FindSuiteSparse.cmake", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -196,14 +197,6 @@ class CeresSolverConan(ConanFile):
         tc.variables["SCHUR_SPECIALIZATIONS"] = self.options.use_schur_specializations
         tc.variables["SUITESPARSE"] = self.options.get_safe("use_suitesparse", False)
 
-        if self.options.get_safe("use_suitesparse"):
-            tc.variables["CMAKE_FIND_LIBRARY_PREFIXES"] = ";".join([
-                dep.package_folder.replace("\\", "/")
-                for dep_name, dep in self.dependencies.items() if dep_name.ref.name.startswith("suitesparse-")
-            ])
-            # CHOLMOD on CCI uses vendored METIS with renamed symbols, which Ceres fails to detect
-            tc.variables["SuiteSparse_CHOLMOD_USES_METIS"] = True
-
         # IOS_DEPLOYMENT_TARGET variable was added to iOS.cmake file in 1.12.0 version
         if self.settings.os == "iOS":
             tc.variables["IOS_DEPLOYMENT_TARGET"] = self.settings.os.version
@@ -237,8 +230,12 @@ class CeresSolverConan(ConanFile):
         deps.set_property("metis", "cmake_target_name", "METIS::METIS")
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        copy(self, "FindSuiteSparse.cmake", self.export_sources_folder, os.path.join(self.source_folder, "cmake"))
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
