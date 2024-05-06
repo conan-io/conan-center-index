@@ -258,9 +258,9 @@ class PackageConan(ConanFile):
     default_options.update({f'gst_base_{_name}': True for _name in GST_BASE_MESON_OPTIONS_WITH_EXT_DEPS})
     default_options.update({f'gst_base_{_name}': True for _name in GST_BASE_MESON_OPTIONS_GL})
     default_options.update({f'gst_good_{_name}': True for _name in GST_GOOD_MESON_OPTIONS})
-    default_options.update({f'gst_bad_{_name}': False for _name in GST_BAD_MESON_OPTIONS})
-    default_options.update({f'gst_ugly_{_name}': False for _name in GST_UGLY_MESON_OPTIONS})
-    default_options.update({f'gst_rtsp_server_{_name}': False for _name in GST_RTSP_SERVER_MESON_OPTIONS})
+    default_options.update({f'gst_bad_{_name}': True for _name in GST_BAD_MESON_OPTIONS})
+    default_options.update({f'gst_ugly_{_name}': True for _name in GST_UGLY_MESON_OPTIONS})
+    default_options.update({f'gst_rtsp_server_{_name}': True for _name in GST_RTSP_SERVER_MESON_OPTIONS})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -272,6 +272,7 @@ class PackageConan(ConanFile):
             del self.options.gst_base_x11
             del self.options.gst_base_xvideo
         if self.settings.os not in ["Linux", "FreeBSD"]:
+            del self.options.gst_bad_unixfd
             del self.options.gst_base_drm
             del self.options.with_egl
             del self.options.with_xorg
