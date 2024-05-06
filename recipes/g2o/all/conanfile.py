@@ -122,7 +122,7 @@ class G2oConan(ConanFile):
         # Used in public core/eigen_types.h
         self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
         # Used in stuff/logger.h
-        self.requires("spdlog/1.13.0", transitive_headers=True, transitive_libs=True)
+        self.requires("spdlog/1.14.1", transitive_headers=True, transitive_libs=True)
         # Used in stuff/opengl_wrapper.h
         self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
         self.requires("freeglut/3.4.0", transitive_headers=True, transitive_libs=True)
