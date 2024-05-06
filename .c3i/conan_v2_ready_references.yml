@@ -245,6 +245,7 @@ required_for_references:
 - cpuinfo
 - cpython
 - cqrlib
+- cr
 - crc32c
 - crc_cpp
 - crcpp
@@ -304,6 +305,7 @@ required_for_references:
 - discount
 - djinni-generator
 - djinni-support-lib
+- djvulibre
 - dlib
 - dlpack
 - dnet
@@ -439,6 +441,7 @@ required_for_references:
 - gainput
 - gamenetworkingsockets
 - gamma
+- gcc
 - gcem
 - gdal
 - gdbm
@@ -1279,6 +1282,7 @@ required_for_references:
 - serial
 - sfl
 - sfml
+- shaderc
 - shapelib
 - shield
 - si
