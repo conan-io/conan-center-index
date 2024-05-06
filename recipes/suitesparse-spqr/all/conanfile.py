@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, rm, rmdir, copy
@@ -47,6 +48,10 @@ class SuiteSparseSpqrConan(ConanFile):
         self.requires("suitesparse-config/7.7.0", transitive_headers=True, transitive_libs=True)
         self.requires("suitesparse-cholmod/5.2.1", transitive_headers=True, transitive_libs=True)
 
+    def validate(self):
+        if self.options.cuda and not self.dependencies["suitesparse-cholmod"].options.cuda:
+            raise ConanInvalidConfiguration("suitesparse-spqr/*:cuda=True option requires suitesparse-cholmod/*:cuda=True")
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22 <4]")
 
@@ -58,6 +63,7 @@ class SuiteSparseSpqrConan(ConanFile):
         venv.generate()
 
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_VERBOSE_MAKEFILE"] = True
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["SUITESPARSE_USE_OPENMP"] = True
