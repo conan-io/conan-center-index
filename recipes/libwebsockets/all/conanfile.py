@@ -299,8 +299,9 @@ class LibwebsocketsConan(ConanFile):
         # Allow forwarding project targets to try_compile and derivatives
         tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
 
-        # Ensure find_package(OpenSSL) is called early
-        tc.variables["CMAKE_PROJECT_libwebsockets_INCLUDE"] = os.path.join(self.source_folder, "project_include.cmake").replace('\\','/')
+        if self.options.with_ssl == "openssl":
+            # Ensure find_package(OpenSSL) is called early
+            tc.variables["CMAKE_PROJECT_libwebsockets_INCLUDE"] = os.path.join(self.source_folder, "project_include.cmake").replace('\\','/')
 
         if self.options.with_ssl == "mbedtls":
             tc.variables["LWS_WITH_MBEDTLS"] = True
