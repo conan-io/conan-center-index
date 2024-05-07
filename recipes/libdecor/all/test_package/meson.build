@@ -8,7 +8,7 @@ executable('test_package',
   ],
   dependencies: [
     libdecor_dep,
-    ],
+  ],
 )
 
 
