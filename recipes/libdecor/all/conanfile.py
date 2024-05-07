@@ -64,9 +64,9 @@ class libdecorConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires the with_cairo option of pango to be enabled")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.2")
+        self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/2.2.0")
         self.tool_requires("wayland/<host_version>")
         self.tool_requires("wayland-protocols/1.33")
 
