@@ -411,7 +411,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.5.6")
+            self.requires("zstd/[>=1.5.5 <2]")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("expat/2.6.2")
             self.requires("opus/1.4")
