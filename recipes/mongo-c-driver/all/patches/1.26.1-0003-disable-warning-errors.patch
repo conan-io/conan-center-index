@@ -1,0 +1,13 @@
+--- build/cmake/MongoC-Warnings.cmake
++++ build/cmake/MongoC-Warnings.cmake
+@@ -66,10 +66,6 @@
+      gnu-like:lang-c:-Werror=implicit msvc:/we4013 msvc:/we4431
+      # Missing return types/statements
+      gnu-like:-Werror=return-type msvc:/we4716
+-     # Incompatible pointer types
+-     gnu-like:lang-c:not-gcc-lt5:-Werror=incompatible-pointer-types msvc:/we4113
+-     # Integral/pointer conversions
+-     gnu-like:lang-c:not-gcc-lt5:-Werror=int-conversion msvc:/we4047
+      # Discarding qualifiers
+      gnu:lang-c:not-gcc-lt5:-Werror=discarded-qualifiers
+      clang:lang-c:-Werror=ignored-qualifiers
