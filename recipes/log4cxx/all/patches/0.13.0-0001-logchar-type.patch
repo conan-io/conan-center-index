@@ -1,0 +1,44 @@
+diff --git a/src/main/cpp/threadutility.cpp b/src/main/cpp/threadutility.cpp
+index c14c12fd..057ecd86 100644
+--- a/src/main/cpp/threadutility.cpp
++++ b/src/main/cpp/threadutility.cpp
+@@ -113,11 +113,13 @@ void ThreadUtility::threadStartedNameThread(LogString threadName,
+ 							 std::thread::id /*threadId*/,
+ 							 std::thread::native_handle_type nativeHandle){
+ #if LOG4CXX_HAS_PTHREAD_SETNAME
+-	if( pthread_setname_np( static_cast<pthread_t>( nativeHandle ), threadName.c_str() ) < 0 ){
+-		LOGLOG_ERROR( LOG4CXX_STR("unable to set thread name") );
++	LOG4CXX_ENCODE_CHAR(sthreadName, threadName);
++	if (pthread_setname_np(static_cast<pthread_t>(nativeHandle), sthreadName.c_str()) < 0) {
++		LOGLOG_ERROR(LOG4CXX_STR("unable to set thread name"));
+ 	}
+ #elif LOG4CXX_HAS_SETTHREADDESCRIPTION
+-	HRESULT hr = SetThreadDescription(static_cast<HANDLE>(nativeHandle), threadName.c_str());
++	LOG4CXX_ENCODE_WCHAR(wthreadName, threadName);
++	HRESULT hr = SetThreadDescription(static_cast<HANDLE>(nativeHandle), wthreadName.c_str());
+ 	if(FAILED(hr)){
+ 		LOGLOG_ERROR( LOG4CXX_STR("unable to set thread name") );
+ 	}
+diff --git a/src/main/include/CMakeLists.txt b/src/main/include/CMakeLists.txt
+index e31443fb..32122e41 100644
+--- a/src/main/include/CMakeLists.txt
++++ b/src/main/include/CMakeLists.txt
+@@ -39,9 +39,18 @@ endif()
+ 
+ if(${LOG4CXX_CHAR} STREQUAL "unichar")
+   set(LOGCHAR_IS_UNICHAR 1)
++  set(LOGCHAR_IS_WCHAR 0)
++  set(LOGCHAR_IS_UTF8 0)
+ elseif(${LOG4CXX_CHAR} STREQUAL "wchar_t")
+   set(LOGCHAR_IS_WCHAR 1)
++  set(LOGCHAR_IS_UNICHAR 0)
++  set(LOGCHAR_IS_UTF8 0)
++elseif(${LOG4CXX_CHAR} STREQUAL "utf-8")
++    set(LOGCHAR_IS_UNICHAR 0)
++    set(LOGCHAR_IS_WCHAR 0)
++    set(LOGCHAR_IS_UTF8 1)
+ endif()
++
+ option(LOG4CXX_WCHAR_T "Enable wchar_t API methods" ON)
+ option(LOG4CXX_UNICHAR "Enable UniChar API methods" OFF)
+ set(INIT_IOS_BASE 0)
