@@ -1,12 +1,4 @@
 sources:
-  "2.40":
-    # Official release tarball is missing meson.build files, so use GitHub archive.
-    # Refer to https://github.com/util-linux/util-linux/issues/2875.
-    url: "https://github.com/util-linux/util-linux/archive/refs/tags/v2.40.tar.gz"
-    sha256: "f7ff8573289313e38ee3378cbc2938f34444a8cb546e1236e46151834be69784"
-patches:
-  "2.40":
-    - patch_file: "patches/2.40-0001-meson-Only-require-the-crypt-library-when-necessary.patch"
-      patch_description: "Only require the crypt library when necessary"
-      patch_type: "portability"
-      patch_source: "https://github.com/util-linux/util-linux/pull/2877"
+  "2.40.1":
+    url: "https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.40/util-linux-2.40.1.tar.xz"
+    sha256: "59e676aa53ccb44b6c39f0ffe01a8fa274891c91bef1474752fad92461def24f"
