@@ -1,0 +1,4 @@
+sources:
+  "2.58.91":
+    url: "https://download.gnome.org/sources/librsvg/2.58/librsvg-2.58.91.tar.xz"
+    sha256: "65846ae57c11aba288bf3a6fe517f800f7e38e7fbc79b98c99a8177634ed29f7"
