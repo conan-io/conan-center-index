@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -6,6 +7,7 @@ from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.53.0"
@@ -47,8 +49,8 @@ class OpenldapConan(ConanFile):
             self.requires("cyrus-sasl/2.1.28")
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration(f"{self.name} is only supported on Linux")
+        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
+            raise ConanInvalidConfiguration(f"{self.name} is only supported on Unix platforms")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -70,6 +72,15 @@ class OpenldapConan(ConanFile):
             "--libexecdir=${prefix}/bin",
             f"systemdsystemunitdir={os.path.join(self.package_folder, 'res')}",
         ]
+        if cross_building(self):
+            # When cross-building, yielding_select should be explicit:
+            # https://git.openldap.org/openldap/openldap/-/blob/OPENLDAP_REL_ENG_2_5/configure.ac#L1636
+            tc.configure_args.append("--with-yielding_select=yes")
+            # Workaround: https://bugs.openldap.org/show_bug.cgi?id=9228
+            tc.configure_args.append("ac_cv_func_memcmp_working=yes")
+        if is_apple_os(self):
+            # macOS Ventura does not have soelim, but mandoc_soelim
+            tc.make_args.append("SOELIM=soelim" if shutil.which("soelim") else "SOELIM=mandoc_soelim")
         tc.generate()
         tc = AutotoolsDeps(self)
         tc.generate()
@@ -92,7 +103,8 @@ class OpenldapConan(ConanFile):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "COPYRIGHT", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         rm(self, "*.la", self.package_folder, recursive=True)
-        for folder in ["var", "share", "etc", os.path.join("lib", "pkgconfig"), "home"]:
+        fix_apple_shared_install_name(self)
+        for folder in ["var", "share", "etc", os.path.join("lib", "pkgconfig"), "home", "Users"]:
             rmdir(self, os.path.join(self.package_folder, folder))
 
     def package_info(self):
