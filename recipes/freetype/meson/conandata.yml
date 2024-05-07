@@ -1,0 +1,22 @@
+sources:
+  "2.13.2":
+    url:
+      - "https://download.savannah.gnu.org/releases/freetype/freetype-2.13.2.tar.xz"
+      - "https://sourceforge.net/projects/freetype/files/freetype2/2.13.2/freetype-2.13.2.tar.xz"
+    sha256: "12991c4e55c506dd7f9b765933e62fd2be2e06d421505d7950a132e4f1bb484d"
+  "2.13.0":
+    url:
+      - "https://download.savannah.gnu.org/releases/freetype/freetype-2.13.0.tar.xz"
+      - "https://sourceforge.net/projects/freetype/files/freetype2/2.13.0/freetype-2.13.0.tar.xz"
+    sha256: "5ee23abd047636c24b2d43c6625dcafc66661d1aca64dec9e0d05df29592624c"
+patches:
+  "2.13.2":
+    - patch_file: "patches/2.13.0-0001-meson-Use-the-standard-dependency-mechanism-to-find-.patch"
+      patch_description: "meson: Use the standard dependency mechanism to find bzip2"
+      patch_source: "https://gitlab.freedesktop.org/freetype/freetype/-/merge_requests/318"
+      patch_type: "portability"
+  "2.13.0":
+    - patch_file: "patches/2.13.0-0001-meson-Use-the-standard-dependency-mechanism-to-find-.patch"
+      patch_description: "meson: Use the standard dependency mechanism to find bzip2"
+      patch_source: "https://gitlab.freedesktop.org/freetype/freetype/-/merge_requests/318"
+      patch_type: "portability"
