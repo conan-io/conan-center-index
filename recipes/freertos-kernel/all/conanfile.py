@@ -634,7 +634,7 @@ class FreeRTOSKernelConan(ConanFile):
         tc.variables["FREERTOS_PORT"] = self.options.port
         if self.options.get_safe("risc_v_chip_extension"):
             tc.variables["FREERTOS_RISCV_EXTENSION"] = self.options.risc_v_chip_extension
-        tc.variables["_FREERTOS_CONFIG_DIR"] = self.build_folder
+        tc.variables["_FREERTOS_CONFIG_DIR"] = self.build_folder.replace("\\", "/")
         tc.generate()
 
     def _patch_sources(self):
