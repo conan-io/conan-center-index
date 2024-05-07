@@ -14,7 +14,6 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str, options={
             "heap": "3",
             "max_priorities": "7",
-            "minimal_stack_size": "(( unsigned short ) PTHREAD_STACK_MIN)",
             "use_counting_semaphores": True,
             "use_mutexes": True,
             "use_queue_sets": True,
