@@ -365,7 +365,7 @@ class QtConan(ConanFile):
         if self.options.openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.42")
+            self.requires("pcre2/10.43")
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.268.0")
             if is_apple_os(self):
@@ -386,45 +386,45 @@ class QtConan(ConanFile):
             self.requires("harfbuzz/8.3.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/3.0.1")
+                self.requires("libjpeg-turbo/3.0.2")
             else:
                 self.requires("libjpeg/9e")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
-            self.requires("libpng/1.6.42")
+            self.requires("libpng/1.6.43")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.45.0")
+            self.requires("sqlite3/3.45.3")
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.1.0")
         if self.options.with_pq:
-            self.requires("libpq/15.4")
+            self.requires("libpq/15.5")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.11")
         if self.options.get_safe("with_openal", False):
-            self.requires("openal-soft/1.22.2")
+            self.requires("openal-soft/1.23.1")
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
         if self.options.get_safe("with_x11") or self.options.qtwayland:
-            self.requires("xkbcommon/1.5.0")
+            self.requires("xkbcommon/1.6.0")
         if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.get_safe("with_zstd"):
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/1.5.6")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("expat/2.6.0")
+            self.requires("expat/2.6.2")
             self.requires("opus/1.4")
             if not self.options.qtwayland:
                 self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.93")
-            self.requires("libdrm/2.4.119")
+            self.requires("libdrm/2.4.120")
             self.requires("egl/system")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
         if self.options.get_safe("with_pulseaudio", False):
-            self.requires("pulseaudio/14.2")
+            self.requires("pulseaudio/17.0")
         if self.options.with_dbus:
             self.requires("dbus/1.15.8")
         if self.options.qtwayland:
@@ -434,7 +434,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_atspi"):
             self.requires("at-spi2-core/2.51.0")
         if self.options.get_safe("with_md4c", False):
-            self.requires("md4c/0.4.8")
+            self.requires("md4c/0.5.2")
 
     def package_id(self):
         del self.info.options.cross_compile
