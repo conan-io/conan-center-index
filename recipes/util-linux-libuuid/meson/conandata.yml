@@ -1,11 +1,7 @@
 sources:
-  "2.40":
-    # Official release tarball is missing meson.build files, so use GitHub archive.
-    # Refer to https://github.com/util-linux/util-linux/issues/2875.
-    # url: "https://github.com/util-linux/util-linux/archive/refs/tags/v2.40.tar.gz"
-    # sha256: "f7ff8573289313e38ee3378cbc2938f34444a8cb546e1236e46151834be69784"
-    url: "https://github.com/util-linux/util-linux/archive/4c55f993bdaaae31d2b0475d40821cf56af5cb2e.tar.gz"
-    sha256: "6983965d90bdf74388eea4977d54dec43c19bd2f5f5a47fe3927a5616c357d6a"
+  "2.40.1":
+    url: "https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.40/util-linux-2.40.1.tar.xz"
+    sha256: "59e676aa53ccb44b6c39f0ffe01a8fa274891c91bef1474752fad92461def24f"
 patches:
   "2.40":
     # Do not merge this patch!
