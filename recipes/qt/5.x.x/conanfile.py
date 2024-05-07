@@ -122,7 +122,7 @@ class QtConan(ConanFile):
         "sysroot": None,
         "config": None,
         "multiconfiguration": False,
-        "essential_modules": not os.getenv('CONAN_CENTER_BUILD_SERVICE')
+        "essential_modules": True
     }
     default_options.update({f"{status}_modules": False for status in _module_statuses if status != "essential"})
 
