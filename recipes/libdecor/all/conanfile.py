@@ -51,7 +51,7 @@ class libdecorConan(ConanFile):
             self.requires("dbus/1.15.8")
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
-        # Linking the test package results in missing freetype sympols without this.
+        # Linking the test package results in missing freetype symbols without this.
         # It appears that this is due to an issue with a dependency such as pango or cairo pulling in the system freetype instead of Conan's.
         # Or potentially, it's related to an incorrectly specified dependency.
         self.requires("pango/1.51.0", transitive_libs=True)
