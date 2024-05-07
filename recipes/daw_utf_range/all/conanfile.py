@@ -19,6 +19,12 @@ class DawUtfRangeConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+    options = {
+        "with_old_header_libraries": [True, False],
+    }
+    default_options = {
+        "with_old_header_libraries": False,
+    }
 
     @property
     def _minimum_cpp_standard(self):
@@ -34,12 +40,18 @@ class DawUtfRangeConan(ConanFile):
             "apple-clang": "12",
         }
 
+    def config_options(self):
+        if self.version != "2.2.4":
+            del self.options.with_old_header_libraries
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "2.2.4":
+        if self.version == "2.2.4" and self.options.get_safe("with_old_header_libraries", False):
             self.requires("daw_header_libraries/2.101.0")
+        elif Version(self.version) >= "2.2.4":
+            self.requires("daw_header_libraries/2.106.0")
         else:
             self.requires("daw_header_libraries/2.97.0")
 
