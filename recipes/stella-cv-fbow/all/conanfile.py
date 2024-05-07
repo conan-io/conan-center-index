@@ -47,7 +47,7 @@ class StellaCvFbowConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.arch not in ["x86", "x86_64"]:
+        if self.settings.arch not in ["x86", "x86_64"] or self.settings.compiler not in ["gcc", "clang", "apple-clang"]:
             del self.options.avx
             del self.options.mmx
             del self.options.sse
