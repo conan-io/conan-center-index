@@ -48,7 +48,7 @@ class QarchiveConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libarchive/3.6.2")
+        self.requires("libarchive/3.7.4")
         self.requires("qt/5.15.10", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):

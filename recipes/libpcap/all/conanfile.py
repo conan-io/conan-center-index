@@ -29,11 +29,13 @@ class LibPcapConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_libusb": [True, False],
+        "with_snf": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_libusb": False,
+        "with_snf": False,
     }
 
     # TODO: Add dbus-glib when available
@@ -114,7 +116,9 @@ class LibPcapConan(ConanFile):
                 "--disable-packet-ring",
                 "--disable-dbus",
                 "--disable-rdma",
+                f"--with-snf={yes_no(self.options.get_safe('with_snf'))}",
             ])
+            
             if cross_building(self):
                 target_os = "linux" if self.settings.os == "Linux" else "null"
                 tc.configure_args.append(f"--with-pcap={target_os}")
@@ -171,3 +175,5 @@ class LibPcapConan(ConanFile):
         self.cpp_info.libs = [f"pcap{suffix}"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
+        if self.options.get_safe("with_snf"):
+            self.cpp_info.system_libs.append("snf")

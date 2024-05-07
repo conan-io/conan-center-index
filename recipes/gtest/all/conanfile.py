@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc_static_runtime, msvc_runtime_flag
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=1.53.0 <2 || >=2.1.0"
 
 
 class GTestConan(ConanFile):
@@ -37,6 +37,9 @@ class GTestConan(ConanFile):
         "debug_postfix": "d",
         "disable_pthreads": False,
     }
+    # disallow cppstd compatibility, as it affects the ABI in this library
+    # see https://github.com/conan-io/conan-center-index/issues/23854
+    extension_properties = {"compatibility_cppstd": False}
 
     @property
     def _min_cppstd(self):

@@ -1,4 +1,6 @@
 versions:
+  "5.2.6":
+    folder: all
   "5.2.3":
     folder: all
   "5.2.2":
@@ -14,18 +16,4 @@ versions:
   "4.0.3":
     folder: all
   "3.2.17":
-    folder: all
-  "3.2.15":
-    folder: all
-  "3.2.14":
-    folder: all
-  "3.2.2":
-    folder: all
-  "3.2.0":
-    folder: all
-  "3.1.0":
-    folder: all
-  "3.0.0":
-    folder: all
-  "2.2.0":
     folder: all

@@ -1,4 +1,17 @@
 sources:
+  "r26d":
+    "Windows":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r26d-windows.zip"
+        sha256: "9b285da57a36818cb65ea5b93ec74f8138f48a40182ff2994f6aade4580ed597"
+    "Linux":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r26d-linux.zip"
+        sha256: "eefeafe7ccf177de7cc57158da585e7af119bb7504a63604ad719e4b2a328b54"
+    "Macos":
+      "x86_64":
+        url: "https://dl.google.com/android/repository/android-ndk-r26d-darwin.zip"
+        sha256: "ee2d0531685a69164fc0a66705d3a30109223f6fc01f1008ca5d8bc3a32d628d"
   "r26c":
     "Windows":
       "x86_64":
