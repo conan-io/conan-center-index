@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 
 required_conan_version = ">=1.53.0"
 
@@ -40,6 +40,9 @@ class StellaCvFbowConan(ConanFile):
         "sse3": True,
         "sse4": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -82,7 +85,7 @@ class StellaCvFbowConan(ConanFile):
         tc.variables["USE_SSE4"] = self.options.get_safe("sse4", False)
         tc.variables["BUILD_UTILS"] = False
         tc.variables["BUILD_TESTS"] = False
-        tc.variables["USE_CONTRIB"] = True
+        tc.variables["USE_CONTRIB"] = self.dependencies["opencv"].options.xfeatures2d
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
@@ -90,6 +93,7 @@ class StellaCvFbowConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -104,12 +108,18 @@ class StellaCvFbowConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "fbow")
         self.cpp_info.set_property("cmake_target_name", "fbow::fbow")
+        # unofficial
+        self.cpp_info.set_property("pkg_config_name", "fbow")
 
         self.cpp_info.libs = ["fbow"]
         self.cpp_info.requires = [
             "opencv::opencv_core",
+            "opencv::opencv_features2d",
+            "opencv::opencv_highgui",
             "llvm-openmp::llvm-openmp",
         ]
+        if self.dependencies["opencv"].options.xfeatures2d:
+            self.cpp_info.requires.append("opencv::opencv_xfeatures2d")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
