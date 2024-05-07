@@ -562,7 +562,7 @@ class FreeRTOSKernelConan(ConanFile):
         "timer_queue_length": 10,
         "timer_service_task_core_affinity": "tskNO_AFFINITY",
         "timer_task_priority": 3,
-        "timer_task_stack_depth": "configMINIMAL_STACK_SIZE",
+        "timer_task_stack_depth": 128,
         "total_heap_size": 10_240,
         "total_mpu_regions": 8,
         "use_application_task_tag": False,
