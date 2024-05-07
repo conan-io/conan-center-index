@@ -630,10 +630,10 @@ class FreeRTOSKernelConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["FREERTOS_HEAP"] = self.options.heap
-        tc.cache_variables["FREERTOS_PORT"] = self.options.port
+        tc.variables["FREERTOS_HEAP"] = self.options.heap
+        tc.variables["FREERTOS_PORT"] = self.options.port
         if self.options.get_safe("risc_v_chip_extension"):
-            tc.cache_variables["FREERTOS_RISCV_EXTENSION"] = self.options.risc_v_chip_extension
+            tc.variables["FREERTOS_RISCV_EXTENSION"] = self.options.risc_v_chip_extension
         tc.variables["_FREERTOS_CONFIG_DIR"] = self.build_folder
         tc.generate()
 
