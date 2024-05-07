@@ -3,7 +3,7 @@ sources:
     url: "https://mirrors.edge.kernel.org/pub/linux/utils/util-linux/v2.40/util-linux-2.40.1.tar.xz"
     sha256: "59e676aa53ccb44b6c39f0ffe01a8fa274891c91bef1474752fad92461def24f"
 patches:
-  "2.40":
+  "2.40.1":
     # Do not merge this patch!
     # It is a hack to build but needs verification that it actually works properly.
     - patch_file: "patches/2.40-0001-Add-patch-to-workaround-alias-on-macOS.patch"
