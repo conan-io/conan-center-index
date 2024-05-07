@@ -1,9 +1,9 @@
 sources:
-  "10.6.1":
-    url: "https://github.com/FreeRTOS/FreeRTOS-Kernel/releases/download/V10.6.1/FreeRTOS-KernelV10.6.1.zip"
-    sha256: "6d7611606d8cacb23eb388f8592fa978bcfe731148d8217ccebc928fc74a6445"
+  "11.1.0":
+    url: "https://github.com/FreeRTOS/FreeRTOS-Kernel/releases/download/V11.1.0/FreeRTOS-KernelV11.1.0.zip"
+    sha256: "eebd58aa71a623c9381f25f77b708c0ed14ef995a8913e2460fe9f286bb271eb"
 patches:
-  "10.6.1":
-    - patch_file: "patches/0001-Insert-freertos_config-CMake-target-for-the-FreeRTOS.patch"
+  "11.1.0":
+    - patch_file: "patches/10.6.1-0001-Insert-freertos_config-CMake-target-for-the-FreeRTOS.patch"
       patch_description: "Use the FreeRTOSConfig.h header provided by Conan as the freertos_config CMake target"
       patch_type: "conan"

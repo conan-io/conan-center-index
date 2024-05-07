@@ -1,6 +1,6 @@
-From b50fc578136f32ccf66963c3ecc75e2965ece555 Mon Sep 17 00:00:00 2001
+From be12d3ca12f4127c2ca20e4be144d34d9f9825e7 Mon Sep 17 00:00:00 2001
 From: Jordan Williams <jordan@jwillikers.com>
-Date: Wed, 23 Aug 2023 15:02:01 -0500
+Date: Tue, 7 May 2024 10:30:18 -0500
 Subject: [PATCH] Insert freertos_config CMake target for the FreeRTOSConfig.h
  header
 
@@ -9,12 +9,12 @@ Subject: [PATCH] Insert freertos_config CMake target for the FreeRTOSConfig.h
  1 file changed, 21 insertions(+)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a68b652ca..28a6fd797 100644
+index 6fd1ff56b..9f06a088d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -13,6 +13,27 @@ cmake_minimum_required(VERSION 3.15)
- # option FREERTOS_HEAP. If the option is not set, the cmake will default to
- # using heap_4.c.
+@@ -15,6 +15,27 @@ cmake_minimum_required(VERSION 3.15)
+ # heap implementation. If the option is not set, the cmake will use no heap
+ # implementation (e.g. when only static allocation is used).
  
 +project(freertos_kernel LANGUAGES C)
 +
@@ -41,5 +41,5 @@ index a68b652ca..28a6fd797 100644
  if(NOT TARGET freertos_config )
      if (NOT DEFINED FREERTOS_CONFIG_FILE_DIRECTORY )
 -- 
-2.41.0
+2.45.0
 
