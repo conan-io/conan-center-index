@@ -18,6 +18,7 @@ class EasyloggingppConan(ConanFile):
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "fPIC": [True, False],
         "enable_crash_log": [True, False],
         "enable_thread_safe": [True, False],
         "enable_debug_errors": [True, False],
@@ -33,6 +34,7 @@ class EasyloggingppConan(ConanFile):
         "lib_utc_datetime": [True, False],
     }
     default_options = {
+        "fPIC": True,
         "enable_crash_log": False,
         "enable_thread_safe": False,
         "enable_debug_errors": False,
@@ -47,6 +49,10 @@ class EasyloggingppConan(ConanFile):
         "disable_trace_logs": False,
         "lib_utc_datetime": False,
     }
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def layout(self):
         cmake_layout(self, src_folder="src")

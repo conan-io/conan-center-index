@@ -1,0 +1,22 @@
+diff --git a/cmake/simdutf-flags.cmake b/cmake/simdutf-flags.cmake
+index d1e9bcd..2ff37c0 100644
+--- a/cmake/simdutf-flags.cmake
++++ b/cmake/simdutf-flags.cmake
+@@ -22,4 +22,3 @@ set(SIMDUTF_CXX_STANDARD 11 CACHE STRING "the C++ standard to use for simdutf")
+ set(CMAKE_CXX_STANDARD ${SIMDUTF_CXX_STANDARD})
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+-set(CMAKE_MACOSX_RPATH OFF)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index ed6be55..0b649c6 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -3,7 +3,7 @@ target_include_directories(simdutf-include-source INTERFACE $<BUILD_INTERFACE:${
+ add_library(simdutf-source INTERFACE)
+ target_sources(simdutf-source INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/simdutf.cpp)
+ target_link_libraries(simdutf-source INTERFACE simdutf-include-source)
+-add_library(simdutf STATIC simdutf.cpp)
++add_library(simdutf simdutf.cpp)
+ target_include_directories(simdutf PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> )
+ target_include_directories(simdutf PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+ 

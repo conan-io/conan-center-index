@@ -44,7 +44,7 @@ class ZuluOpenJDK(ConanFile):
     def package(self):
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "bin"),
              src=os.path.join(self.source_folder, "bin"),
-             excludes=("msvcp140.dll", "vcruntime140.dll"))
+             excludes=("msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll"))
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "include"),
              src=os.path.join(self.source_folder, "include"))
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "lib"),

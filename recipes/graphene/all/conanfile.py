@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -51,7 +51,7 @@ class GrapheneConan(ConanFile):
 
     def requirements(self):
         if self.options.with_glib:
-            self.requires("glib/2.76.2")
+            self.requires("glib/2.78.3")
 
     def validate(self):
         if self.settings.compiler == "gcc":
@@ -70,9 +70,9 @@ class GrapheneConan(ConanFile):
                 )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.1.0")
+        self.tool_requires("meson/1.3.1")
         if not self.conf.get("tools.gnu:pkg_config", default=False):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -97,7 +97,15 @@ class GrapheneConan(ConanFile):
             meson.project_options["introspection"] = "disabled"
         meson.generate()
 
+    def _patch_sources(self):
+        # The finite-math-only optimization has no effect and can cause linking errors
+        # when linked against glibc >= 2.31
+        replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                        "'-ffast-math'",
+                        "'-ffast-math', '-fno-finite-math-only'")
+
     def build(self):
+        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()

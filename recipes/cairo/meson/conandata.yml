@@ -1,7 +1,13 @@
 sources:
+  "1.18.0":
+    sha256: "abf8fba4d510086a492783c3e0828e90b32734738fd80906595617d229d02bab"
+    url: "https://gitlab.freedesktop.org/cairo/cairo/-/archive/1.18.0/cairo-1.18.0.tar.bz2"
+  "1.17.8":
+    url: "https://gitlab.freedesktop.org/cairo/cairo/-/archive/1.17.8/cairo-1.17.8.tar.bz2"
+    sha256: "ead4724423eb969f98b456fe1e3ee1e1741fe1c8dfb1a41ca12afa81a6c1665f"
   "1.17.6":
-    sha256: "90496d135c9ef7612c98f8ee358390cdec0825534573778a896ea021155599d2"
     url: "https://gitlab.freedesktop.org/cairo/cairo/-/archive/1.17.6/cairo-1.17.6.tar.bz2"
+    sha256: "90496d135c9ef7612c98f8ee358390cdec0825534573778a896ea021155599d2"
   "1.17.4":
     url:
       - "https://www.cairographics.org/snapshots/cairo-1.17.4.tar.xz"

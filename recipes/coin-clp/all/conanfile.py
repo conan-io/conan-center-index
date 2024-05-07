@@ -50,7 +50,7 @@ class CoinClpConan(ConanFile):
 
     def requirements(self):
         # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16053#issuecomment-1512637106
-        self.requires("coin-utils/2.11.6", transitive_headers=True, transitive_libs=True)
+        self.requires("coin-utils/2.11.9", transitive_headers=True, transitive_libs=True)
         self.requires("coin-osi/0.108.7", transitive_headers=True)
 
     def validate(self):
@@ -63,7 +63,7 @@ class CoinClpConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("gnu-config/cci.20210814")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):

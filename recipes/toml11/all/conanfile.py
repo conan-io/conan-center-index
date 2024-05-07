@@ -9,11 +9,12 @@ required_conan_version = ">=1.50.0"
 
 class Toml11Conan(ConanFile):
     name = "toml11"
+    description = "TOML for Modern C++"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ToruNiina/toml11"
-    description = "TOML for Modern C++"
-    topics = ("toml", "c-plus-plus-11", "c-plus-plus", "parser", "serializer")
-    license = "MIT"
+    topics = ("toml", "c-plus-plus-11", "c-plus-plus", "parser", "serializer", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -28,11 +29,7 @@ class Toml11Conan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
-
-    def build(self):
-        pass
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, "toml.hpp", src=self.source_folder, dst=os.path.join(self.package_folder, "include", "toml11"))

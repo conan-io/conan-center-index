@@ -1,0 +1,34 @@
+sources:
+  "5.2.0":
+    url: "https://github.com/libxmlplusplus/libxmlplusplus/releases/download/5.2.0/libxml++-5.2.0.tar.xz"
+    sha256: "e41b8eae55210511585ae638615f00db7f982c0edea94699865f582daf03b44f"
+  "5.0.3":
+    url: "https://github.com/libxmlplusplus/libxmlplusplus/releases/download/5.0.3/libxml++-5.0.3.tar.xz"
+    sha256: "13074f59e3288a378cafe9e6847df17f764c23fa29bc94f3305b8bf81efb2cf7"
+  "5.0.1":
+    url: "https://github.com/libxmlplusplus/libxmlplusplus/releases/download/5.0.1/libxml++-5.0.1.tar.xz"
+    sha256: "15c38307a964fa6199f4da6683a599eb7e63cc89198545b36349b87cf9aa0098"
+  "2.42.1":
+    url: "https://github.com/libxmlplusplus/libxmlplusplus/releases/download/2.42.1/libxml++-2.42.1.tar.xz"
+    sha256: "9b59059abe5545d28ceb388a55e341095f197bd219c73e6623aeb6d801e00be8"
+patches:
+  "5.2.0":
+    - patch_file: "patches/5.2.0-0001-enable_static_builds_on_msvc.patch"
+      patch_type: "portability"
+      patch_description: "Manage dllexport correctly to be able to build static libraries on MSVC"
+      patch_source: "https://github.com/libxmlplusplus/libxmlplusplus/commit/2a2825c67a30ea34f3514659bfd91111db8e009d.patch"
+  "5.0.3":
+    - patch_file: "patches/5.0.3-0001-enable_static_builds_on_msvc.patch"
+      patch_type: "portability"
+      patch_description: "Manage dllexport correctly to be able to build static libraries on MSVC"
+      patch_source: "https://github.com/libxmlplusplus/libxmlplusplus/commit/2a2825c67a30ea34f3514659bfd91111db8e009d.patch"
+  "5.0.1":
+    - patch_file: "patches/5.0.1-0001-enable_static_builds_on_msvc.patch"
+      patch_type: "portability"
+      patch_description: "Manage dllexport correctly to be able to build static libraries on MSVC"
+      patch_source: "https://github.com/libxmlplusplus/libxmlplusplus/commit/2a2825c67a30ea34f3514659bfd91111db8e009d.patch"
+  "2.42.1":
+    - patch_file: "patches/2.42.1-0001-enable_static_builds_on_msvc.patch"
+      patch_type: "portability"
+      patch_description: "Manage dllexport correctly to be able to build static libraries on MSVC"
+      patch_source: "https://github.com/libxmlplusplus/libxmlplusplus/commit/2a2825c67a30ea34f3514659bfd91111db8e009d.patch"

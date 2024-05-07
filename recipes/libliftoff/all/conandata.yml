@@ -1,0 +1,4 @@
+sources:
+  "0.4.1":
+    url: "https://gitlab.freedesktop.org/emersion/libliftoff/-/archive/v0.4.1/libliftoff-v0.4.1.tar.bz2"
+    sha256: "2ec4a6b467dda20476acb4d6bd864538ccdaa946e8666f96efa98156bf25cfb5"

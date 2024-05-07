@@ -98,7 +98,7 @@ class AbseilConan(ConanFile):
         # In case of cross-build, set CMAKE_SYSTEM_PROCESSOR if not set by toolchain or user
         if cross_building(self):
             toolchain_file = os.path.join(self.generators_folder, "conan_toolchain.cmake")
-            cmake_system_processor_block = textwrap.dedent("""\
+            cmake_system_processor_block = textwrap.dedent("""
                 if(NOT CMAKE_SYSTEM_PROCESSOR)
                     set(CMAKE_SYSTEM_PROCESSOR {})
                 endif()
@@ -144,10 +144,10 @@ class AbseilConan(ConanFile):
         components = {}
 
         abs_target_content = load(self, absl_target_file_path)
-        
+
         # Replace the line endings to support building with MSys2 on Windows
         abs_target_content = abs_target_content.replace("\r\n", "\n")
-        
+
         cmake_functions = re.findall(r"(?P<func>add_library|set_target_properties)[\n|\s]*\([\n|\s]*(?P<args>[^)]*)\)", abs_target_content)
         for (cmake_function_name, cmake_function_args) in cmake_functions:
             cmake_function_args = re.split(r"[\s|\n]+", cmake_function_args, maxsplit=2)
@@ -190,7 +190,11 @@ class AbseilConan(ConanFile):
                     elif property_type == "INTERFACE_COMPILE_DEFINITIONS":
                         values_list = target_property[1].replace('"', "").split(";")
                         for definition in values_list:
-                            components[potential_lib_name].setdefault("defines", []).append(definition)
+                            if definition == r"\$<\$<PLATFORM_ID:AIX>:_LINUX_SOURCE_COMPAT>":
+                                if self.settings.os == "AIX":
+                                    components[potential_lib_name].setdefault("defines", []).append("_LINUX_SOURCE_COMPAT")
+                            else:
+                                components[potential_lib_name].setdefault("defines", []).append(definition)
 
         return components
 
@@ -228,11 +232,6 @@ class AbseilConan(ConanFile):
             self.cpp_info.components[pkgconfig_name].system_libs = values.get("system_libs", [])
             self.cpp_info.components[pkgconfig_name].frameworks = values.get("frameworks", [])
             self.cpp_info.components[pkgconfig_name].requires = values.get("requires", [])
-            if is_msvc(self) and self.settings.compiler.get_safe("cppstd") == "20":
-                self.cpp_info.components[pkgconfig_name].defines.extend([
-                    "_HAS_DEPRECATED_RESULT_OF",
-                    "_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING",
-                ])
 
             self.cpp_info.components[pkgconfig_name].names["cmake_find_package"] = cmake_target
             self.cpp_info.components[pkgconfig_name].names["cmake_find_package_multi"] = cmake_target

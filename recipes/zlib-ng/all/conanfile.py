@@ -34,7 +34,7 @@ class ZlibNgConan(ConanFile):
         "fPIC": True,
         "zlib_compat": False,
         "with_gzfileop": True,
-        "with_optim": False,
+        "with_optim": True,
         "with_new_strategies": True,
         "with_native_instructions": False,
         "with_reduced_mem": False,
@@ -51,6 +51,8 @@ class ZlibNgConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        if self.options.zlib_compat:
+            self.provides = ["zlib"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -106,6 +108,12 @@ class ZlibNgConan(ConanFile):
             self.cpp_info.libs = [f"z{suffix}"]
         if self.options.zlib_compat:
             self.cpp_info.defines.append("ZLIB_COMPAT")
+            #copied from zlib
+            self.cpp_info.set_property("cmake_find_mode", "both")
+            self.cpp_info.set_property("cmake_file_name", "ZLIB")
+            self.cpp_info.set_property("cmake_target_name", "ZLIB::ZLIB")
+            self.cpp_info.names["cmake_find_package"] = "ZLIB"
+            self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
         if self.options.with_gzfileop:
             self.cpp_info.defines.append("WITH_GZFILEOP")
         if not self.options.with_new_strategies:

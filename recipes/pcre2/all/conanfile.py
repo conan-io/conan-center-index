@@ -16,7 +16,7 @@ class PCRE2Conan(ConanFile):
     description = "Perl Compatible Regular Expressions"
     topics = ("regex", "regexp", "perl")
     license = "BSD-3-Clause"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -65,7 +65,7 @@ class PCRE2Conan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_bzip2"):
             self.requires("bzip2/1.0.8")
 
@@ -76,8 +76,7 @@ class PCRE2Conan(ConanFile):
             raise ConanInvalidConfiguration("build_pcre2_8 must be enabled for the pcre2grep program")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -150,6 +149,9 @@ class PCRE2Conan(ConanFile):
             self.cpp_info.components["pcre2-posix"].set_property("pkg_config_name", "libpcre2-posix")
             self.cpp_info.components["pcre2-posix"].libs = [self._lib_name("pcre2-posix")]
             self.cpp_info.components["pcre2-posix"].requires = ["pcre2-8"]
+            if Version(self.version) >= "10.43" and is_msvc(self) and self.options.shared:
+                self.cpp_info.components["pcre2-posix"].defines.append("PCRE2POSIX_SHARED=1")
+
         # pcre2-16
         if self.options.build_pcre2_16:
             self.cpp_info.components["pcre2-16"].set_property("cmake_target_name", "PCRE2::16BIT")

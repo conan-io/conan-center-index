@@ -13,7 +13,8 @@ class CassandraCppDriverConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://docs.datastax.com/en/developer/cpp-driver/"
-    topics = ("cassandra", "cpp-driver", "database",)
+    topics = ("cassandra", "cpp-driver", "database")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -66,13 +67,13 @@ class CassandraCppDriverConan(ConanFile):
 
         if self.options.with_zlib:
             self.requires("minizip/1.2.13")
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
         if self.options.use_atomic == "boost":
-            self.requires("boost/1.82.0")
+            self.requires("boost/1.83.0")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
         if self.options.use_atomic == "boost":
@@ -122,6 +123,8 @@ class CassandraCppDriverConan(ConanFile):
 
         if self.settings.os == "Linux":
             tc.variables["CASS_USE_TIMERFD"] = self.options.use_timerfd
+        # Relocatable shared lib on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -155,3 +158,6 @@ class CassandraCppDriverConan(ConanFile):
                 "crypt32", "ws2_32", "userenv", "version"])
             if not self.options.shared:
                 self.cpp_info.defines = ["CASS_STATIC"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m"]
+

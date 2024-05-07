@@ -1,0 +1,20 @@
+commit e28d1f3868db8c7f5ff654a205d80d5d7ed203c4
+Author: Martin Delille <martin@delille.org>
+Date:   Fri Jan 19 18:06:56 2024 +0100
+
+    Fix target without LOCATION property
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6d0de20..dbfbed3 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -26,8 +26,7 @@ if( NOT Qt5_FOUND OR NOT Qt6_FOUND )
+ 	find_package( Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Network )
+ endif()
+ 
+-get_target_property( QTCORE_LOCATION Qt${QT_VERSION_MAJOR}::Core LOCATION )
+-get_filename_component( QT_BIN_DIR ${QTCORE_LOCATION} DIRECTORY )
++get_filename_component(QT_BIN_DIR "$<TARGET_FILE_DIR:Qt${QT_VERSION_MAJOR}::Core>" ABSOLUTE)
+ set( CMAKE_MSVCIDE_RUN_PATH ${QT_BIN_DIR} )
+ set_property( DIRECTORY "." APPEND PROPERTY COMPILE_DEFINITIONS "QT_DEPRECATED_WARNINGS" )
+ 

@@ -1,0 +1,9 @@
+sources:
+  "0.2.2":
+    url: "https://github.com/graeme-hill/crossguid/archive/refs/tags/v0.2.2.tar.gz"
+    sha256: "48321928473c682b0cdc7e17bbd3390f79f4b98ab22fef3b81a852dda81fd195"
+patches:
+  "0.2.2":
+    - patch_file: "patches/0001-add-installer.patch"
+      patch_description: "add installer definition"
+      patch_type: "conan"

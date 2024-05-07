@@ -52,14 +52,14 @@ class XtensorConan(ConanFile):
 
     def requirements(self):
         self.requires("xtl/0.7.5")
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("nlohmann_json/3.11.3")
         if self.options.xsimd:
             if Version(self.version) < "0.24.0":
                 self.requires("xsimd/7.5.0")
             else:
-                self.requires("xsimd/10.0.0")
+                self.requires("xsimd/12.0.0")
         if self.options.tbb:
-            self.requires("onetbb/2021.7.0")
+            self.requires("onetbb/2021.10.0")
 
     def package_id(self):
         self.info.clear()

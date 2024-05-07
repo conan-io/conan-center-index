@@ -1,0 +1,33 @@
+From 5f4738e980b688b26522603a9173a72b007968d3 Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Thu, 28 Sep 2023 15:25:30 -0500
+Subject: [PATCH] Disable building tests
+
+---
+ meson.build | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 516d7d2..f37109e 100644
+--- a/meson.build
++++ b/meson.build
+@@ -241,11 +241,11 @@ if get_option('examples') == 'enabled'
+ 	)
+ endif
+ 
+-tests = {
+-	'linked_list': ['common/linked_list.c'],
+-	'connection': ['common/connection.c'],
+-	'poller': ['common/linked_list.c', 'seatd/poller.c'],
+-}
++tests = {}
++# 	'linked_list': ['common/linked_list.c'],
++#	'connection': ['common/connection.c'],
++#	'poller': ['common/linked_list.c', 'seatd/poller.c'],
++#}
+ 
+ foreach name, value : tests
+ 	test(name, executable(
+-- 
+2.41.0
+

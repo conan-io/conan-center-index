@@ -5,9 +5,7 @@
 #include "roaring/roaring.hh"
 #include "roaring/roaring.h"
 
-#ifndef ROARING_NO_NAMESPACE
 using namespace roaring;
-#endif
 
 void test_example_cpp(bool copy_on_write) {
   // create a new empty bitmap

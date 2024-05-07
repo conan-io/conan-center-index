@@ -13,6 +13,7 @@ class SpirvheadersConan(ConanFile):
     license = "MIT-KhronosGroup"
     topics = ("spirv", "spirv-v", "vulkan", "opengl", "opencl", "khronos")
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
@@ -22,8 +23,7 @@ class SpirvheadersConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

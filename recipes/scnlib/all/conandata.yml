@@ -1,14 +1,45 @@
 sources:
+  "2.0.2":
+    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v2.0.2.tar.gz"
+    sha256: "a485076b8710576cf05fbc086d39499d16804575c0660b0dfaeeaf7823660a17"
+  "2.0.1":
+    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v2.0.1.tar.gz"
+    sha256: "f399d1b1f36f5d53a2d63fd2974797ab8f3f7e69c424d9661253830cb793b72e"
+  "2.0.0":
+    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "2a35356a3a7485fdf97f28cfbea52db077cf4e7bab0a5a0fc3b04e89630334cd"
+  "1.1.3":
+    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v1.1.3.tar.gz"
+    sha256: "32ca1baed2da5d86aa03273c87580ef32e95925697d252138507ec0545d86ab2"
   "1.1.2":
     url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v1.1.2.tar.gz"
     sha256: "5ed3ec742302c7304bf188bde9c4012a65dc8124ff4e1a69b598480d664250e6"
   "1.0":
     url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v1.0.tar.gz"
     sha256: "5b8333e522206c2a74e57a9c9544c4fe4e7858cfe93e216905b463eaf91af5fe"
-  "0.4":
-    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v0.4.tar.gz"
-    sha256: "f23e66b00c9d38671b39b83c082a5b2db1cf05b3e3eff7b4a769487d9ed9d366"
 patches:
+  "2.0.2":
+    - patch_file: "patches/2.0.0-0001-remove-re2-version.patch"
+      patch_description: "remove re2 version on find_package"
+      patch_type: "portability"
+  "2.0.1":
+    - patch_file: "patches/2.0.0-0001-remove-re2-version.patch"
+      patch_description: "remove re2 version on find_package"
+      patch_type: "portability"
+  "2.0.0":
+    - patch_file: "patches/2.0.0-0001-remove-re2-version.patch"
+      patch_description: "remove re2 version on find_package"
+      patch_type: "portability"
+  "1.1.3":
+    - patch_file: "patches/1.1.3-0001-install-dll-windows.patch"
+      patch_description: "add runtime destination path on install"
+      patch_type: "portability"
+    - patch_file: "patches/1.1.3-0002-remove-header-only-target.patch"
+      patch_description: "prevent to generate header only target for conan package"
+      patch_type: "conan"
+    - patch_file: "patches/1.1.3-0003-fix-link-keyword.patch"
+      patch_description: "use PRIVATE instead of INTERFACE"
+      patch_type: "conan"
   "1.1.2":
     - patch_file: "patches/1.1.2-0001-install-dll-windows.patch"
       patch_description: "add runtime destination path on install"
@@ -29,7 +60,3 @@ patches:
     - patch_file: "patches/1.0-0003-use-conan-package.patch"
       patch_description: "use conan package of fast-float"
       patch_type: "conan"
-  "0.4":
-    - patch_file: "patches/0.4-0001-install-dll-windows.patch"
-      patch_description: "add runtime destination path on install"
-      patch_type: "portability"

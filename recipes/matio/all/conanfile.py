@@ -54,9 +54,9 @@ class MatioConan(ConanFile):
 
     def requirements(self):
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.1")
+            self.requires("hdf5/1.14.3")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if not self.options.with_hdf5 and self.options.mat73:
@@ -67,6 +67,7 @@ class MatioConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["MATIO_ENABLE_CPPCHECK"] = False
         tc.variables["MATIO_EXTENDED_SPARSE"] = self.options.extended_sparse
         tc.variables["MATIO_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["MATIO_SHARED"] = self.options.shared

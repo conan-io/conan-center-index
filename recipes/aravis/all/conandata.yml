@@ -1,7 +1,30 @@
 sources:
+  "0.8.30":
+    url: "https://github.com/AravisProject/aravis/releases/download/0.8.30/aravis-0.8.30.tar.xz"
+    sha256: "40380f06fa04524a7875bd456e5a5ea78b2c058fa84b5598bc6e0642fcef00b0"
+  "0.8.29":
+    url: "https://github.com/AravisProject/aravis/releases/download/0.8.29/aravis-0.8.29.tar.xz"
+    sha256: "12e5f2f0e1a966c3a6dce0a42d96b2f24497f42ae6051d6f026811124e986963"
+  "0.8.25":    # latest version that supports GenDC data format (supported by U3V 1.1)
+    url: "https://github.com/AravisProject/aravis/releases/download/0.8.25/aravis-0.8.25.tar.xz"
+    sha256: "3ba18f941ae4e2c898fed1f63c4ce67ea41a800a902ee5684eef4ffdb87f1c09"
   "0.8.20":
     url: "https://github.com/AravisProject/aravis/releases/download/0.8.20/aravis-0.8.20.tar.xz"
     sha256: "0c0eb5a76109f29180c09c7e6a23fd403633bf22bbe8468a0ae44995c4449f46"
 patches:
+  "0.8.30":
+    - patch_file: "patches/0.8.29-gst-shared-lib.patch"
+      patch_description: "remove forcing of shared library built for gst-plugins"
+      patch_type: conan
+  "0.8.29":
+    - patch_file: "patches/0.8.29-gst-shared-lib.patch"
+      patch_description: "remove forcing of shared library built for gst-plugins"
+      patch_type: conan
+  "0.8.25":
+    - patch_file: "patches/0.8.25-gst-shared-lib.patch"
+      patch_description: "remove forcing of shared library built for gst-plugins"
+      patch_type: conan
   "0.8.20":
     - patch_file: "patches/0.8.19-gst-shared-lib.patch"
+      patch_description: "remove forcing of shared library built for gst-plugins"
+      patch_type: conan

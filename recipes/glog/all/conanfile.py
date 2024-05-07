@@ -1,8 +1,10 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
 import os
 
 required_conan_version = ">=1.54.0"
@@ -10,12 +12,11 @@ required_conan_version = ">=1.54.0"
 
 class GlogConan(ConanFile):
     name = "glog"
+    description = "Google logging library"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/glog/"
-    description = "Google logging library"
     topics = ("logging",)
-    license = "BSD-3-Clause"
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -32,6 +33,20 @@ class GlogConan(ConanFile):
         "with_threads": True,
         "with_unwind": True,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 14
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "apple-clang": "10",
+            "clang": "7",
+            "gcc": "7",
+            "msvc": "191",
+            "Visual Studio": "15",
+        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -56,10 +71,23 @@ class GlogConan(ConanFile):
             self.requires("gflags/2.2.2", transitive_headers=True, transitive_libs=True)
         # 0.4.0 requires libunwind unconditionally
         if self.options.get_safe("with_unwind") or (Version(self.version) < "0.5.0" and self.settings.os in ["Linux", "FreeBSD"]):
-            self.requires("libunwind/1.6.2")
+            self.requires("libunwind/1.8.0", transitive_headers=True, transitive_libs=True)
+
+    def validate(self):
+        if Version(self.version) < "0.7.0":
+            return
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def build_requirements(self):
-        if Version(self.version) >= "0.6.0":
+        if Version(self.version) >= "0.7.0":
+            self.tool_requires("cmake/[>=3.22 <4]")
+        elif Version(self.version) >= "0.6.0":
             self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
@@ -129,3 +157,5 @@ class GlogConan(ConanFile):
             self.cpp_info.defines.append(f"GOOGLE_GLOG_DLL_DECL={decl}")
         if self.options.with_gflags and not self.options.shared:
             self.cpp_info.defines.extend(["GFLAGS_DLL_DECLARE_FLAG=", "GFLAGS_DLL_DEFINE_FLAG="])
+        if Version(self.version) >= "0.7.0":
+            self.cpp_info.defines.extend(["GLOG_USE_GLOG_EXPORT="])

@@ -32,13 +32,15 @@ class GsoapConan(ConanFile):
         "with_cookies": True,
         "with_c_locale": True,
     }
-
-    exports_sources = "CMakeLists.txt", "cmake/*.cmake"
     short_paths = True
 
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        copy(self, "cmake/*.cmake", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -50,7 +52,7 @@ class GsoapConan(ConanFile):
     def requirements(self):
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
         if cross_building(self, skip_x64_x86=True) and hasattr(self, "settings_build"):
@@ -95,11 +97,11 @@ class GsoapConan(ConanFile):
     def package_info(self):
         defines = []
         if self.options.with_openssl:
-            libs = ["gsoapssl++", ]
+            libs = ["gsoapssl++"]
             defines.append("WITH_OPENSSL")
             defines.append("WITH_GZIP")
         else:
-            libs = ["gsoap++", ]
+            libs = ["gsoap++"]
         self.cpp_info.libs = libs
 
         if self.options.with_ipv6:

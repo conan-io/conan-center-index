@@ -1,4 +1,18 @@
 sources:
+  "8.9.0":
+    source:
+      url: "https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_9_0.tar.gz"
+      sha256: "ab5174b9b5c6236588e15a1aa1aaecb6658cdbe09501c7981ac8db276a24d9ab"
+    cmake:
+      url: "https://github.com/abdes/cryptopp-cmake/archive/CRYPTOPP_8_9_0.tar.gz"
+      sha256: "191d69061c56602de1610ebf03b44dcf75636006e7e60ef8105bee6472ec0caf"
+  "8.8.0":
+    source:
+      url: "https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_8_0.tar.gz"
+      sha256: "f8b8f632533b279ee297694e651e9204824bba6022ce66e60ebebb08b551fe7a"
+    cmake:
+      url: "https://github.com/abdes/cryptopp-cmake/archive/CRYPTOPP_8_8_0.tar.gz"
+      sha256: "a10068ab47fb46785dfe43ebe45369008855b03f6711ac7d1af6f45aa9238290"
   "8.7.0":
     source:
       url: "https://github.com/weidai11/cryptopp/archive/CRYPTOPP_8_7_0.tar.gz"
@@ -35,6 +49,11 @@ sources:
       url: "https://github.com/noloader/cryptopp-cmake/archive/CRYPTOPP_8_2_0.tar.gz"
       sha256: "f41f6a32b1177c094c3ef97423916713c902d0ac26cbee30ec70b1e8ab0e6fba"
 patches:
+  "8.9.0":
+    - patch_file: "patches/8.9.0-0001-cve-2023-50980.patch"
+      patch_description: "Validate PolynomialMod2 coefficients (CVE-2023-50980)"
+      patch_type: "vulnerability"
+      patch_source: "https://github.com/weidai11/cryptopp/issues/1248"
   "8.7.0":
     - patch_file: "patches/8.7.0-0001-fix-msvc-arm64.patch"
   "8.6.0":

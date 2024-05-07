@@ -1,0 +1,14 @@
+--- shared/DSPFilters/CMakeLists.txt	2017-03-09 13:40:27.000000000 +0100
++++ shared/DSPFilters/CMakeLists.txt	2023-08-03 09:10:56.248123716 +0200
+@@ -4,10 +4,8 @@
+ 
+ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/source SOURCE_LIB)
+ 
+-add_library(${PROJECT_NAME} STATIC ${SOURCE_LIB})
++add_library(${PROJECT_NAME} ${SOURCE_LIB})
+ 
+ target_include_directories(${PROJECT_NAME} 
+ PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+ 
+-set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
+-

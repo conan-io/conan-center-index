@@ -45,7 +45,8 @@ class MosquittoConan(ConanFile):
 
     def requirements(self):
         if self.options.with_tls:
-            self.requires("openssl/1.1.1s")
+            # uses deprecated functions in openssl/3.0.0
+            self.requires("openssl/1.1.1w")
         if self.options.with_websockets:
             self.requires("libwebsockets/4.3.2")
 

@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(PackageTest CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(imagl CONFIG REQUIRED)
 
 add_executable(example example.cpp)
-target_link_libraries(example ${CONAN_LIBS})
-set_target_properties(example PROPERTIES CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON)
+target_link_libraries(example PRIVATE imagl::imagl)
+target_compile_features(example PRIVATE cxx_std_20)

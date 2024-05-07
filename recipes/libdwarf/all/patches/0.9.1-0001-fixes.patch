@@ -1,0 +1,86 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 70839abd..972a2b9e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -188,14 +188,20 @@ if (ENABLE_DECOMPRESSION)
+     find_package(ZLIB)
+   endif()
+   if(NOT TARGET ZSTD::ZSTD)
+-    find_package(ZSTD)
++    find_package(zstd)
+   endif()
+-  if (ZLIB_FOUND AND ZSTD_FOUND )
++  if (ZLIB_FOUND AND zstd_FOUND )
+     set(HAVE_ZLIB TRUE)
+     set(HAVE_ZLIB_H TRUE)
+     set(HAVE_ZSTD TRUE)
+     set(HAVE_ZSTD_H TRUE)
+   endif()
++  find_package(zstd CONFIG REQUIRED)
++  if(TARGET zstd::libzstd_shared)
++    set(ZSTD_LIB zstd::libzstd_shared)
++  else()
++    set(ZSTD_LIB zstd::libzstd_static)
++  endif()
+ endif ()
+ 
+ message(STATUS "CMAKE_SIZEOF_VOID_P ... " ${CMAKE_SIZEOF_VOID_P} )
+diff --git a/src/lib/libdwarf/CMakeLists.txt b/src/lib/libdwarf/CMakeLists.txt
+index 7500c9f4..ce1461fb 100644
+--- a/src/lib/libdwarf/CMakeLists.txt
++++ b/src/lib/libdwarf/CMakeLists.txt
+@@ -104,8 +104,8 @@ target_include_directories(dwarf PUBLIC
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+   )
+-if(ZLIB_FOUND AND ZSTD_FOUND)
+-  target_link_libraries(dwarf PRIVATE  ZLIB::ZLIB ZSTD::ZSTD ) 
++if(ZLIB_FOUND AND zstd_FOUND)
++  target_link_libraries(dwarf PRIVATE  ZLIB::ZLIB ${ZSTD_LIB} ) 
+ endif()
+ set_target_properties(dwarf PROPERTIES PUBLIC_HEADER "libdwarf.h;dwarf.h")
+ 
+@@ -116,7 +116,7 @@ install(TARGETS dwarf
+         PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+         )
+ 
+-configure_file(libdwarf.pc.cmake libdwarf.pc @ONLY)
++# configure_file(libdwarf.pc.cmake libdwarf.pc @ONLY)
+ 
+ # The install has to be here, not in
+ # another CMakeLists.txt  to make install work properly
+@@ -131,4 +131,4 @@ install(EXPORT libdwarfTargets
+         NAMESPACE libdwarf::
+         DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/libdwarf")
+ install(FILES cmake/libdwarf-config.cmake DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/libdwarf")
+-install(FILES "${PROJECT_BINARY_DIR}/src/lib/libdwarf/libdwarf.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
++# install(FILES "${PROJECT_BINARY_DIR}/src/lib/libdwarf/libdwarf.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+diff --git a/src/lib/libdwarf/libdwarf.h b/src/lib/libdwarf/libdwarf.h
+index 380d2ef7..8c62ee7e 100644
+--- a/src/lib/libdwarf/libdwarf.h
++++ b/src/lib/libdwarf/libdwarf.h
+@@ -51,7 +51,7 @@
+ #endif /* DW_API */
+ 
+ #ifndef LIBDWARF_STATIC
+-# if defined(_WIN32) || defined(__CYGWIN__)
++# if defined(LIBDWARF_SHARED) && (defined(_WIN32) || defined(__CYGWIN__))
+ #  ifdef LIBDWARF_BUILD
+ #   define DW_API __declspec(dllexport)
+ #  else /* !LIBDWARF_BUILD */
+diff --git a/src/lib/libdwarf/libdwarf_private.h b/src/lib/libdwarf/libdwarf_private.h
+index b37ae994..7fa89256 100644
+--- a/src/lib/libdwarf/libdwarf_private.h
++++ b/src/lib/libdwarf/libdwarf_private.h
+@@ -26,11 +26,7 @@
+ #ifdef _MSC_VER /* Macro to select VS compiler */
+ #include <windows.h>
+ typedef SSIZE_T ssize_t;
+-#ifdef _WIN64
+-typedef long long off_t;
+-#else
+ typedef long off_t;
+-#endif
+ #endif /* _MSC_VER */
+ 
+ #ifndef TRUE
