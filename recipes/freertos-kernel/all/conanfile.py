@@ -597,17 +597,16 @@ class FreeRTOSKernelConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
+        if self.settings.os in ["Linux", "Macos"]:
+            self.options.port = "GCC_POSIX"
+        elif self.settings.os == "Windows":
+            self.options.port = "MSVC_MINGW"
 
     def configure(self):
         if self.options.shared or self.settings.os == "baremetal":
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-
-        if self.settings.os in ["Linux", "Macos"]:
-            self.options.port = "GCC_POSIX"
-        elif self.settings.os == "Windows":
-            self.options.port = "MSVC_MINGW"
 
         if self.options.port not in ["GCC_RISC_V_GENERIC", "IAR_RISC_V_GENERIC"]:
             self.options.rm_safe("risc_v_chip_extension")
