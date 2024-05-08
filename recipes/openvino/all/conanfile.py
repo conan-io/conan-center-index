@@ -102,7 +102,7 @@ class OpenvinoConan(ConanFile):
 
     @property
     def _npu_option_available(self):
-        return self.settings.os in ["Linux", "Windows"] and self._target_x86_64 and Version(self.version) >= "2024.0.0"
+        return self.settings.os in ["Linux", "Windows"] and self._target_x86_64 and Version(self.version) >= "2024.1.0"
 
     @property
     def _gpu_option_available(self):
