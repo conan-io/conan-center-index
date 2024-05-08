@@ -14,7 +14,7 @@ required_conan_version = ">=1.53.0"
 class IridescenceConan(ConanFile):
     name = "small_gicp"
     description = "Efficient and parallelized algorithms for point cloud registration"
-    license = "MIT AND BSD" # BSD is from nanoflann
+    license = "MIT AND BSD" # BSD is from nanoflann and Sophus
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/koide3/small_gicp"
     topics = ("point-cloud", "icp", "registration", "scan-matching", "pcl")
@@ -64,8 +64,6 @@ class IridescenceConan(ConanFile):
         self.requires("llvm-openmp/17.0.6", transitive_headers=True, transitive_libs=True)
         if self.options.with_tbb:
             self.requires("onetbb/2021.12.0", transitive_headers=True, transitive_libs=True)
-        # The project vendors nanoflann, but it has been heavily extended and should be kept intact
-        # Also uses some fragments from Sophus
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -106,6 +104,7 @@ class IridescenceConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        # The source code contains fragments from nanoflann and Sophus
         copy(self, "LICENSE.nanoflann", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(self, "LICENSE.sophus", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
