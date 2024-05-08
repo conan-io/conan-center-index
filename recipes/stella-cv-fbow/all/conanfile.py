@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rm, rmdir
 
 required_conan_version = ">=1.53.0"
 
@@ -40,9 +40,6 @@ class StellaCvFbowConan(ConanFile):
         "sse3": True,
         "sse4": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -86,14 +83,12 @@ class StellaCvFbowConan(ConanFile):
         tc.variables["BUILD_UTILS"] = False
         tc.variables["BUILD_TESTS"] = False
         tc.variables["USE_CONTRIB"] = self.dependencies["opencv"].options.xfeatures2d
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

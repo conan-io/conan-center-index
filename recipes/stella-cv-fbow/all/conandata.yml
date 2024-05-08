@@ -1,9 +1,4 @@
 sources:
-  "cci.20240107":
-    url: "https://github.com/stella-cv/FBoW/archive/c925ef9d444c39d2967791b8c08bf3dfda9c4e1c.zip"
-    sha256: "6f91982b049e0e297f9621b221d9a02eb389cf401ca3620730a19a2c20fff5a4"
-patches:
-  "cci.20240107":
-    - patch_file: "patches/001-avoid-opencv-overlinking.patch"
-      patch_description: "Avoid overlinking of OpenCV libraries"
-      patch_type: "conan"
+  "cci.20240508":
+    url: "https://github.com/stella-cv/FBoW/archive/c6e3c29e3332a0b0834021797e2aa4e8eb66a3c1.zip"
+    sha256: "23d866d86eaca6a85da8fe3e542b94324d5f6be4b37691cf82cd74a6cfd838bd"
