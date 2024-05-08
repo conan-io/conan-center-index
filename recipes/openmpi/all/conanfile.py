@@ -73,7 +73,7 @@ class OpenMPIConan(ConanFile):
             self.requires("libpciaccess/0.17")
             self.requires("libudev/system")
         if self.options.get_safe("with_verbs"):
-            self.requires("rdma-core/49.0")
+            self.requires("rdma-core/51.0")
 
     def validate(self):
         if self.settings.os == "Windows":
