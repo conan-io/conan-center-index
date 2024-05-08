@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.tools.files import get, replace_in_file, rmdir, copy, save, collect_libs
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -237,8 +237,7 @@ class LibwebsocketsConan(ConanFile):
             # https://github.com/conan-io/conan-center-index/pull/5321#issuecomment-826367276
             raise ConanInvalidConfiguration("{}/{} shared=True with gcc<5 does not build. Please submit a PR with a fix.".format(self.name, self.version))
         if Version(self.version) >= "4.3.2":
-            if ("Visual" in str(self.settings.compiler) and Version(self.settings.compiler.version) < 16) or  \
-                    ("msvc" == str(self.settings.compiler) and Version(self.settings.compiler.version) < 192):
+            if check_min_vs(self, "192", raise_invalid=False):
                 raise ConanInvalidConfiguration ("{}/{} requires at least Visual Studio 2019".format(self.name, self.version))
 
         if self.options.with_hubbub:
