@@ -30,7 +30,6 @@ class FFMpegConan(ConanFile):
               "transcoding", "multiplexer", "demultiplexer", "streaming")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    short_paths = True
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
