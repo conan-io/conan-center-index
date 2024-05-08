@@ -12,10 +12,10 @@ required_conan_version = ">=1.54.0"
 
 class MongoCxxConan(ConanFile):
     name = "mongo-cxx-driver"
+    description = "C++ Driver for MongoDB"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://mongocxx.org"
-    description = "C++ Driver for MongoDB"
     topics = ("libbsoncxx", "libmongocxx", "mongo", "mongodb", "database", "db")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -47,7 +47,7 @@ class MongoCxxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("mongo-c-driver/1.24.3")
+        self.requires("mongo-c-driver/1.27.1")
         if self.options.polyfill == "boost":
             self.requires("boost/1.82.0", transitive_headers=True)
 
@@ -182,6 +182,8 @@ class MongoCxxConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["mongocxx"].defines.append("MONGOCXX_STATIC")
         self.cpp_info.components["mongocxx"].requires = ["mongo-c-driver::mongoc", "bsoncxx"]
+        if Version(self.version) >= "3.10.1":
+            self.cpp_info.components["mongocxx"].includedirs.append(os.path.join("include", "mongocxx", "v_noabi"))
 
         # bsoncxx
         bsoncxx_target = "bsoncxx_shared" if self.options.shared else "bsoncxx_static"
@@ -197,3 +199,5 @@ class MongoCxxConan(ConanFile):
         self.cpp_info.components["bsoncxx"].requires = ["mongo-c-driver::bson"]
         if self.options.polyfill == "boost":
             self.cpp_info.components["bsoncxx"].requires.append("boost::headers")
+        if Version(self.version) >= "3.10.1":
+            self.cpp_info.components["bsoncxx"].includedirs.append(os.path.join("include", "bsoncxx", "v_noabi"))
