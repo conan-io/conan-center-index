@@ -160,8 +160,6 @@ class PackageConan(ConanFile):
             if self.settings.build_type == "Debug":
                 # add D to the end of all the names in the lib_names list
                 lib_names = [f"{lib_name}D" for lib_name in lib_names]
-            print(self.settings.build_type)
-            print(lib_names)
             self.cpp_info.libs = lib_names
         else:
             self.cpp_info.libs = ["lzhamdll", "lzhamcomp", "lzhamdecomp"]
