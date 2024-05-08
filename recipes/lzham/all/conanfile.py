@@ -107,11 +107,26 @@ class PackageConan(ConanFile):
 
         if is_msvc(self):
             suffix = "x64D" if self.settings.build_type == "Debug" else "x64"
+            build_folder = "x64D" if self.settings.build_type == "Debug" else "x64"
             copy(
                 self,
-                pattern=f"lzham_{suffix}.lib",
+                pattern=f"lzhamlib_{suffix}.lib",
                 dst=os.path.join(self.package_folder, "lib"),
-                src=os.path.join(self.build_folder, "lib", "x64"),
+                src=os.path.join(self.build_folder, "lib", build_folder),
+                keep_path=False
+            )
+            copy(
+                self,
+                pattern=f"lzhamcomp_{suffix}.lib",
+                dst=os.path.join(self.package_folder, "lib"),
+                src=os.path.join(self.build_folder, "lib", build_folder),
+                keep_path=False
+            )
+            copy(
+                self,
+                pattern=f"lzhamdecomp_{suffix}.lib",
+                dst=os.path.join(self.package_folder, "lib"),
+                src=os.path.join(self.build_folder, "lib", build_folder),
                 keep_path=False
             )
             copy(
@@ -141,10 +156,13 @@ class PackageConan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread"])
 
         if is_msvc(self):
-            lib_name = "lzham_x64"
+            lib_names = ["lzhamlib_x64", "lzhamcomp_x64", "lzhamdecomp_x64"]
             if self.settings.build_type == "Debug":
-                lib_name += "D"
-            self.cpp_info.libs = [lib_name]
+                # add D to the end of all the names in the lib_names list
+                lib_names = [f"{lib_name}D" for lib_name in lib_names]
+            print(self.settings.build_type)
+            print(lib_names)
+            self.cpp_info.libs = lib_names
         else:
             self.cpp_info.libs = ["lzhamdll", "lzhamcomp", "lzhamdecomp"]
             self.cpp_info.set_property("cmake_file_name", "lzham")
