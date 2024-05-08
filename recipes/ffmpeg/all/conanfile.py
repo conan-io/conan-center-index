@@ -228,16 +228,8 @@ class FFMpegConan(ConanFile):
         }
 
     @property
-    def _version_supports_vulkan(self):
-        return Version(self.version) >= "4.3.0"
-
-    @property
     def _version_supports_libsvtav1(self):
         return Version(self.version) >= "5.1.0"
-
-    @property
-    def _version_supports_libdav1d(self):
-        return Version(self.version) >= "4.3.0"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -260,12 +252,8 @@ class FFMpegConan(ConanFile):
             del self.options.with_videotoolbox
         if not is_apple_os(self):
             del self.options.with_avfoundation
-        if not self._version_supports_vulkan:
-            self.options.rm_safe("with_vulkan")
         if not self._version_supports_libsvtav1:
             self.options.rm_safe("with_libsvtav1")
-        if not self._version_supports_libdav1d:
-            self.options.rm_safe("with_libdav1d")
 
     def configure(self):
         if self.options.shared:
@@ -323,13 +311,13 @@ class FFMpegConan(ConanFile):
             self.requires("vaapi/system")
         if self.options.get_safe("with_vdpau"):
             self.requires("vdpau/system")
-        if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
+        if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.243.0")
         if self.options.get_safe("with_libsvtav1"):
             self.requires("libsvtav1/1.6.0")
         if self.options.with_libaom:
             self.requires("libaom-av1/3.6.1")
-        if self.options.get_safe("with_libdav1d"):
+        if self.options.with_libdav1d:
             self.requires("dav1d/1.2.1")
 
     def validate(self):
@@ -512,6 +500,8 @@ class FFMpegConan(ConanFile):
                 "videotoolbox", self.options.get_safe("with_videotoolbox")),
             opt_enable_disable("securetransport",
                                self.options.with_ssl == "securetransport"),
+            opt_enable_disable("vulkan", self.options.get_safe("with_vulkan")),
+            opt_enable_disable("libdav1d", self.options.with_libdav1d),
             "--disable-cuda",  # FIXME: CUDA support
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
@@ -581,12 +571,8 @@ class FFMpegConan(ConanFile):
         args.extend(self._split_and_format_options_string(
             "disable-filter", self.options.disable_filters))
 
-        if self._version_supports_vulkan:
-            args.append(opt_enable_disable("vulkan", self.options.get_safe("with_vulkan")))
         if self._version_supports_libsvtav1:
             args.append(opt_enable_disable("libsvtav1", self.options.get_safe("with_libsvtav1")))
-        if self._version_supports_libsvtav1:
-            args.append(opt_enable_disable("libdav1d", self.options.get_safe("with_libdav1d")))
         if is_apple_os(self):
             # relocatable shared libs
             args.append("--install-name-dir=@rpath")
@@ -978,7 +964,7 @@ class FFMpegConan(ConanFile):
             if self.options.get_safe("with_libaom"):
                 self.cpp_info.components["avcodec"].requires.append(
                     "libaom-av1::libaom-av1")
-            if self.options.get_safe("with_libdav1d"):
+            if self.options.with_libdav1d:
                 self.cpp_info.components["avcodec"].requires.append(
                     "dav1d::dav1d")
 
@@ -1019,6 +1005,6 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vdpau"):
             self.cpp_info.components["avutil"].requires.append("vdpau::vdpau")
 
-        if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
+        if self.options.get_safe("with_vulkan"):
             self.cpp_info.components["avutil"].requires.append(
                 "vulkan-loader::vulkan-loader")
