@@ -1,0 +1,46 @@
+diff --git CMakeLists.txt CMakeLists.txt
+index b086352..91d3165 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -9,8 +9,6 @@ endif()
+ 
+ project(AvCpp LANGUAGES CXX VERSION ${AVCPP_VERSION})
+ 
+-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+-
+ set(FFMPEG_PKG_CONFIG_SUFFIX "" CACHE STRING "This suffix uses for FFmpeg component names searches by pkg-config")
+ set(AV_ENABLE_STATIC On CACHE BOOL "Enable static library build (On)")
+ set(AV_ENABLE_SHARED On CACHE BOOL "Enable shared library build (On)")
+@@ -31,8 +29,8 @@ set (AVCPP_WARNING_OPTIONS
+ set(THREADS_PREFER_PTHREAD_FLAG ON)
+ find_package(Threads)
+ 
+-find_package(FFmpeg
+-    COMPONENTS AVCODEC AVFORMAT AVUTIL AVDEVICE AVFILTER SWSCALE SWRESAMPLE REQUIRED)
++find_package(ffmpeg
++    COMPONENTS avcodec avformat avutil avdevice avfilter swscale swresample REQUIRED)
+ 
+ add_subdirectory(src)
+ 
+diff --git src/CMakeLists.txt src/CMakeLists.txt
+index 3c00150..c3818cf 100644
+--- src/CMakeLists.txt
++++ src/CMakeLists.txt
+@@ -29,7 +29,7 @@ foreach(TARGET ${AV_TARGETS})
+ 
+     target_compile_options(${TARGET} PRIVATE ${AVCPP_WARNING_OPTIONS})
+     target_compile_definitions(${TARGET} PUBLIC __STDC_CONSTANT_MACROS)
+-    target_link_libraries(${TARGET} PRIVATE Threads::Threads PUBLIC FFmpeg::FFmpeg)
++    target_link_libraries(${TARGET} PRIVATE Threads::Threads PUBLIC ffmpeg::ffmpeg)
+     target_include_directories(${TARGET}
+         PUBLIC
+           $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
+@@ -58,7 +58,7 @@ if (AVCPP_NOT_SUBPROJECT)
+     #    APPEND
+     #    FILE ${CMAKE_CURRENT_BINARY_DIR}/avcpp-targets.cmake)
+ 
+-    install(TARGETS ${AV_TARGETS} FFmpeg
++    install(TARGETS ${AV_TARGETS}
+         EXPORT avcpp-targets
+         LIBRARY DESTINATION        ${CMAKE_INSTALL_LIBDIR}
+         ARCHIVE DESTINATION        ${CMAKE_INSTALL_LIBDIR}
