@@ -2,12 +2,13 @@ import os
 import textwrap
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -27,7 +28,7 @@ class libdecorConan(ConanFile):
     }
     default_options = {
         "with_dbus": True,
-        "with_gtk": False,
+        "with_gtk": True,
     }
 
     @property
@@ -50,7 +51,7 @@ class libdecorConan(ConanFile):
         if self.options.get_safe("with_dbus"):
             self.requires("dbus/1.15.8")
         if self.options.get_safe("with_gtk"):
-            self.requires("gtk/system")
+            self.requires("gtk/system", options={"version": "3"})
         # Linking the test package results in missing freetype symbols without this.
         # It appears that this is due to an issue with a dependency such as pango or cairo pulling in the system freetype instead of Conan's.
         # Or potentially, it's related to an incorrectly specified dependency.
@@ -62,6 +63,8 @@ class libdecorConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
         if not self.dependencies["pango"].options.with_cairo:
             raise ConanInvalidConfiguration(f"{self.ref} requires the with_cairo option of pango to be enabled")
+        if self.options.get_safe("with_gtk") and Version(self.dependencies["gtk"].options.version) < 3:
+            raise ConanInvalidConfiguration(f"{self.ref} requires at least version 3 of GTK when the with_gtk option is enabled")
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.0")
