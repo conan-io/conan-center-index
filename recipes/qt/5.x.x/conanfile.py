@@ -1282,25 +1282,30 @@ Examples = bin/datadir/examples""")
                 _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
             _create_module("Help", ["Gui", "Sql", "Widgets"])
 
-        if self.options.get_safe("qtquick3d") and self.options.gui:
-            _create_module("Quick3DUtils", ["Gui"])
-            _create_module("Quick3DRender", ["Quick3DUtils", "Quick"])
-            _create_module("Quick3DAssetImport", ["Gui", "Qml", "Quick3DRender", "Quick3DUtils"])
-            _create_module("Quick3DRuntimeRender", ["Quick3DRender", "Quick3DAssetImport", "Quick3DUtils"])
-            _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
+        if self.options.gui:
+            if self.options.get_safe("qtquick3d"):
+                _create_module("Quick3DUtils", ["Gui"])
+                _create_module("Quick3DRender", ["Quick3DUtils", "Quick"])
+                _create_module("Quick3DAssetImport", ["Gui", "Qml", "Quick3DRender", "Quick3DUtils"])
+                _create_module("Quick3DRuntimeRender", ["Quick3DRender", "Quick3DAssetImport", "Quick3DUtils"])
+                _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
 
-        if self.options.qtquickcontrols2 and self.options.gui:
-            _create_module("QuickControls2", ["Gui", "Quick"])
-            _create_module("QuickTemplates2", ["Gui", "Quick"])
+            if self.options.qtquickcontrols2:
+                _create_module("QuickControls2", ["Gui", "Quick"])
+                _create_module("QuickTemplates2", ["Gui", "Quick"])
 
-        if self.options.qtsvg and self.options.gui:
-            _create_module("Svg", ["Gui"])
-            _create_plugin("QSvgIconPlugin", "qsvgicon", "iconengines", [])
-            _create_plugin("QSvgPlugin", "qsvg", "imageformats", [])
+            if self.options.qtsvg:
+                _create_module("Svg", ["Gui"])
+                _create_plugin("QSvgIconPlugin", "qsvgicon", "iconengines", [])
+                _create_plugin("QSvgPlugin", "qsvg", "imageformats", [])
 
-        if self.options.qtwayland and self.options.gui:
-            _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
-            _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
+            if self.options.with_libjpeg:
+                jpeg_lib = str(self.options.with_libjpeg)
+                _create_plugin("QJpegPlugin", "qjpeg", "imageformats", [f"{jpeg_lib}::{jpeg_lib}"])
+
+            if self.options.qtwayland:
+                _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
+                _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
 
         if self.options.qtlocation:
             _create_module("Positioning")
