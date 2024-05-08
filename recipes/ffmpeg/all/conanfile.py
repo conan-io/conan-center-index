@@ -319,7 +319,10 @@ class FFMpegConan(ConanFile):
         if self.options.with_libaom:
             self.requires("libaom-av1/3.6.1")
         if self.options.with_libdav1d:
-            self.requires("dav1d/1.2.1")
+            if Version(self.version) >= "4.4.4":
+                self.requires("dav1d/1.2.1")
+            else:
+                self.requires("dav1d/0.9.1")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
