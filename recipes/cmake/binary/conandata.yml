@@ -1,4 +1,23 @@
 sources:
+  "3.29.3":
+    Linux:
+      armv8:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.3-linux-aarch64.tar.gz"
+        sha256: "ae61d262b2771ba9cbdf1eeac288e64d6510d2f0417d2d92e27807d269ac90fa"
+      x86_64:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.3-linux-x86_64.tar.gz"
+        sha256: "90b543a30220401db0e08347af067545be158ce89ffb09b7df1516cda8617329"
+    Macos:
+      universal:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.3-macos10.10-universal.tar.gz"
+        sha256: "1a7ecdd1dc8baaede55d1011f60b5871ff908fa640f7e96ab5520f38ef97bba0"
+    Windows:
+      armv8:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.3-windows-arm64.zip"
+        sha256: "8d7d65e46a45bdbf8b4416d29ef6ad9a80f0b26afb5d6afab358e34b1b30a556"
+      x86_64:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.3-windows-x86_64.zip"
+        sha256: "6423ed300e6aa1b15c4aeae9a7399157f53fc84a2fb7242ca64c8dfd83e5f8a6"
   "3.29.2":
     Linux:
       armv8:

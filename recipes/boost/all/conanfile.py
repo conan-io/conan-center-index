@@ -272,7 +272,7 @@ class BoostConan(ConanFile):
         cppstd = self.settings.compiler.get_safe("cppstd")
         if cppstd:
             return valid_min_cppstd(self, 14)
-        required_compiler_version = self._min_compiler_version_default_cxx14        
+        required_compiler_version = self._min_compiler_version_default_cxx14
         if required_compiler_version:
             msvc_versions = {14: 190, 15: 191, 16: 192, 17: 193}
             compiler_version = Version(self.settings.compiler.version)
@@ -1317,8 +1317,9 @@ class BoostConan(ConanFile):
                 cxx_flags.append("-fembed-bitcode")
         if self._with_stacktrace_backtrace:
             flags.append(f"-sLIBBACKTRACE_PATH={self.dependencies['libbacktrace'].package_folder}")
-        if self._stacktrace_from_exception_available and is_apple_os(self) and str(self.settings.compiler.libcxx) == "libc++":
+        if self._stacktrace_from_exception_available and "x86" not in str(self.settings.arch):
             # https://github.com/boostorg/stacktrace/blob/boost-1.85.0/src/from_exception.cpp#L29
+            # This feature is guarded by BOOST_STACKTRACE_ALWAYS_STORE_IN_PADDING, but that is only enabled on x86.
             flags.append("define=BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK=1")
         if self._with_iconv:
             flags.append(f"-sICONV_PATH={self.dependencies['libiconv'].package_folder}")
