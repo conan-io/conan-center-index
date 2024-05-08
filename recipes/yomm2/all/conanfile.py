@@ -18,7 +18,8 @@ class yomm2Recipe(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jll63/yomm2"
     description = "Fast, orthogonal, open multi-methods. Solve the Expression Problem in C++17"
-    topics = ("multi-methods", "library", "header-only", "expressions", "c++17")
+    topics = ("multi-methods", "multiple-dispatch", "open-methods", "library",
+              "header-only", "polymorphism", "expression-problem", "c++17")
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {
