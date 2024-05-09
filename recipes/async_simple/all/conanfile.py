@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rename, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -76,7 +76,7 @@ class AsyncSimpleConan(ConanFile):
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
         if not self.options.header_only and self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f"{self.ref} cannot use uthread on Windows, and therefore should only be header_only")
+            raise ConanInvalidConfiguration(f'{self.ref} cannot use uthread on Windows, and therefore it\'s only supported as a header-only library in this configuration with "{self.name}/*:header_only=True"')
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -90,8 +90,6 @@ class AsyncSimpleConan(ConanFile):
             #libaio is only used in SimpleIOExecutor which is only used in executor tests and not meant for end users
             tc.cache_variables["ASYNC_SIMPLE_DISABLE_AIO"] = True 
             tc.generate()
-            deps = CMakeDeps(self)
-            deps.generate()
             
     def build(self):
         apply_conandata_patches(self)
