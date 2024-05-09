@@ -1,4 +1,4 @@
 sources:
-  "1.0.1":
-    url: "https://github.com/werto87/confu_json/archive/refs/tags/v1.0.1.tar.gz"
+  "1.0.3":
+    url: "https://github.com/werto87/confu_json/archive/refs/tags/v1.0.3.tar.gz"
     sha256: "c616874a3986cdff10bc29bb61a35fa9c9feff23e356aba027f46099254c3413"
