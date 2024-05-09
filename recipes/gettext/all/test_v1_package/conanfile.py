@@ -14,6 +14,5 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             for exe in ["gettext", "ngettext", "msgcat", "msgmerge", "msgfmt"]:
-                bin_path = os.path.join("bin", exe)
-                self.run(f"{bin_path} --version", run_environment=True)
+                self.run(f"{exe} --version", run_environment=True)
             self.run(os.path.join("bin", "test_package"), run_environment=True)
