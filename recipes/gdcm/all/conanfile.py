@@ -57,8 +57,8 @@ class GDCMConan(ConanFile):
 
     def requirements(self):
         self.requires("charls/2.4.2")
-        self.requires("expat/2.5.0")
-        self.requires("openjpeg/2.5.0")
+        self.requires("expat/[>=2.6.2 <3]")
+        self.requires("openjpeg/2.5.2")
         if self.options.with_zlibng:
             self.requires("zlib-ng/2.1.6")
         else:

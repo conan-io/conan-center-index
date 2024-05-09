@@ -146,7 +146,7 @@ class PulseAudioConan(ConanFile):
         if self.options.get_safe("with_fftw"):
             self.cpp_info.components["pulse"].requires.append("fftw::fftw")
         if self.options.with_x11:
-            self.cpp_info.components["pulse"].requires.append("xorg::xorg")
+            self.cpp_info.components["pulse"].requires.extend(["xorg::x11", "xorg::x11-xcb"])
         if self.options.with_openssl:
             self.cpp_info.components["pulse"].requires.append("openssl::openssl")
         if self.options.with_dbus:

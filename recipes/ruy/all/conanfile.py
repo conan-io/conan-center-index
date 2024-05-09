@@ -31,7 +31,7 @@ class RuyConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "15",
-            "msvc": "191", 
+            "msvc": "191",
             "gcc": "5",
             "clang": "3.4",
             "apple-clang": "5.1",
@@ -60,7 +60,7 @@ class RuyConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("cpuinfo/cci.20220228")
+        self.requires("cpuinfo/cci.20231129")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -85,8 +85,8 @@ class RuyConan(ConanFile):
         patches = {
             #Remove the invocation after project(), see https://github.com/google/ruy/issues/328
             "cmake_minimum_required(VERSION 3.13)": "",
-            # Ensure `cmake_minimum_required` is called first 
-            "# Copyright 2021 Google LLC": "# Copyright 2021 Google LLC\ncmake_minimum_required(VERSION 3.13)", 
+            # Ensure `cmake_minimum_required` is called first
+            "# Copyright 2021 Google LLC": "# Copyright 2021 Google LLC\ncmake_minimum_required(VERSION 3.13)",
         }
 
         for pattern, patch in patches.items():
