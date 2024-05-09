@@ -353,17 +353,22 @@ class OpenSSLConan(ConanFile):
     def _configure_args(self):
         openssldir = self.options.openssldir or self._get_default_openssl_dir()
         openssldir = unix_path(self, openssldir) if self.win_bash else openssldir
+        installdir = self.install_folder if not self._use_nmake else self._adjust_path(self.install_folder)
+        self.output.error(f"installdir: {installdir}")
+        # raise ConanInvalidConfiguration(f"installdir: {installdir}")
         args = [
-            '"%s"' % (self._target),
+            f'"{self._target}"',
             "shared" if self.options.shared else "no-shared",
-            "--prefix=/",
-            "--libdir=lib",
-            "--openssldir=\"%s\"" % openssldir,
-            "no-unit-test",
-            "no-threads" if self.options.no_threads else "threads",
-            "PERL=%s" % self._perl,
-            "no-tests",
             "--debug" if self.settings.build_type == "Debug" else "--release",
+            "--prefix=/",
+            # f"--prefix={installdir}",
+            # "--prefix=/" if not self._use_nmake else '--prefix="\\\\"',
+            "--libdir=lib",
+            f"--openssldir=\"{openssldir}\"",
+            "no-threads" if self.options.no_threads else "threads",
+            f"PERL={self._perl}",
+            "no-unit-test",
+            "no-tests",
         ]
 
         if self.settings.os == "Android":
@@ -515,6 +520,13 @@ class OpenSSLConan(ConanFile):
                 # When `--prefix=/`, the scripts derive `\` without escaping, which
                 # causes issues on Windows
                 replace_in_file(self, "Makefile", "INSTALLTOP_dir=\\", "INSTALLTOP_dir=\\\\")
+                if(self.version) >= "3.3.0":
+                    # replace_in_file(self, os.path.join("util","mkinstallvars.pl"), "$v = File::Spec->rel2abs($v) if $v && grep { $k eq $_ } @absolutes;", r"$v = File::Spec->rel2abs($v) if $v && grep { $k eq $_ } @absolutes; $v =~ s/\\/\\\\/g;")
+                    replace_in_file(self, os.path.join("util","mkinstallvars.pl"), "'$ENV{", "q#$ENV{")
+                    replace_in_file(self, os.path.join("util","mkinstallvars.pl"), "}'", "}#")
+                    #replace_in_file(self, os.path.join("util","mkinstallvars.pl"), "$ENV{PREFIX}';", "$ENV{PREFIX}\\\\';")
+                    #replace_in_file(self, os.path.join("util","mkinstallvars.pl"), "$ENV{PKGCONFIGDIR}';", "$ENV{PKGCONFIGDIR}\\\\';")
+                #     replace_in_file(self, os.path.join(self.source_folder, "installdata.pm"), "\\", "\\\\")
             self._run_make()
 
     def _make_install(self):
