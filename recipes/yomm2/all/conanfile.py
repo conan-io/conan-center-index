@@ -90,6 +90,11 @@ class yomm2Recipe(ConanFile):
         cmake.configure()
         cmake.build()
 
+    def package_id(self):
+        # if yomm2 is built as static, it behaves as a header-only one
+        if not self.info.options.shared:
+            self.info.clear()
+
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
@@ -105,6 +110,6 @@ class yomm2Recipe(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "YOMM2::yomm2")
         if self.options.shared:
             self.cpp_info.libs = ["yomm2"]
-        else:  # header-only one
+        else:  # static == header-only
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
