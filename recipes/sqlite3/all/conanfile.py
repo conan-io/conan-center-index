@@ -75,7 +75,7 @@ class Sqlite3Conan(ConanFile):
         "max_column": None,             # Uses default value from source
         "max_variable_number": None,    # Uses default value from source
         "max_blob_size": None,          # Uses default value from source
-        "build_executable": True,
+        "build_executable": False,
         "enable_default_vfs": True,
         "enable_dbpage_vtab": False,
     }
