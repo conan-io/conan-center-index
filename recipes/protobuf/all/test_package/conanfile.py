@@ -13,10 +13,8 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires(self.tested_reference_str)
-
-    def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
+        # note `run=True` so that the runenv can find protoc
+        self.requires(self.tested_reference_str, run=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -32,3 +30,8 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
+
+            # Invoke protoc in the same way CMake would
+            self.run(f"protoc --proto_path={self.source_folder} --cpp_out={self.build_folder} {self.source_folder}/addressbook.proto", env="conanrun")
+            assert os.path.exists(os.path.join(self.build_folder,"addressbook.pb.cc"))
+            assert os.path.exists(os.path.join(self.build_folder,"addressbook.pb.h"))

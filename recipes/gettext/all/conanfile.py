@@ -85,7 +85,7 @@ class GetTextConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        if is_msvc(self) or self._is_clang_cl:
+        if self.version >= Version("0.22") or is_msvc(self) or self._is_clang_cl:
             self.build_requires("automake/1.16.5")
 
     def source(self):
@@ -156,6 +156,19 @@ class GetTextConan(ConanFile):
             if check_min_vs(self, "180", raise_invalid=False):
                 # INFO: https://github.com/conan-io/conan/issues/15365
                 tc.extra_cflags.append("-FS")
+
+            # prevent redefining compiler instrinsic functions
+            tc.configure_args.extend([
+                'ac_cv_func_memmove=yes',
+                'ac_cv_func_memset=yes'
+            ])
+
+            # Skip checking for the 'n' printf format directly
+            # in msvc, as it is known to not be available due to security concerns.
+            # Skipping it avoids a GUI prompt during ./configure for a debug build
+            # See https://github.com/conan-io/conan-center-index/issues/23698]
+            if self.settings.build_type == "Debug":
+                tc.configure_args.extend(['gl_cv_func_printf_directive_n=no'])
 
             # The flag above `--with-libiconv-prefix` fails to correctly detect libiconv on windows+msvc
             # so it needs an extra nudge. We could use `AutotoolsDeps` but it's currently affected by the
