@@ -12,23 +12,21 @@ required_conan_version = ">=1.53.0"
 
 class yomm2Recipe(ConanFile):
     name = "yomm2"
-    package_type = "library"  # if static, it's a header-only one
+    package_type = "shared-library"
     # Optional metadata
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jll63/yomm2"
     description = "Fast, orthogonal, open multi-methods. Solve the Expression Problem in C++17"
-    topics = ("multi-methods", "multiple-dispatch", "open-methods", "library",
+    topics = ("multi-methods", "multiple-dispatch", "open-methods", "shared-library",
               "header-only", "polymorphism", "expression-problem", "c++17")
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False]
+        "header_only": [True, False],
     }
     default_options = {
-        "shared": False,
-        "fPIC": True
+        "header_only": False
     }
 
     @property
@@ -44,13 +42,9 @@ class yomm2Recipe(ConanFile):
             "msvc": "192"
         }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+        if self.options.header_only:
+            self.package_type = "header-library"
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -82,7 +76,7 @@ class yomm2Recipe(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["YOMM2_ENABLE_EXAMPLES"] = "OFF"
         tc.variables["YOMM2_ENABLE_TESTS"] = "OFF"
-        tc.variables["YOMM2_SHARED"] = self.options.shared
+        tc.variables["YOMM2_SHARED"] = not bool(self.options.header_only)
         tc.generate()
 
     def build(self):
@@ -92,7 +86,7 @@ class yomm2Recipe(ConanFile):
 
     def package_id(self):
         # if yomm2 is built as static, it behaves as a header-only one
-        if not self.info.options.shared:
+        if self.info.options.header_only:
             self.info.clear()
 
     def package(self):
@@ -100,16 +94,16 @@ class yomm2Recipe(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-        if self.options.shared:
-            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        else:  # header-only one
+        if self.options.header_only:
             rmdir(self, os.path.join(self.package_folder, "lib"))
+        else:
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "YOMM2")
         self.cpp_info.set_property("cmake_target_name", "YOMM2::yomm2")
-        if self.options.shared:
-            self.cpp_info.libs = ["yomm2"]
-        else:  # static == header-only
+        if self.options.header_only:
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
+        else:
+            self.cpp_info.libs = ["yomm2"]
