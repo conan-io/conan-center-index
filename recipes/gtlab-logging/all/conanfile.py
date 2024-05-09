@@ -93,7 +93,6 @@ class GTLabLoggingConan(ConanFile):
         cmake.install()
 
         files.rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        files.copy(self, "README.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         files.copy(self, os.path.join("LICENSES", "BSD-3-Clause.txt"), dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
     def package_info(self):
