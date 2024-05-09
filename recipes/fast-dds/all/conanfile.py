@@ -49,11 +49,18 @@ class FastDDSConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        return {
-            "gcc": "6",
-            "clang": "3.9",
-            "apple-clang": "8",
-        }
+        if Version(self.version) < "2.11.0":
+            return {
+                "gcc": "8",
+                "clang": "12",
+                "apple-clang": "12",
+            }
+        else:
+            return {
+                "gcc": "9",
+                "clang": "15",
+                "apple-clang": "15",
+            }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -93,7 +100,7 @@ class FastDDSConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
-                
+
         if self.options.shared and is_msvc(self) and "MT" in msvc_runtime_flag(self):
             # This combination leads to an fast-dds error when linking
             # linking dynamic '*.dll' and static MT runtime
