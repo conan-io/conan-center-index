@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import get, rm, rmdir, copy
+from conan.tools.files import get, rm, rmdir, copy, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.54.0"
@@ -79,7 +79,12 @@ class yomm2Recipe(ConanFile):
         tc.variables["YOMM2_SHARED"] = not bool(self.options.header_only)
         tc.generate()
 
+    def _patch_sources(self):
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "add_subdirectory(docs.in)", "")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -105,5 +110,7 @@ class yomm2Recipe(ConanFile):
         if self.options.header_only:
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
-        else:
+        else:  # shared-library
             self.cpp_info.libs = ["yomm2"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.system_libs.append("m")
