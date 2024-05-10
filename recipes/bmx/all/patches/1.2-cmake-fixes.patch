@@ -1,7 +1,16 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index 6fe9540e..4847ba3e 100644
+index 6fe9540e..69909e40 100644
 --- CMakeLists.txt
 +++ CMakeLists.txt
+@@ -34,7 +34,7 @@ if(BUILD_SHARED_LIBS OR NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
+     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ endif()
+ 
+-set(CMAKE_CXX_STANDARD 11)
++#set(CMAKE_CXX_STANDARD 11)
+ 
+ # Set the test samples output directory
+ if(BMX_TEST_SAMPLES_DIR STREQUAL "")
 @@ -93,11 +93,25 @@ add_custom_target(bmx_test_data)
  
  include("${PROJECT_SOURCE_DIR}/cmake/libmxf.cmake")

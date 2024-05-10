@@ -44,14 +44,14 @@ class BmxConan(ConanFile):
     def requirements(self):
         # Required libraries
         self.requires("uriparser/0.9.8")
-        self.requires("expat/2.6.2")
+        self.requires("expat/[>=2.6.2 <3]")
 
         if not (self.settings.os == 'Windows' or self.settings.os == 'Macos'):
             self.requires('libuuid/1.0.3')
 
         # Configuration dependent requirements
         if self.options.with_libcurl:
-            self.requires("libcurl/8.6.0")
+            self.requires("libcurl/[>=7.78.0 <9]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
