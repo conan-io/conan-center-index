@@ -34,9 +34,6 @@ class PlatformFoldersConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
-        if is_msvc(self) and self.options.shared:
-            # See https://github.com/sago007/PlatformFolders/pull/29
-            raise ConanInvalidConfiguration(f"{self.ref} does not support shared libraries with MSVC.")
 
     def config_options(self):
         if self.settings.os == "Windows":
