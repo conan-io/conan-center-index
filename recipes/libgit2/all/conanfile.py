@@ -151,6 +151,8 @@ class LibGit2Conan(ConanFile):
         tc.variables["REGEX_BACKEND"] = self.options.with_regex
         if is_msvc(self):
             tc.variables["STATIC_CRT"] = is_msvc_static_runtime(self)
+        if Version(self.version) >= "1.8.0":
+            tc.variables["USE_SSH"] = "libssh2"
         # REGEX_BACKEND is SET(), avoid options overriding it
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
