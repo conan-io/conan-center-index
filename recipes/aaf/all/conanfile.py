@@ -35,7 +35,7 @@ class AafConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("expat/2.5.0")
+        self.requires("expat/[>=2.6.2 <3]")
         self.requires("libjpeg/9e")
         if self.settings.os in ("FreeBSD", "Linux"):
             self.requires("util-linux-libuuid/2.39")

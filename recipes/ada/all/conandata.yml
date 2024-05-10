@@ -1,4 +1,7 @@
 sources:
+  "2.7.8":
+    url: "https://github.com/ada-url/ada/archive/v2.7.8.tar.gz"
+    sha256: "8de067b7cb3da1808bf5439279aee6048d761ba246bf8a854c2af73b16b41c75"
   "2.7.7":
     url: "https://github.com/ada-url/ada/archive/v2.7.7.tar.gz"
     sha256: "7116d86a80b79886efbc9d946d3919801815060ae62daf78de68c508552af554"
