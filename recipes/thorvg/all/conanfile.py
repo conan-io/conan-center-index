@@ -62,6 +62,7 @@ class ThorvgConan(ConanFile):
         "with_tools": "Enable building thorvg tools",
         "with_examples": "Enable building examples",
     }
+    short_paths = True
 
     @property
     def _min_cppstd(self):
