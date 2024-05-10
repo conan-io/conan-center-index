@@ -52,7 +52,10 @@ class PackageConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_libcrypto == "openssl":
-            self.requires("openssl/[>=1.1 <4]")
+            if self.version == "9.1p1":
+              self.requires("openssl/[>=1.1 <3.2]")
+            else:
+              self.requires("openssl/[>=1.1 <4]")                
         elif self.options.with_libcrypto == "libressl":
             self.requires("libressl/3.9.1")
         if self.options.with_pam == "openpam":
