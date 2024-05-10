@@ -1,0 +1,16 @@
+sources:
+  "1.2":
+    url: "https://github.com/bbc/bmx/archive/refs/tags/v1.2.tar.gz"
+    sha256: "e64d91b2d27478d6b892d72183e1ecf79c99880b079ce04442432f3caed1e259"
+  "cci.20240510":
+    url: "https://github.com/bbc/bmx/archive/38204bbb2637da99c288b61d02c60f1d2d926a7d.tar.gz"
+    sha256: "c2c650461fe4c0bde83e1145a064d6ff4295350246d8c9ee0456b86013dfb79e"
+patches:
+  "1.2":
+    - patch_file: "patches/1.2-cmake-fixes.patch"
+      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
+      patch_type: "conan"
+  "cci.20240510":
+    - patch_file: "patches/1.2-cmake-fixes.patch"
+      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
+      patch_type: "conan"
