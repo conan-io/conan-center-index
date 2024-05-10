@@ -31,6 +31,9 @@ patches:
     - patch_file: "patches/3.10.1-0001-dirs.patch"
       patch_description: "disable documentation features, fix directories"
       patch_type: "conan"
+    - patch_file: "patches/3.10.1-0002-remove-abi-suffixes.patch"
+      patch_description: "remove abi suffixes for MSVC"
+      patch_type: "conan"
   "3.8.1":
     - patch_file: "patches/3.8.1-0001-dirs.patch"
       patch_description: "disable documentation features, fix directories"
