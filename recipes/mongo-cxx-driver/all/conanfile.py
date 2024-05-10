@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rm, rmdir
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 import shutil
 
@@ -129,6 +130,8 @@ class MongoCxxConan(ConanFile):
         if not valid_min_cppstd(self, self._minimal_std_version):
             tc.variables["CMAKE_CXX_STANDARD"] = self._minimal_std_version
         tc.variables["ENABLE_TESTS"] = False
+        if Version(self.version) >= "3.10.1" and is_msvc(self):
+            tc.variables["ENABLE_ABI_TAG_IN_LIBRARY_FILENAMES"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
