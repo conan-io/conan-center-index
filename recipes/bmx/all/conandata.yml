@@ -13,6 +13,7 @@ patches:
     - patch_file: "patches/1.2-fix-cpp20.patch"
       patch_description: "Fix a compilation problem with C++20"
       patch_type: "portability"
+      patch_source: "https://github.com/bbc/bmx/pull/69"
   "cci.20240510":
     - patch_file: "patches/1.2-cmake-fixes.patch"
       patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
@@ -20,3 +21,4 @@ patches:
     - patch_file: "patches/1.2-fix-cpp20.patch"
       patch_description: "Fix a compilation problem with C++20"
       patch_type: "portability"
+      patch_source: "https://github.com/bbc/bmx/pull/69"
