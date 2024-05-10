@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
-from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, cmake_layout
 import os
@@ -24,7 +23,7 @@ class ConfuJson(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "20" if Version(self.version) < "1.0.0" else "17"
+        return "17"
 
     @property
     def _compilers_minimum_version(self):
@@ -57,17 +56,11 @@ class ConfuJson(ConanFile):
         if self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration("apple-clang is not supported. Pull request welcome. ")
 
-        if self.settings.compiler == "gcc" and Version(self.version) < "1.0.0":
-            raise ConanInvalidConfiguration("gcc is only supported in versions greater than or equal 1.0.0.")
-
-        if is_msvc(self) and Version(self.version) < "0.0.9":
-            raise ConanInvalidConfiguration("Visual Studio is not supported in versions before confu_json/0.0.9")
-
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+        
+        if Version(self.settings.compiler.version) < self._min_cppstd:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
