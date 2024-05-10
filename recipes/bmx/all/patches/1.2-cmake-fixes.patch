@@ -45,7 +45,7 @@ diff --git src/CMakeLists.txt src/CMakeLists.txt
 index 1c0824d8..ed95310a 100644
 --- src/CMakeLists.txt
 +++ src/CMakeLists.txt
-@@ -65,13 +65,13 @@ target_link_libraries(bmx
+@@ -65,13 +65,14 @@ target_link_libraries(bmx
          ${MXFpp_link_lib}
      PRIVATE
          ${uuid_link_lib}
@@ -56,8 +56,10 @@ index 1c0824d8..ed95310a 100644
  )
  
  if(BMX_BUILD_WITH_LIBCURL)
-     target_link_libraries(bmx PRIVATE
+-    target_link_libraries(bmx PRIVATE
 -        ${libcurl_link_lib}
++    # Linking public to see if the shared library for curls dependencies correctly link
++    target_link_libraries(bmx PUBLIC
 +        CURL::libcurl
      )
  endif()
