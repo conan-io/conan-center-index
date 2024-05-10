@@ -814,7 +814,7 @@ class QtConan(ConanFile):
         rm(self, "*.la*", os.path.join(self.package_folder, "lib"), recursive=True)
         rm(self, "*.pdb*", self.package_folder, recursive=True)
         rm(self, "ensure_pro_file.cmake", self.package_folder, recursive=True)
-        os.remove(os.path.join(self.package_folder, "libexec" if Version(self.version) >= "6.5.0" else "bin", "qt-cmake-private-install.cmake"))
+        os.remove(os.path.join(self.package_folder, "libexec" if Version(self.version) >= "6.5.0" and self.settings.os != "Windows" else "bin", "qt-cmake-private-install.cmake"))
 
         for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
             if os.path.isfile(os.path.join(self.package_folder, "lib", "cmake", m, f"{m}Macros.cmake")):
