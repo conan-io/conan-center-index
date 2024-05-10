@@ -45,6 +45,9 @@ class PlatformFoldersConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if is_msvc(self):
+            self.package_type = "static-library"
+            del self.options.shared
 
     def layout(self):
         cmake_layout(self, src_folder="src")
