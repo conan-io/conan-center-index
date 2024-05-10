@@ -21,12 +21,14 @@ class SVTAV1Conan(ConanFile):
         "fPIC": [True, False],
         "build_encoder": [True, False],
         "build_decoder": [True, False],
+        "minimal_build": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "build_encoder": True,
         "build_decoder": True,
+        "minimal_build": False,
     }
 
     def export_sources(self):
@@ -35,6 +37,8 @@ class SVTAV1Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
+        if Version(self.version) < "2.0.0":
+            del self.options.minimal_build
 
     def configure(self):
         if self.options.shared:
@@ -63,6 +67,7 @@ class SVTAV1Conan(ConanFile):
         tc.variables["USE_EXTERNAL_CPUINFO"] = True
         if self.settings.arch in ("x86", "x86_64"):
             tc.variables["ENABLE_NASM"] = True
+        tc.variables["MINIMAL_BUILD"] = self.options.get_safe("minimal_build", False)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
