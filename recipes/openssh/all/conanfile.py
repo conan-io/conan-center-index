@@ -66,7 +66,7 @@ class PackageConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        if self.version == "9.1p1":
+        if self.version in ["9.1p1", "9.6p1"]:
             # Backport configure script fix to accept OpenSSL versions in the 3.x series
             # See https://github.com/openssh/openssh-portable/commit/2eded551ba96e66bc3afbbcc883812c2eac02bd7
             replace_in_file(self, join(self.source_folder, "configure"), "300*", "30*")
