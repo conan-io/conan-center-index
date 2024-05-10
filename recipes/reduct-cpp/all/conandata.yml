@@ -13,3 +13,6 @@ patches:
     - patch_file: "patches/1.9.0-0003-fix-spaceship-operator.patch"
       patch_description: "fix spaceship operator for msvc"
       patch_type: "portability"
+    - patch_file: "patches/1.9.0-0004-date-parse.patch"
+      patch_description: "fix ambiguous parse calls"
+      patch_type: "portability"
