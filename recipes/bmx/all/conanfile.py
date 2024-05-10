@@ -65,7 +65,9 @@ class BmxConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["BMX_BUILD_WITH_LIBCURL"] = self.options.with_libcurl
         tc.generate()
+
         cd = CMakeDeps(self)
         cd.generate()
 
