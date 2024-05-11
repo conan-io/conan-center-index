@@ -1,17 +1,17 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index a5fed05..d077b96 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -6,7 +6,7 @@ endif()
+diff --git CMakeLists.txt CMakeLists.txt
+index b086352..91d3165 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -9,8 +9,6 @@ endif()
  
- project(AvCpp LANGUAGES CXX VERSION 2.0.99)
+ project(AvCpp LANGUAGES CXX VERSION ${AVCPP_VERSION})
  
 -set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
-+# set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
- 
+-
  set(FFMPEG_PKG_CONFIG_SUFFIX "" CACHE STRING "This suffix uses for FFmpeg component names searches by pkg-config")
  set(AV_ENABLE_STATIC On CACHE BOOL "Enable static library build (On)")
-@@ -28,8 +28,8 @@ set (AVCPP_WARNING_OPTIONS
+ set(AV_ENABLE_SHARED On CACHE BOOL "Enable shared library build (On)")
+@@ -31,8 +29,8 @@ set (AVCPP_WARNING_OPTIONS
  set(THREADS_PREFER_PTHREAD_FLAG ON)
  find_package(Threads)
  
@@ -22,20 +22,20 @@ index a5fed05..d077b96 100644
  
  add_subdirectory(src)
  
-diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 80c6faa..262c16c 100644
---- a/src/CMakeLists.txt
-+++ b/src/CMakeLists.txt
-@@ -24,7 +24,7 @@ foreach(TARGET ${AV_TARGETS})
-     add_library(${TARGET} ${TYPE} ${AV_SOURCES} ${AV_HEADERS})
+diff --git src/CMakeLists.txt src/CMakeLists.txt
+index 3c00150..c3818cf 100644
+--- src/CMakeLists.txt
++++ src/CMakeLists.txt
+@@ -29,7 +29,7 @@ foreach(TARGET ${AV_TARGETS})
  
      target_compile_options(${TARGET} PRIVATE ${AVCPP_WARNING_OPTIONS})
+     target_compile_definitions(${TARGET} PUBLIC __STDC_CONSTANT_MACROS)
 -    target_link_libraries(${TARGET} PRIVATE Threads::Threads PUBLIC FFmpeg::FFmpeg)
 +    target_link_libraries(${TARGET} PRIVATE Threads::Threads PUBLIC ffmpeg::ffmpeg)
      target_include_directories(${TARGET}
          PUBLIC
            $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>
-@@ -53,7 +53,7 @@ if (AVCPP_NOT_SUBPROJECT)
+@@ -58,7 +58,7 @@ if (AVCPP_NOT_SUBPROJECT)
      #    APPEND
      #    FILE ${CMAKE_CURRENT_BINARY_DIR}/avcpp-targets.cmake)
  
