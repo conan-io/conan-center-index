@@ -25,29 +25,12 @@ class ConfuJson(ConanFile):
     def _min_cppstd(self):
         return "17"
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "17": {
-                "Visual Studio": "17",
-                "msvc": "193",
-                "gcc": "7",
-                "clang": "7",
-            },
-            "20": {
-                "Visual Studio": "17",
-                "msvc": "193",
-                "gcc": "10",
-                "clang": "10",
-            },
-        }.get(self._min_cppstd, {})
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.84.0")
-        self.requires("magic_enum/[>=0.9.5 <10]")
+        self.requires("boost/1.85.0")
+        self.requires("magic_enum/0.9.5")
 
     def package_id(self):
         self.info.clear()
@@ -55,15 +38,9 @@ class ConfuJson(ConanFile):
     def validate(self):
         if self.settings.compiler == "apple-clang":
             raise ConanInvalidConfiguration("apple-clang is not supported. Pull request welcome. ")
-
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
-        
-        if Version(self.settings.compiler.version) < self._min_cppstd:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
