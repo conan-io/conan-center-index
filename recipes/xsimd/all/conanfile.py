@@ -59,8 +59,8 @@ class XsimdConan(ConanFile):
         # TODO: There are compilation errors on apple-clang/13.0.0 with cppstd=17
         if self.settings.compiler == "apple-clang" and \
             Version(self.settings.compiler.version).major <= "13" and \
-            self.settings.compiler.get_safe("cppstd") in ["17", "gnu17"]:
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support apple-clang 13 with cppstd=17")
+            self.settings.compiler.get_safe("cppstd") in ["17", "gnu17", "20", "gnu20",]:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support apple-clang 13 with cppstd=17 or later")
 
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
