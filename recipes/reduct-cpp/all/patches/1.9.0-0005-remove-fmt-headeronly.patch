@@ -13,3 +13,16 @@ index b714389..3e81279 100644
  #if CONAN
  #include <moodycamel/concurrentqueue.h>
  #else
+diff --git a/src/reduct/error.cc b/src/reduct/error.cc
+index 2a5dbb4..de7c153 100644
+--- a/src/reduct/error.cc
++++ b/src/reduct/error.cc
+@@ -1,7 +1,7 @@
+ // Copyright 2022 Alexey Timin
+ 
+ #include "reduct/error.h"
+-#define FMT_HEADER_ONLY 1
++// #define FMT_HEADER_ONLY 1
+ #include <fmt/core.h>
+ 
+ namespace reduct {
