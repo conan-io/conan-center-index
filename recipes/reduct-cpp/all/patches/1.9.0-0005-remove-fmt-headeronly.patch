@@ -1,0 +1,15 @@
+diff --git a/src/reduct/bucket.cc b/src/reduct/bucket.cc
+index b714389..3e81279 100644
+--- a/src/reduct/bucket.cc
++++ b/src/reduct/bucket.cc
+@@ -1,8 +1,9 @@
+ // Copyright 2022-2023 Alexey Timin
+ 
+ #include "reduct/bucket.h"
+-#define FMT_HEADER_ONLY 1
++// #define FMT_HEADER_ONLY 1
+ #include <fmt/core.h>
++#include <fmt/format.h>
+ #if CONAN
+ #include <moodycamel/concurrentqueue.h>
+ #else
