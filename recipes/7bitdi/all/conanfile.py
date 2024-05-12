@@ -51,7 +51,6 @@ class SevenBitDIConan(ConanFile):
             self.options.rm_safe("fPIC")
         if self.options.header_only:
             self.options.rm_safe("shared")
-            self.package_type = "header-library"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
