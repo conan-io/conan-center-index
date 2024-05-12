@@ -1,0 +1,48 @@
+sources:
+  "0.19.4.1":
+    binaries:
+      Linux:
+        "x86_64":
+          Release:
+            url: "https://github.com/gfx-rs/wgpu-native/releases/download/v0.19.4.1/wgpu-linux-x86_64-release.zip"
+            sha256: "7d73bd7af2be60b632e5ab814996acb381d1b459975d6629f91c468049c8866a"
+          Debug:
+            url: "https://github.com/gfx-rs/wgpu-native/releases/download/v0.19.4.1/wgpu-linux-x86_64-debug.zip"
+            sha256: "1feb5419a84eb2a5710b5686b8f8c30c70f24cea5c39774853c2c5406a3857fd"
+        "armv8":
+          Release:
+            url: "https://github.com/gfx-rs/wgpu-native/releases/download/v0.19.4.1/wgpu-linux-aarch64-release.zip"
+            sha256: "6e53aa3f0aec4b2b65cb0d7635000cf39bddd672bcb6138a593bf8cb8134f621"
+          Debug:
+            url: "https://github.com/gfx-rs/wgpu-native/releases/download/v0.19.4.1/wgpu-linux-aarch64-debug.zip"
+            sha256: "0b0598c2dda670c9c02379ba23d3ab36a6a4d4b113ba916419f92a7e7618ebee"
+      Windows:
+        "x86_64":
+          Release:
+            url: "https://github.com/gfx-rs/wgpu-native/releases/download/v0.19.4.1/wgpu-windows-x86_64-release.zip"
+            sha256: "9e1591d60c2d2ee20d6d4a63bc01c7c5eecf7734761673160aa639e550a1ba4d"
+          Debug:
+            url: "https://github.com/gfx-rs/wgpu-native/releases/download/v0.19.4.1/wgpu-windows-x86_64-debug.zip"
+            sha256: "cac41053da833f7f40ba56fb58561ee66a373cb2e96f1658b243b7edfa3b8767"
+      Macos:
+        "x86_64":
+          Release:
+            url: "https://github.com/gfx-rs/wgpu-native/releases/download/v0.19.4.1/wgpu-macos-x86_64-release.zip"
+            sha256: "e41a35bf4f2b1c7dd87092cfcb932b7a96118971129a6213b7be240deb07e614"
+          Debug:
+            url: "https://github.com/gfx-rs/wgpu-native/releases/download/v0.19.4.1/wgpu-macos-x86_64-debug.zip"
+            sha256: "e0f4628ce95f98295079fa6c35545d1c60fa6e82e9c7dcc5f07d35b5b1898346"
+        "armv8":
+          Release:
+            url: "https://github.com/gfx-rs/wgpu-native/releases/download/v0.19.4.1/wgpu-macos-aarch64-release.zip"
+            sha256: "21cf8e69a4a775ea63f437f170a93e371df0f72c83119c81c25a668611c1771d"
+          Debug:
+            url: "https://github.com/gfx-rs/wgpu-native/releases/download/v0.19.4.1/wgpu-macos-aarch64-debug.zip"
+            sha256: "f8f93d888f4f9d2d7252a638e9c8f432ef0125f436c4b6735ce91dcfbd64c676"
+    licenses:
+      mit:
+        url: https://raw.githubusercontent.com/gfx-rs/wgpu-native/v0.19.4.1/LICENSE.MIT
+        sha256: "C7FEA58D1CFE49634CD92E54FC10A9D871F4B275321A4CD8C09E449122CAAEB4"
+      apache:
+        url: https://raw.githubusercontent.com/gfx-rs/wgpu-native/v0.19.4.1/LICENSE.APACHE
+        sha256: "A6CBA85BC92E0CFF7A450B1D873C0EAA2E9FC96BF472DF0247A26BEC77BF3FF9"
