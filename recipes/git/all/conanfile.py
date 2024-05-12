@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import get, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -42,50 +43,72 @@ class PackageConan(ConanFile):
         # might need perl
 
     def build_requirements(self):
-        self.tool_requires("gettext/0.22.5")
-        if self._settings_build.os == "Windows":
-            self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-                self.tool_requires("msys2/cci.latest")
+        if not is_msvc(self):
+            self.tool_requires("gettext/0.22.5")
     
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
+        if is_msvc(self):
+            tc = CMakeToolchain(self)
+            # FIXME
+            tc.generator = "Ninja"
+            tc.generate()
 
-        env = Environment()
-        def package_folder_of(lib): return self.dependencies[lib].package_folder.replace('\\', '/')
-        env.define("ZLIB_PATH", package_folder_of('zlib'))
-        env.define("EXPATDIR", package_folder_of('expat'))
-        env.define("CURLDIR", package_folder_of('libcurl'))
-        env.define("LIBPCREDIR", package_folder_of('pcre2'))
-        env.define("OPENSSLDIR", package_folder_of('openssl'))
-        env.define("ICONVDIR", package_folder_of('libiconv'))
-        env.define("MSVC", "1")
-        env.define("SKIP_VCPKG", "1")
+            deps = CMakeDeps(self)
+            deps.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
 
-        env.vars(self).save_script("conanbuild_msvc")
+            env = Environment()
+            def package_folder_of(lib): return self.dependencies[lib].package_folder.replace('\\', '/')
+            env.define("ZLIB_PATH", package_folder_of('zlib'))
+            env.define("EXPATDIR", package_folder_of('expat'))
+            env.define("CURLDIR", package_folder_of('libcurl'))
+            env.define("LIBPCREDIR", package_folder_of('pcre2'))
+            env.define("OPENSSLDIR", package_folder_of('openssl'))
+            env.define("ICONVDIR", package_folder_of('libiconv'))
 
-        tc = AutotoolsToolchain(self)
-        tc.generate()
+            env.vars(self).save_script("conanbuild_msvc")
+
+            tc = AutotoolsToolchain(self)
+            tc.generate()
 
     def build(self):
-        os.chdir(self.source_folder)
-        replace_in_file(self, os.path.join(self.source_folder, "git-compat-util.h"), '#error "Required C99 support is in a test phase.', '//')
-        autotools = Autotools(self)
-        # Probably will never be needed for the sake of a Conan recipe.
-        # TODO: Is there a cleaner way to do this?
-        os.environ["NO_GITWEB"] = "1"
-        autotools.make()
+        if is_msvc(self):
+            cmake_directory = os.path.join(self.source_folder, "contrib", "buildsystems")
+            cmake_file = os.path.join(cmake_directory, "CMakeLists.txt")
+            replace_in_file(self, cmake_file, "${EXPAT_LIBRARIES}", "expat::expat")
+
+            replace_in_file(self, cmake_file, "if(EXPAT_VERSION_STRING VERSION_LESS_EQUAL 1.2)", "if(FALSE)")
+            cmake = CMake(self)
+            cmake.configure(
+                build_script_folder=cmake_directory,
+                # USE_VCPKG is checked before project(), so it can't be injected from the toolchain.
+                cli_args=["-DUSE_VCPKG=OFF"],
+                
+            )
+            cmake.build()
+        else:
+            os.chdir(self.source_folder)
+            replace_in_file(self, os.path.join(self.source_folder, "git-compat-util.h"), '#error "Required C99 support is in a test phase.', '//')
+            autotools = Autotools(self)
+            # Probably will never be needed for the sake of a Conan recipe.
+            # TODO: Is there a cleaner way to do this?
+            os.environ["NO_GITWEB"] = "1"
+            autotools.make()
 
     def package(self):
-        os.chdir(self.source_folder)
-        autotools = Autotools(self)
-        autotools.install()
-
-        # "share" folder exists, but is probably fine to keep *no large files). Will investigate the contents.
+        if is_msvc(self):
+            cmake = CMake(self)
+            cmake.install()
+        else:
+            os.chdir(self.source_folder)
+            autotools = Autotools(self)
+            autotools.install()
+            # "share" folder exists, but is probably fine to keep *no large files). Will investigate the contents.
 
     def package_id(self):
         # Just an application
