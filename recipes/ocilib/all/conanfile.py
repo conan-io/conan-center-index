@@ -12,7 +12,7 @@ class OCILIBConan(ConanFile):
     description = "An open source and cross platform Oracle Driver that delivers efficient access to Oracle databases."
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://vrogier.github.io/ocilib/"
+    homepage = "https://github.com/vrogier/ocilib"
     topics = ("database", "db", "sql", "oracle")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -31,7 +31,7 @@ class OCILIBConan(ConanFile):
 
     def validate(self):
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("This Conan recipe is only supported for Linux!")
+            raise ConanInvalidConfiguration(f"{self.ref} recipe only supports Linux for now. Pull requests to add new configurtations are welcomed.")
         # TODO: Check support for other platforms
 
     def configure(self):
@@ -66,3 +66,4 @@ class OCILIBConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["ocilib"]
+        self.cpp_info.system_libs("dl")
