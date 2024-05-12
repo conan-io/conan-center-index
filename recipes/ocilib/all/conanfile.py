@@ -66,4 +66,4 @@ class OCILIBConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["ocilib"]
-        self.cpp_info.system_libs("dl")
+        self.cpp_info.system_libs.append("dl")
