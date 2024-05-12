@@ -175,13 +175,17 @@ class LibrsvgConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
-        # In shared lib/executable files, meson set install_name (macOS) to lib dir absolute path instead of @rpath, it's not relocatable, so fix it
         fix_apple_shared_install_name(self)
+        fix_msvc_libname(self)
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "librsvg")
+        self.cpp_info.set_property("cmake_target_name", "librsvg::librsvg")
         self.cpp_info.libs = ["librsvg"]
+        #self.cpp_info.components["librsvg"].libs = ["rsvg"]
         # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
-        self.cpp_info.set_property("pkg_config_name", "librsvg-2")
+        self.cpp_info.set_property("pkg_config_name", "librsvg-2.0")
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
@@ -195,3 +199,20 @@ class LibrsvgConan(ConanFile):
             # unsure about this, package seems to be broken anyway
         if self.options.with_vapigen:
             pass
+
+# stolen from the libvips recipe
+def fix_msvc_libname(conanfile, remove_lib_prefix=True):
+    """remove lib prefix & change extension to .lib in case of cl like compiler"""
+    from conan.tools.files import rename
+    import glob
+    if not conanfile.settings.get_safe("compiler.runtime"):
+        return
+    libdirs = getattr(conanfile.cpp.package, "libdirs")
+    for libdir in libdirs:
+        for ext in [".dll.a", ".dll.lib", ".a"]:
+            full_folder = os.path.join(conanfile.package_folder, libdir)
+            for filepath in glob.glob(os.path.join(full_folder, f"*{ext}")):
+                libname = os.path.basename(filepath)[0:-len(ext)]
+                if remove_lib_prefix and libname[0:3] == "lib":
+                    libname = libname[3:]
+                rename(conanfile, filepath, os.path.join(os.path.dirname(filepath), f"{libname}.lib"))
