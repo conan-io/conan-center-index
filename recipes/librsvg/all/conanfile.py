@@ -182,7 +182,7 @@ class LibrsvgConan(ConanFile):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "librsvg")
         self.cpp_info.set_property("cmake_target_name", "librsvg::librsvg")
-        self.cpp_info.libs = ["librsvg"]
+        self.cpp_info.libs = ["rsvg-2"]
         #self.cpp_info.components["librsvg"].libs = ["rsvg"]
         # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
         self.cpp_info.set_property("pkg_config_name", "librsvg-2.0")
