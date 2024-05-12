@@ -56,7 +56,8 @@ class ZziplibConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        if Version(self.version) < "0.13.74":
+            tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["ZZIPCOMPAT"] = self.settings.os != "Windows"
         tc.variables["ZZIPMMAPPED"] = self.options.zzipmapped
         tc.variables["ZZIPFSEEKO"] = self.options.zzipfseeko
@@ -65,6 +66,8 @@ class ZziplibConan(ConanFile):
         tc.variables["ZZIPBINS"] = False
         tc.variables["ZZIPTEST"] = False
         tc.variables["ZZIPDOCS"] = False
+        if Version(self.version) >= "0.13.74":
+            tc.variables["ZZIP_LIBLATEST"] = False
         # For msvc shared
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
