@@ -79,21 +79,21 @@ class LibrsvgConan(ConanFile):
 
     def layout(self):
         # src_folder must use the same source folder name the project
-        basic_layout(self, src_folder="src")
+        basic_layout(self, src_folder="rsvg")
 
     def requirements(self):
         # prefer self.requires method instead of requires attribute
-        self.requires("cairo/1.18.0")
+        self.requires("cairo/1.18.0", transitive_headers=True, transitive_libs=True)
         self.requires("dav1d/1.3.0")
         self.requires("freetype/2.13.2")
-        self.requires("glib/2.78.3")
+        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         self.requires("harfbuzz/8.3.0")
         self.requires("libxml2/2.12.6")
         self.requires("pango/1.51.0")
         self.requires("fontconfig/2.15.0")
 
         if self.options.with_gdk_pixbuf:
-            self.requires("gdk-pixbuf/2.42.10")
+            self.requires("gdk-pixbuf/2.42.10", transitive_headers=True, transitive_libs=True)
         if self.options.with_gidocgen:
             pass  # self.requires("...")
         if self.options.with_introspection:
@@ -114,27 +114,20 @@ class LibrsvgConan(ConanFile):
             )
 
     def build_requirements(self):
-        # CCI policy assumes that Meson may not be installed on consumers machine
         self.tool_requires("meson/[>1.2.0]")
-        # pkgconf is largely used by Meson, it should be added in build requirement when there are dependencies
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.0.3")
+        # TODO add rustc
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        # Meson feature options must be set to "enabled" or "disabled"
         feature = lambda option: "enabled" if option else "disabled"
         true_false = lambda option: True if option else False
 
-        # default_library and b_staticpic are automatically parsed when self.options.shared and self.options.fpic exist
-        # buildtype is automatically parsed for self.settings
         tc = MesonToolchain(self)
 
-        # Meson features are typically enabled automatically when possible.
-        # The default behavior can be changed to disable all features by setting "auto_features" to "disabled".
-        # tc.project_options["auto_features"] = "disabled"
         tc.project_options["introspection"] = feature(self.options.get_safe("introspection"))
         tc.project_options["docs"] = feature(self.options.get_safe("docs"))
         tc.project_options["vala"] = feature(self.options.get_safe("vala"))
@@ -187,7 +180,6 @@ class LibrsvgConan(ConanFile):
             os.path.join("include", "librsvg-2.0"),
         ]
 
-        # https://gitlab.gnome.org/GNOME/librsvg/-/blob/2.57.0/configure.ac#L161-173
         self.cpp_info.requires = [
             "cairo::cairo_",
             "cairo::cairo-png",
@@ -210,6 +202,8 @@ class LibrsvgConan(ConanFile):
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
+        if is_msvc(self):
+            self.cpp_info.system_libs += ["ntdll", "userenv.lib"]
 
         if self.options.with_gdk_pixbuf:
             self.cpp_info.requires += ["gdk-pixbuf::gdk-pixbuf"]
