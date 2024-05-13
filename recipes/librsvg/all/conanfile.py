@@ -86,10 +86,11 @@ class LibrsvgConan(ConanFile):
         self.requires("cairo/1.18.0")
         self.requires("dav1d/1.3.0")
         self.requires("freetype/2.13.2")
-        self.requires("glib/2.78.3")  # I think this includes gio?
+        self.requires("glib/2.78.3")
         self.requires("harfbuzz/8.3.0")
         self.requires("libxml2/2.12.6")
         self.requires("pango/1.51.0")
+        self.requires("fontconfig/2.15.0")
 
         if self.options.with_gdk_pixbuf:
             self.requires("gdk-pixbuf/2.42.10")
@@ -178,13 +179,31 @@ class LibrsvgConan(ConanFile):
         fix_msvc_libname(self)
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_file_name", "librsvg")
-        self.cpp_info.set_property("cmake_target_name", "librsvg::librsvg")
+        #self.cpp_info.set_property("cmake_find_mode", "both")
+        #self.cpp_info.set_property("cmake_file_name", "librsvg")
+        #self.cpp_info.set_property("cmake_target_name", "librsvg::librsvg")
         self.cpp_info.libs = ["rsvg-2"]
         self.cpp_info.includedirs += [
             os.path.join("include", "librsvg-2.0"),
         ]
+
+        # https://gitlab.gnome.org/GNOME/librsvg/-/blob/2.57.0/configure.ac#L161-173
+        self.cpp_info.requires = [
+            "cairo::cairo_",
+            "cairo::cairo-png",
+            "cairo::cairo-gobject",
+            "fontconfig::fontconfig",
+            "freetype::freetype",
+            "glib::gio-2.0",
+            "glib::glib-2.0",
+            "glib::gobject-2.0",
+            "harfbuzz::harfbuzz",
+            "libxml2::libxml2",
+            "pango::pangocairo",
+            "pango::pangoft2",
+            "dav1d::dav1d",
+        ]
+
         #self.cpp_info.components["librsvg"].libs = ["rsvg"]
         # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
         self.cpp_info.set_property("pkg_config_name", "librsvg-2.0")
@@ -193,7 +212,7 @@ class LibrsvgConan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
 
         if self.options.with_gdk_pixbuf:
-            self.cpp_info.components["librsvg"].requires.append("gdk-pixbuf::gdk-pixbuf")
+            self.cpp_info.requires += ["gdk-pixbuf::gdk-pixbuf"]
         if self.options.with_gidocgen:
             pass
         if self.options.with_introspection:
