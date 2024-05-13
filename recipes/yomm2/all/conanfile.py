@@ -112,5 +112,5 @@ class yomm2Recipe(ConanFile):
             self.cpp_info.libdirs = []
         else:  # shared-library
             self.cpp_info.libs = ["yomm2"]
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs.append("m")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
