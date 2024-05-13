@@ -1,0 +1,7 @@
+sources:
+  "0.2.3":
+    url: "https://github.com/petiaccja/asyncpp/archive/refs/tags/v0.2.3.tar.gz"
+    sha256: "0787FC918674D1C3775C0EEAB563FF36B2BB735BC4CA6CD74EC8ECBBDA772139"
+  "0.2.2":
+    url: "https://github.com/petiaccja/asyncpp/archive/refs/tags/v0.2.2.tar.gz"
+    sha256: "C5F1BBED7FD0A0B1FA76326BAB136644F338DEDBAA36AB7D0AEE711DE9604F1A"
