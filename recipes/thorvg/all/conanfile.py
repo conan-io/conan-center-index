@@ -138,7 +138,6 @@ class ThorvgConan(ConanFile):
             "examples": bool(self.options.with_examples),
             "tests": False,
             "log": is_debug,
-            "static": True,
         })
         # Workaround to avoid: error D8016: '/O1' and '/RTC1' command-line options are incompatible
         if is_msvc(self) and is_debug:
