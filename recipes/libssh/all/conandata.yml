@@ -7,3 +7,10 @@ patches:
     - patch_file: patches/0.10.6-0001-fix-cmake.patch
       patch_description: "cmake: fix OpenSSL compatibility checks, fix ZLIB targets"
       patch_type: "conan"
+    - patch_file: patches/0.10.6-0002-fix-cmake.patch
+      patch_description: "cmake: fix MbedTLS and GCrypt compatibility"
+      patch_type: "conan"
+    - patch_file: patches/0.10.6-0003-fix-mbedtls-private-struct.patch
+      patch_description: "Fix mbedTLS issues caused by v3 API changes"
+      patch_type: "bugfix"
+      patch_source: "https://gitlab.com/libssh/libssh-mirror/-/merge_requests/480"

@@ -189,7 +189,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.25.0")
+            self.requires("c-ares/[>=1.27 <2]")
         if self.options.get_safe("with_libpsl"):
             self.requires("libpsl/0.21.1")
 
@@ -682,6 +682,7 @@ class LibcurlConan(ConanFile):
                 self.cpp_info.components["curl"].system_libs.append("crypt32")
         elif is_apple_os(self):
             self.cpp_info.components["curl"].frameworks.append("CoreFoundation")
+            self.cpp_info.components["curl"].frameworks.append("CoreServices")
             self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("ldap")
