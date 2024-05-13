@@ -13,7 +13,6 @@ class TestPackageLibrsvg(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        print(f"################################{self.tested_reference_str}#######################")
         self.requires(self.tested_reference_str)
 
     def build(self):

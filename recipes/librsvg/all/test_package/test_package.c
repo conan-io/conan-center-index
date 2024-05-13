@@ -1,3 +1,5 @@
+#include "zlib.h"
+#include "glib-2.0/glib-object.h"
 #include <librsvg/rsvg.h>
 
 int main() {
