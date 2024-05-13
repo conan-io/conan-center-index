@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
-from conan.tools.files import get, replace_in_file, rmdir
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 import os
@@ -86,14 +86,14 @@ class PackageConan(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         # Contains mainly perl scripts an examples, otherwise is actually rather small
         rmdir(self, os.path.join(self.package_folder, "share"))
-        # Contains many exectuables which are near duplicates of `git`, presumably with pre-configured command line args.
-        # Greatly bloats the package size.
+        # Contains many executables which are near duplicates of `git`, presumably with pre-configured command line args.
+        # Greatly bloats the package size. These are also packaged on normal distributions, but often separately. Unsure of their purpose.
         rmdir(self, os.path.join(self.package_folder, "libexec"))
-        # Only the executables in `bin` seem to be executables normally installed, at least on Ubuntu 22.04 with apt.
 
     def package_id(self):
         # Just an application
