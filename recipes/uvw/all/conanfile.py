@@ -38,6 +38,7 @@ class UvwConan(ConanFile):
     @property
     def _required_libuv_version(self):
         return {
+            "3.4.0": "1.48.0",
             "3.3.0": "1.47.0",
             "3.2.0": "1.46.0",
             "3.1.0": "1.45.0",
