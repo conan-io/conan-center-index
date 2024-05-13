@@ -112,7 +112,6 @@ class LibrsvgConan(ConanFile):
                 f"{self.ref} static with MT runtime not supported if glib shared due to conancenter CI limitations"
             )
 
-    # if another tool than the compiler or Meson is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         # CCI policy assumes that Meson may not be installed on consumers machine
         self.tool_requires("meson/[>1.2.0]")
@@ -183,6 +182,9 @@ class LibrsvgConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "librsvg")
         self.cpp_info.set_property("cmake_target_name", "librsvg::librsvg")
         self.cpp_info.libs = ["rsvg-2"]
+        self.cpp_info.includedirs += [
+            os.path.join("include", "librsvg-2.0"),
+        ]
         #self.cpp_info.components["librsvg"].libs = ["rsvg"]
         # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
         self.cpp_info.set_property("pkg_config_name", "librsvg-2.0")
