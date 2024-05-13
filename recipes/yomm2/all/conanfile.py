@@ -12,7 +12,7 @@ required_conan_version = ">=1.54.0"
 
 class yomm2Recipe(ConanFile):
     name = "yomm2"
-    package_type = "shared-library"
+    package_type = "header-library"
     # Optional metadata
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
@@ -26,7 +26,7 @@ class yomm2Recipe(ConanFile):
         "header_only": [True, False],
     }
     default_options = {
-        "header_only": False
+        "header_only": True
     }
 
     @property
@@ -43,8 +43,8 @@ class yomm2Recipe(ConanFile):
         }
 
     def configure(self):
-        if self.options.header_only:
-            self.package_type = "header-library"
+        if not bool(self.options.header_only):
+            self.package_type = "shared-library"
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
