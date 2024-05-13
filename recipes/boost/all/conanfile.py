@@ -265,7 +265,7 @@ class BoostConan(ConanFile):
             return valid_min_cppstd(self, 11)
         compiler_version = self._min_compiler_version_default_cxx11
         if compiler_version:
-            return (Version(self.settings.compiler.version) >= compiler_version) or "11" in supported_cppstd(self)
+            return (Version(self.settings.compiler.version) >= compiler_version) and "11" in supported_cppstd(self)
 
     @property
     def _has_cppstd_14_supported(self):
