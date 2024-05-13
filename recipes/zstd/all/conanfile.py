@@ -54,8 +54,6 @@ class ZstdConan(ConanFile):
         tc.variables["ZSTD_BUILD_STATIC"] = not self.options.shared or self.options.build_programs
         tc.variables["ZSTD_BUILD_SHARED"] = self.options.shared
         tc.variables["ZSTD_MULTITHREAD_SUPPORT"] = self.options.threading
-        #if not is_msvc(self):
-        #    tc.variables["CMAKE_C_FLAGS"] = "-Wno-maybe-uninitialized"
         tc.generate()
 
     def _patch_sources(self):
