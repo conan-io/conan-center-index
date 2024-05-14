@@ -1,32 +1,14 @@
-#include <cstdio>
-#include <cstdlib>
 #include <iostream>
 
-#include <artery-font/std-artery-font.h>
-#include <artery-font/stdio-serialization.h>
+#include <artery-font/structures.h>
 
 int main(int argc, char *argv[]) {
-  if (argc < 2) {
-      std::cerr << "usage: test_package <arfont file>\n";
-      return EXIT_FAILURE;
-  }
+    artery_font::KernPair<float> kp;
+    kp.codepoint1 = 65; // ASCII value for 'A'
+    kp.codepoint2 = 66; // ASCII value for 'B'
+    kp.advance.h = 1.0f;
+    kp.advance.v = 0.0f;
+    std::cout << "Test: " << sizeof(kp) << std::endl;
 
-  FILE *const font_file = fopen(argv[1], "rb");
-  if (font_file == nullptr) {
-    std::cerr << "couldn't open font file" << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  artery_font::StdArteryFont<float> font;
-  if (!artery_font::read(font, font_file)) {
-    std::cerr << "couldn't read artery font" << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  if (fclose(font_file) != 0) {
-    std::cerr << "an error occured when closing font file" << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
