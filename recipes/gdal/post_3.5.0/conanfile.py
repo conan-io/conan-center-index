@@ -189,7 +189,7 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
-            self.requires("arrow/15.0.0")
+            self.requires("arrow/16.0.0")
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
@@ -228,7 +228,7 @@ class GdalConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/3.0.1")
         if self.options.with_jxl:
             # 0.9+ is not compatible as of v3.8.4
             self.requires("libjxl/0.8.2")
