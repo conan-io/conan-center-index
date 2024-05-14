@@ -10,7 +10,7 @@ required_conan_version = ">=1.53.0"
 class TidwallNecoConan(ConanFile):
     name = "tidwall-neco"
     description = "Concurrency library for C (coroutines)"
-    license = "MIT",
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/tidwall/neco"
     topics = ("coroutine", "concurrency", "network")
