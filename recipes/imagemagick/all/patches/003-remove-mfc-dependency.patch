@@ -1,0 +1,318 @@
+Subject: [PATCH] Adapt into a simple non-MFC CMake project
+---
+diff --git a/Configure/CMakeLists.txt b/Configure/CMakeLists.txt
+--- /dev/null
++++ b/Configure/CMakeLists.txt
+@@ -0,0 +1,16 @@
++cmake_minimum_required(VERSION 3.15)
++project(ImageMagick-Configure)
++
++set(CMAKE_CXX_STANDARD 17)
++set(CMAKE_RUNTIME_OUTPUT_DIRECTORY $<1:${PROJECT_SOURCE_DIR}>)
++
++add_executable(configure
++    main.cpp
++    Pages/TargetPage.cpp
++    CommandLineInfo.cpp
++    ConfigureWizard.cpp
++    Project.cpp
++    ProjectFile.cpp
++    Solution.cpp
++    VersionInfo.cpp
++)
+diff --git a/Configure/main.cpp b/Configure/main.cpp
+--- /dev/null
++++ b/Configure/main.cpp
+@@ -0,0 +1,19 @@
++#include "ConfigureWizard.h"
++#include "CommandLineInfo.h"
++#include "Solution.h"
++
++int main(int argc, char* argv[]) {
++	ConfigureWizard wizard;
++	CommandLineInfo info{wizard};
++	for (int i = 1; i < argc; i++) {
++       if (argv[i][0] != '/') continue;
++		wchar_t arg[256];
++		mbstowcs_s(nullptr, arg, argv[i] + 1, sizeof(arg));
++		info.ParseParam(arg, TRUE, i == argc - 1);
++	}
++	wizard.parseCommandLineInfo(info);
++
++	Solution solution{wizard};
++	solution.loadProjects();
++	solution.write();
++}
+diff --git a/Configure/CommandLineInfo.cpp b/Configure/CommandLineInfo.cpp
+--- a/Configure/CommandLineInfo.cpp
++++ b/Configure/CommandLineInfo.cpp
+@@ -17,7 +17,6 @@
+ %                                                                             %
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ */
+-#include "stdafx.h"
+ #include "CommandLineInfo.h"
+ 
+ CommandLineInfo::CommandLineInfo(const ConfigureWizard &wizard)
+diff --git a/Configure/CommandLineInfo.h b/Configure/CommandLineInfo.h
+--- a/Configure/CommandLineInfo.h
++++ b/Configure/CommandLineInfo.h
+@@ -23,7 +23,7 @@
+ #include "ConfigureWizard.h"
+ #include "Shared.h"
+ 
+-class CommandLineInfo : public CCommandLineInfo
++class CommandLineInfo
+ {
+ public:
+   CommandLineInfo(const ConfigureWizard &wizard);
+diff --git a/Configure/ConfigureWizard.cpp b/Configure/ConfigureWizard.cpp
+--- a/Configure/ConfigureWizard.cpp
++++ b/Configure/ConfigureWizard.cpp
+@@ -17,28 +17,13 @@
+ %                                                                             %
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ */
+-#include "stdafx.h"
+-#include "resource.h"
+ #include "ConfigureWizard.h"
+ #include "CommandLineInfo.h"
+ 
+-IMPLEMENT_DYNAMIC(ConfigureWizard,CPropertySheet)
+ 
+-ConfigureWizard::ConfigureWizard(CWnd* pWndParent)
+-  : CPropertySheet(IDS_PROPSHT_CAPTION,pWndParent)
++ConfigureWizard::ConfigureWizard()
+ {
+-  AddPage(&_welcomePage);
+-  AddPage(&_targetPage);
+-  AddPage(&_finishedPage);
+-
+-  _isImageMagick7=filesystem::exists(pathFromRoot(L"ImageMagick\\MagickCore"));
+   _targetPage.useHDRI(_isImageMagick7);
+-
+-  SetWizardMode();
+-}
+-
+-ConfigureWizard::~ConfigureWizard()
+-{
+ }
+ 
+ const wstring ConfigureWizard::binDirectory() const
+@@ -249,6 +234,3 @@
+   _targetPage.visualStudioVersion(info.visualStudioVersion());
+   _targetPage.zeroConfigurationSupport(info.zeroConfigurationSupport());
+ }
+-
+-BEGIN_MESSAGE_MAP(ConfigureWizard,CPropertySheet)
+-END_MESSAGE_MAP()
+diff --git a/Configure/ConfigureWizard.h b/Configure/ConfigureWizard.h
+--- a/Configure/ConfigureWizard.h
++++ b/Configure/ConfigureWizard.h
+@@ -20,21 +20,15 @@
+ #ifndef __ConfigureWizard__
+ #define __ConfigureWizard__
+ 
+-#include "Pages\WelcomePage.h"
+ #include "Pages\TargetPage.h"
+-#include "Pages\FinishedPage.h"
+ #include "Shared.h"
+ 
+ class CommandLineInfo;
+ 
+-class ConfigureWizard : public CPropertySheet
++class ConfigureWizard
+ {
+-  DECLARE_DYNAMIC(ConfigureWizard)
+-
+ public:
+-  ConfigureWizard(CWnd* pWndParent = (CWnd *) NULL);
+-
+-  virtual ~ConfigureWizard();
++  ConfigureWizard();
+ 
+   const wstring binDirectory() const;
+ 
+@@ -90,16 +84,10 @@
+ 
+   void parseCommandLineInfo(const CommandLineInfo &info);
+ 
+-protected:
+-
+-  DECLARE_MESSAGE_MAP()
+-
+ private:
+ 
+-  FinishedPage _finishedPage;
+-  bool         _isImageMagick7; 
++  bool         _isImageMagick7 = true;
+   TargetPage   _targetPage;
+-  WelcomePage  _welcomePage;
+ };
+ 
+ #endif // __ConfigureWizard__
+diff --git a/Configure/Pages/TargetPage.cpp b/Configure/Pages/TargetPage.cpp
+--- a/Configure/Pages/TargetPage.cpp
++++ b/Configure/Pages/TargetPage.cpp
+@@ -20,9 +20,7 @@
+ #include "..\stdafx.h"
+ #include "TargetPage.h"
+ 
+-IMPLEMENT_DYNCREATE(TargetPage, CPropertyPage)
+-
+-TargetPage::TargetPage() : CPropertyPage(IDD_TARGET_PAGE)
++TargetPage::TargetPage()
+ {
+   setVisualStudioVersion();
+ 
+@@ -207,6 +205,7 @@
+   _zeroConfigurationSupport=value;
+ }
+ 
++#if 0
+ void TargetPage::DoDataExchange(CDataExchange* pDX)
+ {
+   CPropertyPage::DoDataExchange(pDX);
+@@ -238,6 +237,7 @@
+ 
+ BEGIN_MESSAGE_MAP(TargetPage, CPropertyPage)
+ END_MESSAGE_MAP()
++#endif
+ 
+ wstring TargetPage::getEnvironmentVariable(const wchar_t *name)
+ {
+diff --git a/Configure/Pages/TargetPage.h b/Configure/Pages/TargetPage.h
+--- a/Configure/Pages/TargetPage.h
++++ b/Configure/Pages/TargetPage.h
+@@ -20,12 +20,11 @@
+ #ifndef __TargetPage__
+ #define __TargetPage__
+ 
++#include "..\stdafx.h"
+ #include "..\Shared.h"
+ 
+-class TargetPage : public CPropertyPage
++class TargetPage
+ {
+-  DECLARE_DYNCREATE(TargetPage)
+-
+ public:
+ 
+   TargetPage();
+@@ -77,14 +76,6 @@
+   bool zeroConfigurationSupport() const;
+   void zeroConfigurationSupport(bool value);
+ 
+-protected:
+-
+-  virtual void DoDataExchange(CDataExchange* pDX);
+-
+-  virtual BOOL OnInitDialog();
+-
+-  DECLARE_MESSAGE_MAP()
+-
+ private:
+ 
+   wstring getEnvironmentVariable(const wchar_t *name);
+diff --git a/Configure/Solution.cpp b/Configure/Solution.cpp
+--- a/Configure/Solution.cpp
++++ b/Configure/Solution.cpp
+@@ -60,7 +60,7 @@
+   loadProjectsFromFolder(L"Projects", L"ImageMagick");
+ }
+ 
+-void Solution::write(WaitDialog &waitDialog) const
++void Solution::write() const
+ {
+   int
+     steps;
+@@ -72,14 +72,11 @@
+     file;
+ 
+   steps=loadProjectFiles();
+-  waitDialog.setSteps(steps+4);
+ 
+   file.open(getFileName());
+   if (!file)
+     return;
+ 
+-  waitDialog.nextStep(L"Writing solution");
+-
+   write(file);
+ 
+   file.close();
+@@ -88,33 +85,25 @@
+   {
+     for (auto& projectFile : project->files())
+     {
+-      waitDialog.nextStep(L"Writing: " + projectFile->fileName());
+       projectFile->write(_projects);
+     }
+   }
+ 
+-  waitDialog.nextStep(L"Writing configuration");
+   writeMagickBaseConfig();
+ 
+-  waitDialog.nextStep(L"Writing Makefile.PL");
+   writeMakeFile();
+ 
+-  waitDialog.nextStep(L"Writing config config");
+   createConfigFiles();
+ 
+-  waitDialog.nextStep(L"Writing threshold-map.h");
+   writeThresholdMap();
+ 
+   if (!versionInfo.load())
+     return;
+ 
+-  waitDialog.nextStep(L"Writing version");
+   writeVersion(versionInfo);
+ 
+-  waitDialog.nextStep(L"Writing installer config");
+   writeInstallerConfig(versionInfo);
+ 
+-  waitDialog.nextStep(L"Writing NOTICE.txt");
+   writeNotice(versionInfo);
+ }
+ 
+diff --git a/Configure/Solution.h b/Configure/Solution.h
+--- a/Configure/Solution.h
++++ b/Configure/Solution.h
+@@ -23,7 +23,6 @@
+ #include "Project.h"
+ #include "ConfigureWizard.h"
+ #include "VersionInfo.h"
+-#include "WaitDialog.h"
+ 
+ class Solution
+ {
+@@ -34,7 +33,7 @@
+ 
+   void loadProjects();
+ 
+-  void write(WaitDialog &waitDialog) const;
++  void write() const;
+ 
+ private:
+ 
+
+diff --git a/Configure/stdafx.h b/Configure/stdafx.h
+--- a/Configure/stdafx.h
++++ b/Configure/stdafx.h
+@@ -14,14 +14,8 @@
+ 
+ #define VC_EXTRALEAN // Exclude rarely-used stuff from Windows headers
+ 
+-#include <afxwin.h>   // MFC core and standard components
+-#include <afxext.h>   // MFC extensions
+-#include <afxdtctl.h> // MFC support for Internet Explorer 4 Common Controls
+-#ifndef _AFX_NO_AFXCMN_SUPPORT
+-#include <afxcmn.h>   // MFC support for Windows Common Controls
+-#endif // _AFX_NO_AFXCMN_SUPPORT
+-
+-#include "resource.h" // main symbols
++#include <combaseapi.h>
++#include <shlwapi.h>
+ 
+ #include <string>
+ #include <vector>
