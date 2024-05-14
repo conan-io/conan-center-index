@@ -183,7 +183,7 @@ class MpdecimalConan(ConanFile):
     def _build_msvc(self):
         libmpdec_folder = self._libmpdec_folder
         copy(self, "Makefile.vc", libmpdec_folder, self.build_folder)
-        rename(self, os.path.join(self.build_folder, "Makefile.vc"), libmpdec_folder / "Makefile")
+        rename(self, Path(self.build_folder) / "Makefile.vc", libmpdec_folder / "Makefile")
 
         ext = "dll" if self.options.shared else "lib"
         mpdec_target = f"libmpdec-{self.version}.{ext}"
