@@ -63,11 +63,7 @@ class ProtobufConan(ConanFile):
                 "Visual Studio": "15",
                 "msvc": "191",
             }
-        return {
-            "clang": "4",
-            "Visual Studio": "14",
-            "msvc": "190",
-        }
+        return {}
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -80,6 +76,8 @@ class ProtobufConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
             if Version(self.version) >= "3.22.0" and is_msvc(self):
+                # Protobuf requires absl::abseil_dll
+                # https://github.com/protocolbuffers/protobuf/blob/v25.3/cmake/abseil-cpp.cmake#L40
                 self.options["abseil"].shared = True
 
     def layout(self):
@@ -130,6 +128,8 @@ class ProtobufConan(ConanFile):
             tc.variables["CMAKE_INSTALL_RPATH"] = "@loader_path/../lib"
         tc.variables["protobuf_ABSL_PROVIDER"] = "package"
         if not valid_min_cppstd(self, self._min_cppstd):
+            # Protobuf does not pass a C++ standard but requires C++14 (>=3.22)
+            # https://github.com/protocolbuffers/protobuf/blob/v4.25.3/cmake/README.md#c-version
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
 
