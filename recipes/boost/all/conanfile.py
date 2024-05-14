@@ -287,7 +287,7 @@ class BoostConan(ConanFile):
     def _min_compiler_version_nowide(self):
         # Nowide needs c++11 + swappable std::fstream
         return {
-            "gcc": 5,
+            "gcc": 4.8,
             "clang": 5,
             "Visual Studio": 14,  # guess
             "msvc": 190,  # guess
@@ -435,6 +435,9 @@ class BoostConan(ConanFile):
                     self.output.warning("Assuming the compiler supports c++11 by default")
                 elif not self._has_cppstd_11_supported:
                     disable_math()
+                # Boost.Math is not built when the compiler is GCC < 5 and uses C++11
+                elif self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
+                    disable_math()
 
         if Version(self.version) >= "1.79.0":
             # Starting from 1.79.0, Boost.Wave requires a c++11 capable compiler
@@ -457,6 +460,9 @@ class BoostConan(ConanFile):
                     self.output.warning("Assuming the compiler supports c++11 by default")
                 elif not self._has_cppstd_11_supported:
                     disable_wave()
+                # Boost.Wave is not built when the compiler is GCC < 5 and uses C++11
+                elif self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
+                    disable_wave()
 
         if Version(self.version) >= "1.81.0":
             # Starting from 1.81.0, Boost.Locale requires a c++11 capable compiler
@@ -478,6 +484,9 @@ class BoostConan(ConanFile):
                 if min_compiler_version is None:
                     self.output.warning("Assuming the compiler supports c++11 by default")
                 elif not self._has_cppstd_11_supported:
+                    disable_locale()
+                # Boost.Locale is not built when the compiler is GCC < 5 and uses C++11
+                elif self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
                     disable_locale()
 
         if Version(self.version) >= "1.84.0":
