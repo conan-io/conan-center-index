@@ -102,7 +102,7 @@ class QrCodeGeneratorConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = [
-            "qrcodegen" if Version(self.version) < "1.7.0" else "qrcodegencpp"
+            "qrcodegen" if Version(self.version) < "1.7.0" else "qrcodegencpp", "qrcodegenc"
         ]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
