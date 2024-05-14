@@ -85,6 +85,7 @@ class NiftiClibConan(ConanFile):
         if is_msvc(self):
             # don't use self.settings.compiler.runtime
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
             tc.preprocessor_definitions["_CRT_SECURE_NO_WARNINGS"] = 1
         tc.generate()
         # In case there are dependencies listed on requirements, CMakeDeps should be used
@@ -98,7 +99,13 @@ class NiftiClibConan(ConanFile):
         apply_conandata_patches(self)
 
     def build(self):
-        self._patch_sources()  # It can be apply_conandata_patches(self) only in case no more patches are needed
+        self._patch_sources()
+
+        if is_msvc(self):  # patch in __declspec(dllimport) for a global variable that is used
+            to_replace = "extern char const * const inam[];"
+            fixed = "__declspec(dllimport) " + to_replace
+            replace_in_file(self, os.path.join(self.source_folder, "nifticdf", "nifticdf.h"), to_replace, fixed, strict=True)
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -108,7 +115,6 @@ class NiftiClibConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
@@ -117,10 +123,8 @@ class NiftiClibConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        # if package provides a CMake config file (package-config.cmake or packageConfig.cmake, with package::package target, usually installed in <prefix>/lib/cmake/<package>/)
         self.cpp_info.set_property("cmake_file_name", "nifti")
         self.cpp_info.set_property("cmake_target_name", "NIFTI::NIFTI")
-        # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
         self.cpp_info.set_property("pkg_config_name", "nifti")
         self.cpp_info.includedirs += [ os.path.join("include", "nifti") ]
 
@@ -157,14 +161,7 @@ class NiftiClibConan(ConanFile):
             self.cpp_info.components["cifti"].set_property("cmake_target_name", "NIFTI::cifti")
             self.cpp_info.components["cifti"].includedirs += [os.path.join("include", "nifti")]
 
-        # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("dl")
-
-        # # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        # self.cpp_info.filenames["cmake_find_package"] = "PACKAGE"
-        # self.cpp_info.filenames["cmake_find_package_multi"] = "package"
-        # self.cpp_info.names["cmake_find_package"] = "PACKAGE"
-        # self.cpp_info.names["cmake_find_package_multi"] = "package"
+        # if self.settings.os in ["Linux", "FreeBSD"]:
+        #     self.cpp_info.system_libs.append("m")
+        #     self.cpp_info.system_libs.append("pthread")
+        #     self.cpp_info.system_libs.append("dl")
