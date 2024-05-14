@@ -25,3 +25,5 @@ versions:
     folder: 5.x.x
   "5.15.9":
     folder: 5.x.x
+  "5.6.3":
+    folder: 5.6.3
