@@ -77,7 +77,7 @@ class ZserioConanFile(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        tc.variables["CMAKE_CXX_STANDARD"] = self.settings.compiler.get_safe("cppstd", str(self._min_cppstd)).replace("gnu", "")
         tc.generate()
 
     def build(self):
