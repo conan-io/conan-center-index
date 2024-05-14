@@ -318,8 +318,6 @@ class AssimpConan(ConanFile):
         ]:
             save(self, os.path.join(self.source_folder, "contrib", contrib_header),
                  f"#include <{include}>\n")
-        if Version(self.version) >= "5.4.0":
-            rmdir(self, self.source_path.joinpath("contrib", "utf8cpp"))
 
         # minizip is provided via conan_deps.cmake, no need to use pkgconfig
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
