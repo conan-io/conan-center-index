@@ -331,13 +331,13 @@ class OpenSSLConan(ConanFile):
         openssldir = unix_path(self, openssldir) if self.win_bash else openssldir
         args = [
             f'"{self._ancestor_target}"',
-            "shared" if self.options.shared else "no-shared",
+            "-shared" if self.options.shared else "-no-shared",
             f"--prefix=\"{self.package_folder}\"",
             f"--openssldir=\"{openssldir}\"",
-            "no-unit-test",
-            "threads" if self.options.no_threads else "no-threads",
+            "no-unit-test"
         ]
-
+        if self.options.no_threads:
+            args.append("threads")
         if self.settings.os in ["tvOS", "watchOS"]:
             args.append(" -DNO_FORK")  # fork is not available on tvOS and watchOS
         if self.settings.os == "Android":
@@ -352,10 +352,10 @@ class OpenSSLConan(ConanFile):
         else:
             args.append("-fPIC" if self.options.get_safe("fPIC", True) else "no-pic")
 
-        args.append("no-md2")
+        args.append("-no-md2")
 
         if self.settings.os == "Neutrino":
-            args.append("no-asm -lsocket -latomic")
+            args.append("-no-asm -lsocket -latomic")
         if self._is_clang_cl:
             # #error <stdatomic.h> is not yet supported when compiling as C, but this is planned for a future release.
             args.append("-D__STDC_NO_ATOMICS__")
