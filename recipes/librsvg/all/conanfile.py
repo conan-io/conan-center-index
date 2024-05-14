@@ -1,22 +1,16 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 import os
 
 
 required_conan_version = ">=1.53.0"
-
-#
-# INFO: Please, remove all comments before pushing your PR!
-#
 
 # some information taken from https://gitlab.gnome.org/GNOME/librsvg/-/blob/main/Cargo.toml
 class LibrsvgConan(ConanFile):
@@ -61,8 +55,6 @@ class LibrsvgConan(ConanFile):
         "with_vapigen": False,
     }
 
-    # no exports_sources attribute, but export_sources(self) method instead
-    # this allows finer grain exportation of patches per version
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -73,16 +65,13 @@ class LibrsvgConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # for plain C projects only
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         basic_layout(self, src_folder="rsvg")
 
     def requirements(self):
-        # prefer self.requires method instead of requires attribute
         self.requires("cairo/1.18.0", transitive_headers=True, transitive_libs=True)
         self.requires("dav1d/1.3.0")
         self.requires("freetype/2.13.2")
@@ -162,7 +151,6 @@ class LibrsvgConan(ConanFile):
         meson = Meson(self)
         meson.install()
 
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
@@ -172,9 +160,6 @@ class LibrsvgConan(ConanFile):
         fix_msvc_libname(self)
 
     def package_info(self):
-        #self.cpp_info.set_property("cmake_find_mode", "both")
-        #self.cpp_info.set_property("cmake_file_name", "librsvg")
-        #self.cpp_info.set_property("cmake_target_name", "librsvg::librsvg")
         self.cpp_info.libs = ["rsvg-2"]
         self.cpp_info.includedirs += [
             os.path.join("include", "librsvg-2.0"),
@@ -196,24 +181,24 @@ class LibrsvgConan(ConanFile):
             "dav1d::dav1d",
         ]
 
-        #self.cpp_info.components["librsvg"].libs = ["rsvg"]
-        # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
         self.cpp_info.set_property("pkg_config_name", "librsvg-2.0")
-        # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
+        
+        # this is a somewhat temporary fix for rust, should probably be handled by a rust recipe
         if is_msvc(self):
             self.cpp_info.system_libs += ["ntdll", "userenv.lib"]
 
         if self.options.with_gdk_pixbuf:
             self.cpp_info.requires += ["gdk-pixbuf::gdk-pixbuf"]
         if self.options.with_gidocgen:
-            pass
+            pass  # currently not present on conan-center
         if self.options.with_introspection:
-            pass  # self.cpp_info.components["librsvg"].requires.append()
+            pass  # self.cpp_info.requires.append()
             # unsure about this, package seems to be broken anyway
         if self.options.with_vapigen:
-            pass
+            pass  # currently not present on conan-center
 
 # stolen from the libvips recipe
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
