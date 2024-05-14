@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -171,18 +172,18 @@ class MpdecimalConan(ConanFile):
 
     @property
     def _libmpdec_folder(self):
-        return self.source_path / "libmpdec"
+        return Path(self.source_folder) / "libmpdec"
 
     @property
     def _dist_folder(self):
-        vcbuild_folder = self.build_path / "vcbuild"
+        vcbuild_folder = Path(self.build_folder) / "vcbuild"
         arch_ext = "32" if self.settings.arch == "x86" else "64"
         return vcbuild_folder / f"dist{arch_ext}"
 
     def _build_msvc(self):
         libmpdec_folder = self._libmpdec_folder
-        copy(self, "Makefile.vc", libmpdec_folder, self.build_path)
-        rename(self, self.build_path / "Makefile.vc", libmpdec_folder / "Makefile")
+        copy(self, "Makefile.vc", libmpdec_folder, self.build_folder)
+        rename(self, os.path.join(self.build_folder, "Makefile.vc"), libmpdec_folder / "Makefile")
 
         ext = "dll" if self.options.shared else "lib"
         mpdec_target = f"libmpdec-{self.version}.{ext}"
