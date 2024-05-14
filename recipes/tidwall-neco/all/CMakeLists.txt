@@ -9,6 +9,7 @@ set_target_properties(neco PROPERTIES
     PUBLIC_HEADER ${TIDWALL_NECO_SRC_DIR}/neco.h
     WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
+target_compile_features(neco PRIVATE c_std_11)
 
 install(
     TARGETS neco

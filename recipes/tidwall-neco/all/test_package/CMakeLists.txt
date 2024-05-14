@@ -5,3 +5,4 @@ find_package(tidwall-neco REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} PRIVATE tidwall-neco::tidwall-neco)
+target_compile_features(${PROJECT_NAME} PRIVATE c_std_11)
