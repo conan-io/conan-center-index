@@ -1,12 +1,12 @@
 versions:
-  "2.1.4":
+  "2.1.6":
     folder: all
   # mold requires 2.1.2
   "2.1.2":
     folder: all
   "2.0.9":
     folder: all
-  "1.8.4":
+  "1.8.6":
     folder: all
   "1.8.2":
     folder: all

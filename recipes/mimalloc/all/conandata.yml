@@ -1,16 +1,16 @@
 sources:
-  "2.1.4":
-    url: "https://github.com/microsoft/mimalloc/archive/v2.1.4.tar.gz"
-    sha256: "ef31a7c593866a35883b2090654a8d6136a1cf06f22b577b4e1c818b1b0a8796"
+  "2.1.6":
+    url: "https://github.com/microsoft/mimalloc/archive/v2.1.6.tar.gz"
+    sha256: "0ec960b656f8623de35012edacb988f8edcc4c90d2ce6c19f1d290fbb4872ccc"
   "2.1.2":
     url: "https://github.com/microsoft/mimalloc/archive/v2.1.2.tar.gz"
     sha256: "2b1bff6f717f9725c70bf8d79e4786da13de8a270059e4ba0bdd262ae7be46eb"
   "2.0.9":
     url: "https://github.com/microsoft/mimalloc/archive/v2.0.9.tar.gz"
     sha256: "4a29edae32a914a706715e2ac8e7e4109e25353212edeed0888f4e3e15db5850"
-  "1.8.4":
-    url: "https://github.com/microsoft/mimalloc/archive/v1.8.4.tar.gz"
-    sha256: "b7a272de210a6fd7faa6c206eced79f6ffdf8655fe4fb755d36b66c66d7962f7"
+  "1.8.6":
+    url: "https://github.com/microsoft/mimalloc/archive/v1.8.6.tar.gz"
+    sha256: "342a41004334d9ca0ac6532784e1ae28c5e4df4e12d1340d969daa26bb024034"
   "1.8.2":
     url: "https://github.com/microsoft/mimalloc/archive/v1.8.2.tar.gz"
     sha256: "4058d53d6ceb75862f32c30a6ee686c3cbb5e965b2c324b828ca454f7fe064f9"
@@ -21,11 +21,11 @@ sources:
     url: "https://github.com/microsoft/mimalloc/archive/v1.7.6.tar.gz"
     sha256: "d74f86ada2329016068bc5a243268f1f555edd620b6a7d6ce89295e7d6cf18da"
 patches:
-  "2.1.4":
-    - patch_file: "patches/2.1.4-0001-change-install-paths.patch"
+  "2.1.6":
+    - patch_file: "patches/2.1.6-0001-change-install-paths.patch"
       patch_description: "fix install paths"
       patch_type: "conan"
-    - patch_file: "patches/2.1.4-0002-support-older-compiler.patch"
+    - patch_file: "patches/2.1.6-0002-support-older-compiler.patch"
       patch_description: "fix compilation errors on older compilers"
       patch_type: "portability"
   "2.1.2":
@@ -42,11 +42,11 @@ patches:
     - patch_file: "patches/2.0.9-0002-support-older-compiler.patch"
       patch_description: "fix compilation errors on older compilers"
       patch_type: "portability"
-  "1.8.4":
-    - patch_file: "patches/1.8.4-0001-change-install-paths.patch"
+  "1.8.6":
+    - patch_file: "patches/1.8.6-0001-change-install-paths.patch"
       patch_description: "fix install paths"
       patch_type: "conan"
-    - patch_file: "patches/1.8.4-0002-support-older-compiler.patch"
+    - patch_file: "patches/1.8.6-0002-support-older-compiler.patch"
       patch_description: "fix compilation errors on older compilers"
       patch_type: "portability"
   "1.8.2":
