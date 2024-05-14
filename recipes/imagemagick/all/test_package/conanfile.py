@@ -51,3 +51,4 @@ class TestPackageConan(ConanFile):
             check(opts.with_webp, "webp")
             check(opts.with_freetype, "freetype")
             check(opts.with_xml2, "xml")
+            check(opts.with_djvu, "djvu")

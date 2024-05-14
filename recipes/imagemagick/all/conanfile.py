@@ -120,11 +120,7 @@ class ImageMagicConan(ConanFile):
         if self.options.with_freetype:
             self.requires("freetype/2.13.2")
         if self.options.with_djvu:
-            # FIXME: missing djvu recipe
-            self.output.warning(
-                "There is no djvu package available on Conan (yet). "
-                "This recipe will use the one present on the system (if available)."
-            )
+            self.requires("djvulibre/3.5.28")
 
     @property
     def _modules(self):
@@ -425,6 +421,8 @@ class ImageMagicConan(ConanFile):
             core_requires.append("libxml2::libxml2")
         if self.options.with_freetype:
             core_requires.append("freetype::freetype")
+        if self.options.with_djvu:
+            core_requires.append("djvulibre::djvulibre")
 
         if is_msvc(self) and not self.options.shared:
             self.cpp_info.components["MagickCore"].libs.append(self._libname("coders"))
