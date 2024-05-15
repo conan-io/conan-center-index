@@ -1,0 +1,4 @@
+sources:
+  "3.2.9999":
+    url: "https://github.com/centricular/libffi/archive/refs/tags/3.2.9999.tar.gz"
+    sha256: "c4d086e32eafcbf87f785ad41d437695299edd55626309a0bfea2c55c0e962d1"

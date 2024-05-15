@@ -7,3 +7,5 @@ versions:
     folder: "all"
   "3.3":
     folder: "all"
+  "3.2.9999":
+    folder: "meson_build"
