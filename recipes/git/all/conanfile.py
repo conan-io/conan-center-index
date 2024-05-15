@@ -58,9 +58,14 @@ class PackageConan(ConanFile):
         if is_msvc(self):
             tc.generator = "Ninja"
         if is_apple_os(self):
-            # This isn't set properly in CMake
+            # This isn't set properly in CMake.
             # https://lore.kernel.org/git/1236547371-88742-1-git-send-email-benji@silverinsanity.com/T/
-            tc.preprocessor_definitions["USE_ST_TIMESPEC"] = True
+            tc.preprocessor_definitions["USE_ST_TIMESPEC"] = "1"
+            # Forces Git to look relative to the binary for additional files.
+            tc.preprocessor_definitions["RUNTIME_PREFIX"] = "1"
+            # Allows the use of _NSGetExecutablePath to get the path of the running executable,
+            # used in tandem with RUNTIME_PREFIX.
+            tc.preprocessor_definitions["HAVE_NS_GET_EXECUTABLE_PATH"] = "1"
         tc.generate()
 
         deps = CMakeDeps(self)
