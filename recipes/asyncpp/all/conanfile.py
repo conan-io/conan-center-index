@@ -38,7 +38,9 @@ class AsyncppRecipe(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "13",
-            "clang": "14",
+            "clang": "17",
+            "msvc": "193",
+            "Visual Studio": "17",
         }
 
     def config_options(self):
