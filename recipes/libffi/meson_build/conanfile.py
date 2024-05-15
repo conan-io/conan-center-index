@@ -11,6 +11,8 @@ import os
 import shutil
 import sys
 
+import xml.etree.ElementTree as ET
+
 required_conan_version = ">=1.57.0"
 
 
@@ -76,6 +78,7 @@ class LibffiConan(ConanFile):
     def build(self):
         meson = Meson(self)
         meson.configure()
+        self._fix_msvc_toolset()
         meson.build()
 
     def package(self):
@@ -85,3 +88,30 @@ class LibffiConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["libffi"].set_property("pkg_config_name", "libffi")
         self.cpp_info.components["libffi"].libs = ["ffi"]
+
+    def _fix_msvc_toolset(self):
+        if self.settings.arch != "x86":
+            return
+        if self.conf.get("tools.meson.mesontoolchain:backend", default='ninja') == 'ninja':
+            return
+
+        # 遍历指定目录及其子目录
+        for root, dirs, files in os.walk(self.build_folder):
+            # 查找所有.vcproj文件
+            for file in files:
+                if file.endswith('.vcxproj'):
+                    filepath = os.path.join(root, file)
+                    self.output.subtitle('fix {filepath} toolset')
+                    # 解析XML文件
+                    tree = ET.parse(filepath)
+                    node = tree.getroot()
+                    for tt in node:
+                        if tt.tag.endswith('PropertyGroup'):
+                            for t in tt:
+                                if t.tag.endswith('PlatformToolset'):
+                                    subs_toolset = self.settings.get_safe("compiler.toolset")
+                                    if subs_toolset and subs_toolset != t.text:
+                                        self.output.warning("change toolset %s => %s" % (t.text, subs_toolset))
+                                        t.text= subs_toolset
+                    tree.write(filepath)
+                      
