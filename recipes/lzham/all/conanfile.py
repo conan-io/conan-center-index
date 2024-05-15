@@ -103,6 +103,9 @@ class PackageConan(ConanFile):
             # Honor BUILD_SHARED_LIBS from conan_toolchain (see
             # https://github.com/conan-io/conan/issues/11840)
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+
+            # Build relocatable shared libraries on Apple OSs
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
             tc.generate()
 
     def build(self):
