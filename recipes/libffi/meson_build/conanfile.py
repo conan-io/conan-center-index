@@ -79,6 +79,7 @@ class LibffiConan(ConanFile):
         meson = Meson(self)
         meson.configure()
         self._fix_msvc_toolset()
+        self._fix_msvc_safeseh()
         meson.build()
 
     def package(self):
@@ -103,6 +104,7 @@ class LibffiConan(ConanFile):
                     filepath = os.path.join(root, file)
                     self.output.subtitle('fix {filepath} toolset')
                     # 解析XML文件
+                    ET.register_namespace('', 'http://schemas.microsoft.com/developer/msbuild/2003')
                     tree = ET.parse(filepath)
                     node = tree.getroot()
                     for tt in node:
@@ -114,4 +116,30 @@ class LibffiConan(ConanFile):
                                         self.output.warning("change toolset %s => %s" % (t.text, subs_toolset))
                                         t.text= subs_toolset
                     tree.write(filepath)
+    
+    def _fix_msvc_safeseh(self):
+        if self.conf.get("tools.meson.mesontoolchain:backend", default='ninja') == 'ninja':
+            return
+
+        # 遍历指定目录及其子目录
+        for root, dirs, files in os.walk(self.build_folder):
+            # 查找所有.vcproj文件
+            for file in files:
+                if file.endswith('.vcxproj'):
+                    filepath = os.path.join(root, file)
+                    self.output.subtitle('fix {filepath} toolset')
+                    # 解析XML文件
+                    ET.register_namespace('', 'http://schemas.microsoft.com/developer/msbuild/2003')
+                    tree = ET.parse(filepath)
+                    node = tree.getroot()
+                    for tt in node:
+                        if tt.tag.endswith('ItemDefinitionGroup'):
+                            for t in tt:
+                                if t.tag.endswith('Link'):
+                                    for t2 in t:
+                                        if t2.tag.endswith('AdditionalOptions') and t2.text.find('/SAFESEH:NO') == -1:
+                                            t2.text = '/SAFESEH:NO {}'.format(t2.text)
+                                            self.output.info("fix link options: %s" % t2.text)
+                    tree.write(filepath)
+    
                       
