@@ -322,20 +322,21 @@ class OpenSSLConan(ConanFile):
 
     def _get_default_openssl_dir(self):
         if self.settings.os == "Linux":
-            return "/etc/ssl"
+            return None
         return "res"
 
     @property
     def _configure_args(self):
-        openssldir = self.options.openssldir or self._get_default_openssl_dir()
-        openssldir = unix_path(self, openssldir) if self.win_bash else openssldir
         args = [
             f'"{self._ancestor_target}"',
             "-shared" if self.options.shared else "-no-shared",
             f"--prefix=\"{self.package_folder}\"",
-            f"--openssldir=\"{openssldir}\"",
             "no-unit-test"
         ]
+        openssldir = self.options.openssldir or self._get_default_openssl_dir()
+        if openssldir:
+            openssldir = unix_path(self, openssldir) if self.win_bash else openssldir
+            args.append(f"--openssldir=\"{openssldir}\"")
         if self.options.no_threads:
             args.append("threads")
         if self.settings.os in ["tvOS", "watchOS"]:
@@ -504,8 +505,8 @@ class OpenSSLConan(ConanFile):
             self.cpp_info.components["ssl"].libs = ["ssleay32"]
             self.cpp_info.components["crypto"].libs = ["libeay32"]
         else:
-            self.cpp_info.components["ssl"].libs = ["ssleay32"]
-            self.cpp_info.components["crypto"].libs = ["eay32"]
+            self.cpp_info.components["ssl"].libs = ["ssl"]
+            self.cpp_info.components["crypto"].libs = ["crypto"]
 
         self.cpp_info.components["ssl"].requires = ["crypto"]
 
