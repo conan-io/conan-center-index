@@ -2,10 +2,8 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
-from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -27,7 +25,7 @@ class PackageConan(ConanFile):
         self.settings.compiler.rm_safe("cppstd")
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
     
     def validate(self):
         if cross_building(self):
@@ -38,15 +36,14 @@ class PackageConan(ConanFile):
         self.requires("libcurl/[>=7.78.0 <9]")
         self.requires("libiconv/1.17")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("pcre2/10.43")
         self.requires("zlib/[>=1.2.11 <2]")
-
-        # might need perl
+        if self.settings.os != "Windows":
+            # Git's CMake tries to pick this up only when PkgConfig is detected, so it
+            # likely expects it to not exist on Windows. It fails if it is injected.
+            self.requires("pcre2/10.43")
 
     def build_requirements(self):
         self.tool_requires("gettext/0.22.5")
-        if is_msvc(self):
-            self.tool_requires("ninja/1.11.1")
     
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -54,9 +51,8 @@ class PackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
-        # FIXME: Workaround for https://github.com/conan-io/conan/issues/12012
-        if is_msvc(self):
-            tc.generator = "Ninja"
+        # So `check_c_source_compiles` can work with multi-config generators
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
         if is_apple_os(self):
             # This isn't set properly in CMake.
             # https://lore.kernel.org/git/1236547371-88742-1-git-send-email-benji@silverinsanity.com/T/
