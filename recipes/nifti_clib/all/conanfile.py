@@ -34,16 +34,16 @@ class NiftiClibConan(ConanFile):
         "fPIC": [True, False],
         "use_nifti2": [True, False],
         "use_cifti": [True, False],
+        "use_fslio": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "use_nifti2": True,
         "use_cifti": False,  # seems to be beta?
+        "use_fslio": False  # Note in CMakeLists.txt: "If OFF, The copyright of this code is questionable for inclusion with nifti."
     }
 
-    # no exports_sources attribute, but export_sources(self) method instead
-    # this allows finer grain exportation of patches per version
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -58,7 +58,6 @@ class NiftiClibConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
@@ -76,22 +75,19 @@ class NiftiClibConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
         tc = CMakeToolchain(self)
-        # Boolean values are preferred instead of "ON"/"OFF"
         tc.variables["NIFTI_INSTALL_NO_DOCS"] = True
         tc.variables["USE_NIFTI2_CODE"] = self.options.use_nifti2
         tc.variables["USE_CIFTI_CODE"] = self.options.use_cifti
+        tc.variables["USE_FSL_CODE"] = self.options.use_fslio
+        tc.variables["NIFTI_BUILD_TESTING"] = True  # maybe this should be false? It downloads extra test data
         if is_msvc(self):
-            # don't use self.settings.compiler.runtime
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
             tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
             tc.preprocessor_definitions["_CRT_SECURE_NO_WARNINGS"] = 1
         tc.generate()
-        # In case there are dependencies listed on requirements, CMakeDeps should be used
         tc = CMakeDeps(self)
         tc.generate()
-        # In case there are dependencies listed on build_requirements, VirtualBuildEnv should be used
         tc = VirtualBuildEnv(self)
         tc.generate(scope="build")
 
@@ -128,24 +124,33 @@ class NiftiClibConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "nifti")
         self.cpp_info.includedirs += [ os.path.join("include", "nifti") ]
 
+        sys_libs = []
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            sys_libs += ["m"]
+
         self.cpp_info.required_components = ["ZLIB::ZLIB"]
+        if self.options.use_cifti:
+            self.cpp_info.required_components += ["EXPAT::EXPAT"]
 
         self.cpp_info.components["znz"].libs = ["znz"]
         self.cpp_info.components["znz"].set_property("pkg_config_name", "znz")
         self.cpp_info.components["znz"].set_property("cmake_target_name", "NIFTI::znz")
         self.cpp_info.components["znz"].includedirs += [os.path.join("include", "nifti")]
+        self.cpp_info.components["znz"].system_libs += sys_libs
 
         # inside the niftilib folder
         self.cpp_info.components["niftiio"].libs = ["niftiio"]
         self.cpp_info.components["niftiio"].set_property("pkg_config_name", "niftiio")
         self.cpp_info.components["niftiio"].set_property("cmake_target_name", "NIFTI::niftiio")
         self.cpp_info.components["niftiio"].includedirs += [os.path.join("include", "nifti")]
+        self.cpp_info.components["niftiio"].system_libs += sys_libs
 
         self.cpp_info.components["nifticdf"].libs = ["nifticdf"]
         self.cpp_info.components["nifticdf"].requires = ["niftiio"]
         self.cpp_info.components["nifticdf"].set_property("pkg_config_name", "nifticdf")
         self.cpp_info.components["nifticdf"].set_property("cmake_target_name", "NIFTI::nifticdf")
         self.cpp_info.components["nifticdf"].includedirs += [os.path.join("include", "nifti")]
+        self.cpp_info.components["nifticdf"].system_libs += sys_libs
 
         if self.options.use_nifti2:
             self.cpp_info.components["nifti2"].libs = ["nifti2"]
@@ -153,6 +158,7 @@ class NiftiClibConan(ConanFile):
             self.cpp_info.components["nifti2"].set_property("pkg_config_name", "nifti2")
             self.cpp_info.components["nifti2"].set_property("cmake_target_name", "NIFTI::nifti2")
             self.cpp_info.components["nifti2"].includedirs += [os.path.join("include", "nifti")]
+            self.cpp_info.components["nifti2"].system_libs += sys_libs
 
         if self.options.use_cifti:
             self.cpp_info.components["cifti"].libs = ["cifti"]
@@ -160,8 +166,12 @@ class NiftiClibConan(ConanFile):
             self.cpp_info.components["cifti"].set_property("pkg_config_name", "cifti")
             self.cpp_info.components["cifti"].set_property("cmake_target_name", "NIFTI::cifti")
             self.cpp_info.components["cifti"].includedirs += [os.path.join("include", "nifti")]
+            self.cpp_info.components["cifti"].system_libs += sys_libs
 
-        # if self.settings.os in ["Linux", "FreeBSD"]:
-        #     self.cpp_info.system_libs.append("m")
-        #     self.cpp_info.system_libs.append("pthread")
-        #     self.cpp_info.system_libs.append("dl")
+        if self.options.use_fslio:
+            self.cpp_info.components["fslio"].libs = ["fslio"]
+            self.cpp_info.components["fslio"].requires = ["nifti2"]
+            self.cpp_info.components["fslio"].set_property("pkg_config_name", "fslio")
+            self.cpp_info.components["fslio"].set_property("cmake_target_name", "NIFTI::fslio")
+            self.cpp_info.components["fslio"].includedirs += [os.path.join("include", "nifti")]
+            self.cpp_info.components["fslio"].system_libs += sys_libs
