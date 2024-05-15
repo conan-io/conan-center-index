@@ -7,7 +7,7 @@ from conan.tools.files import copy, get, rm, rmdir, replace_in_file, export_cona
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path, is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches
 import os
 
 required_conan_version = ">=1.54.0"
