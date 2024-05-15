@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 from conan.tools.files import copy, get, replace_in_file, rmdir
@@ -56,6 +57,10 @@ class PackageConan(ConanFile):
         # FIXME: Workaround for https://github.com/conan-io/conan/issues/12012
         if is_msvc(self):
             tc.generator = "Ninja"
+        if is_apple_os(self):
+            # This isn't set properly in CMake
+            # https://lore.kernel.org/git/1236547371-88742-1-git-send-email-benji@silverinsanity.com/T/
+            tc.preprocessor_definitions["USE_ST_TIMESPEC"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -76,6 +81,18 @@ class PackageConan(ConanFile):
         replace_in_file(self, cmake_file, "find_package(PkgConfig)", "")
         replace_in_file(self, cmake_file, "if(PkgConfig_FOUND)", "if(TRUE)")
         replace_in_file(self, cmake_file, "pkg_check_modules(PCRE2 libpcre2-8)", "find_package(PCRE2)")
+
+        if is_apple_os(self):
+            # RT doesn't exist on MacOS, and add in some reqisite frameworks.
+            replace_in_file(self, cmake_file,
+                            'target_link_libraries(common-main pthread rt)',
+                            'target_link_libraries(common-main pthread "-framework CoreFoundation" "-framework CoreServices")'
+                            )
+            # The CMake file only builds these files on Linux, but it probably just needs it anything that isn't Windows.
+            replace_in_file(self, cmake_file,
+                            'set(NO_UNIX_SOCKETS 1)\n\nelseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")',
+                            'set(NO_UNIX_SOCKETS 1)\n\nelse()'
+                            )
 
         cmake = CMake(self)
         cmake.configure(
