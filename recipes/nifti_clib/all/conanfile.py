@@ -1,27 +1,18 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
 
 required_conan_version = ">=1.53.0"
 
-#
-# INFO: Please, remove all comments before pushing your PR!
-#
-
 
 class NiftiClibConan(ConanFile):
     name = "nifti_clib"
     description = "C libraries for NIFTI support"
-    # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
-    # In case not listed there, use "LicenseRef-<license-file-name>"
-    license = ""
+    license = "LicenseRef-LICENSE"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
     # no "conan" and project name in topics. Use topics from the upstream listed on GH
@@ -80,7 +71,7 @@ class NiftiClibConan(ConanFile):
         tc.variables["USE_NIFTI2_CODE"] = self.options.use_nifti2
         tc.variables["USE_CIFTI_CODE"] = self.options.use_cifti
         tc.variables["USE_FSL_CODE"] = self.options.use_fslio
-        tc.variables["NIFTI_BUILD_TESTING"] = True  # maybe this should be false? It downloads extra test data
+        tc.variables["NIFTI_BUILD_TESTING"] = False  # maybe this should be false? It downloads extra test data
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
             tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
