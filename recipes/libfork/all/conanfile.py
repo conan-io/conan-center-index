@@ -8,8 +8,7 @@ import os
 
 required_conan_version = ">=1.53.0"
 
-
-class PackageConan(ConanFile):
+class LibforkConan(ConanFile):
     name = "libfork"
     description = "A bleeding-edge, lock-free, wait-free, continuation-stealing tasking library."
     license = "MPL-2.0"
@@ -45,7 +44,6 @@ class PackageConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-
     def package_id(self):
         self.info.clear()
 
@@ -58,9 +56,6 @@ class PackageConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def build(self):
-        pass
 
     def package(self):
         copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
