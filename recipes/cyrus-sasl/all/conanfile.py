@@ -7,6 +7,7 @@ from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path, is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 import os
 
 required_conan_version = ">=1.54.0"
@@ -112,6 +113,9 @@ class CyrusSaslConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def _generate_autotools(self):
         env = VirtualBuildEnv(self)
@@ -224,6 +228,7 @@ class CyrusSaslConan(ConanFile):
             self._generate_autotools()
 
     def build(self):
+        apply_conandata_patches(self)
         if is_msvc(self):
             self._build_msvc()
         else:
