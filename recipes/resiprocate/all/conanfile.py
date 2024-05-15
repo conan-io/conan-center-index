@@ -1,94 +1,106 @@
 import os
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
 
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualRunEnv
+from conan.tools.files import copy, get, rm, rmdir, chdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.29.1"
+required_conan_version = ">=1.53.0"
+
 
 class ResiprocateConan(ConanFile):
     name = "resiprocate"
-    description = "The project is dedicated to maintaining a complete, correct, and commercially usable implementation of SIP and a few related protocols. "
-    topics = ("sip", "voip", "communication", "signaling")
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://www.resiprocate.org"
+    description = (
+        "The project is dedicated to maintaining a complete, correct, "
+        "and commercially usable implementation of SIP and a few related protocols."
+    )
     license = "VSL-1.0"
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"fPIC": [True, False],
-               "shared": [True, False],
-               "with_ssl": [True, False],
-               "with_postgresql": [True, False],
-               "with_mysql": [True, False]}
-    default_options = {"fPIC": True,
-                       "shared": False,
-                       "with_ssl": True,
-                       "with_postgresql": True,
-                       "with_mysql": True}
-    _autotools = None
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/resiprocate/resiprocate/wiki/"
+    topics = ("sip", "voip", "communication", "signaling")
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_ssl": [True, False],
+        "with_postgresql": [True, False],
+        "with_mysql": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_ssl": True,
+        "with_postgresql": True,
+        "with_mysql": False,
+    }
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        if self.settings.os in ("Windows", "Macos"):
-            # FIXME: Visual Studio project & Mac support seems available in resiprocate
-            raise ConanInvalidConfiguration("reSIProcate recipe does not currently support {}.".format(self.settings.os))
+        if self.settings.os == "Windows" or is_apple_os(self):
+            # FIXME: unreleased versions of resiprocate use CMake and should support Windows and macOS
+            raise ConanInvalidConfiguration(f"reSIProcate recipe does not currently support {self.settings.os}.")
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/1.1.1w")  # OpenSSL 3.x is not supported
         if self.options.with_postgresql:
-            self.requires("libpq/14.2")
+            self.requires("libpq/15.4")
         if self.options.with_mysql:
-            self.requires("libmysqlclient/8.0.29")
+            self.requires("libmysqlclient/8.1.0")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{}-{}".format(self.name, self.version), self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self)
-        yes_no = lambda v: "yes" if v else "no"
-        configure_args = [
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
-            "--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True)))
-        ]
-
+    def generate(self):
+        if not cross_building(self):
+            venv = VirtualRunEnv(self)
+            venv.generate(scope="build")
+        tc = AutotoolsToolchain(self)
         # These options do not support yes/no
         if self.options.with_ssl:
-            configure_args.append("--with-ssl")
+            tc.configure_args.append("--with-ssl")
         if self.options.with_mysql:
-            configure_args.append("--with-mysql")
+            tc.configure_args.append("--with-mysql")
         if self.options.with_postgresql:
-            configure_args.append("--with-postgresql")
-        
-        self._autotools.configure(configure_dir=self._source_subfolder, args=configure_args)
-        return self._autotools
+            tc.configure_args.append("--with-postgresql")
+        tc.generate()
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
     def build(self):
-        autotools = self._configure_autotools()
-        autotools.make()
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.autoreconf()
+            autotools.configure()
+            autotools.make()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        autotools = self._configure_autotools()
-        autotools.install()
-        tools.rmdir(os.path.join(os.path.join(self.package_folder, "share")))
-        tools.remove_files_by_mask(os.path.join(self.package_folder), "*.la")
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        with chdir(self, self.source_folder):
+            autotools = Autotools(self)
+            autotools.install()
+        rmdir(self, os.path.join(os.path.join(self.package_folder, "share")))
+        rm(self, "*.la", os.path.join(self.package_folder), recursive=True)
 
     def package_info(self):
         self.cpp_info.libs = ["resip", "rutil", "dum", "resipares"]
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs = ["pthread"]
+
+        # TODO: Legacy, to be removed on Conan 2.0
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        self.env_info.PATH.append(bin_path)

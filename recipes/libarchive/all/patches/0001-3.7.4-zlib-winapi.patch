@@ -1,0 +1,23 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ec97e4c..7e87e07 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -456,12 +456,12 @@ IF(ZLIB_FOUND)
+     #
+     # Test if ZLIB_WINAPI macro is needed to use.
+     #
+-    TRY_MACRO_FOR_LIBRARY(
+-      "${ZLIB_INCLUDE_DIR}" "${ZLIB_LIBRARIES}"
+-      RUNS
+-      "#include <zlib.h>\nint main() {uLong f = zlibCompileFlags(); return (f&(1U<<10))?0:-1; }"
+-      ZLIB_WINAPI)
+-    IF(ZLIB_WINAPI)
++    # TRY_MACRO_FOR_LIBRARY(
++    #   "${ZLIB_INCLUDE_DIR}" "${ZLIB_LIBRARIES}"
++    #   RUNS
++    #   "#include <zlib.h>\nint main() {uLong f = zlibCompileFlags(); return (f&(1U<<10))?0:-1; }"
++    #   ZLIB_WINAPI)
++    IF(TRUE)
+       ADD_DEFINITIONS(-DZLIB_WINAPI)
+     ELSE(ZLIB_WINAPI)
+       # Test if a macro is needed for the library.

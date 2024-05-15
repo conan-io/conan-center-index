@@ -14,6 +14,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
-            in_wav_path = os.path.join(self.source_folder, os.pardir, "test_package", "8kadpcm.wav")
-            out_ogg_path = os.path.join("bin", "sample.ogg")
-            self.run(f"{bin_path} < {in_wav_path} > {out_ogg_path}", run_environment=True)
+            self.run(bin_path, run_environment=True)

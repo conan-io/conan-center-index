@@ -25,17 +25,14 @@ class GlazeConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        versions = {
+        return {
             "Visual Studio": "17",
             "msvc": "193",
-            "gcc": "10",
+            "gcc": "11",
             # glaze >= 2.1.6 uses std::bit_cast which is supported by clang >= 14
             "clang": "12" if Version(self.version) < "2.1.6" else "14",
             "apple-clang": "13.1",
         }
-        if Version(self.version) >= "1.9.0":
-            versions["gcc"] = "11"
-        return versions
 
     def layout(self):
         basic_layout(self, src_folder="src")

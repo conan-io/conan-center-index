@@ -55,7 +55,7 @@ class ImGuizmoConan(ConanFile):
         tc.generate()
 
     def build(self):
-        if Version(self.dependencies["imgui"].ref.version) >= "1.89.4":
+        if self.version == "1.83" and Version(self.dependencies["imgui"].ref.version) >= "1.89.4":
             # Related to a breaking change: https://github.com/ocornut/imgui/blob/master/docs/CHANGELOG.txt#L912
             # Redirection: ImDrawList::AddBezierCurve() -> use ImDrawList::AddBezierCubic()
             replace_in_file(self, os.path.join(self.source_folder, "GraphEditor.cpp"),

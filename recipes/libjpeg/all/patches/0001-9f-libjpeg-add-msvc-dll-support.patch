@@ -1,0 +1,31 @@
+--- jmorecfg.h
++++ jmorecfg.h
+@@ -238,14 +238,26 @@
+  * or code profilers that require it.
+  */
+ 
++#if defined(_MSC_VER)
++#if defined(LIBJPEG_STATIC)
++#define LIBJPEG_EXPORTS
++#elif !defined(LIBJPEG_BUILDING)
++#define LIBJPEG_EXPORTS __declspec(dllimport)
++#else
++#define LIBJPEG_EXPORTS __declspec(dllexport)
++#endif
++#else
++#define LIBJPEG_EXPORTS
++#endif
++
+ /* a function called through method pointers: */
+ #define METHODDEF(type)		static type
+ /* a function used only in its module: */
+ #define LOCAL(type)		static type
+ /* a function referenced thru EXTERNs: */
+-#define GLOBAL(type)		type
++#define GLOBAL(type)		LIBJPEG_EXPORTS type
+ /* a reference to a GLOBAL function: */
+-#define EXTERN(type)		extern type
++#define EXTERN(type)		extern GLOBAL(type)
+ 
+ 
+ /* This macro is used to declare a "method", that is, a function pointer.
