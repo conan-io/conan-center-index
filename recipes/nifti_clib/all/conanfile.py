@@ -14,10 +14,8 @@ class NiftiClibConan(ConanFile):
     description = "C libraries for NIFTI support"
     license = "LicenseRef-LICENSE"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/project/package"
-    # no "conan" and project name in topics. Use topics from the upstream listed on GH
+    homepage = "https://github.com/NIFTI-Imaging/nifti_clib"
     topics = ("image")
-    # package_type should usually be "library" (if there is shared option)
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -55,12 +53,6 @@ class NiftiClibConan(ConanFile):
         self.requires("zlib/1.3.1")
         if self.options.use_cifti:
             self.requires("expat/2.6.2")
-
-    def validate(self):
-        pass
-
-    def build_requirements(self):
-        pass
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
