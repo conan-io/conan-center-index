@@ -1,7 +1,7 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
@@ -36,6 +36,11 @@ class NiftiClibConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def validate(self):
+        if is_msvc(self) and self.options.shared:
+            # not supported due to not having dllexport definitions
+            raise ConanInvalidConfiguration(f"{self.ref} does not support -o {self.ref}:shared=True with MSVC compiler.")
 
     def configure(self):
         if self.options.shared:
