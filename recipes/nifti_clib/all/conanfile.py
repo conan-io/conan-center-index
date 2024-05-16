@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
@@ -33,9 +33,6 @@ class NiftiClibConan(ConanFile):
         "use_fslio": False  # Note in CMakeLists.txt: "If OFF, The copyright of this code is questionable for inclusion with nifti."
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -50,9 +47,9 @@ class NiftiClibConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.3.1")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.options.use_cifti:
-            self.requires("expat/2.6.2")
+            self.requires("expat/[>=2.6.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -63,10 +60,9 @@ class NiftiClibConan(ConanFile):
         tc.variables["USE_NIFTI2_CODE"] = self.options.use_nifti2
         tc.variables["USE_CIFTI_CODE"] = self.options.use_cifti
         tc.variables["USE_FSL_CODE"] = self.options.use_fslio
-        tc.variables["NIFTI_BUILD_TESTING"] = False  # maybe this should be false? It downloads extra test data
+        tc.variables["NIFTI_BUILD_TESTING"] = False  # disable building tests
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
             tc.preprocessor_definitions["_CRT_SECURE_NO_WARNINGS"] = 1
         tc.generate()
         tc = CMakeDeps(self)
@@ -74,17 +70,7 @@ class NiftiClibConan(ConanFile):
         tc = VirtualBuildEnv(self)
         tc.generate(scope="build")
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
-
-        if is_msvc(self):  # patch in __declspec(dllimport) for a global variable that is used
-            to_replace = "extern char const * const inam[];"
-            fixed = "__declspec(dllimport) " + to_replace
-            replace_in_file(self, os.path.join(self.source_folder, "nifticdf", "nifticdf.h"), to_replace, fixed, strict=True)
-
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
