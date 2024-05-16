@@ -1010,6 +1010,12 @@ Prefix = ..""")
             if self.options.gui:
                 _create_private_module("Quick", ["CorePrivate", "GuiPrivate", "QmlPrivate", "Quick"])
 
+            if self.options.gui:
+                _create_private_module("Quick", ["CorePrivate", "GuiPrivate", "QmlPrivate", "Quick"])
+
+        if self.options.qtscxml:
+            _create_private_module("Scxml", ["Scxml", "Qml"])
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Qt5")
         self.cpp_info.set_property("pkg_config_name", "qt5")
@@ -1370,6 +1376,7 @@ Prefix = ..""")
 
         if self.options.qtscxml:
             _create_module("Scxml", ["Qml"])
+            _add_build_module("qtScxml", self._cmake_qt5_private_file("Scxml"))
 
         if self.options.qtpurchasing:
             _create_module("Purchasing")
