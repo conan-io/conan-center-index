@@ -21,12 +21,10 @@ class PahoMqttCppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "ssl": [True, False, "deprecated"], # TODO: deprecated option, to remove in few months
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "ssl": "deprecated",
     }
 
     @property
@@ -47,10 +45,6 @@ class PahoMqttCppConan(ConanFile):
         suffix = "" if Version(conan_version).major < "2" else "/*"
         self.options[f"paho-mqtt-c{suffix}"].shared = self.options.shared
 
-        # TODO: deprecated option, to remove in few months
-        if self.options.ssl != "deprecated":
-            self.output.warning("ssl option is deprecated, do not use anymore")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -58,10 +52,6 @@ class PahoMqttCppConan(ConanFile):
         # Headers are exposed https://github.com/conan-io/conan-center-index/pull/16760#issuecomment-1502420549
         # Symbols are exposed   "_MQTTProperties_free", referenced from: mqtt::connect_options::~connect_options() in test_package.cpp.o
         self.requires("paho-mqtt-c/1.3.13", transitive_headers=True, transitive_libs=True)
-
-    def package_id(self):
-        # TODO: deprecated option, to remove in few months
-        del self.info.options.ssl
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
