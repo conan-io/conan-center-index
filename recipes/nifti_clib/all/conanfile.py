@@ -67,8 +67,6 @@ class NiftiClibConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
 
     def build(self):
         cmake = CMake(self)
