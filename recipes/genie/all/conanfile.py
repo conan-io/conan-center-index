@@ -57,8 +57,10 @@ class GenieConan(ConanFile):
         }[str(self.settings.os)]
 
     def _patch_compiler(self, cc, cxx):
-        replace_in_file(self, os.path.join(self.source_folder, "build", f"gmake.{self._os}", "genie.make"), "CC  = gcc", f"CC  = {cc}")
-        replace_in_file(self, os.path.join(self.source_folder, "build", f"gmake.{self._os}", "genie.make"), "CXX = g++", f"CXX = {cxx}")
+        makefile = os.path.join(self.source_folder, "build", f"gmake.{self._os}", "genie.make")
+        
+        replace_in_file(self, makefile, "CC  = gcc", f"CC = {cc}" if cc else "")
+        replace_in_file(self, makefile, "CXX = g++", f"CXX = {cxx}" if cxx else "")
 
     @property
     def _genie_config(self):
@@ -79,19 +81,7 @@ class GenieConan(ConanFile):
             self._patch_compiler("cccl", "cccl")
             self.run("make", cwd=self.source_folder)
         else:
-            cc = os.environ.get("CC")
-            cxx = os.environ.get("CXX")
-            if is_apple_os(self):
-                if not cc:
-                    cc = "clang"
-                if not cxx:
-                    cxx = "clang"
-            else:
-                if not cc:
-                    cc = "clang" if self.settings.compiler == "clang" else "gcc"
-                if not cxx:
-                    cxx = "clang++" if self.settings.compiler == "clang" else "g++"
-            self._patch_compiler(cc, cxx)
+            self._patch_compiler("", "")
 
             autotools = Autotools(self)
             autotools.make(args=[f"-C {self.source_folder}", f"OS={self._os}", f"config={self._genie_config}"])

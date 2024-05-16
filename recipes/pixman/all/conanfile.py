@@ -1,7 +1,6 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
@@ -11,7 +10,6 @@ from conan.tools.files import (
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -50,12 +48,8 @@ class PixmanConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def validate(self):
-        if self.settings.os == "Windows" and self.options.shared and Version(self.version) < "0.40.0":
-            raise ConanInvalidConfiguration(f"pixman/{self.version} can only be built as a static library on Windows")
-
     def build_requirements(self):
-        self.tool_requires("meson/1.2.3")
+        self.tool_requires("meson/1.4.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
