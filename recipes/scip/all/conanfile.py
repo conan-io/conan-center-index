@@ -121,6 +121,7 @@ class SCIPConan(ConanFile):
         tc.variables["PAPILO"] = False  # LGPL
         tc.variables["ZIMPL"] = False  # LPGL
         tc.variables["IPOPT"] = False  # no such coin package on conan center yet
+        tc.variables["BUILD_TESTING"] = False  # do not build documentation and examples
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("sopex", "cmake_file_name", "SOPEX")
