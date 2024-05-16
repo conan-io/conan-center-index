@@ -96,4 +96,3 @@ class AsyncppRecipe(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["asyncpp"]
         self.cpp_info.set_property("cmake_file_name", "asyncpp")
-        self.cpp_info.set_property("cmake_target_name", "asyncpp")
