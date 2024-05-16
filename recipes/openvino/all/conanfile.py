@@ -14,7 +14,6 @@ required_conan_version = ">=1.60.0 <2.0 || >=2.0.8"
 class OpenvinoConan(ConanFile):
     name = "openvino"
 
-    # Optional metadata
     license = "Apache-2.0"
     homepage = "https://github.com/openvinotoolkit/openvino"
     url = "https://github.com/conan-io/conan-center-index"
