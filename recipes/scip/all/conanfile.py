@@ -35,7 +35,7 @@ class SCIPConan(ConanFile):
         "with_sym": "bliss",
     }
     soplex_version_belonging_to_me = {
-        "9.0.0": "7.0.0",
+        "9.0.1": "7.0.1",
         "8.1.0": "6.0.4",
         "8.0.4": "6.0.4",
         "8.0.3": "6.0.3"
