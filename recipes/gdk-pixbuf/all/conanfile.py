@@ -123,8 +123,6 @@ class GdkPixbufConan(ConanFile):
             "man": "false",
             "installed_tests": "false"
         })
-        if Version(self.version) < "2.42.0":
-            tc.project_options["gir"] = "false"
 
         if Version(self.version) >= "2.42.8":
             tc.project_options.update({
