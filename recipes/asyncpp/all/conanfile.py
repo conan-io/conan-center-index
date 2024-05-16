@@ -81,7 +81,7 @@ class AsyncppRecipe(ConanFile):
         tc.variables["ASYNCPP_BUILD_BENCHMARKS"] = "OFF"
         tc.generate()
         venv = VirtualBuildEnv(self)
-        venv.generate(scope="build")
+        venv.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -95,4 +95,8 @@ class AsyncppRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["asyncpp"]
-        self.cpp_info.set_property("cmake_file_name", "asyncpp")
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.bindirs = ["libs"]
+
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.system_libs = ["pthread"]
