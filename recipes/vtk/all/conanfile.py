@@ -1067,7 +1067,9 @@ class VtkConan(ConanFile):
                 # these are the public depends ONLY
                 # For consumers of this VTK recipe, they need to also link the public depends of a module.
                 # Optional and Private depends (in VTK's world) are only used when building VTK.
-                for section in ["depends"]:
+                # We still need to include the private_depends for the linker to correctly gather the libs.
+                # But, this will also expose private header includes for the consumer.
+                for section in ["depends", "private_depends"]:
                     for dep in vtkmods["modules"][module_name][section]:
                         depname = dep.split(':')[2]
                         if depname in self.cpp_info.components:
