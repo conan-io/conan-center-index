@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rmdir, export_conandata_patches
+from conan.tools.files import copy, get, replace_in_file, rmdir, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 
@@ -52,7 +52,7 @@ class PackageConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_libcrypto == "openssl":
-            self.requires("openssl/[>=1.1 <=3.1]")
+            self.requires("openssl/[>=1.1 <4]")
         elif self.options.with_libcrypto == "libressl":
             self.requires("libressl/3.9.1")
         if self.options.with_pam == "openpam":
@@ -66,6 +66,10 @@ class PackageConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        if self.version in ["9.1p1", "9.6p1"]:
+            # Backport configure script fix to accept OpenSSL versions in the 3.x series
+            # See https://github.com/openssh/openssh-portable/commit/2eded551ba96e66bc3afbbcc883812c2eac02bd7
+            replace_in_file(self, join(self.source_folder, "configure"), "300*", "30*")
 
     def generate(self):
         env = VirtualBuildEnv(self)
