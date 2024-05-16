@@ -1,0 +1,9 @@
+sources:
+  "0.12.0":
+    url: "https://github.com/facebook/hermes/archive/refs/tags/v0.12.0.tar.gz"
+    sha256: "bd8fd158381813483123eb1ab553ed08db68e4949f314c99ee8fa79fa8f3e7ed"
+patches:
+  "0.12.0":
+    - patch_file: "patches/0001-include-cstdint.patch"
+      patch_description: "include cstdint"
+      patch_type: "portability"

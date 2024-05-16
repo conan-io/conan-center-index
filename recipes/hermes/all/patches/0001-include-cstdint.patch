@@ -1,0 +1,24 @@
+diff --git a/include/hermes/Support/SHA1.h b/include/hermes/Support/SHA1.h
+index cfc82b4..80da5df 100644
+--- a/include/hermes/Support/SHA1.h
++++ b/include/hermes/Support/SHA1.h
+@@ -10,6 +10,7 @@
+ 
+ #include <array>
+ #include <string>
++#include <cstdint>
+ 
+ namespace hermes {
+ 
+diff --git a/public/hermes/Public/DebuggerTypes.h b/public/hermes/Public/DebuggerTypes.h
+index fe65180..977b6e0 100644
+--- a/public/hermes/Public/DebuggerTypes.h
++++ b/public/hermes/Public/DebuggerTypes.h
+@@ -10,6 +10,7 @@
+ 
+ #include <string>
+ #include <vector>
++#include <cstdint>
+ 
+ namespace hermes {
+ namespace vm {
