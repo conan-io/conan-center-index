@@ -1106,6 +1106,9 @@ Prefix = ..""")
         ]
         self.cpp_info.components["qtCore"].set_property("pkg_config_custom_content", "\n".join(pkg_config_vars))
 
+        if self.settings.build_type != "Debug":
+            self.cpp_info.components['qtCore'].defines.append('QT_NO_DEBUG')
+
         if self.settings.os == "Windows":
             module = "WinMain"
             componentname = f"qt{module}"
