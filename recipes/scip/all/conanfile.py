@@ -72,6 +72,9 @@ class SCIPConan(ConanFile):
             raise ConanInvalidConfiguration("Bliss does not support libc++.")
         if self.dependencies["soplex"].options.with_gmp and not self.options.with_gmp:
             raise ConanInvalidConfiguration("The options 'with_gmp' should be aligned with 'soplex:with_gmp' too.")
+        if Version(self.version) >= "9.0.1" and is_msvc(self) and self.settings.build_type == "Debug":
+            # lpi_spx2.cpp : error C1128: number of sections exceeded object file format limit: compile with /bigobj
+            raise ConanInvalidConfiguration(f"{self.ref} can not be build in Debug with MSVC.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
