@@ -1267,10 +1267,10 @@ class VtkConan(ConanFile):
                     "cli11":             [False, "cli11/[>=2.3.2]",             "cli11::cli11"  ],
                     "doubleconversion":  [False, "double-conversion/[>=3.2.1]", "double-conversion::double-conversion" ],
                     "eigen":             [False, "eigen/[>=3.4.0]",             "eigen::eigen"  ],
-                    "expat":             [True,  "expat/[=2.6.0]",              "expat::expat"  ],  # TODO conflict: wayland (2.5.0)
+                    "expat":             [True,  "expat/[>=2.6.2 <3]",          "expat::expat"  ],  # TODO conflict: wayland (2.5.0), sub 2.6.2 had a security issue
                     "exprtk":            [True,  "exprtk/[=0.0.1]",             "exprtk::exprtk"],  # TODO upgrade to 0.0.2 (there was a problem with first attempt)
                     "fmt":               [True,  "fmt/[=8.1.1]",                "fmt::fmt"      ],  # TODO must be 8.1.1 for some reason ... VTK 9.1.0 release docs mention a PR - confirmed merged 8.1.0, will be bumped in future VTK release
-                    "freetype":          [False, "freetype/[>=2.13.0]",         "freetype::freetype" ],
+                    "freetype":          [False, "freetype/[>=2.13.2]",         "freetype::freetype" ],
                     "glew":              [False, "glew/[>=2.2.0]",              "glew::glew"    ],
                     "hdf5":              [True,  "hdf5/[=1.14.3]",              "hdf5::hdf5"    ],  # TODO conflict: netcdf (.1) and cgns (.0)
                     "jsoncpp":           [False, "jsoncpp/[>=1.9.4]",           "jsoncpp::jsoncpp"  ],
@@ -1279,7 +1279,7 @@ class VtkConan(ConanFile):
                     "lz4":               [False, "lz4/[>=1.9.4]",               "lz4::lz4"          ],
 
                     "png":               [True,  "libpng/[=1.6.42]",            "libpng::libpng"    ],  # TODO conflict: libharu (.40) and freetype (.42)
-                    "libxml2":           [True,  "libxml2/[=2.12.4]",           "libxml2::libxml2"  ],  # TODO conflict: xkbcommon (2.12.3)
+                    "libxml2":           [True,  "libxml2/[>=2.12.5 <4]",       "libxml2::libxml2"  ],  # TODO conflict: xkbcommon (2.12.3), sub 2.12.4 had a security issue
 
                     "netcdf":            [False, "netcdf/[>=4.8.1]",            "netcdf::netcdf"    ],
                     "nlohmannjson":      [False, "nlohmann_json/[>=3]",         "nlohmann_json::nlohman_json" ],
@@ -1291,12 +1291,12 @@ class VtkConan(ConanFile):
                     "libproj":           [False, "proj/[>=9.1.1]",              "proj::proj"        ],
                     "pugixml":           [False, "pugixml/[>=1.13]",            "pugixml::pugixml"  ],
 
-                    "sqlite":            [True,  "sqlite3/[=3.45.1]",           "sqlite3::sqlite3"  ],  # TODO conflict: qt (3.44.2) and proj (3.44.2)
+                    "sqlite":            [True,  "sqlite3/[=3.45.3]",           "sqlite3::sqlite3"  ],  # TODO conflict: qt (3.44.2) and proj (3.44.2)
 
                     "theora":            [False, "theora/[>=1.1.1]",            "theora::theora"    ],
 
                     "utf8":              [False, "utfcpp/[>=3.2.3]",            "utfcpp::utfcpp"    ],
-                    "lzma":              [False, "xz_utils/[>=5.4.2]",          "xz_utils::xz_utils"], # note: VTK calls this lzma
+                    "lzma":              [False, "xz_utils/[>=5.4.5]",          "xz_utils::xz_utils"], # note: VTK calls this lzma
                     "zlib":              [False, "zlib/[>=1.2.13]",             "zlib::zlib"        ],
                     "tiff":              [False, "libtiff/[>=4.4.0]",           "libtiff::libtiff"  ],
 
@@ -1340,11 +1340,11 @@ class VtkConan(ConanFile):
                     "cli11":             [False, "cli11/[>=2.3.2]",             "cli11::cli11"  ],
                     "doubleconversion":  [False, "double-conversion/[>=3.2.1]", "double-conversion::double-conversion" ],
                     "eigen":             [False, "eigen/[>=3.4.0]",             "eigen::eigen"  ],
-                    "expat":             [True,  "expat/[=2.6.0]",              "expat::expat"  ],  # TODO conflict: wayland (2.5.0)
+                    "expat":             [True,  "expat/[>=2.6.2 <3]",          "expat::expat"  ],  # TODO conflict: wayland (2.5.0), sub 2.6.2 had a security issue
                     "exprtk":            [True,  "exprtk/[=0.0.1]",             "exprtk::exprtk"],  # TODO upgrade to 0.0.2 (there was a problem with first attempt)
                     "fast_float":        [False, "fast_float/3.9.0",            "fast_float::fast_float"],
                     "fmt":               [True,  "fmt/10.2.1",                  "fmt::fmt"      ],
-                    "freetype":          [False, "freetype/[>=2.13.0]",         "freetype::freetype" ],
+                    "freetype":          [False, "freetype/[>=2.13.2]",         "freetype::freetype" ],
                     "glew":              [False, "glew/[>=2.2.0]",              "glew::glew"    ],
                     "hdf5":              [True,  "hdf5/[=1.14.3]",              "hdf5::hdf5"    ],  # TODO conflict: netcdf (.1) and cgns (.0)
                     "jsoncpp":           [False, "jsoncpp/[>=1.9.4]",           "jsoncpp::jsoncpp"  ],
@@ -1353,7 +1353,7 @@ class VtkConan(ConanFile):
                     "lz4":               [False, "lz4/[>=1.9.4]",               "lz4::lz4"          ],
 
                     "png":               [True,  "libpng/[=1.6.42]",            "libpng::libpng"    ],  # TODO conflict: libharu (.40) and freetype (.42)
-                    "libxml2":           [True,  "libxml2/[=2.12.4]",           "libxml2::libxml2"  ],  # TODO conflict: xkbcommon (2.12.3)
+                    "libxml2":           [True,  "libxml2/[>=2.12.5 <4]",       "libxml2::libxml2"  ],  # TODO conflict: xkbcommon (2.12.3), sub 2.12.4 had a security issue
 
                     "netcdf":            [False, "netcdf/[>=4.8.1]",            "netcdf::netcdf"    ],
                     "nlohmannjson":      [False, "nlohmann_json/[>=3]",         "nlohmann_json::nlohman_json" ],
@@ -1365,12 +1365,12 @@ class VtkConan(ConanFile):
                     "libproj":           [False, "proj/[>=9.1.1]",              "proj::proj"        ],
                     "pugixml":           [False, "pugixml/[>=1.13]",            "pugixml::pugixml"  ],
 
-                    "sqlite":            [True,  "sqlite3/[=3.45.1]",           "sqlite3::sqlite3"  ],  # TODO conflict: qt (3.44.2) and proj (3.44.2)
+                    "sqlite":            [True,  "sqlite3/[=3.45.3]",           "sqlite3::sqlite3"  ],  # TODO conflict: qt (3.44.2) and proj (3.44.2)
 
                     "theora":            [False, "theora/[>=1.1.1]",            "theora::theora"    ],
 
                     "utf8":              [False, "utfcpp/[>=3.2.3]",            "utfcpp::utfcpp"    ],
-                    "lzma":              [False, "xz_utils/[>=5.4.2]",          "xz_utils::xz_utils"], # note: VTK calls this lzma
+                    "lzma":              [False, "xz_utils/[>=5.4.5]",          "xz_utils::xz_utils"], # note: VTK calls this lzma
                     "zlib":              [False, "zlib/[>=1.2.13]",             "zlib::zlib"        ],
                     "tiff":              [False, "libtiff/[>=4.4.0]",           "libtiff::libtiff"  ],
 
