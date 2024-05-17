@@ -36,12 +36,14 @@ class NiftiClibConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def validate(self):
+        if is_msvc(self) and self.options.shared:
             # not supported due to not having dllexport definitions
-            del self.options.shared
-            package_type = "static-library"
+            raise ConanInvalidConfiguration(f"{self.ref} does not support -o {self.ref}:shared=True with MSVC compiler.")
 
     def configure(self):
-        if self.options.get_safe("shared"):
+        if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
