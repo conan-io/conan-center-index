@@ -21,8 +21,10 @@ class TestPackageConan(ConanFile):
         venv = VirtualRunEnv(self)
         venv.generate(scope="build")
         venv.generate(scope="run")
+
         tc = CMakeToolchain(self)
         tc.variables["protobuf_LITE"] = self.dependencies[self.tested_reference_str].options.lite
+        tc.cache_variables["CMAKE_PROJECT_test_package_INCLUDE"] = os.path.join(self.source_folder, "macos_make_override.cmake")
         tc.generate()
 
     def build(self):
