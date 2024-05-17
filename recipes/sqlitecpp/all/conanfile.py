@@ -98,8 +98,9 @@ class SQLiteCppConan(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
 
-        pc = PkgConfigDeps(self)
-        pc.generate()
+        if self.options.get_safe("with_sqlcipher"):
+            pc = PkgConfigDeps(self)
+            pc.generate()
 
     def build(self):
         self._patch_sources()
