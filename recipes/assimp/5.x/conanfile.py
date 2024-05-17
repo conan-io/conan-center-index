@@ -270,20 +270,18 @@ class AssimpConan(ConanFile):
         apply_conandata_patches(self)
 
         # Don't force several compiler and linker flags
-        replace_mapping = [
-            ("-fPIC", ""),
-            ("-g ", ""),
-            ("/WX", ""),
-            ("-Werror", ""),
-            ("SET(CMAKE_POSITION_INDEPENDENT_CODE ON)", ""),
-            ('SET(CMAKE_CXX_FLAGS_DEBUG "/D_DEBUG /MDd /Ob2 /DEBUG:FULL /Zi")', ""),
-            ('SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_DEBUG /Zi /Od")', ""),
-            ('SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")', ""),
-            ('SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG:FULL /PDBALTPATH:%_PDB% /OPT:REF /OPT:ICF")', ""),
-        ]
-        for before, after in replace_mapping:
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), before, after, strict=False)
-            replace_in_file(self, os.path.join(self.source_folder, "code", "CMakeLists.txt"), before, after, strict=False)
+        for pattern in [
+            "-fPIC",
+            "-g ",
+            "SET(CMAKE_POSITION_INDEPENDENT_CODE ON)",
+            'SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_DEBUG /Zi /Od")',
+            'SET(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /DEBUG:FULL /PDBALTPATH:%_PDB% /OPT:REF /OPT:ICF")',
+        ]:
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), pattern, "")
+
+        for pattern in ["-Werror", "/WX"]:
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), pattern, "")
+            replace_in_file(self, os.path.join(self.source_folder, "code", "CMakeLists.txt"), pattern, "")
 
         # Make sure vendored libs are not used by accident by removing their subdirs
         allow_vendored = ["Open3DGC"]
