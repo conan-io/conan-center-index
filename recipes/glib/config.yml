@@ -17,3 +17,5 @@ versions:
     folder: all
   "2.75.3":
     folder: all
+  "2.54.0":
+    folder: old

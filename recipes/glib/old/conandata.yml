@@ -1,0 +1,9 @@
+sources:
+  "2.54.3":
+    url: "https://mirror.ossplanet.net/gnome/sources/glib/2.54/glib-2.54.3.tar.xz"
+    sha256: "963fdc6685dc3da8e5381dfb9f15ca4b5709b28be84d9d05a9bb8e446abac0a8"
+patches:
+  "2.54.3":
+    - patch_file: "patches/libintl-discovery-2.54.3.patch"
+      patch_type: bugfix
+      patch_description: fix libintl discovery

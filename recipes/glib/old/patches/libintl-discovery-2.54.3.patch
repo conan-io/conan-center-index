@@ -1,0 +1,95 @@
+From d5ea854c84e004ae86515d774ea2029da9f0a8e3 Mon Sep 17 00:00:00 2001
+From: NiceBlueChai <bluechai@qq.com>
+Date: Sat, 18 May 2024 18:52:12 +0800
+Subject: [PATCH] fix discover libintl
+
+---
+ glib/gnulib/meson.build |  2 +-
+ meson.build             | 56 +++++++++++++++++++++++++++++++++++------
+ 2 files changed, 50 insertions(+), 8 deletions(-)
+
+diff --git a/glib/gnulib/meson.build b/glib/gnulib/meson.build
+index 6746631..8ceff7d 100644
+--- a/glib/gnulib/meson.build
++++ b/glib/gnulib/meson.build
+@@ -1,4 +1,4 @@
+ gnulib_lib = static_library('gnulib', 'asnprintf.c', 'printf.c', 'printf-args.c', 'printf-parse.c', 'vasnprintf.c',
+-  include_directories : configinc,
++  include_directories : [configinc, glibinc, include_directories ('.')],
+   pic : true,
+   c_args : [ '-DLIBDIR="@0@"'.format(get_option('libdir')), '-DGLIB_COMPILATION', '-DG_LOG_DOMAIN="GLib"' ] + glib_hidden_visibility_args)
+diff --git a/meson.build b/meson.build
+index af6ca0d..53ce39a 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1462,18 +1462,60 @@ else
+   endif
+ endif
+ 
+-# Only used on non-glibc targets
+-libintl = cc.find_library('intl', required : false)
+-if host_system == 'windows' and not libintl.found()
+-  # Used only when the gettext library is not available (MSVC, not MinGW)
+-  libintl = subproject('proxy-libintl').get_variable('intl_dep')
+-  glib_conf.set('HAVE_DCGETTEXT', 1)
++
++# First check in libc, fallback to libintl, and as last chance build
++# proxy-libintl subproject.
++# FIXME: glib-gettext.m4 has much more checks to detect broken/uncompatible
++# implementations. This could be extended if issues are found in some platforms.
++libintl_deps = []
++libintl_prefix = '#include <libintl.h>'
++libintl = dependency('intl', required: false)
++if libintl.found() and libintl.type_name() != 'internal'
++  # libintl supports different threading APIs, which may not
++  # require additional flags, but it defaults to using pthreads if
++  # found. Meson's "threads" dependency does not allow you to
++  # prefer pthreads. We may not be using pthreads for glib itself
++  # either so just link the library to satisfy libintl rather than
++  # also defining the macros with the -pthread flag.
++  #
++  # Meson's builtin dependency lookup as of 0.60.0 doesn't check for
++  # pthread, so we do this manually here.
++  if cc.has_function('ngettext', dependencies : libintl, prefix: libintl_prefix)
++    libintl_deps += [libintl]
++  else
++    libintl_iconv = cc.find_library('iconv', required : false)
++    if libintl_iconv.found() and cc.has_function('ngettext', args : osx_ldflags, dependencies : [libintl, libintl_iconv])
++      libintl_deps += [libintl, libintl_iconv]
++    else
++      libintl_pthread = cc.find_library('pthread', required : false)
++      if libintl_pthread.found() and cc.has_function('ngettext', dependencies : [libintl, libintl_pthread], prefix: libintl_prefix)
++        libintl_deps += [libintl, libintl_pthread]
++      else
++        libintl = disabler()
++      endif
++    endif
++  endif
++endif
++
++if libintl.found() and libintl.type_name() != 'internal'
++  have_bind_textdomain_codeset = cc.has_function('bind_textdomain_codeset', dependencies: libintl_deps, prefix: libintl_prefix)
+ else
+-  glib_conf.set('HAVE_DCGETTEXT', cc.has_header_symbol('libintl.h', 'dcgettext'))
++  # using proxy-libintl fallback
++  libintl = dependency('intl', allow_fallback: true)
++  assert(libintl.type_name() == 'internal')
++  libintl_deps = [libintl]
++  have_bind_textdomain_codeset = true  # proxy-libintl supports it
+ endif
++
++glib_conf.set('HAVE_BIND_TEXTDOMAIN_CODESET', have_bind_textdomain_codeset)
++
+ # We require gettext to always be present
++glib_conf.set('HAVE_DCGETTEXT', 1)
+ glib_conf.set('HAVE_GETTEXT', 1)
++
+ glib_conf.set_quoted('GLIB_LOCALE_DIR', join_paths(glib_datadir, 'locale'))
++
++
+ # xgettext is optional (on Windows for instance)
+ xgettext = find_program('xgettext', required : false)
+ 
+-- 
+2.42.0.windows.2
+
