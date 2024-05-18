@@ -14,11 +14,11 @@ class MsdfgenConan(ConanFile):
     name = "msdfgen"
     description = "Multi-channel signed distance field generator"
     license = "MIT"
-    topics = ("msdf", "shape", "glyph", "font")
-    homepage = "https://github.com/Chlumsky/msdfgen"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "https://github.com/Chlumsky/msdfgen"
+    topics = ("msdf", "shape", "glyph", "font")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],

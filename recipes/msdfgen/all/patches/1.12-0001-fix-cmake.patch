@@ -1,0 +1,24 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 44e8fe0..46e480c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,6 +2,9 @@
+ cmake_minimum_required(VERSION 3.15)
+ include(cmake/version.cmake)
+ 
++# Version is specified in vcpkg.json
++project(msdfgen VERSION ${MSDFGEN_VERSION} LANGUAGES CXX)
++
+ option(MSDFGEN_CORE_ONLY "Only build the core library with no dependencies" OFF)
+ option(MSDFGEN_BUILD_STANDALONE "Build the msdfgen standalone executable" ON)
+ option(MSDFGEN_USE_VCPKG "Use vcpkg package manager to link project dependencies" ON)
+@@ -64,9 +67,6 @@ if(MSDFGEN_USE_VCPKG)
+     endif()
+ endif()
+ 
+-# Version is specified in vcpkg.json
+-project(msdfgen VERSION ${MSDFGEN_VERSION} LANGUAGES CXX)
+-
+ if(MSDFGEN_DYNAMIC_RUNTIME)
+     set(MSDFGEN_MSVC_RUNTIME "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+ else()
