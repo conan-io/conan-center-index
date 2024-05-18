@@ -4,6 +4,9 @@ sources:
     sha256: "ffba405f53822cac80491702a6b7c5490dc109474a0f37556bd00ddb69433309"
 patches:
   "1.0.0":
-    - patch_file: "patches/1.0.0-0001-use-cci.patch"
+    - patch_file: "patches/1.0.0-0001-disable-werror.patch"
+      patch_description: "correct the order of cmake min and project"
+      patch_type: "conan"
+    - patch_file: "patches/1.0.0-0002-use-cci.patch"
       patch_description: "correct the order of cmake min and project"
       patch_type: "conan"
