@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMakeToolchain, CMake
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save, rename
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, msvs_toolset, MSBuildDeps, check_min_vs
@@ -66,11 +66,11 @@ class ImageMagicConan(ConanFile):
         "with_pango": True,
         "with_png": True,
         "with_tiff": True,
-        "with_webp": False,
+        "with_webp": True,
         "with_xml2": True,
         "with_freetype": True,
-        "with_djvu": False,
-        "utilities": True,
+        "with_djvu": True,
+        "utilities": False,
     }
 
     def export_sources(self):
@@ -120,7 +120,7 @@ class ImageMagicConan(ConanFile):
         if self.options.with_tiff:
             self.requires("libtiff/4.6.0")
         if self.options.with_webp:
-            self.requires("libwebp/1.4.0")
+            self.requires("libwebp/1.3.2")
         if self.options.with_xml2:
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_freetype:
@@ -358,12 +358,12 @@ class ImageMagicConan(ConanFile):
             with chdir(self, self.source_folder):
                 autotools = Autotools(self)
                 autotools.install()
-            with chdir(self, self.package_folder):
-                # remove undesired files
-                rmdir(self, os.path.join("lib", "pkgconfig"))  # pc files
-                rmdir(self, "etc")
-                rmdir(self, "share")
-                rm(self, "*.la", "lib", recursive=True)
+            rename(self,
+                   os.path.join(self.package_folder, "share"),
+                   os.path.join(self.package_folder, "res"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "etc"))
+            rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
 
     @property
     def _lib_infix(self):
