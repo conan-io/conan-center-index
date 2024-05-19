@@ -99,12 +99,10 @@ class KtxConan(ConanFile):
             os.remove(os.path.join(basisu_dir, "encoder", "lodepng.h"))
         ## zstd
         rmdir(self, os.path.join(basisu_dir, "zstd"))
-        # Disable -Werror (newer versions have it disabled by default)
-        if self.version == "4.2.1":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+        # disable -Werror
+        if Version(self.version) >= "4.3.2":
+            replace_in_file(self, os.path.join(self.source_folder, "lib", "astc-encoder", "Source", "cmake_core.cmake"),
                             "-Werror", "")
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "/WX", "")
 
     def build(self):
         self._patch_sources()
