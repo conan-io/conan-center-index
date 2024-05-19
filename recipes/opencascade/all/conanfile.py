@@ -76,7 +76,21 @@ class OpenCascadeConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if Version(self.version) >= "7.8":
+            return "14"
         return "11"
+
+    @property
+    def _compilers_minimum_version(self):
+        if Version(self.version) >= "7.8":
+            return {
+                "gcc": "7",
+                "clang": "7",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            }
+        return {}
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -102,7 +116,7 @@ class OpenCascadeConan(ConanFile):
         self.requires("tcl/8.6.10")
         if self._link_tk:
             self.requires("tk/8.6.10")
-        self.requires("freetype/2.13.0")
+        self.requires("freetype/2.13.2")
         if self._link_opengl:
             self.requires("opengl/system")
         if self._is_linux:
@@ -110,13 +124,13 @@ class OpenCascadeConan(ConanFile):
             self.requires("xorg/system")
         # TODO: add vtk support?
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/6.0")
+            self.requires("ffmpeg/6.1")
         if self.options.with_freeimage:
             self.requires("freeimage/3.18.0")
         if self.options.with_openvr:
             self.requires("openvr/1.16.8")
         if self.options.with_rapidjson:
-            self.requires("rapidjson/1.1.0")
+            self.requires("rapidjson/cci.20230929")
         if self.options.get_safe("with_draco"):
             self.requires("draco/1.5.6")
         if self.options.with_tbb:
@@ -128,16 +142,26 @@ class OpenCascadeConan(ConanFile):
         if self.settings.compiler == "clang" and self.settings.compiler.version == "6.0" and \
            self.settings.build_type == "Release":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support Clang 6.0 if Release build type")
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-
-        # Inject C++ standard from profile since we have removed hardcoded C++ standard from upstream build files
-        if not valid_min_cppstd(self, self._min_cppstd):
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        if Version(self.version) < "7.7.0":
+            # Inject C++ standard from profile since we have removed hardcoded C++ standard from upstream build files
+            if not valid_min_cppstd(self, self._min_cppstd):
+                tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        else:
+            if not valid_min_cppstd(self, self._min_cppstd):
+                tc.cache_variables["BUILD_CPP_STANDARD"] = self._min_cppstd
+            else:
+                tc.cache_variables["BUILD_CPP_STANDARD"] = str(self.settings.compiler.cppstd)
 
         tc.cache_variables["BUILD_LIBRARY_TYPE"] = "Shared" if self.options.shared else "Static"
         tc.cache_variables["INSTALL_TEST_CASES"] = False
@@ -195,6 +219,9 @@ class OpenCascadeConan(ConanFile):
         occt_csf_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_csf.cmake")
         occt_defs_flags_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_defs_flags.cmake")
 
+        modules = os.path.join(self.source_folder, "adm", "MODULES")
+        replace_in_file(self, modules, "DETools TKExpress ExpToCasExe", "")
+            
         # Inject interface definitions of dependencies because opencascade
         # does not always link to CMake imported targets
         sorted_deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
@@ -412,26 +439,27 @@ class OpenCascadeConan(ConanFile):
 
         # Honor fPIC option, compiler.cppstd and compiler.libcxx
         replace_in_file(self, occt_defs_flags_cmake, "-fPIC", "")
-        replace_in_file(self, occt_defs_flags_cmake, "-std=c++0x", "")
-        replace_in_file(self, occt_defs_flags_cmake, "-std=gnu++0x", "")
+        if Version(self.version) < "7.8.0":
+            replace_in_file(self, occt_defs_flags_cmake, "-std=c++0x", "")
+            replace_in_file(self, occt_defs_flags_cmake, "-std=gnu++0x", "")
         replace_in_file(self, occt_defs_flags_cmake, "-stdlib=libc++", "")
         replace_in_file(self, occt_csf_cmake,
-                              "set (CSF_ThreadLibs  \"pthread rt stdc++\")",
-                              "set (CSF_ThreadLibs  \"pthread rt\")")
+                              'set (CSF_ThreadLibs  "pthread rt stdc++")',
+                              'set (CSF_ThreadLibs  "pthread rt")')
 
         # No hardcoded link through #pragma
         if Version(self.version) < "7.6.0":
             replace_in_file(
                 self,
                 os.path.join(self.source_folder, "src", "Font", "Font_FontMgr.cxx"),
-                "#pragma comment (lib, \"freetype.lib\")",
+                '#pragma comment (lib, "freetype.lib")',
                 "",
             )
             replace_in_file(
                 self,
                 os.path.join(self.source_folder, "src", "Draw", "Draw.cxx"),
-                """#pragma comment (lib, "tcl" STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")
-#pragma comment (lib, "tk"  STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")""",
+                '#pragma comment (lib, "tcl" STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")\n'
+                '#pragma comment (lib, "tk"  STRINGIZE2(TCL_MAJOR_VERSION) STRINGIZE2(TCL_MINOR_VERSION) ".lib")',
                 ""
             )
 
@@ -439,6 +467,7 @@ class OpenCascadeConan(ConanFile):
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
+        cmake.verbose = True
         cmake.build()
 
     def _replace_package_folder(self, source, target):
@@ -541,10 +570,11 @@ class OpenCascadeConan(ConanFile):
                     if dependency.startswith("TK") and dependency in packaged_libs_list:
                         component_deps.setdefault("internals", []).append(dependency)
                     elif dependency.startswith("CSF_"):
-                        deps_dict = csf_to_conan_dependencies[dependency]
-                        for dep_type, deps in deps_dict.items():
-                            if deps:
-                                component_deps.setdefault(dep_type, []).extend(deps)
+                        deps_dict = csf_to_conan_dependencies.get(dependency)
+                        if deps_dict:
+                            for dep_type, deps in deps_dict.items():
+                                if deps:
+                                    component_deps.setdefault(dep_type, []).extend(deps)
                 components.update({component_name: component_deps})
             modules.update({module_components[0]:components})
 
