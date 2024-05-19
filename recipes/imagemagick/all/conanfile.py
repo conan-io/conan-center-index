@@ -3,7 +3,7 @@ from pathlib import Path
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
+from conan.tools.build import can_run
 from conan.tools.cmake import CMakeToolchain, CMake
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save, rename
@@ -278,7 +278,7 @@ class ImageMagicConan(ConanFile):
         msbuild.build(os.path.join(self.source_folder, f"IM7.{solution_type}.sln"))
 
     def _generate_autotools(self):
-        if not cross_building(self):
+        if can_run(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
 
@@ -322,8 +322,6 @@ class ImageMagicConan(ConanFile):
 
         deps = PkgConfigDeps(self)
         deps.generate()
-
-
 
     def _build_autotools(self):
         with chdir(self, self.source_folder):
