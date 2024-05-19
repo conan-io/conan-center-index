@@ -190,6 +190,8 @@ class FFMpegConan(ConanFile):
         "disable_filters": None,
         "enable_filters": None,
     }
+    # Fix for mslink: Argument list too long
+    short_paths = True
 
     @property
     def _settings_build(self):
