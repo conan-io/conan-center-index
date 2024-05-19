@@ -144,8 +144,9 @@ class ImageMagicConan(ConanFile):
                 raise ConanInvalidConfiguration("with_lcms option is currently not supported on MSVC")
             if self.options.with_pango:
                 raise ConanInvalidConfiguration("with_pango option is currently not supported on MSVC")
-        if self.settings.compiler == "apple-clang" and cross_building(self):
-            raise ConanInvalidConfiguration("Cross-building on apple-clang is not supported")
+        if self.settings.compiler == "apple-clang" and self.options.shared:
+            # configure: error: cannot run C compiled programs.
+            raise ConanInvalidConfiguration("Shared build is not supported on apple-clang. Contributions are welcome.")
 
 
     def build_requirements(self):
