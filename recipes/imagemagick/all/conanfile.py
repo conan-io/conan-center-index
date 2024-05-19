@@ -3,7 +3,9 @@ from pathlib import Path
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
 from conan.tools.cmake import CMakeToolchain, CMake
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -206,7 +208,7 @@ class ImageMagicConan(ConanFile):
             "FREETYPE": self.options.with_freetype,
             "GS": False,
             "GVC": False,
-            "HEIC": False, # self.options.with_heic,
+            "HEIC": self.options.with_heic,
             "JBIG": self.options.with_jbig,
             "JP2": self.options.with_openjp2,
             "JPEG": self.options.with_jpeg,
@@ -276,6 +278,10 @@ class ImageMagicConan(ConanFile):
         msbuild.build(os.path.join(self.source_folder, f"IM7.{solution_type}.sln"))
 
     def _generate_autotools(self):
+        if not cross_building(self):
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         def yes_no(o):
             return "yes" if o else "no"
 
@@ -312,13 +318,12 @@ class ImageMagicConan(ConanFile):
         tc.generate()
 
         deps = AutotoolsDeps(self)
-        # FIXME: workaround for xorg/system adding system includes https://github.com/conan-io/conan-center-index/issues/6880
-        # if "/usr/include/uuid" in tc.include_paths:
-        #     tc.include_paths.remove("/usr/include/uuid")
         deps.generate()
 
         deps = PkgConfigDeps(self)
         deps.generate()
+
+
 
     def _build_autotools(self):
         with chdir(self, self.source_folder):
@@ -339,7 +344,7 @@ class ImageMagicConan(ConanFile):
             self._build_autotools()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
             output_dir = os.path.join(self.source_folder, "Output")
             copy(self, "NOTICE.txt", output_dir, os.path.join(self.package_folder, "licenses"))
