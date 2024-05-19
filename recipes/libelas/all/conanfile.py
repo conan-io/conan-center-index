@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get, rm, download, load, save, export_conandata_patches, apply_conandata_patches
@@ -48,6 +49,8 @@ class LibelasConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 98)
+        if self.settings.arch not in ["x86", "x86_64"]:
+            raise ConanInvalidConfiguration("Only x86 and x86_64 architectures are supported")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["sources"], strip_root=True)
