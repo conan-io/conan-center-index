@@ -2,3 +2,11 @@ sources:
   "2.45.1":
     url: "https://github.com/git/git/archive/refs/tags/v2.45.1.tar.gz"
     sha256: "d98c8f70d58f49f7546d59b25e25f2deae6999eb036a33b0fe6f5d07c33f67c6"
+patches:
+  "2.45.1":
+    - patch_file: "patches/fix-expat-and-replace-pkgconfig-in-cmake.patch"
+      patch_description: "Use module mode for find_package(EXPAT) and don't use pkg_check_modules"
+      patch_type: "conan"
+    - patch_file: "patches/fix-macos-in-cmake.patch"
+      patch_description: "Fix handling of MacOS in upstream CMake"
+      patch_type: "portability"

@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
 
@@ -26,6 +26,9 @@ class PackageConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+    
+    def export_sources(self):
+        export_conandata_patches(self)
     
     def validate(self):
         if cross_building(self):
@@ -68,32 +71,9 @@ class PackageConan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
+
         cmake_directory = os.path.join(self.source_folder, "contrib", "buildsystems")
-        cmake_file = os.path.join(cmake_directory, "CMakeLists.txt")
-
-        # TODO: replace below with patches
-
-        # FIXME: Handling of expat seems to be a little broken.
-        replace_in_file(self, cmake_file, "${EXPAT_LIBRARIES}", "expat::expat")
-        replace_in_file(self, cmake_file, "if(EXPAT_VERSION_STRING VERSION_LESS_EQUAL 1.2)", "if(FALSE)")
-
-        # For some reason, libpcre2 specifically uses pkgconfig within CMake, everything else uses find_package.
-        # To avoid extra complexity, just replace with a normal find_package
-        replace_in_file(self, cmake_file, "find_package(PkgConfig)", "")
-        replace_in_file(self, cmake_file, "if(PkgConfig_FOUND)", "if(TRUE)")
-        replace_in_file(self, cmake_file, "pkg_check_modules(PCRE2 libpcre2-8)", "find_package(PCRE2)")
-
-        if is_apple_os(self):
-            # RT doesn't exist on MacOS, and add in some reqisite frameworks.
-            replace_in_file(self, cmake_file,
-                            'target_link_libraries(common-main pthread rt)',
-                            'target_link_libraries(common-main pthread "-framework CoreFoundation" "-framework CoreServices")'
-                            )
-            # The CMake file only builds these files on Linux, but it probably just needs it anything that isn't Windows.
-            replace_in_file(self, cmake_file,
-                            'set(NO_UNIX_SOCKETS 1)\n\nelseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")',
-                            'set(NO_UNIX_SOCKETS 1)\n\nelse()'
-                            )
 
         cmake = CMake(self)
         cmake.configure(
