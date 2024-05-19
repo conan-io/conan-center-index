@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 from conan.tools.files import get, copy, rmdir, save, replace_in_file, export_conandata_patches, apply_conandata_patches, mkdir, rename
@@ -67,7 +68,7 @@ class GNSSTkConan(ConanFile):
         # https://github.com/SGL-UT/gnsstk/blob/v14.0.0/CMakeLists.txt#L41-L51
         tc.variables["BUILD_EXT"] = self.options.build_ext
         tc.variables["VERSIONED_HEADER_INSTALL"] = True
-        tc.variables["USE_RPATH"] = False
+        tc.variables["USE_RPATH"] = False  # Adds install directory to RPATH otherwise
         if not valid_min_cppstd(self, self._min_cppstd):
             # The C++ standard is not set correctly by the project for apple-clang
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
@@ -103,6 +104,7 @@ class GNSSTkConan(ConanFile):
             mkdir(self, os.path.join(self.package_folder, "bin"))
             rename(self, os.path.join(self.package_folder, "lib", "gnsstk.dll"),
                    os.path.join(self.package_folder, "bin", "gnsstk.dll"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         # https://github.com/SGL-UT/gnsstk/blob/stable/GNSSTKConfig.cmake.in
