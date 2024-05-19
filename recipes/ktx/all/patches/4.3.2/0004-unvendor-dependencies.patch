@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -252,7 +252,6 @@
+@@ -355,7 +355,6 @@
      lib/basisu/transcoder/basisu_transcoder.cpp
      lib/basisu/transcoder/basisu_transcoder.h
      lib/basisu/transcoder/basisu.h
@@ -8,8 +8,8 @@
      lib/checkheader.c
      lib/dfdutils/createdfd.c
      lib/dfdutils/colourspaces.c
-@@ -601,6 +600,10 @@
-     lib/writer2.c
+@@ -765,6 +764,10 @@
+     BASISD_SUPPORT_KTX2=0
  )
  
 +find_package(zstd REQUIRED CONFIG)

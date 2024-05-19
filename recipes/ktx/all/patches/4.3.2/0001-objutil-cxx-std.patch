@@ -1,6 +1,6 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -842,6 +842,6 @@
+@@ -972,6 +972,6 @@
  PUBLIC
      utils
  )
