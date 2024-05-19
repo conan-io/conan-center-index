@@ -6,3 +6,8 @@ sources:
     license:
       url: "https://raw.githubusercontent.com/kou1okada/libelas/master/README.TXT"
       sha256: "627924f4cb0fe790de303fe721233d227a6d0c1734ed39fa4641923dcb9c5b8f"
+patches:
+  "cci.20150630":
+    - patch_file: "patches/001-fix-cast.patch"
+      patch_type: "portability"
+      patch_description: "Add a missing explicit cast from int to float"

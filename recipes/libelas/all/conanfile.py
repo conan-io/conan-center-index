@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, rm, download, load, save
+from conan.tools.files import copy, get, rm, download, load, save, export_conandata_patches, apply_conandata_patches
 
 required_conan_version = ">=1.53.0"
 
@@ -28,6 +28,7 @@ class LibelasConan(ConanFile):
     }
 
     def export_sources(self):
+        export_conandata_patches(self)
         copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
@@ -60,6 +61,7 @@ class LibelasConan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

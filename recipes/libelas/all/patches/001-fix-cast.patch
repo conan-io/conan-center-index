@@ -1,0 +1,13 @@
+Fix
+error: non-constant-expression cannot be narrowed from type 'int32_t' (aka 'int') to 'float' in initializer list [-Wc++11-narrowing]
+--- elas.cpp
++++ elas.cpp
+@@ -874,7 +874,7 @@
+ 			tri_u[1] = p_support[c2].u-p_support[c2].d;
+ 			tri_u[2] = p_support[c3].u-p_support[c3].d;
+ 		}
+-		float tri_v[3] = {p_support[c1].v,p_support[c2].v,p_support[c3].v};
++		float tri_v[3] = {static_cast<float>(p_support[c1].v), static_cast<float>(p_support[c2].v), static_cast<float>(p_support[c3].v)};
+ 
+ 		for (uint32_t j=0; j<3; j++) {
+ 			for (uint32_t k=0; k<j; k++) {
