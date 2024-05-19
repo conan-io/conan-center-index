@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
@@ -63,6 +64,9 @@ class KtxConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
+        if Version(self.version) >= "4.2" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 6:
+            # astcenc_vecmathlib_sse_4.h:809:41: error: the last argument must be a 4-bit immediate
+            raise ConanInvalidConfiguration("GCC v6+ is required")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
