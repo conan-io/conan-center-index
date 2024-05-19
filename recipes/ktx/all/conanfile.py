@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, save
 from conan.tools.scm import Version
 import os
 
@@ -70,6 +70,10 @@ class KtxConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Avoid copying of 300 MB of test assets and third-party binaries
+        rmdir(self, os.path.join(self.source_folder, "tests"))
+        rmdir(self, os.path.join(self.source_folder, "other_lib"))
+        save(self, os.path.join(self.source_folder, "tests", "CMakeLists.txt"), "")
 
     def generate(self):
         tc = CMakeToolchain(self)
