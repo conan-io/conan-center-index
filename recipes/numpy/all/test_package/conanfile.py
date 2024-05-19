@@ -29,4 +29,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             self.run('python -c "import test_package; print(test_package.create_numpy_array())"',
-                     env=["conanbuild", "conanrun"], cwd=self.cpp.build.bindir)
+                     env=["conanbuild", "conanrun"], cwd=self.build_folder)
