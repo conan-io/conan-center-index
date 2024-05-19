@@ -3,7 +3,8 @@ from pathlib import Path
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import can_run
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.build import can_run, cross_building
 from conan.tools.cmake import CMakeToolchain, CMake
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save, rename
@@ -143,6 +144,8 @@ class ImageMagicConan(ConanFile):
                 raise ConanInvalidConfiguration("with_lcms option is currently not supported on MSVC")
             if self.options.with_pango:
                 raise ConanInvalidConfiguration("with_pango option is currently not supported on MSVC")
+        if self.settings.compiler == "apple-clang" and cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building on apple-clang is not supported")
 
 
     def build_requirements(self):
@@ -362,6 +365,7 @@ class ImageMagicConan(ConanFile):
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "etc"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
+            fix_apple_shared_install_name(self)
 
     @property
     def _lib_infix(self):
@@ -437,6 +441,8 @@ class ImageMagicConan(ConanFile):
                 self.cpp_info.components["MagickCore"].libs.append(self._libname("filters"))
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["MagickCore"].system_libs.append("pthread")
+        elif is_apple_os(self):
+            self.cpp_info.components["MagickCore"].frameworks.append("CoreText")
 
         self.cpp_info.components["MagickCore"].defines.append(f"MAGICKCORE_QUANTUM_DEPTH={self.options.quantum_depth}")
         self.cpp_info.components["MagickCore"].defines.append(f"MAGICKCORE_HDRI_ENABLE={int(bool(self.options.hdri))}")
