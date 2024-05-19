@@ -1,10 +1,10 @@
 diff --git a/cmake/SelectHTTPParser.cmake b/cmake/SelectHTTPParser.cmake
-index 955aea3..ff94eb8 100644
+index 4fc1f69..1e8d83e 100644
 --- a/cmake/SelectHTTPParser.cmake
 +++ b/cmake/SelectHTTPParser.cmake
 @@ -1,10 +1,10 @@
  # Optional external dependency: http-parser
- if(USE_HTTP_PARSER STREQUAL "system")
+ if(USE_HTTP_PARSER STREQUAL "http-parser")
 -	find_package(HTTPParser)
 +	find_package(http_parser)
  
@@ -15,8 +15,8 @@ index 955aea3..ff94eb8 100644
 +		list(APPEND LIBGIT2_SYSTEM_INCLUDES ${http_parser_INCLUDE_DIRS})
 +		list(APPEND LIBGIT2_SYSTEM_LIBS ${http_parser_LIBRARIES})
  		list(APPEND LIBGIT2_PC_LIBS "-lhttp_parser")
- 		add_feature_info(http-parser ON "http-parser support (system)")
- 	else()
+ 		set(GIT_HTTPPARSER_HTTPPARSER 1)
+ 		add_feature_info(http-parser ON "using http-parser (system)")
 diff --git a/cmake/SelectHTTPSBackend.cmake b/cmake/SelectHTTPSBackend.cmake
 index d293001..acffba9 100644
 --- a/cmake/SelectHTTPSBackend.cmake
