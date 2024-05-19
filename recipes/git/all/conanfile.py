@@ -98,7 +98,14 @@ class PackageConan(ConanFile):
         del self.info.settings.compiler
 
     def package_info(self):
-        self.runenv_info.prepend_path("PATH", os.path.join(self.package_folder, "bin"))
-
-        self.cpp_info.includedirs = []
+        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = []
+        self.cpp_info.includedirs = []
+
+        bin_folder = os.path.join(self.package_folder, "bin")
+
+        self.runenv_info.prepend_path("PATH", bin_folder)
+
+        # TODO: Legacy, to be removed in Conan 2.0
+        self.env_info.PATH.append(bin_folder)
