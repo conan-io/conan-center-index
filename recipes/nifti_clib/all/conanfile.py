@@ -41,6 +41,8 @@ class NiftiClibConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             # not supported due to not having dllexport definitions
             raise ConanInvalidConfiguration(f"{self.ref} does not support -o {self.ref}:shared=True with MSVC compiler.")
+        if not self.options.use_nifti2 and self.options.use_cifti:
+            raise ConanInvalidConfiguration(f"{self.ref} -o '&:use_cifti=True' requires -o '&:use_nifti2=True'")
 
     def configure(self):
         if self.options.shared:
