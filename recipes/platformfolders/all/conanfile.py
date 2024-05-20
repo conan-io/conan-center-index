@@ -55,7 +55,7 @@ class PlatformFoldersConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["PLATFORMFOLDERS_BUILD_TESTING"] = False
-        tc.variables["PLATFORMFOLDERS_BUILD_SHARED_LIBS"] = self.options.get_safe("shared")
+        tc.variables["PLATFORMFOLDERS_BUILD_SHARED_LIBS"] = self.options.get_safe("shared", default=False)
         tc.variables["PLATFORMFOLDERS_ENABLE_INSTALL"] = True
         tc.generate()
 
