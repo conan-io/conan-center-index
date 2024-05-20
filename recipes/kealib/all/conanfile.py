@@ -96,3 +96,6 @@ class KealibConan(ConanFile):
                 self.cpp_info.libs = ["libkea"]
         else:
             self.cpp_info.libs = ["kea"]
+        
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("shlwapi")
