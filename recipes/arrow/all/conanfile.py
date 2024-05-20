@@ -201,7 +201,7 @@ class ArrowConan(ConanFile):
         if self.options.with_snappy:
             self.requires("snappy/1.1.9")
         if self.options.get_safe("simd_level") != None or \
-            self.options.get_safe("runtime_simd_level") != None:
+                self.options.get_safe("runtime_simd_level") != None:
             self.requires("xsimd/9.0.1")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
@@ -317,6 +317,7 @@ class ArrowConan(ConanFile):
         tc.variables["GLOG_SOURCE"] = "SYSTEM"
         tc.variables["ARROW_WITH_BACKTRACE"] = bool(self.options.with_backtrace)
         tc.variables["ARROW_WITH_BROTLI"] = bool(self.options.with_brotli)
+        tc.variables["ARROW_WITH_RE2"] = bool(self.options.with_re2)
         tc.variables["brotli_SOURCE"] = "SYSTEM"
         if self.options.with_brotli:
             tc.variables["ARROW_BROTLI_USE_SHARED"] = bool(self.dependencies["brotli"].options.shared)
