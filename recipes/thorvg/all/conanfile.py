@@ -108,9 +108,9 @@ class ThorvgConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if is_msvc(self) and self.settings.build_type == "Debug" and self.options.shared:
+        if is_msvc(self) and self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration(
-                f"{self.ref} doesn't support shared debug build on MSVC."
+                f"{self.ref} doesn't support debug build on MSVC."
             )
 
     def requirements(self):
