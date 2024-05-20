@@ -137,7 +137,7 @@ class ImageMagicConan(ConanFile):
                 raise ConanInvalidConfiguration(f"{self.settings.arch} architecture is not supported for MSVC")
             # Only VS 2017, 2019 and 2022 are supported by configure.exe
             # TODO: older versions could probably be supported by patching the generated projects
-            check_min_vs(self, 191)
+            check_min_vs(self, 193)
             if self.options.with_heic:
                 raise ConanInvalidConfiguration("with_heic option is currently not supported on MSVC")
             if self.options.with_lcms:
