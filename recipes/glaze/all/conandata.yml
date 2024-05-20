@@ -1,4 +1,11 @@
 sources:
+  "2.6.3":
+    url: "https://github.com/stephenberry/glaze/archive/v2.6.3.tar.gz"
+    sha256: "5a2fd2a1ed18a184d7f86f5f8cd1350b12b8f2389466a436dfc198e3e6912c70"
+  # keep 2.6.2 for gcc11
+  "2.6.2":
+    url: "https://github.com/stephenberry/glaze/archive/v2.6.2.tar.gz"
+    sha256: "8498de2b5e80b4eeab07108ea8ed460d4bbfef56f533ff08ca9e119501185dc4"
   "2.6.1":
     url: "https://github.com/stephenberry/glaze/archive/v2.6.1.tar.gz"
     sha256: "c8b1d981329f279b85f6ee732e2c3cc9d0d2e014ef3d79cb72bf67dc9f2357d4"
