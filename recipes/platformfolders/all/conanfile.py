@@ -77,3 +77,6 @@ class PlatformFoldersConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "platform_folders")
         self.cpp_info.set_property("cmake_target_name", "sago::platform_folders")
         self.cpp_info.set_property("cmake_target_aliases", ["platform_folders"])
+
+        if self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.system_libs.append("m")
