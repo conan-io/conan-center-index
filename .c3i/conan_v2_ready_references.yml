@@ -306,6 +306,7 @@ required_for_references:
 - directx-headers
 - dirent
 - discount
+- dispenso
 - djinni-generator
 - djinni-support-lib
 - djvulibre
@@ -1580,6 +1581,7 @@ required_for_references:
 - yasm
 - yder
 - yoga
+- yomm2
 - yyjson
 - z3
 - zbar
