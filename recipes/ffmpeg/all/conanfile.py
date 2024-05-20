@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
@@ -348,6 +348,10 @@ class FFMpegConan(ConanFile):
             if not used:
                 raise ConanInvalidConfiguration("FFmpeg '{}' option requires '{}' option to be enabled".format(
                     dependency, "' or '".join(features)))
+
+        if conan_version.major == 1 and is_msvc(self) and self.options.shared:
+            # Linking fails with "Argument list too long" for some reason on Conan v1
+            raise ConanInvalidConfiguration("MSVC shared build is not supported for Conan v1")
 
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
