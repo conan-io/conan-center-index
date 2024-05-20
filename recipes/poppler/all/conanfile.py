@@ -251,7 +251,7 @@ class PopplerConan(ConanFile):
         apply_conandata_patches(self)
         # Use upper-case package names to force CMakeDeps to define upper-case variables
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "find_package(Freetype", "find_package(FREETYPE")
+                        "find_package(Freetype ${FREETYPE_VERSION}", "find_package(FREETYPE")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "find_package(Cairo", "find_package(CAIRO")
         # Ignore package versions in find_soft_mandatory_package()
