@@ -1,5 +1,5 @@
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index d01cc64..0941cbd 100644
+index d01cc64..5691f7e 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -167,11 +167,11 @@ ENDIF()
@@ -31,3 +31,15 @@ index d01cc64..0941cbd 100644
  ENDIF()
  IF (LIBSSH2_FOUND)
  	SET(GIT_SSH 1)
+@@ -218,10 +222,7 @@ IF (LIBSSH2_FOUND)
+ 	LIST(APPEND LIBGIT2_LIBS ${LIBSSH2_LIBRARIES})
+ 	LIST(APPEND LIBGIT2_PC_LIBS ${LIBSSH2_LDFLAGS})
+ 
+-	CHECK_LIBRARY_EXISTS("${LIBSSH2_LIBRARIES}" libssh2_userauth_publickey_frommemory "${LIBSSH2_LIBRARY_DIRS}" HAVE_LIBSSH2_MEMORY_CREDENTIALS)
+-	IF (HAVE_LIBSSH2_MEMORY_CREDENTIALS)
+-		SET(GIT_SSH_MEMORY_CREDENTIALS 1)
+-	ENDIF()
++	SET(GIT_SSH_MEMORY_CREDENTIALS 1)
+ ELSE()
+ 	MESSAGE(STATUS "LIBSSH2 not found. Set CMAKE_PREFIX_PATH if it is installed outside of the default search path.")
+ ENDIF()
