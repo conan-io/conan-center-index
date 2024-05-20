@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir, chdir
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.53.0"
@@ -76,6 +76,15 @@ class LibBsdConan(ConanFile):
 
         autotools = Autotools(self)
         autotools.install()
+
+        if self.options.shared and self.settings.os in ["Linux", "FreeBSD"]:
+            # Overwrite linker script:
+            # OUTPUT_FORMAT(elf64-x86-64)
+            # GROUP(//lib/libbsd.so.0.12.2 AS_NEEDED())
+            with chdir(self, os.path.join(self.package_folder, "lib")):
+                if os.path.exists("libbsd.so"):
+                    os.unlink("libbsd.so")
+                os.symlink(f"libbsd.so.{self.version}", "libbsd.so")
 
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libbsd.la")))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
