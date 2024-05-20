@@ -1,9 +1,4 @@
 sources:
-  "0.12.0":
-    url: "https://github.com/facebook/hermes/archive/refs/tags/v0.12.0.tar.gz"
-    sha256: "bd8fd158381813483123eb1ab553ed08db68e4949f314c99ee8fa79fa8f3e7ed"
-patches:
-  "0.12.0":
-    - patch_file: "patches/0001-include-cstdint.patch"
-      patch_description: "include cstdint"
-      patch_type: "portability"
+  "2024-04-29":
+    url: "https://github.com/facebook/hermes/archive/refs/tags/hermes-2024-04-29-RNv0.73.8-644c8be78af1eae7c138fa4093fb87f0f4f8db85.tar.gz"
+    sha256: "f49f3e1115fcf96399b673bfbf05a4fb07334def9ffe6ae7eb692ad9ba27a3a8"

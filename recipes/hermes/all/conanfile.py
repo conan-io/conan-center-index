@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
@@ -15,6 +16,7 @@ class HermesConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/facebook/hermes"
     topics = ("javascript", "ahead-of-time", "react native")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -65,6 +67,9 @@ class HermesConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+    def build_requirements(self):
+        self.tool_requires("cpython/3.12.2")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -76,6 +81,8 @@ class HermesConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
+        venv = VirtualBuildEnv(self)
+        venv.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)
