@@ -153,7 +153,7 @@ class OpenSceneGraphConanFile(ConanFile):
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
             self.requires("mozjpeg/4.1.5")
         if self.options.get_safe("with_openexr"):
-            self.requires("openexr/3.1.9")
+            self.requires("openexr/3.2.3")
         if self.options.get_safe("with_png"):
             self.requires("libpng/1.6.40")
         if self.options.with_tiff:
