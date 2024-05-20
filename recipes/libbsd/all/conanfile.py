@@ -14,7 +14,7 @@ class LibBsdConan(ConanFile):
     name = "libbsd"
     description = "This library provides useful functions commonly found on BSD systems, and lacking on others like GNU systems, " \
                   "thus making it easier to port projects with strong BSD origins, without needing to embed the same code over and over again on each project."
-    topics = ("conan", "libbsd", "useful", "functions", "bsd", "GNU")
+    topics = ("bsd", "compatibility")
     license = ("ISC", "MIT", "Beerware", "BSD-2-clause", "BSD-3-clause", "BSD-4-clause")
     homepage = "https://libbsd.freedesktop.org/wiki/"
     url = "https://github.com/conan-io/conan-center-index"
