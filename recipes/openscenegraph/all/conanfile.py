@@ -130,7 +130,7 @@ class OpenSceneGraphConanFile(ConanFile):
 
         if self.options.get_safe("with_asio"):
             # Should these be private requires?
-            self.requires("asio/1.28.2")
+            self.requires("asio/1.28.1")
             self.requires("boost/1.83.0")
         if self.options.with_curl:
             self.requires("libcurl/[>=7.78 <9]")
