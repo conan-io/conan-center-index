@@ -1,7 +1,7 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
 // Workaround for GCC<10 bug, see https://github.com/numpy/numpy/issues/16970
-#if defined __GNUC__ && __GNUC__ < 10
+#if defined __GNUC__ && !defined __clang__ && __GNUC__ < 10
 struct _typeobject {};
 #endif
 
