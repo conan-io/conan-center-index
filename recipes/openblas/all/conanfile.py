@@ -68,7 +68,7 @@ class OpenblasConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    def validate(self):
+    def validate_build(self):
         if Version(self.version) < "0.3.24" and self.settings.arch == "armv8":
             # OpenBLAS fails to detect the appropriate target architecture for armv8 for versions < 0.3.24, as it matches the 32 bit variant instead of 64.
             # This was fixed in https://github.com/OpenMathLib/OpenBLAS/pull/4142, which was introduced in 0.3.24.
