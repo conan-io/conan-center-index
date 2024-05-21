@@ -152,8 +152,7 @@ class ThorvgConan(ConanFile):
             tc.project_options["simd"] = bool(self.options.with_simd)
         else:
             tc.project_options["vector"] = bool(self.options.with_vector)
-        if "with_extra" in self.options:
-            tc.project_options["extra"] = str(self.options.with_extra) if self.options.with_extra else ''
+        tc.project_options["extra"] = str(self.options.with_extra) if self.options.get_safe("with_extra") else ''
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
