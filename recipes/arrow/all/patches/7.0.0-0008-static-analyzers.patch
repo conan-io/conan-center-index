@@ -1,0 +1,13 @@
+diff --git a/cpp/CMakeLists.txt b/cpp/CMakeLists.txt
+index dff5b1a59..163801af3 100644
+--- a/cpp/CMakeLists.txt
++++ b/cpp/CMakeLists.txt
+@@ -161,8 +161,6 @@ else()
+   set(MSVC_TOOLCHAIN FALSE)
+ endif()
+ 
+-find_package(ClangTools)
+-find_package(InferTools)
+ if("$ENV{CMAKE_EXPORT_COMPILE_COMMANDS}" STREQUAL "1"
+    OR CLANG_TIDY_FOUND
+    OR INFER_FOUND)
