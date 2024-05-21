@@ -26,6 +26,11 @@ class ScipPlusPlus(ConanFile):
         "shared": False,
         "fPIC": True
     }
+    scip_version_belonging_to_me = {
+        "1.2.0": "9.0.1",
+        "1.1.0": "8.0.4",
+        "1.1.0": "8.0.4"
+    }
 
     @property
     def _min_cppstd(self):
@@ -76,7 +81,7 @@ class ScipPlusPlus(ConanFile):
 
     def requirements(self):
         # see https://github.com/scipopt/SCIPpp/blob/1.0.0/conanfile.py#L25
-        self.requires("scip/8.0.4", transitive_headers=True)
+        self.requires(f"scip/{self.scip_version_belonging_to_me[self.version]}", transitive_headers=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
