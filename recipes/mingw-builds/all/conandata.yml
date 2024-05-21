@@ -1,4 +1,13 @@
 sources:
+  "13.2.0":
+    posix:
+      seh:
+        url: "https://github.com/niXman/mingw-builds-binaries/releases/download/13.2.0-rt_v11-rev1/x86_64-13.2.0-release-posix-seh-msvcrt-rt_v11-rev1.7z"
+        sha256: "7d3f84b17b235aa233f0fb5df9765bf79dbea950177a69ff99f8ad1d75b0aa6e"
+    win32:
+      seh:
+        url: "https://github.com/niXman/mingw-builds-binaries/releases/download/13.2.0-rt_v11-rev1/x86_64-13.2.0-release-win32-seh-msvcrt-rt_v11-rev1.7z"
+        sha256: "15b914f38f2f2e2d6f7b9b8425ff22b7e406878b01920190b09ce0dd8259c6aa"
   "12.2.0":
     posix:
       seh:
