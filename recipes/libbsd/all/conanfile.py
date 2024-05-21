@@ -7,6 +7,7 @@ from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir, chdir
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -42,7 +43,8 @@ class LibBsdConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def requirements(self):
-        self.requires("libmd/1.1.0")
+        if Version(self.version) > "0.10":
+            self.requires("libmd/1.1.0")
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -78,12 +80,11 @@ class LibBsdConan(ConanFile):
         autotools.install()
 
         if self.options.shared and self.settings.os in ["Linux", "FreeBSD"]:
-            # Overwrite linker script:
-            # OUTPUT_FORMAT(elf64-x86-64)
-            # GROUP(//lib/libbsd.so.0.12.2 AS_NEEDED())
+            # Fix a broken ($MD5_LIBS is empty) and unnecessary linker script:
+            # https://gitlab.freedesktop.org/libbsd/libbsd/-/blob/0.12.2/src/Makefile.am#L388
+            # echo "GROUP($(runtimelibdir)/$$soname AS_NEEDED($(MD5_LIBS)))";
             with chdir(self, os.path.join(self.package_folder, "lib")):
-                if os.path.exists("libbsd.so"):
-                    os.unlink("libbsd.so")
+                os.unlink("libbsd.so")
                 os.symlink(f"libbsd.so.{self.version}", "libbsd.so")
 
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libbsd.la")))
@@ -94,7 +95,8 @@ class LibBsdConan(ConanFile):
     def package_info(self):
         self.cpp_info.components["bsd"].libs = ["bsd"]
         self.cpp_info.components["bsd"].set_property("pkg_config_name", "libbsd")
-        self.cpp_info.components["bsd"].requires = ["libmd::libmd"]
+        if Version(self.version) > "0.10":
+            self.cpp_info.components["bsd"].requires = ["libmd::libmd"]
 
         self.cpp_info.components["libbsd-overlay"].libs = []
         self.cpp_info.components["libbsd-overlay"].requires = ["bsd"]
