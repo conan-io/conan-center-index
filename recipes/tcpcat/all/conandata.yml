@@ -1,0 +1,4 @@
+sources:
+  "1.0.0":
+    url: "https://github.com/ydcpp/tcpcat/archive/refs/tags/1.0.0.tar.gz"
+    sha256: "60763370e6924b2257dd897b8a37b33396e333d246e500e1c49011e8b3219461"
