@@ -68,7 +68,10 @@ class GLibConan(ConanFile):
         self.requires("libffi/3.4.4")
         self.requires("pcre2/10.42")
         if self.options.get_safe("with_elf"):
-            self.requires("libelf/0.8.13")
+            if is_apple_os(self) or self.settings.compiler not in ["clang", "gcc"]:
+                self.requires("libelf/0.8.13")
+            else:
+                self.requires("elfutils/0.190")
         if self.options.get_safe("with_mount"):
             self.requires("libmount/2.39")
         if self.options.get_safe("with_selinux"):
@@ -230,7 +233,11 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gio-2.0"].requires.append("libselinux::libselinux")
 
         if self.options.get_safe("with_elf"):
-            self.cpp_info.components["gresource"].requires.append("libelf::libelf")  # this is actually an executable
+            # gresource is actually an executable
+            if is_apple_os(self) or self.settings.compiler not in ["clang", "gcc"]:
+                self.cpp_info.components["gresource"].requires.append("libelf::libelf")
+            else:
+                self.cpp_info.components["gresource"].requires.append("elfutils::libelf")
 
         self.env_info.GLIB_COMPILE_SCHEMAS = os.path.join(self.package_folder, "bin", "glib-compile-schemas")
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
