@@ -29,7 +29,7 @@ class ScipPlusPlus(ConanFile):
     scip_version_belonging_to_me = {
         "1.2.0": "9.0.1",
         "1.1.0": "8.0.4",
-        "1.1.0": "8.0.4"
+        "1.0.2": "8.0.4"
     }
 
     @property
