@@ -6,9 +6,6 @@ class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
 
-    def requirements(self):
-        self.requires("stb/cci.20210910")
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
