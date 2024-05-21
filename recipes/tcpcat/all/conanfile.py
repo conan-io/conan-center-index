@@ -6,7 +6,6 @@ from os.path import join
 
 class TcpcatConan(ConanFile):
     name = "tcpcat"
-    version = "1.0.0"
     package_type = "library"
 
     # Optional metadata
@@ -37,7 +36,7 @@ class TcpcatConan(ConanFile):
             check_min_cppstd(self, 17)
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def generate(self):
         deps = CMakeDeps(self)
