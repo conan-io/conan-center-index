@@ -79,13 +79,14 @@ class LibBsdConan(ConanFile):
         autotools = Autotools(self)
         autotools.install()
 
-        if self.options.shared and self.settings.os in ["Linux", "FreeBSD"]:
+        if Version(self.version) > "0.10" and self.settings.os in ["Linux", "FreeBSD"]:
             # Fix a broken ($MD5_LIBS is empty) and unnecessary linker script:
             # https://gitlab.freedesktop.org/libbsd/libbsd/-/blob/0.12.2/src/Makefile.am#L388
             # echo "GROUP($(runtimelibdir)/$$soname AS_NEEDED($(MD5_LIBS)))";
             with chdir(self, os.path.join(self.package_folder, "lib")):
                 os.unlink("libbsd.so")
-                os.symlink(f"libbsd.so.{self.version}", "libbsd.so")
+                if self.options.shared:
+                    os.symlink(f"libbsd.so.{self.version}", "libbsd.so")
 
         os.unlink(os.path.join(os.path.join(self.package_folder, "lib", "libbsd.la")))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
