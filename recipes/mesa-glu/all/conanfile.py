@@ -25,10 +25,12 @@ class MesaGluConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "glvnd": ["libglvnd", "system"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "glvnd": "system",
     }
 
     @property
@@ -40,7 +42,9 @@ class MesaGluConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+        if not self._with_libglvnd:
+            self.options.rm_safe("glvnd")
 
     def configure(self):
         if self.options.shared:
@@ -52,7 +56,10 @@ class MesaGluConan(ConanFile):
     def requirements(self):
         # The glu headers include OpenGL headers.
         if self._with_libglvnd:
-            self.requires("libglvnd/1.7.0", transitive_headers=True)
+            if self.options.get_safe("glvnd") == "libglvnd":
+                self.requires("libglvnd/1.7.0", transitive_headers=True)
+            elif self.options.get_safe("glvnd") == "system":
+                self.requires("opengl/system", transitive_headers=True)
 
     def validate(self):
         if is_apple_os(self) or self.settings.os == "Windows":
