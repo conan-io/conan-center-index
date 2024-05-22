@@ -35,10 +35,6 @@ class DoxygenConan(ConanFile):
 
     @property
     def _minimum_compiler_version(self):
-        if Version(self.version) <= "1.9.1":
-            return {
-                "gcc": "5",
-            }
         return {
             "gcc": "7",  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66297
             "Visual Studio": "15",
@@ -63,8 +59,6 @@ class DoxygenConan(ConanFile):
         minimum_compiler_version = self._minimum_compiler_version.get(str(self.settings.compiler))
         if minimum_compiler_version and Version(self.settings.compiler.version) < minimum_compiler_version:
             raise ConanInvalidConfiguration(f"Compiler version too old. At least {minimum_compiler_version} is required.")
-        if Version(self.version) == "1.8.18":
-            check_min_vs(self, "191")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
