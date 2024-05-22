@@ -287,7 +287,10 @@ class LibcurlConan(ConanFile):
         # - link errors if mingw shared or iOS/tvOS/watchOS
         # - it makes recipe consistent with CMake build where we don't build curl tool
         top_makefile = os.path.join(self.source_folder, "Makefile.am")
-        replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
+        if Version(self.version) < "8.8.0":
+            replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
+        else:
+            replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", "SUBDIRS = lib")
         replace_in_file(self, top_makefile, "include src/Makefile.inc", "")
 
         # zlib naming is not always very consistent
@@ -445,7 +448,7 @@ class LibcurlConan(ConanFile):
             tc.configure_args.append(f"--with-wolfssl={path}")
         else:
             tc.configure_args.append("--without-wolfssl")
-        
+
         if self.options.with_ssl == "mbedtls":
             path = unix_path(self, self.dependencies["mbedtls"].package_folder)
             tc.configure_args.append(f"--with-mbedtls={path}")
