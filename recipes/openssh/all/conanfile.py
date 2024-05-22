@@ -25,6 +25,7 @@ class PackageConan(ConanFile):
         "with_pam": [False, "openpam"],  # linux-pam and Solaris PAM are also supported
         "with_selinux": [True, False],
         "with_libedit": [True, False],
+        "with_strip": [True, False],
         "with_sandbox": [False, "auto", "capsicum", "darwin", "rlimit", "seccomp_filter", "systrace", "pledge"]
     }
     default_options = {
@@ -32,6 +33,7 @@ class PackageConan(ConanFile):
         "with_pam": False,
         "with_selinux": False,
         "with_libedit": False,
+        "with_strip": True,
         "with_sandbox": "auto"
     }
 
@@ -80,6 +82,9 @@ class PackageConan(ConanFile):
 
         tc = AutotoolsToolchain(self)
         tc.configure_args.append("--without-zlib-version-check")
+
+        if not self.options.with_strip:
+            tc.configure_args.append("--disable-strip")
 
         if self.options.with_selinux:
             tc.configure_args.append("--with-selinux")
