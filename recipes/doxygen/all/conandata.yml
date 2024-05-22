@@ -11,13 +11,7 @@ patches:
       patch_description: "Enable modern compilers"
       patch_type: "portability"
       patch_source: "https://github.com/doxygen/doxygen/commit/5198966c8d5fec89116d025c74934ac03ea511fa"
-    - patch_file: "patches/1.9.4-0002-fix-iconv-linkage.patch"
-      patch_description: "Replace IConv CMake variables by Conan CMake targets"
-      patch_type: "conan"
   "1.8.20":
     - patch_file: "patches/1.8-0001-xapian.patch"
       patch_description: "Fix xapian find_package command"
       patch_type: "portability"
-    - patch_file: "patches/1.8.20-0002-fix-iconv-linkage.patch"
-      patch_description: "Replace IConv CMake variables by Conan CMake targets"
-      patch_type: "conan"
