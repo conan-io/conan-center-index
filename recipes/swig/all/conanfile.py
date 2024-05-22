@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, to_apple_arch
 from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
@@ -100,10 +100,9 @@ class SwigConan(ConanFile):
                 tc.extra_ldflags.append("-static")
                 tc.configure_args.append("LIBS=-lmingwex -lssp")
         elif is_apple_os(self):
-            if self.settings.arch == "armv8":
-                # FIXME: Apple ARM should be handled by build helpers
-                tc.extra_cxxflags.append("-arch arm64")
-                tc.extra_ldflags.append("-arch arm64")
+            tc.extra_cflags.append(f"-arch {to_apple_arch(self)}")
+            tc.extra_cxxflags.append(f"-arch {to_apple_arch(self)}")
+            tc.extra_ldflags.append(f"-arch {to_apple_arch(self)}")
         tc.generate(env)
 
         if is_msvc(self):
