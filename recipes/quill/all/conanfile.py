@@ -188,6 +188,10 @@ class QuillConan(ConanFile):
     def package_info(self):
         if Version(self.version) < "4.0.0":
             self.cpp_info.libs = ["quill"]
+        else:
+            self.cpp_info.bindirs = []
+            self.cpp_info.libdirs = []
+
         self.cpp_info.defines.append("QUILL_FMT_EXTERNAL")
         if Version(self.version) < "4.0.0" and self.is_quilll_x86_arch():
             self.cpp_info.defines.append("QUILL_X86ARCH")
