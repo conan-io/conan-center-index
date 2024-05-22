@@ -3,7 +3,11 @@ project(test_package LANGUAGES CXX)
 
 find_package(quill REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} test_package.cpp)
+if(quill_VERSION VERSION_GREATER_EQUAL "4.0.0")
+    add_executable(${PROJECT_NAME} test_package_4_0.cpp)
+else()
+    add_executable(${PROJECT_NAME} test_package.cpp)
+endif()
 target_link_libraries(${PROJECT_NAME} PRIVATE quill::quill)
 if(quill_VERSION VERSION_GREATER_EQUAL "2.0.0")
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)

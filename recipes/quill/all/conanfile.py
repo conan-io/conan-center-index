@@ -4,6 +4,7 @@ from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 
 import os
@@ -60,13 +61,23 @@ class QuillConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "4.0.0":
+            del self.options.fPIC
+            del self.options.with_bounded_queue
+            del self.options.with_no_exceptions
+            del self.options.with_x86_arch
+            del self.options.with_bounded_blocking_queue
+            self.package_type = "header-library"
 
     def configure(self):
         if Version(self.version) < "2.8.0":
             del self.options.with_bounded_blocking_queue
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        if Version(self.version) >= "4.0.0":
+            basic_layout(self, src_folder="src")
+        else:
+            cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("fmt/10.2.1", transitive_headers=True)
@@ -110,6 +121,9 @@ class QuillConan(ConanFile):
         return True
 
     def generate(self):
+        if Version(self.version) >= "4.0.0":
+            return
+
         tc = CMakeToolchain(self)
         tc.variables["QUILL_FMT_EXTERNAL"] = True
         tc.variables["QUILL_ENABLE_INSTALL"] = True
@@ -138,7 +152,8 @@ class QuillConan(ConanFile):
     def _patch_sources(self):
         # remove bundled fmt
         rmdir(self, os.path.join(self.source_folder, "quill", "quill", "include", "quill", "bundled", "fmt"))
-        rmdir(self, os.path.join(self.source_folder, "quill", "quill", "src", "bundled", "fmt"))
+        if Version(self.version) < "4.0.0":
+            rmdir(self, os.path.join(self.source_folder, "quill", "quill", "src", "bundled", "fmt"))
 
         if "2.0.0" <= Version(self.version) < "2.9.1":
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
@@ -148,22 +163,33 @@ class QuillConan(ConanFile):
 
     def build(self):
         self._patch_sources()
+        if Version(self.version) >= "4.0.0":
+            return
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        cmake = CMake(self)
-        cmake.install()
+        if Version(self.version) >= "4.0.0":
+            copy(
+                self,
+                "*.h",
+                os.path.join(self.source_folder, "quill", "include"),
+                os.path.join(self.package_folder, "include"),
+            )
+        else:
+            cmake = CMake(self)
+            cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["quill"]
+        if Version(self.version) < "4.0.0":
+            self.cpp_info.libs = ["quill"]
         self.cpp_info.defines.append("QUILL_FMT_EXTERNAL")
-        if self.is_quilll_x86_arch():
+        if Version(self.version) < "4.0.0" and self.is_quilll_x86_arch():
             self.cpp_info.defines.append("QUILL_X86ARCH")
             self.cpp_info.cxxflags.append("-mclflushopt")
 
