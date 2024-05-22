@@ -14,7 +14,7 @@ class FmtConan(ConanFile):
     name = "fmt"
     homepage = "https://github.com/fmtlib/fmt"
     description = "A safe and fast alternative to printf and IOStreams."
-    topics = ("format", "iostream", "printf")
+    topics = ("format", "iostream", "printf", "testing")
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     package_type = "library"
