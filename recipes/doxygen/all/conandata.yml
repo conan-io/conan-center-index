@@ -14,19 +14,3 @@ sources:
       - "https://github.com/doxygen/doxygen/releases/download/Release_1_9_8/doxygen-1.9.8.src.tar.gz"
       - "https://sourceforge.net/projects/doxygen/files/doxygen-1.9.8.src.tar.gz"
     sha256: "05e3d228e8384b5f3af9c8fd6246d22804acb731a3a24ce285c8986ed7e14f62"
-  "1.9.4":
-    url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.9.4.src.tar.gz"
-    sha256: "a15e9cd8c0d02b7888bc8356eac200222ecff1defd32f3fe05257d81227b1f37"
-  "1.8.20":
-    url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.8.20.src.tar.gz"
-    sha256: "e0db6979286fd7ccd3a99af9f97397f2bae50532e4ecb312aa18862f8401ddec"
-patches:
-  "1.9.4":
-    - patch_file: "patches/1.9.4-0001-enable-modern-compilers.patch"
-      patch_description: "Enable modern compilers"
-      patch_type: "portability"
-      patch_source: "https://github.com/doxygen/doxygen/commit/5198966c8d5fec89116d025c74934ac03ea511fa"
-  "1.8.20":
-    - patch_file: "patches/1.8-0001-xapian.patch"
-      patch_description: "Fix xapian find_package command"
-      patch_type: "portability"
