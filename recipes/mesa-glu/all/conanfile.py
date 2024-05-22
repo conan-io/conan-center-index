@@ -107,4 +107,6 @@ class MesaGluConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["GLU"]
+        if self.settings.os in ["FreeBSD", "Linux"]:
+            self.cpp_info.system_libs = ["m"]
         self.cpp_info.set_property("pkg_config_name", "glu")
