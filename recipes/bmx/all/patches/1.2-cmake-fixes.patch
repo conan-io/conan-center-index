@@ -94,11 +94,33 @@ index 2272a2709..924fdf770 100644
  
      # Enable large file support on 32-bit systems.
      add_definitions(
+diff --git deps/libMXFpp/libMXF++/CMakeLists.txt deps/libMXFpp/libMXF++/CMakeLists.txt
+index 94d48c905..e6c6a63f9 100644
+--- deps/libMXFpp/libMXF++/CMakeLists.txt
++++ deps/libMXFpp/libMXF++/CMakeLists.txt
+@@ -32,6 +32,8 @@ add_library(MXFpp
+     ${MXFpp_sources}
+ )
+ 
++target_compile_features(MXFpp PUBLIC cxx_std_11)
++
+ target_include_directories(MXFpp PUBLIC
+     ${PROJECT_SOURCE_DIR}
+ )
 diff --git src/CMakeLists.txt src/CMakeLists.txt
-index 1c0824d8a..4f7dbfb05 100644
+index 1c0824d8a..94f9c00d6 100644
 --- src/CMakeLists.txt
 +++ src/CMakeLists.txt
-@@ -65,13 +65,14 @@ target_link_libraries(bmx
+@@ -26,6 +26,8 @@ target_include_directories(bmx PUBLIC
+     ${PROJECT_SOURCE_DIR}/include
+ )
+ 
++target_compile_features(bmx PUBLIC cxx_std_11)
++
+ # Add path to header files if not included in MSVC distribution
+ if(MSVC)
+     include(CheckIncludeFile)
+@@ -65,13 +67,14 @@ target_link_libraries(bmx
          ${MXFpp_link_lib}
      PRIVATE
          ${uuid_link_lib}
