@@ -28,6 +28,9 @@ patches:
     - patch_file: "patches/0003-define-win32-winnt-1-0-4-0.patch"
       patch_description: "define _WIN32_WINNT"
       patch_type: "portability"
+    - patch_file: "patches/0006-add-initializer-1-0-4-1.patch"
+      patch_description: "add member variable initializer in constructor"
+      patch_type: "portability"
   "1.0.4.0":
     - patch_file: "patches/0001-update-cmakelists-1-0-4-0.patch"
       patch_description: "use cci packages"
