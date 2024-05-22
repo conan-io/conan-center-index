@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
-from conan.tools.scm import Version
+from conan.tools.scm import Git, Version
 import conan.tools.files
 
 class DbusCXX(ConanFile):
@@ -35,8 +35,9 @@ class DbusCXX(ConanFile):
             del self.options.fPIC
 
     def validate(self):
-        if self.options.uv_support and Version(self.version) < "2.5.0":
-            raise ConanInvalidConfiguration("UV support requires verion >= 2.5.0")
+        # Our branch added libuv support in 2.4.0 so this check must
+        # be removed
+        pass
 
     def requirements(self):
         self.requires("libsigcpp/[^3.0.7]", transitive_headers=True)
@@ -46,19 +47,24 @@ class DbusCXX(ConanFile):
             self.requires("libuv/[>=1.0 <2.0]")
 
     def source(self):
-        conan.tools.files.get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        git = Git(self)
+        git.clone(url=self.conan_data["sources"][self.version]["url"], target=".")
+        git.checkout(commit=self.conan_data["sources"][self.version]["sha"])
 
     def layout(self):
         cmake_layout(self)
 
-    generators = "PkgConfigDeps"
+    # Our branch changed to find_package(). We should change back
+    # and drop this customization
+    generators = "CMakeDeps"
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["ENABLE_GLIB_SUPPORT"] = self.options.glib_support
         tc.cache_variables["ENABLE_QT_SUPPORT"] = self.options.qt_support
-        if Version(self.version) >= "2.5.0":
-            tc.cache_variables["ENABLE_UV_SUPPORT"] = self.options.uv_support
+        # Our branch add libuv support in 2.4.0 so this cmake variable
+        # must be created
+        tc.cache_variables["ENABLE_UV_SUPPORT"] = self.options.uv_support
         tc.generate()
 
     def build(self):
@@ -79,4 +85,6 @@ class DbusCXX(ConanFile):
             self.cpp_info.libs.append("dbus-cxx-uv")
 
         self.cpp_info.libs.append("dbus-cxx")
-        self.cpp_info.includedirs = ['include/dbus-cxx-2.0']
+
+        # Our branch drops the versioned include path. We should
+        # restore that and drop this customization

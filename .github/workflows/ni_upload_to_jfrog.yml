@@ -37,6 +37,7 @@ jobs:
       - run: conan export recipes/ninja/all --version 1.11.1
       - run: conan export recipes/nlohmann_json/all --version 3.11.3
       - run: conan export recipes/spdlog/all --version 1.14.1
+      - run: conan export recipes/dbus-cxx/2.x.x --version 2.4.0
         # upload everthing
       - run: conan upload -r rnd-conan-ci -c "*"
 
