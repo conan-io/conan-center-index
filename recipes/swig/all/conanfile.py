@@ -2,11 +2,11 @@ import os
 
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -106,8 +106,36 @@ class SwigConan(ConanFile):
                 tc.extra_ldflags.append("-arch arm64")
         tc.generate(env)
 
-        deps = AutotoolsDeps(self)
-        deps.generate()
+        if is_msvc(self):
+            # Custom AutotoolsDeps for cl-like compilers
+            # workaround for https://github.com/conan-io/conan/issues/12784
+            includedirs = []
+            defines = []
+            libs = []
+            libdirs = []
+            linkflags = []
+            cxxflags = []
+            cflags = []
+            for dependency in self.dependencies.values():
+                deps_cpp_info = dependency.cpp_info.aggregated_components()
+                includedirs.extend(deps_cpp_info.includedirs)
+                defines.extend(deps_cpp_info.defines)
+                libs.extend(deps_cpp_info.libs + deps_cpp_info.system_libs)
+                libdirs.extend(deps_cpp_info.libdirs)
+                linkflags.extend(deps_cpp_info.sharedlinkflags + deps_cpp_info.exelinkflags)
+                cxxflags.extend(deps_cpp_info.cxxflags)
+                cflags.extend(deps_cpp_info.cflags)
+
+            env = Environment()
+            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in includedirs] + [f"-D{d}" for d in defines])
+            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in libs])
+            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in libdirs] + linkflags)
+            env.append("CXXFLAGS", cxxflags)
+            env.append("CFLAGS", cflags)
+            env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
+        else:
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
