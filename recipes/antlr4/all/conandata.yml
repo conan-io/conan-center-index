@@ -1,0 +1,8 @@
+sources:
+  "4.13.1":
+    jar:
+      url: "https://www.antlr.org/download/antlr-4.13.1-complete.jar"
+      sha256: "bc13a9c57a8dd7d5196888211e5ede657cb64a3ce968608697e4f668251a8487"
+    license:
+      url: "https://raw.githubusercontent.com/antlr/antlr4/4.13.1/LICENSE.txt"
+      sha256: "3db1fb3ee79a4b4f9918fc4d0f6133bf18a3cf787f126cd22f8aa9b862281c0c"

@@ -1,9 +1,15 @@
 sources:
+  "0.4.1":
+    url: "https://github.com/mfontanini/cppkafka/archive/refs/tags/v0.4.1.tar.gz"
+    sha256: "45770ae0404cb9ba73d659618c51cd55b574c66ed3c7b148360222fb524b0ff7"
   "0.4.0":
     url: "https://github.com/mfontanini/cppkafka/archive/refs/tags/0.4.0.tar.gz"
     sha256: "f4f05eb7a180a856663b02ec0b777283275ef88e5523f3013fd51c6c4ab63b5a"
 patches:
+  "0.4.1":
+    - patch_file: "patches/0.4.0-0001-no-template-export.patch"
+    - patch_file: "patches/0.4.1-0003-clean-rpath.patch"
   "0.4.0":
-    - patch_file: "patches/0001-no-template-export.patch"
-    - patch_file: "patches/0002-cppstd.patch"
-    - patch_file: "patches/0003-clean-rpath.patch"
+    - patch_file: "patches/0.4.0-0001-no-template-export.patch"
+    - patch_file: "patches/0.4.0-0002-cppstd.patch"
+    - patch_file: "patches/0.4.0-0003-clean-rpath.patch"

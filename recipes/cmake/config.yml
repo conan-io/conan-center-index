@@ -1,4 +1,12 @@
 versions:
+  "3.29.3":
+    folder: "binary"
+  "3.29.2":
+    folder: "binary"
+  "3.29.0":
+    folder: "binary"
+  "3.28.5":
+    folder: "binary"
   "3.28.1":
     folder: "binary"
   "3.27.9":

@@ -1,21 +1,31 @@
 versions:
-  "1.9.9":
+  "2.6.3":
     folder: all
-  "1.9.8.1":
+  "2.6.2":
     folder: all
-  "1.9.5":
+  "2.6.1":
     folder: all
-  "1.8.5":
+  "2.6.0":
     folder: all
-  "1.8.4":
+  "2.5.5":
     folder: all
-  "1.8.3":
+  "2.5.4":
     folder: all
-  "1.8.2":
+  "2.5.3":
     folder: all
-  "1.8.1":
+  "2.4.0":
     folder: all
-  "1.7.0":
+  "2.3.2":
     folder: all
-  "1.6.1":
+  "2.3.1":
+    folder: all
+  "2.3.0":
+    folder: all
+  "2.2.1":
+    folder: all
+  "2.1.9":
+    folder: all
+  "2.1.6":
+    folder: all
+  "2.0.9":
     folder: all

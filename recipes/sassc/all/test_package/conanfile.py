@@ -1,9 +1,13 @@
-from conans import ConanFile, tools
+from conan import ConanFile
 
 
-class LibsassTestConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "VirtualBuildEnv"
+    test_type = "explicit"
+
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        if not tools.cross_building(self):
-            self.run("sassc --version", run_environment=True)
+        self.run("sassc --version")
