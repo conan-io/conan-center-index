@@ -1,0 +1,26 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -58,7 +58,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+ 
+ # Generate position-independent code (-fPIC on UNIX)
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ 
+ # --- System Libraries ---
+
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -82,9 +82,12 @@ target_include_directories(paho-cpp-objs
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+     $<INSTALL_INTERFACE:include>
+   PRIVATE 
+-    ${PAHO_MQTT_C_INCLUDE_DIRS}
+     src
+ )
++target_link_libraries(paho-cpp-objs PUBLIC PahoMqttC::PahoMqttC)
++if(PAHO_BUILD_SHARED)
++    set_target_properties(paho-cpp-objs PROPERTIES POSITION_INDEPENDENT_CODE ON)
++endif()
+ 
+ target_compile_definitions(paho-cpp-objs PRIVATE PAHO_MQTTPP_EXPORTS)
+ 
