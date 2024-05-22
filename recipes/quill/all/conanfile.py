@@ -82,6 +82,10 @@ class QuillConan(ConanFile):
     def requirements(self):
         self.requires("fmt/10.2.1", transitive_headers=True)
 
+    def package_id(self):
+        if Version(self.version) >= "4.0.0":
+            self.info.clear()
+
     def validate(self):
         supported_archs = ["x86", "x86_64", "armv6", "armv7", "armv7hf", "armv8"]
 
