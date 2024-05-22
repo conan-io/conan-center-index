@@ -6,19 +6,16 @@ from pathlib import PurePath
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
+from conan.tools.env import VirtualRunEnv
 from conan.tools.microsoft import is_msvc
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "VirtualRunEnv"
     test_type = "explicit"
 
     def requirements(self):
-        self.requires(self.tested_reference_str, visible=False)
-
-    def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
+        self.requires(self.tested_reference_str, visible=False, run=True)
 
     def layout(self):
         cmake_layout(self)
@@ -40,6 +37,9 @@ class TestPackageConan(ConanFile):
         return sys.executable
 
     def generate(self):
+        venv = VirtualRunEnv(self)
+        venv.generate(scope="build")
+        venv.generate(scope="run")
         tc = CMakeToolchain(self)
         tc.variables["Python_EXECUTABLE"] = PurePath(self._python_interpreter).as_posix()
         tc.generate()
