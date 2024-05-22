@@ -4,6 +4,7 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 import os
+import platform
 
 required_conan_version = ">=1.53.0"
 
@@ -34,6 +35,8 @@ class ObjectboxCConan(ConanFile):
         if Version(self.version) >= "0.19.0" and \
             self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "5":
             raise ConanInvalidConfiguration(f"{self.ref} requires GCC 6 or higher")
+        if Version(self.version) >= "4.0.0" and self._is_glibc_older_than_2_27_on_linux:
+            raise ConanInvalidConfiguration(f"{self.ref} requires glibc>=2.27")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -62,3 +65,12 @@ class ObjectboxCConan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread"])
             if Version(self.version) >= "0.18.0":
                 self.cpp_info.system_libs.append("dl")
+
+    @property
+    def _is_glibc_older_than_2_27_on_linux(self):
+        libver = platform.libc_ver()
+        return (
+            self.settings.os == 'Linux' and
+            libver[0] == 'glibc' and
+            Version(libver[1]) < '2.27'
+        )
