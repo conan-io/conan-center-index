@@ -59,8 +59,6 @@ class QuillConan(ConanFile):
         }
 
     def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
         if Version(self.version) >= "4.0.0":
             del self.options.fPIC
             del self.options.with_bounded_queue
@@ -68,6 +66,9 @@ class QuillConan(ConanFile):
             del self.options.with_x86_arch
             del self.options.with_bounded_blocking_queue
             self.package_type = "header-library"
+        else:
+            if self.settings.os == "Windows":
+                del self.options.fPIC
 
     def configure(self):
         if Version(self.version) < "2.8.0":
