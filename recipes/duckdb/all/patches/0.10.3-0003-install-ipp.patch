@@ -1,0 +1,19 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index e04f9db..043404b 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -117,9 +117,14 @@ else()
+     DESTINATION "${INSTALL_INCLUDE_DIR}"
+     FILES_MATCHING
+     PATTERN "*.hpp")
++  install(
++    DIRECTORY "${PROJECT_SOURCE_DIR}/src/include/duckdb"
++    DESTINATION "${INSTALL_INCLUDE_DIR}"
++    FILES_MATCHING
++    PATTERN "*.ipp")
+   install(FILES "${PROJECT_SOURCE_DIR}/src/include/duckdb.hpp"
+                 "${PROJECT_SOURCE_DIR}/src/include/duckdb.h"
+           DESTINATION "${INSTALL_INCLUDE_DIR}")
+ 
+ endif()
+ if(BUILD_SHARED_LIBS)
