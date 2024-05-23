@@ -67,7 +67,7 @@ class PerlConan(ConanFile):
             autotools.make()
 
     def package(self):
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "Copying", self.source_folder, os.path.join(self.package_folder, "licenses"))
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
             autotools.install(args=["DESTDIR="])
@@ -79,6 +79,8 @@ class PerlConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
+
+        self.cpp_info.system_libs = ["m"]
 
         # TODO: Legacy, to be removed in Conan 2.0
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
