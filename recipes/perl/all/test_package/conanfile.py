@@ -33,11 +33,11 @@ class TestPackageConan(ConanFile):
             # Magic syntax for getting the perl version: $^V
             # `perl --version` doesn't give a cleanly parsable output.
             self.run("perl -e 'print $^V'", buffer, env="conanrun")
+            # Produces something like "v5.38.2"
             self.output.info(buffer.getvalue())
-            version_detected = buffer.getvalue()[1:] # Trim prefixed "v"
-            if str(self._version) != version_detected:
+            if str(self._version) not in buffer.getvalue():
                 raise ConanException(
-                    f"perl reported wrong version. Expected {self._version}, got {version_detected}."
+                    f"perl reported wrong version. Expected {self._version}, got {buffer.getvalue()}."
                 )
             
             self.run(f"perl {os.path.join(self.source_folder, 'test_package.pl')}", env="conanrun")

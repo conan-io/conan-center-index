@@ -80,7 +80,8 @@ class PerlConan(ConanFile):
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
 
-        self.cpp_info.system_libs = ["m"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m", "rt"]
 
         # TODO: Legacy, to be removed in Conan 2.0
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
