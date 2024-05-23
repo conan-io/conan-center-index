@@ -477,6 +477,8 @@ class QtConan(ConanFile):
 
         tc = CMakeToolchain(self, generator="Ninja")
 
+        tc.absolute_paths = True
+
         tc.variables["QT_BUILD_TESTS"] = "OFF"
         tc.variables["QT_BUILD_EXAMPLES"] = "OFF"
 
