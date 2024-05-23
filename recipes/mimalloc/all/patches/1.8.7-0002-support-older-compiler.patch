@@ -1,8 +1,8 @@
 diff --git a/include/mimalloc.h b/include/mimalloc.h
-index 9848d53..60ae53a 100644
+index ae6f99b..773424e 100644
 --- a/include/mimalloc.h
 +++ b/include/mimalloc.h
-@@ -510,7 +510,7 @@ template<class T, bool _mi_destroy> struct _mi_heap_stl_allocator_common : publi
+@@ -511,7 +511,7 @@ template<class T, bool _mi_destroy> struct _mi_heap_stl_allocator_common : publi
    #endif
  
    void collect(bool force) { mi_heap_collect(this->heap.get(), force); }
@@ -11,7 +11,7 @@ index 9848d53..60ae53a 100644
  
  protected:
    std::shared_ptr<mi_heap_t> heap;
-@@ -521,7 +521,7 @@ protected:
+@@ -522,7 +522,7 @@ protected:
      this->heap.reset(hp, (_mi_destroy ? &heap_destroy : &heap_delete));  /* calls heap_delete/destroy when the refcount drops to zero */
    }
    _mi_heap_stl_allocator_common(const _mi_heap_stl_allocator_common& x) mi_attr_noexcept : heap(x.heap) { }
