@@ -81,7 +81,8 @@ class QuillConan(ConanFile):
             cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/10.2.1", transitive_headers=True)
+        if Version(self.version) < "4.0.0":
+            self.requires("fmt/10.2.1", transitive_headers=True)
 
     def package_id(self):
         if Version(self.version) >= "4.0.0":
@@ -183,24 +184,23 @@ class QuillConan(ConanFile):
                 os.path.join(self.source_folder, "quill", "include"),
                 os.path.join(self.package_folder, "include"),
             )
-        else:
-            cmake = CMake(self)
-            cmake.install()
+            return
 
+        cmake = CMake(self)
+        cmake.install()
         rmdir(self, os.path.join(self.package_folder, "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         if Version(self.version) < "4.0.0":
             self.cpp_info.libs = ["quill"]
+            if self.is_quilll_x86_arch():
+                self.cpp_info.defines.append("QUILL_X86ARCH")
+                self.cpp_info.cxxflags.append("-mclflushopt")
+            self.cpp_info.defines.append("QUILL_FMT_EXTERNAL")
         else:
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
-
-        self.cpp_info.defines.append("QUILL_FMT_EXTERNAL")
-        if Version(self.version) < "4.0.0" and self.is_quilll_x86_arch():
-            self.cpp_info.defines.append("QUILL_X86ARCH")
-            self.cpp_info.cxxflags.append("-mclflushopt")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
