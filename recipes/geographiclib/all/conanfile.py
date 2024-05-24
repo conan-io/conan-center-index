@@ -110,6 +110,10 @@ class GeographiclibConan(ConanFile):
             replace_in_file(self, cmakelists, "add_subdirectory (tools)", "")
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "CMakeLists.txt"),
                                   "${TOOLS}", "")
+            replace_in_file(self, cmakelists, "set (TOOLS CartConvert ConicProj GeodesicProj GeoConvert GeodSolve", "")
+            replace_in_file(self, cmakelists, "GeoidEval Gravity IntersectTool MagneticField Planimeter RhumbSolve", "")
+            replace_in_file(self, cmakelists, "TransverseMercatorProj)", "")
+            
         # Disable -Werror
         replace_in_file(self, cmakelists, "-Werror", "")
         replace_in_file(self, cmakelists, "/WX", "")
