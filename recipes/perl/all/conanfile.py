@@ -83,8 +83,11 @@ class PerlConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "rt"]
 
+        self.runenv_info.define_path("PERL5LIB", os.path.join(self.package_folder, "lib"))
+
         # TODO: Legacy, to be removed in Conan 2.0
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        self.env_info.PERL5LIB = os.path.join(self.package_folder, "lib")
 
     def package_id(self):
         del self.info.settings.compiler
