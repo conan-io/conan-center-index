@@ -4,6 +4,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, save, collect_libs
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, VCVars
 from conan.tools.scm import Version
+from conan.tools.env import VirtualBuildEnv
 import os
 import shutil
 import textwrap
@@ -94,6 +95,9 @@ class MimallocConan(ConanFile):
            self.options.get_safe("inject"):
             raise ConanInvalidConfiguration("Single object is incompatible with library injection")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.18 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -109,6 +113,8 @@ class MimallocConan(ConanFile):
         if Version(self.version) >= "1.7.0":
             tc.variables["MI_INSTALL_TOPLEVEL"] = "ON"
         tc.generate()
+        venv = VirtualBuildEnv(self)
+        venv.generate(scope="build")
 
         if is_msvc(self):
             vcvars = VCVars(self)
