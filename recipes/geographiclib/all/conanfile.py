@@ -95,6 +95,7 @@ class GeographiclibConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["GEOGRAPHICLIB_LIB_TYPE"] = "SHARED" if self.options.shared else "STATIC"
         tc.variables["GEOGRAPHICLIB_PRECISION"] = self._cmake_option_precision
+        tc.variables["BUILD_TOOLS"] = self.options.tools
         tc.generate()
 
     def _patch_sources(self):
@@ -105,14 +106,6 @@ class GeographiclibConan(ConanFile):
             replace_in_file(self, cmakelists, "add_subdirectory (js)", "")
         # Don't install system libs
         replace_in_file(self, cmakelists, "include (InstallRequiredSystemLibraries)", "")
-        # Don't build tools if asked
-        if not self.options.tools:
-            replace_in_file(self, cmakelists, "add_subdirectory (tools)", "")
-            replace_in_file(self, os.path.join(self.source_folder, "cmake", "CMakeLists.txt"),
-                                  "${TOOLS}", "")
-            replace_in_file(self, cmakelists, "set (TOOLS CartConvert ConicProj GeodesicProj GeoConvert GeodSolve", "")
-            replace_in_file(self, cmakelists, "GeoidEval Gravity IntersectTool MagneticField Planimeter RhumbSolve", "")
-            replace_in_file(self, cmakelists, "TransverseMercatorProj)", "")
             
         # Disable -Werror
         replace_in_file(self, cmakelists, "-Werror", "")
