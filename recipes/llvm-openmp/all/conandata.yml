@@ -1,11 +1,11 @@
 sources:
-  "18.1.3":
+  "18.1.6":
     openmp:
-      url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.3/openmp-18.1.3.src.tar.xz"
-      sha256: "34f8528575c0916a1ef521afaadba0455a3e49822e8bbbbea9344ab61adeb945"
+      url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.6/openmp-18.1.6.src.tar.xz"
+      sha256: "24ffd900fc7b707fda3a2d3b4aa011289d5a5fedff19c348dfdc4351f7063aae"
     cmake:
-      url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.3/cmake-18.1.3.src.tar.xz"
-      sha256: "acfecb615d41c5b1a0a31e15324994ca06f7a3f37d8958d719b20de0d217b71b"
+      url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.6/cmake-18.1.6.src.tar.xz"
+      sha256: "a643261ed98ff76ab10f1a7039291fa841c292435ba1cfe11e235c2231b95cdb"
   "17.0.6":
     openmp:
       url: "https://github.com/llvm/llvm-project/releases/download/llvmorg-17.0.6/openmp-17.0.6.src.tar.xz"
