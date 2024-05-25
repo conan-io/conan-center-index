@@ -163,14 +163,14 @@ class LLVMCoreConan(ConanFile):
         if self.options.get_safe("with_libedit"):
             self.requires("editline/3.1")
         if self.options.with_zlib:
-            self.requires("zlib/1.3.1")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_xml2:
-            self.requires("libxml2/2.12.4")
+            self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_z3:
-            self.requires("z3/4.12.4")
+            self.requires("z3/4.13.0")
 
     def build_requirements(self):
-        self.tool_requires("ninja/1.11.1")
+        self.tool_requires("ninja/1.12.1")
 
     def validate(self):
         if self.settings.compiler.cppstd:
