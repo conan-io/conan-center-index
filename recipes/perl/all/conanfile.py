@@ -56,7 +56,7 @@ class PerlConan(ConanFile):
     def build(self):
         # Can't use configure() since Perl uses "Configure" instead of "configure". Renaming the file does not seem to work.
         with chdir(self, self.source_folder):
-            command = f"Configure -de -Dprefix={self.package_folder}"
+            command = f"./Configure -de -Dprefix={self.package_folder}"
             compiler = self._compiler
             if compiler:
                 command += f" -Dcc={compiler}"
