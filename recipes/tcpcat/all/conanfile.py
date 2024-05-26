@@ -16,7 +16,7 @@ class TcpcatConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ydcpp/tcpcat"
     description = "Simple C++ TCP Server and Client library."
-    topics = ("network", "tcp", "tcp server", "tcp client")
+    topics = ("network", "tcp", "tcp-server", "tcp-client")
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
@@ -59,7 +59,7 @@ class TcpcatConan(ConanFile):
             )
 
     def requirements(self):
-        self.requires("asio/[^1.30]", transitive_headers = True)
+        self.requires("asio/1.30.2", transitive_headers = True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
