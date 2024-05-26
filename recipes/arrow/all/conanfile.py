@@ -429,6 +429,9 @@ class ArrowConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Arrow")
 
         suffix = "_static" if is_msvc(self) and not self.options.shared else ""
+        cmake_tgt_suffix = "arrow_shared" if self.options.shared else "arrow_static"
+
+        self.cpp_info.set_property("cmake_target_name", f"Arrow::{cmake_tgt_suffix}")
 
         self.cpp_info.components["libarrow"].set_property("pkg_config_name", "arrow")
         self.cpp_info.components["libarrow"].libs = [f"arrow{suffix}"]
