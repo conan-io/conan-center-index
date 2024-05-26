@@ -31,6 +31,10 @@ patches:
     - patch_file: patches/Makefile.in-v4.5.7.patch
     - patch_file: patches/Makefile.msc-v4.5.7.patch
     - patch_file: patches/fix_configure-v4.5.7.patch
+  "4.5.7":
+    - patch_file: patches/Makefile.in-v4.5.7.patch
+    - patch_file: patches/Makefile.msc-v4.5.7.patch
+    - patch_file: patches/fix_configure-v4.5.7.patch
   "4.5.6":
     - patch_file: patches/Makefile.in-v4.5.6.patch
     - patch_file: patches/Makefile.msc-v4.5.6.patch
