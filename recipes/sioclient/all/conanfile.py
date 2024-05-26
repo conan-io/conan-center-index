@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -51,6 +52,8 @@ class SioclientConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
+        if self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Shared builds on Windows are not supported")
 
     def build_requirements(self):
         # 3.28+ is not supported
