@@ -570,7 +570,7 @@ class ArrowConan(ConanFile):
         if self.options.parquet:
             self.cpp_info.components["libparquet"].names["cmake_find_package"] = f"parquet_{cmake_suffix}"
             self.cpp_info.components["libparquet"].names["cmake_find_package_multi"] = f"parquet_{cmake_suffix}"
-            self.cpp_info.components["libarrow"].set_property("cmake_target_name", f"Parquet::parquet_{cmake_suffix}")
+            self.cpp_info.components["libparquet"].set_property("cmake_target_name", f"Parquet::parquet_{cmake_suffix}")
         if self.options.get_safe("substrait"):
             self.cpp_info.components["libarrow_substrait"].names["cmake_find_package"] = f"arrow_substrait_{cmake_suffix}"
             self.cpp_info.components["libarrow_substrait"].names["cmake_find_package_multi"] = f"arrow_substrait_{cmake_suffix}"
