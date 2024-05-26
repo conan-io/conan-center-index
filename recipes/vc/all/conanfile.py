@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
@@ -6,30 +7,6 @@ import os
 
 required_conan_version = ">=1.50.0"
 
-# https://github.com/VcDevel/Vc/blob/1.4.4/cmake/OptimizeForArchitecture.cmake#L493-L513
-cpu_features = [
-    "sse2",
-    "sse3",
-    "ssse3",
-    "sse4_1",
-    "sse4_2",
-    "sse4a",
-    "avx",
-    "fma",
-    "bmi2",
-    "avx2",
-    "xop",
-    "fma4",
-    "avx512f",
-    "avx512vl",
-    "avx512pf",
-    "avx512er",
-    "avx512cd",
-    "avx512dq",
-    "avx512bw",
-    "avx512ifma",
-    "avx512vbmi",
-]
 
 class VcConan(ConanFile):
     name = "vc"
@@ -42,32 +19,31 @@ class VcConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
+        # https://github.com/VcDevel/Vc/blob/1.4.4/cmake/OptimizeForArchitecture.cmake
+        "cpu_architecture": [
+            "auto", "generic", "none", "x86-64", "x86-64-v2", "x86-64-v3", "x86-64-v4",
+            # Intel
+            "core", "merom", "penryn", "nehalem", "westmere", "sandy-bridge", "ivy-bridge", "haswell",
+            "broadwell", "skylake", "skylake-xeon", "kaby-lake", "cannonlake", "silvermont", "goldmont",
+            "knl", "atom",
+            # AMD
+            "k8", "k8-sse3", "barcelona", "istanbul", "magny-cours", "bulldozer", "interlagos",
+            "piledriver", "AMD 14h", "AMD 16h", "zen", "zen3"
+        ],
     }
     default_options = {
         "fPIC": True,
+        "cpu_architecture": "sandy-bridge",  # sse sse2 sse3 ssse3 sse4.1 sse4.2 avx
     }
-    # See https://github.com/VcDevel/Vc/blob/1.4.4/cmake/OptimizeForArchitecture.cmake for details.
-    # Defaults are based on Steam Hardware survey as of 2024-05 and the common subset of features supported by both
-    # Intel Skylake (2015+) and AMD Piledriver (2012+) architectures.
-    options.update({f"use_{feature}": [True, False] for feature in cpu_features})
-    default_options.update({f"use_{feature}": False for feature in cpu_features})
-    default_options.update({
-        "use_sse2": True,
-        "use_sse3": True,
-        "use_ssse3": True,
-        "use_sse4_1": True,
-        "use_sse4_2": True,
-        "use_sse4a": False,
-        "use_avx": True,
-        "use_fma": True,
-    })
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if is_apple_os(self):
+            # sse sse2 sse3 ssse3 sse4.1 sse4.2, no avx
+            self.options.cpu_architecture = "westmere"
         if self.settings.arch not in ["x86", "x86_64"]:
-            for feature in cpu_features:
-                self.options.rm_safe(f"use_{feature}")
+            del self.options.cpu_architecture
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -81,10 +57,8 @@ class VcConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # Set TARGET_ARCHITECTURE to generic to avoid automatic detection of the target architecture.
-        tc.variables["TARGET_ARCHITECTURE"] = "generic"
-        for feature in cpu_features:
-            tc.variables[f"USE_{feature.upper()}"] = self.options.get_safe(f"use_{feature}", False)
+        # https://github.com/openMVG/openMVG/blob/v2.1/src/cmakeFindModules/OptimizeForArchitecture.cmake
+        tc.variables["TARGET_ARCHITECTURE"] = self.options.get_safe("cpu_architecture", "none")
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
