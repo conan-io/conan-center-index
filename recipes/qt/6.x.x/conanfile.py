@@ -477,6 +477,8 @@ class QtConan(ConanFile):
 
         tc = CMakeToolchain(self, generator="Ninja")
 
+        tc.absolute_paths = True
+
         package_folder = self.package_folder.replace('\\', '/')
         tc.variables["INSTALL_MKSPECSDIR"] = f"{package_folder}/res/archdatadir/mkspecs"
         tc.variables["INSTALL_ARCHDATADIR"] = f"{package_folder}/res/archdatadir"
