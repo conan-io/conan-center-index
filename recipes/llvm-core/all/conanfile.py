@@ -60,7 +60,7 @@ class LLVMCoreConan(ConanFile):
         "A toolkit for the construction of highly optimized compilers,"
         "optimizers, and runtime environments."
     )
-    license = "LLVM-exception"
+    license = "Apache-2.0 WITH LLVM-exception"
     topics = ("llvm", "compiler")
     homepage = "https://llvm.org"
     url = "https://github.com/conan-io/conan-center-index"
