@@ -98,6 +98,11 @@ class CgnsConan(ConanFile):
         else:
             replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
                             "set(install_targets ${install_targets} cgns_shared)", "")
+        # Fix fragile linking against HDF5 libs
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'message (STATUS "HDF5 C libs:',
+                        ('link_libraries(HDF5::HDF5)\n'
+                         'message (STATUS "HDF5 C libs:'))
 
     def build(self):
         self._patch_sources()
@@ -122,7 +127,6 @@ class CgnsConan(ConanFile):
         if self.options.shared:
             self.cpp_info.components["cgns_shared"].set_property("cmake_target_name", "CGNS::cgns_shared")
             self.cpp_info.components["cgns_shared"].libs = ["cgnsdll" if self.settings.os == "Windows" else "cgns"]
-            self.cpp_info.components["cgns_shared"].libdirs = ["lib"]
             if self.options.with_hdf5:
                 self.cpp_info.components["cgns_shared"].requires = ["hdf5::hdf5"]
             if self.settings.os == "Windows":
@@ -131,7 +135,6 @@ class CgnsConan(ConanFile):
         else:
             self.cpp_info.components["cgns_static"].set_property("cmake_target_name", "CGNS::cgns_static")
             self.cpp_info.components["cgns_static"].libs = ["cgns"]
-            self.cpp_info.components["cgns_static"].libdirs = ["lib"]
             if self.options.with_hdf5:
                 self.cpp_info.components["cgns_static"].requires = ["hdf5::hdf5"]
 
