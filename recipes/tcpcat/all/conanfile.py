@@ -58,6 +58,9 @@ class TcpcatConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+    def requirements(self):
+        self.requires("asio/[^1.30]", transitive_headers = True)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -78,3 +81,4 @@ class TcpcatConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["tcpcat"]
+        self.cpp_info.set_property("cmake_target_name", "tcpcat")
