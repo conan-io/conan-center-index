@@ -82,7 +82,7 @@ class CrashpadConan(ConanFile):
         # FIXME: use mini_chromium conan package instead of embedded package (if possible)
         self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("linux-syscall-support/cci.20200813")
+            self.requires("linux-syscall-support/2022.10.12")
         if self.options.http_transport == "libcurl":
             self.requires("libcurl/[>=7.78 <9]")
         if self.options.get_safe("with_tls") == "openssl":
@@ -105,14 +105,14 @@ class CrashpadConan(ConanFile):
             self.output.warning("crashpad needs a shared libcurl library")
 
     def build_requirements(self):
-        self.tool_requires("ninja/1.11.1")
+        self.tool_requires("ninja/1.12.0")
         self.tool_requires("gn/cci.20210429")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         if is_msvc(self):
-            self.tool_requires("automake/x.y.z")
+            self.tool_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["crashpad"], strip_root=True)
