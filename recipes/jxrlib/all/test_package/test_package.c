@@ -4,15 +4,12 @@
 
 int main(int argc, char* argv[])
 {
-    {
-        ERR err = WMP_errSuccess;
-        PKCodecFactory* pCodecFactory = NULL;
+    PKCodecFactory* pCodecFactory = NULL;
 
-        Call(PKCreateCodecFactory(&pCodecFactory, WMP_SDK_VERSION));
-        printf("Test");
-
-    Cleanup:
-        if(pCodecFactory) pCodecFactory->Release(&pCodecFactory);
+    Call(PKCreateCodecFactory(&pCodecFactory, WMP_SDK_VERSION));
+    
+    if(pCodecFactory) {
+        pCodecFactory->Release(&pCodecFactory)
     }
 
     return 0;
