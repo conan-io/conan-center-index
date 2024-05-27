@@ -139,7 +139,7 @@ class GeographiclibConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "GeographicLib::GeographicLib")
         self.cpp_info.set_property("pkg_config_name", "geographiclib")
         suffix = "_d" if self.settings.build_type == "Debug" and is_msvc(self) else ""
-        suffix += "-i" if is_msvc(self) else ""
+        suffix += "-i" if is_msvc(self) and self.options.shared else ""
         self.cpp_info.libs = [f"GeographicLib{suffix}"] if Version(self.version) >= "2" else [f"Geographic{suffix}"]
         self.cpp_info.defines.append("GEOGRAPHICLIB_SHARED_LIB={}".format("1" if self.options.shared else "0"))
 
