@@ -33,7 +33,13 @@ endif()
 
 target_compile_features(quickfast PUBLIC cxx_std_11)
 target_include_directories(quickfast PUBLIC src)
-target_link_libraries(${PROJECT_NAME} Boost::boost Boost::thread Boost::date_time XercesC::XercesC)
+target_link_libraries(${PROJECT_NAME}
+    Boost::boost
+    Boost::thread
+    Boost::date_time
+    Boost::disable_autolinking
+    XercesC::XercesC
+)
 
 install(TARGETS quickfast
     RUNTIME DESTINATION bin
