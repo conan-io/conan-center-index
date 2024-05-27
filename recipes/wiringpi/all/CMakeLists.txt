@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.11)
-project(wiringPi C)
+project(wiringPi LANGUAGES C)
 
 file(GLOB SRC_FILES ${WIRINGPI_SRC_DIR}/wiringPi/*.c)
 
@@ -18,6 +18,10 @@ if(WIRINGPI_WITH_DEV_LIB)
     add_library(wiringPiDevLib ${SRC_FILES})
     target_include_directories(wiringPiDevLib PUBLIC ${WIRINGPI_SRC_DIR}/devLib
                                                      ${WIRINGPI_SRC_DIR}/wiringPi)
+endif()
+
+if(WIRINGPI_LINUX_HEADERS_DIR)
+    target_include_directories(${PROJECT_NAME} PUBLIC ${WIRINGPI_LINUX_HEADERS_DIR})
 endif()
 
 install(TARGETS ${PROJECT_NAME}

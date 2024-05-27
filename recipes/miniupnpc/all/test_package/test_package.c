@@ -7,6 +7,8 @@ int main(void) {
     int ipv6 = 0;
     unsigned char ttl = 2;
     int error = 0;
-    struct UPNPDev *devlist = upnpDiscover(2000, multicastif, minissdpdpath, localport, ipv6, ttl, &error);
+    if (0) {
+        struct UPNPDev *devlist = upnpDiscover(2000, multicastif, minissdpdpath, localport, ipv6, ttl, &error);
+    }
     return 0;
 }

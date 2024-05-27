@@ -39,6 +39,8 @@ class WolfSSLConan(ConanFile):
         "sessioncerts": [True, False],
         "sni": [True, False],
         "testcert": [True, False],
+        "with_curl": [True, False],
+        "with_experimental": [True, False],
     }
     default_options = {
         "shared": False,
@@ -55,6 +57,8 @@ class WolfSSLConan(ConanFile):
         "sessioncerts": False,
         "sni": False,
         "testcert": False,
+        "with_curl": False,
+        "with_experimental": False,
     }
 
     @property
@@ -64,6 +68,10 @@ class WolfSSLConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "5.2.0":
+            del self.options.with_curl
+        if Version(self.version) < "5.7.0":
+            del self.options.with_experimental
 
     def configure(self):
         if self.options.shared:
@@ -114,6 +122,10 @@ class WolfSSLConan(ConanFile):
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ])
+        if self.options.get_safe("with_curl"):
+            tc.configure_args.append("--enable-curl")
+        if self.options.get_safe("with_experimental"):
+            tc.configure_args.append("--enable-experimental")
         if is_msvc(self):
             tc.extra_ldflags.append("-ladvapi32")
             if check_min_vs(self, "180", raise_invalid=False):

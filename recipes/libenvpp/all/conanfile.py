@@ -49,7 +49,7 @@ class LibenvppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/10.1.1", transitive_headers=True)
+        self.requires("fmt/10.2.1", transitive_headers=True)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")

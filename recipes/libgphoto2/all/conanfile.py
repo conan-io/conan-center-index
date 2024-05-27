@@ -57,7 +57,7 @@ class LibGphoto2(ConanFile):
         if self.options.with_libcurl:
             self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.12.2")
+            self.requires("libxml2/2.12.3")
         if self.options.with_libexif:
             self.requires("libexif/0.6.24")
         if self.options.with_libjpeg:

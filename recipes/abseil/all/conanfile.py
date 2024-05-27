@@ -98,7 +98,7 @@ class AbseilConan(ConanFile):
         # In case of cross-build, set CMAKE_SYSTEM_PROCESSOR if not set by toolchain or user
         if cross_building(self):
             toolchain_file = os.path.join(self.generators_folder, "conan_toolchain.cmake")
-            cmake_system_processor_block = textwrap.dedent("""\
+            cmake_system_processor_block = textwrap.dedent("""
                 if(NOT CMAKE_SYSTEM_PROCESSOR)
                     set(CMAKE_SYSTEM_PROCESSOR {})
                 endif()
@@ -232,11 +232,6 @@ class AbseilConan(ConanFile):
             self.cpp_info.components[pkgconfig_name].system_libs = values.get("system_libs", [])
             self.cpp_info.components[pkgconfig_name].frameworks = values.get("frameworks", [])
             self.cpp_info.components[pkgconfig_name].requires = values.get("requires", [])
-            if is_msvc(self) and self.settings.compiler.get_safe("cppstd") == "20":
-                self.cpp_info.components[pkgconfig_name].defines.extend([
-                    "_HAS_DEPRECATED_RESULT_OF",
-                    "_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING",
-                ])
 
             self.cpp_info.components[pkgconfig_name].names["cmake_find_package"] = cmake_target
             self.cpp_info.components[pkgconfig_name].names["cmake_find_package_multi"] = cmake_target
