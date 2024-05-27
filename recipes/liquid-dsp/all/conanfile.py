@@ -191,7 +191,7 @@ class LiquidDspConan(ConanFile):
             # Package MinGW runtime libraries since Conan lacks support for proper handling of compiler runtime libs
             mingw = self.dependencies.build["mingw-builds"].package_folder
             if self.options.shared:
-                copy(self, "libgcc_s*.dll", os.path.join(mingw, "bin"), os.path.join(self.package_folder, "bin"), keep_path=False)
+                copy(self, "*.dll", os.path.join(mingw, "bin"), os.path.join(self.package_folder, "bin"), keep_path=False)
                 copy(self, "libgcc_s.a", os.path.join(mingw, "lib", "gcc", f"{self.settings.arch}-w64-mingw32", "lib"), os.path.join(self.package_folder, "lib"))
             else:
                 copy(self, "libgcc.a", os.path.join(mingw, "lib", "gcc", f"{self.settings.arch}-w64-mingw32", "12.2.0"), os.path.join(self.package_folder, "lib"))
