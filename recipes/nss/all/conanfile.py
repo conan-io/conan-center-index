@@ -62,7 +62,8 @@ class NSSConan(ConanFile):
             self.tool_requires("mozilla-build/4.0.2")
         if cross_building(self):
             self.tool_requires("sqlite3/<host_version>")
-        self.tool_requires("cpython/3.12.2")
+        # gyp is not compatible with Python 3.12
+        self.tool_requires("cpython/3.11.9")
         self.tool_requires("ninja/1.12.1")
 
     def source(self):
@@ -174,7 +175,7 @@ class NSSConan(ConanFile):
     def build(self):
         self._patch_sources()
         # install gyp-next
-        self.run(f"python -m pip install gyp-next --no-cache-dir --target={self._site_packages_dir}")
+        self.run(f"python -m pip install gyp-next==0.18.0 --no-cache-dir --target={self._site_packages_dir}")
         self.run("gyp --version")
 
         with chdir(self, os.path.join(self.source_folder, "nss")):
