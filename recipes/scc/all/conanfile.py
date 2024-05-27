@@ -76,7 +76,7 @@ class SystemcComponentsConan(ConanFile):
             #     see declaration of 'tlm::tlm_extension<tlm::scc::tlm_gp_mm>::copy_from'
             # and
             #   src\sysc\tlm\scc\tlm_mm.h(31,20): error C2061: syntax error: identifier '__attribute__'
-            raise ConanInvalidConfiguration(f"{self.ref} is not supported on MSVC.")
+            raise ConanInvalidConfiguration(f"{self.ref} recipe is not supported on MSVC. Contributions are welcome!")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
