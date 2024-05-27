@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, save
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
@@ -161,7 +161,7 @@ class FollyConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
-        tc.cache_variables["CMAKE_PROJECT_folly_INCLUDE"] = os.path.join(self.source_folder, "conan_deps.cmake")
+        tc.cache_variables["CMAKE_PROJECT_folly_INCLUDE"] = "conan_deps.cmake"
 
         if can_run(self):
             for var in ["FOLLY_HAVE_UNALIGNED_ACCESS", "FOLLY_HAVE_LINUX_VDSO", "FOLLY_HAVE_WCHAR_SUPPORT", "HAVE_VSNPRINTF_ERRORS"]:
@@ -194,7 +194,7 @@ class FollyConan(ConanFile):
         if is_msvc(self):
             tc.variables["MSVC_LANGUAGE_VERSION"] = cxx_std_value
             tc.variables["MSVC_ENABLE_ALL_WARNINGS"] = False
-            tc.variables["MSVC_USE_STATIC_RUNTIME"] = "MT" in msvc_runtime_flag(self)
+            tc.variables["MSVC_USE_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
             tc.preprocessor_definitions["NOMINMAX"] = ""
         else:
             tc.variables["CXX_STD"] = cxx_std_value
