@@ -57,7 +57,7 @@ class SioclientConan(ConanFile):
 
     def build_requirements(self):
         # 3.28+ is not supported
-        self.tool_requires("cmake/[>=3.12 <=3.27]")
+        self.tool_requires("cmake/[>=3.15 <=3.27]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
