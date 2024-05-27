@@ -184,8 +184,6 @@ class FollyConan(ConanFile):
         tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         # Relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        # Honor CMAKE_REQUIRED_LIBRARIES in check_include_file_xxx
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0075"] = "NEW"
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         # Honor Boost_ROOT set by boost recipe
