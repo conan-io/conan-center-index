@@ -128,15 +128,16 @@ class GeographiclibConan(ConanFile):
             rmdir(self, os.path.join(os.path.join(self.package_folder, folder)))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         if not self.options.tools:
-            bin_files = os.listdir(os.path.join(self.package_folder, "bin"))
-            for bin_file in [it for it in bin_files if not it.endswith(".dll")]:
-                rm(self, bin_file, os.path.join(self.package_folder, "bin"))
+            rmdir(self, os.path.join(self.package_folder, "sbin"))
+            bin_files = [it for it in os.listdir(os.path.join(self.package_folder, "bin")) if not it.endswith(".dll")]
+            for it in bin_files:
+                rm(self, it, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "geographiclib")
         self.cpp_info.set_property("cmake_target_name", "GeographicLib::GeographicLib")
         self.cpp_info.set_property("pkg_config_name", "geographiclib")
-        self.cpp_info.libs = ["GeographicLib"]
+        self.cpp_info.libs = ["GeographicLib"] if Version(self.version) >= "2" else ["Geographic"]
         self.cpp_info.defines.append("GEOGRAPHICLIB_SHARED_LIB={}".format("1" if self.options.shared else "0"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
