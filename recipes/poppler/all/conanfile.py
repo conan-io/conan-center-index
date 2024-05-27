@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, cross_building, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -233,7 +233,12 @@ class PopplerConan(ConanFile):
 
         # To ensure check_cxx_source_compiles() checks work correctly
         # https://github.com/conan-io/conan/issues/12180
-        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+
+        # Workaround for MSVC:
+        # CMake Error at cmake/modules/PopplerMacros.cmake:91 (message):
+        #   Unsupported CMAKE_BUILD_TYPE:
+        tc.cache_variables["CMAKE_BUILD_TYPE"] = str(self.settings.build_type)
 
         tc.generate()
 
