@@ -17,15 +17,13 @@ class S2let(ConanFile):
     homepage = "https://github.com/astro-informatics/s2let"
     topics = ("physics", "astrophysics", "radio interferometry")
 
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
         "with_cfitsio": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
         "with_cfitsio": False,
     }
@@ -35,8 +33,6 @@ class S2let(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
