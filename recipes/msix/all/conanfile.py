@@ -96,7 +96,10 @@ class MsixConan(ConanFile):
 
     def validate(self):
         if self.settings.os in ["Linux", "FreeBSD"] and self.settings.compiler != "clang":
-            raise ConanInvalidConfiguration("Only clang is supported on Linux")
+            raise ConanInvalidConfiguration(f"Only clang is supported on {self.settings.os}")
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= "12" and self.version == "1.7":
+            # AppxPackaging.hpp:706:5: error: templates must have C++ linkage
+            raise ConanInvalidConfiguration("Clang 12 and newer are not supported")
         if self.options.pack:
             if is_apple_os(self):
                 if not self.options.use_external_zlib:
