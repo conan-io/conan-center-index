@@ -34,6 +34,12 @@ patches:
     - patch_file: "patches/9.3.0-fix-vtkQuadricDecimation-OutputPrecision.patch"
       patch_type: "conan"
       patch_description: "Allow user to adjust output points precision in vtkQuadricDecimation"
+    - patch_file: "patches/9.3.0-fix-vtkQuadricDecimation-AlwaysCopyPointData.patch"
+      patch_type: "conan"
+      patch_description: "Add option in vtkQuadricDecimation to always copy pointdata to the output, without additional weighting and interpolation"
+    - patch_file: "patches/9.3.0-fix-vtkQuadricDecimation-edge-counting.patch"
+      patch_type: "conan"
+      patch_description: "Improve edge-count performance in vtkQuadricDecimation"
   "9.2.6":
     - patch_file: "patches/9.2.2-remove-qt-59-limit.patch"
       patch_type: "conan"
