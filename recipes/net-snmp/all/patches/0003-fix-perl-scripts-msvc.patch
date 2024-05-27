@@ -53,7 +53,8 @@
  
 -my $perl_cflags = ExtUtils::Embed::ccopts();
  # Do not use $perl_cflags if these come from a Perl executable built with gcc.
- $perl_cflags = "" if $perl_cflags =~ / -pipe/;
+-$perl_cflags = "" if $perl_cflags =~ / -pipe/;
++
  
 @@ -207,29 +205,24 @@
      "sdk" => [ "^SDK=",        $sdk == 1 ? "SDK=true" : "SDK=false" ],
