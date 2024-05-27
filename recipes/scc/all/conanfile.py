@@ -112,16 +112,6 @@ class SystemcComponentsConan(ConanFile):
         apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "third_party", "axi_chi", "CMakeLists.txt"),
                         " STATIC", "")
-        if is_msvc(self):
-            # Fix duplicate definition by `template<> struct value_converter<sc_dt::uint64>`
-            # https://github.com/Minres/LWTR4SC/blob/03d52fc4e704d62377d1b1073fc45b2b22512654/src/lwtr/lwtr.h#L137-L172
-            lwtr_h = os.path.join(self.source_folder, "third_party", "lwtr4sc", "src", "lwtr", "lwtr.h")
-            replace_in_file(self, lwtr_h, "VAL_CONV(int64_t);", "")
-            replace_in_file(self, lwtr_h, "VAL_CONV(uint64_t);", "")
-            # Drop a non-portable malloc_trim(0) call, which does not appear to be essential
-            # https://github.com/Minres/SystemC-Components/blob/2023.06/src/sysc/scc/perf_estimator.cpp#L86
-            replace_in_file(self, os.path.join(self.source_folder, "src", "sysc", "scc", "perf_estimator.cpp"),
-                            "malloc_trim(0);", "")
 
     def build(self):
         self._patch_sources()
