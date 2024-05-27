@@ -9,4 +9,3 @@ patches:
     - patch_file: "patches/1.7/001-fix-missing-include.patch"
       patch_description: "Fix missing #include <cstdint>"
       patch_type: "portability"
-
