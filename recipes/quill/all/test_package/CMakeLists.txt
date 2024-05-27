@@ -3,18 +3,9 @@ project(test_package LANGUAGES CXX)
 
 find_package(quill REQUIRED CONFIG)
 
-if(quill_VERSION VERSION_GREATER_EQUAL "4.0.0")
-    add_executable(${PROJECT_NAME} test_package_4_0.cpp)
-else()
-    add_executable(${PROJECT_NAME} test_package.cpp)
-endif()
-target_link_libraries(${PROJECT_NAME} PRIVATE quill::quill)
-if(quill_VERSION VERSION_GREATER_EQUAL "2.0.0")
-    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
-else()
-    target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
-endif()
+add_executable(${PROJECT_NAME} test_package.cpp)
 
-if(quill_VERSION VERSION_GREATER_EQUAL "3.3.0")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE QUILL_FILE_HANDLERS_API_V3_3)
-endif()
+target_link_libraries(${PROJECT_NAME} PRIVATE quill::quill)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+target_compile_definitions(${PROJECT_NAME} PRIVATE QUILL_FILE_HANDLERS_API_V3_3)
+
