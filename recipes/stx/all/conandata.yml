@@ -1,8 +1,18 @@
 sources:
+  "1.0.5":
+    url: "https://github.com/lamarrr/STX/archive/v1.0.5.tar.gz"
+    sha256: "d21a1895bc7057c8c6118a042ec39f364b2ad768394d4facb2fd64b73b07d97f"
   "1.0.4":
     url: "https://github.com/lamarrr/STX/archive/v1.0.4.tar.gz"
     sha256: "89c61efb84828e42ddd6765e323e12b7b8de7ff68116f93227a87c56159c34ab"
 patches:
+  "1.0.5":
+    - patch_file: "patches/1.0.4-0001-cmake_module_path.patch"
+      patch_description: "append CMAKE_MODULE_PATH instead of setting CMAKE_MODULE_PATH"
+      patch_type: "conan"
+    - patch_file: "patches/1.0.5-0002-add-installer.patch"
+      patch_description: "use GNUInstallDirs for target path"
+      patch_type: "portability"
   "1.0.4":
     - patch_file: "patches/1.0.4-0001-cmake_module_path.patch"
       patch_description: "append CMAKE_MODULE_PATH instead of setting CMAKE_MODULE_PATH"

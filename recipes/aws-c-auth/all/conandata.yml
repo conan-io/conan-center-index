@@ -1,4 +1,10 @@
 sources:
+  "0.7.8":
+    url: "https://github.com/awslabs/aws-c-auth/archive/v0.7.8.tar.gz"
+    sha256: "5db8ab91262b5c055e3634f2c9dc2bc1a3285c2dd5513fdcafcb3e79468dc7de"
+  "0.7.7":
+    url: "https://github.com/awslabs/aws-c-auth/archive/v0.7.7.tar.gz"
+    sha256: "ea3c9e75b59b36aaf9147deec655d1669f197745bbe914cd3b8e234740be29ba"
   "0.6.17":
     url: "https://github.com/awslabs/aws-c-auth/archive/v0.6.17.tar.gz"
     sha256: "b43678ad3a779c9c7fccf8f931c162eaaf4d5d64d2955ac1fcfd32e538545c0f"
@@ -14,3 +20,9 @@ sources:
   "0.6.0":
     url: "https://github.com/awslabs/aws-c-auth/archive/v0.6.0.tar.gz"
     sha256: "5f5fff63110c3e8f619385ca563f77886bc101d3e054987eecbb87586e27b651"
+patches:
+  "0.6.17":
+    - patch_file: "patches/0.6.17-0001-fix-macro-usage.patch"
+      patch_description: "Fix inconsistent usage of macros"
+      patch_type: "backport"
+      patch_source: "https://github.com/awslabs/aws-c-auth/pull/181"

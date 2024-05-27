@@ -1,4 +1,7 @@
 sources:
+  "1.4.20":
+    url: "https://github.com/babelouest/yder/archive/refs/tags/v1.4.20.tar.gz"
+    sha256: "c1a7f2281514d0d0bba912b6b70f371d8c127ccfd644b8c438c9301a0fd4c5f2"
   "1.4.18":
     url: "https://github.com/babelouest/yder/archive/refs/tags/v1.4.18.tar.gz"
     sha256: "b69cc81f6630f66468595d151446c00c90abed058f03f82e151591b8598a7598"

@@ -82,6 +82,7 @@ class OdeConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("libccd", "cmake_target_name", "ccd::ccd")
         deps.generate()
 
     def build(self):

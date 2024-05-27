@@ -1,0 +1,38 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bed8895..4698501 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,8 +12,8 @@ add_library(lunasvg)
+ 
+ add_subdirectory(include)
+ add_subdirectory(source)
+-add_subdirectory(3rdparty/plutovg)
+-
++find_package(plutovg CONFIG REQUIRED)
++target_link_libraries(lunasvg plutovg::plutovg)
+ if(BUILD_SHARED_LIBS)
+     target_compile_definitions(lunasvg PUBLIC LUNASVG_SHARED)
+     target_compile_definitions(lunasvg PRIVATE LUNASVG_EXPORT)
+@@ -25,16 +25,16 @@ if(LUNASVG_BUILD_EXAMPLES)
+     target_include_directories(svg2png PRIVATE 3rdparty/stb)
+ endif()
+ 
+-set(LUNASVG_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib)
+-set(LUNASVG_INCDIR ${CMAKE_INSTALL_PREFIX}/include)
++#set(LUNASVG_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib)
++#set(LUNASVG_INCDIR ${CMAKE_INSTALL_PREFIX}/include)
+ 
+ install(FILES
+     include/lunasvg.h
+-    DESTINATION ${LUNASVG_INCDIR}
++    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+ )
+ 
+ install(TARGETS lunasvg
+-    LIBRARY     DESTINATION    ${LUNASVG_LIBDIR}
+-    ARCHIVE     DESTINATION    ${LUNASVG_LIBDIR}
+-    INCLUDES    DESTINATION    ${LUNASVG_INCDIR}
++    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
++    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
++    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+ )

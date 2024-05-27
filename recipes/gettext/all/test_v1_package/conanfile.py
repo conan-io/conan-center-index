@@ -18,7 +18,8 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         self.build_requires(self.tested_reference_str)
-        self.build_requires("automake/1.16.4")
+        self.build_requires("automake/1.16.5")
+        self.build_requires("xz_utils/5.4.5")
         if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
             self.build_requires("msys2/cci.latest")
 
