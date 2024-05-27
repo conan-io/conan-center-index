@@ -3,5 +3,5 @@ project(PackageTest CXX)
 
 add_executable(test_package test_package.cpp)
 
-find_package(tcpcat CONFIG REQUIRED)
-target_link_libraries(test_package tcpcat)
+find_package(ydcpp-tcpcat CONFIG REQUIRED)
+target_link_libraries(test_package ydcpp-tcpcat)

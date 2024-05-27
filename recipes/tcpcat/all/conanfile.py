@@ -8,7 +8,7 @@ import os
 
 
 class TcpcatConan(ConanFile):
-    name = "tcpcat"
+    name = "ydcpp-tcpcat"
     package_type = "library"
 
     # Optional metadata
@@ -82,5 +82,5 @@ class TcpcatConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["tcpcat"]
-        self.cpp_info.set_property("cmake_target_name", "tcpcat")
+        self.cpp_info.libs = ["ydcpp-tcpcat"]
+        self.cpp_info.set_property("cmake_target_name", "ydcpp-tcpcat")
