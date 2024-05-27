@@ -182,7 +182,7 @@ class CrashpadConan(ConanFile):
             return " ".join(filter(None, [tc.vars().get(name), deps.vars().get(name)]))
 
         env = Environment()
-        env.define("CXX", self._cxx)
+        env.define("CXX", shutil.which(self._cxx))
         env.vars(self).save_script("conanbuild_gn")
 
         gn_args = {}
