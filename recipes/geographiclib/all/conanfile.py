@@ -7,6 +7,7 @@ from conan.tools.files import (
     replace_in_file, rm, rmdir
 )
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -137,7 +138,9 @@ class GeographiclibConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "geographiclib")
         self.cpp_info.set_property("cmake_target_name", "GeographicLib::GeographicLib")
         self.cpp_info.set_property("pkg_config_name", "geographiclib")
-        self.cpp_info.libs = ["GeographicLib"] if Version(self.version) >= "2" else ["Geographic"]
+        suffix = "_d" if self.settings.build_type == "Debug" and is_msvc(self) else ""
+        suffix += "-i" if is_msvc(self) else ""
+        self.cpp_info.libs = [f"GeographicLib{suffix}"] if Version(self.version) >= "2" else [f"Geographic{suffix}"]
         self.cpp_info.defines.append("GEOGRAPHICLIB_SHARED_LIB={}".format("1" if self.options.shared else "0"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
