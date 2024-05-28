@@ -272,7 +272,7 @@ class BoostConan(ConanFile):
         cppstd = self.settings.compiler.get_safe("cppstd")
         if cppstd:
             return valid_min_cppstd(self, 14)
-        required_compiler_version = self._min_compiler_version_default_cxx14        
+        required_compiler_version = self._min_compiler_version_default_cxx14
         if required_compiler_version:
             msvc_versions = {14: 190, 15: 191, 16: 192, 17: 193}
             compiler_version = Version(self.settings.compiler.version)
@@ -287,7 +287,7 @@ class BoostConan(ConanFile):
     def _min_compiler_version_nowide(self):
         # Nowide needs c++11 + swappable std::fstream
         return {
-            "gcc": 5,
+            "gcc": 4.8,
             "clang": 5,
             "Visual Studio": 14,  # guess
             "msvc": 190,  # guess
@@ -435,6 +435,9 @@ class BoostConan(ConanFile):
                     self.output.warning("Assuming the compiler supports c++11 by default")
                 elif not self._has_cppstd_11_supported:
                     disable_math()
+                # Boost.Math is not built when the compiler is GCC < 5 and uses C++11
+                elif self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
+                    disable_math()
 
         if Version(self.version) >= "1.79.0":
             # Starting from 1.79.0, Boost.Wave requires a c++11 capable compiler
@@ -457,6 +460,9 @@ class BoostConan(ConanFile):
                     self.output.warning("Assuming the compiler supports c++11 by default")
                 elif not self._has_cppstd_11_supported:
                     disable_wave()
+                # Boost.Wave is not built when the compiler is GCC < 5 and uses C++11
+                elif self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
+                    disable_wave()
 
         if Version(self.version) >= "1.81.0":
             # Starting from 1.81.0, Boost.Locale requires a c++11 capable compiler
@@ -478,6 +484,9 @@ class BoostConan(ConanFile):
                 if min_compiler_version is None:
                     self.output.warning("Assuming the compiler supports c++11 by default")
                 elif not self._has_cppstd_11_supported:
+                    disable_locale()
+                # Boost.Locale is not built when the compiler is GCC < 5 and uses C++11
+                elif self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
                     disable_locale()
 
         if Version(self.version) >= "1.84.0":
@@ -1317,8 +1326,9 @@ class BoostConan(ConanFile):
                 cxx_flags.append("-fembed-bitcode")
         if self._with_stacktrace_backtrace:
             flags.append(f"-sLIBBACKTRACE_PATH={self.dependencies['libbacktrace'].package_folder}")
-        if self._stacktrace_from_exception_available and is_apple_os(self) and str(self.settings.compiler.libcxx) == "libc++":
+        if self._stacktrace_from_exception_available and "x86" not in str(self.settings.arch):
             # https://github.com/boostorg/stacktrace/blob/boost-1.85.0/src/from_exception.cpp#L29
+            # This feature is guarded by BOOST_STACKTRACE_ALWAYS_STORE_IN_PADDING, but that is only enabled on x86.
             flags.append("define=BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK=1")
         if self._with_iconv:
             flags.append(f"-sICONV_PATH={self.dependencies['libiconv'].package_folder}")
