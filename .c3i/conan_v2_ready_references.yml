@@ -23,6 +23,7 @@ required_for_references:
 - andreasbuhr-cppcoro
 - android-ndk
 - angelscript
+- annoy
 - antlr4
 - antlr4-cppruntime
 - any-lite
@@ -61,6 +62,7 @@ required_for_references:
 - autoconf-archive
 - automake
 - avahi
+- avcpp
 - avir
 - aws-c-auth
 - aws-c-cal
@@ -86,6 +88,7 @@ required_for_references:
 - baical-p7
 - bandit
 - base64
+- basu
 - bazel
 - bdwgc
 - bear
@@ -136,6 +139,7 @@ required_for_references:
 - c-dbg-macro
 - c4core
 - caf
+- cairo
 - cairomm
 - cajun-jsonapi
 - calceph
@@ -150,6 +154,7 @@ required_for_references:
 - ccache
 - cccl
 - ccfits
+- cctag
 - cctz
 - cd3-boost-unit-definitions
 - celero
@@ -210,6 +215,7 @@ required_for_references:
 - cotila
 - coz
 - cpp-channel
+- cpp-dump
 - cpp-httplib
 - cpp-ipc
 - cpp-jwt
@@ -218,6 +224,7 @@ required_for_references:
 - cpp-peglib
 - cpp-sort
 - cpp-validator
+- cpp-yyjson
 - cpp_project_framework
 - cppbenchmark
 - cppcheck
@@ -240,6 +247,7 @@ required_for_references:
 - cpuinfo
 - cpython
 - cqrlib
+- cr
 - crc32c
 - crc_cpp
 - crcpp
@@ -266,6 +274,7 @@ required_for_references:
 - cute_headers
 - cvplot
 - cwalk
+- cxxgraph
 - cxxopts
 - cyclonedds
 - cyclonedds-cxx
@@ -283,6 +292,7 @@ required_for_references:
 - dbg-macro
 - dbus
 - dcmtk
+- dd-opentracing-cpp
 - debug_assert
 - decimal_for_cpp
 - deco
@@ -297,8 +307,10 @@ required_for_references:
 - directx-headers
 - dirent
 - discount
+- dispenso
 - djinni-generator
 - djinni-support-lib
+- djvulibre
 - dlib
 - dlpack
 - dnet
@@ -353,6 +365,7 @@ required_for_references:
 - entityx
 - entt
 - enum-flags
+- enumbitmask
 - erikzenker-hsm
 - erkir
 - etc2comp
@@ -434,6 +447,7 @@ required_for_references:
 - gainput
 - gamenetworkingsockets
 - gamma
+- gcc
 - gcem
 - gdal
 - gdbm
@@ -471,6 +485,7 @@ required_for_references:
 - glu
 - gm2calc
 - gmp
+- gn
 - gnu-config
 - gnulib
 - gnutls
@@ -559,6 +574,7 @@ required_for_references:
 - intx
 - inversify-cpp
 - iowow
+- ipaddress
 - iqa
 - irrxml
 - isa-l
@@ -576,6 +592,7 @@ required_for_references:
 - jerryscript
 - jfalcou-eve
 - jinja2cpp
+- jnk0le_ringbuffer
 - joltphysics
 - jom
 - jpcre2
@@ -606,6 +623,7 @@ required_for_references:
 - kmod
 - ktx
 - kuba-zip
+- kuliya
 - lager
 - laslib
 - laszip
@@ -615,6 +633,7 @@ required_for_references:
 - lefticus-tools
 - lely-core
 - lemon
+- leopard
 - leptonica
 - lerc
 - lest
@@ -686,6 +705,7 @@ required_for_references:
 - libgd
 - libgeotiff
 - libgettext
+- libgit2
 - libglvnd
 - libgpg-error
 - libgphoto2
@@ -698,6 +718,9 @@ required_for_references:
 - libiberty
 - libiconv
 - libid3tag
+- libidn
+- libidn2
+- libigl
 - libinput
 - libinterpolate
 - libipt
@@ -712,6 +735,7 @@ required_for_references:
 - libmagic
 - libmaxminddb
 - libmbus
+- libmd
 - libmediainfo
 - libmemcached
 - libmetalink
@@ -748,6 +772,7 @@ required_for_references:
 - libpqxx
 - libproperties
 - libpsl
+- libqasm
 - libqrencode
 - librasterlite
 - libraw
@@ -840,6 +865,7 @@ required_for_references:
 - log.c
 - log4cplus
 - log4cxx
+- logfault
 - logr
 - loguru
 - ls-qpack
@@ -868,6 +894,7 @@ required_for_references:
 - mariadb-connector-c
 - marisa
 - matchit
+- materialx
 - mathfu
 - mathter
 - matio
@@ -914,6 +941,7 @@ required_for_references:
 - minizip
 - minizip-ng
 - mio
+- mlpack
 - mm_file
 - mocknetworkaccessmanager
 - modern-cpp-kafka
@@ -931,6 +959,7 @@ required_for_references:
 - mpdecimal
 - mpfr
 - mpg123
+- mpir
 - mpmcqueue
 - mppp
 - ms-gsl
@@ -963,6 +992,7 @@ required_for_references:
 - nextsilicon-cpp-subprocess
 - nfrechette-acl
 - nghttp3
+- nifti_clib
 - ninja
 - nlohmann_json
 - nlopt
@@ -1003,6 +1033,7 @@ required_for_references:
 - ogdf
 - ogg
 - ohnet
+- ohpipeline
 - ois
 - onedpl
 - onetbb
@@ -1037,9 +1068,11 @@ required_for_references:
 - openimageio
 - openjdk
 - openjpeg
+- openldap
 - openmesh
 - openmvg
 - openpam
+- openscenegraph
 - openssh
 - openssl
 - opensubdiv
@@ -1107,6 +1140,7 @@ required_for_references:
 - platform.exceptions
 - platform.hashing
 - platform.interfaces
+- platformfolders
 - playrho
 - plf_colony
 - plf_indiesort
@@ -1119,6 +1153,7 @@ required_for_references:
 - plutovg
 - pngpp
 - poco
+- podofo
 - poly2tri
 - polylabel
 - polylineencoder
@@ -1161,6 +1196,7 @@ required_for_references:
 - qr-code-generator
 - qt
 - qtawesome
+- qtxlsxwriter
 - quantlib
 - quaternions
 - quazip
@@ -1202,6 +1238,7 @@ required_for_references:
 - refl-cpp
 - reflect-cpp
 - replxx
+- resiprocate
 - resource_pool
 - restbed
 - restinio
@@ -1260,6 +1297,7 @@ required_for_references:
 - serial
 - sfl
 - sfml
+- shaderc
 - shapelib
 - shield
 - si
@@ -1320,6 +1358,7 @@ required_for_references:
 - stduuid
 - stlab
 - strawberryperl
+- streaming-percentiles
 - streamvbyte
 - string-view-lite
 - stringtoolbox
@@ -1363,6 +1402,7 @@ required_for_references:
 - tgbot
 - tgc
 - thelink2012-any
+- thorvg
 - threadpool
 - thrift
 - thrust
@@ -1376,6 +1416,7 @@ required_for_references:
 - tiny-utf8
 - tinyalsa
 - tinycbor
+- tinycolormap
 - tinycthread
 - tinycthreadpool
 - tinydir
@@ -1545,10 +1586,12 @@ required_for_references:
 - yasm
 - yder
 - yoga
+- yomm2
 - yyjson
 - z3
 - zbar
 - zeromq
+- zeus_expected
 - zfp
 - zimg
 - zint

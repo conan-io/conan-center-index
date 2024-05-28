@@ -1,23 +1,13 @@
-#include <cstdlib>
-#include <cstring>
+#include <string>
+#include <iostream>
 
-#include <lzham_static_lib.h>
+#include <lzham.h>
 
 int main() {
-    unsigned char in[] = "Hello Conan Center!";
-    unsigned char out[sizeof(in)];
+    const std::string version(lzham_z_version());
 
-    lzham_z_stream stream;
-    std::memset(&stream, 0, sizeof(stream));
-    stream.next_in = in;
-    stream.avail_in = sizeof(in);
-    stream.next_out = out;
-    stream.avail_out = sizeof(out);
-    if (lzham_z_deflateInit(&stream, LZHAM_Z_BEST_COMPRESSION) != LZHAM_Z_OK)
-        return EXIT_FAILURE;
+    std::cout << "lzham version: " << version << std::endl;
 
-    if (lzham_z_deflate(&stream, LZHAM_Z_FULL_FLUSH) != LZHAM_Z_OK)
-        return EXIT_FAILURE;
 
     return EXIT_SUCCESS;
 }
