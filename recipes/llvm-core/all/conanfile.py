@@ -16,7 +16,7 @@ from conan.tools.files import (
     rename,
     replace_in_file
 )
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.scm import Version
 
 import json
@@ -28,7 +28,7 @@ import textwrap
 
 required_conan_version = ">=1.62.0"
 
-# LLVM's default config is enable all targets, but end users can significantly reduce
+# LLVM's default config is to enable all targets, but end users can significantly reduce
 # build times for the package by disabling the ones they don't need with the corresponding option
 # `-o llvm-core/*:with_target_<target name in lower case>=False`
 LLVM_TARGETS = [
@@ -145,7 +145,7 @@ class LLVMCoreConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.with_libedit # not supported on windows
+            del self.options.with_libedit  # not supported on windows
         if self._major_version < 14:
             del self.options.with_target_loongarch  # experimental
             del self.options.with_target_ve  # experimental
@@ -183,7 +183,7 @@ class LLVMCoreConan(ConanFile):
 
         if self.options.shared:
             if self._is_windows:
-                raise ConanInvalidConfiguration("Shared builds not currently supported on Windows")
+                raise ConanInvalidConfiguration("Shared builds are currently not supported on Windows")
             if os.getenv("CONAN_CENTER_BUILD_SERVICE") and self.settings.build_type == "Debug":
                 raise ConanInvalidConfiguration("Shared Debug build is not supported on CCI due to resource limitations")
             if is_apple_os(self):
@@ -200,7 +200,7 @@ class LLVMCoreConan(ConanFile):
         if cross_building(self):
             # FIXME support cross compilation, at least for common cases like Apple Silicon -> X86
             #  requires a host-compiled version of llvm-tablegen
-            raise ConanInvalidConfiguration("Cross compilation is not supported")
+            raise ConanInvalidConfiguration("Cross compilation is not supported. Contributions are welcome!")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -228,25 +228,11 @@ class LLVMCoreConan(ConanFile):
         return ";".join(
             target for target in LLVM_TARGETS if self.options.get_safe(f"with_target_{target.lower()}") is not None)
 
-    @property
-    def _msvcrt(self):
-        msvcrt = str(self.settings.compiler.runtime)
-        # handle conan legacy setting
-        if msvcrt in ["MDd", "MTd", "MD", "MT"]:
-            return msvcrt
-
-        if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
-            crt = {"static": "MTd", "dynamic": "MDd"}
-        else:
-            crt = {"static": "MT", "dynamic": "MD"}
-
-        return crt[msvcrt]
-
     def generate(self):
         tc = CMakeToolchain(self, generator="Ninja")
         # https://releases.llvm.org/12.0.0/docs/CMake.html
         # https://releases.llvm.org/13.0.0/docs/CMake.html
-        cmake_definitions = {
+        cmake_variables = {
             "LLVM_TARGETS_TO_BUILD": self._targets_to_build,
             # See comment below on LLVM shared library builds
             "LLVM_BUILD_LLVM_DYLIB": self.options.shared,
@@ -274,7 +260,7 @@ class LLVMCoreConan(ConanFile):
             "LLVM_ENABLE_TERMINFO": self.options.with_terminfo
         }
 
-        self._apply_resource_limits(cmake_definitions)
+        self._apply_resource_limits(cmake_variables)
 
         # this capability is back-ported from LLVM 14.x
         is_platform_ELF_based = self.settings.os in [
@@ -282,24 +268,24 @@ class LLVMCoreConan(ConanFile):
         ]
         if is_platform_ELF_based:
             self.output.info("ELF Platform Detected, optimizing memory usage during debug build linking.")
-            cmake_definitions["LLVM_USE_SPLIT_DWARF"] = True
+            cmake_variables["LLVM_USE_SPLIT_DWARF"] = True
 
         if is_msvc(self):
             build_type = str(self.settings.build_type).upper()
-            cmake_definitions[f"LLVM_USE_CRT_{build_type}"] = self._msvcrt
+            cmake_variables[f"LLVM_USE_CRT_{build_type}"] = msvc_runtime_flag(self)
 
         if not self.options.shared:
-            cmake_definitions.update({
+            cmake_variables.update({
                 "DISABLE_LLVM_LINK_LLVM_DYLIB": True,
                 "LLVM_ENABLE_PIC": self.options.get_safe("fPIC", default=False)
             })
 
         if self.options.use_sanitizer == "None":
-            cmake_definitions["LLVM_USE_SANITIZER"] = ""
+            cmake_variables["LLVM_USE_SANITIZER"] = ""
         else:
-            cmake_definitions["LLVM_USE_SANITIZER"] = self.options.use_sanitizer
+            cmake_variables["LLVM_USE_SANITIZER"] = self.options.use_sanitizer
 
-        tc.variables.update(cmake_definitions)
+        tc.variables.update(cmake_variables)
         tc.cache_variables.update({
             # Enables LLVM to find conan libraries during try_compile
             "CMAKE_TRY_COMPILE_CONFIGURATION": str(self.settings.build_type),
@@ -359,7 +345,7 @@ class LLVMCoreConan(ConanFile):
                 "requires": [],
                 "system_libs": []
             }
-            windows_system_libs=[
+            windows_system_libs = [
                 "ole32",
                 "delayimp",
                 "shell32",
@@ -395,7 +381,7 @@ class LLVMCoreConan(ConanFile):
             self.output.warning("Could not find components in LLVMConfig.cmake")
             return None
 
-        components = { component: {} for component in match.groupdict()["components"].split(";") }
+        components = {component: {} for component in match.groupdict()["components"].split(";")}
         self._update_component_dependencies(components)
 
         return {
