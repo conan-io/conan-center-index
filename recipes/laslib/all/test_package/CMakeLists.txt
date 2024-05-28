@@ -8,8 +8,8 @@ add_executable(${PROJECT_NAME} test_package.cpp)
 add_custom_command(
         TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_CURRENT_SOURCE_DIR}/test.laz
-                ${CMAKE_BINARY_DIR}/test.laz)
+                ${CMAKE_CURRENT_SOURCE_DIR}/test_package.cpp
+                ${CMAKE_BINARY_DIR}/test_package.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE laslib::laslib)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
