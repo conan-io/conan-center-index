@@ -18,7 +18,7 @@ class MavenConan(ConanFile):
         pass
 
     def requirements(self):
-        self.requires("zulu-openjdk/11.0.19")
+        self.requires("zulu-openjdk/21.0.1")
 
     def package_id(self):
         del self.info.settings.arch

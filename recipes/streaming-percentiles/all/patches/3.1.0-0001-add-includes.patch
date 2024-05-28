@@ -1,0 +1,62 @@
+diff --git a/cpp/src/include/stmpct/ckms_hbq.hpp b/cpp/src/include/stmpct/ckms_hbq.hpp
+index 87cf860..850d527 100644
+--- a/cpp/src/include/stmpct/ckms_hbq.hpp
++++ b/cpp/src/include/stmpct/ckms_hbq.hpp
+@@ -4,6 +4,7 @@
+ // quantiles as defined in the paper _Effective Computation of Biased
+ // Quantiles over Data Streams_
+ 
++#include <cassert>
+ #include "ckms_impl.hpp"
+ 
+ namespace stmpct {
+diff --git a/cpp/src/include/stmpct/ckms_lbq.hpp b/cpp/src/include/stmpct/ckms_lbq.hpp
+index fb932af..c62d61d 100644
+--- a/cpp/src/include/stmpct/ckms_lbq.hpp
++++ b/cpp/src/include/stmpct/ckms_lbq.hpp
+@@ -4,6 +4,7 @@
+ // quantiles as defined in the paper _Effective Computation of Biased
+ // Quantiles over Data Streams_
+ 
++#include <cassert>
+ #include "ckms_impl.hpp"
+ 
+ namespace stmpct {
+diff --git a/cpp/src/include/stmpct/ckms_tq.hpp b/cpp/src/include/stmpct/ckms_tq.hpp
+index ac9dde8..5d1f093 100644
+--- a/cpp/src/include/stmpct/ckms_tq.hpp
++++ b/cpp/src/include/stmpct/ckms_tq.hpp
+@@ -4,6 +4,8 @@
+ // quantiles as defined in the paper _Effective Computation of Biased
+ // Quantiles over Data Streams_
+ 
++#include <cassert>
++#include <vecetor>
+ #include "ckms_impl.hpp"
+ #include "targeted_quantile.hpp"
+ 
+diff --git a/cpp/src/include/stmpct/ckms_uq.hpp b/cpp/src/include/stmpct/ckms_uq.hpp
+index d0d3837..c417ddc 100644
+--- a/cpp/src/include/stmpct/ckms_uq.hpp
++++ b/cpp/src/include/stmpct/ckms_uq.hpp
+@@ -5,6 +5,7 @@
+ // Quantiles over Data Streams_.  Conceptually nearly equivalent to
+ // the GK algorithm.
+ 
++#include <cassert>
+ #include "ckms_impl.hpp"
+ 
+ namespace stmpct {
+diff --git a/cpp/src/include/stmpct/gk.hpp b/cpp/src/include/stmpct/gk.hpp
+index 6b7a1c6..bf4e163 100644
+--- a/cpp/src/include/stmpct/gk.hpp
++++ b/cpp/src/include/stmpct/gk.hpp
+@@ -1,6 +1,8 @@
+ #pragma once
+ 
++#include <cassert>
+ #include <cmath>
++#include <vector>
+ 
+ // The Greenwald-Khanna algorithm as defined in the paper
+ // Space-Efficient Online Computation of Quantile Summaries

@@ -1,4 +1,7 @@
 sources:
+  "5.0":
+    url: "https://github.com/raysan5/raylib/archive/refs/tags/5.0.tar.gz"
+    sha256: "98f049b9ea2a9c40a14e4e543eeea1a7ec3090ebdcd329c4ca2cf98bc9793482"
   "4.0.0":
     url: "https://github.com/raysan5/raylib/archive/refs/tags/4.0.0.tar.gz"
     sha256: "11f6087dc7bedf9efb3f69c0c872f637e421d914e5ecea99bbe7781f173dc38c"

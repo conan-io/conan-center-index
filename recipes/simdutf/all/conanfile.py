@@ -62,7 +62,7 @@ class SimdutfConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["SIMDUTF_BENCHMARKS"] = False
-        tc.variables["BUILD_TESTING"] = False
+        tc.variables["SIMDUTF_TESTS"] = False
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "8":
             tc.variables["CMAKE_CXX_FLAGS"] = " -mavx512f"
         tc.variables["SIMDUTF_TOOLS"] = False

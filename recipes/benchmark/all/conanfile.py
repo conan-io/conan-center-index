@@ -113,7 +113,6 @@ class BenchmarkConan(ConanFile):
             self.cpp_info.components["_benchmark"].system_libs.append("kstat")
         if self.options.get_safe("enable_libpfm"):
             self.cpp_info.components["_benchmark"].requires.append("libpfm4::libpfm4")
-        
 
         self.cpp_info.components["benchmark_main"].set_property("cmake_target_name", "benchmark::benchmark_main")
         self.cpp_info.components["benchmark_main"].libs = ["benchmark_main"]

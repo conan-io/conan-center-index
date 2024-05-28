@@ -1,4 +1,7 @@
 sources:
+  "1.3.2":
+    url: "https://github.com/bacnet-stack/bacnet-stack/archive/refs/tags/bacnet-stack-1.3.2.tar.gz"
+    sha256: "e38cee9a96485692d5306bcd893ad02244efbecead12be8d2b2e3f3fc50328cb"
   "1.0.0":
     url: "https://github.com/bacnet-stack/bacnet-stack/archive/refs/tags/bacnet-stack-1.0.0.tar.gz"
     sha256: "8dad24decb3870bc8147a1ea5eecd5c6f8c1205ec48d5ae4d454085427122658"

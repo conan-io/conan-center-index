@@ -11,14 +11,14 @@ required_conan_version = ">=1.54.0"
 
 class Liburing(ConanFile):
     name = "liburing"
-    license = "GPL-2.0-or-later"
-    homepage = "https://github.com/axboe/liburing"
-    url = "https://github.com/conan-io/conan-center-index"
     description = ("helpers to setup and teardown io_uring instances, and also a simplified interface for "
                    "applications that don't need (or want) to deal with the full kernel side implementation.")
+    license = "GPL-2.0-or-later"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/axboe/liburing"
     topics = ("asynchronous-io", "async", "kernel")
-
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
@@ -53,8 +53,7 @@ class Liburing(ConanFile):
         # FIXME: use kernel version of build/host machine.
         # kernel version should be encoded in profile
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(
-                "liburing is supported only on linux")
+            raise ConanInvalidConfiguration(f"{self.ref} is supported only on linux")
 
     def layout(self):
         basic_layout(self, src_folder='src')
@@ -64,8 +63,17 @@ class Liburing(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
+
+        if Version(self.version) >= "2.5":
+            if self.options.with_libc:
+                tc.configure_args.append("--use-libc")
+        elif Version(self.version) >= "2.2":
+            if not self.options.with_libc:
+                tc.configure_args.append("--nolibc")
+
         tc.update_configure_args({
-            "--nolibc": None if self.options.get_safe("with_libc", default=True) else "",
+            "--host": None,
+            "--build": None,
             "--enable-shared": None,
             "--disable-shared": None,
             "--enable-static": None,

@@ -1,0 +1,13 @@
+versions:
+  "2.0.0":
+    folder: all
+  "1.9.3":
+    folder: all
+  "1.9.2":
+    folder: all
+  "1.8.7":
+    folder: all
+  "1.8.6":
+    folder: all
+  "1.7.10":
+    folder: all

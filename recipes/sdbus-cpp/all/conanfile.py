@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, get, rmdir
+from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.51.0"
@@ -38,15 +38,15 @@ class SdbusCppConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
+        # non-trivial designated initializers are not supported in gcc < 8
+        # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=55606
         return {
-            "gcc": "7",
+            "gcc": "7" if Version(self.version) < "2.0.0" else "8",
             "clang": "6",
         }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder,
-                 self.export_sources_folder)
+        export_conandata_patches(self)
 
     def configure(self):
         if Version(self.version) < "0.9.0":
@@ -56,7 +56,7 @@ class SdbusCppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libsystemd/253.10")
+        self.requires("libsystemd/255.2")
 
     def validate(self):
         if self.info.settings.os != "Linux":
@@ -74,9 +74,9 @@ class SdbusCppConan(ConanFile):
                     self.name, self._minimum_cpp_standard, self.info.settings.compiler, self.info.settings.compiler.version))
 
     def build_requirements(self):
-        self.tool_requires("pkgconf/2.0.3")
+        self.tool_requires("pkgconf/2.1.0")
         if self.options.with_code_gen:
-            self.tool_requires("expat/2.5.0")
+            self.tool_requires("expat/[>=2.6.2 <3]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -90,6 +90,7 @@ class SdbusCppConan(ConanFile):
         tc.variables["BUILD_DOC"] = False
         tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_LIBSYSTEMD"] = False
+        tc.variables["SDBUSCPP_BUILD_DOCS"] = False
         tc.generate()
 
         # workaround for https://gitlab.kitware.com/cmake/cmake/-/issues/18150
@@ -135,5 +136,4 @@ class SdbusCppConan(ConanFile):
             "libsystemd::libsystemd")
         if self.options.with_code_gen:
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH env var with : {bin_path}")
             self.env_info.PATH.append(bin_path)

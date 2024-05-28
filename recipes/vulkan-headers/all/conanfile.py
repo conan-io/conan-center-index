@@ -14,6 +14,7 @@ class VulkanHeadersConan(ConanFile):
     homepage = "https://github.com/KhronosGroup/Vulkan-Headers"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
+    package_id_embed_mode = "patch_mode"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 

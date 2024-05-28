@@ -25,5 +25,4 @@ class TestPackageConan(ConanFile):
         with tools.environment_append({"PKG_CONFIG_PATH": secret_value}):
             output = StringIO()
             self.run('bash.exe -c "echo $PKG_CONFIG_PATH"', output=output)
-            print(output.getvalue())
             assert secret_value in output.getvalue()

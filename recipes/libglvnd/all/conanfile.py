@@ -8,7 +8,7 @@ from conan.tools.meson import Meson, MesonToolchain
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.64.0 <2 || >=2.2.0"
 
 class LibGlvndConan(ConanFile):
     name = "libglvnd"
@@ -59,9 +59,9 @@ class LibGlvndConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} is only compatible with Linux and FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -87,6 +87,10 @@ class LibGlvndConan(ConanFile):
         tc.project_options["headers"] = self.options.headers
         tc.project_options["entrypoint-patching"] = "enabled" if self.options.entrypoint_patching else "disabled"
         tc.project_options["libdir"] = "lib"
+        # Configure the data directory so that it defaults to the correct location for ICD discovery on the local system.
+        tc.project_options["datadir"] = os.path.join("usr", "share") if self.settings.os == "Linux" else os.path.join("usr", "local", "share")
+        if self.settings.os == "FreeBSD":
+            tc.project_options["sysconfdir"] = os.path.join("usr", "local", "etc")
         tc.generate()
 
     def build(self):

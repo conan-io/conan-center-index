@@ -1,12 +1,20 @@
-from conan import ConanFile
-from conan.tools.build import cross_building
-from conans import CMake
 import os
+
+from conan import ConanFile, conan_version
+from conan.tools.build import can_run
+from conan.tools.cmake import cmake_layout, CMake
 
 
 class TestPackageConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    test_type = "explicit"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)
@@ -14,10 +22,11 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not cross_building(self):
-            if self.options["gdal"].tools:
-                self.run("gdal_translate --formats", run_environment=True)
-            bin_path = os.path.join("bin", "test_package")
-            self.run(bin_path, run_environment=True)
-            bin_path_c = os.path.join("bin", "test_package_c")
-            self.run(bin_path_c, run_environment=True)
+        if can_run(self):
+            gdal_options = self.options["gdal"] if conan_version < "2" else self.dependencies["gdal"].options
+            if gdal_options.tools:
+                self.run("gdal_translate --formats", env="conanrun")
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
+            self.run(bin_path, env="conanrun")
+            bin_path_c = os.path.join(self.cpp.build.bindir, "test_package_c")
+            self.run(bin_path_c, env="conanrun")

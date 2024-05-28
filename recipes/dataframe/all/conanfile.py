@@ -50,7 +50,12 @@ class DataFrameConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "20" if Version(self.version) >= "2.1.0" else "17"
+        if Version(self.version) < "2.1.0":
+            return "17"
+        elif Version(self.version) <= "2.2.0":
+            return "20"
+        else:
+            return "23"
 
     @property
     def _minimum_compilers_version(self):
@@ -68,6 +73,13 @@ class DataFrameConan(ConanFile):
                 "gcc": "11",
                 "clang": "12",
                 "apple-clang": "13",
+            },
+            "23": {
+                "Visual Studio": "17",
+                "msvc": "192",
+                "gcc": "13",
+                "clang": "15",
+                "apple-clang": "15",
             },
         }.get(self._min_cppstd, {})
 

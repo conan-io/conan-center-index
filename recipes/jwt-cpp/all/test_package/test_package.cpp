@@ -18,8 +18,13 @@ int main() {
 		.sign(jwt::algorithm::hs256{"secret"});
 
 	auto decoded = jwt::decode(token);
-	for(auto& e : decoded.get_payload_claims())
+#ifdef GET_PAYLOAD_JSON
+	for(auto& e : decoded.get_payload_json())
+		std::cout << e.first << " = " << e.second << std::endl;
+#else
+    for(auto& e : decoded.get_payload_claims())
 		std::cout << e.first << " = " << e.second.to_json() << std::endl;
+#endif
 
 	auto verifier = jwt::verify()
 		.allow_algorithm(jwt::algorithm::hs256{"secret"})

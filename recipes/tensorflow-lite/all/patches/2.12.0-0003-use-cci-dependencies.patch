@@ -1,0 +1,103 @@
+diff --git a/tensorflow/lite/CMakeLists.txt b/tensorflow/lite/CMakeLists.txt
+index 24b8265..9e0d1e0 100644
+--- a/tensorflow/lite/CMakeLists.txt
++++ b/tensorflow/lite/CMakeLists.txt
+@@ -142,31 +142,16 @@
+ find_package(absl REQUIRED)
+ find_package(Eigen3 REQUIRED)
+ find_package(farmhash REQUIRED)
+-find_package(fft2d REQUIRED)
++find_package(fft REQUIRED)
+ find_package(Flatbuffers REQUIRED)
+ find_package(gemmlowp REQUIRED)
+-find_package(NEON_2_SSE REQUIRED)
+ find_package(cpuinfo REQUIRED)  #CPUINFO is used by XNNPACK and RUY library
+ find_package(ruy REQUIRED)
+-# Download necessary dependencies.
+-# Download pthreadpool source package if it doesn't exist.
+-if(NOT DEFINED PTHREADPOOL_SOURCE_DIR)
+-    message(STATUS "Downloading pthreadpool to ${CMAKE_BINARY_DIR}/pthreadpool-source (define PTHREADPOOL_SOURCE_DIR to avoid it)")
+-    configure_file(cmake/DownloadPThreadPool.cmake "${CMAKE_BINARY_DIR}/pthreadpool-download/CMakeLists.txt")
+-    execute_process(COMMAND "${CMAKE_COMMAND}" -G "${CMAKE_GENERATOR}" .
+-      WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/pthreadpool-download")
+-    execute_process(COMMAND "${CMAKE_COMMAND}" --build .
+-      WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/pthreadpool-download")
+-    set(PTHREADPOOL_SOURCE_DIR "${CMAKE_BINARY_DIR}/pthreadpool-source" CACHE STRING "pthreadpool source directory")
+-endif()
+-# Configure pthreadpool
+-if(NOT TARGET pthreadpool)
+-  set(PTHREADPOOL_BUILD_TESTS OFF CACHE BOOL "")
+-  set(PTHREADPOOL_BUILD_BENCHMARKS OFF CACHE BOOL "")
+-  set(PTHREADPOOL_ALLOW_DEPRECATED_API OFF CACHE BOOL "")
+-  add_subdirectory(
+-    "${PTHREADPOOL_SOURCE_DIR}"
+-    "${CMAKE_BINARY_DIR}/pthreadpool")
++
++if(TARGET flatbuffers::flatbuffers_shared)
++  set(FLATBUFFERS_TARGET flatbuffers::flatbuffers_shared)
++else()
++  set(FLATBUFFERS_TARGET flatbuffers::flatbuffers)
+ endif()
+ set(TF_TARGET_PRIVATE_OPTIONS "")
+ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang$")
+@@ -180,6 +165,10 @@
+ set(TFLITE_TARGET_PRIVATE_DEFINITIONS "")
+ # Additional library dependencies based upon enabled features.
+ set(TFLITE_TARGET_DEPENDENCIES "")
++if (NOT CMAKE_SYSTEM_PROCESSOR OR CMAKE_SYSTEM_PROCESSOR MATCHES "x86")
++  find_package(NEON_2_SSE REQUIRED)
++  list(APPEND TFLITE_TARGET_DEPENDENCIES NEON_2_SSE::NEON_2_SSE)
++endif()
+ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang$")
+   # TFLite uses deprecated methods in neon2sse which generates a huge number of
+   # warnings so surpress these until they're fixed.
+@@ -429,13 +418,14 @@
+ endif()
+ if(TFLITE_ENABLE_XNNPACK)
+   find_package(fp16_headers REQUIRED)
+-  find_package(XNNPACK REQUIRED)
++  find_package(xnnpack REQUIRED)
++  find_package(pthreadpool REQUIRED)
+   populate_tflite_source_vars("delegates/xnnpack"
+     TFLITE_DELEGATES_XNNPACK_SRCS
+     FILTER ".*(_test|_tester)\\.(cc|h)"
+   )
+   list(APPEND TFLITE_TARGET_DEPENDENCIES
+-    XNNPACK
++    xnnpack::xnnpack    
+   )
+   list(APPEND TFLITE_TARGET_PUBLIC_OPTIONS "-DTFLITE_BUILD_WITH_XNNPACK_DELEGATE")
+ endif()
+@@ -492,6 +482,7 @@
+   TFLITE_KERNEL_INTERNAL_REF_SPARSE_OPS_SRCS
+ )
+ set(TFLITE_PROFILER_SRCS
++${TFLITE_SOURCE_DIR}/profiling/telemetry/telemetry.cc
+   ${TFLITE_SOURCE_DIR}/profiling/platform_profiler.cc
+   ${TFLITE_SOURCE_DIR}/profiling/root_profiler.h
+   ${TFLITE_SOURCE_DIR}/profiling/root_profiler.cc
+@@ -555,19 +546,18 @@
+ target_link_libraries(tensorflow-lite
+   PUBLIC
+     Eigen3::Eigen
+-    NEON_2_SSE::NEON_2_SSE
+     absl::flags
+     absl::hash
+     absl::status
+     absl::strings
+     absl::synchronization
+     absl::variant
+-    farmhash
+-    fft2d_fftsg2d
+-    flatbuffers::flatbuffers
+-    gemmlowp
++    farmhash::farmhash
++    fft::fft
++    ${FLATBUFFERS_TARGET}
++    gemmlowp::eight_bit_int_gemm
+     ruy::ruy
+-    pthreadpool
++    pthreadpool::pthreadpool
+     ${CMAKE_DL_LIBS}
+     ${TFLITE_TARGET_DEPENDENCIES}
+ )

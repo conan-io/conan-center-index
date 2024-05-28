@@ -1,4 +1,7 @@
 sources:
+  "1.0.5":
+    url: "https://github.com/xyz347/xpack/archive/v1.0.5.tar.gz"
+    sha256: "ea8693dd3a53d54e0c1e3c9e6e06f31ff7f593f7f8cf8fb4889f5c3354dbae8e"
   "1.0.4":
     url: "https://github.com/xyz347/xpack/archive/v1.0.4.tar.gz"
     sha256: "ccea6d986052a9ad8ad859ad42283fc01fed29009133017b231a06ec0b1976b9"

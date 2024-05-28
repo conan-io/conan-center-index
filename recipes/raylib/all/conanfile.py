@@ -49,7 +49,7 @@ class RaylibConan(ConanFile):
 
     def requirements(self):
         if self.settings.os != "Android":
-            self.requires("glfw/3.3.8")
+            self.requires("glfw/3.4")
             self.requires("opengl/system")
         if self.settings.os == "Linux":
             self.requires("xorg/system")

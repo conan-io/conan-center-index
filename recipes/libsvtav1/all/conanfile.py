@@ -9,11 +9,11 @@ required_conan_version = ">=1.53.0"
 
 class SVTAV1Conan(ConanFile):
     name = "libsvtav1"
-    license = "BSD-3-Clause"
     description = "An AV1-compliant software encoder/decoder library"
-    topics = "av1", "codec", "encoder", "decoder", "video"
-    homepage = "https://gitlab.com/AOMediaCodec/SVT-AV1"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://gitlab.com/AOMediaCodec/SVT-AV1"
+    topics = ("av1", "codec", "encoder", "decoder", "video")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -21,12 +21,14 @@ class SVTAV1Conan(ConanFile):
         "fPIC": [True, False],
         "build_encoder": [True, False],
         "build_decoder": [True, False],
+        "minimal_build": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "build_encoder": True,
         "build_decoder": True,
+        "minimal_build": False,
     }
 
     def export_sources(self):
@@ -35,6 +37,8 @@ class SVTAV1Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
+        if Version(self.version) < "2.0.0":
+            del self.options.minimal_build
 
     def configure(self):
         if self.options.shared:
@@ -42,6 +46,9 @@ class SVTAV1Conan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("cpuinfo/cci.20231129")
 
     def build_requirements(self):
         if Version(self.version) >= "1.3.0":
@@ -57,8 +64,10 @@ class SVTAV1Conan(ConanFile):
         tc.variables["BUILD_APPS"] = False
         tc.variables["BUILD_DEC"] = self.options.build_decoder
         tc.variables["BUILD_ENC"] = self.options.build_encoder
+        tc.variables["USE_EXTERNAL_CPUINFO"] = True
         if self.settings.arch in ("x86", "x86_64"):
             tc.variables["ENABLE_NASM"] = True
+        tc.variables["MINIMAL_BUILD"] = self.options.get_safe("minimal_build", False)
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -82,11 +91,13 @@ class SVTAV1Conan(ConanFile):
             self.cpp_info.components["encoder"].libs = ["SvtAv1Enc"]
             self.cpp_info.components["encoder"].includedirs = ["include/svt-av1"]
             self.cpp_info.components["encoder"].set_property("pkg_config_name", "SvtAv1Enc")
+            self.cpp_info.components["encoder"].requires = ["cpuinfo::cpuinfo"]
             if self.settings.os in ("FreeBSD", "Linux"):
                 self.cpp_info.components["encoder"].system_libs = ["pthread", "dl", "m"]
         if self.options.build_decoder:
             self.cpp_info.components["decoder"].libs = ["SvtAv1Dec"]
             self.cpp_info.components["decoder"].includedirs = ["include/svt-av1"]
             self.cpp_info.components["decoder"].set_property("pkg_config_name", "SvtAv1Dec")
+            self.cpp_info.components["decoder"].requires = ["cpuinfo::cpuinfo"]
             if self.settings.os in ("FreeBSD", "Linux"):
                 self.cpp_info.components["encoder"].system_libs = ["pthread", "dl", "m"]
