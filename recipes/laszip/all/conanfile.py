@@ -11,7 +11,7 @@ required_conan_version = ">=1.54.0"
 class LaszipConan(ConanFile):
     name = "laszip"
     description = "C++ library for lossless LiDAR compression."
-    license = "Apache-2.0"
+    license = "LGPL-2.1"
     topics = ("las", "laz", "lidar", "compression", "decompression")
     homepage = "https://github.com/LASzip/LASzip"
     url = "https://github.com/conan-io/conan-center-index"
@@ -35,6 +35,8 @@ class LaszipConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if Version(self.version) >= "3.4.4":
+            self.license = "Apache-2.0"
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
