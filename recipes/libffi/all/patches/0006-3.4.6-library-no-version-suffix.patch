@@ -1,6 +1,8 @@
---- Makefile.in
-+++ Makefile.in
-@@ -615,7 +615,7 @@
+diff --git a/Makefile.in b/Makefile.in
+index 450200a..abcee85 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -618,7 +618,7 @@ AM_CFLAGS = $(am__append_3)
  @LIBFFI_BUILD_VERSIONED_SHLIB_FALSE@libffi_version_dep = 
  @LIBFFI_BUILD_VERSIONED_SHLIB_GNU_TRUE@@LIBFFI_BUILD_VERSIONED_SHLIB_TRUE@libffi_version_dep = libffi.map
  @LIBFFI_BUILD_VERSIONED_SHLIB_SUN_TRUE@@LIBFFI_BUILD_VERSIONED_SHLIB_TRUE@libffi_version_dep = libffi.map-sun
