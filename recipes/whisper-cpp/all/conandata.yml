@@ -12,6 +12,10 @@ sources:
     url: "https://github.com/ggerganov/whisper.cpp/archive/refs/tags/v1.2.1.tar.gz"
     sha256: "69d47fc2ba982c42bd5bade4b7c827d5b3ed74b9c59323991c45a9f0f24eb6ed"
 patches:
+  "1.6.2":
+    - patch_file: "patches/1.6.2-0001-remove_hardcoded_cxxstd.patch"
+      patch_description: "Remove hardcoded CMAKE_CXX_STANDARD"
+      patch_type: "conan"
   "1.2.1":
     - patch_file: "patches/1.2.1-0001-find_package_openblas.patch"
       patch_description: "Fix OpenBlas cmake target name"
