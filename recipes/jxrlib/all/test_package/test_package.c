@@ -9,6 +9,7 @@ int main(int argc, char* argv[])
 
     Call(PKCreateCodecFactory(&pCodecFactory, WMP_SDK_VERSION));
 
+    Cleanup:
     if(pCodecFactory) {
         pCodecFactory->Release(&pCodecFactory);
     }
