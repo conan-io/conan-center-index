@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    printf("Test\n");
+    printf("SDL2_ttf is working!\n");
 
     return 0;
 }
