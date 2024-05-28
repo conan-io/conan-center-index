@@ -142,6 +142,8 @@ class GeographiclibConan(ConanFile):
         suffix += "-i" if is_msvc(self) else ""
         self.cpp_info.libs = [f"GeographicLib{suffix}"] if Version(self.version) >= "2" else [f"Geographic{suffix}"]
         self.cpp_info.defines.append("GEOGRAPHICLIB_SHARED_LIB={}".format("1" if self.options.shared else "0"))
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "geographiclib"
