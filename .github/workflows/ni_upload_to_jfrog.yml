@@ -1,0 +1,42 @@
+name: ni_upload_to_jfrog
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+env:
+  REPO_CI: "https://push.artifacts.ni.com/artifactory/api/conan/rnd-conan-ci"
+
+jobs:
+  upload_to_jfrog:
+    name: Upload to JFrog
+    runs-on: ubuntu-latest
+    environment: jfrog-ci
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: pip install conan==2.3
+      - run: conan profile detect --force
+        # add the -ci repo
+      - run: conan remote add rnd-conan-ci ${{ env.REPO_CI }}
+      - run: conan remote login rnd-conan-ci ${{ vars.JFROG_USERNAME }} --password ${{ secrets.JFROG_ACCESS_TOKEN }}
+        # export packages to local cache
+      - run: conan export recipes/expat/all --version 2.6.2
+      - run: conan export recipes/fmt/all --version 10.2.1
+      - run: conan export recipes/gtest/all --version 1.14.0
+      - run: conan export recipes/gtest/all --version 1.15.0
+      - run: conan export recipes/inih/all --version 58
+      - run: conan export recipes/libsigcpp/3.x.x --version 3.0.7
+      - run: conan export recipes/libuv/all --version 1.44.2
+      - run: conan export recipes/meson/all --version 1.2.1
+      - run: conan export recipes/ninja/all --version 1.11.1
+      - run: conan export recipes/nlohmann_json/all --version 3.11.3
+      - run: conan export recipes/spdlog/all --version 1.14.1
+        # upload everthing
+      - run: conan upload -r rnd-conan-ci -c "*"
+
