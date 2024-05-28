@@ -1,6 +1,6 @@
 --- configure
 +++ configure
-@@ -8979,7 +8979,7 @@
+@@ -9882,7 +9882,7 @@
  LIBTOOL_DEPS=$ltmain
 
  # Always use our own libtool.
@@ -9,7 +9,7 @@
 
 
 
-@@ -9072,7 +9072,7 @@
+@@ -9974,7 +9974,7 @@
  esac
 
  # Global variables:
@@ -17,4 +17,4 @@
 +ofile=libtool.sh
  can_build_shared=yes
 
- # All known linkers require a '.a' archive for static linking (except MSVC,
+ # All known linkers require a '.a' archive for static linking (except MSVC and
