@@ -55,10 +55,6 @@ class SioclientConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Shared builds on Windows are not supported")
 
-    def build_requirements(self):
-        # 3.28+ is not supported
-        self.tool_requires("cmake/[>=3.15 <=3.27]")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
