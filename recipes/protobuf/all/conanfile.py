@@ -70,8 +70,8 @@ class ProtobufConan(ConanFile):
             #20230125.3
             #20230802.1
             #self.requires("abseil/20230125.3", transitive_headers=True)
-            self.requires("abseil/20230802.1", transitive_headers=True)
-            #self.requires("abseil/20240116.2", transitive_headers=True)
+            #self.requires("abseil/20230802.1", transitive_headers=True)
+            self.requires("abseil/20240116.2", transitive_headers=True)
 
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
@@ -227,9 +227,9 @@ class ProtobufConan(ConanFile):
 
         # utf8 libraries
         self.cpp_info.components["utf8_range"].set_property("cmake_target_name", "utf8_range::utf8_range")
-        self.cpp_info.components["utf8_range"].libs = [lib_prefix + "utf8_range" + lib_suffix]
+        self.cpp_info.components["utf8_range"].libs = ["utf8_range" + lib_suffix]
         self.cpp_info.components["utf8_validity"].set_property("cmake_target_name", "utf8_range::utf8_validity")
-        self.cpp_info.components["utf8_validity"].libs = [lib_prefix + "utf8_validity" + lib_suffix]
+        self.cpp_info.components["utf8_validity"].libs = ["utf8_validity" + lib_suffix]
         self.cpp_info.components["utf8_validity"].requires = ["abseil::absl_strings"]
 
         # upb librararies
