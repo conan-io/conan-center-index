@@ -179,6 +179,7 @@ class ProtobufConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake", "utf8_range"))
         if self._protobuf_release < "22.0":
             rename(self, os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-config.cmake"),
                       os.path.join(self.package_folder, self._cmake_install_base_path, "protobuf-generate.cmake"))
