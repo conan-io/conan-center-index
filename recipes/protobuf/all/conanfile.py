@@ -94,7 +94,8 @@ class ProtobufConan(ConanFile):
                 check_min_cppstd(self, 14)
             else:
                 compiler = "msvc" if is_msvc(self) else None
-                supported_set = supported_cppstd(self, compiler=compiler)
+                version = {14: 190, 15: 191, 16: 192, 17: 193}.get(self.settings.compiler.version, None) if is_msvc(self) else None
+                supported_set = supported_cppstd(self, compiler=compiler, version=version)
                 if supported_set and "14" not in supported_set:
                     raise ConanInvalidConfiguration(
                         f"{self.ref} requires C++14, which your compiler does not support."
@@ -218,9 +219,9 @@ class ProtobufConan(ConanFile):
             # it's a private dependency and unconditionally built as a static library, should only
             # be exposed when protobuf itself is static (or if upb is being built)
             self.cpp_info.components["utf8_range"].set_property("cmake_target_name", "utf8_range::utf8_range")
-            self.cpp_info.components["utf8_range"].libs = ["utf8_range" + lib_suffix]
+            self.cpp_info.components["utf8_range"].libs = ["utf8_range"]
             self.cpp_info.components["utf8_validity"].set_property("cmake_target_name", "utf8_range::utf8_validity")
-            self.cpp_info.components["utf8_validity"].libs = ["utf8_validity" + lib_suffix]
+            self.cpp_info.components["utf8_validity"].libs = ["utf8_validity"]
             self.cpp_info.components["utf8_validity"].requires = ["abseil::absl_strings"]
 
         if self.options.get_safe("upb"):
