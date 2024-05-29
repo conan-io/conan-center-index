@@ -83,6 +83,11 @@ class ProtobufConan(ConanFile):
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
+        
+        if is_msvc(self) and self._protobuf_release >= "22" and self.options.shared and \
+            not self.dependencies["abseil"].options.shared:
+            raise ConanInvalidConfiguration("When building protobuf as a shared library on Windows, "
+                                            "abseil needs to be a shared library too")
 
         if self._protobuf_release >= "22.0":
             if self.settings.compiler.get_safe("cppstd"):
@@ -119,7 +124,7 @@ class ProtobufConan(ConanFile):
         tc.cache_variables["protobuf_BUILD_LIBPROTOC"] = self.settings.os != "tvOS"
         tc.cache_variables["protobuf_DISABLE_RTTI"] = not self.options.with_rtti
         tc.cache_variables["protobuf_BUILD_LIBUPB"] = self.options.get_safe("upb")
-        if "abseil" in self.dependencies.host:
+        if self._protobuf_release >= "22.0":
             tc.cache_variables["protobuf_ABSL_PROVIDER"] = "package"
             if not self.settings.compiler.get_safe("cppstd") and self._protobuf_release >= "22.0":
                 tc.variables["CMAKE_CXX_STANDARD"] = 14
