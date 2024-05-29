@@ -12,18 +12,26 @@ class LibgeotiffConan(ConanFile):
     description = "Libgeotiff is an open source library normally hosted on top " \
                   "of libtiff for reading, and writing GeoTIFF information tags."
     license = ["MIT", "BSD-3-Clause"]
-    topics = ("geotiff", "tiff")
-    homepage = "https://github.com/OSGeo/libgeotiff"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/OSGeo/libgeotiff"
+    topics = ("geotiff", "tiff")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_tiff": [True, False],
+        "with_zlib": [True, False],
+        "with_jpeg": [True, False],
+        "with_towgs84": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_tiff": True,
+        "with_zlib": False,
+        "with_jpeg": False,
+        "with_towgs84": True,
     }
 
     def export_sources(self):
@@ -43,19 +51,28 @@ class LibgeotiffConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # libgeotiff/include/xtiffio.h includes libtiff/include/tiffio.h
-        self.requires("libtiff/4.6.0", transitive_headers=True, transitive_libs=True)
         self.requires("proj/9.3.1")
+        # libgeotiff/include/xtiffio.h includes libtiff/include/tiffio.h
+        if self.options.with_tiff:
+            self.requires("libtiff/4.6.0", transitive_headers=True, transitive_libs=True)
+        if self.options.with_zlib:
+            self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.with_jpeg:
+            self.requires("libjpeg/9e")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["WITH_UTILITIES"] = False
-        tc.variables["WITH_TOWGS84"] = True
+        tc.cache_variables["WITH_UTILITIES"] = False
+        tc.cache_variables["WITH_TIFF"] = self.options.with_tiff
+        tc.cache_variables["WITH_ZLIB"] = self.options.with_zlib
+        tc.cache_variables["WITH_JPEG"] = self.options.with_jpeg
+        tc.cache_variables["WITH_TOWGS84"] = self.options.with_towgs84
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("proj", "cmake_file_name", "PROJ")
         deps.generate()
 
     def build(self):

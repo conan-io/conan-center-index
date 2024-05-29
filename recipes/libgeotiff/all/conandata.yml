@@ -1,4 +1,7 @@
 sources:
+  "1.7.3":
+    url: "https://github.com/OSGeo/libgeotiff/releases/download/1.7.3/libgeotiff-1.7.3.tar.gz"
+    sha256: "ba23a3a35980ed3de916e125c739251f8e3266be07540200125a307d7cf5a704"
   "1.7.1":
     url: "https://github.com/OSGeo/libgeotiff/releases/download/1.7.1/libgeotiff-1.7.1.tar.gz"
     sha256: "05ab1347aaa471fc97347d8d4269ff0c00f30fa666d956baba37948ec87e55d6"
@@ -12,11 +15,23 @@ sources:
     url: "https://github.com/OSGeo/libgeotiff/releases/download/1.5.1/libgeotiff-1.5.1.tar.gz"
     sha256: "f9e99733c170d11052f562bcd2c7cb4de53ed405f7acdde4f16195cd3ead612c"
 patches:
+  "1.7.3":
+    - patch_file: "patches/fix-cmake-1.7.3.patch"
+      patch_description: "disable fPIC, disable checking functions, disable libxtiff"
+      patch_type: "portability"
   "1.7.1":
     - patch_file: "patches/fix-cmake-1.7.1.patch"
+      patch_description: "fix order CMAKE_MINIMUM_REQUIRED and PROJECT, disable fPIC, disable checking functions, disable libxtiff"
+      patch_type: "portability"
   "1.7.0":
     - patch_file: "patches/fix-cmake-1.6.0.patch"
+      patch_description: "fix order CMAKE_MINIMUM_REQUIRED and PROJECT, disable fPIC, disable checking functions, disable libxtiff"
+      patch_type: "portability"
   "1.6.0":
     - patch_file: "patches/fix-cmake-1.6.0.patch"
+      patch_description: "fix order CMAKE_MINIMUM_REQUIRED and PROJECT, disable fPIC, disable checking functions, disable libxtiff"
+      patch_type: "portability"
   "1.5.1":
     - patch_file: "patches/fix-cmake-1.5.1.patch"
+      patch_description: "fix order CMAKE_MINIMUM_REQUIRED and PROJECT, disable fPIC, disable checking functions, disable libxtiff"
+      patch_type: "portability"
