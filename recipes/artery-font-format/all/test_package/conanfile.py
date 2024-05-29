@@ -24,5 +24,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
-            arfont = os.path.join(self.source_folder, "example.arfont")
-            self.run(f"{bin_path} {arfont}", env="conanrun")
+            self.run(bin_path, env="conanrun")
