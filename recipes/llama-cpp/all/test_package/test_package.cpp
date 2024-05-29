@@ -18,7 +18,7 @@ int main(int argc, char ** argv) {
     const char * prompt     = argv[2];
 
 
-    llama_backend_init(false);
+    llama_backend_init();
 
     llama_model_params model_params = llama_model_default_params();
     model_params.vocab_only = true;
