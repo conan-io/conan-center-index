@@ -121,6 +121,8 @@ class ProtobufConan(ConanFile):
         tc.cache_variables["protobuf_BUILD_LIBUPB"] = self.options.get_safe("upb")
         if "abseil" in self.dependencies.host:
             tc.cache_variables["protobuf_ABSL_PROVIDER"] = "package"
+            if not self.settings.compiler.get_safe("cppstd") and self._protobuf_release >= "22.0":
+                tc.variables["CMAKE_CXX_STANDARD"] = 14
         if is_msvc(self) or self._is_clang_cl:
             runtime = msvc_runtime_flag(self)
             if not runtime:
