@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, supported_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm
 from conan.tools.microsoft import check_min_vs, msvc_runtime_flag, is_msvc, is_msvc_static_runtime
@@ -80,6 +80,16 @@ class ProtobufConan(ConanFile):
         if self._protobuf_release >= "22.0":
             self.requires("abseil/20240116.2", transitive_headers=True)
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "6",
+            "clang": "5",
+            "apple-clang": "10",
+            "Visual Studio": "15",
+            "msvc": "191",
+        }
+
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
@@ -93,12 +103,11 @@ class ProtobufConan(ConanFile):
             if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, 14)
             else:
-                compiler = "msvc" if is_msvc(self) else None
-                version = {14: 190, 15: 191, 16: 192, 17: 193}.get(self.settings.compiler.version, None) if is_msvc(self) else None
-                supported_set = supported_cppstd(self, compiler=compiler, compiler_version=version)
-                if supported_set and "14" not in supported_set:
+                minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), None)
+                compiler_version = Version(self.settings.compiler.version)
+                if minimum_version and compiler_version < minimum_version:
                     raise ConanInvalidConfiguration(
-                        f"{self.ref} requires C++14, which your compiler does not support."
+                        f"{self.ref} requires C++14, which your compiler does not support.",
                     )
         
         check_min_vs(self, "190")
