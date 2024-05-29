@@ -23,7 +23,6 @@ class LibYangConan(ConanFile):
         "fPIC": True
     }
 
-    tool_requires = "cmake/[>=3.22.0 <4]"
 
     def validate(self):
         # TODO For Windows support: https://github.com/CESNET/libyang?tab=readme-ov-file#windows-build-requirements
