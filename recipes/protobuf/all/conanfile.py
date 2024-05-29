@@ -95,7 +95,7 @@ class ProtobufConan(ConanFile):
             else:
                 compiler = "msvc" if is_msvc(self) else None
                 version = {14: 190, 15: 191, 16: 192, 17: 193}.get(self.settings.compiler.version, None) if is_msvc(self) else None
-                supported_set = supported_cppstd(self, compiler=compiler, version=version)
+                supported_set = supported_cppstd(self, compiler=compiler, compiler_version=version=version)
                 if supported_set and "14" not in supported_set:
                     raise ConanInvalidConfiguration(
                         f"{self.ref} requires C++14, which your compiler does not support."
