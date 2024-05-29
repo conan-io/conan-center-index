@@ -78,7 +78,5 @@ class LibYangConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "LibYANG")
         self.cpp_info.libs = ["yang"]
         self.cpp_info.resdirs = ["res"]
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(["ws2_32", "shlwapi"])
-        elif self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread", "dl", "m"])
