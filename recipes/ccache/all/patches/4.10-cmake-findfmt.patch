@@ -1,0 +1,15 @@
+--- cmake/FindFmt.cmake
++++ cmake/FindFmt.cmake
+@@ -5,7 +5,11 @@
+   set(_download_fmt TRUE)
+ else()
+   find_path(FMT_INCLUDE_DIR fmt/core.h)
+-  find_library(FMT_LIBRARY fmt)
++  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
++    find_library(FMT_LIBRARY fmtd)
++  else()
++    find_library(FMT_LIBRARY fmt)
++  endif()
+   if(FMT_INCLUDE_DIR AND FMT_LIBRARY)
+     file(READ "${FMT_INCLUDE_DIR}/fmt/core.h" _fmt_core_h)
+     string(REGEX MATCH "#define FMT_VERSION ([0-9]+)" _ "${_fmt_core_h}")

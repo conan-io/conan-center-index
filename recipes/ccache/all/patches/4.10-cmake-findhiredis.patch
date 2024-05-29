@@ -1,0 +1,23 @@
+--- cmake/FindHiredis.cmake
++++ cmake/FindHiredis.cmake
+@@ -5,7 +5,19 @@
+   set(_download_hiredis TRUE)
+ else()
+   find_path(HIREDIS_INCLUDE_DIR hiredis/hiredis.h)
+-  find_library(HIREDIS_LIBRARY hiredis)
++  if(CMAKE_BUILD_TYPE STREQUAL "Debug")
++    if(MSVC)
++      find_library(HIREDIS_LIBRARY hiredis_staticd)
++    else()
++      find_library(HIREDIS_LIBRARY hiredisd)
++    endif()
++  else()
++    if(MSVC)
++      find_library(HIREDIS_LIBRARY hiredis_static)
++    else()
++      find_library(HIREDIS_LIBRARY hiredis)
++    endif()
++  endif()
+   if(HIREDIS_INCLUDE_DIR AND HIREDIS_LIBRARY)
+     file(READ "${HIREDIS_INCLUDE_DIR}/hiredis/hiredis.h" _hiredis_h)
+     string(REGEX MATCH "#define HIREDIS_MAJOR +([0-9]+).*#define HIREDIS_MINOR +([0-9]+).*#define HIREDIS_PATCH +([0-9]+)" _ "${_hiredis_h}")

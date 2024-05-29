@@ -52,6 +52,10 @@ class CcacheConan(ConanFile):
         if self.options.redis_storage_backend:
             self.requires("hiredis/1.1.0")
 
+        if Version(self.version) >= "4.10":
+            self.requires("xxhash/0.8.2")
+            self.requires("fmt/10.2.1")
+
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
@@ -76,18 +80,22 @@ class CcacheConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["REDIS_STORAGE_BACKEND"] = self.options.redis_storage_backend
-        tc.variables["HIREDIS_FROM_INTERNET"] = False
-        tc.variables["ZSTD_FROM_INTERNET"] = False
         tc.variables["ENABLE_DOCUMENTATION"] = False
         tc.variables["ENABLE_TESTING"] = False
+        if Version(self.version) >= "4.10":
+            tc.variables["DEPS"] = "LOCAL"
+        else:
+            tc.variables["HIREDIS_FROM_INTERNET"] = False
+            tc.variables["ZSTD_FROM_INTERNET"] = False
         tc.generate()
 
-        deps = CMakeDeps(self)
-        deps.set_property("hiredis", "cmake_target_name", "HIREDIS::HIREDIS")
-        deps.set_property("hiredis", "cmake_find_mode", "module")
-        deps.set_property("zstd", "cmake_target_name", "ZSTD::ZSTD")
-        deps.set_property("zstd", "cmake_find_mode", "module")
-        deps.generate()
+        if Version(self.version) < "4.10":
+            deps = CMakeDeps(self)
+            deps.set_property("hiredis", "cmake_target_name", "HIREDIS::HIREDIS")
+            deps.set_property("hiredis", "cmake_find_mode", "module")
+            deps.set_property("zstd", "cmake_target_name", "ZSTD::ZSTD")
+            deps.set_property("zstd", "cmake_find_mode", "module")
+            deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
