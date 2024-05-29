@@ -178,7 +178,7 @@ class ProtobufConan(ConanFile):
 
         cmake_config_folder = os.path.join(self.package_folder, self._cmake_install_base_path)
         rm(self, "protobuf-config*.cmake", folder=cmake_config_folder)
-        # rm(self, "protobuf-targets*.cmake", folder=cmake_config_folder)
+        rm(self, "protobuf-targets*.cmake", folder=cmake_config_folder)
         copy(self, "protobuf-conan-protoc-target.cmake", src=self.source_folder, dst=cmake_config_folder)
 
         if not self.options.lite:
