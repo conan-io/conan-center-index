@@ -1,4 +1,4 @@
 sources:
-  "b3012":
-    url: "https://github.com/ggerganov/llama.cpp/archive/refs/tags/b3012.tar.gz"
-    sha256: "b58bcdfe60e57c8c66ef256a6d99b3fa5e8c0d67724ad2da254cc7d03dd91c65"
+  "b3040":
+    url: "https://github.com/ggerganov/llama.cpp/archive/refs/tags/b3040.tar.gz"
+    sha256: "020e040139660eb40113503bb1057d5387677d249b990e008e04821532f7cd62"
