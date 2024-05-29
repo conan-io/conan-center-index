@@ -432,7 +432,6 @@ class ArrowConan(ConanFile):
         cmake_suffix = "shared" if self.options.shared else "static"
 
         self.cpp_info.components["libarrow"].set_property("pkg_config_name", "arrow")
-        self.cpp_info.components["libarrow"].set_property("cmake_target_name", f"Arrow::arrow_{cmake_suffix}")
         self.cpp_info.components["libarrow"].libs = [f"arrow{suffix}"]
         if not self.options.shared:
             self.cpp_info.components["libarrow"].defines = ["ARROW_STATIC"]
@@ -441,7 +440,6 @@ class ArrowConan(ConanFile):
 
         if self.options.parquet:
             self.cpp_info.components["libparquet"].set_property("pkg_config_name", "parquet")
-            self.cpp_info.components["libparquet"].set_property("cmake_target_name", f"Parquet::parquet_{cmake_suffix}")
             self.cpp_info.components["libparquet"].libs = [f"parquet{suffix}"]
             self.cpp_info.components["libparquet"].requires = ["libarrow"]
             if not self.options.shared:
@@ -449,7 +447,6 @@ class ArrowConan(ConanFile):
 
         if self.options.get_safe("substrait"):
             self.cpp_info.components["libarrow_substrait"].set_property("pkg_config_name", "arrow_substrait")
-            self.cpp_info.components["libarrow_substrait"].set_property("cmake_target_name", f"Arrow::arrow_substrait_{cmake_suffix}")
             self.cpp_info.components["libarrow_substrait"].libs = [f"arrow_substrait{suffix}"]
             self.cpp_info.components["libarrow_substrait"].requires = ["libparquet", "dataset"]
 
@@ -457,8 +454,8 @@ class ArrowConan(ConanFile):
         del self.options.plasma
 
         if self.options.acero:
+            self.cpp_info.components["libacero"].set_property("pkg_config_name", "acero")
             self.cpp_info.components["libacero"].libs = [f"arrow_acero{suffix}"]
-            self.cpp_info.components["libacero"].set_property("cmake_target_name", f"Acero::arrow_acero_{cmake_suffix}")
             self.cpp_info.components["libacero"].names["cmake_find_package"] = "acero"
             self.cpp_info.components["libacero"].names["cmake_find_package_multi"] = "acero"
             self.cpp_info.components["libacero"].names["pkg_config"] = "acero"
@@ -466,7 +463,6 @@ class ArrowConan(ConanFile):
 
         if self.options.gandiva:
             self.cpp_info.components["libgandiva"].set_property("pkg_config_name", "gandiva")
-            self.cpp_info.components["libgandiva"].set_property("cmake_target_name", f"Gandiva::gandiva_{cmake_suffix}")
             self.cpp_info.components["libgandiva"].libs = [f"gandiva{suffix}"]
             self.cpp_info.components["libgandiva"].requires = ["libarrow"]
             if not self.options.shared:
@@ -474,13 +470,11 @@ class ArrowConan(ConanFile):
 
         if self.options.with_flight_rpc:
             self.cpp_info.components["libarrow_flight"].set_property("pkg_config_name", "flight_rpc")
-            self.cpp_info.components["libarrow_flight"].set_property("cmake_target_name", f"ArrowFlight::arrow_flight_{cmake_suffix}")
             self.cpp_info.components["libarrow_flight"].libs = [f"arrow_flight{suffix}"]
             self.cpp_info.components["libarrow_flight"].requires = ["libarrow"]
 
         if self.options.get_safe("with_flight_sql"):
             self.cpp_info.components["libarrow_flight_sql"].set_property("pkg_config_name", "flight_sql")
-            self.cpp_info.components["libarrow_flight_sql"].set_property("cmake_target_name", f"ArrowFlightSql::arrow_flight_sql_{cmake_suffix}")
             self.cpp_info.components["libarrow_flight_sql"].libs = [f"arrow_flight_sql{suffix}"]
             self.cpp_info.components["libarrow_flight_sql"].requires = ["libarrow", "libarrow_flight"]
 
