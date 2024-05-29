@@ -294,7 +294,7 @@ class BoostConan(ConanFile):
             is_visual_studio = str(self.settings.compiler) == "Visual Studio"
             # supported_cppstd only supports msvc, but not Visual Studio as compiler
             supported_cxx20 = "20" in supported_cppstd(self, "msvc", msvc_versions.get(compiler_version)) if is_visual_studio else "20" in supported_cppstd(self)
-            # supported_cppstd: lists GCC 5 due partial support for C++14, but not enough for Boost
+            # We still dont have a compiler using C++20 by default
             return (compiler_version >= required_compiler_version) or supported_cxx20
 
     @property
