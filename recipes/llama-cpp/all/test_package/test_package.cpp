@@ -1,7 +1,7 @@
 #include "llama.h"
 
 int main() {
-  llama_backend_init();
+  llama_model_default_params();
 
   return 0;
 }
