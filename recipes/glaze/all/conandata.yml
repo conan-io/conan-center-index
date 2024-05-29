@@ -1,7 +1,7 @@
 sources:
-  "2.6.7":
-    url: "https://github.com/stephenberry/glaze/archive/v2.6.7.tar.gz"
-    sha256: "edd328b4c1a2e775cf9dbaccb57e2e6cf42b09d91b8a004c90f14439b86f417d"
+  "2.6.8":
+    url: "https://github.com/stephenberry/glaze/archive/v2.6.8.tar.gz"
+    sha256: "c4bb0ba10faeb1750485bba0b32c519c030cbb426881caa5932fd51c7825ef04"
   "2.6.6":
     url: "https://github.com/stephenberry/glaze/archive/v2.6.6.tar.gz"
     sha256: "c8a6b20401eb88419621c8ed25cd69bfee72e27982c1bdc3cec376922c08c2dd"
