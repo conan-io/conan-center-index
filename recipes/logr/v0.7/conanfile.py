@@ -1,13 +1,14 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, copy,rm
+from conan.tools.files import get, copy, rm
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.microsoft import check_min_vs
 import os
 
 required_conan_version = ">=1.50.0"
+
 
 class LogrConan(ConanFile):
     name = "logr"
@@ -34,6 +35,18 @@ class LogrConan(ConanFile):
         "with_boostlog": False,
     }
 
+    @property
+    def _min_cppstd(self):
+        return 17
+
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "gcc": "10",
+            "clang": "11",
+            "apple-clang": "12",
+        }
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -56,28 +69,23 @@ class LogrConan(ConanFile):
         self.info.settings.clear()
 
     def validate(self):
-        minimal_cpp_standard = "17"
         if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, minimal_cpp_standard)
-        minimal_version = {
-            "gcc": "10",
-            "clang": "11",
-            "apple-clang": "12",
-        }
+            check_min_cppstd(self, self._min_cppstd)
+
         check_min_vs(self, 192)
-        if not is_msvc(self):
-            minimum_version = minimal_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires minimum {self.settings.compiler}-{minimum_version}."
-                )
+
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires minimum {self.settings.compiler} version of {minimum_version}"
+            )
 
     def build(self):
         pass
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-                destination=self.source_folder, strip_root=True)
+            destination=self.source_folder, strip_root=True)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -99,7 +107,6 @@ class LogrConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
 
         self.cpp_info.components["logr_base"].includedirs = ["include"]
         self.cpp_info.components["logr_base"].requires = ["fmt::fmt"]
