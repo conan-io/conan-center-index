@@ -1,13 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd, supported_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm
 from conan.tools.microsoft import check_min_vs, msvc_runtime_flag, is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
 import os
-import textwrap
 
 required_conan_version = ">=1.53"
 
@@ -84,6 +84,17 @@ class ProtobufConan(ConanFile):
         if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
 
+        if self._protobuf_release >= "22.0":
+            if self.settings.compiler.get_safe("cppstd"):
+                check_min_cppstd(self, 14)
+            else:
+                compiler = "msvc" if is_msvc(self) else None
+                supported_set = supported_cppstd(self, compiler=compiler)
+                if supported_set and "14" not in supported_set:
+                    raise ConanInvalidConfiguration(
+                        f"{self.ref} requires C++14, which your compiler does not support."
+                    )
+        
         check_min_vs(self, "190")
 
         if self.settings.compiler == "clang":
@@ -167,7 +178,7 @@ class ProtobufConan(ConanFile):
 
         cmake_config_folder = os.path.join(self.package_folder, self._cmake_install_base_path)
         rm(self, "protobuf-config*.cmake", folder=cmake_config_folder)
-        rm(self, "protobuf-targets*.cmake", folder=cmake_config_folder)
+        # rm(self, "protobuf-targets*.cmake", folder=cmake_config_folder)
         copy(self, "protobuf-conan-protoc-target.cmake", src=self.source_folder, dst=cmake_config_folder)
 
         if not self.options.lite:

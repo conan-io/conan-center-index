@@ -18,9 +18,9 @@ if(TARGET protobuf::libprotoc)
 endif()
 
 if(NOT TARGET protobuf::protoc)
-    message(FATAL_ERROR "protoc executable should have been defined as part of find_package(Protobuf)")
+    message(FATAL_ERROR "protoc executable should have been defined as part of find_package(protobuf)")
 endif()
 
 if(NOT COMMAND protobuf_generate)
-    message(FATAL_ERROR "protobuf_generate should have been defined as part of find_package(Protobuf)")
+    message(FATAL_ERROR "protobuf_generate should have been defined as part of find_package(protobuf)")
 endif()
