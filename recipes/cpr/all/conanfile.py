@@ -115,7 +115,7 @@ class CprConan(ConanFile):
         if Version(self.version) >= "1.9.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 6")
 
-        if Version(self.version) >= "1.10.0" and self.settings.compiler in ("clang", "apple-clang") and self.settings.compiler.libcxx == "libstdc++":
+        if Version(self.version) >= "1.9.0" and self.settings.compiler in ("clang", "apple-clang") and self.settings.compiler.libcxx == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang with libstdc++")
 
     def source(self):
