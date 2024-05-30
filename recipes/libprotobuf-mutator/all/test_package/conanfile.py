@@ -11,7 +11,6 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-        self.requires("protobuf/3.21.12")
 
     def layout(self):
         cmake_layout(self)
