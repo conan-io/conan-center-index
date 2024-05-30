@@ -3,6 +3,9 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.54.0"
@@ -26,6 +29,20 @@ class LibProtobufMutatorConan(ConanFile):
         "fPIC": True
     }
 
+    @property
+    def _min_cppstd(self):
+        return 14
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "apple-clang": "10",
+            "clang": "7",
+            "gcc": "5",
+            "msvc": "191",
+            "Visual Studio": "15",
+        }
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -39,11 +56,19 @@ class LibProtobufMutatorConan(ConanFile):
 
     def requirements(self):
         # Protobuf headers are required by public port/protobuf.h
-        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
+        self.requires("protobuf/5.27.0", transitive_headers=True, transitive_libs=True)
+        # Abseil headers are required by public port/absl/strings/str_cat.h
+        self.requires("abseil/20240116.2", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.24 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -66,6 +91,8 @@ class LibProtobufMutatorConan(ConanFile):
         )
 
     def generate(self):
+        tc = VirtualBuildEnv(self)
+        tc.generate()
         tc = CMakeToolchain(self)
         tc.variables["LIB_PROTO_MUTATOR_TESTING"] = False
         tc.variables["LIB_PROTO_MUTATOR_DOWNLOAD_PROTOBUF"] = False
