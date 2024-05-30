@@ -20,7 +20,6 @@ class LibgeotiffConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_tiff": [True, False],
         "with_zlib": [True, False],
         "with_jpeg": [True, False],
         "with_towgs84": [True, False],
@@ -28,7 +27,6 @@ class LibgeotiffConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_tiff": True,
         "with_zlib": False,
         "with_jpeg": False,
         "with_towgs84": True,
@@ -53,8 +51,7 @@ class LibgeotiffConan(ConanFile):
     def requirements(self):
         self.requires("proj/9.3.1")
         # libgeotiff/include/xtiffio.h includes libtiff/include/tiffio.h
-        if self.options.with_tiff:
-            self.requires("libtiff/4.6.0", transitive_headers=True, transitive_libs=True)
+        self.requires("libtiff/4.6.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_jpeg:
@@ -66,7 +63,7 @@ class LibgeotiffConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["WITH_UTILITIES"] = False
-        tc.cache_variables["WITH_TIFF"] = self.options.with_tiff
+        tc.cache_variables["WITH_TIFF"] = True
         tc.cache_variables["WITH_ZLIB"] = self.options.with_zlib
         tc.cache_variables["WITH_JPEG"] = self.options.with_jpeg
         tc.cache_variables["WITH_TOWGS84"] = self.options.with_towgs84
