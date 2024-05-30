@@ -32,7 +32,7 @@ class TestPackageConan(ConanFile):
             buffer = StringIO()
             # Magic syntax for getting the perl version: $^V
             # `perl --version` doesn't give a cleanly parsable output.
-            self.run("perl -e 'print $^V'", buffer, env="conanrun")
+            self.run('perl -e "print $^V"', buffer, env="conanrun")
             # Produces something like "v5.38.2"
             self.output.info(buffer.getvalue())
             if str(self._version) not in buffer.getvalue():
@@ -40,8 +40,8 @@ class TestPackageConan(ConanFile):
                     f"perl reported wrong version. Expected {self._version}, got {buffer.getvalue()}."
                 )
             
-            self.run(f"perl {os.path.join(self.source_folder, 'test_package.pl')}", env="conanrun")
+            self.run(f'perl {os.path.join(self.source_folder, "test_package.pl")}', env="conanrun")
 
             # Check that the extensions requiring dependencies were built
-            self.run("perl -e 'use IO::Compress::Bzip2'", env="conanrun")
-            self.run("perl -e 'use Compress::Zlib'", env="conanrun")
+            self.run('perl -e "use IO::Compress::Bzip2"', env="conanrun")
+            self.run('perl -e "use Compress::Zlib"', env="conanrun")
