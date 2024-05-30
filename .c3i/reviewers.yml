@@ -33,9 +33,6 @@ reviewers:
   - user: "theirix"
     type: "community"
     request_reviews: false
-  - user: "ericLemanissier"
-    type: "community"
-    request_reviews: false
   - user: "prince-chrismc"
     type: "community"
     request_reviews: false
