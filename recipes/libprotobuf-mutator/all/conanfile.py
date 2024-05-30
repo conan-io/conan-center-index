@@ -58,10 +58,10 @@ class LibProtobufMutatorConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # Protobuf headers are required by public port/protobuf.h
-        self.requires("protobuf/4.25.3", transitive_headers=True, transitive_libs=True)
-        # Abseil headers are required by public port/absl/strings/str_cat.h
-        self.requires("abseil/20240116.2", transitive_headers=True)
+        # Protobuf headers are required by public src/binary_format.h and
+        self.requires("protobuf/4.25.3", transitive_headers=True)
+        # Abseil headers are required by public src/field_instance.h
+        self.requires("abseil/20240116.2")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -82,15 +82,11 @@ class LibProtobufMutatorConan(ConanFile):
             "set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/external)",
             "",
         )
+        # Fix libprotobuf-mutator.pc installation origin path
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
             "${CMAKE_BINARY_DIR}/libprotobuf-mutator.pc",
             "${CMAKE_CURRENT_BINARY_DIR}/libprotobuf-mutator.pc",
         )
-        # Do not build examples. There is no option to disable them
-        #replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-        #    "add_subdirectory(examples EXCLUDE_FROM_ALL)",
-        #    "",
-        #)
 
     def generate(self):
         tc = VirtualBuildEnv(self)
@@ -123,7 +119,7 @@ class LibProtobufMutatorConan(ConanFile):
         self.cpp_info.components["mutator"].libs = ["protobuf-mutator"]
         self.cpp_info.components["mutator"].set_property("cmake_target_name", "libprotobuf-mutator::protobuf-mutator")
         self.cpp_info.components["mutator"].includedirs.append("include/libprotobuf-mutator")
-        self.cpp_info.components["mutator"].requires = ["protobuf::libprotobuf", "abseil::strings"]
+        self.cpp_info.components["mutator"].requires = ["protobuf::libprotobuf", "abseil::absl_strings"]
 
         self.cpp_info.components["fuzzer"].libs = ['protobuf-mutator-libfuzzer']
         self.cpp_info.components["fuzzer"].set_property("cmake_target_name", "libprotobuf-mutator::protobuf-mutator-libfuzzer")
