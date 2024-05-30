@@ -49,11 +49,13 @@ class LibProtobufMutatorConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.shared
 
     def configure(self):
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
+        if is_msvc(self):
+            self.options.rm_safe("shared")
+            self.package_type = "static-library"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
