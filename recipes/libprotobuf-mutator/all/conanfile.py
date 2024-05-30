@@ -87,6 +87,11 @@ class LibProtobufMutatorConan(ConanFile):
             "${CMAKE_BINARY_DIR}/libprotobuf-mutator.pc",
             "${CMAKE_CURRENT_BINARY_DIR}/libprotobuf-mutator.pc",
         )
+        # Do not include examples when running CMake configure to avoid more dependencies
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+            "add_subdirectory(examples EXCLUDE_FROM_ALL)",
+            "",
+        )
 
     def generate(self):
         tc = VirtualBuildEnv(self)
