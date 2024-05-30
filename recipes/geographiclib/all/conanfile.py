@@ -3,10 +3,11 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import (
-    apply_conandata_patches, collect_libs, copy, export_conandata_patches, get,
+    apply_conandata_patches, copy, export_conandata_patches, get,
     replace_in_file, rm, rmdir
 )
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -105,11 +106,6 @@ class GeographiclibConan(ConanFile):
             replace_in_file(self, cmakelists, "add_subdirectory (js)", "")
         # Don't install system libs
         replace_in_file(self, cmakelists, "include (InstallRequiredSystemLibraries)", "")
-        # Don't build tools if asked
-        if not self.options.tools:
-            replace_in_file(self, cmakelists, "add_subdirectory (tools)", "")
-            replace_in_file(self, os.path.join(self.source_folder, "cmake", "CMakeLists.txt"),
-                                  "${TOOLS}", "")
         # Disable -Werror
         replace_in_file(self, cmakelists, "-Werror", "")
         replace_in_file(self, cmakelists, "/WX", "")
@@ -132,13 +128,22 @@ class GeographiclibConan(ConanFile):
         ]:
             rmdir(self, os.path.join(os.path.join(self.package_folder, folder)))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        if not self.options.tools:
+            rmdir(self, os.path.join(self.package_folder, "sbin"))
+            bin_files = [it for it in os.listdir(os.path.join(self.package_folder, "bin")) if not it.endswith(".dll")]
+            for it in bin_files:
+                rm(self, it, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "geographiclib")
         self.cpp_info.set_property("cmake_target_name", "GeographicLib::GeographicLib")
         self.cpp_info.set_property("pkg_config_name", "geographiclib")
-        self.cpp_info.libs = collect_libs(self)
+        suffix = "_d" if self.settings.build_type == "Debug" and is_msvc(self) else ""
+        suffix += "-i" if is_msvc(self) and self.options.shared else ""
+        self.cpp_info.libs = [f"GeographicLib{suffix}"] if Version(self.version) >= "2" else [f"Geographic{suffix}"]
         self.cpp_info.defines.append("GEOGRAPHICLIB_SHARED_LIB={}".format("1" if self.options.shared else "0"))
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "geographiclib"
