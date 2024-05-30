@@ -1,31 +1,26 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
-from conan.tools.env import Environment, VirtualRunEnv
-from conan.tools.gnu import PkgConfigDeps
+from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.env import Environment
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
+    generators = "CMakeToolchain", "CMakeDeps", "PkgConfigDeps", "VirtualBuildEnv", "VirtualRunEnv"
     test_type = "explicit"
-
-    def requirements(self):
-        self.requires(self.tested_reference_str)
 
     def layout(self):
         cmake_layout(self)
 
-    def generate(self):
-        pkg_config_deps = PkgConfigDeps(self)
-        pkg_config_deps.generate()
-        cmake_deps = CMakeDeps(self)
-        cmake_deps.generate()
-        tc = CMakeToolchain(self)
-        tc.generate()
-        runenv = VirtualRunEnv(self)
-        runenv.generate()
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
+    def build_requirements(self):
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/2.1.0")
+
+    def generate(self):
         # Print debug information from gstreamer at runtime
         env = Environment()
         env.define("GST_DEBUG", "7")

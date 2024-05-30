@@ -1,16 +1,28 @@
 sources:
+  "2023.6":
+    url: "https://github.com/google/shaderc/archive/refs/tags/v2023.6.tar.gz"
+    sha256: "e40fd4a87a56f6610e223122179f086d5c4f11a7e0e2aa461f0325c3a0acc6ae"
   "2021.1":
     url: "https://github.com/google/shaderc/archive/v2021.1.tar.gz"
     sha256: "047113bc4628da164a3cb845efc20d442728873f6054a68ab56d04a053f2c32b"
-  "2019.0":
-    url: "https://github.com/google/shaderc/archive/v2019.0.tar.gz"
-    sha256: "1018cd02be52295272fdbffa056ee24b881be277c83d039ad554d91230f4e11b"
 patches:
+  "2023.6":
+    - patch_file: "patches/2023.6/use-conan-dependencies.patch"
+      patch_description: "Replace third_party with Conan dependencies"
+      patch_type: "conan"
+    - patch_file: "patches/2021.1/adapt-update_build_version.py.patch"
+      patch_description: "Adapt update_build_version.py for Conan"
+      patch_type: "conan"
+    - patch_file: "patches/2021.1/install-shaderc_util.patch"
+      patch_description: "install() shaderc_util"
+      patch_type: "conan"
   "2021.1":
-    - patch_file: "patches/2021.1/fix-cmake.patch"
-      base_path: "source_subfolder"
-  "2019.0":
-    - patch_file: "patches/2019.0/fix-cmake.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/2019.0/fix-spvc.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/2021.1/use-conan-dependencies.patch"
+      patch_description: "Replace third_party with Conan dependencies"
+      patch_type: "conan"
+    - patch_file: "patches/2021.1/adapt-update_build_version.py.patch"
+      patch_description: "Adapt update_build_version.py for Conan"
+      patch_type: "conan"
+    - patch_file: "patches/2021.1/install-shaderc_util.patch"
+      patch_description: "install() shaderc_util"
+      patch_type: "conan"

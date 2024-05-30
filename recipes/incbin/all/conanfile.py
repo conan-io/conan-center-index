@@ -16,11 +16,14 @@ class IncbinConan(ConanFile):
     homepage = "https://github.com/graphitemaster/incbin/"
     topics = ("include", "binary", "preprocess", "header-only")
     package_type = "header-library"
-    settings = "compiler"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
 
     def validate(self):
         if is_msvc(self):
@@ -33,5 +36,6 @@ class IncbinConan(ConanFile):
         copy(self, "UNLICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "incbin.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder)
 
-    def package_id(self):
-        self.info.clear()
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

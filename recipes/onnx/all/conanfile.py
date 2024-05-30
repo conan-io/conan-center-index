@@ -49,10 +49,19 @@ class OnnxConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
+        if Version(self.version) < "1.16.0":
+            return {
+                "Visual Studio": "15",
+                "msvc": "191",
+                "gcc": "7",
+                "clang": "5",
+                "apple-clang": "10",
+            }
+        # 1.16.0+ requires <filesystem> header available with gcc8+
         return {
             "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "7",
+            "gcc": "8",
             "clang": "5",
             "apple-clang": "10",
         }
@@ -65,7 +74,10 @@ class OnnxConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.shared:
+        if is_msvc(self):
+            del self.options.shared
+            self.package_type = "static-library"
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
@@ -83,8 +95,6 @@ class OnnxConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration("onnx shared is broken with Visual Studio")
 
     def build_requirements(self):
         if not self._is_legacy_one_profile:
@@ -112,9 +122,6 @@ class OnnxConan(ConanFile):
         tc.variables["ONNX_BUILD_TESTS"] = False
         tc.variables["ONNX_USE_LITE_PROTO"] = self.dependencies.host["protobuf"].options.lite
         tc.variables["ONNX_ML"] = True
-        if Version(self.version) < "1.13.0":
-            tc.variables["ONNXIFI_ENABLE_EXT"] = False
-            tc.variables["ONNXIFI_DUMMY_BACKEND"] = False
         tc.variables["ONNX_VERIFY_PROTO3"] = Version(self.dependencies.host["protobuf"].ref.version).major == "3"
         if is_msvc(self):
             tc.variables["ONNX_USE_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
@@ -173,28 +180,6 @@ class OnnxConan(ConanFile):
                 "requires": ["protobuf::libprotobuf"]
             }
         }
-        if Version(self.version) < "1.13.0":
-            components.update(
-                {
-                    "onnxifi": {
-                        "target": "onnxifi",
-                        "system_libs": [(self.settings.os in ["Linux", "FreeBSD"], ["dl"])],
-                    },
-                    "onnxifi_dummy": {
-                        "target": "onnxifi_dummy",
-                        "libs": ["onnxifi_dummy"],
-                        "requires": ["onnxifi"]
-                    },
-                    "onnxifi_loader": {
-                        "target": "onnxifi_loader",
-                        "libs": ["onnxifi_loader"],
-                        "requires": ["onnxifi"]
-                    },
-                    "onnxifi_wrapper": {
-                        "target": "onnxifi_wrapper"
-                    }
-                }
-            )
         components["libonnx"]["defines"].append("__STDC_FORMAT_MACROS")
         return components
 
