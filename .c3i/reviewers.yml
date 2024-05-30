@@ -90,3 +90,6 @@ reviewers:
   - user: "valgur"
     type: "community"
     request_reviews: false
+  - user: "perseoGI"
+    type: "team"
+    request_reviews: false
