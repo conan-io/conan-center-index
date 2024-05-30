@@ -54,7 +54,8 @@ class MsdfgenConan(ConanFile):
             self.requires("lodepng/cci.20200615")
         else:
             self.requires("libpng/[>=1.6 <2]")
-        self.requires("tinyxml2/9.0.0")
+        self.requires("tinyxml2/10.0.0")
+
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
