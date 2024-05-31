@@ -5,7 +5,6 @@ from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -26,7 +25,7 @@ class Dav1dConan(ConanFile):
         "bit_depth": ["all", 8, 16],
         "with_tools": [True, False],
         "assembly": [True, False],
-        "with_avx512": [True, False],
+        "with_avx512": ["deprecated", True, False],
     }
     default_options = {
         "shared": False,
@@ -34,7 +33,7 @@ class Dav1dConan(ConanFile):
         "bit_depth": "all",
         "with_tools": True,
         "assembly": True,
-        "with_avx512": False,
+        "with_avx512": "deprecated",
     }
 
     def config_options(self):
@@ -43,24 +42,27 @@ class Dav1dConan(ConanFile):
         if is_msvc(self) and self.settings.build_type == "Debug":
             # debug builds with assembly often causes linker hangs or LNK1000
             self.options.assembly = False
-        if Version(self.version) < "1.0.0":
-            del self.options.with_avx512
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-        if not self.options.assembly:
-            self.options.rm_safe("with_avx512")
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def package_id(self):
+        del self.info.options.with_avx512
+
+    def validate(self):
+        if self.options.with_avx512 != "deprecated":
+            self.output.warning("The 'with_avx512' option is deprecated and has no effect")
+
     def build_requirements(self):
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/1.4.0")
         if self.options.assembly:
-            self.tool_requires("nasm/2.15.05")
+            self.tool_requires("nasm/2.16.01")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -72,8 +74,6 @@ class Dav1dConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["enable_tests"] = False
         tc.project_options["enable_asm"] = self.options.assembly
-        if Version(self.version) < "1.0.0":
-            tc.project_options["enable_avx512"] = self.options.get_safe("with_avx512", False)
         tc.project_options["enable_tools"] = self.options.with_tools
         if self.options.bit_depth == "all":
             tc.project_options["bitdepths"] = "8,16"
