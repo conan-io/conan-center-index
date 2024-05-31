@@ -141,6 +141,11 @@ class OpenblasConan(ConanFile):
                 raise ConanInvalidConfiguration(f'"{self.name}/*:build_relapack=True" option is only supported for GCC and Clang')
 
     def validate_build(self):
+        if Version(self.version) < "0.3.22" and cross_building(self, skip_x64_x86=True):
+            # OpenBLAS CMake builds did not support some of the cross-compilation targets in 0.3.20/21 and earlier.
+            # This was fixed in https://github.com/OpenMathLib/OpenBLAS/pull/3714 and https://github.com/OpenMathLib/OpenBLAS/pull/3958
+            raise ConanInvalidConfiguration(f"Cross-building is not supported for {self.name}/0.3.21 and earlier.")
+
         # If we're cross-compiling, and the user didn't provide the target, and
         # we couldn't infer the target from settings.arch, fail
         if cross_building(self, skip_x64_x86=True) and not self.options.target:
