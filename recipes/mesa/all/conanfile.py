@@ -1168,8 +1168,8 @@ class MesaConan(ConanFile):
         replace_in_file(
             self,
             os.path.join(self.source_folder, "meson.build"),
-            "dep_wl_protocols = dependency('wayland-protocols', version : '>= 1.30')",
-            "dep_wl_protocols = dependency('wayland-protocols_BUILD', native: true, version : '>= 1.30')",
+            "dep_wl_protocols = dependency('wayland-protocols', version : '>= 1.34')",
+            "dep_wl_protocols = dependency('wayland-protocols_BUILD', native: true, version : '>= 1.34')",
         )
 
     def source(self):
@@ -1231,15 +1231,16 @@ class MesaConan(ConanFile):
         tc.project_options["gbm"] = feature("gbm")
         tc.project_options["gles1"] = feature("gles1")
         tc.project_options["gles2"] = feature("gles2")
-        tc.project_options["glvnd"] = boolean("with_libglvnd")
+        tc.project_options["glvnd"] = feature("with_libglvnd")
         tc.project_options["glx"] = stringifier("glx", default="disabled")
         tc.project_options["imagination-srv"] = boolean("imagination_srv")
         tc.project_options["install-intel-gpu-tests"] = False
-        tc.project_options["intel-clc"] = (
-            "system"
-            if self.options.get_safe("intel_clc") == "system"
-            else (feature("intel_clc"))
-        )
+        intel_clc = "auto"
+        if self.options.get_safe("intel_clc") == "system":
+            intel_clc = "system"
+        else:
+            intel_clc = "enabled"
+        tc.project_options["intel-clc"] = intel_clc
         tc.project_options["llvm"] = feature("with_llvm")
         tc.project_options["libunwind"] = feature("with_libunwind")
         tc.project_options["microsoft-clc"] = feature("microsoft_clc")
