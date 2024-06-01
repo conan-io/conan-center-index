@@ -8,16 +8,14 @@ import os
 
 required_conan_version = ">=1.53.0"
 
-
 class AsmjitConan(ConanFile):
     name = "asmjit"
     description = "AsmJit is a lightweight library for machine code " \
                   "generation written in C++ language."
     license = "Zlib"
     topics = ("asmjit", "compiler", "assembler", "jit")
-    homepage = "https://asmjit.com"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "https://asmjit.com"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
