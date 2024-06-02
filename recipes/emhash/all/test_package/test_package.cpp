@@ -2,6 +2,7 @@
 #include <iostream>
 #include <bitset>
 #include <string>
+#include <vector>
 
 #define EMH_EXT
 #include "hash_table5.hpp"
