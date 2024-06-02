@@ -5,6 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
+from conan.tools.microsoft import is_msvc
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir, save
 
 required_conan_version = ">=1.53.0"
@@ -38,6 +39,9 @@ class SioclientConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if is_msvc(self):
+            self.options.rm_safe("shared")
+            self.package_type = "static-library"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -52,8 +56,6 @@ class SioclientConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Shared builds on Windows are not supported")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -61,17 +63,16 @@ class SioclientConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["USE_SUBMODULES"] = False
+        tc.variables["BUILD_UNIT_TESTS"] = False
+        tc.variables["BUILD_TESTING"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
-        VirtualBuildEnv(self).generate()
-
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "asio asio::asio", "asio::asio")
-        save(self, os.path.join(self.source_folder, "test", "CMakeLists.txt"), "")
 
     def build(self):
         self._patch_sources()
@@ -84,7 +85,6 @@ class SioclientConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "sioclient")
