@@ -6,7 +6,6 @@ from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_
 from conan.tools.gnu import Autotools, AutotoolsToolchain,AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
-import glob
 import os
 
 required_conan_version = ">=1.54.0"
@@ -88,6 +87,11 @@ class Krb5Conan(ConanFile):
             "--with-system-verto",
             f"--with-tcl={(self.deps_cpp_info['tcl'].rootpath if self.options.get_safe('with_tcl') else 'no')}",
             ])
+        tc.configure_args.extend([
+            "krb5_cv_attr_constructor_destructor=yes,yes",
+            "ac_cv_func_regcomp=yes",
+            "ac_cv_printf_positional=yes"
+            ])
         tc.generate()
 
         pkg = AutotoolsDeps(self)
@@ -111,6 +115,7 @@ class Krb5Conan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         autotools = Autotools(self)
+        autotools.autoreconf(os.path.join(self.source_folder,"src"))
         autotools.configure(os.path.join(self.source_folder,"src"))
         autotools.make()
 
