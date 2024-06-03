@@ -46,17 +46,21 @@ class LimereportConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+    
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def build_requirements(self):
-        self.requires("libpng/1.6.42")
-        if self.options.with_zint:
-            self.tool_requires("zint/2.10.0")
-
     def requirements(self):
         self.requires("qt/6.4.2")
+        self.requires("libpng/1.6.42")
+
+    def build_requirements(self):
+        if self.options.with_zint:
+            self.tool_requires("zint/2.10.0")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -68,11 +72,11 @@ class LimereportConan(ConanFile):
             )    
         if Version(self.dependencies["qt"].ref.version) < "6.0.0":
             if not (self.dependencies["qt"].options.qtquickcontrols and self.dependencies["qt"].options.qtquickcontrols2):
-                raise ConanInvalidConfiguration(f"{self.ref} requires qt:quickcontrols=True and qt:quickcontrols2=True")
+                raise ConanInvalidConfiguration(f"{self.ref} requires -o='qt/*:quickcontrols=True' and -o='qt/*:quickcontrols2=True'")
             elif not (self.dependencies["qt"].options.qtdeclarative):
-                raise ConanInvalidConfiguration(f"{self.ref} requires qt:qtdeclarative=True")
+                raise ConanInvalidConfiguration(f"{self.ref} requires -o='qt/*:qtdeclarative=True'")
         if not (self.dependencies["qt"].options.qtsvg and self.dependencies["qt"].options.qttools):
-            raise ConanInvalidConfiguration(f"{self.ref} requires qt:qtsvg=True and qt:qttools=True")
+            raise ConanInvalidConfiguration(f"{self.ref} requires -o='qt/*:qtsvg=True' and -o='qt/*:qttools=True'")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -90,10 +94,6 @@ class LimereportConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def build(self):
         cmake = CMake(self)
