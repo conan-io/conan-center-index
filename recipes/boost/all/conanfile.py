@@ -282,6 +282,20 @@ class BoostConan(ConanFile):
             # supported_cppstd: lists GCC 5 due partial support for C++14, but not enough for Boost
             return (compiler_version >= required_compiler_version) and supported_cxx14
 
+    @property
+    def _has_cppstd_20_supported(self):
+        cppstd = self.settings.compiler.get_safe("cppstd")
+        if cppstd:
+            return valid_min_cppstd(self, 20)
+        required_compiler_version = self._min_compiler_version_default_cxx20
+        if required_compiler_version:
+            msvc_versions = {14: 190, 15: 191, 16: 192, 17: 193}
+            compiler_version = Version(self.settings.compiler.version)
+            is_visual_studio = str(self.settings.compiler) == "Visual Studio"
+            # supported_cppstd only supports msvc, but not Visual Studio as compiler
+            supported_cxx20 = "20" in supported_cppstd(self, "msvc", msvc_versions.get(compiler_version)) if is_visual_studio else "20" in supported_cppstd(self)
+            # We still dont have a compiler using C++20 by default
+            return (compiler_version >= required_compiler_version) or supported_cxx20
 
     @property
     def _min_compiler_version_nowide(self):
@@ -618,7 +632,7 @@ class BoostConan(ConanFile):
         if Version(self.version) >= "1.85.0":
             libraries.append("system")
         libraries.sort()
-        return filter(lambda library: f"without_{library}" in self.options, libraries)
+        return list(filter(lambda library: f"without_{library}" in self.options, libraries))
 
     @property
     def _cxx14_boost_libraries(self):
@@ -627,7 +641,16 @@ class BoostConan(ConanFile):
             # https://github.com/boostorg/math/blob/develop/README.md#boost-math-library
             libraries.append("math")
         libraries.sort()
-        return filter(lambda library: f"without_{library}" in self.options, libraries)
+        return list(filter(lambda library: f"without_{library}" in self.options, libraries))
+
+    @property
+    def _cxx20_boost_libraries(self):
+        libraries = []
+        if Version(self.version) >= "1.84.0":
+            # https://github.com/boostorg/cobalt/blob/boost-1.84.0/build/Jamfile#L54
+            libraries.append("cobalt")
+        libraries.sort()
+        return list(filter(lambda library: f"without_{library}" in self.options, libraries))
 
     def validate(self):
         if not self.options.multithreading:
@@ -669,24 +692,16 @@ class BoostConan(ConanFile):
             if mincompiler_version and Version(self.settings.compiler.version) < mincompiler_version:
                 raise ConanInvalidConfiguration("This compiler is too old to build Boost.nowide.")
 
-        if any([not self.options.get_safe(f"without_{library}", True) for library in self._cxx11_boost_libraries]):
-            if self.settings.compiler.get_safe("cppstd"):
-                check_min_cppstd(self, 11)
-            else:
-                if not self._has_cppstd_11_supported:
+        for cxx_standard, boost_libraries, has_cppstd_supported in [
+             (11, self._cxx11_boost_libraries, self._has_cppstd_11_supported),
+             (14, self._cxx14_boost_libraries, self._has_cppstd_14_supported),
+             (20, self._cxx20_boost_libraries, self._has_cppstd_20_supported)]:
+            if any([not self.options.get_safe(f"without_{library}", True) for library in boost_libraries]):
+                if (self.settings.compiler.get_safe("cppstd") and not valid_min_cppstd(self, cxx_standard)) or \
+                    not has_cppstd_supported:
                     raise ConanInvalidConfiguration(
-                        f"Boost.{{{','.join(self._cxx11_boost_libraries)}}} requires a c++11 compiler "
-                        "(please set compiler.cppstd or use a newer compiler)"
-                    )
-
-        if any([not self.options.get_safe(f"without_{library}", True) for library in self._cxx14_boost_libraries]):
-            if self.settings.compiler.get_safe("cppstd"):
-                check_min_cppstd(self, 14)
-            else:
-                if not self._has_cppstd_14_supported:
-                    raise ConanInvalidConfiguration(
-                        f"Boost.{{{','.join(self._cxx14_boost_libraries)}}} requires a c++14 compiler "
-                        "(please set compiler.cppstd or use a newer compiler)"
+                        f"Boost libraries {', '.join(boost_libraries)} requires a C++{cxx_standard} compiler. "
+                        "Please, set compiler.cppstd or use a newer compiler version or disable from building."
                     )
 
     def _with_dependency(self, dependency):

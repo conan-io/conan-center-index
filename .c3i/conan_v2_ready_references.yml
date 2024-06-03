@@ -292,6 +292,7 @@ required_for_references:
 - dbg-macro
 - dbus
 - dcmtk
+- dd-opentracing-cpp
 - debug_assert
 - decimal_for_cpp
 - deco
@@ -734,6 +735,7 @@ required_for_references:
 - libmagic
 - libmaxminddb
 - libmbus
+- libmd
 - libmediainfo
 - libmemcached
 - libmetalink
@@ -990,6 +992,7 @@ required_for_references:
 - nextsilicon-cpp-subprocess
 - nfrechette-acl
 - nghttp3
+- nifti_clib
 - ninja
 - nlohmann_json
 - nlopt
@@ -1069,6 +1072,7 @@ required_for_references:
 - openmesh
 - openmvg
 - openpam
+- openscenegraph
 - openssh
 - openssl
 - opensubdiv
@@ -1136,6 +1140,7 @@ required_for_references:
 - platform.exceptions
 - platform.hashing
 - platform.interfaces
+- platformfolders
 - playrho
 - plf_colony
 - plf_indiesort
