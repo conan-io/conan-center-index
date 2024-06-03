@@ -1,12 +1,7 @@
-import re, os, functools
-
-from conan import ConanFile, tools
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import load, export_conandata_patches, get
-from conan.tools.env import Environment
+from conan.tools.files import export_conandata_patches, get
 
-from conan.tools.scm import Git
 
 
 class CmaesConan(ConanFile):
@@ -39,7 +34,7 @@ class CmaesConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-    
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
