@@ -5,7 +5,7 @@ from conan.tools.files import export_conandata_patches, get
 
 
 class CmaesConan(ConanFile):
-    name = "libcmaes"
+    name = "cmaes"
 
     generators = "CMakeDeps"
 
