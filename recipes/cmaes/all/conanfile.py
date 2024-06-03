@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import export_conandata_patches, get
+from conan.tools.files import export_conandata_patches, get, rmdir, rm, copy
+import os
 
 class CmaesConan(ConanFile):
     name = "cmaes"
@@ -8,7 +9,7 @@ class CmaesConan(ConanFile):
     generators = "CMakeDeps"
 
     # Optional metadata
-    license = "MIT"
+    license = "LGPLv3"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/CMA-ES/libcmaes"
     description = "libcmaes is a multithreaded C++11 library with Python bindings for high performance blackbox stochastic optimization using the CMA-ES algorithm for Covariance Matrix Adaptation Evolution Strategy"
@@ -67,6 +68,7 @@ class CmaesConan(ConanFile):
         tc.generate()
 
     def build(self):
+        #apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -74,6 +76,10 @@ class CmaesConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+
+        rmdir(self, os.path.join(self.package_folder, "lib","pkgconfig"))
+        rm(self, "*.cmake", os.path.join(self.package_folder, "lib", "cmake", "libcmaes"))
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.libs = ["cmaes"]
