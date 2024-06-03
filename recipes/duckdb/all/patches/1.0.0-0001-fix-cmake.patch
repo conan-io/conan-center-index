@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 4fc03f0..50d10e8 100644
+index ec66b57..6321321 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -843,12 +843,12 @@ function(build_loadable_extension_directory NAME OUTPUT_DIRECTORY EXTENSION_VERS
@@ -31,7 +31,7 @@ index 4fc03f0..50d10e8 100644
  
  # Internal extension register function
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 1cf0e5b..e04f9db 100644
+index 06c0c9a..ac1c4ad 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -93,21 +93,21 @@ else()
@@ -60,7 +60,7 @@ index 1cf0e5b..e04f9db 100644
    target_include_directories(
      duckdb_static PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-@@ -122,10 +122,18 @@ else()
+@@ -123,10 +123,18 @@ else()
            DESTINATION "${INSTALL_INCLUDE_DIR}")
  
  endif()
@@ -82,13 +82,13 @@ index 1cf0e5b..e04f9db 100644
 +  RUNTIME DESTINATION "${INSTALL_BIN_DIR}")
 +endif()
 diff --git a/tools/odbc/CMakeLists.txt b/tools/odbc/CMakeLists.txt
-index baf7823..4bef643 100644
+index baf7823..4447d26 100644
 --- a/tools/odbc/CMakeLists.txt
 +++ b/tools/odbc/CMakeLists.txt
-@@ -38,6 +38,14 @@ add_library(duckdb_odbc SHARED ${ALL_OBJECT_FILES} duckdb_odbc.def)
+@@ -37,6 +37,13 @@ add_library(duckdb_odbc SHARED ${ALL_OBJECT_FILES} duckdb_odbc.def)
+ 
  set_target_properties(duckdb_odbc PROPERTIES DEFINE_SYMBOL "DUCKDB_ODBC_API")
  target_link_libraries(duckdb_odbc ${LINK_LIB_LIST} duckdb_static)
- 
 +install(
 +    TARGETS duckdb_odbc
 +    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -96,15 +96,14 @@ index baf7823..4bef643 100644
 +    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 +    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 +)
-+
+ 
  if(NOT CLANG_TIDY)
    add_subdirectory(test)
- endif()
 diff --git a/tools/sqlite3_api_wrapper/CMakeLists.txt b/tools/sqlite3_api_wrapper/CMakeLists.txt
-index e29c33e..fb926b5 100644
+index e29c33e..9e387f9 100644
 --- a/tools/sqlite3_api_wrapper/CMakeLists.txt
 +++ b/tools/sqlite3_api_wrapper/CMakeLists.txt
-@@ -26,20 +26,20 @@ if(NOT AMALGAMATION_BUILD)
+@@ -26,12 +26,12 @@ if(NOT AMALGAMATION_BUILD)
  endif()
  link_threads(sqlite3_api_wrapper_static)
  
@@ -114,24 +113,13 @@ index e29c33e..fb926b5 100644
    target_link_libraries(sqlite3_api_wrapper duckdb ${DUCKDB_EXTRA_LINK_FLAGS})
    link_threads(sqlite3_api_wrapper)
  endif()
+-
++if(0)
+ include_directories(../../third_party/catch)
  
--include_directories(../../third_party/catch)
-+# include_directories(../../third_party/catch)
- 
--include_directories(test/include)
--add_subdirectory(test)
-+# include_directories(test/include)
-+# add_subdirectory(test)
- 
--add_executable(test_sqlite3_api_wrapper ${SQLITE_TEST_FILES})
--if(WIN32 OR ZOS)
--  target_link_libraries(test_sqlite3_api_wrapper sqlite3_api_wrapper_static)
--else()
--  target_link_libraries(test_sqlite3_api_wrapper sqlite3_api_wrapper)
--endif()
-+# add_executable(test_sqlite3_api_wrapper ${SQLITE_TEST_FILES})
-+# if(WIN32 OR ZOS)
-+#   target_link_libraries(test_sqlite3_api_wrapper sqlite3_api_wrapper_static)
-+# else()
-+#   target_link_libraries(test_sqlite3_api_wrapper sqlite3_api_wrapper)
-+# endif()
+ include_directories(test/include)
+@@ -43,3 +43,4 @@ if(WIN32 OR ZOS)
+ else()
+   target_link_libraries(test_sqlite3_api_wrapper sqlite3_api_wrapper)
+ endif()
++endif()
