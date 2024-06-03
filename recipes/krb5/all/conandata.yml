@@ -1,9 +1,9 @@
 sources:
-  "1.19.2":
-    url: "https://kerberos.org/dist/krb5/1.19/krb5-1.19.2.tar.gz"
-    sha256: "10453fee4e3a8f8ce6129059e5c050b8a65dab1c257df68b99b3112eaa0cdf6a"
+  "1.21.2":
+    url: "https://kerberos.org/dist/krb5/1.21/krb5-1.21.2.tar.gz"
+    sha256: "9560941a9d843c0243a71b17a7ac6fe31c7cebb5bce3983db79e52ae7e850491"
 patches:
-  "1.19.2":
+  "1.21.2":
     - patch_file: "patches/1.19.2-0001-no-html+tests.patch"
       patch_type: "conan"
       patch_description: "no-html+tests"
@@ -12,7 +12,4 @@ patches:
       patch_description: "no-tests"
     - patch_file: "patches/1.19.2-0003-disable_ksu_root.patch"
       patch_description: "no ksu install as root user"
-      patch_type: "conan"
-    - patch_file: "patches/1.19.2-0004-missing_zlib.patch"
-      patch_description: "fix zlib linkage"
       patch_type: "conan"
