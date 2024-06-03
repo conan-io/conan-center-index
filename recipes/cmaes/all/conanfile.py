@@ -2,8 +2,6 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import export_conandata_patches, get
 
-required_conan_version = ">=2.0.0"
-
 class CmaesConan(ConanFile):
     name = "cmaes"
 
