@@ -139,6 +139,11 @@ patches:
       "patch_file": "patches/5.15.12-fix-macos-cpp-lib-memory-resource.patch"
       "patch_source": "https://codereview.qt-project.org/c/qt/qtbase/+/482392"
       "patch_type": "portability"
+    - "base_path": "qt5/qtserialbus"
+      "patch_description": "Fix virtual can backend usage in multithreaded environment"
+      "patch_file": "patches/virtualcanback_mutex.patch"
+      "patch_source": "https://codereview.qt-project.org/c/qt/qtserialbus/+/565329"
+      "patch_type": "backport"
   "5.15.13":
     - "base_path": "qt5/qtbase"
       "patch_file": "patches/aa2a39dea5.diff"
@@ -162,6 +167,11 @@ patches:
       "patch_file": "patches/5.15.12-fix-macos-cpp-lib-memory-resource.patch"
       "patch_source": "https://codereview.qt-project.org/c/qt/qtbase/+/482392"
       "patch_type": "portability"
+    - "base_path": "qt5/qtserialbus"
+      "patch_description": "Fix virtual can backend usage in multithreaded environment"
+      "patch_file": "patches/virtualcanback_mutex.patch"
+      "patch_source": "https://codereview.qt-project.org/c/qt/qtserialbus/+/565329"
+      "patch_type": "backport"
   "5.15.12":
     - "base_path": "qt5/qtbase"
       "patch_file": "patches/aa2a39dea5.diff"

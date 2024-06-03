@@ -1,0 +1,32 @@
+diff --git a/src/plugins/canbus/virtualcan/virtualcanbackend.cpp b/src/plugins/canbus/virtualcan/virtualcanbackend.cpp
+index ce1ca3e9..fee09322 100644
+--- a/src/plugins/canbus/virtualcan/virtualcanbackend.cpp
++++ b/src/plugins/canbus/virtualcan/virtualcanbackend.cpp
+@@ -38,6 +38,7 @@
+ 
+ #include <QtCore/qdatetime.h>
+ #include <QtCore/qloggingcategory.h>
++#include <QtCore/qmutex.h>
+ #include <QtCore/qregularexpression.h>
+ 
+ #include <QtNetwork/qtcpserver.h>
+@@ -164,6 +165,7 @@ void VirtualCanServer::readyRead()
+ }
+ 
+ Q_GLOBAL_STATIC(VirtualCanServer, g_server)
++static QBasicMutex g_serverMutex;
+ 
+ VirtualCanBackend::VirtualCanBackend(const QString &interface, QObject *parent)
+     : QCanBusDevice(parent)
+@@ -205,8 +207,10 @@ bool VirtualCanBackend::open()
+     const QHostAddress address = host.isEmpty() ? QHostAddress::LocalHost : QHostAddress(host);
+     const quint16 port = static_cast<quint16>(m_url.port(ServerDefaultTcpPort));
+ 
+-    if (address.isLoopback())
++    if (address.isLoopback()) {
++        const QMutexLocker locker(&g_serverMutex);
+         g_server->start(port);
++    }
+ 
+     m_clientSocket = new QTcpSocket(this);
+     m_clientSocket->connectToHost(address, port, QIODevice::ReadWrite);
