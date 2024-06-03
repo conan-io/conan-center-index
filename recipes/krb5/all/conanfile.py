@@ -18,18 +18,14 @@ class Krb5Conan(ConanFile):
     topics = ("kerberos", "network", "authentication", "protocol", "client", "server", "cryptography")
     license = "LicenseRef-NOTICE"
     url = "https://github.com/conan-io/conan-center-index"
-    package_type = "library"
+    package_type = "shared-library"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
         "thread": [True, False],
         "use_dns_realms": [True, False],
         "with_tls": [False, "openssl"],
         "with_tcl": [True, False],
     }
     default_options = {
-        "shared": False,
-        "fPIC": True,
         "thread": True,
         "use_dns_realms": False,
         "with_tls": "openssl",
@@ -46,13 +42,7 @@ class Krb5Conan(ConanFile):
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration(f"{self.ref} Conan recipe is not prepared for Macos yet. Contributions are welcome!")
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-
     def configure(self):
-        if self.options.get_safe("shared"):
-            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
@@ -84,14 +74,16 @@ class Krb5Conan(ConanFile):
             "--disable-rpath",
             "--without-libedit",
             "--without-readline",
+            "--enable-dns-for-realm",
             "--with-system-verto",
-            f"--with-tcl={(self.deps_cpp_info['tcl'].rootpath if self.options.get_safe('with_tcl') else 'no')}",
+            f"--with-tcl={(self.dependencies['tcl'].package_folder if self.options.get_safe('with_tcl') else 'no')}",
             ])
         tc.configure_args.extend([
             "krb5_cv_attr_constructor_destructor=yes,yes",
             "ac_cv_func_regcomp=yes",
             "ac_cv_printf_positional=yes"
             ])
+        tc.cflags.append("-fcommon")
         tc.generate()
 
         pkg = AutotoolsDeps(self)
@@ -123,18 +115,19 @@ class Krb5Conan(ConanFile):
         copy(self, "NOTICE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "var"))
+        #rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        #rmdir(self, os.path.join(self.package_folder, "share"))
+        #rmdir(self, os.path.join(self.package_folder, "var"))
 
     def package_info(self):
-        self.cpp_info.components["mit-krb5"].libs = ["krb5", "crypto_libs", "krb5support"]
-        # is a common library, that can potentially be packaged (but I don't know who "owns" it)
-        self.cpp_info.components["mit-krb5"].libs.append("com_err")
-
+        # FIXME: com_err is a system library copied to the package folder
+        self.cpp_info.components["mit-krb5"].libs = ["krb5", "k5crypto"]
+        if self.settings.os == "Linux":
+            self.cpp_info.components["mit-krb5"].system_libs = ["com_err"]
         if self.options.get_safe('with_tls') == "openssl":
-            self.cpp_info.components["mit-krb5"].requires.append("openssl::ssl")
+            self.cpp_info.components["mit-krb5"].requires = ["openssl::ssl"]
         self.cpp_info.components["mit-krb5"].names["pkg_config"] = "mit-krb5"
+
         if self.settings.os == "Linux":
             self.cpp_info.components["mit-krb5"].system_libs = ["resolv"]
 
