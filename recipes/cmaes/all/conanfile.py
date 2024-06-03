@@ -11,9 +11,10 @@ class CmaesConan(ConanFile):
 
     # Optional metadata
     license = "MIT"
-    author = "Philipp Basler"
-    url = "https://github.com/CMA-ES/libcmaes"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/CMA-ES/libcmaes"
     description = "libcmaes is a multithreaded C++11 library with Python bindings for high performance blackbox stochastic optimization using the CMA-ES algorithm for Covariance Matrix Adaptation Evolution Strategy"
+    topics = ("cmaes", "minimization")
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
