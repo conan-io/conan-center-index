@@ -22,6 +22,7 @@ class CivetwebConan(ConanFile):
         "fPIC": [True, False],
         "shared": [True, False],
         "ssl_dynamic_loading": [True, False],
+        "thread_stack_size": [None, "ANY"],
         "with_caching": [True, False],
         "with_cgi": [True, False],
         "with_cxx": [True, False],
@@ -39,6 +40,7 @@ class CivetwebConan(ConanFile):
         "fPIC": True,
         "shared": False,
         "ssl_dynamic_loading": False,
+        "thread_stack_size": None,
         "with_caching": True,
         "with_cgi": True,
         "with_cxx": True,
@@ -122,6 +124,8 @@ class CivetwebConan(ConanFile):
         tc.variables["CIVETWEB_ENABLE_THIRD_PARTY_OUTPUT"] = self.options.with_third_party_output
         tc.variables["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.with_websockets
         tc.variables["CIVETWEB_SERVE_NO_FILES"] = not self.options.with_static_files
+        if self.options.thread_stack_size:
+            tc.variables["CIVETWEB_THREAD_STACK_SIZE"] = self.options.thread_stack_size
 
         if self._has_zlib_option:
             tc.variables["CIVETWEB_ENABLE_ZLIB"] = self.options.with_zlib
