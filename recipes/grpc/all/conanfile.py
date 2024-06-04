@@ -95,10 +95,10 @@ class GrpcConan(ConanFile):
             else:
                 self.requires("abseil/20220623.1", transitive_headers=True, transitive_libs=True)
         else:
-            self.requires("abseil/20230125.3", transitive_headers=True, transitive_libs=True)
+            self.requires("abseil/[*]", transitive_headers=True, transitive_libs=True)
         self.requires("c-ares/1.19.1")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
+        self.requires("protobuf/[*]", transitive_headers=True, transitive_libs=True)
         self.requires("re2/20230301")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52":
