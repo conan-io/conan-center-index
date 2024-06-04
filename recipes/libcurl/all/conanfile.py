@@ -287,9 +287,12 @@ class LibcurlConan(ConanFile):
         # - link errors if mingw shared or iOS/tvOS/watchOS
         # - it makes recipe consistent with CMake build where we don't build curl tool
         top_makefile = os.path.join(self.source_folder, "Makefile.am")
-        replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
         replace_in_file(self, top_makefile, "include src/Makefile.inc", "")
-
+        if Version(self.version) >= "8.7.0":
+            replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", "SUBDIRS = lib")
+        else:
+            replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
+            
         # zlib naming is not always very consistent
         if self.options.with_zlib:
             configure_ac = os.path.join(self.source_folder, "configure.ac")
@@ -562,6 +565,7 @@ class LibcurlConan(ConanFile):
             tc = CMakeToolchain(self)
         tc.variables["ENABLE_UNICODE"] = True
         tc.variables["BUILD_TESTING"] = False
+        tc.variables["ENABLE_CURL_MANUAL"] = False
         tc.variables["BUILD_CURL_EXE"] = False
         tc.variables["CURL_DISABLE_LDAP"] = not self.options.with_ldap
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
