@@ -4,6 +4,6 @@
 
 
 int main(int argc, char** argv) {
-  std::cout << "gPRC version:" << grpc::Version() << "\n";
+  std::cout << "gPRC version: " << grpc::Version() << "\n";
   return 0;
 }
