@@ -13,12 +13,11 @@ required_conan_version = ">=1.52.0"
 class EmSDKConan(ConanFile):
     name = "emsdk"
     description = "Emscripten SDK. Emscripten is an Open Source LLVM to JavaScript compiler"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kripken/emscripten"
-    topics = ("emsdk", "emscripten", "sdk")
-    license = "MIT"
+    topics = ("emscripten", "sdk")
     settings = "os", "arch", "compiler", "build_type"
-
     short_paths = True
 
     @property
