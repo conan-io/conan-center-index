@@ -94,7 +94,7 @@ class CivetwebConan(ConanFile):
     def validate(self):
         if self.options.get_safe("ssl_dynamic_loading") and not self.dependencies["openssl"].options.shared:
             raise ConanInvalidConfiguration("ssl_dynamic_loading requires shared openssl")
-        if self.options.thread_stack_size and not self.options.thread_stack_size.isdigit():
+        if self.options.thread_stack_size and not str(self.options.thread_stack_size).isdigit():
             raise ConanInvalidConfiguration("-o='civetweb/*:thread_stack_size' should be a positive integer")
 
     def source(self):
