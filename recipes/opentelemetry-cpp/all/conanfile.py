@@ -69,6 +69,8 @@ class OpenTelemetryCppConan(ConanFile):
     def _min_cppstd(self):
         if self.options.with_abseil and Version(self.dependencies["abseil"].ref.version) >= "20230125":
             return 14
+        if self.options.with_stl:
+            return 17
         return 11
 
     @property
@@ -77,6 +79,14 @@ class OpenTelemetryCppConan(ConanFile):
             return {
                 "gcc": "6",
                 "clang": "5",
+                "apple-clang": "10",
+                "Visual Studio": "16",
+                "msvc": "192",
+            }
+        elif self._min_cppstd == 17:
+            return {
+                "gcc": "8",
+                "clang": "7",
                 "apple-clang": "10",
                 "Visual Studio": "16",
                 "msvc": "192",
