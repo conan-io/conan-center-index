@@ -3,7 +3,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches, copy, export_conandata_patches, get,
-    rm, rmdir
+    rm, rmdir, replace_in_file
 )
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -90,6 +90,7 @@ class FontconfigConan(ConanFile):
         apply_conandata_patches(self)
 
         if self.settings.os in ("Linux", "FreeBSD") and self.options.get_safe("system_dirs", False):
+            build_script = os.path.join(self.source_folder, "meson.build")
             self._replace_configuration_string(build_script, "CONFIGDIR", "fc_configdir", "'/etc/fonts/conf.d'")
             self._replace_configuration_string(build_script, "FC_CACHEDIR", "fc_cachedir", "'/var/cache/fontconfig'")
             self._replace_configuration_string(build_script, "FC_TEMPLATEDIR", "fc_templatedir", "'/usr/share/fontconfig/conf.avail'")
