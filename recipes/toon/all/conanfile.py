@@ -66,7 +66,7 @@ class ToonConan(ConanFile):
             )
 
         if self.options.with_lapack and not self.dependencies["openblas"].options.build_lapack:
-            raise ConanInvalidConfiguration("TooN requires LAPACK support in OpenBLAS")
+            raise ConanInvalidConfiguration(f"{self.ref} requires LAPACK support in OpenBLAS with -o='openblas/*:build_lapack=True'")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
