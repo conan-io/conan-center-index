@@ -62,6 +62,7 @@ required_for_references:
 - autoconf-archive
 - automake
 - avahi
+- avcpp
 - avir
 - aws-c-auth
 - aws-c-cal
@@ -223,6 +224,7 @@ required_for_references:
 - cpp-peglib
 - cpp-sort
 - cpp-validator
+- cpp-yyjson
 - cpp_project_framework
 - cppbenchmark
 - cppcheck
@@ -272,6 +274,7 @@ required_for_references:
 - cute_headers
 - cvplot
 - cwalk
+- cxxgraph
 - cxxopts
 - cyclonedds
 - cyclonedds-cxx
@@ -289,6 +292,7 @@ required_for_references:
 - dbg-macro
 - dbus
 - dcmtk
+- dd-opentracing-cpp
 - debug_assert
 - decimal_for_cpp
 - deco
@@ -303,6 +307,7 @@ required_for_references:
 - directx-headers
 - dirent
 - discount
+- dispenso
 - djinni-generator
 - djinni-support-lib
 - djvulibre
@@ -360,6 +365,7 @@ required_for_references:
 - entityx
 - entt
 - enum-flags
+- enumbitmask
 - erikzenker-hsm
 - erkir
 - etc2comp
@@ -479,6 +485,7 @@ required_for_references:
 - glu
 - gm2calc
 - gmp
+- gn
 - gnu-config
 - gnulib
 - gnutls
@@ -698,6 +705,7 @@ required_for_references:
 - libgd
 - libgeotiff
 - libgettext
+- libgit2
 - libglvnd
 - libgpg-error
 - libgphoto2
@@ -712,6 +720,7 @@ required_for_references:
 - libid3tag
 - libidn
 - libidn2
+- libigl
 - libinput
 - libinterpolate
 - libipt
@@ -726,6 +735,7 @@ required_for_references:
 - libmagic
 - libmaxminddb
 - libmbus
+- libmd
 - libmediainfo
 - libmemcached
 - libmetalink
@@ -761,7 +771,9 @@ required_for_references:
 - libpq
 - libpqxx
 - libproperties
+- libprotobuf-mutator
 - libpsl
+- libqasm
 - libqrencode
 - librasterlite
 - libraw
@@ -834,6 +846,7 @@ required_for_references:
 - libxshmfence
 - libxslt
 - libyaml
+- libyang
 - libyuv
 - libzen
 - libzip
@@ -981,6 +994,7 @@ required_for_references:
 - nextsilicon-cpp-subprocess
 - nfrechette-acl
 - nghttp3
+- nifti_clib
 - ninja
 - nlohmann_json
 - nlopt
@@ -1060,6 +1074,7 @@ required_for_references:
 - openmesh
 - openmvg
 - openpam
+- openscenegraph
 - openssh
 - openssl
 - opensubdiv
@@ -1127,6 +1142,7 @@ required_for_references:
 - platform.exceptions
 - platform.hashing
 - platform.interfaces
+- platformfolders
 - playrho
 - plf_colony
 - plf_indiesort
@@ -1144,6 +1160,7 @@ required_for_references:
 - polylabel
 - polylineencoder
 - polymorphic_value
+- popl
 - poppler-data
 - popt
 - portable-file-dialogs
@@ -1224,6 +1241,7 @@ required_for_references:
 - refl-cpp
 - reflect-cpp
 - replxx
+- resiprocate
 - resource_pool
 - restbed
 - restinio
@@ -1294,6 +1312,7 @@ required_for_references:
 - simfil
 - simple-websocket-server
 - simple-yaml
+- sioclient
 - sjson-cpp
 - skyr-url
 - sleef
@@ -1401,6 +1420,7 @@ required_for_references:
 - tiny-utf8
 - tinyalsa
 - tinycbor
+- tinycolormap
 - tinycthread
 - tinycthreadpool
 - tinydir
@@ -1462,6 +1482,7 @@ required_for_references:
 - units
 - unity
 - univalue
+- unleash-client-cpp
 - unordered_dense
 - unqlite
 - upx
@@ -1570,6 +1591,7 @@ required_for_references:
 - yasm
 - yder
 - yoga
+- yomm2
 - yyjson
 - z3
 - zbar
