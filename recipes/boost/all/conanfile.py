@@ -609,6 +609,11 @@ class BoostConan(ConanFile):
         if self.options.without_fiber:
             self.options.rm_safe("numa")
 
+        # Use verbosity from [conf] if specified
+        verbosity = self.conf.get("tools.build:verbosity", default="quiet")
+        if verbosity == "verbose" and int(self.options.debug_level) < 2:
+            self.options.debug_level.value = 2
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
