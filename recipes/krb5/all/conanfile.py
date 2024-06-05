@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
@@ -29,6 +29,11 @@ class Krb5Conan(ConanFile):
         "use_dns_realms": False,
         "with_tls": "openssl"
     }
+    options_description = {
+        "use_thread": "Enable thread support",
+        "use_dns_realms": "Enable DNS for realms",
+        "with_tls": "Enable TLS support with OpenSSL",
+    }
     settings = "os", "arch", "compiler", "build_type"
 
     def export_sources(self):
@@ -38,7 +43,6 @@ class Krb5Conan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -47,6 +51,12 @@ class Krb5Conan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} Conan recipe is not prepared for Windows yet. Contributions are welcome!")
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration(f"{self.ref} Conan recipe is not prepared for Macos yet. Contributions are welcome!")
+        if self.options.with_tls == "openssl" and not self.dependencies["openssl"].options.shared:
+            # k5tls does not respect linkage order, it passes krb5 and krb5support before openssl to the linker, which causes linking errors
+            # gcc -shared -fPIC -Wl,-h,k5tls.so.0 -Wl,--no-undefined -o k5tls.so openssl.so notls.so -L../../../lib -lkrb5 -lkrb5support ...
+            # /usr/bin/ld: /.../lib/libssl.a(libssl-lib-ssl_cert_comp.o): in function `OSSL_COMP_CERT_from_uncompressed_data':
+            #     ssl_cert_comp.c:(.text+0x3d1): undefined reference to `COMP_CTX_free'
+            raise ConanInvalidConfiguration(f"{self.ref} building with static OpenSSL generates linking errors. Please use '-o openssl/*:shared=True'")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -101,9 +111,10 @@ class Krb5Conan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        with chdir(self, os.path.join(self.source_folder, "src")):
+            self.run("autoreconf -vif")
         autotools = Autotools(self)
-        autotools.autoreconf(os.path.join(self.source_folder,"src"))
-        autotools.configure(os.path.join(self.source_folder,"src"))
+        autotools.configure(build_script_folder=os.path.join(self.source_folder, "src"))
         autotools.make()
 
     def package(self):
@@ -131,7 +142,7 @@ class Krb5Conan(ConanFile):
         self.cpp_info.components["mit-krb5-gssapi"].names["pkg_config"] = "mit-krb5-gssapi"
 
         self.cpp_info.components["krb5-gssapi"].libs = []
-        self.cpp_info.components["krb5-gssapi"].requires = ["mit-krb5-gssapi", "libdb::libdb"]
+        self.cpp_info.components["krb5-gssapi"].requires = ["mit-krb5-gssapi"]
         self.cpp_info.components["krb5-gssapi"].names["pkg_config"] = "krb5-gssapi"
 
         self.cpp_info.components["gssrpc"].libs = ["gssrpc"]
