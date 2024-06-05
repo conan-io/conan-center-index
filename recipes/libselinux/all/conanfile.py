@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename, replace_in_file, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
@@ -87,9 +88,10 @@ class LibSELinuxConan(ConanFile):
         sepol_lib_folder = os.path.join(self._sepol_source_folder, "src")
         tc.extra_ldflags.append(f"-L{sepol_lib_folder}")
         tc.make_args.append("USE_PCRE2=y")
-        env = tc.environment()
-        env.append_path("PKG_CONFIG_LIBDIR", self.generators_folder)
-        tc.generate(env=env)
+        if cross_building(self):
+            env = tc.environment()
+            env.append_path("PKG_CONFIG_LIBDIR", self.generators_folder)
+            tc.generate(env=env)
 
     def build(self):
         apply_conandata_patches(self)
