@@ -6,7 +6,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
 import os
 import re
@@ -203,7 +203,7 @@ class OpenCVConan(ConanFile):
         "with_msmf": True,
         "with_msmf_dxva": True,
         # objdetect module options
-        "with_quirc": False,
+        "with_quirc": True,
         # videoio module options
         "with_ffmpeg": True,
         "with_v4l": False,
@@ -219,6 +219,14 @@ class OpenCVConan(ConanFile):
     default_options.update({_name: False for _name in OPENCV_EXTRA_MODULES_OPTIONS})
 
     short_paths = True
+
+    @property
+    def _is_cl_like(self):
+        return self.settings.compiler.get_safe("runtime") is not None
+
+    @property
+    def _is_cl_like_static_runtime(self):
+        return self._is_cl_like and "MT" in msvc_runtime_flag(self)
 
     @property
     def _is_mingw(self):
@@ -350,9 +358,6 @@ class OpenCVConan(ConanFile):
             # in a big dependency graph
             if not self._has_with_wayland_option:
                 self.options.with_gtk = True
-
-        if Version(self.version) >= "4.9":
-            self.options.with_quirc = True
 
     @property
     def _opencv_modules(self):
@@ -1193,8 +1198,8 @@ class OpenCVConan(ConanFile):
         self._check_mandatory_options(self._opencv_modules)
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
+        if self.options.shared and self._is_cl_like and self._is_cl_like_static_runtime:
+            raise ConanInvalidConfiguration("MSVC or clang-cl with static runtime are not supported for shared library.")
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "4":
             raise ConanInvalidConfiguration("Clang 3.x can't build OpenCV 4.x due to an internal bug.")
         if self.options.get_safe("dnn_cuda") and \
@@ -1241,9 +1246,9 @@ class OpenCVConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "ANDROID OR NOT UNIX", "FALSE")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "elseif(EMSCRIPTEN)", "elseif(QNXNTO)\nelseif(EMSCRIPTEN)")
 
-        if self.options.with_quirc:
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(3rdparty/quirc)", "# add_subdirectory(3rdparty/quirc)")
-
+        ## Upstream CMakeLists vendors quirc in CMakeLists of 3rdparty/quirc.
+        ## Instead we rely on find-quirc.patch in order to link external quirc.
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(3rdparty/quirc)", "")
 
         ## Fix link to several dependencies
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "JASPER_", "Jasper_")
@@ -1448,7 +1453,7 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_GDAL"] = self.options.get_safe("with_gdal", False)
         tc.variables["WITH_GDCM"] = self.options.get_safe("with_gdcm", False)
         tc.variables["WITH_EIGEN"] = self.options.with_eigen
-        tc.variables["WITH_DSHOW"] = is_msvc(self)
+        tc.variables["WITH_DSHOW"] = self._is_cl_like
         tc.variables["WITH_MSMF"] = self.options.get_safe("with_msmf", False)
         tc.variables["WITH_MSMF_DXVA"] = self.options.get_safe("with_msmf_dxva", False)
         tc.variables["OPENCV_MODULES_PUBLIC"] = "opencv"
@@ -1492,8 +1497,6 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_protobuf"):
             tc.variables["PROTOBUF_UPDATE_FILES"] = True
         tc.variables["WITH_ADE"] = self.options.gapi
-        if self.options.objdetect:
-            tc.variables["HAVE_QUIRC"] = self.options.with_quirc  # force usage of quirc requirement
 
         # Extra modules
         if any([self.options.get_safe(module) for module in OPENCV_EXTRA_MODULES_OPTIONS]) or self.options.with_cuda:
@@ -1527,8 +1530,8 @@ class OpenCVConan(ConanFile):
         tc.variables["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["ENABLE_CCACHE"] = False
 
-        if is_msvc(self):
-            tc.variables["BUILD_WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
+        if self._is_cl_like:
+            tc.variables["BUILD_WITH_STATIC_CRT"] = self._is_cl_like_static_runtime
 
         if self.settings.os == "Android":
             tc.variables["BUILD_ANDROID_EXAMPLES"] = False

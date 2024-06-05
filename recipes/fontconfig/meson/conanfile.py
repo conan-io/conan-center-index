@@ -3,16 +3,15 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches, copy, export_conandata_patches, get,
-    replace_in_file, rm, rmdir
+    rm, rmdir
 )
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.64.0 <2 || >=2.2.0"
 
 
 class FontconfigConan(ConanFile):
@@ -53,15 +52,15 @@ class FontconfigConan(ConanFile):
 
     def requirements(self):
         self.requires("freetype/2.13.2")
-        self.requires("expat/2.6.0")
+        self.requires("expat/[>=2.6.2 <3]")
         if self.settings.os == "Linux":
             self.requires("util-linux-libuuid/2.39.2")
 
     def build_requirements(self):
         self.tool_requires("gperf/3.1")
-        self.tool_requires("meson/1.2.3")
+        self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -78,7 +77,9 @@ class FontconfigConan(ConanFile):
             "doc": "disabled",
             "nls": "disabled",
             "tests": "disabled",
-            "tools": "disabled"
+            "tools": "disabled",
+            "sysconfdir": os.path.join("res", "etc"),
+            "datadir": os.path.join("res", "share"),
         })
         tc.generate()
 
@@ -87,11 +88,6 @@ class FontconfigConan(ConanFile):
 
     def _patch_files(self):
         apply_conandata_patches(self)
-
-        build_script = os.path.join(self.source_folder, "meson.build")
-        replace_in_file(self, build_script,
-                        "freetype_req = '>= 21.0.15'",
-                        f"freetype_req = '{Version(self.dependencies['freetype'].ref.version)}'")
 
         if self.settings.os in ("Linux", "FreeBSD") and self.options.get_safe("system_dirs", False):
             self._replace_configuration_string(build_script, "CONFIGDIR", "fc_configdir", "'/etc/fonts/conf.d'")
@@ -110,11 +106,9 @@ class FontconfigConan(ConanFile):
         meson = Meson(self)
         meson.install()
         rm(self, "*.pdb", self.package_folder, recursive=True)
-        rm(self, "*.conf", os.path.join(self.package_folder, "bin", "etc", "fonts", "conf.d"))
+        rm(self, "*.conf", os.path.join(self.package_folder, "res", "etc", "fonts", "conf.d"))
         rm(self, "*.def", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "etc"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
         fix_msvc_libname(self)
 
@@ -127,16 +121,12 @@ class FontconfigConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["m", "pthread"])
 
-        fontconfig_file = os.path.join(self.package_folder, "bin", "etc", "fonts", "fonts.conf")
-        self.runenv_info.prepend_path("FONTCONFIG_FILE", fontconfig_file)
-
-        fontconfig_path = os.path.join(self.package_folder, "bin", "etc", "fonts")
-        self.runenv_info.prepend_path("FONTCONFIG_PATH", fontconfig_path)
+        fontconfig_path = os.path.join(self.package_folder, "res", "etc", "fonts")
+        self.runenv_info.append_path("FONTCONFIG_PATH", fontconfig_path)
 
         # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "Fontconfig"
         self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"
-        self.env_info.FONTCONFIG_FILE = fontconfig_file
         self.env_info.FONTCONFIG_PATH = fontconfig_path
 
 
