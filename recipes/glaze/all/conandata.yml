@@ -1,4 +1,8 @@
 sources:
+  "2.7.0":
+    url: "https://github.com/stephenberry/glaze/archive/v2.7.0.tar.gz"
+    sha256: "8e3ee2ba725137cd4f61bc9ceb74e2225dc22b970da1c5a43d2a6833115adbfc"
+  # keep 2.6.9 for breaking change: JSONC style comment
   "2.6.9":
     url: "https://github.com/stephenberry/glaze/archive/v2.6.9.tar.gz"
     sha256: "e16c221c12b56f5a7f1cb2f33a884e752e219215826d8bc1edf96c78ee2458ec"
