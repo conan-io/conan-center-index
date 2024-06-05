@@ -2,6 +2,8 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get, save
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
 
@@ -19,18 +21,49 @@ class XpropertyConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
+    @property
+    def _min_cppstd(self):
+        return "14" if Version(self.version) <= "0.12.0" else "17"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "14": {
+                "gcc": "6",
+                "clang": "5",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+            "17": {
+                "gcc": "8",
+                "clang": "7",
+                "apple-clang": "12",
+                "Visual Studio": "16",
+                "msvc": "192",
+            }
+        }.get(self._min_cppstd, {})
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("xtl/0.7.4", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) < "0.12.0":
+            self.requires("xtl/0.7.4", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("nlohmann_json/3.11.3")
 
     def package_id(self):
         self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 14)
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
