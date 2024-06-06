@@ -4,7 +4,6 @@ from conan.tools.build import check_min_cppstd
 from conan import ConanFile
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-from conan.tools.apple import fix_apple_shared_install_name
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -43,10 +42,14 @@ class LimereportConan(ConanFile):
             "apple-clang": "9.1",
         }
 
+    @property
+    def _qt_version_major(self):
+        return Version(self.dependencies["qt"].ref.version).major
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-    
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -55,8 +58,8 @@ class LimereportConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/6.4.2")
-        self.requires("libpng/1.6.42")
+        # QString included in Irglobal.h and Limereport expects be running Qt on customer side
+        self.requires("qt/6.7.1", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         if self.options.with_zint:
@@ -69,10 +72,10 @@ class LimereportConan(ConanFile):
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )    
-        if Version(self.dependencies["qt"].ref.version) < "6.0.0":
+            )
+        if self._qt_version_major == 5:
             if not (self.dependencies["qt"].options.qtquickcontrols and self.dependencies["qt"].options.qtquickcontrols2):
-                raise ConanInvalidConfiguration(f"{self.ref} requires -o='qt/*:quickcontrols=True' and -o='qt/*:quickcontrols2=True'")
+                raise ConanInvalidConfiguration(f"{self.ref} requires -o='qt/*:qtquickcontrols=True' and -o='qt/*:qtquickcontrols2=True'")
             elif not (self.dependencies["qt"].options.qtdeclarative):
                 raise ConanInvalidConfiguration(f"{self.ref} requires -o='qt/*:qtdeclarative=True'")
         if not (self.dependencies["qt"].options.qtsvg and self.dependencies["qt"].options.qttools):
@@ -87,9 +90,7 @@ class LimereportConan(ConanFile):
         tc.cache_variables["LIMEREPORT_STATIC"] = not self.options.shared
         if is_msvc(self):
             tc.variables["WINDOWS_BUILD"] = True
-        qt_major = Version(self.dependencies["qt"].ref.version).major
-        if qt_major == 6: 
-            tc.cache_variables["USE_QT6"] = True
+        tc.cache_variables["USE_QT6"] = self._qt_version_major == 6
         tc.cache_variables["ENABLE_ZINT"] = self.options.with_zint
         tc.generate()
         tc = CMakeDeps(self)
@@ -99,13 +100,17 @@ class LimereportConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-            
+
     def package(self):
         copy(self, "COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        fix_apple_shared_install_name(self)
 
     def package_info(self):
-        qt_major = Version(self.dependencies["qt"].ref.version).major
-        self.cpp_info.libs = ["limereport-qt{}".format(qt_major)]
+        self.cpp_info.libs = [f"limereport-qt{self._qt_version_major}"]
+        self.cpp_info.requires = ["qt::qtCore", "qt::qtWidgets", "qt::qtQml", "qt::qtXml", "qt::qtSql",
+                                   "qt::qtPrintSupport", "qt::qtSvg", "qt::qtUiTools"]
+        if self.options.with_zint:
+            self.cpp_info.requires.append("zint::zint")
+        if self.options.shared:
+            self.cpp_info.defines.append("LIMEREPORT_IMPORTS")
