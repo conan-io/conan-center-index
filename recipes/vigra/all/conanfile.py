@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import get, apply_conandata_patches, rm, collect_libs
-import pathlib
+from conan.tools.files import get, export_conandata_patches, apply_conandata_patches, rm, collect_libs
+
 
 class VigraConan(ConanFile):
     name = "vigra"
@@ -9,25 +9,30 @@ class VigraConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://ukoethe.github.io/vigra/"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     topics = "image-processing", "computer-vision"
+
     options = {
-        "shared" : [True, False],
-        "fPIC" : [True, False],
-        "with_hdf5" : [True, False],
-        "with_openexr" : [True, False],
-        "with_boost_graph" : [True, False],
-        "with_lemon" : [True, False]
-        }
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_hdf5": [True, False],
+        "with_openexr": [True, False],
+        "with_boost_graph": [True, False],
+        "with_lemon": [True, False],
+    }
 
-    default_options = {"shared" : False,
-                       "fPIC" : True,
-                       "with_hdf5": True,
-                       "with_openexr" : True,
-                       "with_boost_graph" : True,
-                       "with_lemon" : True}
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_hdf5": True,
+        "with_openexr": True,
+        "with_boost_graph": True,
+        "with_lemon": True,
+    }
 
-    exports_sources = "patches/*.patch"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -41,24 +46,26 @@ class VigraConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        
+
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        
+            self.options.rm_safe("fPIC")
+
     def requirements(self):
         self.requires("libtiff/4.6.0")
         self.requires("libpng/1.6.43")
         self.requires("fftw/3.3.10")
+        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("libjpeg/9e")
 
         if self.options.with_hdf5:
             self.requires("hdf5/1.14.3")
 
         if self.options.with_openexr:
-            self.requires("openexr/3.2.3")
+            self.requires("openexr/3.2.4")
 
         if self.options.with_boost_graph:
-            self.requires("boost/1.84.0")
+            self.requires("boost/1.85.0")
 
         if self.options.with_lemon:
             self.requires("coin-lemon/1.3.1")
@@ -80,16 +87,13 @@ class VigraConan(ConanFile):
         deps.generate()
 
     def build(self):
-        cm = CMake(self)
-
-        cm.configure()
-        cm.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
         cm = CMake(self)
         cm.install()
-
-        #remove generated cmake packages
         rm(self, "*.cmake", self.package_folder, recursive=True)
 
     def package_info(self):
