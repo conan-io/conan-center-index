@@ -10,8 +10,8 @@ patches:
     - patch_file: "patches/0001-no-build-laszip-api.patch"
     - patch_file: "patches/0002-no-rpath-and-relocatable-macos.patch"
   "3.4.4":
-    - patch_file: "patches/0003-no-build-laszip-api.patch"
-    - patch_file: "patches/0004-no-rpath-and-relocatable-macos.patch"
+    - patch_file: "patches/0001-3.4.4-no-build-laszip-api.patch"
+    - patch_file: "patches/0002-3.4.4-no-rpath-and-relocatable-macos.patch"
     - patch_file: "patches/0003-3.4.4-remove-cppstd-hardcode.patch"
       patch_type: "conan"
       patch_description: "Let Conan set the cppstd, instead of forcing it (In this version it's incorreclty set to C++17 instead of the supported C++14)"
