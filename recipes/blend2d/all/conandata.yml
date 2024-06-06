@@ -22,12 +22,6 @@ sources:
   "0.8":
     url: "https://github.com/blend2d/blend2d/archive/2910c87c5e8ddedcf80bbf4871bb59d70e1170c1.tar.gz"
     sha256: "34ff6f0f2dd10b39e1e6a3b07c5f76844b38f780c6849a65a34351e76e36cd3d"
-  "0.0.18":
-    url: "https://github.com/blend2d/blend2d/archive/fc1061256cadc204ffa6a14c98923334df1bcfcc.tar.gz"
-    sha256: "4dec70e4c69d4b6f748050b0cb892203be05f4d94add80114f3fb28f849de8ff"
-  "0.0.17":
-    url: "https://github.com/blend2d/blend2d/archive/be3c0583427f706b97b9c3fdbd8e637c36bee6d7.tar.gz"
-    sha256: "6ea0e763425db19070911e47cdb5e0b1e5c0045beefdf08a309cb29869856ed2"
 patches:
   "0.10.6":
     - patch_file: "patches/0.10.6-0001-disable-embed-asmjit.patch"
@@ -51,17 +45,5 @@ patches:
       patch_type: "conan"
   "0.8":
     - patch_file: "patches/0.8-0001-disable-embed-asmjit.patch"
-      patch_description: "use asmjit cci package"
-      patch_type: "conan"
-  "0.0.18":
-    - patch_file: "patches/0.0.17-0001-disable-embed-asmjit.patch"
-      patch_description: "use asmjit cci package"
-      patch_type: "conan"
-    - patch_file: "patches/0.0.18-0002-fix-gcc12-compilationerror.patch"
-      patch_description: "fix gcc12 compilation error, backport from upstream"
-      patch_type: "portability"
-      patch_source: "https://github.com/blend2d/blend2d/commit/2574d90ebc61b5195491cc79bfa6da162084242b"
-  "0.0.17":
-    - patch_file: "patches/0.0.17-0001-disable-embed-asmjit.patch"
       patch_description: "use asmjit cci package"
       patch_type: "conan"

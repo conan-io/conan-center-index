@@ -46,10 +46,7 @@ class Blend2dConan(ConanFile):
 
     def requirements(self):
         if self.options.with_jit:
-            if Version(self.version) < "0.11.0":
-                self.requires("asmjit/cci.20230325")
-            else:
-                self.requires("asmjit/cci.20240531")
+            self.requires("asmjit/cci.20240531")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -62,7 +59,7 @@ class Blend2dConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18 <4]")
-    
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
