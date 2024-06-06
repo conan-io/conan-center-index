@@ -409,14 +409,14 @@ class ArrowConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        cmake =CMake(self)
+        cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "cpp"))
         cmake.build()
 
     def package(self):
         copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, pattern="NOTICE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        cmake =CMake(self)
+        cmake = CMake(self)
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
