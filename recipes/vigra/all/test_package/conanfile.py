@@ -22,5 +22,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = pathlib.Path(self.build_folder) / "test_package"
-            print(str(bin_path))
             self.run(bin_path, env="conanrun")
