@@ -1,7 +1,6 @@
 import configparser
 import glob
 import os
-import platform
 import textwrap
 
 from conan import ConanFile
@@ -654,7 +653,7 @@ class QtConan(ConanFile):
 
     def source(self):
         destination = self.source_folder
-        if platform.system() == "Windows":
+        if self.info.settings.os == "Windows":
             # Don't use os.path.join, or it removes the \\?\ prefix, which enables long paths
             destination = rf"\\?\{self.source_folder}"
         get(self, **self.conan_data["sources"][self.version],
