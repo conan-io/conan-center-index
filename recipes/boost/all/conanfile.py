@@ -298,6 +298,24 @@ class BoostConan(ConanFile):
             return (compiler_version >= required_compiler_version) or supported_cxx20
 
     @property
+    def _has_coroutine_supported(self):
+        cppstd = self.settings.compiler.get_safe("cppstd")
+        cppstd_20_supported = True
+        if cppstd:
+            cppstd_20_supported = valid_min_cppstd(self, 20)
+        # https://en.cppreference.com/w/cpp/compiler_support#cpp20
+        min_compiler_versions = {
+                "apple-clang": "12",
+                "clang": "10",
+                "gcc": "10",
+                "msvc": "192",
+                "Visual Studio": "16",}
+        required_compiler_version = min_compiler_versions.get(str(self.settings.compiler))
+        if not required_compiler_version:
+            return cppstd_20_supported
+        return cppstd_20_supported and Version(self.settings.compiler.version) >= required_compiler_version
+
+    @property
     def _min_compiler_version_nowide(self):
         # Nowide needs c++11 + swappable std::fstream
         return {
@@ -515,7 +533,9 @@ class BoostConan(ConanFile):
                     except ConanException:
                         pass
 
-            if self.settings.compiler.get_safe("cppstd"):
+            if not self._has_coroutine_supported:
+                disable_cobalt()
+            elif self.settings.compiler.get_safe("cppstd"):
                 if not valid_min_cppstd(self, 20):
                     disable_cobalt()
             else:
@@ -708,6 +728,9 @@ class BoostConan(ConanFile):
                         f"Boost libraries {', '.join(boost_libraries)} requires a C++{cxx_standard} compiler. "
                         "Please, set compiler.cppstd or use a newer compiler version or disable from building."
                     )
+        if not self.options.get_safe("without_cobalt", True) and not self._has_coroutine_supported:
+            raise ConanInvalidConfiguration("Boost.Cobalt requires a C++20 capable compiler. "
+                                            "Please, set compiler.cppstd and use a newer compiler version, or disable from building.")
 
     def _with_dependency(self, dependency):
         """
