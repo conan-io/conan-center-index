@@ -49,7 +49,8 @@ class DoxygenConan(ConanFile):
             self.requires("xapian-core/1.4.19")
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.enable_app or self.options.enable_parse:
-            # INFO: Doxygen uses upper case CMake variables to link/include IConv, so we are using patches for targets.
+            # INFO: Before https://github.com/doxygen/doxygen/pull/10888 was merged,
+            # Doxygen used upper case CMake variables to link/include IConv, so we are using patches for targets.
             self.requires("libiconv/1.17")
 
     def compatibility(self):
@@ -90,6 +91,7 @@ class DoxygenConan(ConanFile):
             replace_in_file(self, cmake_file, "find_package(Iconv)\\n", "find_package(Iconv)\nget_target_property(ICONV_INCLUDE_DIR Iconv::Iconv INTERFACE_INCLUDE_DIRECTORIES)\n", strict=False)
             replace_in_file(self, cmake_file, "${ICONV_LIBRARIES}", "Iconv::Iconv", strict=False)
         cmake = CMake(self)
+        cmake.verbose = True
         cmake.configure()
         cmake.build()
 
