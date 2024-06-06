@@ -1,6 +1,7 @@
+import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import get, export_conandata_patches, apply_conandata_patches, rm, collect_libs
+from conan.tools.files import get, export_conandata_patches, apply_conandata_patches, rm, copy, collect_libs
 
 
 class VigraConan(ConanFile):
@@ -92,11 +93,12 @@ class VigraConan(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cm = CMake(self)
         cm.install()
         rm(self, "*.cmake", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.libs = ["vigraimpex"]
         self.cpp_info.set_property("cmake_file_name", "Vigra")
         self.cpp_info.set_property("cmake_target_name", "vigraimpex")
