@@ -64,6 +64,7 @@ class LibcurlConan(ConanFile):
         "with_cookies": [True, False],
         "with_ipv6": [True, False],
         "with_docs": [True, False],
+        "with_misc_docs": [True, False],
         "with_verbose_debug": [True, False],
         "with_symbol_hiding": [True, False],
         "with_unix_sockets": [True, False],
@@ -109,6 +110,7 @@ class LibcurlConan(ConanFile):
         "with_cookies": True,
         "with_ipv6": True,
         "with_docs": False,
+        "with_misc_docs": False,
         "with_verbose_debug": True,
         "with_symbol_hiding": False,
         "with_unix_sockets": True,
@@ -155,6 +157,9 @@ class LibcurlConan(ConanFile):
         if self._is_mingw and Version(self.version) < "7.86.0":
             del self.options.with_unix_sockets
 
+        if Version(self.version) < "8.7.0":
+            del self.options.with_misc_docs
+
         # Default options
         self.options.with_ssl = "darwinssl" if is_apple_os(self) else "openssl"
 
@@ -188,7 +193,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.25.0")
+            self.requires("c-ares/[>=1.27 <2]")
         if self.options.get_safe("with_libpsl"):
             self.requires("libpsl/0.21.1")
 
@@ -287,7 +292,10 @@ class LibcurlConan(ConanFile):
         # - link errors if mingw shared or iOS/tvOS/watchOS
         # - it makes recipe consistent with CMake build where we don't build curl tool
         top_makefile = os.path.join(self.source_folder, "Makefile.am")
-        replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
+        if Version(self.version) < "8.8.0":
+            replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
+        else:
+            replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", "SUBDIRS = lib")
         replace_in_file(self, top_makefile, "include src/Makefile.inc", "")
 
         # zlib naming is not always very consistent
@@ -445,7 +453,7 @@ class LibcurlConan(ConanFile):
             tc.configure_args.append(f"--with-wolfssl={path}")
         else:
             tc.configure_args.append("--without-wolfssl")
-        
+
         if self.options.with_ssl == "mbedtls":
             path = unix_path(self, self.dependencies["mbedtls"].package_folder)
             tc.configure_args.append(f"--with-mbedtls={path}")
@@ -498,6 +506,12 @@ class LibcurlConan(ConanFile):
 
         tc.configure_args.append(f"--with-ca-fallback={self._yes_no(self.options.with_ca_fallback)}")
 
+        if "with_misc_docs" in self.options:
+            if self.options.with_misc_docs:
+                tc.configure_args.append("--enable-docs")
+            else:
+                tc.configure_args.append("--disable-docs")
+
         # Cross building flags
         if cross_building(self):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
@@ -522,7 +536,6 @@ class LibcurlConan(ConanFile):
 
         if self.settings.os != "Windows":
             tc.fpic = self.options.get_safe("fPIC", True)
-
 
         if cross_building(self) and is_apple_os(self):
             tc.extra_defines.extend(['HAVE_SOCKET', 'HAVE_FCNTL_O_NONBLOCK'])
@@ -680,6 +693,7 @@ class LibcurlConan(ConanFile):
                 self.cpp_info.components["curl"].system_libs.append("crypt32")
         elif is_apple_os(self):
             self.cpp_info.components["curl"].frameworks.append("CoreFoundation")
+            self.cpp_info.components["curl"].frameworks.append("CoreServices")
             self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("ldap")

@@ -17,6 +17,7 @@ class PrimesieveConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kimwalisch/primesieve"
     topics = ("math", "prime-numbers", "sieve-of-eratosthenes")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -30,7 +31,6 @@ class PrimesieveConan(ConanFile):
         "with_multiarch": True,
         "with_msvc_crt_static": False,
     }
-    package_type = "library"
 
     @property
     def _min_cppstd(self):
@@ -50,9 +50,9 @@ class PrimesieveConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-        
+
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) <= "5":
-            raise ConanInvalidConfiguration("GCC<=5 is currently not supported. Contributions with fixes are welcome.")
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support GCC<=5 currently. Contributions with fixes are welcome.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
