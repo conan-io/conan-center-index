@@ -304,9 +304,11 @@ class BoostConan(ConanFile):
         if cppstd:
             cppstd_20_supported = valid_min_cppstd(self, 20)
         # https://en.cppreference.com/w/cpp/compiler_support#cpp20
+        # https://releases.llvm.org/14.0.0/tools/clang/docs/ReleaseNotes.html#clang-format: before is experimental header
+        # https://gcc.gnu.org/gcc-10/changes.html: requires -fcoroutines
         min_compiler_versions = {
                 "apple-clang": "12",
-                "clang": "10",
+                "clang": "14",
                 "gcc": "10",
                 "msvc": "192",
                 "Visual Studio": "16",}
@@ -1392,6 +1394,10 @@ class BoostConan(ConanFile):
         if self.options.get_safe("addr2line_location"):
             cxx_flags.append(f"-DBOOST_STACKTRACE_ADDR2LINE_LOCATION={self.options.addr2line_location}")
 
+        if not self.options.get_safe('without_cobalt', True) and \
+            (self.settings.compiler == "gcc" or Version(self.settings.compiler.version) == "10"):
+            cxx_flags.append("-fcoroutines")
+
         cxx_flags = f'cxxflags="{" ".join(cxx_flags)}"'
         flags.append(cxx_flags)
 
@@ -2030,6 +2036,11 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["headers"].defines.append("BOOST_SP_USE_SPINLOCK")
                 else:
                     self.cpp_info.components["headers"].defines.extend(["BOOST_AC_DISABLE_THREADS", "BOOST_SP_DISABLE_THREADS"])
+
+            if not self.options.get_safe('without_cobalt', True) and \
+                (self.settings.compiler == "gcc" or Version(self.settings.compiler.version) == "10"):
+                self.cpp_info.components["cobalt"].cxxflags.append("-fcoroutines")
+
         #TODO: remove in the future, user_info deprecated in conan2, but kept for compatibility while recipe is cross-compatible.
         self.user_info.stacktrace_addr2line_available = self._stacktrace_addr2line_available
         self.conf_info.define("user.boost:stacktrace_addr2line_available", self._stacktrace_addr2line_available)
