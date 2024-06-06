@@ -2,6 +2,8 @@ sources:
   "0.11.1":
     url: "https://blend2d.com/download/blend2d-0.11.1.tar.gz"
     sha256: "f46d61b6aa477fea1a353a41f5906d4e861817ae059ed22fc6ecdd50ff859dd2"
+    # When upstream will have new release, tarball may be deleted.
+    # Use following url: https://github.com/blend2d/blend2d/archive/a7f947677e85441abe1769586d3bb935b4086a07.tar.gz
   "0.10.6":
     url: "https://github.com/blend2d/blend2d/archive/df124784fd3e9765251c74d412d88c625e3587e9.tar.gz"
     sha256: "d8a91745c79beeab29d781357308b49ef51d009237b342ce50304ea618e977ad"
@@ -12,11 +14,11 @@ sources:
     url: "https://github.com/blend2d/blend2d/archive/d60f62b9d008be096daff329dfe9b8409c344651.tar.gz"
     sha256: "ce197422ae8ec0d0310895bebed396091e0144ec09482439d24040196957e740"
   "0.10":
-    url: "https://github.com/blend2d/blend2d/archive/452d549751188b04367b5af46c040cb737f5f76c.tar.gz"
-    sha256: "c024674ccd91d556afb17d5356e4a16b5e0de9d8790eb08dfc78da67ec3ccb15"
+    url: "https://github.com/blend2d/blend2d/archive/000d55c75994fa88efcb7a31ae32be9ec8435f7d.tar.gz"
+    sha256: "7a986e14d08d687bfc7510bd762a29f01b1c2449b4e60f85268dd0072c65b698"
   "0.9":
-    url: "https://github.com/blend2d/blend2d/archive/1249a350b44b2781b6d00bc5ef852412d00d4db9.tar.gz"
-    sha256: "104ce243701af8c3a62c681bc4f4a8d544bdca91792389bb3ab9eac44ab8d953"
+    url: "https://github.com/blend2d/blend2d/archive/346555924752f085a2a06265858bc63c8987bf98.tar.gz"
+    sha256: "89639d60320e8d684c3708b849ede9ac660cbd2acc33de6baa846ee7fbed24b8"
   "0.8":
     url: "https://github.com/blend2d/blend2d/archive/2910c87c5e8ddedcf80bbf4871bb59d70e1170c1.tar.gz"
     sha256: "34ff6f0f2dd10b39e1e6a3b07c5f76844b38f780c6849a65a34351e76e36cd3d"
