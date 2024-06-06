@@ -1,10 +1,4 @@
 sources:
-  "1.9.4":
-    url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.9.4.src.tar.gz"
-    sha256: "a15e9cd8c0d02b7888bc8356eac200222ecff1defd32f3fe05257d81227b1f37"
-patches:
-  "1.9.4":
-    - patch_file: "patches/1.9.4-0001-enable-modern-compilers.patch"
-      patch_description: "Enable modern compilers"
-      patch_type: "portability"
-      patch_source: "https://github.com/doxygen/doxygen/commit/5198966c8d5fec89116d025c74934ac03ea511fa"
+  "1.9.5":
+    url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.9.5.src.tar.gz"
+    sha256: "55b454b35d998229a96f3d5485d57a0a517ce2b78d025efb79d57b5a2e4b2eec"
