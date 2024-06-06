@@ -45,7 +45,10 @@ class Blend2dConan(ConanFile):
 
     def requirements(self):
         if self.options.with_jit:
-            self.requires("asmjit/cci.20230325")
+            if Version(self.version) < "0.11.0":
+                self.requires("asmjit/cci.20230325")
+            else:
+                self.requires("asmjit/cci.20240531")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -67,6 +70,7 @@ class Blend2dConan(ConanFile):
         tc.variables["BLEND2D_STATIC"] = not self.options.shared
         tc.variables["BLEND2D_NO_STDCXX"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.variables["BLEND2D_EXTERNAL_ASMJIT"] = True
         if not valid_min_cppstd(self, 11):
             tc.variables["CMAKE_CXX_STANDARD"] = 11
         if not self.options.shared:
