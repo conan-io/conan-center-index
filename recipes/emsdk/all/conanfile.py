@@ -17,6 +17,7 @@ class EmSDKConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kripken/emscripten"
     topics = ("emscripten", "sdk")
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
     short_paths = True
 
