@@ -88,10 +88,10 @@ class LibSELinuxConan(ConanFile):
         sepol_lib_folder = os.path.join(self._sepol_source_folder, "src")
         tc.extra_ldflags.append(f"-L{sepol_lib_folder}")
         tc.make_args.append("USE_PCRE2=y")
+        env = tc.environment()
         if cross_building(self):
-            env = tc.environment()
             env.append_path("PKG_CONFIG_LIBDIR", self.generators_folder)
-            tc.generate(env=env)
+        tc.generate(env=env)
 
     def build(self):
         apply_conandata_patches(self)
