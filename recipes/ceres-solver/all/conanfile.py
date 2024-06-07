@@ -51,7 +51,7 @@ class CeresSolverConan(ConanFile):
         "use_glog": True,
         "use_lapack": True,
         "use_eigen_sparse": True,
-        "use_suitesparse": False, # TODO: enable after #23556
+        "use_suitesparse": True,
         "use_accelerate": True,
         "use_custom_blas": True,
         "use_schur_specializations": True,
@@ -140,7 +140,7 @@ class CeresSolverConan(ConanFile):
     def requirements(self):
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.get_safe("use_glog"):
-            self.requires("glog/0.6.0", transitive_headers=True, transitive_libs=True)
+            self.requires("glog/0.7.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("use_suitesparse"):
             self.requires("suitesparse-cholmod/5.2.1")
             self.requires("suitesparse-spqr/4.3.3")
@@ -150,6 +150,8 @@ class CeresSolverConan(ConanFile):
             self.requires("metis/5.2.1")
         if self.options.get_safe("use_TBB"):
             self.requires("onetbb/2020.3")
+        if Version(self.version) < "2.0":
+            self.requires("llvm-openmp/18.1.3")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -219,7 +221,7 @@ class CeresSolverConan(ConanFile):
             tc.variables["LIB_SUFFIX"] = ""
         if ceres_version < "2.0.0":
             tc.variables["CXX11"] = self.options.use_CXX11
-            tc.variables["OPENMP"] = False
+            tc.variables["OPENMP"] = True
             tc.variables["TBB"] = self.options.use_TBB
             tc.variables["CXX11_THREADS"] = self.options.use_CXX11_threads
         tc.generate()
