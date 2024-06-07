@@ -121,8 +121,6 @@ class MariadbConnectorCPPRecipe(ConanFile):
              "FIND_LIBRARY(CCLIB mariadb)"
          )
 
-
-
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
