@@ -1,4 +1,28 @@
 versions:
+  "1.90.7":
+    folder: all
+  "1.90.7-docking":
+    folder: all
+  "1.90.6":
+    folder: all
+  "1.90.6-docking":
+    folder: all
+  "1.90.5":
+    folder: all
+  "1.90.5-docking":
+    folder: all
+  "1.90.4":
+    folder: all
+  "1.90.4-docking":
+    folder: all
+  "1.90.3":
+    folder: all
+  "1.90.3-docking":
+    folder: all
+  "1.90.2":
+    folder: all
+  "1.90.2-docking":
+    folder: all
   "1.90.1":
     folder: all
   "1.90.1-docking":

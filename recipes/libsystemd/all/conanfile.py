@@ -11,7 +11,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0"
 
 
 class LibsystemdConan(ConanFile):
@@ -55,7 +55,7 @@ class LibsystemdConan(ConanFile):
     def requirements(self):
         self.requires("libcap/2.69")
         self.requires("libmount/2.39.2")
-        if Version(self.version) >= "253.6":
+        if Version(self.version) >= "251.18":
             self.requires("libxcrypt/4.4.36")
         if self.options.with_selinux:
             self.requires("libselinux/3.5")

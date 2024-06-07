@@ -30,7 +30,7 @@ class LibcurlConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_ssl": [False, "openssl", "wolfssl", "schannel", "darwinssl"],
+        "with_ssl": [False, "openssl", "wolfssl", "schannel", "darwinssl", "mbedtls"],
         "with_file": [True, False],
         "with_ftp": [True, False],
         "with_http": [True, False],
@@ -64,6 +64,7 @@ class LibcurlConan(ConanFile):
         "with_cookies": [True, False],
         "with_ipv6": [True, False],
         "with_docs": [True, False],
+        "with_misc_docs": [True, False],
         "with_verbose_debug": [True, False],
         "with_symbol_hiding": [True, False],
         "with_unix_sockets": [True, False],
@@ -109,6 +110,7 @@ class LibcurlConan(ConanFile):
         "with_cookies": True,
         "with_ipv6": True,
         "with_docs": False,
+        "with_misc_docs": False,
         "with_verbose_debug": True,
         "with_symbol_hiding": False,
         "with_unix_sockets": True,
@@ -155,6 +157,9 @@ class LibcurlConan(ConanFile):
         if self._is_mingw and Version(self.version) < "7.86.0":
             del self.options.with_unix_sockets
 
+        if Version(self.version) < "8.7.0":
+            del self.options.with_misc_docs
+
         # Default options
         self.options.with_ssl = "darwinssl" if is_apple_os(self) else "openssl"
 
@@ -174,9 +179,11 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/5.6.3")
+            self.requires("wolfssl/5.6.6")
+        elif self.options.with_ssl == "mbedtls":
+            self.requires("mbedtls/3.5.0")
         if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.58.0")
+            self.requires("libnghttp2/1.59.0")
         if self.options.with_libssh2:
             self.requires("libssh2/1.11.0")
         if self.options.with_zlib:
@@ -186,7 +193,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.22.1")
+            self.requires("c-ares/[>=1.27 <2]")
         if self.options.get_safe("with_libpsl"):
             self.requires("libpsl/0.21.1")
 
@@ -199,6 +206,8 @@ class LibcurlConan(ConanFile):
             openssl = self.dependencies["openssl"]
             if self.options.with_ntlm and openssl.options.no_des:
                 raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
+        if self.options.with_ssl == "wolfssl" and not self.dependencies["wolfssl"].options.with_curl:
+            raise ConanInvalidConfiguration("option with_ssl=wolfssl requires wolfssl:with_curl=True")
 
     def build_requirements(self):
         if self._is_using_cmake_build:
@@ -283,7 +292,10 @@ class LibcurlConan(ConanFile):
         # - link errors if mingw shared or iOS/tvOS/watchOS
         # - it makes recipe consistent with CMake build where we don't build curl tool
         top_makefile = os.path.join(self.source_folder, "Makefile.am")
-        replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
+        if Version(self.version) < "8.8.0":
+            replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
+        else:
+            replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", "SUBDIRS = lib")
         replace_in_file(self, top_makefile, "include src/Makefile.inc", "")
 
         # zlib naming is not always very consistent
@@ -442,6 +454,12 @@ class LibcurlConan(ConanFile):
         else:
             tc.configure_args.append("--without-wolfssl")
 
+        if self.options.with_ssl == "mbedtls":
+            path = unix_path(self, self.dependencies["mbedtls"].package_folder)
+            tc.configure_args.append(f"--with-mbedtls={path}")
+        else:
+            tc.configure_args.append("--without-mbedtls")
+
         if self.options.with_libssh2:
             path = unix_path(self, self.dependencies["libssh2"].package_folder)
             tc.configure_args.append(f"--with-libssh2={path}")
@@ -488,6 +506,12 @@ class LibcurlConan(ConanFile):
 
         tc.configure_args.append(f"--with-ca-fallback={self._yes_no(self.options.with_ca_fallback)}")
 
+        if "with_misc_docs" in self.options:
+            if self.options.with_misc_docs:
+                tc.configure_args.append("--enable-docs")
+            else:
+                tc.configure_args.append("--disable-docs")
+
         # Cross building flags
         if cross_building(self):
             if self.settings.os == "Linux" and "arm" in self.settings.arch:
@@ -512,7 +536,6 @@ class LibcurlConan(ConanFile):
 
         if self.settings.os != "Windows":
             tc.fpic = self.options.get_safe("fPIC", True)
-
 
         if cross_building(self) and is_apple_os(self):
             tc.extra_defines.extend(['HAVE_SOCKET', 'HAVE_FCNTL_O_NONBLOCK'])
@@ -569,6 +592,10 @@ class LibcurlConan(ConanFile):
             tc.variables["CURL_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
         else:
             tc.variables["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
+        if Version(self.version) >= "7.81.0":
+            tc.variables["CURL_USE_MBEDTLS"] = self.options.with_ssl == "mbedtls"
+        else:
+            tc.variables["CMAKE_USE_MBEDTLS"] = self.options.with_ssl == "mbedtls"
         tc.variables["USE_NGHTTP2"] = self.options.with_nghttp2
         tc.variables["CURL_ZLIB"] = self.options.with_zlib
         tc.variables["CURL_BROTLI"] = self.options.with_brotli
@@ -666,6 +693,7 @@ class LibcurlConan(ConanFile):
                 self.cpp_info.components["curl"].system_libs.append("crypt32")
         elif is_apple_os(self):
             self.cpp_info.components["curl"].frameworks.append("CoreFoundation")
+            self.cpp_info.components["curl"].frameworks.append("CoreServices")
             self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("ldap")
@@ -685,6 +713,8 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].requires.append("openssl::openssl")
         if self.options.with_ssl == "wolfssl":
             self.cpp_info.components["curl"].requires.append("wolfssl::wolfssl")
+        if self.options.with_ssl == "mbedtls":
+            self.cpp_info.components["curl"].requires.append("mbedtls::mbedtls")
         if self.options.with_nghttp2:
             self.cpp_info.components["curl"].requires.append("libnghttp2::libnghttp2")
         if self.options.with_libssh2:

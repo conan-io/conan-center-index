@@ -12,8 +12,8 @@ required_conan_version = ">=1.51.1"
 
 class BitserializerConan(ConanFile):
     name = "bitserializer"
-    description = "C++ 17 library for serialization to multiple output formats (JSON, XML, YAML, CSV)"
-    topics = ("serialization", "json", "xml", "yaml", "csv")
+    description = "C++ 17 library for serialization to multiple output formats (JSON, XML, YAML, CSV, MsgPack)"
+    topics = ("serialization", "json", "xml", "yaml", "csv", "msgpack")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://bitbucket.org/Pavel_Kisliak/bitserializer"
     license = "MIT"
@@ -26,6 +26,7 @@ class BitserializerConan(ConanFile):
         "with_pugixml": [True, False],
         "with_rapidyaml": [True, False],
         "with_csv": [True, False],
+        "with_msgpack": [True, False],
     }
     default_options = {
         "fPIC": True,
@@ -34,6 +35,7 @@ class BitserializerConan(ConanFile):
         "with_pugixml": False,
         "with_rapidyaml": False,
         "with_csv": False,
+        "with_msgpack": False,
     }
 
     no_copy_source = True
@@ -55,9 +57,9 @@ class BitserializerConan(ConanFile):
     def _is_header_only(self, info=False):
         if Version(self.version) < "0.50":
             return True
-        # All components of library are header-only except csv-archive
+        # All components of library are header-only except csv-archive and msgpack-archive
         options = self.info.options if info else self.options
-        return not options.with_csv
+        return not (options.with_csv or options.get_safe("with_msgpack"))
 
     def config_options(self):
         if self.settings.os == "Windows" or Version(self.version) < "0.50":
@@ -65,6 +67,8 @@ class BitserializerConan(ConanFile):
         if Version(self.version) < "0.50":
             del self.options.with_rapidyaml
             del self.options.with_csv
+        if Version(self.version) < "0.70":
+            del self.options.with_msgpack
 
     def configure(self):
         if self._is_header_only():
@@ -80,13 +84,13 @@ class BitserializerConan(ConanFile):
 
     def requirements(self):
         if self.options.with_cpprestsdk:
-            self.requires("cpprestsdk/2.10.18", transitive_headers=True, transitive_libs=True)
+            self.requires("cpprestsdk/2.10.19", transitive_headers=True, transitive_libs=True)
         if self.options.with_rapidjson:
-            self.requires("rapidjson/cci.20220822", transitive_headers=True, transitive_libs=True)
+            self.requires("rapidjson/1.1.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_pugixml:
-            self.requires("pugixml/1.13", transitive_headers=True, transitive_libs=True)
+            self.requires("pugixml/1.14", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_rapidyaml"):
-            self.requires("rapidyaml/0.4.1", transitive_headers=True, transitive_libs=True)
+            self.requires("rapidyaml/0.5.0", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
         if self._is_header_only(info=True):
@@ -121,6 +125,7 @@ class BitserializerConan(ConanFile):
             tc.variables["BUILD_PUGIXML_ARCHIVE"] = self.options.with_pugixml
             tc.variables["BUILD_RAPIDYAML_ARCHIVE"] = self.options.with_rapidyaml
             tc.variables["BUILD_CSV_ARCHIVE"] = self.options.with_csv
+            tc.variables["BUILD_MSGPACK_ARCHIVE"] = self.options.get_safe("with_msgpack")
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()
@@ -197,6 +202,13 @@ class BitserializerConan(ConanFile):
             self.cpp_info.components["bitserializer-csv"].bindirs = []
             self.cpp_info.components["bitserializer-csv"].libs = [f"csv-archive{lib_suffix}"]
 
+        # msgpack-archive
+        if self.options.get_safe("with_msgpack"):
+            self.cpp_info.components["bitserializer-msgpack"].set_property("cmake_target_name", "BitSerializer::msgpack-archive")
+            self.cpp_info.components["bitserializer-msgpack"].requires = ["bitserializer-core"]
+            self.cpp_info.components["bitserializer-msgpack"].bindirs = []
+            self.cpp_info.components["bitserializer-msgpack"].libs = [f"msgpack-archive{lib_suffix}"]
+
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "bitserializer"
         self.cpp_info.filenames["cmake_find_package_multi"] = "bitserializer"
@@ -219,3 +231,6 @@ class BitserializerConan(ConanFile):
         if self.options.get_safe("with_csv"):
             self.cpp_info.components["bitserializer-csv"].names["cmake_find_package"] = "csv-archive"
             self.cpp_info.components["bitserializer-csv"].names["cmake_find_package_multi"] = "csv-archive"
+        if self.options.get_safe("with_msgpack"):
+            self.cpp_info.components["bitserializer-msgpack"].names["cmake_find_package"] = "msgpack-archive"
+            self.cpp_info.components["bitserializer-msgpack"].names["cmake_find_package_multi"] = "msgpack-archive"

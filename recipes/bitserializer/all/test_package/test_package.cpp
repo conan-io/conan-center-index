@@ -18,6 +18,9 @@
 #ifdef WITH_CSV
 #include <bitserializer/csv_archive.h>
 #endif
+#ifdef WITH_MSGPACK
+#include <bitserializer/msgpack_archive.h>
+#endif
 
 #include <iostream>
 #include <sstream>
@@ -33,11 +36,27 @@ public:
 	template <class TArchive>
 	void Serialize(TArchive& archive)
 	{
+#if BITSERIALIZER_VERSION >= 7000
+		archive << BitSerializer::KeyValue("Message", mMessage);
+#else
 		archive << BitSerializer::MakeAutoKeyValue("Message", mMessage);
+#endif
 	}
 
 	std::string mMessage;
 };
+
+std::string PrintAsHexString(const std::string& data)
+{
+	constexpr char hexChars[] = "0123456789ABCDEF";
+	std::string result;
+	for (const char ch : data)
+	{
+		if (!result.empty()) result.push_back(' ');
+		result.append({ hexChars[(ch & 0xF0) >> 4], hexChars[(ch & 0x0F) >> 0] });
+	}
+	return result;
+}
 
 template <typename TArchive>
 void TestArchive(const std::string& message)
@@ -47,21 +66,34 @@ void TestArchive(const std::string& message)
 	BitSerializer::SerializationOptions serializationOptions;
 	serializationOptions.streamOptions.writeBom = false;
 
-    CTest testObj[1] = { message };
+	CTest testObj[1] = { message };
 	std::stringstream outputStream;
 	BitSerializer::SaveObject<TArchive>(testObj, outputStream, serializationOptions);
-	std::cout << outputStream.str() << std::endl;
+#if BITSERIALIZER_VERSION >= 7000
+	const std::string result = TArchive::is_binary ? PrintAsHexString(outputStream.str()) : outputStream.str();
+#else
+	const std::string result = outputStream.str();
+#endif
+	std::cout << result<< std::endl;
 }
 
 int main() {
 	std::cout << "BitSerializer version: "
+#ifdef BITSERIALIZER_VERSION
+		<< BitSerializer::Convert::To<std::string>(BITSERIALIZER_VERSION_MAJOR) << "."
+		<< BitSerializer::Convert::To<std::string>(BITSERIALIZER_VERSION_MINOR) << "."
+		<< BitSerializer::Convert::To<std::string>(BITSERIALIZER_VERSION_PATCH)
+#else
 		<< BitSerializer::Convert::To<std::string>(BitSerializer::Version::Major) << "."
 		<< BitSerializer::Convert::To<std::string>(BitSerializer::Version::Minor) << "."
 		<< BitSerializer::Convert::To<std::string>(BitSerializer::Version::Maintenance)
+#endif
 		<< std::endl;
 
+#if !defined BITSERIALIZER_VERSION || BITSERIALIZER_HAS_FILESYSTEM
 	// Some compilers does not link filesystem automatically
 	std::cout << "Testing the link of C++17 filesystem: " << std::filesystem::temp_directory_path() << std::endl;
+#endif
 
 #ifdef WITH_CPPRESTSDK
 	TestArchive<BitSerializer::Json::CppRest::JsonArchive>("Implementation based on cpprestsdk");
@@ -77,5 +109,8 @@ int main() {
 #endif
 #ifdef WITH_CSV
 	TestArchive<BitSerializer::Csv::CsvArchive>("CSV archive (built-in implementation)");
+#endif
+#ifdef WITH_MSGPACK
+	TestArchive<BitSerializer::MsgPack::MsgPackArchive>("MsgPack archive (built-in implementation)");
 #endif
 }

@@ -5,6 +5,7 @@ from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -74,7 +75,7 @@ class SerdConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "serd-0")
         libname = "serd"
-        if not (is_msvc(self) and self.options.shared):
+        if (not (is_msvc(self) and self.options.shared)) or (Version(self.version) >= "0.32.0" and is_msvc(self)):
             libname += "-0"
         self.cpp_info.libs = [libname]
         self.cpp_info.includedirs = [os.path.join("include", "serd-0")]
