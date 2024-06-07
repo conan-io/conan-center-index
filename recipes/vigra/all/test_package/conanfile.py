@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout
-import pathlib
+import os
 
 
 class TestPackageConan(ConanFile):
@@ -21,5 +21,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path = pathlib.Path(self.build_folder) / "test_package"
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
