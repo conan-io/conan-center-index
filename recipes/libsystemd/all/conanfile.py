@@ -11,7 +11,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.60.0"
+required_conan_version = ">=1.64.0"
 
 
 class LibsystemdConan(ConanFile):
@@ -144,10 +144,6 @@ class LibsystemdConan(ConanFile):
 
         for opt in unrelated:
             tc.project_options[opt] = "false"
-
-        # 'rootprefix' is unused during libsystemd packaging but systemd > v247
-        # build files require 'prefix' to be a subdirectory of 'rootprefix'.
-        tc.project_options["rootprefix"] = self.package_folder
 
         # There are a few places in libsystemd where pkgconfig dependencies are
         # not used in compile time and only used in link time. And because of
