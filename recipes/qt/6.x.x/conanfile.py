@@ -1,6 +1,7 @@
 import configparser
 import glob
 import os
+import platform
 import textwrap
 
 from conan import ConanFile
@@ -477,6 +478,8 @@ class QtConan(ConanFile):
 
         tc = CMakeToolchain(self, generator="Ninja")
 
+        tc.absolute_paths = True
+
         package_folder = self.package_folder.replace('\\', '/')
         tc.variables["INSTALL_MKSPECSDIR"] = f"{package_folder}/res/archdatadir/mkspecs"
         tc.variables["INSTALL_ARCHDATADIR"] = f"{package_folder}/res/archdatadir"
@@ -651,7 +654,7 @@ class QtConan(ConanFile):
 
     def source(self):
         destination = self.source_folder
-        if self.info.settings.os == "Windows":
+        if platform.system() == "Windows":
             # Don't use os.path.join, or it removes the \\?\ prefix, which enables long paths
             destination = rf"\\?\{self.source_folder}"
         get(self, **self.conan_data["sources"][self.version],
@@ -1537,10 +1540,8 @@ class QtConan(ConanFile):
                 component = "qt" + m[:m.find("_")]
                 if component not in self.cpp_info.components:
                     continue
-                submodules_dir = os.path.join(object_dir, m)
-                for sub_dir in os.listdir(submodules_dir):
-                    submodule_dir = os.path.join(submodules_dir, sub_dir)
-                    obj_files = [os.path.join(submodule_dir, file) for file in os.listdir(submodule_dir)]
+                for root, _, files in os.walk(os.path.join(object_dir, m)):
+                    obj_files = [os.path.join(root, file) for file in files]
                     self.cpp_info.components[component].exelinkflags.extend(obj_files)
                     self.cpp_info.components[component].sharedlinkflags.extend(obj_files)
 

@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
-from conan.tools.files import get, replace_in_file, rmdir, copy, save, collect_libs, save
-from conan.tools.microsoft import is_msvc
+from conan.tools.files import get, replace_in_file, rmdir, copy, save, collect_libs
+from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -236,12 +236,8 @@ class LibwebsocketsConan(ConanFile):
         if self.options.shared and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             # https://github.com/conan-io/conan-center-index/pull/5321#issuecomment-826367276
             raise ConanInvalidConfiguration("{}/{} shared=True with gcc<5 does not build. Please submit a PR with a fix.".format(self.name, self.version))
-        if Version(self.version) <= "4.0.15" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "12":
-            raise ConanInvalidConfiguration("{}/{} with apple-clang>=12 does not build. Please submit a PR with a fix.".format(self.name, self.version))
         if Version(self.version) >= "4.3.2":
-            if ("Visual" in str(self.settings.compiler.version) and Version(self.settings.compiler.version) < 16) or  \
-                    ("msvc" == str(self.settings.compiler.version) and Version(self.settings.compiler.version) < 192):
-                raise ConanInvalidConfiguration ("{}/{} requires at least Visual Studio 2019".format(self.name, self.version))
+            check_min_vs(self, "192")
 
         if self.options.with_hubbub:
             raise ConanInvalidConfiguration("Library hubbub not implemented (yet) in CCI")
@@ -301,8 +297,9 @@ class LibwebsocketsConan(ConanFile):
         # Allow forwarding project targets to try_compile and derivatives
         tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
 
-        # Ensure find_package(OpenSSL) is called early
-        tc.variables["CMAKE_PROJECT_libwebsockets_INCLUDE"] = os.path.join(self.source_folder, "project_include.cmake").replace('\\','/')
+        if self.options.with_ssl == "openssl":
+            # Ensure find_package(OpenSSL) is called early
+            tc.variables["CMAKE_PROJECT_libwebsockets_INCLUDE"] = os.path.join(self.source_folder, "project_include.cmake").replace('\\','/')
 
         if self.options.with_ssl == "mbedtls":
             tc.variables["LWS_WITH_MBEDTLS"] = True
@@ -422,9 +419,8 @@ class LibwebsocketsConan(ConanFile):
         tc.variables["LWS_WITH_ALSA"] = False
         tc.variables["LWS_WITH_GTK"] = False
 
-        if Version(self.version) >= "4.1.0":
-            tc.variables["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
-            tc.variables["DISABLE_WERROR"] = True
+        tc.variables["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
+        tc.variables["DISABLE_WERROR"] = True
 
         tc.generate()
         deps = CMakeDeps(self)
@@ -448,16 +444,7 @@ class LibwebsocketsConan(ConanFile):
                         os.path.join(self.source_folder, "cmake", "FindOpenSSLbins.cmake"),
                         "if(OPENSSL_FOUND)", "if(FALSE)")
 
-        if Version(self.version) == "4.0.15" and self.options.with_ssl:
-            replace_in_file(self,
-                cmakelists,
-                "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib)",
-                "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib crypt32.lib)"
-            )
-        if Version(self.version) < "4.1.0":
-            replace_in_file(self, cmakelists, "-Werror", "")
-        if Version(self.version) >= "4.1.4":
-            replace_in_file(self, cmakelists, "add_compile_options(/W3 /WX)", "add_compile_options(/W3)")
+        replace_in_file(self, cmakelists, "add_compile_options(/W3 /WX)", "add_compile_options(/W3)")
 
     def build(self):
         self._patch_sources()
