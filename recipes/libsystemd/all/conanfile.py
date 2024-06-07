@@ -157,6 +157,11 @@ class LibsystemdConan(ConanFile):
         for opt in unrelated:
             tc.project_options[opt] = "false"
 
+        if Version(self.version) < "255":
+            # 'rootprefix' is unused during libsystemd packaging but systemd > v247
+            # build files require 'prefix' to be a subdirectory of 'rootprefix'.
+            tc.project_options["rootprefix"] = "/"  # Since, Conan 1.64
+
         # There are a few places in libsystemd where pkgconfig dependencies are
         # not used in compile time and only used in link time. And because of
         # that it is not enough to use the 'PkgConfigDeps' generator here. It
