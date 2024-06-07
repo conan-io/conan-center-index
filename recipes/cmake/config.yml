@@ -7,6 +7,8 @@ versions:
     folder: "binary"
   "3.29.0":
     folder: "binary"
+  "3.28.6":
+    folder: "binary"
   "3.28.5":
     folder: "binary"
   "3.28.1":
