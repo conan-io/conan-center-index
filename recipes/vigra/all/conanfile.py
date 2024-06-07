@@ -1,5 +1,6 @@
 import os
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import get, export_conandata_patches, apply_conandata_patches, rm, copy, collect_libs
 
@@ -70,6 +71,10 @@ class VigraConan(ConanFile):
 
         if self.options.with_lemon:
             self.requires("coin-lemon/1.3.1")
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
 
     def generate(self):
         tc = CMakeToolchain(self)
