@@ -58,7 +58,8 @@ class Blend2dConan(ConanFile):
             check_min_vs(self, 192)
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.18 <4]")
+        if Version(self.version) >= "0.11.1":
+            self.tool_requires("cmake/[>=3.18 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
