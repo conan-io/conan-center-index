@@ -73,11 +73,8 @@ class LimereportConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        if self._qt_version_major == 5:
-            if not (self.dependencies["qt"].options.qtquickcontrols and self.dependencies["qt"].options.qtquickcontrols2):
-                raise ConanInvalidConfiguration(f"{self.ref} requires -o='qt/*:qtquickcontrols=True' and -o='qt/*:qtquickcontrols2=True'")
-            elif not (self.dependencies["qt"].options.qtdeclarative):
-                raise ConanInvalidConfiguration(f"{self.ref} requires -o='qt/*:qtdeclarative=True'")
+        if not (self.dependencies["qt"].options.qtdeclarative):
+            raise ConanInvalidConfiguration(f"{self.ref} requires -o='qt/*:qtdeclarative=True'")
         if not (self.dependencies["qt"].options.qtsvg and self.dependencies["qt"].options.qttools):
             raise ConanInvalidConfiguration(f"{self.ref} requires -o='qt/*:qtsvg=True' and -o='qt/*:qttools=True'")
 
