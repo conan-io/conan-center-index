@@ -106,5 +106,7 @@ class VigraConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["vigraimpex"]
+        if not self.options.shared:
+            self.cpp_info.defines = ["VIGRA_STATIC_LIB"]
         self.cpp_info.set_property("cmake_file_name", "Vigra")
         self.cpp_info.set_property("cmake_target_name", "vigraimpex")
