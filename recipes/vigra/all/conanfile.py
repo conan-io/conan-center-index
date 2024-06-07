@@ -65,6 +65,7 @@ class VigraConan(ConanFile):
 
         if self.options.with_openexr:
             self.requires("openexr/3.2.4")
+            self.requires("imath/3.1.9")
 
         if self.options.with_boost_graph:
             self.requires("boost/1.85.0")
