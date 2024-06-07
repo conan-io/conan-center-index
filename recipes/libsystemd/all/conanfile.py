@@ -52,6 +52,13 @@ class LibsystemdConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",  # gcc 5 is failing
+            "clang": "10"
+        }
+
     def requirements(self):
         self.requires("libcap/2.69")
         self.requires("libmount/2.39.2")
@@ -68,6 +75,11 @@ class LibsystemdConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Only Linux supported")
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if Version(self.version) >= "255.0" and minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires {str(self.settings.compiler)} >= {minimum_version}."
+            )
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.0")
