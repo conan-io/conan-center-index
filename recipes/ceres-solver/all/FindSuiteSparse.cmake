@@ -7,3 +7,7 @@ find_package(METIS CONFIG)
 add_library(SuiteSparse::Partition ALIAS SuiteSparse::CHOLMOD)
 
 set(SuiteSparse_FOUND TRUE)
+
+# For Ceres v1
+set(SUITESPARSE_FOUND TRUE)
+set(SUITESPARSE_LIBRARIES SuiteSparse::CHOLMOD SuiteSparse::SPQR)

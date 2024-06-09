@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save, replace_in_file
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -41,6 +41,7 @@ class CeresSolverConan(ConanFile):
         # Unavailable since v2.0.0
         "use_CXX11": [True, False],
         "use_CXX11_threads": [True, False],
+        "use_OpenMP": [True, False],
         "use_TBB": [True, False],
     }
     default_options = {
@@ -57,6 +58,7 @@ class CeresSolverConan(ConanFile):
         "use_schur_specializations": True,
         "use_CXX11": False,
         "use_CXX11_threads": False,
+        "use_OpenMP": True,
         "use_TBB": False,
     }
     options_description = {
@@ -108,6 +110,7 @@ class CeresSolverConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) >= "2.0":
             del self.options.use_TBB
+            del self.options.use_OpenMP
             del self.options.use_CXX11_threads
             del self.options.use_CXX11
         if Version(self.version) < "2.2.0":
@@ -150,7 +153,7 @@ class CeresSolverConan(ConanFile):
             self.requires("metis/5.2.1")
         if self.options.get_safe("use_TBB"):
             self.requires("onetbb/2020.3")
-        if Version(self.version) < "2.0":
+        if self.options.get_safe("use_OpenMP"):
             self.requires("llvm-openmp/18.1.3")
 
     def validate(self):
@@ -221,7 +224,7 @@ class CeresSolverConan(ConanFile):
             tc.variables["LIB_SUFFIX"] = ""
         if ceres_version < "2.0.0":
             tc.variables["CXX11"] = self.options.use_CXX11
-            tc.variables["OPENMP"] = True
+            tc.variables["OPENMP"] = not self.options.use_OpenMP
             tc.variables["TBB"] = self.options.use_TBB
             tc.variables["CXX11_THREADS"] = self.options.use_CXX11_threads
         tc.generate()
@@ -235,6 +238,11 @@ class CeresSolverConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         copy(self, "FindSuiteSparse.cmake", self.export_sources_folder, os.path.join(self.source_folder, "cmake"))
+        if Version(self.version) < "2.0":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "list(APPEND CERES_COMPILE_OPTIONS CERES_USE_OPENMP)",
+                            "list(APPEND CERES_COMPILE_OPTIONS CERES_USE_OPENMP)\n"
+                            "link_libraries(OpenMP::OpenMP_CXX)")
 
     def build(self):
         self._patch_sources()
@@ -295,6 +303,8 @@ class CeresSolverConan(ConanFile):
             requires.append("metis::metis")
         if self.options.get_safe("use_TBB"):
             requires.append("onetbb::onetbb")
+        if self.options.get_safe("use_OpenMP"):
+            requires.append("llvm-openmp::llvm-openmp")
         self.cpp_info.components["ceres"].requires = requires
 
         if not self.options.shared:
