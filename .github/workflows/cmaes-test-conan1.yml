@@ -1,0 +1,14 @@
+name: test-conan1
+on:
+    push:
+    
+jobs:
+    conan1:
+        runs-on: ubuntu-latest
+        steps:
+            - run: pip3 install "conan<2"
+            - run: |
+                cd recipes/cmaes/all
+                cp profiles/clang-libc++-release ~/.conan/profiles
+                conan create --profile clang-libc++-release . 0.10.0@
+
