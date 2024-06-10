@@ -853,7 +853,8 @@ class QtConan(ConanFile):
             targets.append("qsb")
         if self.options.qtdeclarative:
             targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
-            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltestrunner"])
+            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview"])
+            # Note: consider "qmltestrunner", see https://github.com/conan-io/conan-center-index/issues/24276
         if self.options.get_safe("qtremoteobjects"):
             targets.append("repc")
         if self.options.get_safe("qtscxml"):
