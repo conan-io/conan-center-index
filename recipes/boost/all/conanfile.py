@@ -1395,7 +1395,7 @@ class BoostConan(ConanFile):
             cxx_flags.append(f"-DBOOST_STACKTRACE_ADDR2LINE_LOCATION={self.options.addr2line_location}")
 
         if not self.options.get_safe('without_cobalt', True) and \
-            (self.settings.compiler == "gcc" or Version(self.settings.compiler.version) == "10"):
+            (self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "10"):
             cxx_flags.append("-fcoroutines")
 
         cxx_flags = f'cxxflags="{" ".join(cxx_flags)}"'
@@ -2038,7 +2038,7 @@ class BoostConan(ConanFile):
                     self.cpp_info.components["headers"].defines.extend(["BOOST_AC_DISABLE_THREADS", "BOOST_SP_DISABLE_THREADS"])
 
             if not self.options.get_safe('without_cobalt', True) and \
-                (self.settings.compiler == "gcc" or Version(self.settings.compiler.version) == "10"):
+                (self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "10"):
                 self.cpp_info.components["cobalt"].cxxflags.append("-fcoroutines")
 
         #TODO: remove in the future, user_info deprecated in conan2, but kept for compatibility while recipe is cross-compatible.
