@@ -45,4 +45,3 @@ patches:
       "patch_file": "patches/5.15.12-fix-macos-cpp-lib-memory-resource.patch"
       "patch_source": "https://codereview.qt-project.org/c/qt/qtbase/+/482392"
       "patch_type": "portability"
- 
