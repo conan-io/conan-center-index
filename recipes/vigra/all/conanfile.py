@@ -55,7 +55,7 @@ class VigraConan(ConanFile):
 
     def requirements(self):
         self.requires("libtiff/4.6.0")
-        self.requires("libpng/1.6.43")
+        self.requires("libpng/[>=1.6 <2]")
         self.requires("fftw/3.3.10")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("libjpeg/9e")
