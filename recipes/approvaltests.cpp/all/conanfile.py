@@ -1,11 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, download, rename
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.53"
 
 
 class ApprovalTestsCppConan(ConanFile):
@@ -38,6 +39,10 @@ class ApprovalTestsCppConan(ConanFile):
     @property
     def _header_file(self):
         return "ApprovalTests.hpp"
+    
+    @property
+    def _min_cppstd(self):
+        return 11
 
     def config_options(self):
         if Version(self.version) < "10.4.0":
@@ -62,6 +67,9 @@ class ApprovalTestsCppConan(ConanFile):
         self.info.clear()
 
     def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
         if Version(self.version) >= "10.2.0":
             if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
                 raise ConanInvalidConfiguration(f"{self.ref} with compiler gcc requires at least compiler version 5")
