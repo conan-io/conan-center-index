@@ -190,7 +190,7 @@ version range only when a requirement for a newer version is needed.
 * Libxml2: `[>=2.12.5 <3]`
 * Libuv: `[>=1 <2]`
 * qt5: `[~5.15]`, if your library depends on qt5, only the 5.15 minor version is allowed
-* qt6: `qt/[>=6.x <7]`, where 6.x is the lower bound of your needed qt6 version
+* qt6: `[>=6.x <7]`, where 6.x is the lower bound of your needed qt6 version
 * c-ares: `[>=1.27 <2]`
 
 > **Warning**: With Conan 1.x, [version ranges](https://docs.conan.io/1/versioning/version_ranges.html) adhere to a much more strict sematic version spec,
