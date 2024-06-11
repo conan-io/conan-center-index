@@ -193,7 +193,7 @@ class BotanConan(ConanFile):
             minimum_version = self._compilers_minimum_version.get(compiler_name, False)
             if minimum_version and Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support (minimum {compiler_name} {minimum_version})."
                 )
             if not minimum_version:
                 self.output.warning(f"{self.name} recipe lacks information about the {compiler_name} compiler support.")
