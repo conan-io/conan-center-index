@@ -166,7 +166,6 @@ class VulkanUtilityLibrariesConan(ConanFile):
 
         # Vulkan::CompilerConfiguration
         if Version(self.version) >= "1.3.265":
-            self.cpp_info.components["VulkanCompilerConfiguration"] = self.cpp_info.components["VulkanCompilerConfiguration"]
             self.cpp_info.components["VulkanCompilerConfiguration"].set_property("cmake_target_name", "Vulkan::CompilerConfiguration")
             self.cpp_info.components["VulkanCompilerConfiguration"].requires = ["vulkan-headers::vulkanheaders"]
             self.cpp_info.components["VulkanCompilerConfiguration"].cxxflags = self._exported_cxxflags
