@@ -67,7 +67,7 @@ class ClangConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"libxml2/>2.12")
+        self.requires(f"libxml2/[>2.12.4 <3]")
         self.requires(f"llvm-core/{self.version}", transitive_headers=True)
 
     def validate(self):
