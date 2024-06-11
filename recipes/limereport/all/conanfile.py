@@ -59,7 +59,7 @@ class LimereportConan(ConanFile):
 
     def requirements(self):
         # QString included in Irglobal.h and Limereport expects be running Qt on customer side
-        self.requires("qt/6.7.1", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/[>=6.0 <7]", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         if self.options.with_zint:
