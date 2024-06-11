@@ -1,0 +1,12 @@
+sources:
+  "2.0.4":
+    url: "https://github.com/RichieSams/FiberTaskingLib/archive/refs/tags/v2.0.4.tar.gz"
+    sha256: "680a82c0c74d221ddf15e662f842ac72a6be7ea0e3695f7093afe57162f14f9e"
+patches:
+  "2.0.4":
+    - patch_file: "patches/2.0.4-0001-remove-prefix.patch"
+      patch_description: "use cci's package"
+      patch_type: "conan"
+    - patch_file: "patches/2.0.4-0002-add-installer.patch"
+      patch_description: "add installer"
+      patch_type: "portability"
