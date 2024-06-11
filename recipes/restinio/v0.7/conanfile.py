@@ -37,7 +37,7 @@ class RestinioConan(ConanFile):
     def requirements(self):
         self.requires("llhttp/9.1.3")
         self.requires("fmt/10.2.1")
-        self.requires("expected-lite/0.6.3")
+        self.requires("expected-lite/0.8.0")
 
         if self.options.asio == "standalone":
             self.requires("asio/1.30.2")
