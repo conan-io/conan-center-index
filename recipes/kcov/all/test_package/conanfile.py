@@ -14,4 +14,5 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def test(self):
-        self.run("kcov --version", env="conanrun")
+        if can_run(self):
+            self.run("kcov --version", env="conanrun")
