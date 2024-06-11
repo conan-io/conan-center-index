@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
 from conan.tools.files import chdir, copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -34,6 +35,10 @@ class ReboundConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} recipe does not support Windows, contributions welcomed!")
+
+    def validate_build(self):
+        if cross_building(self):
+            raise ConanInvalidConfiguration(f"{self.ref} cross-building is not supported yet, contributions welcomed!")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
