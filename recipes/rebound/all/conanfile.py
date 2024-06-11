@@ -89,3 +89,5 @@ class ReboundConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["rebound"]
 
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
