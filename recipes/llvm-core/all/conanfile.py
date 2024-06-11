@@ -199,7 +199,13 @@ class LLVMCoreConan(ConanFile):
                 raise ConanInvalidConfiguration("Shared Debug build is not supported on CCI due to resource limitations")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        sources = self.conan_data["sources"][self.version]
+        if Version(self.version) < 18:
+            get(**sources, strip_root=True)
+        else:
+            get(self, **sources["llvm"], destination='llvm-main', strip_root=True)
+            get(self, **sources["cmake"], destination='cmake', strip_root=True)
+            get(self, **sources["third-party"], destination='third-party', strip_root=True)
 
     def _apply_resource_limits(self, cmake_definitions):
         if os.getenv("CONAN_CENTER_BUILD_SERVICE"):
@@ -297,7 +303,10 @@ class LLVMCoreConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        cmake.configure()
+        if Version(self.version) < 18:
+            cmake.configure()
+        else:
+            cmake.configure(build_script_folder="llvm-main")
         cmake.build()
 
     @property
@@ -455,7 +464,9 @@ class LLVMCoreConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "LLVM")
         self.cpp_info.set_property("cmake_build_modules",
                                    [self._build_module_file_rel_path,
-                                    (self._cmake_module_path / "LLVM-ConfigInternal.cmake").as_posix()]
+                                    self._cmake_module_path / "LLVM-ConfigInternal.cmake",
+                                    self._cmake_module_path / "LLVMDistributionSupport.cmake",
+                                    self._cmake_module_path / "AddLLVM.cmake"]
                                    )
         self.cpp_info.builddirs.append(self._cmake_module_path)
 
