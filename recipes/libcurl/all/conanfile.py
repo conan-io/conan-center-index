@@ -571,6 +571,7 @@ class LibcurlConan(ConanFile):
         tc.variables["CURL_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
         tc.variables["CURL_USE_OPENSSL"] = self.options.with_ssl == "openssl"
         tc.variables["CURL_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
+        tc.variables["CURL_USE_MBEDTLS"] = self.options.with_ssl == "mbedtls"
         tc.variables["USE_NGHTTP2"] = self.options.with_nghttp2
         tc.variables["CURL_ZLIB"] = self.options.with_zlib
         tc.variables["CURL_BROTLI"] = self.options.with_brotli
