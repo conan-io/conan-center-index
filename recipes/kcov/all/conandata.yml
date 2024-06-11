@@ -13,6 +13,7 @@ patches:
     - patch_file: "patches/0003-fix-missing-include.patch"
       patch_description: "Add a missing includes on macOS"
       patch_type: "backport"
+      patch_source: "https://github.com/SimonKagstrom/kcov/commit/4efe5e4a4ac4e7b6d99fc869d826aa74ff716ebf"
     - patch_file: "patches/0004-fix-libdwarf-prefix.patch"
       patch_description: "Adjust libdwarf include to match CCI includedirs"
       patch_type: "conan"
