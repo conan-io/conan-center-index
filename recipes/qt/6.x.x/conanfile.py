@@ -1,6 +1,7 @@
 import configparser
 import glob
 import os
+import platform
 import textwrap
 
 from conan import ConanFile
@@ -477,12 +478,7 @@ class QtConan(ConanFile):
 
         tc = CMakeToolchain(self, generator="Ninja")
 
-        package_folder = self.package_folder.replace('\\', '/')
-        tc.variables["INSTALL_MKSPECSDIR"] = f"{package_folder}/res/archdatadir/mkspecs"
-        tc.variables["INSTALL_ARCHDATADIR"] = f"{package_folder}/res/archdatadir"
-        tc.variables["INSTALL_LIBEXECDIR"] = f"{package_folder}/bin"
-        tc.variables["INSTALL_DATADIR"] = f"{package_folder}/res/datadir"
-        tc.variables["INSTALL_SYSCONFDIR"] = f"{package_folder}/res/sysconfdir"
+        tc.absolute_paths = True
 
         tc.variables["QT_BUILD_TESTS"] = "OFF"
         tc.variables["QT_BUILD_EXAMPLES"] = "OFF"
@@ -651,7 +647,7 @@ class QtConan(ConanFile):
 
     def source(self):
         destination = self.source_folder
-        if self.info.settings.os == "Windows":
+        if platform.system() == "Windows":
             # Don't use os.path.join, or it removes the \\?\ prefix, which enables long paths
             destination = rf"\\?\{self.source_folder}"
         get(self, **self.conan_data["sources"][self.version],
@@ -818,7 +814,7 @@ class QtConan(ConanFile):
         rm(self, "*.la*", os.path.join(self.package_folder, "lib"), recursive=True)
         rm(self, "*.pdb*", self.package_folder, recursive=True)
         rm(self, "ensure_pro_file.cmake", self.package_folder, recursive=True)
-        os.remove(os.path.join(self.package_folder, "bin", "qt-cmake-private-install.cmake"))
+        os.remove(os.path.join(self.package_folder, "libexec" if Version(self.version) >= "6.5.0" and self.settings.os != "Windows" else "bin", "qt-cmake-private-install.cmake"))
 
         for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
             if os.path.isfile(os.path.join(self.package_folder, "lib", "cmake", m, f"{m}Macros.cmake")):
@@ -857,7 +853,8 @@ class QtConan(ConanFile):
             targets.append("qsb")
         if self.options.qtdeclarative:
             targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
-            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltestrunner"])
+            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview"])
+            # Note: consider "qmltestrunner", see https://github.com/conan-io/conan-center-index/issues/24276
         if self.options.get_safe("qtremoteobjects"):
             targets.append("repc")
         if self.options.get_safe("qtscxml"):
@@ -865,10 +862,13 @@ class QtConan(ConanFile):
         for target in targets:
             exe_path = None
             for path_ in [f"bin/{target}{extension}",
-                          f"lib/{target}{extension}"]:
+                          f"lib/{target}{extension}",
+                          f"libexec/{target}{extension}"]:
                 if os.path.isfile(os.path.join(self.package_folder, path_)):
                     exe_path = path_
                     break
+            else:
+                assert False, f"Could not find executable {target}{extension} in {self.package_folder}"
             if not exe_path:
                 self.output.warning(f"Could not find path to {target}{extension}")
             filecontents += textwrap.dedent(f"""\
@@ -943,8 +943,8 @@ class QtConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Qt6"
 
         # consumers will need the QT_PLUGIN_PATH defined in runenv
-        self.runenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "res", "archdatadir", "plugins"))
-        self.buildenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "res", "archdatadir", "plugins"))
+        self.runenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "plugins"))
+        self.buildenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "plugins"))
 
         self.buildenv_info.define("QT_HOST_PATH", self.package_folder)
 
@@ -1001,7 +1001,7 @@ class QtConan(ConanFile):
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
             if not self.options.shared:
                 self.cpp_info.components[componentname].libs = [libname + libsuffix]
-            self.cpp_info.components[componentname].libdirs = [os.path.join("res", "archdatadir", "plugins", plugintype)]
+            self.cpp_info.components[componentname].libdirs = [os.path.join("plugins", plugintype)]
             self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
                 requires.append("Core")
@@ -1024,7 +1024,7 @@ class QtConan(ConanFile):
         _create_module("Core", core_reqs)
         pkg_config_vars = [
             "bindir=${prefix}/bin",
-            "libexecdir=${prefix}/bin",
+            "libexecdir=${prefix}/libexec",
             "exec_prefix=${prefix}",
         ]
         self.cpp_info.components["qtCore"].set_property("pkg_config_custom_content", "\n".join(pkg_config_vars))
@@ -1041,7 +1041,7 @@ class QtConan(ConanFile):
         self.cpp_info.components["qtPlatform"].set_property("cmake_target_name", "Qt6::Platform")
         self.cpp_info.components["qtPlatform"].names["cmake_find_package"] = "Platform"
         self.cpp_info.components["qtPlatform"].names["cmake_find_package_multi"] = "Platform"
-        self.cpp_info.components["qtPlatform"].includedirs = [os.path.join("res", "archdatadir", "mkspecs", self._xplatform())]
+        self.cpp_info.components["qtPlatform"].includedirs = [os.path.join("mkspecs", self._xplatform())]
         if self.options.with_dbus:
             _create_module("DBus", ["dbus::dbus"])
             if self.settings.os == "Windows":
@@ -1501,7 +1501,7 @@ class QtConan(ConanFile):
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/corelib/CMakeLists.txt#L1079-L1082
                     self.cpp_info.components["qtCore"].frameworks.append("WatchKit")
 
-        self.cpp_info.components["qtCore"].builddirs.append(os.path.join("res", "archdatadir", "bin"))
+        self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin"))
         _add_build_module("qtCore", self._cmake_executables_file)
         _add_build_module("qtCore", self._cmake_qt6_private_file("Core"))
         if self.settings.os in ["Windows", "iOS"]:
@@ -1537,10 +1537,8 @@ class QtConan(ConanFile):
                 component = "qt" + m[:m.find("_")]
                 if component not in self.cpp_info.components:
                     continue
-                submodules_dir = os.path.join(object_dir, m)
-                for sub_dir in os.listdir(submodules_dir):
-                    submodule_dir = os.path.join(submodules_dir, sub_dir)
-                    obj_files = [os.path.join(submodule_dir, file) for file in os.listdir(submodule_dir)]
+                for root, _, files in os.walk(os.path.join(object_dir, m)):
+                    obj_files = [os.path.join(root, file) for file in files]
                     self.cpp_info.components[component].exelinkflags.extend(obj_files)
                     self.cpp_info.components[component].sharedlinkflags.extend(obj_files)
 
