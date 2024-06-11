@@ -1,4 +1,7 @@
 sources:
+  "3.0.24":
+    url: "https://sourceforge.net/projects/gdcm/files/gdcm%203.x/GDCM%203.0.24/gdcm-3.0.24.tar.bz2"
+    sha256: "c672bb6caa83ac937e5e1595e0f809bc65cbc1d516ab6363156a49548f1e51f1"
   "3.0.23":
     url: "https://sourceforge.net/projects/gdcm/files/gdcm%203.x/GDCM%203.0.23/gdcm-3.0.23.tar.bz2"
     sha256: "711d155ae4ad84a99a38f3b705b5243da346360232c85fe3e2ca575e57e372a1"
@@ -15,6 +18,25 @@ sources:
     url: "https://sourceforge.net/projects/gdcm/files/gdcm%203.x/GDCM%203.0.9/gdcm-3.0.9.tar.bz2"
     sha256: "1d518b0e4709cecfb7330c9bd9b3a73cfd01ffe70d1c178f36a4c847283c4672"
 patches:
+  "3.0.24":
+    - patch_file: "patches/0002-3.0.23-openjpeg.patch"
+      patch_description: "fix variable names for openjpeg"
+      patch_type: "conan"
+    - patch_file: "patches/0004-3.0.23-find-expat.patch"
+      patch_description: "enforce usage of FindEXPAT.cmake"
+      patch_type: "conan"
+    - patch_file: "patches/0005-3.0.20-openssl.patch"
+      patch_description: "skip check_cxx_source_compiles usage for openssl"
+      patch_type: "conan"
+    - patch_file: "patches/0006-3.0.24-json.patch"
+      patch_description: "skip check_cxx_source_compiles usage for json-c"
+      patch_type: "conan"
+    - patch_file: "patches/0007-3.0.23-find-json.patch"
+      patch_description: "fix find_package for json-c"
+      patch_type: "conan"
+    - patch_file: "patches/0008-3.0.23-find-libuuid.patch"
+      patch_description: "fix find_package for libuuid"
+      patch_type: "conan"
   "3.0.23":
     - patch_file: "patches/0002-3.0.23-openjpeg.patch"
       patch_description: "fix variable names for openjpeg"
