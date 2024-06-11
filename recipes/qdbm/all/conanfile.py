@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rename
+from conan.tools.files import copy, get
 
 required_conan_version = ">=1.53.0"
 
@@ -77,8 +77,6 @@ class QDBMConan(ConanFile):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        for dll in (self.package_path / "lib").glob("*.dll"):
-            rename(self, dll, self.package_path / "bin" / dll.name)
 
     def package_info(self):
         self.cpp_info.libs = ["qdbm"]

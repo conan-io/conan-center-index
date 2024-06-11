@@ -78,7 +78,7 @@ class ContinuableConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("function2/4.2.3")
+        self.requires("function2/4.2.4")
 
     def package_id(self):
         self.info.clear()

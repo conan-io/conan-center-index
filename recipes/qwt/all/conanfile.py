@@ -7,7 +7,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
 
 class QwtConan(ConanFile):
@@ -15,7 +15,8 @@ class QwtConan(ConanFile):
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://qwt.sourceforge.io/"
-    topics = ("archive", "compression")
+    topics = ("chart", "data-visualization", "graph", "plot", "qt")
+    package_type = "library"
     description = (
         "The Qwt library contains GUI Components and utility classes which are primarily useful for programs "
         "with a technical background. Beside a framework for 2D plots it provides scales, sliders, dials, compasses, "
@@ -43,6 +44,10 @@ class QwtConan(ConanFile):
         "polar": True,
     }
 
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -58,39 +63,39 @@ class QwtConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/5.15.9")
+        self.requires("qt/5.15.11", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Qwt recipe does not support cross-compilation yet")
         qt_options = self.dependencies["qt"].options
-        if self.info.options.widgets and not qt_options.widgets:
+        if self.options.widgets and not qt_options.widgets:
             raise ConanInvalidConfiguration("qwt:widgets=True requires qt:widgets=True")
-        if self.info.options.svg and not qt_options.qtsvg:
+        if self.options.svg and not qt_options.qtsvg:
             raise ConanInvalidConfiguration("qwt:svg=True requires qt:qtsvg=True")
-        if self.info.options.opengl and qt_options.opengl == "no":
+        if self.options.opengl and qt_options.opengl == "no":
             raise ConanInvalidConfiguration("qwt:opengl=True is not compatible with qt:opengl=no")
-        if self.info.options.designer and not (qt_options.qttools and qt_options.gui and qt_options.widgets):
+        if self.options.designer and not (qt_options.qttools and qt_options.gui and qt_options.widgets):
             raise ConanInvalidConfiguration("qwt:designer=True requires qt:qttools=True, qt::gui=True and qt::widgets=True")
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires("qt/5.15.7")
+        if not self._is_legacy_one_profile:
+            self.tool_requires("qt/<host_version>")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        if hasattr(self, "settings_build") and cross_building(self):
-            env = VirtualBuildEnv(self)
-            env.generate()
-        else:
+        if self._is_legacy_one_profile:
             env = VirtualRunEnv(self)
             env.generate(scope="build")
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
 
         tc = CMakeToolchain(self)
         tc.variables["QWT_DLL"] = self.options.shared
-        tc.variables["QWT_STATIC "] = not self.options.shared
+        tc.variables["QWT_STATIC"] = not self.options.shared
         tc.variables["QWT_PLOT"] = self.options.plot
         tc.variables["QWT_WIDGETS"] = self.options.widgets
         tc.variables["QWT_SVG"] = self.options.svg

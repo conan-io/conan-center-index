@@ -1,6 +1,8 @@
 # Versions from LIBYUV_VERSION definition in include/libyuv/version.h
 # Pay attention to package commits incrementing this definition
 sources:
+  "1880":
+    url: "https://chromium.googlesource.com/libyuv/libyuv/+archive/fb6341d326846fbbe669ad5173e520f66b339621.tar.gz"
   "1854":
     url: "https://chromium.googlesource.com/libyuv/libyuv/+archive/3abd6f36b6e4f5a2e0ce236580a8bc1da3c7cf7e.tar.gz"
   "1845":
@@ -10,6 +12,10 @@ sources:
   "1768":
     url: "https://chromium.googlesource.com/libyuv/libyuv/+archive/dfaf7534e0e536f7e5ef8ddd7326797bd09b8622.tar.gz"
 patches:
+  "1880":
+    - patch_file: "patches/1880-0001-fix-cmake.patch"
+      patch_description: "Fix CMake to be more robust & predictable"
+      patch_type: "conan"
   "1854":
     - patch_file: "patches/1854-0001-fix-cmake.patch"
       patch_description: "Fix CMake to be more robust & predictable"

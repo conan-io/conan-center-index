@@ -16,6 +16,7 @@ class Md4QtConan(ConanFile):
     license = "MIT"
     description = "Header-only C++ library for parsing Markdown."
     topics = ("markdown", "gfm", "parser", "icu", "ast", "commonmark", "md", "qt6", "stl", "cpp17")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -33,12 +34,15 @@ class Md4QtConan(ConanFile):
             "apple-clang": "14",
         }
 
-    def package_id(self):
-        self.info.clear()
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("icu/72.1")
+        self.requires("icu/74.1")
         self.requires("uriparser/0.9.7")
+
+    def package_id(self):
+        self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -49,24 +53,21 @@ class Md4QtConan(ConanFile):
                 f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if Version(self.version) <= "2.8.1":
+            copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        else:
+            copy(self, "MIT.txt", src=os.path.join(self.source_folder, "LICENSES"), dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*.hpp", src=os.path.join(self.source_folder, "md4qt"), dst=os.path.join(self.package_folder, "include", "md4qt"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "md4qt")
         self.cpp_info.set_property("cmake_target_name", "md4qt::md4qt")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []

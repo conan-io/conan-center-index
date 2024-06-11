@@ -5,7 +5,4 @@ sources:
 patches:
   "0.0.7":
     - patch_file: "patches/memleaksfix.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/cmake-no-cflags.patch"
-      base_path: "source_subfolder"
-

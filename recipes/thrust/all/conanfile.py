@@ -35,7 +35,7 @@ class ThrustConan(ConanFile):
         self.requires("cub/1.17.2")
 
         if self.options.device_system == "tbb":
-            self.requires("onetbb/2021.9.0")
+            self.requires("onetbb/2021.10.0")
 
         if self.options.device_system in ["cuda", "omp"]:
             dev = str(self.options.device_system).upper()

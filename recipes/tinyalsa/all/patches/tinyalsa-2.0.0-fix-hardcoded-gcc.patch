@@ -1,0 +1,46 @@
+diff --git a/examples/Makefile b/examples/Makefile
+index 650966d..1f68ff6 100644
+--- a/examples/Makefile
++++ b/examples/Makefile
+@@ -1,6 +1,5 @@
+ CROSS_COMPILE ?=
+ 
+-CC = $(CROSS_COMPILE)gcc
+ CFLAGS = -Wall -Wextra -Werror -Wfatal-errors -I ../include
+ 
+ VPATH = ../src
+diff --git a/src/Makefile b/src/Makefile
+index aaa84b8..ac86400 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -6,9 +6,6 @@ ifdef DEB_HOST_MULTIARCH
+ LIBDIR := $(LIBDIR)/$(DEB_HOST_MULTIARCH)
+ endif
+ 
+-CC = $(CROSS_COMPILE)gcc
+-AR = $(CROSS_COMPILE)ar
+-LD = $(CROSS_COMPILE)gcc
+ 
+ WARNINGS = -Wall -Wextra -Werror -Wfatal-errors
+ INCLUDE_DIRS = -I ../include
+@@ -49,7 +46,7 @@ libtinyalsa.so.$(LIBVERSION_MAJOR): libtinyalsa.so.$(LIBVERSION)
+ 	ln -sf $< $@
+ 
+ libtinyalsa.so.$(LIBVERSION): $(OBJECTS)
+-	$(LD) $(LDFLAGS) -shared -Wl,-soname,libtinyalsa.so.$(LIBVERSION_MAJOR) $^ -o $@
++	$(CC) $(LDFLAGS) -shared -Wl,-soname,libtinyalsa.so.$(LIBVERSION_MAJOR) $^ -o $@
+ 
+ .PHONY: clean
+ clean:
+diff --git a/utils/Makefile b/utils/Makefile
+index f733c39..38a9cb5 100644
+--- a/utils/Makefile
++++ b/utils/Makefile
+@@ -4,7 +4,6 @@ BINDIR ?= $(PREFIX)/bin
+ MANDIR ?= $(PREFIX)/man
+ 
+ CROSS_COMPILE ?=
+-CC = $(CROSS_COMPILE)gcc
+ 
+ CFLAGS += -Wall -Wextra -Werror -Wfatal-errors
+ CFLAGS += -I ../include

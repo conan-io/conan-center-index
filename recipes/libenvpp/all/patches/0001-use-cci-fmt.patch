@@ -1,0 +1,30 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e3ecffb..49cae57 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -54,6 +54,7 @@ function(libenvpp_set_compiler_parameters TARGET)
+ endfunction()
+ 
+ # External dependencies.
++if(0)
+ if(LIBENVPP_INSTALL)
+ 	set(FMT_INSTALL ON CACHE BOOL "" FORCE)
+ endif()
+@@ -63,6 +63,8 @@ FetchContent_Declare(fmt
+ 	GIT_TAG 9.1.0
+ )
+ FetchContent_MakeAvailable(fmt)
++endif()
++find_package(fmt REQUIRED CONFIG)
+ 
+ if(LIBENVPP_TESTS)
+ 	FetchContent_Declare(Catch2
+@@ -133,6 +134,8 @@ endif()
+ 
+ # Installation target.
+ if(LIBENVPP_INSTALL)
++	include(CMakePackageConfigHelpers)
++
+ 	# Libenvpp installation.
+ 	set(LIBENVPP_PROJECT_CONFIG_OUT "${CMAKE_CURRENT_BINARY_DIR}/libenvpp-config.cmake")
+ 	set(LIBENVPP_VERSION_CONFIG_FILE "${CMAKE_CURRENT_BINARY_DIR}/libenvpp-config-version.cmake")

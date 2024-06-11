@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, chdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -32,19 +33,19 @@ class UsocketsConan(ConanFile):
     }
 
     @property
-    def _minimum_cpp_standard(self):
-        version = False
+    def _min_cppstd(self):
         if self.options.eventloop == "boost":
-            version = "14"
+            return "14"
 
         # OpenSSL wrapper of uSockets uses C++17 features.
         if self.options.with_ssl == "openssl":
-            version = "17"
+            return "17"
 
-        return version
+        return False
 
-    def _minimum_compilers_version(self, cppstd):
-        standards = {
+    @property
+    def _minimum_compilers_version(self):
+        return {
             "14": {
                 "Visual Studio": "15",
                 "msvc": "191",
@@ -59,11 +60,7 @@ class UsocketsConan(ConanFile):
                 "clang": "6",
                 "apple-clang": "10",
             },
-        }
-        return standards.get(cppstd) or {}
-
-    def layout(self):
-        basic_layout(self, src_folder="src")
+        }.get(self._min_cppstd, {})
 
     @property
     def _settings_build(self):
@@ -81,40 +78,13 @@ class UsocketsConan(ConanFile):
             del self.options.fPIC
             self.options.eventloop = "libuv"
 
-    def validate(self):
-        if self.options.eventloop == "syscall" and self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("syscall is not supported on Windows")
-
-        if self.options.eventloop == "gcd" and (self.settings.os != "Linux" or self.settings.compiler != "clang"):
-            raise ConanInvalidConfiguration("eventloop=gcd is only supported on Linux with clang")
-
-        if Version(self.version) < "0.8.0" and self.options.eventloop not in ("syscall", "libuv", "gcd"):
-            raise ConanInvalidConfiguration(f"eventloop={self.options.eventloop} is not supported with {self.name}/{self.version}")
-
-        if Version(self.version) >= "0.5.0" and self.options.with_ssl == "wolfssl":
-            raise ConanInvalidConfiguration(f"with_ssl={self.options.with_ssl} is not supported with {self.name}/{self.version}. https://github.com/uNetworking/uSockets/issues/147")
-
-        if self.options.with_ssl == "wolfssl" and not self.options["wolfssl"].opensslextra:
-            raise ConanInvalidConfiguration("wolfssl needs opensslextra option enabled for usockets")
-
-        cppstd = self._minimum_cpp_standard
-        if not cppstd:
-            return
-
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, cppstd)
-
-        minimum_version = self._minimum_compilers_version(cppstd).get(str(self.settings.compiler), False)
-        if minimum_version:
-            if Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("{} requires C++{}, which your compiler does not support.".format(self.name, cppstd))
-        else:
-            self.output.warn("{0} requires C++{1}. Your compiler is unknown. Assuming it supports C++{1}.".format(self.name, cppstd))
-
     def configure(self):
-        if bool(self._minimum_cpp_standard) == False:
+        if not bool(self._min_cppstd):
             self.settings.rm_safe("compiler.libcxx")
             self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
@@ -128,6 +98,35 @@ class UsocketsConan(ConanFile):
             self.requires("libdispatch/5.3.2")
         elif self.options.eventloop == "boost":
             self.requires("boost/1.83.0")
+
+    def validate(self):
+        if self.options.eventloop == "syscall" and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("syscall is not supported on Windows")
+
+        if self.options.eventloop == "gcd" and not (self.settings.os == "Linux" and self.settings.compiler == "clang"):
+            raise ConanInvalidConfiguration("eventloop=gcd is only supported on Linux with clang")
+
+        if Version(self.version) < "0.8.0" and self.options.eventloop not in ("syscall", "libuv", "gcd"):
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support eventloop={self.options.eventloop}")
+
+        if Version(self.version) >= "0.5.0" and self.options.with_ssl == "wolfssl":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} doesn't support with_ssl={self.options.with_ssl}. "
+                "See https://github.com/uNetworking/uSockets/issues/147"
+            )
+
+        if self.options.with_ssl == "wolfssl" and not self.dependencies["wolfssl"].options.opensslextra:
+            raise ConanInvalidConfiguration("wolfssl needs opensslextra option enabled for usockets")
+
+        if bool(self._min_cppstd):
+            if self.settings.compiler.get_safe("cppstd"):
+                check_min_cppstd(self, self._min_cppstd)
+
+            minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not self._uses_msbuild:
@@ -170,6 +169,9 @@ class UsocketsConan(ConanFile):
             deps = MSBuildDeps(self)
             deps.generate()
         else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+
             tc = AutotoolsToolchain(self)
             env = tc.environment()
             if is_msvc(self):
@@ -187,7 +189,8 @@ class UsocketsConan(ConanFile):
                 if self.options.eventloop == "libuv":
                     # Workaround for: https://github.com/conan-io/conan/issues/12784
                     # Otherwise AutotoolsDeps should suffice
-                    env.append("CPPFLAGS", "-I" + unix_path(self, self.dependencies["libuv"].cpp_info.includedirs[0]))
+                    libuv_includes = self.dependencies["libuv"].cpp_info.aggregated_components().includedirs
+                    env.append("CPPFLAGS", " ".join([f"-I{unix_path(self, p)}" for p in libuv_includes]))
             tc.generate(env)
 
             deps = AutotoolsDeps(self)
@@ -200,7 +203,6 @@ class UsocketsConan(ConanFile):
 
     def _build_autotools(self):
         autotools = Autotools(self)
-        autotools.fpic = self.options.get_safe("fPIC", False)
         with chdir(self, self.source_folder):
             args = ["WITH_LTO=0"]
             if self.options.with_ssl == "openssl":

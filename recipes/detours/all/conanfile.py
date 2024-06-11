@@ -1,35 +1,44 @@
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
 import os
 
-required_conan_version = ">=1.45.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import stdcpp_library
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import chdir, copy, get, replace_in_file
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag, VCVars
+
+required_conan_version = ">=1.53.0"
 
 
 class DetoursConan(ConanFile):
     name = "detours"
-    homepage = "https://github.com/antlr/antlr4/tree/master/runtime/Cpp"
     description = "Detours is a software package for monitoring and instrumenting API calls on Windows"
-    topics = ("monitoror", "instrumenting", "hook", "injection")
-    url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-    generators = "cmake"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/microsoft/Detours"
+    topics = ("monitoring", "instrumenting", "hook", "injection", "windows")
+
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _target_processor(self):
+        return {
+            "x86": "X86",
+            "x86_64": "X64",
+            "armv7": "ARM",
+            "armv8": "ARM64",
+        }[str(self.settings.arch)]
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only os=Windows is supported")
-        # if not is_msvc(self):
-        #     raise ConanInvalidConfiguration("Only the MSVC compiler is supported")
         if is_msvc(self) and not is_msvc_static_runtime(self):
             # Debug and/or dynamic runtime is undesired for a hooking library
             raise ConanInvalidConfiguration("Only static runtime is supported (MT)")
@@ -41,58 +50,53 @@ class DetoursConan(ConanFile):
             raise ConanInvalidConfiguration("Unsupported architecture")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def export_sources(self):
-        self.copy("CMakeLists.txt")
-
-    def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-    @property
-    def _target_processor(self):
-        return {
-            "x86": "X86",
-            "x86_64": "X64",
-            "armv7": "ARM",
-            "armv8": "ARM64",
-        }[str(self.settings.arch)]
-
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+    def generate(self):
+        if is_msvc(self):
+            vcvars = VCVars(self)
+            vcvars.generate()
+        else:
+            tc = CMakeToolchain(self)
+            tc.generate()
 
     def _patch_sources(self):
         if is_msvc(self):
-            tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Makefile"),
-                                  "/MT ", f"/{self.settings.compiler.runtime} ")
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "src", "Makefile"),
+                "/MT ",
+                f"/{msvc_runtime_flag(self)} ",
+            )
 
     def build(self):
         self._patch_sources()
         if is_msvc(self):
-            with tools.vcvars(self):
-                with tools.chdir(os.path.join(self._source_subfolder, "src")):
-                    self.run(f"nmake DETOURS_TARGET_PROCESSOR={self._target_processor}")
+            with chdir(self, os.path.join(self.source_folder, "src")):
+                self.run(f"nmake DETOURS_TARGET_PROCESSOR={self._target_processor}")
         else:
-            cmake = self._configure_cmake()
+            cmake = CMake(self)
+            cmake.configure(build_script_folder=self.source_path.parent)
             cmake.build()
 
     def package(self):
-        self.copy("LICENSE.md", src=self._source_subfolder, dst="licenses")
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
-            self.copy("detours.lib", src=os.path.join(self._source_subfolder, f"lib.{self._target_processor}"), dst="lib")
-            self.copy("*.h", src=os.path.join(self._source_subfolder, "include"), dst="include")
+            copy(self, "detours.lib",
+                src=os.path.join(self.source_folder, f"lib.{self._target_processor}"),
+                dst=os.path.join(self.package_folder, "lib"))
+            copy(self, "*.h",
+                src=os.path.join(self.source_folder, "include"),
+                dst=os.path.join(self.package_folder, "include"))
         else:
             cmake = CMake(self)
             cmake.install()
 
     def package_info(self):
         self.cpp_info.bindirs = []
+        self.cpp_info.frameworkdirs = []
+        self.cpp_info.resdirs = []
         self.cpp_info.libs = ["detours"]
         if self.settings.compiler == "gcc":
-            self.cpp_info.system_libs = [tools.stdcpp_library(self)]
+            self.cpp_info.system_libs = [stdcpp_library(self)]
             self.cpp_info.link_flags = ["-static-libgcc", "-static-libstdc++"]

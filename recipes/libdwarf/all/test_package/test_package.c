@@ -3,11 +3,12 @@
 #include <string.h>
 #include <fcntl.h>
 
-#ifndef LIBDWARF_NEW_STRUCTURE
+#ifdef LIBDWARF_NESTED_INCLUDE
+    #include "libdwarf/dwarf.h"
+    #include "libdwarf/libdwarf.h"
+#else
     #include "dwarf.h"
     #include "libdwarf.h"
-#else
-    #include "libdwarf/libdwarf.h"
 #endif
 
 void example1(Dwarf_Die somedie) {
@@ -20,6 +21,8 @@ void example1(Dwarf_Die somedie) {
     errv = dwarf_attrlist(somedie, &atlist, &atcount, &error);
     if (errv == DW_DLV_OK) {
         for (i = 0; i < atcount; ++i) {
+            Dwarf_Bool is_string;
+            dwarf_hasform(atlist[i], DW_FORM_string, &is_string, &error);
             dwarf_dealloc(dbg, atlist[i], DW_DLA_ATTR);
         }
         dwarf_dealloc(dbg, atlist, DW_DLA_LIST);

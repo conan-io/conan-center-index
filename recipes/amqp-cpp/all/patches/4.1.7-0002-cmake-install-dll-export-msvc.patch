@@ -1,0 +1,20 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -82,7 +82,7 @@ if(AMQP-CPP_BUILD_SHARED)
+     #add_library(${PROJECT_NAME} SHARED ${SRCS})
+     add_library(${PROJECT_NAME} SHARED ${src_MAIN} ${src_LINUX_TCP})
+     # set shared lib version
+-    set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${SO_VERSION})
++    set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${SO_VERSION} WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ else()
+     # create static lib
+     #add_library(${PROJECT_NAME} STATIC ${SRCS})
+@@ -97,7 +97,7 @@ if(AMQP-CPP_BUILD_SHARED)
+     install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
+             ARCHIVE DESTINATION lib
+             LIBRARY DESTINATION lib
+-            RUNTIME DESTINATION lib
++            RUNTIME DESTINATION bin
+     )
+ else()
+     # copy static lib

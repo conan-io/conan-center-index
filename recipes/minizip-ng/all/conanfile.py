@@ -14,12 +14,10 @@ required_conan_version = ">=1.53.0"
 class MinizipNgConan(ConanFile):
     name = "minizip-ng"
     description = "Fork of the popular zip manipulation library found in the zlib distribution."
-    topics = ("compression", "zip")
-    package_type = "library"
+    license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zlib-ng/minizip-ng"
-    license = "Zlib"
-
+    topics = ("compression", "zip")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -85,7 +83,7 @@ class MinizipNgConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.2")
+            self.requires("xz_utils/5.4.5")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_openssl:
@@ -96,7 +94,7 @@ class MinizipNgConan(ConanFile):
 
     def build_requirements(self):
         if self._needs_pkg_config:
-            self.tool_requires("pkgconf/1.9.5")
+            self.tool_requires("pkgconf/2.1.0")
         if Version(self.version) >= "4.0.0":
             self.tool_requires("cmake/[>=3.19 <4]")
 
@@ -165,7 +163,7 @@ class MinizipNgConan(ConanFile):
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         prefix = "lib" if is_msvc(self) or self._is_clang_cl else ""
-        suffix = "" if Version(self.version) < "3.0.5" or self.options.mz_compatibility else "-ng"
+        suffix = "" if self.options.mz_compatibility else "-ng"
         self.cpp_info.components["minizip"].libs = [f"{prefix}minizip{suffix}"]
         if self.options.with_lzma:
             self.cpp_info.components["minizip"].defines.append("HAVE_LZMA")
@@ -199,6 +197,8 @@ class MinizipNgConan(ConanFile):
             self.cpp_info.components["minizip"].requires.append("openssl::openssl")
         elif is_apple_os(self):
             self.cpp_info.components["minizip"].frameworks.extend(["CoreFoundation", "Security"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["minizip"].system_libs.append("crypt32")
         if self.settings.os != "Windows" and self.options.with_iconv:
             self.cpp_info.components["minizip"].requires.append("libiconv::libiconv")
 
