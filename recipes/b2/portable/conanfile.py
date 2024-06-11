@@ -21,6 +21,8 @@ class B2Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
 
     settings = "os", "arch"
+    package_type = "application"
+
     '''
     * use_cxx_env: False, True
 
