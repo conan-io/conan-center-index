@@ -1,0 +1,22 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -100,15 +100,7 @@
+ endif()
+
+ if (WHISPER_SUPPORT_OPENBLAS)
+-    find_library(OPENBLAS_LIB
+-        NAMES openblas libopenblas
+-        )
+-    if (OPENBLAS_LIB)
+-        message(STATUS "OpenBLAS found")
+-
+-        set(WHISPER_EXTRA_LIBS  ${WHISPER_EXTRA_LIBS}  ${OPENBLAS_LIB})
+-        set(WHISPER_EXTRA_FLAGS ${WHISPER_EXTRA_FLAGS} -DGGML_USE_OPENBLAS)
+-    else()
+-        message(WARNING "OpenBLAS not found")
+-    endif()
++    find_package(BLAS REQUIRED CONFIG)
++    set(WHISPER_EXTRA_LIBS  ${WHISPER_EXTRA_LIBS} OpenBLAS::OpenBLAS)
++    set(WHISPER_EXTRA_FLAGS ${WHISPER_EXTRA_FLAGS} -DGGML_USE_OPENBLAS)
+ endif()
+

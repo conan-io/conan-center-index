@@ -1,11 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, download, rename
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.53"
 
 
 class ApprovalTestsCppConan(ConanFile):
@@ -38,10 +39,12 @@ class ApprovalTestsCppConan(ConanFile):
     @property
     def _header_file(self):
         return "ApprovalTests.hpp"
+    
+    @property
+    def _min_cppstd(self):
+        return 11
 
     def config_options(self):
-        if Version(self.version) < "8.6.0":
-            del self.options.with_boosttest
         if Version(self.version) < "10.4.0":
             del self.options.with_cpputest
 
@@ -49,14 +52,14 @@ class ApprovalTestsCppConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.get_safe("with_boosttest"):
-            self.requires("boost/1.81.0")
+        if self.options.with_boosttest:
+            self.requires("boost/1.83.0")
         if self.options.with_catch2:
-            self.requires("catch2/2.13.10")
+            self.requires("catch2/3.5.0")
         if self.options.with_gtest:
-            self.requires("gtest/1.12.1")
+            self.requires("gtest/1.14.0")
         if self.options.with_doctest:
-            self.requires("doctest/2.4.10")
+            self.requires("doctest/2.4.11")
         if self.options.get_safe("with_cpputest"):
             self.requires("cpputest/4.0")
 
@@ -64,6 +67,9 @@ class ApprovalTestsCppConan(ConanFile):
         self.info.clear()
 
     def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
         if Version(self.version) >= "10.2.0":
             if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
                 raise ConanInvalidConfiguration(f"{self.ref} with compiler gcc requires at least compiler version 5")
