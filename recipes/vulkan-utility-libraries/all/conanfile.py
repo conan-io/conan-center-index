@@ -126,7 +126,6 @@ class VulkanUtilityLibrariesConan(ConanFile):
                 "/W4",
                 "/we5038",
                 "/permissive-",
-                "/MP",
             ]
         return cxxflags
 
