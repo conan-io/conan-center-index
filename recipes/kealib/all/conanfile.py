@@ -55,7 +55,7 @@ class KealibConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
         hdf5_opts = self.dependencies["hdf5"].options
         if not (hdf5_opts.enable_cxx and hdf5_opts.hl):
-            raise ConanInvalidConfiguration("kealib requires hdf5 with cxx and hl enabled.")
+            raise ConanInvalidConfiguration(f"{self.ref} requires dependencies options -o 'hdf5/*:enable_cxx=True' -o 'hdf5/*:hl=True'")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
