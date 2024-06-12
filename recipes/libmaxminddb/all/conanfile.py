@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -16,10 +17,12 @@ class LibmaxminddbConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_binaries": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_binaries": True,
     }
 
     def export_sources(self):
@@ -28,6 +31,8 @@ class LibmaxminddbConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.10.0":
+            del self.options.with_binaries
 
     def configure(self):
         if self.options.shared:
@@ -54,6 +59,8 @@ class LibmaxminddbConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
+        if "with_binaries" in self.options:
+            tc.variables["MAXMINDDB_BUILD_BINARIES"] = self.options.with_binaries
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
