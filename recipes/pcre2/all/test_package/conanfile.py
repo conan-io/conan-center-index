@@ -15,17 +15,6 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
-    def build_requirements(self):
-        if self._settings_build.os == "Windows":
-            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-                self.tool_requires("msys2/cci.latest")
-
-    def generate(self):
-        # Workaround for Conan v1: store dependency info for later use in test()
-        pcre2_cpp_info = self.dependencies["pcre2"].cpp_info.aggregated_components()
-        save(self, os.path.join(self.build_folder, "bindir"), pcre2_cpp_info.bindir)
-        save(self, os.path.join(self.build_folder, "libs"), " ".join(pcre2_cpp_info.libs))
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
