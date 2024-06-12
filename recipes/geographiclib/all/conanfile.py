@@ -4,7 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import (
     apply_conandata_patches, copy, export_conandata_patches, get,
-    replace_in_file, rm, rmdir
+    replace_in_file, rm, rmdir, collect_libs
 )
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
@@ -138,9 +138,11 @@ class GeographiclibConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "geographiclib")
         self.cpp_info.set_property("cmake_target_name", "GeographicLib::GeographicLib")
         self.cpp_info.set_property("pkg_config_name", "geographiclib")
-        suffix = "_d" if self.settings.build_type == "Debug" and is_msvc(self) else ""
-        suffix += "-i" if is_msvc(self) and self.options.shared else ""
-        self.cpp_info.libs = [f"GeographicLib{suffix}"] if Version(self.version) >= "2" else [f"Geographic{suffix}"]
+        # Geographic library name is GeographicLib since version 2.x (was Geographic before)
+        # It uses a debug postfix _d on Windows or when using multi-configuration generators (like Ninja Multi-Config)
+        # It's hard to track when using multi-configuration generators, so collect_libs is used
+        # Plus, it adds -i postfix on Windows when using shared libraries
+        self.cpp_info.libs = collect_libs(self)
         self.cpp_info.defines.append("GEOGRAPHICLIB_SHARED_LIB={}".format("1" if self.options.shared else "0"))
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
