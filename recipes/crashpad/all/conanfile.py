@@ -159,15 +159,13 @@ class CrashpadConan(ConanFile):
         compilers_by_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
         cxx = compilers_by_conf.get("cpp") or VirtualBuildEnv(self).vars().get("CXX")
         if cxx:
-            self.output.info(f"The compiler defined in conf or CXX profile variable is {cxx}")
             return cxx
         if self.settings.compiler == "apple-clang":
             return XCRun(self).cxx
         compiler_version = self.settings.compiler.version
         major = Version(compiler_version).major
         if self.settings.compiler == "gcc":
-            self.output.info("Using shutil.which to find g++ compiler based on settings")
-            return shutil.which(f"g++-{compiler_version}") or shutil.which(f"g++-{major}") or shutil.which("g++") or shutil.which("c++")
+            return shutil.which(f"g++-{compiler_version}") or shutil.which(f"g++-{major}") or shutil.which("g++")
         if self.settings.compiler == "clang":
             return shutil.which(f"clang++-{compiler_version}") or shutil.which(f"clang++-{major}") or shutil.which("clang++") or ""
         return ""
@@ -184,7 +182,6 @@ class CrashpadConan(ConanFile):
             return " ".join(filter(None, [tc.vars().get(name), deps.vars().get(name)]))
 
         env = Environment()
-        self.output.info(f"The CXX detected compiler is {self._cxx}")
         env.define("CXX", self._cxx)
         env.vars(self).save_script("conanbuild_gn")
 
@@ -216,8 +213,11 @@ class CrashpadConan(ConanFile):
                             'libs = [ "z" ]', f"libs = [ {zlib_libs} ]")
         elif self.settings.compiler == "gcc":
             toolchain_path = os.path.join(self.source_folder, "third_party", "mini_chromium", "mini_chromium", "build", "config", "BUILD.gn")
+            replace_in_file(self, toolchain_path, 'cc = "clang"','cc = "gcc"')
+            replace_in_file(self, toolchain_path, 'cxx = "clang++"', 'cxx = "g++"')
             # Remove gcc-incompatible compiler arguments
             for comp_arg in [
+                "-Werror",
                 "-Wheader-hygiene",
                 "-Wnewline-eof",
                 "-Wstring-conversion",
