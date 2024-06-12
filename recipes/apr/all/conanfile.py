@@ -68,7 +68,7 @@ class AprConan(ConanFile):
             basic_layout(self, src_folder="src")
 
     def validate_build(self):
-        if cross_building(self) and not is_msvc(self):
+        if cross_building(self) and not is_msvc(self) and self.settings.os != "Linux":
             raise ConanInvalidConfiguration("apr recipe doesn't support cross-build yet due to runtime checks in autoconf")
 
     def build_requirements(self):
@@ -96,6 +96,13 @@ class AprConan(ConanFile):
             tc.configure_args.append("--with-installbuilddir=${prefix}/res/build-1")
             if cross_building(self):
                 tc.configure_args.append("apr_cv_mutex_robust_shared=yes")
+                if self.settings.os == "Linux":
+                    # the following are known to be true in modern Linux
+                    tc.configure_args.extend(["ac_cv_file__dev_zero=yes",
+                                            "ac_cv_mmap__dev_zero=yes",
+                                            "ac_cv_define_PTHREAD_PROCESS_SHARED=yes",
+                                            "apr_cv_process_shared_works=yes",
+                                            "apr_cv_tcp_nodelay_with_cork=yes"])
             tc.generate()
 
     def _patch_sources(self):
