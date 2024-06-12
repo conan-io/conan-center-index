@@ -76,7 +76,7 @@ class LimereportConan(ConanFile):
         if not (self.dependencies["qt"].options.qtsvg and self.dependencies["qt"].options.qttools):
             raise ConanInvalidConfiguration(f"{self.ref} requires -o='qt/*:qtsvg=True' and -o='qt/*:qttools=True'")
         if self.options.with_zint and not self.dependencies["zint"].options.with_qt:
-                raise ConanInvalidConfiguration(f"{self.ref} option with_zint=True requires -o 'zint/*:with_qt=True'")
+            raise ConanInvalidConfiguration(f"{self.ref} option with_zint=True requires -o 'zint/*:with_qt=True'")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
