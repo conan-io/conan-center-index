@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
@@ -14,7 +14,7 @@ class ReflectCppConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/getml/reflect-cpp"
-    topics = ("reflection", "serialization", "memory", "json", "xml", "flatbuffers", "header-only")
+    topics = ("reflection", "serialization", "memory", "json", "xml", "flatbuffers", "yaml", "toml", "msgpack", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -44,9 +44,6 @@ class ReflectCppConan(ConanFile):
             "apple-clang": "15",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -59,7 +56,7 @@ class ReflectCppConan(ConanFile):
             self.requires("flatbuffers/23.5.26", transitive_headers=True)
         if self.options.with_yaml:
             self.requires("yaml-cpp/0.8.0", transitive_headers=True)
-            
+
     def package_id(self):
         self.info.clear()
 
@@ -74,9 +71,6 @@ class ReflectCppConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def build(self):
-        apply_conandata_patches(self)
 
     def package(self):
         copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)

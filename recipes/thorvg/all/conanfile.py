@@ -35,7 +35,8 @@ class ThorvgConan(ConanFile):
         "with_threads": [True, False],
         "with_vector": [True, False],  # removed in thorvg 0.13.1. Renamed to simd
         "with_simd": [True, False],  # legacy with_vector
-        "with_examples": [True, False]
+        "with_examples": [True, False],
+        "with_extra": [False, 'lottie_expressions'],
     }
     default_options = {
         "shared": False,
@@ -48,7 +49,8 @@ class ThorvgConan(ConanFile):
         "with_threads": True,
         "with_vector": False,
         "with_simd": False,
-        "with_examples": False
+        "with_examples": False,
+        "with_extra": 'lottie_expressions',
     }
     # See more here: https://github.com/thorvg/thorvg/blob/main/meson_options.txt
     options_description = {
@@ -61,7 +63,9 @@ class ThorvgConan(ConanFile):
         "with_bindings": "Enable API bindings",
         "with_tools": "Enable building thorvg tools",
         "with_examples": "Enable building examples",
+        "with_extra": "Enable support for exceptionally advanced features",
     }
+    short_paths = True
 
     @property
     def _min_cppstd(self):
@@ -85,6 +89,8 @@ class ThorvgConan(ConanFile):
             del self.options.with_vector
         else:
             del self.options.with_simd
+        if Version(self.version)  < "0.13.3":
+            del self.options.with_extra
 
     def configure(self):
         if self.options.shared:
@@ -100,6 +106,11 @@ class ThorvgConan(ConanFile):
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
+        if is_msvc(self) and self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} doesn't support debug build on MSVC."
             )
 
     def requirements(self):
@@ -131,7 +142,7 @@ class ThorvgConan(ConanFile):
             "threads": bool(self.options.with_threads),
             "examples": bool(self.options.with_examples),
             "tests": False,
-            "log": is_debug
+            "log": is_debug,
         })
         # Workaround to avoid: error D8016: '/O1' and '/RTC1' command-line options are incompatible
         if is_msvc(self) and is_debug:
@@ -141,6 +152,8 @@ class ThorvgConan(ConanFile):
             tc.project_options["simd"] = bool(self.options.with_simd)
         else:
             tc.project_options["vector"] = bool(self.options.with_vector)
+        if self.options.get_safe("with_extra") is not None:
+            tc.project_options["extra"] = str(self.options.with_extra) if self.options.with_extra else ''
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
