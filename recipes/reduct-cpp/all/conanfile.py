@@ -20,9 +20,11 @@ class ReductCPPConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
+        "with_std_chrono": [True, False],
     }
     default_options = {
         "fPIC": True,
+        "with_std_chrono": False,
     }
 
     @property
@@ -70,6 +72,11 @@ class ReductCPPConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+        # date::parse doesn't work well in gcc 14 or later due to C++20 std::chrono features.
+        # with_std_chrono = True solves this problem.
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) >= "14" and not self.options.with_std_chrono:
+            raise ConanInvalidConfiguration("gcc >= 14 requires option with_std_chrono=True")
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18 <4]")
 
@@ -78,6 +85,7 @@ class ReductCPPConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["REDUCT_CPP_USE_STD_CHRONO"] = self.options.with_std_chrono
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

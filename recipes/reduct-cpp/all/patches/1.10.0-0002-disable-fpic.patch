@@ -1,5 +1,5 @@
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index abce8a7..2ecbfd0 100644
+index 7bc00f5..c415bf1 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -14,7 +14,7 @@ set(PUBLIC_HEADERS

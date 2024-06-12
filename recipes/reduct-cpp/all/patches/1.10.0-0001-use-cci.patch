@@ -1,14 +1,12 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index cda9d1d..e6cf1d8 100644
+index af71f65..7e3a0e2 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -14,9 +14,20 @@ set(REDUCT_CPP_ENABLE_TESTS OFF CACHE BOOL "Compile tests")
- set(CMAKE_CXX_STANDARD 20)
+@@ -16,7 +16,20 @@ set(CMAKE_CXX_STANDARD 20)
  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
--
+ 
 -include(cmake/InstallDependencies.cmake)
--
 +find_package(fmt REQUIRED CONFIG)
 +find_package(httplib REQUIRED CONFIG)
 +find_package(nlohmann_json REQUIRED CONFIG)
@@ -23,11 +21,11 @@ index cda9d1d..e6cf1d8 100644
 +    concurrentqueue::concurrentqueue 
 +    date::date
 +)
+ 
  configure_file(cmake/ReductCppConfig.cmake.in ${CMAKE_BINARY_DIR}/cmake/ReductCppConfig.cmake @ONLY)
  configure_file(cmake/ReductCppConfigVersion.cmake.in ${CMAKE_BINARY_DIR}/cmake/ReductCppConfigVersion.cmake @ONLY)
- 
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 10a0925..abce8a7 100644
+index a868531..7bc00f5 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -19,7 +19,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
