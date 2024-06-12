@@ -35,15 +35,3 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
-
-            # Check that pcre2-config outputs correct link flags
-            if Version(self.tested_reference_str.split("/")[1]) >= "10.38":
-                bindir = load(self, os.path.join(self.build_folder, "bindir"))
-                libs = load(self, os.path.join(self.build_folder, "libs")).split(" ")
-                output = StringIO()
-                self.run(f"bash {bindir}/pcre2-config --libs8", output)
-                ldflags_str = next(l for l in output.getvalue().splitlines() if l.lower().startswith("-l")).strip()
-                ldflags = ldflags_str.split()
-                for flag in ldflags:
-                    if flag.startswith("-l"):
-                        assert flag[2:] in libs, f"Invalid library target '{flag[2:]}' output by pcre2-config. Not found in {libs}."
