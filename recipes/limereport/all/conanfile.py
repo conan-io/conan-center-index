@@ -1,5 +1,5 @@
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan import ConanFile
 from conan.tools.microsoft import is_msvc
@@ -60,10 +60,8 @@ class LimereportConan(ConanFile):
     def requirements(self):
         # QString included in Irglobal.h and Limereport expects be running Qt on customer side
         self.requires("qt/[>=5.15 <7]", transitive_headers=True, transitive_libs=True)
-
-    def build_requirements(self):
         if self.options.with_zint:
-            self.tool_requires("zint/2.10.0")
+            self.requires("zint/2.10.0")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -77,6 +75,8 @@ class LimereportConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires -o='qt/*:qtdeclarative=True'")
         if not (self.dependencies["qt"].options.qtsvg and self.dependencies["qt"].options.qttools):
             raise ConanInvalidConfiguration(f"{self.ref} requires -o='qt/*:qtsvg=True' and -o='qt/*:qttools=True'")
+        if self.options.with_zint and not self.dependencies["zint"].options.with_qt:
+                raise ConanInvalidConfiguration(f"{self.ref} option with_zint=True requires -o 'zint/*:with_qt=True'")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
@@ -93,7 +93,12 @@ class LimereportConan(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
 
+    def _patch_sources(self):
+        # Avoid using vendozied zint
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(3rdparty)", "")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
