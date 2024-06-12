@@ -208,7 +208,7 @@ class CrashpadConan(ConanFile):
              "#endif\n"
         )
         if is_msvc(self):
-            zlib_libs = ", ".join(f'"{l}".lib' for l in self.dependencies["zlib"].cpp_info.libs)
+            zlib_libs = ", ".join(f'"{l}"' for l in self.dependencies["zlib"].cpp_info.libs)
             replace_in_file(self, os.path.join(self.source_folder, "third_party", "zlib", "BUILD.gn"),
                             'libs = [ "z" ]', f"libs = [ {zlib_libs} ]")
         elif self.settings.compiler == "gcc":
