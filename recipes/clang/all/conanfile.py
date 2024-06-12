@@ -19,14 +19,10 @@ required_conan_version = ">=1.53.0"
 class ClangConan(ConanFile):
     name = "clang"
     description = "The Clang project provides a language front-end and tooling infrastructure for languages in the C language family"
-    # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
-    # In case not listed there, use "LicenseRef-<license-file-name>"
-    license = "LLVM-exception"
+    license = "Apache-2 with LLVM-exception"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://clang.llvm.org/"
-    # no "conan" and project name in topics. Use topics from the upstream listed on GH
-    topics = ("topic1", "topic2", "topic3")
-    # package_type should usually be "library" (if there is shared option)
+    topics = ("clang", "llvm", "compiler")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -67,11 +63,12 @@ class ClangConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"libxml2/[>2.12.4 <3]")
         self.requires(f"llvm-core/{self.version}", transitive_headers=True)
 
+    def build_requirements(self):
+        self.build_requires(f"libxml2/[>2.12.4 <3]")
+
     def validate(self):
-        # validate the minimum cpp standard supported. For C++ projects only
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -79,9 +76,6 @@ class ClangConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        # in case it does not work in another configuration, it should validated here too
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     def source(self):
         sources = self.conan_data["sources"][self.version]
@@ -89,7 +83,6 @@ class ClangConan(ConanFile):
         get(self, **sources["cmake"], destination="cmake", strip_root=True)
 
     def generate(self):
-        # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
         tc = CMakeToolchain(self)
         tc.variables["LLVM_INCLUDE_TESTS"] = False
         tc.generate()
@@ -103,10 +96,9 @@ class ClangConan(ConanFile):
                         """list(APPEND CMAKE_MODULE_PATH "${LLVM_DIR};${LLVM_CMAKE_DIR}")""",
                         strict=False
                         )
-        apply_conandata_patches(self)
 
     def build(self):
-        self._patch_sources()  # It can be apply_conandata_patches(self) only in case no more patches are needed
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder="clang")
         cmake.build()
@@ -182,14 +174,9 @@ class ClangConan(ConanFile):
         self._write_components()
 
         cmake_folder = package_folder / self._cmake_build_folder_rel_path
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
-        #rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        #rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        #rmdir(self, os.path.join(self.package_folder, "share"))
-        #rm(self, "ClangConfig*", cmake_folder)
-        #rm(self, "ClangTargets*", cmake_folder)
-        #rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        #rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rm(self, "ClangConfig*", cmake_folder)
+        rm(self, "ClangTargets*", cmake_folder)
+        rmdir(self, package_folder / "share")
 
     def package_info(self):
         def _lib_name_from_component(name):
@@ -210,15 +197,3 @@ class ClangConan(ConanFile):
             self.cpp_info.components[component].set_property("cmake_target_name", component)
             self.cpp_info.components[component].libs = [_lib_name_from_component(component)]
             self.cpp_info.components[component].requires = data["requires"]
-
-        # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("dl")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "Clang"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Clang"
-        self.cpp_info.names["cmake_find_package"] = "Clang"
-        self.cpp_info.names["cmake_find_package_multi"] = "Clang"
