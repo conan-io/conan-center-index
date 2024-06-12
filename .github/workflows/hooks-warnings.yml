@@ -8,8 +8,7 @@ jobs:
   comment:
     if: ${{ github.event.issue.pull_request && github.event.sender.login == 'conan-center-bot' }}
     runs-on: ubuntu-latest
-    permissions:
-      statuses: none
+    permissions:  {}
     steps:
       - uses: actions/github-script@v6
         with:
