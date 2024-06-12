@@ -50,7 +50,7 @@ class LibisalConan(ConanFile):
     def validate(self):
         if self.settings.arch not in ["x86", "x86_64"]:
             raise ConanInvalidConfiguration(f"{self.settings.arch} architecture is not supported")
-        if self.version == "2.30.0" and self.settings.arch == "armv8":
+        if self.version == "2.30.0" and self._settings_build.arch == "armv8":
             raise ConanInvalidConfiguration(f"Version {self.version} does not support armv8")
 
     def build_requirements(self):
