@@ -157,7 +157,7 @@ class CrashpadConan(ConanFile):
     @property
     def _cxx(self):
         compilers_by_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
-        cxx = compilers_by_conf.get("cpp") or VirtualBuildEnv(self).vars().get("CXX")
+        cxx = compilers_by_conf.get("cpp")
         if cxx:
             return cxx
         if self.settings.compiler == "apple-clang":
@@ -168,7 +168,7 @@ class CrashpadConan(ConanFile):
             return shutil.which(f"g++-{compiler_version}") or shutil.which(f"g++-{major}") or shutil.which("g++") or ""
         if self.settings.compiler == "clang":
             return shutil.which(f"clang++-{compiler_version}") or shutil.which(f"clang++-{major}") or shutil.which("clang++") or ""
-        return ""
+        return VirtualBuildEnv(self).vars().get("CXX") or ""
 
     def generate(self):
         VirtualBuildEnv(self).generate()
