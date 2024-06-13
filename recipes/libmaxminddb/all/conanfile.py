@@ -78,7 +78,7 @@ class LibmaxminddbConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
 
-        if self.settings.os != "Windows":
+        if self.settings.os != "Windows" and self.options.get_safe("with_binaries", True):
             bin_path = os.path.join(self.package_folder, "bin")
             self.env_info.PATH.append(bin_path)
 
