@@ -23,11 +23,13 @@ class ReadLineConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_library": ["termcap", "curses"],
+        "examples": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_library": "termcap",
+        "examples": True,
     }
 
     def config_options(self):
@@ -67,6 +69,10 @@ class ReadLineConan(ConanFile):
         tc.configure_args.extend([
             "--with-curses={}".format("yes" if self.options.with_library == "curses" else "no"),
         ])
+
+        if self.options.examples == True:
+            tc.configure_args.append("--disable-install-examples")
+
         if cross_building(self):
             tc.configure_args.append("bash_cv_wcwidth_broken=yes")
         tc.generate()
