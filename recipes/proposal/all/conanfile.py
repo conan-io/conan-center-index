@@ -65,7 +65,7 @@ class PROPOSALConan(ConanFile):
         # nlohmann_json: public headers include json.hpp and json_fwd.hpp
         self.requires("nlohmann_json/3.11.3", transitive_headers=True)
         if self.options.with_python:
-            self.requires("pybind11/2.11.1")
+            self.requires("pybind11/2.10.1")
 
     def validate(self):
         if is_msvc(self) and self.options.shared:
