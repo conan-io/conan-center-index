@@ -68,8 +68,6 @@ class WolfSSLConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if self.options.quic:
-            self.options.tls13 = True
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
@@ -80,7 +78,7 @@ class WolfSSLConan(ConanFile):
 
     def validate(self):
         if self.options.quic and Version(self.version) < "5.5.0":
-            raise ConanInvalidConfiguration("The option 'quic' requires version > 5.5.0")
+            raise ConanInvalidConfiguration("The option 'quic' requires version >= 5.5.0")
         if self.options.opensslall and not self.options.opensslextra:
             raise ConanInvalidConfiguration("The option 'opensslall' requires 'opensslextra=True'")
 
@@ -110,7 +108,7 @@ class WolfSSLConan(ConanFile):
             "--enable-sslv3={}".format(yes_no(self.options.sslv3)),
             "--enable-alpn={}".format(yes_no(self.options.alpn)),
             "--enable-des3={}".format(yes_no(self.options.des3)),
-            "--enable-tls13={}".format(yes_no(self.options.tls13)),
+            "--enable-tls13={}".format(yes_no(self.options.tls13 or self.options.quic)),
             "--enable-certgen={}".format(yes_no(self.options.certgen)),
             "--enable-dsa={}".format(yes_no(self.options.dsa)),
             "--enable-ripemd={}".format(yes_no(self.options.ripemd)),
