@@ -59,7 +59,7 @@ class ReflectCppConan(ConanFile):
         if self.options.with_yaml:
             self.requires("yaml-cpp/0.8.0", transitive_headers=True)
         if self.options.with_msgpack:
-            self.requires("msgpack-cxx/6.1.1", transitive_headers=True)
+            self.requires("msgpack-c/6.0.0", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()
