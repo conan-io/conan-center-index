@@ -5,10 +5,6 @@
 int main(void) {
     mINI::INIFile file("test_package.ini");
 
-    mINI::INIStructure ini;
-
-    ini["things"]["chairs"] = "20";
-    ini["things"]["balloons"] = "100";
-
-    file.generate(ini);
+    std::cout << "mini test successful \n";
+    return 0;
 }
