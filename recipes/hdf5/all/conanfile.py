@@ -98,7 +98,7 @@ class Hdf5Conan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
     def validate_build(self):
-        if cross_building(self) and Version(self.version) < "1.14.4-3":
+        if cross_building(self) and Version(self.version) < "1.14.4.3":
             # While building it runs some executables like H5detect
             raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
 
