@@ -19,7 +19,7 @@ class CrashpadConan(ConanFile):
     name = "crashpad"
     description = "Crashpad is a crash-reporting system."
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("conan", "crashpad", "crash", "error", "stacktrace", "collecting", "reporting")
+    topics = ("crashpad", "crash", "error", "stacktrace", "collecting", "reporting")
     license = "Apache-2.0"
     homepage = "https://chromium.googlesource.com/crashpad/crashpad/+/master/README.md"
     provides = "mini_chromium"
@@ -283,5 +283,4 @@ class CrashpadConan(ConanFile):
         self.cpp_info.components["handler"].requires = ["client", "util", "handler_common", "minidump", "snapshot"] + extra_handler_req
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
