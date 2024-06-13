@@ -18,6 +18,7 @@ class Im95ableReaConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/im95able/Rea/"
     topics = ("slot_map", "slot_list", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     @property

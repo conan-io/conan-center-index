@@ -1,4 +1,6 @@
 versions:
+  "1880":
+    folder: all
   "1854":
     folder: all
   "1845":

@@ -15,6 +15,7 @@ class BertrandConan(ConanFile):
     homepage = "https://github.com/bernedom/bertrand"
     description = "A C++ header only library providing a trivial implementation for design by contract."
     topics = ("design by contract", "dbc", "cplusplus-library", "cplusplus-17")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     @property
@@ -30,6 +31,9 @@ class BertrandConan(ConanFile):
             "clang": "5",
             "apple-clang": "10",
         }
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -50,12 +54,8 @@ class BertrandConan(ConanFile):
                 f"{self.name} {self.version} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -78,6 +78,4 @@ class BertrandConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "bertrand")
         self.cpp_info.set_property("cmake_target_name", "bertrand::bertrand")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []

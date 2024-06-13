@@ -15,4 +15,4 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             md_path = os.path.join(self.source_folder, os.pardir, "test_package", "test.md")
-            self.run("{} \"{}\"".format(bin_path, md_path), run_environment=True)
+            self.run(f"{bin_path} \"{md_path}\"", run_environment=True)

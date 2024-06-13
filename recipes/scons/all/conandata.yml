@@ -1,4 +1,7 @@
 sources:
+  "4.6.0":
+    url: "http://prdownloads.sourceforge.net/scons/SCons-4.6.0.tar.gz"
+    sha256: "7db28958b188b800f803c287d0680cc3ac7c422ed0b1cf9895042c52567803ec"
   "4.3.0":
     url: "http://prdownloads.sourceforge.net/scons/SCons-4.3.0.tar.gz"
     sha256: "2efc81754a4491299c0c64a6230715dfe33f7a3a42a0834a4ce1756af117bdec"
