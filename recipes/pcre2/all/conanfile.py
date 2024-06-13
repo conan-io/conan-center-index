@@ -120,14 +120,16 @@ class PCRE2Conan(ConanFile):
                               "RUNTIME DESTINATION bin BUNDLE DESTINATION bin")
         # pcre2-config does not correctly include '-static' in static library names
         if is_msvc(self):
+            replace = None
             if Version(self.version) > "10.42":
                 replace = "configure_file(pcre2-config.in"
             elif Version(self.version) >= "10.38":
                 replace = "CONFIGURE_FILE(pcre2-config.in"
             postfix = "-static" if not self.options.shared else ""
-            if self.settings.build_type == "Debug":
-                postfix += "d"
-            replace_in_file(self, cmakelists, replace, f'set(LIB_POSTFIX "{postfix}")\n{replace}')
+            if replace:
+                if self.settings.build_type == "Debug":
+                    postfix += "d"
+                replace_in_file(self, cmakelists, replace, f'set(LIB_POSTFIX "{postfix}")\n{replace}')
 
     def build(self):
         self._patch_sources()
