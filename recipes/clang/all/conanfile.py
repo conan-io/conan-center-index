@@ -48,6 +48,10 @@ class ClangConan(ConanFile):
             "Visual Studio": "15",
         }
 
+    @property
+    def _clang_source_folder(self):
+        return Path(self.source_folder) / "clang"
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -66,7 +70,8 @@ class ClangConan(ConanFile):
         self.requires(f"llvm-core/{self.version}", transitive_headers=True)
 
     def build_requirements(self):
-        self.build_requires(f"libxml2/[>2.12.4 <3]")
+        # needed to build c-index-test but not actually required by any components
+        self.test_requires(f"libxml2/[>2.12.4 <3]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -91,11 +96,13 @@ class ClangConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        replace_in_file(self, Path(self.source_folder) / "clang" / "CMakeLists.txt",
+        cmake_lists = self._clang_source_folder / "CMakeLists.txt"
+        replace_in_file(self, cmake_lists,
                         """list(APPEND CMAKE_MODULE_PATH "${LLVM_DIR}")""",
                         """list(APPEND CMAKE_MODULE_PATH "${LLVM_DIR};${LLVM_CMAKE_DIR}")""",
                         strict=False
                         )
+        #replace_in_file(self, cmake_lists, "if (LIBXML2_FOUND)", "if (LibXml2_FOUND)")
 
     def build(self):
         self._patch_sources()
@@ -165,7 +172,7 @@ class ClangConan(ConanFile):
             return json.load(fp)
 
     def package(self):
-        copy(self, "LICENSE.TXT", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.TXT", self._clang_source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
@@ -179,6 +186,12 @@ class ClangConan(ConanFile):
         rmdir(self, package_folder / "share")
 
     def package_info(self):
+        def _add_no_rtti_flag(component):
+            if is_msvc(self):
+                component.cxxflags.append("/GS-")
+            else:
+                component.cxxflags.append("-fno-rtti")
+
         def _lib_name_from_component(name):
             replacements = {
                 "libclang": "clang"
@@ -190,10 +203,16 @@ class ClangConan(ConanFile):
                                    [self._build_module_file_rel_path,
                                     self._cmake_build_folder_rel_path / "AddClang.cmake"]
                                    )
+
         self.cpp_info.builddirs.append(self._build_module_file_rel_path)
+        llvm = self.dependencies["llvm-core"]
+        if not llvm.options.rtti:
+            _add_no_rtti_flag(self.cpp_info)
 
         components = self._read_components()
         for component, data in components.items():
             self.cpp_info.components[component].set_property("cmake_target_name", component)
             self.cpp_info.components[component].libs = [_lib_name_from_component(component)]
             self.cpp_info.components[component].requires = data["requires"]
+            if not llvm.options.rtti:
+                _add_no_rtti_flag(self.cpp_info.components[component])
