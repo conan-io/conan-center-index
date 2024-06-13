@@ -63,7 +63,7 @@ class PROPOSALConan(ConanFile):
         # spdlog: requires transitive_libs due to direct calls to functionality from headers
         self.requires("spdlog/[>=1.11 <2]", transitive_headers=True, transitive_libs=True)
         # nlohmann_json: public headers include json.hpp and json_fwd.hpp
-        self.requires("nlohmann_json/3.11.3", transitive_headers=True)
+        self.requires("nlohmann_json/[~3.11]", transitive_headers=True)
         if self.options.with_python:
             self.requires("pybind11/2.10.1")
 
