@@ -223,7 +223,7 @@ class CrashpadConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["mini_chromium_base"].libs = ["base"]
-        self.cpp_info.components["mini_chromium_base"].build_modules = [os.path.join(self.package_folder, "lib", "cmake", "crashpad-cxx.cmake")]
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join(self.package_folder, "lib", "cmake", "crashpad-cxx.cmake")])
         self.cpp_info.components["mini_chromium_base"].builddirs = [os.path.join("lib", "cmake")]
         if is_apple_os(self):
             if self.settings.os == "Macos":
