@@ -1,4 +1,8 @@
 sources:
+  "2.9.0":
+    url: "https://github.com/stephenberry/glaze/archive/v2.9.0.tar.gz"
+    sha256: "d07d9cab3d86ee80bf64246c14520d3495027f70444071124ee856dbdf37b6e0"
+  # keep 2.8.4 for breaking change: pure reflection support for C style arrays
   "2.8.4":
     url: "https://github.com/stephenberry/glaze/archive/v2.8.4.tar.gz"
     sha256: "6ca8e63783f0a1dbe69f50c0bc289134301ecf930ada83489b9715cdd2a49252"
@@ -11,7 +15,7 @@ sources:
   "2.8.0":
     url: "https://github.com/stephenberry/glaze/archive/v2.8.0.tar.gz"
     sha256: "dc84691f2f8afde28a1abe58c69ef82f546a3955ef5aa028c34af51e53f710a9"
-  # keep 2.8.0 for breaking change: write error handling
+  # keep 2.7.0 for breaking change: write error handling
   "2.7.0":
     url: "https://github.com/stephenberry/glaze/archive/v2.7.0.tar.gz"
     sha256: "8e3ee2ba725137cd4f61bc9ceb74e2225dc22b970da1c5a43d2a6833115adbfc"
