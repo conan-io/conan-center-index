@@ -12,7 +12,6 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        test_file = os.path.join("bin", "test_package")
-        if self.settings.os == "Windows":
-            test_file += ".exe"
-        assert os.path.exists(test_file)
+        if not tools.cross_building(self):
+            bin_path = os.path.join("bin", "test_package")
+            self.run(bin_path, run_environment=True)

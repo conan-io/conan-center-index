@@ -11,9 +11,10 @@ class TslRobinMapConan(ConanFile):
     name = "tsl-robin-map"
     license = "MIT"
     description = "C++ implementation of a fast hash map and hash set using robin hood hashing."
-    topics = ("robin-map", "structure", "hash map", "hash set")
-    homepage = "https://github.com/Tessil/robin-map"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/Tessil/robin-map"
+    topics = ("robin-map", "structure", "hash map", "hash set", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -28,8 +29,7 @@ class TslRobinMapConan(ConanFile):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -43,7 +43,6 @@ class TslRobinMapConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "tsl::robin_map")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "tsl-robin-map"
@@ -55,4 +54,3 @@ class TslRobinMapConan(ConanFile):
         self.cpp_info.components["robin_map"].set_property("cmake_target_name", "tsl::robin_map")
         self.cpp_info.components["robin_map"].bindirs = []
         self.cpp_info.components["robin_map"].libdirs = []
-        self.cpp_info.components["robin_map"].resdirs = []

@@ -5,6 +5,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import check_min_vs
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.57.0"
@@ -45,7 +46,7 @@ class LcmsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.2.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -70,7 +71,8 @@ class LcmsConan(ConanFile):
         meson.build()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        license_file = "LICENSE" if Version(self.version) >= "2.16" else "COPYING"
+        copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))

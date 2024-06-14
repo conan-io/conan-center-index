@@ -57,10 +57,10 @@ class CppRestSDKConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0")
+        self.requires("boost/1.83.0")
         self.requires("openssl/[>=1.1 <4]")
         if self.options.with_compression:
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_websockets:
             self.requires("websocketpp/0.8.2")
 
@@ -112,7 +112,13 @@ class CppRestSDKConan(ConanFile):
         # cpprestsdk_boost_internal
         self.cpp_info.components["cpprestsdk_boost_internal"].set_property("cmake_target_name", "cpprestsdk::cpprestsdk_boost_internal")
         self.cpp_info.components["cpprestsdk_boost_internal"].includedirs = []
-        self.cpp_info.components["cpprestsdk_boost_internal"].requires = ["boost::boost"]
+        ## List of Boost components cpprestsdk depends on:
+        ## see https://github.com/microsoft/cpprestsdk/blob/v2.10.19/Release/cmake/cpprest_find_boost.cmake#L77-L106
+        self.cpp_info.components["cpprestsdk_boost_internal"].requires = ["boost::headers", "boost::system"]
+        if self.settings.os != "Windows":
+            self.cpp_info.components["cpprestsdk_boost_internal"].requires.extend(["boost::random", "boost::thread", "boost::filesystem", "boost::chrono", "boost::atomic"])
+        if self.settings.os != "Android":
+            self.cpp_info.components["cpprestsdk_boost_internal"].requires.extend(["boost::date_time", "boost::regex"])
         # cpprestsdk_openssl_internal
         self.cpp_info.components["cpprestsdk_openssl_internal"].set_property("cmake_target_name", "cpprestsdk::cpprestsdk_openssl_internal")
         self.cpp_info.components["cpprestsdk_openssl_internal"].includedirs = []

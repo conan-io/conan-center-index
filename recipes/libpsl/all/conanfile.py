@@ -48,7 +48,7 @@ class LibPslConan(ConanFile):
 
     def requirements(self):
         if self.options.with_idna == "icu":
-            self.requires("icu/72.1")
+            self.requires("icu/73.2")
         elif self.options.with_idna == "libidn":
             self.requires("libidn/1.36")
         elif self.options.with_idna == "libidn2":
@@ -57,9 +57,9 @@ class LibPslConan(ConanFile):
             self.requires("libunistring/0.9.10")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.2.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

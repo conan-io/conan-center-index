@@ -2,7 +2,6 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
 from conan.tools.files import chdir, copy, get
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -30,11 +29,13 @@ class LinuxHeadersGenericConan(ConanFile):
         del self.info.settings.build_type
         del self.info.settings.compiler
 
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
+
     def validate(self):
-        if self.settings.os != "Linux":
+        if self.settings.os != "Linux" or (not self._is_legacy_one_profile and self.settings_build.os != "Linux"):
             raise ConanInvalidConfiguration("linux-headers-generic supports only Linux")
-        if hasattr(self, "settings_build") and cross_building(self):
-            raise ConanInvalidConfiguration("linux-headers-generic can not be cross-compiled")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

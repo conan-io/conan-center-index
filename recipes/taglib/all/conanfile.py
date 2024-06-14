@@ -1,9 +1,12 @@
+import os
+
 from conan import ConanFile
-from conan.tools.build import stdcpp_library
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import stdcpp_library, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
-import os
 
 required_conan_version = ">=1.54.0"
 
@@ -29,6 +32,21 @@ class TaglibConan(ConanFile):
         "bindings": True,
     }
 
+    @property
+    def _min_cppstd(self):
+        # https://github.com/taglib/taglib/blob/v2.0beta/CMakeLists.txt#L5
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "7",
+            "clang": "6",
+            "apple-clang": "10",
+        }
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -44,7 +62,19 @@ class TaglibConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
+        if Version(self.version) >= 2:
+            self.requires("utfcpp/4.0.4")
+
+    def validate(self):
+        if Version(self.version) >= 2:
+            if self.settings.compiler.cppstd:
+                check_min_cppstd(self, self._min_cppstd)
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -56,6 +86,7 @@ class TaglibConan(ConanFile):
         tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_BINDINGS"] = self.options.bindings
+        tc.variables["ENABLE_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
@@ -67,10 +98,7 @@ class TaglibConan(ConanFile):
             os.path.join(self.source_folder, "taglib", "CMakeLists.txt"),
             os.path.join(self.source_folder, "bindings", "c", "CMakeLists.txt"),
         ]:
-            if Version(self.version) >= "1.13":
-                replace_in_file(self, cmakelists, "INSTALL_NAME_DIR ${CMAKE_INSTALL_LIBDIR}", "")
-            else:
-                replace_in_file(self, cmakelists, "INSTALL_NAME_DIR ${LIB_INSTALL_DIR}", "")
+            replace_in_file(self, cmakelists, "INSTALL_NAME_DIR ${", "# INSTALL_NAME_DIR ${")
 
     def build(self):
         self._patch_sources()
@@ -83,6 +111,7 @@ class TaglibConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rm(self, "taglib-config", os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
@@ -92,6 +121,8 @@ class TaglibConan(ConanFile):
         self.cpp_info.components["tag"].includedirs.append(os.path.join("include", "taglib"))
         self.cpp_info.components["tag"].libs = ["tag"]
         self.cpp_info.components["tag"].requires = ["zlib::zlib"]
+        if Version(self.version) >= 2:
+            self.cpp_info.components["tag"].requires.append("utfcpp::utfcpp")
         if not self.options.shared:
             self.cpp_info.components["tag"].defines.append("TAGLIB_STATIC")
             if self.settings.os in ["Linux", "FreeBSD"]:

@@ -3,7 +3,8 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -26,9 +27,6 @@ class awskvspicConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -55,8 +53,11 @@ class awskvspicConan(ConanFile):
         tc.variables["BUILD_DEPENDENCIES"] = False
         tc.generate()
 
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), " -fPIC", "")
+
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -72,6 +73,10 @@ class awskvspicConan(ConanFile):
         self.cpp_info.components["kvspic"].set_property("pkg_config_name", "libkvspic")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["kvspic"].system_libs = ["dl", "rt", "pthread"]
+        
+        if Version(self.version) >= "1.1.0":
+            if self.settings.build_type == "Debug":
+                self.cpp_info.components["kvspic"].defines = ["DEBUG_BUILD"]
 
         self.cpp_info.components["kvspicClient"].libs = ["kvspicClient"]
         self.cpp_info.components["kvspicClient"].set_property("pkg_config_name", "libkvspicClient")

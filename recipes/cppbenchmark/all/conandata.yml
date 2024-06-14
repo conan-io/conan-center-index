@@ -1,4 +1,7 @@
 sources:
+  "1.0.4.0":
+    url: "https://github.com/chronoxor/CppBenchmark/archive/1.0.4.0.tar.gz"
+    sha256: "44fec3d4264b6654999dfa0f6ceb8a7aeef4eca32db0d229fba70819e11cede0"
   "1.0.3.0":
     url: "https://github.com/chronoxor/CppBenchmark/archive/1.0.3.0.tar.gz"
     sha256: "6a62cfdb2aacf91523f74c6d0e42a3e2388ff94a2b7b983bec543c88554cc3e9"
@@ -9,6 +12,10 @@ sources:
     url: "https://github.com/chronoxor/CppBenchmark/archive/8605a8e886647e964180cb7a622424404a1da01f.tar.gz"
     sha256: "f0b88802b4418b13c04ae4dfdb859b2cb81142a47ca473ad447a8be087e0adee"
 patches:
+  "1.0.4.0":
+    - patch_file: "patches/1.0.3.0-0001-fix-cmake.patch"
+      patch_description: "fix install path, use cci packages, disable tests"
+      patch_type: "conan"
   "1.0.3.0":
     - patch_file: "patches/1.0.3.0-0001-fix-cmake.patch"
       patch_description: "fix install path, use cci packages, disable tests"

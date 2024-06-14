@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, save, collect_libs
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, VCVars
 from conan.tools.scm import Version
+from conan.tools.env import VirtualBuildEnv
 import os
 import shutil
 import textwrap
@@ -14,10 +14,10 @@ required_conan_version = ">=1.53.0"
 
 class MimallocConan(ConanFile):
     name = "mimalloc"
+    description = "mimalloc is a compact general purpose allocator with excellent performance."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/microsoft/mimalloc"
-    description = "mimalloc is a compact general purpose allocator with excellent performance."
     topics = ("mimalloc", "allocator", "performance", "microsoft")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -37,20 +37,6 @@ class MimallocConan(ConanFile):
         "inject": False,
         "single_object": False,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "Visual Studio": "15",
-            "msvc": "191",
-            "clang": "5",
-            "apple-clang": "10",
-        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -109,13 +95,8 @@ class MimallocConan(ConanFile):
            self.options.get_safe("inject"):
             raise ConanInvalidConfiguration("Single object is incompatible with library injection")
 
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.18 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -128,9 +109,12 @@ class MimallocConan(ConanFile):
         tc.variables["MI_BUILD_OBJECT"] = self.options.get_safe("single_object", False)
         tc.variables["MI_OVERRIDE"] = "ON" if self.options.override else "OFF"
         tc.variables["MI_SECURE"] = "ON" if self.options.secure else "OFF"
+        tc.variables["MI_WIN_REDIRECT"] = "OFF"
         if Version(self.version) >= "1.7.0":
             tc.variables["MI_INSTALL_TOPLEVEL"] = "ON"
         tc.generate()
+        venv = VirtualBuildEnv(self)
+        venv.generate(scope="build")
 
         if is_msvc(self):
             vcvars = VCVars(self)

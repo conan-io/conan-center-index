@@ -1,4 +1,7 @@
 sources:
+  "1.27.0":
+    url: "https://github.com/google/nsync/archive/1.27.0.tar.gz"
+    sha256: "e8e552a358f4a28e844207a7c5cb51767e4aeb0b29e22d23ac2a09924130f761"
   "1.26.0":
     url: "https://github.com/google/nsync/archive/1.26.0.tar.gz"
     sha256: "80fc1e605bb3cf5f272811ece39c4fb6761ffcb9b30563301845cc9ff381eb8b"
@@ -12,6 +15,8 @@ sources:
     sha256: "b7e75b17957c62bd02dd73890bde22da3a564903fcaad651b395453d41d3325b"
     url: "https://github.com/google/nsync/archive/refs/tags/1.23.0.tar.gz"
 patches:
+  "1.27.0":
+    - patch_file: "patches/0001-1.27.0-darwin-exclude_semaphore_mutex_c_from_nsync_cpp_lib.patch"
   "1.26.0":
     - patch_file: "patches/0001-darwin-exclude_semaphore_mutex_c_from_nsync_cpp_lib.patch"
   "1.25.0":

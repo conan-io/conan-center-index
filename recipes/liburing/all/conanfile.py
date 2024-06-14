@@ -1,23 +1,24 @@
-from conans import AutoToolsBuildEnvironment
 from conan import ConanFile
-from conan.tools.files import get, patch, chdir, rmdir, copy
+from conan.tools.files import get, rmdir, copy, apply_conandata_patches, chdir, export_conandata_patches, rm
 from conan.tools.scm import Version
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54.0"
 
 
-class LiburingConan(ConanFile):
+class Liburing(ConanFile):
     name = "liburing"
-    license = "GPL-2.0-or-later"
-    homepage = "https://github.com/axboe/liburing"
-    url = "https://github.com/conan-io/conan-center-index"
     description = ("helpers to setup and teardown io_uring instances, and also a simplified interface for "
                    "applications that don't need (or want) to deal with the full kernel side implementation.")
+    license = "GPL-2.0-or-later"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/axboe/liburing"
     topics = ("asynchronous-io", "async", "kernel")
-
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
@@ -29,13 +30,12 @@ class LiburingConan(ConanFile):
         "with_libc": True,
     }
 
-    exports_sources = ["patches/*"]
+    def export_sources(self):
+        export_conandata_patches(self)
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def requirements(self):
+        if Version(self.version) < "2.3":
+            self.requires("linux-headers-generic/5.13.9")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,64 +45,69 @@ class LiburingConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-
-    def requirements(self):
-        self.requires("linux-headers-generic/5.13.9")
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def validate(self):
         # FIXME: use kernel version of build/host machine.
         # kernel version should be encoded in profile
         if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(
-                "liburing is supported only on linux")
+            raise ConanInvalidConfiguration(f"{self.ref} is supported only on linux")
+
+    def layout(self):
+        basic_layout(self, src_folder='src')
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-              destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
+    def generate(self):
+        tc = AutotoolsToolchain(self)
 
-        self._autotools = AutoToolsBuildEnvironment(self)
-        args = []
-        if self.options.get_safe("with_libc") == False:
-            args.append("--nolibc")
-        self._autotools.configure(args=args)
-        self._autotools.flags.append("-std=gnu99")
-        return self._autotools
+        if Version(self.version) >= "2.5":
+            if self.options.with_libc:
+                tc.configure_args.append("--use-libc")
+        elif Version(self.version) >= "2.2":
+            if not self.options.with_libc:
+                tc.configure_args.append("--nolibc")
 
-    def _patch_sources(self):
-        for data in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **data)
+        tc.update_configure_args({
+            "--host": None,
+            "--build": None,
+            "--enable-shared": None,
+            "--disable-shared": None,
+            "--enable-static": None,
+            "--disable-static": None,
+            "--bindir": None,
+            "--sbindir": None,
+            "--oldincludedir": None,
+            "--libdevdir": "${prefix}/lib",  # pointing to libdir
+        })
+        tc.generate()
 
     def build(self):
-        self._patch_sources()
-        with chdir(self, self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.make()
+        apply_conandata_patches(self)
+        with chdir(self, self.source_folder):
+            at = Autotools(self)
+            at.configure()
+            at.make(target="src")
 
     def package(self):
-        copy(self, "COPYING*", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "LICENSE", src=self._source_subfolder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
-        with chdir(self, self._source_subfolder):
-            autotools = self._configure_autotools()
-            install_args = [
-                "ENABLE_SHARED={}".format(1 if self.options.shared else 0)
-            ]
-            autotools.install(args=install_args)
+        with chdir(self, self.source_folder):
+            at = Autotools(self)
+            at.install(
+                args=[f"ENABLE_SHARED={1 if self.options.shared else 0}"]
+            )
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "man"))
 
         if self.options.shared:
-            os.remove(os.path.join(self.package_folder, "lib", "liburing.a"))
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.names["pkg_config"] = "liburing"
+        self.cpp_info.set_property("pkg_config_name", "liburing")
         self.cpp_info.libs = ["uring"]

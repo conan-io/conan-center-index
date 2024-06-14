@@ -1,4 +1,7 @@
 sources:
+  "1.6.0":
+    url: "https://github.com/recastnavigation/recastnavigation/archive/refs/tags/v1.6.0.tar.gz"
+    sha256: "d48ca0121962fa0639502c0f56c4e3ae72f98e55d88727225444f500775c0074"
   "cci.20200511":
     url: "https://github.com/recastnavigation/recastnavigation/archive/df27e4eb1a4ade9912f8b7d75c25769a3193dbd0.tar.gz"
     sha256: "299fdcfe14749a26041f54b4a018b8c4918e0dd0283f77823b96247bc97c9400"

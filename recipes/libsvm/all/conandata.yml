@@ -1,4 +1,7 @@
 sources:
+  "332":
+    url: "https://github.com/cjlin1/libsvm/archive/v332.tar.gz"
+    sha256: "e1d7d316112d199ebd69c9695f79226d236b86e2c8d88e70cfe35fd383954ed8"
   "330":
     url: "https://github.com/cjlin1/libsvm/archive/v330.tar.gz"
     sha256: "e4fe41308c87cc210aec73e4f5f0fb4da14234d90e7a131763fbad3788ca2d80"

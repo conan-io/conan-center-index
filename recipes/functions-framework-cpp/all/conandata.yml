@@ -1,8 +1,22 @@
 sources:
+  "1.2.0":
+    url: "https://github.com/GoogleCloudPlatform/functions-framework-cpp/archive/refs/tags/v1.2.0.tar.gz"
+    sha256: "729e24ef58a03b563e48d8006d63972b16a22bcf93bf2b49f40c3b219032b64b"
   "1.0.0":
     url: "https://github.com/GoogleCloudPlatform/functions-framework-cpp/archive/refs/tags/v1.0.0.tar.gz"
     sha256: "005f2fbe3b8be9f6f0bf7a4a5d218a23b0f62d854a5e84c56872dd3a4d2820f7"
 patches:
+  "1.2.0":
+    - patch_file: "patches/1.2.0-0001-dont-skip-namelink.patch"
+      patch_description: "disable NAMELINK_SKIP"
+      patch_type: "portability"
+    - patch_file: "patches/1.2.0-0002-find-nlohmann_json.patch"
+      patch_description: "use cci's nlohmann_json"
+      patch_type: "conan"
   "1.0.0":
-    - patch_file: "patches/0001-dont-skip-namelink.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.0.0-0001-dont-skip-namelink.patch"
+      patch_description: "disable NAMELINK_SKIP"
+      patch_type: "portability"
+    - patch_file: "patches/1.0.0-0002-find-nlohmann_json.patch"
+      patch_description: "use cci's nlohmann_json"
+      patch_type: "conan"

@@ -1,7 +1,12 @@
 sources:
+  "1.0":
+    url: "https://github.com/dnwrnr/sgp4/archive/refs/tags/v1.0.tar.gz"
+    sha256: "34cdcce25adbe25234b5113b06537bec9d6e6c2a74f70919c9d71710dc3773f4"
   "20191207":
-    url: "https://github.com/dnwrnr/sgp4/archive/f5cb54b382a5b4787432ab5b9a1e83de1a224610.zip"
-    sha256: "e8ce05b5e62ffe81e2e07020ac693cb5f3eb7dd90587e9c2203639564c030495"
+    url: "https://github.com/dnwrnr/sgp4/archive/f5cb54b382a5b4787432ab5b9a1e83de1a224610.tar.gz"
+    sha256: "260f3524ead05c191bdf19c2f018376394b4856d2fbcc1ed63bcdd475b81c338"
 patches:
+  "1.0":
+    - patch_file: "patches/1.0-fix-cmake-files.patch"
   "20191207":
-    - patch_file: "patches/fix-cmake-files.patch"
+    - patch_file: "patches/20191207-fix-cmake-files.patch"

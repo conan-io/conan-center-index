@@ -1,0 +1,4 @@
+sources:
+  "0.1.1":
+    url: "https://gitlab.freedesktop.org/emersion/libdisplay-info/-/archive/0.1.1/libdisplay-info-0.1.1.tar.bz2"
+    sha256: "51cdb0362882ca2af62532ab4d95e60d81e9890b339264719fd55f8e3945d695"

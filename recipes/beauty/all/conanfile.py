@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -12,12 +13,11 @@ required_conan_version = ">=1.53.0"
 
 class BeautyConan(ConanFile):
     name = "beauty"
-    homepage = "https://github.com/dfleury2/beauty"
     description = "HTTP Server above Boost.Beast"
-    topics = ("http", "server", "boost.beast")
-    url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/dfleury2/beauty"
+    topics = ("http", "server", "boost.beast")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -57,8 +57,11 @@ class BeautyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.79.0"),
-        self.requires("openssl/1.1.1s")
+        # beauty public headers include some boost headers.
+        # For example beauty/application.hpp includes boost/asio.hpp
+        self.requires("boost/1.83.0", transitive_headers=True)
+        # dependency of asio in boost, exposed in boost/asio/ssl/detail/openssl_types.hpp
+        self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -79,11 +82,16 @@ class BeautyConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration("shared is not supported on Visual Studio")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.21 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
         tc = CMakeToolchain(self)
+        tc.variables["CONAN"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

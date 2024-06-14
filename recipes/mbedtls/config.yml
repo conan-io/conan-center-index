@@ -1,13 +1,29 @@
 versions:
+  "3.6.0":
+    folder: all
+  "3.5.2":
+    folder: all
+  "3.5.1":
+    folder: all
+  "3.5.0":
+    folder: all
+  "3.4.1":
+    folder: all
   "3.2.1":
     folder: all
   "3.1.0":
     folder: all
   "3.0.0":
     folder: all
+  "2.28.8":
+    folder: all
+  "2.28.4":
+    folder: all
   "2.25.0":
     folder: all
   "2.24.0":
     folder: all
   "2.23.0":
+    folder: all
+  "2.16.12":
     folder: all

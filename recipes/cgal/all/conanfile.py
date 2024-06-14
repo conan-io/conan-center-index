@@ -2,7 +2,7 @@ import os
 import textwrap
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, replace_in_file, rmdir, rm, copy, save, export_conandata_patches, patch
+from conan.tools.files import get, replace_in_file, rmdir, rm, copy, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -43,9 +43,10 @@ class CgalConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.82.0")
+        self.requires("boost/1.83.0")
         self.requires("eigen/3.4.0")
-        self.requires("mpfr/4.1.0")
+        self.requires("mpfr/4.2.1")
+        self.requires("gmp/6.3.0")
 
     def package_id(self):
         self.info.clear()
@@ -62,8 +63,7 @@ class CgalConan(ConanFile):
     def _patch_sources(self):
         replace_in_file(self,  os.path.join(self.source_folder, "CMakeLists.txt"),
                         "if(NOT PROJECT_NAME)", "if(1)", strict=False)
-        for it in self.conan_data.get("patches", {}).get(self.version, []):
-            patch(self, **it, strip=2)
+        apply_conandata_patches(self)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -93,7 +93,7 @@ class CgalConan(ConanFile):
     def _create_cmake_module_variables(self, module_file):
         '''
         CGAL requires C++14, and specific compilers flags to enable the possibility to set FPU rounding modes.
-        This CMake module, from the upsream CGAL pull-request https://github.com/CGAL/cgal/pull/7512, takes
+        This CMake module, from the upstream CGAL pull-request https://github.com/CGAL/cgal/pull/7512, takes
         care of all the known compilers CGAL has ever supported.
         '''
         content = textwrap.dedent('''\
@@ -163,6 +163,10 @@ function(CGAL_setup_CGAL_flags target)
 endfunction()
 
 CGAL_setup_CGAL_flags(CGAL::CGAL)
+
+# CGAL use may rely on the presence of those two variables
+set(CGAL_USE_GMP  TRUE CACHE INTERNAL "CGAL library is configured to use GMP")
+set(CGAL_USE_MPFR TRUE CACHE INTERNAL "CGAL library is configured to use MPFR")
 ''')
         save(self, module_file, content)
 

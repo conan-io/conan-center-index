@@ -1,0 +1,25 @@
+diff --git a/src/entry_handler.cpp b/src/entry_handler.cpp
+index 5844a03..0dc25a5 100644
+--- a/src/entry_handler.cpp
++++ b/src/entry_handler.cpp
+@@ -19,6 +19,7 @@
+ #include <assert.h>
+ #include <cinttypes>
+ #include <functional>
++#include <thread>
+ #include "file_util.h"
+ #include "string_helper.hpp"
+ #include "string_encode.h"
+diff --git a/src/md5.cpp b/src/md5.cpp
+index 93dd21f..78a4b57 100644
+--- a/src/md5.cpp
++++ b/src/md5.cpp
+@@ -90,7 +90,7 @@ void byteSwap(UWORD32* buf, unsigned words) {
+  * the data and converts bytes into longwords for this routine.
+  */
+ void MD5Transform(UWORD32 buf[4], UWORD32 const in[16]) {
+-  register UWORD32 a, b, c, d;
++  UWORD32 a, b, c, d;
+ 
+   a = buf[0];
+   b = buf[1];

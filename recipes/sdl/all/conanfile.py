@@ -3,14 +3,13 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, replace_in_file, rm, rmdir, copy
 from conan.tools.microsoft import is_msvc
-from conan.tools.build import cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class SDLConan(ConanFile):
@@ -80,7 +79,12 @@ class SDLConan(ConanFile):
         "libunwind": True,
     }
     generators = "CMakeDeps", "PkgConfigDeps", "VirtualBuildEnv"
-    
+
+    @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+               self.settings.compiler.get_safe("runtime")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -89,9 +93,6 @@ class SDLConan(ConanFile):
         lib_paths = [lib for _, dep in self.dependencies.items() for lib in dep.cpp_info.libdirs]
         env = Environment()
         env.define_path("LIBRARY_PATH", os.pathsep.join(lib_paths))
-
-        # FIXME: remove and raise required_conan_version to 1.55 once it's on c3i
-        env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
 
         env = env.vars(self, scope="build")
         env.save_script("sdl_env")
@@ -108,7 +109,7 @@ class SDLConan(ConanFile):
 
         if self.settings.os == "Windows":
             del self.options.fPIC
-            if is_msvc(self):
+            if (is_msvc(self) or self._is_clang_cl):
                 del self.options.iconv
         if self.settings.os != "Linux":
             del self.options.alsa
@@ -144,7 +145,7 @@ class SDLConan(ConanFile):
             self.requires("libiconv/1.17")
         if self.settings.os == "Linux":
             if self.options.alsa:
-                self.requires("libalsa/1.2.7.2")
+                self.requires("libalsa/1.2.10")
             if self.options.pulse:
                 self.requires("pulseaudio/14.2")
             if self.options.opengl:
@@ -152,15 +153,15 @@ class SDLConan(ConanFile):
             if self.options.nas:
                 self.requires("nas/1.9.5")
             if self.options.wayland:
-                self.requires("wayland/1.21.0")
-                self.requires("xkbcommon/1.4.1")
+                self.requires("wayland/1.22.0")
+                self.requires("xkbcommon/1.6.0")
                 self.requires("egl/system")
             if self.options.libunwind:
-                self.requires("libunwind/1.6.2")
+                self.requires("libunwind/1.8.0")
 
     def validate(self):
         # SDL>=2.0.18 requires xcode 12 or higher because it uses CoreHaptics.
-        if Version(self.version) >= "2.0.18" and is_apple_os(self) and Version(self.settings.compiler.version) < "12":
+        if is_apple_os(self) and Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("{}/{} requires xcode 12 or higher".format(self.name, self.version))
 
         if self.settings.os == "Linux":
@@ -178,17 +179,11 @@ class SDLConan(ConanFile):
             del self.info.options.sdl2main
 
     def build_requirements(self):
-        if self.settings.os == "Macos" and cross_building(self):
-            # Workaround for CMake bug with error message:
-            # Attempting to use @rpath without CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG being
-            # set. This could be because you are using a Mac OS X version less than 10.5
-            # or because CMake's platform configuration is corrupt.
-            # FIXME: Remove once CMake on macOS/M1 CI runners is upgraded.
-            self.tool_requires("cmake/3.25.3")
+        self.tool_requires("cmake/[>3.27 <4]")
         if self.settings.os == "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.1.0")
         if hasattr(self, "settings_build") and self.options.get_safe("wayland"):
-            self.build_requires("wayland/1.21.0")  # Provides wayland-scanner
+            self.build_requires("wayland/1.22.0")  # Provides wayland-scanner
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True,
@@ -197,25 +192,26 @@ class SDLConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        if self.settings.os == "Macos":
-            if self.options.iconv:
-                # If using conan-provided iconv, search for the symbol "libiconv_open"
-                replace_check = "check_library_exists(iconv libiconv_open"
-            else:
-                # When no tusing conan-provided icon, don't check for iconv at all
-                replace_check = "#check_library_exists(iconv iconv_open"
-            replace_in_file(self, cmakelists, "check_library_exists(iconv iconv_open",
-                            replace_check)
+        if Version(self.version) < "2.30.0":
+            cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+            if self.settings.os == "Macos":
+                if self.options.iconv:
+                    # If using conan-provided iconv, search for the symbol "libiconv_open"
+                    replace_check = "check_library_exists(iconv libiconv_open"
+                else:
+                    # When no tusing conan-provided icon, don't check for iconv at all
+                    replace_check = "#check_library_exists(iconv iconv_open"
+                replace_in_file(self, cmakelists, "check_library_exists(iconv iconv_open",
+                                replace_check)
 
-        # Avoid assuming iconv is available if it is provided by the C runtime,
-        # and let SDL build the fallback implementation
-        replace_in_file(self, cmakelists,
-                        'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
-                        '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
+            # Avoid assuming iconv is available if it is provided by the C runtime,
+            # and let SDL build the fallback implementation
+            replace_in_file(self, cmakelists,
+                            'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
+                            '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
 
         # Ensure to find wayland-scanner from wayland recipe in build requirements (or requirements if 1 profile)
-        if self.options.get_safe("wayland") and Version(self.version) >= "2.0.18":
+        if self.options.get_safe("wayland"):
             replace_in_file(self,
                 os.path.join(self.source_folder, "cmake", "sdlchecks.cmake"),
                 "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
@@ -238,10 +234,11 @@ class SDLConan(ConanFile):
 
         if self.settings.os != "Windows" and not self.options.shared:
             tc.variables["SDL_STATIC_PIC"] = self.options.fPIC
-        if is_msvc(self) and not self.options.shared:
+        if (is_msvc(self) or self._is_clang_cl) and not self.options.shared:
             tc.variables["HAVE_LIBC"] = True
         tc.variables["SDL_SHARED"] = self.options.shared
         tc.variables["SDL_STATIC"] = not self.options.shared
+        tc.variables["SDL_TEST"] = False
         tc.variables["SDL_OPENGL"] = self.options.opengl
         tc.variables["SDL_OPENGLES"] = self.options.opengles
         tc.variables["SDL_VULKAN"] = self.options.vulkan
@@ -318,13 +315,17 @@ class SDLConan(ConanFile):
 
         if Version(self.version) >= "2.0.22":
             tc.variables["SDL2_DISABLE_SDL2MAIN"] = not self.options.sdl2main
+        if Version(self.version) >= "2.30.0":
+            tc.variables["SDL_LIBICONV"] = self.options.get_safe("iconv", False)
+            tc.variables["SDL_SYSTEM_ICONV"] = False
 
         # Add extra information collected from the deps
         tc.variables["EXTRA_LDFLAGS"] = ";".join(cmake_extra_ldflags)
         tc.variables["CMAKE_REQUIRED_INCLUDES"] = ";".join(cmake_required_includes)
         cmake_extra_cflags = ["-I{}".format(path) for _, dep in self.dependencies.items() for path in dep.cpp_info.includedirs]
-        tc.variables["EXTRA_CFLAGS"] = ";".join(cmake_extra_cflags)
+        tc.variables["EXTRA_CFLAGS"] = ";".join(cmake_extra_cflags).replace(os.sep, '/')
         tc.variables["EXTRA_LIBS"] = ";".join(cmake_extra_libs)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):
@@ -339,6 +340,8 @@ class SDLConan(ConanFile):
 
         copy(self, pattern="LICENSE.txt", src=os.path.join(self.source_folder), dst=os.path.join(self.package_folder, "licenses"))
         rm(self, "sdl2-config", os.path.join(self.package_folder, "bin"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -355,7 +358,7 @@ class SDLConan(ConanFile):
 
         # SDL2
         lib_postfix = postfix
-        if self.version >= "2.0.24" and is_msvc(self) and not self.options.shared:
+        if self.version >= "2.0.24" and (is_msvc(self) or self._is_clang_cl) and not self.options.shared:
             lib_postfix = "-static" + postfix
 
         self.cpp_info.components["libsdl2"].set_property("cmake_target_name", "SDL2::SDL2")

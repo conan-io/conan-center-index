@@ -16,8 +16,8 @@ class CpplazyConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/MarcDirven/cpp-lazy"
     topics = ("lazy evaluation", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
 
     @property
     def _min_cppstd(self):
@@ -55,5 +55,7 @@ class CpplazyConan(ConanFile):
         )
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "cpp-lazy")
+        self.cpp_info.set_property("cmake_target_name", "cpp-lazy::cpp-lazy")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []

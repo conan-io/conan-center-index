@@ -66,7 +66,7 @@ class Clipper2Conan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version], strip_root = Version(self.version) >= "1.2.3")
 
     def generate(self):
         tc = CMakeToolchain(self)

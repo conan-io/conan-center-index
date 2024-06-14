@@ -1,0 +1,4 @@
+sources:
+  "cci.20240225":
+    url: "https://github.com/teslamotors/fixed-containers/archive/095b1bc100903a4c49cbec13842288f57e84b4f3.tar.gz"
+    sha256: "5d3624cd2c1fdfd1b054b03005804f2b7a2a6c2c114943976821c64b20a94588"

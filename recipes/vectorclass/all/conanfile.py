@@ -5,7 +5,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.50.0"
 
 
 class VectorclassConan(ConanFile):
@@ -18,7 +18,7 @@ class VectorclassConan(ConanFile):
     topics = ("vectorclass", "vector", "simd")
     homepage = "https://github.com/vectorclass/version2"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -37,6 +37,7 @@ class VectorclassConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15.7",
+            "msvc": "191",
             "gcc": "7",
             "clang": "4.0",
             "apple-clang": "9.1",
@@ -50,10 +51,10 @@ class VectorclassConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.os not in ["Linux", "Windows", "Macos"] or self.info.settings.arch not in ["x86", "x86_64"]:
+        if self.settings.os not in ["Linux", "Windows", "Macos"] or self.settings.arch not in ["x86", "x86_64"]:
             raise ConanInvalidConfiguration("vectorclass supports Linux/Windows/macOS and x86/x86_64 only.")
 
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
         def loose_lt_semver(v1, v2):
@@ -62,15 +63,14 @@ class VectorclassConan(ConanFile):
             min_length = min(len(lv1), len(lv2))
             return lv1[:min_length] < lv2[:min_length]
 
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and loose_lt_semver(str(self.info.settings.compiler.version), minimum_version):
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

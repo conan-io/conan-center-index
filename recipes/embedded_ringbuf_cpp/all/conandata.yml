@@ -1,0 +1,4 @@
+sources:
+  "1.3":
+    url: "https://github.com/wizard97/Embedded_RingBuf_CPP/archive/refs/tags/1.3.tar.gz"
+    sha256: "52340d9762e48b507810458507105c79c57c4d9bff2a9faec6c48bbf65ed2290"
