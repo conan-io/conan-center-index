@@ -18,7 +18,7 @@ class RocketConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return 17
 
     def validate(self):
         if self.settings.compiler.cppstd:
