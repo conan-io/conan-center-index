@@ -52,6 +52,9 @@ class RapidYAMLConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        # with_default_callback_uses_exceptions should only be valid if with_default_callbacks is true
+        if not self.options.with_default_callbacks:
+            self.options.rm_safe("with_default_callback_uses_exceptions")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
