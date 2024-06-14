@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.api.output import ConanOutput
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
@@ -68,8 +69,13 @@ class AprConan(ConanFile):
             basic_layout(self, src_folder="src")
 
     def validate_build(self):
-        if cross_building(self) and not is_msvc(self) and self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("apr recipe doesn't support cross-build yet due to runtime checks in autoconf")
+        if cross_building(self) and not is_msvc(self):
+            # Conan provide for Windows and Linux a simple "hack" to avoid entering a pre-built cached file
+            if self.settings.os not in ("Windows", "Linux") and self.conf.get("user.apr:cache_file") is None:
+                raise ConanInvalidConfiguration("apr recipe doesn't support cross-build for all the platforms"
+                                                " due to runtime checks in autoconf. You can provide"
+                                                " a cached file via Conan conf: \n"
+                                                " [conf]\nuser.apr:cache_file=/path/to/cache_file to try it.")
 
     def build_requirements(self):
         if not is_msvc(self):
@@ -83,6 +89,56 @@ class AprConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def _get_cross_building_configure_args(self):
+        """
+        The APR configure.in script makes extensive (30 instances) use
+        Check warning on line 73 in recipes/apr/all/conanfile.py
+
+        String statement has no effect of AC_TRY_RUN (to determine system capabilities) and
+        checks for /dev/zero. These runtime checks only work when run on the host so
+        the configure script will fail when cross compiling unless the relevant
+        configuration variables are provided in a cache file or on the command line or in an
+        environment variable. The configuration variable values are most easily determined by
+        running the configure script on a host system using:
+
+            ./configure --cache-file={gnu_host_triplet}.cache
+
+        The generated cache file can be repeatedly used to cross-compile to the targeted host system
+        by including it with the recipe data.
+
+        This recipe is reading this custom user conf variable:
+
+            [conf]
+            user.apr:cache_file=/path/to/{gnu_host_triplet}.cache
+
+        So you can use it to cross-compile on your system.
+        """
+        configure_args = []
+        user_cache_file = self.conf.get("user.apr:cache_file", check_type=str)
+        if user_cache_file:
+            configure_args.append(f"--cache-file={user_cache_file}")
+            return configure_args
+
+        ConanOutput().warning("Trying to set some configuration arguments, but it"
+                              " could fail. The best approach is to provide a"
+                              " pre-built cached file.")
+        # Let's try this hack (tested on Linux ARM and Intel)
+        if self.settings.os == "Linux":
+            # The following are known to be true in modern Linux
+            configure_args.extend(["apr_cv_mutex_robust_shared=yes",
+                                   "ac_cv_file__dev_zero=yes",
+                                   "ac_cv_mmap__dev_zero=yes",
+                                   "ac_cv_define_PTHREAD_PROCESS_SHARED=yes",
+                                   "apr_cv_process_shared_works=yes",
+                                   "apr_cv_tcp_nodelay_with_cork=yes"])
+        elif self.settings.os == "Windows":
+            configure_args.extend(["apr_cv_mutex_robust_shared=no"
+                                   "ac_cv_file__dev_zero=no",
+                                   "ac_cv_mmap__dev_zero=no",
+                                   "ac_cv_define_PTHREAD_PROCESS_SHARED=yes",
+                                   "apr_cv_tcp_nodelay_with_cork=no"])
+        return configure_args
+
     def generate(self):
         if is_msvc(self):
             tc = CMakeToolchain(self)
@@ -95,14 +151,7 @@ class AprConan(ConanFile):
             tc = AutotoolsToolchain(self)
             tc.configure_args.append("--with-installbuilddir=${prefix}/res/build-1")
             if cross_building(self):
-                tc.configure_args.append("apr_cv_mutex_robust_shared=yes")
-                if self.settings.os == "Linux":
-                    # the following are known to be true in modern Linux
-                    tc.configure_args.extend(["ac_cv_file__dev_zero=yes",
-                                            "ac_cv_mmap__dev_zero=yes",
-                                            "ac_cv_define_PTHREAD_PROCESS_SHARED=yes",
-                                            "apr_cv_process_shared_works=yes",
-                                            "apr_cv_tcp_nodelay_with_cork=yes"])
+                tc.configure_args.extend(self._get_cross_building_configure_args())
             tc.generate()
 
     def _patch_sources(self):
