@@ -74,6 +74,7 @@ class SuiteSparseLdlConan(ConanFile):
 
     def package(self):
         copy(self, "License.txt", os.path.join(self.source_folder, "LDL", "Doc"), os.path.join(self.package_folder, "licenses"))
+        copy(self, "lesser.txt", os.path.join(self.source_folder, "LDL", "Doc"), os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
