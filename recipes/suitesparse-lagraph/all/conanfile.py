@@ -71,7 +71,7 @@ class SuiteSparseLagraphConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", os.path.join(self.source_folder, "Doc"), os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", os.path.join(self.source_folder, "LAGraph"), os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
