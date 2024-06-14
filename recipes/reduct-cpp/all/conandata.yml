@@ -13,3 +13,6 @@ patches:
     - patch_file: "patches/1.10.0-0003-remove-fmt-headeronly.patch"
       patch_description: "remove FMT_HEADER_ONLY definition"
       patch_type: "conan"
+    - patch_file: "patches/1.10.0-0004-include-compare.patch"
+      patch_description: "include compare header for spaceship operator"
+      patch_type: "portability"

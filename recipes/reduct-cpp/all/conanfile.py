@@ -37,7 +37,8 @@ class ReductCPPConan(ConanFile):
             "gcc": "11.2",
             # spaceship operator(<=>) in std lib has been supported since clang 14
             "clang": "14",
-            "apple-clang": "10",
+            # spaceship operator(<=>) in std lib has been supported since apple-clang 14
+            "apple-clang": "14",
             "Visual Studio": "16",
             "msvc": "192",
         }
@@ -61,9 +62,6 @@ class ReductCPPConan(ConanFile):
         self.requires("date/3.0.1")
 
     def validate(self):
-        if self.settings.compiler == "apple-clang":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support apple-clang due to operator<=> support.")
-
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
