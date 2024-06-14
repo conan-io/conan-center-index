@@ -24,6 +24,7 @@ class CrashpadConan(ConanFile):
     homepage = "https://chromium.googlesource.com/crashpad/crashpad/+/master/README.md"
     provides = "mini_chromium"
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "static-library"
     options = {
         "fPIC": [True, False],
         "http_transport": ["libcurl", "socket", None],
