@@ -1,5 +1,7 @@
+import os
+import re
+
 from conan import ConanFile
-from conan.api.output import ConanOutput
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
@@ -10,8 +12,6 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-import os
-import re
 
 required_conan_version = ">=1.54.0"
 
@@ -119,9 +119,9 @@ class AprConan(ConanFile):
             configure_args.append(f"--cache-file={user_cache_file}")
             return configure_args
 
-        ConanOutput().warning("Trying to set some configuration arguments, but it"
-                              " could fail. The best approach is to provide a"
-                              " pre-built cached file.")
+        self.output.warning("Trying to set some configuration arguments, but it"
+                            " could fail. The best approach is to provide a"
+                            " pre-built cached file.")
         # Let's try this hack (tested on Linux ARM and Intel)
         if self.settings.os == "Linux":
             # The following are known to be true in modern Linux
