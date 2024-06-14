@@ -84,7 +84,7 @@ class CrashpadConan(ConanFile):
             if Version(self.settings.compiler.version) < min_compiler_version:
                 raise ConanInvalidConfiguration("crashpad needs a c++14 capable compiler, version >= {}".format(min_compiler_version))
         else:
-            self.output.warn("This recipe does not know about the current compiler and assumes it has sufficient c++14 supports.")
+            self.output.warning("This recipe does not know about the current compiler and assumes it has sufficient c++14 supports.")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 14)
 
