@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.15)
-project(PackageTest)
+cmake_minimum_required(VERSION 3.8)
+project(test_package LANGUAGES CXX)
 
-find_package(rocket CONFIG REQUIRED)
+find_package(rocket REQUIRED CONFIG)
 
-add_executable(example src/example.cpp)
-target_link_libraries(example rocket::rocket)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE rocket::rocket)

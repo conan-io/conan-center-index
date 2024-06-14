@@ -1,3 +1,4 @@
 sources:
-  "2.0":
-    commit: "348869fcda83f8b8b521c7654f83fea07ebe7a0a"
+  "cci.20200603":
+    url: "https://github.com/tripleslash/rocket/archive/348869fcda83f8b8b521c7654f83fea07ebe7a0a.tar.gz"
+    sha256: "de03b9c7f9b9478cfaa60683f95a7b0773dc0929d14e510c23f53b3804cc921f"
