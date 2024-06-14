@@ -11,7 +11,7 @@ required_conan_version = ">=1.53.0"
 class SuiteSparseSpexConan(ConanFile):
     name = "suitesparse-spex"
     description = "SPEX: Software package for SParse EXact algebra in SuiteSparse"
-    license = "GPL-2.0-or-later or LGPL-3.0-or-later"
+    license = "GPL-2.0-or-later OR LGPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://people.engr.tamu.edu/davis/suitesparse.html"
     topics = ("mathematics", "sparse-matrix", "linear-algebra", "exact-linear-algebra")
