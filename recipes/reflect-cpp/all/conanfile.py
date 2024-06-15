@@ -22,12 +22,14 @@ class ReflectCppConan(ConanFile):
         "with_xml" : [True, False],
         "with_flatbuffers" : [True, False],
         "with_yaml": [True, False],
+        "with_msgpack": [True, False],
     }
     default_options = {
         "with_json" : False,
         "with_xml" : False,
         "with_flatbuffers" : False,
         "with_yaml" : False,
+        "with_msgpack":  False,
     }
 
     @property
@@ -56,6 +58,8 @@ class ReflectCppConan(ConanFile):
             self.requires("flatbuffers/23.5.26", transitive_headers=True)
         if self.options.with_yaml:
             self.requires("yaml-cpp/0.8.0", transitive_headers=True)
+        if self.options.with_msgpack:
+            self.requires("msgpack-c/6.0.0", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()

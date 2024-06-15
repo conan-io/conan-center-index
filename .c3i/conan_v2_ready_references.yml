@@ -771,6 +771,7 @@ required_for_references:
 - libpq
 - libpqxx
 - libproperties
+- libprotobuf-mutator
 - libpsl
 - libqasm
 - libqrencode
@@ -845,6 +846,7 @@ required_for_references:
 - libxshmfence
 - libxslt
 - libyaml
+- libyang
 - libyuv
 - libzen
 - libzip
@@ -1158,6 +1160,7 @@ required_for_references:
 - polylabel
 - polylineencoder
 - polymorphic_value
+- popl
 - poppler-data
 - popt
 - portable-file-dialogs
@@ -1309,6 +1312,7 @@ required_for_references:
 - simfil
 - simple-websocket-server
 - simple-yaml
+- sioclient
 - sjson-cpp
 - skyr-url
 - sleef
@@ -1478,6 +1482,7 @@ required_for_references:
 - units
 - unity
 - univalue
+- unleash-client-cpp
 - unordered_dense
 - unqlite
 - upx

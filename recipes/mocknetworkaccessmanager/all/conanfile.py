@@ -38,9 +38,9 @@ class MockNetworkAccessManagerConan(ConanFile):
 
     def requirements(self):
         if self.options.with_qt == 5:
-            self.requires("qt/5.15.12", transitive_headers=True)
+            self.requires("qt/[~5.15]", transitive_headers=True)
         else:
-            self.requires("qt/6.6.1", transitive_headers=True)
+            self.requires("qt/[>=6.6 <7]", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
