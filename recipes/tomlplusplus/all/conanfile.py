@@ -22,10 +22,10 @@ class TomlPlusPlusConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "exceptions": [True, False, "none"]
+        "exceptions": [True, False, None]
     }
     default_options = {
-        "exceptions": "none"
+        "exceptions": None
     }
     no_copy_source = True
 
@@ -79,6 +79,7 @@ class TomlPlusPlusConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "tomlplusplus::tomlplusplus")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        if self.options.exceptions is not None:
+        if self.options.exceptions != None:
             define_value = "1" if self.options.exceptions else "0"
             self.cpp_info.defines.append(f"TOML_EXCEPTIONS={define_value}")
+            

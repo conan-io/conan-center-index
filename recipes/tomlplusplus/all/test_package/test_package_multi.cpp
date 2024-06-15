@@ -7,11 +7,9 @@ using namespace std::string_view_literals;
 
 int main(int argc, char* argv[]) {
     auto config = toml::parse_file(argv[1]);
-#if TOML_EXCEPTIONS
-    auto table = config;
-#else
-    auto table = config.table();
-#endif
+    // Important: this cast will convert from parse_result which is sometimes defined as a table
+    // and sometimes defined as it's own class that is castable to a table&.
+    auto& table = static_cast<toml::table&>(config);
 
     // get key-value pairs
     std::string_view library_name = table["library"]["name"].value_or(""sv);
