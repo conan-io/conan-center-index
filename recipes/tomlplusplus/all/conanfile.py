@@ -79,7 +79,6 @@ class TomlPlusPlusConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "tomlplusplus::tomlplusplus")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-        if self.options.exceptions != None:
-            define_value = "1" if self.options.exceptions else "0"
+        if self.options.exceptions.value is not None:
+            define_value = "1" if self.options.exceptions is True else "0"
             self.cpp_info.defines.append(f"TOML_EXCEPTIONS={define_value}")
-            
