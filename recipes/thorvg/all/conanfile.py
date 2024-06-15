@@ -20,7 +20,7 @@ class ThorvgConan(ConanFile):
     description = "ThorVG is a platform-independent portable library that allows for drawing vector-based scenes and animations."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/thorvg/thorvg"
+    homepage = "https://www.thorvg.org/"
     topics = ("svg", "animation", "tvg")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
