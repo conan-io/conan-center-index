@@ -1,17 +1,12 @@
 sources:
+  "2.9.0":
+    url: "https://github.com/stephenberry/glaze/archive/v2.9.0.tar.gz"
+    sha256: "d07d9cab3d86ee80bf64246c14520d3495027f70444071124ee856dbdf37b6e0"
+  # keep 2.8.4 for breaking change: pure reflection support for C style arrays
   "2.8.4":
     url: "https://github.com/stephenberry/glaze/archive/v2.8.4.tar.gz"
     sha256: "6ca8e63783f0a1dbe69f50c0bc289134301ecf930ada83489b9715cdd2a49252"
-  "2.8.2":
-    url: "https://github.com/stephenberry/glaze/archive/v2.8.2.tar.gz"
-    sha256: "1df9a39355de78a86300f102291fd7ee7cb475915da8569e2997803a755d4a15"
-  "2.8.1":
-    url: "https://github.com/stephenberry/glaze/archive/v2.8.1.tar.gz"
-    sha256: "e22c25db871f772e42e2d70c405f6cd95a8443a0ddd8fe7fc9d3a92b929104a0"
-  "2.8.0":
-    url: "https://github.com/stephenberry/glaze/archive/v2.8.0.tar.gz"
-    sha256: "dc84691f2f8afde28a1abe58c69ef82f546a3955ef5aa028c34af51e53f710a9"
-  # keep 2.8.0 for breaking change: write error handling
+  # keep 2.7.0 for breaking change: write error handling
   "2.7.0":
     url: "https://github.com/stephenberry/glaze/archive/v2.7.0.tar.gz"
     sha256: "8e3ee2ba725137cd4f61bc9ceb74e2225dc22b970da1c5a43d2a6833115adbfc"
@@ -19,18 +14,6 @@ sources:
   "2.6.9":
     url: "https://github.com/stephenberry/glaze/archive/v2.6.9.tar.gz"
     sha256: "e16c221c12b56f5a7f1cb2f33a884e752e219215826d8bc1edf96c78ee2458ec"
-  "2.6.6":
-    url: "https://github.com/stephenberry/glaze/archive/v2.6.6.tar.gz"
-    sha256: "c8a6b20401eb88419621c8ed25cd69bfee72e27982c1bdc3cec376922c08c2dd"
-  "2.6.5":
-    url: "https://github.com/stephenberry/glaze/archive/v2.6.5.tar.gz"
-    sha256: "5d5f3b41c7803cded9602ee93c80ea38fd3521cdaad6ea1836f818046d21e504"
-  "2.6.4":
-    url: "https://github.com/stephenberry/glaze/archive/v2.6.4.tar.gz"
-    sha256: "79aff3370c6fe79be8e1774c4fab3e450a10444b91c2aa15aeebf5f54efedc5d"
-  "2.6.3":
-    url: "https://github.com/stephenberry/glaze/archive/v2.6.3.tar.gz"
-    sha256: "5a2fd2a1ed18a184d7f86f5f8cd1350b12b8f2389466a436dfc198e3e6912c70"
   # keep 2.6.2 for gcc11
   "2.6.2":
     url: "https://github.com/stephenberry/glaze/archive/v2.6.2.tar.gz"
