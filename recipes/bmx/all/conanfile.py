@@ -58,6 +58,9 @@ class BmxConan(ConanFile):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
 
+        # Symbol export is currently not working properly on Windows so shared
+        # libraries are currently deactivated. This can later be revisited based
+        # on https://github.com/bbc/bmx/issues/80
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration(
                 "Building as a shared library currently not supported on Windows!"
