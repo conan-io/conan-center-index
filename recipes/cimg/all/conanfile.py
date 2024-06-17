@@ -68,9 +68,9 @@ class CImgConan(ConanFile):
         if self.options.enable_jpeg:
             self.requires("libjpeg/9e")
         if self.options.enable_openexr:
-            self.requires("openexr/3.1.9")
+            self.requires("openexr/3.2.1")
         if self.options.enable_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.enable_tiff:
             self.requires("libtiff/4.6.0")
         if self.options.enable_ffmpeg:

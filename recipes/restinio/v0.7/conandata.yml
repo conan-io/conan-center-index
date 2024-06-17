@@ -1,0 +1,10 @@
+sources:
+  "0.7.2":
+    url: "https://github.com/Stiffstream/restinio/archive/v.0.7.2.tar.gz"
+    sha256: "8d48dcf0e01a30562d7357f95048f43fa7c08db69eabef00540d60a3278523cb"
+  "0.7.1":
+    url: "https://github.com/Stiffstream/restinio/archive/v.0.7.1.tar.gz"
+    sha256: "46a3224ad23f768412c3494cd11f973b753b0d0be51906c46176ea7bafa687f6"
+  "0.7.0":
+    url: "https://github.com/Stiffstream/restinio/archive/v.0.7.0.tar.gz"
+    sha256: "1d6ad5812c02ee42342ed0ed78678a4e37c1cfe87f2f7c32c2862f825062feaa"

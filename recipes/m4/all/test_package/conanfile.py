@@ -26,11 +26,12 @@ class TestPackageConan(ConanFile):
         """))
 
     def test(self):
-        self.run("m4 --version")
-        self.run(f"m4 -P {self._m4_input_path}")
+        extension = ".exe" if self.settings.os == "Windows" else ""
+        self.run(f"m4{extension} --version")
+        self.run(f"m4{extension} -P {self._m4_input_path}")
 
-        self.run(f"m4 -R {self.source_folder}/frozen.m4f {self.source_folder}/test.m4")
+        self.run(f"m4{extension} -R {self.source_folder}/frozen.m4f {self.source_folder}/test.m4")
 
         output = StringIO()
-        self.run(f"m4 -P {self._m4_input_path}", output)
+        self.run(f"m4{extension} -P {self._m4_input_path}", output)
         assert "Harry, Jr. met Sally" in output.getvalue()

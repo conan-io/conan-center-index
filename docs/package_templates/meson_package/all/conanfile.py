@@ -7,7 +7,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import check_min_vs, is_msvc
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
@@ -35,23 +35,27 @@ class PackageConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "feature": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "feature": True,
     }
 
     @property
     def _min_cppstd(self):
-        return 17
+        return 14
 
     # in case the project requires C++14/17/20/... the minimum compiler version should be listed
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "7",
-            "clang": "7",
             "apple-clang": "10",
+            "clang": "7",
+            "gcc": "7",
+            "msvc": "191",
+            "Visual Studio": "15",
         }
 
     # no exports_sources attribute, but export_sources(self) method instead
@@ -67,8 +71,8 @@ class PackageConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         # for plain C projects only
-        self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         # src_folder must use the same source folder name the project
@@ -82,13 +86,11 @@ class PackageConan(ConanFile):
         # validate the minimum cpp standard supported. For C++ projects only
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        check_min_vs(self, 191)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
         # in case it does not work in another configuration, it should validated here too
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
@@ -96,20 +98,27 @@ class PackageConan(ConanFile):
     # if another tool than the compiler or Meson is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         # CCI policy assumes that Meson may not be installed on consumers machine
-        self.tool_requires("meson/0.63.3")
+        self.tool_requires("meson/1.2.3")
         # pkgconf is largely used by Meson, it should be added in build requirement when there are dependencies
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        # Meson feature options must be set to "enabled" or "disabled"
+        feature = lambda option: "enabled" if option else "disabled"
+
         # default_library and b_staticpic are automatically parsed when self.options.shared and self.options.fpic exist
         # buildtype is automatically parsed for self.settings
         tc = MesonToolchain(self)
         # In case need to pass definitions directly to the compiler
         tc.preprocessor_definitions["MYDEFINE"] = "MYDEF_VALUE"
+        # Meson features are typically enabled automatically when possible.
+        # The default behavior can be changed to disable all features by setting "auto_features" to "disabled".
+        tc.project_options["auto_features"] = "disabled"
+        tc.project_options["feature"] = feature(self.options.get_safe("feature"))
         # Meson project options may vary their types
         tc.project_options["tests"] = False
         tc.generate()
@@ -133,11 +142,12 @@ class PackageConan(ConanFile):
         meson.build()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
 
         # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))

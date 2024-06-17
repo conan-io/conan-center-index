@@ -53,9 +53,9 @@ class LibmetalinkConan(ConanFile):
 
     def requirements(self):
         if self.options.xml_backend == "expat":
-            self.requires("expat/2.4.9")
+            self.requires("expat/[>=2.6.2 <3]")
         elif self.options.xml_backend == "libxml2":
-            self.requires("libxml2/2.9.14")
+            self.requires("libxml2/[>=2.12.5 <3]")
 
     def validate(self):
         if is_msvc(self):
@@ -63,7 +63,7 @@ class LibmetalinkConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("gnu-config/cci.20210814")
-        self.tool_requires("pkgconf/1.9.3")
+        self.tool_requires("pkgconf/2.1.0")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):

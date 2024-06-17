@@ -15,6 +15,7 @@ class MparkVariantConan(ConanFile):
     description = "C++17 std::variant for C++11/14/17"
     license = "BSL-1.0"
     topics = ("variant", "mpark-variant")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -29,8 +30,7 @@ class MparkVariantConan(ConanFile):
             check_min_cppstd(self, "11")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
