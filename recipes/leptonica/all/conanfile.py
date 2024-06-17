@@ -128,34 +128,22 @@ class LeptonicaConan(ConanFile):
         replace_in_file(self, cmakelists_src, "${GIF_LIBRARIES}", "GIF::GIF")
         if not self.options.with_gif:
             replace_in_file(self, cmakelists_src, "if (GIF_LIBRARIES)", "if(0)")
-            if Version(self.version) >= "1.83.0":
-                replace_in_file(self, cmake_configure, "if(GIF_FOUND)", "if(0)")
-            else:
-                replace_in_file(self, cmake_configure, "if (GIF_FOUND)", "if(0)")
+            replace_in_file(self, cmake_configure, "if (GIF_FOUND)", "if(0)")
         ## libjpeg
         replace_in_file(self, cmakelists_src, "${JPEG_LIBRARIES}", "JPEG::JPEG")
         if not self.options.with_jpeg:
             replace_in_file(self, cmakelists_src, "if (JPEG_LIBRARIES)", "if(0)")
-            if Version(self.version) >= "1.83.0":
-                replace_in_file(self, cmake_configure, "if(JPEG_FOUND)", "if(0)")
-            else:
-                replace_in_file(self, cmake_configure, "if (JPEG_FOUND)", "if(0)")
+            replace_in_file(self, cmake_configure, "if (JPEG_FOUND)", "if(0)")
         ## libpng
         replace_in_file(self, cmakelists_src, "${PNG_LIBRARIES}", "PNG::PNG")
         if not self.options.with_png:
             replace_in_file(self, cmakelists_src, "if (PNG_LIBRARIES)", "if(0)")
-            if Version(self.version) >= "1.83.0":
-                replace_in_file(self, cmake_configure, "if(PNG_FOUND)", "if(0)")
-            else:
-                replace_in_file(self, cmake_configure, "if (PNG_FOUND)", "if(0)")
+            replace_in_file(self, cmake_configure, "if (PNG_FOUND)", "if(0)")
         ## libtiff
         replace_in_file(self, cmakelists_src, "${TIFF_LIBRARIES}", "TIFF::TIFF")
         if not self.options.with_tiff:
             replace_in_file(self, cmakelists_src, "if (TIFF_LIBRARIES)", "if(0)")
-            if Version(self.version) >= "1.83.0":
-                replace_in_file(self, cmake_configure, "if(TIFF_FOUND)", "if(0)")
-            else:
-                replace_in_file(self, cmake_configure, "if (TIFF_FOUND)", "if(0)")
+            replace_in_file(self, cmake_configure, "if (TIFF_FOUND)", "if(0)")
         ## We have to be more aggressive with dependencies found with pkgconfig
         ## Injection of libdirs is ensured by conan_basic_setup()
         ## openjpeg
@@ -174,7 +162,7 @@ class LeptonicaConan(ConanFile):
         else:
             replace_in_file(self, cmakelists, "set(JP2K_INCLUDE_DIRS ${OPENJPEG_INCLUDE_DIRS})", "set(JP2K_INCLUDE_DIRS ${OpenJPEG_INCLUDE_DIRS})")
             if not self.options.with_openjpeg:
-                replace_in_file(self, cmake_configure, "if(JP2K_FOUND)", "if(0)")
+                replace_in_file(self, cmake_configure, "if (JP2K_FOUND)", "if(0)")
 
         ## libwebp
         if Version(self.version) < "1.83.0":
@@ -185,11 +173,12 @@ class LeptonicaConan(ConanFile):
             if not self.options.with_webp:
                 replace_in_file(self, cmakelists_src, "if (WEBP_FOUND)", "if(0)")
                 replace_in_file(self, cmake_configure, "if (WEBP_FOUND)", "if(0)")
-        replace_in_file(self, cmakelists_src,
-                              "if (WEBP_FOUND)",
-                              "if (WEBP_FOUND)\n"
-                              "target_link_directories(leptonica PRIVATE ${WEBP_LIBRARY_DIRS} ${WEBPMUX_LIBRARY_DIRS})\n"
-                              "target_compile_definitions(leptonica PRIVATE ${WEBP_CFLAGS_OTHER} ${WEBPMUX_CFLAGS_OTHER})")
+        if Version(self.version) >= "1.83.0" or self.options.with_webp:
+            replace_in_file(self, cmakelists_src,
+                                "if (WEBP_FOUND)",
+                                "if (WEBP_FOUND)\n"
+                                "target_link_directories(leptonica PRIVATE ${WEBP_LIBRARY_DIRS} ${WEBPMUX_LIBRARY_DIRS})\n"
+                                "target_compile_definitions(leptonica PRIVATE ${WEBP_CFLAGS_OTHER} ${WEBPMUX_CFLAGS_OTHER})")
         replace_in_file(self, cmakelists_src, "${WEBP_LIBRARIES}", "${WEBP_LIBRARIES} ${WEBPMUX_LIBRARIES}")
 
         # Remove detection of fmemopen() on macOS < 10.13
