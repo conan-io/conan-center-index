@@ -125,4 +125,8 @@ class BeautyConan(ConanFile):
         if self.options.with_openssl:
             self.cpp_info.requires.append("openssl::ssl")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["m"]
+            self.cpp_info.system_libs = ["m", "pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["crypt32"]
+        if self.options.with_openssl:
+            self.cpp_info.defines = ["BEAUTY_ENABLE_OPENSSL"]
