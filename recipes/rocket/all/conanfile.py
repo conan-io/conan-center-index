@@ -14,7 +14,7 @@ class RocketConan(ConanFile):
     license = "DocumentRef-README.md:LicenseRef-Rocket-public-domain"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/tripleslash/rocket"
-    topics = ("signal-slots", "observer-pattern")
+    topics = ("signal-slots", "observer-pattern", "header-only")
     package_type = "header-library"
     settings = "os", "compiler", "build_type", "arch"
 
