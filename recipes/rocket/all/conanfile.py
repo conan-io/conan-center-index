@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import copy, get, save, load
 from conan.tools.build import check_min_cppstd
 import os
+import re
 
 required_conan_version = ">=1.53.0"
 
@@ -35,7 +36,11 @@ class RocketConan(ConanFile):
 
     def _extract_license(self):
         readme_content = load(self, os.path.join(self.source_folder, "README.md"))
-        license_content = "\n".join(readme_content.splitlines()[:6])
+        first = readme_content.find("# rocket")
+        last = readme_content.find("signals2).")
+        license_content = readme_content[first:last+len("signals2).")]
+        # Make sure the extracted text from README has the license type
+        assert license_content.find("public-domain") != -1
         save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_content)
 
     def package(self):
