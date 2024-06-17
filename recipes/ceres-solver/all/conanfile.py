@@ -147,6 +147,8 @@ class CeresSolverConan(ConanFile):
         if self.options.get_safe("use_suitesparse"):
             self.requires("suitesparse-cholmod/5.2.1")
             self.requires("suitesparse-spqr/4.3.3")
+            if Version(self.version) < "2.2.0":
+                self.requires("suitesparse-cxsparse/4.4.0")
         if self.options.get_safe("use_lapack"):
             self.requires("openblas/0.3.27")
         if self._require_metis:
@@ -217,7 +219,7 @@ class CeresSolverConan(ConanFile):
             tc.variables["ACCELERATESPARSE"] = self.options.get_safe("use_accelerate", False)
 
         if ceres_version < "2.2.0":
-            tc.variables["CXSPARSE"] = False
+            tc.variables["CXSPARSE"] = self.options.get_safe("use_suitesparse", False)
             tc.variables["MSVC_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         if ceres_version < "2.1.0":
@@ -233,6 +235,7 @@ class CeresSolverConan(ConanFile):
         deps.set_property("openblas", "cmake_file_name", "LAPACK")
         deps.set_property("metis", "cmake_file_name", "METIS")
         deps.set_property("metis", "cmake_target_name", "METIS::METIS")
+        deps.set_property("suitesparse-cxsparse", "cmake_target_name", "CXSparse::CXSparse")
         deps.generate()
 
     def _patch_sources(self):
@@ -297,6 +300,8 @@ class CeresSolverConan(ConanFile):
         if self.options.get_safe("use_suitesparse"):
             requires.append("suitesparse-cholmod::suitesparse-cholmod")
             requires.append("suitesparse-spqr::suitesparse-spqr")
+            if Version(self.version) < "2.2.0":
+                requires.append("suitesparse-cxsparse::suitesparse-cxsparse")
         if self.options.get_safe("use_lapack"):
             requires.append("openblas::openblas")
         if self._require_metis:
