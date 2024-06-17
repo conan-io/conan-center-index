@@ -61,6 +61,9 @@ class ReflectCppConan(ConanFile):
         if self.options.with_msgpack:
             self.requires("msgpack-c/6.0.0", transitive_headers=True)
 
+        if Version(self.version) >= "0.11.1":
+            self.requires("ctre/3.9.0", transitive_headers=True)
+
     def package_id(self):
         self.info.clear()
 
@@ -88,3 +91,5 @@ class ReflectCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        if Version(self.version) >= "0.11.1":
+            self.cpp_info.defines.append("REFLECTCPP_NO_BUNDLED_DEPENDENCIES")
