@@ -22,3 +22,6 @@ patches:
       patch_description: "Handle pthread_setname_np not being defined on macOS"
       patch_type: "portability"
       patch_source: "https://github.com/dfleury2/beauty/pull/28"
+    - patch_file: "patches/0002-remove-openssl-target.patch"
+      patch_description: "Avoid defining openssl::openssl target when defined by Conan"
+      patch_type: "conan"
