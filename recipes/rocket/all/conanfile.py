@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import copy, get, save, load
+from conan.tools.files import apply_conandata_patches, copy, get, save, load, export_conandata_patches
 from conan.tools.build import check_min_cppstd
 import os
 import re
@@ -21,6 +21,9 @@ class RocketConan(ConanFile):
     def _min_cppstd(self):
         return 17
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
@@ -32,7 +35,7 @@ class RocketConan(ConanFile):
         self.info.clear()
 
     def build(self):
-        pass
+        apply_conandata_patches(self)
 
     def _extract_license(self):
         readme_content = load(self, os.path.join(self.source_folder, "README.md"))
