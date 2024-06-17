@@ -2,7 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import get, export_conandata_patches, apply_conandata_patches, rm, copy
+from conan.tools.files import get, export_conandata_patches, apply_conandata_patches, rm, copy, replace_in_file
 
 
 class VigraConan(ConanFile):
@@ -41,6 +41,12 @@ class VigraConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
         apply_conandata_patches(self)
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "src", "impex", "CMakeLists.txt"),
+            'SOVERSION ${SOVERSION} INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}"',
+            'SOVERSION ${SOVERSION} INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}" INSTALL_NAME_DIR "@rpath"'
+        )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -103,6 +109,7 @@ class VigraConan(ConanFile):
         cm = CMake(self)
         cm.install()
         rm(self, "*.cmake", self.package_folder, recursive=True)
+        #fix_apple_shared_install_name(self)
 
     def package_info(self):
         if not self.options.shared:
