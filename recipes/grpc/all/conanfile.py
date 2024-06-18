@@ -89,16 +89,14 @@ class GrpcConan(ConanFile):
 
     def requirements(self):
         # abseil is public. See https://github.com/conan-io/conan-center-index/pull/17284#issuecomment-1526082638
-        if Version(self.version) < "1.47":
-            if is_msvc(self):
-                self.requires("abseil/20211102.0", transitive_headers=True, transitive_libs=True)
-            else:
-                self.requires("abseil/20220623.1", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) >= "1.62.0":
+            self.requires("protobuf/5.27.0", transitive_headers=True)
+            self.requires("abseil/[>=20240116.1]", transitive_headers=True)
         else:
-            self.requires("abseil/20230125.3", transitive_headers=True, transitive_libs=True)
+            self.requires("abseil/[>=20230125.3 <=20230802.1]", transitive_headers=True)
+            self.requires("protobuf/3.21.12", transitive_headers=True)
         self.requires("c-ares/1.19.1")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
         self.requires("re2/20230301")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52":
@@ -215,8 +213,8 @@ class GrpcConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        # rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # Create one custom module file per executable in order to emulate
         # CMake executables imported targets of grpc
@@ -288,7 +286,8 @@ class GrpcConan(ConanFile):
     def _grpc_components(self):
 
         def libsystemd():
-            return ["libsystemd::libsystemd"] if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52" else []
+            return ["libsystemd::libsystemd"
+                    ] if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52" else []
 
         def libm():
             return ["m"] if self.settings.os in ["Linux", "FreeBSD"] else []
@@ -314,27 +313,38 @@ class GrpcConan(ConanFile):
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
             },
             "gpr": {
-                "lib": "gpr",
+                "lib":
+                "gpr",
                 "requires": [
-                    "upb", "abseil::absl_base", "abseil::absl_memory",
-                    "abseil::absl_status", "abseil::absl_str_format",
-                    "abseil::absl_strings", "abseil::absl_synchronization",
-                    "abseil::absl_time", "abseil::absl_optional",
-                    "abseil::absl_flags"
+                    "abseil::absl_base", "abseil::absl_memory", "abseil::absl_status", "abseil::absl_str_format",
+                    "abseil::absl_strings", "abseil::absl_synchronization", "abseil::absl_time",
+                    "abseil::absl_optional", "abseil::absl_flags"
                 ] + libsystemd(),
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                "system_libs":
+                libm() + pthread() + crypt32() + ws2_32() + wsock32(),
             },
             "_grpc": {
-                "lib": "grpc",
+                "lib":
+                "grpc",
                 "requires": [
-                    "address_sorting", "gpr", "upb", "abseil::absl_bind_front",
-                    "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector",
-                    "abseil::absl_statusor", "abseil::absl_random_random",
-                    "c-ares::cares", "openssl::crypto",
-                    "openssl::ssl", "re2::re2", "zlib::zlib",
+                    "address_sorting",
+                    "gpr",
+                    # "upb",
+                    "abseil::absl_bind_front",
+                    "abseil::absl_flat_hash_map",
+                    "abseil::absl_inlined_vector",
+                    "abseil::absl_statusor",
+                    "abseil::absl_random_random",
+                    "c-ares::cares",
+                    "openssl::crypto",
+                    "openssl::ssl",
+                    "re2::re2",
+                    "zlib::zlib",
                 ],
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-                "frameworks": corefoundation(),
+                "system_libs":
+                libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                "frameworks":
+                corefoundation(),
             },
             "grpc++": {
                 "lib": "grpc++",
@@ -351,10 +361,6 @@ class GrpcConan(ConanFile):
                 "requires": ["grpc++", "protobuf::libprotobuf"],
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
             },
-            "upb": {
-                "lib": "upb",
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
             "grpc_plugin_support": {
                 "lib": "grpc_plugin_support",
                 "requires": ["protobuf::libprotoc", "protobuf::libprotobuf"],
@@ -365,15 +371,24 @@ class GrpcConan(ConanFile):
         if not self.options.secure:
             components.update({
                 "grpc_unsecure": {
-                    "lib": "grpc_unsecure",
+                    "lib":
+                    "grpc_unsecure",
                     "requires": [
-                        "address_sorting", "gpr", "upb", "abseil::absl_flat_hash_map",
-                        "abseil::absl_inlined_vector", "abseil::absl_statusor",
-                        "c-ares::cares", "re2::re2", "zlib::zlib",
+                        "address_sorting",
+                        "gpr",
+                        #"upb",
+                        "abseil::absl_flat_hash_map",
+                        "abseil::absl_inlined_vector",
+                        "abseil::absl_statusor",
+                        "c-ares::cares",
+                        "re2::re2",
+                        "zlib::zlib",
                         "abseil::absl_random_random",
                     ],
-                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-                    "frameworks": corefoundation(),
+                    "system_libs":
+                    libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                    "frameworks":
+                    corefoundation(),
                 },
                 "grpc++_unsecure": {
                     "lib": "grpc++_unsecure",
@@ -395,6 +410,24 @@ class GrpcConan(ConanFile):
                     "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
                 },
             })
+
+        if Version(self.version) <= "1.47":
+            components.update(
+                {"upb": {
+                    "lib": "upb",
+                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                }})
+            # TODO: check if order needs to be preserved
+            components["gpr"]['requires'].append('upb')
+            components["_grpc"]['requires'].append('upb')
+            if not self.options.secure:
+                components["grpc_unsecure"]['requies'].append('upb')
+
+        else:
+            # TODO: upb_base_lib, upb_json_lib, upb_mem_lib, upb_message_lib, upb_textformat_lib
+            # TODO: gRPC::utf8_range_lib
+            # TODO: gRPC::grpc_authorization_provider
+            pass
 
         return components
 
