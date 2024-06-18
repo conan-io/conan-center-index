@@ -19,8 +19,14 @@ class HictkConan(ConanFile):
     topics = "hictk", "bioinformatics", "hic"
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"with_eigen": [True, False]}
-    default_options = {"with_eigen": True}
+    options = {
+        "with_arrow": [True, False],
+        "with_eigen": [True, False]
+    }
+    default_options = {
+        "with_arrow": False,
+        "with_eigen": True
+    }
 
     @property
     def _min_cppstd(self):
@@ -40,6 +46,8 @@ class HictkConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        if self.options.with_arrow and Version(self.version) >= "1.0.0":
+            self.requires("arrow/16.1.0", transitive_headers=True)
         self.requires("bshoshany-thread-pool/4.1.0", transitive_headers=True)
         self.requires("fast_float/6.1.1", transitive_headers=True)
         if self.options.with_eigen:
@@ -92,6 +100,7 @@ class HictkConan(ConanFile):
         tc.variables["HICTK_BUILD_TOOLS"] = "OFF"
         tc.variables["HICTK_ENABLE_GIT_VERSION_TRACKING"] = "OFF"
         tc.variables["HICTK_ENABLE_TESTING"] = "OFF"
+        tc.variables["HICTK_WITH_ARROW"] = self.options.with_arrow
         tc.variables["HICTK_WITH_EIGEN"] = self.options.with_eigen
         tc.generate()
 
@@ -122,5 +131,7 @@ class HictkConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "hictk")
         self.cpp_info.set_property("cmake_target_name", "hictk::libhictk")
 
+        if self.options.with_arrow:
+            self.cpp_info.defines.append("HICTK_WITH_ARROW")
         if self.options.with_eigen:
             self.cpp_info.defines.append("HICTK_WITH_EIGEN")
