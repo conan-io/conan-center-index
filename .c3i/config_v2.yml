@@ -161,3 +161,4 @@ pod_size:
   #   - Both notations can be combined for the same reference name
   xlarge:
     - "pcl"
+    - "libigl"
