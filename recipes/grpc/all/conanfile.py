@@ -1,4 +1,6 @@
 import os
+import re
+import json
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -6,7 +8,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, valid_min_cppstd, check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save, load
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 
@@ -36,7 +38,8 @@ class GrpcConan(ConanFile):
         "php_plugin": [True, False],
         "python_plugin": [True, False],
         "ruby_plugin": [True, False],
-        "secure": [True, False]
+        "secure": [True, False],
+        "with_systemd": [True, False],
     }
     default_options = {
         "shared": False,
@@ -51,6 +54,7 @@ class GrpcConan(ConanFile):
         "python_plugin": True,
         "ruby_plugin": True,
         "secure": False,
+        "with_systemd": True,
     }
 
     short_paths = True
@@ -94,14 +98,17 @@ class GrpcConan(ConanFile):
                 self.requires("abseil/20211102.0", transitive_headers=True, transitive_libs=True)
             else:
                 self.requires("abseil/20220623.1", transitive_headers=True, transitive_libs=True)
-        else:
+        elif Version(self.version) < "1.60.0":
             self.requires("abseil/20230125.3", transitive_headers=True, transitive_libs=True)
+            self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("abseil/20240116.2", transitive_headers=True, transitive_libs=True)
+            self.requires("protobuf/4.25.3", transitive_headers=True, transitive_libs=True)
         self.requires("c-ares/1.19.1")
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
         self.requires("re2/20230301")
         self.requires("zlib/[>=1.2.11 <2]")
-        if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52":
+        if self.options.with_systemd and self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52":
             self.requires("libsystemd/255")
 
     def package_id(self):
@@ -122,6 +129,12 @@ class GrpcConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "If built as shared protobuf must be shared as well. "
                 "Please, use `protobuf:shared=True`.",
+            )
+
+        if is_apple_os(self) and Version(self.version) >= "1.63.0" and self.options.shared:
+            # https://github.com/grpc/grpc/issues/36654
+            raise ConanInvalidConfiguration(
+                "Shared build with Apple clang is not supported yet for specified version.",
             )
 
     def build_requirements(self):
@@ -173,6 +186,7 @@ class GrpcConan(ConanFile):
         tc.cache_variables["gRPC_BUILD_GRPC_PHP_PLUGIN"] = self.options.php_plugin
         tc.cache_variables["gRPC_BUILD_GRPC_PYTHON_PLUGIN"] = self.options.python_plugin
         tc.cache_variables["gRPC_BUILD_GRPC_RUBY_PLUGIN"] = self.options.ruby_plugin
+        tc.cache_variables["WITH_LIBSYSTEMD"] = self.options.with_systemd
 
         # Consumed targets (abseil) via interface target_compiler_feature can propagate newer standards
         if not valid_min_cppstd(self, self._cxxstd_required):
@@ -190,6 +204,13 @@ class GrpcConan(ConanFile):
         cmake_deps = CMakeDeps(self)
         cmake_deps.generate()
 
+    def _remove_in_file(self, file_path, pattern):
+        content = load(self, file_path)
+        updated_content = re.sub(pattern, "", content)
+        if content == updated_content:
+            raise ConanInvalidConfiguration(f"_remove_in_file didn't find pattern: {pattern} in {file_path}")
+        save(self, file_path, updated_content)
+
     def _patch_sources(self):
         apply_conandata_patches(self)
 
@@ -204,6 +225,20 @@ class GrpcConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}",
                             'COMMAND ${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}')
+
+        # Remove downloading archives in CMakeLists.txt
+        pattern = r"if \(NOT EXISTS \$\{CMAKE_CURRENT_SOURCE_DIR\}/third_party(.|\n)*?endif\(\)"
+        self._remove_in_file(os.path.join(self.source_folder, "CMakeLists.txt"), pattern)
+
+        # Make systemd an option
+        systemd_file_path = os.path.join(self.source_folder, "cmake/systemd.cmake")
+        if os.path.exists(systemd_file_path):
+            replace_in_file(
+                self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                'option(gRPC_BUILD_GRPC_CPP_PLUGIN "Build grpc_cpp_plugin" ON)',
+                'option(WITH_LIBSYSTEMD "Build WITH_LIBSYSTEMD" ON)\noption(gRPC_BUILD_GRPC_CPP_PLUGIN "Build grpc_cpp_plugin" ON)')
+            replace_in_file(self, systemd_file_path, "if(TARGET systemd)", "if(WITH_LIBSYSTEMD AND TARGET systemd)")
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
@@ -214,6 +249,7 @@ class GrpcConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        self._load_grpc_components()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -285,118 +321,79 @@ class GrpcConan(ConanFile):
         return os.path.join("lib", "cmake", "conan_trick")
 
     @property
-    def _grpc_components(self):
+    def _components_file_path(self):
+        return os.path.join(self.package_folder, "lib", "components.json")
 
-        def libsystemd():
-            return ["libsystemd::libsystemd"] if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52" else []
+    def _load_grpc_components(self):
+        # parse from gRPCTargets.cmake
+        cmake_target_file = os.path.join(self.package_folder, "lib/cmake/grpc/gRPCTargets.cmake")
 
-        def libm():
-            return ["m"] if self.settings.os in ["Linux", "FreeBSD"] else []
+        system_libs = ["thread", "crypt32", "ws2_32", "wsock32"]
+        def any_system_libs(dep):
+            sys_lib = None
+            if dep == "m":
+                sys_lib = "m"
+            else:
+                for lib in system_libs:
+                    if lib in dep:
+                        sys_lib = "pthread" if lib == "thread" else lib
+            return sys_lib
 
-        def pthread():
-            return ["pthread"] if self.settings.os in ["Linux", "FreeBSD"] else []
+        def match_dependencies(deps):
+            system_deps = []
+            package_deps = []
 
-        def crypt32():
-            return ["crypt32"] if self.settings.os == "Windows" else []
+            for dep in deps:
+                dep = dep.lower()
+                sys_lib = any_system_libs(dep)
+                if sys_lib:
+                    system_deps.append(sys_lib)
+                elif "::" in dep:
+                    dep = dep.replace("absl::", "abseil::absl_")
+                    dep = dep.replace("grpc::", "")
+                    if dep == "grpc":
+                        dep = f"_{dep}"
+                    package_deps.append(dep)
+            return system_deps, package_deps
 
-        def ws2_32():
-            return ["ws2_32"] if self.settings.os == "Windows" else []
+        components = {}
+        target_content = load(self, cmake_target_file)
+        cmake_functions = re.findall(r"(?P<func>add_library|set_target_properties)\((?P<args>[^)]*)\)", target_content)
 
-        def wsock32():
-            return ["wsock32"] if self.settings.os == "Windows" else []
+        target_names = set()
+        for (cmake_function_name, cmake_function_args) in cmake_functions:
+            cmake_function_args = re.split(r"[\n]+", cmake_function_args)
+            cmake_function_args = [ arg.strip() for arg in cmake_function_args]
 
-        def corefoundation():
-            return ["CoreFoundation"] if is_apple_os(self) else []
+            cmake_imported_target_name = cmake_function_args[0]
+            if cmake_imported_target_name in target_names:
+                continue
+            target_names.add(cmake_imported_target_name)
+            cmake_target_nonamespace =  cmake_imported_target_name.split("::")[-1].split(" ")[0]
 
-        components = {
-            "address_sorting": {
-                "lib": "address_sorting",
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
-            "gpr": {
-                "lib": "gpr",
-                "requires": [
-                    "upb", "abseil::absl_base", "abseil::absl_memory",
-                    "abseil::absl_status", "abseil::absl_str_format",
-                    "abseil::absl_strings", "abseil::absl_synchronization",
-                    "abseil::absl_time", "abseil::absl_optional",
-                    "abseil::absl_flags"
-                ] + libsystemd(),
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
-            "_grpc": {
-                "lib": "grpc",
-                "requires": [
-                    "address_sorting", "gpr", "upb", "abseil::absl_bind_front",
-                    "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector",
-                    "abseil::absl_statusor", "abseil::absl_random_random",
-                    "c-ares::cares", "openssl::crypto",
-                    "openssl::ssl", "re2::re2", "zlib::zlib",
-                ],
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-                "frameworks": corefoundation(),
-            },
-            "grpc++": {
-                "lib": "grpc++",
-                "requires": ["_grpc", "protobuf::libprotobuf"],
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
-            "grpc++_alts": {
-                "lib": "grpc++_alts",
-                "requires": ["grpc++", "protobuf::libprotobuf"],
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
-            "grpc++_error_details": {
-                "lib": "grpc++_error_details",
-                "requires": ["grpc++", "protobuf::libprotobuf"],
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
-            "upb": {
-                "lib": "upb",
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
-            "grpc_plugin_support": {
-                "lib": "grpc_plugin_support",
-                "requires": ["protobuf::libprotoc", "protobuf::libprotobuf"],
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
-        }
+            lib_name = cmake_target_nonamespace
+            component_name = f"_{lib_name}" if lib_name == "grpc" else lib_name
+            components.setdefault(component_name, {"cmake_target": cmake_target_nonamespace})
 
-        if not self.options.secure:
-            components.update({
-                "grpc_unsecure": {
-                    "lib": "grpc_unsecure",
-                    "requires": [
-                        "address_sorting", "gpr", "upb", "abseil::absl_flat_hash_map",
-                        "abseil::absl_inlined_vector", "abseil::absl_statusor",
-                        "c-ares::cares", "re2::re2", "zlib::zlib",
-                        "abseil::absl_random_random",
-                    ],
-                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-                    "frameworks": corefoundation(),
-                },
-                "grpc++_unsecure": {
-                    "lib": "grpc++_unsecure",
-                    "requires": ["grpc_unsecure", "protobuf::libprotobuf"],
-                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-                },
-            })
+            if cmake_function_name == "add_library":
+                cmake_imported_target_type = cmake_function_args[0].split(" ")[1]
+                if cmake_imported_target_type in ["STATIC", "SHARED"]:
+                    components[component_name]["lib"] = lib_name
+            elif cmake_function_name == "set_target_properties":
+                for arg in cmake_function_args:
+                    if arg.startswith("INTERFACE_LINK_LIBRARIES"):
+                        deps = set(arg.replace("INTERFACE_LINK_LIBRARIES ", "").replace('"', "").split(";"))
+                        system_deps, package_deps = match_dependencies(deps)
+                        if self.options.with_systemd and component_name == "gpr" and self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52":
+                            package_deps.append("libsystemd::libsystemd")
+                        components[component_name]["requires"] = package_deps
+                        components[component_name]["system_libs"] = system_deps
 
-        if self.options.codegen:
-            components.update({
-                "grpc++_reflection": {
-                    "lib": "grpc++_reflection",
-                    "requires": ["grpc++", "protobuf::libprotobuf"],
-                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-                },
-                "grpcpp_channelz": {
-                    "lib": "grpcpp_channelz",
-                    "requires": ["grpc++", "protobuf::libprotobuf"],
-                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-                },
-            })
-
-        return components
+        for component_name in components.keys():
+            if component_name in ["_grpc", "grpc_unsecure"] and is_apple_os(self):
+                components[component_name]["frameworks"] = ["CoreFoundation"]
+        content = json.dumps(components, indent=4)
+        save(self, self._components_file_path, content)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "gRPC")
@@ -404,9 +401,12 @@ class GrpcConan(ConanFile):
         ssl_roots_file_path = os.path.join(self.package_folder, "res", "grpc", "roots.pem")
         self.runenv_info.define_path("GRPC_DEFAULT_SSL_ROOTS_FILE_PATH", ssl_roots_file_path)
 
-        for component, values in self._grpc_components.items():
-            target = values.get("lib")
+        components_file = load(self, self._components_file_path)
+        components = json.loads(components_file)
+
+        for component, values in components.items():
             lib = values.get("lib")
+            target = lib
             self.cpp_info.components[component].set_property("cmake_target_name", "gRPC::{}".format(target))
             # actually only gpr, grpc, grpc_unsecure, grpc++ and grpc++_unsecure should have a .pc file
             self.cpp_info.components[component].set_property("pkg_config_name", target)

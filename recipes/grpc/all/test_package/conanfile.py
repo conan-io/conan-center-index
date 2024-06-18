@@ -4,6 +4,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.microsoft import is_msvc
 import os
+from conan.tools.scm import Version
 
 
 class TestPackageConan(ConanFile):
@@ -19,7 +20,11 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-        self.requires("protobuf/3.21.12")
+        version = self.tested_reference_str.split("/")[-1]
+        if Version(version) < "1.60.0":
+            self.requires("protobuf/3.21.12")
+        else:
+            self.requires("protobuf/4.25.3")
 
     def build_requirements(self):
         if not self._is_legacy_one_profile:
