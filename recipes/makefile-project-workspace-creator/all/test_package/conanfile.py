@@ -1,5 +1,7 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.tools.layout import basic_layout
+from conan.tools.files import save, load
+import os
 
 
 class TestPackageConan(ConanFile):
@@ -10,10 +12,14 @@ class TestPackageConan(ConanFile):
     def layout(self):
         basic_layout(self)
 
-    def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
-        if conan_version.major < 2 and self.settings.os == "Windows":
-            self.tool_requires("strawberryperl/5.32.1.1")
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def generate(self):
+        build_vars = self.dependencies[self.tested_reference_str].buildenv_info.vars(self, scope="build")
+        mpc_root = build_vars["MPC_ROOT"]
+        save(self, os.path.join(self.build_folder, "mpc_root.txt"), mpc_root)
 
     def test(self):
-        self.run("perl -S mpc.pl --version")
+        mpc_root = load(self, os.path.join(self.build_folder, "mpc_root.txt"))
+        assert os.path.exists(os.path.join(mpc_root, 'mpc.pl'))

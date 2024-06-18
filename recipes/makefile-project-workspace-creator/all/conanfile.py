@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 
@@ -21,11 +21,6 @@ class MPCGeneratorConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def build_requirements(self):
-        if self.settings.os == "Windows":
-            kwargs = dict(visible=True) if conan_version.major >= 2 else {}
-            self.tool_requires("strawberryperl/5.32.1.1", **kwargs)
-
     def package_id(self):
         self.info.clear()
 
@@ -35,7 +30,8 @@ class MPCGeneratorConan(ConanFile):
     def package(self):
         copy(self, "*",
              src=self.build_folder,
-             dst=os.path.join(self.package_folder, "bin"))
+             dst=os.path.join(self.package_folder, "bin"),
+             excludes=["history", "docs", "rpm", "MPC.ico", "PROBLEM-REPORT-FORM", "azure-pipelines.yml", "ChangeLog"])
         copy(self, "LICENSE",
             src=os.path.join(self.build_folder, "docs"),
             dst=os.path.join(self.package_folder, "licenses"))
@@ -47,7 +43,9 @@ class MPCGeneratorConan(ConanFile):
         self.cpp_info.includedirs = []
 
         bin_path = os.path.join(self.package_folder, "bin")
+        # MPC_ROOT: https://github.com/objectcomputing/MPC/blob/5b4c2443871e5e9b6267edef17fed66afc125fa4/docs/USAGE#L243
         self.buildenv_info.define("MPC_ROOT", bin_path)
 
+        # TODO: Remove after dropping Conan 1.x
         self.env_info.PATH.append(bin_path)
         self.env_info.MPC_ROOT = bin_path
