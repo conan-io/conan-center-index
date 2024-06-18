@@ -299,7 +299,7 @@ class GrpcConan(ConanFile):
     def _grpc_components(self):
 
         def libsystemd():
-            return ["libsystemd::libsystemd"] if self._supports_libsystemd else []
+            return ["libsystemd::libsystemd"] if self._supports_libsystemd and self.options.with_libsystemd else []
 
         def libm():
             return ["m"] if self.settings.os in ["Linux", "FreeBSD"] else []
