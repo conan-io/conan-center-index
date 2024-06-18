@@ -55,10 +55,10 @@ class HictkConan(ConanFile):
         self.requires("fmt/10.2.1", transitive_headers=True)
         self.requires("hdf5/1.14.3", transitive_headers=True)
         self.requires("highfive/2.9.0", transitive_headers=True)
-        self.requires("libdeflate/1.19", transitive_headers=True)
-        self.requires("parallel-hashmap/1.3.11", transitive_headers=True)  # Note: v1.3.11 is more recent than v1.37
+        self.requires("libdeflate/1.20", transitive_headers=True)
+        self.requires("parallel-hashmap/1.3.12", transitive_headers=True)  # Note: v1.3.12 is more recent than v1.37
         self.requires("span-lite/0.11.0", transitive_headers=True)
-        self.requires("spdlog/1.13.0", transitive_headers=True)
+        self.requires("spdlog/1.14.1", transitive_headers=True)
         self.requires("zstd/1.5.6", transitive_headers=True)
 
         if Version(self.version) == "0.0.3":
