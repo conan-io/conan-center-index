@@ -12,6 +12,10 @@ sources:
     url: "https://github.com/grpc/grpc/archive/v1.48.4.tar.gz"
     sha256: "0c3faa83e39d4f1ab55fe1476362b9ac3b81632a46dce7fd4d50271bce816b53"
 patches:
+  "1.54.3":
+    - patch_file: "patches/v1.50.x/002-CMake-Add-gRPC_USE_SYSTEMD-option-34384.patch"
+      patch_type: "backport"
+      patch_source: "https://github.com/grpc/grpc/commit/5c3400e8dc08d0810e3301d7e8cd8a718c82eeed"
   "1.50.1":
     - patch_file: "patches/v1.50.x/001-disable-cppstd-override.patch"
   "1.50.0":
