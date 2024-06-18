@@ -67,6 +67,7 @@ class SimdConan(ConanFile):
 
     @property
     def vs_proj_folder(self):
+        """Return the vsXXXX/ folder given the MSVC compiler version"""
         toolset = msvs_toolset(self)
         # By default, v2022 folder
         return {"v140": "vs2015",
