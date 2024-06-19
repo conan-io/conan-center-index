@@ -10,12 +10,11 @@ required_conan_version = ">=1.53.0"
 
 class CAresConan(ConanFile):
     name = "c-ares"
+    description = "A C library for asynchronous DNS requests"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "A C library for asynchronous DNS requests"
-    topics = ("dns", "resolver", "async")
     homepage = "https://c-ares.haxx.se/"
-
+    topics = ("dns", "resolver", "async")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
