@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class Catch2Conan(ConanFile):
@@ -35,6 +35,9 @@ class Catch2Conan(ConanFile):
         "console_width": "80",
         "no_posix_signals": False,
     }
+    # disallow cppstd compatibility, as it affects the ABI in this library
+    # see https://github.com/conan-io/conan-center-index/issues/19008
+    extension_properties = {"compatibility_cppstd": False}
 
     @property
     def _min_cppstd(self):

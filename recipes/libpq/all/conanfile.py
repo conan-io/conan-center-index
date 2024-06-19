@@ -164,6 +164,13 @@ class LibpqConan(ConanFile):
                 replace_in_file(self, os.path.join(self.source_folder, "src", "interfaces", "libpq", "Makefile"),
                 "ifeq ($(enable_thread_safety), yes)\nOBJS += pthread-win32.o\nendif",
                 "")
+        # When linking to static openssl, it comes with static pthread library too, failing with:
+        # libpq.so.5.15: U pthread_exit@GLIBC_2.2.5: libpq must not be calling any function which invokes exit
+        # https://www.postgresql.org/message-id/20210703001639.GB2374652%40rfd.leadboat.com
+        if Version(self.version) >= "15":
+            replace_in_file(self, os.path.join(self.source_folder, "src", "interfaces", "libpq", "Makefile"),
+                "-v __cxa_atexit",
+                "-v __cxa_atexit -e pthread_exit")
 
     def build(self):
         apply_conandata_patches(self)
