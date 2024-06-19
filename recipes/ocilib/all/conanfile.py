@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get, rm, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.scm import Version
@@ -29,7 +30,13 @@ class OCILIBConan(ConanFile):
         "with_oracle_import": "runtime",
     }
 
+    @property
+    def _min_cppstd(self):
+        return 11
+
     def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} recipe only supports Linux for now. Pull requests to add new configurtations are welcomed.")
         # TODO: Check support for other platforms
@@ -56,7 +63,10 @@ class OCILIBConan(ConanFile):
             autotools.make()
 
     def package(self):
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        autotools = Autotools(self)
+        autotools.install()
+
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(self, "*", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
         copy(self, "*.lib", self.source_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*.a", self.source_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
@@ -66,4 +76,5 @@ class OCILIBConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["ocilib"]
+        self.cpp_info.set_property("pkg_config_name", "ocilib")
         self.cpp_info.system_libs.append("dl")
