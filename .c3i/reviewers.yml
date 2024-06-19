@@ -90,3 +90,7 @@ reviewers:
   - user: "perseoGI"
     type: "team"
     request_reviews: false
+  - user: "ErniGH"
+    type: "team"
+    request_reviews: false
+
