@@ -30,7 +30,7 @@ class TestPackgeConan(ConanFile):
         if not skip_run:
             self.run(f"{ndk_build} --version", env="conanbuild")
         else:
-            self.output.warning(f"Skipped running ndk-build on macOS Apple Silicon in arm64 mode, please use a newer"
+            self.output.warning("Skipped running ndk-build on macOS Apple Silicon in arm64 mode, please use a newer"
                                  " version of the Android NDK")
 
         # INFO: Run the project that was built using Android NDK
