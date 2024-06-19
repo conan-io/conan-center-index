@@ -1,11 +1,13 @@
 extends: default
 rules:
+  colons: disable
   document-start:
     level: error
     present: false
   document-end:
     level: error
     present: false
+  empty-lines: disable
   empty-values:
     forbid-in-block-mappings: true
     forbid-in-flow-mappings: true
