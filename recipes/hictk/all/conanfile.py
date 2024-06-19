@@ -45,8 +45,12 @@ class HictkConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def config_options(self):
+        if Version(self.version) < "1.0.0":
+            del self.options.with_arrow
+
     def requirements(self):
-        if self.options.with_arrow and Version(self.version) >= "1.0.0":
+        if self.options.get_safe("with_arrow"):
             self.requires("arrow/16.1.0", transitive_headers=True)
         self.requires("bshoshany-thread-pool/4.1.0", transitive_headers=True)
         self.requires("fast_float/6.1.1", transitive_headers=True)
@@ -100,7 +104,7 @@ class HictkConan(ConanFile):
         tc.variables["HICTK_BUILD_TOOLS"] = "OFF"
         tc.variables["HICTK_ENABLE_GIT_VERSION_TRACKING"] = "OFF"
         tc.variables["HICTK_ENABLE_TESTING"] = "OFF"
-        tc.variables["HICTK_WITH_ARROW"] = self.options.with_arrow
+        tc.variables["HICTK_WITH_ARROW"] = self.options.get_safe("with_arrow", False)
         tc.variables["HICTK_WITH_EIGEN"] = self.options.with_eigen
         tc.generate()
 
@@ -131,7 +135,7 @@ class HictkConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "hictk")
         self.cpp_info.set_property("cmake_target_name", "hictk::libhictk")
 
-        if self.options.with_arrow:
+        if self.options.get_safe("with_arrow"):
             self.cpp_info.defines.append("HICTK_WITH_ARROW")
         if self.options.with_eigen:
             self.cpp_info.defines.append("HICTK_WITH_EIGEN")
