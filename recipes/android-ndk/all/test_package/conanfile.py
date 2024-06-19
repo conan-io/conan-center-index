@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
-from conan.tools.build import can_run
+from conan.tools.scm import Version
 import os
+import platform
 
 
 class TestPackgeConan(ConanFile):
@@ -23,13 +24,14 @@ class TestPackgeConan(ConanFile):
             cmake.build()
 
     def test(self):
-        # INFO: can_run allows mac M1, but it does not work for the NDK
-        # https://github.com/android/ndk/issues/1299
-        if can_run(self) and not (self.settings.os == "Macos" and self.settings.arch == "armv8"):
-            if self.settings.os == "Windows":
-                self.run("ndk-build.cmd --version")
-            else:
-                self.run("ndk-build --version")
+        ndk_build = "ndk-build.cmd" if self.settings.os == "Windows" else "ndk-build"
+        ndk_version = Version(self.tested_reference_str.split('/')[1])
+        skip_run = platform.system() == "Darwin" and "arm" in platform.processor() and ndk_version < "r23c"
+        if not skip_run:
+            self.run(f"{ndk_build} --version", env="conanbuild")
+        else:
+            self.output.warning(f"Skipped running ndk-build on macOS Apple Silicon in arm64 mode, please use a newer"
+                                 " version of the Android NDK")
 
         # INFO: Run the project that was built using Android NDK
         if self.settings.os == "Android":
