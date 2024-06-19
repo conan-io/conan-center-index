@@ -3,10 +3,11 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -26,6 +27,9 @@ class TarConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
@@ -39,9 +43,14 @@ class TarConan(ConanFile):
     def requirements(self):
         self.requires("bzip2/1.0.8", run=True, headers=False, libs=False)
         self.requires("lzip/1.23", run=True, headers=False, libs=False)
-        self.requires("xz_utils/5.4.4", run=True, headers=False, libs=False)
+        self.requires("xz_utils/5.4.5", run=True, headers=False, libs=False)
         self.requires("zstd/1.5.5", run=True, headers=False, libs=False)
         # self.requires("lzo/2.10", run=True, headers=False, libs=False)
+
+    def build_requirements(self):
+        if Version(self.version) == "1.35":
+            self.build_requires("automake/1.16.5")
+            self.build_requires("gettext/0.22.5")
 
     def validate(self):
         if self.settings.os == "Windows":
@@ -86,6 +95,8 @@ class TarConan(ConanFile):
     def build(self):
         self._patch_sources()
         autotools = Autotools(self)
+        if Version(self.version) == "1.35":
+            autotools.autoreconf()  # autoreconf needed after patching
         autotools.configure()
         autotools.make()
 

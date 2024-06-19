@@ -265,6 +265,7 @@ class OnnxRuntimeConan(ConanFile):
 
         if self.settings.os in ["Linux", "Android", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("m")
+        if self.settings.os in ["Linux", "FreeBSD", "SunOS", "AIX"]:
             self.cpp_info.system_libs.append("pthread")
         if is_apple_os(self):
             self.cpp_info.frameworks.append("Foundation")

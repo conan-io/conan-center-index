@@ -33,9 +33,6 @@ reviewers:
   - user: "theirix"
     type: "community"
     request_reviews: false
-  - user: "ericLemanissier"
-    type: "community"
-    request_reviews: false
   - user: "prince-chrismc"
     type: "community"
     request_reviews: false
@@ -85,5 +82,11 @@ reviewers:
     type: "team"
     request_reviews: false
   - user: "juansblanco"
+    type: "team"
+    request_reviews: false
+  - user: "valgur"
+    type: "community"
+    request_reviews: false
+  - user: "perseoGI"
     type: "team"
     request_reviews: false

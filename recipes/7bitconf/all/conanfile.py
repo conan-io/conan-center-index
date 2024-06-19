@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, apply_conandata_patches, copy, export_conandata_patches
 from conan.tools.scm import Version
 import os
 
@@ -43,6 +43,9 @@ class SevenBitConfConan(ConanFile):
             "apple-clang": "10",
         }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
@@ -80,6 +83,7 @@ class SevenBitConfConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        apply_conandata_patches(self)
         if not self.options.header_only:
             tc = CMakeToolchain(self)
             tc.variables["_7BIT_CONF_BUILD_EXAMPLES"] = False

@@ -14,16 +14,21 @@ required_conan_version = ">=1.60.1"
 
 class vvencRecipe(ConanFile):
     name = "vvenc"
+    description = "Fraunhofer Versatile Video Encoder (VVenC)"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Fraunhofer Versatile Video Encoder (VVenC)"
-    topics = ("video", "encoder", "codec", "vvc", "h266")
     homepage = "https://www.hhi.fraunhofer.de/en/departments/vca/technologies-and-solutions/h266-vvc.html"
+    topics = ("video", "encoder", "codec", "vvc", "h266")
     package_type = "library"
-
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False], 
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False, 
+        "fPIC": True,
+    }
 
     def validate_build(self):
         if conan_version.major == 2:
@@ -59,6 +64,17 @@ class vvencRecipe(ConanFile):
         check_max_cppstd = getattr(sys.modules['conan.tools.build'], 'check_max_cppstd')
         check_max_cppstd(self, 14)
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            self.options.rm_safe("fPIC")
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe('fPIC')
+
+    def layout(self):
+        cmake_layout(self, src_folder='src')
+
     def package_id(self):
         # still important, older binutils cannot recognize
         # object files created with newer binutils,
@@ -72,17 +88,6 @@ class vvencRecipe(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe('fPIC')
-
-    def layout(self):
-        cmake_layout(self, src_folder='src')
 
     def generate(self):
         deps = CMakeDeps(self)

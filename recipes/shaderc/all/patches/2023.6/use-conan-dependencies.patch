@@ -1,0 +1,17 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -120,7 +120,12 @@
+ 
+ # Configure subdirectories.
+ # We depend on these for later projects, so they should come first.
+-add_subdirectory(third_party)
++find_package(glslang REQUIRED CONFIG)
++find_package(SPIRV-Headers REQUIRED CONFIG)
++find_package(SPIRV-Tools REQUIRED CONFIG)
++set(glslang_SOURCE_DIR ${glslang_INCLUDE_DIRS})
++set(SPIRV-Headers_SOURCE_DIR ${SPIRV-Headers_INCLUDE_DIR}/..)
++set(spirv-tools_SOURCE_DIR ${SPIRV-Tools_INCLUDE_DIR}/..)
+ 
+ add_subdirectory(libshaderc_util)
+ add_subdirectory(libshaderc)
