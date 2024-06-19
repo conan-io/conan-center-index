@@ -6,7 +6,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import (
     apply_conandata_patches, export_conandata_patches,
-    get, copy, rename, rm, rmdir
+    get, copy, rename, rm, rmdir, replace_in_file
     )
 from conan.tools.scm import Version
 from conan.tools.env import VirtualRunEnv
@@ -57,9 +57,9 @@ class PackageConan(ConanFile):
         self.requires("fmi2/2.0.4")
         if self.version >= Version("3.0a2"):
             self.requires("fmi3/3.0.1")
-        self.requires("expat/2.5.0")
-        self.requires("minizip/1.2.13")
-        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("expat/2.6.2")
+        self.requires("minizip/[>1.2.13 <=1.3.1]")
+        self.requires("zlib/[>=1.2.13 <2]")
         # c99_snprintf -> should be externalised
 
     def validate(self):
@@ -91,17 +91,62 @@ class PackageConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0026"] = "OLD"
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0045"] = "OLD"
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0046"] = "OLD"
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         tc.generate()
 
         cd = CMakeDeps(self)
+        cd.set_property("expat", "cmake_target_name", "expat")
+        cd.set_property("minizip", "cmake_target_name", "minizip")
         cd.generate()
 
+        # This is needed if with_fmus=True
         vre = VirtualRunEnv(self)
         vre.generate(scope="build")
 
-    def build(self):
+        minizip_code = {
+            "1.3.1":
+            {
+                "url": "https://zlib.net/fossils/zlib-1.3.1.tar.gz",
+                "sha256": "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23"
+            },
+            "1.2.13":
+            {
+                "url": "https://zlib.net/fossils/zlib-1.2.13.tar.gz",
+                "sha256": "b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30"
+            }
+        }
+        get(self,
+            **minizip_code[str(self.dependencies["minizip"].ref.version)],
+            pattern="*/minizip/*",
+            strip_root=True, destination=path.join(self.build_folder))
+        minizip_src = path.join(self.build_folder, "contrib", "minizip")
+        minizip_dest = path.join(self.source_folder, "src", "ZIP", "src")
+        copy(self, "minizip.c", minizip_src, minizip_dest)
+        copy(self, "miniunz.c", minizip_src, minizip_dest)
+
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        minizip = path.join(self.source_folder, "src", "ZIP", "src", "minizip.c")
+        miniunz = path.join(self.source_folder, "src", "ZIP", "src", "miniunz.c")
+        replace_in_file(self, minizip, "printf", "minizip_printf")
+        replace_in_file(self, minizip, "// In darwin and perhaps other BSD variants off_t is a 64 bit value, hence no need for specific 64 bit functions", "")
+        replace_in_file(self, minizip, "// base filename follows last slash.", "")
+        replace_in_file(self, miniunz, "printf", "minizip_printf")
+        replace_in_file(self, minizip, '#include "zip.h"',
+                        '#include "zip.h"\n static int minizip_printf( const char * format, ... ){ return 1; }')
+        replace_in_file(self, miniunz, '#include "unzip.h"',
+                        '#include "unzip.h"\n static int minizip_printf( const char * format, ... ){ return 1; }')
+
+        if Version(self.dependencies["minizip"].ref.version) < Version("1.3.0"):
+            replace_in_file(self, minizip, "main(argc,argv)", "minizip(argc, argv)")
+            replace_in_file(self, miniunz, "main(argc,argv)", "miniunz(argc, argv)")
+        else:
+            replace_in_file(self, minizip, "main(int argc", "minizip(int argc")
+            replace_in_file(self, miniunz, "main(int argc", "miniunz(int argc")
+
+    def build(self):
+        self._patch_sources()
 
         copy(self, "fmiModel*.h", self.dependencies["fmi1"].cpp_info.components["modex"].includedirs[0],
              path.join(self.build_folder, "fmis", "FMI1"))

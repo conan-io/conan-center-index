@@ -5,13 +5,13 @@ Subject: [PATCH 3/6] use minizip and zlib from conan
 
 ---
  Config.cmake/fmizip.cmake | 17 +++++++++++------
- 1 file changed, 11 insertions(+), 6 deletions(-)
+ 1 file changed, 8 insertions(+), 6 deletions(-)
 
 diff --git a/Config.cmake/fmizip.cmake b/Config.cmake/fmizip.cmake
 index 091fc4d..213b5f8 100644
 --- a/Config.cmake/fmizip.cmake
 +++ b/Config.cmake/fmizip.cmake
-@@ -19,28 +19,33 @@ if(NOT FMIZIPDIR)
+@@ -19,28 +19,30 @@ if(NOT FMIZIPDIR)
  	# set(DOXYFILE_EXTRA_SOURCES "${DOXYFILE_EXTRA_SOURCES} \"${FMIZIPDIR}/include\"")
  
      set(FMIZIP_LIBRARIES fmizip)
@@ -19,9 +19,6 @@ index 091fc4d..213b5f8 100644
 -    add_subdirectory(Config.cmake/Minizip)
 -	
 -	include_directories("${FMIZIPDIR}/include" "${FMILIB_THIRDPARTYLIBS}/Minizip/minizip" "${FMILIB_THIRDPARTYLIBS}/FMI" "${FMILIB_THIRDPARTYLIBS}/Zlib/zlib-1.2.6" "${FMILibrary_BINARY_DIR}/zlib")
-+
-+    #add_subdirectory(Config.cmake/Minizip)
-+
 +    include_directories("${FMIZIPDIR}/include" "${FMILIB_THIRDPARTYLIBS}/FMI")
  
  set(FMIZIPSOURCE
@@ -42,13 +39,13 @@ index 091fc4d..213b5f8 100644
  #include_directories("${FMILIB_THIRDPARTYLIBS}/zlib/lib/VS2005/win32")
  
 -SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DZLIB_STATIC")
-+find_package(minizip CONFIG REQUIRED)
-+find_package(ZLIB CONFIG REQUIRED)
++find_package(minizip REQUIRED)
++find_package(ZLIB REQUIRED)
  
  add_library(fmizip ${FMILIBKIND} ${FMIZIPSOURCE} ${FMIZIPHEADERS})
  
 -target_link_libraries(fmizip minizip jmutils)
-+target_link_libraries(fmizip minizip::minizip ZLIB::ZLIB jmutils)
++target_link_libraries(fmizip minizip ZLIB::ZLIB jmutils)
  
  endif(NOT FMIZIPDIR)
 -- 

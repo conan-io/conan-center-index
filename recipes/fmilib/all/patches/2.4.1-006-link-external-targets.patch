@@ -16,7 +16,7 @@ index d61137f..0765268 100644
  #Create function that zipz the dummy FMUs 
  add_executable (compress_test_fmu_zip ${RTTESTDIR}/compress_test_fmu_zip.c)
 -target_link_libraries (compress_test_fmu_zip ${FMIZIP_LIBRARIES})
-+target_link_libraries (compress_test_fmu_zip ${FMIZIP_LIBRARIES} minizip::minizip)
++target_link_libraries (compress_test_fmu_zip ${FMIZIP_LIBRARIES} minizip)
  
  set_target_properties(
  	jm_vector_test jm_locale_test compress_test_fmu_zip
@@ -25,7 +25,7 @@ index d61137f..0765268 100644
  endfunction(compress_fmu)
  
 -set(FMILIBFORTEST fmilib)
-+set(FMILIBFORTEST fmilib minizip::minizip expat::expat)
++set(FMILIBFORTEST fmilib minizip expat)
  
  if(FMILIB_BUILD_SHARED_LIB AND (FMILIB_LINK_TEST_TO_SHAREDLIB OR NOT FMILIB_BUILD_STATIC_LIB))
  	set(FMILIBFORTEST fmilib_shared)
@@ -34,11 +34,11 @@ index d61137f..0765268 100644
  
  add_executable (fmi_zip_zip_test ${RTTESTDIR}/FMI1/fmi_zip_zip_test.c )
 -target_link_libraries (fmi_zip_zip_test ${FMIZIP_LIBRARIES})
-+target_link_libraries (fmi_zip_zip_test ${FMIZIP_LIBRARIES} minizip::minizip)
++target_link_libraries (fmi_zip_zip_test ${FMIZIP_LIBRARIES} minizip)
  
  add_executable (fmi_zip_unzip_test ${RTTESTDIR}/FMI1/fmi_zip_unzip_test.c )
 -target_link_libraries (fmi_zip_unzip_test ${FMIZIP_LIBRARIES})
-+target_link_libraries (fmi_zip_unzip_test ${FMIZIP_LIBRARIES} minizip::minizip)
++target_link_libraries (fmi_zip_unzip_test ${FMIZIP_LIBRARIES} minizip)
  
  add_executable (fmi_import_test 
  					${RTTESTDIR}/fmi_import_test.c
