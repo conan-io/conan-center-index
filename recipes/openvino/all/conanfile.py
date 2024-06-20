@@ -14,7 +14,6 @@ required_conan_version = ">=1.60.0 <2.0 || >=2.0.8"
 class OpenvinoConan(ConanFile):
     name = "openvino"
 
-    # Optional metadata
     license = "Apache-2.0"
     homepage = "https://github.com/openvinotoolkit/openvino"
     url = "https://github.com/conan-io/conan-center-index"
@@ -99,6 +98,10 @@ class OpenvinoConan(ConanFile):
     @property
     def _gna_option_available(self):
         return self.settings.os in ["Linux", "Windows"] and self._target_x86_64 and Version(self.version) < "2024.0.0"
+
+    @property
+    def _npu_option_available(self):
+        return self.settings.os in ["Linux", "Windows"] and self._target_x86_64 and Version(self.version) >= "2024.1.0"
 
     @property
     def _gpu_option_available(self):
@@ -205,6 +208,8 @@ class OpenvinoConan(ConanFile):
             toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = self.options.shared or not self.options.enable_cpu
         if self._gna_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GNA"] = False
+        if self._npu_option_available:
+            toolchain.cache_variables["ENABLE_INTEL_NPU"] = False
         # SW plugins
         toolchain.cache_variables["ENABLE_AUTO"] = self.options.enable_auto
         toolchain.cache_variables["ENABLE_MULTI"] = self.options.enable_auto
@@ -355,8 +360,9 @@ class OpenvinoConan(ConanFile):
             if self.options.enable_pytorch_frontend:
                 openvino_runtime.libs.append("openvino_pytorch_frontend")
             # Common private dependencies should go last, because they satisfy dependencies for all other libraries
-            openvino_runtime.libs.extend(["openvino_reference", "openvino_builders",
-                                          "openvino_shape_inference", "openvino_itt",
+            if Version(self.version) < "2024.0.0":
+                openvino_runtime.libs.append("openvino_builders")
+            openvino_runtime.libs.extend(["openvino_reference", "openvino_shape_inference", "openvino_itt",
                                           # utils goes last since all others depend on it
                                           "openvino_util"])
             # set 'openvino' once again for transformations objects files (cyclic dependency)

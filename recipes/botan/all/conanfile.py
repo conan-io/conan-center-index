@@ -193,7 +193,7 @@ class BotanConan(ConanFile):
             minimum_version = self._compilers_minimum_version.get(compiler_name, False)
             if minimum_version and Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support (minimum {compiler_name} {minimum_version})."
                 )
             if not minimum_version:
                 self.output.warning(f"{self.name} recipe lacks information about the {compiler_name} compiler support.")
@@ -457,7 +457,7 @@ class BotanConan(ConanFile):
                          ' --extra-cxxflags="{cxxflags}"'
                          ' --cc={compiler}'
                          ' --cpu={cpu}'
-                         ' --prefix={prefix}'
+                         ' --prefix="{prefix}"'
                          ' --os={os}'
                          ' {build_flags}').format(
                              python_call=call_python,
@@ -516,6 +516,8 @@ class BotanConan(ConanFile):
         # https://github.com/conan-io/conan-center-index/pull/18079#issuecomment-1919206949
         # https://github.com/conan-io/conan-center-index/pull/18079#issuecomment-1919486839
 
+        if self.settings.os != 'Linux':
+            return False
         libver = platform.libc_ver()
         return (
             self.settings.os == 'Linux' and
