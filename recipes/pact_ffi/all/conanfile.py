@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.files import get, copy, rm
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 
 import os
 
@@ -14,7 +15,7 @@ class PactFFIConan(ConanFile):
     url = "https://gitlab.prod.entos.sky/immerse-ui/libs/Pact"
     homepage = "https://github.com/pact-foundation/pact-reference"
     license = "MIT"
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
     topics = ("pact", "consumer-driven-contracts", "contract-testing", "mock-server")
     user = "sky"
@@ -25,44 +26,31 @@ class PactFFIConan(ConanFile):
         "shared": False
     }
 
-    def validate(self):
-        if not self.settings.arch == "x86_64":
-            raise ConanInvalidConfiguration(f"Binary does not exist for architecture {self.settings.arch}")
-        if self.settings.os not in ["Linux", "Macos"]:
-            raise ConanInvalidConfiguration(f"Binary does not exist for OS {self.settings.os}")
-        if self.settings.os == "Linux" and self.options.shared:
-            raise ConanInvalidConfiguration(f"Shared library not supported on Linux")
-        if self.settings.os == "Macos" and not self.options.shared:
-            raise ConanInvalidConfiguration(f"Static library not supported on Macos")
+    def source(self):
+        get(self, "https://github.com/pact-foundation/pact-reference/archive/refs/tags/libpact_ffi-v0.4.21.tar.gz", strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
+
 
     def build(self):
-        data = self.conan_data["sources"][self.version]
-        token = os.getenv("GITLAB_API_TOKEN") or os.getenv("CI_JOB_TOKEN")
-        if token is None:
-            raise ConanException("GITLAB_API_TOKEN or CI_JOB_TOKEN must be defined "
-                                 "with a token with the permissions to read the Pact repository")
-        get(
-            self,
-            data["url"],
-            sha256=data["sha256"],
-            strip_root=True,
-            headers={"PRIVATE-TOKEN": token},
-            filename=f"pact_ffi-{self.version}.tar.gz"
-        )
+        # todo: release build
+        # self.run(f"cargo build --target-dir={self.build_folder}", cwd=os.path.join(self.source_folder, "rust"))
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "rust", "pact_ffi"))
+        cmake.build()
 
     def package(self):
-        subfolder = {
-            "Linux": "linux-x86_64",
-            "Macos": "mac-x86_64"
-        }
         copy(self,
-             "libpact*",
-             os.path.join(self.build_folder, "lib", subfolder[str(self.settings.os)]),
+             "libpact_ffi*",
+             os.path.join(self.build_folder),
              os.path.join(self.package_folder, "lib")
         )
+        # TODO: locate generated headers
         copy(self, "pact*.h", os.path.join(self.build_folder, "include"), os.path.join(self.package_folder, "include"))
-        # we don't want the C++ binaries as part of this package
-        rm(self, "libpact-cpp-consumer.*", self.package_folder, recursive=True)
         fix_apple_shared_install_name(self)
 
     def package_info(self):
