@@ -38,7 +38,7 @@ class CxxgraphConan(ConanFile):
 
     def configure(self):
         if Version(self.version) < "4.0.0":
-            license = "AGPL-3.0-later"
+            self.license = "AGPL-3.0-later"
 
     def layout(self):
         basic_layout(self, src_folder="src")
