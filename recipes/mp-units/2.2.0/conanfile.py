@@ -51,7 +51,7 @@ class MPUnitsConan(ConanFile):
         "string_view_ret": "auto",
         "no_crtp": "auto",
         "contracts": "gsl-lite",
-        "freestanding": "False",
+        "freestanding": False,
     }
     tool_requires = "cmake/[>=3.29]"
     package_type = "header-library"
@@ -80,7 +80,7 @@ class MPUnitsConan(ConanFile):
             },
             "cxx_modules": {
                 "std": "20",
-                "compiler": {"gcc": "14", "clang": "17", "apple-clang": "", "msvc": ""},
+                "compiler": {"gcc": "", "clang": "17", "apple-clang": "", "msvc": ""},
             },
             "static_constexpr_vars_in_constexpr_func": {
                 "std": "23",
@@ -147,16 +147,17 @@ class MPUnitsConan(ConanFile):
         )
 
     @property
-    def _build_all(self):
-        return bool(self.conf.get("user.mp-units.build:all", default=False))
-
-    @property
     def _build_cxx_modules(self):
         return self._is_feature_enabled("cxx_modules")
 
     @property
     def _use_fmtlib(self):
         return not self._is_feature_enabled("std_format")
+
+    def configure(self):
+        if self.options.freestanding:
+            self.options.rm_safe("contracts")
+            self.options.rm_safe("std_format")
 
     def requirements(self):
         if not self.options.freestanding:
@@ -210,7 +211,8 @@ class MPUnitsConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure(build_script_folder="src")
-        cmake.build()
+        if self._build_cxx_modules:
+            cmake.build()
 
     def package_id(self):
         self.info.clear()
