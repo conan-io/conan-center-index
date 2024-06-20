@@ -6,7 +6,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.files import (
     apply_conandata_patches, export_conandata_patches,
-    get, copy, rename, rm, rmdir, replace_in_file
+    get, copy, rm, rmdir, replace_in_file
     )
 from conan.tools.scm import Version
 from conan.tools.env import VirtualRunEnv
