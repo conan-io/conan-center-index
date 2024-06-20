@@ -92,7 +92,7 @@ class CMakeConan(ConanFile):
             tc.generate()
             bootstrap_cmake_options = ["--"]
             bootstrap_cmake_options.append(f'-DCMAKE_CXX_STANDARD={"11" if not self.settings.compiler.cppstd else self.settings.compiler.cppstd}')
-            bootstrap_cmake_options.append('-CMake_ENABLE_DEBUGGER=FALSE')
+            # bootstrap_cmake_options.append('-CMake_ENABLE_DEBUGGER=FALSE')
             if self.settings.os == "Linux":
                 if self.options.with_openssl:
                     openssl = self.dependencies["openssl"]
@@ -106,7 +106,7 @@ class CMakeConan(ConanFile):
             tc = CMakeToolchain(self)
             # Disabling testing because CMake tests build can fail in Windows in some cases
             tc.variables["BUILD_TESTING"] = False
-            tc.variables["CMake_ENABLE_DEBUGGER"] = False
+            # tc.variables["CMake_ENABLE_DEBUGGER"] = False
             if not self.settings.compiler.cppstd:
                 tc.variables["CMAKE_CXX_STANDARD"] = 11
             tc.variables["CMAKE_BOOTSTRAP"] = False
