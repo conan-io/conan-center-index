@@ -11,7 +11,7 @@ from conan.errors import ConanInvalidConfiguration
 import os
 import json
 
-required_conan_version = ">=1.51.0"
+required_conan_version = ">=1.55.0"
 
 class CMakeConan(ConanFile):
     name = "cmake"
