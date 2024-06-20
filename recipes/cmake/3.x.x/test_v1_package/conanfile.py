@@ -18,6 +18,7 @@ class TestPackageConan(ConanFile):
         self.output.info("Installed version: {}".format(output_str))
         tokens = re.split('[@#]', self.tested_reference_str)
         require_version = tokens[0].split("/", 1)[1]
+        require_version = require_version.replace("cci.", "")
         self.output.info("Expected version: {}".format(require_version))
         assert_cmake_version = "cmake version %s" % require_version
         assert(assert_cmake_version in output_str)
