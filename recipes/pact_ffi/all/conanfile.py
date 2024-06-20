@@ -27,7 +27,8 @@ class PactFFIConan(ConanFile):
     }
 
     def source(self):
-        get(self, "https://github.com/pact-foundation/pact-reference/archive/refs/tags/libpact_ffi-v0.4.21.tar.gz", strip_root=True)
+        get(self, "https://github.com/pact-foundation/pact-reference/archive/refs/tags/libpact_ffi-v0.4.21.tar.gz",
+            strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -35,22 +36,36 @@ class PactFFIConan(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
 
-
     def build(self):
-        # todo: release build
-        # self.run(f"cargo build --target-dir={self.build_folder}", cwd=os.path.join(self.source_folder, "rust"))
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "rust", "pact_ffi"))
         cmake.build()
+
+        # Build the headers
+        # Note: CMakeLists.txt only supports building the C header 'pact.h', via a "generate_header" custom target.
+        #       For consistency, instead of cmake.build(target="generate_header"), we use the explicit commands to
+        #       generate both C and C++ headers (as defined in pact_ffi/release-linux.sh)
+        generated_headers_dir = os.path.join(self.source_folder, "rust", "pact_ffi", "include")
+        pact_c_header = os.path.join(generated_headers_dir, "pact.h")
+        self.run(f"rustup run nightly cbindgen --config cbindgen.toml --crate pact_ffi --output {pact_c_header}",
+                 cwd=os.path.join(self.source_folder, "rust", "pact_ffi"))
+
+        pact_cpp_header = os.path.join(generated_headers_dir, "pact-cpp.h")
+        self.run(f"rustup run nightly cbindgen --config cbindgen-c++.toml --crate pact_ffi --output {pact_cpp_header}",
+                 cwd=os.path.join(self.source_folder, "rust", "pact_ffi"))
 
     def package(self):
         copy(self,
              "libpact_ffi*",
              os.path.join(self.build_folder),
              os.path.join(self.package_folder, "lib")
-        )
-        # TODO: locate generated headers
-        copy(self, "pact*.h", os.path.join(self.build_folder, "include"), os.path.join(self.package_folder, "include"))
+             )
+
+        copy(self,
+             "pact*.h",
+             os.path.join(self.source_folder, "rust", "pact_ffi", "include"),
+             os.path.join(self.package_folder, "include"))
+
         fix_apple_shared_install_name(self)
 
     def package_info(self):
