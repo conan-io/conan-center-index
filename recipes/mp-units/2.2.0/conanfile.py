@@ -156,7 +156,6 @@ class MPUnitsConan(ConanFile):
 
     def configure(self):
         if self.options.freestanding:
-            self.options.rm_safe("contracts")
             self.options.rm_safe("std_format")
 
     def requirements(self):
