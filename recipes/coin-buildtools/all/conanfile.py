@@ -30,7 +30,7 @@ class CoinBuildtoolsConan(ConanFile):
 
     def requirements(self):
         # https://github.com/coin-or-tools/BuildTools/blob/20208f47f7bbc0056a92adefdfd43fded969f674/install_autotools.sh#L9-L12
-        self.requires("autoconf/2.71", run=True)
+        self.requires("autoconf/2.72", run=True)
         self.requires("autoconf-archive/2023.02.20", run=True)
         self.requires("automake/1.16.5", run=True)
         self.requires("libtool/2.4.7", run=True)
