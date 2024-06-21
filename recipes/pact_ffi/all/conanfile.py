@@ -58,7 +58,7 @@ class PactFFIConan(ConanFile):
     def package(self):
         copy(self,
              "libpact_ffi*",
-             os.path.join(self.build_folder),
+             os.path.join(self.build_folder, "rust", "target", "release"),
              os.path.join(self.package_folder, "lib")
              )
 
