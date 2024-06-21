@@ -11,6 +11,7 @@ required_conan_version = ">=2.0.0"
 
 class PactFFIConan(ConanFile):
     name = "pact_ffi"
+    version = "0.4.21"
     description = "Pact/Rust FFI bindings"
     url = "https://gitlab.prod.entos.sky/immerse-ui/libs/Pact"
     homepage = "https://github.com/pact-foundation/pact-reference"
@@ -27,7 +28,7 @@ class PactFFIConan(ConanFile):
     }
 
     def source(self):
-        get(self, "https://github.com/pact-foundation/pact-reference/archive/refs/tags/libpact_ffi-v0.4.21.tar.gz",
+        get(self, f"https://github.com/pact-foundation/pact-reference/archive/refs/tags/libpact_ffi-v{self.version}.tar.gz",
             strip_root=True)
 
     def generate(self):
