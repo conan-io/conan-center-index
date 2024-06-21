@@ -80,7 +80,7 @@ class VerilatorConan(ConanFile):
         else:
             self.tool_requires("bison/3.8.2")
         if Version(self.version) >= "4.224":
-            self.tool_requires("autoconf/2.71")
+            self.tool_requires("autoconf/2.72")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
