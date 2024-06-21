@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rename, mkdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -55,9 +55,6 @@ class QxmppConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if is_msvc(self):
-            del self.options.shared
-            self.package_type = "static-library"
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
@@ -104,6 +101,9 @@ class QxmppConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if is_msvc(self) and self.options.shared:
+            mkdir(self, os.path.join(self.package_folder, "bin"))
+            rename(self, os.path.join(self.package_folder, "lib", "qxmpp.dll"), os.path.join(self.package_folder, "bin", "qxmpp.dll"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "QXmpp")
