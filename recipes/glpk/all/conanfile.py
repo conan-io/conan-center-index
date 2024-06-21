@@ -1,9 +1,9 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rename, rm
-from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path, check_min_vs
 import os
@@ -54,8 +54,6 @@ class GlpkConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
-        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -97,7 +95,7 @@ class GlpkConan(ConanFile):
             env.define("STRIP", ":")
             env.vars(self).save_script("conanbuild_msvc")
 
-        deps = PkgConfigDeps(self)
+        deps = AutotoolsDeps(self)
         deps.generate()
 
     def build(self):
