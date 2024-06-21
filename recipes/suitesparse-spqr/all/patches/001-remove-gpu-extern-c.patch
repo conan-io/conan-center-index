@@ -1,0 +1,24 @@
+Causes the build to fail with a ton of CUDA compilation errors (with CUDA 12 at least).
+SPQR and transitive dependencies build fine without it.
+
+--- a/SPQR/Include/SuiteSparseQR.hpp
++++ b/SPQR/Include/SuiteSparseQR.hpp
+@@ -17,14 +17,10 @@
+ #ifdef SPQR_HAS_CUDA
+ #include <cublas_v2.h>
+ #endif
+-#define SUITESPARSE_GPU_EXTERN_ON
+-extern "C"
+-{
+-    #include "SuiteSparse_config.h"
+-    #include "cholmod.h"
+-    #include "SuiteSparseQR_definitions.h"
+-}
+-#undef SUITESPARSE_GPU_EXTERN_ON
++
++#include "SuiteSparse_config.h"
++#include "cholmod.h"
++#include "SuiteSparseQR_definitions.h"
+ 
+ #include <complex>
+ typedef std::complex<double> Complex ;
