@@ -15,13 +15,13 @@ required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
 class GrpcConan(ConanFile):
     name = "grpc"
-    package_type = "library"
     description = "Google's RPC (remote procedure call) library and framework."
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/grpc/grpc"
     topics = ("rpc",)
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
@@ -36,7 +36,8 @@ class GrpcConan(ConanFile):
         "php_plugin": [True, False],
         "python_plugin": [True, False],
         "ruby_plugin": [True, False],
-        "secure": [True, False]
+        "secure": [True, False],
+        "with_libsystemd": [True, False]
     }
     default_options = {
         "shared": False,
@@ -51,6 +52,7 @@ class GrpcConan(ConanFile):
         "python_plugin": True,
         "ruby_plugin": True,
         "secure": False,
+        "with_libsystemd": True
     }
 
     short_paths = True
@@ -67,6 +69,10 @@ class GrpcConan(ConanFile):
     def _is_legacy_one_profile(self):
         return not hasattr(self, "settings_build")
 
+    @property
+    def _supports_libsystemd(self):
+        return self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52"
+
     def export_sources(self):
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
         copy(self, f"cmake/{self._grpc_plugin_template}", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
@@ -75,6 +81,8 @@ class GrpcConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self._supports_libsystemd:
+            del self.options.with_libsystemd
 
     def configure(self):
         if self.options.shared:
@@ -101,7 +109,7 @@ class GrpcConan(ConanFile):
         self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
         self.requires("re2/20230301")
         self.requires("zlib/[>=1.2.11 <2]")
-        if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52":
+        if self.options.get_safe("with_libsystemd"):
             self.requires("libsystemd/255")
 
     def package_id(self):
@@ -184,6 +192,9 @@ class GrpcConan(ConanFile):
 
         if is_msvc(self) and Version(self.version) >= "1.48":
             tc.cache_variables["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
+
+        if self._supports_libsystemd:
+            tc.cache_variables["gRPC_USE_SYSTEMD"] = self.options.with_libsystemd
 
         tc.generate()
 
@@ -288,7 +299,7 @@ class GrpcConan(ConanFile):
     def _grpc_components(self):
 
         def libsystemd():
-            return ["libsystemd::libsystemd"] if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52" else []
+            return ["libsystemd::libsystemd"] if self._supports_libsystemd and self.options.with_libsystemd else []
 
         def libm():
             return ["m"] if self.settings.os in ["Linux", "FreeBSD"] else []
