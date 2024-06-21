@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, rm, rmdir, copy
+from conan.tools.files import get, rm, rmdir, copy, save
 
 required_conan_version = ">=1.53.0"
 
@@ -89,6 +89,8 @@ class SuiteSparseCholmodConan(ConanFile):
         tc.variables["SUITESPARSE_USE_CUDA"] = self.options.cuda
         tc.variables["SUITESPARSE_DEMOS"] = False
         tc.variables["SUITESPARSE_USE_FORTRAN"] = False  # Fortran sources are translated to C instead
+        tc.variables["LAPACK_LIBRARIES"] = "OpenBLAS::OpenBLAS"
+        tc.variables["LAPACK_FOUND"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
