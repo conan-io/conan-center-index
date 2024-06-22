@@ -19,8 +19,8 @@
  )
 +find_package(lodepng REQUIRED CONFIG)
 +find_package(zstd REQUIRED CONFIG)
-+target_link_libraries(ktx PRIVATE lodepng::lodepng $<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>)
-+target_link_libraries(ktx_read PRIVATE $<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>)
++target_link_libraries(ktx PRIVATE lodepng::lodepng zstd::libzstd)
++target_link_libraries(ktx_read PRIVATE zstd::libzstd)
  target_include_directories(
      ktx
  PRIVATE
@@ -31,7 +31,7 @@
      toktx
      ktx
 +    lodepng::lodepng
-+    $<IF:$<TARGET_EXISTS:zstd::libzstd_shared>,zstd::libzstd_shared,zstd::libzstd_static>
++    zstd::libzstd
  )
  
  target_compile_definitions(
