@@ -226,7 +226,7 @@ class CeresSolverConan(ConanFile):
             tc.variables["LIB_SUFFIX"] = ""
         if ceres_version < "2.0.0":
             tc.variables["CXX11"] = self.options.use_CXX11
-            tc.variables["OPENMP"] = not self.options.use_OpenMP
+            tc.variables["OPENMP"] = self.options.use_OpenMP
             tc.variables["TBB"] = self.options.use_TBB
             tc.variables["CXX11_THREADS"] = self.options.use_CXX11_threads
         tc.generate()
@@ -241,11 +241,6 @@ class CeresSolverConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         copy(self, "FindSuiteSparse.cmake", self.export_sources_folder, os.path.join(self.source_folder, "cmake"))
-        if Version(self.version) < "2.0":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "list(APPEND CERES_COMPILE_OPTIONS CERES_USE_OPENMP)",
-                            "list(APPEND CERES_COMPILE_OPTIONS CERES_USE_OPENMP)\n"
-                            "link_libraries(OpenMP::OpenMP_CXX)")
 
     def build(self):
         self._patch_sources()
