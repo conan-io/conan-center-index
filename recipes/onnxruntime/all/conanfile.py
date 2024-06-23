@@ -79,7 +79,9 @@ class OnnxRuntimeConan(ConanFile):
     def requirements(self):
         # ONNX versions are based on the minor version used at
         # https://github.com/microsoft/onnxruntime/tree/main/cmake/external
-        if Version(self.version) >= "1.17":
+        if Version(self.version) >= "1.18":
+            self.requires("onnx/1.16.1")
+        elif Version(self.version) >= "1.17":
             self.requires("onnx/1.15.0")
         elif Version(self.version) >= "1.15":
             self.requires("onnx/1.14.1")
@@ -89,7 +91,11 @@ class OnnxRuntimeConan(ConanFile):
         self.requires("protobuf/3.21.12")
         self.requires("date/3.0.1")
         self.requires("re2/20231101")
-        self.requires("flatbuffers/1.12.0")  # v1.* is required, newer versions are not compatible
+        if Version(self.version) >= "1.18":
+            self.requires("flatbuffers/23.5.26")
+        else:
+            # v1.* is required, newer versions are not compatible
+            self.requires("flatbuffers/1.12.0")
         # using 1.84.0+ fails on CCI as it prevents the cpp 17 version to be picked up when building with cpp 20
         self.requires("boost/1.83.0", headers=True, libs=False)  # for mp11, header only, no need for libraries
         self.requires("safeint/3.0.28")
@@ -224,6 +230,9 @@ class OnnxRuntimeConan(ConanFile):
             tc.variables["onnxruntime_ENABLE_CUDA_EP_INTERNAL_TESTS"] = False
             tc.variables["onnxruntime_USE_NEURAL_SPEED"] = False
             tc.variables["onnxruntime_USE_MEMORY_EFFICIENT_ATTENTION"] = True
+        if Version(self.version) >= "1.18":
+            tc.variables["onnxruntime_CUDA_MINIMAL"] = False
+
         # Disable a warning that gets converted to an error
         tc.preprocessor_definitions["_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS"] = "1"
         tc.generate()
