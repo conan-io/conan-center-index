@@ -1,0 +1,11 @@
+sources:
+  "1.127.8771":
+    "bgfx":
+      url: "https://github.com/bkaradzic/bgfx/archive/06d0e2af2f50fee3e8e84e0c3b407073692a678c.tar.gz"
+      sha256: "0869F9D18C63AB8D804918FEFCC53D8568626A26FCAE7273DF1A70D4C8E7AFE3"
+    "bimg":
+      url: "https://github.com/bkaradzic/bimg/archive/2afa64c14c1e3dd5d28412ee03bee0dfe7242f03.tar.gz"
+      sha256: "376E17EA4A70CEE72E6006DD942CB2F2FE3DB047F524A3F203A15A8BBA1BCD90"
+    "bx":
+      url: "https://github.com/bkaradzic/bx/archive/e64b7c097f30d33134fe8fa522b3c95fc461c3d3.tar.gz"
+      sha256: "2A6E438AC6250CD6052CBBABF2906482DFA1585E537064CB5DA47E2EC728FE92"
