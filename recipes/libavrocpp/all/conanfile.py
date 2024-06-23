@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, replace_in_file
-from conan.tools.build import check_min_cppstd, default_cppstd
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
@@ -43,12 +43,12 @@ class LibavrocppConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
+        
     def requirements(self):
-        if default_cppstd(self) <= "11" :
-            self.requires("boost/[<=1.81.0]", transitive_headers=True)
-        else:
+        if valid_min_cppstd(self, 14) :
             self.requires("boost/[>=1.82.0]", transitive_headers=True)
+        else:
+            self.requires("boost/[<1.82.0]", transitive_headers=True)
         self.requires("snappy/[~1.1.9]")
 
     def validate(self):
