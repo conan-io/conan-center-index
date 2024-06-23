@@ -162,7 +162,7 @@ class bgfxConan(ConanFile):
         else:
             tc = AutotoolsToolchain(self)
             if not self.settings.get_safe("compiler.cppstd"):
-                tc.cppstd = "c++17"
+                tc.cppstd = "-std=c++17"
             tc.generate()
 
     def build(self):
