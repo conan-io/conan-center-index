@@ -87,7 +87,7 @@ class OnnxRuntimeConan(ConanFile):
             self.requires("onnx/1.14.1")
         else:
             self.requires("onnx/1.13.1")
-        self.requires("abseil/20230802.1")
+        self.requires("abseil/20240116.1")
         self.requires("protobuf/3.21.12")
         self.requires("date/3.0.1")
         self.requires("re2/20231101")
