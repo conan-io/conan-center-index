@@ -19,6 +19,7 @@ class ReboundConan(ConanFile):
     homepage = "https://github.com/hannorein/rebound"
     topics = ("physics", "simulation", "n-body", "gravity", "integrator")
     package_type = "shared-library"
+    # Scripts always compile with optimizations enabled
     settings = "os", "arch", "compiler"
 
     @property
