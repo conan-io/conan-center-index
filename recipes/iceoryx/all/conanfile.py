@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rmdir, save, rm
 from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 
@@ -146,6 +146,7 @@ class IceoryxConan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rm(self, ".clang-tidy", os.path.join(self.package_folder, "include"), recursive=True)
         if self.options.toml_config:
             mkdir(self, os.path.join(self.package_folder, "res"))
             rename(self, os.path.join(self.package_folder, "etc", "roudi_config_example.toml"),

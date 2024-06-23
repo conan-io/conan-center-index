@@ -1,4 +1,61 @@
 sources:
+  "3.29.6":
+    Linux:
+      armv8:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.6-linux-aarch64.tar.gz"
+        sha256: "4d6b0a551db9da7a034a09372f716cf2094413d7fd8a787051854154b0b3b343"
+      x86_64:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.6-linux-x86_64.tar.gz"
+        sha256: "28fef61e64840b784da6db35218fd3ae179ff8bf0be1c8a9d075d6185a0e4fdc"
+    Macos:
+      universal:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.6-macos10.10-universal.tar.gz"
+        sha256: "a65f9e66c63bb79f3b6f00e4b67367b6f6c40030ee41cf06580818a74a84b3e9"
+    Windows:
+      armv8:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.6-windows-arm64.zip"
+        sha256: "8f0df498d8b1a076fc9305dde5a06427262a0476e89d4c670a49147b0bc30761"
+      x86_64:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.6-windows-x86_64.zip"
+        sha256: "5c648eac06c33477e510bae14ce1f969e9abb38992b71f245633b182fccb474d"
+  "3.29.5":
+    Linux:
+      armv8:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.5-linux-aarch64.tar.gz"
+        sha256: "6eb655ee89c50611f2370c5a3293bd2fe1920b73dff50b71fb3357d56a9d28d8"
+      x86_64:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.5-linux-x86_64.tar.gz"
+        sha256: "92629f95e15e7c2e88726c57a984ffdc5cf248e354f7ab791bc86d2ad513903e"
+    Macos:
+      universal:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.5-macos10.10-universal.tar.gz"
+        sha256: "a110d173ab839854fc0b19b9f29f213c1112106e2858c1a1fe7973d4bb13a536"
+    Windows:
+      armv8:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.5-windows-arm64.zip"
+        sha256: "9c67d16560125ebf1278ef1b3072914a60bff780522b28c0096f364f775a8e55"
+      x86_64:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.5-windows-x86_64.zip"
+        sha256: "f85db8361cb7eb11ceb6b2f1ee42bec7234bb8d9e487ea78c00de64771768d92"
+  "3.29.4":
+    Linux:
+      armv8:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.4-linux-aarch64.tar.gz"
+        sha256: "9210619e7907b14858178743d5b7ba70ce846d98a6a65bcdbd83c08b932ba6a5"
+      x86_64:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.4-linux-x86_64.tar.gz"
+        sha256: "64e5473169dd43055fbf2c138cae6e5ec10f30a0606d24f12078e68466320cf4"
+    Macos:
+      universal:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.4-macos10.10-universal.tar.gz"
+        sha256: "44a59c584122676463bf5bdd2c7dee2ac02944e065a71cc30c57541a20d3465c"
+    Windows:
+      armv8:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.4-windows-arm64.zip"
+        sha256: "16ce291dd34189a60d7add96b4148adfdbb46b6b2478086cb43abe2e5ff34ad3"
+      x86_64:
+        url: "https://cmake.org/files/v3.29/cmake-3.29.4-windows-x86_64.zip"
+        sha256: "1c8bfbc5537553edccded62f8f03475a161280c1b64f54c887824c6eb4e773ff"
   "3.29.3":
     Linux:
       armv8:
@@ -56,6 +113,25 @@ sources:
       x86_64:
         url: "https://cmake.org/files/v3.29/cmake-3.29.0-windows-x86_64.zip"
         sha256: "9ab28eba1ab7911a0e57ab274f5990a283fffa1d22eb711792d5562e5869f9ef"
+  "3.28.6":
+    Linux:
+      armv8:
+        url: "https://cmake.org/files/v3.28/cmake-3.28.6-linux-aarch64.tar.gz"
+        sha256: "7909cc2128ce9442c63ce674a0bfb0e4f4ce04cef667d887e15ad5670d594ba7"
+      x86_64:
+        url: "https://cmake.org/files/v3.28/cmake-3.28.6-linux-x86_64.tar.gz"
+        sha256: "931e3c0d546ee03ca72bb147ccd9b49e3b6252f765f66bf21b9d165519940458"
+    Macos:
+      universal:
+        url: "https://cmake.org/files/v3.28/cmake-3.28.6-macos10.10-universal.tar.gz"
+        sha256: "cbda8e719b3239e304b339cdd90e946c09dac5ad2d57c93bf1b1d3914685d9a7"
+    Windows:
+      armv8:
+        url: "https://cmake.org/files/v3.28/cmake-3.28.6-windows-arm64.zip"
+        sha256: "63e4ebd2dadb5ad63faaf4ed38db40d3fec92d1b050d2a4e69011ea3ee699d29"
+      x86_64:
+        url: "https://cmake.org/files/v3.28/cmake-3.28.6-windows-x86_64.zip"
+        sha256: "a8f2e684ead94a64fd3517a38857a5b3f7f8d68d15c49ca1143d18797eaf9cac"
   "3.28.5":
     Linux:
       armv8:

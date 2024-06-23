@@ -9,3 +9,9 @@ versions:
     folder: portable
   "5.0.0":
     folder: portable
+  "5.1.0":
+    folder: portable
+  "5.2.0":
+    folder: portable
+  "5.2.1":
+    folder: portable
