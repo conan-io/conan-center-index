@@ -58,7 +58,7 @@ class PackageConan(ConanFile):
         if self.version >= Version("3.0a2"):
             self.requires("fmi3/3.0.1")
         self.requires("expat/2.6.2")
-        self.requires("minizip/[>1.2.13 <=1.3.1]")
+        self.requires("minizip/[>1.2.13 <2]")
         self.requires("zlib/[>=1.2.13 <2]")
         # c99_snprintf -> should be externalised
 
@@ -78,7 +78,7 @@ class PackageConan(ConanFile):
         tc.variables["FMILIB_BUILD_STATIC_LIB"] = not self.options.shared
         tc.variables["FMILIB_BUILD_SHARED_LIB"] = self.options.shared
         tc.variables["FMILIB_BUILD_TESTS"] = self.options.with_fmus
-        tc.variables["FMILIB_FMI_STANDARD_HEADERS"] = posixpath.join(self.build_folder, "fmis").replace("\\", "/")
+        tc.variables["FMILIB_FMI_STANDARD_HEADERS"] = posixpath.join(self.source_folder, "src", "fmis").replace("\\", "/")
         tc.variables["FMILIB_GENERATE_DOXYGEN_DOC"] = False
 
         # The variable is an option only if the following condition is true
@@ -104,20 +104,9 @@ class PackageConan(ConanFile):
         vre = VirtualRunEnv(self)
         vre.generate(scope="build")
 
-        minizip_code = {
-            "1.3.1":
-            {
-                "url": "https://zlib.net/fossils/zlib-1.3.1.tar.gz",
-                "sha256": "9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23"
-            },
-            "1.2.13":
-            {
-                "url": "https://zlib.net/fossils/zlib-1.2.13.tar.gz",
-                "sha256": "b3a24de97a8fdbc835b9833169501030b8977031bcb54b3b3ac13740f846ab30"
-            }
-        }
+        minizip_version = str(self.dependencies["minizip"].ref.version)
         get(self,
-            **minizip_code[str(self.dependencies["minizip"].ref.version)],
+            **self.dependencies["minizip"].conan_data["sources"][minizip_version],
             pattern="*/minizip/*",
             strip_root=True, destination=path.join(self.build_folder))
         minizip_src = path.join(self.build_folder, "contrib", "minizip")
@@ -149,13 +138,13 @@ class PackageConan(ConanFile):
         self._patch_sources()
 
         copy(self, "fmiModel*.h", self.dependencies["fmi1"].cpp_info.components["modex"].includedirs[0],
-             path.join(self.build_folder, "fmis", "FMI1"))
+             path.join(self.source_folder, "src", "fmis", "FMI1"))
         copy(self, "fmiPlatformTypes.h", self.dependencies["fmi1"].cpp_info.components["cosim"].includedirs[0],
-             path.join(self.build_folder, "fmis", "FMI1"))
+             path.join(self.source_folder, "src", "fmis", "FMI1"))
         copy(self, "fmiFunctions.h", self.dependencies["fmi1"].cpp_info.components["cosim"].includedirs[0],
-             path.join(self.build_folder, "fmis", "FMI1"))
+             path.join(self.source_folder, "src", "fmis", "FMI1"))
         copy(self, "*.h", self.dependencies["fmi2"].cpp_info.includedirs[0],
-             path.join(self.build_folder, "fmis", "FMI2"))
+             path.join(self.source_folder, "src", "fmis", "FMI2"))
 
         cmake = CMake(self)
         cmake.configure()
