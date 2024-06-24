@@ -70,12 +70,20 @@ class AprConan(ConanFile):
 
     def validate_build(self):
         if cross_building(self) and not is_msvc(self):
-            # Conan provides for Linux some configuration flags to avoid entering a pre-built cached file
+            msg = ("apr recipe doesn't support cross-build for all the platforms"
+                   " due to runtime checks in autoconf. You can provide"
+                   " a pre-built cached file as an user Conan conf variable to try it.\n\n"
+                   "Via host profile:\n"
+                   "[conf]\nuser.apr:cache_file=/path/to/cache_file\n\n"
+                   "Via CLI: \n"
+                   "-c \"user.apr:cache_file='/path/to/cache_file'\"")
+            # Cross-building for apr < 1.7.4 is not supported without a pre-built cached file
+            if Version(self.version) < "1.7.4" and self.conf.get("user.apr:cache_file") is None:
+                raise ConanInvalidConfiguration(msg)
+            # Conan provides for apr >= 1.7.4 and Linux some configuration flags to avoid
+            # entering a pre-built cached file
             if self.settings.os != "Linux" and self.conf.get("user.apr:cache_file") is None:
-                raise ConanInvalidConfiguration("apr recipe doesn't support cross-build for all the platforms"
-                                                " due to runtime checks in autoconf. You can provide"
-                                                " a pre-built cached file via Conan conf: \n"
-                                                " [conf]\nuser.apr:cache_file=/path/to/cache_file to try it.")
+                raise ConanInvalidConfiguration(msg)
 
     def build_requirements(self):
         if not is_msvc(self):
