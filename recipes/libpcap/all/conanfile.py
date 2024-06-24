@@ -30,12 +30,14 @@ class LibPcapConan(ConanFile):
         "fPIC": [True, False],
         "enable_libusb": [True, False],
         "with_snf": [True, False],
+        "with_dpdk": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_libusb": False,
         "with_snf": False,
+        "with_dpdk": False,
     }
 
     # TODO: Add dbus-glib when available
@@ -118,7 +120,11 @@ class LibPcapConan(ConanFile):
                 "--disable-rdma",
                 f"--with-snf={yes_no(self.options.get_safe('with_snf'))}",
             ])
-            
+
+            if self.options.with_dpdk:
+                tc.configure_args.append("--with-dpdk")
+            else:
+                tc.configure_args.append("--without-dpdk")
             if cross_building(self):
                 target_os = "linux" if self.settings.os == "Linux" else "null"
                 tc.configure_args.append(f"--with-pcap={target_os}")
