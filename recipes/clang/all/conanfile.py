@@ -102,7 +102,6 @@ class ClangConan(ConanFile):
                         """list(APPEND CMAKE_MODULE_PATH "${LLVM_DIR};${LLVM_CMAKE_DIR}")""",
                         strict=False
                         )
-        #replace_in_file(self, cmake_lists, "if (LIBXML2_FOUND)", "if (LibXml2_FOUND)")
 
     def build(self):
         self._patch_sources()
@@ -152,6 +151,7 @@ class ClangConan(ConanFile):
     def _create_cmake_build_module(self, module_file):
         package_folder = Path(self.package_folder)
         content = textwrap.dedent(f"""\
+            set(CLANG_INSTALL_PREFIX "{str(package_folder)}")
             set(CLANG_CMAKE_DIR "{str(package_folder / self._cmake_build_folder_rel_path)}")
             if (NOT TARGET clang-tablegen-targets)
               add_custom_target(clang-tablegen-targets)
