@@ -60,10 +60,17 @@ class MetalcppConan(ConanFile):
         os_name = str(self.settings.os)
         if not minimum_os_version or not os_name in minimum_os_version:
             raise ConanInvalidConfiguration("Missing minimum system version definitions.")
-        elif self.settings.os.version < Version(minimum_os_version[os_name]):
-            os_ver = self.settings.os.version
+
+        os_version = self.settings.get_safe("os.version")
+        sdk_version = self.settings.get_safe("os.sdk_version")
+        if sdk_version is None:
+            sdk_version = os_version
+
+        if sdk_version is None:
+            raise ConanInvalidConfiguration("metal-cpp can't verify the current SDK version to validate compatibility. Either os.sdk_version or os.version should be set.")
+        elif sdk_version < Version(minimum_os_version[os_name]):
             req_os_ver = minimum_os_version[os_name]
-            raise ConanInvalidConfiguration(f"metal-cpp {self.version} requires {os_name} version {req_os_ver} but {os_ver} is the target.")
+            raise ConanInvalidConfiguration(f"metal-cpp {self.version} requires {os_name} SDK version {req_os_ver} but {sdk_version} is the target.")
 
     def build(self):
         pass
