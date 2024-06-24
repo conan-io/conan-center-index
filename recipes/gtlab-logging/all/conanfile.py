@@ -30,7 +30,7 @@ class GTLabLoggingConan(ConanFile):
 
     def requirements(self):
         if self.options.with_qt:
-            self.requires("qt/6.7.0")
+            self.requires("qt/[>=5.15 <7]", transitive_headers=True)
 
 
     @property
