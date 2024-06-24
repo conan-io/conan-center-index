@@ -70,11 +70,11 @@ class AprConan(ConanFile):
 
     def validate_build(self):
         if cross_building(self) and not is_msvc(self):
-            # Conan provide for Windows and Linux a simple "hack" to avoid entering a pre-built cached file
-            if self.settings.os not in ("Windows", "Linux") and self.conf.get("user.apr:cache_file") is None:
+            # Conan provides for Linux some configuration flags to avoid entering a pre-built cached file
+            if self.settings.os != "Linux" and self.conf.get("user.apr:cache_file") is None:
                 raise ConanInvalidConfiguration("apr recipe doesn't support cross-build for all the platforms"
                                                 " due to runtime checks in autoconf. You can provide"
-                                                " a cached file via Conan conf: \n"
+                                                " a pre-built cached file via Conan conf: \n"
                                                 " [conf]\nuser.apr:cache_file=/path/to/cache_file to try it.")
 
     def build_requirements(self):
@@ -91,15 +91,15 @@ class AprConan(ConanFile):
 
     def _get_cross_building_configure_args(self):
         """
-        The APR configure.in script makes extensive (30 instances) use
-        Check warning on line 73 in recipes/apr/all/conanfile.py
+        The vast majority of projects that use autotools and make use of the AC_TRY_RUN macro,
+        do provide a default fallback when cross-compiling, as per the documentation here:
 
-        String statement has no effect of AC_TRY_RUN (to determine system capabilities) and
-        checks for /dev/zero. These runtime checks only work when run on the host so
-        the configure script will fail when cross compiling unless the relevant
-        configuration variables are provided in a cache file or on the command line or in an
-        environment variable. The configuration variable values are most easily determined by
-        running the configure script on a host system using:
+            * https://ftp.gnu.org/old-gnu/Manuals/autoconf-2.53/html_node/Test-Programs.html
+
+        In that regard, APR cannot be cross-compiled by traditional means, and the only fallback
+        is to use a cache file. Indeed, the only way to cross-compile that is documented by upstream
+        is by pre-empting the configuration checks with a cache file that needs to be generated on
+        the target system:
 
             ./configure --cache-file={gnu_host_triplet}.cache
 
@@ -122,21 +122,14 @@ class AprConan(ConanFile):
         self.output.warning("Trying to set some configuration arguments, but it"
                             " could fail. The best approach is to provide a"
                             " pre-built cached file.")
-        # Let's try this hack (tested on Linux ARM and Intel)
         if self.settings.os == "Linux":
-            # The following are known to be true in modern Linux
+            # Mandatory cross-building configuration flags (tested on Linux ARM and Intel)
             configure_args.extend(["apr_cv_mutex_robust_shared=yes",
                                    "ac_cv_file__dev_zero=yes",
                                    "ac_cv_mmap__dev_zero=yes",
                                    "ac_cv_define_PTHREAD_PROCESS_SHARED=yes",
                                    "apr_cv_process_shared_works=yes",
                                    "apr_cv_tcp_nodelay_with_cork=yes"])
-        elif self.settings.os == "Windows":
-            configure_args.extend(["apr_cv_mutex_robust_shared=no"
-                                   "ac_cv_file__dev_zero=no",
-                                   "ac_cv_mmap__dev_zero=no",
-                                   "ac_cv_define_PTHREAD_PROCESS_SHARED=yes",
-                                   "apr_cv_tcp_nodelay_with_cork=no"])
         return configure_args
 
     def generate(self):
