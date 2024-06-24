@@ -126,8 +126,6 @@ class AprConan(ConanFile):
             # Mandatory cross-building configuration flags (tested on Linux ARM and Intel)
             configure_args.extend(["apr_cv_mutex_robust_shared=yes",
                                    "ac_cv_file__dev_zero=yes",
-                                   "ac_cv_mmap__dev_zero=yes",
-                                   "ac_cv_define_PTHREAD_PROCESS_SHARED=yes",
                                    "apr_cv_process_shared_works=yes",
                                    "apr_cv_tcp_nodelay_with_cork=yes"])
         return configure_args
