@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.files import get, copy, rm
+from conan.tools.files import get, copy, replace_in_file
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
 
 import os
@@ -33,11 +33,15 @@ class PactFFIConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["CARGO_TARGET_DIR"] = os.path.join(self.build_folder, "rust", "target")
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
+        replace_in_file(self, os.path.join(self.source_folder, "rust", "pact_ffi", "CMakeLists.txt"),
+                        'set(CARGO_TARGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../target")',
+                        'set(CARGO_TARGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../target" CACHE STRING "")')
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "rust", "pact_ffi"))
         cmake.build()
