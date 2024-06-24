@@ -82,8 +82,7 @@ class CAresConan(ConanFile):
                 self.cpp_info.components["cares"].system_libs.append("pthread")
         elif self.settings.os == "Windows":
             self.cpp_info.components["cares"].system_libs.extend(["ws2_32", "advapi32"])
-            if Version(self.version) >= "1.18.0":
-                self.cpp_info.components["cares"].system_libs.append("iphlpapi")
+            self.cpp_info.components["cares"].system_libs.append("iphlpapi")
         elif is_apple_os(self):
             self.cpp_info.components["cares"].system_libs.append("resolv")
 
