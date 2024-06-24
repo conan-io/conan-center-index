@@ -6,6 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rename, mkdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.54.0"
@@ -74,10 +75,15 @@ class QxmppConan(ConanFile):
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
 
+    def build_requirements(self):
+        self.tool_requires("qt/<host_version>")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        tc = VirtualBuildEnv(self)
+        tc.generate(scope="build")
         tc = CMakeToolchain(self)
         tc.variables["BUILD_DOCUMENTATION"] = False
         tc.variables["BUILD_TESTS"] = False
