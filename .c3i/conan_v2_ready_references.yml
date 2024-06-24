@@ -111,6 +111,7 @@ required_for_references:
 - blaze
 - blend2d
 - bliss
+- bmx
 - boolean-lite
 - boolinq
 - boost
@@ -120,6 +121,7 @@ required_for_references:
 - botan
 - box2d
 - breakpad
+- bredis
 - brigand
 - brotli
 - brunsli
@@ -249,6 +251,7 @@ required_for_references:
 - cpython
 - cqrlib
 - cr
+- crashpad
 - crc32c
 - crc_cpp
 - crcpp
@@ -617,6 +620,7 @@ required_for_references:
 - kainjow-mustache
 - kaitai_struct_cpp_stl_runtime
 - kangaru
+- kcov
 - kcp
 - kdbindings
 - kealib
@@ -859,6 +863,7 @@ required_for_references:
 - libzip
 - libzippp
 - lief
+- lielab
 - lightgbm
 - lightpcapng
 - linmath.h
@@ -897,6 +902,7 @@ required_for_references:
 - magic_enum
 - mailio
 - make
+- makefile-project-workspace-creator
 - mapbox-geometry
 - mapbox-variant
 - mapbox-wagyu
@@ -1262,6 +1268,7 @@ required_for_references:
 - rmm
 - roaring
 - robin-hood-hashing
+- rocket
 - rocksdb
 - rotor
 - rpclib
@@ -1318,6 +1325,7 @@ required_for_references:
 - si
 - signals-light
 - sigslot
+- simd
 - simde
 - simdjson
 - simdutf
