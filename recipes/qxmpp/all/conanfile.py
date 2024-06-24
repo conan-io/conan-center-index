@@ -9,7 +9,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.56.0 <2 || >= 2.0.6"
+required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
 
 class QxmppConan(ConanFile):
