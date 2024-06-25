@@ -16,6 +16,7 @@ class GTLabLoggingConan(ConanFile):
     description = "Simple logging interface with qt support"
 
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     
     options = {
         "shared": [True, False],
