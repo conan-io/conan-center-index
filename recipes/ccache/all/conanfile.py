@@ -12,6 +12,7 @@ required_conan_version = ">=1.55.0"
 
 class CcacheConan(ConanFile):
     name = "ccache"
+    package_type = "application"
     description = (
         "Ccache (or “ccache”) is a compiler cache. It speeds up recompilation "
         "by caching previous compilations and detecting when the same "
@@ -51,6 +52,7 @@ class CcacheConan(ConanFile):
 
         if Version(self.version) >= "4.10":
             self.requires("fmt/10.2.1")
+            self.requires("xxhash/[~0.8]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
