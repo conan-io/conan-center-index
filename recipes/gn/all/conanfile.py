@@ -44,7 +44,7 @@ class GnConan(ConanFile):
             "apple-clang": 10,
         }.get(str(self.settings.compiler))
 
-    def validate(self):
+    def validate_build(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 17)
         else:
@@ -59,7 +59,7 @@ class GnConan(ConanFile):
 
     def build_requirements(self):
         # FIXME: add cpython build requirements for `build/gen.py`.
-        self.build_requires("ninja/1.11.1")
+        self.tool_requires("ninja/1.11.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
