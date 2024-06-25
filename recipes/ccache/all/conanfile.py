@@ -75,8 +75,8 @@ class CcacheConan(ConanFile):
         self.tool_requires("cmake/[>=3.15 <4]")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder,
+            strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -85,7 +85,7 @@ class CcacheConan(ConanFile):
         tc.variables["ZSTD_FROM_INTERNET"] = False
         tc.variables["ENABLE_DOCUMENTATION"] = False
         tc.variables["ENABLE_TESTING"] = False
-        tc.variables["STATIC_LINK"] = False # Don't link static runtimes and let Conan handle it
+        tc.variables["STATIC_LINK"] = False  # Don't link static runtimes and let Conan handle it
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -115,7 +115,9 @@ class CcacheConan(ConanFile):
         cmake.install()
 
     def package_info(self):
+        self.cpp_info.libdirs = []
+        self.cpp_info.includedirs = []
+
         bin_path = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
-        self.cpp_info.includedirs = []
