@@ -68,6 +68,9 @@ class CcacheConan(ConanFile):
             self.settings.compiler.libcxx == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} requires C++ filesystem library, that is not supported by Clang 11 + libstdc++.")
 
+        if self.settings.os == "Windows" and self.settings.arch == "armv8" and Version(self.version) < "4.10":
+            raise ConanInvalidConfiguration("ccache does not support ARMv8 on Windows before version 4.10")
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.15 <4]")
 
