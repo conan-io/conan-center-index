@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, get
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.microsoft import check_min_vs, is_msvc
@@ -41,9 +41,6 @@ class CcacheConan(ConanFile):
             "apple-clang": "11",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -51,6 +48,9 @@ class CcacheConan(ConanFile):
         self.requires("zstd/1.5.5")
         if self.options.redis_storage_backend:
             self.requires("hiredis/1.1.0")
+
+        if Version(self.version) >= "4.10":
+            self.requires("fmt/10.2.1")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -80,17 +80,26 @@ class CcacheConan(ConanFile):
         tc.variables["ZSTD_FROM_INTERNET"] = False
         tc.variables["ENABLE_DOCUMENTATION"] = False
         tc.variables["ENABLE_TESTING"] = False
+        tc.variables["STATIC_LINK"] = False # Don't link static runtimes and let Conan handle it
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("hiredis", "cmake_target_name", "HIREDIS::HIREDIS")
-        deps.set_property("hiredis", "cmake_find_mode", "module")
-        deps.set_property("zstd", "cmake_target_name", "ZSTD::ZSTD")
+        if Version(self.version) >= "4.10":
+            deps.set_property("fmt", "cmake_file_name", "Fmt")
+            deps.set_property("fmt", "cmake_find_mode", "module")
+            deps.set_property("fmt", "cmake_target_name", "dep_fmt")
+            deps.set_property("zstd", "cmake_file_name", "Zstd")
+            deps.set_property("zstd", "cmake_target_name", "dep_zstd")
+            deps.set_property("hiredis", "cmake_file_name", "Hiredis")
+            deps.set_property("hiredis", "cmake_target_name", "dep_hiredis")
+        else:
+            deps.set_property("hiredis", "cmake_target_name", "HIREDIS::HIREDIS")
+            deps.set_property("zstd", "cmake_target_name", "ZSTD::ZSTD")
         deps.set_property("zstd", "cmake_find_mode", "module")
+        deps.set_property("hiredis", "cmake_find_mode", "module")
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
