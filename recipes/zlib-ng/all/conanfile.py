@@ -89,6 +89,7 @@ class ZlibNgConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         # upstream CMakeLists intentionally hardcodes install_name with full
         # install path (to match autootools behavior), instead of @rpath
         fix_apple_shared_install_name(self)
