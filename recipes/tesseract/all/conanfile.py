@@ -155,7 +155,7 @@ class TesseractConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
