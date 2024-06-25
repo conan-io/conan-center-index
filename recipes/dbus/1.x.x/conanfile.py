@@ -131,7 +131,7 @@ class DbusConan(ConanFile):
         if self.options.get_safe("dbus_user"):
             tc.project_options["dbus_user"] = str(self.options.dbus_user)
         if self.options.system_pid_file:
-            tc.project_options["system_pid_file"] = self.options.system_pid_file
+            tc.project_options["system_pid_file"] = str(self.options.system_pid_file)
         if self.options.system_socket:
             tc.project_options["system_socket"] = self.options.system_socket
         if is_apple_os(self):
