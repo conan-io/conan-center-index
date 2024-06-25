@@ -22,8 +22,8 @@ class bgfxConan(ConanFile):
     description = "Cross-platform, graphics API agnostic, \"Bring Your Own Engine/Framework\" style rendering library."
     topics = ("rendering", "graphics", "gamedev")
     settings = "os", "compiler", "arch", "build_type"
-    options = {"fPIC": [True, False], "shared": [True, False], "tools": [True, False], "rtti": [True, False]}
-    default_options = {"fPIC": True, "shared": False, "tools": False, "rtti": True}
+    options = {"fPIC": [True, False], "shared": [True, False], "rtti": [True, False], "tools": [True, False], "profiler": [True, False]}
+    default_options = {"fPIC": True, "shared": False, "rtti": True, "tools": False, "profiler": False}
 
     @property
     def _bx_folder(self):
@@ -48,8 +48,18 @@ class bgfxConan(ConanFile):
             genie_extra += " --with-dynamic-runtime"
         if self.options.shared:
             genie_extra += " --with-shared-lib"
+        if self.options.profiler:
+            genie_extra += " --with-profiler"
         # generate tools projects regardless of tools option because that also generates bimg_encode
         genie_extra += " --with-tools"
+        # deal with macos 11 to 13
+        if self.settings.os == "Macos": 
+            if self.settings.get_safe("os.sdk_version"): 
+                if self.settings.get_safe("os.sdk_version") < "13.0" and self.settings.get_safe("os.sdk_version") >= "11.0":
+                    genie_extra += " --with-macos=11"
+            else:
+                # err on the side of comaptibility if sdk version not set
+                genie_extra += " --with-macos=11"
         return genie_extra
 
     @property
@@ -118,8 +128,8 @@ class bgfxConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 17)
         check_min_vs(self, 192)
-        if self.settings.os == "Macos" and self.settings.get_safe("os.sdk_version") and self.settings.get_safe("os.sdk_version") < "13.0":
-            raise ConanInvalidConfiguration(f"{self.ref} requires macos sdk version >= 13")
+        if self.settings.os == "Macos" and self.settings.get_safe("os.sdk_version") and self.settings.get_safe("os.sdk_version") < "11.0":
+            raise ConanInvalidConfiguration(f"{self.ref} requires macos sdk version >= 11")
         if self.settings.os in ["iOS", "tvOS"]  and self.settings.get_safe("os.sdk_version") and self.settings.get_safe("os.sdk_version") < "16.0":
             raise ConanInvalidConfiguration(f"{self.ref} requires iOS/tvOS sdk version >= 16")
         if not is_msvc(self):
