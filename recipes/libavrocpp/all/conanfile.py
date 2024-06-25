@@ -45,11 +45,9 @@ class LibavrocppConan(ConanFile):
         cmake_layout(self, src_folder="src")
         
     def requirements(self):
-        if valid_min_cppstd(self, 14) :
-            self.requires("boost/[>=1.82.0]", transitive_headers=True)
-        else:
-            self.requires("boost/[<1.82.0]", transitive_headers=True)
-        self.requires("snappy/[~1.1.9]")
+        # boost upper to 1.81.0 requires C++14 minimum
+        self.requires("boost/1.81.0", transitive_headers=True)
+        self.requires("snappy/1.1.9")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
