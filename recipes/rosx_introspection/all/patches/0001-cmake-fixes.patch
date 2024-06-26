@@ -1,0 +1,36 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,11 +1,10 @@
+-cmake_minimum_required(VERSION 3.10)
++cmake_minimum_required(VERSION 3.15)
+ 
+ project(rosx_introspection LANGUAGES CXX VERSION 1.0.1)
+ 
+ 
+ option(CMAKE_POSITION_INDEPENDENT_CODE "Set -fPIC" ON)
+ 
+-include(cmake/CPM.cmake)
+ 
+ find_package(ament_cmake QUIET)
+ 
+@@ -48,7 +47,7 @@
+         rclcpp
+         rosbag2_cpp
+         fastcdr)
+-else()
++elseif(FALSE)
+     message(STATUS "Downloading FastCDR with CPM and building as static library")
+     # Override Fast-CDR option: compile as static lib
+     # set(BUILD_SHARED_LIBS OFF CACHE BOOL "Create static libraries by default")
+@@ -60,8 +59,10 @@
+     target_link_libraries(rosx_introspection fastcdr)
+ endif()
+ 
++find_package(fastcdr REQUIRED)
++find_package(RapidJSON REQUIRED)
+ 
+-find_package(RapidJSON QUIET)
++target_link_libraries(rosx_introspection PRIVATE rapidjson fastcdr)
+ 
+ if(NOT RapidJSON_FOUND)
+     message(STATUS "Downloading RapidJSON with CPM")    
