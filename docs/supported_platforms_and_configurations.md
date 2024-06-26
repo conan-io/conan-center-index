@@ -74,11 +74,11 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 
 ## MacOS
 
-- Python: 3.7.12
-- CMake: 3.20.1
-- Compilers: Apple-clang versions 13.0.0
-- Macos SDK versions (for each apple-clang version respectively): 11.3
-- Macos deployment target (`minos`): 11.0
+- Python: 
+- CMake: 
+- Compilers: Apple-clang versions 
+- Macos SDK versions (for each apple-clang version respectively): 
+- Macos deployment target (`minos`): 
 - C++ Standard Library (`libcxx`): `libc++`
 - Architectures: armv8
 - Build types: Release, Debug
