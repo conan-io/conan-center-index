@@ -24,15 +24,13 @@ index 4f61915..b5fa821 100644
      public:
        /// @brief Construct using the internal, common io service
 diff --git a/src/Communication/AsioService_fwd.h b/src/Communication/AsioService_fwd.h
-index dc2f235..0a4a9a7 100644
+index dc2f235..8d9be19 100644
 --- a/src/Communication/AsioService_fwd.h
 +++ b/src/Communication/AsioService_fwd.h
-@@ -11,15 +11,7 @@
- #error Please include <Application/QuickFAST.h> preferably as a precompiled header file.
- #endif //QUICKFAST_HEADERS
+@@ -13,13 +13,7 @@
  
--// forward declare io_service without including
--// boost header
+ // forward declare io_service without including
+ // boost header
 -namespace boost
 -{
 -  namespace asio
