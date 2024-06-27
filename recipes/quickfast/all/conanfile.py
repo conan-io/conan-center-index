@@ -14,7 +14,7 @@ class QuickfastConan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/objectcomputing/quickfast"
-    topics = ("QuickFAST", "FAST", "FIX", "Fix Adapted for STreaming", "Financial Information Exchange")
+    topics = ("fast-protocol", "fast", "fix-adapted-for-streaming", "fpl", "fix-protocol-limited")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"

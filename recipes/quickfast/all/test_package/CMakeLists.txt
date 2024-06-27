@@ -5,4 +5,4 @@ find_package(quickfast REQUIRED CONFIG)
 
 add_executable(test ${PROJECT_SOURCE_DIR}/main.cpp)
 target_link_libraries(test PRIVATE quickfast::quickfast)
-set_property(TARGET test PROPERTY CXX_STANDARD 11)
+target_compile_features(test PRIVATE cxx_std_11)
