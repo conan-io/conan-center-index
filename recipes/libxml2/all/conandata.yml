@@ -1,7 +1,7 @@
 sources:
-  "2.13.0":
-    url: "https://download.gnome.org/sources/libxml2/2.13/libxml2-2.13.0.tar.xz"
-    sha256: "d5a2f36bea96e1fb8297c6046fb02016c152d81ed58e65f3d20477de85291bc9"
+  "2.13.1":
+    url: "https://download.gnome.org/sources/libxml2/2.13/libxml2-2.13.1.tar.xz"
+    sha256: "25239263dc37f5f55a5393eff27b35f0b7d9ea4b2a7653310598ea8299e3b741"
   "2.12.7":
     url: "https://download.gnome.org/sources/libxml2/2.12/libxml2-2.12.7.tar.xz"
     sha256: "24ae78ff1363a973e6d8beba941a7945da2ac056e19b53956aeb6927fd6cfb56"
