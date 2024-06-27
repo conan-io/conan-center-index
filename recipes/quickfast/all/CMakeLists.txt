@@ -26,9 +26,9 @@ add_library(quickfast ${HEADERS} ${SOURCES})
 target_compile_definitions(quickfast PRIVATE -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 
 if(BUILD_SHARED_LIBS)
-    target_compile_definitions(quickfast PRIVATE -DQUICKFAST_BUILD_DLL)
+    target_compile_definitions(quickfast PUBLIC QUICKFAST_BUILD_DLL)
 else()
-    target_compile_definitions(quickfast PUBLIC -DQUICKFAST_HAS_DLL=0)
+    target_compile_definitions(quickfast PUBLIC QUICKFAST_HAS_DLL=0)
 endif()
 
 target_compile_features(quickfast PUBLIC cxx_std_11)
@@ -36,8 +36,8 @@ target_include_directories(quickfast PRIVATE src)
 target_link_libraries(${PROJECT_NAME}
     Boost::boost
     Boost::thread
-    Boost::date_time
-    Boost::disable_autolinking
+    Boost::system
+    Boost::filesystem
     XercesC::XercesC
 )
 set_target_properties(quickfast PROPERTIES
