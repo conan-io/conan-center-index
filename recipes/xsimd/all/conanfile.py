@@ -46,7 +46,7 @@ class XsimdConan(ConanFile):
 
     def requirements(self):
         if self.options.xtl_complex:
-            self.requires("xtl/0.7.5")
+            self.requires("xtl/0.7.6")
 
     def package_id(self):
         self.info.clear()
@@ -58,7 +58,7 @@ class XsimdConan(ConanFile):
 
         # TODO: There are compilation errors on apple-clang/13.0.0 with cppstd=17
         if self.settings.compiler == "apple-clang" and \
-            Version(self.settings.compiler.version).major <= "13" and \
+            Version(self.settings.compiler.version).major == "13" and \
             self.settings.compiler.get_safe("cppstd") in ["17", "gnu17", "20", "gnu20",]:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support apple-clang 13 with cppstd=17 or later")
 
