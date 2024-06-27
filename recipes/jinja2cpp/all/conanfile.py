@@ -101,6 +101,7 @@ class Jinja2cppConan(ConanFile):
             tc.variables["JINJA2CPP_MSVC_RUNTIME_TYPE"] = runtime
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("expected-lite", "cmake_target_name", "expected-lite::expected-lite")
         deps.generate()
 
     def _patch_sources(self):
