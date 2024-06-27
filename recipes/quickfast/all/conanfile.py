@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -78,5 +79,5 @@ class QuickfastConan(ConanFile):
         # Needed to keep support for deprecated placeholders in boost::bind
         self.cpp_info.defines.append("BOOST_BIND_GLOBAL_PLACEHOLDERS")
 
-        if not self.options.shared:
+        if is_msvc(self) and not self.options.shared:
             self.cpp_info.defines.append("QUICKFAST_HAS_DLL=0")
