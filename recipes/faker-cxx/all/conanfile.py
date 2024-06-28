@@ -20,10 +20,12 @@ class FakerCXXConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_std_format": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_std_format": False,
     }
 
     @property
@@ -49,8 +51,7 @@ class FakerCXXConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        if self.settings.compiler == "apple-clang" or \
-           (self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "12.0"):
+        if not self.options.with_std_format:
             self.requires("fmt/10.2.1")
 
     def layout(self):
@@ -76,6 +77,7 @@ class FakerCXXConan(ConanFile):
         tc.variables["USE_SYSTEM_DEPENDENCIES"] = True
         tc.variables["BUILD_TESTING"] = False
         tc.variables["WARNINGS_AS_ERRORS"] = False
+        tc.variables["WITH_STD_FORMAT"] = self.options.with_std_format
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
