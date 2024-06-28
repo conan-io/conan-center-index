@@ -5,11 +5,11 @@
 
 int main()
 {
-    const auto id = faker::String::uuid();
-    const auto email = faker::Internet::email();
-    const auto password = faker::Internet::password();
-    const auto createdAt = faker::Date::pastDate(5, faker::Date::DateFormat::ISO);
-    const auto updatedAt = faker::Date::recentDate(2, faker::Date::DateFormat::ISO);
+    const auto id = faker::string::uuid();
+    const auto email = faker::internet::email();
+    const auto password = faker::internet::password();
+    const auto createdAt = faker::date::pastDate(5, faker::date::DateFormat::ISO);
+    const auto updatedAt = faker::date::recentDate(2, faker::date::DateFormat::ISO);
 
     std::cout << "id: " << id << ", email: " << email << ", password: " <<  password << ", createdAt: " << createdAt << ", updatedAt: " << updatedAt << "\n";
 

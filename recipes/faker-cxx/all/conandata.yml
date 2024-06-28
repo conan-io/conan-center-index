@@ -1,12 +1,4 @@
 sources:
-  "1.0.0":
-    url: "https://github.com/cieslarmichal/faker-cxx/archive/refs/tags/v1.0.0.tar.gz"
-    sha256: "ffba405f53822cac80491702a6b7c5490dc109474a0f37556bd00ddb69433309"
-patches:
-  "1.0.0":
-    - patch_file: "patches/1.0.0-0001-disable-werror.patch"
-      patch_description: "correct the order of cmake min and project"
-      patch_type: "conan"
-    - patch_file: "patches/1.0.0-0002-use-cci.patch"
-      patch_description: "correct the order of cmake min and project"
-      patch_type: "conan"
+  "2.0.0":
+    url: "https://github.com/cieslarmichal/faker-cxx/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "8a7f5441f4453af868444675878a2d9a74918c1595caa65d537d3ea327e46a49"
