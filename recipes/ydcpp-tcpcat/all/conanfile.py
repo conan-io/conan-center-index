@@ -9,7 +9,6 @@ import os
 
 class TcpcatConan(ConanFile):
     name = "ydcpp-tcpcat"
-    package_type = "library"
 
     # Optional metadata
     license = "MIT"
@@ -19,6 +18,7 @@ class TcpcatConan(ConanFile):
     topics = ("network", "tcp", "tcp-server", "tcp-client")
 
     # Binary configuration
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
