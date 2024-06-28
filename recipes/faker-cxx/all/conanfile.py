@@ -65,6 +65,9 @@ class FakerCXXConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        if self.settings.os == "Windows" and self.options.shared:
+            # https://github.com/cieslarmichal/faker-cxx/issues/753
+            raise ConanInvalidConfiguration(f"{self.ref} is not prepared to generated shared library on Windows.")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22 <4]")
