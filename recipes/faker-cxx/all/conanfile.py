@@ -35,11 +35,11 @@ class FakerCXXConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "11",
-            "clang": "12",
-            "apple-clang": "13",
-            "Visual Studio": "16",
-            "msvc": "192",
+            "gcc": "12",
+            "clang": "16",
+            "apple-clang": "16",
+            "Visual Studio": "17",
+            "msvc": "193",
         }
 
     def config_options(self):
