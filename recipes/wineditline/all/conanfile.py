@@ -26,8 +26,9 @@ class WineditlineConan(ConanFile):
     }
     provides = "editline"
 
-    def export_sources(self):
-        copy(self, "CMakeLists.txt", dst=self.export_sources_folder, src=self.recipe_folder)
+    @property
+    def _target_name(self):
+        return "edit" if self.options.shared else "edit_static"
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
@@ -38,7 +39,7 @@ class WineditlineConan(ConanFile):
 
     def validate(self):
         if self.settings.os != "Windows":
-            raise ConanInvalidConfiguration("wineditline is supported only on Windows.")
+            raise ConanInvalidConfiguration(f"{self.ref} is supported only on Windows.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -48,15 +49,15 @@ class WineditlineConan(ConanFile):
         tc.generate()
 
     def build(self):
-        copy(self, "CMakeLists.txt", dst=self.source_folder, src=self.export_sources_folder)
         cmake = CMake(self)
         cmake.configure()
-        cmake.build()
+        cmake.build(target=self._target_name)
 
     def package(self):
         copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        cmake = CMake(self)
-        cmake.install()
+        copy(self, "*.h", dst=os.path.join(self.package_folder, "include", "editline"), src=os.path.join(self.source_folder, "src", "editline"))
+        copy(self, "*.lib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
+        copy(self, "*.dll", dst=os.path.join(self.package_folder, "bin"), src=self.build_folder, keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["edit"]
+        self.cpp_info.libs = [self._target_name]
