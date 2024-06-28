@@ -27,7 +27,7 @@ class DbusConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "dbus_user": ["ANY"],
+        "dbus_user": [None, "ANY"],
         "message_bus": [True, False],
         "system_socket": [None, "ANY"],
         "system_pid_file": [None, "ANY"],
