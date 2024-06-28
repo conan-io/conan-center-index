@@ -124,7 +124,7 @@ class MPUnitsConan(ConanFile):
             return
         if min_version == "":
             raise ConanInvalidConfiguration(
-                f"'{name}' is not yet supported by any known {compiler} compiler"
+                f"'{name}' is not yet supported by any known {compiler} version"
             )
         if loose_lt_semver(str(compiler.version), min_version):
             raise ConanInvalidConfiguration(
