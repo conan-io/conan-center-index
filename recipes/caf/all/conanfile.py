@@ -12,11 +12,10 @@ required_conan_version = ">=1.54.0"
 class CAFConan(ConanFile):
     name = "caf"
     description = "An open source implementation of the Actor Model in C++"
+    license = "BSD-3-Clause", "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/actor-framework/actor-framework"
-    topics = "actor-framework", "actor-model", "pattern-matching", "actors"
-    license = "BSD-3-Clause", "BSL-1.0"
-
+    topics = ("actor-framework", "actor-model", "pattern-matching", "actors")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
