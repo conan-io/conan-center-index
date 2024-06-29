@@ -1,7 +1,7 @@
 sources:
-  "1.18.0":
-    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.18.0.tar.gz"
-    sha256: "630612317ea9eeba2a8ce57b9b553f86d46b2ee7966dd9c23af9a04629b8087b"
+  "1.18.1":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.18.1.tar.gz"
+    sha256: "480ff5d2450ff18d02db48908c9c0c6a602993942cb47866b8effe32d0469a2c"
   "1.17.3":
     url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.17.3.tar.gz"
     sha256: "4112f6552c17216311be013b9a2621a3c1a17ed9e1268a1142599b6a494517c2"
@@ -15,7 +15,7 @@ sources:
     url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.14.1.tar.gz"
     sha256: "f998352b131bb89fa7dd1f1d87ddbafe647dfaddd11929b6b5168b3f4ef857de"
 patches:
-  "1.18.0":
+  "1.18.1":
     - patch_file: "patches/1.17.3-0002-missing-include.patch"
       patch_description: "add missing '<optional>' include when abseil is built without c++17 support"
       patch_type: "portability"
