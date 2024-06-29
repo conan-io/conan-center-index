@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
+from conan.tools.microsoft import is_msvc
 from conan.tools.files import copy, get
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -51,6 +52,12 @@ class TcpcatConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+        
+        # Upstream meant to support Windows Shared builds, but they don't currently export any symbols
+        # Disable for now until fixed. As this is an upstream issue they want fixed, we don't set
+        # package_type = "static-library" in the configure() method so that users have a clear message error for now
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} does not currently support Windows shared builds due to an upstream issue")
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
