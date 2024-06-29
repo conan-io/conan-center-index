@@ -1,9 +1,10 @@
-from conans import ConanFile, CMake, tools
 import os
 
+from conans import ConanFile, CMake, tools
 
-class TestPackageConan(ConanFile):
-    settings = "os", "arch", "compiler", "build_type"
+
+class QuickfastTestConan(ConanFile):
+    settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
@@ -13,5 +14,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
-            bin_path = os.path.join("bin", "test_package")
+            bin_path = os.path.join("bin", "test")
             self.run(bin_path, run_environment=True)
