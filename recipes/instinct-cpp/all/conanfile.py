@@ -44,7 +44,6 @@ class InstinctCppConan(ConanFile):
     def _min_cppstd(self):
         return 20
 
-    # in case the project requires C++14/17/20/... the minimum compiler version should be listed
     @property
     def _compilers_minimum_version(self):
         return {
@@ -53,8 +52,6 @@ class InstinctCppConan(ConanFile):
             "gcc": "12"
         }
 
-    # no exports_sources attribute, but export_sources(self) method instead
-    # this allows finer grain exportation of patches per version
     def export_sources(self):
         export_conandata_patches(self)
 
