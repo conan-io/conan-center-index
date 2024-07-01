@@ -48,3 +48,8 @@ patches:
       patch_description: "Fix usage of memory_resource with apple-clang>=15 and deployment target of macOS < 14"
       patch_type: "portability"
       patch_source: "https://codereview.qt-project.org/c/qt/qtbase/+/482392"
+    - patch_file: "patches/5.15.7/f2055fa.diff"
+      base_path: "qt5/qtbase"
+      patch_description: "Fix linkage with lld"
+      patch_type: "portability"
+      patch_source: "https://bugreports.qt.io/browse/QTBUG-111514"
