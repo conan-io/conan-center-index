@@ -100,9 +100,7 @@ class InstinctCppConan(ConanFile):
 
         self.requires("llama-cpp/b3040", transitive_headers=True)
         self.requires("cpp-httplib/0.15.3", transitive_headers=True)
-        # deps of examples
         self.requires("cli11/2.4.1")
-        # test deps
         self.test_requires("gtest/1.14.0")
 
     def validate(self):
