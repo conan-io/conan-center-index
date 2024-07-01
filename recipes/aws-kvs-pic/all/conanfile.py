@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -72,6 +73,10 @@ class awskvspicConan(ConanFile):
         self.cpp_info.components["kvspic"].set_property("pkg_config_name", "libkvspic")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["kvspic"].system_libs = ["dl", "rt", "pthread"]
+        
+        if Version(self.version) >= "1.1.0":
+            if self.settings.build_type == "Debug":
+                self.cpp_info.components["kvspic"].defines = ["DEBUG_BUILD"]
 
         self.cpp_info.components["kvspicClient"].libs = ["kvspicClient"]
         self.cpp_info.components["kvspicClient"].set_property("pkg_config_name", "libkvspicClient")

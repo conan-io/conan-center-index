@@ -1,0 +1,5 @@
+--- lib/glob.c
++++ lib/glob.c
+@@ -139,1 +139,1 @@
+-#if !defined __alloca && !defined __GNU_LIBRARY__
++#if (!defined __alloca && defined __GNU_LIBRARY__ && __linux__) || (!defined __alloca && !defined __GNU_LIBRARY__)

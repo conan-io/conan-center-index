@@ -84,7 +84,7 @@ class HarfbuzzConan(ConanFile):
         if self.options.with_icu:
             self.requires("icu/74.1")
         if self.options.with_glib:
-            self.requires("glib/2.78.1")
+            self.requires("glib/2.78.3")
 
     def validate(self):
         if self.options.shared and self.options.with_glib and not self.dependencies["glib"].options.shared:
@@ -100,9 +100,9 @@ class HarfbuzzConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.3")
+        self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self.options.with_glib:
             self.tool_requires("glib/<host_version>")
         if self.settings.os == "Macos":
@@ -141,6 +141,7 @@ class HarfbuzzConan(ConanFile):
 
         backend, cxxflags = meson_backend_and_flags()
         tc = MesonToolchain(self, backend=backend)
+        tc.project_options["auto_features"] = "disabled"
         tc.project_options.update({
             "glib": is_enabled(self.options.with_glib),
             "icu": is_enabled(self.options.with_icu),
@@ -197,8 +198,11 @@ class HarfbuzzConan(ConanFile):
                 self.cpp_info.system_libs.append("usp10")
             if self.options.with_directwrite:
                 self.cpp_info.system_libs.append("dwrite")
-        if is_apple_os(self):
-            self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText", "ApplicationServices"])
+        if is_apple_os(self) and self.options.get_safe("with_coretext", False):
+            if self.settings.os == "Macos":
+                self.cpp_info.frameworks.append("ApplicationServices")
+            else:
+                self.cpp_info.frameworks.extend(["CoreFoundation", "CoreGraphics", "CoreText"])
         if not self.options.shared:
             libcxx = stdcpp_library(self)
             if libcxx:

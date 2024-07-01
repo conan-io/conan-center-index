@@ -1,0 +1,5 @@
+sources:
+  0.5.2:
+    url:
+      - https://github.com/jgaa/logfault/archive/refs/tags/v0.5.2.tar.gz
+    sha256: b6c7a4faca340bb7e3105c2094acd2afd52ce1bcfbe7e3ed2233c1ec933a904f
