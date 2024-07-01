@@ -38,7 +38,9 @@ class DawUtfRangeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "2.2.4":
+        if Version(self.version) >= "2.2.5":
+            self.requires("daw_header_libraries/2.106.0")
+        elif Version(self.version) >= "2.2.4":
             self.requires("daw_header_libraries/2.101.0")
         else:
             self.requires("daw_header_libraries/2.97.0")
