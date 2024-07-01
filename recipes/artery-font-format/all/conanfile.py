@@ -7,11 +7,11 @@ required_conan_version = ">=1.52.0"
 
 class ArteryFontFormatConan(ConanFile):
     name = "artery-font-format"
-    license = "MIT"
-    homepage = "https://github.com/Chlumsky/artery-font-format"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "Artery Atlas Font format library"
-    topics = ("artery", "font", "atlas")
+    license = "MIT"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/Chlumsky/artery-font-format"
+    topics = ("artery", "font", "atlas", "header-only")
     package_type = "header-library"
     no_copy_source = True
 
@@ -20,10 +20,6 @@ class ArteryFontFormatConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def build(self):
-        # header only: no build step
-        pass
 
     def package(self):
         copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
@@ -39,3 +35,7 @@ class ArteryFontFormatConan(ConanFile):
             dst=os.path.join(self.package_folder, "include"),
             src=self.source_folder,
         )
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
