@@ -1,0 +1,148 @@
+diff --git a/coin.m4 b/coin.m4
+index 1dc7d8f..77a7781 100644
+--- a/coin.m4
++++ b/coin.m4
+@@ -337,7 +337,7 @@ AM_CONDITIONAL(COIN_CXX_IS_CL, [test $coin_cxx_is_cl = true])
+ 
+ # Autoconf incorrectly concludes that cl recognises -g. It doesn't.
+ case "$CXX" in
+-  clang* ) ;;
++  clang* | */clang* ) ;;
+   cl* | */cl* | CL* | */CL* )
+     if test "$ac_cv_prog_cxx_g" = yes ; then
+       ac_cv_prog_cxx_g=no
+@@ -386,7 +386,7 @@ if test x"$CXXFLAGS" = x; then
+     case $build in
+       *-cygwin* | *-mingw*)
+         case "$CXX" in
+-          clang* ) ;;
++          clang* | */clang* ) ;;
+           cl* | */cl* | CL* | */CL*)
+             # The MT and MTd options are mutually exclusive
+             if test "$coin_disable_shared" = yes || test "$enable_shared" = yes ; then
+@@ -527,7 +527,7 @@ fi
+ 
+ # correct the LD variable in a build with MS or Intel-windows compiler
+ case "$CXX" in
+-  clang* ) ;;
++  clang* | */clang* ) ;;
+   cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
+     LD=link
+     ;;
+@@ -571,7 +571,7 @@ if test -z "$CXXLIBS"; then
+     case $build in
+      *-mingw32 | *-cygwin* )
+       case "$CXX" in
+-      clang* ) ;;
++      clang* | */clang* ) ;;
+       cl* | */cl* | CL* | */CL*)
+         CXXLIBS=nothing;;
+       esac;;
+@@ -673,7 +673,7 @@ AC_LANG_PUSH(C)
+ # compiler, if the C++ is set, but the C compiler isn't (only for CXX=cl)
+ if test x"$CXX" != x; then
+   case "$CXX" in
+-    clang* ) ;;
++    clang* | */clang* ) ;;
+     cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
+       if test x"$CC" = x; then
+         CC="$CXX"
+@@ -728,7 +728,7 @@ if test -z "$CC" ; then
+ fi
+ # Autoconf incorrectly concludes that cl recognises -g. It doesn't.
+ case "$CC" in
+-  clang* ) ;;
++  clang* | */clang* ) ;;
+   cl* | */cl* | CL* | */CL* )
+     if test "$ac_cv_prog_cc_g" = yes ; then
+       ac_cv_prog_cc_g=no
+@@ -745,7 +745,7 @@ CFLAGS="$save_cflags"
+ # add automake conditional so we can recognize cl compiler in makefile
+ coin_cc_is_cl=false
+ case "$CC" in
+-  clang* ) ;;
++  clang* | */clang* ) ;;
+   cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
+     coin_cc_is_cl=true
+     ;;
+@@ -782,7 +782,7 @@ if test x"$CFLAGS" = x; then
+     case $build in
+       *-cygwin* | *-mingw*)
+         case "$CC" in
+-          clang* ) ;;
++          clang* | */clang* ) ;;
+           cl* | */cl* | CL* | */CL*)
+             if test "$coin_disable_shared" = yes || test "$enable_shared" = yes ; then
+               coin_opt_cflags='-MD -O2'
+@@ -915,7 +915,7 @@ fi
+ 
+ # Correct the LD variable if we are using the MS or Intel-windows compiler
+ case "$CC" in
+-  clang* ) ;;
++  clang* | */clang* ) ;;
+   cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
+     LD=link
+     ;;
+@@ -1530,7 +1530,7 @@ else
+       coin_disable_shared=yes
+       if test x"$enable_shared" = xyes; then
+         case "$CC" in
+-          clang* )
++          clang* | */clang* )
+             AC_MSG_WARN([Building of DLLs not supported in this configuration.])
+             ;;
+           cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
+@@ -1661,7 +1661,7 @@ if test "$dependency_linking" = auto; then
+     case $build in
+       *-cygwin* | *-mingw*)
+         case "$CC" in
+-          clang* )
++          clang* | */clang* )
+             dependency_linking=yes
+             ;;
+           cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
+@@ -1720,7 +1720,7 @@ AC_SUBST(LT_LDFLAGS)
+ 
+ AC_DEFUN([AC_COIN_PATCH_LIBTOOL_CYGWIN],
+ [ case "$CXX" in
+-    clang* )
++    clang* | */clang* )
+       # we assume that libtool patches for CLANG are the same as for GNU compiler - correct???
+       AC_MSG_NOTICE(Applying patches to libtool for CLANG compiler)
+       sed -e 's|fix_srcfile_path=\"`cygpath -w \"\$srcfile\"`\"|fix_srcfile_path=\"\\\`'"$CYGPATH_W"' \\\"\\$srcfile\\\"\\\`\"|' \
+@@ -1953,7 +1953,7 @@ AC_BEFORE([AC_COIN_ENABLE_MSVC], [$0])
+ AC_MSG_CHECKING([which command should be used to link input files])
+ coin_link_input_cmd="$LN_S"
+ case "$CC" in
+-  clang* ) ;;
++  clang* | */clang* ) ;;
+   cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
+     coin_link_input_cmd=cp ;;
+ esac
+@@ -1979,7 +1979,7 @@ if test x$coin_skip_ac_output != xyes; then
+   # library extension
+   AC_SUBST(LIBEXT)
+   case "$CC" in
+-    clang* )
++    clang* | */clang* )
+          LIBEXT=a ;;
+     cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
+          LIBEXT=lib ;;
+@@ -2632,7 +2632,7 @@ if test $coin_vpath_config = yes; then
+     lnkcmd=cp
+   fi
+   case "$CC" in
+-    clang* ) ;;
++    clang* | */clang* ) ;;
+     cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
+       lnkcmd=cp ;;
+   esac
+@@ -3965,7 +3965,7 @@ else
+       
+     *-cygwin* | *-mingw*)
+       case "$CC" in
+-        clang* ) ;;
++        clang* | */clang* ) ;;
+         cl* | */cl* | CL* | */CL* | icl* | */icl* | ICL* | */ICL*)
+           coin_save_LIBS="$LIBS"
+           LIBS="mkl_intel_c.lib mkl_sequential.lib mkl_core.lib $LIBS"

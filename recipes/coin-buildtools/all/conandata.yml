@@ -8,6 +8,10 @@ sources:
       sha256: "fe33d31053be0fbea60137ee7234291049d68c72f4f6880d13c03243c684e0a6"
 patches:
   "0.8.11":
+    - patch_file: "patches/0.8.11-fix-clang-misclassified-as-cl.patch"
+      patch_type: "portability"
+      patch_description: "Fixes Clang being incorrectly identified as cl"
+      patch_source: "https://github.com/coin-or-tools/BuildTools/pull/153"
     - patch_file: "patches/0.8.11-m4-tweaks.patch"
       patch_type: "portability"
       patch_description: "Fixes to Autotools M4 scripts for compatibility with Conan"
