@@ -25,11 +25,12 @@ class UnitsConan(ConanFile):
         "run-time",
     )
     settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "base_type": ["uint32_t", "uint64_t"],
-        "namespace": "ANY",
+        "namespace": [None, "ANY"],
     }
     default_options = {
         "shared": False,
@@ -57,11 +58,11 @@ class UnitsConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["UNITS_ENABLE_TESTS"] = "OFF"
         tc.variables["UNITS_BASE_TYPE"] = self.options.base_type
-        if units_namespace := self.options.get_safe("namespace"):
+        units_namespace = str(self.options.get_safe("namespace"))
+        if units_namespace != "None":
             tc.variables["UNITS_NAMESPACE"] = units_namespace
-        if self.options["shared"]:
-            tc.variables["UNITS_BUILD_SHARED_LIBRARY"] = "ON"
-            tc.variables["UNITS_BUILD_STATIC_LIBRARY"] = "OFF"
+        tc.variables["UNITS_BUILD_SHARED_LIBRARY"] = self.options.shared
+        tc.variables["UNITS_BUILD_STATIC_LIBRARY"] = not self.options.shared
         tc.variables["UNITS_CMAKE_PROJECT_NAME"] = "LLNL-UNITS"
         tc.generate()
 
