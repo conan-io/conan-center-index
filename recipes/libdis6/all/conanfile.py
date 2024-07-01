@@ -9,9 +9,9 @@ from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
 
-class OpenDis6Conan(ConanFile):
-    name = "opendis6"
-    homepage = "https://github.com/crhowell3/opendis6"
+class libdis6Conan(ConanFile):
+    name = "libdis6"
+    homepage = "https://github.com/crhowell3/libdis6"
     description = "Modern C++ implementation of IEEE 1278.1a-1998"
     topics = ("library", "protocol", "dis")
     url = "https://github.com/conan-io/conan-center-index"
@@ -86,10 +86,10 @@ class OpenDis6Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["OpenDIS6"]
-        self.cpp_info.set_property("cmake_file_name", "OpenDIS")
-        self.cpp_info.set_property("cmake_target_name", "OpenDIS::OpenDIS6")
-        self.cpp_info.set_property("cmake_target_aliases", ["OpenDIS::DIS6","OpenDIS6"])
+        self.cpp_info.libs = ["dis6"]
+        self.cpp_info.set_property("cmake_file_name", "libdis6")
+        self.cpp_info.set_property("cmake_target_name", "libdis6::dis6")
+        self.cpp_info.set_property("cmake_target_aliases", ["libdis6::dis6","dis6"])
         
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
