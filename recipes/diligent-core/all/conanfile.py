@@ -180,6 +180,11 @@ class DiligentCoreConan(ConanFile):
         # MinGw creates many invalid files, called objects.a, remove them here:
         rm(self, "objects.a", self.package_folder, recursive=True)
 
+        # BuildUtils.cmake is required in diligent-tools and others, but is not packaged correctly by DiligentCore
+        copy(self, "BuildUtils.cmake",
+             dst=os.path.join(self.package_folder, "lib", "cmake"),
+             src=os.path.join(self.source_folder, "BuildTools", "CMake", "BuildUtils.cmake"))
+
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
         self.cpp_info.resdirs = ["res"]
