@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import rm, get, rmdir, collect_libs, export_conandata_patches, copy
+from conan.tools.files import rm, get, rmdir, collect_libs, export_conandata_patches, copy, rename
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -155,11 +155,10 @@ class DiligentCoreConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "Licenses"))
+        rename(self, os.path.join(self.package_folder, "Licenses"), os.path.join(self.package_folder, "licenses"))
+        copy(self, "License.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         rmdir(self, os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "bin"))
-        copy(self, "License.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.package_folder)
-
         if self.options.shared:
             copy(self, "*.dylib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
             copy(self, "*.so", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
