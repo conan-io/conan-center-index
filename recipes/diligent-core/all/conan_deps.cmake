@@ -2,6 +2,7 @@ find_package(SPIRV-Tools REQUIRED CONFIG)
 find_package(spirv-cross REQUIRED CONFIG)
 find_package(volk REQUIRED CONFIG)
 find_package(xxHash REQUIRED CONFIG)
+find_package(GLEW REQUIRED CONFIG)
 
 if(NOT DILIGENT_NO_GLSLANG)
     find_package(glslang REQUIRED CONFIG)
@@ -13,3 +14,4 @@ endif()
 
 add_library(SPIRV-Headers ALIAS SPIRV-Headers::SPIRV-Headers)
 add_library(spirv-tools-core ALIAS spirv-tools::spirv-tools)
+add_library(GLEW::glew ALIAS GLEW::GLEW)

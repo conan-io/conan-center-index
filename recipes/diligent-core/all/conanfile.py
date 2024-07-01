@@ -107,6 +107,7 @@ class DiligentCoreConan(ConanFile):
 
     def requirements(self):
         self.requires("opengl/system")
+        self.requires("glew/2.2.0")
         if self.settings.os == "Linux":
             self.requires("wayland/1.22.0")
 
