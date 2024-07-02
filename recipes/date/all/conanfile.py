@@ -24,6 +24,7 @@ class DateConan(ConanFile):
         "header_only": [True, False],
         "use_system_tz_db": [True, False],
         "use_tz_db_in_dot": [True, False],
+        "manual_tz_db": [True, False],
     }
     default_options = {
         "shared": False,
@@ -31,6 +32,7 @@ class DateConan(ConanFile):
         "header_only": False,
         "use_system_tz_db": False,
         "use_tz_db_in_dot": False,
+        "manual_tz_db": False,
     }
 
     def export_sources(self):
@@ -53,7 +55,7 @@ class DateConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if not self.options.header_only and not self.options.use_system_tz_db:
+        if not self.options.header_only and not self.options.use_system_tz_db and not self.options.manual_tz_db:
             self.requires("libcurl/[>=7.78 <9]")
 
     def package_id(self):
@@ -72,6 +74,7 @@ class DateConan(ConanFile):
         tc.variables["ENABLE_DATE_TESTING"] = False
         tc.variables["USE_SYSTEM_TZ_DB"] = self.options.use_system_tz_db
         tc.variables["USE_TZ_DB_IN_DOT"] = self.options.use_tz_db_in_dot
+        tc.variables["MANUAL_TZ_DB "] = self.options.manual_tz_db
         tc.variables["BUILD_TZ_LIB"] = not self.options.header_only
         # workaround for clang 5 not having string_view
         if Version(self.version) >= "3.0.0" and self.settings.compiler == "clang" \
