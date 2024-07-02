@@ -131,6 +131,7 @@ class WaylandConan(ConanFile):
 
         if self.options.enable_libraries:
             self.cpp_info.components["wayland-server"].libs = ["wayland-server"]
+            self.cpp_info.components["wayland-server"].set_property("cmake_target_aliases", ["Wayland::Server"])
             self.cpp_info.components["wayland-server"].set_property("pkg_config_name", "wayland-server")
             self.cpp_info.components["wayland-server"].requires = ["libffi::libffi"]
             self.cpp_info.components["wayland-server"].system_libs = ["pthread", "m"]
@@ -147,6 +148,7 @@ class WaylandConan(ConanFile):
                 "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items()))
 
             self.cpp_info.components["wayland-client"].libs = ["wayland-client"]
+            self.cpp_info.components["wayland-client"].set_property("cmake_target_aliases", ["Wayland::Client"])
             self.cpp_info.components["wayland-client"].set_property("pkg_config_name", "wayland-client")
             self.cpp_info.components["wayland-client"].requires = ["libffi::libffi"]
             self.cpp_info.components["wayland-client"].system_libs = ["pthread", "m"]
@@ -164,15 +166,18 @@ class WaylandConan(ConanFile):
 
             self.cpp_info.components["wayland-cursor"].libs = ["wayland-cursor"]
             self.cpp_info.components["wayland-cursor"].set_property("pkg_config_name", "wayland-cursor")
+            self.cpp_info.components["wayland-cursor"].set_property("cmake_target_aliases", ["Wayland::Cursor"])
             self.cpp_info.components["wayland-cursor"].requires = ["wayland-client"]
             self.cpp_info.components["wayland-cursor"].set_property("component_version", self.version)
 
             self.cpp_info.components["wayland-egl"].libs = ["wayland-egl"]
             self.cpp_info.components["wayland-egl"].set_property("pkg_config_name", "wayland-egl")
+            self.cpp_info.components["wayland-egl"].set_property("cmake_target_aliases", "Wayland::Egl")
             self.cpp_info.components["wayland-egl"].requires = ["wayland-client"]
             self.cpp_info.components["wayland-egl"].set_property("component_version", "18.1.0")
 
             self.cpp_info.components["wayland-egl-backend"].set_property("pkg_config_name", "wayland-egl-backend")
+            self.cpp_info.components["wayland-egl-backend"].set_property("cmake_target_aliases", ["Wayland::Egl::Backend"])
             self.cpp_info.components["wayland-egl-backend"].set_property("component_version", "3")
 
             # TODO: to remove in conan v2
