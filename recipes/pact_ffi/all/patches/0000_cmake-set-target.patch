@@ -1,8 +1,29 @@
 diff --git a/rust/pact_ffi/CMakeLists.txt b/rust/pact_ffi/CMakeLists.txt
-index bc751ce0..4bcce753 100644
+index bc751ce0..36c72706 100644
 --- a/rust/pact_ffi/CMakeLists.txt
 +++ b/rust/pact_ffi/CMakeLists.txt
-@@ -176,7 +176,7 @@ endif()
+@@ -2,18 +2,8 @@
+ # CMAKE VERSION
+ #################################################################################################
+ 
+-# Set the minimum to 3.15. This is arbitrary and we should probably try to
+-# test everything with older CMake versions once this is all written, to
+-# figure out an actual lower-bound.
+-cmake_minimum_required(VERSION 3.15...3.17)
+-
+-# Set policies appropriately, so it knows when to warn about policy
+-# violations.
+-if(${CMAKE_VERSION} VERSION_LESS 3.17)
+-    cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+-else()
+-    cmake_policy(VERSION 3.17)
+-endif()
++# CMake 3.20 for path support
++cmake_minimum_required(VERSION 3.20)
+ 
+ #################################################################################################
+ # CONFIG FILES
+@@ -176,7 +166,7 @@ endif()
  # the workspace root and get the target dir from that, and in a more general context
  # that's what ought to be done, but for now we know where the target dir is, and should
  # just reuse it.
@@ -11,7 +32,21 @@ index bc751ce0..4bcce753 100644
  
  # The name of the crate itself.
  set(CRATE_NAME ${NAME_STRING})
-@@ -222,13 +222,15 @@ set(CBINDGEN_HEADER_FILE "${CMAKE_CURRENT_SOURCE_DIR}/include/${CBINDGEN_HEADER_
+@@ -195,7 +185,12 @@ else()
+ endif()
+ 
+ # The path to the library file.
+-set(CARGO_LIBRARY_FILE "${CARGO_TARGET_DIR}/${TARGET_TYPE}/${CARGO_LIBRARY_NAME}")
++cmake_path(SET CARGO_LIBRARY_DIR "${CARGO_TARGET_DIR}/${TARGET_TYPE}")
++# if we've defined a target triple, output files go in a subfolder
++if(CARGO_TARGET_TRIPLE)
++    cmake_path(APPEND CARGO_LIBRARY_DIR ${CARGO_TARGET_TRIPLE})
++endif()
++cmake_path(APPEND CARGO_LIBRARY_DIR ${CARGO_LIBRARY_NAME} OUTPUT_VARIABLE CARGO_LIBRARY_FILE)
+ 
+ # On Windows, dynamic linking requires both a .dll file (which will be dynamically
+ # linked), and a library file (which describes _how_ to link to the DLL, and will
+@@ -222,13 +217,15 @@ set(CBINDGEN_HEADER_FILE "${CMAKE_CURRENT_SOURCE_DIR}/include/${CBINDGEN_HEADER_
  #################################################################################################
  
  # Defines the cargo command to build the library file.
