@@ -1,0 +1,21 @@
+diff --git a/cmake/external_dependencies.cmake b/cmake/external_dependencies.cmake
+index aa9227284f..776e730879 100644
+--- a/cmake/external_dependencies.cmake
++++ b/cmake/external_dependencies.cmake
+@@ -40,14 +40,14 @@ elseif(ENABLE_OPENSSL_ENCRYPTION)
+     add_definitions(-DENABLE_OPENSSL_ENCRYPTION)
+     message(STATUS "Encryption: LibCrypto")
+ 
+-    set(CRYPTO_TARGET_NAME "AWS::crypto")
++    set(CRYPTO_TARGET_NAME "OpenSSL::Crypto")
+     if(PLATFORM_ANDROID AND ANDROID_BUILD_OPENSSL)
+         set(BUILD_OPENSSL 1)
+         set(CRYPTO_TARGET_NAME "crypto")
+         set(USE_OPENSSL ON)
+         message(STATUS "  Building Openssl as part of AWS SDK")
+     else()
+-        find_package(crypto REQUIRED)
++        find_package(OpenSSL REQUIRED)
+     endif()
+     set(CRYPTO_LIBS ${CRYPTO_TARGET_NAME} ${ZLIB_LIBRARIES})
+     # ssl depends on libcrypto

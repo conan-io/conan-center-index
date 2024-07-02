@@ -1,0 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 23f3403ef5..4999dee6f2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -255,7 +255,7 @@ if (LEGACY_BUILD)
+     include(sdks)
+ 
+     include(utilities)
+-
++#[[
+     if (ENABLE_BCRYPT_ENCRYPTION)
+         set(CRYPTO_LIBS Bcrypt)
+         set(CRYPTO_LIBS_ABSTRACT_NAME Bcrypt)
+@@ -280,7 +280,7 @@ if (LEGACY_BUILD)
+             set(CLIENT_LIBS_ABSTRACT_NAME Wininet winhttp)
+         endif ()
+     endif ()
+-
++]]
+     # setup user specified installation directory if any, regardless previous platform default settings
+     if (CMAKE_INSTALL_BINDIR)
+         set(BINARY_DIRECTORY "${CMAKE_INSTALL_BINDIR}")
