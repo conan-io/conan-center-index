@@ -12,7 +12,7 @@ required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
 class QwtConan(ConanFile):
     name = "qwt"
-    license = "LGPL-2.1-or-later"
+    license = "LGPL-2.1+ WITH Qwt-exception-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://qwt.sourceforge.io/"
     topics = ("chart", "data-visualization", "graph", "plot", "qt")
@@ -63,9 +63,12 @@ class QwtConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/5.15.11", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/6.6.2", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
+        qt_version = Version(self.dependencies["qt"].ref.version)
+        if not 5 <= qt_version.major <= 6:
+            raise ConanInvalidConfiguration(f"{self.name} doesn't support Qt/{qt_version}. Allowed Qt version are 5 or 6")
         if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Qwt recipe does not support cross-compilation yet")
         qt_options = self.dependencies["qt"].options
@@ -86,12 +89,8 @@ class QwtConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        if self._is_legacy_one_profile:
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
-        else:
-            env = VirtualBuildEnv(self)
-            env.generate()
+        VirtualBuildEnv(self).generate()
+        VirtualRunEnv(self).generate(scope="build")
 
         tc = CMakeToolchain(self)
         tc.variables["QWT_DLL"] = self.options.shared
