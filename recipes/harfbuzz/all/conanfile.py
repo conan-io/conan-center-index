@@ -17,13 +17,13 @@ required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
 
 class HarfbuzzConan(ConanFile):
     name = "harfbuzz"
-    description = "HarfBuzz is an OpenType text shaping engine."
-    topics = ("opentype", "text", "engine")
+    description = "an OpenType text shaping engine."
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://harfbuzz.github.io/"
-    license = "MIT"
-    package_type = "library"
+    topics = ("opentype", "text", "engine")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -154,14 +154,21 @@ class HarfbuzzConan(ConanFile):
             "tests": "disabled",
             "docs": "disabled",
             "benchmark": "disabled",
-            "icu_builtin": "false"
+            "icu_builtin": "false",
         })
+        if Version(self.version) >= "7.3.0":
+            tc.project_options.update({
+                "utilities": "disabled",
+            })
         tc.cpp_args += cxxflags
         tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('util')", "")
+        if Version(self.version) < "7.3.0":
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('util')", "")
+        if Version(self.version) >= "8.4.0":
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "version: freetype_min_version,", "")
         meson = Meson(self)
         meson.configure()
         meson.build()
