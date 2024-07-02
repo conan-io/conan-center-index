@@ -1,0 +1,11 @@
+--- src/DaggyCore/Sources.cpp 
++++ src/DaggyCore/Sources.cpp
+@@ -371,7 +371,7 @@
+ }
+ 
+ #else
+-std::optional<daggy::Sources> daggy::sources::convertors::yaml(const QString& data, QString& error)
++std::optional<daggy::Sources> daggy::sources::convertors::yaml(const QString& data, QString& error) noexcept
+ {
+     error = "yaml not supported";
+     return {};

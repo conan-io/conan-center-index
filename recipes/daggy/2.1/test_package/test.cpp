@@ -52,7 +52,7 @@ constexpr const char* json_data = R"JSON(
 )JSON";
 }
 
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);
     daggy::Core core(*daggy::sources::convertors::json(json_data));
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
     QObject::connect(&core, &daggy::Core::stateChanged, &core,
     [&](DaggyStates state){
         if(state == DaggyFinished)
-            app.quit();      
+            app.quit();
     });
 
     QTimer::singleShot(2000, &core, [&]()
