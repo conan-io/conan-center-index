@@ -1,8 +1,6 @@
-diff --git a/libmariadb/CMakeLists.txt b/libmariadb/CMakeLists.txt
-index 070fdc9..77584e6 100644
---- a/libmariadb/CMakeLists.txt
-+++ b/libmariadb/CMakeLists.txt
-@@ -404,7 +404,7 @@ ELSE()
+--- libmariadb/CMakeLists.txt
++++ libmariadb/CMakeLists.txt
+@@ -414,7 +414,7 @@
  ENDIF()
  
  
@@ -11,14 +9,13 @@ index 070fdc9..77584e6 100644
    # CREATE OBJECT LIBRARY 
    ADD_LIBRARY(mariadb_obj OBJECT ${LIBMARIADB_SOURCES})
    IF(UNIX)
-@@ -433,22 +433,24 @@ IF(WIN32)
+@@ -443,21 +443,24 @@
                     "FILE_DESCRIPTION:Dynamic lib for client/server communication")
  ENDIF()
  
--
 +IF(NOT BUILD_SHARED_LIBS)
  ADD_LIBRARY(mariadbclient STATIC  ${MARIADB_OBJECTS} ${EMPTY_FILE})
- TARGET_LINK_LIBRARIES(mariadbclient ${SYSTEM_LIBS})
+ TARGET_LINK_LIBRARIES(mariadbclient ${SYSTEM_LIBS} ${CRYPTO_LIBS})
 -
 +ELSE()
  IF(UNIX)
@@ -30,16 +27,17 @@ index 070fdc9..77584e6 100644
    SET_TARGET_PROPERTIES(libmariadb PROPERTIES LINKER_LANGUAGE C)
  ENDIF()
  
- TARGET_LINK_LIBRARIES(libmariadb LINK_PRIVATE ${SYSTEM_LIBS})
+ TARGET_LINK_LIBRARIES(libmariadb LINK_PRIVATE ${SYSTEM_LIBS} ${CRYPTO_LIBS})
  
  SIGN_TARGET(libmariadb)
+-
 +ENDIF()
- 
++
 +IF(BUILD_SHARED_LIBS)
  IF(CMAKE_SYSTEM_NAME MATCHES "Linux" OR
     CMAKE_SYSTEM_NAME MATCHES "kFreeBSD" OR
     CMAKE_SYSTEM_NAME MATCHES "GNU")
-@@ -457,11 +459,14 @@ IF(CMAKE_SYSTEM_NAME MATCHES "Linux" OR
+@@ -466,11 +469,14 @@
    ENDIF()
    SET_TARGET_PROPERTIES(libmariadb PROPERTIES LINK_FLAGS "${CC_BINARY_DIR}/libmariadb/mariadbclient.def")
  ENDIF()
@@ -55,14 +53,15 @@ index 070fdc9..77584e6 100644
  
  #
  # Installation
-@@ -481,11 +486,15 @@ IF(WITH_MYSQLCOMPAT)
+@@ -490,11 +496,15 @@
    ENDIF()
  ENDIF()
  
 +IF(NOT BUILD_SHARED_LIBS)
  create_symlink(libmariadb${CMAKE_STATIC_LIBRARY_SUFFIX} mariadbclient ${INSTALL_LIBDIR})
+-
 +ENDIF()
- 
++
 +IF(BUILD_SHARED_LIBS)
  SET_TARGET_PROPERTIES(libmariadb PROPERTIES VERSION
   ${CPACK_PACKAGE_VERSION_MAJOR}
@@ -71,7 +70,7 @@ index 070fdc9..77584e6 100644
  
  IF(NOT WIN32)
    SET_TARGET_PROPERTIES(mariadbclient PROPERTIES OUTPUT_NAME "${LIBMARIADB_STATIC_NAME}")
-@@ -493,20 +502,33 @@ ENDIF()
+@@ -502,20 +512,33 @@
  
  INSTALL(TARGETS mariadbclient
            COMPONENT Development
@@ -86,9 +85,9 @@ index 070fdc9..77584e6 100644
  INSTALL(TARGETS libmariadb
          COMPONENT SharedLibraries
 -        DESTINATION ${INSTALL_LIBDIR})
-+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
++          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
  ELSE()
  # in cmake 3.12+ we can use
  #INSTALL(TARGETS libmariadb LIBRARY DESTINATION ${INSTALL_LIBDIR}
@@ -111,7 +110,7 @@ index 070fdc9..77584e6 100644
  ENDIF()
  
  IF(MSVC)
-@@ -515,3 +537,4 @@ IF(MSVC)
+@@ -524,3 +547,4 @@
             CONFIGURATIONS Debug RelWithDebInfo
             COMPONENT Development)
  ENDIF()
