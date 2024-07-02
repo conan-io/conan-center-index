@@ -1,11 +1,8 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 import os
-
 
 required_conan_version = ">=1.50.0"
 
@@ -18,21 +15,6 @@ class PlflistConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mattreecebentley/plf_list"
     settings = "os", "arch", "compiler", "build_type"
-
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "gcc": "7",
-            "clang": "5",
-            "apple-clang": "9",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -43,14 +25,8 @@ class PlflistConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if Version(self.version) >= "2.70":
-            if self.settings.compiler.get_safe("cppstd"):
-                check_min_cppstd(self, self._min_cppstd)
-            minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
-                )
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 98)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

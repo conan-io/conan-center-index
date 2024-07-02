@@ -1,4 +1,7 @@
 sources:
+  "2.72":
+    url: "https://github.com/mattreecebentley/plf_list/archive/bccfbdb4e4286d42030f5bf0c18aff072157adbb.tar.gz"
+    sha256: "298e950f663ed4db585790e1a87cabb02bf442ab878ec7bbee265093240c6d03"
   "2.70":
     url: "https://github.com/mattreecebentley/plf_list/archive/c48d271caad535a783a37e418e1f146040934a30.tar.gz"
     sha256: "d6bd1dfb4e7e02804ad91c5a06c9d6f3a3512499ce5c3c0a633eba5e67e90930"
@@ -15,6 +18,11 @@ sources:
     url: "https://github.com/mattreecebentley/plf_list/archive/cc579a5cc828d8a0da6715ef075d560e4de89901.tar.gz"
     sha256: "4ab3f7ca41e3567710a64ede3a9f708b388f3ae52e09b3ee1a45d6b4fd89dd09"
 patches:
+  "2.70":
+    - patch_file: "patches/2.70-0002-fix-cxx-standard-regression.patch"
+      patch_description: "Fix a regression in pre-C++17 support"
+      patch_type: "portability"
+      patch_source: "https://github.com/mattreecebentley/plf_list/commit/bccfbdb4e4286d42030f5bf0c18aff072157adbb?w=1"
   "2.57":
     - patch_file: "patches/2.57-0001-disable-cxx20-from-apple-clang14.patch"
       patch_description: "apple-clang 14 defaults C++ 20, but it doesn't support C++20 features little"
