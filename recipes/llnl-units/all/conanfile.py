@@ -1,8 +1,8 @@
 import os
 
-from conans import ConanFile, tools
+from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
-from conan.tools.files import copy, rm, rmdir
+from conan.tools.files import copy, rm, rmdir, get
 
 
 class UnitsConan(ConanFile):
@@ -38,6 +38,7 @@ class UnitsConan(ConanFile):
         "base_type": "uint32_t",
         "namespace": None,
     }
+
     @property
     def _min_cppstd(self):
         return 14
@@ -61,7 +62,7 @@ class UnitsConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -81,13 +82,12 @@ class UnitsConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("*.hpp", dst="include/units", src="units/units")
-        self.copy("*units.lib", dst="lib", keep_path=False)
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(
+            self,
+            "LICENSE",
+            self.source_folder,
+            os.path.join(self.package_folder, "licenses"),
+        )
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
