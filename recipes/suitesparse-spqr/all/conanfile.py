@@ -74,6 +74,8 @@ class SuiteSparseSpqrConan(ConanFile):
         tc.variables["SPQR_USE_CUDA"] = self.options.cuda
         tc.variables["SUITESPARSE_DEMOS"] = False
         tc.variables["SUITESPARSE_USE_FORTRAN"] = False  # Fortran sources are translated to C instead
+        # FIXME: Find a way to not hardcode this. The system BLAS gets used otherwise.
+        tc.variables["BLAS_LIBRARIES"] = "OpenBLAS::OpenBLAS"
         tc.variables["LAPACK_LIBRARIES"] = "OpenBLAS::OpenBLAS"
         tc.variables["LAPACK_FOUND"] = True
         tc.generate()
