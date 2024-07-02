@@ -1,0 +1,11 @@
+--- ThirdParty/PSCommon/BuildSystem/CommonCppMakefile
++++ ThirdParty/PSCommon/BuildSystem/CommonCppMakefile
+@@ -76,6 +76,8 @@
+ 	CFLAGS += -Werror
+ endif
+ 
++CFLAGS += $(CPPFLAGS) $(CXXFLAGS)
++
+ LDFLAGS += $(LIB_DIRS_OPTION) $(USED_LIBS_OPTION)
+ 
+ # some lib / exe specifics
