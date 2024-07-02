@@ -1,5 +1,5 @@
 diff --git a/rust/pact_ffi/CMakeLists.txt b/rust/pact_ffi/CMakeLists.txt
-index bc751ce0..36c72706 100644
+index bc751ce0..aa38df61 100644
 --- a/rust/pact_ffi/CMakeLists.txt
 +++ b/rust/pact_ffi/CMakeLists.txt
 @@ -2,18 +2,8 @@
@@ -32,21 +32,23 @@ index bc751ce0..36c72706 100644
  
  # The name of the crate itself.
  set(CRATE_NAME ${NAME_STRING})
-@@ -195,7 +185,12 @@ else()
+@@ -195,7 +185,14 @@ else()
  endif()
  
  # The path to the library file.
 -set(CARGO_LIBRARY_FILE "${CARGO_TARGET_DIR}/${TARGET_TYPE}/${CARGO_LIBRARY_NAME}")
-+cmake_path(SET CARGO_LIBRARY_DIR "${CARGO_TARGET_DIR}/${TARGET_TYPE}")
-+# if we've defined a target triple, output files go in a subfolder
++cmake_path(SET CARGO_LIBRARY_DIR "${CARGO_TARGET_DIR}")
 +if(CARGO_TARGET_TRIPLE)
++    # if we've defined a target triple, output files go in a subfolder
 +    cmake_path(APPEND CARGO_LIBRARY_DIR ${CARGO_TARGET_TRIPLE})
++else()
++    cmake_path(APPEND CARGO_LIBRARY_DIR ${TARGET_TYPE})
 +endif()
 +cmake_path(APPEND CARGO_LIBRARY_DIR ${CARGO_LIBRARY_NAME} OUTPUT_VARIABLE CARGO_LIBRARY_FILE)
  
  # On Windows, dynamic linking requires both a .dll file (which will be dynamically
  # linked), and a library file (which describes _how_ to link to the DLL, and will
-@@ -222,13 +217,15 @@ set(CBINDGEN_HEADER_FILE "${CMAKE_CURRENT_SOURCE_DIR}/include/${CBINDGEN_HEADER_
+@@ -222,13 +219,15 @@ set(CBINDGEN_HEADER_FILE "${CMAKE_CURRENT_SOURCE_DIR}/include/${CBINDGEN_HEADER_
  #################################################################################################
  
  # Defines the cargo command to build the library file.

@@ -72,7 +72,7 @@ class PactFFIConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["CARGO_TARGET_DIR"] = Path(self.build_folder) / "rust" / "target"
+        tc.cache_variables["CARGO_TARGET_DIR"] = str(Path(self.build_folder) / "rust" / "target")
         if cross_building(self):
             tc.cache_variables["CARGO_TARGET_TRIPLE"] = self._rust_target_triple()
         tc.generate()
@@ -96,7 +96,7 @@ class PactFFIConan(ConanFile):
         #       generate both C and C++ headers (as defined in pact_ffi/release-linux.sh)
         generated_headers_dir = Path(self.source_folder) / "rust" / "pact_ffi" /"include"
         generate_headers("cbindgen.toml", generated_headers_dir / "pact.h")
-        generate_headers("cbindget-c++.toml", generated_headers_dir / "pact-cpp.h")
+        generate_headers("cbindgen-c++.toml", generated_headers_dir / "pact-cpp.h")
 
     def package(self):
         cmake = CMake(self)
@@ -106,7 +106,8 @@ class PactFFIConan(ConanFile):
         package_folder = Path(self.package_folder)
         lib_folder = package_folder / "lib"
         if not self.options.shared:
-            target_folder = Path(self.build_folder) / "rust" / "target" / str(self.settings.build_type).lower()
+            subfolder = str(self.settings.build_type) if not cross_building(self) else self._rust_target_triple()
+            target_folder = Path(self.build_folder) / "rust" / "target" / subfolder
             copy(self, pattern="*.a", src=target_folder, dst=lib_folder)
             rm(self, pattern="*.so", folder=lib_folder)
             rm(self, pattern="*.dylib", folder=lib_folder)
