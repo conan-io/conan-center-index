@@ -1,0 +1,57 @@
+diff --git a/src/openslide.c b/src/openslide.c
+index e32985a..25bac88 100644
+--- a/src/openslide.c
++++ b/src/openslide.c
+@@ -34,6 +34,31 @@
+ #include "openslide-cairo.h"
+ #include "openslide-error.h"
+ 
++// https://stackoverflow.com/a/2390626
++#ifdef __cplusplus
++    #define INITIALIZER(f) \
++        static void f(void); \
++        struct f##_t_ { f##_t_(void) { f(); } }; static f##_t_ f##_; \
++        static void f(void)
++#elif defined(_MSC_VER)
++    #pragma section(".CRT$XCU",read)
++    #define INITIALIZER2_(f,p) \
++        static void f(void); \
++        __declspec(allocate(".CRT$XCU")) void (*f##_)(void) = f; \
++        __pragma(comment(linker,"/include:" p #f "_")) \
++        static void f(void)
++    #ifdef _WIN64
++        #define INITIALIZER(f) INITIALIZER2_(f,"")
++    #else
++        #define INITIALIZER(f) INITIALIZER2_(f,"_")
++    #endif
++#else
++    #define INITIALIZER(f) \
++        static void f(void) __attribute__((constructor)); \
++        static void f(void)
++#endif
++
++
+ const char _openslide_release_info[] = "OpenSlide " SUFFIXED_VERSION ", copyright (C) 2007-2015 Carnegie Mellon University and others.\nLicensed under the GNU Lesser General Public License, version 2.1.";
+ 
+ static const char * const EMPTY_STRING_ARRAY[] = { NULL };
+@@ -55,7 +80,7 @@ static const struct _openslide_format *formats[] = {
+ static bool openslide_was_dynamically_loaded;
+ 
+ // called from shared-library constructor!
+-static void __attribute__((constructor)) _openslide_init(void) {
++static void  _openslide_init(void) {
+   // activate threads
+   if (!g_thread_supported()) {
+     g_thread_init(NULL);
+@@ -69,6 +94,11 @@ static void __attribute__((constructor)) _openslide_init(void) {
+   openslide_was_dynamically_loaded = true;
+ }
+ 
++INITIALIZER( initialize)
++{
++    _openslide_init();
++}
++
+ static void destroy_associated_image(gpointer data) {
+   struct _openslide_associated_image *img = data;
+ 
