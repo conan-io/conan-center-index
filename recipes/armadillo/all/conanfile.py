@@ -126,7 +126,7 @@ class ArmadilloConan(ConanFile):
 
         for value, options in self._co_dependencies.items():
             options_without_value = [
-                x for x in options if getattr(self.options, x) != value
+                x for x in options if self.options.get_safe(x) != value
             ]
             if options_without_value and (len(options) != len(options_without_value)):
                 raise ConanInvalidConfiguration(
@@ -146,22 +146,16 @@ class ArmadilloConan(ConanFile):
                 "OpenBLAS can only provide LAPACK functionality when also providing BLAS functionality. Set use_blas=openblas and try again."
             )
 
-        deprecated_opts = list(
-            set(
-                [
-                    opt
-                    for opt in [
-                        str(self.options.use_blas),
-                        str(self.options.use_lapack),
-                    ]
-                    if "system" in opt
-                ]
-            )
-        )
+        deprecated_opts = sorted({
+            opt for opt in [
+                str(self.options.use_blas),
+                str(self.options.use_lapack),
+            ] if "system" in opt
+        })
 
         for opt in deprecated_opts:
             self.output.warning(
-                f"DEPRECATION NOTICE: Value {opt} uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
+                f"DEPRECATION NOTICE: Value '{opt}' uses armadillo's default dependency search and will be replaced when this package becomes available in ConanCenter"
             )
 
         # Ignore use_extern_rng when the option has been removed
@@ -223,17 +217,6 @@ class ArmadilloConan(ConanFile):
             or self.options.use_lapack == "framework_accelerate"
         ) and self.settings.os == "Macos"
         tc.variables["DETECT_HDF5"] = self.options.use_hdf5
-        tc.variables["USE_OPENBLAS"] = (self.options.use_blas == "openblas")
-        tc.variables["USE_MKL"] = self.options.use_blas == "intel_mkl" and self.options.use_lapack == "intel_mkl"
-        tc.variables["USE_SYSTEM_LAPACK"] = self.options.use_lapack == "system_lapack"
-        tc.variables["USE_SYSTEM_BLAS"] = (self.options.use_blas == "system_blas")
-        tc.variables["USE_SYSTEM_ATLAS"] = self.options.use_lapack == "system_atlas"
-        tc.variables["USE_SYSTEM_HDF5"] = False
-        tc.variables["USE_SYSTEM_ARPACK"] = self.options.use_arpack
-        tc.variables["USE_SYSTEM_SUPERLU"] = self.options.use_superlu
-        tc.variables["USE_SYSTEM_OPENBLAS"] = False
-        tc.variables["USE_SYSTEM_FLEXIBLAS"] = self.options.use_blas == "system_flexiblas"
-        tc.variables["ALLOW_FLEXIBLAS_LINUX"] = self.options.use_blas == "system_flexiblas" and self.settings.os == "Linux"
         tc.variables["ALLOW_OPENBLAS_MACOS"] = self.options.use_blas == "openblas" and self.settings.os == "Macos"
         tc.variables["OPENBLAS_PROVIDES_LAPACK"] = self.options.use_lapack == "openblas"
         tc.variables["ALLOW_BLAS_LAPACK_MACOS"] = self.options.use_blas != "framework_accelerate"
@@ -246,14 +229,43 @@ class ArmadilloConan(ConanFile):
         deps.generate()
 
     def source(self):
-        get(self,
-            **self.conan_data["sources"][self.version],
-            strip_root=True,
-            filename="f{self.name}-{self.version}.tar.xz"
-        )
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
+        def _override_pkg_module(pkg, content):
+            save(self, self.source_path.joinpath("cmake_aux", "Modules", f"ARMA_Find{pkg}.cmake"), content)
+
+        def _disable_pkg_module(pkg, var=None):
+            _override_pkg_module(pkg, f"set({var or pkg}_FOUND NO)")
+
+        if self.options.use_blas == "openblas":
+            _override_pkg_module("OpenBLAS", "find_package(OpenBLAS REQUIRED)")
+        else:
+            _disable_pkg_module("OpenBLAS")
+
+        if self.options.use_blas == "intel_mkl" and self.options.use_lapack == "intel_mkl":
+            _override_pkg_module("MKL", "find_package(OpenBLAS REQUIRED)")
+        else:
+            _disable_pkg_module("MKL")
+
+        _disable_pkg_module("HDF5")
+        if self.options.use_lapack != "system_lapack":
+            _disable_pkg_module("LAPACK")
+        if self.options.use_blas != "system_blas":
+            _disable_pkg_module("BLAS")
+        if self.options.use_lapack != "system_atlas":
+            _disable_pkg_module("ATLAS")
+        if not self.options.use_arpack:
+            _disable_pkg_module("ARPACK")
+        if not self.options.use_superlu:
+            _disable_pkg_module("SuperLU5", "SUPERLU")
+        if self.options.use_blas != "system_flexiblas" or self.settings.os != "Linux":
+            _disable_pkg_module("FLEXIBLAS")
 
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
 
         cmake = CMake(self)
         cmake.configure()
