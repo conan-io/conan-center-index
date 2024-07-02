@@ -41,7 +41,7 @@ class UnitsConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14
+        return 17
 
     @property
     def _compilers_minimum_version(self):
@@ -66,14 +66,13 @@ class UnitsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["UNITS_ENABLE_TESTS"] = "OFF"
-        tc.variables["UNITS_BASE_TYPE"] = self.options.base_type
-        units_namespace = str(self.options.get_safe("namespace"))
-        if units_namespace != "None":
-            tc.variables["UNITS_NAMESPACE"] = units_namespace
-        tc.variables["UNITS_BUILD_SHARED_LIBRARY"] = self.options.shared
-        tc.variables["UNITS_BUILD_STATIC_LIBRARY"] = not self.options.shared
-        tc.variables["UNITS_CMAKE_PROJECT_NAME"] = "LLNL-UNITS"
+        tc.preprocessor_definitions["UNITS_CMAKE_PROJECT_NAME"] = "LLNL-UNITS"
+        tc.preprocessor_definitions["UNITS_ENABLE_TESTS"] = "OFF"
+        tc.preprocessor_definitions["UNITS_BASE_TYPE"] = self.options.base_type
+        tc.preprocessor_definitions["UNITS_BUILD_SHARED_LIBRARY"] = self.options.shared
+        tc.preprocessor_definitions[
+            "UNITS_BUILD_STATIC_LIBRARY"
+        ] = not self.options.shared
         tc.generate()
 
     def build(self):
@@ -99,10 +98,10 @@ class UnitsConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["units"]
+        units_namespace = self.options.get_safe("namespace")
+        self.cpp_info.defines = [f"UNITS_BASE_TYPE={self.options.base_type}"]
+        if units_namespace:
+            self.cpp_info.defines.append(f"UNITS_NAMESPACE={units_namespace}")
+
         self.cpp_info.set_property("cmake_file_name", "llnl-units")
         self.cpp_info.set_property("cmake_target_name", "llnl-units::units")
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "LLNL-UNITS"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "llnl-units"
-        self.cpp_info.names["cmake_find_package"] = "LLNL-UNITS"
-        self.cpp_info.names["cmake_find_package_multi"] = "llnl-units"
