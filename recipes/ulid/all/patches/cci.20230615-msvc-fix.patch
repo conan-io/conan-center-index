@@ -1,0 +1,20 @@
+diff --git a/source/CMakeLists.txt b/source/CMakeLists.txt
+index 12ba41b..e0f59b1 100644
+--- a/source/CMakeLists.txt
++++ b/source/CMakeLists.txt
+@@ -1,7 +1,11 @@
+ add_library(${PROJECT_NAME} ulid.cpp)
+ target_compile_options(${PROJECT_NAME} PRIVATE
+     -fno-exceptions
+-    -fno-rtti
+-    -Wall
+-    -Wextra
+-    -Werror)
++    -fno-rtti)
++
++if(NOT MSVC)
++    target_compile_options(${PROJECT_NAME} PRIVATE
++        -Wall
++        -Werror
++        -Wextra)
++endif()
