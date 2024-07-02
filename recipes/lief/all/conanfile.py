@@ -50,7 +50,10 @@ class LiefConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "14" if self.options.with_frozen else "11"
+        if Version(self.version) < "0.14.0":
+            return "14" if self.options.with_frozen else "11"
+        else:
+            return "17"
 
     @property
     def _compilers_minimum_version(self):
@@ -61,6 +64,13 @@ class LiefConan(ConanFile):
                 "apple-clang": "10",
                 "Visual Studio": "15",
                 "msvc": "191",
+            },
+            "17": {
+                "gcc": "8",
+                "clang": "7",
+                "apple-clang": "12",
+                "Visual Studio": "16",
+                "msvc": "192",
             },
         }.get(self._min_cppstd, {})
 
@@ -83,15 +93,18 @@ class LiefConan(ConanFile):
         if Version(self.version) < "0.12.2":
             self.requires("rang/3.2")
         else:
-            self.requires("utfcpp/3.2.3")
+            # lief doesn't supprot utfcpp/4.x.x yet.
+            self.requires("utfcpp/3.2.5")
             # lief doesn't supprot spdlog/1.11.0 with fmt/9.x yet.
             self.requires("spdlog/1.10.0")
-            self.requires("boost/1.81.0", transitive_headers=True)
+            self.requires("boost/1.83.0", transitive_headers=True)
             self.requires("tcb-span/cci.20220616", transitive_headers=True)
         if self.options.with_json:
-            self.requires("nlohmann_json/3.11.2")
+            self.requires("nlohmann_json/3.11.3")
         if self.options.with_frozen:
             self.requires("frozen/1.1.1")
+        if Version(self.version) >= "0.14.0":
+            self.requires("tl-expected/1.1.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -107,6 +120,11 @@ class LiefConan(ConanFile):
 
         if self.settings.compiler.get_safe("libcxx") == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} does not support libstdc++")
+
+        # FIXME: Visual 2022 does has a bug: developercommunity.visualstudio.com/t/Internal-compiler-error-compiler-file-m/10376323
+        # fatal  error C1001: Internal compiler error. [C:\J2\w\prod-v2\bsr\14710\ccfaa\p\b\lief70856170ca89f\b\build\LIB_LIEF.vcxproj]
+        if is_msvc(self) and str(self.settings.compiler.version) in ["17", "193"]:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built by Visual Studio 2022 due internal compiler error. See developercommunity.visualstudio.com/t/Internal-compiler-error-compiler-file-m/10376323")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -141,9 +159,12 @@ class LiefConan(ConanFile):
             tc.variables["LIEF_INSTALL"] = True
             tc.variables["LIEF_EXTERNAL_SPAN_DIR"] = self.dependencies["tcb-span"].cpp_info.includedirs[0].replace("\\", "/")
             tc.variables["LIEF_EXTERNAL_LEAF_DIR"] = self.dependencies["boost"].cpp_info.includedirs[0].replace("\\", "/")
+        if Version(self.version) >= "0.14.0":
+            tc.variables["LIEF_OPT_EXTERNAL_EXPECTED"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("mbedtls", "cmake_find_mode", "both")
         deps.generate()
 
     def build(self):
