@@ -68,7 +68,6 @@ class UnitsConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.preprocessor_definitions["UNITS_CMAKE_PROJECT_NAME"] = "LLNL-UNITS"
         tc.preprocessor_definitions["UNITS_ENABLE_TESTS"] = "OFF"
-        tc.preprocessor_definitions["UNITS_BASE_TYPE"] = self.options.base_type
         tc.preprocessor_definitions["UNITS_BUILD_SHARED_LIBRARY"] = self.options.shared
         tc.preprocessor_definitions[
             "UNITS_BUILD_STATIC_LIBRARY"
