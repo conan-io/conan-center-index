@@ -6,3 +6,5 @@ find_package(aws-lambda-runtime REQUIRED CONFIG)
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE AWS::aws-lambda-runtime)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+
+aws_lambda_package_target(${PROJECT_NAME})
