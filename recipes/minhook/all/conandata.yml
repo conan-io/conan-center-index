@@ -1,0 +1,9 @@
+sources:
+  "cci.20240114":
+    url: "https://github.com/TsudaKageyu/minhook/archive/f5485b8454544c2f034c78f8f127c1d03dea3636.tar.gz"
+    sha256: "9a60e6615ddfe4ba0ef53f8589aa51acb539d617ce106ef72bfeed5a125f758b"
+patches:
+  "cci.20240114":
+    - patch_file: "patches/cci.20240114-0001-increase-cmake-min.patch"
+      patch_description: "Increase cmake_minimum_required version to 3.5"
+      patch_type: "conan"
