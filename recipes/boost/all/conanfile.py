@@ -565,6 +565,9 @@ class BoostConan(ConanFile):
                 elif not self._has_cppstd_14_supported:
                     disable_math()
 
+            if is_apple_os(self) and self._settings_build.arch == "x86_64" and not self._has_cppstd_20_supported:
+                self.options.with_stacktrace_backtrace = False
+                disable_locale()
 
     @property
     def _configure_options(self):
@@ -588,6 +591,8 @@ class BoostConan(ConanFile):
     @property
     def _stacktrace_from_exception_available(self):
         if Version(self.version) >= "1.85.0":
+            if is_apple_os(self) and self._settings_build.arch == "x86_64" and self._has_cppstd_20_supported:
+                return False
             return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
 
     def configure(self):
