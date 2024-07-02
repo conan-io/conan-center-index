@@ -1,0 +1,13 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 7bc00f5..c415bf1 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -14,7 +14,7 @@ set(PUBLIC_HEADERS
+         reduct/diagnostics.h)
+ 
+ 
+-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
++# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+ 
+ add_library(${CMAKE_PROJECT_NAME} STATIC ${SRC_FILES})
+ 
