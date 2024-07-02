@@ -27,7 +27,7 @@ class DbusConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "dbus_user": ["ANY"],
+        "dbus_user": [None, "ANY"],
         "message_bus": [True, False],
         "system_socket": [None, "ANY"],
         "system_pid_file": [None, "ANY"],
@@ -113,7 +113,6 @@ class DbusConan(ConanFile):
         tc.project_options["asserts"] = not is_apple_os(self)
         tc.project_options["checks"] = False
         tc.project_options["datadir"] = os.path.join("res", "share")
-        tc.project_options["localstatedir"] = os.path.join("res", "var")
         tc.project_options["sysconfdir"] = os.path.join("res", "etc")
         tc.project_options["doxygen_docs"] = "disabled"
         tc.project_options["ducktype_docs"] = "disabled"
