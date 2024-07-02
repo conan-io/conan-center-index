@@ -229,6 +229,10 @@ class BehaviorTreeCPPConan(ConanFile):
             replace_in_file(self, cmakelists, "3rdparty/minitrace/minitrace.cpp", "")
             replace_in_file(self, os.path.join(self.source_folder, "src", "loggers", "bt_minitrace_logger.cpp"),
                             "minitrace/minitrace.h", "minitrace.h")
+            if Version(self.version) >= "4.6.2":
+                replace_in_file(self, cmakelists, "add_library(minitrace STATIC )", "")
+                replace_in_file(self, cmakelists, "target_compile_definitions(minitrace PRIVATE MTR_ENABLED=True)", "")
+                replace_in_file(self, cmakelists, "set_property(TARGET minitrace PROPERTY POSITION_INDEPENDENT_CODE ON)", "")
         # Unvendor tinyxml2
         if self._with_tinyxml2:
             rmdir(self, os.path.join(self.source_folder, "3rdparty", "tinyxml2"))
