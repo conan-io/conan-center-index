@@ -1,0 +1,61 @@
+sources:
+  "20240312":
+    f2c:
+      url:
+        - "https://github.com/valgur/f2c/releases/download/f2c-20240312/f2c-20240312.tgz"
+        - "https://netlib.org/f2c/src.tgz"
+      sha256: "4d33ef7b67dedf5fc077ec45016cba35421eb36432522e8d8c5b9c374a5d6f99"
+    fc:
+      url:
+        - "https://salsa.debian.org/debian/f2c/-/raw/b17b7c087db97f96ef9f603dcea5424093669799/fc"
+        - "https://github.com/valgur/f2c/releases/download/f2c-20240312/fc"
+        - "https://www.netlib.org/f2c/fc"
+      sha256: "f0dced9b581a5808bd2d0d5e4716997043960a56333d5f4c44b201b870aa0ea8"
+    libf2c:
+      url:
+        - "https://github.com/valgur/f2c/releases/download/libf2c-20240130/libf2c-20240130.zip"
+        - "https://www.netlib.org/f2c/libf2c.zip"
+      sha256: "cc84253b47b5c036aa1d529332a6c218a39ff71c76974296262b03776f822695"
+patches:
+  "20240312":
+    # https://salsa.debian.org/debian/f2c/-/tree/b17b7c087db97f96ef9f603dcea5424093669799/debian/patches
+    - patch_file: "patches/f2c/0002-prototype-rmdir.patch"
+      base_path: "f2c"
+    - patch_file: "patches/f2c/0004-fc-script-path-and-tmpfile.patch"
+      base_path: "f2c"
+    - patch_file: "patches/f2c/0005-sysdep-tmpfiles.patch"
+      base_path: "f2c"
+    - patch_file: "patches/f2c/0008-typos.patch"
+      base_path: "f2c"
+    # CCI
+    - patch_file: "patches/f2c/0009-fc-pass-libf2c-flags.patch"
+      base_path: "f2c"
+      patch_type: "conan"
+      patch_description: "Pass libf2c flags to cc in fc"
+    - patch_file: "patches/f2c/0010-fc-respect-CC-envvar.patch"
+      base_path: "f2c"
+      patch_type: "conan"
+      patch_description: "Respect CC environment variable"
+
+    # https://salsa.debian.org/debian/libf2c2/-/tree/7de354efec5312e15deab83affdaa620ae75849a/debian/patches
+    - patch_file: "patches/libf2c/0003-C-tweaks.patch"
+      base_path: "libf2c"
+    - patch_file: "patches/libf2c/0004-add-clapack-files.patch"
+      base_path: "libf2c"
+    - patch_file: "patches/libf2c/0006-weak-MAIN__.patch"
+      base_path: "libf2c"
+    - patch_file: "patches/libf2c/0007-format-security-sprintf.patch"
+      base_path: "libf2c"
+    - patch_file: "patches/libf2c/0008-XintXX_t.patch"
+      base_path: "libf2c"
+    - patch_file: "patches/libf2c/0009-F77_aloc-type.patch"
+      base_path: "libf2c"
+    - patch_file: "patches/libf2c/0010-largefile_source-redefinition.patch"
+      base_path: "libf2c"
+    - patch_file: "patches/libf2c/0011-cross.patch"
+      base_path: "libf2c"
+    # CCI
+    - patch_file: "patches/libf2c/0012-enable-shared.patch"
+      base_path: "libf2c"
+      patch_description: "Enable building of shared library"
+      patch_type: "conan"
