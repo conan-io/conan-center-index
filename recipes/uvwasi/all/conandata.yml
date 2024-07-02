@@ -1,0 +1,9 @@
+sources:
+  "0.0.21":
+    url: "https://github.com/nodejs/uvwasi/archive/refs/tags/v0.0.21.tar.gz"
+    sha256: "5cf32f166c493f41c0de7f3fd578d0be1b692c81c54f0c68889e62240fe9ab60"
+patches:
+  "0.0.21":
+    - patch_file: "patches/0.0.21-0001-fix-cmake.patch"
+      patch_description: "separate static and shared build, disable visibility=hidden"
+      patch_type: "conan"
