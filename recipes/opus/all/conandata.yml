@@ -1,4 +1,7 @@
 sources:
+  "1.5.1":
+    url: "https://downloads.xiph.org/releases/opus/opus-1.5.1.tar.gz"
+    sha256: "b84610959b8d417b611aa12a22565e0a3732097c6389d19098d844543e340f85"
   "1.4":
     url: "https://github.com/xiph/opus/releases/download/v1.4/opus-1.4.tar.gz"
     sha256: "c9b32b4253be5ae63d1ff16eea06b94b5f0f2951b7a02aceef58e3a3ce49c51f"
