@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualRunEnv
 from conan.tools.scm import Version
@@ -60,7 +60,7 @@ class QtAwesomeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/5.15.9", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/6.6.2", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -72,7 +72,7 @@ class QtAwesomeConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
-        if self.settings.os == "Linux":
+        if self.version == "6.4.0" and self.settings.os == "Linux":
             raise ConanInvalidConfiguration("Linux is not supported yet")
 
     def source(self):
@@ -101,6 +101,9 @@ class QtAwesomeConan(ConanFile):
         copy(self, pattern="LICENSE.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["QtAwesome"]
+        if Version(self.version) >= "6.5":
+            self.cpp_info.includedirs.append(os.path.join("include", "QtAwesome"))
