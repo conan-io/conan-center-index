@@ -6,7 +6,7 @@ import shutil
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building, stdcpp_library
+from conan.tools.build import cross_building, stdcpp_library, check_min_cppstd
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -58,6 +58,16 @@ class ICUConan(ConanFile):
     def _with_unit_tests(self):
         return not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
 
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "Visual Studio": "16",
+            "msvc": "192",
+            "gcc": "8",
+            "clang": "9",
+            "apple-clang": "11"
+        }
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -74,6 +84,14 @@ class ICUConan(ConanFile):
         if self.options.dat_package_file:
             if not os.path.exists(str(self.options.dat_package_file)):
                 raise ConanInvalidConfiguration("Non-existent dat_package_file specified")
+
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 17)
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if not minimum_version:
+            self.output.warning("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
+        elif Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
 
     def layout(self):
         basic_layout(self, src_folder="src")
