@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, save
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -45,7 +45,7 @@ class ApriltagConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if is_msvc(self):
+        if is_msvc(self) and Version(self.version) < "3.3.0":
             self.requires("pthreads4w/3.0.0", transitive_headers=True)
 
     def validate(self):
@@ -58,16 +58,28 @@ class ApriltagConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_EXAMPLES"] = False
         if Version(self.version) >= "3.1.4":
             tc.variables["BUILD_PYTHON_WRAPPER"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        if self.settings.os == "Windows":
+            tc.preprocessor_definitions["NOMINMAX"] = ""
         tc.generate()
         if is_msvc(self):
             deps = CMakeDeps(self)
             deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # Fix DLL installation
+        if Version(self.version) <= "3.3.0":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}",
+                            "ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}\n"
+                            "RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -83,9 +95,13 @@ class ApriltagConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "apriltag")
         self.cpp_info.set_property("cmake_target_name", "apriltag::apriltag")
         self.cpp_info.set_property("pkg_config_name", "apriltag")
-        self.cpp_info.libs = ["apriltag"]
+        suffix = ""
+        if self.settings.build_type == "Debug" and Version(self.version) >= "3.2.0":
+            suffix = "d"
+        self.cpp_info.libs = ["apriltag" + suffix]
         self.cpp_info.includedirs.append(os.path.join("include", "apriltag"))
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["winmm"]
+            self.cpp_info.defines.append("NOMINMAX")

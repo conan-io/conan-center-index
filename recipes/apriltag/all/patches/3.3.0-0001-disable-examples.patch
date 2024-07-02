@@ -1,0 +1,15 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -159,6 +159,7 @@
+ endif (NOT Python3_NOT_FOUND AND NOT Numpy_NOT_FOUND AND PYTHONLIBS_FOUND AND BUILD_PYTHON_WRAPPER)
+ 
+ # Examples
++if (BUILD_EXAMPLES)
+ # apriltag_demo
+ add_executable(apriltag_demo example/apriltag_demo.c)
+ target_link_libraries(apriltag_demo ${PROJECT_NAME})
+@@ -177,3 +178,4 @@
+ 
+ # install example programs
+ install(TARGETS apriltag_demo RUNTIME DESTINATION bin)
++endif()
