@@ -1,0 +1,255 @@
+--- a/Configure/Solution.cpp
++++ b/Configure/Solution.cpp
+@@ -57,8 +57,6 @@
+ 
+ void Solution::loadProjects()
+ {
+-  loadProjectsFromFolder(L"Dependencies", L"Dependencies");
+-  loadProjectsFromFolder(L"OptionalDependencies", L"OptionalDependencies");
+   loadProjectsFromFolder(L"Projects", L"ImageMagick");
+ }
+ 
+--- a/Projects/MagickCore/Config.txt
++++ b/Projects/MagickCore/Config.txt
+@@ -8,17 +8,7 @@
+ 
+ [INCLUDES]
+ ..
+-bzlib->.
+-fftw->api
+-freetype->include
+-glib->.
+-glib->glib
+-lcms->include
+-lqr->.
+-lqr->lqr
+-raqm->src
+-xml->include
+-zlib->.
++
+ 
+ [EXCLUDES]
+ mac.c
+@@ -26,14 +16,6 @@
+ widget.c
+ 
+ [DEPENDENCIES]
+-bzlib
+-freetype
+-fftw
+-lcms
+-lqr
+-raqm
+-xml
+-zlib
+ 
+ [OPENCL]
+ 
+--- a/Projects/coders/Config.dng.txt
++++ b/Projects/coders/Config.dng.txt
+@@ -1,8 +1,3 @@
+ [INCLUDES]
+-raw->libraw
+-
+-[DEFINES_LIB]
+-LIBRAW_NODLL
+ 
+ [DEPENDENCIES]
+-raw
+--- a/Projects/coders/Config.exr.txt
++++ b/Projects/coders/Config.exr.txt
+@@ -1,12 +1,3 @@
+ [INCLUDES]
+-exr->imath
+-exr->imath\src\Imath
+-exr->openexr
+-exr->openexr\src\lib\OpenEXR
+-exr->openexr\src\lib\OpenEXRCore
+ 
+-[DEFINES_DLL]
+-OPENEXR_DLL
+-
+-[DEPENDENCIES]
+-exr
++[DEPENDENCIES]
+\ No newline at end of file
+--- a/Projects/coders/Config.flif.txt
++++ b/Projects/coders/Config.flif.txt
+@@ -1,5 +1,3 @@
+ [INCLUDES]
+-flif->src\library
+ 
+ [DEPENDENCIES]
+-flif
+--- a/Projects/coders/Config.heic.txt
++++ b/Projects/coders/Config.heic.txt
+@@ -1,9 +1,3 @@
+ [INCLUDES]
+-heif->.
+-heif->libheif
+-
+-[DEFINES_LIB]
+-LIBHEIF_STATIC_BUILD
+ 
+ [DEPENDENCIES]
+-heif
+--- a/Projects/coders/Config.jbig.txt
++++ b/Projects/coders/Config.jbig.txt
+@@ -1,5 +1,3 @@
+ [INCLUDES]
+-jbig->libjbig
+ 
+ [DEPENDENCIES]
+-jbig
+--- a/Projects/coders/Config.jp2.txt
++++ b/Projects/coders/Config.jp2.txt
+@@ -1,8 +1,3 @@
+ [INCLUDES]
+-openjpeg->src\lib\openjp2
+-
+-[DEFINES_LIB]
+-OPJ_STATIC
+ 
+ [DEPENDENCIES]
+-openjpeg
+--- a/Projects/coders/Config.jpeg.txt
++++ b/Projects/coders/Config.jpeg.txt
+@@ -1,5 +1,3 @@
+ [INCLUDES]
+-jpeg-turbo->.
+ 
+ [DEPENDENCIES]
+-jpeg-turbo
+--- a/Projects/coders/Config.jxl.txt
++++ b/Projects/coders/Config.jxl.txt
+@@ -1,9 +1,3 @@
+ [INCLUDES]
+-jpeg-xl->lib\include
+-
+-[DEFINES_LIB]
+-JXL_STATIC_DEFINE
+-JXL_THREADS_STATIC_DEFINE
+ 
+ [DEPENDENCIES]
+-jpeg-xl
+--- a/Projects/coders/Config.mat.txt
++++ b/Projects/coders/Config.mat.txt
+@@ -1,5 +1,3 @@
+ [INCLUDES]
+-zlib->.
+ 
+ [DEPENDENCIES]
+-zlib
+--- a/Projects/coders/Config.miff.txt
++++ b/Projects/coders/Config.miff.txt
+@@ -1,12 +1,3 @@
+ [INCLUDES]
+-bzlib->.
+-lzma->src\liblzma\api
+-zlib->.
+-
+-[DEFINES_LIB]
+-LZMA_API_STATIC
+ 
+ [DEPENDENCIES]
+-bzlib
+-lzma
+-zlib
+--- a/Projects/coders/Config.msl.txt
++++ b/Projects/coders/Config.msl.txt
+@@ -1,5 +1,3 @@
+ [INCLUDES]
+-xml->include
+ 
+ [DEPENDENCIES]
+-xml
+--- a/Projects/coders/Config.ora.txt
++++ b/Projects/coders/Config.ora.txt
+@@ -1,5 +1,3 @@
+ [INCLUDES]
+-zip->lib
+ 
+ [DEPENDENCIES]
+-zip
+--- a/Projects/coders/Config.pango.txt
++++ b/Projects/coders/Config.pango.txt
+@@ -1,11 +1,3 @@
+ [INCLUDES]
+-cairo->src
+-glib->.
+-glib->glib
+-harfbuzz->src
+-pango->.
+ 
+ [DEPENDENCIES]
+-cairo
+-glib
+-pango
+--- a/Projects/coders/Config.png.txt
++++ b/Projects/coders/Config.png.txt
+@@ -1,7 +1,3 @@
+ [INCLUDES]
+-png->.
+-zlib->.
+ 
+ [DEPENDENCIES]
+-png
+-zlib
+--- a/Projects/coders/Config.psd.txt
++++ b/Projects/coders/Config.psd.txt
+@@ -1,5 +1,3 @@
+ [INCLUDES]
+-zlib->.
+ 
+ [DEPENDENCIES]
+-zlib
+--- a/Projects/coders/Config.svg.txt
++++ b/Projects/coders/Config.svg.txt
+@@ -1,14 +1,3 @@
+ [INCLUDES]
+-cairo->src
+-glib->.
+-glib->glib
+-glib->gmodule
+-rsvg->.
+-rsvg->gdk-pixbuf
+-xml->include
+ 
+ [DEPENDENCIES]
+-cairo
+-glib
+-rsvg
+-xml
+--- a/Projects/coders/Config.tiff.txt
++++ b/Projects/coders/Config.tiff.txt
+@@ -1,6 +1,4 @@
+ [INCLUDES]
+-tiff->libtiff
+ 
+ [DEPENDENCIES]
+-tiff
+ coders>psd
+--- a/Projects/coders/Config.ttf.txt
++++ b/Projects/coders/Config.ttf.txt
+@@ -1,5 +1,3 @@
+ [INCLUDES]
+-freetype->include
+ 
+ [DEPENDENCIES]
+-freetype
+--- a/Projects/coders/Config.url.txt
++++ b/Projects/coders/Config.url.txt
+@@ -1,5 +1,3 @@
+ [INCLUDES]
+-xml->include
+ 
+ [DEPENDENCIES]
+-xml
+--- a/Projects/coders/Config.webp.txt
++++ b/Projects/coders/Config.webp.txt
+@@ -1,5 +1,3 @@
+ [INCLUDES]
+-webp->src
+ 
+ [DEPENDENCIES]
+-webp

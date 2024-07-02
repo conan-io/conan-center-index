@@ -1,5 +1,6 @@
-#include <stdio.h>
 #include <MagickCore/MagickCore.h>
+
+#include <stdio.h>
 
 int main()
 {

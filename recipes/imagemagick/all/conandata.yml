@@ -1,13 +1,15 @@
 sources:
-  "7.0.11-14":
+  # Use a dot instead of a hyphen to match the version names used by most other package repositories
+  # https://repology.org/project/imagemagick/versions
+  "7.1.1.32":
     source:
-      url: "https://github.com/ImageMagick/ImageMagick/archive/7.0.11-14.tar.gz"
-      sha256: "dfa5aa3f7f289f12c2f9ee6c7c19b02ae857b4eec02f40298f60f5c11048a016"
-    visualmagick:
-      "fcd198e4344576b9efc2facd952a2f0c57752c07":
-        url: "https://github.com/ImageMagick/VisualMagick/archive/fcd198e4344576b9efc2facd952a2f0c57752c07.zip"
-        sha256: "f793c1c48796ed2f295ba9cacb938f6aa7e4bf011226d96f977655911852bfda"
+      url: "https://github.com/ImageMagick/ImageMagick/archive/refs/tags/7.1.1-32.tar.gz"
+      sha256: "fda0c1a5fdf511721893014370a6303413c70e0c11f2b543a7a4aff36f8c6e92"
+    windows:
+      url: "https://github.com/ImageMagick/ImageMagick-Windows/archive/0b13f5dc7b4725e452f395193c0ce7f869774c21.zip"
+      sha256: "cb3a1d666afcde3df6fd5a9ec22f8ff03d9a11b12c1d1ccea08f0e2092e3f044"
 patches:
-  "7.0.11-14":
-    - patch_file: "patches/remove-unnecessary-dependencies.patch"
-      base_path: "VisualMagick"
+  "7.1.1.32":
+    - patch_file: "patches/001-remove-unnecessary-dependencies.patch"
+    - patch_file: "patches/002-no-warnings-as-error.patch"
+    - patch_file: "patches/003-remove-mfc-dependency.patch"
