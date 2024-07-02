@@ -1,23 +1,7 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 43113fa..f8f85f8 100644
+index 4862f86..0fbc867 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -5,6 +5,7 @@
- # Author: Mateusz Loskot <mateusz@loskot.net>
- #
- ###############################################################################
-+CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
- PROJECT(GeoTIFF)
- 
- SET(GEOTIFF_LIB_NAME geotiff)
-@@ -12,7 +13,6 @@ SET(GEOTIFF_LIBRARY_TARGET geotiff_library)
- 
- ##############################################################################
- # CMake settings
--CMAKE_MINIMUM_REQUIRED(VERSION 2.6.0)
- 
- SET(CMAKE_COLOR_MAKEFILE ON)
- 
 @@ -92,7 +92,7 @@ IF(WIN32)
  ENDIF()
  
@@ -27,7 +11,7 @@ index 43113fa..f8f85f8 100644
      SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMPILE_FLAGS} -std=c99")
      SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMPILE_FLAGS} -std=c++98")
      IF(GEOTIFF_BUILD_PEDANTIC)
-@@ -171,7 +171,7 @@ IF(WITH_TIFF)
+@@ -168,7 +168,7 @@ IF(WITH_TIFF)
        FIND_PACKAGE(TIFF REQUIRED)
      endif ()
  
@@ -36,7 +20,7 @@ index 43113fa..f8f85f8 100644
          # Confirm required API is available
          INCLUDE(CheckFunctionExists)
          SET(CMAKE_REQUIRED_LIBRARIES ${TIFF_LIBRARIES})
-@@ -301,7 +301,7 @@ INSTALL(FILES ${GEOTIFF_LIB_HEADERS} DESTINATION include)
+@@ -258,7 +258,7 @@ INSTALL(FILES ${GEOTIFF_LIB_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
  ###############################################################################
  # Build libxtiff library
  
@@ -45,7 +29,7 @@ index 43113fa..f8f85f8 100644
  
  ###############################################################################
  # Build libgeotiff library
-@@ -346,7 +346,7 @@ IF(UNIX)
+@@ -302,7 +302,7 @@ if(UNIX)
        VERSION ${LINK_VERSION}
        SOVERSION ${LINK_SOVERSION}
        CLEAN_DIRECT_OUTPUT 1 )
