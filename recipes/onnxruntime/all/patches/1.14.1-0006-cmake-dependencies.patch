@@ -1,0 +1,29 @@
+--- a/cmake/external/onnxruntime_external_deps.cmake
++++ b/cmake/external/onnxruntime_external_deps.cmake
+@@ -115,7 +115,7 @@
+   URL_HASH SHA1=${DEP_SHA1_protobuf}
+   SOURCE_SUBDIR  cmake
+   PATCH_COMMAND ${ONNXRUNTIME_PROTOBUF_PATCH_COMMAND}
+-  FIND_PACKAGE_ARGS 3.20.2 NAMES Protobuf
++  FIND_PACKAGE_ARGS NAMES Protobuf
+ )
+ set(protobuf_BUILD_TESTS OFF CACHE BOOL "Build protobuf tests" FORCE)
+ if (CMAKE_SYSTEM_NAME STREQUAL "Android")
+@@ -158,7 +158,7 @@
+     nlohmann_json
+     URL ${DEP_URL_json}
+     URL_HASH SHA1=${DEP_SHA1_json}
+-    FIND_PACKAGE_ARGS 3.10 NAMES nlohmann_json
++    FIND_PACKAGE_ARGS NAMES nlohmann_json
+ )
+
+ #TODO: include clog first
+@@ -257,7 +257,7 @@
+     GSL
+     URL ${DEP_URL_microsoft_gsl}
+     URL_HASH SHA1=${DEP_SHA1_microsoft_gsl}
+-    FIND_PACKAGE_ARGS 4.0 NAMES Microsoft.GSL
++    FIND_PACKAGE_ARGS NAMES Microsoft.GSL
+   )
+ endif()
+ 
