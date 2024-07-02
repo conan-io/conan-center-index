@@ -5,6 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.system import package_manager
 import os
@@ -143,7 +144,7 @@ class PclConan(ConanFile):
         "with_libusb": True,
         "with_opencv": True,
         "with_opengl": True,
-        "with_openmp": False,
+        "with_openmp": True,
         "with_pcap": True,
         "with_png": True,
         "with_qhull": True,
@@ -188,13 +189,19 @@ class PclConan(ConanFile):
     def _external_optional_deps(self):
         return {
             "2d": ["vtk"],
-            "io": ["davidsdk", "dssdk", "ensenso", "fzapi", "libusb", "openni", "openni2", "pcap", "png", "rssdk", "rssdk2", "vtk"],
+            "features": ["openmp"],
+            "filters": ["openmp"],
+            "io": ["davidsdk", "dssdk", "ensenso", "fzapi", "libusb", "openmp", "openni", "openni2", "pcap", "png", "rssdk", "rssdk2", "vtk"],
             "kdtree": ["flann"],
+            "keypoints": ["openmp"],
             "people": ["openni"],
             "recognition": ["metslib"],
+            "registration": ["openmp"],
             "search": ["flann"],
             "simulation": ["opengl"],
-            "surface": ["qhull", "vtk"],
+            "segmentation": ["openmp"],
+            "surface": ["openmp", "qhull", "vtk"],
+            "tracking": ["openmp"],
             "visualization": ["davidsdk", "dssdk", "ensenso", "opengl", "openni", "openni2", "qvtk", "rssdk"],
             "apps": ["cuda", "libusb", "opengl", "openni", "png", "qhull", "qt", "qvtk", "vtk"],
             "tools": ["cuda", "davidsdk", "dssdk", "ensenso", "opencv", "opengl", "openni", "openni2", "qhull", "rssdk", "vtk"],
@@ -216,6 +223,7 @@ class PclConan(ConanFile):
             "metslib": [],
             "opencv": ["opencv::opencv"],
             "opengl": ["opengl::opengl", "freeglut::freeglut", "glew::glew", "glu::glu" if is_apple_os(self) or self.settings.os == "Windows" else "mesa-glu::mesa-glu"],
+            "openmp": ["llvm-openmp::llvm-openmp"] if self.settings.compiler in ["clang", "apple-clang"] else [],
             "openni": [],
             "openni2": [],
             "pcap": ["libpcap::libpcap"],
@@ -393,6 +401,9 @@ class PclConan(ConanFile):
             self.requires("opencv/4.8.1", transitive_headers=True)
         if self._is_enabled("zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
+        if self._is_enabled("openmp"):
+            if self.settings.compiler in ["clang", "apple-clang"]:
+                self.requires("llvm-openmp/17.0.4", transitive_headers=True, transitive_libs=True)
         # TODO:
         # self.requires("vtk/9.x.x", transitive_headers=True)
         # self.requires("openni/x.x.x", transitive_headers=True)
@@ -402,7 +413,6 @@ class PclConan(ConanFile):
         # self.requires("dssdk/x.x.x", transitive_headers=True)
         # self.requires("rssdk/x.x.x", transitive_headers=True)
         # self.requires("metslib/x.x.x", transitive_headers=True)
-        # self.requires("openmp/system", transitive_headers=True)
         # self.requires("opennurbs/x.x.x", transitive_headers=True)
         # self.requires("poisson4/x.x.x", transitive_headers=True)
 
@@ -441,52 +451,55 @@ class PclConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["PCL_SHARED_LIBS"] = self.options.shared
-        tc.cache_variables["WITH_LIBUSB"] = self._is_enabled("libusb")
-        tc.cache_variables["WITH_OPENGL"] = self._is_enabled("opengl")
-        tc.cache_variables["WITH_OPENMP"] = self._is_enabled("openmp")
-        tc.cache_variables["WITH_PCAP"] = self._is_enabled("pcap")
-        tc.cache_variables["WITH_PNG"] = self._is_enabled("png")
-        tc.cache_variables["WITH_QHULL"] = self._is_enabled("qhull")
+        tc.variables["PCL_SHARED_LIBS"] = self.options.shared
+        tc.variables["WITH_LIBUSB"] = self._is_enabled("libusb")
+        tc.variables["WITH_OPENGL"] = self._is_enabled("opengl")
+        tc.variables["WITH_OPENMP"] = self._is_enabled("openmp")
+        tc.variables["WITH_PCAP"] = self._is_enabled("pcap")
+        tc.variables["WITH_PNG"] = self._is_enabled("png")
+        tc.variables["WITH_QHULL"] = self._is_enabled("qhull")
         if self._is_enabled("qhull"):
             # Upstream FindQhull.cmake defines HAVE_QHULL which changes content of pcl_config.h
             # Since we use CMakeDeps instead of this file, we have to manually inject HAVE_QHULL
-            tc.cache_variables["HAVE_QHULL"] = True
-        tc.cache_variables["WITH_QT"] = self._is_enabled("qt")
-        tc.cache_variables["WITH_VTK"] = self._is_enabled("vtk")
-        tc.cache_variables["WITH_CUDA"] = self._is_enabled("cuda")
-        tc.cache_variables["BUILD_CUDA"] = self._is_enabled("cuda")
-        tc.cache_variables["BUILD_GPU"] = self._is_enabled("cuda")
-        tc.cache_variables["WITH_SYSTEM_ZLIB"] = True
-        tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = self.options.precompile_only_core_point_types
+            tc.variables["HAVE_QHULL"] = True
+        tc.variables["WITH_QT"] = self._is_enabled("qt")
+        tc.variables["WITH_VTK"] = self._is_enabled("vtk")
+        tc.variables["WITH_CUDA"] = self._is_enabled("cuda")
+        tc.variables["BUILD_CUDA"] = self._is_enabled("cuda")
+        tc.variables["BUILD_GPU"] = self._is_enabled("cuda")
+        tc.variables["WITH_SYSTEM_ZLIB"] = True
+        tc.variables["PCL_ONLY_CORE_POINT_TYPES"] = self.options.precompile_only_core_point_types
         # The default False setting breaks OpenGL detection in CMake
-        tc.cache_variables["PCL_ALLOW_BOTH_SHARED_AND_STATIC_DEPENDENCIES"] = True
+        tc.variables["PCL_ALLOW_BOTH_SHARED_AND_STATIC_DEPENDENCIES"] = True
         tc.variables["OpenGL_GL_PREFERENCE"] = "GLVND"
 
         if not self.options.add_build_type_postfix:
-            tc.cache_variables["CMAKE_DEBUG_POSTFIX"] = ""
-            tc.cache_variables["CMAKE_RELEASE_POSTFIX"] = ""
-            tc.cache_variables["CMAKE_RELWITHDEBINFO_POSTFIX"] = ""
-            tc.cache_variables["CMAKE_MINSIZEREL_POSTFIX"] = ""
+            tc.variables["CMAKE_DEBUG_POSTFIX"] = ""
+            tc.variables["CMAKE_RELEASE_POSTFIX"] = ""
+            tc.variables["CMAKE_RELWITHDEBINFO_POSTFIX"] = ""
+            tc.variables["CMAKE_MINSIZEREL_POSTFIX"] = ""
 
-        tc.cache_variables["BUILD_tools"] = self.options.tools
-        tc.cache_variables["BUILD_apps"] = self.options.apps
-        tc.cache_variables["BUILD_examples"] = False
+        tc.variables["BUILD_tools"] = self.options.tools
+        tc.variables["BUILD_apps"] = self.options.apps
+        tc.variables["BUILD_examples"] = False
         enabled = sorted(self._enabled_components())
         disabled = sorted(self._disabled_components())
         self.output.info("Enabled components: " + ", ".join(enabled))
         self.output.info("Disabled components: " + ", ".join(disabled))
         for comp in enabled:
-            tc.cache_variables[f"BUILD_{comp}"] = True
+            tc.variables[f"BUILD_{comp}"] = True
         for comp in disabled:
-            tc.cache_variables[f"BUILD_{comp}"] = False
+            tc.variables[f"BUILD_{comp}"] = False
 
         tc.cache_variables["PCL_ENABLE_SSE"] = self.options.get_safe("use_sse", False)
 
+        # Do not overwrite CMakeToolchain variables with cache variables
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("eigen", "cmake_file_name", "EIGEN")
+        if Version(self.version) < "1.14.0":
+            deps.set_property("eigen", "cmake_file_name", "EIGEN")
         deps.set_property("flann", "cmake_file_name", "FLANN")
         deps.set_property("flann", "cmake_target_name", "FLANN::FLANN")
         deps.set_property("libpcap", "cmake_file_name", "PCAP")
@@ -499,7 +512,10 @@ class PclConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        for mod in ["Eigen", "FLANN", "GLEW", "Pcap", "Qhull", "libusb"]:
+        find_modules_to_remove = ["FLANN", "GLEW", "Pcap", "Qhull", "libusb"]
+        if Version(self.version) < "1.14.0":
+            find_modules_to_remove.append("Eigen")
+        for mod in find_modules_to_remove:
             os.remove(os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake"))
 
     def build(self):
@@ -574,18 +590,21 @@ class PclConan(ConanFile):
         if not self.options.shared:
             if self.settings.os in ["Linux", "FreeBSD"]:
                 common.system_libs.append("pthread")
-            if self.options.with_openmp:
-                if self.settings.os == "Linux":
-                    if self.settings.compiler == "gcc":
-                        common.sharedlinkflags.append("-fopenmp")
-                        common.exelinkflags.append("-fopenmp")
-                elif self.settings.os == "Windows":
-                    if self.settings.compiler == "msvc":
-                        common.system_libs.append("delayimp")
-                    elif self.settings.compiler == "gcc":
-                        common.system_libs.append("gomp")
         if self.settings.os == "Windows":
             common.system_libs.append("ws2_32")
+
+        if self.options.with_openmp:
+            openmp_flags = []
+            if is_msvc(self):
+                openmp_flags = ["-openmp"]
+            elif self.settings.compiler in ["clang", "apple-clang"]:
+                openmp_flags = ["-Xpreprocessor", "-fopenmp"]
+            elif self.settings.compiler == "gcc":
+                openmp_flags = ["-fopenmp"]
+            elif self.settings.compiler == "intel-cc":
+                openmp_flags = ["/Qopenmp"] if self.settings.os == "Windows" else ["-Qopenmp"]
+            self.cpp_info.cflags += openmp_flags
+            self.cpp_info.cxxflags += openmp_flags
 
         # TODO: Legacy, to be removed on Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "PCL"
