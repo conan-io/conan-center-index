@@ -122,6 +122,7 @@ class OpenCVConan(ConanFile):
         "with_flatbuffers": [True, False],
         "with_protobuf": [True, False],
         "with_vulkan": [True, False],
+        "with_openvino": [True, False],
         "dnn_cuda": [True, False],
         # highgui module options
         "with_gtk": [True, False],
@@ -181,6 +182,7 @@ class OpenCVConan(ConanFile):
         "with_flatbuffers": True,
         "with_protobuf": True,
         "with_vulkan": False,
+        "with_openvino": True,
         "dnn_cuda": False,
         # highgui module options
         "with_gtk": False,
@@ -285,6 +287,10 @@ class OpenCVConan(ConanFile):
         return Version(self.version) >= "4.5.3" and Version(self.version) < "4.8.0"
 
     @property
+    def _has_openvino_option(self):
+        return Version(self.version) >= "4.9.0"
+
+    @property
     def _has_with_wayland_option(self):
         return Version(self.version) >= "4.7.0" and self.settings.os in ["Linux", "FreeBSD"]
 
@@ -345,6 +351,8 @@ class OpenCVConan(ConanFile):
             del self.options.with_avif
         if not self._has_with_flatbuffers_option:
             del self.options.with_flatbuffers
+        if not self._has_openvino_option:
+            del self.options.with_openvino
 
         # Conditional default options
         if self._is_mingw:
@@ -430,6 +438,9 @@ class OpenCVConan(ConanFile):
         def xkbcommon():
             return ["xkbcommon::libxkbcommon"] if self.options.get_safe("with_wayland") else []
 
+        def openvino():
+            return ["openvino::Runtime"] if self.options.get_safe("with_openvino") else []
+
         def opencv_calib3d():
             return ["opencv_calib3d"] if self.options.calib3d else []
 
@@ -504,7 +515,7 @@ class OpenCVConan(ConanFile):
             "dnn": {
                 "is_built": self.options.dnn,
                 "mandatory_options": ["imgproc"],
-                "requires": ["opencv_core", "opencv_imgproc"] + protobuf() + vulkan() + ipp(),
+                "requires": ["opencv_core", "opencv_imgproc"] + protobuf() + vulkan() + ipp() + openvino(),
             },
             "features2d": {
                 "is_built": self.options.features2d,
@@ -518,7 +529,7 @@ class OpenCVConan(ConanFile):
             "gapi": {
                 "is_built": self.options.gapi,
                 "mandatory_options": ["imgproc"],
-                "requires": ["opencv_imgproc", "ade::ade"],
+                "requires": ["opencv_imgproc", "ade::ade"] + openvino(),
                 "system_libs": [
                     (self.settings.os == "Windows", ["ws2_32", "wsock32"]),
                 ],
@@ -1038,11 +1049,15 @@ class OpenCVConan(ConanFile):
         # Call this first before any further manipulation of options based on other options
         self._solve_internal_dependency_graph(self._opencv_modules)
 
+        if not self._has_openvino_option:
+            self.options.rm_safe("with_openvino")
+
         if not self.options.dnn:
             self.options.rm_safe("dnn_cuda")
             self.options.rm_safe("with_flatbuffers")
             self.options.rm_safe("with_protobuf")
             self.options.rm_safe("with_vulkan")
+            self.options.rm_safe("with_openvino")
         if not self.options.highgui:
             self.options.rm_safe("with_gtk")
             self.options.rm_safe("with_wayland")
@@ -1102,6 +1117,8 @@ class OpenCVConan(ConanFile):
             self.requires("protobuf/3.21.12", transitive_libs=True)
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-headers/1.3.268.0")
+        if self.options.get_safe("with_openvino"):
+            self.requires("openvino/2024.0.0")
         # gapi module dependencies
         if self.options.gapi:
             self.requires("ade/0.1.2d")
@@ -1470,7 +1487,7 @@ class OpenCVConan(ConanFile):
         tc.variables["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
 
         if Version(self.version) >= "4.6.0":
-            tc.variables["WITH_OPENVINO"] = False
+            tc.variables["WITH_OPENVINO"] = self.options.get_safe("with_openvino", False)
             tc.variables["WITH_TIMVX"] = False
         else:
             tc.variables["WITH_INF_ENGINE"] = False
