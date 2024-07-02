@@ -10,6 +10,18 @@ patches:
     - patch_file: "patches/0001-find-conan-packages.patch"
       patch_description: "inject thirdparties from conan"
       patch_type: "conan"
+    - patch_file: "patches/0002-fix-gcc11-std20.patch"
+      patch_description: "Fix compilation with cppstd for gcc"
+      patch_type: "portability"
+      patch_source: "https://github.com/InsightSoftwareConsortium/ITK/pull/2589"
+    - patch_file: "patches/0003-fix-msvc-std20.patch"
+      patch_description: "Fix compilation with cppstd for msvc"
+      patch_type: "portability"
+      patch_source: https://github.com/InsightSoftwareConsortium/ITK/commit/75350f1f81c8062f8b7a47f467506e26d608c6e7
+    - patch_file: "patches/0004-fix-msvc-std20.patch"
+      patch_description: "Fix compilation with cppstd for msvc"
+      patch_type: "portability"
+      patch_source: "https://github.com/InsightSoftwareConsortium/ITK/commit/da1229dc1b0131bd606260bfa27196ae3503085a"
   "5.1.0":
     - patch_file: "patches/0001-find-conan-packages.patch"
       patch_description: "inject thirdparties from conan"
