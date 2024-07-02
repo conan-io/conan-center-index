@@ -1,16 +1,23 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rm, rmdir, download, replace_in_file, save
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.53.0"
 
 
 class LibTomMathConan(ConanFile):
     name = "libtommath"
     description = "LibTomMath is a free open source portable number theoretic multiple-precision integer library written entirely in C."
-    topics = "libtommath", "math", "multiple", "precision"
     license = "Unlicense"
-    homepage = "https://www.libtom.net/"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.libtom.net/"
+    topics = ("math", "multi-precision")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,119 +28,72 @@ class LibTomMathConan(ConanFile):
         "fPIC": True,
     }
 
-    exports_sources = "patches/*"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and self.settings.compiler != "Visual Studio":
-            self.build_requires("make/4.3")
-        if self.settings.compiler != "Visual Studio" and self.settings.os != "Windows" and self.options.shared:
-            self.build_requires("libtool/2.4.6")
+        if is_msvc(self) and self.settings.build_type == "Debug":
+            # libtommath requires at least /O1 on MSVC for dead code elimination
+            # https://github.com/libtom/libtommath/blob/42b3fb07e7d504f61a04c7fca12e996d76a25251/s_mp_rand_platform.c#L120-L138
+            self.output.warning("Debug builds on MSVC are not supported, switching to RelWithDebInfo")
+            self.settings.build_type = "RelWithDebInfo"
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        if Version(self.version) >= "1.3":
+            get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        else:
+            get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
+            download(self, **self.conan_data["sources"][self.version]["cmakelists"], filename="CMakeLists.txt")
 
-    def _run_makefile(self, target=None):
-        target = target or ""
-        autotools = AutoToolsBuildEnvironment(self)
-        autotools.libs = []
-        if self.settings.os == "Windows" and self.settings.compiler != "Visual Studio":
-            autotools.link_flags.append("-lcrypt32")
-        if self.settings.os == "Macos" and self.settings.arch == "armv8":
-            # FIXME: should be handled by helper
-            autotools.link_flags.append("-arch arm64")
-        args = autotools.vars
-        args.update({
-            "PREFIX": self.package_folder,
-        })
-        if self.settings.compiler != "Visual Studio":
-            if tools.get_env("CC"):
-                args["CC"] = tools.get_env("CC")
-            if tools.get_env("LD"):
-                args["LD"] = tools.get_env("LD")
-            if tools.get_env("AR"):
-                args["AR"] = tools.get_env("AR")
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
 
-            args["LIBTOOL"] = "libtool"
-        arg_str = " ".join("{}=\"{}\"".format(k, v) for k, v in args.items())
-
-        with tools.environment_append(args):
-            with tools.chdir(self._source_subfolder):
-                if self.settings.compiler == "Visual Studio":
-                    if self.options.shared:
-                        target = "tommath.dll"
-                    else:
-                        target = "tommath.lib"
-                    with tools.vcvars(self):
-                        self.run("nmake -f makefile.msvc {} {}".format(
-                            target,
-                            arg_str,
-                        ), run_environment=True)
-                else:
-                    if self.settings.os == "Windows":
-                        makefile = "makefile.mingw"
-                        if self.options.shared:
-                            target = "libtommath.dll"
-                        else:
-                            target = "libtommath.a"
-                    else:
-                        if self.options.shared:
-                            makefile = "makefile.shared"
-                        else:
-                            makefile = "makefile.unix"
-                    self.run("{} -f {} {} {} -j{}".format(
-                        tools.get_env("CONAN_MAKE_PROGRAM", "make"),
-                        makefile,
-                        target,
-                        arg_str,
-                        tools.cpu_count(),
-                    ), run_environment=True)
+    def _patch_sources(self):
+        if Version(self.version) < "1.3":
+            save(self, os.path.join(self.source_folder, "sources.cmake"),
+                 "file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.c)\n"
+                 "file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)\n")
+            # Disable installation of docs, which is not valid for < 1.3
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "# Windows uses a different help sytem.\nif(", "if(0 AND")
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        self._run_makefile()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        if self.settings.os == "Windows":
-            # The mingw makefile uses `cmd`, which is only available on Windows
-            self.copy("*.a", src=self._source_subfolder, dst="lib")
-            self.copy("*.lib", src=self._source_subfolder, dst="lib")
-            self.copy("*.dll", src=self._source_subfolder, dst="bin")
-            self.copy("tommath.h", src=self._source_subfolder, dst="include")
-        else:
-            self._run_makefile("install")
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
 
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "lib"), "*.la")
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-
-        if self.settings.compiler == "Visual Studio" and self.options.shared:
-            os.rename(os.path.join(self.package_folder, "lib", "tommath.dll.lib"),
-                      os.path.join(self.package_folder, "lib", "tommath.lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "libtommath")
+        self.cpp_info.set_property("cmake_target_name", "libtommath")
+        self.cpp_info.set_property("pkg_config_name", "libtommath")
+
         self.cpp_info.libs = ["tommath"]
+        if Version(self.version) < "1.3":
+            self.cpp_info.includedirs.append(os.path.join("include", "libtommath"))
         if not self.options.shared:
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["advapi32", "crypt32"]
-
-        self.cpp_info.names["pkg_config"] = "libtommath"
