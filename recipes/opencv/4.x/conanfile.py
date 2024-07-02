@@ -147,6 +147,7 @@ class OpenCVConan(ConanFile):
         "with_quirc": [True, False],
         # videoio module options
         "with_ffmpeg": [True, False],
+        "with_gstreamer": [True, False],
         "with_v4l": [True, False],
         # text module options
         "with_tesseract": [True, False],
@@ -206,6 +207,7 @@ class OpenCVConan(ConanFile):
         "with_quirc": True,
         # videoio module options
         "with_ffmpeg": True,
+        "with_gstreamer": False,
         "with_v4l": False,
         # text module options
         "with_tesseract": True,
@@ -245,6 +247,10 @@ class OpenCVConan(ConanFile):
         return os.path.join(self._contrib_folder, "modules")
 
     @property
+    def _build_depends_on_pkgconfig(self):
+        return self.options.get_safe("with_gstreamer") or self.options.get_safe("with_wayland")
+
+    @property
     def _has_with_jpeg2000_option(self):
         return self.settings.os != "iOS"
 
@@ -254,7 +260,11 @@ class OpenCVConan(ConanFile):
 
     @property
     def _has_with_ffmpeg_option(self):
-        return self.settings.os != "iOS" and self.settings.os != "WindowsStore"
+        return self.settings.os not in ["iOS", "WindowsStore"]
+
+    @property
+    def _has_with_gstreamer_option(self):
+        return self.settings.os not in ["Android", "iOS", "WindowsStore"]
 
     @property
     def _has_superres_option(self):
@@ -325,6 +335,8 @@ class OpenCVConan(ConanFile):
             del self.options.with_jpeg2000
         if not self._has_with_tiff_option:
             del self.options.with_tiff
+        if not self._has_with_gstreamer_option:
+            del self.options.with_gstreamer
         if not self._has_superres_option:
             del self.options.superres
         if not self._has_alphamat_option:
@@ -395,6 +407,22 @@ class OpenCVConan(ConanFile):
             if self.options.get_safe("with_ffmpeg"):
                 components = ["ffmpeg::avcodec", "ffmpeg::avformat", "ffmpeg::avutil", "ffmpeg::swscale"]
             return components
+
+        def gstreamer():
+            components = []
+            if self.options.get_safe("with_gstreamer"):
+                components.extend([
+                    "gstreamer::gstreamer-base-1.0",
+                    "gst-plugins-base::gstreamer-app-1.0",
+                    "gst-plugins-base::gstreamer-riff-1.0",
+                    "gst-plugins-base::gstreamer-pbutils-1.0",
+                    "gst-plugins-base::gstreamer-video-1.0",
+                    "gst-plugins-base::gstreamer-audio-1.0",
+                ])
+            return components
+
+        def gstreamer_in_gapi():
+            return gstreamer() if Version(self.version) >= "4.5.5" else []
 
         def gtk():
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
@@ -518,7 +546,7 @@ class OpenCVConan(ConanFile):
             "gapi": {
                 "is_built": self.options.gapi,
                 "mandatory_options": ["imgproc"],
-                "requires": ["opencv_imgproc", "ade::ade"],
+                "requires": ["opencv_imgproc", "ade::ade"] + gstreamer_in_gapi(),
                 "system_libs": [
                     (self.settings.os == "Windows", ["ws2_32", "wsock32"]),
                 ],
@@ -578,7 +606,7 @@ class OpenCVConan(ConanFile):
             "videoio": {
                 "is_built": self.options.videoio,
                 "mandatory_options": ["imgcodecs", "imgproc"],
-                "requires": ["opencv_imgcodecs", "opencv_imgproc"] + ffmpeg() + ipp(),
+                "requires": ["opencv_imgcodecs", "opencv_imgproc"] + ffmpeg() + gstreamer() + ipp(),
                 "system_libs": [
                     (self.settings.os == "Android" and int(str(self.settings.os.api_level)) > 20, ["mediandk"]),
                 ],
@@ -1069,6 +1097,8 @@ class OpenCVConan(ConanFile):
         if not self.options.videoio:
             self.options.rm_safe("with_ffmpeg")
             self.options.rm_safe("with_v4l")
+        if not (self.options.videoio or (self.options.gapi and Version(self.version) >= "4.5.5")):
+            self.options.rm_safe("with_gstreamer")
         if not self.options.with_cuda:
             self.options.rm_safe("with_cublas")
             self.options.rm_safe("with_cudnn")
@@ -1145,6 +1175,9 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_ffmpeg"):
             # opencv doesn't support ffmpeg >= 5.0.0 for the moment (until 4.5.5 at least)
             self.requires("ffmpeg/4.4.4")
+        if self.options.get_safe("with_gstreamer"):
+            self.requires("gst-plugins-base/1.19.2")
+            self.requires("gstreamer/1.22.6")
         # freetype module dependencies
         if self.options.freetype:
             self.requires("freetype/2.13.2")
@@ -1221,8 +1254,9 @@ class OpenCVConan(ConanFile):
             self.tool_requires("wayland-protocols/1.33")
             if not self._is_legacy_one_profile:
                 self.tool_requires("wayland/<host_version>")
+        if self._build_depends_on_pkgconfig:
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.1.0")
+                self.tool_requires("pkgconf/2.2.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
@@ -1398,7 +1432,9 @@ class OpenCVConan(ConanFile):
                     tc.variables[f"FFMPEG_lib{component}_VERSION"] = ffmpeg_component_version
             tc.variables["FFMPEG_LIBRARIES"] = ";".join(ffmpeg_libraries)
 
-        tc.variables["WITH_GSTREAMER"] = False
+        tc.variables["WITH_GSTREAMER"] = self.options.get_safe("with_gstreamer", False)
+        if Version(self.version) >= "4.5.5":
+            tc.variables["OPENCV_GAPI_GSTREAMER"] = self.options.get_safe("with_gstreamer", False)
         tc.variables["WITH_HALIDE"] = False
         tc.variables["WITH_HPX"] = False
         tc.variables["WITH_IMGCODEC_HDR"] = self.options.get_safe("with_imgcodec_hdr", False)
@@ -1540,24 +1576,25 @@ class OpenCVConan(ConanFile):
 
         CMakeDeps(self).generate()
 
-        if self.options.get_safe("with_wayland"):
+        if self._build_depends_on_pkgconfig:
             deps = PkgConfigDeps(self)
-            if self._is_legacy_one_profile:
-                # Manually generate pkgconfig file of wayland-protocols since
-                # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
-                wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
-                wp_version = self.dependencies.build["wayland-protocols"].ref.version
-                wp_pkg_content = textwrap.dedent(f"""\
-                    prefix={wp_prefix}
-                    datarootdir=${{prefix}}/res
-                    pkgdatadir=${{datarootdir}}/wayland-protocols
-                    Name: Wayland Protocols
-                    Description: Wayland protocol files
-                    Version: {wp_version}
-                """)
-                save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
-            else:
-                deps.build_context_activated = ["wayland-protocols"]
+            if self.options.get_safe("with_wayland"):
+                if self._is_legacy_one_profile:
+                    # Manually generate pkgconfig file of wayland-protocols since
+                    # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
+                    wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
+                    wp_version = self.dependencies.build["wayland-protocols"].ref.version
+                    wp_pkg_content = textwrap.dedent(f"""\
+                        prefix={wp_prefix}
+                        datarootdir=${{prefix}}/res
+                        pkgdatadir=${{datarootdir}}/wayland-protocols
+                        Name: Wayland Protocols
+                        Description: Wayland protocol files
+                        Version: {wp_version}
+                    """)
+                    save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
+                else:
+                    deps.build_context_activated = ["wayland-protocols"]
             deps.generate()
 
     def build(self):

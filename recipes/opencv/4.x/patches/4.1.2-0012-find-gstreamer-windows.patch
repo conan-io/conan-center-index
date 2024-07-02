@@ -1,0 +1,9 @@
+--- a/modules/videoio/cmake/detect_gstreamer.cmake
++++ b/modules/videoio/cmake/detect_gstreamer.cmake
+@@ -1,5 +1,5 @@
+ # --- GStreamer ---
+-if(NOT HAVE_GSTREAMER AND WIN32)
++if(0)
+   set(env_paths "${GSTREAMER_DIR}" ENV GSTREAMER_ROOT)
+   if(X86_64)
+     list(APPEND env_paths ENV GSTREAMER_1_0_ROOT_X86_64 ENV GSTREAMER_ROOT_X86_64)
