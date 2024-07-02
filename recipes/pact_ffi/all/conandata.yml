@@ -1,7 +1,9 @@
 sources:
-  "0.4.1":
-    url: "https://gitlab.prod.entos.sky/api/v4/projects/7/repository/archive?sha=5a2490710991bbd3ca6ecc86453d5aa4798bd75c"
-    sha256: "27335f0982a81f245c3f7a13dee698ad7aa7896e6267253e58a8f4cb7098db1e"
-  "0.4.5":
-    url: "https://gitlab.prod.entos.sky/api/v4/projects/7/repository/archive?sha=49c69473ac8654b93ced3b7892251850c77151c2"
-    sha256: "23b58dfdc414c382432a938d7e70827777fbd8eb96fbeec571c3c53a515dfcac"
+  "0.4.21":
+    url: "https://github.com/pact-foundation/pact-reference/archive/refs/tags/libpact_ffi-v0.4.21.tar.gz"
+    sha256: 9fc91c7d6d9f1cbc5a8774a3d691c8fec8ed839129e6f4bae20875bfb015aa9f
+patches:
+  "0.4.21":
+    - patch_file: "patches/0000_cmake-set-target.patch"
+      patch_type: portability
+      patch_description: "allow overriding of target location and architecture"

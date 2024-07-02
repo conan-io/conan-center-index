@@ -1,0 +1,32 @@
+diff --git a/rust/pact_ffi/CMakeLists.txt b/rust/pact_ffi/CMakeLists.txt
+index bc751ce0..4bcce753 100644
+--- a/rust/pact_ffi/CMakeLists.txt
++++ b/rust/pact_ffi/CMakeLists.txt
+@@ -176,7 +176,7 @@ endif()
+ # the workspace root and get the target dir from that, and in a more general context
+ # that's what ought to be done, but for now we know where the target dir is, and should
+ # just reuse it.
+-set(CARGO_TARGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../target")
++set(CARGO_TARGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../target" CACHE PATH "")
+ 
+ # The name of the crate itself.
+ set(CRATE_NAME ${NAME_STRING})
+@@ -222,13 +222,15 @@ set(CBINDGEN_HEADER_FILE "${CMAKE_CURRENT_SOURCE_DIR}/include/${CBINDGEN_HEADER_
+ #################################################################################################
+ 
+ # Defines the cargo command to build the library file.
++set(CARGO_ARGS "build;${CARGO_BUILD_TYPE};--target-dir=${CARGO_TARGET_DIR}")
++if (CARGO_TARGET_TRIPLE)
++    list(APPEND CARGO_ARGS "--target=${CARGO_TARGET_TRIPLE}")
++endif()
+ add_custom_command(
+     OUTPUT ${CARGO_LIBRARY_FILE}
+     COMMAND
+         ${CARGO_EXECUTABLE}
+-        build
+-        ${CARGO_BUILD_TYPE}
+-        --target-dir ${CARGO_TARGET_DIR}
++        ${CARGO_ARGS}
+     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+ 
+ # Add target for the library file

@@ -1,8 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain
-from conan.tools.files import get, copy, replace_in_file, rmdir, rm
+from conan.tools.files import get, copy, replace_in_file, rmdir, rm, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 
 from pathlib import Path
@@ -14,7 +15,6 @@ required_conan_version = ">=2.0.0"
 
 class PactFFIConan(ConanFile):
     name = "pact_ffi"
-    version = "0.4.21"
     description = "Pact/Rust FFI bindings"
     url = "https://gitlab.prod.entos.sky/immerse-ui/libs/Pact"
     homepage = "https://github.com/pact-foundation/pact-reference"
@@ -24,10 +24,12 @@ class PactFFIConan(ConanFile):
     topics = ("pact", "consumer-driven-contracts", "contract-testing", "mock-server")
     user = "sky"
     options = {
-        "shared": [True, False]
+        "shared": [True, False],
+        "fPIC": [True, False],
     }
     default_options = {
-        "shared": False
+        "shared": False,
+        "fPIC": True
     }
 
     def config_options(self):
@@ -38,6 +40,9 @@ class PactFFIConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def validate(self):
         if self.settings.build_type in ["RelWithDebInfo", "MinSizeRel"]:
             raise ConanInvalidConfiguration("build_type must be Release or Debug")
@@ -45,24 +50,42 @@ class PactFFIConan(ConanFile):
             raise ConanInvalidConfiguration("The Ninja generator is not supported. Define "
                                             "'pact_ffi/*:tools.cmake.cmaketoolchain:generator=!' in a profile to unset it")
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
-        get(self, f"https://github.com/pact-foundation/pact-reference/archive/refs/tags/libpact_ffi-v{self.version}.tar.gz",
-            strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def _rust_target_triple(self):
+        arch_lookup = {
+            "armv8": "aarch64"
+        }
+        vendor_lookup = {
+            "Macos": "apple"
+        }
+        os_lookup = {
+            "Macos": "darwin"
+        }
+        return (f"{arch_lookup.get(str(self.settings.arch), 'x86_64')}-"
+                f"{vendor_lookup.get(str(self.settings.os), 'unknown')}-"
+                f"{os_lookup.get(str(self.settings.os), 'linux')}")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["CARGO_TARGET_DIR"] = os.path.join(self.build_folder, "rust", "target")
-        tc.generate()
-        tc = CMakeDeps(self)
+        tc.cache_variables["CARGO_TARGET_DIR"] = Path(self.build_folder) / "rust" / "target"
+        if cross_building(self):
+            tc.cache_variables["CARGO_TARGET_TRIPLE"] = self._rust_target_triple()
         tc.generate()
 
+        CMakeDeps(self).generate()
+
     def build(self):
-        replace_in_file(self, os.path.join(self.source_folder, "rust", "pact_ffi", "CMakeLists.txt"),
-                        'set(CARGO_TARGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../target")',
-                        'set(CARGO_TARGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../target" CACHE STRING "")', strict=False)
+        def generate_headers(config: str, header_path: Path):
+            dest_path = Path(self.source_folder) / "rust" / "pact_ffi"
+            self.run(f"rustup run nightly cbindgen --config {config} --crate pact_ffi --output {header_path}",
+                     cwd=dest_path)
+
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "rust", "pact_ffi"))
         cmake.build()
@@ -71,14 +94,9 @@ class PactFFIConan(ConanFile):
         # Note: CMakeLists.txt only supports building the C header 'pact.h', via a "generate_header" custom target.
         #       For consistency, instead of cmake.build(target="generate_header"), we use the explicit commands to
         #       generate both C and C++ headers (as defined in pact_ffi/release-linux.sh)
-        generated_headers_dir = os.path.join(self.source_folder, "rust", "pact_ffi", "include")
-        pact_c_header = os.path.join(generated_headers_dir, "pact.h")
-        self.run(f"rustup run nightly cbindgen --config cbindgen.toml --crate pact_ffi --output {pact_c_header}",
-                 cwd=os.path.join(self.source_folder, "rust", "pact_ffi"))
-
-        pact_cpp_header = os.path.join(generated_headers_dir, "pact-cpp.h")
-        self.run(f"rustup run nightly cbindgen --config cbindgen-c++.toml --crate pact_ffi --output {pact_cpp_header}",
-                 cwd=os.path.join(self.source_folder, "rust", "pact_ffi"))
+        generated_headers_dir = Path(self.source_folder) / "rust" / "pact_ffi" /"include"
+        generate_headers("cbindgen.toml", generated_headers_dir / "pact.h")
+        generate_headers("cbindget-c++.toml", generated_headers_dir / "pact-cpp.h")
 
     def package(self):
         cmake = CMake(self)
