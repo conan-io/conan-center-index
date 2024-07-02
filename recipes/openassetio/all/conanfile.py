@@ -1,18 +1,16 @@
-import pathlib
 import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.apple import is_apple_os
-from conan.tools.files import apply_conandata_patches, get, copy, rm
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, get, copy, rm
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
-
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2 || >=2.0.6"
 
 
 class PackageConan(ConanFile):
@@ -44,82 +42,58 @@ class PackageConan(ConanFile):
             "gcc": "9",
             "clang": "12",
             "apple-clang": "12",
+            "Visual Studio": "15",
+            "msvc": "191",
         }
 
     def configure(self):
-        if self.options.with_python:
-            if is_msvc(self):
-                # Required to create import .lib for building extension module.
-                self.options["cpython"].shared = True
+        if self.options.with_python and is_msvc(self):
+            # Required to create import .lib for building extension module.
+            self.options["cpython"].shared = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("tomlplusplus/3.2.0")
+        self.requires("tomlplusplus/3.4.0")
         if self.options.with_python:
-            # TODO: cpython requires ncurses/6.2 but no pre-built package exists.
-            self.requires("ncurses/6.3")
-            self.requires("cpython/3.9.7")
-            self.requires("pybind11/2.10.1")
+            self.requires("ncurses/6.4")
+            self.requires("cpython/3.10.0")
+            self.requires("pybind11/2.12.0")
 
     def validate(self):
         if is_apple_os(self):
-            raise ConanInvalidConfiguration(
-                f"{self.ref} does not support MacOS at this time"
-            )
+            raise ConanInvalidConfiguration(f"{self.ref} does not support MacOS at this time")
+
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
         if is_msvc(self) and not self.dependencies["cpython"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires cpython:shared=True when using MSVC compiler")
 
-        check_min_vs(self, 191)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
-
     def build_requirements(self):
-        self.tool_requires("cmake/3.25.3")
+        self.tool_requires("cmake/[>=3.25 <4]")
+        self.tool_requires("cpython/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-
-        tc.variables["OPENASSETIO_ENABLE_TESTS"] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
-
+        tc.variables["OPENASSETIO_ENABLE_TESTS"] = False
         tc.variables["OPENASSETIO_GLIBCXX_USE_CXX11_ABI"] = self.settings.get_safe("compiler.libcxx") == "libstdc++11"
-
         tc.variables["OPENASSETIO_ENABLE_PYTHON"] = self.options.with_python
-        if self.options.with_python:
-            tc.variables["Python_EXECUTABLE"] = self._python_exe
-            if is_msvc(self):
-                tc.variables["Python_LIBRARY"] = self._python_windows_lib
-
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
         tc = VirtualBuildEnv(self)
         tc.generate()
-
-    @property
-    def _python_exe(self):
-        # TODO: update to V2 once cpython is updated
-        return pathlib.Path(self.deps_user_info["cpython"].python).as_posix()
-
-    @property
-    def _python_windows_lib(self):
-        pth = pathlib.Path(
-            self.dependencies["cpython"].package_folder,
-            self.dependencies["cpython"].cpp_info.components["embed"].libdirs[0],
-            self.dependencies["cpython"].cpp_info.components["embed"].libs[0])
-        pth = pth.with_suffix(".lib")
-        return pth.as_posix()
 
     def build(self):
         apply_conandata_patches(self)
@@ -128,11 +102,11 @@ class PackageConan(ConanFile):
         cmake.build()
 
     def package_id(self):
-        if self.options.with_python:
+        if self.info.options.with_python:
             self.info.requires["cpython"].minor_mode()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
@@ -150,6 +124,7 @@ class PackageConan(ConanFile):
 
         self.cpp_info.components["openassetio-core"].set_property("cmake_target_name", "OpenAssetIO::openassetio-core")
         self.cpp_info.components["openassetio-core"].libs = ["openassetio"]
+
         if self.options.with_python:
             self.cpp_info.components["openassetio-python-bridge"].set_property("cmake_target_name", "OpenAssetIO::openassetio-python-bridge")
             self.cpp_info.components["openassetio-python-bridge"].requires = ["openassetio-core"]
