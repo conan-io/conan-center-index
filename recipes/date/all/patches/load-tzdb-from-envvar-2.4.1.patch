@@ -1,0 +1,117 @@
+From 73ed8608827b3256e4f97415c9e2014fd31da2be Mon Sep 17 00:00:00 2001
+From: Samuel Dowling <samuel.dowling@protonmail.com>
+Date: Sat, 13 Jan 2024 19:57:49 +1030
+Subject: [PATCH] Add ability to specify timezone database location via
+ environment variable
+
+This adds the ability for a user to populate the TZDATA environment
+variable to specify the location in which to look for the timezone
+database, which allows for a runtime query of this location. Without
+this, date currently only supports compile time determination of the
+database location.
+
+This facilitates the ability to:
+* Use a timezone database provided by a package manager
+* Keep the timezone database up to date without re-compilation
+* Be flexible about where the timezone database is stored
+
+Closes #788
+---
+ CMakeLists.txt | 23 +++++++++++++++--------
+ src/tz.cpp     | 19 +++++++++++++++++++
+ 2 files changed, 34 insertions(+), 8 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7bc93df..ac989c8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -23,6 +23,7 @@ function( print_option OPT )
+ endfunction( )
+ 
+ print_option( USE_SYSTEM_TZ_DB )
++print_option( MANUAL_TZ_DB )
+ print_option( USE_TZ_DB_IN_DOT )
+ print_option( BUILD_SHARED_LIBS  )
+ print_option( ENABLE_DATE_TESTING )
+@@ -45,20 +46,26 @@ set( HEADER_FILES
+ 
+ add_library( tz ${HEADER_FILES} ${SOURCE_FOLDER}/tz.cpp )
+ 
+-if( USE_SYSTEM_TZ_DB )
++if( USE_SYSTEM_TZ_DB OR MANUAL_TZ_DB )
+ 	target_compile_definitions( tz PRIVATE -DUSE_AUTOLOAD=0 )
+ 	target_compile_definitions( tz PRIVATE -DHAS_REMOTE_API=0 )
+-	# cannot set USE_OS_TZDB to 1 on Windows
+-	if( NOT WIN32 )
+-		target_compile_definitions( tz PUBLIC -DUSE_OS_TZDB=1 )
+-	endif( )
+ else( )
+ 	target_compile_definitions( tz PRIVATE -DUSE_AUTOLOAD=1 )
+ 	target_compile_definitions( tz PRIVATE -DHAS_REMOTE_API=1 )
+-	target_compile_definitions( tz PUBLIC -DUSE_OS_TZDB=0 )
+-	find_package( CURL REQUIRED )
++endif( )
++
++if ( USE_SYSTEM_TZ_DB AND NOT MANUAL_TZ_DB )
++    target_compile_definitions( tz PRIVATE -DINSTALL=. )
++    target_compile_definitions( tz PUBLIC -DUSE_OS_TZDB=1 )
++else( )
++    target_compile_definitions( tz PUBLIC USE_OS_TZDB=0 )
++endif( )
++
++if( NOT USE_SYSTEM_TZ_DB AND NOT MANUAL_TZ_DB )
++    find_package( CURL REQUIRED )
++    include_directories( SYSTEM ${CURL_INCLUDE_DIRS} )
+     set( OPTIONAL_LIBRARIES CURL::libcurl )
+-endif()
++endif( )
+ 
+ if( BUILD_SHARED_LIBS )
+     target_compile_definitions( tz PRIVATE -DDATE_BUILD_DLL=1 )
+diff --git a/src/tz.cpp b/src/tz.cpp
+index f4a819b..fd7cd9f 100644
+--- a/src/tz.cpp
++++ b/src/tz.cpp
+@@ -81,6 +81,9 @@
+ #  endif  // __MINGW32__
+ 
+ #  include <windows.h>
++#  if !defined(S_ISDIR) && defined(S_IFMT) && defined(_S_IFDIR)
++#    define S_ISDIR(m) (((m) & S_IFMT) == _S_IFDIR)
++#  endif
+ #endif  // _WIN32
+ 
+ #include "date/tz_private.h"
+@@ -276,6 +279,14 @@ access_install()
+     #undef STRINGIZE
+ #endif  // !INSTALL
+ 
++    {
++        static char* tz_local_env = getenv("TZDATA");
++        if (tz_local_env != nullptr) {
++            static std::string tz_local_env_s = tz_local_env;
++            return tz_local_env_s;
++        }
++    }
++
+     return install;
+ }
+ 
+@@ -330,6 +341,14 @@ discover_tz_dir()
+     CONSTDATA auto tz_dir_default = "/usr/share/zoneinfo";
+     CONSTDATA auto tz_dir_buildroot = "/usr/share/zoneinfo/uclibc";
+ 
++    {
++        static char* tz_local_env = getenv("TZDATA");
++        if (tz_local_env != nullptr) {
++            static std::string tz_local_env_s = tz_local_env;
++            return tz_local_env_s;
++        }
++    }
++
+     // Check special path which is valid for buildroot with uclibc builds
+     if(stat(tz_dir_buildroot, &sb) == 0 && S_ISDIR(sb.st_mode))
+         return tz_dir_buildroot;
+-- 
+2.43.0.windows.1
+
