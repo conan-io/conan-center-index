@@ -3,7 +3,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches, copy, export_conandata_patches, get,
-    rm, rmdir
+    rm, rmdir, replace_in_file
 )
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -25,10 +25,12 @@ class FontconfigConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "system_dirs": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "system_dirs": False,
     }
 
     def export_sources(self):
@@ -37,6 +39,7 @@ class FontconfigConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.system_dirs
 
     def configure(self):
         if self.options.shared:
@@ -80,8 +83,18 @@ class FontconfigConan(ConanFile):
         })
         tc.generate()
 
+    def _replace_configuration_string(self, file, variable, old_value, new_value):
+        replace_in_file(self, file, f"conf.set_quoted('{variable}', {old_value})", f"conf.set_quoted('{variable}', {new_value})")
+
     def _patch_files(self):
         apply_conandata_patches(self)
+
+        if self.settings.os in ("Linux", "FreeBSD") and self.options.get_safe("system_dirs", False):
+            build_script = os.path.join(self.source_folder, "meson.build")
+            self._replace_configuration_string(build_script, "CONFIGDIR", "fc_configdir", "'/etc/fonts/conf.d'")
+            self._replace_configuration_string(build_script, "FC_CACHEDIR", "fc_cachedir", "'/var/cache/fontconfig'")
+            self._replace_configuration_string(build_script, "FC_TEMPLATEDIR", "fc_templatedir", "'/usr/share/fontconfig/conf.avail'")
+            self._replace_configuration_string(build_script, "FONTCONFIG_PATH", "fc_baseconfigdir", "'/etc/fonts'")
 
     def build(self):
         self._patch_files()
@@ -116,6 +129,7 @@ class FontconfigConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "Fontconfig"
         self.cpp_info.names["cmake_find_package_multi"] = "Fontconfig"
         self.env_info.FONTCONFIG_PATH = fontconfig_path
+
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
