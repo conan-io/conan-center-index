@@ -72,7 +72,10 @@ class PactFFIConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["CARGO_TARGET_DIR"] = str(Path(self.build_folder) / "rust" / "target")
+        tc.cache_variables.update({
+            "CARGO_TARGET_DIR": str(Path(self.build_folder) / "rust" / "target"),
+            "PACT_FFI_BUILD_DOCS": False
+        })
         if cross_building(self):
             tc.cache_variables["CARGO_TARGET_TRIPLE"] = self._rust_target_triple()
         tc.generate()
