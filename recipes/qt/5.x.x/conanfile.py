@@ -14,6 +14,7 @@ import itertools
 import os
 import textwrap
 import shutil
+import subprocess
 
 required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
@@ -153,12 +154,14 @@ class QtConan(ConanFile):
                        "in order to build Qt WebEngine")
                 raise ConanInvalidConfiguration(msg)
 
-            # In any case, check its actual version for compatibility
-            from six import StringIO  # Python 2 and 3 compatible
-            mybuf = StringIO()
-            cmd_v = f"\"{python_exe}\" --version"
-            self.run(cmd_v, mybuf)
-            verstr = mybuf.getvalue().strip().split("Python ")[1]
+            # In any case, check its actual version for compatibility.
+            # Note that python2 exe sends its version to stderr instead of stdout.
+            completed = subprocess.run( [python_exe, '--version'], stderr=subprocess.PIPE,
+                                            timeout=5 )
+            if completed.returncode != 0:
+                msg = ("Found python2 executable %s but could not run it" % python_exe)
+                raise ConanInvalidConfiguration(msg)
+            verstr = completed.stderr.decode('utf-8').split("Python ")[1]
             if verstr.endswith("+"):
                 verstr = verstr[:-1]
             version = Version(verstr)
@@ -167,7 +170,7 @@ class QtConan(ConanFile):
             v_max = "3.0.0"
             if (version >= v_min) and (version < v_max):
                 msg = ("Found valid Python 2 required for QtWebengine:"
-                       f" version={mybuf.getvalue()}, path={python_exe}")
+                       f" version={verstr}, path={python_exe}")
                 self.output.success(msg)
             else:
                 msg = (f"Found Python 2 in path, but with invalid version {verstr}"
