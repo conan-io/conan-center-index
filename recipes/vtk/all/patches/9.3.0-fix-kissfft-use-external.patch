@@ -1,0 +1,60 @@
+Adjust vendoring to make VTK use the external kissfft
+Thanks to Nekto89 for this patch in his recipe review.
+
+--- a/Common/Math/vtkFFT.h	2023-11-14 07:37:21.000000000 +0800
++++ b/Common/Math/vtkFFT.h	2024-02-24 15:07:11.074695861 +0800
+@@ -31,7 +31,7 @@
+ #include "vtk_kissfft.h" // kiss_fft_scalar, kiss_fft_cpx
+ // clang-format off
+ #include VTK_KISSFFT_HEADER(kiss_fft.h)
+-#include VTK_KISSFFT_HEADER(tools/kiss_fftr.h)
++#include VTK_KISSFFT_TOOLS_HEADER(kiss_fftr.h)
+ // clang-format on
+ 
+ #include <array>       // std::array
+--- a/ThirdParty/kissfft/CMakeLists.txt	2023-11-14 07:37:21.000000000 +0800
++++ b/ThirdParty/kissfft/CMakeLists.txt	2024-02-24 15:07:11.042704429 +0800
+@@ -1,12 +1,23 @@
+ set(KISSFFT_SCALAR_TYPE "double")
+ 
+-vtk_module_third_party_internal(
+-  LICENSE_FILES           "vtkkissfft/COPYING"
+-  SPDX_LICENSE_IDENTIFIER "BSD-3-Clause"
+-  SPDX_COPYRIGHT_TEXT     "Copyright (c) 2003-2010 Mark Borgerding"
+-  SPDX_DOWNLOAD_LOCATION  "git+https://gitlab.kitware.com/third-party/kissfft.git@for/vtk-20211123-master-g6f09c27"
+-  VERSION                 "master"
+-  STANDARD_INCLUDE_DIRS)
++vtk_module_third_party(
++  INTERNAL
++    LICENSE_FILES
++      "vtkkissfft/COPYING"
++    SPDX_LICENSE_IDENTIFIER
++      "BSD-3-Clause"
++    SPDX_COPYRIGHT_TEXT
++      "Copyright (c) 2003-2010 Mark Borgerding"
++    SPDX_DOWNLOAD_LOCATION
++      "git+https://gitlab.kitware.com/third-party/kissfft.git@for/vtk-20211123-master-g6f09c27"
++    VERSION
++      "master"
++    STANDARD_INCLUDE_DIRS
++  EXTERNAL
++    PACKAGE kissfft
++    TARGETS kissfft::kissfft-double
++    STANDARD_INCLUDE_DIRS
++  )
+ 
+ configure_file(
+   "${CMAKE_CURRENT_SOURCE_DIR}/vtk_kissfft.h.in"
+--- a/ThirdParty/kissfft/vtk_kissfft.h.in	2023-11-14 07:37:21.000000000 +0800
++++ b/ThirdParty/kissfft/vtk_kissfft.h.in	2024-02-24 15:07:11.054701215 +0800
+@@ -8,8 +8,10 @@
+ 
+ #if VTK_MODULE_USE_EXTERNAL_vtkkissfft
+ # define VTK_KISSFFT_HEADER(header) <header>
++# define VTK_KISSFFT_TOOLS_HEADER(header) <header>
+ #else
+ # define VTK_KISSFFT_HEADER(header) <vtkkissfft/header>
++# define VTK_KISSFFT_TOOLS_HEADER(header) <vtkkissfft/tools/header>
+ #endif
+ 
+ #endif
