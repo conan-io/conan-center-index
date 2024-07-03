@@ -88,7 +88,5 @@ class PackageConan(ConanFile):
         self.cpp_info.components["reproc_cxx"].set_property("pkg_config_name", "reproc++")
         self.cpp_info.components["reproc_cxx"].set_property("cmake_target_name", "reproc++")
         self.cpp_info.components["reproc_cxx"].libs = ["reproc++"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["reproc_cxx"].system_libs.append("rt")
-            if self.options.multithreaded:
-                self.cpp_info.components["reproc_cxx"].system_libs.append("pthread")
+        self.cpp_info.components["reproc_cxx"].requires = ["reproc_c"]
+
