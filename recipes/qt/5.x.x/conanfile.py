@@ -1378,8 +1378,10 @@ Prefix = ..""")
                 _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
                 _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
             if self.settings.os == "Linux":
-                _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
-                _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
+                if self.options.with_gstreamer:
+                    _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
+                if self.options.get_safe("with_libalsa", False):
+                    _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
             if self.settings.os == "Windows":
                 _create_plugin("AudioCaptureServicePlugin", "qtmedia_audioengine", "mediaservice", [])
                 _create_plugin("DSServicePlugin", "dsengine", "mediaservice", [])
