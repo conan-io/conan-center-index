@@ -1,0 +1,4 @@
+sources:
+  "0.7.29":
+    url: "https://github.com/openSUSE/libsolv/archive/refs/tags/0.7.29.tar.gz"
+    sha256: "cb8d36a345ea9491f75d88c3a36a6f575c4e25f08197562f7ab0aa1c6e8c6abd"
