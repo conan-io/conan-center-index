@@ -126,6 +126,9 @@ class FmtConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", f"fmt::{target}")
         self.cpp_info.set_property("pkg_config_name",  "fmt")
 
+        if self.options.get_safe("with_unicode") and is_msvc(self):
+            self.cpp_info.components["_fmt"].cxxflags.append("/utf-8")
+
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         if self.options.with_fmt_alias:
             self.cpp_info.components["_fmt"].defines.append("FMT_STRING_ALIAS=1")
@@ -134,9 +137,6 @@ class FmtConan(ConanFile):
             self.cpp_info.components["_fmt"].defines.append("FMT_HEADER_ONLY=1")
             self.cpp_info.components["_fmt"].libdirs = []
             self.cpp_info.components["_fmt"].bindirs = []
-            if self._has_with_unicode_option and is_msvc(self):
-                self.cpp_info.components["_fmt"].cxxflags.append("/utf-8")
-
         else:
             postfix = "d" if self.settings.build_type == "Debug" else ""
             libname = "fmt" + postfix
