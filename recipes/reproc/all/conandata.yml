@@ -1,0 +1,4 @@
+sources:
+  "14.2.5":
+    url: "https://github.com/DaanDeMeyer/reproc/archive/refs/tags/v14.2.5.tar.gz"
+    sha256: "69467be0cfc80734b821c54ada263c8f1439f964314063f76b7cf256c3dc7ee8"
