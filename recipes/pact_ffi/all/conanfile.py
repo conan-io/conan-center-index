@@ -46,6 +46,9 @@ class PactFFIConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def requirements(self):
+        self.requires("bzip2/1.0.8")
+
     def validate(self):
         if self.settings.build_type in ["RelWithDebInfo", "MinSizeRel"]:
             raise ConanInvalidConfiguration("build_type must be Release or Debug")
@@ -112,8 +115,10 @@ class PactFFIConan(ConanFile):
         package_folder = Path(self.package_folder)
         lib_folder = package_folder / "lib"
         if not self.options.shared:
-            subfolder = str(self.settings.build_type) if not cross_building(self) else self._rust_target_triple()
+            subfolder = str(self.settings.build_type).lower() if not cross_building(self) else self._rust_target_triple()
             target_folder = Path(self.build_folder) / "rust" / "target" / subfolder
+            self.output.info(f"target folder: {target_folder}")
+            self.output.info(f"lib folder: {lib_folder}")
             copy(self, pattern="*.a", src=target_folder, dst=lib_folder)
             rm(self, pattern="*.so", folder=lib_folder)
             rm(self, pattern="*.dylib", folder=lib_folder)
