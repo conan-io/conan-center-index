@@ -1,0 +1,77 @@
+diff --git a/rust/pact_ffi/CMakeLists.txt b/rust/pact_ffi/CMakeLists.txt
+index bc751ce0..1c4e1e34 100644
+--- a/rust/pact_ffi/CMakeLists.txt
++++ b/rust/pact_ffi/CMakeLists.txt
+@@ -2,18 +2,8 @@
+ # CMAKE VERSION
+ #################################################################################################
+ 
+-# Set the minimum to 3.15. This is arbitrary and we should probably try to
+-# test everything with older CMake versions once this is all written, to
+-# figure out an actual lower-bound.
+-cmake_minimum_required(VERSION 3.15...3.17)
+-
+-# Set policies appropriately, so it knows when to warn about policy
+-# violations.
+-if(${CMAKE_VERSION} VERSION_LESS 3.17)
+-    cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+-else()
+-    cmake_policy(VERSION 3.17)
+-endif()
++# CMake 3.20 for path support
++cmake_minimum_required(VERSION 3.20)
+ 
+ #################################################################################################
+ # CONFIG FILES
+@@ -176,7 +166,8 @@ endif()
+ # the workspace root and get the target dir from that, and in a more general context
+ # that's what ought to be done, but for now we know where the target dir is, and should
+ # just reuse it.
+-set(CARGO_TARGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../target")
++set(CARGO_TARGET_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../target" CACHE PATH "")
++option(PACT_FFI_BUILD_DOCS "Build Doxygen docs if doxygen is available" ON)
+ 
+ # The name of the crate itself.
+ set(CRATE_NAME ${NAME_STRING})
+@@ -195,7 +186,12 @@ else()
+ endif()
+ 
+ # The path to the library file.
+-set(CARGO_LIBRARY_FILE "${CARGO_TARGET_DIR}/${TARGET_TYPE}/${CARGO_LIBRARY_NAME}")
++cmake_path(SET CARGO_LIBRARY_DIR "${CARGO_TARGET_DIR}")
++if(CARGO_TARGET_TRIPLE)
++    # if we've defined a target triple, output files go in a subfolder
++    cmake_path(APPEND CARGO_LIBRARY_DIR ${CARGO_TARGET_TRIPLE})
++endif()
++cmake_path(APPEND CARGO_LIBRARY_DIR ${TARGET_TYPE} ${CARGO_LIBRARY_NAME} OUTPUT_VARIABLE CARGO_LIBRARY_FILE)
+ 
+ # On Windows, dynamic linking requires both a .dll file (which will be dynamically
+ # linked), and a library file (which describes _how_ to link to the DLL, and will
+@@ -222,13 +218,15 @@ set(CBINDGEN_HEADER_FILE "${CMAKE_CURRENT_SOURCE_DIR}/include/${CBINDGEN_HEADER_
+ #################################################################################################
+ 
+ # Defines the cargo command to build the library file.
++set(CARGO_ARGS "build;${CARGO_BUILD_TYPE};--target-dir=${CARGO_TARGET_DIR}")
++if (CARGO_TARGET_TRIPLE)
++    list(APPEND CARGO_ARGS "--target=${CARGO_TARGET_TRIPLE}")
++endif()
+ add_custom_command(
+     OUTPUT ${CARGO_LIBRARY_FILE}
+     COMMAND
+         ${CARGO_EXECUTABLE}
+-        build
+-        ${CARGO_BUILD_TYPE}
+-        --target-dir ${CARGO_TARGET_DIR}
++        ${CARGO_ARGS}
+     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+ 
+ # Add target for the library file
+@@ -302,7 +300,7 @@ if(NOT DOXYGEN_FOUND)
+     message(WARNING "Could not find Doxygen; FFI documentation will not be generated")
+ endif()
+ 
+-if(DOXYGEN_FOUND)
++if(PACT_FFI_BUILD_DOCS AND DOXYGEN_FOUND)
+   # Configure Doxygen to be appropriate for our C header file.
+   set(DOXYGEN_QUIET "YES")
+   set(DOXYGEN_HTML_DYNAMIC_MENUS "YES")
