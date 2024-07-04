@@ -18,7 +18,7 @@ class InstinctCppConan(ConanFile):
                    "and built-in utilities for developing AI Agent applications (RAG, Chatbot, Code interpreter) powered by language models. "
                    "Call it langchain.cpp if you like.")
     license = "Apache-2.0"
-    url = "https://github.com/RobinQu/instinct.cpp"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/RobinQu/instinct.cpp"
     topics = ("llm", "agent", "genai")
     package_type = "library"
