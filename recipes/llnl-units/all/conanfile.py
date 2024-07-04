@@ -102,5 +102,5 @@ class UnitsConan(ConanFile):
         if units_namespace:
             self.cpp_info.defines.append(f"UNITS_NAMESPACE={units_namespace}")
 
-        self.cpp_info.set_property("cmake_file_name", "llnl-units")
-        self.cpp_info.set_property("cmake_target_name", "llnl-units::units")
+        self.cpp_info.set_property("cmake_file_name", "units")
+        self.cpp_info.set_property("cmake_target_name", "units::units")
