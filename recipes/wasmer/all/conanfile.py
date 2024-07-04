@@ -63,7 +63,7 @@ class WasmerConan(ConanFile):
     def build(self):
         get(
             self,
-            **self.conan_data["sources"][self.version][str(self.info.settings.os)][str(self.info.settings.arch)][self._compiler_alias]
+            **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias]
         )
 
     def package(self):
