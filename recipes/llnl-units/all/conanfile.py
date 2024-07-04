@@ -29,19 +29,15 @@ class UnitsConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "base_type": ["uint32_t", "uint64_t"],
-        "namespace": [None, "ANY"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "base_type": "uint32_t",
-        "namespace": None,
     }
 
     @property
     def _min_cppstd(self):
-        return 17
+        return 14
 
     @property
     def _compilers_minimum_version(self):
@@ -97,9 +93,10 @@ class UnitsConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["units"]
-        units_namespace = self.options.get_safe("namespace")
-        self.cpp_info.defines = [f"UNITS_BASE_TYPE={self.options.base_type}"]
-        if units_namespace:
+        namespace = self.conf.get("user.llnl-units:namespace", check_type=str)
+        base_type = self.conf.get("user.llnl-units:base_type", check_type=str, default="uint32_t")
+        self.cpp_info.defines = [f"UNITS_BASE_TYPE={base_type}"]
+        if namespace:
             self.cpp_info.defines.append(f"UNITS_NAMESPACE={units_namespace}")
 
         self.cpp_info.set_property("cmake_file_name", "units")
