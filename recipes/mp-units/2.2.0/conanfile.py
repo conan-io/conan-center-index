@@ -67,6 +67,7 @@ class MPUnitsConan(ConanFile):
                     "clang": "16",
                     "apple-clang": "15",
                     "msvc": "",
+                    "Visual Studio": "",
                 },
             },
             "std_format": {
@@ -76,15 +77,28 @@ class MPUnitsConan(ConanFile):
                     "clang": "17",
                     "apple-clang": "",
                     "msvc": "",
+                    "Visual Studio": "",
                 },
             },
             "cxx_modules": {
                 "min_cppstd": "20",
-                "compiler": {"gcc": "", "clang": "17", "apple-clang": "", "msvc": ""},
+                "compiler": {
+                    "gcc": "",
+                    "clang": "17",
+                    "apple-clang": "",
+                    "msvc": "",
+                    "Visual Studio": "",
+                },
             },
             "static_constexpr_vars_in_constexpr_func": {
                 "min_cppstd": "23",
-                "compiler": {"gcc": "13", "clang": "17", "apple-clang": "", "msvc": ""},
+                "compiler": {
+                    "gcc": "13",
+                    "clang": "17",
+                    "apple-clang": "",
+                    "msvc": "",
+                    "Visual Studio": "",
+                },
             },
             "explicit_this": {
                 "min_cppstd": "23",
@@ -93,6 +107,7 @@ class MPUnitsConan(ConanFile):
                     "clang": "18",
                     "apple-clang": "",
                     "msvc": "",
+                    "Visual Studio": "",
                 },
             },
         }
