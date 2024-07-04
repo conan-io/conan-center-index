@@ -122,7 +122,6 @@ class LibSolvConan(ConanFile):
         tc.variables["ENABLE_PUBKEY"] = False
         # Requires package/PackageInfo.h, enables CXX
         tc.variables["ENABLE_HAIKU"] = False
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -136,6 +135,8 @@ class LibSolvConan(ConanFile):
         replace_in_file(self, cmakelists, "${LZMA_LIBRARY}", "LibLZMA::LibLZMA")
         replace_in_file(self, cmakelists, "${EXPAT_LIBRARY}", "expat::expat")
         replace_in_file(self, cmakelists, "${LIBXML2_LIBRARIES}", "LibXml2::LibXml2")
+        # Workaround for "The CMake policy CMP0091 must be NEW, but is ''"
+        replace_in_file(self, cmakelists, "CMAKE_MINIMUM_REQUIRED (VERSION 2.8.5)", "CMAKE_MINIMUM_REQUIRED (VERSION 3.15)")
 
     def build(self):
         self._patch_sources()
