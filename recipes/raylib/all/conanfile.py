@@ -135,7 +135,11 @@ class RaylibConan(ConanFile):
             self.cpp_info.system_libs.append("winmm")
 
         # Some useful files are not packaged by default
-        self.cpp_info.resdirs = ["res/include"]
+        res_includes = os.path.join(self.package_folder, "res", "include")
+        self.cpp_info.resdirs = [res_includes]
+
+        if self.conf.get("user.raylib:include_res", default=False, check_type=bool):
+            self.cpp_info.includedirs.append(res_includes)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
