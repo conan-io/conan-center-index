@@ -20,7 +20,7 @@ class InstinctCppConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/RobinQu/instinct.cpp"
     homepage = "https://github.com/RobinQu/instinct.cpp"
-    topics = ("LLM", "Agent", "GenAI")
+    topics = ("llm", "agent", "genai")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -37,7 +37,10 @@ class InstinctCppConan(ConanFile):
         "with_duckdb": True,
         "with_exprtk": True,
         "with_pdfium": True,
-        "with_duckx": True
+        "with_duckx": True,
+        "duckdb/*:with_httpfs": True,
+        "icu/*:with_extras": True,
+        "icu/*:data_packaging": "static"
     }
 
     @property
@@ -101,7 +104,6 @@ class InstinctCppConan(ConanFile):
         self.requires("llama-cpp/b3040", transitive_headers=True)
         self.requires("cpp-httplib/0.15.3", transitive_headers=True)
         self.requires("cli11/2.4.1")
-        self.test_requires("gtest/1.14.0")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -111,6 +113,14 @@ class InstinctCppConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        
+        def _ensure_dep_has_option(dep, option, value):
+            if self.dependencies[dep].options[option] != value:
+                raise ConanInvalidConfiguration(f'{self.ref} needs -o="{dep}/*:{option}={value}"')
+
+        _ensure_dep_has_option("duckdb", "with_httpfs", self.default_options["duckdb/*:with_httpfs"])       
+        _ensure_dep_has_option("icu", "with_extras", self.default_options["icu/*:with_extras"])
+        _ensure_dep_has_option("icu", "data_packaging", self.default_options["icu/*:data_packaging"])
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -129,8 +139,6 @@ class InstinctCppConan(ConanFile):
 
         tc = CMakeDeps(self)
         tc.generate()
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
 
     def build(self):
         cmake = CMake(self)
