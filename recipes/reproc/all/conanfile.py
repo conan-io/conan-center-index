@@ -84,6 +84,8 @@ class PackageConan(ConanFile):
             self.cpp_info.components["reproc_c"].system_libs.append("rt")
             if self.options.multithreaded:
                 self.cpp_info.components["reproc_c"].system_libs.append("pthread")
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["reproc_c"].system_libs.append("Ws2_32")
 
         self.cpp_info.components["reproc_cxx"].set_property("pkg_config_name", "reproc++")
         self.cpp_info.components["reproc_cxx"].set_property("cmake_target_name", "reproc++")
