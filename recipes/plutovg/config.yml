@@ -1,7 +1,9 @@
 versions:
+  "0.0.1":
+    folder: all
   "cci.20230205":
-    folder: all
+    folder: prerelease
   "cci.20221030":
-    folder: all
+    folder: prerelease
   "cci.20220103":
-    folder: all
+    folder: prerelease
