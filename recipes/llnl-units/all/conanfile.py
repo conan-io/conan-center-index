@@ -7,7 +7,7 @@ from conan.tools.files import copy, rm, rmdir, get
 
 class UnitsConan(ConanFile):
     name = "llnl-units"
-    license = "BSD-3"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://units.readthedocs.io"
     description = (
