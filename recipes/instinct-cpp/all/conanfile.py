@@ -75,13 +75,13 @@ class InstinctCppConan(ConanFile):
         self.requires("bshoshany-thread-pool/4.1.0", transitive_headers=True)
 
         if self.options.with_duckdb:
-            self.requires("duckdb/0.10.2", options={"with_httpfs": True}, transitive_headers=True)
+            self.requires("duckdb/0.10.2", transitive_headers=True)
 
         self.requires("uriparser/0.9.7", transitive_headers=True)
         self.requires("crossguid/0.2.2", transitive_headers=True)
         self.requires("protobuf/5.27.0", transitive_headers=True)
         self.requires("reactiveplusplus/2.1.1", transitive_headers=True)
-        self.requires("icu/74.1", options={"with_extras": True, "data_packaging": "static"})
+        self.requires("icu/74.1")
         self.requires("tsl-ordered-map/1.1.0", transitive_headers=True)
         self.requires("fmt/10.2.1", transitive_headers=True)
         self.requires("fmtlog/2.2.1", transitive_headers=True)
