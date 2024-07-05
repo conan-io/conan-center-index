@@ -23,10 +23,12 @@ class LlamaCppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "cuda": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "cuda": False
     }
  
     package_type = "library"
@@ -69,6 +71,8 @@ class LlamaCppConan(ConanFile):
         deps.generate()
 
         tc = CMakeToolchain(self)
+        if self.options.cuda:
+            tc.variables["LLAMA_CUDA"] = True
         tc.variables["LLAMA_STANDALONE"] = False
         tc.variables["LLAMA_BUILD_TESTS"] = False
         tc.variables["LLAMA_BUILD_EXAMPLES"] = False
