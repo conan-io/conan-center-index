@@ -36,8 +36,6 @@ tasks:
     # Requirements to merge a given pull-request:
     # * check_runs refers to notifications from GH actions
     # * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
-    check_runs:
-      - name: "Lint changed files (YAML files)"
     status_checks:
       - name: "license/cla"
       - name: "continuous-integration/jenkins/pr-merge"
@@ -163,6 +161,7 @@ pod_size:
   large:
     - "duckdb"
     - "ceres-solver"
+    - "simd"
   xlarge:
     - "llvm"
     - "opengv"
