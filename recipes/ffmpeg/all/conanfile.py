@@ -319,11 +319,8 @@ class FFMpegConan(ConanFile):
             self.requires("libsvtav1/1.6.0")
         if self.options.with_libaom:
             self.requires("libaom-av1/3.6.1")
-        if self.options.with_libdav1d:
-            if Version(self.version) >= "4.4.4":
-                self.requires("dav1d/1.2.1")
-            else:
-                self.requires("dav1d/0.9.1")
+        if self.options.get_safe("with_libdav1d"):
+            self.requires("dav1d/1.2.1")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -500,6 +497,8 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("audiotoolbox", self.options.get_safe("with_audiotoolbox")),
             opt_enable_disable("videotoolbox", self.options.get_safe("with_videotoolbox")),
             opt_enable_disable("securetransport", self.options.with_ssl == "securetransport"),
+            opt_enable_disable("vulkan", self.options.get_safe("with_vulkan")),
+            opt_enable_disable("libdav1d", self.options.get_safe("with_libdav1d")),
             "--disable-cuda",  # FIXME: CUDA support
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
@@ -886,5 +885,5 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vdpau"):
             avutil.requires.append("vdpau::vdpau")
 
-        if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
+        if self.options.get_safe("with_vulkan"):
             avutil.requires.append("vulkan-loader::vulkan-loader")
