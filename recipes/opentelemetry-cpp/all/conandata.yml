@@ -1,6 +1,6 @@
 sources:
-  "1.15.0":
-    url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/v1.15.0.tar.gz"
+  "1.16.0":
+    url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/v1.16.0.tar.gz"
     sha256: "69b0fef380658e15be9d817bfcb32e3f5de96da652bcdce77b4e750ed8beddee"
   "1.14.2":
     url: "https://github.com/open-telemetry/opentelemetry-cpp/archive/v1.14.2.tar.gz"
