@@ -151,6 +151,7 @@ class OpenCVConan(ConanFile):
         "with_v4l": [True, False],
         "with_aravis": [True, False],
         "with_gphoto2": [True, False],
+        "with_librealsense": [True, False],
         # text module options
         "with_tesseract": [True, False],
         # TODO: deprecated options to remove in few months
@@ -213,6 +214,7 @@ class OpenCVConan(ConanFile):
         "with_v4l": False,
         "with_aravis": False,
         "with_gphoto2": False,
+        "with_librealsense": False,
         # text module options
         "with_tesseract": True,
         # TODO: deprecated options to remove in few months
@@ -461,6 +463,9 @@ class OpenCVConan(ConanFile):
                 return ["ippiw"]
             return []
 
+        def librealsense():
+            return ["librealsense::librealsense"] if self.options.get_safe("with_librealsense") else []
+
         def parallel():
             return ["onetbb::onetbb"] if self.options.parallel == "tbb" else []
 
@@ -633,7 +638,7 @@ class OpenCVConan(ConanFile):
             "videoio": {
                 "is_built": self.options.videoio,
                 "mandatory_options": ["imgcodecs", "imgproc"],
-                "requires": ["opencv_imgcodecs", "opencv_imgproc"] + aravis() + ffmpeg() + gphoto2() + gstreamer() + ipp(),
+                "requires": ["opencv_imgcodecs", "opencv_imgproc"] + aravis() + ffmpeg() + gphoto2() + gstreamer() + librealsense() + ipp(),
                 "system_libs": [
                     (self.settings.os == "Android" and int(str(self.settings.os.api_level)) > 20, ["mediandk"]),
                 ],
@@ -1126,6 +1131,7 @@ class OpenCVConan(ConanFile):
             self.options.rm_safe("with_v4l")
             self.options.rm_safe("with_aravis")
             self.options.rm_safe("with_gphoto2")
+            self.options.rm_safe("with_librealsense")
         if not (self.options.videoio or (self.options.gapi and Version(self.version) >= "4.5.5")):
             self.options.rm_safe("with_gstreamer")
         if not self.options.with_cuda:
@@ -1211,6 +1217,8 @@ class OpenCVConan(ConanFile):
             self.requires("aravis/0.8.30")
         if self.options.get_safe("with_gphoto2"):
             self.requires("libgphoto2/2.5.31")
+        if self.options.get_safe("with_librealsense"):
+            self.requires("librealsense/2.53.1")
         # freetype module dependencies
         if self.options.freetype:
             self.requires("freetype/2.13.2")
@@ -1330,6 +1338,12 @@ class OpenCVConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "${GDAL_LIBRARY}", "GDAL::GDAL")
         if Version(self.version) >= "4.8.0":
             replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "${AVIF_LIBRARY}", "avif")
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "modules", "videoio", "cmake", "detect_realsense.cmake"),
+            'ocv_add_external_target(librealsense "" "${realsense2_LIBRARY}" "HAVE_LIBREALSENSE")',
+            'ocv_add_external_target(librealsense "${realsense2_INCLUDE_DIRS}" "${realsense2_LIBRARIES}" "HAVE_LIBREALSENSE")',
+        )
 
         ## Fix detection of ffmpeg
         replace_in_file(self, os.path.join(self.source_folder, "modules", "videoio", "cmake", "detect_ffmpeg.cmake"),
@@ -1488,7 +1502,7 @@ class OpenCVConan(ConanFile):
             tc.variables["IPPROOT"] = ipp_root
             tc.variables["IPPIWROOT"] = ipp_root
         tc.variables["WITH_ITT"] = False
-        tc.variables["WITH_LIBREALSENSE"] = False
+        tc.variables["WITH_LIBREALSENSE"] = self.options.get_safe("with_librealsense", False)
         tc.variables["WITH_MFX"] = False
         tc.variables["WITH_OPENCL"] = self.options.get_safe("with_opencl", False)
         tc.variables["WITH_OPENCLAMDBLAS"] = False
