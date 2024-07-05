@@ -60,8 +60,8 @@ class QhullConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def package_id(self):
-        del self.info.options.cpp
         del self.info.options.reentrant
+        self.info.options.rm_safe("cpp")
 
     def validate(self):
         if self.options.get_safe("cpp"):
