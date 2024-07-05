@@ -149,6 +149,7 @@ class OpenCVConan(ConanFile):
         "with_ffmpeg": [True, False],
         "with_gstreamer": [True, False],
         "with_v4l": [True, False],
+        "with_aravis": [True, False],
         # text module options
         "with_tesseract": [True, False],
         # TODO: deprecated options to remove in few months
@@ -209,6 +210,7 @@ class OpenCVConan(ConanFile):
         "with_ffmpeg": True,
         "with_gstreamer": False,
         "with_v4l": False,
+        "with_aravis": False,
         # text module options
         "with_tesseract": True,
         # TODO: deprecated options to remove in few months
@@ -248,7 +250,11 @@ class OpenCVConan(ConanFile):
 
     @property
     def _build_depends_on_pkgconfig(self):
-        return self.options.get_safe("with_gstreamer") or self.options.get_safe("with_wayland")
+        return (
+            self.options.get_safe("with_aravis")
+            or self.options.get_safe("with_gstreamer")
+            or self.options.get_safe("with_wayland")
+        )
 
     @property
     def _has_with_jpeg2000_option(self):
@@ -265,6 +271,10 @@ class OpenCVConan(ConanFile):
     @property
     def _has_with_gstreamer_option(self):
         return self.settings.os not in ["Android", "iOS", "WindowsStore"]
+
+    @property
+    def _has_with_aravis_option(self):
+        return self.settings.os not in ["Android", "iOS", "Windows", "WindowsStore"]
 
     @property
     def _has_superres_option(self):
@@ -337,6 +347,8 @@ class OpenCVConan(ConanFile):
             del self.options.with_tiff
         if not self._has_with_gstreamer_option:
             del self.options.with_gstreamer
+        if not self._has_with_aravis_option:
+            del self.options.with_aravis
         if not self._has_superres_option:
             del self.options.superres
         if not self._has_alphamat_option:
@@ -398,6 +410,9 @@ class OpenCVConan(ConanFile):
             if self.options.get_safe("with_gdcm"):
                 components.append("gdcm::gdcm")
             return components
+
+        def aravis():
+            return ["aravis::aravis"] if self.options.get_safe("with_aravis") else []
 
         def eigen():
             return ["eigen::eigen"] if self.options.with_eigen else []
@@ -606,7 +621,7 @@ class OpenCVConan(ConanFile):
             "videoio": {
                 "is_built": self.options.videoio,
                 "mandatory_options": ["imgcodecs", "imgproc"],
-                "requires": ["opencv_imgcodecs", "opencv_imgproc"] + ffmpeg() + gstreamer() + ipp(),
+                "requires": ["opencv_imgcodecs", "opencv_imgproc"] + aravis() + ffmpeg() + gstreamer() + ipp(),
                 "system_libs": [
                     (self.settings.os == "Android" and int(str(self.settings.os.api_level)) > 20, ["mediandk"]),
                 ],
@@ -1097,6 +1112,7 @@ class OpenCVConan(ConanFile):
         if not self.options.videoio:
             self.options.rm_safe("with_ffmpeg")
             self.options.rm_safe("with_v4l")
+            self.options.rm_safe("with_aravis")
         if not (self.options.videoio or (self.options.gapi and Version(self.version) >= "4.5.5")):
             self.options.rm_safe("with_gstreamer")
         if not self.options.with_cuda:
@@ -1178,6 +1194,8 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_gstreamer"):
             self.requires("gst-plugins-base/1.19.2")
             self.requires("gstreamer/1.22.6")
+        if self.options.get_safe("with_aravis"):
+            self.requires("aravis/0.8.30")
         # freetype module dependencies
         if self.options.freetype:
             self.requires("freetype/2.13.2")
@@ -1245,6 +1263,14 @@ class OpenCVConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "viz module can't be enabled yet. It requires VTK which is not available in conan-center."
             )
+        if self.options.get_safe("with_aravis"):
+            aravis_version = Version(self.dependencies["aravis"].ref.version)
+            aravis_major_minor = f"{aravis_version.major}.{aravis_version.minor}"
+            supported_aravis_major_minor = "0.6" if Version(self.version) < "4.6.0" else "0.8"
+            if aravis_major_minor != supported_aravis_major_minor:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires aravis {supported_aravis_major_minor}.x when with_aravis option is enabled"
+                )
 
     def build_requirements(self):
         if self.options.get_safe("with_protobuf"):
@@ -1410,7 +1436,7 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_ts"] = False
 
         tc.variables["WITH_1394"] = False
-        tc.variables["WITH_ARAVIS"] = False
+        tc.variables["WITH_ARAVIS"] = self.options.get_safe("with_aravis", False)
         tc.variables["WITH_CLP"] = False
         tc.variables["WITH_NVCUVID"] = False
 
