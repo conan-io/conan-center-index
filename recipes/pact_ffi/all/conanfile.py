@@ -89,23 +89,11 @@ class PactFFIConan(ConanFile):
         CMakeDeps(self).generate()
 
     def build(self):
-        def generate_headers(config: str, header_path: Path):
-            dest_path = Path(self.source_folder) / "rust" / "pact_ffi"
-            self.run(f"rustup run nightly cbindgen --config {config} --crate pact_ffi --output {header_path}",
-                     cwd=dest_path)
-
         apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "rust", "pact_ffi"))
         cmake.build()
-
-        # Build the headers
-        # Note: CMakeLists.txt only supports building the C header 'pact.h', via a "generate_header" custom target.
-        #       For consistency, instead of cmake.build(target="generate_header"), we use the explicit commands to
-        #       generate both C and C++ headers (as defined in pact_ffi/release-linux.sh)
-        generated_headers_dir = Path(self.source_folder) / "rust" / "pact_ffi" /"include"
-        generate_headers("cbindgen.toml", generated_headers_dir / "pact.h")
-        generate_headers("cbindgen-c++.toml", generated_headers_dir / "pact-cpp.h")
+        cmake.build(target="generate_headers")
 
     def package(self):
         cmake = CMake(self)
