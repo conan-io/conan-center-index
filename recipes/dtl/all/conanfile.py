@@ -17,6 +17,7 @@ class DtlConan(ConanFile):
 
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -26,8 +27,6 @@ class DtlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def build(self):
         # See https://github.com/cubicdaiya/dtl/pull/18
         replace_in_file(self, os.path.join(self.source_folder, "dtl", "Diff.hpp"), "void enableTrivial () const {", "void enableTrivial () {")
 
