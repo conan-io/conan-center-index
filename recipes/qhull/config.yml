@@ -1,7 +1,7 @@
 versions:
-  "8.0.1":
+  "cci.20231130":
     folder: all
-  "8.0.0":
+  "8.0.1":
     folder: all
   "7.3.2":
     folder: all

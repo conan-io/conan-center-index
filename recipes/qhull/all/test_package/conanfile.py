@@ -17,7 +17,8 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["QHULL_REENTRANT"] = self.dependencies["qhull"].options.reentrant
+        tc.variables["QHULL_REENTRANT"] = self.dependencies["qhull"].options.get_safe("reentrant", True)
+        tc.variables["QHULL_CPP"] = self.dependencies["qhull"].options.get_safe("cpp", False)
         tc.generate()
 
     def build(self):
@@ -27,5 +28,9 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
+
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package_cpp")
+            if os.path.exists(bin_path):
+                self.run(bin_path, env="conanrun")

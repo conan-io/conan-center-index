@@ -1,0 +1,20 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -349,7 +349,7 @@
+ 
+ set(qhull_TARGETS_APPLICATIONS qhull rbox qconvex qdelaunay qvoronoi qhalf)
+ set(qhull_TARGETS_STATIC ${qhull_CPP} ${qhull_STATIC} ${qhull_STATICR})
+-set(qhull_TARGETS_SHARED ${qhull_SHAREDR})
++set(qhull_TARGETS_SHARED ${qhull_SHARED} ${qhull_SHAREDR})
+ 
+ set(
+     qhull_TARGETS_TEST   # Unused
+@@ -401,7 +401,7 @@
+         src/libqhull/qhull-exports.def)
+ 
+ set_target_properties(${qhull_SHARED} PROPERTIES
+-    EXCLUDE_FROM_ALL TRUE
++    # EXCLUDE_FROM_ALL TRUE
+     SOVERSION ${qhull_SOVERSION}
+     VERSION ${qhull_VERSION}
+     OUTPUT_NAME "qhull$<$<CONFIG:Debug>:_d>")
