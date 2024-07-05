@@ -1,9 +1,9 @@
 from conan.errors import ConanInvalidConfiguration
 from conan import ConanFile
 from conan.tools.build import cross_building
-from conan.tools.files import apply_conandata_patches, chdir, collect_libs, get, load, rename, replace_in_file, rm, rmdir, save
+from conan.tools.files import copy, apply_conandata_patches, export_conandata_patches, chdir, collect_libs, get, load, rename, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
-from conans import CMake
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from collections import defaultdict
 import json
 import re
@@ -57,8 +57,8 @@ class LLVMCoreConan(ConanFile):
     default_options = {
         'shared': False,
         'fPIC': True,
-        'components': 'all',
-        'targets': 'all',
+        'components': 'A',
+        'targets': 'A',
         'exceptions': True,
         'rtti': True,
         'threads': True,
@@ -77,7 +77,7 @@ class LLVMCoreConan(ConanFile):
     # Older cmake versions may have issues generating the graphviz output used
     # to model the components
     build_requires = [
-        'cmake/3.20.5'
+        'cmake/3.29.0'
     ]
 
     generators = 'cmake', 'cmake_find_package'
@@ -189,9 +189,8 @@ class LLVMCoreConan(ConanFile):
         return cmake
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -259,7 +258,7 @@ class LLVMCoreConan(ConanFile):
         save(self, module_file, content)
 
     def package(self):
-        self.copy('LICENSE.TXT', dst='licenses', src=self._source_subfolder)
+        copy(self, 'LICENSE.TXT', dst='licenses', src=self._source_subfolder)
         lib_path = os.path.join(self.package_folder, 'lib')
 
         cmake = self._configure_cmake()
@@ -268,9 +267,9 @@ class LLVMCoreConan(ConanFile):
         if not self.options.shared:
             for ext in ['.a', '.lib']:
                 lib = '**/lib/*LLVMTableGenGlobalISel{}'.format(ext)
-                self.copy(lib, dst='lib', keep_path=False)
+                copy(self, lib, dst='lib', keep_path=False)
                 lib = '*LLVMTableGenGlobalISel{}'.format(ext)
-                self.copy(lib, dst='lib', src='lib')
+                copy(self, lib, dst='lib', src='lib')
 
             CMake(self).configure(args=['--graphviz=graph/llvm.dot'], source_dir='.', build_dir='.')
             with chdir(self, 'graph'):
