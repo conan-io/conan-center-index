@@ -53,6 +53,8 @@ class MsdfAtlasGenConan(ConanFile):
         tc.cache_variables["MSDF_ATLAS_NO_ARTERY_FONT"] = False
         tc.cache_variables["MSDF_ATLAS_MSDFGEN_EXTERNAL"] = True
         tc.cache_variables["MSDF_ATLAS_INSTALL"] = True
+        if Version(self.version) >= "1.3":
+            tc.preprocessor_definitions["MSDFGEN_USE_LODEPNG"] = 1
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
