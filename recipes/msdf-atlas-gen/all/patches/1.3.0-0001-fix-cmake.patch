@@ -1,19 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 5b7f6db..ae03024 100644
+index 5b7f6db..1936ca5 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -86,7 +86,9 @@ find_package(Threads REQUIRED)
- if(NOT MSDFGEN_DISABLE_PNG AND NOT TARGET PNG::PNG)
-     find_package(PNG REQUIRED)
- endif()
--
-+if(NOT MSDFGEN_DISABLE_PNG AND NOT TARGET lodepng::lodepng)
-+    find_package(lodepng REQUIRED)
-+endif()
- file(GLOB_RECURSE MSDF_ATLAS_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "msdf-atlas-gen/*.h" "msdf-atlas-gen/*.hpp")
- file(GLOB_RECURSE MSDF_ATLAS_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "msdf-atlas-gen/*.cpp")
- 
-@@ -109,16 +111,17 @@ target_include_directories(msdf-atlas-gen INTERFACE
+@@ -109,7 +109,8 @@ target_include_directories(msdf-atlas-gen INTERFACE
  if(MSDF_ATLAS_NO_ARTERY_FONT)
      target_compile_definitions(msdf-atlas-gen PUBLIC MSDF_ATLAS_NO_ARTERY_FONT)
  else()
@@ -23,11 +12,9 @@ index 5b7f6db..ae03024 100644
  endif()
  set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT msdf-atlas-gen)
  
- target_compile_features(msdf-atlas-gen PUBLIC cxx_std_11)
- target_link_libraries(msdf-atlas-gen PRIVATE Threads::Threads)
+@@ -118,7 +119,7 @@ target_link_libraries(msdf-atlas-gen PRIVATE Threads::Threads)
  if(NOT MSDFGEN_DISABLE_PNG)
--    target_link_libraries(msdf-atlas-gen PRIVATE PNG::PNG)
-+    target_link_libraries(msdf-atlas-gen PRIVATE PNG::PNG lodepng::lodepng)
+     target_link_libraries(msdf-atlas-gen PRIVATE PNG::PNG)
  endif()
 -target_link_libraries(msdf-atlas-gen PUBLIC msdfgen::msdfgen)
 +target_link_libraries(msdf-atlas-gen PUBLIC msdfgen::msdfgen msdfgen::msdfgen-ext)

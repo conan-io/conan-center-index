@@ -33,10 +33,10 @@ class MsdfAtlasGenConan(ConanFile):
         if Version(self.version) < "1.3":
             self.requires("msdfgen/1.9.1")
             self.requires("artery-font-format/1.0")
+            self.requires("lodepng/cci.20200615")
         else:
             self.requires("msdfgen/1.12")
             self.requires("artery-font-format/1.1")
-        self.requires("lodepng/cci.20200615")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -54,7 +54,7 @@ class MsdfAtlasGenConan(ConanFile):
         tc.cache_variables["MSDF_ATLAS_MSDFGEN_EXTERNAL"] = True
         tc.cache_variables["MSDF_ATLAS_INSTALL"] = True
         if Version(self.version) >= "1.3":
-            tc.preprocessor_definitions["MSDFGEN_USE_LODEPNG"] = 1
+            tc.preprocessor_definitions["MSDFGEN_USE_LIBPNG"] = 1
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
