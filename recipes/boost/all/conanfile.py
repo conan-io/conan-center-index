@@ -1601,7 +1601,7 @@ class BoostConan(ConanFile):
             return str(self.settings.compiler)
         if self.settings.compiler == "sun-cc":
             return "sunpro"
-        if self.settings.compiler == "intel":
+        if "intel" in str(self.settings.compiler):
             return {
                 "Macos": "intel-darwin",
                 "Windows": "intel-win",
