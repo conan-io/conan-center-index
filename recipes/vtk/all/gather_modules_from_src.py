@@ -8,178 +8,117 @@
 # so this information has to be gathered and stored with the recipe
 # when new versions of VTK are added to this recipe.
 
-import glob
-import os
-import json
 import argparse
+import json
+from pathlib import Path
 
-parser = argparse.ArgumentParser(
-        prog='gather_modules_from_src.py',
-        description='Conan VTK Recipe Helper for adding new VTK versions to recipe - tool for extracting module information from VTK source'
-        )
-parser.add_argument('source_path')
-args = parser.parse_args()
-src_path = args.source_path
+# Based on https://gitlab.kitware.com/vtk/vtk/-/blob/v9.3.1/CMake/vtkModule.cmake?ref_type=tags#L262-266
+OPTIONS = {
+    "implementable",
+    "exclude_wrap",
+    "third_party",
+    "include_marshal",
+}
+SINGLE_VALUE = {
+    "library_name",
+    "name",
+    "kit",
+    "spdx_download_location",
+    "spdx_custom_license_file",
+    "spdx_custom_license_name",
+    # Moved from MULTI_VALUE
+    "spdx_license_identifier",
+}
+MULTI_VALUE = {
+    "groups",
+    "depends",  # if one of these is no, then this module will not be built
+    "private_depends",  # if one of these is no, then this module will not be built
+    "optional_depends",  # if one of these is no, does not stop the module from building
+    "order_depends",
+    "test_depends",
+    "test_optional_depends",
+    "test_labels",
+    "description",
+    "condition",
+    "implements",
+    "license_files",
+    "spdx_copyright_text",
+}
 
+# Things we don't care about
+exclude = {
+    "description",
+    "spdx_copyright_text",
+    "implements",
+    "implementable",
+    "order_depends",
+    "test_depends",
+    "test_optional_depends",
+    "test_labels",
+}
 
-current_filename = None
-current_file = None
-line = ''
-
-
-# Loads None if EOF, else, will strip the newline
-# Will raise RuntimeError if blank line, or line does not end with newline
-def load_next_line():
-    global line
-    line = current_file.readline().decode('utf-8')
-    # print(f'Read line: {line}')
-    if len(line) == 0: # EOF, translate to 'None'
-        line = None
-    elif len(line) == 1: # blank line (skip)
-        load_next_line()    # skip blank line, load again
-    elif line[-1] != '\n':
-        raise RuntimeError(f'Expected line to end with newline in file "{current_filename}"')
-    elif line[0] == '#':
-        load_next_line()    # skip comment, load again
-    else:
-        # strip the newline
-        line = line[0:-1]
-
-
-# expects the line to start with 2 spaces
-def read_value_from_line():
-    load_next_line()
-    if line[0:2] != '  ':
-        raise RuntimeError(f'Expected line starting with a space in file "{current_filename}"')
-    result = line[2:]   # strip initial spaces
-    load_next_line()    # get ready for next read (should be a header or EOF)
-    return result
-
-
-def read_multiple_values_from_lines():
-    results = []
-    while True:
-        load_next_line()
-        if line is None or line[0:2] != '  ':
-            return results  # finished, with either a header or EOF
-        elif line[2:].startswith('#'):
-            pass    # skip comment lines
+def parse_vtk_module(path):
+    with open(path, "r", encoding="utf8") as f:
+        lines = f.readlines()
+    module = {}
+    key = None
+    values = []
+    for line in lines:
+        if line.startswith("#") or line == "\n":
+            continue
+        if line.startswith("  "):
+            values.append(line.strip())
         else:
-            results.append(line[2:]) # strip initial spaces
+            if key is None and values:
+                raise RuntimeError("Unexpected values without any key")
+            if key is not None:
+                module[key] = values
+            key = line.strip().lower()
+            values = []
+    if key is not None:
+        module[key] = values
+    for key, values in list(module.items()):
+        if key in exclude:
+            del module[key]
+        elif key in OPTIONS:
+            module[key] = True
+        elif key in SINGLE_VALUE:
+            if len(values) != 1:
+                raise RuntimeError(f"Expected single value for {key}, got {values}")
+            module[key] = values[0]
+        elif key in MULTI_VALUE:
+            module[key] = values
+    return module
 
 
-modules = {}
+def find_vtk_modules(root):
+    root = Path(root)
+    for path in root.rglob("vtk.module"):
+        rel_path = path.relative_to(root)
+        if not str(rel_path).startswith(("Examples", "Testing")):
+            yield path
 
-if not os.path.exists(src_path):
-    raise RuntimeError(f'Path does not exist: {src_path}')
 
-for filename in glob.glob(os.path.join(src_path, '**', 'vtk.module'), recursive=True):
-    relative_filename = filename[len(src_path)+1:]
-    current_filename = filename
+def load_vtk_module_details(root):
+    modules = {}
+    for path in find_vtk_modules(root):
+        module_info = parse_vtk_module(path)
+        module_info["path"] = str(path.parent.relative_to(root))
+        name = module_info["name"]
+        del module_info["name"]
+        modules[name] = module_info
+    return modules
 
-    # print(f'Processing: {filename}')
 
-    # Skip Examples and Testing
-    if relative_filename.startswith('Examples') or relative_filename.startswith('Testing'):
-        continue
+def main(argv=None):
+    parser = argparse.ArgumentParser(
+        description="Conan VTK Recipe Helper for adding new VTK versions to recipe - tool for extracting module information from VTK source",
+    )
+    parser.add_argument("source_path")
+    args = parser.parse_args(argv)
+    modules = load_vtk_module_details(args.source_path)
+    print(json.dumps(modules, indent=2))
 
-    current_file = open(filename, 'rb')
-    module = {
-            # Single-value items
-            'vtk.module filename':   relative_filename,  # for debugging
-            'library_name':          None,
-            'description':           None,
-            'kit':                   None,
-            'condition':             '',
-            'spdx_license_identifier': None,
-            'spdx_custom_license_file': None,
-            'spdx_custom_license_name': None,
-            # True/False items
-            'implementable':         False,
-            'third_party':           False,
-            'wrap_exclude':          False,
-            # Multiple values
-            'implements':            [],
-            'groups':                [],    # Not found in modules.json - we want this!
-            'depends':               [],    # If one of these is NO, then this module will not be built
-            'optional_depends':      [],    # If one of these is NO, does not stop the module from building
-            'private_depends':       [],    # If one of these is NO, then this module will not be built
-            'test_depends':          [],    # We dont need tests
-            'test_optional_depends': [],    # Not found in modules.json
-            'license_files':         [],    # Not found in modules.json
-            'test_labels':           [],    # Not found in modules.json
-            'order_depends':         [],    # Not found in modules.json. Not important for us - for build-order
-            }
-    module_name = None
-    load_next_line()
-    while line is not None: # while not EOF
-        # note: do not load next line here, it will already be loaded from previous loop
-        # print(f'checking header "{line}"')
-        ################
-        # Items with values on the next line
-        if line == 'NAME':
-            module_name = read_value_from_line()
-        elif line == 'LIBRARY_NAME':
-            module['library_name'] = read_value_from_line()
-        elif line == 'DESCRIPTION':
-            module['description'] = read_value_from_line()
-        elif line == 'CONDITION':
-            module['condition'] = read_value_from_line()
-        elif line.startswith('CONDITION '):  # sometimes the condition is on the header line
-            module['condition'] = line[len('CONDITION '):]
-            load_next_line()
-        elif line == 'KIT':
-            module['kit'] = read_value_from_line()
-        elif line == 'SPDX_LICENSE_IDENTIFIER':
-            module['spdx_license_identifier'] = read_value_from_line()
-        elif line == 'SPDX_CUSTOM_LICENSE_FILE':
-            module['spdx_custom_license_file'] = read_value_from_line()
-        elif line == 'SPDX_CUSTOM_LICENSE_NAME':
-            module['spdx_custom_license_name'] = read_value_from_line()
-        ################
-        # True/false items, the header item just has to be there
-        elif line == 'IMPLEMENTABLE':
-            module['implementable'] = True
-            load_next_line()
-        elif line == 'THIRD_PARTY':
-            module['third_party'] = True
-            load_next_line()
-        elif line == 'EXCLUDE_WRAP':
-            module['wrap_exclude'] = True   # NOTE: different name from in module file, to align with modules.json
-            load_next_line()
-        ###############
-        # Multiple values (on following lines)
-        elif line == 'IMPLEMENTS':
-            module['implements'] = read_multiple_values_from_lines()
-        elif line == 'GROUPS':
-            # note: this is one element that is NOT loaded in VTK's cmake-generated modules.json
-            # but we need this for requirements()
-            module['groups'] = read_multiple_values_from_lines()
-        elif line == 'DEPENDS':
-            module['depends'] = read_multiple_values_from_lines()
-        elif line == 'OPTIONAL_DEPENDS':
-            module['optional_depends'] = read_multiple_values_from_lines()
-        elif line == 'ORDER_DEPENDS':
-            module['order_depends'] = read_multiple_values_from_lines()
-        elif line == 'PRIVATE_DEPENDS':
-            module['private_depends'] = read_multiple_values_from_lines()
-        elif line == 'TEST_DEPENDS':
-            module['test_depends'] = read_multiple_values_from_lines()
-        elif line == 'TEST_OPTIONAL_DEPENDS':
-            module['test_optional_depends'] = read_multiple_values_from_lines()
-        elif line == 'LICENSE_FILES':
-            module['license_files'] = read_multiple_values_from_lines()
-        elif line == 'TEST_LABELS':
-            module['test_labels'] = read_multiple_values_from_lines()
-        elif line == 'SPDX_COPYRIGHT_TEXT':
-            module['spdx_copyright_text'] = read_multiple_values_from_lines()
-        else:
-            raise RuntimeError(f'Unexpected header "{line}" in file "{current_filename}"')
-    if module_name == '':
-        raise RuntimeError(f'Did not find NAME in file {current_filename}')
-    modules[module_name] = module
 
-# NOTE: the order of items in 'groups' is important for the ModuleSystem enable/disable
-#  Do not reorder 'groups' !
-results = { "modules": modules }
-print(json.dumps(results, indent=2))
+if __name__ == "__main__":
+    main()
