@@ -52,6 +52,9 @@ patches:
     - patch_file: "patches/4.1.2-0007-android-install-layout.patch"
       patch_description: "Honor install layout from conan if Android"
       patch_type: "conan"
+    - patch_file: "patches/4.1.2-0012-find-gstreamer-windows.patch"
+      patch_description: "Windows: find & link gstreamer with pkgconfig"
+      patch_type: "conan"
   "4.9.0":
     - patch_file: "patches/4.5.5-0001-find-openexr.patch"
       patch_description: "Robust discovery & injection of OpenEXR"
