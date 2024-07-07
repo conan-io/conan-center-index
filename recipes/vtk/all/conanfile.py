@@ -445,36 +445,36 @@ class VtkConan(ConanFile):
             parties = {
                 # LEFT field:  target name for linking, will be used as TARGET::TARGET in package_info()
                 # RIGHT field: Force the version (for development mode), package/version to require, component requirement
-                "cgns":              (False, "cgns/[>=4.3.0]",              "cgns::cgns"        ),
-                "cli11":             (False, "cli11/[>=2.3.2]",             "cli11::cli11"      ),
-                "doubleconversion":  (False, "double-conversion/[>=3.2.1]", "double-conversion::double-conversion"),
-                "eigen":             (False, "eigen/[>=3.4.0]",             "eigen::eigen"      ),
-                "expat":             (True,  "expat/[>=2.6.2 <3]",          "expat::expat"      ),  # TODO conflict: wayland (2.5.0), sub 2.6.2 had a security issue
-                "exprtk":            (True,  "exprtk/[=0.0.1]",             "exprtk::exprtk"    ),  # TODO upgrade to 0.0.2 (there was a problem with first attempt)
-                "fast_float":        (False, "fast_float/3.9.0",            "fast_float::fast_float"),
-                "fmt":               (True,  "fmt/10.2.1",                  "fmt::fmt"          ),
-                "freetype":          (False, "freetype/[>=2.13.2]",         "freetype::freetype"),
-                "glew":              (False, "glew/[>=2.2.0]",              "glew::glew"        ),
-                "hdf5":              (True,  "hdf5/[=1.14.3]",              "hdf5::hdf5"        ),  # TODO conflict: netcdf (.1) and cgns (.0)
-                "jsoncpp":           (False, "jsoncpp/[>=1.9.4]",           "jsoncpp::jsoncpp"  ),
-                "kissfft":           (False, "kissfft/[>=131.1.0]",         "kissfft::kissfft"  ),
-                "libharu":           (False, "libharu/[>=2.4.3]",           "libharu::libharu"  ),
-                "libproj":           (False, "proj/[>=9.1.1]",              "proj::proj"        ),
-                "libxml2":           (True,  "libxml2/[>=2.12.5 <4]",       "libxml2::libxml2"  ),  # TODO conflict: xkbcommon (2.12.3), sub 2.12.4 had a security issue
-                "lz4":               (False, "lz4/[>=1.9.4]",               "lz4::lz4"          ),
-                "lzma":              (False, "xz_utils/[>=5.4.5]",          "xz_utils::xz_utils"),
-                "netcdf":            (False, "netcdf/[>=4.8.1]",            "netcdf::netcdf"    ),
-                "nlohmannjson":      (False, "nlohmann_json/[>=3]",         "nlohmann_json::nlohmann_json"),
-                "ogg":               (False, "ogg/[>=1.3.5]",               "ogg::ogg"          ),
-                "opengl":            (False, "opengl/system",               "opengl::opengl"    ),
-                "openvr":            (False, "openvr/[>=1.16.8]",           "openvr::openvr"    ),
-                "png":               (True,  "libpng/[=1.6.42]",            "libpng::libpng"    ),  # TODO conflict: libharu (.40) and freetype (.42)
-                "pugixml":           (False, "pugixml/[>=1.13]",            "pugixml::pugixml"  ),
-                "sqlite":            (True,  "sqlite3/[=3.45.3]",           "sqlite3::sqlite3"  ),  # TODO conflict: qt (3.44.2) and proj (3.44.2)
-                "theora":            (False, "theora/[>=1.1.1]",            "theora::theora"    ),
-                "tiff":              (False, "libtiff/[>=4.4.0]",           "libtiff::libtiff"  ),
-                "utf8":              (False, "utfcpp/[>=3.2.3]",            "utfcpp::utfcpp"    ),
-                "zlib":              (False, "zlib/[>=1.2.13]",             "zlib::zlib"        ),
+                "cgns":              (False, "cgns/[>=4.3.0]",              ["cgns::cgns"]        ),
+                "cli11":             (False, "cli11/[>=2.3.2]",             ["cli11::cli11"]      ),
+                "doubleconversion":  (False, "double-conversion/[>=3.2.1]", ["double-conversion::double-conversion"]),
+                "eigen":             (False, "eigen/[>=3.4.0]",             ["eigen::eigen"]      ),
+                "expat":             (True,  "expat/[>=2.6.2 <3]",          ["expat::expat"]      ),  # TODO conflict: wayland (2.5.0), sub 2.6.2 had a security issue
+                "exprtk":            (True,  "exprtk/[=0.0.1]",             ["exprtk::exprtk"]    ),  # TODO upgrade to 0.0.2 (there was a problem with first attempt)
+                "fast_float":        (False, "fast_float/3.9.0",            ["fast_float::fast_float"]),
+                "fmt":               (True,  "fmt/10.2.1",                  ["fmt::fmt"]          ),
+                "freetype":          (False, "freetype/[>=2.13.2]",         ["freetype::freetype"]),
+                "glew":              (False, "glew/[>=2.2.0]",              ["glew::glew"]        ),
+                "hdf5":              (True,  "hdf5/[=1.14.3]",              ["hdf5::hdf5"]        ),  # TODO conflict: netcdf (.1) and cgns (.0)
+                "jsoncpp":           (False, "jsoncpp/[>=1.9.4]",           ["jsoncpp::jsoncpp"]  ),
+                "kissfft":           (False, "kissfft/[>=131.1.0]",         ["kissfft::kissfft"]  ),
+                "libharu":           (False, "libharu/[>=2.4.3]",           ["libharu::libharu"]  ),
+                "libproj":           (False, "proj/[>=9.1.1]",              ["proj::proj"]        ),
+                "libxml2":           (True,  "libxml2/[>=2.12.5 <4]",       ["libxml2::libxml2"]  ),  # TODO conflict: xkbcommon (2.12.3), sub 2.12.4 had a security issue
+                "lz4":               (False, "lz4/[>=1.9.4]",               ["lz4::lz4"]          ),
+                "lzma":              (False, "xz_utils/[>=5.4.5]",          ["xz_utils::xz_utils"]),
+                "netcdf":            (False, "netcdf/[>=4.8.1]",            ["netcdf::netcdf"]    ),
+                "nlohmannjson":      (False, "nlohmann_json/[>=3]",         ["nlohmann_json::nlohmann_json"]),
+                "ogg":               (False, "ogg/[>=1.3.5]",               ["ogg::ogg"]          ),
+                "opengl":            (False, "opengl/system",               ["opengl::opengl"]    ),
+                "openvr":            (False, "openvr/[>=1.16.8]",           ["openvr::openvr"]    ),
+                "png":               (True,  "libpng/[=1.6.42]",            ["libpng::libpng"]    ),  # TODO conflict: libharu (.40) and freetype (.42)
+                "pugixml":           (False, "pugixml/[>=1.13]",            ["pugixml::pugixml"]  ),
+                "sqlite":            (True,  "sqlite3/[=3.45.3]",           ["sqlite3::sqlite3"]  ),  # TODO conflict: qt (3.44.2) and proj (3.44.2)
+                "theora":            (False, "theora/[>=1.1.1]",            ["theora::theora"]    ),
+                "tiff":              (False, "libtiff/[>=4.4.0]",           ["libtiff::libtiff"]  ),
+                "utf8":              (False, "utfcpp/[>=3.2.3]",            ["utfcpp::utfcpp"]    ),
+                "zlib":              (False, "zlib/[>=1.2.13]",             ["zlib::zlib"]        ),
 
                 # TODO what module depends on boost?
                 # "boost":             (False, "boost/[>=1.82.0]"),
@@ -490,17 +490,17 @@ class VtkConan(ConanFile):
             #   also adjusting the patch, as the versions are also mentioned in ThirdParty/*/CMakeLists.txt
 
             if self.options.with_jpeg == "libjpeg":
-                parties["jpeg"] = (False, "libjpeg/9e", "libjpeg::libjpeg")
+                parties["jpeg"] = (False, "libjpeg/9e", ["libjpeg::libjpeg"])
             elif self.options.with_jpeg == "libjpeg-turbo":
-                parties["jpeg"] = (False, "libjpeg-turbo/[>=2.1.5]", "libjpeg-turbo::jpeg")
+                parties["jpeg"] = (False, "libjpeg-turbo/[>=2.1.5]", ["libjpeg-turbo::jpeg"])
 
             if self.options.qt_version == "5":
-                parties["QtOpenGL"] = (False, "qt/[>=5.15.9 <6]", "qt::qtOpenGLWidgets")
+                parties["QtOpenGL"] = (False, "qt/[>=5.15.9 <6]", ["qt::qtOpenGLWidgets"])
             else:
-                parties["QtOpenGL"] = (False, "qt/[>=6.5.0 <7]", "qt::qtOpenGLWidgets")
+                parties["QtOpenGL"] = (False, "qt/[>=6.5.0 <7]", ["qt::qtOpenGLWidgets"])
 
             if self.settings.os in ["Linux", "FreeBSD"]:
-                parties["stub-system-display"] = (False, "xorg/system", "xorg::xorg")
+                parties["stub-system-display"] = (False, "xorg/system", ["xorg::x11", "xorg::xcursor"])
             else:
                 pass  # nothing required for other platforms
 
@@ -1055,7 +1055,7 @@ class VtkConan(ConanFile):
                 _, _, extern = self._third_party[comp]
                 self.cpp_info.components[comp].set_property("cmake_target_name", module_name)
                 self.output.info(f"Component {comp} requires EXTERNAL {extern}")
-                self.cpp_info.components[comp].requires.append(extern)
+                self.cpp_info.components[comp].requires.extend(extern)
             else:
                 self.output.warning(f"Skipping module (lib file does not exist, or no kit) {module_name}")
 
@@ -1088,7 +1088,7 @@ class VtkConan(ConanFile):
                 elif depname in self._third_party:
                     _, _, extern = self._third_party[depname]
                     self.output.info(f"{comp}   depends on external {dep} --> {extern}")
-                    self.cpp_info.components[comp].requires.append(extern)
+                    self.cpp_info.components[comp].requires.extend(extern)
                 else:
                     self.output.info(f"{comp}   skipping depends (component does not exist): {dep}")
 
