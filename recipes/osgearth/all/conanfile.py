@@ -104,7 +104,7 @@ class OsgearthConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("gdal/3.8.0")
+        self.requires("gdal/3.8.3")
         self.requires("lerc/4.0.1")
         self.requires("libcurl/[>=7.78.0 <9]")
         self.requires("libzip/1.10.1")
@@ -115,13 +115,13 @@ class OsgearthConan(ConanFile):
         if self.options.build_leveldb_cache:
             self.requires("leveldb/1.23")
         if self.options.build_rocksdb_cache:
-            self.requires("rocksdb/6.29.5")
+            self.requires("rocksdb/9.2.1")
         if self.options.enable_profiling:
             self.requires("tracy/0.10")
         if self.options.with_basisu:
             self.requires("libbasisu/1.14.0")  # libbasisu 1.15+ is not compatible
         if self.options.with_blend2d:
-            self.requires("blend2d/0.10.6")
+            self.requires("blend2d/0.11.1")
         if self.options.with_blosc:
             self.requires("c-blosc/1.21.5")
         if self.options.with_draco:
@@ -135,15 +135,17 @@ class OsgearthConan(ConanFile):
             self.requires("glew/2.2.0")
         if self.options.with_protobuf:
             # Used transitively by the generated headers
-            self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
+            self.requires("protobuf/5.27.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_spdlog:
-            self.requires("spdlog/1.12.0")
+            self.requires("spdlog/1.14.1")
         if self.options.with_sqlite3:
             self.requires("sqlite3/[>=3.42 <4]")
         if self.options.with_tinyxml:
             self.requires("tinyxml/2.6.2")
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
+
+        self.requires("libpng/[>=1.6 <2]", override=True)
 
         # TODO:
         # - Unvendor imgui
