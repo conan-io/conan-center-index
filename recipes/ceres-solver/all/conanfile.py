@@ -52,7 +52,7 @@ class CeresSolverConan(ConanFile):
         "use_glog": True,
         "use_lapack": True,
         "use_eigen_sparse": True,
-        "use_suitesparse": True,
+        "use_suitesparse": False, # TODO: enable after #23556 is merged
         "use_accelerate": True,
         "use_custom_blas": True,
         "use_schur_specializations": True,
