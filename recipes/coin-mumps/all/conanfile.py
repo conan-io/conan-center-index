@@ -9,7 +9,6 @@ from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import get, rm, rmdir, patch, mkdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
@@ -64,8 +63,8 @@ class PackageConan(ConanFile):
             self.requires("openblas/0.3.25")
         if self.options.with_metis:
             self.requires("metis/5.2.1")
-        if self.options.with_openmp and self.settings.compiler in ["clang", "apple-clang"]:
-            self.requires("llvm-openmp/17.0.4")
+        if self.options.with_openmp:
+            self.requires("llvm-openmp/18.1.8")
         self.requires("gcc/13.2.0", headers=False, libs=True)
 
     def validate(self):
@@ -143,23 +142,11 @@ class PackageConan(ConanFile):
             if self.options.with_pthread:
                 self.cpp_info.system_libs.extend(["pthread"])
 
-        if self.options.with_openmp:
-            if is_msvc(self):
-                openmp_flags = ["-openmp"]
-            elif self.settings.compiler in ("gcc", "clang"):
-                openmp_flags = ["-fopenmp"]
-            elif self.settings.compiler == "apple-clang":
-                openmp_flags = ["-Xpreprocessor", "-fopenmp"]
-            else:
-                openmp_flags = []
-            self.cpp_info.exelinkflags = openmp_flags
-            self.cpp_info.sharedlinkflags = openmp_flags
-
         self.cpp_info.requires = ["openmpi::ompi-c"]
         if self.options.with_lapack:
             self.cpp_info.requires.append("openblas::openblas")
         if self.options.with_metis:
             self.cpp_info.requires.append("metis::metis")
-        if self.options.with_openmp and self.settings.compiler in ["clang", "apple-clang"]:
+        if self.options.with_openmp:
             self.cpp_info.requires.append("llvm-openmp::llvm-openmp")
         self.cpp_info.requires.extend(["gcc::gfortran", "gcc::quadmath"])
