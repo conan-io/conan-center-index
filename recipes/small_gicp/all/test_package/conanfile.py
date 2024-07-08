@@ -17,6 +17,8 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if self.dependencies["small_gicp"].options.with_openmp:
+            tc.preprocessor_definitions["WITH_OPENMP"] = ""
         if self.dependencies["small_gicp"].options.with_tbb:
             tc.preprocessor_definitions["WITH_TBB"] = ""
         tc.generate()

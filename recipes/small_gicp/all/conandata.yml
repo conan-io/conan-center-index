@@ -1,4 +1,4 @@
 sources:
-  "cci.20240518":
-    url: "https://github.com/koide3/small_gicp/archive/5c6f13cfc94c1ab129d32b8554c8bd712dc76346.zip"
-    sha256: "c1c1ebebf7181f1db3130d24cc56314bf5b7b3669ab7e92a58017889e21de448"
+  "0.1.2":
+    url: "https://github.com/koide3/small_gicp/archive/refs/tags/v0.1.2.tar.gz"
+    sha256: "dc3fc95236079c71dda63706e75bede03b0a2bb24447474da6fced91f0bf4a56"

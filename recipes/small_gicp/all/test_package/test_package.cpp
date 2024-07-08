@@ -1,5 +1,8 @@
 #include <small_gicp/points/point_cloud.hpp>
+#include <small_gicp/ann/kdtree.hpp>
+#ifdef WITH_OPENMP
 #include <small_gicp/ann/kdtree_omp.hpp>
+#endif
 #ifdef WITH_TBB
 #include <small_gicp/ann/kdtree_tbb.hpp>
 #endif
@@ -16,6 +19,10 @@ int main() {
 
   const int num_threads = 1;
   std::make_shared<KdTree<PointCloud>>(target, KdTreeBuilderOMP(num_threads));
+
+#ifdef WITH_OPENMP
+  std::make_shared<KdTree<PointCloud>>(target, KdTreeBuilderOMP());
+#endif
 
 #ifdef WITH_TBB
   std::make_shared<KdTree<PointCloud>>(target, KdTreeBuilderTBB());
