@@ -6,7 +6,6 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -121,30 +120,30 @@ class PackageConan(ConanFile):
     def requirements(self):
         if self.options.with_alpaqa or self.options.with_proxqp:
             self.requires("eigen/3.4.0")
-        if self.options.with_openmp and self.settings.compiler in ["clang", "apple-clang"]:
-            self.requires("llvm-openmp/17.0.4")
+        if self.options.with_openmp:
+            self.requires("llvm-openmp/18.1.8")
         if self.options.with_pthread and self.settings.os == "Windows":
             self.requires("pthreads4w/3.0.0")
         if self.options.with_opencl:
-            self.requires("opencl-headers/2023.04.17")
+            self.requires("opencl-headers/2023.12.14")
         if self.options.with_osqp:
-            self.requires("osqp/0.6.2")
+            self.requires("osqp/0.6.3")
         if self.options.with_tinyxml:
-            self.requires("tinyxml/2.6.2")
+            self.requires("tinyxml2/10.0.0")
         if self.options.with_lapack:
-            self.requires("openblas/0.3.25")
+            self.requires("openblas/0.3.27")
         if self.options.with_ipopt:
             self.requires("coin-ipopt/3.14.13")
         if self.options.with_cbc:
-            self.requires("coin-cbc/2.10.5")
+            self.requires("coin-cbc/2.10.11")
         if self.options.with_clp:
-            self.requires("coin-clp/1.17.7")
+            self.requires("coin-clp/1.17.9")
         if self.options.with_mumps:
             self.requires("coin-mumps/3.0.5")
         if self.options.with_bonmin:
-            self.requires("coin-cgl/0.60.7")
-            self.requires("coin-osi/0.108.7")
-            self.requires("coin-utils/2.11.9")
+            self.requires("coin-cgl/0.60.8")
+            self.requires("coin-osi/0.108.10")
+            self.requires("coin-utils/2.11.11")
         if self.options.with_spral:
             self.requires("metis/5.2.1")
 
@@ -160,7 +159,7 @@ class PackageConan(ConanFile):
 
         # FIXME: unvendor simde
         # if self.options.with_proxqp:
-        #     self.requires("simde/0.7.6")
+        #     self.requires("simde/0.8.2")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -168,7 +167,7 @@ class PackageConan(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/2.2.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=False)
@@ -277,8 +276,8 @@ class PackageConan(ConanFile):
         deps.set_property("metis", "cmake_target_name", "metis::metis")
         deps.set_property("osqp", "cmake_file_name", "OSQP")
         deps.set_property("osqp", "cmake_target_name", "osqp::osqp")
-        deps.set_property("tinyxml", "cmake_file_name", "TINYXML")
-        deps.set_property("tinyxml", "cmake_target_name", "tinyxml2::tinyxml2")
+        deps.set_property("tinyxml2", "cmake_file_name", "TINYXML")
+        deps.set_property("tinyxml2", "cmake_target_name", "tinyxml2::tinyxml2")
         deps.generate()
 
         deps = PkgConfigDeps(self)
@@ -328,15 +327,3 @@ class PackageConan(ConanFile):
             self.cpp_info.system_libs.append("dl")
             if self.options.with_pthread:
                 self.cpp_info.system_libs.append("pthread")
-
-        if self.options.with_openmp:
-            if is_msvc(self):
-                openmp_flags = ["-openmp"]
-            elif self.settings.compiler in ("gcc", "clang"):
-                openmp_flags = ["-fopenmp"]
-            elif self.settings.compiler == "apple-clang":
-                openmp_flags = ["-Xpreprocessor", "-fopenmp"]
-            else:
-                openmp_flags = []
-            self.cpp_info.exelinkflags = openmp_flags
-            self.cpp_info.sharedlinkflags = openmp_flags
