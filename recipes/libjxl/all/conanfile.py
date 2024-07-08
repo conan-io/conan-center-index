@@ -29,7 +29,6 @@ class LibjxlConan(ConanFile):
         "avx512": [True, False],
         "avx512_spr": [True, False],
         "avx512_zen4": [True, False],
-        "force_neon": [True, False],
         "with_tcmalloc": [True, False],
     }
     default_options = {
@@ -38,7 +37,6 @@ class LibjxlConan(ConanFile):
         "avx512": False,
         "avx512_spr": False,
         "avx512_zen4": False,
-        "force_neon": False,
         "with_tcmalloc": False,
     }
 
@@ -52,8 +50,6 @@ class LibjxlConan(ConanFile):
             del self.options.avx512
             del self.options.avx512_spr
             del self.options.avx512_zen4
-        if not str(self.settings.arch).startswith("arm"):
-            del self.options.force_neon
         # https://github.com/libjxl/libjxl/blob/v0.9.1/CMakeLists.txt#L52-L59
         if self.settings.os in ["Linux", "FreeBSD"] and self.settings.arch == "x86_64":
             self.options.with_tcmalloc = True
@@ -109,15 +105,16 @@ class LibjxlConan(ConanFile):
         tc.variables["JPEGXL_ENABLE_SKCMS"] = False
         tc.variables["JPEGXL_ENABLE_TCMALLOC"] = self.options.with_tcmalloc
         tc.variables["JPEGXL_ENABLE_VIEWERS"] = False
+        tc.variables["JPEGXL_ENABLE_TOOLS"] = False
         tc.variables["JPEGXL_FORCE_SYSTEM_BROTLI"] = True
         tc.variables["JPEGXL_FORCE_SYSTEM_GTEST"] = True
         tc.variables["JPEGXL_FORCE_SYSTEM_HWY"] = True
         tc.variables["JPEGXL_FORCE_SYSTEM_LCMS2"] = True
         tc.variables["JPEGXL_WARNINGS_AS_ERRORS"] = False
+        tc.variables["JPEGXL_FORCE_NEON"] = False
         tc.variables["JPEGXL_ENABLE_AVX512"] = self.options.get_safe("avx512", False)
         tc.variables["JPEGXL_ENABLE_AVX512_SPR"] = self.options.get_safe("avx512_spr", False)
         tc.variables["JPEGXL_ENABLE_AVX512_ZEN4"] = self.options.get_safe("avx512_zen4", False)
-        tc.variables["JPEGXL_FORCE_NEON"] = self.options.get_safe("force_neon", False)
         if cross_building(self):
             tc.variables["CMAKE_SYSTEM_PROCESSOR"] = str(self.settings.arch)
         # Allow non-cache_variables to be used
@@ -151,7 +148,6 @@ class LibjxlConan(ConanFile):
     def _patch_sources(self):
         # Disable tools, extras and third_party
         save(self, os.path.join(self.source_folder, "tools", "CMakeLists.txt"), "")
-        save(self, os.path.join(self.source_folder, "lib", "jxl_extras.cmake"), "")
         save(self, os.path.join(self.source_folder, "third_party", "CMakeLists.txt"), "")
         # FindAtomics.cmake values are set by CMakeToolchain instead
         save(self, os.path.join(self.source_folder, "cmake", "FindAtomics.cmake"), "")
