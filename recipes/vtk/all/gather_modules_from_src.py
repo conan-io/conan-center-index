@@ -10,6 +10,7 @@
 
 import argparse
 import json
+from collections import defaultdict
 from pathlib import Path
 
 # Based on https://gitlab.kitware.com/vtk/vtk/-/blob/v9.3.1/CMake/vtkModule.cmake?ref_type=tags#L262-266
@@ -114,9 +115,15 @@ def load_vtk_info(root):
 def dump_options(vtk_info):
     modules = sorted(k.replace("VTK::", "") for k in vtk_info["modules"].keys())
     groups = sorted(set().union(*(module.get("groups", []) for module in vtk_info["modules"].values())))
+    conditions = defaultdict(list)
+    for module_name, module_info in vtk_info["modules"].items():
+        for condition in module_info.get("condition", []):
+            conditions[condition].append(module_name.replace("VTK::", ""))
+    conditions = {k: sorted(v) for k, v in sorted(conditions.items())}
     # kits = sorted(k.replace("VTK::", "") for k in vtk_info["kits"].keys())
     print(json.dumps({
         "modules": modules,
+        "conditions": conditions,
         "groups": groups,
         # Kits are currently not exposed as options
         # "kits": kits,
