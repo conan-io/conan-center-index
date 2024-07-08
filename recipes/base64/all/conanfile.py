@@ -1,8 +1,8 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get, apply_conandata_patches, chdir, export_conandata_patches, rmdir
 from conan.tools.env import Environment
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -24,10 +24,12 @@ class Base64Conan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_openmp": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_openmp": False,
     }
 
     def export_sources(self):
@@ -52,6 +54,10 @@ class Base64Conan(ConanFile):
         else:
             basic_layout(self, src_folder="src")
 
+    def requirements(self):
+        if self.options.with_openmp:
+            self.requires("llvm-openmp/18.1.8")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -65,11 +71,15 @@ class Base64Conan(ConanFile):
             tc.variables["BASE64_BUILD_CLI"] = False
             tc.variables["BASE64_WERROR"] = False
             tc.variables["BASE64_BUILD_TESTS"] = False
-            tc.variables["BASE64_WITH_OpenMP"] = False
+            tc.variables["BASE64_WITH_OpenMP"] = self.options.with_openmp
             tc.generate()
+            deps = CMakeDeps(self)
+            deps.generate()
         else:
             tc = AutotoolsToolchain(self)
             tc.generate()
+            deps = AutotoolsDeps(self)
+            deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
