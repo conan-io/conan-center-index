@@ -111,14 +111,29 @@ def load_vtk_info(root):
         "kits": load_vtk_kit_details(root),
     }
 
+def dump_options(vtk_info):
+    modules = sorted(k.replace("VTK::", "") for k in vtk_info["modules"].keys())
+    groups = sorted(set().union(*(module.get("groups", []) for module in vtk_info["modules"].values())))
+    # kits = sorted(k.replace("VTK::", "") for k in vtk_info["kits"].keys())
+    print(json.dumps({
+        "modules": modules,
+        "groups": groups,
+        # Kits are currently not exposed as options
+        # "kits": kits,
+    }, indent=2))
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="Conan VTK Recipe Helper for adding new VTK versions to recipe - tool for extracting module information from VTK source",
     )
     parser.add_argument("source_path")
+    parser.add_argument("--dump-options", action="store_true")
     args = parser.parse_args(argv)
-    info = load_vtk_info(args.source_path)
-    print(json.dumps(info, indent=2))
+    vtk_info = load_vtk_info(args.source_path)
+    if args.dump_options:
+        dump_options(vtk_info)
+    else:
+        print(json.dumps(vtk_info, indent=2))
 
 
 if __name__ == "__main__":
