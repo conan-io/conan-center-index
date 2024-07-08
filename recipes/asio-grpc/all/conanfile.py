@@ -43,8 +43,12 @@ class AsioGrpcConan(ConanFile):
             "apple-clang": "11",
         }
 
+    def config_options(self):
+        if Version(self.version) >= "3.0.0":
+            del self.options.local_allocator
+
     def configure(self):
-        self._local_allocator_option = self.options.local_allocator
+        self._local_allocator_option = self.options.get_safe("local_allocator")
         if self._local_allocator_option == "auto":
             libcxx = self.settings.compiler.get_safe("libcxx")
             compiler_version = Version(self.settings.compiler.version)
@@ -52,7 +56,7 @@ class AsioGrpcConan(ConanFile):
                 (self.settings.compiler == "gcc" and compiler_version < "9")  or \
                 (self.settings.compiler == "clang" and compiler_version < "12" and libcxx and str(libcxx) == "libstdc++")
             self._local_allocator_option = "boost_container" if prefer_boost_container else "memory_resource"
-        if self._local_allocator_option == "recycling_allocator" and self.options.backend == "unifex" and Version(self.version) < "3.0.0":
+        if self._local_allocator_option == "recycling_allocator" and self.options.backend == "unifex":
             raise ConanInvalidConfiguration(f"{self.name} 'recycling_allocator' cannot be used in combination with the 'unifex' backend.")
 
     def requirements(self):
@@ -66,7 +70,7 @@ class AsioGrpcConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
-        if Version(self.version) < "3.0.0":
+        if self._local_allocator_option:
             self.info.options.local_allocator = self._local_allocator_option
 
     def layout(self):
