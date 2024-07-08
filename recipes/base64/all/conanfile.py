@@ -29,7 +29,7 @@ class Base64Conan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_openmp": False,
+        "with_openmp": True,
     }
 
     def export_sources(self):
