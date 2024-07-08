@@ -83,10 +83,10 @@ class OpenmvgConan(ConanFile):
             self.requires("ceres-solver/2.2.0")
         else:
             self.requires("ceres-solver/2.1.0")
-        self.requires("coin-clp/1.17.7")
+        self.requires("coin-clp/1.17.9")
         self.requires("coin-lemon/1.3.1", transitive_headers=True, transitive_libs=True)
-        self.requires("coin-osi/0.108.7")
-        self.requires("coin-utils/2.11.9")
+        self.requires("coin-osi/0.108.10")
+        self.requires("coin-utils/2.11.11")
         self.requires("eigen/3.4.0", transitive_headers=True)
         self.requires("flann/1.9.2", transitive_headers=True, transitive_libs=True)
         if self.options.with_jpeg == "libjpeg":
@@ -99,7 +99,7 @@ class OpenmvgConan(ConanFile):
         self.requires("libtiff/4.6.0")
         if self.options.with_openmp:
             # '#pragma omp' is used in public headers
-            self.requires("llvm-openmp/17.0.6", transitive_headers=True, transitive_libs=True)
+            self.requires("llvm-openmp/18.1.8", transitive_headers=True, transitive_libs=True)
         # TODO: unvendor vlfeat
 
     def validate(self):
