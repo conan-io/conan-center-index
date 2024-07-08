@@ -28,6 +28,7 @@ SINGLE_VALUE = {
     "spdx_custom_license_name",
     # Moved from MULTI_VALUE
     "spdx_license_identifier",
+    "description",
 }
 MULTI_VALUE = {
     "groups",
@@ -38,23 +39,10 @@ MULTI_VALUE = {
     "test_depends",
     "test_optional_depends",
     "test_labels",
-    "description",
     "condition",
     "implements",
     "license_files",
     "spdx_copyright_text",
-}
-
-# Things we don't care about
-exclude = {
-    "description",
-    "spdx_copyright_text",
-    "implements",
-    "implementable",
-    "order_depends",
-    "test_depends",
-    "test_optional_depends",
-    "test_labels",
 }
 
 def parse_vtk_module(path):
@@ -78,9 +66,7 @@ def parse_vtk_module(path):
     if key is not None:
         module[key] = values
     for key, values in list(module.items()):
-        if key in exclude:
-            del module[key]
-        elif key in OPTIONS:
+        if key in OPTIONS:
             module[key] = True
         elif key in SINGLE_VALUE:
             if len(values) != 1:
@@ -91,17 +77,17 @@ def parse_vtk_module(path):
     return module
 
 
-def find_vtk_modules(root):
+def find_vtk_modules(root, name="vtk.module", exclude=("Examples", "Testing")):
     root = Path(root)
-    for path in root.rglob("vtk.module"):
+    for path in root.rglob(name):
         rel_path = path.relative_to(root)
-        if not str(rel_path).startswith(("Examples", "Testing")):
+        if not str(rel_path).startswith(exclude):
             yield path
 
 
 def load_vtk_module_details(root):
     modules = {}
-    for path in find_vtk_modules(root):
+    for path in find_vtk_modules(root, "vtk.module"):
         module_info = parse_vtk_module(path)
         module_info["path"] = str(path.parent.relative_to(root))
         name = module_info["name"]
@@ -109,6 +95,21 @@ def load_vtk_module_details(root):
         modules[name] = module_info
     return modules
 
+def load_vtk_kit_details(root):
+    kits = {}
+    for path in find_vtk_modules(root, "vtk.kit"):
+        kit_info = parse_vtk_module(path)
+        kit_info["path"] = str(path.parent.relative_to(root))
+        name = kit_info["name"]
+        del kit_info["name"]
+        kits[name] = kit_info
+    return kits
+
+def load_vtk_info(root):
+    return {
+        "modules": load_vtk_module_details(root),
+        "kits": load_vtk_kit_details(root),
+    }
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
@@ -116,8 +117,8 @@ def main(argv=None):
     )
     parser.add_argument("source_path")
     args = parser.parse_args(argv)
-    modules = load_vtk_module_details(args.source_path)
-    print(json.dumps(modules, indent=2))
+    info = load_vtk_info(args.source_path)
+    print(json.dumps(info, indent=2))
 
 
 if __name__ == "__main__":
