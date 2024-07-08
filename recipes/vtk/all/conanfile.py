@@ -223,7 +223,7 @@ class VtkConan(ConanFile):
         modules = set()
         modules_info = self._vtkmods(mod_filename)
         for mod_with_prefix in modules_info:
-            mod = _module_remove_prefix(mod_with_prefix)
+            mod = _remove_vtk_prefix(mod_with_prefix)
             modules.add(mod)
             groups.update(modules_info[mod_with_prefix]["groups"])
         return groups, modules
@@ -272,7 +272,7 @@ class VtkConan(ConanFile):
         def _check_condition(condition, error_message):
             for mod, info in modules_info.items():
                 if condition in info["condition"]:
-                    mod_no_prefix = _module_remove_prefix(mod)
+                    mod_no_prefix = _remove_vtk_prefix(mod)
                     # user insisted this module be built? Error.
                     if self.options.get_safe(f"module_{mod_no_prefix}") == "YES":
                         raise ConanInvalidConfiguration(f"{mod} {error_message}")
@@ -310,7 +310,7 @@ class VtkConan(ConanFile):
         self.output.info("*** Setting module-enabled based on Groups and build_all_modules ***")
 
         for mod_with_prefix, module_info in modules_info.items():
-            mod_name = _module_remove_prefix(mod_with_prefix)
+            mod_name = _remove_vtk_prefix(mod_with_prefix)
             state = self.options.get_safe(f"module_{mod_name}", default="NO")
             if state == "DEFAULT":
                 for group in module_info["groups"]:
@@ -387,7 +387,7 @@ class VtkConan(ConanFile):
         # find all modules that are not tagged YES or NO (ie WANT_*) and tag appropriately
         final_module_states = {}
         for mod_with_prefix, state in module_states.items():
-            mod_name = _module_remove_prefix(mod_with_prefix)
+            mod_name = _remove_vtk_prefix(mod_with_prefix)
             if state == "WANT":  # if we WANT, then the answer is YES (dependencies don't care)
                 final_module_states[f"module_{mod_name}"] = "YES"
             elif state == "DONT_WANT":  # if we don't want, then answer is no (dependencies don't care)
@@ -614,12 +614,14 @@ class VtkConan(ConanFile):
         tc.variables["VTK_VERSIONED_INSTALL"] = False
 
         # Turn these off for CCI
-        tc.variables["BUILD_TESTING"] = False
-        tc.variables["BUILD_EXAMPLES"] = False
-        tc.variables["BUILD_DOCUMENTATION"] = False
+        tc.variables["VTK_BUILD_TESTING"] = False
+        tc.variables["VTK_BUILD_EXAMPLES"] = False
+        tc.variables["VTK_BUILD_DOCUMENTATION"] = False
+        tc.variables["VTK_BUILD_SPHINX_DOCUMENTATION"] = False
+        tc.variables["VTK_FORBID_DOWNLOADS"] = True
 
-        # Needed or not? Nothing gets installed without this ON at the moment.
-        # tc.variables["VTK_INSTALL_SDK"] = False
+        # Nothing gets installed without this ON at the moment.
+        tc.variables["VTK_INSTALL_SDK"] = True
 
         #
         # future-proofing for your code
@@ -965,7 +967,7 @@ class VtkConan(ConanFile):
 
         def autoinit_add_implements_package(comp, implements):
             for vtk_implemented in implements:
-                implemented = "vtk" + _strip_namespace(vtk_implemented)
+                implemented = "vtk" + _remove_vtk_prefix(vtk_implemented)
                 vtkcomp = "vtk" + comp
                 if implemented not in autoinits:
                     autoinits[implemented] = []
@@ -973,11 +975,11 @@ class VtkConan(ConanFile):
                     autoinits[implemented].append("vtk" + comp)
 
         for module_name, module_info in self._installed_modules_info.items():
-            comp = _strip_namespace(module_name)
+            comp = _remove_vtk_prefix(module_name)
             comp_libname = module_info["library_name"] + self._lib_suffix
             comp_kit = module_info["kit"]
             if comp_kit is not None:
-                comp_kit = _strip_namespace(comp_kit)
+                comp_kit = _remove_vtk_prefix(comp_kit)
             has_lib = comp_libname in self._existing_libs
             use_kit = comp_kit and comp_kit in self._enabled_kits
             # sanity check should be one or the other... not true for both
@@ -1024,7 +1026,7 @@ class VtkConan(ConanFile):
         for kit_name, kit_enabled in self._installed_kits_info.items():
             self.output.info(f"Processing kit {kit_name} ({'enabled' if kit_enabled else 'disabled'})")
             if kit_enabled:
-                kit = _strip_namespace(kit_name)
+                kit = _remove_vtk_prefix(kit_name)
                 self.cpp_info.components[kit].set_property("cmake_target_name", kit_name)
                 # guess this, as json has empty library_name for kits
                 self.cpp_info.components[kit].libs = [f"vtk{kit}"]
@@ -1034,7 +1036,7 @@ class VtkConan(ConanFile):
 
         def autoinit_add_implements_packinfo(comp, implements):
             for vtk_implemented in implements:
-                implemented = "vtk" + _strip_namespace(vtk_implemented)
+                implemented = "vtk" + _remove_vtk_prefix(vtk_implemented)
                 headerdef = f'{implemented}_AUTOINIT_INCLUDE="vtk-conan/vtk_autoinit_{implemented}.h"'
                 cmddef = f"VTK_CONAN_WANT_AUTOINIT_vtk{comp}"
                 if headerdef not in self.cpp_info.components[comp].defines:
@@ -1043,11 +1045,11 @@ class VtkConan(ConanFile):
                     self.cpp_info.components[comp].defines.append(cmddef)
 
         for module_name, module_info in self._installed_modules_info.items():
-            comp = _strip_namespace(module_name)
+            comp = _remove_vtk_prefix(module_name)
             comp_libname = module_info["library_name"] + self._lib_suffix
             comp_kit = module_info["kit"]
             if comp_kit is not None:
-                comp_kit = _strip_namespace(comp_kit)
+                comp_kit = _remove_vtk_prefix(comp_kit)
             has_lib = comp_libname in self._existing_libs
             use_kit = comp_kit and comp_kit in self._enabled_kits
             # sanity check should be one or the other... not true for both
@@ -1084,7 +1086,7 @@ class VtkConan(ConanFile):
 
         # second loop for internal dependencies
         for module_name, module_info in self._installed_modules_info.items():
-            comp = _strip_namespace(module_name)
+            comp = _remove_vtk_prefix(module_name)
             if comp not in self.cpp_info.components:
                 self.output.warning(f"Skipping module, did not become a component: {module_name}")
                 continue
@@ -1099,7 +1101,7 @@ class VtkConan(ConanFile):
             # We still need to include the private_depends for the linker to correctly gather the libs.
             # But, this will also expose private header includes for the consumer.
             for dep in module_info["depends"] + module_info["private_depends"]:
-                depname = _strip_namespace(dep)
+                depname = _remove_vtk_prefix(dep)
                 if depname in self.cpp_info.components:
                     self.output.info(f"{comp}   depends on {depname}")
                     self.cpp_info.components[comp].requires.append(depname)
@@ -1136,10 +1138,7 @@ class VtkConan(ConanFile):
         self.cpp_info.components["headers"].set_property("cmake_build_modules", vtk_cmake_build_modules)
 
 
-def _module_remove_prefix(mod):
+def _remove_vtk_prefix(mod):
     if not mod.startswith("VTK::"):
-        raise RuntimeError("RECIPE BUG: Expected VTK module to start with VTK::")
+        raise RuntimeError(f"RECIPE BUG: Expected VTK module ({mod}) to start with VTK::")
     return mod[5:]
-
-def _strip_namespace(mod):
-    return mod.split("::", 1)[1]
