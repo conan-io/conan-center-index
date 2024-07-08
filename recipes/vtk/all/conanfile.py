@@ -444,7 +444,7 @@ class VtkConan(ConanFile):
     @property
     @functools.lru_cache()
     def _third_party(self):
-        if self.version == "9.3.0":
+        if self.version == "9.3.1":
             parties = {
                 # LEFT field:  target name for linking, will be used as TARGET::TARGET in package_info()
                 # RIGHT field: Force the version (for development mode), package/version to require, component requirement
