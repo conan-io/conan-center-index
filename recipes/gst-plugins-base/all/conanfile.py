@@ -1,18 +1,20 @@
 import glob
 import os
 import shutil
+import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.files import chdir, copy, get, rm, rmdir
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import chdir, copy, get, rm, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, check_min_vs
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
 
 class GStPluginsBaseConan(ConanFile):
@@ -62,14 +64,21 @@ class GStPluginsBaseConan(ConanFile):
         "with_introspection": False,
     }
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.os not in ["Linux", "FreeBSD"]:
             self.options.rm_safe("with_libalsa")
-            self.options.rm_safe("with_wayland")
-        if self.settings.os not in ["Linux", "FreeBSD"]:
             self.options.rm_safe("with_egl")
+            self.options.rm_safe("with_wayland")
             self.options.rm_safe("with_xorg")
 
     def configure(self):
@@ -77,6 +86,12 @@ class GStPluginsBaseConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+        if not self.options.with_gl:
+            self.options.rm_safe("with_egl")
+            self.options.rm_safe("with_wayland")
+            self.options.rm_safe("with_graphene")
+            self.options.rm_safe("with_libpng")
+            self.options.rm_safe("with_libjpeg")
         self.options["gstreamer"].shared = self.options.shared
 
     def layout(self):
@@ -99,7 +114,6 @@ class GStPluginsBaseConan(ConanFile):
                 self.requires("egl/system", transitive_headers=True, transitive_libs=True)
             if self.options.get_safe("with_wayland"):
                 self.requires("wayland/1.22.0", transitive_headers=True, transitive_libs=True)
-                self.requires("wayland-protocols/1.33")
             if self.options.with_graphene:
                 self.requires("graphene/1.10.8")
             if self.options.with_libpng:
@@ -133,13 +147,19 @@ class GStPluginsBaseConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.0")
-        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
-        if self.settings.os == "Windows":
+        if not self._is_legacy_one_profile:
+            self.tool_requires("glib/<host_version>")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/2.2.0")
+        if self._settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
+        if self.options.get_safe("with_wayland"):
+            if not self._is_legacy_one_profile:
+                self.tool_requires("wayland/<host_version>")
+            self.tool_requires("wayland-protocols/1.33")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
 
@@ -186,6 +206,10 @@ class GStPluginsBaseConan(ConanFile):
             tc.c_link_args.appened(value)
             tc.cpp_link_args.appened(value)
 
+        VirtualBuildEnv(self).generate()
+        if self._is_legacy_one_profile:
+            VirtualRunEnv(self).generate(scope="build")
+
         tc = MesonToolchain(self)
 
         if is_msvc(self):
@@ -228,8 +252,25 @@ class GStPluginsBaseConan(ConanFile):
         tc.project_options["xvideo"] = _enabled(self.options.get_safe("with_xorg"))
         tc.generate()
 
-        tc = PkgConfigDeps(self)
-        tc.generate()
+        deps = PkgConfigDeps(self)
+        if self.options.get_safe("with_wayland"):
+            if self._is_legacy_one_profile:
+                # Manually generate pkgconfig file of wayland-protocols since
+                # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
+                wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
+                wp_version = self.dependencies.build["wayland-protocols"].ref.version
+                wp_pkg_content = textwrap.dedent(f"""\
+                    prefix={wp_prefix}
+                    datarootdir=${{prefix}}/res
+                    pkgdatadir=${{datarootdir}}/wayland-protocols
+                    Name: Wayland Protocols
+                    Description: Wayland protocol files
+                    Version: {wp_version}
+                """)
+                save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
+            else:
+                deps.build_context_activated = ["wayland-protocols"]
+        deps.generate()
 
     def build(self):
         meson = Meson(self)
