@@ -17,6 +17,12 @@ class ensmallenRecipe(ConanFile):
 
     package_type = "header-library"
     settings = "os", "compiler", "build_type", "arch"
+    options = {
+        "with_openmp": [True, False],
+    }
+    default_options = {
+        "with_openmp": True,
+    }
 
     def package_id(self):
         self.info.clear()
@@ -26,6 +32,8 @@ class ensmallenRecipe(ConanFile):
 
     def requirements(self):
         self.requires("armadillo/12.6.4")
+        if self.options.with_openmp:
+            self.requires("llvm-openmp/18.1.8")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -37,7 +45,7 @@ class ensmallenRecipe(ConanFile):
         deps.set_property("armadillo", "cmake_config_version_compat", "AnyNewerVersion")
         deps.generate()
         tc = CMakeToolchain(self)
-        tc.variables["USE_OPENMP"] = False
+        tc.variables["USE_OPENMP"] = self.options.with_openmp
         tc.generate()
 
 
