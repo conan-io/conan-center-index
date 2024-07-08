@@ -13,6 +13,7 @@ class LLVMOpenMpTestConan(ConanFile):
 
     def test(self):
         if not tools.cross_building(self):
+            os.environ["KMP_VERSION"] = "TRUE"
             for executable in ["test_package_cxx", "test_package_c"]:
                 bin_path = os.path.join("bin", executable)
                 self.run(bin_path, run_environment=True)
