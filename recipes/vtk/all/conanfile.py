@@ -478,16 +478,38 @@ class VtkConan(ConanFile):
                 "tiff":              (False, "libtiff/[>=4.4.0]",           ["libtiff::libtiff"]  ),
                 "utf8":              (False, "utfcpp/[>=3.2.3]",            ["utfcpp::utfcpp"]    ),
                 "zlib":              (False, "zlib/[>=1.2.13]",             ["zlib::zlib"]        ),
-
-                # TODO what module depends on boost?
-                # "boost":             (False, "boost/[>=1.82.0]"),
-
-                # TODO what module depends on odbc?
-                # "odbc":              (False, "odbc/[>=2.3.11]"),
-
-                # MODULES: zfp, boost and odbc
-                # parties["zfp"]     = "zfp/[>=0.5.5]"
             }
+
+            # TODO:
+            # ADIOS2
+            # Boost
+            # catalyst
+            # Dawn
+            # DirectX
+            # FFMPEG
+            # FontConfig
+            # GDAL
+            # LibArchive
+            # libLAS
+            # MEMKIND
+            # MySQL
+            # ODBC
+            # OpenCASCADE
+            # OpenImageDenoise
+            # OpenMP
+            # OpenSlide
+            # OpenVDB
+            # OpenVR
+            # OpenXR
+            # OpenXRRemoting
+            # ospray
+            # PDAL
+            # PostgreSQL
+            # SDL2
+            # TBB
+            # VisRTX
+            # ZeroMQ
+            # zSpace
 
             # NOTE: You may NOT be able to just adjust the version numbers in here, without
             #   also adjusting the patch, as the versions are also mentioned in ThirdParty/*/CMakeLists.txt
