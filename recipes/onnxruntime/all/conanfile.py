@@ -131,6 +131,8 @@ class OnnxRuntimeConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires Python 3.8+ to be built as shared."
             )
+        if self.settings.os == "Windows" and self.dependencies["abseil"].options.shared:
+            raise ConanInvalidConfiguration("Using abseil shared on Windows leads to link errors.")
 
     def build_requirements(self):
         # Required by upstream https://github.com/microsoft/onnxruntime/blob/v1.16.1/cmake/CMakeLists.txt#L5
