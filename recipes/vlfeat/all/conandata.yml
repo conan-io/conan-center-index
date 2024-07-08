@@ -2,3 +2,13 @@ sources:
   "0.9.21":
     url: "https://github.com/vlfeat/vlfeat/archive/refs/tags/v0.9.21.tar.gz"
     sha256: "221d7fb5103f004cc90201307fd1acb080c0caf5c2c26435ba1d5307c07e8cce"
+patches:
+  "0.9.21":
+    - patch_file: "patches/001-export-missing-symbols.patch"
+      patch_description: "Export missing symbols on Windows"
+      patch_type: "portability"
+      patch_source: "https://github.com/microsoft/vcpkg/blob/576379156e82da642f8d1834220876759f13534d/ports/vlfeat/expose_missing_symbols.patch"
+    - patch_file: "patches/002-fix-openmp-build.patch"
+      patch_description: "Fix OpenMP build on GCC 9 and newer"
+      patch_type: "portability"
+      patch_source: "https://salsa.debian.org/science-team/vlfeat/-/blob/master/debian/patches/0018-Fixed-build-on-gcc-9.patch"
