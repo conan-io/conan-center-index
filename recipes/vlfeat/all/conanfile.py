@@ -32,7 +32,7 @@ class VlfeatConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "threads": True,
-        "openmp": False, # TODO: enable after PR #22353 is merged
+        "openmp": True,
         "sse2": True,
         "avx": False,
     }
@@ -59,7 +59,7 @@ class VlfeatConan(ConanFile):
     def requirements(self):
         if self.options.openmp:
             # Used only in .c files
-            self.requires("llvm-openmp/17.0.6")
+            self.requires("llvm-openmp/18.1.8")
 
     def validate(self):
         if is_msvc(self) and not self.options.shared:
