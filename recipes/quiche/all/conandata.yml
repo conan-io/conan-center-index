@@ -1,0 +1,5 @@
+sources:
+  "0.22.0":
+    url:
+      - "https://github.com/cloudflare/quiche/archive/refs/tags/0.22.0.zip"
+    sha256: "201b6834b65c06766f9db86edaae06297f751cd36f907c94e6c04460dc2c0aff"
