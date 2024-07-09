@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import XCRun
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
@@ -27,10 +27,6 @@ class MetalcppConan(ConanFile):
 
     no_copy_source = True
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -41,36 +37,25 @@ class MetalcppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def validate(self):
-        if not is_apple_os(self):
-            raise ConanInvalidConfiguration("Metal can only be used on an Apple OS.")
+        os_name = str(self.settings.os)
+        if not os_name in ["Macos", "iOS", "tvOS"]:
+            raise ConanInvalidConfiguration("Metal can only be used on an Macos, iOS or tvOS platform.")
 
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+            min_cppstd = "17"
+            check_min_cppstd(self, min_cppstd)
 
-        minimum_os_version = None
-        if self.version == '13':
-            minimum_os_version = {'Macos': '13.0', 'iOS': '16.0'}
-        elif self.version == '13.3':
-            minimum_os_version = {'Macos': '13.3', 'iOS': '16.4'}
-        elif self.version == '14':
-            minimum_os_version = {'Macos': '14.0', 'iOS': '17.0'}
-        elif self.version == '14.2':
-            minimum_os_version = {'Macos': '14.2', 'iOS': '17.2'}
+        minimum_os_version = self.conan_data["minimum_os_version"][self.version][os_name]
 
-        os_name = str(self.settings.os)
-        if not minimum_os_version or not os_name in minimum_os_version:
-            raise ConanInvalidConfiguration("Missing minimum system version definitions.")
-
+        xcrun = XCRun(self)
         os_version = self.settings.get_safe("os.version")
         sdk_version = self.settings.get_safe("os.sdk_version")
-        if sdk_version is None:
-            sdk_version = os_version
+        visible_sdk_version = xcrun.sdk_version
 
-        if sdk_version is None:
-            raise ConanInvalidConfiguration("metal-cpp can't verify the current SDK version to validate compatibility. Either os.sdk_version or os.version should be set.")
-        elif sdk_version < Version(minimum_os_version[os_name]):
-            req_os_ver = minimum_os_version[os_name]
-            raise ConanInvalidConfiguration(f"metal-cpp {self.version} requires {os_name} SDK version {req_os_ver} but {sdk_version} is the target.")
+        sdk_version = sdk_version or os_version or visible_sdk_version
+
+        if sdk_version < Version(minimum_os_version):
+            raise ConanInvalidConfiguration(f"metal-cpp {self.version} requires {os_name} SDK version {minimum_os_version} but {sdk_version} is the target.")
 
     def build(self):
         pass

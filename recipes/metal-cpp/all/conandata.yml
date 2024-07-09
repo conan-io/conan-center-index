@@ -11,3 +11,20 @@ sources:
   "13":
     url: "https://developer.apple.com/metal/cpp/files/metal-cpp_macOS13_iOS16.zip"
     sha256: "6f741894229e9c750add1afc3797274fc008c7507e2ae726370c17c34b7c6a68"
+minimum_os_version:
+  "14.2":
+    "Macos": "14.2"
+    "iOS": "17.2"
+    "tvOS": "17.2"
+  "14":
+    "Macos": "14"
+    "iOS": "17"
+    "tvOS": "17.2"
+  "13.3":
+    "Macos": "13.3"
+    "iOS": "16.4"
+    "tvOS": "16.4"
+  "13":
+    "Macos": "13"
+    "iOS": "16"
+    "tvOS": "16"
