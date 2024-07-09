@@ -14,46 +14,36 @@ class PackageConan(ConanFile):
     homepage = "https://www.openmp.org/"
     topics = ("parallelism", "multiprocessing")
 
-    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "provider": ["auto", "llvm-openmp"],
+        "provider": ["auto", "native", "llvm"],
     }
     default_options = {
         "provider": "auto",
     }
 
     def config_options(self):
-        # GCC and MSVC provide OpenMP out of the box, use llvm-openmp from CCI for others
-        if self.settings.compiler != "gcc" and not is_msvc(self):
-            self.options.provider = "llvm-openmp"
-
-    def layout(self):
-        pass
+        if self.settings.compiler in ["clang", "apple-clang"]:
+            # Clang and AppleClang typically ship without their native libomp libraries.
+            self.options.provider = "llvm"
+        else:
+            self.options.provider = "native"
 
     def requirements(self):
-        if self.options.provider == "llvm-openmp":
-            self.requires("llvm-openmp/17.0.6", transitive_headers=True, transitive_libs=True)
+        if self.options.provider == "llvm":
+            # Note: MSVC ships with an optional LLVM OpenMP implementation, but it would require reliably setting
+            # `OpenMP_RUNTIME_MSVC=llvm` in CMake for all consumers of this recipe, which is not possible in a meta-package.
+            # TODO: match the major version of llvm-openmp to the version of Clang / LLVM.
+            self.requires("llvm-openmp/18.1.8", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
         self.info.clear()
 
     def validate(self):
-        if is_msvc(self) and self.options.provider == "llvm-openmp":
-            raise ConanInvalidConfiguration("llvm-openmp is not compatible with MSVC")
-        if not self._openmp_flags():
+        if self._openmp_flags() is None:
             raise ConanInvalidConfiguration(
                 f"{self.settings.compiler} is not supported by this recipe. Contributions are welcome!"
             )
-
-    def source(self):
-        pass
-
-    def build(self):
-        pass
-
-    def package(self):
-        pass
 
     def _openmp_flags(self):
         # Based on https://github.com/Kitware/CMake/blob/v3.28.1/Modules/FindOpenMP.cmake#L104-L135
@@ -79,7 +69,7 @@ class PackageConan(ConanFile):
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
 
-        if self.options.provider == "auto":
+        if self.options.provider == "native":
             # Rely on CMake's FindOpenMP.cmake and an OpenMP implementation provided by the compiler.
             # Export appropriate flags for the transitive use case.
             openmp_flags = self._openmp_flags()
