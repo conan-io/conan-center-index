@@ -85,12 +85,13 @@ class OpenH264Conan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         # Version 2.1.1 installs both static and shared libraries
-        if self.options.shared:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
-        else:
-            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dylib*", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
+        if Version(self.version) <= "2.1.1":
+            if self.options.shared:
+                rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+            else:
+                rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
+                rm(self, "*.dylib*", os.path.join(self.package_folder, "lib"))
+                rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
