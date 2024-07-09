@@ -13,7 +13,7 @@ required_conan_version = ">=1.53.0"
 class OpenUSDConan(ConanFile):
     name = "openusd"
     description = "Universal Scene Description"
-    license = "LicenseRef-LICENSE.txt"
+    license = "DocumentRef-LICENSE.txt:LicenseRef-Modified-Apache-2.0-License"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://openusd.org/"
     topics = ("3d", "scene", "usd")
