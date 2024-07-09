@@ -95,12 +95,13 @@ class OpenH264Conan(ConanFile):
                 rm(self, "*.dylib*", os.path.join(self.package_folder, "lib"))
                 rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
                 rm(self, "openh264.lib", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
         if is_msvc(self) or self._is_clang_cl:
             if self.options.shared:
                 # Preserve same old library name as when building with Make on Windows
                 rename(self, os.path.join(self.package_folder, "lib", "openh264.lib"),
-                    os.path.join(self.package_folder, "lib", "libopenh264_dll.lib"))
+                    os.path.join(self.package_folder, "lib", "openh264_dll.lib"))
             else:
                 rename(self, os.path.join(self.package_folder, "lib", "libopenh264.a"),
                     os.path.join(self.package_folder, "lib", "openh264.lib"))
