@@ -103,7 +103,7 @@ class OpenH264Conan(ConanFile):
                     os.path.join(self.package_folder, "lib", "libopenh264_dll.lib"))
             else:
                 rename(self, os.path.join(self.package_folder, "lib", "libopenh264.a"),
-                    os.path.join(self.package_folder, "lib", "libopenh264.lib"))
+                    os.path.join(self.package_folder, "lib", "openh264.lib"))
 
     def package_info(self):
         suffix = "_dll" if (is_msvc(self) or self._is_clang_cl) and self.options.shared else ""
