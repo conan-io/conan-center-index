@@ -7,6 +7,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
 import os
+import platform
 
 required_conan_version = ">=1.53.0"
 
@@ -50,9 +51,14 @@ class MetalcppConan(ConanFile):
         xcrun = XCRun(self)
         os_version = self.settings.get_safe("os.version")
         sdk_version = self.settings.get_safe("os.sdk_version")
-        visible_sdk_version = xcrun.sdk_version
+        visible_sdk_version = xcrun.sdk_version if platform.system() == "Darwin" else None
 
         sdk_version = sdk_version or os_version or visible_sdk_version
+
+        if sdk_version is None:
+            # Will raise when `os.version` or `os.sdk_version` are not defined
+            # and we are *NOT* running this on macOS
+            raise ConanInvalidConfiguration(f"metal-cpp {self.version} requires the os.version or sdk.version settings, but the are not defined")
 
         if sdk_version < Version(minimum_os_version):
             raise ConanInvalidConfiguration(f"metal-cpp {self.version} requires {os_name} SDK version {minimum_os_version} but {sdk_version} is the target.")
