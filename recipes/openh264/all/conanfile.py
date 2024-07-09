@@ -55,6 +55,7 @@ class OpenH264Conan(ConanFile):
         self.tool_requires("meson/1.4.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.2.0")
+        self.tool_requires("nasm/2.16.01")
 
     def validate(self):
         if Version(self.version) <= "2.1.1" and self.settings.os == "Android":
