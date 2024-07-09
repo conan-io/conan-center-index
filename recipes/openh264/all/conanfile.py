@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import stdcpp_library
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm, rename
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
@@ -87,7 +87,7 @@ class OpenH264Conan(ConanFile):
         meson.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # Version 2.1.1 installs both static and shared libraries
+        # Version 2.1.1 installs both static and shared libraries using same target name
         if Version(self.version) <= "2.1.1":
             if self.options.shared:
                 rm(self, "*.a", os.path.join(self.package_folder, "lib"))
@@ -95,11 +95,15 @@ class OpenH264Conan(ConanFile):
                 rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
                 rm(self, "*.dylib*", os.path.join(self.package_folder, "lib"))
                 rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
+                rm(self, "openh264.lib", os.path.join(self.package_folder, "lib"))
+
+        if is_msvc(self) and not self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "libopenh264.a"),
+                    os.path.join(self.package_folder, "lib", "libopenh264.lib"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        suffix = "_dll" if (is_msvc(self) or self._is_clang_cl) and self.options.shared else ""
-        self.cpp_info.libs = [f"openh264{suffix}"]
+        self.cpp_info.libs = [f"openh264"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.extend(["m", "pthread"])
         if self.settings.os == "Android":
