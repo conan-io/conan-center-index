@@ -1,5 +1,5 @@
---- cmake/helpers/CheckDependentLibraries.cmake
-+++ cmake/helpers/CheckDependentLibraries.cmake
+--- a/cmake/helpers/CheckDependentLibraries.cmake
++++ b/cmake/helpers/CheckDependentLibraries.cmake
 @@ -11,7 +11,7 @@
  include(CheckFunctionExists)
  include(CMakeDependentOption)

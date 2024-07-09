@@ -1,6 +1,6 @@
---- cmake/helpers/GdalDriverHelper.cmake
-+++ cmake/helpers/GdalDriverHelper.cmake
-@@ -316,6 +316,7 @@
+--- a/cmake/helpers/GdalDriverHelper.cmake
++++ b/cmake/helpers/GdalDriverHelper.cmake
+@@ -355,6 +355,7 @@
                  target_compile_options(${_TARGET} PRIVATE ${_res})
              endif ()
              get_property(_res TARGET ${_LIB} PROPERTY INTERFACE_LINK_LIBRARIES)
@@ -9,8 +9,8 @@
                  gdal_target_interfaces(${_TARGET} ${_res})
              endif ()
 
---- cmake/helpers/GdalGenerateConfig.cmake
-+++ cmake/helpers/GdalGenerateConfig.cmake
+--- a/cmake/helpers/GdalGenerateConfig.cmake
++++ b/cmake/helpers/GdalGenerateConfig.cmake
 @@ -50,6 +50,7 @@
              if(TARGET "${_lib}")
                  get_target_property(_link_libraries ${_lib} INTERFACE_LINK_LIBRARIES)
