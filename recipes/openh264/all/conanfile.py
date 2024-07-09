@@ -59,8 +59,9 @@ class OpenH264Conan(ConanFile):
             self.tool_requires("nasm/2.16.01")
 
     def validate(self):
-        if Version(self.version) <= "2.1.1" and self.settings.os == "Android":
+        if Version(self.version) <= "2.1.1" and self.settings.os in ["Android", "Macos"]:
             # ../src/meson.build:86:2: ERROR: Problem encountered: FIXME: Unhandled system android
+            # ../src/meson.build:86:2: ERROR: Problem encountered: FIXME: Unhandled system darwin
             raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.os}. Try a newer version.")
 
     def source(self):
