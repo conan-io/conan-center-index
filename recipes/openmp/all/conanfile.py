@@ -39,10 +39,18 @@ class PackageConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self._openmp_flags() is None:
+        if self.options.provider == "native" and self._openmp_flags() is None:
             raise ConanInvalidConfiguration(
                 f"{self.settings.compiler} is not supported by this recipe. Contributions are welcome!"
             )
+
+        if self.options.provider == "llvm":
+            if self.settings.compiler not in ["clang", "apple-clang"] and not is_msvc(self):
+                # More info: https://cpufun.substack.com/p/is-mixing-openmp-runtimes-safe
+                self.output.warning(
+                    "Warning: Using a non-native OpenMP implementation can be bug-prone. "
+                    "Make sure you avoid accidental linking against the native implementation through external libraries."
+                )
 
     def _openmp_flags(self):
         # Based on https://github.com/Kitware/CMake/blob/v3.28.1/Modules/FindOpenMP.cmake#L104-L135
