@@ -55,7 +55,7 @@ class OpenH264Conan(ConanFile):
         self.tool_requires("meson/1.4.1")
 
     def validate(self):
-        if Version(self.version) <= "2.1.1":
+        if Version(self.version) <= "2.1.1" and self.settings.os == "Android":
             # ../src/meson.build:86:2: ERROR: Problem encountered: FIXME: Unhandled system android
             raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.os}. Try a newer version.")
 
