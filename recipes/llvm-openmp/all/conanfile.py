@@ -1,14 +1,13 @@
 import os
-import re
 import textwrap
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, move_folder_contents, rmdir, load, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, save, move_folder_contents, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -58,57 +57,45 @@ class LLVMOpenMpConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-        copy(self, "*.cmake.in", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if is_apple_os(self) or self.settings.os == "Windows":
-            del self.options.build_libomptarget
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.settings.os == "Windows":
-            del self.options.shared
-            self.package_type = "shared-library"
+
+    def requirements(self):
+        if self.options.build_libomptarget and self._version_major >= 13:
+            self.requires(f"llvm-core/{self.version}")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def requirements(self):
-        if self.options.get_safe("build_libomptarget") and self._version_major >= 13:
-            self.requires(f"llvm-core/{self.version}")
-
     def validate(self):
-        if self.settings.os == "Windows":
-            if self._version_major < 17:
-                #  fatal error LNK1181: cannot open input file 'build\runtime\src\omp.dll.lib'
-                raise ConanInvalidConfiguration(f"{self.ref} build is broken on MSVC for versions < 17")
-
-        if not self._openmp_flags:
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("llvm-openmp is not compatible with MSVC")
+        if self.settings.compiler not in ["apple-clang", "clang", "gcc", "intel-cc"]:
             raise ConanInvalidConfiguration(
                 f"{self.settings.compiler} is not supported by this recipe. Contributions are welcome!"
             )
-
         if self._version_major >= 17:
             if self.settings.compiler.cppstd:
                 check_min_cppstd(self, 17)
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
             if minimum_version and Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(f"{self.ref} requires C++17, which your compiler does not support.")
-
         if is_apple_os(self) and self.settings.arch == "armv8":
-            if self._version_major >= 12 and self.settings.build_type == "Debug":
+            if self._version_major <= 10:
+                raise ConanInvalidConfiguration("ARM v8 not supported")
+            if self._version_major != 11 and self.settings.build_type == "Debug":
                 # All versions except for v11 crash with a segfault for the simple test_package.cpp test
-                # Might be related to https://github.com/llvm/llvm-project/issues/49923
                 raise ConanInvalidConfiguration("Debug mode not supported for ARM v8")
 
     def build_requirements(self):
         if self._version_major >= 17:
             self.tool_requires("cmake/[>=3.20 <4]")
-        if is_msvc(self):
-            self.tool_requires("strawberryperl/5.32.1.1")
 
     def source(self):
         if self._version_major >= 15:
@@ -132,41 +119,20 @@ class LLVMOpenMpConan(ConanFile):
         env.generate()
         tc = CMakeToolchain(self)
         tc.variables["OPENMP_STANDALONE_BUILD"] = True
-        tc.variables["LIBOMP_ENABLE_SHARED"] = self.options.get_safe("shared", True)
-        tc.variables["OPENMP_ENABLE_LIBOMPTARGET"] = self.options.get_safe("build_libomptarget", False)
-        # Do not build OpenMP Tools Interface (OMPT)
+        tc.variables["LIBOMP_ENABLE_SHARED"] = self.options.shared
+        tc.variables["OPENMP_ENABLE_LIBOMPTARGET"] = self.options.build_libomptarget
+        # Do not buidl OpenMP Tools Interface (OMPT)
         tc.variables["LIBOMP_OMPT_SUPPORT"] = False
-        # Should not be needed and causes the library to be copied on Windows due to lack of symlink support
-        tc.variables["LIBOMP_INSTALL_ALIASES"] = False
-        # The library file incorrectly includes a "lib" prefix on Windows otherwise
-        if self.settings.os == "Windows":
-            tc.variables["LIBOMP_LIB_NAME"] = "omp"
         tc.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if self._version_major < 17:
-            # Fix CMake version and policies not being propagated in linker tests
-            replace_in_file(self, os.path.join(self.source_folder, "runtime", "cmake", "LibompCheckLinkerFlag.cmake"),
-                            "cmake_minimum_required(",
-                            "cmake_minimum_required(VERSION 3.15) #")
-            # Ensure sufficient CMake policy version is used for tc.variables
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "cmake_minimum_required(",
-                            "cmake_minimum_required(VERSION 3.15) #")
-        # Disable tests
         replace_in_file(self, os.path.join(self.source_folder, "runtime", "CMakeLists.txt"),
                         "add_subdirectory(test)", "")
-        # v12 can be built without LLVM includes
         if self._version_major == 12:
+            # v12 can be built without LLVM includes
             replace_in_file(self, os.path.join(self.source_folder, "libomptarget", "CMakeLists.txt"),
                             "if (NOT LIBOMPTARGET_LLVM_INCLUDE_DIRS)", "if (FALSE)")
-        # TODO: looks like a bug, should ask upstream
-        # The built import lib is named "libomp.dll.lib" otherwise, which also causes install() to fail
-        if self._version_major >= 14:
-            replace_in_file(self, os.path.join(self.source_folder, "runtime", "src", "CMakeLists.txt"),
-                            "set(LIBOMP_GENERATED_IMP_LIB_FILENAME ${LIBOMP_LIB_FILE}${CMAKE_STATIC_LIBRARY_SUFFIX})",
-                            "set(LIBOMP_GENERATED_IMP_LIB_FILENAME ${LIBOMP_LIB_NAME}${CMAKE_STATIC_LIBRARY_SUFFIX})")
 
     def build(self):
         self._patch_sources()
@@ -174,71 +140,17 @@ class LLVMOpenMpConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "openmp", "conan-llvm-openmp-vars.cmake")
-
-    @property
-    def _conan1_targets_module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "openmp", f"conan-official-{self.name}-targets.cmake")
-
-    @property
-    def _openmp_flags(self):
-        # Based on https://github.com/Kitware/CMake/blob/v3.28.1/Modules/FindOpenMP.cmake#L104-L135
-        if self.settings.compiler == "clang":
-            return ["-fopenmp=libomp"]
-        elif self.settings.compiler == "apple-clang":
-            return ["-Xclang", "-fopenmp"]
-        elif self.settings.compiler == "gcc":
-            return ["-fopenmp"]
-        elif self.settings.compiler == "intel-cc":
-            return ["-Qopenmp"]
-        elif self.settings.compiler == "sun-cc":
-            return ["-xopenmp"]
-        elif is_msvc(self):
-            return ["-openmp:llvm"]
-        return None
-
-    @property
-    def _system_libs(self):
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            return ["m", "dl", "pthread", "rt"]
-        if self.settings.os == "Windows":
-            return ["psapi"]
-        return []
-
-    @property
-    def _omp_runtime_version(self):
-        # llvm-openmp has hardcoded its OMP runtime version since v9
-        # https://github.com/llvm/llvm-project/commit/e4b4f994d2f6a090694276b40d433dc1a58beb24
-        cmake_content = load(self, os.path.join(self.source_folder, "runtime", "CMakeLists.txt"))
-        year_date = re.search(r"set\(LIBOMP_OMP_YEAR_MONTH (\d{6})\)", cmake_content).group(1)
-        if year_date != "201611":
-            raise ConanException(f"Unexpected LIBOMP_OMP_YEAR_MONTH value: {year_date}")
-        return "5.0", "201611"
-
-    def _write_cmake_module(self):
-        omp_version, omp_spec_date = self._omp_runtime_version
-        cmake_module = load(self, os.path.join(self.export_sources_folder, "cmake", "conan-llvm-openmp-vars.cmake.in"))
-        cmake_module = cmake_module.replace("@OpenMP_FLAGS@", " ".join(self._openmp_flags))
-        cmake_module = cmake_module.replace("@OpenMP_LIB_NAMES@", ";".join(["omp"] + self._system_libs))
-        cmake_module = cmake_module.replace("@OpenMP_SPEC_DATE@", omp_spec_date)
-        cmake_module = cmake_module.replace("@OpenMP_VERSION_MAJOR@", str(Version(omp_version).major))
-        cmake_module = cmake_module.replace("@OpenMP_VERSION_MINOR@", str(Version(omp_version).minor))
-        cmake_module = cmake_module.replace("@OpenMP_VERSION@", omp_version)
-        save(self, os.path.join(self.package_folder, self._module_file_rel_path), cmake_module)
-
     def package(self):
-        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.txt",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
-        self._write_cmake_module()
-
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._conan1_targets_module_file_rel_path),
+            os.path.join(self.package_folder, self._module_file_rel_path),
             {
                 "OpenMP::OpenMP_C": "OpenMP::OpenMP",
                 "OpenMP::OpenMP_CXX": "OpenMP::OpenMP",
@@ -256,27 +168,29 @@ class LLVMOpenMpConan(ConanFile):
             """)
         save(self, module_file, content)
 
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
+
     def package_info(self):
-        # Match FindOpenMP.cmake module provided by CMake
-        self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "OpenMP")
+        self.cpp_info.set_property("cmake_target_name", "OpenMP::OpenMP")
+        self.cpp_info.set_property("cmake_target_aliases", ["OpenMP::OpenMP_C", "OpenMP::OpenMP_CXX"])
 
-        omp = self.cpp_info.components["omp"]
-        omp.set_property("cmake_target_name", "OpenMP::OpenMP")
-        omp.set_property("cmake_target_aliases", ["OpenMP::OpenMP_C", "OpenMP::OpenMP_CXX"])
-        omp.libs = ["omp"]
-        omp.system_libs = self._system_libs
-        omp.cflags = self._openmp_flags
-        omp.cxxflags = self._openmp_flags
-
-        omp.builddirs.append(os.path.join(self.package_folder, "lib", "cmake", "openmp"))
-        self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
+        if self.settings.compiler in ("clang", "apple-clang"):
+            self.cpp_info.cxxflags = ["-Xpreprocessor", "-fopenmp"]
+        elif self.settings.compiler == "gcc":
+            self.cpp_info.cxxflags = ["-fopenmp"]
+        elif self.settings.compiler == "intel-cc":
+            self.cpp_info.cxxflags = ["/Qopenmp"] if self.settings.os == "Windows" else ["-Qopenmp"]
+        self.cpp_info.cflags = self.cpp_info.cxxflags
+        self.cpp_info.libs = ["omp"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["dl", "m", "pthread", "rt"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "OpenMP"
         self.cpp_info.names["cmake_find_package_multi"] = "OpenMP"
-        omp.names["cmake_find_package"] = "OpenMP"
-        omp.names["cmake_find_package_multi"] = "OpenMP"
-        omp.builddirs.append(os.path.join(self.package_folder, "lib", "cmake"))
-        omp.build_modules["cmake_find_package"] = [self._module_file_rel_path, self._conan1_targets_module_file_rel_path]
-        omp.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path, self._conan1_targets_module_file_rel_path]
+        self.cpp_info.builddirs.append(os.path.join(self.package_folder, "lib", "cmake"))
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
