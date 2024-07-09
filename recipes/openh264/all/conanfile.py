@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import stdcpp_library
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
@@ -84,6 +84,13 @@ class OpenH264Conan(ConanFile):
         meson.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # Version 2.1.1 installs both static and shared libraries
+        if self.options.shared:
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+        else:
+            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dylib*", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
