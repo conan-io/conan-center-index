@@ -7,7 +7,6 @@ required_conan_version = ">=1.52.0"
 
 class PackageConan(ConanFile):
     name = "openmp"
-    version = "cci.latest"
     description = "Conan meta-package for OpenMP (Open Multi-Processing)"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
