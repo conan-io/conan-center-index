@@ -788,7 +788,7 @@ class GdalConan(ConanFile):
         if self.options.with_rasterlite2:
             self.cpp_info.requires.extend(["librasterlite2::librasterlite2"])
         if self.options.with_qhull:
-            self.cpp_info.requires.extend(["qhull::libqhull"])
+            self.cpp_info.requires.extend(["qhull::qhull"])
         if self.options.with_spatialite:
             self.cpp_info.requires.extend(["libspatialite::libspatialite"])
         if self.options.with_sqlite3:
