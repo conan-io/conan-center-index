@@ -53,6 +53,8 @@ class OpenH264Conan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.1")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/2.2.0")
 
     def validate(self):
         if Version(self.version) <= "2.1.1" and self.settings.os == "Android":
@@ -67,6 +69,7 @@ class OpenH264Conan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
         tc = MesonToolchain(self)
+        tc.project_options["tests"] = "disabled"
         tc.generate()
 
     def build(self):
