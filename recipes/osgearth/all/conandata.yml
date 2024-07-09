@@ -1,9 +1,15 @@
 sources:
-  "3.5":
-    url: "https://github.com/gwaldron/osgearth/archive/refs/tags/osgearth-3.5.tar.gz"
-    sha256: "9204759f3df0d05356bdead71c13b9e9a086c9ebfa3daa93c149dd7aa664d378"
+  "3.6":
+    url: "https://github.com/gwaldron/osgearth/archive/refs/tags/osgearth-3.6.tar.gz"
+    sha256: "98fbd88c233cd8f5f507a56f19b49e6893ba28f551a1f8f94f5f94c28b747357"
 patches:
-  "3.5":
+  "3.6":
+    - patch_file: "patches/0001-Fix-tingltf-rapidjson-includes.patch"
+      patch_description: "Fix rapidjson includes in vendored tingltf"
+      patch_type: "portability"
+    - patch_file: "patches/0002-Unvendor-dependencies.patch"
+      patch_description: "Unvendor dependencies"
+      patch_type: "portability"
     - patch_file: "patches/3.5-mingw.patch"
     - patch_file: "patches/3.5-lerc-api-upgrades.patch"
       patch_description: "Upgrade lerc library calls for v4 compatibility"
