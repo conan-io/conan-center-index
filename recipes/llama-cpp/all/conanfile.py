@@ -20,16 +20,20 @@ class LlamaCppConan(ConanFile):
     homepage = "https://github.com/ggerganov/llama.cpp"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_metal": [True, False],
+        "with_cuda": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_metal": False,
+        "with_cuda": False,
     }
- 
-    package_type = "library"
 
     @property
     def _min_cppstd(self):
@@ -44,6 +48,8 @@ class LlamaCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os != "Macos":
+            del self.options.with_metal
 
     def configure(self):
         if self.options.shared:
@@ -73,6 +79,8 @@ class LlamaCppConan(ConanFile):
         tc.variables["LLAMA_BUILD_TESTS"] = False
         tc.variables["LLAMA_BUILD_EXAMPLES"] = False
         tc.variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
+        tc.variables["GGML_METAL"] = self.options.get_safe("with_metal")
+        tc.variables["GGML_CUDA"] = self.options.get_safe("with_cuda")
         if hasattr(self, "settings_build") and cross_building(self):
             tc.variables["LLAMA_NATIVE"] = False
         tc.generate()
@@ -109,4 +117,7 @@ class LlamaCppConan(ConanFile):
         self.cpp_info.components["common"].requires.append("llama")
         self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
         self.cpp_info.components["common"].libs = ["common"]
+        if self.version >= Version("b3240"):
+            self.cpp_info.components["common"].libs.append("ggml")
+
 

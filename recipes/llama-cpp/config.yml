@@ -1,4 +1,6 @@
 versions:
+  "b3347":
+    folder: "all"
   "b3040":
     folder: "all"
   "b2038":
