@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.tools.build import stdcpp_library
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm, rename
+from conan.tools.files import copy, get, rmdir, rm, rename
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.scm import Version
 from conan.tools.meson import Meson, MesonToolchain
 from conan.errors import ConanInvalidConfiguration
@@ -35,9 +36,6 @@ class OpenH264Conan(ConanFile):
     @property
     def _is_clang_cl(self):
         return self.settings.os == 'Windows' and self.settings.compiler == 'clang'
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -75,7 +73,6 @@ class OpenH264Conan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -105,6 +102,7 @@ class OpenH264Conan(ConanFile):
             else:
                 rename(self, os.path.join(self.package_folder, "lib", "libopenh264.a"),
                     os.path.join(self.package_folder, "lib", "openh264.lib"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         suffix = "_dll" if (is_msvc(self) or self._is_clang_cl) and self.options.shared else ""
