@@ -25,12 +25,14 @@ class LlamaCppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_examples": [True, False],
         "with_metal": [True, False],
         "with_cuda": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_examples": False,
         "with_metal": False,
         "with_cuda": False,
     }
@@ -48,7 +50,7 @@ class LlamaCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Macos":
+        if not is_apple_os(self):
             del self.options.with_metal
 
     def configure(self):
@@ -77,10 +79,11 @@ class LlamaCppConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["LLAMA_STANDALONE"] = False
         tc.variables["LLAMA_BUILD_TESTS"] = False
-        tc.variables["LLAMA_BUILD_EXAMPLES"] = False
+        tc.variables["LLAMA_BUILD_EXAMPLES"] = self.options.get_safe("with_examples")
         tc.variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
-        tc.variables["GGML_METAL"] = self.options.get_safe("with_metal")
         tc.variables["GGML_CUDA"] = self.options.get_safe("with_cuda")
+        if is_apple_os(self):
+            tc.variables["GGML_METAL"] = self.options.get_safe("with_metal")
         if hasattr(self, "settings_build") and cross_building(self):
             tc.variables["LLAMA_NATIVE"] = False
         tc.generate()
