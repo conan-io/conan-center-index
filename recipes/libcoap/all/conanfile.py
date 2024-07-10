@@ -16,7 +16,7 @@ class LibCoapConan(ConanFile):
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/obgm/libcoap"
-    topics = "coap"
+    topics = "coap", "testing", "iot", "rfc7252"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
