@@ -15,7 +15,6 @@ Add the following section to your _host_ profile targeting Linux:
 [tool_requires]
 *:mold/[*]
 [conf]
-# The following config will only work with clang or gcc >= 12
 tools.build:exelinkflags=['-fuse-ld=mold']
 tools.build:sharedlinkflags=['-fuse-ld=mold']
 ```
