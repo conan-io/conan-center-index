@@ -1,10 +1,9 @@
 # mold: A Modern Linker
 
 mold is a faster drop-in replacement for existing Unix linkers. It is several
-times quicker than the LLVM lld linker, the second-fastest open-source linker,
-which I initially developed a few years ago. mold aims to enhance developer
-productivity by minimizing build time, particularly in rapid debug-edit-rebuild
-cycles.
+times quicker than the LLVM lld linker, the second-fastest open-source linker.
+mold aims to enhance developer productivity by minimizing build time, 
+particularly in rapid debug-edit-rebuild cycles.
 
 You can configure [Conan](https://github.com/conan-io) to download the latest
 version of `mold` and use it as the linker when building your dependencies and
