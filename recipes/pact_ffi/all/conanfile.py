@@ -103,11 +103,10 @@ class PactFFIConan(ConanFile):
         package_folder = Path(self.package_folder)
         lib_folder = package_folder / "lib"
         if not self.options.shared:
-            subfolder = str(self.settings.build_type).lower() if not cross_building(self) else self._rust_target_triple()
+            build_type = Path(str(self.settings.build_type).lower())
+            subfolder = build_type if not cross_building(self) else self._rust_target_triple() / build_type
             target_folder = Path(self.build_folder) / "rust" / "target" / subfolder
-            self.output.info(f"target folder: {target_folder}")
-            self.output.info(f"lib folder: {lib_folder}")
-            copy(self, pattern="*.a", src=target_folder, dst=lib_folder)
+            copy(self, pattern="*.a", src=target_folder, dst=lib_folder, excludes=["build/*", "deps/*"])
             rm(self, pattern="*.so", folder=lib_folder)
             rm(self, pattern="*.dylib", folder=lib_folder)
         else:
