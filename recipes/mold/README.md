@@ -9,7 +9,9 @@ You can configure Conan to download the latest version of `mold` and use it as t
 when building your dependencies and projects from source. Currently only supported
 when targeting Linux as the platform.
 
-Add the following section to your _host_ profile targeting Linux:
+To use mold automatically as the linker, you can add the following section to your
+_host_ profile that targets Linux. When using gcc, please note that the following
+flags require gcc 12.1 or greater.
 
 ```
 [tool_requires]
