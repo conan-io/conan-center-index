@@ -63,9 +63,6 @@ class MetalcppConan(ConanFile):
         if sdk_version < Version(minimum_os_version):
             raise ConanInvalidConfiguration(f"metal-cpp {self.version} requires {os_name} SDK version {minimum_os_version} but {sdk_version} is the target.")
 
-    def build(self):
-        pass
-
     def package(self):
         copy(
             self,

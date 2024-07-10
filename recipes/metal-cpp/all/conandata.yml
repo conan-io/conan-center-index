@@ -19,7 +19,7 @@ minimum_os_version:
   "14":
     "Macos": "14"
     "iOS": "17"
-    "tvOS": "17.2"
+    "tvOS": "17"
   "13.3":
     "Macos": "13.3"
     "iOS": "16.4"
