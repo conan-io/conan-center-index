@@ -1,5 +1,9 @@
 # Changelog
 
+### 10-Jul-2024 - 13:2 CEST
+
+- [feature] Add support for Conan 2.5.0 in the CI
+
 ### 22-May-2024 - 12:04 CEST
 
 - [feature] Add support for Conan 2.3.1 in the CI
