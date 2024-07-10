@@ -5,9 +5,9 @@ times quicker than the LLVM lld linker, the second-fastest open-source linker.
 mold aims to enhance developer productivity by minimizing build time, 
 particularly in rapid debug-edit-rebuild cycles.
 
-You can configure [Conan](https://github.com/conan-io) to download the latest
-version of `mold` and use it as the linker when building your dependencies and
-projects from source.
+You can configure Conan to download the latest version of `mold` and use it as the linker 
+when building your dependencies and projects from source. Currently only supported
+when targeting Linux as the platform.
 
 Add the following section to your _host_ profile targeting Linux:
 
