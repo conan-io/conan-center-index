@@ -1,6 +1,6 @@
 # Changelog
 
-### 10-Jul-2024 - 13:2 CEST
+### 10-Jul-2024 - 13:22 CEST
 
 - [feature] Add support for Conan 2.5.0 in the CI
 
