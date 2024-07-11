@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save, replace_in_file
 from conan.tools.microsoft import is_msvc
@@ -22,12 +23,22 @@ class RaylibConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "opengl_version": [None, "4.3", "3.3", "2.1", "1.1", "ES-2.0"],
+        "module_rshapes": [True, False],
+        "module_rtextures": [True, False],
+        "module_rtext": [True, False],
+        "module_rmodels": [True, False],
+        "module_raudio": [True, False],
         "custom_frame_control": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "opengl_version": None,
+        "module_rshapes": True,
+        "module_rtextures": True,
+        "module_rtext": True,
+        "module_rmodels": True,
+        "module_raudio": True,
         "custom_frame_control": False
     }
 
@@ -56,6 +67,10 @@ class RaylibConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("xorg/system")
 
+    def validate(self):
+        if self.options.module_rtext and not self.options.module_rtextures:
+            raise ConanInvalidConfiguration("Cannot build rtext without rtextures")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -83,9 +98,26 @@ class RaylibConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
 
+        config_file = os.path.join(self.source_folder, "src", "config.h")
+        if not self.options.module_rshapes:
+            opt = "#define SUPPORT_MODULE_RSHAPES"
+            replace_in_file(self, config_file, opt, "//"+opt, strict=True)
+        if not self.options.module_rtextures:
+            opt = "#define SUPPORT_MODULE_RTEXTURES"
+            replace_in_file(self, config_file, opt, "//"+opt, strict=True)
+        if not self.options.module_rtext:
+            opt = "#define SUPPORT_MODULE_RTEXT"
+            replace_in_file(self, config_file, opt, "//"+opt, strict=True)
+        if not self.options.module_rmodels:
+            opt = "#define SUPPORT_MODULE_RMODELS"
+            replace_in_file(self, config_file, opt, "//"+opt, strict=True)
+        if not self.options.module_raudio:
+            opt = "#define SUPPORT_MODULE_RAUDIO"
+            replace_in_file(self, config_file, opt, "//"+opt, strict=True)
+
         if self.options.custom_frame_control:
-            opt = "#define SUPPORT_CUSTOM_FRAME_CONTROL    1"
-            replace_in_file(self, os.path.join(self.source_folder, "src", "config.h"), "//"+opt, opt)
+            opt = "#define SUPPORT_CUSTOM_FRAME_CONTROL"
+            replace_in_file(self, config_file, "//"+opt, opt, strict=True)
 
         cmake = CMake(self)
         cmake.configure()
