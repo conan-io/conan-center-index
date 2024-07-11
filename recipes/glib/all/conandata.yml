@@ -27,13 +27,56 @@ sources:
     url: "https://download.gnome.org/sources/glib/2.75/glib-2.75.3.tar.xz"
     sha256: "7c517d0aff456c35a039bce8a8df7a08ce95a8285b09d1849f8865f633f7f871"
 patches:
+  "2.78.3":
+    - patch_file: "patches/remove-distutils-2.77.0.patch"
+      patch_type: backport
+      patch_description: remove distutils
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4133
+  "2.78.1":
+    - patch_file: "patches/remove-distutils-2.77.0.patch"
+      patch_type: backport
+      patch_description: remove distutils
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4133
+  "2.78.0":
+    - patch_file: "patches/remove-distutils-2.77.0.patch"
+      patch_type: backport
+      patch_description: remove distutils
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4133
+  "2.77.3":
+    - patch_file: "patches/remove-distutils-2.77.0.patch"
+      patch_type: backport
+      patch_description: remove distutils
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4133
+  "2.77.2":
+    - patch_file: "patches/remove-distutils-2.77.0.patch"
+      patch_type: backport
+      patch_description: remove distutils
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4133
+  "2.77.1":
+    - patch_file: "patches/remove-distutils-2.77.0.patch"
+      patch_type: backport
+      patch_description: remove distutils
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4133
+  "2.77.0":
+    - patch_file: "patches/remove-distutils-2.77.0.patch"
+      patch_type: backport
+      patch_description: remove distutils
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4133
   "2.76.3":
     - patch_file: "patches/libintl-discovery.patch"
       patch_type: bugfix
       patch_description: fix libintl discovery
       patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3352
+    - patch_file: "patches/remove-distutils.patch"
+      patch_type: backport
+      patch_description: remove distutils
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4133
   "2.75.3":
     - patch_file: "patches/libintl-discovery-2.75.3.patch"
       patch_type: bugfix
       patch_description: fix libintl discovery
       patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3352
+    - patch_file: "patches/remove-distutils.patch"
+      patch_type: backport
+      patch_description: remove distutils
+      patch_source: https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4133
