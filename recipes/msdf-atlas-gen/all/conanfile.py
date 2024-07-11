@@ -5,6 +5,7 @@ from conan.tools.files import get, copy, apply_conandata_patches, export_conanda
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
@@ -56,6 +57,8 @@ class MsdfAtlasGenConan(ConanFile):
         tc.cache_variables["MSDF_ATLAS_INSTALL"] = True
         if Version(self.version) >= "1.3":
             tc.preprocessor_definitions["MSDFGEN_USE_LIBPNG"] = 1
+        if is_msvc(self):
+            tc.cache_variables["MSDF_ATLAS_DYNAMIC_RUNTIME"] = "dynamic" in str(self.settings.compiler.runtime) or "MD" in str(self.settings.compiler.runtime)
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
