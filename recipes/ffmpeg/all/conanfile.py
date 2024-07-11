@@ -823,7 +823,7 @@ class FFMpegConan(ConanFile):
             if self.options.get_safe("with_libalsa"):
                 avdevice.requires.append("libalsa::libalsa")
             if self.options.get_safe("with_xcb"):
-                avdevice.requires.append("xorg::xcb")
+                avdevice.requires.extend(["xorg::xcb", "xorg::xcb-shm", "xorg::xcb-xfixes", "xorg::xcb-shape", "xorg::xv", "xorg::xext"])
             if self.options.get_safe("with_pulse"):
                 avdevice.requires.append("pulseaudio::pulseaudio")
             if self.options.get_safe("with_appkit"):
