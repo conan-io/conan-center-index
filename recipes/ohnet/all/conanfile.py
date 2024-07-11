@@ -51,6 +51,9 @@ class OhNetConan(ConanFile):
         if is_msvc(self) and (self.options.shared or msvc_runtime_flag(self).startswith('MD')):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared builds with Visual Studio yet")
 
+    def requirements(self):
+        self.requires("cpython/3.12.2")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
