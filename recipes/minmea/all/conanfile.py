@@ -1,6 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.microsoft import is_msvc
+from conaon.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.53.0"
@@ -39,6 +41,10 @@ class MinmeaConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built on Visual Studio and msvc.(yet)")
 
     def build_requirements(self):
         self.tool_requires("pkgconf/2.2.0")
