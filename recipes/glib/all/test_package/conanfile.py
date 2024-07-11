@@ -26,4 +26,3 @@ class TestPackageConan(ConanFile):
             self.run(bin_path, env="conanrun")
             if self.settings.os != "Windows":
                 self.run("gdbus-codegen -h", env="conanrun")
-g
