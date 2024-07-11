@@ -42,13 +42,16 @@ class AsioGrpcConan(ConanFile):
             "clang": "6",
             "apple-clang": "11",
         }
+    
+    @property
+    def _local_allocator_option(self):
+        return self.options.get_safe("local_allocator")
 
     def config_options(self):
         if Version(self.version) >= "3.0.0":
             del self.options.local_allocator
 
     def configure(self):
-        self._local_allocator_option = self.options.get_safe("local_allocator")
         if self._local_allocator_option == "auto":
             libcxx = self.settings.compiler.get_safe("libcxx")
             compiler_version = Version(self.settings.compiler.version)
