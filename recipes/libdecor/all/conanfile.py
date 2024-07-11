@@ -28,7 +28,8 @@ class libdecorConan(ConanFile):
     }
     default_options = {
         "with_dbus": True,
-        "with_gtk": True,
+        # with_gtk is defaulted to false for CCI and missing binaries for version 3 of the gtk/system package.
+        "with_gtk": False,
     }
 
     @property
