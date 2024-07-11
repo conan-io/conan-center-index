@@ -1,9 +1,29 @@
 # Changelog
 
-### 13-Mar-2024 - 11:08 CET
+### 10-Jul-2024 - 13:22 CEST
 
-- [feature]: Build with both */*:shared=True/False option when package type is declared as ``shared-library``.
-- [fix]: Fix ValidateInfra python version check to be aligned with the latest Jenkins version.
+- [feature] Add support for Conan 2.5.0 in the CI
+- [fix] Invalid configuration from tool requirement in Conan 1.x
+
+### 22-May-2024 - 12:04 CEST
+
+- [feature] Add support for Conan 2.3.1 in the CI
+- [feature] Add support for Conan 1.64.1 in the CI
+
+### 03-April-2024 - 13:53 CEST
+
+- [feature] Add support for Conan 2.2.2 in the CI
+- [feature] Add support for Conan 1.63.0 in the CI
+
+### 20-March-2024 - 11:13 CET
+
+- [fix] Changing Version Ranges in dependencies is now bump dependencies
+- [fix] Static library package type should be built with both all static and all shared dependencies
+
+### 13-March-2024 - 11:08 CET
+
+- [feature] Build with both */*:shared=True/False option when package type is declared as ``shared-library``.
+- [fix] Fix ValidateInfra python version check to be aligned with the latest Jenkins version.
 
 ### 07-February-2024 - 15:43 CET
 

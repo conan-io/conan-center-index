@@ -72,6 +72,10 @@ class TensorflowLiteConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    @property
+    def _needs_fxdiv(self):
+        return Version(self.version) >= "2.12.0"
+
     def requirements(self):
         self.requires("abseil/20230125.3")
         self.requires("eigen/3.4.0")
@@ -84,10 +88,12 @@ class TensorflowLiteConan(ConanFile):
             self.requires("intel-neon2sse/cci.20210225")
         if self.options.with_xnnpack:
             self.requires("xnnpack/cci.20231026")
-            # https://github.com/tensorflow/tensorflow/blob/359c3cdfc5fabac82b3c70b3b6de2b0a8c16874f/tensorflow/lite/delegates/xnnpack/xnnpack_delegate.cc#L165
+        if Version(self.version) >= "2.12.0" or self.options.with_xnnpack:
             self.requires("pthreadpool/cci.20231129")
         if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
             self.requires("fp16/cci.20210320")
+        if self._needs_fxdiv:
+            self.requires("fxdiv/cci.20200417")
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
@@ -151,6 +157,7 @@ class TensorflowLiteConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", self.source_folder, join(self.package_folder, "licenses"))
         copy(self, "*.h", join(self.source_folder, "tensorflow", "lite"), join(self.package_folder, "include", "tensorflow", "lite"))
+        copy(self, "version.h", join(self.source_folder, "tensorflow", "core", "public"), join(self.package_folder, "include", "tensorflow", "core", "public"))
         copy(self, "*.a", self.build_folder, join(self.package_folder, "lib"))
         copy(self, "*.so", self.build_folder, join(self.package_folder, "lib"))
         copy(self, "*.dylib", self.build_folder, join(self.package_folder, "lib"))
