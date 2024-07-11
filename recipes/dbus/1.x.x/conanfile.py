@@ -27,15 +27,14 @@ class DbusConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "dbus_user": ["ANY"],
+        "dbus_user": [None, "ANY"],
         "message_bus": [True, False],
         "system_socket": [None, "ANY"],
         "system_pid_file": [None, "ANY"],
         "with_x11": [True, False],
-        "with_glib": ["deprecated", True, False],
         "with_systemd": [True, False],
         "with_selinux": [True, False],
-        "session_socket_dir": ["ANY"],
+        "session_socket_dir": [None, "ANY"],
     }
     default_options = {
         "shared": False,
@@ -45,7 +44,6 @@ class DbusConan(ConanFile):
         "system_socket": None,
         "system_pid_file": None,
         "with_x11": False,
-        "with_glib": "deprecated",
         "with_systemd": False,
         "with_selinux": False,
         "session_socket_dir": "/tmp",
@@ -92,7 +90,6 @@ class DbusConan(ConanFile):
             self.requires("xorg/system", visible=False)
 
     def package_id(self):
-        del self.info.options.with_glib
         # The dbus_user option only effects the installation of dbus during the package method.
         # Otherwise, it only appears in the system.conf file in the package.
         self.info.options.rm_safe("dbus_user")
@@ -100,8 +97,6 @@ class DbusConan(ConanFile):
     def validate(self):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < 7:
             raise ConanInvalidConfiguration(f"{self.ref} requires at least gcc 7.")
-        if self.options.with_glib != "deprecated":
-            raise ConanInvalidConfiguration("with_glib option is deprecated and should not be used - the option had no effect.")
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.0")
@@ -118,14 +113,14 @@ class DbusConan(ConanFile):
         tc.project_options["asserts"] = not is_apple_os(self)
         tc.project_options["checks"] = False
         tc.project_options["datadir"] = os.path.join("res", "share")
-        tc.project_options["localstatedir"] = os.path.join("res", "var")
         tc.project_options["sysconfdir"] = os.path.join("res", "etc")
         tc.project_options["doxygen_docs"] = "disabled"
         tc.project_options["ducktype_docs"] = "disabled"
         tc.project_options["qt_help"] = "disabled"
         tc.project_options["modular_tests"] = "disabled"
         tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
-        tc.project_options["session_socket_dir"] = str(self.options.get_safe("session_socket_dir", ""))
+        if self.options.session_socket_dir:
+            tc.project_options["session_socket_dir"] = str(self.options.session_socket_dir)
         tc.project_options["systemd"] = "enabled" if self.options.get_safe("with_systemd") else "disabled"
         if self.options.get_safe("with_systemd"):
             tc.project_options["systemd_system_unitdir"] = "/res/lib/systemd/system"
@@ -134,8 +129,10 @@ class DbusConan(ConanFile):
             tc.project_options["message_bus"] = bool(self.options.message_bus)
         if self.options.get_safe("dbus_user"):
             tc.project_options["dbus_user"] = str(self.options.dbus_user)
-        tc.project_options["system_pid_file"] = str(self.options.get_safe("system_pid_file", ""))
-        tc.project_options["system_socket"] = str(self.options.get_safe("system_socket", ""))
+        if self.options.system_pid_file:
+            tc.project_options["system_pid_file"] = str(self.options.system_pid_file)
+        if self.options.system_socket:
+            tc.project_options["system_socket"] = str(self.options.system_socket)
         if is_apple_os(self):
             tc.project_options["launchd_agent_dir"] = os.path.join("res", "LaunchAgents")
         tc.project_options["x11_autolaunch"] = "enabled" if self.options.get_safe("with_x11") else "disabled"

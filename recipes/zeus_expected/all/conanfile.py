@@ -74,7 +74,6 @@ class ZeusExpectedConan(ConanFile):
         )
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "zeus_expected")
         self.cpp_info.set_property("cmake_target_name", "zeus::expected")
         self.cpp_info.bindirs = []
         self.cpp_info.frameworkdirs = []
