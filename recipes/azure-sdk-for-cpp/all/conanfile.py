@@ -84,7 +84,7 @@ class AzureSDKForCppConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.export_sources_folder)
+        cmake.configure()
         cmake.build()
 
     def package(self):
