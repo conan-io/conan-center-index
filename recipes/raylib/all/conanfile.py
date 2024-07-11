@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -22,11 +22,13 @@ class RaylibConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "opengl_version": [None, "4.3", "3.3", "2.1", "1.1", "ES-2.0"],
+        "custom_frame_control": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "opengl_version": None,
+        "custom_frame_control": False
     }
 
     def export_sources(self):
@@ -80,6 +82,11 @@ class RaylibConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+
+        if self.options.custom_frame_control:
+            opt = "#define SUPPORT_CUSTOM_FRAME_CONTROL    1"
+            replace_in_file(self, os.path.join(self.source_folder, "src", "config.h"), "//"+opt, opt)
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
