@@ -46,17 +46,18 @@ class OhPipelineConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>3.23 <4]")
+        self.tool_requires("cpython/[>=3.0.0]")
 
     def requirements(self):
-        self.requires("ohnet/1.36.5182", transitive_headers=True, transitive_libs=True)
+        self.requires("ohnet/[>=1.36.5182]", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("libmad/0.15.1b")
-        self.requires("alac/cci.20121212")
-        self.requires("libfdk_aac/2.0.3")
-        self.requires("faac/1.30")
-        self.requires("flac/1.4.3")
-        self.requires("ogg/1.3.5")
-        self.requires("vorbis/1.3.7")
+        self.requires("libmad/[>=0.15.1b]")
+        self.requires("alac/[>=cci.20121212]")
+        self.requires("libfdk_aac/[>=2.0.3]")
+        self.requires("faac/[>=1.30]")
+        self.requires("flac/[>=1.4.3]")
+        self.requires("ogg/[>=1.3.5]")
+        self.requires("vorbis/[>=1.3.7]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
