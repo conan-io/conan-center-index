@@ -72,7 +72,7 @@ class GLibConan(ConanFile):
         if self.options.get_safe("with_mount"):
             self.requires("libmount/2.39")
         if self.options.get_safe("with_selinux"):
-            self.requires("libselinux/3.5")
+            self.requires("libselinux/3.6")
         if self.settings.os != "Linux":
             # for Linux, gettext is provided by libc
             self.requires("libgettext/0.22", transitive_headers=True, transitive_libs=True)
