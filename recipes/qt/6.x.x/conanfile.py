@@ -351,7 +351,7 @@ class QtConan(ConanFile):
             else:
                 self.requires("libjpeg/9e")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
-            self.requires("libpng/1.6.42")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
             self.requires("sqlite3/3.45.0")
         if self.options.get_safe("with_mysql", False):
@@ -380,7 +380,7 @@ class QtConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.1.0")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
-            self.requires("expat/2.6.0")
+            self.requires("expat/[>=2.6.2 <3]")
             self.requires("opus/1.4")
             self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
@@ -400,9 +400,9 @@ class QtConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21.1 <4]")
-        self.tool_requires("ninja/1.11.1")
+        self.tool_requires("ninja/1.12.1")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/2.2.0")
         if self.settings.os == "Windows":
             self.tool_requires('strawberryperl/5.32.1.1')
 
