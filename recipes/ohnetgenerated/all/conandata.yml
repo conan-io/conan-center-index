@@ -1,0 +1,9 @@
+sources:
+  "1.1.143":
+    url: "https://github.com/openhome/ohNetGenerated/archive/refs/tags/ohNetGenerated_1.1.143.tar.gz"
+    sha256: "7f6a8dff02a11f4a54cd9bebd0ca5ba398bf8cf5ddf2019b762c4ded9a9f0a1c"
+patches:
+  "1.1.143":
+    - patch_file: "patches/0001-makefile.patch"
+      patch_description: "Make Makefile more flexible"
+      patch_type: "conan"
