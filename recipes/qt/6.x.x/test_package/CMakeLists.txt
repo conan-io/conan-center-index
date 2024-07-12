@@ -8,6 +8,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Core Qt6::Network Qt6::Sql Qt
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC ON AUTORCC ON)
 
+find_package(Qt6 COMPONENTS Core OPTIONAL_COMPONENTS Qml)
+add_executable(CheckQMLModules test_qml_modules.cpp)
+target_link_libraries(CheckQMLModules PRIVATE Qt6::Core Qt6::Qml)
+target_compile_features(CheckQMLModules PRIVATE cxx_std_17)
+set_target_properties(CheckQMLModules PROPERTIES AUTOMOC ON AUTORCC ON)
+
 # Only running this Qt macros in macOS
 if (APPLE)
     # Related to https://github.com/conan-io/conan-center-index/issues/20574
