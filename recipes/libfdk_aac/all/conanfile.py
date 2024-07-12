@@ -48,7 +48,7 @@ class LibFDKAACConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    def validate(self):
+    def validate_build(self):
         if cross_building(self) and self.settings.os == "Android":
             # https://github.com/mstorsjo/fdk-aac/issues/124#issuecomment-653473956
             # INFO: It's possible to inject a log.h to fix the error, but there is no official support.
