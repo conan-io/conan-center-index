@@ -51,8 +51,8 @@ class OhNetConan(ConanFile):
         if is_msvc(self) and (self.options.shared or msvc_runtime_flag(self).startswith('MD')):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared builds with Visual Studio yet")
 
-    def requirements(self):
-        self.build_requires("cpython/[>=3.0.0]")
+    def build_requirements(self):
+        self.tool_requires("cpython/[>=3.0.0]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -93,7 +93,7 @@ class OhNetConan(ConanFile):
 
         with chdir(self, self.source_folder):
             if is_msvc(self):
-                self.run(f"nmake /f OhNet.mak {targets} {" ".join(args)}")
+                self.run(f"nmake /f OhNet.mak {targets} {' '.join(args)}")
             else:
                 autotools = Autotools(self)
                 autotools.make(args=args, target=targets)
@@ -109,7 +109,7 @@ class OhNetConan(ConanFile):
 
         with chdir(self, self.source_folder):
             if is_msvc(self):
-                self.run(f"nmake /f OhNet.mak install {" ".join(args)}")
+                self.run(f"nmake /f OhNet.mak install {' '.join(args)}")
             else:
                 autotools = Autotools(self)
                 autotools.make(args=args, target="install-libs install-includes")
