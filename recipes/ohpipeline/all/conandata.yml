@@ -18,13 +18,3 @@ patches:
     - patch_file: "patches/0001-missing-include.patch"
       patch_type: "portability"
       patch_description: "Add a missing stdlib include"
-  "1.155.1133":
-    - patch_file: "patches/0001-disable-raat.patch"
-      patch_type: "build"
-      patch_description: "Disable proprietary SDK"
-    - patch_file: "patches/0002-remove-msvs.patch"
-      patch_type: "build"
-      patch_description: "Remove msvs"
-    - patch_file: "patches/0004-link-to-atomic.patch"
-      patch_type: "build"
-      patch_description: "Link to atomic"
