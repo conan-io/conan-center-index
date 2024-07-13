@@ -17,14 +17,14 @@ public:
 
 int main() {
   InitialisationParams *initParams = InitialisationParams::Create();
-  auto library = new Library(initParams);
-  auto dvStack = library->StartDv();
+  Library *library = new Library(initParams);
+  DvStack *dvStack = library->StartDv();
   OpenHome::Bws<12> udn;
   udn.Append("test-dimming");
   DvDeviceStandard *device = new DvDeviceStandard(*dvStack, udn);
 
   device->SetAttribute("Upnp.Domain", "av.openhome.org");
-  auto dimming = new Dimming(*device);
+  Dimming *dimming = new Dimming(*device);
   dimming->SetPropertyIsRamping(true);
   OpenHome::TBool isRamping;
   dimming->GetPropertyIsRamping(isRamping);
