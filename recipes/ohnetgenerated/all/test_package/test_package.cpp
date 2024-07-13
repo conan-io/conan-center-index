@@ -29,8 +29,4 @@ int main() {
   OpenHome::TBool isRamping;
   dimming->GetPropertyIsRamping(isRamping);
   ASSERT(isRamping == true);
-  delete dimming;
-  delete initParams;
-  delete device;
-  delete library;
 }
