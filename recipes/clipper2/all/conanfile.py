@@ -21,15 +21,15 @@ class Clipper2Conan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "usingz": ["ON", "OFF", "ONLY"],
+        "with_hi_precision": ["ANY"],
         "with_max_precision": [True, False],
-        "with_hi_precision": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "usingz": "ON",
+        "with_hi_precision": 8,
         "with_max_precision": False,
-        "with_hi_precision": False,
     }
 
     @property
@@ -52,7 +52,7 @@ class Clipper2Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) <= "1.2.3" or "1.4.0" <= Version(self.version):
+        if Version(self.version) < "1.2.4":
             del self.options.with_max_precision
         if Version(self.version) < "1.4.0":
             del self.options.with_hi_precision
@@ -83,10 +83,10 @@ class Clipper2Conan(ConanFile):
         tc.variables["CLIPPER2_EXAMPLES"] = False
         tc.variables["CLIPPER2_TESTS"] = False
         tc.variables["CLIPPER2_USINGZ"] = self.options.usingz
-        if "with_max_precision" in self.options:
-            tc.variables["CLIPPER2_MAX_PRECISION"] = self.options.with_max_precision
         if "with_hi_precision" in self.options:
             tc.variables["CLIPPER2_HI_PRECISION"] = self.options.with_hi_precision
+        if "with_max_precision" in self.options:
+            tc.variables["CLIPPER2_MAX_PRECISION"] = self.options.with_max_precision
         tc.generate()
 
     def build(self):
