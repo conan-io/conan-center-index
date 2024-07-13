@@ -21,15 +21,15 @@ class Clipper2Conan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "usingz": ["ON", "OFF", "ONLY"],
-        "with_hi_precision": ["ANY"],
-        "with_max_precision": [True, False],
+        "with_max_precision": ["ANY"],
+        "with_hi_precision": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "usingz": "ON",
-        "with_hi_precision": 8,
-        "with_max_precision": False,
+        "with_max_precision": 8,
+        "with_hi_precision": False,
     }
 
     @property
