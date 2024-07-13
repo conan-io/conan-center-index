@@ -4,6 +4,7 @@ from conan.tools.files import get, chdir, copy, mkdir, export_conandata_patches,
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, NMakeToolchain
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.53.0"
@@ -40,7 +41,7 @@ class OhNetGeneratedConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            self.options.rm_safe("fPIC")
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared builds")
 
     def layout(self):
         basic_layout(self, src_folder="src")
