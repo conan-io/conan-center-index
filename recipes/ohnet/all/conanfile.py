@@ -52,7 +52,7 @@ class OhNetConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared builds with Visual Studio yet")
 
     def build_requirements(self):
-        self.tool_requires("cpython/[>=3.0.0]")
+        self.tool_requires("cpython")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
