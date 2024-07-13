@@ -13,6 +13,9 @@ patches:
     - patch_file: "patches/0001-makefile-1.37.5454.patch"
       patch_description: "Reduce gcc-centricity in Makefile"
       patch_type: "conan"
+    - patch_file: "patches/0001-common.mak-1.37.5454.patch"
+      patch_description: "Use proper flags for C++ file"
+      patch_type: "conan"
   "1.36.5344":
     - patch_file: "patches/0001-makefile-1.36.5344.patch"
       patch_description: "Reduce gcc-centricity in Makefile"
