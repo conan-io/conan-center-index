@@ -46,7 +46,6 @@ class OhPipelineConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>3.23 <4]")
-        self.tool_requires("cpython/[>=3.0.0]")
 
     def requirements(self):
         self.requires("ohnet/[>=1.36.5182]", transitive_headers=True, transitive_libs=True)
