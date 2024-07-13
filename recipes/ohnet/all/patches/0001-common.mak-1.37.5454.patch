@@ -1,8 +1,8 @@
 diff --git a/Common.mak b/Common.mak
-index baae7b17..fbbb2cab 100644
+index a25489c2..1741579e 100644
 --- a/Common.mak
 +++ b/Common.mak
-@@ -381,21 +381,21 @@ $(objdir)nsec.$(objext) : $(mDNSdir)/nsec.c $(headers)
+@@ -385,21 +385,21 @@ $(objdir)nsec.$(objext) : $(mDNSdir)/nsec.c $(headers)
  	$(compiler)nsec.$(objext) -c $(cflags_third_party) $(includes) $(mDNSdir)/nsec.c
  $(objdir)nsec3.$(objext) : $(mDNSdir)/nsec3.c $(headers)
  	$(compiler)nsec3.$(objext) -c $(cflags_third_party) $(includes) $(mDNSdir)/nsec3.c
@@ -14,7 +14,7 @@ index baae7b17..fbbb2cab 100644
  	$(compiler)dnssd_clientlib.$(objext) -c $(cflags_third_party) $(includes) $(mDNSdir)/dnssd_clientlib.c
  $(objdir)MdnsPlatform.$(objext) : OpenHome/Net/Device/Bonjour/MdnsPlatform.cpp $(headers)
 -	$(compiler)MdnsPlatform.$(objext) -c $(cflags_third_party) $(includes) OpenHome/Net/Device/Bonjour/MdnsPlatform.cpp
-+	$(compiler)MdnsPlatform.$(objext) -c  $(cppflags) $(includes) OpenHome/Net/Device/Bonjour/MdnsPlatform.cpp
++	$(compiler)MdnsPlatform.$(objext) -c $(cppflags) $(includes) OpenHome/Net/Device/Bonjour/MdnsPlatform.cpp
  $(objdir)MdnsProvider.$(objext) : OpenHome/Net/Device/Bonjour/MdnsProvider.cpp $(headers)
  	$(compiler)MdnsProvider.$(objext) -c $(cppflags) $(includes) OpenHome/Net/Device/Bonjour/MdnsProvider.cpp
  $(objdir)Md5.$(objext) : OpenHome/md5.c $(headers)
