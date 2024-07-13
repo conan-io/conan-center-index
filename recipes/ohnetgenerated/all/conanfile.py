@@ -119,7 +119,7 @@ class OhNetGeneratedConan(ConanFile):
         self.cpp_info.components["ohNetGeneratedDevices"].libs = ["ohNetGeneratedDevices"]
         self.cpp_info.components["ohNetGeneratedDevices"].set_property("cmake_target_name", "ohNetGeneratedDevices")
 
-        for component in ["ohNetCore", "OhNetDevices", "ohNetProxies", "TestFramework"]:
+        for component in ["ohNetGeneratedProxies", "ohNetGeneratedDeviced"]:
             self.cpp_info.components[component].names["cmake_find_package"] = component
             self.cpp_info.components[component].names["cmake_find_package_multi"] = component
             self.cpp_info.components[component].set_property("cmake_target_name", component)
