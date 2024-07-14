@@ -72,15 +72,15 @@ class LeptonicaConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.1")
+            self.requires("libjpeg-turbo/3.0.2")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.5")
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_tiff:
             self.requires("libtiff/4.6.0")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.5.0")
+            self.requires("openjpeg/2.5.2")
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
 
@@ -94,8 +94,6 @@ class LeptonicaConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) < "1.79.0":
-            tc.variables["STATIC"] = not self.options.shared
         tc.variables["BUILD_PROG"] = False
         tc.variables["SW_BUILD"] = False
         if Version(self.version) >= "1.83.0":
@@ -150,10 +148,7 @@ class LeptonicaConan(ConanFile):
         replace_in_file(self, cmakelists_src, "${JP2K_LIBRARIES}", "openjp2")
         if Version(self.version) < "1.83.0":
             # pkgconfig is prefered to CMake. Disable pkgconfig so only CMake is used
-            if Version(self.version) <= "1.78.0":
-                replace_in_file(self, cmakelists, "pkg_check_modules(JP2K libopenjp2)", "")
-            else:
-                replace_in_file(self, cmakelists, "pkg_check_modules(JP2K libopenjp2>=2.0 QUIET)", "")
+            replace_in_file(self, cmakelists, "pkg_check_modules(JP2K libopenjp2>=2.0 QUIET)", "")
             # versions below 1.83.0 do not have an option toggle
             replace_in_file(self, cmakelists, "if(NOT JP2K)", "if(0)")
             if not self.options.with_openjpeg:
@@ -168,8 +163,7 @@ class LeptonicaConan(ConanFile):
         if Version(self.version) < "1.83.0":
             # versions below 1.83.0 do not have an option toggle
             replace_in_file(self, cmakelists, "if(NOT WEBP)", "if(0)")
-            if Version(self.version) >= "1.79.0":
-                replace_in_file(self, cmakelists, "if(NOT WEBPMUX)", "if(0)")
+            replace_in_file(self, cmakelists, "if(NOT WEBPMUX)", "if(0)")
             if not self.options.with_webp:
                 replace_in_file(self, cmakelists_src, "if (WEBP_FOUND)", "if(0)")
                 replace_in_file(self, cmake_configure, "if (WEBP_FOUND)", "if(0)")
