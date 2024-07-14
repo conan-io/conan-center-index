@@ -48,8 +48,8 @@ class GinkgoConan(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "17",
-            "msvc": "194",
+            "Visual Studio": "16",
+            "msvc": "193",
             "gcc": "5.4",
             "clang": "3.9",
             "apple-clang": "10.0",
@@ -150,6 +150,8 @@ class GinkgoConan(ConanFile):
 
         debug_suffix = "d" if self.settings.build_type == "Debug" else ""
         has_dpcpp_device = Version(self.version) >= "1.4.0"
+        # Shared MSVC builds ues a separate library for part of Ginkgo since 1.8.0
+        has_config_library = Version(self.version) >= "1.8.0" and self.options.shared and self.settings.os == "Windows"
 
         self.cpp_info.components["ginkgo_core"].set_property(
             "cmake_target_name", "Ginkgo::ginkgo"
@@ -216,6 +218,12 @@ class GinkgoConan(ConanFile):
             self.cpp_info.components["ginkgo_hip"].requires += ["ginkgo_device"]
             self.cpp_info.components["ginkgo_cuda"].requires += ["ginkgo_device"]
             self.cpp_info.components["ginkgo_dpcpp"].requires += ["ginkgo_device"]
+        
+        if has_config_library:
+            self.cpp_info.components["ginkgo_core"].requires += ["ginkgo_config"]
+
+            self.cpp_info.components["ginkgo_config"].set_property("cmake_target_name", "Ginkgo::ginkgo_core")
+            self.cpp_info.components["ginkgo_config"].libs = ["ginkgo_core" + debug_suffix]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Ginkgo"
