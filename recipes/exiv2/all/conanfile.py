@@ -73,16 +73,16 @@ class Exiv2Conan(ConanFile):
     def requirements(self):
         self.requires("libiconv/1.17")
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_xmp == "bundled":
-            self.requires("expat/2.5.0")
+            self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_curl:
             self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.get_safe("with_brotli"):
             self.requires("brotli/1.1.0")
         if self.options.get_safe("with_inih"):
-            self.requires("inih/57")
+            self.requires("inih/58")
 
     def validate(self):
         if Version(self.version) >= "0.28.0":

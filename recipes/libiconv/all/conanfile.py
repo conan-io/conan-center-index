@@ -87,6 +87,19 @@ class LibiconvConan(ConanFile):
         env.generate()
 
         tc = AutotoolsToolchain(self)
+        if self.settings.os == "Windows" and self.settings.compiler == "gcc":
+            if self.settings.arch == "x86":
+                tc.update_configure_args({
+                    "--host": "i686-w64-mingw32",
+                    "RC": "windres --target=pe-i386",
+                    "WINDRES": "windres --target=pe-i386",
+                })
+            elif self.settings.arch == "x86_64":
+                tc.update_configure_args({
+                    "--host": "x86_64-w64-mingw32",
+                    "RC": "windres --target=pe-x86-64",
+                    "WINDRES": "windres --target=pe-x86-64",
+                })
         msvc_version = {"Visual Studio": "12", "msvc": "180"}
         if is_msvc(self) and Version(self.settings.compiler.version) >= msvc_version[str(self.settings.compiler)]:
             # https://github.com/conan-io/conan/issues/6514

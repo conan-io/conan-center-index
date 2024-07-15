@@ -22,7 +22,7 @@ jobs:
           --toc-level 5
       shell: bash
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v4
+      uses: peter-evans/create-pull-request@v6
       with:
         branch: bot/action-doc-toc
         commit-message: "[docs] Regenerate tables of contents"

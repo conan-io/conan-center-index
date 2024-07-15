@@ -1,0 +1,10 @@
+sources:
+  "3.0.0":
+    url: "https://github.com/valgur/velodyne_decoder/archive/refs/tags/v3.0.0.tar.gz"
+    sha256: "bce471232205f9d559464ba8cb99bfb96a2245115e54b744115fe71cd9e42042"
+patches:
+  "3.0.0":
+    - patch_file: "patches/3.0.0-001-fix-msvc-flags.patch"
+      patch_type: "portability"
+      patch_description: "Fix /O2 conflicting with debug flags on MSVC"
+      patch_source: "https://github.com/valgur/velodyne_decoder/commit/22809df3a4d550c3746b17aaca1d6c20692730c4"

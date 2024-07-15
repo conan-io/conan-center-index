@@ -1,4 +1,10 @@
 sources:
+  "0.10.1":
+    url: "https://github.com/e-dant/watcher/archive/release/0.10..tar.gz"
+    sha256: "3c2d3318f64d79437b1305a83382aa26e5054444ac4aed1821937cb97fedc03a"
+  "0.10.0":
+    url: "https://github.com/e-dant/watcher/archive/release/0.10.0.tar.gz"
+    sha256: "c15f088ddc41b58100921ea0b630bcbde83c9960aefecf82221da997f4d4b4ec"
   "0.9.5":
     url: "https://github.com/e-dant/watcher/archive/release/0.9.5.tar.gz"
     sha256: "41b74d138eec106c35a99e7544def599453a8bf4cf4887ad627e1c9e3355287c"
