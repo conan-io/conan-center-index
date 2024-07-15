@@ -1,4 +1,10 @@
 sources:
+  "1.7.2":
+    url: "https://github.com/ERGO-Code/HiGHS/archive/refs/tags/v1.7.2.tar.gz"
+    sha256: "5ff96c14ae19592d3568e9ae107624cbaf3409d328fb1a586359f0adf9b34bf7"
+  "1.7.0":
+    url: "https://github.com/ERGO-Code/HiGHS/archive/refs/tags/v1.7.0.tar.gz"
+    sha256: "D10175AD66E7F113AC5DC00C9D6650A620663A6884FBF2942D6EB7A3D854604F"
   "1.6.0":
     url: "https://github.com/ERGO-Code/HiGHS/archive/refs/tags/v1.6.0.tar.gz"
     sha256: "71962981566477c72c51b8b722c5df053d857b05b4f0e6869f455f657b3aa193"

@@ -69,7 +69,7 @@ index 3cfaedd57..f75fee7a3 100644
 -                      DEFINITIONS -DUSE_JPEG_TURBO=1)
 -if (NOT TARGET libjpeg-turbo::jpeg) # Try to find the non-turbo version
 +if (USE_JPEGTURBO)
-+    checked_find_package (JPEGTurbo REQUIRED
++    checked_find_package (libjpeg-turbo REQUIRED
 +                          DEFINITIONS -DUSE_JPEG_TURBO=1
 +                          PRINT libjpeg-turbo_INCLUDES libjpeg-turbo_LIBRARIES)
 +    add_library(JPEG::JPEG ALIAS libjpeg-turbo::libjpeg-turbo)

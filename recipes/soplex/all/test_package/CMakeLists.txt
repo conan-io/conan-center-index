@@ -9,5 +9,9 @@ if(TARGET soplex::soplex)
    set_target_properties(soplex PROPERTIES INTERFACE_LINK_LIBRARIES soplex::soplex)
 endif()
 
+if (MSVC)
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+endif ()
+
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE soplex)
