@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
@@ -78,6 +78,9 @@ class ReflectCppConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "include", "rfl", "parsing", "NamedTupleParser.hpp"),
+                        "typename F::Type",
+                        "typename std::tuple_element_t<NamedTupleType::pos_extra_fields(), typename NamedTuple<FieldTypes...>::Fields>::Fields")
 
     def package(self):
         copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
