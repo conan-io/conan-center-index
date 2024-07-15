@@ -30,7 +30,7 @@ class IgnitionMathConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "enable_swig": False,
+        "enable_swig": True,
     }
 
     @property
