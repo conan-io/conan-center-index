@@ -6,7 +6,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
 import os
 import re
@@ -219,6 +219,14 @@ class OpenCVConan(ConanFile):
     default_options.update({_name: False for _name in OPENCV_EXTRA_MODULES_OPTIONS})
 
     short_paths = True
+
+    @property
+    def _is_cl_like(self):
+        return self.settings.compiler.get_safe("runtime") is not None
+
+    @property
+    def _is_cl_like_static_runtime(self):
+        return self._is_cl_like and "MT" in msvc_runtime_flag(self)
 
     @property
     def _is_mingw(self):
@@ -1190,8 +1198,8 @@ class OpenCVConan(ConanFile):
         self._check_mandatory_options(self._opencv_modules)
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
-        if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration("Visual Studio with static runtime is not supported for shared library.")
+        if self.options.shared and self._is_cl_like and self._is_cl_like_static_runtime:
+            raise ConanInvalidConfiguration("MSVC or clang-cl with static runtime are not supported for shared library.")
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "4":
             raise ConanInvalidConfiguration("Clang 3.x can't build OpenCV 4.x due to an internal bug.")
         if self.options.get_safe("dnn_cuda") and \
@@ -1445,7 +1453,7 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_GDAL"] = self.options.get_safe("with_gdal", False)
         tc.variables["WITH_GDCM"] = self.options.get_safe("with_gdcm", False)
         tc.variables["WITH_EIGEN"] = self.options.with_eigen
-        tc.variables["WITH_DSHOW"] = is_msvc(self)
+        tc.variables["WITH_DSHOW"] = self._is_cl_like
         tc.variables["WITH_MSMF"] = self.options.get_safe("with_msmf", False)
         tc.variables["WITH_MSMF_DXVA"] = self.options.get_safe("with_msmf_dxva", False)
         tc.variables["OPENCV_MODULES_PUBLIC"] = "opencv"
@@ -1477,6 +1485,15 @@ class OpenCVConan(ConanFile):
         if Version(self.version) >= "4.8.0":
             tc.variables["WITH_AVIF"] = self.options.get_safe("with_avif", False)
             tc.variables["WITH_FLATBUFFERS"] = self.options.get_safe("with_flatbuffers", False)
+
+        if Version(self.version) >= "4.10.0":
+            tc.variables["WITH_KLEIDICV"] = False
+            tc.variables["WITH_NDSRVP"] = False
+            tc.variables["OBSENSOR_USE_ORBBEC_SDK"] = False
+            if is_apple_os(self):
+                # default behavior for 4.9.0
+                tc.variables["WITH_OBSENSOR"] = False
+            tc.variables["WITH_ZLIB_NG"] = False
 
         # Special world option merging all enabled modules into one big library file
         tc.variables["BUILD_opencv_world"] = self.options.world
@@ -1522,8 +1539,8 @@ class OpenCVConan(ConanFile):
         tc.variables["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["ENABLE_CCACHE"] = False
 
-        if is_msvc(self):
-            tc.variables["BUILD_WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
+        if self._is_cl_like:
+            tc.variables["BUILD_WITH_STATIC_CRT"] = self._is_cl_like_static_runtime
 
         if self.settings.os == "Android":
             tc.variables["BUILD_ANDROID_EXAMPLES"] = False

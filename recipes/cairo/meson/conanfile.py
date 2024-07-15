@@ -88,7 +88,7 @@ class CairoConan(ConanFile):
     def requirements(self):
         self.requires("pixman/0.43.4")
         if self.options.with_zlib and self.options.with_png:
-            self.requires("expat/2.6.0")
+            self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_zlib:
