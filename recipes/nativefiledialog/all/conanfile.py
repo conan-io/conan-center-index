@@ -49,7 +49,7 @@ class NativefiledialogConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.settings.arch} architecture is not supported")
 
     def build_requirements(self):
-        self.tool_requires("premake/5.0.0-beta2")
+        self.tool_requires("premake/5.0.0-alpha15")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
