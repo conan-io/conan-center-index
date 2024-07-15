@@ -73,7 +73,7 @@ class LercConan(ConanFile):
         self.cpp_info.libs = ["LercLib" if Version(self.version) < "4.0.0" else "Lerc"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-        if stdcpp_library(self):
+        if not self.options.shared and stdcpp_library(self):
             self.cpp_info.system_libs.append(stdcpp_library(self))
 
         if Version(self.version) >= "3.0":
