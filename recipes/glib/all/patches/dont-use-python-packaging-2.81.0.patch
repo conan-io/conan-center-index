@@ -1,0 +1,148 @@
+diff --git a/gio/gdbus-2.0/codegen/gdbus-codegen.in b/gio/gdbus-2.0/codegen/gdbus-codegen.in
+index 9c409e6..1913b6d 100755
+--- a/gio/gdbus-2.0/codegen/gdbus-codegen.in
++++ b/gio/gdbus-2.0/codegen/gdbus-codegen.in
+@@ -1,4 +1,4 @@
+-#!@PYTHON@
++#!/usr/bin/env @PYTHON@
+ 
+ # GDBus - GLib D-Bus Library
+ #
+diff --git a/gio/gdbus-2.0/codegen/meson.build b/gio/gdbus-2.0/codegen/meson.build
+index 67ea9f2..2ee1fc8 100644
+--- a/gio/gdbus-2.0/codegen/meson.build
++++ b/gio/gdbus-2.0/codegen/meson.build
+@@ -31,7 +31,7 @@ gdbus_codegen_conf = configuration_data()
+ gdbus_codegen_conf.set('VERSION', glib_version)
+ gdbus_codegen_conf.set('MAJOR_VERSION', major_version)
+ gdbus_codegen_conf.set('MINOR_VERSION', minor_version)
+-gdbus_codegen_conf.set('PYTHON', python.full_path())
++gdbus_codegen_conf.set('PYTHON', python_name)
+ gdbus_codegen_conf.set('DATADIR', glib_datadir)
+ 
+ # Install gdbus-codegen executable
+diff --git a/gio/gdbus-2.0/codegen/utils.py b/gio/gdbus-2.0/codegen/utils.py
+index 6399945..86024d7 100644
+--- a/gio/gdbus-2.0/codegen/utils.py
++++ b/gio/gdbus-2.0/codegen/utils.py
+@@ -21,10 +21,9 @@
+ #
+ # Author: David Zeuthen <davidz@redhat.com>
+ 
+-import packaging.version
+ import os
+ import sys
+-
++import re
+ 
+ # pylint: disable=too-few-public-methods
+ class Color:
+@@ -161,11 +160,35 @@ def lookup_brief_docs(annotations):
+ def version_cmp_key(key):
+     # If the 'since' version is 'UNRELEASED', compare higher than anything else
+     # If it is empty put a 0 in its place as this will
+-    # allow LooseVersion to work and will always compare lower.
++    # allow _parse_version() to work and will always compare lower.
+     if key[0] == "UNRELEASED":
+         v = "9999"
+     elif key[0]:
+         v = str(key[0])
+     else:
+         v = "0"
+-    return (packaging.version.Version(v), key[1])
++    return (_parse_version(v), key[1])
++
++
++def _parse_version(version):
++    """
++    Parse a version string into a list of integers and strings.
++
++    This function takes a version string and breaks it down into its component parts.
++    It separates numeric and non-numeric segments, converting numeric segments to integers.
++
++    Args:
++        version (str): The version string to parse.
++
++    Returns:
++        list: A list where each element is either an integer (for numeric parts)
++              or a string (for non-numeric parts).
++
++    Example:
++        >>> parseversion("1.2.3a")
++        [1, 2, 3, 'a']
++        >>> parseversion("2.0.0-rc1")
++        [2, 0, 0, 'rc1']
++    """
++    blocks = re.findall(r"(\d+|\w+)", version)
++    return [int(b) if b.isdigit() else b for b in blocks]
+diff --git a/glib/gtester-report.in b/glib/gtester-report.in
+index 0745d53..b8291d2 100644
+--- a/glib/gtester-report.in
++++ b/glib/gtester-report.in
+@@ -1,4 +1,4 @@
+-#!@PYTHON@
++#! /usr/bin/env @PYTHON@
+ # GLib Testing Framework Utility			-*- Mode: python; -*-
+ # Copyright (C) 2007 Imendio AB
+ # Authors: Tim Janik
+diff --git a/glib/meson.build b/glib/meson.build
+index b2dd569..5c29bb7 100644
+--- a/glib/meson.build
++++ b/glib/meson.build
+@@ -502,7 +502,7 @@ endif
+ 
+ report_conf = configuration_data()
+ report_conf.set('GLIB_VERSION', glib_version)
+-report_conf.set('PYTHON', python.full_path())
++report_conf.set('PYTHON', python_name)
+ configure_file(
+   input: 'gtester-report.in',
+   output: 'gtester-report',
+diff --git a/gobject/glib-genmarshal.in b/gobject/glib-genmarshal.in
+index 0578b74..aa5af43 100755
+--- a/gobject/glib-genmarshal.in
++++ b/gobject/glib-genmarshal.in
+@@ -1,4 +1,4 @@
+-#!@PYTHON@
++#!/usr/bin/env @PYTHON@
+ 
+ # pylint: disable=too-many-lines, missing-docstring, invalid-name
+ 
+diff --git a/gobject/glib-mkenums.in b/gobject/glib-mkenums.in
+index 7e794e9..e10b910 100755
+--- a/gobject/glib-mkenums.in
++++ b/gobject/glib-mkenums.in
+@@ -1,4 +1,4 @@
+-#!@PYTHON@
++#!/usr/bin/env @PYTHON@
+ 
+ # If the code below looks horrible and unpythonic, do not panic.
+ #
+diff --git a/gobject/meson.build b/gobject/meson.build
+index 78b732b..2129aaf 100644
+--- a/gobject/meson.build
++++ b/gobject/meson.build
+@@ -87,7 +87,7 @@ python_tools = [
+ 
+ python_tools_conf = configuration_data()
+ python_tools_conf.set('VERSION', glib_version)
+-python_tools_conf.set('PYTHON', python.full_path())
++python_tools_conf.set('PYTHON', python_name)
+ 
+ foreach tool: python_tools
+   tool_bin = configure_file(
+diff --git a/meson.build b/meson.build
+index bcc2887..6cca73d 100644
+--- a/meson.build
++++ b/meson.build
+@@ -2457,7 +2457,9 @@ endif
+ 
+ glib_conf.set('HAVE_PROC_SELF_CMDLINE', have_proc_self_cmdline)
+ 
+-python = import('python').find_installation(modules: ['packaging'])
++python = import('python').find_installation()
++# used for '#!/usr/bin/env <name>'
++python_name = 'python3'
+ 
+ python_version = python.language_version()
+ python_version_req = '>=3.7'

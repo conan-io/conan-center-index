@@ -453,6 +453,8 @@ and does not install libraries with the boost prefix.
 
 Yes, but make sure it does not have Boost in the name. Use the [`author-name` convention](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#what-is-the-policy-on-recipe-name-collisions) so there are no conflicts. In addition to follow the rules outlined above.
 
+**NOTE**: In case you have no intention to submit to Boost, then you can use the project name as is (e.g `boost-foobar`).
+
 ## Can I add options that do not affect `package_id` or the package contents
 
 Generally no, these sorts of options can most likely be set from a profile or downstream recipes. However if the project supports this option from its build script

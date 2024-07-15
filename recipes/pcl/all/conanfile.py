@@ -91,6 +91,7 @@ class PclConan(ConanFile):
         "precompile_only_core_point_types": [True, False],
         # Whether to append a ''/d/rd/s postfix to executables on Windows depending on the build type
         "add_build_type_postfix": [True, False],
+        "use_sse": [True, False],
     }
     default_options = {
         "shared": False,
@@ -151,6 +152,7 @@ class PclConan(ConanFile):
         # Enabled to avoid excessive memory usage during compilation in CCI
         "precompile_only_core_point_types": True,
         "add_build_type_postfix": False,
+        "use_sse": True,
     }
 
     short_paths = True
@@ -333,6 +335,8 @@ class PclConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.use_sse
 
     def configure(self):
         if self.options.shared:
@@ -476,6 +480,8 @@ class PclConan(ConanFile):
             tc.cache_variables[f"BUILD_{comp}"] = True
         for comp in disabled:
             tc.cache_variables[f"BUILD_{comp}"] = False
+
+        tc.cache_variables["PCL_ENABLE_SSE"] = self.options.get_safe("use_sse", False)
 
         tc.generate()
 
