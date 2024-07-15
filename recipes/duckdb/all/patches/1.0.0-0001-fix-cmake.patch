@@ -1,0 +1,125 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ec66b57..6321321 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -843,12 +843,12 @@ function(build_loadable_extension_directory NAME OUTPUT_DIRECTORY EXTENSION_VERS
+       COMMAND emcc $<TARGET_FILE:${TARGET_NAME}> -o $<TARGET_FILE:${TARGET_NAME}>.wasm -O3 -sSIDE_MODULE=2 -sEXPORTED_FUNCTIONS="_${NAME}_init,_${NAME}_version" ${WASM_THREAD_FLAGS} ${TO_BE_LINKED}
+       )
+   endif()
+-  add_custom_command(
+-    TARGET ${TARGET_NAME}
+-    POST_BUILD
+-    COMMAND
+-    ${CMAKE_COMMAND} -DEXTENSION=$<TARGET_FILE:${TARGET_NAME}>${EXTENSION_POSTFIX} -DPLATFORM_FILE=${DuckDB_BINARY_DIR}/duckdb_platform_out -DDUCKDB_VERSION="${DUCKDB_NORMALIZED_VERSION}" -DEXTENSION_VERSION="${EXTENSION_VERSION}" -DNULL_FILE=${DUCKDB_MODULE_BASE_DIR}/scripts/null.txt -P ${DUCKDB_MODULE_BASE_DIR}/scripts/append_metadata.cmake
+-    )
++  # add_custom_command(
++  #   TARGET ${TARGET_NAME}
++  #   POST_BUILD
++  #   COMMAND
++  #   ${CMAKE_COMMAND} -DEXTENSION=$<TARGET_FILE:${TARGET_NAME}>${EXTENSION_POSTFIX} -DPLATFORM_FILE=${DuckDB_BINARY_DIR}/duckdb_platform_out -DDUCKDB_VERSION="${DUCKDB_NORMALIZED_VERSION}" -DEXTENSION_VERSION="${EXTENSION_VERSION}" -DNULL_FILE=${DUCKDB_MODULE_BASE_DIR}/scripts/null.txt -P ${DUCKDB_MODULE_BASE_DIR}/scripts/append_metadata.cmake
++  #   )
+   add_dependencies(${TARGET_NAME} duckdb_platform)
+   if (NOT EXTENSION_CONFIG_BUILD AND NOT ${EXTENSION_TESTS_ONLY} AND NOT CLANG_TIDY)
+     add_dependencies(duckdb_local_extension_repo ${TARGET_NAME})
+@@ -869,7 +869,7 @@ function(build_static_extension NAME PARAMETERS)
+   set(FILES "${ARGV}")
+   list(REMOVE_AT FILES 0)
+   add_library(${NAME}_extension STATIC ${FILES})
+-  target_link_libraries(${NAME}_extension duckdb_static)
++#  target_link_libraries(${NAME}_extension duckdb_static)
+ endfunction()
+ 
+ # Internal extension register function
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 06c0c9a..ac1c4ad 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -93,21 +93,21 @@ else()
+       duckdb_skiplistlib
+       duckdb_mbedtls
+       duckdb_yyjson)
+-
++  if(BUILD_SHARED_LIBS)
+   add_library(duckdb SHARED ${ALL_OBJECT_FILES})
+   target_link_libraries(duckdb ${DUCKDB_LINK_LIBS})
+   link_threads(duckdb)
+   link_extension_libraries(duckdb)
+-
++  endif()
+   add_library(duckdb_static STATIC ${ALL_OBJECT_FILES})
+   target_link_libraries(duckdb_static ${DUCKDB_LINK_LIBS})
+   link_threads(duckdb_static)
+   link_extension_libraries(duckdb_static)
+-
++  if(BUILD_SHARED_LIBS)
+   target_include_directories(
+     duckdb PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+-
++  endif()
+   target_include_directories(
+     duckdb_static PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                          $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+@@ -123,10 +123,18 @@ else()
+           DESTINATION "${INSTALL_INCLUDE_DIR}")
+ 
+ endif()
+-
++if(BUILD_SHARED_LIBS)
+ install(
+-  TARGETS duckdb duckdb_static
++  TARGETS duckdb
+   EXPORT "${DUCKDB_EXPORT_SET}"
+   LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
+   ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+   RUNTIME DESTINATION "${INSTALL_BIN_DIR}")
++else()
++install(
++  TARGETS duckdb_static
++  EXPORT "${DUCKDB_EXPORT_SET}"
++  LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
++  ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
++  RUNTIME DESTINATION "${INSTALL_BIN_DIR}")
++endif()
+diff --git a/tools/odbc/CMakeLists.txt b/tools/odbc/CMakeLists.txt
+index baf7823..4447d26 100644
+--- a/tools/odbc/CMakeLists.txt
++++ b/tools/odbc/CMakeLists.txt
+@@ -37,6 +37,13 @@ add_library(duckdb_odbc SHARED ${ALL_OBJECT_FILES} duckdb_odbc.def)
+ 
+ set_target_properties(duckdb_odbc PROPERTIES DEFINE_SYMBOL "DUCKDB_ODBC_API")
+ target_link_libraries(duckdb_odbc ${LINK_LIB_LIST} duckdb_static)
++install(
++    TARGETS duckdb_odbc
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++)
+ 
+ if(NOT CLANG_TIDY)
+   add_subdirectory(test)
+diff --git a/tools/sqlite3_api_wrapper/CMakeLists.txt b/tools/sqlite3_api_wrapper/CMakeLists.txt
+index e29c33e..9e387f9 100644
+--- a/tools/sqlite3_api_wrapper/CMakeLists.txt
++++ b/tools/sqlite3_api_wrapper/CMakeLists.txt
+@@ -26,12 +26,12 @@ if(NOT AMALGAMATION_BUILD)
+ endif()
+ link_threads(sqlite3_api_wrapper_static)
+ 
+-if(NOT WIN32 AND NOT ZOS)
++if(BUILD_SHARED_LIBS AND NOT WIN32 AND NOT ZOS)
+   add_library(sqlite3_api_wrapper SHARED ${SQLITE_API_WRAPPER_FILES})
+   target_link_libraries(sqlite3_api_wrapper duckdb ${DUCKDB_EXTRA_LINK_FLAGS})
+   link_threads(sqlite3_api_wrapper)
+ endif()
+-
++if(0)
+ include_directories(../../third_party/catch)
+ 
+ include_directories(test/include)
+@@ -43,3 +43,4 @@ if(WIN32 OR ZOS)
+ else()
+   target_link_libraries(test_sqlite3_api_wrapper sqlite3_api_wrapper)
+ endif()
++endif()
