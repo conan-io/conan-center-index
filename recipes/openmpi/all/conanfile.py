@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
@@ -82,6 +83,9 @@ class OpenMPIConan(ConanFile):
         if self.version == "4.1.0" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("OpenMPI 4.1.0 doesn't support armv8")
 
+    def build_requirements(self):
+        self.tool_requires("libtool/2.4.7")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -149,6 +153,8 @@ class OpenMPIConan(ConanFile):
         deps = AutotoolsDeps(self)
         deps.generate()
 
+        VirtualBuildEnv(self).generate()
+
         # TODO: might want to enable reproducible builds by setting
         #  $SOURCE_DATE_EPOCH, $USER and $HOSTNAME
 
@@ -159,6 +165,8 @@ class OpenMPIConan(ConanFile):
     def build(self):
         self._patch_sources()
         autotools = Autotools(self)
+        # Run autoreconf to fix "error: cannot run C compiled programs" configure issues with Clang
+        self.run("./autogen.pl --force", cwd=self.source_folder)
         autotools.configure()
         autotools.make()
 
