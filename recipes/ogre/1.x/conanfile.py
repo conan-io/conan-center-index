@@ -452,6 +452,7 @@ class OgreConanFile(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "OGRE", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake", "OGRE"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_file_rel_path), Version(self.version)
