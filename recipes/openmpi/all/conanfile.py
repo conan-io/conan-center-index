@@ -132,6 +132,9 @@ class OpenMPIConan(ConanFile):
             "--with-xpmem=no",  # XPMEM
         ]
         if is_apple_os(self):
+            if self.settings.arch == "armv8":
+                tc.configure_args.append("--host=aarch64-apple-darwin")
+                tc.extra_ldflags.append("-arch arm64")
             # macOS has no libnl
             tc.configure_args.append("--enable-mca-no-build=reachable-netlink")
         # libtool's libltdl is not really needed, OpenMPI provides its own equivalent.
