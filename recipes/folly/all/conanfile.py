@@ -161,8 +161,6 @@ class FollyConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
-        tc.cache_variables["CMAKE_PROJECT_folly_INCLUDE"] = "conan_deps.cmake"
-
         if can_run(self):
             for var in ["FOLLY_HAVE_UNALIGNED_ACCESS", "FOLLY_HAVE_LINUX_VDSO", "FOLLY_HAVE_WCHAR_SUPPORT", "HAVE_VSNPRINTF_ERRORS"]:
                 tc.variables[f"{var}_EXITCODE"] = "0"
@@ -230,10 +228,17 @@ class FollyConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+
+        # -DCMAKE_PROJECT_folly_INCLUDE=conan_deps.cmake does not work in C3I for some reason, force the inclusion
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "project(${PACKAGE_NAME} CXX C ASM)",
+                        "project(${PACKAGE_NAME} CXX C ASM)\ninclude(conan_deps.cmake)")
+
         folly_deps = os.path.join(self.source_folder, "CMake", "folly-deps.cmake")
         replace_in_file(self, folly_deps, " MODULE", " ")
         replace_in_file(self, folly_deps, "${Boost_LIBRARIES}", f"{' '.join(self._required_boost_cmake_targets)}")
         replace_in_file(self, folly_deps, "OpenSSL 1.1.1", "OpenSSL")
+
         # Disable example
         save(self, os.path.join(self.source_folder, "folly", "logging", "example", "CMakeLists.txt"), "")
 
