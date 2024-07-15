@@ -41,7 +41,8 @@ class NativefiledialogConan(ConanFile):
 
     def requirements(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("gtk/3.24.37")
+            # Using system GTK since the Conan version is not v2 compatible
+            self.requires("gtk/system", options={"version": 3})
 
     def validate(self):
         if self.settings.arch not in ["x86", "x86_64"]:
@@ -112,24 +113,15 @@ class NativefiledialogConan(ConanFile):
         return "nfd" + suffix
 
     def package(self):
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, "*nfd.h",
-             dst=os.path.join(self.package_folder, "include"),
-             src=self.source_folder,
-             keep_path=False)
-
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*nfd.h", self.source_folder, os.path.join(self.package_folder, "include"), keep_path=False)
         if is_msvc(self):
-            copy(self, f"*{self._lib_name}.lib",
-                 dst=os.path.join(self.package_folder, "lib"),
-                 src=self.source_folder,
-                 keep_path=False)
+            copy(self, f"*{self._lib_name}.lib", self.source_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
         else:
-            copy(self, f"*{self._lib_name}.a",
-                 dst=os.path.join(self.package_folder, "lib"),
-                 src=self.source_folder,
-                 keep_path=False)
+            copy(self, f"*{self._lib_name}.a", self.source_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = [self._lib_name]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.requires = ["gtk::gtk+-3.0"]
+        # FIXME: uncomment once non-system GTK is available
+        # if self.settings.os in ["Linux", "FreeBSD"]:
+        #     self.cpp_info.requires = ["gtk::gtk+-3.0"]
