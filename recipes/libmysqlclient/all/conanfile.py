@@ -38,7 +38,7 @@ class LibMysqlClientCConan(ConanFile):
         "with_curl": True,
         "with_boost": False, # Disabled by default due to a rigid version requirement
         "with_kerberos": False, # TODO: enable once krb5 is available in CCI
-        "with_ldap": False, # TODO: enable once https://github.com/conan-io/conan-center-index/pull/18800 is merged
+        "with_ldap": True,
         "with_protobuf": True,
         "with_sasl": False, # TODO: enable once with_gssapi=True in cyrus-sasl
     }
@@ -80,7 +80,7 @@ class LibMysqlClientCConan(ConanFile):
         else:
             self.requires("openssl/[>=1.1 <4]")
         if self.settings.os == "FreeBSD":
-            self.requires("libunwind/1.7.2")
+            self.requires("libunwind/1.8.1")
         # Dependencies that would otherwise be bundled
         self.requires("icu/74.2")
         self.requires("editline/3.1")
@@ -88,7 +88,7 @@ class LibMysqlClientCConan(ConanFile):
         self.requires("lz4/1.9.4")
         self.requires("rapidjson/cci.20230929")
         self.requires("zlib/[>=1.2.13 <2]")
-        self.requires("zstd/1.5.5")
+        self.requires("zstd/1.5.6")
         # Optional deps
         if self.options.with_boost:
             # Requires an exact version of boost
@@ -101,9 +101,9 @@ class LibMysqlClientCConan(ConanFile):
             # TODO: add krb5 package to CCI for Kerberos support
             self.requires("krb5/1.21.2")
         if self.options.with_ldap:
-            self.requires("openldap/2.6.6")
+            self.requires("openldap/2.6.7")
         if self.options.with_protobuf:
-            self.requires("protobuf/3.21.12")
+            self.requires("protobuf/5.27.0")
 
     def validate_build(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -133,7 +133,7 @@ class LibMysqlClientCConan(ConanFile):
         if is_apple_os(self):
             self.tool_requires("cmake/[>=3.20 <4]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/2.2.0")
         if self.options.with_protobuf:
             self.tool_requires("protobuf/<host_version>")
 
