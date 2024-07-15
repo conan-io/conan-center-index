@@ -80,6 +80,9 @@ class OpenMPIConan(ConanFile):
             # Requires Cygwin or WSL
             raise ConanInvalidConfiguration("OpenMPI doesn't support Windows")
 
+        if self.version == "4.1.0" and self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("OpenMPI 4.1.0 doesn't support armv8")
+
         if conan_version.major == 1 and self.settings.compiler in ["clang", "apple-clang"]:
             # Fails with "configure: error: cannot run C compiled programs."
             raise ConanInvalidConfiguration("Clang and AppleClang are not supported on Conan v1")
