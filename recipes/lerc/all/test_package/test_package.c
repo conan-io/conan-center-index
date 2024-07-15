@@ -1,11 +1,10 @@
 #include <Lerc_c_api.h>
 
-#include <cstdint>
-#include <vector>
+#include <stdint.h>
 
 int main() {
-  uint32_t numBytesBlob = 275714;
-  std::vector<uint8_t> pLercBlob(numBytesBlob);
+  const uint32_t numBytesBlob = 275714;
+  uint8_t pLercBlob[1000000];
   uint32_t infoArr[10];
   double dataRangeArr[3];
   lerc_getBlobInfo(&pLercBlob[0], numBytesBlob, infoArr, dataRangeArr, 10, 3);
