@@ -8,7 +8,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.env import Environment, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, replace_in_file, rm, rmdir, save, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
@@ -204,9 +204,18 @@ class ICUConan(ConanFile):
 
         autotools = Autotools(self)
         autotools.configure(build_script_folder=os.path.join(self.source_folder, "source"))
-        autotools.make()
-        if self._with_unit_tests:
-            autotools.make(target="check")
+
+        if self.settings.arch == 'armv8' and self._settings_build.os == "Windows":
+            bash_path = self.conf.get("tools.microsoft.bash:path")
+            with chdir(self, os.path.join(self.source_folder, "source")):
+                self.run(f"./configure {autotools._configure_args}", win_bash=True)
+                self.run(f"{bash_path} make", win_bash=True)
+                if self._with_unit_tests:
+                    self.run(f"{bash_path} make check", win_bash=True)
+        else:
+            autotools.make()
+            if self._with_unit_tests:
+                autotools.make(target="check")
 
     @property
     def _data_filename(self):
@@ -223,8 +232,11 @@ class ICUConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        autotools = Autotools(self)
-        autotools.install()
+        if self.settings.arch == 'armv8' and self._settings_build.os == "Windows":
+            self.run(f'make install "DESTDIR={unix_path(self, self.package_folder)}"')
+        else:
+            autotools = Autotools(self)
+            autotools.install()
 
         dll_files = glob.glob(os.path.join(self.package_folder, "lib", "*.dll"))
         if dll_files:
