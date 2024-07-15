@@ -80,8 +80,6 @@ class OpenMPIConan(ConanFile):
         if self.settings.os == "Windows":
             # Requires Cygwin or WSL
             raise ConanInvalidConfiguration("OpenMPI doesn't support Windows")
-        if self.version == "4.1.0" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("OpenMPI 4.1.0 doesn't support armv8")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
