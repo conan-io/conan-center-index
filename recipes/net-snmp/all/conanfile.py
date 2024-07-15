@@ -82,6 +82,9 @@ class NetSnmpConan(ConanFile):
         if is_msvc(self):
             tc = NMakeToolchain(self)
             tc.generate()
+            # Workaround for "unresolved external symbol" errors during shared build
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
         else:
             if not cross_building(self):
                 env = VirtualRunEnv(self)
