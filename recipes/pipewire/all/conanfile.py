@@ -181,13 +181,8 @@ class PipeWireConan(ConanFile):
         tc.c_args.append("-Wno-error=strict-prototypes")
         # This appears to be an issue that crops up when using Avahi and libpulse involving the malloc_info and malloc_trim functions.
         tc.c_args.append("-Wno-error=implicit-function-declaration")
-        for dependency, _value in self.dependencies.direct_host.items():
-            if dependency.ref.name == "linux-headers-generic":
-                for includedir in self.dependencies.direct_host[
-                    "linux-headers-generic"
-                ].cpp_info.includedirs:
-                    tc.c_args.append(f"-I{includedir}")
-                break
+        for includedir in self.dependencies["linux-headers-generic"].cpp_info.includedirs:
+            tc.c_args.append(f"-I{includedir}")
         tc.project_options["alsa"] = feature("with_libalsa")
         tc.project_options["auto_features"] = "disabled"
         tc.project_options["avb"] = (
