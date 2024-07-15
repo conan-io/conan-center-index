@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.files import copy, get, save
+from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.52.0"
@@ -115,8 +115,6 @@ class IosCMakeConan(ConanFile):
              dst=os.path.join(self.package_folder, "licenses"),
              src=self.source_folder,
              keep_path=False)
-        # satisfy KB-H014 (header_only recipes require headers)
-        save(self, os.path.join(self.package_folder, "include", "dummy_header.h"), "\n")
 
     def package_info(self):
         settings = getattr(self, "settings_target", self.settings)
