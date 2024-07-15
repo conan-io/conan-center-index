@@ -9,10 +9,9 @@ required_conan_version = ">=1.50.0"
 
 class NanoflannConan(ConanFile):
     name = "nanoflann"
-    description = """nanoflann is a C++11 header-only library for building KD-Trees
-                    of datasets with different topologies: R2, R3 (point clouds),
-                    SO(2) and SO(3) (2D and 3D rotation groups).
-                    """
+    description = ("nanoflann is a C++11 header-only library for building KD-Trees"
+                   " of datasets with different topologies: R2, R3 (point clouds),"
+                   " SO(2) and SO(3) (2D and 3D rotation groups).")
     topics = ("flann", "nearest-neighbor", "kd-trees")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jlblancoc/nanoflann"
