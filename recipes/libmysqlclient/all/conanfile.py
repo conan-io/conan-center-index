@@ -48,14 +48,14 @@ class LibMysqlClientCConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17" if Version(self.version) >= "8.0.27" else "11"
+        return "17"
 
     @property
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "16",
             "msvc": "192",
-            "gcc": "7" if Version(self.version) >= "8.0.27" else "5.3",
+            "gcc": "7",
             "clang": "6",
         }
 
@@ -75,10 +75,7 @@ class LibMysqlClientCConan(ConanFile):
 
     def requirements(self):
         # Required
-        if Version(self.version) < "8.0.30":
-            self.requires("openssl/1.1.1w")
-        else:
-            self.requires("openssl/[>=1.1 <4]")
+        self.requires("openssl/[>=1.1 <4]")
         if self.settings.os == "FreeBSD":
             self.requires("libunwind/1.8.1")
         # Dependencies that would otherwise be bundled
