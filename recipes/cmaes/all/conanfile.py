@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import export_conandata_patches, get, rmdir, rm, copy
+from conan.tools.files import export_conandata_patches, get, rmdir, rm, copy, apply_conandata_patches
 import os
 
 class CmaesConan(ConanFile):
@@ -68,7 +68,7 @@ class CmaesConan(ConanFile):
         tc.generate()
 
     def build(self):
-        #apply_conandata_patches(self)
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
