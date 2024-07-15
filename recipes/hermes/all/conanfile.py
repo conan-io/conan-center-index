@@ -34,7 +34,7 @@ class HermesConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "7",
+            "gcc": "8",
             "clang": "7",
             "apple-clang": "10",
             "Visual Studio": "15",
