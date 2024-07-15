@@ -42,7 +42,7 @@ class NativefiledialogConan(ConanFile):
     def requirements(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
             # Using system GTK since the Conan version is not v2 compatible
-            self.requires("gtk/system", options={"version": 3})
+            self.requires("gtk/system")
 
     def validate(self):
         if self.settings.arch not in ["x86", "x86_64"]:
