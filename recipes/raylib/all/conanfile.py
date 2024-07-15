@@ -69,7 +69,7 @@ class RaylibConan(ConanFile):
 
     def validate(self):
         if self.options.module_rtext and not self.options.module_rtextures:
-            raise ConanInvalidConfiguration("Cannot build rtext without rtextures")
+            raise ConanInvalidConfiguration('-o="raylib/*:module_rtext=True" needs -o="raylib/*:module_rtextures=True"')
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
