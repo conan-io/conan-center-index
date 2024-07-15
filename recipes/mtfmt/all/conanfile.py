@@ -77,17 +77,15 @@ class MtFmtConan(ConanFile):
         cmake.install()
 
         # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
-        rmdir(self, os.path.join(self.package_folder, "mtfmt", "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "mtfmt", "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "mtfmt", "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "mtfmt", "bin"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         suffix = "_d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = ["mtfmt" + suffix]
-        self.cpp_info.libdirs = [os.path.join("mtfmt", "lib") if self.options.shared else os.path.join("mtfmt", "lib", "static")]
-        self.cpp_info.bindirs = [os.path.join("mtfmt", "bin")]
-        self.cpp_info.includedirs = [os.path.join("mtfmt", "include")]
+        self.cpp_info.libdirs = ["lib" if self.options.shared else os.path.join("lib", "static")]
         if self.options.use_stdout:
             self.cpp_info.defines = ["_MSTR_USE_STD_IO"]
