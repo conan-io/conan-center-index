@@ -8,8 +8,10 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.scm import Version
 import os
 import re
+import shutil
 import textwrap
 
 required_conan_version = ">=1.53.0"
@@ -151,7 +153,17 @@ class FreetypeConan(ConanFile):
         if self.settings.os == "Windows" and not self.options.shared:
             rename(self, os.path.join(self.package_folder, "lib", "libfreetype.a"), os.path.join(self.package_folder, "lib", "freetype.lib"))
 
+        ver = Version(self.version)
+        if self.settings.os == "Windows" and self.options.shared and ver >= "2.13.0" and ver < "2.14.0":
+            # Duplicate DLL name for backwards compatibility with earlier recipe revisions
+            # See https://github.com/conan-io/conan-center-index/issues/23768
+            suffix = "d" if self.settings.build_type == "Debug" else ""
+            src = os.path.join(self.package_folder, "bin", "freetype-6.dll")
+            dst = os.path.join(self.package_folder, "bin", f"freetype{suffix}.dll")
+            shutil.copyfile(src, dst)
+
         libtool_version = self._extract_libtool_version()
+
         save(self, self._libtool_version_txt, libtool_version)
         self._make_freetype_config(libtool_version)
 
