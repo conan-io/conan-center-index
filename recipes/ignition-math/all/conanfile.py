@@ -69,10 +69,10 @@ class IgnitionMathConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("ignition-cmake/2.10.0", visible=False)
+        self.requires("ignition-cmake/2.17.1", visible=False)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.enable_swig:
-            self.requires("swig/4.1.0")
+            self.requires("swig/4.1.1")
 
     def validate(self):
         if cross_building(self) and self.settings.arch == "armv8":
