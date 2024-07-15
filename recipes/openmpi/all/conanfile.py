@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.files import copy, get, rm, rmdir, save
@@ -79,6 +79,10 @@ class OpenMPIConan(ConanFile):
         if self.settings.os == "Windows":
             # Requires Cygwin or WSL
             raise ConanInvalidConfiguration("OpenMPI doesn't support Windows")
+
+        if conan_version.major == 1 and self.settings.compiler in ["clang", "apple-clang"]:
+            # Fails with "configure: error: cannot run C compiled programs."
+            raise ConanInvalidConfiguration("Clang and AppleClang are not supported on Conan v1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
