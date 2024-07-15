@@ -102,20 +102,10 @@ class XapianCoreConan(ConanFile):
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
 
-        # Based on https://github.com/conan-io/conan-center-index/blob/c647b1/recipes/libx264/all/conanfile.py#L94
         if is_apple_os(self) and self.settings.arch == "armv8":
+            # A fix for ./configure issues on armv8
             tc.configure_args.append("--host=aarch64-apple-darwin")
-            tc.extra_asflags = ["-arch arm64"]
-            tc.extra_ldflags = ["-arch arm64"]
-            if self.settings.os != "Macos":
-                xcrun = XCRun(self)
-                platform_flags = ["-isysroot", xcrun.sdk_path]
-                apple_min_version_flag = AutotoolsToolchain(self).apple_min_version_flag
-                if apple_min_version_flag:
-                    platform_flags.append(apple_min_version_flag)
-                tc.extra_asflags.extend(platform_flags)
-                tc.extra_cflags.extend(platform_flags)
-                tc.extra_ldflags.extend(platform_flags)
+            tc.extra_ldflags.append("-arch arm64")
 
         tc.generate(env)
 
