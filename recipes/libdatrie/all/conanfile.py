@@ -55,9 +55,7 @@ class LibdatrieConan(ConanFile):
         export_conandata_patches(self)
 
     def requirements(self):
-        # Only used by the tools and to pass a ./configure check
-        # FIXME: should not be required if tools=False
-        self.requires("libiconv/1.17", visible=False)
+        self.requires("libiconv/1.17")
 
     def validate(self):
         if is_apple_os(self) and self.options.shared:
