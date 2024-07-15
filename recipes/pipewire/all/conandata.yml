@@ -1,4 +1,4 @@
 sources:
-  "1.0.6":
-    url: "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.0.6/pipewire-1.0.6.tar.bz2"
-    sha256: "22f78b0e5a0e16821748cfb238fc756d1d44632751f2db0fdaa733a73701c6b1"
+  "1.2.1":
+    url: "https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/1.2.1/pipewire-1.2.1.tar.bz2"
+    sha256: "f15be402ec3b69f36ee2cb0244b6c17fdd5e6374429ae9e3dc194313503dd5ad"
