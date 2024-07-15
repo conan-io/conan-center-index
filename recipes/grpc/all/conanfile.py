@@ -208,11 +208,20 @@ class GrpcConan(ConanFile):
         # - using `make` as the cmake generator
         # Make will run commands via `/bin/sh` which will strip all env vars that start with `DYLD*`
         # This workaround wraps the protoc command to be invoked by CMake with a modified environment
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         settings_build = getattr(self, "settings_build", self.settings)
         if settings_build.os == "Macos":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+            replace_in_file(self, cmakelists,
                             "COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}",
                             'COMMAND ${CMAKE_COMMAND} -E env "DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}" ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}')
+        if self.settings.os == "Macos":
+            # See https://github.com/grpc/grpc/issues/36654#issuecomment-2228569158
+            replace_in_file(self, cmakelists, "target_compile_features(upb_textformat_lib PUBLIC cxx_std_14)", 
+            """target_compile_features(upb_textformat_lib PUBLIC cxx_std_14)
+            target_link_options(upb_textformat_lib PRIVATE -Wl,-undefined,dynamic_lookup)
+            target_link_options(upb_json_lib PRIVATE -Wl,-undefined,dynamic_lookup)
+            """)
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
