@@ -34,8 +34,6 @@ class libuiConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.options["gtk"].version = 3
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -61,21 +59,11 @@ class libuiConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=self.source_folder)
-        copy(self, "*.h",
-             dst=os.path.join(self.package_folder, "include"),
-             src=self.source_folder)
-        copy(self, "*.dll",
-             dst=os.path.join(self.package_folder, "bin"),
-             src=self.build_folder,
-             keep_path=False)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.h", self.source_folder, os.path.join(self.package_folder, "include"))
+        copy(self, "*.dll", self.build_folder, os.path.join(self.package_folder, "bin"), keep_path=False)
         for pattern in ["*.a", "*.so*", "*.dylib*", "*.lib"]:
-            copy(self, pattern,
-                 dst=os.path.join(self.package_folder, "lib"),
-                 src=self.build_folder,
-                 keep_path=False)
+            copy(self, pattern, self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
