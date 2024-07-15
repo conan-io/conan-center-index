@@ -1133,8 +1133,8 @@ class MesaConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.4.0")
-        self.tool_requires("cpython/3.12.2")
+        self.tool_requires("meson/[>=1.4.0 <2]")
+        self.tool_requires("cpython/3.12.2", options={"shared": True})
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.2.0")
         if self.options.get_safe("platform_wayland"):
@@ -1165,12 +1165,20 @@ class MesaConan(ConanFile):
             "dep_wl_scanner = dependency('wayland-scanner', native: true)",
             "dep_wl_scanner = dependency('wayland-scanner_BUILD', native: true)",
         )
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "meson.build"),
-            "dep_wl_protocols = dependency('wayland-protocols', version : '>= 1.34')",
-            "dep_wl_protocols = dependency('wayland-protocols_BUILD', native: true, version : '>= 1.34')",
-        )
+        if self.version >= Version("24.1"):
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "meson.build"),
+                "dep_wl_protocols = dependency('wayland-protocols', version : '>= 1.34')",
+                "dep_wl_protocols = dependency('wayland-protocols_BUILD', native: true, version : '>= 1.34')",
+            )
+        else:
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "meson.build"),
+                "dep_wl_protocols = dependency('wayland-protocols', version : '>= 1.30')",
+                "dep_wl_protocols = dependency('wayland-protocols_BUILD', native: true, version : '>= 1.30')",
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -1231,16 +1239,26 @@ class MesaConan(ConanFile):
         tc.project_options["gbm"] = feature("gbm")
         tc.project_options["gles1"] = feature("gles1")
         tc.project_options["gles2"] = feature("gles2")
-        tc.project_options["glvnd"] = feature("with_libglvnd")
+        if self.version >= Version("24.1"):
+            tc.project_options["glvnd"] = feature("with_libglvnd")
+        else:
+            tc.project_options["glvnd"] = boolean("with_libglvnd")
         tc.project_options["glx"] = stringifier("glx", default="disabled")
         tc.project_options["imagination-srv"] = boolean("imagination_srv")
         tc.project_options["install-intel-gpu-tests"] = False
-        intel_clc = "auto"
-        if self.options.get_safe("intel_clc") == "system":
-            intel_clc = "system"
+        if self.version >= Version("24.1"):
+            intel_clc = "auto"
+            if self.options.get_safe("intel_clc") == "system":
+                intel_clc = "system"
+            else:
+                intel_clc = "enabled"
+            tc.project_options["intel-clc"] = intel_clc
         else:
-            intel_clc = "enabled"
-        tc.project_options["intel-clc"] = intel_clc
+            tc.project_options["intel-clc"] = (
+                "system"
+                if self.options.get_safe("intel_clc") == "system"
+                else (feature("intel_clc"))
+            )
         tc.project_options["llvm"] = feature("with_llvm")
         tc.project_options["libunwind"] = feature("with_libunwind")
         tc.project_options["microsoft-clc"] = feature("microsoft_clc")

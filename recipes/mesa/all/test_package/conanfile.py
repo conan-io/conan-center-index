@@ -20,7 +20,7 @@ class TestPackageConan(ConanFile):
             self.requires("egl-headers/cci.20220525")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.4.0")
+        self.tool_requires("meson/[>=1.4.0 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.2.0")
 
