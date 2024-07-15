@@ -49,6 +49,8 @@ class libdis6Conan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_EXAMPLES"] = False
         tc.cache_variables["BUILD_TESTS"] = False
+        # CMake Error at cmake/libdis6-api.cmake:37 (set_property): could not find CACHE variable CMAKE_BUILD_TYPE
+        tc.cache_variables["CMAKE_BUILD_TYPE"] = str(self.settings.build_type)
         tc.generate()
 
     def layout(self):
