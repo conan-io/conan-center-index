@@ -1,0 +1,22 @@
+diff --git a/CPP/CMakeLists.txt b/CPP/CMakeLists.txt
+index 58b41c2..f405521 100644
+--- a/CPP/CMakeLists.txt
++++ b/CPP/CMakeLists.txt
+@@ -46,7 +46,7 @@ if (NOT (CLIPPER2_USINGZ STREQUAL "ONLY"))
+   if (MSVC)
+     target_compile_options(Clipper2 PRIVATE /W4 /WX)
+   else()
+-    target_compile_options(Clipper2 PRIVATE -Wall -Wextra -Wpedantic -Werror)
++    # target_compile_options(Clipper2 PRIVATE -Wall -Wextra -Wpedantic -Werror)
+     target_link_libraries(Clipper2 PUBLIC -lm)
+   endif()
+ endif()
+@@ -65,7 +65,7 @@ if (NOT (CLIPPER2_USINGZ STREQUAL "OFF"))
+   if (MSVC)
+     target_compile_options(Clipper2Z PRIVATE /W4 /WX)
+   else()
+-    target_compile_options(Clipper2Z PRIVATE -Wall -Wextra -Wpedantic -Werror)
++    # target_compile_options(Clipper2Z PRIVATE -Wall -Wextra -Wpedantic -Werror)
+     target_link_libraries(Clipper2Z PUBLIC -lm)
+   endif()
+ endif()
