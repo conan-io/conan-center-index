@@ -38,13 +38,13 @@ class FollyConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
+        # https://github.com/facebook/folly/blob/v2024.07.08.00/folly/Portability.h
         return {
-            # https://github.com/facebook/folly/commit/3e001b85f4cbfcf962a696b89c1284a00083fce1
-            "gcc": "8" if Version(self.version) >= "2024.04.01.00" else "7",
-            "Visual Studio": "16",
-            "msvc": "192",
-            "clang": "6",
+            "gcc": "10",
+            "clang": "10",
             "apple-clang": "10",
+            "msvc": "192",
+            "Visual Studio": "16",
         }
 
     def export_sources(self):
