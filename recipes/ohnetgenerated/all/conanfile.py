@@ -17,18 +17,16 @@ class OhNetGeneratedConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/openhome/ohNetGenerated"
     topics = ("openhome", "ohnet", "ohnetgenerated", "upnp")
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
 
-    def _get_openhome_architecture(self, args):
+    def _fill_openhome_architecture(self, args):
         if is_apple_os(self):
             if str(self.settings.arch).startswith("armv8"):
                 openhome_architecture = "arm64"
@@ -39,15 +37,11 @@ class OhNetGeneratedConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def configure(self):
-        if self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared builds")
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("ohnet/[>=1.36.5182]", transitive_headers=True, transitive_libs=True)
+        self.requires("ohnet/1.37.5454", transitive_headers=True, transitive_libs=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -61,52 +55,53 @@ class OhNetGeneratedConan(ConanFile):
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
-            tc.make_args.append("-j1")
             tc.generate()
+
+    def _fill_ohnet_args(self, args):
+        include_dir = self.dependencies["ohnet"].cpp_info.includedirs[0]
+        lib_dir = self.dependencies["ohnet"].cpp_info.libdirs[0]
+
+        args.extend([f"inc_build={include_dir}", f"depDirCs={lib_dir}/", f"ohNetLibDir={lib_dir}/"])
+
+        if self.settings.build_type == "Debug":
+            args.append("debug=1")
+
+        installlibdir = os.path.join(self.package_folder, "lib")
+        installincludedir = os.path.join(self.package_folder, "include")
+
+        args.extend([f"prefix={self.package_folder}",f"installdir={self.package_folder}",  f"installlibdir={installlibdir}", f"installincludedir={installincludedir}"])
+
+        if not is_msvc(self):
+            args = self._fill_openhome_architecture(args)
+            args.append("rsync=no")
+            if str(self.settings.compiler.libcxx) == "libc++":
+                args.extend(["CPPFLAGS=-stdlib=libc++", "LDFLAGS=-stdlib=libc++"])
+        return args
 
     def build(self):
         apply_conandata_patches(self)
         targets = "proxies devices"
-
-        include_dir = self.dependencies["ohnet"].cpp_info.includedirs[0]
-        lib_dir = self.dependencies["ohnet"].cpp_info.libdirs[0]
-
-        args = [f"inc_build={include_dir}", f"depDirCs={lib_dir}/", f"ohNetLibDir={lib_dir}/"]
-        if self.settings.build_type == "Debug":
-            args.append("debug=1")
+        args = []
+        self._fill_ohnet_args(args)
 
         with chdir(self, self.source_folder):
             if is_msvc(self):
                 self.run(f"nmake /f OhNet.mak {' '.join(args)} {targets}")
             else:
-                args = self._get_openhome_architecture(args)
-                args.append("rsync=no")
-                if str(self.settings.compiler.libcxx) == "libc++":
-                    args.extend(["CPPFLAGS=-stdlib=libc++", "LDFLAGS=-stdlib=libc++"])
                 autotools = Autotools(self)
                 autotools.make(args=args, target=targets)
 
     def package(self):
         targets = "install"
-
-        installlibdir = os.path.join(self.package_folder, "lib")
-        installincludedir = os.path.join(self.package_folder, "include")
-
-        include_dir = self.dependencies["ohnet"].cpp_info.includedirs[0]
-        lib_dir = self.dependencies["ohnet"].cpp_info.libdirs[0]
-
-        args = [f"inc_build={include_dir}", f"depDirCs={lib_dir}/", f"ohNetLibDir={lib_dir}/"]
-        if self.settings.build_type == "Debug":
-            args.append("debug=1")
+        args = []
+        self._fill_ohnet_args(args)
 
         copy(self, "License.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         with chdir(self, self.source_folder):
             if is_msvc(self):
-                self.run(f"nmake /f OhNet.mak {targets} installdir={self.package_folder} installlibdir={installlibdir} installincludedir={installincludedir} {' ' .join(args)}")
+                self.run(f"nmake /f OhNet.mak {' '.join(args)} {targets}")
             else:
-                args.extend([f"prefix={self.package_folder}", f"installlibdir={installlibdir}", f"installincludedir={installincludedir}", "rsync=no"])
-                args = self._get_openhome_architecture(args)
                 autotools = Autotools(self)
                 autotools.make(args=args, target=targets)
                 if is_apple_os(self):
