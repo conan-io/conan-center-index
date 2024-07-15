@@ -52,6 +52,29 @@ class IosCMakeConan(ConanFile):
         "toolchain_target": "auto",
     }
 
+    @property
+    def _default_toolchain_target(self):
+        if self.settings.os == "iOS":
+            if self.settings.arch in ["armv8", "armv8.3"]:
+                return "OS64"
+            if self.settings.arch == "x86_64":
+                return "SIMULATOR64"
+            # 32bit is dead, don't care
+        elif self.settings.os == "watchOS":
+            if self.settings.arch == "x86_64":
+                return "SIMULATOR_WATCHOS"
+            else:
+                return "WATCHOS"
+        elif self.settings.os == "tvOS":
+            if self.settings.arch == "x86_64":
+                return "TVOS"
+            else:
+                return "SIMULATOR_TVOS"
+        return None
+
+    def config_options(self):
+        self.options.toolchain_target = self._default_toolchain_target or "auto"
+
     def export_sources(self):
         copy(self, "cmake-wrapper", self.recipe_folder, self.export_sources_folder)
 
@@ -61,31 +84,11 @@ class IosCMakeConan(ConanFile):
     def validate(self):
         if not is_apple_os(self):
             raise ConanInvalidConfiguration("This package only supports Apple operating systems")
+        if self.options.toolchain_target == "auto":
+            raise ConanInvalidConfiguration("Cannot guess toolchain_target. Please set the option explicitly.")
 
     def package_id(self):
         self.info.clear()
-
-    def _guess_toolchain_target(self, os, arch):
-        if os == "iOS":
-            if arch in ["armv8", "armv8.3"]:
-                return "OS64"
-            if arch == "x86_64":
-                return "SIMULATOR64"
-            # 32bit is dead, don't care
-        elif os == "watchOS":
-            if arch == "x86_64":
-                return "SIMULATOR_WATCHOS"
-            else:
-                return "WATCHOS"
-        elif os == "tvOS":
-            if arch == "x86_64":
-                return "TVOS"
-            else:
-                return "SIMULATOR_TVOS"
-        raise ConanInvalidConfiguration(
-            "Cannot guess toolchain_target. "
-            "Please set the option explicitly (or check your os settings)."
-        )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -115,55 +118,32 @@ class IosCMakeConan(ConanFile):
         # satisfy KB-H014 (header_only recipes require headers)
         save(self, os.path.join(self.package_folder, "include", "dummy_header.h"), "\n")
 
-    @property
-    def _platform_info(self):
-        if is_apple_os(self):
-            if not getattr(self, "settings_target", None):
-                #  not a build_require, but can be fine since its build as a ppr:b, but nothing to do
-                return None, None, None
-            # this is where I want to be, expecting this as a build_require for a host
-            target_os = str(self.settings_target.os)
-            arch_flag = self.settings_target.arch
-            target_version = self.settings_target.os.version
-        elif self.settings.os == "iOS":  # old-style v1 profile, don't use
-            target_os = str(self.settings.os)
-            arch_flag = self.settings.arch
-            target_version = self.settings.os.version
-        else:
-            # hackingtosh ? hu
-            raise ConanInvalidConfiguration("Building for iOS on a non-Mac platform? Please tell me how!")
-
-        return target_os, arch_flag, target_version
-
     def package_info(self):
-        target_os, arch_flag, target_version = self._platform_info
-        if not target_os:
+        settings = getattr(self, "settings_target", self.settings)
+
+        if not settings.os:
             return
 
-        if self.options.toolchain_target == "auto":
-            toolchain_target = self._guess_toolchain_target(target_os, arch_flag)
-        else:
-            toolchain_target = self.options.toolchain_target
-
+        arch_flag = str(settings.arch)
         if arch_flag == "armv8":
             arch_flag = "arm64"
         elif arch_flag == "armv8.3":
             arch_flag = "arm64e"
 
-        cmake_options = (
-            f"-DENABLE_BITCODE={self.options.enable_bitcode} "
-            f"-DENABLE_ARC={self.options.enable_arc} "
-            f"-DENABLE_VISIBILITY={self.options.enable_visibility} "
+        cmake_options = " ".join([
+            f"-DENABLE_BITCODE={self.options.enable_bitcode}",
+            f"-DENABLE_ARC={self.options.enable_arc}",
+            f"-DENABLE_VISIBILITY={self.options.enable_visibility}",
             f"-DENABLE_STRICT_TRY_COMPILE={self.options.enable_strict_try_compile}"
-        )
+        ])
         # Note that this, as long as we specify (overwrite) the ARCHS, PLATFORM has just limited effect,
         # but PLATFORM need to be set in the profile so it makes sense, see ios-cmake docs for more info
-        cmake_flags = (
-            f"-DPLATFORM={toolchain_target} "
-            f"-DDEPLOYMENT_TARGET={target_version} "
-            f"-DARCHS={arch_flag} "
-            f"{cmake_options}"
-        )
+        cmake_flags = " ".join([
+            f"-DPLATFORM={self.options.toolchain_target}",
+            f"-DDEPLOYMENT_TARGET={str(settings.os.version)}",
+            f"-DARCHS={arch_flag}",
+            f"{cmake_options}",
+        ])
         self.output.info(f"Setting toolchain options to: {cmake_flags}")
         cmake_wrapper = os.path.join(self.package_folder, "bin", "cmake-wrapper")
         self.output.info(f"Setting cmake-wrapper path to: {cmake_wrapper}")
