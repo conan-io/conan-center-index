@@ -82,6 +82,7 @@ class PipeWireConan(ConanFile):
         export_conandata_patches(self)
 
     def config_options(self):
+        # The xfixes from the xorg/system package on CCI is version 5.0.1 which is too old for PipeWire which requires at least version 6.
         if os.getenv("CONAN_CENTER_BUILD_SERVICE") is not None:
             self.options.with_xfixes = False
 
