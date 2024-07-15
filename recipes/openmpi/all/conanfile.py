@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.files import copy, get, rm, rmdir, save
-from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
 
@@ -68,7 +68,7 @@ class OpenMPIConan(ConanFile):
         if not is_apple_os(self):
             self.requires("libnl/3.8.0")
         if self.options.external_hwloc:
-            self.requires("hwloc/2.9.3")
+            self.requires("hwloc/2.10.0")
         else:
             self.requires("libpciaccess/0.17")
             self.requires("libudev/system")
@@ -142,6 +142,9 @@ class OpenMPIConan(ConanFile):
         # ./configure with a external libevent fails.
         tc.configure_args.append("--with-libevent=internal")
         tc.generate()
+
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
         # TODO: might want to enable reproducible builds by setting
         #  $SOURCE_DATE_EPOCH, $USER and $HOSTNAME
