@@ -70,10 +70,11 @@ class IosCMakeConan(ConanFile):
                 return "TVOS"
             else:
                 return "SIMULATOR_TVOS"
-        return None
+        return "auto"
 
-    def config_options(self):
-        self.options.toolchain_target = self._default_toolchain_target or "auto"
+    def configure(self):
+        if self.options.toolchain_target == "auto":
+            self.options.toolchain_target = self._default_toolchain_target
 
     def export_sources(self):
         copy(self, "cmake-wrapper", self.recipe_folder, self.export_sources_folder)
