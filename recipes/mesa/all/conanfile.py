@@ -1,5 +1,6 @@
 import glob
 import os
+import platform
 import re
 
 from conan import ConanFile, conan_version
@@ -1134,7 +1135,7 @@ class MesaConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.4.0 <2]")
-        self.tool_requires("cpython/3.12.2", options={"shared": True})
+        self.tool_requires("cpython/3.12.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.2.0")
         if self.options.get_safe("platform_wayland"):
@@ -1337,10 +1338,18 @@ class MesaConan(ConanFile):
         python_suffix = ".exe" if self.settings.os == "Windows" else "3"
         venv_python = os.path.join(venv_folder, script_subfolder, f"python{python_suffix}")
         self.run(f"{self._python} -m venv {venv_folder}")
-        self.run(f"{venv_python} -m pip install pip --upgrade")
-        self.run(f"{venv_python} -m pip install packaging==24.0")
-        self.run(f"{venv_python} -m pip install mako==1.3.3")
-        # INFO: Preserve user's PYTHONPATH in case defined. Only can access venv path after installing mako.
+        env = Environment()
+        if platform.system() == "Linux":
+            # The Python SSL module is used by pip when installing packages.
+            # Dependending on the Linux distribution, the OpenSSL configuration may be incompatible with the Python SSL module.
+            # Set OPENSSL_CONF to avoid attempting to load an invalid configuration.
+            env.define("OPENSSL_CONF", "/dev/null")
+        with env.vars(self).apply():
+            self.run(f"{venv_python} -m pip install pip --upgrade")
+            self.run(f"{venv_python} -m pip install packaging==24.1")
+            self.run(f"{venv_python} -m pip install mako==1.3.5")
+        # Preserve user's PYTHONPATH in case it is defined.
+        # Only access the venv path after installing mako.
         pythonpath = None
         if self.settings.os == "Windows":
             pythonpath = os.path.join(self.build_folder, "venv", "Lib", "site-packages")
