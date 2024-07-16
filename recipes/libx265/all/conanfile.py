@@ -78,7 +78,7 @@ class Libx265Conan(ConanFile):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("shared not supported with static runtime")
 
-        if self.settings.compiler == "apple-clang" and "arm" in self.settings.arch:
+        if self.settings.compiler == "apple-clang" and "arm" in self.settings.arch and self.options.assembly:
             # Undefined symbols for architecture arm64:
             # "x265::setupAssemblyPrimitives(x265::EncoderPrimitives&, int)", referenced from:
             # x265::x265_setup_primitives(x265_param*) in libx265.a[20](primitives.cpp.o)
