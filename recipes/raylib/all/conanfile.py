@@ -30,13 +30,9 @@ class RaylibConan(ConanFile):
         "module_rmodels": [True, False],
         "module_raudio": [True, False],
 
-        "mouse_gestures": [True, False],
         "default_font": [True, False],
-        "screen_capture": [True, False],
-        "gif_recording": [True, False],
         "busy_wait_loop": [True, False],
         "events_waiting": [True, False],
-        "compression_api": [True, False],
         "events_automation": [True, False],
         "custom_frame_control": [True, False]
     }
@@ -51,13 +47,9 @@ class RaylibConan(ConanFile):
         "module_rmodels": True,
         "module_raudio": True,
 
-        "mouse_gestures": True,
         "default_font": True,
-        "screen_capture": True,
-        "gif_recording": True,
         "busy_wait_loop": False,
         "events_waiting": False,
-        "compression_api": True,
         "events_automation": False,
         "custom_frame_control": False
     }
@@ -111,27 +103,22 @@ class RaylibConan(ConanFile):
         tc.variables["WITH_PIC"] = self.options.get_safe("fPIC", True)
 
         tc.variables["CUSTOMIZE_BUILD"] = True
-        true_false = lambda x: True if x else False
-        tc.variables["SUPPORT_MODULE_RSHAPES"]   = true_false(self.options.module_rshapes)
-        tc.variables["SUPPORT_MODULE_RTEXTURES"] = true_false(self.options.module_rtextures)
-        tc.variables["SUPPORT_MODULE_RTEXT"]     = true_false(self.options.module_rtext)
-        tc.variables["SUPPORT_MODULE_RMODELS"]   = true_false(self.options.module_rmodels)
-        tc.variables["SUPPORT_MODULE_RAUDIO"]    = true_false(self.options.module_raudio)
+        tc.variables["SUPPORT_MODULE_RSHAPES"]   = self.options.module_rshapes
+        tc.variables["SUPPORT_MODULE_RTEXTURES"] = self.options.module_rtextures
+        tc.variables["SUPPORT_MODULE_RTEXT"]     = self.options.module_rtext
+        tc.variables["SUPPORT_MODULE_RMODELS"]   = self.options.module_rmodels
+        tc.variables["SUPPORT_MODULE_RAUDIO"]    = self.options.module_raudio
 
         # this makes it include the headers rcamera.h, rgesture.h and rprand.h
-        tc.variables["SUPPORT_CAMERA_SYSTEM"] = True
-        tc.variables["SUPPORT_GESTURES_SYSTEM"] = True
+        tc.variables["SUPPORT_CAMERA_SYSTEM"]    = True
+        tc.variables["SUPPORT_GESTURES_SYSTEM"]  = True
         tc.variables["SUPPORT_RPRAND_GENERATOR"] = True
 
-        tc.variables["SUPPORT_MOUSE_GESTURES"] = true_false(self.options.mouse_gestures)
-        tc.variables["SUPPORT_DEFAULT_FONT"] = true_false(self.options.default_font)
-        tc.variables["SUPPORT_SCREEN_CAPTURE"] = true_false(self.options.screen_capture)
-        tc.variables["SUPPORT_GIF_RECORDING"] = true_false(self.options.gif_recording)
-        tc.variables["SUPPORT_BUSY_WAIT_LOOP"] = true_false(self.options.busy_wait_loop)
-        tc.variables["SUPPORT_EVENTS_WAITING"] = true_false(self.options.events_waiting)
-        tc.variables["SUPPORT_COMPRESSION_API"] = true_false(self.options.compression_api)
-        tc.variables["SUPPORT_EVENTS_AUTOMATION"] = true_false(self.options.events_automation)
-        tc.variables["SUPPORT_CUSTOM_FRAME_CONTROL"] = true_false(self.options.custom_frame_control)
+        tc.variables["SUPPORT_DEFAULT_FONT"]         = self.options.default_font
+        tc.variables["SUPPORT_BUSY_WAIT_LOOP"]       = self.options.busy_wait_loop
+        tc.variables["SUPPORT_EVENTS_WAITING"]       = self.options.events_waiting
+        tc.variables["SUPPORT_EVENTS_AUTOMATION"]    = self.options.events_automation
+        tc.variables["SUPPORT_CUSTOM_FRAME_CONTROL"] = self.options.custom_frame_control
 
         # Due to a specific logic of cmakedeps_macros.cmake used by CMakeDeps to try to locate shared libs on Windows
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0054"] = "NEW"
