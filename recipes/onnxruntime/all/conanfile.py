@@ -77,16 +77,8 @@ class OnnxRuntimeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # ONNX versions are based on the minor version used at
-        # https://github.com/microsoft/onnxruntime/tree/main/cmake/external
-        if Version(self.version) >= "1.18":
-            self.requires("onnx/1.16.1")
-        elif Version(self.version) >= "1.17":
-            self.requires("onnx/1.15.0")
-        elif Version(self.version) >= "1.15":
-            self.requires("onnx/1.14.1")
-        else:
-            self.requires("onnx/1.13.1")
+        required_onnx_version = self.conan_data["onnx_version_map"][self.version]
+        self.requires(f"onnx/{required_onnx_version}")
         self.requires("abseil/20240116.1")
         self.requires("protobuf/3.21.12")
         self.requires("date/3.0.1")
