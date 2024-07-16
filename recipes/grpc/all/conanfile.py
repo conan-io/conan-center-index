@@ -188,9 +188,6 @@ class GrpcConan(ConanFile):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
             tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
 
-        if is_msvc(self) and Version(self.version) >= "1.48":
-            tc.cache_variables["CMAKE_SYSTEM_VERSION"] = "10.0.18362.0"
-
         if self._supports_libsystemd:
             tc.cache_variables["gRPC_USE_SYSTEMD"] = self.options.with_libsystemd
 
@@ -240,8 +237,8 @@ class GrpcConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        # rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # Create one custom module file per executable in order to emulate
         # CMake executables imported targets of grpc
@@ -339,38 +336,27 @@ class GrpcConan(ConanFile):
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
             },
             "gpr": {
-                "lib":
-                "gpr",
+                "lib": "gpr",
                 "requires": [
-                    "abseil::absl_base", "abseil::absl_memory", "abseil::absl_status", "abseil::absl_str_format",
-                    "abseil::absl_strings", "abseil::absl_synchronization", "abseil::absl_time",
-                    "abseil::absl_optional", "abseil::absl_flags"
+                    "upb", "abseil::absl_base", "abseil::absl_memory",
+                    "abseil::absl_status", "abseil::absl_str_format",
+                    "abseil::absl_strings", "abseil::absl_synchronization",
+                    "abseil::absl_time", "abseil::absl_optional",
+                    "abseil::absl_flags"
                 ] + libsystemd(),
-                "system_libs":
-                libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
             },
             "_grpc": {
-                "lib":
-                "grpc",
+                "lib": "grpc",
                 "requires": [
-                    "address_sorting",
-                    "gpr",
-                    # "upb",
-                    "abseil::absl_bind_front",
-                    "abseil::absl_flat_hash_map",
-                    "abseil::absl_inlined_vector",
-                    "abseil::absl_statusor",
-                    "abseil::absl_random_random",
-                    "c-ares::cares",
-                    "openssl::crypto",
-                    "openssl::ssl",
-                    "re2::re2",
-                    "zlib::zlib",
+                    "address_sorting", "gpr", "upb", "abseil::absl_bind_front",
+                    "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector",
+                    "abseil::absl_statusor", "abseil::absl_random_random",
+                    "c-ares::cares", "openssl::crypto",
+                    "openssl::ssl", "re2::re2", "zlib::zlib",
                 ],
-                "system_libs":
-                libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-                "frameworks":
-                corefoundation(),
+                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                "frameworks": corefoundation(),
             },
             "grpc++": {
                 "lib": "grpc++",
@@ -397,24 +383,15 @@ class GrpcConan(ConanFile):
         if not self.options.secure:
             components.update({
                 "grpc_unsecure": {
-                    "lib":
-                    "grpc_unsecure",
+                    "lib": "grpc_unsecure",
                     "requires": [
-                        "address_sorting",
-                        "gpr",
-                        #"upb",
-                        "abseil::absl_flat_hash_map",
-                        "abseil::absl_inlined_vector",
-                        "abseil::absl_statusor",
-                        "c-ares::cares",
-                        "re2::re2",
-                        "zlib::zlib",
+                        "address_sorting", "gpr", "upb", "abseil::absl_flat_hash_map",
+                        "abseil::absl_inlined_vector", "abseil::absl_statusor",
+                        "c-ares::cares", "re2::re2", "zlib::zlib",
                         "abseil::absl_random_random",
                     ],
-                    "system_libs":
-                    libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-                    "frameworks":
-                    corefoundation(),
+                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
+                    "frameworks": corefoundation(),
                 },
                 "grpc++_unsecure": {
                     "lib": "grpc++_unsecure",
