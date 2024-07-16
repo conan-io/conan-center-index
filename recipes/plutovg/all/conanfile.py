@@ -1,10 +1,11 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, rename
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -80,7 +81,12 @@ class PlutoVGConan(ConanFile):
 
         fix_apple_shared_install_name(self)
 
+        if is_msvc(self) and not self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "libplutovg.a"), os.path.join(self.package_folder, "lib", "plutovg.lib"))
+
     def package_info(self):
         self.cpp_info.libs = ["plutovg"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["m"]
+        if is_msvc(self) and not self.options.shared:
+            self.cpp_info.defines.append("PLUTOVG_BUILD_STATIC")
