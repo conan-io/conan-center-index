@@ -4,6 +4,7 @@ from conan.tools.files import get, copy, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.51.1"
@@ -78,9 +79,12 @@ class ReflectCppConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        replace_in_file(self, os.path.join(self.source_folder, "include", "rfl", "parsing", "NamedTupleParser.hpp"),
-                        "typename F::Type",
-                        "typename std::tuple_element_t<NamedTupleType::pos_extra_fields(), typename NamedTuple<FieldTypes...>::Fields>::Fields")
+
+    def build(self):
+        if Version(self.version) >= "0.13.0" and is_msvc(self):
+            replace_in_file(self, os.path.join(self.source_folder, "include", "rfl", "parsing", "NamedTupleParser.hpp"),
+                            "typename F::Type",
+                            "typename std::tuple_element_t<NamedTupleType::pos_extra_fields(), typename NamedTuple<FieldTypes...>::Fields>::Fields")
 
     def package(self):
         copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
