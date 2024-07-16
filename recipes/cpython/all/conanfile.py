@@ -648,6 +648,72 @@ class CPythonConan(ConanFile):
         lib_dir_path = os.path.join(self.package_folder, self._msvc_install_subprefix, "Lib").replace("\\", "/")
         self.run(f"{interpreter_path} -c \"import compileall; compileall.compile_dir('{lib_dir_path}')\"")
 
+    @property
+    def _exact_lib_name(self):
+        prefix = "" if self.settings.os == "Windows" else "lib"
+        if self.settings.os == "Windows":
+            extension = "lib"
+        elif not self.options.shared:
+            extension = "a"
+        elif is_apple_os(self):
+            extension = "dylib"
+        else:
+            extension = "so"
+        return f"{prefix}{self._lib_name}.{extension}"
+
+    @property
+    def _cmake_module_path(self):
+        if is_msvc(self):
+            # On Windows, `lib` is for Python modules, `libs` is for compiled objects.
+            # Usually CMake modules are packaged with the latter.
+            return os.path.join(self._msvc_install_subprefix, "libs", "cmake")
+        else:
+            return os.path.join("lib", "cmake")
+
+    def _write_cmake_findpython_wrapper_file(self):
+        template = textwrap.dedent("""
+        if (DEFINED Python3_VERSION_STRING)
+            set(_CONAN_PYTHON_SUFFIX "3")
+        else()
+            set(_CONAN_PYTHON_SUFFIX "")
+        endif()
+        set(Python${_CONAN_PYTHON_SUFFIX}_EXECUTABLE @PYTHON_EXECUTABLE@)
+        set(Python${_CONAN_PYTHON_SUFFIX}_LIBRARY @PYTHON_LIBRARY@)
+
+        # Fails if these are set beforehand
+        unset(Python${_CONAN_PYTHON_SUFFIX}_INCLUDE_DIRS)
+        unset(Python${_CONAN_PYTHON_SUFFIX}_INCLUDE_DIR)
+
+        include(${CMAKE_ROOT}/Modules/FindPython${_CONAN_PYTHON_SUFFIX}.cmake)
+
+        # Sanity check: The former comes from FindPython(3), the latter comes from the injected find module
+        if(NOT Python${_CONAN_PYTHON_SUFFIX}_VERSION STREQUAL Python${_CONAN_PYTHON_SUFFIX}_VERSION_STRING)
+            message(FATAL_ERROR "CMake detected wrong cpython version - this is likely a bug with the cpython Conan package")
+        endif()
+
+        if (TARGET Python${_CONAN_PYTHON_SUFFIX}::Module)
+            set_target_properties(Python${_CONAN_PYTHON_SUFFIX}::Module PROPERTIES INTERFACE_LINK_LIBRARIES cpython::python)
+        endif()
+        if (TARGET Python${_CONAN_PYTHON_SUFFIX}::SABIModule)
+            set_target_properties(Python${_CONAN_PYTHON_SUFFIX}::SABIModule PROPERTIES INTERFACE_LINK_LIBRARIES cpython::python)
+        endif()
+        if (TARGET Python${_CONAN_PYTHON_SUFFIX}::Python)
+            set_target_properties(Python${_CONAN_PYTHON_SUFFIX}::Python PROPERTIES INTERFACE_LINK_LIBRARIES cpython::embed)
+        endif()
+        """)
+
+        # In order for the package to be relocatable, these variables must be relative to the installed CMake file
+        if is_msvc(self):
+            python_exe = "${CMAKE_CURRENT_LIST_DIR}/../../" + self._cpython_interpreter_name
+            python_library = "${CMAKE_CURRENT_LIST_DIR}/../" + self._exact_lib_name
+        else:
+            python_exe = "${CMAKE_CURRENT_LIST_DIR}/../../bin/" + self._cpython_interpreter_name
+            python_library = "${CMAKE_CURRENT_LIST_DIR}/../" + self._exact_lib_name
+
+        cmake_file = os.path.join(self.package_folder, self._cmake_module_path, "use_conan_python.cmake")
+        content = template.replace("@PYTHON_EXECUTABLE@", python_exe).replace("@PYTHON_LIBRARY@", python_library)
+        save(self, cmake_file, content)
+
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
@@ -695,6 +761,8 @@ class CPythonConan(ConanFile):
                 os.symlink(f"python{self._version_suffix}", self._cpython_symlink)
         fix_apple_shared_install_name(self)
 
+        self._write_cmake_findpython_wrapper_file()
+
     @property
     def _cpython_symlink(self):
         symlink = os.path.join(self.package_folder, "bin", "python")
@@ -733,16 +801,10 @@ class CPythonConan(ConanFile):
             else:
                 lib_ext = ""
         else:
-            lib_ext = self._abi_suffix + (
-                ".dll.a" if self.options.shared and self.settings.os == "Windows" else ""
-            )
+            lib_ext = self._abi_suffix
         return f"python{self._version_suffix}{lib_ext}"
 
     def package_info(self):
-        # FIXME: conan components Python::Interpreter component, need a target type
-        # self.cpp_info.names["cmake_find_package"] = "Python"
-        # self.cpp_info.names["cmake_find_package_multi"] = "Python"
-
         py_version = Version(self.version)
         # python component: "Build a C extension for Python"
         if is_msvc(self):
@@ -785,6 +847,13 @@ class CPythonConan(ConanFile):
             "pkg_config_aliases", [f"python{py_version.major}-embed"]
         )
         self.cpp_info.components["embed"].requires = ["python"]
+
+        # Transparent integration with CMake's FindPython(3)
+        self.cpp_info.set_property("cmake_file_name", "Python3")
+        self.cpp_info.set_property("cmake_module_file_name", "Python")
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join(self._cmake_module_path, "use_conan_python.cmake")])
+        self.cpp_info.builddirs = [self._cmake_module_path]
 
         if self._supports_modules:
             # hidden components: the C extensions of python are built as dynamically loaded shared libraries.
