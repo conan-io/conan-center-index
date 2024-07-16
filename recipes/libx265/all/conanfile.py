@@ -83,7 +83,7 @@ class Libx265Conan(ConanFile):
             # "x265::setupAssemblyPrimitives(x265::EncoderPrimitives&, int)", referenced from:
             # x265::x265_setup_primitives(x265_param*) in libx265.a[20](primitives.cpp.o)
             # ld: symbol(s) not found for architecture arm64
-            raise ConanInvalidConfiguration(f"{self.ref} does not support Mac M1.")
+            raise ConanInvalidConfiguration(f"{self.ref} fails to build for Mac M1. Contributions are welcome.")
 
     def build_requirements(self):
         if self.options.assembly:
