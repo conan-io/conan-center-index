@@ -52,7 +52,7 @@ class QtConan(ConanFile):
         "with_fontconfig": [True, False],
         "with_icu": [True, False],
         "with_harfbuzz": [True, False],
-        "with_libjpeg": ["libjpeg", "libjpeg-turbo", False],
+        "with_libjpeg": ["libjpeg", "libjpeg-turbo", "system", False],
         "with_libpng": [True, False],
         "with_sqlite3": [True, False],
         "with_mysql": [True, False],
