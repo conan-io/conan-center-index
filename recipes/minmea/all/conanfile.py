@@ -56,6 +56,8 @@ class MinmeaConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["MINMEA_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        if is_msvc(self):
+            tc.preprocessor_definitions["MINMEA_INCLUDE_COMPAT"] = "1"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -73,3 +75,5 @@ class MinmeaConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["minmea"]
+        if is_msvc(self):
+            self.cpp_info.defines.append("MINMEA_INCLUDE_COMPAT")
