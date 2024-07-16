@@ -19,6 +19,7 @@ class IosCMakeConan(ConanFile):
 
     package_type = "build-scripts"
     settings = "os", "arch", "compiler", "build_type"
+    # Note: you need to use `-o:b ...` to set these options due to package_type
     options = {
         "enable_bitcode": [True, False],
         "enable_arc": [True, False],
@@ -52,6 +53,11 @@ class IosCMakeConan(ConanFile):
         "toolchain_target": "auto",
     }
 
+    def config_options(self):
+        if os.getenv("CONAN_CENTER_BUILD_SERVICE") is not None:
+            # To not simply skip the build in C3I due to a missing toolchain_target value
+            self.options.toolchain_target = "OS64"
+
     @property
     def _default_toolchain_target(self):
         if self.settings.os == "iOS":
@@ -72,8 +78,11 @@ class IosCMakeConan(ConanFile):
                 return "SIMULATOR_TVOS"
         return None
 
-    def config_options(self):
-        self.options.toolchain_target = self._default_toolchain_target or "auto"
+    @property
+    def _toolchain_target(self):
+        if self.options.toolchain_target == "auto":
+            return self._default_toolchain_target
+        return self.options.toolchain_target
 
     def export_sources(self):
         copy(self, "cmake-wrapper", self.recipe_folder, self.export_sources_folder)
@@ -84,8 +93,11 @@ class IosCMakeConan(ConanFile):
     def validate(self):
         if not is_apple_os(self):
             raise ConanInvalidConfiguration("This package only supports Apple operating systems")
-        if self.options.toolchain_target == "auto":
-            raise ConanInvalidConfiguration("Cannot guess toolchain_target. Please set the option explicitly.")
+        if self._toolchain_target is None:
+            raise ConanInvalidConfiguration(
+                "Cannot guess toolchain target type. "
+                f"Please set the option explicitly with '-o:b {self.name}/*:toolchain_target=...'."
+            )
 
     def package_id(self):
         self.info.clear()
@@ -137,7 +149,7 @@ class IosCMakeConan(ConanFile):
         # Note that this, as long as we specify (overwrite) the ARCHS, PLATFORM has just limited effect,
         # but PLATFORM need to be set in the profile so it makes sense, see ios-cmake docs for more info
         cmake_flags = " ".join([
-            f"-DPLATFORM={self.options.toolchain_target}",
+            f"-DPLATFORM={self._toolchain_target}",
             f"-DDEPLOYMENT_TARGET={str(settings.os.version)}",
             f"-DARCHS={arch_flag}",
             f"{cmake_options}",
