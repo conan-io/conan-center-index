@@ -8,7 +8,7 @@ import os
 import subprocess
 import glob
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2.4.1"
 
 def command_exists(command, cmd="which"):
     return subprocess.call([cmd, command]) == 0
