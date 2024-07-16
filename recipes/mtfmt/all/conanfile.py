@@ -49,7 +49,7 @@ class MtFmtConan(ConanFile):
 
     def validate(self):
         # Windows always builds as release, debug is not supported
-        if is_msvc(self):
+        if is_msvc(self) and self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC debug builds")
 
     def source(self):
