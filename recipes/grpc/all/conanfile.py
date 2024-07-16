@@ -75,10 +75,12 @@ class GrpcConan(ConanFile):
     def _supports_libsystemd(self):
         return self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "1.52"
 
+    def export(self):
+        copy(self, f"target_info/grpc_{self.version}.yml", src=self.recipe_folder, dst=self.export_folder)
+    
     def export_sources(self):
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
         copy(self, f"cmake/{self._grpc_plugin_template}", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
-        copy(self, f"target_info/grpc_{self.version}.yml", src=self.recipe_folder, dst=self.export_folder)
         export_conandata_patches(self)
 
     def config_options(self):
