@@ -39,19 +39,19 @@ class QuciheConan(ConanFile):
         apt.update()
 
         try:
-            apt.install ("rustup", check=True)
+            apt.install (["rustup"], check=True)
             return
         except:
             print ("Can not install `rustup` deb package")
         
         try:
-            apt.install ("cargo", check=True)
+            apt.install (["cargo"], check=True)
             return
         except:
             print ("Can not install `cargo` deb package")
         
         try:
-            apt.install ("rustc", check=True)
+            apt.install (["rustc"], check=True)
             return
         except:
             print ("Can not install `cargo` deb package")
