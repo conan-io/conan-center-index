@@ -11,3 +11,13 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE
         $<IF:$<TARGET_EXISTS:gRPC::grpc++_unsecure>,gRPC::grpc++_unsecure,gRPC::grpc++>
 )
+
+if(CHECK_GRPC_CPP_PLUGIN)
+    if(NOT GRPC_CPP_PLUGIN_PROGRAM)
+        message(FATAL_ERROR "grpc_cpp_plugin not found")
+    endif()
+
+    if(NOT TARGET gRPC::grpc_cpp_plugin)
+        message(FATAL_ERROR "grpc_cpp_plugin target not defined, but expected")
+    endif()
+endif()

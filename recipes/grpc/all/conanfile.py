@@ -1,4 +1,5 @@
 import os
+import yaml
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -56,6 +57,7 @@ class GrpcConan(ConanFile):
     }
 
     short_paths = True
+    _target_info = None
 
     @property
     def _grpc_plugin_template(self):
@@ -76,6 +78,7 @@ class GrpcConan(ConanFile):
     def export_sources(self):
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
         copy(self, f"cmake/{self._grpc_plugin_template}", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
+        copy(self, f"target_info/grpc_{self.version}.yml", src=self.recipe_folder, dst=self.export_folder)
         export_conandata_patches(self)
 
     def config_options(self):
@@ -99,11 +102,11 @@ class GrpcConan(ConanFile):
         # abseil is public. See https://github.com/conan-io/conan-center-index/pull/17284#issuecomment-1526082638
         if Version(self.version) >= "1.62.0":
             self.requires("protobuf/5.27.0", transitive_headers=True)
-            self.requires("abseil/[>=20240116.1]", transitive_headers=True)
+            self.requires("abseil/[>=20240116.1 <20240117.0]", transitive_headers=True)
         else:
             self.requires("abseil/[>=20230125.3 <=20230802.1]", transitive_headers=True)
             self.requires("protobuf/3.21.12", transitive_headers=True)
-        self.requires("c-ares/1.19.1")
+        self.requires("c-ares/[>=1.19.1 <2]")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("re2/20230301")
         self.requires("zlib/[>=1.2.11 <2]")
@@ -232,6 +235,15 @@ class GrpcConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    @property
+    def target_info(self):
+        if self._target_info:
+            return self._target_info
+        target_info_file = os.path.join(self.recipe_folder, "target_info", f"grpc_{self.version}.yml")
+        with open(target_info_file) as f:
+            self._target_info = yaml.safe_load(f)
+        return self._target_info
+
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
@@ -241,45 +253,13 @@ class GrpcConan(ConanFile):
         # rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # Create one custom module file per executable in order to emulate
-        # CMake executables imported targets of grpc
-        for plugin_option, values in self._grpc_plugins.items():
-            if self.options.get_safe(plugin_option):
-                target = values["target"]
-                executable = values["executable"]
+        # CMake executables imported targets of grpc plugins.
+        for plugin_info in self.target_info["grpc_plugins"]:
+            target = plugin_info["target"]
+            executable = plugin_info["executable"]
+            option_name = executable.replace("grpc_", "")
+            if self.options.get_safe(option_name):
                 self._create_executable_module_file(target, executable)
-
-    @property
-    def _grpc_plugins(self):
-        return {
-            "cpp_plugin": {
-                "target": "gRPC::grpc_cpp_plugin",
-                "executable": "grpc_cpp_plugin",
-            },
-            "csharp_plugin": {
-                "target": "gRPC::grpc_csharp_plugin",
-                "executable": "grpc_csharp_plugin",
-            },
-            "node_plugin": {
-                "target": "gRPC::grpc_node_plugin",
-                "executable": "grpc_node_plugin",
-            },
-            "objective_c_plugin": {
-                "target": "gRPC::grpc_objective_c_plugin",
-                "executable": "grpc_objective_c_plugin",
-            },
-            "php_plugin": {
-                "target": "gRPC::grpc_php_plugin",
-                "executable": "grpc_php_plugin",
-            },
-            "python_plugin": {
-                "target": "gRPC::grpc_python_plugin",
-                "executable": "grpc_python_plugin",
-            },
-            "ruby_plugin": {
-                "target": "gRPC::grpc_ruby_plugin",
-                "executable": "grpc_ruby_plugin",
-            },
-        }
 
     def _create_executable_module_file(self, target, executable):
         module_abs_path = os.path.join(self.package_folder, self._module_path)
@@ -327,110 +307,19 @@ class GrpcConan(ConanFile):
         def wsock32():
             return ["wsock32"] if self.settings.os == "Windows" else []
 
-        def corefoundation():
-            return ["CoreFoundation"] if is_apple_os(self) else []
-
-        components = {
-            "address_sorting": {
-                "lib": "address_sorting",
+        targets = self.target_info['grpc_targets']
+        components = {}
+        for target in targets:
+            if self.options.secure and target['name'] in ["grpc_unsecure", "grpc++_unsecure"]:
+                continue
+            if not self.options.codegen and target['name'] in ["grpc++_reflection", "grpcpp_channelz"]:
+                continue
+            components[target['name']] = {
+                "lib": target['lib'],
+                "requires": target.get('requires', []) + libsystemd(),
                 "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
-            "gpr": {
-                "lib": "gpr",
-                "requires": [
-                    "upb", "abseil::absl_base", "abseil::absl_memory",
-                    "abseil::absl_status", "abseil::absl_str_format",
-                    "abseil::absl_strings", "abseil::absl_synchronization",
-                    "abseil::absl_time", "abseil::absl_optional",
-                    "abseil::absl_flags"
-                ] + libsystemd(),
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
-            "_grpc": {
-                "lib": "grpc",
-                "requires": [
-                    "address_sorting", "gpr", "upb", "abseil::absl_bind_front",
-                    "abseil::absl_flat_hash_map", "abseil::absl_inlined_vector",
-                    "abseil::absl_statusor", "abseil::absl_random_random",
-                    "c-ares::cares", "openssl::crypto",
-                    "openssl::ssl", "re2::re2", "zlib::zlib",
-                ],
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-                "frameworks": corefoundation(),
-            },
-            "grpc++": {
-                "lib": "grpc++",
-                "requires": ["_grpc", "protobuf::libprotobuf"],
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
-            "grpc++_alts": {
-                "lib": "grpc++_alts",
-                "requires": ["grpc++", "protobuf::libprotobuf"],
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
-            "grpc++_error_details": {
-                "lib": "grpc++_error_details",
-                "requires": ["grpc++", "protobuf::libprotobuf"],
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
-            "grpc_plugin_support": {
-                "lib": "grpc_plugin_support",
-                "requires": ["protobuf::libprotoc", "protobuf::libprotobuf"],
-                "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-            },
-        }
-
-        if not self.options.secure:
-            components.update({
-                "grpc_unsecure": {
-                    "lib": "grpc_unsecure",
-                    "requires": [
-                        "address_sorting", "gpr", "upb", "abseil::absl_flat_hash_map",
-                        "abseil::absl_inlined_vector", "abseil::absl_statusor",
-                        "c-ares::cares", "re2::re2", "zlib::zlib",
-                        "abseil::absl_random_random",
-                    ],
-                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-                    "frameworks": corefoundation(),
-                },
-                "grpc++_unsecure": {
-                    "lib": "grpc++_unsecure",
-                    "requires": ["grpc_unsecure", "protobuf::libprotobuf"],
-                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-                },
-            })
-
-        if self.options.codegen:
-            components.update({
-                "grpc++_reflection": {
-                    "lib": "grpc++_reflection",
-                    "requires": ["grpc++", "protobuf::libprotobuf"],
-                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-                },
-                "grpcpp_channelz": {
-                    "lib": "grpcpp_channelz",
-                    "requires": ["grpc++", "protobuf::libprotobuf"],
-                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-                },
-            })
-
-        if Version(self.version) <= "1.47":
-            components.update(
-                {"upb": {
-                    "lib": "upb",
-                    "system_libs": libm() + pthread() + crypt32() + ws2_32() + wsock32(),
-                }})
-            # TODO: check if order needs to be preserved
-            components["gpr"]['requires'].append('upb')
-            components["_grpc"]['requires'].append('upb')
-            if not self.options.secure:
-                components["grpc_unsecure"]['requies'].append('upb')
-
-        else:
-            # TODO: upb_base_lib, upb_json_lib, upb_mem_lib, upb_message_lib, upb_textformat_lib
-            # TODO: gRPC::utf8_range_lib
-            # TODO: gRPC::grpc_authorization_provider
-            pass
+                "frameworks": target.get('frameworks', []),
+            }
 
         return components
 
@@ -458,9 +347,11 @@ class GrpcConan(ConanFile):
         # Executable imported targets are added through custom CMake module files,
         # since conan generators don't know how to emulate these kind of targets.
         grpc_modules = []
-        for plugin_option, values in self._grpc_plugins.items():
-            if self.options.get_safe(plugin_option):
-                grpc_module_filename = "{}.cmake".format(values["executable"])
+        for plugin_info in self.target_info["grpc_plugins"]:
+            executable = plugin_info["executable"]
+            option_name = executable.replace("grpc_", "")
+            if self.options.get_safe(option_name):
+                grpc_module_filename = "{}.cmake".format(executable)
                 grpc_modules.append(os.path.join(self._module_path, grpc_module_filename))
         self.cpp_info.set_property("cmake_build_modules", grpc_modules)
 
@@ -471,5 +362,4 @@ class GrpcConan(ConanFile):
         if grpc_modules:
             self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package"] = grpc_modules
             self.cpp_info.components["grpc_execs"].build_modules["cmake_find_package_multi"] = grpc_modules
-        if any(self.options.get_safe(plugin_option) for plugin_option in self._grpc_plugins.keys()):
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
