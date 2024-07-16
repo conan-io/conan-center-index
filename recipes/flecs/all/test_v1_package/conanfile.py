@@ -8,6 +8,8 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        if self.deps_cpp_info["flecs"].version < "4.0.0":
+            cmake.definitions["LESS_VERSION_4"] = "1"
         cmake.configure()
         cmake.build()
 
