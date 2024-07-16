@@ -47,7 +47,8 @@ class MinmeaConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built on Visual Studio and msvc.(yet)")
 
     def build_requirements(self):
-        self.tool_requires("pkgconf/2.2.0")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/2.2.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
