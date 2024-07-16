@@ -8,11 +8,7 @@ import os
 import subprocess
 import glob
 
-required_conan_version = ">=2.4.1"
-
-def command_exists(command, cmd="which"):
-    return subprocess.call([cmd, command]) == 0
-
+required_conan_version = ">=2.0.0"
 
 class QuciheConan(ConanFile):
     name = "quiche"
@@ -31,14 +27,44 @@ class QuciheConan(ConanFile):
     package_type = "library"
 
     def system_requirements(self):
-        Apt(self).install(["cargo"])
-        PacMan(self).install(["rust"])
-        Brew(self).install(["rustup"])
-        Zypper(self).install(["cargo"])
-        Yum(self).install(["rust-toolset"])
-        Dnf(self).install(["rust-toolset"])
-        Apk(self).install(["rust"])
-        Chocolatey(self).install(["rustup.install"])
+        PacMan(self).install(["rust"], update=True, check=True)
+        Brew(self).install(["rustup"], update=True, check=True)
+        Zypper(self).install(["cargo"], update=True, check=True)
+        Yum(self).install(["rust-toolset"], update=True, check=True)
+        Dnf(self).install(["rust-toolset"], update=True, check=True)
+        Apk(self).install(["rust"], update=True, check=True)
+        Chocolatey(self).install(["rustup.install"], update=True, check=True)
+
+        apt = Apt(self)
+        apt.update()
+
+        try:
+            apt.install ("rustup", check=True)
+            return
+        except:
+            print ("Can not install `rustup` deb package")
+        
+        try:
+            apt.install ("cargo", check=True)
+            return
+        except:
+            print ("Can not install `cargo` deb package")
+        
+        try:
+            apt.install ("rustc", check=True)
+            return
+        except:
+            print ("Can not install `cargo` deb package")
+
+        raise ConanInvalidConfiguration ("Can not install Rust")
+            
+    def command_exists(self, command):
+        cmd = "which"
+
+        if self.settings.os == "Windows":
+            cmd = "where"
+
+        return subprocess.call([cmd, command]) == 0
 
     def source(self):
         get (self, **self.conan_data["sources"][self.version], strip_root=False)
@@ -58,11 +84,7 @@ class QuciheConan(ConanFile):
             git.clone ('https://github.com/google/boringssl.git', boringssl)
 
     def generate(self):
-        cmd = "which"
-        if self.settings.os == "Windows":
-            cmd = "where"
-        
-        if not command_exists('cargo', cmd):
+        if not self.command_exists('cargo'):
             raise ConanInvalidConfiguration ("This project made on rust, so the OS must provide the 'cargo'. Can not find the 'cargo' (which cargo)")
 
     def build(self):
