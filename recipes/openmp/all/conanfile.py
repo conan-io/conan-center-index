@@ -13,6 +13,7 @@ class PackageConan(ConanFile):
     homepage = "https://www.openmp.org/"
     topics = ("parallelism", "multiprocessing")
 
+    # package_type = "meta-package"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "provider": ["auto", "native", "llvm"],
@@ -115,8 +116,8 @@ class PackageConan(ConanFile):
         self.cpp_info.includedirs = []
 
         if self.options.provider == "native":
-            # Rely on CMake's FindOpenMP.cmake and an OpenMP implementation provided by the compiler.
-            # Export appropriate flags for the transitive use case.
+            # Export appropriate flags for packages linking against this one transitively.
+            # Direct dependencies of this package will rely on CMake's FindOpenMP.cmake instead.
             openmp_flags = self._openmp_flags
             self.cpp_info.sharedlinkflags = openmp_flags
             self.cpp_info.exelinkflags = openmp_flags
