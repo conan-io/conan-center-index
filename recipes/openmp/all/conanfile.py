@@ -23,7 +23,7 @@ class PackageConan(ConanFile):
 
     def config_options(self):
         if self.settings.compiler in ["clang", "apple-clang"]:
-            # Clang and AppleClang typically ship without their native libomp libraries.
+            # Clang and AppleClang typically ship without their native libomp libraries
             self.options.provider = "llvm"
         else:
             self.options.provider = "native"
@@ -39,7 +39,7 @@ class PackageConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.options.provider == "native" and self._openmp_flags() is None:
+        if self.options.provider == "native" and self._openmp_flags is None:
             raise ConanInvalidConfiguration(
                 f"{self.settings.compiler} is not supported by this recipe. Contributions are welcome!"
             )
@@ -52,20 +52,53 @@ class PackageConan(ConanFile):
                     "Make sure you avoid accidental linking against the native implementation through external libraries."
                 )
 
+    @property
     def _openmp_flags(self):
-        # Based on https://github.com/Kitware/CMake/blob/v3.28.1/Modules/FindOpenMP.cmake#L104-L135
-        if self.settings.compiler == "clang":
+        # Based on https://github.com/Kitware/CMake/blob/v3.30.0/Modules/FindOpenMP.cmake#L119-L154
+        if self.settings.compiler == "gcc":
+            return ["-fopenmp"]
+        elif self.settings.compiler == "clang":
             return ["-fopenmp=libomp"]
         elif self.settings.compiler == "apple-clang":
             return ["-Xclang", "-fopenmp"]
-        elif self.settings.compiler == "gcc":
-            return ["-fopenmp"]
-        elif self.settings.compiler == "intel-cc":
-            return ["-Qopenmp"]
-        elif self.settings.compiler == "sun-cc":
-            return ["-xopenmp"]
         elif is_msvc(self):
             return ["-openmp"]
+        elif self.settings.compiler == "intel-cc":
+            if self.settings.os == "Windows":
+                return ["-Qopenmp"]
+            else:
+                return ["-qopenmp"]
+        elif self.settings.compiler == "sun-cc":
+            return ["-xopenmp"]
+
+        # The following compilers are not currently covered by settings.yml,
+        # but are included for completeness.
+        elif self.settings.compiler == "hp":
+            return ["+Oopenmp"]
+        elif self.settings.compiler == "intel-llvm":
+            if self.settings.get_safe("compiler.frontend") == "msvc":
+                return ["-Qiopenmp"]
+            else:
+                return ["-fiopenmp"]
+        elif self.settings.compiler == "pathscale":
+            return ["-openmp"]
+        elif self.settings.compiler == "nag":
+            return ["-openmp"]
+        elif self.settings.compiler == "absoft":
+            return ["-openmp"]
+        elif self.settings.compiler == "nvhpc":
+            return ["-mp"]
+        elif self.settings.compiler == "pgi":
+            return ["-mp"]
+        elif self.settings.compiler == "xl":
+            return ["-qsmp=omp"]
+        elif self.settings.compiler == "cray":
+            return ["-h", "omp"]
+        elif self.settings.compiler == "fujitsu":
+            return ["-Kopenmp"]
+        elif self.settings.compiler == "fujitsu-clang":
+            return ["-fopenmp"]
+
         return None
 
     def package_info(self):
@@ -79,7 +112,7 @@ class PackageConan(ConanFile):
         if self.options.provider == "native":
             # Rely on CMake's FindOpenMP.cmake and an OpenMP implementation provided by the compiler.
             # Export appropriate flags for the transitive use case.
-            openmp_flags = self._openmp_flags()
+            openmp_flags = self._openmp_flags
             self.cpp_info.sharedlinkflags = openmp_flags
             self.cpp_info.exelinkflags = openmp_flags
             self.cpp_info.cflags = openmp_flags
