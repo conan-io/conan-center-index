@@ -21,6 +21,5 @@ int main()
         printf("There are probably missing compiler flags.\n");
         return 1;
     }
-    printf("OpenMP API version supported by the compiler: %d\n", _OPENMP);
     return 0;
 }
