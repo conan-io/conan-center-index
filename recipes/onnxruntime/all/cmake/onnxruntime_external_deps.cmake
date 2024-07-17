@@ -103,22 +103,6 @@ if(onnxruntime_ENABLE_TRAINING OR (onnxruntime_ENABLE_TRAINING_APIS AND onnxrunt
   find_package(cxxopts REQUIRED CONFIG)
 endif()
 
-set(onnxruntime_LINK_DIRS )
-if (onnxruntime_USE_CUDA)
-      #TODO: combine onnxruntime_CUDNN_HOME and onnxruntime_CUDA_HOME, assume they are the same
-      if (WIN32)
-        if(onnxruntime_CUDNN_HOME)
-          list(APPEND onnxruntime_LINK_DIRS ${onnxruntime_CUDNN_HOME}/lib ${onnxruntime_CUDNN_HOME}/lib/x64)
-        endif()
-        list(APPEND onnxruntime_LINK_DIRS ${onnxruntime_CUDA_HOME}/x64/lib64)
-      else()
-        if(onnxruntime_CUDNN_HOME)
-          list(APPEND onnxruntime_LINK_DIRS  ${onnxruntime_CUDNN_HOME}/lib ${onnxruntime_CUDNN_HOME}/lib64)
-        endif()
-        list(APPEND onnxruntime_LINK_DIRS ${onnxruntime_CUDA_HOME}/lib64)
-      endif()
-endif()
-
 if(onnxruntime_USE_SNPE)
     include(external/find_snpe.cmake)
     list(APPEND onnxruntime_EXTERNAL_LIBRARIES ${SNPE_NN_LIBS})

@@ -27,13 +27,11 @@ class OnnxRuntimeConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_xnnpack": [True, False],
-        "use_cuda": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_xnnpack": False,
-        "use_cuda": False,
     }
     short_paths = True
 
@@ -145,7 +143,7 @@ class OnnxRuntimeConan(ConanFile):
         tc.variables["onnxruntime_USE_FULL_PROTOBUF"] = not self.dependencies["protobuf"].options.lite
         tc.variables["onnxruntime_USE_XNNPACK"] = self.options.with_xnnpack
 
-        tc.variables["onnxruntime_USE_CUDA"] = self.options.use_cuda
+        tc.variables["onnxruntime_USE_CUDA"] = False
         tc.variables["onnxruntime_BUILD_UNIT_TESTS"] = False
         tc.variables["onnxruntime_RUN_ONNX_TESTS"] = False
         tc.variables["onnxruntime_GENERATE_TEST_REPORTS"] = False
@@ -170,7 +168,7 @@ class OnnxRuntimeConan(ConanFile):
         tc.variables["onnxruntime_TVM_CUDA_RUNTIME"] = False
         tc.variables["onnxruntime_TVM_USE_HASH"] = False
         tc.variables["onnxruntime_CROSS_COMPILING"] = False
-        tc.variables["onnxruntime_DISABLE_CONTRIB_OPS"] = self.options.use_cuda
+        tc.variables["onnxruntime_DISABLE_CONTRIB_OPS"] = False
         tc.variables["onnxruntime_DISABLE_ML_OPS"] = False
         tc.variables["onnxruntime_DISABLE_RTTI"] = False
         tc.variables["onnxruntime_DISABLE_EXCEPTIONS"] = False
