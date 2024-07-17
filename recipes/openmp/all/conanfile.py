@@ -22,8 +22,11 @@ class PackageConan(ConanFile):
     }
 
     def config_options(self):
-        if self.settings.compiler in ["clang", "apple-clang"]:
-            # Clang and AppleClang typically ship without their native libomp libraries
+        if self.settings.compiler == "clang" and self.settings.os == "Linux":
+            # The Clang toolchain on Linux distros typically ships without libomp.
+            # FreeBSD includes it, though.
+            self.options.provider = "llvm"
+        elif self.settings.compiler == "apple-clang":
             self.options.provider = "llvm"
         else:
             self.options.provider = "native"
@@ -62,6 +65,8 @@ class PackageConan(ConanFile):
         elif self.settings.compiler == "apple-clang":
             return ["-Xclang", "-fopenmp"]
         elif is_msvc(self):
+            # Use `-o provider=llvm` for `-openmp=llvm` in MSVC.
+            # TODO: add support for `-openmp=experimental`?
             return ["-openmp"]
         elif self.settings.compiler == "intel-cc":
             if self.settings.os == "Windows":
