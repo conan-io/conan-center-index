@@ -35,8 +35,8 @@ class PackageConan(ConanFile):
         if self.options.provider == "llvm":
             # Note: MSVC ships with an optional LLVM OpenMP implementation, but it would require reliably setting
             # `OpenMP_RUNTIME_MSVC=llvm` in CMake for all consumers of this recipe, which is not possible in a meta-package.
-            # TODO: match the major version of llvm-openmp to the version of Clang / LLVM.
-            self.requires("llvm-openmp/18.1.8", transitive_headers=True, transitive_libs=True)
+            # Always use the latest llvm-openmp version, since the library is ABI-compatible across versions.
+            self.requires("llvm-openmp/[*]", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
         self.info.clear()
