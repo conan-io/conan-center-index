@@ -146,6 +146,15 @@ class ProtobufConan(ConanFile):
         if is_apple_os(self) and self.options.shared:
             # Workaround against SIP on macOS for consumers while invoking protoc when protobuf lib is shared
             tc.variables["CMAKE_INSTALL_RPATH"] = "@loader_path/../lib"
+
+        if self.settings.os == "Linux":
+            # Use RPATH instead of RUNPATH to help with specific case
+            # in the grpc recipe when grpc_cpp_plugin is run with protoc
+            # in the same build. RPATH ensures that the rpath in the binary
+            # is respected for transitive dependencies too
+            tc.extra_exelinkflags.append("-Wl,--disable-new-dtags")
+            tc.extra_sharedlinkflags.append("-Wl,--disable-new-dtags")
+
         tc.generate()
 
         deps = CMakeDeps(self)
