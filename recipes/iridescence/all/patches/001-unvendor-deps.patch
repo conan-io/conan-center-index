@@ -1,38 +1,42 @@
---- CMakeLists.txt
-+++ CMakeLists.txt
-@@ -21,62 +21,57 @@
-   set(CMAKE_CXX_FLAGS "-march=native ${CMAKE_CXX_FLAGS}")
- endif()
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -26,12 +26,18 @@
  
--find_package(GLM REQUIRED)
-+find_package(glm REQUIRED)
  find_package(OpenGL REQUIRED)
-+find_package(khrplatform REQUIRED)
  
- # find_package(PCL)
- find_package(Boost REQUIRED filesystem program_options)
- find_package(Eigen3 REQUIRED)
- find_package(PNG REQUIRED)
- find_package(JPEG REQUIRED)
+-find_package(glm)
+-find_package(glfw3)
+-find_package(Eigen3)
+-find_package(PNG)
+-find_package(JPEG)
 -find_package(assimp QUIET)
++find_package(glm REQUIRED)
++find_package(glfw3 REQUIRED)
++find_package(Eigen3 REQUIRED)
++find_package(PNG REQUIRED)
++find_package(JPEG REQUIRED)
 +find_package(assimp REQUIRED)
- 
- ###########
- ## Build ##
- ###########
- 
- # imgui
++
 +find_package(imgui REQUIRED CONFIG)
 +find_package(imguizmo REQUIRED CONFIG)
 +find_package(implot REQUIRED CONFIG)
-+find_package(glfw3 REQUIRED CONFIG)
 +find_package(portable-file-dialogs REQUIRED CONFIG)
-+
- add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_GL3W)
- add_definitions(-DDATA_PATH_GUESS="${CMAKE_SOURCE_DIR}/data")
++find_package(khrplatform REQUIRED CONFIG)
  
--add_library(gl_imgui SHARED
-+add_library(gl_imgui
+ if(NOT glm_FOUND)
+   message(STATUS "System GLM not found. Download GLM 1.0.1.")
+@@ -94,7 +100,7 @@
+ endif()
+ 
+ if(${assimp_FOUND})
+-  list(APPEND EXTRA_LIBRARIES assimp)
++  list(APPEND EXTRA_LIBRARIES assimp::assimp)
+   list(APPEND EXTRA_SOURCE src/glk/io/mesh_io.cpp)
+ endif()
+ 
+@@ -115,20 +121,8 @@
+ add_library(iridescence
+   # GL and IMGUI
    thirdparty/gl3w/gl3w.cpp
 -  thirdparty/imgui/imgui.cpp
 -  thirdparty/imgui/imgui_demo.cpp
@@ -50,79 +54,43 @@
 -  thirdparty/imgui/backends/imgui_impl_opengl3.cpp
 +  ${IMGUI_BACKENDS}/imgui_impl_glfw.cpp
 +  ${IMGUI_BACKENDS}/imgui_impl_opengl3.cpp
+   # glk
+   src/glk/path_std.cpp
+   src/glk/mesh.cpp
+@@ -195,19 +189,19 @@
  )
- target_include_directories(gl_imgui PUBLIC
-   include
--  thirdparty/imgui
--  thirdparty/imgui/backends
--  thirdparty/ImGuizmo
--  thirdparty/implot
--  thirdparty/portable-file-dialogs
+ target_include_directories(iridescence PUBLIC
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui>
+-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/examples>
+-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/imgui/backends>
+-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/ImGuizmo>
+-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/implot>
+-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/portable-file-dialogs>
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/gl3w>
+   $<INSTALL_INTERFACE:include/iridescence>
 +  ${IMGUI_BACKENDS}
-   thirdparty/gl3w
  )
- target_link_libraries(gl_imgui
--  ${OPENGL_LIBRARIES}
-+  OpenGL::GL
+ target_link_libraries(iridescence PUBLIC
+   Eigen3::Eigen
+   OpenGL::GL
    glfw
--  dl
-+  khrplatform::khrplatform
 +  imgui::imgui
 +  imguizmo::imguizmo
 +  implot::implot
 +  portable-file-dialogs::portable-file-dialogs
- )
- 
- if(${assimp_FOUND})
--  list(APPEND EXTRA_LIBRARIES assimp)
-+  list(APPEND EXTRA_LIBRARIES assimp::assimp)
-   list(APPEND EXTRA_SOURCE src/glk/io/mesh_io.cpp)
- endif()
- 
--add_library(iridescence SHARED
-+add_library(iridescence
-   src/glk/path_std.cpp
-   src/glk/mesh.cpp
-   src/glk/mesh_model.cpp
-@@ -143,23 +138,18 @@
- )
- target_include_directories(iridescence PUBLIC
-   include
--  thirdparty/imgui
--  thirdparty/imgui/examples
--  thirdparty/ImGuizmo
--  thirdparty/portable-file-dialogs
-   thirdparty/gl3w
--  ${PNG_INCLUDE_DIRS}
--  ${JPEG_INCLUDE_DIRS}
--  ${GLM_INCLUDE_DIRS}
--  ${Boost_INCLUDE_DIRS}
--  ${EIGEN3_INCLUDE_DIRS}
--)
-+)
-+find_package(Threads REQUIRED)
- target_link_libraries(iridescence
-   gl_imgui
--  pthread
--  ${PNG_LIBRARIES}
--  ${JPEG_LIBRARIES}
--  ${Boost_LIBRARIES}
-+  Threads::Threads
-+  Eigen3::Eigen
-+  PNG::PNG
-+  JPEG::JPEG
-+  glm::glm
-+  Boost::boost
-+  Boost::filesystem
++  khrplatform::khrplatform
    ${EXTRA_LIBRARIES}
  )
+ target_link_libraries(iridescence PRIVATE
+@@ -287,10 +281,6 @@
  
-@@ -224,8 +214,4 @@
- install(TARGETS gl_imgui iridescence DESTINATION lib)
- install(DIRECTORY include/ DESTINATION include/iridescence)
- install(DIRECTORY thirdparty/gl3w/GL/ DESTINATION include/iridescence/GL)
--install(FILES thirdparty/imgui/imgui.h thirdparty/imgui/imconfig.h thirdparty/imgui/imgui_internal.h thirdparty/imgui/imstb_textedit.h DESTINATION include/iridescence)
--install(FILES thirdparty/implot/implot.h thirdparty/implot/implot_internal.h DESTINATION include/iridescence)
--install(FILES thirdparty/portable-file-dialogs/portable-file-dialogs.h DESTINATION include/iridescence)
--install(FILES thirdparty/ImGuizmo/ImGuizmo.h DESTINATION include/iridescence)
- install(DIRECTORY data/ DESTINATION share/iridescence/data)
+ install(DIRECTORY include/ DESTINATION ${INCLUDE_INSTALL_DIR})
+ install(DIRECTORY thirdparty/gl3w/GL/ DESTINATION ${INCLUDE_INSTALL_DIR}/GL)
+-install(FILES thirdparty/imgui/imgui.h thirdparty/imgui/imconfig.h thirdparty/imgui/imgui_internal.h thirdparty/imgui/imstb_textedit.h DESTINATION  ${INCLUDE_INSTALL_DIR})
+-install(FILES thirdparty/implot/implot.h thirdparty/implot/implot_internal.h DESTINATION  ${INCLUDE_INSTALL_DIR})
+-install(FILES thirdparty/portable-file-dialogs/portable-file-dialogs.h DESTINATION  ${INCLUDE_INSTALL_DIR})
+-install(FILES thirdparty/ImGuizmo/ImGuizmo.h DESTINATION  ${INCLUDE_INSTALL_DIR})
+ install(DIRECTORY data/ DESTINATION ${CMAKE_INSTALL_DATADIR}/iridescence/data)
+ 
+ install(TARGETS iridescence

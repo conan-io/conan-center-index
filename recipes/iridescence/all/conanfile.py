@@ -67,11 +67,11 @@ class IridescenceConan(ConanFile):
         self.requires("portable-file-dialogs/0.1.0", transitive_headers=True)
         # Upstream uses -docking version of imgui, but it would cause version conflicts on CCI
         self.requires("imgui/1.90.5", transitive_headers=True, transitive_libs=True)
-        self.requires("imguizmo/1.83")
+        self.requires("imguizmo/cci.20231114")
         self.requires("implot/0.16")
         self.requires("glfw/3.4", transitive_headers=True, transitive_libs=True)
         self.requires("opengl/system")
-        # https://github.com/koide3/iridescence/blob/15c5a8787759e104f21cf85fdaeefe64c418d99f/thirdparty/gl3w/GL/glcorearb.h#L82
+        # https://github.com/koide3/iridescence/blob/7034275ee6516eb4d155f645cd8327173edfeb9d/thirdparty/gl3w/GL/glcorearb.h#L82
         self.requires("khrplatform/cci.20200529", transitive_headers=True)
 
     def validate(self):
@@ -139,7 +139,7 @@ class IridescenceConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Iridescence")
         self.cpp_info.set_property("cmake_target_name", "Iridescence::Iridescence")
 
-        self.cpp_info.libs = ["iridescence", "gl_imgui"]
+        self.cpp_info.libs = ["iridescence"]
         self.cpp_info.includedirs.append(os.path.join("include", "iridescence"))
 
         if self.settings.os in ["Linux", "FreeBSD"]:
