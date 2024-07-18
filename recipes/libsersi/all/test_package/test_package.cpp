@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "libdis6/entity_information/EntityStatePdu.h"
+#include "libsersi/entity_information/EntityStatePdu.h"
 
 int main() {
   dis::EntityStatePdu pdu1, pdu2;

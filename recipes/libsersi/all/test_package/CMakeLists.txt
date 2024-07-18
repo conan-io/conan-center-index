@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-find_package(libdis6 CONFIG REQUIRED)
+find_package(libsersi CONFIG REQUIRED)
 
 add_executable(test_package_dis test_package.cpp)
 target_link_libraries(test_package_dis PRIVATE libdis6::dis6)
