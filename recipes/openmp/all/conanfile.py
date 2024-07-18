@@ -108,7 +108,9 @@ class PackageConan(ConanFile):
         return None
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_find_mode", "none")
+        # Can't use cmake_find_mode=none because Conan tries to find_package() it internally,
+        # when used transitively.
+        self.cpp_info.set_property("cmake_file_name", "_openmp_")
 
         self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
