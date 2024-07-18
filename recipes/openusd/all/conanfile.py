@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -142,9 +142,9 @@ class OpenUSDConan(ConanFile):
                 self.requires("openvdb/11.0.0")
             if self.options.build_embree_plugin:
                 self.requires("embree3/3.13.5")
-        if self.options.build_renderman_plugin:
+        # if self.options.build_renderman_plugin:
             # TODO: add a recipe for renderman
-            self.requires("renderman/x.y.z")
+            # self.requires("renderman/x.y.z")
         if self.options.build_alembic_plugin:
             self.requires("alembic/1.8.6")
             if self.options.enable_hdf5_support:
@@ -156,9 +156,9 @@ class OpenUSDConan(ConanFile):
         if self.options.enable_osl_support:
            # TODO: add osl to conan center (https://github.com/AcademySoftwareFoundation/OpenShadingLanguage)
             self.requires("openshadinglanguage/1.13.8.0")
-        if self.options.build_animx_tests:
+        # if self.options.build_animx_tests:
            # TODO: add animx to conan center (https://github.com/Autodesk/animx/)
-            self.requires("animx/x.y.z")
+            # self.requires("animx/x.y.z")
         if self.options.build_imaging and (self.options.build_openimageio_plugin and self.options.build_gpu_support or self.options.enable_openvdb_support) or self.options.build_alembic_plugin or self.options.enable_osl_support:
             self.requires("imath/3.1.11")
 
@@ -178,7 +178,6 @@ class OpenUSDConan(ConanFile):
             raise ConanInvalidConfiguration("openshadinglanguage recipe doesn't yet exists in conan center index")
         if self.options.build_renderman_plugin:
             raise ConanInvalidConfiguration("renderman recipe doesn't yet exists in conan center index")
-        
         if self.options.enable_python_support:
             raise ConanInvalidConfiguration("python doesn't yet supported")
 
@@ -230,31 +229,19 @@ class OpenUSDConan(ConanFile):
         tc.generate()
 
         tc = CMakeDeps(self)
+        if self.options.enable_materialx_support:
+            tc.set_property("materialx::MaterialXCore", "cmake_target_name", "MaterialXCore")
+            tc.set_property("materialx::MaterialXFormat", "cmake_target_name", "MaterialXFormat")
+            tc.set_property("materialx::MaterialXGenShader", "cmake_target_name", "MaterialXGenShader")
+            tc.set_property("materialx::MaterialXRender", "cmake_target_name", "MaterialXRender")
+            tc.set_property("materialx::MaterialXGenGlsl", "cmake_target_name", "MaterialXGenGlsl")
         tc.generate()
 
         tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
+        tc.generate()
 
     def _patch_sources(self):
         rmdir(self, os.path.join(self.source_folder, "cmake", "modules"))
-                              
-        if self.options.enable_materialx_support:
-            pxrImagingHdMtlxCMakeListsToUpdate = os.path.join(self.source_folder, "pxr/imaging/hdMtlx/CMakeLists.txt")
-            replace_in_file(self, pxrImagingHdMtlxCMakeListsToUpdate, "MaterialXCore", "materialx::MaterialXCore")
-            replace_in_file(self, pxrImagingHdMtlxCMakeListsToUpdate, "MaterialXFormat", "materialx::MaterialXFormat")
-            pxrImagingHdStCMakeListsToUpdate = os.path.join(self.source_folder, "pxr/imaging/hdSt/CMakeLists.txt")
-            replace_in_file(self, pxrImagingHdStCMakeListsToUpdate, "MaterialXGenShader", "materialx::MaterialXGenShader")
-            replace_in_file(self, pxrImagingHdStCMakeListsToUpdate, "MaterialXRender", "materialx::MaterialXRender")
-            replace_in_file(self, pxrImagingHdStCMakeListsToUpdate, "MaterialXCore", "materialx::MaterialXCore")
-            replace_in_file(self, pxrImagingHdStCMakeListsToUpdate, "MaterialXFormat", "materialx::MaterialXFormat")
-            replace_in_file(self, pxrImagingHdStCMakeListsToUpdate, "MaterialXGenGlsl", "materialx::MaterialXGenGlsl")
-            pxrUsdUsdMtlxCMakeListsToUpdate = os.path.join(self.source_folder, "pxr/usd/usdMtlx/CMakeLists.txt")
-            replace_in_file(self, pxrUsdUsdMtlxCMakeListsToUpdate, "MaterialXCore", "materialx::MaterialXCore")
-            replace_in_file(self, pxrUsdUsdMtlxCMakeListsToUpdate, "MaterialXFormat", "materialx::MaterialXFormat")
-            pxrUsdImagingBinUseBakeMtlxCMakeListsToUpdate = os.path.join(self.source_folder, "pxr/usdImaging/bin/usdBakeMtlx/CMakeLists.txt")
-            replace_in_file(self, os.path.join(self.source_folder, pxrUsdImagingBinUseBakeMtlxCMakeListsToUpdate), "MaterialXCore", "materialx::MaterialXCore")
-            replace_in_file(self, os.path.join(self.source_folder, pxrUsdImagingBinUseBakeMtlxCMakeListsToUpdate), "MaterialXFormat", "materialx::MaterialXFormat")
-            replace_in_file(self, os.path.join(self.source_folder, pxrUsdImagingBinUseBakeMtlxCMakeListsToUpdate), "MaterialXRenderGlsl", "materialx::MaterialXRenderGlsl")
         apply_conandata_patches(self)
 
     def build(self):
