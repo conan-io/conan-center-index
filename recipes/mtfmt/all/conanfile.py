@@ -36,7 +36,6 @@ class MtFmtConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # for plain C projects only
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
@@ -44,7 +43,6 @@ class MtFmtConan(ConanFile):
         export_conandata_patches(self)
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         cmake_layout(self, src_folder="src")
 
     def validate(self):
@@ -75,17 +73,20 @@ class MtFmtConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rmdir(self, os.path.join(self.package_folder, "mtfmt", "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "mtfmt", "share"))
+        rm(self, "*.la", os.path.join(self.package_folder, "mtfmt", "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "mtfmt", "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "mtfmt", "bin"))
 
     def package_info(self):
         suffix = "_d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = ["mtfmt" + suffix]
-        self.cpp_info.libdirs = ["lib" if self.options.shared else os.path.join("lib", "static")]
+        libdir = os.path.join("mtfmt", "lib")
+        if not self.options.shared and self.settings.os == "Windows":
+            libdir = os.path.join(libdir, "static")
+        self.cpp_info.libdirs = [libdir]
+        self.cpp_info.includedirs = [os.path.join("mtfmt", "include")]
+        self.cpp_info.bindirs = [os.path.join("mtfmt", "bin")]
         if self.options.use_stdout:
             self.cpp_info.defines = ["_MSTR_USE_STD_IO"]

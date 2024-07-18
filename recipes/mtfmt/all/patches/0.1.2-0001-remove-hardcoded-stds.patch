@@ -25,27 +25,3 @@ index 2d4ffcd..293cf7e 100644
  # debug?
  if(NOT MSVC)
      if(NOT CMAKE_BUILD_TYPE)
-@@ -108,18 +113,18 @@ endif()
- 
- install(TARGETS mtfmt
-     EXPORT mtfmt-targets
--    RUNTIME DESTINATION mtfmt/bin # dll
--    LIBRARY DESTINATION mtfmt/lib # 动态库安装路径
--    ARCHIVE DESTINATION mtfmt/lib/static # 静态库安装路径
-+    RUNTIME DESTINATION bin # dll
-+    LIBRARY DESTINATION lib # 动态库安装路径
-+    ARCHIVE DESTINATION lib/static # 静态库安装路径
- )
- 
- # 安装头文件
--install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/inc/ DESTINATION mtfmt/include)
-+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/inc/ DESTINATION include)
- 
- install(EXPORT mtfmt-targets
-     FILE mtfmt-config.cmake
-     NAMESPACE mtfmt::
--    DESTINATION mtfmt/lib/cmake/mtfmt)
-+    DESTINATION lib/cmake/mtfmt)
- 
- # 测试
- # enable_testing()
