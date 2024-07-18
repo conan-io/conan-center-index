@@ -5,5 +5,5 @@ project(test_package CXX)
 find_package(ulid REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE ulid::ulid)
+target_link_libraries(${PROJECT_NAME} PRIVATE ULID::ulid)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
