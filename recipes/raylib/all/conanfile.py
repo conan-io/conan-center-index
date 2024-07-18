@@ -31,7 +31,6 @@ class RaylibConan(ConanFile):
         "module_raudio": [True, False],
 
         "default_font": [True, False],
-        "busy_wait_loop": [True, False],
         "events_waiting": [True, False],
         "events_automation": [True, False],
         "custom_frame_control": [True, False]
@@ -48,7 +47,6 @@ class RaylibConan(ConanFile):
         "module_raudio": True,
 
         "default_font": True,
-        "busy_wait_loop": False,
         "events_waiting": False,
         "events_automation": False,
         "custom_frame_control": False
@@ -102,23 +100,23 @@ class RaylibConan(ConanFile):
             tc.variables["OPENGL_VERSION"] = "OFF" if not self.options.opengl_version else self.options.opengl_version
         tc.variables["WITH_PIC"] = self.options.get_safe("fPIC", True)
 
-        tc.variables["CUSTOMIZE_BUILD"] = True
-        tc.variables["SUPPORT_MODULE_RSHAPES"]   = self.options.module_rshapes
-        tc.variables["SUPPORT_MODULE_RTEXTURES"] = self.options.module_rtextures
-        tc.variables["SUPPORT_MODULE_RTEXT"]     = self.options.module_rtext
-        tc.variables["SUPPORT_MODULE_RMODELS"]   = self.options.module_rmodels
-        tc.variables["SUPPORT_MODULE_RAUDIO"]    = self.options.module_raudio
+        tc.variables["CUSTOMIZE_BUILD"] = "ON"
+        on_off = lambda x: "ON" if x else "OFF"
+        tc.variables["SUPPORT_MODULE_RSHAPES"]   = on_off(self.options.module_rshapes)
+        tc.variables["SUPPORT_MODULE_RTEXTURES"] = on_off(self.options.module_rtextures)
+        tc.variables["SUPPORT_MODULE_RTEXT"]     = on_off(self.options.module_rtext)
+        tc.variables["SUPPORT_MODULE_RMODELS"]   = on_off(self.options.module_rmodels)
+        tc.variables["SUPPORT_MODULE_RAUDIO"]    = on_off(self.options.module_raudio)
 
         # this makes it include the headers rcamera.h, rgesture.h and rprand.h
-        tc.variables["SUPPORT_CAMERA_SYSTEM"]    = True
-        tc.variables["SUPPORT_GESTURES_SYSTEM"]  = True
-        tc.variables["SUPPORT_RPRAND_GENERATOR"] = True
+        tc.variables["SUPPORT_CAMERA_SYSTEM"]    = "ON"
+        tc.variables["SUPPORT_GESTURES_SYSTEM"]  = "ON"
+        tc.variables["SUPPORT_RPRAND_GENERATOR"] = "ON"
 
-        tc.variables["SUPPORT_DEFAULT_FONT"]         = self.options.default_font
-        tc.variables["SUPPORT_BUSY_WAIT_LOOP"]       = self.options.busy_wait_loop
-        tc.variables["SUPPORT_EVENTS_WAITING"]       = self.options.events_waiting
-        tc.variables["SUPPORT_EVENTS_AUTOMATION"]    = self.options.events_automation
-        tc.variables["SUPPORT_CUSTOM_FRAME_CONTROL"] = self.options.custom_frame_control
+        tc.variables["SUPPORT_DEFAULT_FONT"]         = on_off(self.options.default_font)
+        tc.variables["SUPPORT_EVENTS_WAITING"]       = on_off(self.options.events_waiting)
+        tc.variables["SUPPORT_EVENTS_AUTOMATION"]    = on_off(self.options.events_automation)
+        tc.variables["SUPPORT_CUSTOM_FRAME_CONTROL"] = on_off(self.options.custom_frame_control)
 
         # Due to a specific logic of cmakedeps_macros.cmake used by CMakeDeps to try to locate shared libs on Windows
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0054"] = "NEW"
