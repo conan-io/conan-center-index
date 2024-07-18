@@ -50,19 +50,19 @@ class OpenUSDConan(ConanFile):
         "build_imaging": True,
         "build_usd_imaging": True,
         "build_usdview": True,
-        "build_openimageio_plugin": False,
-        "build_opencolorio_plugin": False,
-        "build_embree_plugin": False,
-        "enable_materialx_support": False,
+        "build_openimageio_plugin": True,
+        "build_opencolorio_plugin": True,
+        "build_embree_plugin": True,
+        "enable_materialx_support": True,
         "enable_vulkan_support": False,
         "enable_gl_support": False,
         "build_gpu_support": False,
-        "enable_ptex_support": False,
-        "enable_openvdb_support": False,
+        "enable_ptex_support": True,
+        "enable_openvdb_support": True,
         "build_renderman_plugin": False,
-        "build_alembic_plugin": False,
-        "enable_hdf5_support": False,
-        "build_draco_plugin": False,
+        "build_alembic_plugin": True,
+        "enable_hdf5_support": True,
+        "build_draco_plugin": True,
         "enable_osl_support": False,
         "build_animx_tests": False,
         "enable_python_support": True,
@@ -153,9 +153,9 @@ class OpenUSDConan(ConanFile):
             self.requires("draco/1.5.6")
         if self.options.enable_materialx_support:
             self.requires("materialx/1.38.10", transitive_headers=True)
-        if self.options.enable_osl_support:
+        # if self.options.enable_osl_support:
            # TODO: add osl to conan center (https://github.com/AcademySoftwareFoundation/OpenShadingLanguage)
-            self.requires("openshadinglanguage/1.13.8.0")
+            # self.requires("openshadinglanguage/1.13.8.0")
         # if self.options.build_animx_tests:
            # TODO: add animx to conan center (https://github.com/Autodesk/animx/)
             # self.requires("animx/x.y.z")
