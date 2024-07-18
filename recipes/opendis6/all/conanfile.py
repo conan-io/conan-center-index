@@ -26,8 +26,8 @@ class OpenDis6Conan(ConanFile):
         "shared": False,
         "fPIC": True
     }
-    provides = "libdis6"
-    deprecated = "libdis6"
+    provides = "libsersi"
+    deprecated = "libsersi"
 
     @property
     def _min_cppstd(self):
