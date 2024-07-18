@@ -71,3 +71,7 @@ class TinyADConan(ConanFile):
             self.cpp_info.cxxflags.extend(openmp_flags)
             self.cpp_info.exelinkflags.extend(openmp_flags)
             self.cpp_info.sharedlinkflags.extend(openmp_flags)
+
+        if is_msvc(self):
+            # https://github.com/patr-schm/TinyAD/blob/29417031c185b6dc27b6d4b684550d844459b735/CMakeLists.txt#L35
+            self.cpp_info.cxxflags.append("/bigobj")
