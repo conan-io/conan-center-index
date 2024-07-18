@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc, check_min_vs
@@ -35,6 +35,20 @@ class BenchmarkConan(ConanFile):
         "enable_libpfm": False,
     }
 
+    @property
+    def _min_cppstd(self):
+        return 14
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "apple-clang": "10",
+            "clang": "7",
+            "gcc": "7",
+            "msvc": "191",
+            "Visual Studio": "15",
+        }
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -49,6 +63,15 @@ class BenchmarkConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
+        if Version(self.version) >= "1.8.5":
+            if self.settings.compiler.cppstd:
+                check_min_cppstd(self, self._min_cppstd)
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
+
         check_min_vs(self, "190")
         if Version(self.version) < "1.7.0" and is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support msvc shared builds")
