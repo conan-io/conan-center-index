@@ -349,11 +349,13 @@ class OpenvinoConan(ConanFile):
                 openvino_runtime.libs.extend(["openvino_onnx_frontend", "openvino_onnx_common"])
                 openvino_runtime.requires.extend(["protobuf::libprotobuf", "onnx::onnx"])
             if self.options.enable_tf_frontend:
-                openvino_runtime.libs.extend(["openvino_tensorflow_frontend", "openvino_tensorflow_common"])
+                openvino_runtime.libs.extend(["openvino_tensorflow_frontend"])
                 openvino_runtime.requires.extend(["protobuf::libprotobuf", "snappy::snappy"])
             if self.options.enable_tf_lite_frontend:
-                openvino_runtime.libs.extend(["openvino_tensorflow_lite_frontend", "openvino_tensorflow_common"])
+                openvino_runtime.libs.extend(["openvino_tensorflow_lite_frontend"])
                 openvino_runtime.requires.extend(["flatbuffers::flatbuffers"])
+            if self.options.enable_tf_frontend or self.options.enable_tf_lite_frontend:
+                openvino_runtime.libs.extend(["openvino_tensorflow_common"])
             if self.options.enable_paddle_frontend:
                 openvino_runtime.libs.append("openvino_paddle_frontend")
                 openvino_runtime.requires.append("protobuf::libprotobuf")
