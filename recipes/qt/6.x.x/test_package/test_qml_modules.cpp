@@ -14,7 +14,6 @@ int main(int argc, char *argv[])
     QStringList modulePaths = engine.importPathList();
     QString rootQMLModules;
     QString logMessage;
-    int rc = 0;
 
     for (auto &modulePath: modulePaths)
     {
@@ -31,25 +30,25 @@ int main(int argc, char *argv[])
         }
     }
 
-    QDir dir (rootQMLModules);
-    QFileInfoList list = dir.entryInfoList(QDir::Dirs| QDir::NoSymLinks | QDir::NoDotAndDotDot);
+    // QCoreApplication is only needed while we look up the path from the QQmlEngine
+    a.exit();
 
-    if (list.empty())
+    if (rootQMLModules.isEmpty())
     {
         logMessage = "No QML Modules are found!";
         qCritical() << logMessage;
-        rc = 1;
-    }
-    else
-    {
-        logMessage = "List of QML Modules: ";
-        qDebug() << logMessage;
-        for (auto &l : list)
-        {
-            qDebug() << l.baseName();
-        }
+        return 1;
     }
 
-    a.exit();
-    return rc;
+    QDir dir (rootQMLModules);
+    QFileInfoList list = dir.entryInfoList(QDir::Dirs| QDir::NoSymLinks | QDir::NoDotAndDotDot);
+
+    logMessage = "List of QML Modules: ";
+    qDebug() << logMessage;
+    for (auto &l : list)
+    {
+        qDebug() << l.baseName();
+    }
+
+    return 0;
 }
