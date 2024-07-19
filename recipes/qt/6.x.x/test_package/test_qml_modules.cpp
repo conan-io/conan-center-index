@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
     QStringList modulePaths = engine.importPathList();
     QString rootQMLModules;
     QString logMessage;
+    int rc = 0;
 
     for (auto &modulePath: modulePaths)
     {
@@ -36,7 +37,8 @@ int main(int argc, char *argv[])
     if (list.empty())
     {
         logMessage = "No QML Modules are found!";
-        qDebug() << logMessage;
+        qCritical() << logMessage;
+        rc = 1;
     }
     else
     {
@@ -48,5 +50,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    return a.exec();
+    a.exit();
+    return rc;
 }
