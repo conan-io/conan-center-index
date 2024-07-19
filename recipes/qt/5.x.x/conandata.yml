@@ -53,3 +53,7 @@ patches:
       patch_description: "Fix linkage with lld"
       patch_type: "portability"
       patch_source: "https://bugreports.qt.io/browse/QTBUG-111514"
+    - patch_file: "patches/5.15.7/osxcross.patch"
+      base_path: "qt5/qtbase"
+      patch_description: "Support for building with osxcross"
+      patch_type: "portability"
