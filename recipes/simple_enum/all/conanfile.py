@@ -10,7 +10,7 @@ required_conan_version = ">=1.52.0"
 
 class SimpleEnumConan(ConanFile):
     name = "simple_enum"
-    description = "SimpleEnum: An Fast, Intuitive and Type-Safe C++ Enumeration Support Library"
+    description = "An Fast, Intuitive and Type-Safe C++ Enumeration Support Library"
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/arturbac/simple_enum"
