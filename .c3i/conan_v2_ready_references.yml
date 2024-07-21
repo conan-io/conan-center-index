@@ -81,6 +81,7 @@ required_for_references:
 - aws-lambda-cpp
 - aws-libfabric
 - aws-sdk-cpp
+- azure-sdk-for-cpp
 - b2
 - b64
 - backport-cpp
@@ -739,6 +740,7 @@ required_for_references:
 - libipt
 - libjpeg
 - libjpeg-turbo
+- libjxl
 - libkml
 - libliftoff
 - liblsl
@@ -809,6 +811,7 @@ required_for_references:
 - libslz
 - libsmacker
 - libsndfile
+- libsndio
 - libsodium
 - libsolace
 - libspatialindex
@@ -1404,6 +1407,7 @@ required_for_references:
 - svector
 - svgpp
 - svgwrite
+- swig
 - symengine
 - systemc
 - systemc-cci
