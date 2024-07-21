@@ -49,7 +49,7 @@ class QuillConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-                del self.options.fPIC
+            del self.options.fPIC
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -139,7 +139,5 @@ class QuillConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-            if Version(self.version) >= "4.4.0":
-                self.cpp_info.system_libs.append("rt")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
             self.cpp_info.system_libs.append("stdc++fs")
