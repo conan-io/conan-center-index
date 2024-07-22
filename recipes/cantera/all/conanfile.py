@@ -9,6 +9,13 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import VCVars, msvs_toolset, is_msvc
 from conan.tools.apple import is_apple_os
 
+# For Python<3.9
+if not hasattr(str, "removeprefix"):
+    def remove_prefix(text, prefix):
+        if text.startswith(prefix):
+            return text[len(prefix):]
+        return text
+
 class canteraRecipe(ConanFile):
     name = "cantera"
     tool_requires="scons/4.3.0"
@@ -125,7 +132,10 @@ class canteraRecipe(ConanFile):
 
         toolset: str = msvs_toolset(self)
         if toolset:
-            options["msvc_toolset_version"] = toolset.removeprefix("v")
+            try:
+                options["msvc_toolset_version"] = toolset.removeprefix("v")
+            except AttributeError:
+                options["msvc_toolset_version"] = remove_prefix(toolset, "v")
 
         if self._is_debug:
             # Will never be called since debug build will raise InvalidConfiguration error. Just to keep some ideas for the future.
