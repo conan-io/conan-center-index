@@ -24,21 +24,13 @@ class SCIPConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_gmp": [True, False],
-        "with_tpi": [False, "omp", "tny"],
-        "with_sym": [False, "bliss"],
+        "with_tpi": [False, "omp", "tny"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_gmp": True,
-        "with_tpi": False,
-        "with_sym": "bliss",
-    }
-    soplex_version_belonging_to_me = {
-        "9.0.1": "7.0.1",
-        "8.1.0": "6.0.4",
-        "8.0.4": "6.0.4",
-        "8.0.3": "6.0.3"
+        "with_tpi": False
     }
 
     @property
@@ -68,7 +60,7 @@ class SCIPConan(ConanFile):
         if self.options.shared and self.options.with_sym == "bliss":
             raise ConanInvalidConfiguration("Bliss is not supported in shared mode.")
         comp = self.settings.compiler
-        if self.options.with_sym == "bliss" and comp == 'clang' and comp.libcxx and comp.libcxx == 'libc++':
+        if Version(self.version) <= "9.0.1" and comp == 'clang' and comp.libcxx and comp.libcxx == 'libc++':
             raise ConanInvalidConfiguration("Bliss does not support libc++.")
         if self.dependencies["soplex"].options.with_gmp and not self.options.with_gmp:
             raise ConanInvalidConfiguration("The options 'with_gmp' should be aligned with 'soplex:with_gmp' too.")
@@ -86,9 +78,9 @@ class SCIPConan(ConanFile):
     def requirements(self):
         if self.options.with_gmp:
             self.requires("gmp/6.3.0")
-        if self.options.with_sym == "bliss":
+        if Version(self.version) <= "9.0.1":
             self.requires("bliss/0.77")
-        self.requires(f"soplex/{self.soplex_version_belonging_to_me[self.version]}")
+        self.requires(f"soplex/{self.conan_data['soplex_mapping'][self.version]}")
         self.requires("zlib/[>=1.2.11 <2]")
 
     def configure(self):
@@ -110,7 +102,6 @@ class SCIPConan(ConanFile):
         tc.variables["GMP"] = self.options.with_gmp
         tc.variables["TPI"] = self.options.with_tpi or "none"
         tc.variables["LPS"] = "spx"
-        tc.variables["SYM"] = self.options.with_sym or "none"
         tc.variables["SOPLEX_INCLUDE_DIRS"] = self._to_cmake(self.dependencies["soplex"].cpp_info.includedirs)
         if self.options.shared:
             # CMakeLists accesses different variables for SoPlex depending on the SHARED option
