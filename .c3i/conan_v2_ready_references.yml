@@ -81,6 +81,7 @@ required_for_references:
 - aws-lambda-cpp
 - aws-libfabric
 - aws-sdk-cpp
+- azure-sdk-for-cpp
 - b2
 - b64
 - backport-cpp
@@ -390,6 +391,7 @@ required_for_references:
 - ezc3d
 - faac
 - fakeit
+- faker-cxx
 - farmhash
 - fast-cdr
 - fast-cpp-csv-parser
@@ -513,6 +515,7 @@ required_for_references:
 - gtest
 - gtk
 - gtk-doc-stub
+- gtlab-logging
 - gtsam
 - guetzli
 - gumbo-parser
@@ -658,6 +661,7 @@ required_for_references:
 - libatomic_ops
 - libattr
 - libavif
+- libavrocpp
 - libb2
 - libbacktrace
 - libbasisu
@@ -736,6 +740,7 @@ required_for_references:
 - libipt
 - libjpeg
 - libjpeg-turbo
+- libjxl
 - libkml
 - libliftoff
 - liblsl
@@ -806,6 +811,7 @@ required_for_references:
 - libslz
 - libsmacker
 - libsndfile
+- libsndio
 - libsodium
 - libsolace
 - libspatialindex
@@ -1114,6 +1120,7 @@ required_for_references:
 - ozz-animation
 - p-ranav-glob
 - p7zip
+- pagmo2
 - paho-mqtt-c
 - paho-mqtt-cpp
 - pango
@@ -1221,11 +1228,13 @@ required_for_references:
 - quaternions
 - quazip
 - quickcpplib
+- quickfast
 - quickfix
 - quickjs
 - quill
 - quirc
 - qwt
+- qxmpp
 - r8brain-free-src
 - rabbitmq-c
 - ragel
@@ -1291,6 +1300,7 @@ required_for_references:
 - sassc
 - sbepp
 - sbp
+- scc
 - scdoc
 - scip
 - scippp
@@ -1397,6 +1407,7 @@ required_for_references:
 - svector
 - svgpp
 - svgwrite
+- swig
 - symengine
 - systemc
 - systemc-cci
@@ -1568,6 +1579,7 @@ required_for_references:
 - wil
 - wildcards
 - wildmidi
+- wineditline
 - winflexbison
 - winmd
 - winreg
@@ -1613,6 +1625,7 @@ required_for_references:
 - yandex-ozo
 - yas
 - yasm
+- ydcpp-tcpcat
 - yder
 - yoga
 - yomm2
