@@ -36,6 +36,22 @@ class CmaesConan(ConanFile):
     def _min_cppstd(self):
         return 11
 
+    @property
+    def _openmp_flags(self):
+        if self.settings.compiler == "clang":
+            return ["-fopenmp=libomp"]
+        elif self.settings.compiler == "apple-clang":
+            return ["-Xclang", "-fopenmp"]
+        elif self.settings.compiler == "gcc":
+            return ["-fopenmp"]
+        elif self.settings.compiler == "intel-cc":
+            return ["-Qopenmp"]
+        elif self.settings.compiler == "sun-cc":
+            return ["-xopenmp"]
+        elif is_msvc(self):
+            return ["-openmp"]
+        return None
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -47,8 +63,8 @@ class CmaesConan(ConanFile):
 
     def requirements(self):
         self.requires("eigen/3.4.0", transitive_headers=True)
-        if self.options.openmp:
-            self.requires("llvm-openmp/17.0.6", transitive_headers=True)
+        if self.options.openmp and self.settings.compiler in ["clang", "apple-clang"]:
+            self.requires("llvm-openmp/17.0.6", transitive_headers=True, transitive_libs=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -88,6 +104,15 @@ class CmaesConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["cmaes"]
         self.cpp_info.set_property("cmake_target_name", "libcmaes::cmaes")
+
+        if self.options.openmp:
+            if self.settings.compiler in ["clang", "apple-clang"]:
+                self.cpp_info.requires.append("llvm-openmp::llvm-openmp")
+            openmp_flags = self._openmp_flags
+            self.cpp_info.cflags = openmp_flags
+            self.cpp_info.cxxflags = openmp_flags
+            self.cpp_info.sharedlinkflags = openmp_flags
+            self.cpp_info.exelinkflags = openmp_flags
 
     def validate(self):
         if self.settings.compiler.cppstd:
