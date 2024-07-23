@@ -1,10 +1,12 @@
 sources:
-  "b3347":
-    url: "https://github.com/ggerganov/llama.cpp/archive/refs/tags/b3347.tar.gz"
-    sha256: "a9fc1d47a3a3db9ba1b6631a70e25a3c95272f5a27ad9cd594621970050d9cda"
+  "b3447":
+    url: "https://github.com/ggerganov/llama.cpp/archive/refs/tags/b3447.tar.gz"
+    sha256: "12aefd1034e30f80a0d884e996e8270a6c6da48c280f10b3310d0db061ecac1f"
   "b3040":
     url: "https://github.com/ggerganov/llama.cpp/archive/refs/tags/b3040.tar.gz"
     sha256: "020e040139660eb40113503bb1057d5387677d249b990e008e04821532f7cd62"
-  "b2038":
-    url: "https://github.com/ggerganov/llama.cpp/archive/refs/tags/b2038.tar.gz"
-    sha256: "a55bc75f5c76624cabfd9ea5e045f76597411231cb6fc231f2a0bff6287ab13b"
+patches:
+  "b3447":
+    - patch_file: "patches/001-curl-patch-targets.patch"
+  "b3040":
+    - patch_file: "patches/001-curl-patch-targets.patch"

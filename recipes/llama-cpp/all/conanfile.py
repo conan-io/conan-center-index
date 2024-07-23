@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
 
 
@@ -28,6 +28,7 @@ class LlamaCppConan(ConanFile):
         "with_examples": [True, False],
         "with_metal": [True, False],
         "with_cuda": [True, False],
+        "with_curl": [True, False],
     }
     default_options = {
         "shared": False,
@@ -35,6 +36,7 @@ class LlamaCppConan(ConanFile):
         "with_examples": False,
         "with_metal": False,
         "with_cuda": False,
+        "with_curl": False,
     }
 
     @property
@@ -46,6 +48,9 @@ class LlamaCppConan(ConanFile):
         return {
             "gcc": "8"
         }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -69,6 +74,10 @@ class LlamaCppConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        if self.options.with_curl:
+            self.requires("libcurl/[>=7.78 <9]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -80,6 +89,7 @@ class LlamaCppConan(ConanFile):
         tc.variables["LLAMA_STANDALONE"] = False
         tc.variables["LLAMA_BUILD_TESTS"] = False
         tc.variables["LLAMA_BUILD_EXAMPLES"] = self.options.get_safe("with_examples")
+        tc.variables["LLAMA_CURL"] = self.options.get_safe("with_curl")
         tc.variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.variables["GGML_CUDA"] = self.options.get_safe("with_cuda")
         if is_apple_os(self):
@@ -89,6 +99,7 @@ class LlamaCppConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
