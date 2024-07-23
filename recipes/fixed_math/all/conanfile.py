@@ -5,6 +5,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
+from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.53.0"
@@ -70,6 +71,9 @@ class FixedMathConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.21 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -78,6 +82,8 @@ class FixedMathConan(ConanFile):
             return
         tc = CMakeToolchain(self)
         tc.generate()
+        venv = VirtualBuildEnv(self)
+        venv.generate(scope="build")
 
     def build(self):
         if not self.options.header_only:
