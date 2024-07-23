@@ -39,7 +39,7 @@ class OpenH264Conan(ConanFile):
 
     @property
     def _preserve_dll_name(self):
-        return is_msvc(self) or self._is_clang_cl and Version(self.version) <= "2.4.1" and self.options.shared
+        return (is_msvc(self) or self._is_clang_cl) and Version(self.version) <= "2.4.1" and self.options.shared
 
     def config_options(self):
         if self.settings.os == "Windows":
