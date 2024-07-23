@@ -8,6 +8,8 @@
 #include <QSqlDatabase>
 #include <qtconcurrentfilter.h>
 #include <QDomText>
+#include <QLibraryInfo>
+#include <QDir>
 
 #include "greeter.h"
 
@@ -43,6 +45,27 @@ int main(int argc, char *argv[]){
     });
 
     QDomText xmlTester;
+
+
+    QString rootPluginFolder = QLibraryInfo::path(QLibraryInfo::PluginsPath);
+    QString logMessage;
+
+    if (rootPluginFolder.isEmpty())
+    {
+        logMessage = "No Pplugins are found!";
+        qCritical() << logMessage;
+        return 1;
+    }
+
+    QDir dir (rootPluginFolder);
+    QFileInfoList list = dir.entryInfoList(QDir::Dirs| QDir::NoSymLinks | QDir::NoDotAndDotDot);
+
+    logMessage = "List of Plugin Modules: ";
+    qDebug() << logMessage;
+    for (auto &l : list)
+    {
+        qDebug() << l.baseName();
+    }
 
     return app.exec();
 }
