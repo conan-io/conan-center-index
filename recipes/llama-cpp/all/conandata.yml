@@ -7,6 +7,6 @@ sources:
     sha256: "020e040139660eb40113503bb1057d5387677d249b990e008e04821532f7cd62"
 patches:
   "b3447":
-    - patch_file: "patches/001-curl-patch-targets.patch"
+    - patch_file: "patches/b3447-001-curl-patch-targets.patch"
   "b3040":
-    - patch_file: "patches/001-curl-patch-targets.patch"
+    - patch_file: "patches/b3040-001-curl-patch-targets.patch"
