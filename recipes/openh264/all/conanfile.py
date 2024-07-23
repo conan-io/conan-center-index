@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import stdcpp_library
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rmdir, rm, rename
+from conan.tools.files import copy, get, rmdir, rm, rename, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.apple import fix_apple_shared_install_name
@@ -37,6 +37,10 @@ class OpenH264Conan(ConanFile):
     def _is_clang_cl(self):
         return self.settings.os == 'Windows' and self.settings.compiler == 'clang'
 
+    @property
+    def _preserve_dll_name(self):
+        return is_msvc(self) or self._is_clang_cl and Version(self.version) <= "2.4.1" and self.options.shared
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -57,8 +61,8 @@ class OpenH264Conan(ConanFile):
 
     def validate(self):
         if Version(self.version) <= "2.1.1" and self.settings.os in ["Android", "Macos"]:
-            # ../src/meson.build:86:2: ERROR: Problem encountered: FIXME: Unhandled system android
-            # ../src/meson.build:86:2: ERROR: Problem encountered: FIXME: Unhandled system darwin
+            # INFO: ../src/meson.build:86:2: ERROR: Problem encountered: FIXME: Unhandled system android
+            # INFO: ../src/meson.build:86:2: ERROR: Problem encountered: FIXME: Unhandled system darwin
             raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.os}. Try a newer version.")
 
     def source(self):
@@ -72,7 +76,13 @@ class OpenH264Conan(ConanFile):
         tc.project_options["tests"] = "disabled"
         tc.generate()
 
+    def _patch_sources(self):
+        if self._preserve_dll_name:
+            # INFO: When generating with Meson, the library name is openh264-7.dll. This change preserves the old name openh264.dll
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "soversion: major_version,", "soversion: '',")
+
     def build(self):
+        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -83,7 +93,7 @@ class OpenH264Conan(ConanFile):
         meson.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # Version 2.1.1 installs both static and shared libraries using same target name
+        # INFO: Version 2.1.1 installs both static and shared libraries using same target name
         if Version(self.version) <= "2.1.1":
             if self.options.shared:
                 rm(self, "*.a", os.path.join(self.package_folder, "lib"))
@@ -95,8 +105,8 @@ class OpenH264Conan(ConanFile):
 
         if is_msvc(self) or self._is_clang_cl:
             rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-            if self.options.shared:
-                # Preserve same old library name as when building with Make on Windows
+            if self._preserve_dll_name:
+                # INFO: Preserve same old library name as when building with Make on Windows but using Meson
                 rename(self, os.path.join(self.package_folder, "lib", "openh264.lib"),
                     os.path.join(self.package_folder, "lib", "openh264_dll.lib"))
             else:
@@ -105,7 +115,7 @@ class OpenH264Conan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        suffix = "_dll" if (is_msvc(self) or self._is_clang_cl) and self.options.shared else ""
+        suffix = "_dll" if self._preserve_dll_name else ""
         self.cpp_info.libs = [f"openh264{suffix}"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.extend(["m", "pthread"])
