@@ -538,8 +538,6 @@ class QtConan(ConanFile):
                               ("with_gssapi", "gssapi"),
                               ("with_egl", "egl"),
                               ("with_gstreamer", "gstreamer")]:
-            on_or_off = ("ON" if self.options.get_safe(opt, False) else "OFF")
-            self.output.warning(f"FEATURE_{conf_arg}: {on_or_off}")
             tc.variables[f"FEATURE_{conf_arg}"] = ("ON" if self.options.get_safe(opt, False) else "OFF")
 
 
