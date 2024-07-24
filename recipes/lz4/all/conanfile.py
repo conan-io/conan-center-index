@@ -62,10 +62,7 @@ class LZ4Conan(ConanFile):
 
     @property
     def _cmakelists_folder(self):
-        if Version(self.version) < "1.9.3":
-            subfolder = os.path.join("contrib", "cmake_unofficial")
-        else:
-            subfolder = os.path.join("build", "cmake")
+        subfolder = os.path.join("build", "cmake")
         return os.path.join(self.source_folder, subfolder)
 
     def build(self):

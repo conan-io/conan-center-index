@@ -8,9 +8,6 @@ sources:
   "1.9.3":
     url: "https://github.com/lz4/lz4/archive/v1.9.3.tar.gz"
     sha256: "030644df4611007ff7dc962d981f390361e6c97a34e5cbc393ddfbe019ffe2c1"
-  "1.9.2":
-    url: "https://github.com/lz4/lz4/archive/v1.9.2.tar.gz"
-    sha256: 2658ba6191fa44c92280d4aa2c271b0f4fbc0e34d249578dd05e50e76d0e5efcc"
 patches:
   "1.9.4":
     - patch_file: "patches/0004-Added-namespace-declaration-for-xxhash-in-CMake.patch"
@@ -19,15 +16,5 @@ patches:
       patch_source: "https://github.com/lz4/lz4/pull/1258"
   "1.9.3":
     - patch_file: "patches/0003-cmake-minimum-required-first-1.9.3.patch"
-      patch_description: "Move cmake_minimum_required to the top of CMakeFile.txt"
-      patch_type: conan
-  "1.9.2":
-    - patch_file: "patches/0001-cmake-add-shared-DEFINE_SYMBOL.patch"
-      patch_description: "Add LZ4_DLL_EXPORT to MSVC"
-      patch_type: portability
-    - patch_file: "patches/0002-cmake-optional-cli.patch"
-      patch_description: "Add ability not to compile the CLI"
-      patch_type: conan
-    - patch_file: "patches/0003-cmake-minimum-required-first-1.9.2.patch"
       patch_description: "Move cmake_minimum_required to the top of CMakeFile.txt"
       patch_type: conan
