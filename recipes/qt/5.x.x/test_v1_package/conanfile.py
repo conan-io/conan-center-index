@@ -106,6 +106,14 @@ Prefix = {}""".format(self.dependencies["qt"].package_folder.replace('\\', '/'))
         self._build_with_meson()
         self._build_with_cmake_find_package_multi()
 
+    def _get_packageoption_value(self, optionname):
+        result = None
+        for (name, value) in self.options.values.as_list():
+            if name == f"qt:{optionname}":
+                result = value
+                break
+        return result
+
     def _test_with_qmake(self):
         if not self._qmake_supported():
             return
@@ -126,6 +134,8 @@ Prefix = {}""".format(self.dependencies["qt"].package_folder.replace('\\', '/'))
         self.output.info("Testing CMake_find_package_multi")
         shutil.copy(os.path.join(self.generators_folder, "qt.conf"), "bin")
         self.run(os.path.join("bin", "test_package"), run_environment=True)
+        if self._get_packageoption_value("qtdeclarative"):
+            self.run(os.path.join("bin", "CheckQMLModules"), run_environment=True)
 
     def test(self):
         if not cross_building(self, skip_x64_x86=True):
