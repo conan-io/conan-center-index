@@ -37,7 +37,7 @@ class FixedMathConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "8",
+            "gcc": "10", # fixed_math requires __has_builtin
             "clang": "7",
             "apple-clang": "12",
             "Visual Studio": "16",
