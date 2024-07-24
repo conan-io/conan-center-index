@@ -5,9 +5,8 @@ import shlex
 from conan import ConanFile
 from conan.errors import ConanException
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import cross_building
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches, copy, export_conandata_patches, get, load,
     replace_in_file, rm, rmdir, save
@@ -82,9 +81,12 @@ class MpfrConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
+        if self.options.shared and self.settings.os == "Linux":
+            env = Environment()
+            libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
+            #env.append("LDFLAGS", " ".join([f'-Wl,-rpath,{d}' for d in libdirs_host]))
+            env.define("LD_RUN_PATH", ":".join(libdirs_host))
+            env.vars(self).save_script("conanbuild_build_rpath")
         if self.settings.os == "Windows":
             if is_msvc(self) and not check_min_vs(self, 193, raise_invalid=False) and \
                 not self.conf.get("tools.cmake.cmaketoolchain:generator", check_type=str):
@@ -159,6 +161,9 @@ class MpfrConan(ConanFile):
         self._patch_sources()
         autotools = Autotools(self)
         autotools.configure() # Need to generate Makefile to extract variables for CMake below
+        if self.options.shared and self.settings.os == "Linux":
+            build_rpath_sh = os.path.join(self.generators_folder, "conanbuild_build_rpath.sh")
+            save(self, build_rpath_sh, "#!/bin/sh\n") # this script does nothing after configure...
 
         if self.settings.os == "Windows":
             cmakelists_in = load(self, os.path.join(self.export_sources_folder, "CMakeLists.txt.in"))
