@@ -24,7 +24,7 @@ grpc_targets:
         - abseil::absl_time
         - abseil::absl_optional
         - abseil::absl_variant
-    - name: "grpc"
+    - name: "_grpc"
       lib: "grpc"
       requires:
         - upb_json_lib
