@@ -62,6 +62,10 @@ class FixedMathConan(ConanFile):
         else:
             cmake_layout(self, src_folder="src")
 
+    def package_id(self):
+        if self.info.options.header_only:
+            self.info.clear()
+
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
