@@ -28,7 +28,7 @@ class SimpleEnumConan(ConanFile):
         return {
             "gcc": "11",
             "clang": "12",
-            "apple-clang": "13",
+            "apple-clang": "14", # apple-clang/13 doesn't support std::convertible_to
             "Visual Studio": "16",
             "msvc": "192",
         }
