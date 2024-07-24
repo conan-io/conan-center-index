@@ -1,8 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, replace_in_file
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.52.0"
@@ -28,6 +27,8 @@ class DtlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # See https://github.com/cubicdaiya/dtl/pull/18
+        replace_in_file(self, os.path.join(self.source_folder, "dtl", "Diff.hpp"), "void enableTrivial () const {", "void enableTrivial () {")
 
     def package(self):
         copy(self, "COPYING",
