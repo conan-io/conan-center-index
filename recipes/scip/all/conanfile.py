@@ -57,7 +57,7 @@ class SCIPConan(ConanFile):
                 )
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
-        if self.options.shared and self.options.with_sym == "bliss":
+        if self.options.shared and Version(self.version) <= "9.0.1":
             raise ConanInvalidConfiguration("Bliss is not supported in shared mode.")
         comp = self.settings.compiler
         if Version(self.version) <= "9.0.1" and comp == 'clang' and comp.libcxx and comp.libcxx == 'libc++':
