@@ -34,6 +34,13 @@ class GlazeConan(ConanFile):
                 "clang": "14",
                 "apple-clang": "13.1",
             },
+            "23": {
+                "Visual Studio": "17",
+                "msvc": "193",
+                "gcc": "12",
+                "clang": "15",
+                "apple-clang": "14",
+            },
         }.get(self._min_cppstd, {})
 
     def layout(self):
