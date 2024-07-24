@@ -89,6 +89,7 @@ class OpenSSLConan(ConanFile):
         "no_zlib": [True, False],
         "openssldir": [None, "ANY"],
         "tls_security_level": [None, 0, 1, 2, 3, 4, 5],
+        "use_validated_fips": [True, False],
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
@@ -125,6 +126,9 @@ class OpenSSLConan(ConanFile):
             self.options.no_threads = True
             self.options.no_stdio = True
 
+        if self.options.use_validated_fips == True:
+            self.options.no_fips = True
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -137,6 +141,8 @@ class OpenSSLConan(ConanFile):
     def requirements(self):
         if not self.options.no_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.use_validated_fips:
+            self.requires("openssl/3.0.9", visible=False, libs=False, headers=False, run=False)
 
     def validate(self):
         if self.settings.os == "Emscripten":
@@ -410,7 +416,7 @@ class OpenSSLConan(ConanFile):
             ])
 
         for option_name in self.default_options.keys():
-            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "tls_security_level", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2"):
+            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "tls_security_level", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2", "use_validated_fips"):
                 self.output.info(f"Activated option: {option_name}")
                 args.append(option_name.replace("_", "-"))
         return args
@@ -545,6 +551,18 @@ class OpenSSLConan(ConanFile):
             replace_in_file(self, filename, f"/{e} ", f"/{runtime} ", strict=False)
             replace_in_file(self, filename, f"/{e}\"", f"/{runtime}\"", strict=False)
 
+    @property
+    def _is_fips_enabled(self):
+        return not self.options.no_fips or self.options.use_validated_fips
+
+    @property
+    def _fips_provider_dir(self):
+        if self.options.use_validated_fips:
+            return self.dependencies["openssl"].runenv_info.vars(self)["OPENSSL_MODULES"]
+        elif not self.options.no_fips:
+            return os.path.join(self.source_folder, "providers")
+        else:
+            return None
     def package(self):
         copy(self, "*LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         self._make_install()
@@ -560,8 +578,8 @@ class OpenSSLConan(ConanFile):
                 if file.endswith(".a"):
                     os.unlink(os.path.join(libdir, file))
 
-        if not self.options.no_fips:
-            provdir = os.path.join(self.source_folder, "providers")
+        if self._is_fips_enabled:
+            provdir = self._fips_provider_dir
             modules_dir = os.path.join(self.package_folder, "lib", "ossl-modules")
             if self.settings.os == "Macos":
                 copy(self, "fips.dylib", src=provdir, dst=modules_dir)
