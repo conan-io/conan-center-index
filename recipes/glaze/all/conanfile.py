@@ -4,6 +4,7 @@ from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.51.1"
@@ -69,3 +70,5 @@ class GlazeConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        if is_msvc(self):
+            self.cpp_info.cxxflags.append("/Zc:preprocessor")
