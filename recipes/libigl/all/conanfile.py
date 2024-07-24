@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -9,7 +9,7 @@ from conan.tools.files import copy, get, rm, rmdir, replace_in_file, export_cona
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibiglConan(ConanFile):
@@ -80,8 +80,8 @@ class LibiglConan(ConanFile):
 
     def validate_build(self):
         if (os.getenv('CONAN_CENTER_BUILD_SERVICE') is not None and
-                Version(self.version) == "2.3.0" and conan_version.major == 1 and self.settings.build_type == "Debug"):
-            raise ConanInvalidConfiguration("Debug build disabled for Conan 1.x due to excessive memory use in ConanCenter CI")
+                Version(self.version) == "2.3.0" and self.settings.build_type == "Debug"):
+            raise ConanInvalidConfiguration("Debug build disabled from building in CCI due to excessive memory use in ConanCenter CI")
 
     def validate(self):
         if Version(self.version) < "2.4.0" and "arm" in self.settings.arch:
