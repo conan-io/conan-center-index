@@ -36,11 +36,11 @@ class IridescenceConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "7",
-            "clang": "7",
-            "apple-clang": "10",
-            "Visual Studio": "17",
-            "msvc": "193",
+            "gcc": "9",
+            "clang": "9",
+            "apple-clang": "11",
+            "Visual Studio": "16",
+            "msvc": "192",
         }
 
     def export_sources(self):
