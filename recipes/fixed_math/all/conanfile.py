@@ -92,7 +92,7 @@ class FixedMathConan(ConanFile):
             cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENCE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         if not self.options.header_only:
             cmake = CMake(self)
             cmake.install()
