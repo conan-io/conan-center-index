@@ -26,3 +26,11 @@ sources:
   3.0.18: # LTS: 3.5.4 should be used, but this is supported by OpenSSL until 2026-09-07
     url: "https://github.com/openssl/openssl/releases/download/openssl-3.0.18/openssl-3.0.18.tar.gz"
     sha256: d80c34f5cf902dccf1f1b5df5ebb86d0392e37049e5d73df1b3abae72e4ffe8b
+  # Validated FIPS versions
+  3.0.9:
+    url: "https://github.com/openssl/openssl/releases/download/openssl-3.0.9/openssl-3.0.9.tar.gz"
+    sha256: eb1ab04781474360f77c318ab89d8c5a03abc38e63d65a603cabbf1b00a1dc90
+  3.0.8:
+    url: "https://github.com/openssl/openssl/releases/download/openssl-3.0.8/openssl-3.0.8.tar.gz"
+    sha256: 6c13d2bf38fdf31eac3ce2a347073673f5d63263398f1f69d0df4a41253e4b3e
+  #
