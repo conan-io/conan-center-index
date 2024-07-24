@@ -521,6 +521,8 @@ class QtConan(ConanFile):
             tc.variables["FEATURE_dbus"] = "OFF"
         tc.variables["CMAKE_FIND_DEBUG_MODE"] = "FALSE"
 
+        if not self.options.with_zstd:
+            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapZSTD"] = "ON"
 
         for opt, conf_arg in [("with_glib", "glib"),
                               ("with_icu", "icu"),
@@ -536,6 +538,8 @@ class QtConan(ConanFile):
                               ("with_gssapi", "gssapi"),
                               ("with_egl", "egl"),
                               ("with_gstreamer", "gstreamer")]:
+            on_or_off = ("ON" if self.options.get_safe(opt, False) else "OFF")
+            self.output.warning(f"FEATURE_{conf_arg}: {on_or_off}")
             tc.variables[f"FEATURE_{conf_arg}"] = ("ON" if self.options.get_safe(opt, False) else "OFF")
 
 
