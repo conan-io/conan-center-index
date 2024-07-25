@@ -115,6 +115,7 @@ class MariadbConnectorCppRecipe (ConanFile):
             self.requires("libcurl/[>=7.78.0 <9]")
 
     def _patch_sources(self):
+        # C
         root_cmake = os.path.join(self.source_folder, "libmariadb", "CMakeLists.txt")
         replace_in_file(self, root_cmake, "${ZLIB_LIBRARY}", "${ZLIB_LIBRARIES}")
         replace_in_file(self,
@@ -125,6 +126,10 @@ class MariadbConnectorCppRecipe (ConanFile):
         replace_in_file(self, root_cmake, "${CURL_LIBRARIES}", "CURL::libcurl")
         plugins_io_cmake = os.path.join(self.source_folder, "libmariadb", "plugins", "io", "CMakeLists.txt")
         replace_in_file(self, plugins_io_cmake, "${CURL_LIBRARIES}", "CURL::libcurl")
+
+        # C++
+        base_cmake = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, base_cmake, "CMAKE_MINIMUM_REQUIRED(VERSION 3.23)", "CMAKE_MINIMUM_REQUIRED(VERSION 3.1)")
 
     def build(self):
         self._patch_sources()
