@@ -22,77 +22,35 @@ class MariadbConnectorCppRecipe (ConanFile):
 
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
-        "with_curl": [True, False],
-        "with_external_zlib": [True, False],
-        "with_dyncol": [True, False],
-        "with_mysqlcompat": [True, False],
-        "with_ssl": [False, "openssl", "gnutls", "schannel"],
-        "with_iconv": [True, False],
+        "fPIC": [True, False]
     }
     
     default_options = {
         "shared": False, 
-        "fPIC": True, 
-        "with_iconv": True, 
-        "with_curl": True, 
-        "with_dyncol": True, 
-        "with_external_zlib": True, 
-        "with_mysqlcompat": False, 
-        "with_ssl": "openssl"
+        "fPIC": True
     }
 
     def source(self):
-        get (self, **self.conan_data["sources"][self.version]["cpp"], strip_root=True)
-        get (self, **self.conan_data["sources"][self.version]["c"], strip_root=False)
-
-        source_cpp = "."
-        source_c = glob.glob ("mariadb-connector-c-*")[0]
-        
-        files.move_folder_contents (self, source_c, os.path.join (source_cpp, "libmariadb"))
+        get (self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-            self.options.rm_safe("with_iconv")
-            self.options.with_ssl = "schannel"
-
-    def configure(self):
-        if self.options.shared:
             self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def validate(self):
-        if self.settings.os != "Windows" and self.options.with_ssl == "schannel":
-            raise ConanInvalidConfiguration("schannel only supported on Windows")
-        if self.options.with_ssl == "gnutls":
-            raise ConanInvalidConfiguration("gnutls not yet available in CCI")
-
     def generate(self):
         deps = CMakeDeps(self)
-        deps.set_property("zstd", "cmake_file_name", "ZSTD")
         deps.generate()
 
         tc = CMakeToolchain(self)
-
-        if self.settings.os == "Windows":
-            tc.variables["WITH_MSI"] = False
-            tc.variables["WITH_SIGNCODE"] = False
-            tc.variables["WITH_RTC"] = False
-        else:
-            tc.variables["WITH_MYSQLCOMPAT"] = False
-            tc.variables["WITH_ICONV"] = self.options.with_iconv
         
         tc.variables["WITH_UNIT_TESTS"] = False
-        tc.variables["WITH_DYNCOL"] = self.options.with_dyncol
-        tc.variables["WITH_EXTERNAL_ZLIB"] = self.options.with_external_zlib
-        tc.variables["WITH_CURL"] = self.options.with_curl
-        tc.variables["WITH_SSL"] = self.options.with_ssl
         tc.variables["INSTALL_BINDIR"] = "bin"
         tc.variables["INSTALL_LIBDIR"] = "lib"
         tc.variables["INSTALL_PLUGINDIR"] = os.path.join("lib", "plugin").replace("\\", "/")
+        tc.variables["USE_SYSTEM_INSTALLED_LIB"] = True
 
         # To install relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
@@ -100,36 +58,15 @@ class MariadbConnectorCppRecipe (ConanFile):
         tc.generate()
 
     def requirements(self):
-        self.requires("zstd/1.5.5")
-
-        if self.options.get_safe("with_iconv"):
-            self.requires("libiconv/1.17")
-
-        if self.options.with_ssl == "openssl":
-            self.requires("openssl/[>=1.1 <4]")
-
-        if self.options.with_external_zlib:
-            self.requires("zlib/[>=1.2.11 <2]")
-
-        if self.options.with_curl:
-            self.requires("libcurl/[>=7.78.0 <9]")
+        self.requires ("mariadb-connector-c/[>=3.1.11 <4]")
 
     def _patch_sources(self):
-        # C
-        root_cmake = os.path.join(self.source_folder, "libmariadb", "CMakeLists.txt")
-        replace_in_file(self, root_cmake, "${ZLIB_LIBRARY}", "${ZLIB_LIBRARIES}")
-        replace_in_file(self,
-            root_cmake,
-            "SET(SSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})",
-            "SET(SSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)"
-        )
-        replace_in_file(self, root_cmake, "${CURL_LIBRARIES}", "CURL::libcurl")
-        plugins_io_cmake = os.path.join(self.source_folder, "libmariadb", "plugins", "io", "CMakeLists.txt")
-        replace_in_file(self, plugins_io_cmake, "${CURL_LIBRARIES}", "CURL::libcurl")
+        cmake = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmake, "CMAKE_MINIMUM_REQUIRED(VERSION 3.23)", "CMAKE_MINIMUM_REQUIRED(VERSION 3.1)")
+        replace_in_file(self, cmake, "${MARIADB_CLIENT_TARGET_NAME}", "mariadb-connector-c::mariadb-connector-c")
 
-        # C++
-        base_cmake = os.path.join(self.source_folder, "CMakeLists.txt")
-        replace_in_file(self, base_cmake, "CMAKE_MINIMUM_REQUIRED(VERSION 3.23)", "CMAKE_MINIMUM_REQUIRED(VERSION 3.1)")
+        # TODO: resolve find mariadb-connector-c
+        replace_in_file(self, cmake, "SET(CMAKE_CXX_STANDARD 11)", "SET(CMAKE_CXX_STANDARD 11)\nFIND_PACKAGE(mariadb-connector-c REQUIRED)")
 
     def build(self):
         self._patch_sources()

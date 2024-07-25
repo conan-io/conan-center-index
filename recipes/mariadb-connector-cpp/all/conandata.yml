@@ -1,10 +1,5 @@
 sources:
   "1.1.4":
-    cpp:
-      url:
-        - "https://github.com/mariadb-corporation/mariadb-connector-cpp/archive/refs/tags/1.1.4.zip"
-      sha256: "4b6846abff09b9fece8c3766785248b60aa7e11815e5b4590bbf7dff7f2e7b3d"
-    c:
-      url:
-        - "https://github.com/mariadb-corporation/mariadb-connector-c/archive/refs/tags/v3.1.24.zip"
-      sha256: "72eee2c836853ae94d718d5894c4ccd4cd011d636913990a85c11661ff7d0bf8"
+    url: 
+      - "https://github.com/mariadb-corporation/mariadb-connector-cpp/archive/refs/tags/1.1.4.zip"
+    sha256: "4b6846abff09b9fece8c3766785248b60aa7e11815e5b4590bbf7dff7f2e7b3d"
