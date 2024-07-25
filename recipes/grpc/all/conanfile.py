@@ -222,7 +222,7 @@ class GrpcConan(ConanFile):
             # Note: if protobuf used RPATH instead of RUNPATH this is not needed
             replace_in_file(self, cmakelists,
                             "COMMAND ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}",
-                            'COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=$<JOIN:${CMAKE_LIBRARY_PATH},:>" ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}')
+                            'COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=$<JOIN:${CMAKE_LIBRARY_PATH},:>:$ENV{LD_LIBRARY_PATH}" ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}')
         if self.settings.os == "Macos" and Version(self.version) >= "1.64":
             # See https://github.com/grpc/grpc/issues/36654#issuecomment-2228569158
             replace_in_file(self, cmakelists, "target_compile_features(upb_textformat_lib PUBLIC cxx_std_14)", 
