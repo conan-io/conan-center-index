@@ -214,18 +214,18 @@ class QtConan(ConanFile):
         #         self.options.with_libiconv = False # QTBUG-84708
 
         if not self.options.gui:
-            del self.options.opengl
-            del self.options.with_vulkan
-            del self.options.with_freetype
-            del self.options.with_fontconfig
-            del self.options.with_harfbuzz
-            del self.options.with_libjpeg
-            del self.options.with_libpng
-            del self.options.with_md4c
-            del self.options.with_x11
+            self.options.rm_safe("opengl")
+            self.options.rm_safe("with_vulkan")
+            self.options.rm_safe("with_freetype")
+            self.options.rm_safe("with_fontconfig")
+            self.options.rm_safe("with_harfbuzz")
+            self.options.rm_safe("with_libjpeg")
+            self.options.rm_safe("with_libpng")
+            self.options.rm_safe("with_md4c")
+            self.options.rm_safe("with_x11")
 
         if not self.options.with_dbus:
-            del self.options.with_atspi
+            self.options.rm_safe("with_atspi")
 
         if self.options.multiconfiguration:
             del self.settings.build_type
@@ -613,9 +613,6 @@ class QtConan(ConanFile):
         if cross_building(self):
             args.append(f"-extprefix {self.package_folder}")
         args.append("-v")
-        args.append("-archdatadir  %s" % os.path.join(self.package_folder, "bin", "archdatadir"))
-        args.append("-datadir  %s" % os.path.join(self.package_folder, "bin", "datadir"))
-        args.append("-sysconfdir  %s" % os.path.join(self.package_folder, "bin", "sysconfdir"))
         if self.options.commercial:
             args.append("-commercial")
         else:
@@ -854,18 +851,7 @@ class QtConan(ConanFile):
         with chdir(self, "build_folder"):
             self.run(f"{self._make_program()} install")
         save(self, os.path.join(self.package_folder, "bin", "qt.conf"), """[Paths]
-Prefix = ..
-ArchData = bin/archdatadir
-HostData = bin/archdatadir
-Data = bin/datadir
-Sysconf = bin/sysconfdir
-LibraryExecutables = bin/archdatadir/bin
-Plugins = bin/archdatadir/plugins
-Imports = bin/archdatadir/imports
-Qml2Imports = bin/archdatadir/qml
-Translations = bin/datadir/translations
-Documentation = bin/datadir/doc
-Examples = bin/datadir/examples""")
+Prefix = ..""")
         copy(self, "*LICENSE*", os.path.join(self.source_folder, "qt5/"), os.path.join(self.package_folder, "licenses"),
              excludes="qtbase/examples/*")
         for module in self._submodules:
@@ -877,6 +863,7 @@ Examples = bin/datadir/examples""")
         rm(self, "*.la*", os.path.join(self.package_folder, "lib"), recursive=True)
         rm(self, "*.pdb*", os.path.join(self.package_folder, "lib"), recursive=True)
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"), recursive=True)
+        rm(self, "*.pdb", os.path.join(self.package_folder, "plugins"), recursive=True)
         # "Qt5Bootstrap" is internal Qt library - removing it to avoid linking error, since it contains
         # symbols that are also in "Qt5Core.lib". It looks like there is no "Qt5Bootstrap.dll".
         for fl in glob.glob(os.path.join(self.package_folder, "lib", "*Qt5Bootstrap*")):
@@ -1049,7 +1036,7 @@ Examples = bin/datadir/examples""")
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
             if not self.options.shared:
                 self.cpp_info.components[componentname].libs = [libname + libsuffix]
-            self.cpp_info.components[componentname].libdirs = [os.path.join("bin", "archdatadir", "plugins", plugintype)]
+            self.cpp_info.components[componentname].libdirs = [os.path.join("plugins", plugintype)]
             self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
                 requires.append("Core")
@@ -1391,8 +1378,10 @@ Examples = bin/datadir/examples""")
                 _create_plugin("QGstreamerCaptureServicePlugin", "gstmediacapture", "mediaservice", [])
                 _create_plugin("QGstreamerPlayerServicePlugin", "gstmediaplayer", "mediaservice", [])
             if self.settings.os == "Linux":
-                _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
-                _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
+                if self.options.with_gstreamer:
+                    _create_plugin("CameraBinServicePlugin", "gstcamerabin", "mediaservice", [])
+                if self.options.get_safe("with_libalsa", False):
+                    _create_plugin("QAlsaPlugin", "qtaudio_alsa", "audio", [])
             if self.settings.os == "Windows":
                 _create_plugin("AudioCaptureServicePlugin", "qtmedia_audioengine", "mediaservice", [])
                 _create_plugin("DSServicePlugin", "dsengine", "mediaservice", [])
@@ -1491,7 +1480,7 @@ Examples = bin/datadir/examples""")
                 self.cpp_info.components["qtCore"].frameworks.append("Cocoa")     # qtcore requires "_OBJC_CLASS_$_NSApplication" and more, which are in "Cocoa" framework
                 self.cpp_info.components["qtCore"].frameworks.append("Security")  # qtcore requires "_SecRequirementCreateWithString" and more, which are in "Security" framework
 
-        self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin","archdatadir","bin"))
+        self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin"))
         _add_build_module("qtCore", self._cmake_core_extras_file)
         _add_build_module("qtCore", self._cmake_qt5_private_file("Core"))
 
@@ -1506,8 +1495,7 @@ Examples = bin/datadir/examples""")
             os.path.join("lib", "cmake", "Qt5Core", "Qt5CoreConfigExtrasMkspecDir.cmake"))
         mkspecs_dir_begin = qt5core_config_extras_mkspec_dir_cmake.find("mkspecs/")
         mkspecs_dir_end = qt5core_config_extras_mkspec_dir_cmake.find("\"", mkspecs_dir_begin)
-        mkspecs_dir = qt5core_config_extras_mkspec_dir_cmake[mkspecs_dir_begin:mkspecs_dir_end].split('/')
-        mkspecs_path = os.path.join("bin", "archdatadir", *mkspecs_dir)
+        mkspecs_path = qt5core_config_extras_mkspec_dir_cmake[mkspecs_dir_begin:mkspecs_dir_end]
         assert os.path.exists(mkspecs_path)
         self.cpp_info.components["qtCore"].includedirs.append(mkspecs_path)
 

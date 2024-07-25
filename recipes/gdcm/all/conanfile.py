@@ -64,7 +64,7 @@ class GDCMConan(ConanFile):
         else:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os != "Windows":
-            self.requires("util-linux-libuuid/2.39")
+            self.requires("util-linux-libuuid/2.39.2")
             if Version(self.version) >= Version("3.0.20"):
                 self.requires("libiconv/1.17")
         if self.options.with_json:

@@ -1,17 +1,11 @@
 versions:
+  "9.4.1":
+    folder: "all"
   "9.3.1":
     folder: "all"
   "9.3.0":
     folder: "all"
   "9.2.1":
-    folder: "all"
-  "9.1.1":
-    folder: "all"
-  "9.1.0":
-    folder: "all"
-  "9.0.1":
-    folder: "all"
-  "9.0.0":
     folder: "all"
   "8.2.1":
     folder: "all"
