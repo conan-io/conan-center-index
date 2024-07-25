@@ -123,7 +123,7 @@ class OpenUSDConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.85.0", transitive_headers=True)
+        self.requires("boost/1.84.0", transitive_headers=True)
         self.requires("onetbb/2019_u9", transitive_headers=True)
         
         if self.options.build_imaging:
