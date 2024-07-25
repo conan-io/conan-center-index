@@ -521,6 +521,8 @@ class QtConan(ConanFile):
             tc.variables["FEATURE_dbus"] = "OFF"
         tc.variables["CMAKE_FIND_DEBUG_MODE"] = "FALSE"
 
+        if not self.options.with_zstd:
+            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapZSTD"] = "ON"
 
         for opt, conf_arg in [("with_glib", "glib"),
                               ("with_icu", "icu"),
