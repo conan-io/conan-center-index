@@ -1,7 +1,8 @@
 from conan import ConanFile, tools
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import files, get, copy, replace_in_file, collect_libs
+from conan.tools.files import files, get, copy, replace_in_file, collect_libs, rmdir, rm
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 import os
 import glob
 
@@ -43,6 +44,10 @@ class MariadbConnectorCppRecipe (ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
+            self.options.rm_safe("fPIC")
+
+    def configure(self):
+        if self.options.shared:
             self.options.rm_safe("fPIC")
 
     def layout(self):
@@ -111,6 +116,10 @@ class MariadbConnectorCppRecipe (ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
             
