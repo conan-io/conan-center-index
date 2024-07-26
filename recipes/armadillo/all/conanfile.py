@@ -1,13 +1,14 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches, save
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.build import cross_building
 from conan.errors import ConanInvalidConfiguration
 import os
+import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.55.0"
 
 
 class ArmadilloConan(ConanFile):
@@ -58,7 +59,7 @@ class ArmadilloConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "use_blas": "openblas",
-        "use_lapack": False,
+        "use_lapack": "openblas",
         "use_hdf5": True,
         "use_superlu": False,
         "use_extern_rng": False,
@@ -102,11 +103,6 @@ class ArmadilloConan(ConanFile):
             self.options.rm_safe("fPIC")
 
         if self.options.use_blas == "openblas":
-            # Note that if you're relying on this to build LAPACK, you _must_ have
-            # a fortran compiler installed. If you don't, OpenBLAS will build successfully but
-            # without LAPACK support, which isn't obvious.
-            # This can be achieved by setting the FC environment variable or the conf tools.build:compiler_executables={"fortran": "/path/to/fortran"}
-            # in your conan profile.
             self.options["openblas"].build_lapack = (
                 self.options.use_lapack == "openblas"
             )
@@ -190,11 +186,11 @@ class ArmadilloConan(ConanFile):
         if self.options.use_hdf5 and Version(self.version) < "12":
             # Use the conan dependency if the system lib isn't being used
             # Libraries not required to be propagated transitively when the armadillo run-time wrapper is used
-            self.requires("hdf5/1.14.1", transitive_headers=True, transitive_libs=not self.options.use_wrapper)
+            self.requires("hdf5/1.14.3", transitive_headers=True, transitive_libs=not self.options.use_wrapper)
 
         if self.options.use_blas == "openblas":
             # Libraries not required to be propagated transitively when the armadillo run-time wrapper is used
-            self.requires("openblas/0.3.20", transitive_libs=not self.options.use_wrapper)
+            self.requires("openblas/0.3.25", transitive_libs=not self.options.use_wrapper)
         if (
             self.options.use_blas == "intel_mkl"
             and self.options.use_lapack == "intel_mkl"
@@ -263,6 +259,40 @@ class ArmadilloConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    @property
+    def _get_arma_version_name(self):
+        version_file = os.path.join(self.source_folder, "include", "armadillo_bits", "arma_version.hpp")
+        with open(version_file, "r") as f:
+            for line in f:
+                if "ARMA_VERSION_NAME" in line:
+                    return line.split("\"")[-2].strip()
+        return ""
+
+    @property
+    def _module_vars_rel_path(self):
+        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
+
+    def _create_cmake_module_variables(self, module_file):
+        content = textwrap.dedent(f"""\
+            set(ARMADILLO_FOUND TRUE)
+            if(DEFINED Armadillo_INCLUDE_DIRS)
+                set(ARMADILLO_INCLUDE_DIRS ${{Armadillo_INCLUDE_DIRS}})
+            endif()
+            if(DEFINED Armadillo_LIBRARIES)
+                set(ARMADILLO_LIBRARIES ${{Armadillo_LIBRARIES}})
+            endif()
+            set(ARMADILLO_VERSION_MAJOR "{Version(self.version).major}")
+            set(ARMADILLO_VERSION_MINOR "{Version(self.version).minor}")
+            set(ARMADILLO_VERSION_PATCH "{Version(self.version).patch}")
+            if(DEFINED Armadillo_VERSION_STRING)
+                set(ARMADILLO_VERSION_STRING ${{Armadillo_VERSION_STRING}})
+            else()
+                set(ARMADILLO_VERSION_STRING "${{ARMADILLO_VERSION_MAJOR}}.${{ARMADILLO_VERSION_MINOR}}.${{ARMADILLO_VERSION_PATCH}}")
+            endif()
+            set(ARMADILLO_VERSION_NAME "{self._get_arma_version_name}")
+        """)
+        save(self, module_file, content)
+
     def package(self):
         cmake = CMake(self)
         cmake.install()
@@ -271,10 +301,25 @@ class ArmadilloConan(ConanFile):
         copy(self, "NOTICE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_vars_rel_path))
+
 
     def package_info(self):
         self.cpp_info.libs = ["armadillo"]
         self.cpp_info.set_property("pkg_config_name", "armadillo")
+        self.cpp_info.set_property("cmake_find_mode", "both")
+        self.cpp_info.set_property("cmake_file_name", "Armadillo")
+        self.cpp_info.set_property("cmake_target_name", "Armadillo::Armadillo")
+        self.cpp_info.set_property("cmake_target_aliases", ["armadillo", "armadillo::armadillo"])
+        self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
+
+        # Remove when cmake_find_package and pkg_config generators are no
+        # longer supported
+        self.cpp_info.names["pkg_config"] = "armadillo"
+        self.cpp_info.names["cmake_find_package"] = "Armadillo"
+        self.cpp_info.names["cmake_find_package_multi"] = "Armadillo"
+        self.cpp_info.build_modules["cmake_find_package"] = [self._module_vars_rel_path]
+        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_vars_rel_path]
 
         if self.options.get_safe("use_extern_rng"):
             self.cpp_info.defines.append("ARMA_USE_EXTERN_RNG")

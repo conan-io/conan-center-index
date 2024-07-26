@@ -1,0 +1,15 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -17,7 +17,11 @@
+ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ 
+ if(MSVC)
+-  add_compile_options(/W4 /O2)
++  add_compile_options(
++      "$<$<CONFIG:RelWithDebInfo>:/O2>"
++      "$<$<CONFIG:Release>:/O2>"
++      /W4
++  )
+ else()
+   add_compile_options(
+     "$<$<CONFIG:Debug>:-ggdb3;-Og>"

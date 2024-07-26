@@ -1,0 +1,45 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -16,27 +16,26 @@ if( EXISTS "${LOC_PATH}" )
+ endif()
+ 
+ # Set c++ standard options
+-set( CMAKE_CXX_STANDARD 17 )
+-set( CMAKE_CXX_STANDARD_REQUIRED ON )
+-set( CMAKE_CXX_EXTENSIONS OFF )
+ 
+ # Fetching dependencies
+-add_subdirectory( deps )
+ 
+ # Include directories
+ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
+ 
+ # Create static library
+-add_library( arsenalgear STATIC
++add_library( arsenalgear
+     src/stream.cpp
+     src/system.cpp
+     src/utils.cpp
+ )
++set_target_properties(arsenalgear PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
++target_compile_features(arsenalgear PUBLIC cxx_std_17)
+ add_library( arsenalgear::arsenalgear ALIAS arsenalgear )
+ 
+ # Compile tests
+ option( ARSENALGEAR_TESTS "Enable / disable tests." ON )
+ if( ARSENALGEAR_TESTS )
++    add_subdirectory( deps )
+     add_subdirectory( test )
+ else()
+     message( STATUS "Skipping tests." )
+@@ -57,7 +56,9 @@ install(
+ install( 
+     TARGETS arsenalgear
+     EXPORT arsenalgearTargets
+-    DESTINATION lib
++    ARCHIVE DESTINATION lib
++    LIBRARY DESTINATION lib
++    RUNTIME DESTINATION bin
+ )
+ 
+ install(

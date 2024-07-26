@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 class QuickJSConan(ConanFile):
     name = "quickjs"
@@ -35,21 +35,14 @@ class QuickJSConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.version >= "2023-12-09":
+            del self.options.use_bignum
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def validate(self):
         # TODO: there are forked repository to support MSVC. (https://github.com/c-smile/quickjspp)
@@ -60,12 +53,12 @@ class QuickJSConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["QUICKJS_SRC_DIR"] = self.source_folder.replace("\\", "/")
-        tc.variables["USE_BIGNUM"] = self.options.use_bignum
+        tc.variables["USE_BIGNUM"] = self.options.get_safe("use_bignum", True)
         tc.variables["DUMP_LEAKS"] = self.options.dump_leaks
         tc.generate()
 
@@ -82,7 +75,7 @@ class QuickJSConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["quickjs"]
 
-        if self.options.use_bignum == True:
+        if self.options.get_safe("use_bignum", True):
             self.cpp_info.defines.append("CONFIG_BIGNUM")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
