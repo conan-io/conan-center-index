@@ -131,10 +131,17 @@ class TracyConan(ConanFile):
             self.cpp_info.components["tracyclient"].defines.append(
                 "TRACY_IMPORTS")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["tracyclient"].system_libs.append(
-                "pthread")
+            self.cpp_info.components["tracyclient"].system_libs.extend([
+                "pthread",
+                "m"
+            ])
         if self.settings.os == "Linux":
             self.cpp_info.components["tracyclient"].system_libs.append("dl")
+        if self.settings.os == "Windows":
+            self.cpp_info.components["tracyclient"].system_libs.extend([
+                "dbghelp",
+                "ws2_32"
+            ])
 
         # Tracy CMake adds options set to ON as public
         for opt in self._tracy_options.keys():
