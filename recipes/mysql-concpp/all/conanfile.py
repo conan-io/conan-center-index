@@ -85,7 +85,7 @@ class MysqlCppConnRecipe(ConanFile):
         
         # Apple patches
         if is_apple_os(self):
-            tc.cache_variables["CMAKE_OSX_ARCHITECTURES"] = "x86_64;arm64"
+            tc.cache_variables["CMAKE_OSX_ARCHITECTURES"] = "x86_64;armv8"
 
         tc.generate()
         
