@@ -107,7 +107,6 @@ class GLibConan(ConanFile):
 
         if self.settings.os == "Neutrino":
             tc.cross_build["host"]["system"] = "qnx"
-            tc.c_args = ["-Wno-nonnull", "-Wno-format-nonliteral", "-Wno-unused-variable", "-Wno-unused-function", "-Wno-sign-compare", "-Wno-error=implicit-function-declaration", "-Wno-int-conversion"]
             tc.c_link_args.append("-lm")
             tc.c_link_args.append("-lsocket")
 
