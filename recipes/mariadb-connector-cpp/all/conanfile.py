@@ -15,7 +15,7 @@ class MariadbConnectorCppRecipe (ConanFile):
     license = "LGPL-2.1-or-later"
     topics = ("mariadb", "mysql", "database")
     homepage = "https://mariadb.com/docs/server/connect/programming-languages/cpp"
-    url = "https://github.com/mariadb-corporation/mariadb-connector-cpp"
+    url = "https://github.com/conan-io/conan-center-index"
 
     package_type = "library"
 
@@ -43,6 +43,13 @@ class MariadbConnectorCppRecipe (ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
+            self.options.with_ssl = "schannel"
+
+    def validate(self):
+        if self.settings.os != "Windows" and self.options.with_ssl == "schannel":
+            raise ConanInvalidConfiguration("schannel only supported on Windows")
+        if self.options.with_ssl == "gnutls":
+            raise ConanInvalidConfiguration("gnutls not yet available in CCI")
 
     def configure(self):
         if self.options.shared:
