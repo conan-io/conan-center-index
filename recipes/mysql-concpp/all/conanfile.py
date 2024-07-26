@@ -102,7 +102,7 @@ class MysqlCppConnRecipe(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_folder=self.build_folder)
+        cmake.configure()
         cmake.build()
 
     def package(self):
