@@ -36,8 +36,8 @@ class PackageConan(ConanFile):
         "build_libibnetdisc": True,
         "build_libmana": True,
         "build_libmlx4": True,
-        "build_libmlx5": False,
-        "build_librdmacm": False,
+        "build_libmlx5": True,
+        "build_librdmacm": True,
     }
 
     def configure(self):
