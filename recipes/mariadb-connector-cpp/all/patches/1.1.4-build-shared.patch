@@ -1,5 +1,5 @@
---- a/CMakeLists.txt	2024-07-26 18:25:43.150534700 +0500
-+++ b/CMakeLists.txt	2024-07-26 18:55:37.270380025 +0500
+--- a/CMakeLists.txt	2024-07-26 19:34:14.636960374 +0500
++++ b/CMakeLists.txt	2024-07-26 19:34:41.248958080 +0500
 @@ -19,7 +19,7 @@
  
  IF(APPLE)
@@ -141,7 +141,7 @@
      MESSAGE(STATUS "Found MariaDB Connector/C libraries - ${MARIADB_CONNECTORC_LIB}")
    ELSE()
      MESSAGE(WARNING "Did not find MariaDB Connector/C libraries")
-@@ -685,7 +698,9 @@
+@@ -685,14 +698,16 @@
  ENDIF()
  
  INCLUDE(symlink)
@@ -152,6 +152,14 @@
  
  ADD_DEPENDENCIES(${LIBRARY_NAME} DEPENDENCIES_FOR_PACKAGE)
  
+ ########## Packaging ##########
+ 
+ # MSI
+-IF(WIN32)
++IF(False)
+   IF(WITH_MSI)
+     ADD_CUSTOM_COMMAND(TARGET ${LIBRARY_NAME} POST_BUILD
+       COMMAND ${CMAKE_COMMAND} ARGS -DDRIVER_LIB_DIR=$<TARGET_FILE_DIR:${LIBRARY_NAME}>
 @@ -709,13 +724,16 @@
      #MESSAGE(STATUS "Configuring to generate PKG package")
      #ADD_SUBDIRECTORY(osxinstall)

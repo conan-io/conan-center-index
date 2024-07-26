@@ -3,8 +3,10 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import files, get, copy, replace_in_file, collect_libs, rmdir, rm, apply_conandata_patches, export_conandata_patches
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
+from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
 import os
-import glob
 
 required_conan_version = ">=1.53.0"
 
@@ -20,6 +22,20 @@ class MariadbConnectorCppRecipe (ConanFile):
     package_type = "library"
 
     settings = "os", "compiler", "build_type", "arch"
+
+    @property
+    def _min_cppstd(self):
+        return 14
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "apple-clang": "10",
+            "clang": "7",
+            "gcc": "7",
+            "msvc": "191",
+            "Visual Studio": "15",
+        }
 
     options = {
         "shared": [True, False],
@@ -50,6 +66,15 @@ class MariadbConnectorCppRecipe (ConanFile):
             raise ConanInvalidConfiguration("schannel only supported on Windows")
         if self.options.with_ssl == "gnutls":
             raise ConanInvalidConfiguration("gnutls not yet available in CCI")
+        
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def configure(self):
         if self.options.shared:
