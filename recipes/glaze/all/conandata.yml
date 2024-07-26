@@ -1,7 +1,7 @@
 sources:
-  "3.1.6":
-    url: "https://github.com/stephenberry/glaze/archive/v3.1.6.tar.gz"
-    sha256: "6ba080cb81bb835061253cebee9199c2000352841355fc0f8d975fb646c5e679"
+  "3.1.7":
+    url: "https://github.com/stephenberry/glaze/archive/v3.1.7.tar.gz"
+    sha256: "388483bb3dfa1fe25c1dfec24f0afd1651e0303833cfa1b7f51020a2569e992a"
   # keep 2.9.5 for c++20 compilers
   "2.9.5":
     url: "https://github.com/stephenberry/glaze/archive/v2.9.5.tar.gz"
