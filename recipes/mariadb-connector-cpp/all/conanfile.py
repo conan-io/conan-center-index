@@ -99,6 +99,9 @@ class MariadbConnectorCppRecipe (ConanFile):
         string = "SET(CMAKE_CXX_STANDARD 11)"
         replace_in_file(self, cmake, string, string + "\nFIND_PACKAGE(mariadb-connector-c REQUIRED)")
 
+        # Plugin Install
+        replace_in_file(self, cmake, "$<TARGET_FILE_DIR:dialog>", "${INSTALL_PLUGINDIR}")
+
         # Headers
         string = "IF (${CCHEADER} STREQUAL \"CCHEADER-NOTFOUND\")"
         replace_in_file(self, cmake, string, "FIND_FILE(CCHEADER NAMES \"mysql.h\")\n" + string)
@@ -121,6 +124,9 @@ class MariadbConnectorCppRecipe (ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+
+        copy(self, "COPYING", src=os.path.join(self.package_folder, "share", "doc"), dst=os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join (self.package_folder, "share"))
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
