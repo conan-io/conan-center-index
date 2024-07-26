@@ -117,17 +117,13 @@ class MariadbConnectorCppRecipe (ConanFile):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "mariadb-connector-cpp")
         self.cpp_info.set_property("cmake_target_name", "mariadb-connector-cpp::mariadb-connector-cpp")
-        self.cpp_info.set_property("pkg_config_name", "libmariadb")
+        self.cpp_info.set_property("pkg_config_name", "libmariadbcpp")
 
-        self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "m", "pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32", "shlwapi"]
             if self.options.with_ssl == "schannel":
                 self.cpp_info.system_libs.append("secur32")
-
-        plugin_dir = os.path.join(self.package_folder, "lib", "plugin").replace("\\", "/")
-        self.runenv_info.prepend_path("MARIADB_PLUGIN_DIR", plugin_dir)
 
         self.cpp_info.libs = ["mariadbcpp"]
