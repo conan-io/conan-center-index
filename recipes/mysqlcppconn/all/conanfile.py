@@ -17,7 +17,7 @@ class MysqlCppConnRecipe(ConanFile):
 
     # Optional metadata
     license = "GPL-2.0"
-    author = "Hussein Itawi hus@michealscottsoftwarecompany.com"
+    author = "Hussein Itawi hus@hus.codes"
     url = "https://github.com/husitawi/mysql-conncpp-conan"
     homepage = "https://github.com/mysql/mysql-connector-cpp"
     description = "A MySQL client library for C++ development"
