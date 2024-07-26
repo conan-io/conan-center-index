@@ -87,7 +87,7 @@ class FixedMathConan(ConanFile):
             return
         tc = CMakeToolchain(self)
         if is_msvc(self):
-            tc.extra_cxxflags.append("/Zc:__cplusplus")
+            tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus"
         tc.generate()
         venv = VirtualBuildEnv(self)
         venv.generate(scope="build")
