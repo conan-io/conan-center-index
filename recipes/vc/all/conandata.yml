@@ -1,4 +1,7 @@
 sources:
+  "1.4.5":
+    url: "https://github.com/VcDevel/Vc/archive/1.4.5.tar.gz"
+    sha256: "eb734ef4827933fcd67d4c74aef54211b841c350a867c681c73003eb6d511a48"
   "1.4.3":
     url: "https://github.com/VcDevel/Vc/archive/1.4.3.tar.gz"
     sha256: "988ea0053f3fbf17544ca776a2749c097b3139089408b0286fa4e9e8513e037f"
