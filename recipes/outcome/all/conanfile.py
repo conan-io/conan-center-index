@@ -20,6 +20,8 @@ class OutcomeConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+    options = { "single_header": [True, False] }
+    default_options = { "single_header": True }
 
     @property
     def _min_cppstd(self):
@@ -37,8 +39,12 @@ class OutcomeConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def requirements(self):
+        if not self.options.single_header:
+            self.requires("quickcpplib/cci.20231208")
+
     def package_id(self):
-        self.info.clear()
+        self.info.settings.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -58,8 +64,12 @@ class OutcomeConan(ConanFile):
 
     def package(self):
         copy(self, "Licence.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "outcome.hpp", src=os.path.join(self.source_folder, "single-header"),
-                                  dst=os.path.join(self.package_folder, "include"))
+        if self.options.single_header:
+            copy(self, "outcome.hpp", src=os.path.join(self.source_folder, "single-header"),
+                                      dst=os.path.join(self.package_folder, "include"))
+        else:
+            copy(self, "*", src=os.path.join(self.source_folder, "include"),
+                            dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         self.cpp_info.bindirs = []
