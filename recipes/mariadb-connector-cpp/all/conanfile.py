@@ -61,6 +61,9 @@ class MariadbConnectorCppRecipe (ConanFile):
         tc.variables["USE_SYSTEM_INSTALLED_LIB"] = True
         tc.variables["MARIADB_LINK_DYNAMIC"] = True
 
+        # To install relocatable shared libs on Macos
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+
         tc.generate()
 
     def requirements(self):
