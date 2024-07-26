@@ -1,6 +1,6 @@
 from conan import ConanFile, tools
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import files, get, copy, replace_in_file, collect_libs, rmdir, rm
+from conan.tools.files import files, get, copy, replace_in_file, collect_libs, rmdir, rm, apply_conandata_patches, export_conandata_patches
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 import os
@@ -71,6 +71,10 @@ class MariadbConnectorCppRecipe (ConanFile):
         tc.variables["USE_SYSTEM_INSTALLED_LIB"] = True
         tc.variables["MARIADB_LINK_DYNAMIC"] = True
 
+        if (self.settings.os == "Windows"):
+            tc.variables["CONC_WITH_MSI"] = False
+            tc.variables["WITH_MSI"] = False
+
         # To install relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
 
@@ -88,30 +92,11 @@ class MariadbConnectorCppRecipe (ConanFile):
             "with_ssl": self.options.with_ssl
         })
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def _patch_sources(self):
-        cmake = os.path.join(self.source_folder, "CMakeLists.txt")
-        replace_in_file(self, cmake, "CMAKE_MINIMUM_REQUIRED(VERSION 3.23)", "CMAKE_MINIMUM_REQUIRED(VERSION 3.1)")
-        replace_in_file(self, cmake, "FIND_LIBRARY(CCLIB libmariadb.so)", "SET(CCLIB mariadb-connector-c::mariadb-connector-c)")
-
-        # TODO: resolve find mariadb-connector-c
-
-        # Library
-        string = "SET(CMAKE_CXX_STANDARD 11)"
-        replace_in_file(self, cmake, string, string + "\nFIND_PACKAGE(mariadb-connector-c REQUIRED)")
-
-        # Plugin Install
-        replace_in_file(self, cmake, "$<TARGET_FILE_DIR:dialog>", "${INSTALL_PLUGINDIR}")
-
-        # Headers
-        string = "IF (${CCHEADER} STREQUAL \"CCHEADER-NOTFOUND\")"
-        replace_in_file(self, cmake, string, "FIND_FILE(CCHEADER NAMES \"mysql.h\")\n" + string)
-        
-        # MARIADB_LINK_DYNAMIC
-        options_cmake = os.path.join (self.source_folder, "cmake", "options_defaults.cmake")
-
-        string = "OPTION(MARIADB_LINK_DYNAMIC \"Link Connector/C library dynamically\" "
-        replace_in_file(self, options_cmake, string + "OFF)", string + "ON)")
-        replace_in_file(self, options_cmake, "SET(MARIADB_LINK_DYNAMIC OFF)", "SET(MARIADB_LINK_DYNAMIC ON)")
+        apply_conandata_patches(self)
 
     def build(self):
         self._patch_sources()
@@ -130,6 +115,7 @@ class MariadbConnectorCppRecipe (ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+
         fix_apple_shared_install_name(self)
 
     def package_info(self):
@@ -146,4 +132,4 @@ class MariadbConnectorCppRecipe (ConanFile):
             if self.options.with_ssl == "schannel":
                 self.cpp_info.system_libs.append("secur32")
 
-        self.cpp_info.libs = ["mariadbcpp"]
+        self.cpp_info.libs = collect_libs(self)
