@@ -36,13 +36,16 @@ class MysqlCppConnRecipe(ConanFile):
     
     def validate(self):
         check_min_cppstd(self, "17")
-    
+
     def requirements(self):
         self.requires("lz4/1.9.4", force=True)
         self.requires("openssl/3.2.2", force=True)
         self.requires("boost/1.85.0", force=True)
         # self.requires("libmysqlclient/8.1.0")
-    
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.24 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
 
@@ -129,7 +132,7 @@ class MysqlCppConnRecipe(ConanFile):
             self.vs = ""
         
         template_libdirs = ["lib", "lib/debug", "lib64", "lib64/debug"]
-        self.cpp_info.libdirs = [f"{lib}/{self.vs}" for lib in template_libdirs]
+        self.cpp_info.libdirs = template_libdirs if not self.vs else [f"{lib}/{self.vs}" for lib in template_libdirs]
         self.cpp_info.bindirs = ["lib64", "lib64/debug", "lib", "lib/debug"]
         
         if is_apple_os(self):
