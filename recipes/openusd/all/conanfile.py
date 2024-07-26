@@ -50,15 +50,15 @@ class OpenUSDConan(ConanFile):
         "build_imaging": True,
         "build_usd_imaging": True,
         "build_usdview": True,
-        "build_openimageio_plugin": True,
-        "build_opencolorio_plugin": True,
+        "build_openimageio_plugin": False,
+        "build_opencolorio_plugin": False,
         "build_embree_plugin": True,
         "enable_materialx_support": True,
         "enable_vulkan_support": False,
         "enable_gl_support": False,
         "build_gpu_support": False,
         "enable_ptex_support": True,
-        "enable_openvdb_support": True,
+        "enable_openvdb_support": False,
         "build_renderman_plugin": False,
         "build_alembic_plugin": True,
         "enable_hdf5_support": True,
@@ -93,9 +93,6 @@ class OpenUSDConan(ConanFile):
         if self.options.build_usd_imaging and not self.options.build_imaging:
             self.options.build_usd_imaging = False
         self.options.build_gpu_support = self.options.enable_gl_support or is_apple_os(self) or self.options.enable_vulkan_support
-        self.options["opensubdiv"].with_opengl = self.options.enable_gl_support
-        if is_apple_os(self):
-            self.options["opensubdiv"].with_metal = True
         if self.options.build_usdview:
             if self.options.build_imaging:
                 self.options.build_usd_imaging = False
@@ -124,13 +121,14 @@ class OpenUSDConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.84.0", transitive_headers=True)
+        # openusd doesn't support yet recent release of onetbb, see https://github.com/PixarAnimationStudios/OpenUSD/issues/1471
         self.requires("onetbb/2019_u9", transitive_headers=True)
         
         if self.options.build_imaging:
             if self.options.build_openimageio_plugin and self.options.build_gpu_support:
                 self.requires("openimageio/2.5.12.0")
-            if self.options.build_opencolorio_plugin and self.options.build_gpu_support and self.options.enable_gl_support:
-                self.requires("opencolorio/2.3.2")
+            if not self.options.build_openimageio_plugin and self.options.build_opencolorio_plugin and self.options.build_gpu_support and self.options.enable_gl_support:
+                self.requires("opencolorio/2.3.1")
             self.requires("opensubdiv/3.6.0")
             if self.options.enable_vulkan_support:
                 self.requires("vulkan-headers/1.3.268.0")
@@ -148,7 +146,7 @@ class OpenUSDConan(ConanFile):
         if self.options.build_alembic_plugin:
             self.requires("alembic/1.8.6")
             if self.options.enable_hdf5_support:
-                self.requires("hdf5/1.14.4.3")
+                self.requires("hdf5/1.14.3")
         if self.options.build_draco_plugin:
             self.requires("draco/1.5.6")
         if self.options.enable_materialx_support:
@@ -160,7 +158,7 @@ class OpenUSDConan(ConanFile):
            # TODO: add animx to conan center (https://github.com/Autodesk/animx/)
             # self.requires("animx/x.y.z")
         if self.options.build_imaging and (self.options.build_openimageio_plugin and self.options.build_gpu_support or self.options.enable_openvdb_support) or self.options.build_alembic_plugin or self.options.enable_osl_support:
-            self.requires("imath/3.1.11")
+            self.requires("imath/3.1.9")
 
     def validate(self):
         if self.settings.compiler.cppstd:
