@@ -9,7 +9,6 @@ required_conan_version = ">=1.53.0"
 
 class MariadbConnectorCppRecipe (ConanFile):
     name = "mariadb-connector-cpp"
-    version = "1.1.4"
     description = "MariaDB Connector/C++ is used to connect applications " \
                   "developed in C++ to MariaDB and MySQL databases."
     license = "LGPL-2.1-or-later"
@@ -60,6 +59,7 @@ class MariadbConnectorCppRecipe (ConanFile):
         tc.variables["INSTALL_LIBDIR"] = "lib"
         tc.variables["INSTALL_PLUGINDIR"] = os.path.join("lib", "plugin").replace("\\", "/")
         tc.variables["USE_SYSTEM_INSTALLED_LIB"] = True
+        tc.variables["MARIADB_LINK_DYNAMIC"] = True
 
         tc.generate()
 
@@ -77,18 +77,25 @@ class MariadbConnectorCppRecipe (ConanFile):
 
     def _patch_sources(self):
         cmake = os.path.join(self.source_folder, "CMakeLists.txt")
-        replace_in_file(self, cmake, "CMAKE_MINIMUM_REQUIRED(VERSION 3.23)", "CMAKE_MINIMUM_REQUIRED(VERSION 3.1)", strict=False)
-        replace_in_file(self, cmake, "FIND_LIBRARY(CCLIB libmariadb.so)", "SET(CCLIB mariadb-connector-c::mariadb-connector-c)", strict=False)
+        replace_in_file(self, cmake, "CMAKE_MINIMUM_REQUIRED(VERSION 3.23)", "CMAKE_MINIMUM_REQUIRED(VERSION 3.1)")
+        replace_in_file(self, cmake, "FIND_LIBRARY(CCLIB libmariadb.so)", "SET(CCLIB mariadb-connector-c::mariadb-connector-c)")
 
         # TODO: resolve find mariadb-connector-c
 
         # Library
         string = "SET(CMAKE_CXX_STANDARD 11)"
-        replace_in_file(self, cmake, string, string + "\nFIND_PACKAGE(mariadb-connector-c REQUIRED)", strict=False)
+        replace_in_file(self, cmake, string, string + "\nFIND_PACKAGE(mariadb-connector-c REQUIRED)")
 
         # Headers
         string = "IF (${CCHEADER} STREQUAL \"CCHEADER-NOTFOUND\")"
         replace_in_file(self, cmake, string, "FIND_FILE(CCHEADER NAMES \"mysql.h\")\n" + string)
+        
+        # MARIADB_LINK_DYNAMIC
+        options_cmake = os.path.join (self.source_folder, "cmake", "options_defaults.cmake")
+
+        string = "OPTION(MARIADB_LINK_DYNAMIC \"Link Connector/C library dynamically\" "
+        replace_in_file(self, options_cmake, string + "OFF)", string + "ON)")
+        replace_in_file(self, options_cmake, "SET(MARIADB_LINK_DYNAMIC OFF)", "SET(MARIADB_LINK_DYNAMIC ON)")
 
     def build(self):
         self._patch_sources()
