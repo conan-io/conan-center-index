@@ -1,7 +1,7 @@
 sources:
-  "cci.20231130":
-    url: "https://github.com/qhull/qhull/archive/89341b937a90ae8dc19e13a2bd4225d3c9abe4c2.zip"
-    sha256: "59315e8c349a4a0551919af7b0ba6c4d53f896cc107c92b1aff760aff0cdb565"
+  "8.1-alpha4":
+    url: "https://github.com/qhull/qhull/archive/refs/tags/v8.1-alpha4.tar.gz"
+    sha256: "81c4696ea54a2441178b8c5f4a49f63e1fa3550ebed0aecbe787cdbd8e34af02"
   "8.0.1":
     url: "https://github.com/qhull/qhull/archive/v8.0.1.tar.gz"
     sha256: "33c442518b033862978089776a3ec29cd771ebb535c2b4a6d604fcef043c4264"
@@ -9,7 +9,7 @@ sources:
     url: "https://github.com/qhull/qhull/archive/v7.3.2.tar.gz"
     sha256: "619c8a954880d545194bc03359404ef36a1abd2dde03678089459757fd790cb0"
 patches:
-  "cci.20231130":
+  "8.1-alpha4":
     - patch_file: "patches/0005-install-non-reentrant-shared.patch"
       patch_description: "Install non-reentrant shared library"
       patch_type: "conan"

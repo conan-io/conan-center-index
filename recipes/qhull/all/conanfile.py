@@ -44,7 +44,7 @@ class QhullConan(ConanFile):
 
     @property
     def _is_v8_1(self):
-        return self.version == "cci.20231130" or Version(self.version) >= "8.1.0"
+        return self.version == "8.1-alpha4" or Version(self.version) >= "8.1"
 
     def configure(self):
         if self.options.shared:
