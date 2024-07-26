@@ -47,8 +47,7 @@ class MysqlCppConnRecipe(ConanFile):
         self.tool_requires("cmake/[>=3.24 <4]")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            strip_root=True, destination="source_subfolder")
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -104,6 +103,9 @@ class MysqlCppConnRecipe(ConanFile):
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
+        cmake.configure(source_folder=self.source_folder,
+                        build_script_folder=os.path.join(self.source_folder, "mysql-concpp"))
+                        # build_folder=os.path.join(self.source_folder, "mysql-concpp/build"))
         cmake.build()
 
     def package(self):
