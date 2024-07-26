@@ -1,5 +1,5 @@
 sources:
-  "9.0":
+  "9.0.0":
     url: "https://github.com/mysql/mysql-connector-cpp/archive/refs/tags/9.0.0.zip"
     # sha256: "7bc71c682895758a996ccf33b70b91611f51252832b01ef3b4675371510ee466"
     strip_root: true

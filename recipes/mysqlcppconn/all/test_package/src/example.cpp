@@ -160,16 +160,13 @@ int main(int argc, const char *argv[])
     catch (const mysqlx::Error &err)
     {
         cout << "ERROR: " << err << endl;
-        return 1;
     }
     catch (std::exception &ex)
     {
         cout << "STD EXCEPTION: " << ex.what() << endl;
-        return 1;
     }
     catch (const char *ex)
     {
         cout << "EXCEPTION: " << ex << endl;
-        return 1;
     }
 }
