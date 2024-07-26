@@ -47,7 +47,8 @@ class MysqlCppConnRecipe(ConanFile):
         self.tool_requires("cmake/[>=3.24 <4]")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version],
+            strip_root=True, destination="source_subfolder")
 
     def config_options(self):
         if self.settings.os == "Windows":
