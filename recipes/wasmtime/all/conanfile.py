@@ -1,4 +1,5 @@
 import os
+import platform
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -57,6 +58,11 @@ class WasmtimeConan(ConanFile):
         if self.info.settings.compiler == "clang":
             self.info.settings.compiler = "gcc"
 
+    @property
+    def _is_glibc_older_than_2_28(self):
+        libver = platform.libc_ver()
+        return self.settings.os == 'Linux' and libver[0] == 'glibc' and Version(libver[1]) < "2.28"
+
     def validate(self):
         try:
             self.conan_data["sources"][self.version][self._sources_os_key][str(self.settings.arch)]
@@ -68,6 +74,8 @@ class WasmtimeConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        if self._is_glibc_older_than_2_28:
+            raise ConanInvalidConfiguration(f"{self.ref} requires glibc 2.28 or later.")
 
     def build(self):
         # This is packaging binaries so the download needs to be in build
