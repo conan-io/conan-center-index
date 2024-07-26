@@ -22,12 +22,20 @@ class MariadbConnectorCppRecipe (ConanFile):
 
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
+        "dyncol": [True, False],
+        "with_iconv": [True, False],
+        "with_curl": [True, False],
+        "with_ssl": [False, "openssl", "gnutls", "schannel"],
     }
     
     default_options = {
         "shared": False, 
-        "fPIC": True
+        "fPIC": True,
+        "dyncol": True,
+        "with_iconv": False,
+        "with_curl": True,
+        "with_ssl": "openssl",
     }
 
     def source(self):
@@ -58,7 +66,16 @@ class MariadbConnectorCppRecipe (ConanFile):
         tc.generate()
 
     def requirements(self):
-        self.requires ("mariadb-connector-c/[>=3.1.11 <4]")
+        if self.options.with_curl:
+            # precompiled mariadb-connector-c accepts only this version of libcurl
+            self.requires ("libcurl/8.6.0")
+        
+        self.requires ("mariadb-connector-c/3.3.3", options={
+            "dyncol": self.options.dyncol, 
+            "with_iconv": self.options.with_iconv,
+            "with_curl": self.options.with_curl,
+            "with_ssl": self.options.with_ssl
+        })
 
     def _patch_sources(self):
         cmake = os.path.join(self.source_folder, "CMakeLists.txt")
