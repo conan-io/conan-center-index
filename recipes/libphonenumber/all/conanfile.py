@@ -5,7 +5,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
@@ -73,17 +72,17 @@ class LibphonenumberConan(ConanFile):
     def requirements(self):
         # https://github.com/google/libphonenumber/blob/v8.13.35/cpp/src/phonenumbers/phonenumberutil.h#L33-L34
         self.requires("abseil/20240116.2", transitive_headers=True)
-        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
+        self.requires("protobuf/5.27.0", transitive_headers=True, transitive_libs=True)
         if self.options.use_boost:
             # https://github.com/google/libphonenumber/blob/v8.13.35/cpp/src/phonenumbers/base/synchronization/lock_boost.h
-            self.requires("boost/1.84.0", transitive_headers=True, transitive_libs=True)
+            self.requires("boost/1.85.0", transitive_headers=True, transitive_libs=True)
         if self.options.use_icu_regexp or self.options.get_safe("build_geocoder"):
             # https://github.com/google/libphonenumber/blob/v8.13.35/cpp/src/phonenumbers/geocoding/phonenumber_offline_geocoder.h#L23
-            self.requires("icu/74.2", transitive_headers=True, transitive_libs=True)
+            self.requires("icu/75.1", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f"{self.name} not supported in Windows yet, contributions welcome\n" 
+            raise ConanInvalidConfiguration(f"{self.name} not supported in Windows yet, contributions welcome\n"
                                             "https://github.com/google/libphonenumber/blob/master/FAQ.md#what-about-windows")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
@@ -137,7 +136,7 @@ class LibphonenumberConan(ConanFile):
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "cpp", "CMakeLists.txt"),
                         "find_package(absl)", "find_package(absl REQUIRED)")
-        # Not used yet, because package will not work in Windows/msvc, but at least this managed to get 
+        # Not used yet, because package will not work in Windows/msvc, but at least this managed to get
         # pass the configure stage (then fails in build step because dirent.h not found)
         if is_msvc(self):  # In Windows the lib is called differently
             replace_in_file(self, os.path.join(self.source_folder, "cpp", "CMakeLists.txt"),
