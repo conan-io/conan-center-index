@@ -83,6 +83,10 @@ class MysqlCppConnRecipe(ConanFile):
         # OpenSSL patches
         tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
         
+        # Apple patches
+        if is_apple_os(self):
+            tc.cache_variables["CMAKE_OSX_ARCHITECTURES"] = "x86_64;arm64"
+
         tc.generate()
         
         deps = CMakeDeps(self)
