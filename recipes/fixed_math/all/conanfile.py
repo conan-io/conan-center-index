@@ -2,10 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 from conan.tools.env import VirtualBuildEnv
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -85,11 +86,17 @@ class FixedMathConan(ConanFile):
         if self.options.header_only:
             return
         tc = CMakeToolchain(self)
+        if is_msvc(self):
+            tc.extra_cxxflags.append("/Zc:__cplusplus")
         tc.generate()
         venv = VirtualBuildEnv(self)
         venv.generate(scope="build")
 
     def build(self):
+        replace_in_file(self, os.path.join(self.source_folder, "fixed_lib", "include", "fixedmath", "fixed_math.hpp"),
+            "template<typename arithmethic_type>\n  constexpr fixed_t arithmetic_to_fixed( arithmethic_type value ) noexcept;",
+            "template<typename arithmethic_type, typename>\n  constexpr fixed_t arithmetic_to_fixed( arithmethic_type value ) noexcept;"
+            )
         if not self.options.header_only:
             cmake = CMake(self)
             cmake.configure()
@@ -124,3 +131,6 @@ class FixedMathConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "fixed_math")
         self.cpp_info.set_property("cmake_target_name", "fixed_math::fixed_math")
+
+        if is_msvc(self):
+            self.cpp_info.cxxflags.append("/Zc:__cplusplus")
