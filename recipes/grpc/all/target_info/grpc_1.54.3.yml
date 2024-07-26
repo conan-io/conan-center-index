@@ -23,7 +23,7 @@ grpc_targets:
         - abseil::absl_time
         - abseil::absl_optional
         - abseil::absl_variant
-    - name: "grpc"
+    - name: "_grpc"
       lib: "grpc"
       requires:
         - zlib::zlib
@@ -76,7 +76,7 @@ grpc_targets:
       requires:
         - protobuf::libprotobuf
         - zlib::zlib
-        - grpc
+        - _grpc
     - name: "grpc++_alts"
       lib: "grpc++_alts"
       requires:
@@ -150,4 +150,3 @@ grpc_plugins:
       executable: "grpc_python_plugin"
     - target: "gRPC::grpc_ruby_plugin"
       executable: "grpc_ruby_plugin"
-  
