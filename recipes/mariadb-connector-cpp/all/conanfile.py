@@ -25,7 +25,6 @@ class MariadbConnectorCppRecipe (ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "dyncol": [True, False],
-        "with_iconv": [True, False],
         "with_curl": [True, False],
         "with_ssl": [False, "openssl", "gnutls", "schannel"],
     }
@@ -34,7 +33,6 @@ class MariadbConnectorCppRecipe (ConanFile):
         "shared": False, 
         "fPIC": True,
         "dyncol": True,
-        "with_iconv": False,
         "with_curl": True,
         "with_ssl": "openssl",
     }
@@ -76,9 +74,9 @@ class MariadbConnectorCppRecipe (ConanFile):
             # precompiled mariadb-connector-c accepts only this version of libcurl
             self.requires ("libcurl/8.6.0")
         
+        # with_iconv doesn't exists on Windows (Why?)
         self.requires ("mariadb-connector-c/3.3.3", options={
-            "dyncol": self.options.dyncol, 
-            "with_iconv": self.options.with_iconv,
+            "dyncol": self.options.dyncol,
             "with_curl": self.options.with_curl,
             "with_ssl": self.options.with_ssl
         })
