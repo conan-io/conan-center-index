@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.scm import Version
+from conan.tools.env import VirtualBuildEnv
 import os
 import textwrap
 
@@ -79,6 +80,9 @@ class LibAVIFConan(ConanFile):
         if self._depends_on_sharpyuv and Version(self.dependencies["libwebp"].ref.version) < "1.3.0":
             raise ConanInvalidConfiguration(f"{self.ref} requires libwebp >= 1.3.0 in order to get libsharpyuv")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.19 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -102,6 +106,9 @@ class LibAVIFConan(ConanFile):
         if Version(self.version) >= "1.1.0":
             deps.set_property("libyuv", "cmake_target_name", "yuv::yuv")
         deps.generate()
+        venv = VirtualBuildEnv(self)
+        venv.generate(scope="build")
+
 
     def _patch_sources(self):
         apply_conandata_patches(self)
