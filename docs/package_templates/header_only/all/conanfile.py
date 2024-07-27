@@ -88,18 +88,9 @@ class PackageConan(ConanFile):
     # Copy all files to the package folder
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(
-            self,
-            "*.h",
-            os.path.join(self.source_folder, "include"),
-            os.path.join(self.package_folder, "include"),
-        )
+        copy(self, "*.h", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
 
     def package_info(self):
-        # Folders not used for header-only
-        self.cpp_info.bindirs = []
-        self.cpp_info.libdirs = []
-
         # Set these to the appropriate values if the package has an official FindPACKAGE.cmake
         # listed in https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules
         # examples: bzip2, freetype, gdal, icu, libcurl, libjpeg, libpng, libtiff, openssl, sqlite3, zlib...
@@ -113,12 +104,10 @@ class PackageConan(ConanFile):
         # (package.pc, usually installed in <prefix>/lib/pkgconfig/)
         self.cpp_info.set_property("pkg_config_name", "package")
 
+        # Folders not used for header-only
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
         # Add m, pthread and dl if needed in Linux/FreeBSD
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "PACKAGE"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "package"
-        self.cpp_info.names["cmake_find_package"] = "PACKAGE"
-        self.cpp_info.names["cmake_find_package_multi"] = "package"

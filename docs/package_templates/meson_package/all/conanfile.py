@@ -151,20 +151,20 @@ class PackageConan(ConanFile):
         meson = Meson(self)
         meson.install()
 
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
+        # Some files extensions and folders are not allowed. Please, read the FAQs to get informed.
+        # Consider disabling these at first to verify that the package_info() output matches the info exported by the project.
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
 
         # In shared lib/executable files, meson set install_name (macOS) to lib dir absolute path instead of @rpath, it's not relocatable, so fix it
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        # avoid collect_libs(), prefer explicit library name instead
-        self.cpp_info.libs = ["package_lib"]
         # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
         self.cpp_info.set_property("pkg_config_name", "package")
+        # avoid collect_libs(), prefer explicit library name instead
+        self.cpp_info.libs = ["package_lib"]
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])

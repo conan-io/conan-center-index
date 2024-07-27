@@ -146,15 +146,14 @@ class PackageConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
+        # Some files extensions and folders are not allowed. Please, read the FAQs to get informed.
+        # Consider disabling these at first to verify that the package_info() output matches the info exported by the project.
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.libs = ["package_lib"]
-
         # if package has an official FindPACKAGE.cmake listed in https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules
         # examples: bzip2, freetype, gdal, icu, libcurl, libjpeg, libpng, libtiff, openssl, sqlite3, zlib...
         self.cpp_info.set_property("cmake_module_file_name", "PACKAGE")
@@ -164,6 +163,8 @@ class PackageConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "package::package")
         # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
         self.cpp_info.set_property("pkg_config_name", "package")
+
+        self.cpp_info.libs = ["package_lib"]
 
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -180,11 +181,3 @@ class PackageConan(ConanFile):
         self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
         cmake_module = os.path.join("lib", "cmake", "conan-official-variables.cmake")
         self.cpp_info.set_property("cmake_build_modules", [cmake_module])
-        self.cpp_info.build_modules["cmake_find_package"] = [cmake_module]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [cmake_module]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "PACKAGE"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "package"
-        self.cpp_info.names["cmake_find_package"] = "PACKAGE"
-        self.cpp_info.names["cmake_find_package_multi"] = "package"
