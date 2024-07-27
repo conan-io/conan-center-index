@@ -85,6 +85,8 @@ class MysqlCppConnRecipe(ConanFile):
         
         # Apple patches
         if is_apple_os(self):
+            tc.cache_variables["CMAKE_AUTOMOC"] = 1
+            tc.cache_variables["CMAKE_AUTORCC"] = 1
             tc.cache_variables["CMAKE_OSX_ARCHITECTURES"] = str(self.settings.arch)
 
         tc.generate()
