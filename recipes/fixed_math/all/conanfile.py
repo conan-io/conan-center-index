@@ -49,8 +49,8 @@ class FixedMathConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.options.header_only:
-            self.options.rm_safe("fPIC")
             self.options.rm_safe("shared")
+            self.options.rm_safe("fPIC")
             self.package_type = "header-library"
 
     def configure(self):
@@ -77,7 +77,8 @@ class FixedMathConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.21 <4]")
+        if not self.options.header_only:
+            self.tool_requires("cmake/[>=3.21 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
