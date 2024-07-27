@@ -1,0 +1,25 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1155844..ace2e61 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -107,7 +107,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
+ 
+ # Generate position-independent code (-fPIC on UNIX)
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
++# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ 
+ # --- System Details ---
+ 
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index c8b213d..2898972 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -68,6 +68,7 @@ if(PAHO_BUILD_SHARED)
+     set_target_properties(paho-mqttpp3 PROPERTIES
+         VERSION ${PROJECT_VERSION}
+         SOVERSION ${PROJECT_VERSION_MAJOR}
++		POSITION_INDEPENDENT_CODE ON
+     )
+ endif()
+ 

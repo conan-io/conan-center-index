@@ -6,14 +6,13 @@ import os
 
 required_conan_version = ">=1.50.0"
 
-
 class BvdbergCtestConan(ConanFile):
     name = "bvdberg-ctest"
-    license = "Apache-2.0"
-    homepage = "https://github.com/bvdberg/ctest"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "ctest is a unit test framework for software written in C."
-    topics = ("testing", "testing-framework", "unit-testing")
+    license = "Apache-2.0"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/bvdberg/ctest"
+    topics = ("testing", "testing-framework", "unit-testing", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
@@ -26,13 +25,10 @@ class BvdbergCtestConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("Windows not supported")
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Windows.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def build(self):
-        pass
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))

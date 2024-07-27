@@ -1,0 +1,50 @@
+diff --git a/src/osg/DisplaySettings.cpp b/src/osg/DisplaySettings.cpp
+index 5c699c8b0..5c097cf66 100644
+--- a/src/osg/DisplaySettings.cpp
++++ b/src/osg/DisplaySettings.cpp
+@@ -22,9 +22,6 @@
+ #include <algorithm>
+ #include <string.h>
+ 
+-using namespace osg;
+-using namespace std;
+-
+ #if defined(WIN32) && !defined(__CYGWIN__)
+ #include<windows.h>
+ extern "C" { OSG_EXPORT DWORD NvOptimusEnablement=0x00000001; }
+@@ -32,6 +29,9 @@ extern "C" { OSG_EXPORT DWORD NvOptimusEnablement=0x00000001; }
+ extern "C" { int NvOptimusEnablement=0x00000001; }
+ #endif
+ 
++using namespace osg;
++using namespace std;
++
+ void DisplaySettings::setNvOptimusEnablement(int value)
+ {
+     NvOptimusEnablement = value;
+diff --git a/src/osgPlugins/cfg/ConfigParser.cpp b/src/osgPlugins/cfg/ConfigParser.cpp
+index 263c82896..4247cc2af 100644
+--- a/src/osgPlugins/cfg/ConfigParser.cpp
++++ b/src/osgPlugins/cfg/ConfigParser.cpp
+@@ -235,7 +235,7 @@
+ #include "CameraConfig.h"
+ 
+ 
+-using namespace std;
++
+ using namespace osgProducer;
+ 
+ static void ConfigParser_error( const char * );
+diff --git a/src/osgPlugins/cfg/ConfigParser.y b/src/osgPlugins/cfg/ConfigParser.y
+index cf9adf507..5221be184 100644
+--- a/src/osgPlugins/cfg/ConfigParser.y
++++ b/src/osgPlugins/cfg/ConfigParser.y
+@@ -34,7 +34,7 @@
+ #include <Producer/CameraConfig>
+ 
+ 
+-using namespace std;
++
+ using namespace Producer;
+ 
+ static void ConfigParser_error( const char * );
