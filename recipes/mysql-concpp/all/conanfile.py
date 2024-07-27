@@ -94,16 +94,16 @@ class MysqlCppConnRecipe(ConanFile):
                                 "set(LIB_NAME_STATIC \"${LIB_NAME}-mt\")",
                                 "set(LIB_NAME_STATIC \"${LIB_NAME_STATIC}-mt\")",
                                 strict=False)
-            
+
         # Apple patches
         if is_apple_os(self):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                 "PROJECT(MySQL_CONCPP)",
-                                
+
                                 "PROJECT(MySQL_CONCPP)\n"\
                                 "set(CMAKE_AUTOMOC ON)\n"\
                                 "set(CMAKE_AUTORCC ON)\n"\
-                                f"set(CMAKE_OSX_ARCHITECTURES ${str(self.settings.arch)})",
+                                "set(CMAKE_OSX_ARCHITECTURES \"arm64;x86_64\")",
                                 strict=False)
 
     def build(self):
