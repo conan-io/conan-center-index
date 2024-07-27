@@ -102,6 +102,7 @@ class Libxml2Conan(ConanFile):
         env.generate()
 
         tc = MesonToolchain(self)
+        tc.project_options["auto_features"] = "disabled"
         for option in self._boolean_option_names:
             tc.project_options[option] = self.options.get_safe(option)
         for option in self._feature_option_names:
