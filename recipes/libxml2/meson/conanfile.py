@@ -87,7 +87,7 @@ class Libxml2Conan(ConanFile):
             self.requires("icu/73.2")
 
     def build_requirements(self):
-        self.tool_requires("meson/[>1.5.0 <2]")
+        self.tool_requires("meson/[>=1.5.0 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.2.0")
 
