@@ -137,6 +137,7 @@ class SubunitConan(ConanFile):
         apply_conandata_patches(self)
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
+            autotools.autoreconf()
             autotools.configure()
             autotools.make()
 
