@@ -83,12 +83,6 @@ class MysqlCppConnRecipe(ConanFile):
         # OpenSSL patches
         tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
         
-        # Apple patches
-        if is_apple_os(self):
-            tc.cache_variables["CMAKE_AUTOMOC"] = 1
-            tc.cache_variables["CMAKE_AUTORCC"] = 1
-            tc.cache_variables["CMAKE_OSX_ARCHITECTURES"] = str(self.settings.arch)
-
         tc.generate()
         
         deps = CMakeDeps(self)
@@ -99,6 +93,17 @@ class MysqlCppConnRecipe(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "install_layout.cmake"),
                                 "set(LIB_NAME_STATIC \"${LIB_NAME}-mt\")",
                                 "set(LIB_NAME_STATIC \"${LIB_NAME_STATIC}-mt\")",
+                                strict=False)
+            
+        # Apple patches
+        if is_apple_os(self):
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                "PROJECT(MySQL_CONCPP)",
+                                
+                                "PROJECT(MySQL_CONCPP)\n"\
+                                "set(CMAKE_AUTOMOC ON)\n"\
+                                "set(CMAKE_AUTORCC ON)\n"\
+                                f"set(CMAKE_OSX_ARCHITECTURES ${str(self.settings.arch)})",
                                 strict=False)
 
     def build(self):
