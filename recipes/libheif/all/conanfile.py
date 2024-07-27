@@ -122,6 +122,8 @@ class LibheifConan(ConanFile):
             self.cpp_info.components["heif"].defines = ["LIBHEIF_STATIC_BUILD"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["heif"].system_libs.extend(["m", "pthread"])
+            if Version(self.version) >= "1.18.0":
+                self.cpp_info.components["heif"].system_libs.append("dl")
         if not self.options.shared:
             libcxx = stdcpp_library(self)
             if libcxx:
