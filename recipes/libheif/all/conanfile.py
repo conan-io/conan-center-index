@@ -3,6 +3,7 @@ from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
+from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.54.0"
@@ -73,6 +74,10 @@ class LibheifConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
+    def build_requirements(self):
+        if Version(self.version) >= "1.18.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -98,6 +103,9 @@ class LibheifConan(ConanFile):
         if Version(self.version) >= "1.18.0":
             deps.set_property("libde265", "cmake_file_name", "LIBDE265")
         deps.generate()
+        if Version(self.version) >= "1.18.0":
+            venv = VirtualBuildEnv(self)
+            venv.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)
