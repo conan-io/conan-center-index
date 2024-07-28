@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import get, collect_libs
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
 
+
 class NodeEditorConan(ConanFile):
     name = "nodeeditor"
     license = "BSD-3-Clause"
@@ -11,8 +12,8 @@ class NodeEditorConan(ConanFile):
     topics = ("qt", "ui", "dataflow")
     settings = "os", "compiler", "arch", "build_type"
 
-    options = {"shared" : [True, False]}
-    default_options = {"shared" : False}
+    options = {"shared": [True, False]}
+    default_options = {"shared": False}
     package_type = "library"
 
     def layout(self):
