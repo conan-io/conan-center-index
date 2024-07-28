@@ -21,7 +21,8 @@ class NodeEditorConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def requirements(self):
-        self.requires("qt/6.7.1")
+        self.requires("qt/6.7.1", transitive_headers=True,
+                      transitive_libs=True)
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -43,6 +44,12 @@ class NodeEditorConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.requires.extend(["qt::qtCore", "qt::qtGui",
+                                       "qt::qtWidgets", "qt::qtOpenGL"])
         self.cpp_info.set_property("cmake_find_mode", "config")
+        self.cpp_info.set_property("cmake_file_name", "QtNodes")
         self.cpp_info.set_property("cmake_target_name", "QtNodes::QtNodes")
-        
+        if self.options.shared:
+            self.cpp_info.defines = ["NODE_EDITOR_SHARED"]
+        else:
+            self.cpp_info.defines = ["NODE_EDITOR_STATIC"]
