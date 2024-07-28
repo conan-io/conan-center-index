@@ -39,7 +39,8 @@ class MysqlCppConnRecipe(ConanFile):
 
     def requirements(self):
         self.requires("lz4/1.9.4")
-        self.requires("openssl/3.2.2")
+        if self.settings.os == "Windows":
+            self.requires("openssl/3.2.2")
         self.requires("boost/1.85.0")
         self.requires("zstd/1.5.6")
         # self.requires("libmysqlclient/8.1.0")
@@ -102,13 +103,13 @@ class MysqlCppConnRecipe(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                 "PROJECT(MySQL_CONCPP)",
                                 "PROJECT(MySQL_CONCPP)\n"\
-                                "set(CMAKE_OSX_ARCHITECTURES \"x86_64;arm64\" CACHE INTERNAL \"\" FORCE)\n",
+                                f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n",
                                 strict=False)
             
             replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "protobuf", "CMakeLists.txt"),
                                 "if(APPLE)",
                                 "if(APPLE)\n"\
-                                "set(CMAKE_OSX_ARCHITECTURES \"x86_64;arm64\" CACHE INTERNAL \"\" FORCE)\n",
+                                f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n",
                                 strict=False)
 
     def build(self):
