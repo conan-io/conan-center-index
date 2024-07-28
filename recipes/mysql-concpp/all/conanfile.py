@@ -39,8 +39,10 @@ class MysqlCppConnRecipe(ConanFile):
 
     def requirements(self):
         self.requires("lz4/1.9.4")
-        if self.settings.os == "Windows":
+        if self.options.shared:
             self.requires("openssl/3.2.2")
+        else:
+            self.requires("openssl/3.2.2", options={"no_asm": False, "shared": False, "no_apps": True})
         self.requires("boost/1.85.0")
         self.requires("zstd/1.5.6")
         # self.requires("libmysqlclient/8.1.0")
@@ -83,8 +85,7 @@ class MysqlCppConnRecipe(ConanFile):
         # Boost patches
         tc.cache_variables["BOOST_DIR"] = self._package_folder_dep("boost")
         # OpenSSL patches
-        if self.settings.os == "Windows":
-            tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
+        tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
         # ZSTD
         tc.cache_variables["WITH_ZSTD"] = self._package_folder_dep("zstd")
         tc.generate()
