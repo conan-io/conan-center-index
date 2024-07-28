@@ -13,7 +13,7 @@ class NodeEditorConan(ConanFile):
     options = {"shared" : [True, False]}
     default_options = {"shared" : False}
     package_type = "library"
-    
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
