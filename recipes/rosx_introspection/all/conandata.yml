@@ -1,7 +1,7 @@
 sources:
-  "1.0.1":
-    url: "https://github.com/facontidavide/rosx_introspection/archive/refs/tags/1.0.1.zip"
-    sha256: "fe11c6593d1b1096e5646867baeca6a5aba36f097fbbe56ad610c58be65eb0fa"
+  "1.0.2":
+    url: "https://github.com/facontidavide/rosx_introspection/archive/refs/tags/1.0.2.zip"
+    sha256: "cd10448e8857c900e2803bea7526e8889bc5bf4d3807ce0e4bb745f4bc2fdddc"
 patches:
-  "1.0.1":
+  "1.0.2":
     - patch_file: "patches/0001-cmake-fixes.patch"
