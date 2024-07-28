@@ -106,7 +106,10 @@ class SdbusCppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_CODE_GEN"] = self.options.with_code_gen
+        if Version(self.version) >= "2.0.0":
+            tc.variables["SDBUSCPP_BUILD_CODEGEN"] = self.options.with_code_gen
+        else:
+            tc.variables["BUILD_CODE_GEN"] = self.options.with_code_gen
         tc.variables["BUILD_DOC"] = False
         tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_LIBSYSTEMD"] = False
