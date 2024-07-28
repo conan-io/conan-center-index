@@ -3,7 +3,7 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.files import get, replace_in_file, export_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 
@@ -29,7 +29,7 @@ class MysqlCppConnRecipe(ConanFile):
                "fPIC": [True, False],
                }
 
-    default_options = { "shared": False, "fPIC": True }
+    default_options = { "shared": False, "fPIC": True, "protobuf/3.19.6:lite": True }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -38,9 +38,11 @@ class MysqlCppConnRecipe(ConanFile):
         check_min_cppstd(self, "17")
 
     def requirements(self):
-        self.requires("lz4/1.9.4", force=True)
-        self.requires("openssl/3.2.2", force=True)
-        self.requires("boost/1.85.0", force=True)
+        self.requires("lz4/1.9.4")
+        self.requires("openssl/3.2.2")
+        self.requires("boost/1.85.0")
+        self.requires("zstd/1.5.6")
+        self.requires("protobuf/3.19.6")
         # self.requires("libmysqlclient/8.1.0")
 
     def build_requirements(self):
@@ -82,7 +84,10 @@ class MysqlCppConnRecipe(ConanFile):
         tc.cache_variables["BOOST_DIR"] = self._package_folder_dep("boost")
         # OpenSSL patches
         tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
-        
+        # Protobuf
+        tc.cache_variables["PROTOBUF_ROOT_DIR"] = self._package_folder_dep("protobuf")
+        # ZSTD
+        tc.cache_variables["WITH_ZSTD"] = self._package_folder_dep("zstd")
         tc.generate()
         
         deps = CMakeDeps(self)
@@ -96,14 +101,11 @@ class MysqlCppConnRecipe(ConanFile):
                                 strict=False)
 
         # Apple patches
-        if is_apple_os(self):
+        if is_apple_os(self) and cross_building(self):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                 "PROJECT(MySQL_CONCPP)",
-
                                 "PROJECT(MySQL_CONCPP)\n"\
-                                "set(CMAKE_AUTOMOC ON)\n"\
-                                "set(CMAKE_AUTORCC ON)\n"\
-                                "set(CMAKE_OSX_ARCHITECTURES \"arm64;x86_64\")",
+                                "set(CMAKE_OSX_ARCHITECTURES \"x86_64;arm64\" CACHE INTERNAL \"\" FORCE)\n",
                                 strict=False)
 
     def build(self):
