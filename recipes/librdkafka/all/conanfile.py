@@ -3,6 +3,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.55.0"
