@@ -29,7 +29,7 @@ class MysqlCppConnRecipe(ConanFile):
                "fPIC": [True, False],
                }
 
-    default_options = { "shared": False, "fPIC": True, "protobuf/3.19.6:lite": True }
+    default_options = { "shared": False, "fPIC": True }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -42,7 +42,7 @@ class MysqlCppConnRecipe(ConanFile):
         self.requires("openssl/3.2.2")
         self.requires("boost/1.85.0")
         self.requires("zstd/1.5.6")
-        self.requires("protobuf/3.19.6")
+        self.requires("protobuf/3.19.6", options={"lite": True})
         # self.requires("libmysqlclient/8.1.0")
 
     def build_requirements(self):
