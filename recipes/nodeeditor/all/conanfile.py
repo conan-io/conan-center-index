@@ -5,6 +5,7 @@ from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
 class NodeEditorConan(ConanFile):
     name = "nodeeditor"
     license = "BSD-3-Clause"
+    description = "Dataflow programming framework and UI for Qt"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/paceholder/nodeeditor"
     topics = ("qt", "ui", "dataflow")
