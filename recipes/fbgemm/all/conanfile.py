@@ -62,9 +62,10 @@ class FbgemmConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("asmjit/cci.20240531")
-        self.requires("cpuinfo/cci.20231129")
+        self.requires("asmjit/cci.20240531", transitive_headers=True, transitive_libs=True)
+        self.requires("cpuinfo/cci.20231129", transitive_headers=True, transitive_libs=True)
         # TODO: #22360
+        # Not used in any public headers
         # self.requires("openmp/system")
 
     def validate(self):
