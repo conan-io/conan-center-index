@@ -169,4 +169,6 @@ int main(int argc, const char *argv[])
     {
         cout << "EXCEPTION: " << ex << endl;
     }
+
+    return 0;
 }

@@ -42,7 +42,6 @@ class MysqlCppConnRecipe(ConanFile):
         self.requires("openssl/3.2.2")
         self.requires("boost/1.85.0")
         self.requires("zstd/1.5.6")
-        self.requires("protobuf/3.19.6", options={"lite": True})
         # self.requires("libmysqlclient/8.1.0")
 
     def build_requirements(self):
@@ -84,8 +83,6 @@ class MysqlCppConnRecipe(ConanFile):
         tc.cache_variables["BOOST_DIR"] = self._package_folder_dep("boost")
         # OpenSSL patches
         tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
-        # Protobuf
-        tc.cache_variables["PROTOBUF_ROOT_DIR"] = self._package_folder_dep("protobuf")
         # ZSTD
         tc.cache_variables["WITH_ZSTD"] = self._package_folder_dep("zstd")
         tc.generate()
@@ -105,6 +102,12 @@ class MysqlCppConnRecipe(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                 "PROJECT(MySQL_CONCPP)",
                                 "PROJECT(MySQL_CONCPP)\n"\
+                                "set(CMAKE_OSX_ARCHITECTURES \"x86_64;arm64\" CACHE INTERNAL \"\" FORCE)\n",
+                                strict=False)
+            
+            replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "protobuf", "CMakeLists.txt"),
+                                "if(APPLE)",
+                                "if(APPLE)\n"\
                                 "set(CMAKE_OSX_ARCHITECTURES \"x86_64;arm64\" CACHE INTERNAL \"\" FORCE)\n",
                                 strict=False)
 

@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.25)
-project(PackageTest CXX )
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
 
 find_package(mysql-concpp REQUIRED CONFIG)
 
