@@ -32,6 +32,7 @@ class LibphonenumberConan(ConanFile):
         "use_lite_metadata": [True, False],
         "use_posix_thread": [True, False],
         "use_std_mutex": [True, False],
+        #re2 is not an option, because using it crashes
     }
     default_options = {
         "shared": False,
@@ -117,7 +118,7 @@ class LibphonenumberConan(ConanFile):
         tc.variables["USE_LITE_METADATA"] = self.options.use_lite_metadata
         tc.variables["USE_POSIX_THREAD"] = self.options.get_safe("use_posix_thread", False)
         tc.variables["USE_PROTOBUF_LITE"] = self.dependencies["protobuf"].options.lite
-        tc.variables["USE_RE2"] = False
+        tc.variables["USE_RE2"] = False  # Hardcoded, attempt to use it crashed
         tc.variables["USE_STDMUTEX"] = self.options.use_std_mutex
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_TOOLS_ONLY"] = False
@@ -134,20 +135,8 @@ class LibphonenumberConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "cpp", "CMakeLists.txt"),
-                        "find_package(absl)", "find_package(absl REQUIRED)")
-        # Not used yet, because package will not work in Windows/msvc, but at least this managed to get
-        # pass the configure stage (then fails in build step because dirent.h not found)
-        if is_msvc(self):  # In Windows the lib is called differently
-            replace_in_file(self, os.path.join(self.source_folder, "cpp", "CMakeLists.txt"),
-                            "find_required_library (PROTOBUF google/protobuf/message_lite.h protobuf",
-                            "find_required_library (PROTOBUF google/protobuf/message_lite.h libprotobuf")
-            replace_in_file(self, os.path.join(self.source_folder, "cpp", "CMakeLists.txt"),
-                            "find_required_library (ICU_UC unicode/uchar.h icuuc",
-                            "find_required_library (ICU_UC unicode/uchar.h sicuuc")
-            replace_in_file(self, os.path.join(self.source_folder, "cpp", "CMakeLists.txt"),
-                            "find_required_library (ICU_I18N unicode/regex.h icui18n",
-                            "find_required_library (ICU_I18N unicode/regex.h sicuin")
+        # (failed) attempt to make it work in windows/msvc, patching some build scripts
+        # https://github.com/conan-io/conan-center-index/pull/23689/commits/c5e7091d134174fb590218ed066c074f45274a93
         replace_in_file(self, os.path.join(self.source_folder, "cpp", "CMakeLists.txt"), " -Werror", "")
 
     def build(self):
