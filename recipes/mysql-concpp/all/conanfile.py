@@ -83,7 +83,8 @@ class MysqlCppConnRecipe(ConanFile):
         # Boost patches
         tc.cache_variables["BOOST_DIR"] = self._package_folder_dep("boost")
         # OpenSSL patches
-        tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
+        if self.settings.os == "Windows":
+            tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
         # ZSTD
         tc.cache_variables["WITH_ZSTD"] = self._package_folder_dep("zstd")
         tc.generate()
