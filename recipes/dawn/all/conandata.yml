@@ -1,6 +1,7 @@
 sources:
   "cci.20240726":
-    url: "https://dawn.googlesource.com/dawn/+archive/076d076106a07f8a68ea7566f6b9f64fbe0c0687.tar.gz"
+    url: "https://github.com/google/dawn/archive/076d076106a07f8a68ea7566f6b9f64fbe0c0687.tar.gz"
+    sha256: "14a4ecc52f7ec5acbbf2156a8b2f1c76a6950a86bb379812923ed1d043893c3d"
 patches:
   "cci.20240726":
     - patch_file: "patches/0001-unvendor-third-party.patch"

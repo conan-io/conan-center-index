@@ -47,7 +47,7 @@ class DawnConan(ConanFile):
             raise ConanInvalidConfiguration("spirv-tools must be built as a static library (-o spirv-tools/*:shared=False)")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version])
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
         # Dawn uses SPIRV-Tools internals, so we need to provide a vendored version
         get(self, **self.conan_data["spirv-tools-sources"][str(self.dependencies["spirv-tools"].ref.version)], strip_root=True,
             destination=os.path.join(self.source_folder, "third_party", "spirv-tools", "src"))
