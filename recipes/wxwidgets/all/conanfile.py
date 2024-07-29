@@ -164,9 +164,9 @@ class wxWidgetsConan(ConanFile):
                 self.requires("gst-plugins-base/1.19.2")
             if self.options.get_safe("secretstore") and self.options.get_safe("gtk") == "gtk":
                 self.requires("libsecret/0.20.5")
-            self.requires("libcurl/8.4.0")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.png == "libpng":
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.jpeg == "libjpeg-turbo":
