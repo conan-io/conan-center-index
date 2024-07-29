@@ -21,10 +21,12 @@ class Jinja2cppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_regex": ["std", "boost"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_regex": "boost",
     }
 
     @property
@@ -47,6 +49,8 @@ class Jinja2cppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.3.2":
+            del self.options.with_regex
 
     def configure(self):
         if self.options.shared:
@@ -88,6 +92,8 @@ class Jinja2cppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) >= "1.3.2":
+            tc.cache_variables["JINJA2CPP_USE_REGEX"] = self.options.with_regex
         tc.variables["JINJA2CPP_BUILD_TESTS"] = False
         tc.variables["JINJA2CPP_STRICT_WARNINGS"] = False
         tc.variables["JINJA2CPP_BUILD_SHARED"] = self.options.shared
