@@ -16,6 +16,7 @@ class libsvmConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.csie.ntu.edu.tw/~cjlin/libsvm/"
     topics = ("svm", "vector")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
