@@ -104,12 +104,20 @@ class MysqlCppConnRecipe(ConanFile):
                                 f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n",
                                 strict=False)
             
-            for lib in ["protobuf", "zstd"]:
-                replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", lib, "CMakeLists.txt"),
-                                    "enable_pic()",
-                                    "enable_pic()\n"\
-                                    f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n",
-                                    strict=False)
+            # PROTOBUF patch
+            replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "protobuf", "CMakeLists.txt"),
+                                "enable_pic()",
+                                "enable_pic()\n"\
+                                f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n",
+                                strict=False)
+
+            # ZSTD patch
+            replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "zstd", "CMakeLists.txt"),
+                                "enable_pic()",
+                                "enable_pic()\n"\
+                                f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n"\
+                                "add_compile_definitions(ZSTD_DISABLE_ASM)",
+                                strict=False)
 
 
     def build(self):
