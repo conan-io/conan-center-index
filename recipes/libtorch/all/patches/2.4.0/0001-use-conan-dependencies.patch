@@ -1,0 +1,120 @@
+From 97305d11a21d847851bf2d65d20db1eac3330f8d Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Mon, 29 Jul 2024 18:35:04 +0300
+Subject: [PATCH] use conan dependencies
+
+---
+ aten/src/ATen/CMakeLists.txt        | 10 +---------
+ caffe2/CMakeLists.txt               |  1 +
+ caffe2/serialize/CMakeLists.txt     |  4 ++--
+ caffe2/serialize/inline_container.h |  5 +----
+ cmake/Dependencies.cmake            | 20 ++++----------------
+ 5 files changed, 9 insertions(+), 31 deletions(-)
+
+diff --git a/aten/src/ATen/CMakeLists.txt b/aten/src/ATen/CMakeLists.txt
+index 0087dd95d9..569bae4bab 100644
+--- a/aten/src/ATen/CMakeLists.txt
++++ b/aten/src/ATen/CMakeLists.txt
+@@ -455,16 +455,8 @@ if(NOT EMSCRIPTEN AND NOT INTERN_BUILD_MOBILE)
+     set_property(TARGET sleef PROPERTY FOLDER "dependencies")
+     list(APPEND ATen_THIRD_PARTY_INCLUDE ${CMAKE_BINARY_DIR}/include)
+     link_directories(${CMAKE_BINARY_DIR}/sleef/lib)
+-  else()
+-    add_library(sleef SHARED IMPORTED)
+-    find_library(SLEEF_LIBRARY sleef)
+-    if(NOT SLEEF_LIBRARY)
+-      message(FATAL_ERROR "Cannot find sleef")
+-    endif()
+-    message("Found sleef: ${SLEEF_LIBRARY}")
+-    set_target_properties(sleef PROPERTIES IMPORTED_LOCATION "${SLEEF_LIBRARY}")
+   endif()
+-  list(APPEND ATen_CPU_DEPENDENCY_LIBS sleef)
++  list(APPEND ATen_CPU_DEPENDENCY_LIBS sleef::sleef)
+ 
+   if(NOT MSVC)
+     set(CMAKE_C_FLAGS_DEBUG ${OLD_CMAKE_C_FLAGS_DEBUG})
+diff --git a/caffe2/CMakeLists.txt b/caffe2/CMakeLists.txt
+index 89c31fab11..ca7600b0df 100644
+--- a/caffe2/CMakeLists.txt
++++ b/caffe2/CMakeLists.txt
+@@ -489,6 +489,7 @@ if(NOT INTERN_DISABLE_MOBILE_INTERP)
+      )
+   list(APPEND TORCH_SRCS ${MOBILE_SRCS})
+   list(APPEND TORCH_SRCS ${LITE_EAGER_SYMOBLICATION_SRCS})
++  list(APPEND Caffe2_DEPENDENCY_LIBS flatbuffers::flatbuffers)
+ endif()
+ 
+ # This one needs to be unconditionally added as Functions.cpp is also unconditionally added
+diff --git a/caffe2/serialize/CMakeLists.txt b/caffe2/serialize/CMakeLists.txt
+index 1552b59d0d..ba4c11a4e6 100644
+--- a/caffe2/serialize/CMakeLists.txt
++++ b/caffe2/serialize/CMakeLists.txt
+@@ -2,14 +2,14 @@ file(GLOB tmp *_test.cc)
+ 
+ set(Caffe2_CPU_TEST_SRCS ${Caffe2_CPU_TEST_SRCS} ${tmp})
+ list(APPEND Caffe2_CPU_SRCS
+-  ${PROJECT_SOURCE_DIR}/third_party/miniz-2.1.0/miniz.c
+   ${CMAKE_CURRENT_SOURCE_DIR}/inline_container.cc
+   ${CMAKE_CURRENT_SOURCE_DIR}/istream_adapter.cc
+   ${CMAKE_CURRENT_SOURCE_DIR}/file_adapter.cc
+   ${CMAKE_CURRENT_SOURCE_DIR}/crc.cc
+   ${CMAKE_CURRENT_SOURCE_DIR}/read_adapter_interface.cc)
+-list(APPEND Caffe2_CPU_INCLUDE ${PROJECT_SOURCE_DIR}/third_party/miniz-2.1.0)
++list(APPEND Caffe2_DEPENDENCY_LIBS miniz::miniz)
+ 
+ set(Caffe2_CPU_TEST_SRCS ${Caffe2_CPU_TEST_SRCS} PARENT_SCOPE)
+ set(Caffe2_CPU_SRCS ${Caffe2_CPU_SRCS} PARENT_SCOPE)
+ set(Caffe2_CPU_INCLUDE ${Caffe2_CPU_INCLUDE} PARENT_SCOPE)
++set(Caffe2_DEPENDENCY_LIBS ${Caffe2_DEPENDENCY_LIBS} PARENT_SCOPE)
+diff --git a/caffe2/serialize/inline_container.h b/caffe2/serialize/inline_container.h
+index 6a13d414fe..a7753aa163 100644
+--- a/caffe2/serialize/inline_container.h
++++ b/caffe2/serialize/inline_container.h
+@@ -15,12 +15,9 @@
+ #include "caffe2/serialize/istream_adapter.h"
+ #include "caffe2/serialize/read_adapter_interface.h"
+ #include "caffe2/serialize/versions.h"
++#include "miniz.h"
+ 
+ 
+-extern "C" {
+-typedef struct mz_zip_archive mz_zip_archive;
+-}
+-
+ // PyTorch containers are a special zip archive with the following layout
+ // archive_name.zip contains:
+ //    archive_name/
+diff --git a/cmake/Dependencies.cmake b/cmake/Dependencies.cmake
+index c4661e39e1..9ddaed099e 100644
+--- a/cmake/Dependencies.cmake
++++ b/cmake/Dependencies.cmake
+@@ -1306,22 +1306,10 @@ if(CAFFE2_CMAKE_BUILDING_WITH_MAIN_REPO AND NOT INTERN_DISABLE_ONNX)
+       target_compile_options(onnx PRIVATE -Wno-deprecated-declarations)
+     endif()
+   else()
+-    add_library(onnx SHARED IMPORTED)
+-    find_library(ONNX_LIBRARY onnx)
+-    if(NOT ONNX_LIBRARY)
+-      message(FATAL_ERROR "Cannot find onnx")
+-    endif()
+-    set_property(TARGET onnx PROPERTY IMPORTED_LOCATION ${ONNX_LIBRARY})
+-    add_library(onnx_proto SHARED IMPORTED)
+-    find_library(ONNX_PROTO_LIBRARY onnx_proto)
+-    if(NOT ONNX_PROTO_LIBRARY)
+-      message(FATAL_ERROR "Cannot find onnx")
+-    endif()
+-    set_property(TARGET onnx_proto PROPERTY IMPORTED_LOCATION ${ONNX_PROTO_LIBRARY})
+-    message("-- Found onnx: ${ONNX_LIBRARY} ${ONNX_PROTO_LIBRARY}")
+-    list(APPEND Caffe2_DEPENDENCY_LIBS onnx_proto onnx)
+-  endif()
+-  include_directories(${FOXI_INCLUDE_DIRS})
++    find_package(ONNX REQUIRED CONFIG)
++    list(APPEND Caffe2_DEPENDENCY_LIBS onnx::onnx)
++  endif()
++  find_package(foxi REQUIRED CONFIG)
+   list(APPEND Caffe2_DEPENDENCY_LIBS foxi_loader)
+   # Recover the build shared libs option.
+   set(BUILD_SHARED_LIBS ${TEMP_BUILD_SHARED_LIBS})
+-- 
+2.43.0
+

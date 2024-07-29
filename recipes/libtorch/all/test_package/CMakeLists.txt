@@ -1,11 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(test_package)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
 
 find_package(Torch REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} ${TORCH_LIBRARIES})
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
+target_link_libraries(${PROJECT_NAME} torch)
+target_compile_features(test_package PRIVATE cxx_std_17)
