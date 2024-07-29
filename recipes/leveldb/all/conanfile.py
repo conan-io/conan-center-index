@@ -52,7 +52,7 @@ class LevelDBCppConan(ConanFile):
         # there is no "official" conan package yet; when that is available, we
         # can add similar with options for those
         if self.options.with_snappy:
-            self.requires("snappy/1.1.9")
+            self.requires("snappy/1.1.10")
         if self.options.with_crc32c:
             self.requires("crc32c/1.1.2")
 

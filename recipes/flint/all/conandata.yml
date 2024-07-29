@@ -1,18 +1,20 @@
 sources:
-  "2.8.1":
-    url: "https://github.com/wbhart/flint2/archive/refs/tags/v2.8.1.tar.gz"
-    sha256: "93c4d6acd46d7a4357a2abe313e5f0625fa7e94a1a0e53048f9066f55a7acd49"
+  "3.0.1":
+    url: "https://github.com/flintlib/flint/releases/download/v3.0.1/flint-3.0.1.tar.xz"
+    sha256: "de9ada43c94a69de2e78a5241dc183a1c1ece11e45fe565da7272cf8ed818dd6"
+  "2.9.0":
+    url: "https://github.com/wbhart/flint2/archive/v2.9.0.tar.gz"
+    sha256: "624e0fc343b27a156c0e3bb48d2a644a1ac387aa66217f6753c03a02c80bbf6f"
+  "2.8.5":
+    url: "https://github.com/wbhart/flint2/archive/refs/tags/v2.8.5.tar.gz"
+    sha256: "4d5377e7432e67b0f34f95059a01d243ef29208da86ba3e812d312d323db0d8e"
   "2.7.1":
     url: "https://github.com/wbhart/flint2/archive/refs/tags/v2.7.1.tar.gz"
-    sha256: "bcadc2252e61092a9b3a3198b337e20abeac56078eaa19793ab99ff7a987efb7"
+    sha256: "80f1b7240f1ee5d15952c33cb0aa27b6395993fe897bc279ad984f4fc2743bd4"
 patches:
-  "2.8.1":
-    - patch_file: "patches/0001-cmake-2.8.1.patch"
-      base_path: "source_subfolder"
+  "2.9.0":
     - patch_file: "patches/0002-msvc-alloca.patch"
-      base_path: "source_subfolder"
+  "2.8.5":
+    - patch_file: "patches/0002-msvc-alloca.patch"
   "2.7.1":
-    - patch_file: "patches/0001-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-msvc-alloca.patch"
-      base_path: "source_subfolder"

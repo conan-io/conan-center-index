@@ -14,10 +14,9 @@ class CeleroConan(ConanFile):
     name = "celero"
     description = "C++ Benchmarking Library"
     license = "Apache-2.0"
-    topics = ("benchmark", "benchmark-tests", "measurements", "microbenchmarks")
-    homepage = "https://github.com/DigitalInBlue/Celero"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "https://github.com/DigitalInBlue/Celero"
+    topics = ("benchmark", "benchmark-tests", "measurements", "microbenchmarks")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -66,6 +65,10 @@ class CeleroConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+    def build_requirements(self):
+        if Version(self.version) >= "2.9.0":
+            self.tool_requires("cmake/[>=3.22 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -90,6 +93,7 @@ class CeleroConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake", "celero"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
@@ -119,7 +123,7 @@ class CeleroConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["CELERO_STATIC"]
         if self.settings.os in ("FreeBSD", "Linux"):
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread", "m"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["powrprof", "psapi"]
 

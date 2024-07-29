@@ -14,6 +14,7 @@ class StrawberryPerlConan(ConanFile):
     homepage = "http://strawberryperl.com"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("perl", "interpreter", "windows")
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
@@ -24,8 +25,10 @@ class StrawberryPerlConan(ConanFile):
         del self.info.settings.build_type
 
     def validate(self):
-        if self.info.settings.os != "Windows":
-            raise ConanInvalidConfiguration("Strawberry Perl is only intended to be used on Windows.")
+        if self.settings.os != "Windows":
+            raise ConanInvalidConfiguration(f"{self.ref} is only intended to be used on Windows.")
+        if self.settings.arch not in ("x86", "x86_64"):
+            raise ConanInvalidConfiguration(f"{self.ref} is only available for x86 and x86_64 architectures.")
 
     def source(self):
         pass

@@ -19,7 +19,7 @@ class OsqpConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
     }
-    default_options = { 
+    default_options = {
         "shared": False,
         "fPIC": True,
     }
@@ -38,7 +38,8 @@ class OsqpConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        strip_root = self.version == "0.6.2"
+        get(self, **self.conan_data["sources"][self.version], strip_root=strip_root)
 
     def generate(self):
         tc = CMakeToolchain(self)

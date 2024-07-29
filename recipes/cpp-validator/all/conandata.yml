@@ -1,0 +1,4 @@
+sources:
+  "2.0.3":
+    url: "https://github.com/evgeniums/cpp-validator/archive/refs/tags/v2.0.3.tar.gz"
+    sha256: "0afc607377518edd6adc1612962ed5d5808d96e5b40944d9ce7e91a1aa9ab1d8"

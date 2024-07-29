@@ -1,22 +1,22 @@
 sources:
-  "0.2.11":
-    url: "https://github.com/Stiffstream/json_dto/archive/v.0.2.11.tar.gz"
-    sha256: "9ce409a8210ee78ef5b1e60dfb919186ba6a2e928e391e46f0e1d36049e06b1c"
-  "0.2.12":
-    url: "https://github.com/Stiffstream/json_dto/archive/v.0.2.12.tar.gz"
-    sha256: "3b1ca412a74c339c01bcbf739542fa69b2391d24c321742098a2d6dfa7402d84"
-  "0.2.13":
-    url: "https://github.com/Stiffstream/json_dto/archive/v.0.2.13.tar.gz"
-    sha256: "ed4138bf86e0724c95508a9c74bed6fa0c98814b96f4cb3a1b540857e2302663"
-  "0.2.14":
-    url: "https://github.com/Stiffstream/json_dto/archive/v.0.2.14.tar.gz"
-    sha256: "d885fe16cf621f7470a45fb6e955e8aded02958bb2212819dc151feac930905b"
-  "0.2.15":
-    url: "https://github.com/Stiffstream/json_dto/archive/v.0.2.15.tar.gz"
-    sha256: "d7631d21785ddddc81b2fe04a7998d0d49323c2224168568cb80cc32093da3ac"
-  "0.3.0":
-    url: "https://github.com/Stiffstream/json_dto/archive/v.0.3.0.tar.gz"
-    sha256: "cd497c9ee5556c45aaa3402a23ab935e6a90c1e62076562efd0708d1ec8f4c30"
+  "0.3.4":
+    url: "https://github.com/Stiffstream/json_dto/archive/refs/tags/v.0.3.4.tar.gz"
+    sha256: "1b9595dbd86fa90edf621b72f5f4dac43170339250e9e650ede5269ff6fa3f2e"
+  "0.3.3":
+    url: "https://github.com/Stiffstream/json_dto/archive/refs/tags/v.0.3.3.tar.gz"
+    sha256: "c52857c074f4e204426a52160e2699694c45bb93e9297ca535e2d5fdf54ae187"
+  "0.3.2":
+    url: "https://github.com/Stiffstream/json_dto/archive/refs/tags/v.0.3.2.tar.gz"
+    sha256: "425d31c06c4e7f82d6414969fcdeaccb95ab44063c08296984ea0703de445744"
   "0.3.1":
-    url: "https://github.com/Stiffstream/json_dto/archive/v.0.3.1.tar.gz"
+    url: "https://github.com/Stiffstream/json_dto/archive/refs/tags/v.0.3.1.tar.gz"
     sha256: "515a2d1510d3d8f8b240eb2149f44aeb47a70d26a7071609cca45c0ee198d1d1"
+  "0.3.0":
+    url: "https://github.com/Stiffstream/json_dto/archive/refs/tags/v.0.3.0.tar.gz"
+    sha256: "cd497c9ee5556c45aaa3402a23ab935e6a90c1e62076562efd0708d1ec8f4c30"
+  "0.2.15":
+    url: "https://github.com/Stiffstream/json_dto/archive/refs/tags/v.0.2.15.tar.gz"
+    sha256: "d7631d21785ddddc81b2fe04a7998d0d49323c2224168568cb80cc32093da3ac"
+  "0.2.14":
+    url: "https://github.com/Stiffstream/json_dto/archive/refs/tags/v.0.2.14.tar.gz"
+    sha256: "d885fe16cf621f7470a45fb6e955e8aded02958bb2212819dc151feac930905b"

@@ -1,0 +1,13 @@
+diff --git a/include/libassert/assert-gtest.hpp b/include/libassert/assert-gtest.hpp
+index 912da40..57dbc91 100644
+--- a/include/libassert/assert-gtest.hpp
++++ b/include/libassert/assert-gtest.hpp
+@@ -6,8 +6,6 @@
+ #define LIBASSERT_PREFIX_ASSERTIONS
+ #include <libassert/assert.hpp>
+
+-#include "tokenizer.hpp"
+-
+ #if defined(_MSVC_TRADITIONAL) && _MSVC_TRADITIONAL != 0
+  #error "Libassert integration does not work with MSVC's non-conformant preprocessor. /Zc:preprocessor must be used."
+ #endif

@@ -1,3 +1,3 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 ign_add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} ignition-cmake${IGN_CMAKE_VER}::utilities)

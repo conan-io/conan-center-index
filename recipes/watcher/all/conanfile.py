@@ -1,11 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy
+from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.apple import is_apple_os
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.49.0"
@@ -19,6 +18,7 @@ class WatcherConan(ConanFile):
     topics = ("watch", "filesystem", "event", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
     def _min_cppstd(self):
@@ -42,9 +42,6 @@ class WatcherConan(ConanFile):
                 "msvc": "192",
             },
         }.get(self._min_cppstd, {})
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -71,9 +68,6 @@ class WatcherConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def build(self):
-        apply_conandata_patches(self)
-
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(
@@ -88,6 +82,6 @@ class WatcherConan(ConanFile):
         self.cpp_info.libdirs = []
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.extend(["m", "pthread"])
         if is_apple_os(self):
             self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
