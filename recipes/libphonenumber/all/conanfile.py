@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, valid_min_cppstd, can_run
@@ -98,6 +98,9 @@ class LibphonenumberConan(ConanFile):
         if not self.options.use_icu_regexp:
             # Fails with 'undefined reference to `vtable for i18n::phonenumbers::ICURegExpFactory''
             raise ConanInvalidConfiguration("use_icu_regexp=False is not supported")
+
+        if conan_version.major == 1:
+            raise ConanInvalidConfiguration("Conan 1.x is not supported. Contributions are welcome!")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
