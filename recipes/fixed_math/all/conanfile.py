@@ -21,14 +21,14 @@ class FixedMathConan(ConanFile):
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "header_only": [True, False],
         "shared": [True, False],
         "fPIC": [True, False],
-        "header_only": [True, False],
     }
     default_options = {
+        "header_only": False,
         "shared": False,
         "fPIC": True,
-        "header_only": False,
     }
 
     @property
@@ -48,13 +48,13 @@ class FixedMathConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
         if self.options.header_only:
             self.options.rm_safe("shared")
             self.options.rm_safe("fPIC")
             self.package_type = "header-library"
-
-    def configure(self):
-        if self.options.get_safe("shared"):
+        elif self.options.shared:
             self.options.rm_safe("fPIC")
 
     def layout(self):
