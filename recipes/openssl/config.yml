@@ -21,5 +21,8 @@ versions:
     folder: "3.x.x"
   "3.0.13":
     folder: "3.x.x"
+  # Latest validated FIPS version
+  "3.0.9":
+    folder: "3.x.x"
   "1.1.1w":
     folder: "1.x.x"
