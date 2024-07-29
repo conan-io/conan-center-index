@@ -95,10 +95,6 @@ class LibphonenumberConan(ConanFile):
             # Fails with 'undefined reference to `vtable for i18n::phonenumbers::ICURegExpFactory''
             raise ConanInvalidConfiguration("use_icu_regexp=False is not supported")
 
-        if conan_version.major == 1:
-            # "Can't find Google Protocol Buffers: can't locate protobuf."
-            raise ConanInvalidConfiguration("Conan 1.x is not supported. Contributions are welcome!")
-
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
