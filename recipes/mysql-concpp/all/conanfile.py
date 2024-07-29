@@ -39,12 +39,10 @@ class MysqlCppConnRecipe(ConanFile):
 
     def requirements(self):
         self.requires("lz4/1.9.4")
-        if self.options.shared:
-            self.requires("openssl/3.2.2")
-        else:
-            self.requires("openssl/3.2.2", options={"no_asm": False, "shared": False, "no_apps": True})
+        self.requires("openssl/3.2.2")
         self.requires("boost/1.85.0")
         self.requires("zstd/1.5.6")
+        self.requires("rapidjson/cci.20230929")
         # self.requires("libmysqlclient/8.1.0")
 
     def build_requirements(self):
@@ -102,6 +100,7 @@ class MysqlCppConnRecipe(ConanFile):
 
         # Apple patches
         if is_apple_os(self) and cross_building(self):
+            print(f"Building for {str(self.settings.arch)}")
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                 "PROJECT(MySQL_CONCPP)",
                                 "PROJECT(MySQL_CONCPP)\n"\
@@ -109,10 +108,11 @@ class MysqlCppConnRecipe(ConanFile):
                                 strict=False)
             
             replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "protobuf", "CMakeLists.txt"),
-                                "if(APPLE)",
-                                "if(APPLE)\n"\
+                                "enable_pic()",
+                                "enable_pic()\n"\
                                 f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n",
                                 strict=False)
+
 
     def build(self):
         self._patch_sources()
@@ -150,9 +150,9 @@ class MysqlCppConnRecipe(ConanFile):
         else:
             self.vs = ""
         
-        template_libdirs = ["lib", "lib/debug", "lib64", "lib64/debug"]
-        self.cpp_info.libdirs = template_libdirs if not self.vs else [f"{lib}/{self.vs}" for lib in template_libdirs]
-        self.cpp_info.bindirs = ["lib64", "lib64/debug", "lib", "lib/debug"]
+        template_dirs = ["lib64", "lib64/debug", "lib", "lib/debug"]
+        self.cpp_info.libdirs = template_dirs if not self.vs else [f"{lib}/{self.vs}" for lib in template_dirs]
+        self.cpp_info.bindirs = template_dirs
         
         if is_apple_os(self):
             self.cpp_info.system_libs.extend(["resolv"])
