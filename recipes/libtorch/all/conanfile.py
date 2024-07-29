@@ -28,81 +28,83 @@ class LibtorchConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "blas": ["eigen", "openblas", "veclib"],
-        "build_lazy_cuda_linalg": [True, False],
         "build_lazy_ts_backend": [True, False],
         "build_lite_interpreter": [True, False],
         "coreml_delegate": [True, False],
-        "debug_cuda": [True, False],
         "fakelowp": [True, False],
         "observers": [True, False],
         "utilities": [True, False],
         "vulkan_fp16_inference": [True, False],
         "vulkan_relaxed_precision": [True, False],
-        "with_cuda": [True, False],
-        "with_cudnn": [True, False],
-        "with_cusparselt": [True, False],
         "with_fbgemm": [True, False],
         "with_gflags": [True, False],
         "with_glog": [True, False],
         "with_itt": [True, False],
-        "with_magma": [True, False],
-        "with_metal": [True, False],
         "with_mimalloc": [True, False],
-        "with_mkldnn": [True, False],
-        "with_mps": [True, False],
-        "with_nccl": [True, False],
-        "with_nnapi": [True, False],
         "with_nnpack": [True, False],
         "with_numa": [True, False],
-        "with_nvrtc": [True, False],
         "with_opencl": [True, False],
         "with_openmp": [True, False],
         "with_qnnpack": [True, False],
-        "with_rocm": [True, False],
-        "with_snpe": [True, False],
         "with_vulkan": [True, False],
         "with_xnnpack": [True, False],
-        "with_xpu": [True, False],
+        # TODO
+        # "build_lazy_cuda_linalg": [True, False],
+        # "debug_cuda": [True, False],
+        # "with_cuda": [True, False],
+        # "with_cudnn": [True, False],
+        # "with_cusparselt": [True, False],
+        # "with_magma": [True, False],
+        # "with_metal": [True, False],
+        # "with_mkldnn": [True, False],
+        # "with_mps": [True, False],
+        # "with_nccl": [True, False],
+        # "with_nnapi": [True, False],
+        # "with_nvrtc": [True, False],
+        # "with_rocm": [True, False],
+        # "with_snpe": [True, False],
+        # "with_xpu": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "blas": "openblas",
-        "build_lazy_cuda_linalg": False,
         "build_lazy_ts_backend": True,
         "build_lite_interpreter": False,
         "coreml_delegate": False,
-        "debug_cuda": False,
         "fakelowp": False,
         "observers": False,
         "utilities": False,
         "vulkan_fp16_inference": False,
         "vulkan_relaxed_precision": False,
-        "with_cuda": False,
-        "with_cudnn": True,
-        "with_cusparselt": True,
         "with_fbgemm": True,
         "with_gflags": False,
         "with_glog": False,
         "with_itt": True,
-        "with_magma": False,  # TODO: should be enabled
-        "with_metal": False,
         "with_mimalloc": False,
-        "with_mkldnn": False,
-        "with_mps": False,  # TODO: should be enabled
-        "with_nccl": True,
-        "with_nnapi": False,
         "with_nnpack": True,
         "with_numa": True,
-        "with_nvrtc": False,
         "with_opencl": False,
         "with_openmp": True,
         "with_qnnpack": True,
-        "with_rocm": False,
-        "with_snpe": False,
-        "with_vulkan": False,
+        "with_vulkan": True,
         "with_xnnpack": True,
-        "with_xpu": False,
+        # TODO
+        # "build_lazy_cuda_linalg": False,
+        # "debug_cuda": False,
+        # "with_cuda": False,
+        # "with_cudnn": True,
+        # "with_cusparselt": True,
+        # "with_mkldnn": False,
+        # "with_magma": True,
+        # "with_metal": False,
+        # "with_mps": True,
+        # "with_nccl": True,
+        # "with_nnapi": False,
+        # "with_nvrtc": False,
+        # "with_rocm": False,
+        # "with_snpe": False,
+        # "with_xpu": False,
     }
     options_description = {
         "blas": "Which BLAS backend to use",
@@ -171,23 +173,22 @@ class LibtorchConan(ConanFile):
             del self.options.fPIC
             del self.options.with_qnnpack
         if not is_apple_os(self):
-            del self.options.with_metal
-            del self.options.with_magma
-            del self.options.with_mps
+            self.options.rm_safe("with_metal")
+            self.options.rm_safe("with_magma")
+            self.options.rm_safe("with_mps")
         if self.settings.os != "Linux":
             del self.options.with_numa
         if self.settings.os != "Android":
-            del self.options.with_nnapi
-            del self.options.with_snpe
-        else:
-            self.options.with_vulkan = True
+            self.options.rm_safe("with_nnapi")
+            self.options.rm_safe("with_snpe")
+            self.options.with_vulkan = False
         if self._is_mobile_os:
             self.options.blas = "eigen"
             self.options.build_lazy_ts_backend = False
             del self.options.with_fbgemm
             # del self.options.distributed
         if self.settings.arch not in ["x86", "x86_64", "armv8"]:
-            del self.options.with_mkldnn
+            self.options.rm_safe("with_mkldnn")
         if not is_apple_os(self) or self.settings.os not in ["Linux", "Android"]:
             del self.options.with_nnpack
         self.options.with_itt = self.settings.arch in ["x86", "x86_64"]
@@ -195,13 +196,13 @@ class LibtorchConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if not self.options.with_cuda:
+        if not self.options.get_safe("with_cuda"):
             self.options.rm_safe("build_lazy_cuda_linalg")
             self.options.rm_safe("debug_cuda")
             self.options.rm_safe("with_cudnn")
             self.options.rm_safe("with_cusparselt")
             self.options.rm_safe("with_nvrtc")
-            if not self.options.with_rocm:
+            if not self.options.get_safe("with_rocm"):
                 self.options.rm_safe("with_nccl")
         if not self.options.with_vulkan:
             self.options.rm_safe("vulkan_fp16_inference")
@@ -249,7 +250,7 @@ class LibtorchConan(ConanFile):
     def requirements(self):
         self.requires("cpuinfo/cci.20231129")
         self.requires("eigen/3.4.0")
-        # fmt/11.x is not yet supported as of v2.4.0
+        # fmt/11.x is not supported as of v2.4.0
         self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
         self.requires("foxi/cci.20210217")
         self.requires("onnx/1.16.1", transitive_headers=True, transitive_libs=True)
@@ -321,35 +322,20 @@ class LibtorchConan(ConanFile):
         if self.options.blas == "veclib" and not is_apple_os(self):
             raise ConanInvalidConfiguration("veclib only available on Apple family OS")
 
-        if self.options.with_cuda:
-            self.output.warning("cuda recipe not yet available in CCI, assuming that NVIDIA CUDA SDK is installed on your system")
-        if self.options.get_safe("with_cudnn"):
-            self.output.warning("cudnn recipe not yet available in CCI, assuming that NVIDIA CuDNN is installed on your system")
+        if self.options.get_safe("with_cuda"):
+            self.output.warning("cuda recipe is not available, assuming that NVIDIA CUDA SDK is installed on your system")
+            if self.options.get_safe("with_cudnn"):
+                self.output.warning("cudnn recipe is not available, assuming that NVIDIA CuDNN is installed on your system")
+            if self.options.get_safe("with_nvrtc"):
+                self.output.warning("nvrtc recipe is not available, assuming that NVIDIA NVRTC is installed on your system")
+            if self.options.get_safe("with_cusparselt"):
+                self.output.warning("cusparselt recipe is not available, assuming that NVIDIA cuSPARSELt is installed on your system")
         if self.options.get_safe("with_nccl"):
-            self.output.warning("nccl recipe not yet available in CCI, assuming that NVIDIA NCCL is installed on your system")
-        if self.options.get_safe("with_nvrtc"):
-            self.output.warning("nvrtc recipe not yet available in CCI, assuming that NVIDIA NVRTC is installed on your system")
-        if self.options.get_safe("with_cusparselt"):
-            self.output.warning("cusparselt recipe not yet available in CCI, assuming that NVIDIA cuSPARSE LT is installed on your system")
-        if self.options.with_rocm:
-            self.output.warning("rocm recipe not yet available in CCI, assuming that ROCm is installed on your system")
-
-        # TODO
-        for opt in [
-            "with_cuda",
-            "with_magma",
-            "with_metal",
-            "with_mkldnn",
-            "with_mps",
-            "with_nnapi",
-            "with_opencl",
-            "with_rocm",
-            "with_snpe",
-            "with_vulkan",
-            "with_xpu",
-        ]:
-            if self.options.get_safe(opt):
-                raise ConanInvalidConfiguration(f"Option '{opt}' is not yet supported")
+            self.output.warning("nccl recipe is not available, assuming that NVIDIA NCCL is installed on your system")
+        if self.options.get_safe("with_rocm"):
+            self.output.warning("rocm recipe is not available, assuming that ROCm is installed on your system")
+        if self.options.get_safe("with_xpu"):
+            self.output.warning("xpu recipe is not available, assuming that Intel oneAPI is installed on your system")
 
 
     def build_requirements(self):
@@ -372,10 +358,10 @@ class LibtorchConan(ConanFile):
         tc.variables["BUILD_PYTHON"] = False
         tc.variables["BUILD_LITE_INTERPRETER"] = self.options.build_lite_interpreter
         tc.variables["CAFFE2_USE_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
-        tc.variables["USE_CUDA"] = self.options.with_cuda
-        tc.variables["USE_XPU"] = self.options.with_xpu
+        tc.variables["USE_CUDA"] = self.options.get_safe("with_cuda", False)
+        tc.variables["USE_XPU"] = self.options.get_safe("with_xpu", False)
         tc.variables["BUILD_LAZY_CUDA_LINALG"] = self.options.get_safe("build_lazy_cuda_linalg", False)
-        tc.variables["USE_ROCM"] = self.options.with_rocm
+        tc.variables["USE_ROCM"] = self.options.get_safe("with_rocm", False)
         tc.variables["CAFFE2_STATIC_LINK_CUDA"] = False
         tc.variables["USE_CUDNN"] = self.options.get_safe("with_cudnn", False)
         tc.variables["USE_STATIC_CUDNN"] = False
@@ -426,11 +412,10 @@ class LibtorchConan(ConanFile):
         tc.variables["USE_MIMALLOC"] = self.options.with_mimalloc
 
         tc.variables["BLAS"] = self._blas_cmake_option_value
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_OpenMP"] = not self.options.with_openmp
 
         tc.variables["MSVC_Z7_OVERRIDE"] = False
 
-        # Custom variables for our_LIBTORCH CMake wrapper
+        # Custom variables for our CMake wrapper
         tc.variables["CONAN_LIBTORCH_USE_FLATBUFFERS"] = self._depends_on_flatbuffers
         tc.variables["CONAN_LIBTORCH_USE_PTHREADPOOL"] = self._depends_on_pthreadpool
         tc.variables["CONAN_LIBTORCH_USE_SLEEF"] = self._depends_on_sleef
@@ -568,7 +553,7 @@ class LibtorchConan(ConanFile):
             return ["vulkan-headers::vulkan-headers", "vulkan-loader::vulkan-loader"] if self.options.with_vulkan else []
 
         def _onednn():
-            return ["onednn::onednn"] if self.options.with_mkldnn else []
+            return ["onednn::onednn"] if self.options.get_safe("with_mkldnn", False) else []
 
         def _mimalloc():
             return ["mimalloc::mimalloc"] if self.options.with_mimalloc else []
@@ -647,30 +632,25 @@ class LibtorchConan(ConanFile):
             self.cpp_info.components["libtorch_caffe2_protos"].requires.append("libtorch_caffe2_protos_link_order_workaround")
             self.cpp_info.components["libtorch_caffe2_protos_link_order_workaround"].requires.append(_protobuf())
 
-            # Caffe2_perfkernels_avx
             if _lib_exists("Caffe2_perfkernels_avx"):
                 _add_whole_archive_lib("libtorch_caffe2_perfkernels_avx", "Caffe2_perfkernels_avx", shared=self.options.shared)
                 self.cpp_info.components["libtorch_caffe2_perfkernels_avx"].requires.append("c10")
                 self.cpp_info.components["torch_cpu"].requires.append("libtorch_caffe2_perfkernels_avx")
 
-            # Caffe2_perfkernels_avx2
             if _lib_exists("Caffe2_perfkernels_avx2"):
                 _add_whole_archive_lib("libtorch_caffe2_perfkernels_avx2", "Caffe2_perfkernels_avx2", shared=self.options.shared)
                 self.cpp_info.components["libtorch_caffe2_perfkernels_avx2"].requires.append("c10")
                 self.cpp_info.components["torch_cpu"].requires.append("libtorch_caffe2_perfkernels_avx2")
 
-            # Caffe2_perfkernels_avx512
             if _lib_exists("Caffe2_perfkernels_avx512"):
                 _add_whole_archive_lib("libtorch_caffe2_perfkernels_avx512", "Caffe2_perfkernels_avx512", shared=self.options.shared)
                 self.cpp_info.components["libtorch_caffe2_perfkernels_avx512"].requires.append("c10")
                 self.cpp_info.components["torch_cpu"].requires.append("libtorch_caffe2_perfkernels_avx512")
 
-        # caffe2_observers
         if self.options.observers:
             _add_whole_archive_lib("libtorch_caffe2_observers", "caffe2_observers", shared=self.options.shared)
             self.cpp_info.components["libtorch_caffe2_observers"].requires.append("torch")
 
-        # pytorch_qnnpack
         if self.options.get_safe("with_qnnpack"):
             self.cpp_info.components["clog"].libs = ["clog"]
 
