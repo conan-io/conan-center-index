@@ -1,0 +1,25 @@
+From 90c281c0c0ae524e69d7450ac0f572cdfcea82d6 Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Mon, 29 Jul 2024 20:57:34 +0300
+Subject: [PATCH 1/2] fix a minor glog incompatibility
+
+---
+ c10/util/Logging.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/c10/util/Logging.cpp b/c10/util/Logging.cpp
+index 66a24980a4..520bb3e723 100644
+--- a/c10/util/Logging.cpp
++++ b/c10/util/Logging.cpp
+@@ -324,7 +324,7 @@ void UpdateLoggingLevelsFromFlags() {
+ 
+ void ShowLogInfoToStderr() {
+   FLAGS_logtostderr = 1;
+-  FLAGS_minloglevel = std::min(FLAGS_minloglevel, google::GLOG_INFO);
++  FLAGS_minloglevel = std::min(FLAGS_minloglevel, static_cast<google::int32>(google::GLOG_INFO));
+ }
+ } // namespace c10
+ 
+-- 
+2.43.0
+
