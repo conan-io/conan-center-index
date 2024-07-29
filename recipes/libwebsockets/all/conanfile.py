@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.tools.files import get, replace_in_file, rmdir, copy, save, collect_libs
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -30,6 +30,7 @@ class LibwebsocketsConan(ConanFile):
         "with_sqlite3": [True, False],
         "with_libmount": [True, False],
         "with_hubbub": [True, False],
+        "with_netlink": [True, False],
         "ssl_client_use_os_ca_certs": [True, False],                            # SSL support should make use of the OS-installed CA root certs
         "ssl_server_with_ecdh_cert": [True, False],                             # Include SSL server use ECDH certificate
 
@@ -114,6 +115,7 @@ class LibwebsocketsConan(ConanFile):
         "with_sqlite3": False,
         "with_libmount": False,
         "with_hubbub": False,
+        "with_netlink": False,
 
         "ssl_client_use_os_ca_certs": True,
         "ssl_server_with_ecdh_cert": False,
@@ -224,8 +226,7 @@ class LibwebsocketsConan(ConanFile):
             self.requires("sqlite3/3.44.2")
 
         if self.options.with_ssl == "openssl":
-            # Cannot add the [>=1.1 <4] range, as it seems openssl3 makes it fail
-            self.requires("openssl/1.1.1w", transitive_headers=True)
+            self.requires("openssl/[>=1.1.1w <4]", transitive_headers=True)
         elif self.options.with_ssl == "mbedtls":
             self.requires("mbedtls/3.5.0")
         elif self.options.with_ssl == "wolfssl":
@@ -235,12 +236,8 @@ class LibwebsocketsConan(ConanFile):
         if self.options.shared and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             # https://github.com/conan-io/conan-center-index/pull/5321#issuecomment-826367276
             raise ConanInvalidConfiguration("{}/{} shared=True with gcc<5 does not build. Please submit a PR with a fix.".format(self.name, self.version))
-        if Version(self.version) <= "4.0.15" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) >= "12":
-            raise ConanInvalidConfiguration("{}/{} with apple-clang>=12 does not build. Please submit a PR with a fix.".format(self.name, self.version))
         if Version(self.version) >= "4.3.2":
-            if ("Visual" in str(self.settings.compiler.version) and Version(self.settings.compiler.version) < 16) or  \
-                    ("msvc" == str(self.settings.compiler.version) and Version(self.settings.compiler.version) < 192):
-                raise ConanInvalidConfiguration ("{}/{} requires at least Visual Studio 2019".format(self.name, self.version))
+            check_min_vs(self, "192")
 
         if self.options.with_hubbub:
             raise ConanInvalidConfiguration("Library hubbub not implemented (yet) in CCI")
@@ -295,11 +292,16 @@ class LibwebsocketsConan(ConanFile):
         tc.variables["LWS_WITH_SHARED"] = self.options.shared
         tc.variables["LWS_WITH_STATIC"] = not self.options.shared
         tc.variables["LWS_WITH_SSL"] = bool(self.options.with_ssl)
+        tc.variables["LWS_WITH_NETLINK"] = self.options.with_netlink
+
+        # Allow forwarding project targets to try_compile and derivatives
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
 
         if self.options.with_ssl == "openssl":
-            tc.variables["LWS_OPENSSL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("openssl"))
-            tc.variables["LWS_OPENSSL_INCLUDE_DIRS"] = self._cmakify_path_list(self.dependencies["openssl"].cpp_info.includedirs)
-        elif self.options.with_ssl == "mbedtls":
+            # Ensure find_package(OpenSSL) is called early
+            tc.variables["CMAKE_PROJECT_libwebsockets_INCLUDE"] = os.path.join(self.source_folder, "project_include.cmake").replace('\\','/')
+
+        if self.options.with_ssl == "mbedtls":
             tc.variables["LWS_WITH_MBEDTLS"] = True
             tc.variables["LWS_MBEDTLS_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("mbedtls"))
             tc.variables["LWS_MBEDTLS_INCLUDE_DIRS"] = self._cmakify_path_list(self.dependencies["mbedtls"].cpp_info.includedirs)
@@ -417,9 +419,8 @@ class LibwebsocketsConan(ConanFile):
         tc.variables["LWS_WITH_ALSA"] = False
         tc.variables["LWS_WITH_GTK"] = False
 
-        if Version(self.version) >= "4.1.0":
-            tc.variables["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
-            tc.variables["DISABLE_WERROR"] = True
+        tc.variables["LWS_WITH_SYS_SMD"] = self.settings.os != "Windows"
+        tc.variables["DISABLE_WERROR"] = True
 
         tc.generate()
         deps = CMakeDeps(self)
@@ -432,16 +433,18 @@ class LibwebsocketsConan(ConanFile):
             "SET(CMAKE_INSTALL_NAME_DIR \"${CMAKE_INSTALL_PREFIX}/${LWS_INSTALL_LIB_DIR}${LIB_SUFFIX}\")",
             "",
         )
-        if Version(self.version) == "4.0.15" and self.options.with_ssl:
-            replace_in_file(self,
-                cmakelists,
-                "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib)",
-                "list(APPEND LIB_LIST ws2_32.lib userenv.lib psapi.lib iphlpapi.lib crypt32.lib)"
-            )
-        if Version(self.version) < "4.1.0":
-            replace_in_file(self, cmakelists, "-Werror", "")
-        if Version(self.version) >= "4.1.4":
-            replace_in_file(self, cmakelists, "add_compile_options(/W3 /WX)", "add_compile_options(/W3)")
+
+        # Early call to find_package(OpenSSL) because its referenced in different places
+        if self.options.with_ssl == "openssl":
+            project_include_file = os.path.join(self.source_folder, "project_include.cmake")
+            save(self, project_include_file, 'find_package(OpenSSL REQUIRED)\nset(OPENSSL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})')
+
+        # Prevent locating and copying OpenSSL binaries (not needed by the recipe)
+        replace_in_file(self, 
+                        os.path.join(self.source_folder, "cmake", "FindOpenSSLbins.cmake"),
+                        "if(OPENSSL_FOUND)", "if(FALSE)")
+
+        replace_in_file(self, cmakelists, "add_compile_options(/W3 /WX)", "add_compile_options(/W3)")
 
     def build(self):
         self._patch_sources()

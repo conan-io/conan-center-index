@@ -1,0 +1,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ebf3c4c..2db2794 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -7,7 +7,9 @@ set(CIO_VERSION_PATCH  6)
+ set(CIO_VERSION_STR "${CIO_VERSION_MAJOR}.${CIO_VERSION_MINOR}.${CIO_VERSION_PATCH}")
+ 
+ # CFLAGS
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
++if(BUILD_SHARED_LIBS)
++  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
++endif()
+ if(MSVC)
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4 ")
+ else()

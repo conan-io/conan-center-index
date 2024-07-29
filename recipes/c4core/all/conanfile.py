@@ -47,7 +47,7 @@ class C4CoreConan(ConanFile):
 
     def requirements(self):
         if self.options.with_fast_float:
-            self.requires("fast_float/6.0.0", transitive_headers=True)
+            self.requires("fast_float/6.1.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -82,7 +82,7 @@ class C4CoreConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rm(self, "*.natvis", os.path.join(self.package_folder, "include"))
+        rm(self, "*.natvis", os.path.join(self.package_folder, "include"), recursive=True)
 
     def package_info(self):
         self.cpp_info.libs = ["c4core"]

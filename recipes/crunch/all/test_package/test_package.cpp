@@ -4,6 +4,6 @@
 
 int main(int argc, const char* argv[])
 {
-    crn_get_file_type_ext(crn_file_type::cCRNFileTypeCRN);
+    std::cout << "Test string: " << crn_get_format_string(crn_format::cCRNFmtDXT1) << std::endl;
     return 0;
 }

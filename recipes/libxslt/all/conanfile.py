@@ -62,7 +62,7 @@ class LibxsltConan(ConanFile):
     def requirements(self):
         if Version(self.version) >= "1.1.39":
             # see https://github.com/conan-io/conan-center-index/pull/16205#discussion_r1149570846
-            self.requires("libxml2/2.12.3", transitive_headers=True, transitive_libs=True)
+            self.requires("libxml2/[>=2.12.5 <3]", transitive_headers=True, transitive_libs=True)
         else:
             self.requires("libxml2/2.11.6", transitive_headers=True, transitive_libs=True)
 
@@ -225,6 +225,8 @@ class LibxsltConan(ConanFile):
         self.cpp_info.components["exslt"].set_property("pkg_config_name", "libexslt")
         self.cpp_info.components["exslt"].libs = [f"{prefix}exslt{suffix}"]
         self.cpp_info.components["exslt"].requires = ["xslt"]
+        if not self.options.shared:
+            self.cpp_info.components["exslt"].defines = ["LIBEXSLT_STATIC"]
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "LibXslt"

@@ -1,4 +1,10 @@
 sources:
+  "cci.20240229":
+    url: "https://github.com/google/XNNPACK/archive/fcbf55af6cf28a4627bcd1f703ab7ad843f0f3a2.tar.gz"
+    sha256: "96b2800652a605f0bd289faa09865792d139cadde89f681c79e1b2a08a7e0498"
+  "cci.20231026":
+    url: "https://github.com/google/XNNPACK/archive/ab16a544c1cbc5ee4ec105a2f35f8adca22e94c1.tar.gz"
+    sha256: "11c7e0555d2c2c14d812b3fba2a277d59121cfb898dcc99de1c76477ff2055a0"
   "cci.20230715":
     url: "https://github.com/google/XNNPACK/archive/645035286fe31d47eeb07900450f4f6540b75c2c.tar.gz"
     sha256: "4c91153dfe4648dc3b325db0b4d6719d6e16f7ce30940b4ceb65abd033e5245e"

@@ -1,4 +1,22 @@
 sources:
+  "5.2.8":
+    url: "https://github.com/simdutf/simdutf/archive/v5.2.8.tar.gz"
+    sha256: "2706f1bef85a6d8598f82defd3848f1c5100e2e065c5d416d993118b53ea8d77"
+  "5.2.6":
+    url: "https://github.com/simdutf/simdutf/archive/v5.2.6.tar.gz"
+    sha256: "ab9e56facf7cf05f4e9d062a0adef310fc6a0f82a8132e8ec1e1bb7ab5e234df"
+  "5.2.3":
+    url: "https://github.com/simdutf/simdutf/archive/v5.2.3.tar.gz"
+    sha256: "dfa55d85c3ee51e9b52e55c02701b16f83dcf1921e1075b67f99b1036df5adb8"
+  "5.2.2":
+    url: "https://github.com/simdutf/simdutf/archive/v5.2.2.tar.gz"
+    sha256: "6cd905ac7fcf6293e34d7acaa9d5af901d85f182f82ec6ec3ee9f9273881791d"
+  "5.0.0":
+    url: "https://github.com/simdutf/simdutf/archive/v5.0.0.tar.gz"
+    sha256: "088d750466bf3487117cce7f828eb94a0a3474d7e76b45d4902c99a2387212b7"
+  "4.0.9":
+    url: "https://github.com/simdutf/simdutf/archive/v4.0.9.tar.gz"
+    sha256: "599E6558FC8D06F8346E5F210564F8B18751C93D83BCE1A40A0E6A326C57B61E"
   "4.0.5":
     url: "https://github.com/simdutf/simdutf/archive/v4.0.5.tar.gz"
     sha256: "040d80ff4321f89ea9739ccc7f468ece9c4bc2630f3d4762b6d829000d2ec625"
@@ -11,57 +29,8 @@ sources:
   "3.2.17":
     url: "https://github.com/simdutf/simdutf/archive/v3.2.17.tar.gz"
     sha256: "c24e3eec1e08522a09b33e603352e574f26d367a7701bf069a65881f64acd519"
-  "3.2.15":
-    url: "https://github.com/simdutf/simdutf/archive/v3.2.15.tar.gz"
-    sha256: "c26d2e2e9124e1c20335d3880d74c8b0d74a5e247ba82ef82d15df4ccc413bcd"
-  "3.2.14":
-    url: "https://github.com/simdutf/simdutf/archive/v3.2.14.tar.gz"
-    sha256: "6bd6cd41e0e588312c3ae24adb297454bd9bd9622ed7443f41300d7201f233a1"
-  "3.2.2":
-    url: "https://github.com/simdutf/simdutf/archive/v3.2.2.tar.gz"
-    sha256: "5a5c84c05bf30d681126d1dcbde903615f2c927e201e0c6d489f74a91b7f506f"
-  "3.2.0":
-    url: "https://github.com/simdutf/simdutf/archive/v3.2.0.tar.gz"
-    sha256: "0d9f63e2f308b6b54f399ebbe3a02776b902a2670c88c28de2d75ea2197dc4e9"
-  "3.1.0":
-    url: "https://github.com/simdutf/simdutf/archive/v3.1.0.tar.gz"
-    sha256: "9757a04085ad3ebab9fe933d9198ec6b84a857632a540418b6cfeb7b889a8017"
-  "3.0.0":
-    url: "https://github.com/simdutf/simdutf/archive/v3.0.0.tar.gz"
-    sha256: "cc23b47fd0caf9018fc0dcf49ebeff2676654fff997f9f6ce50fa93cd36f661f"
-  "2.2.0":
-    url: "https://github.com/simdutf/simdutf/archive/v2.2.0.tar.gz"
-    sha256: "b0b8527e194700363cc47e75a7b8d58c88798b0dc31671f5ae5c8803d8678fe6"
 patches:
   "3.2.17":
     - patch_file: "patches/3.2.17-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
-  "3.2.15":
-    - patch_file: "patches/3.2.14-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
-  "3.2.14":
-    - patch_file: "patches/3.2.14-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
-  "3.2.2":
-    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
-  "3.2.0":
-    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
-  "3.1.0":
-    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
-  "3.0.0":
-    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
-  "2.2.0":
-    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
       patch_description: "remove static build, enable rpath on macOS"
       patch_type: "conan"
