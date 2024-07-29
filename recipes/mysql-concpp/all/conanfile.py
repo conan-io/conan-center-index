@@ -41,7 +41,6 @@ class MysqlCppConnRecipe(ConanFile):
         self.requires("lz4/1.9.4")
         self.requires("openssl/3.2.2")
         self.requires("boost/1.85.0")
-        self.requires("zstd/1.5.6")
         self.requires("rapidjson/cci.20230929")
         # self.requires("libmysqlclient/8.1.0")
 
@@ -84,8 +83,6 @@ class MysqlCppConnRecipe(ConanFile):
         tc.cache_variables["BOOST_DIR"] = self._package_folder_dep("boost")
         # OpenSSL patches
         tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
-        # ZSTD
-        tc.cache_variables["WITH_ZSTD"] = self._package_folder_dep("zstd")
         tc.generate()
         
         deps = CMakeDeps(self)
@@ -107,11 +104,12 @@ class MysqlCppConnRecipe(ConanFile):
                                 f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n",
                                 strict=False)
             
-            replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "protobuf", "CMakeLists.txt"),
-                                "enable_pic()",
-                                "enable_pic()\n"\
-                                f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n",
-                                strict=False)
+            for lib in ["protobuf", "zstd"]:
+                replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", lib, "CMakeLists.txt"),
+                                    "enable_pic()",
+                                    "enable_pic()\n"\
+                                    f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n",
+                                    strict=False)
 
 
     def build(self):
