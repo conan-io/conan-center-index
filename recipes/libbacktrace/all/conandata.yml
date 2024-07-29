@@ -13,6 +13,9 @@ patches:
     - patch_file: "patches/0002-msvc-unistd-alternative.patch"
       patch_description: "support msvc for codes using unistd.h"
       patch_type: "portability"
+    - patch_file: "patches/cci.20240719-0003-fix-typedef-error.patch"
+      patch_description: "fix typedef error in pecoff.c"
+      patch_type: "portability"
   "cci.20210118":
     - patch_file: "patches/0001-pointer-arithmetic.patch"
       patch_description: "casting pointer types for pointer arithmetics"
