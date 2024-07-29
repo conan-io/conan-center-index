@@ -130,6 +130,8 @@ class FixedMathConan(ConanFile):
             self.cpp_info.libdirs = []
         else:
             self.cpp_info.libs = ["fixed_math"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.system_libs.append("m")
 
         self.cpp_info.set_property("cmake_file_name", "fixed_math")
         self.cpp_info.set_property("cmake_target_name", "fixed_math::fixed_math")
