@@ -94,6 +94,7 @@ class FbgemmConan(ConanFile):
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_OpenMP"] = True
         if not valid_min_cppstd(self, self._min_cppstd):
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        tc.variables["CMAKE_C_STANDARD"] = 99
         tc.generate()
 
         deps = CMakeDeps(self)

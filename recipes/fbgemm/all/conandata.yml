@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/0001-use-conan-dependencies.patch"
       patch_description: "Use Conan dependencies"
       patch_type: "conan"
+    - patch_file: "patches/0002-let-conan-define-cxx_standard.patch"
+      patch_description: "Let Conan define CXX_STANDARD"
+      patch_type: "conan"
