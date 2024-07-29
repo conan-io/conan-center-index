@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import get, collect_libs
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
 
+QT_DEP: str = "qt/6.7.1"
 
 class NodeEditorConan(ConanFile):
     name = "nodeeditor"
@@ -23,8 +24,11 @@ class NodeEditorConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def requirements(self):
-        self.requires("qt/6.7.1", transitive_headers=True,
+        self.requires(QT_DEP, transitive_headers=True,
                       transitive_libs=True)
+
+    def build_requirements(self):
+        self.tool_requires(QT_DEP)
 
     def generate(self):
         deps = CMakeDeps(self)
