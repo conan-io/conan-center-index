@@ -89,6 +89,7 @@ class FixedMathConan(ConanFile):
         tc = CMakeToolchain(self)
         if is_msvc(self):
             tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus"
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         venv = VirtualBuildEnv(self)
         venv.generate(scope="build")
