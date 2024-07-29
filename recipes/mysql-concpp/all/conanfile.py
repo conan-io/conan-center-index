@@ -116,7 +116,7 @@ class MysqlCppConnRecipe(ConanFile):
                                 "enable_pic()",
                                 "enable_pic()\n"\
                                 f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n"\
-                                "add_compile_definitions(ZSTD_DISABLE_ASM)",
+                                "add_compile_definitions(-DZSTD_DISABLE_ASM=1)",
                                 strict=False)
 
 
