@@ -1,66 +1,98 @@
 import os
 
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, replace_in_file
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.53.0"
+
 
 class LibsolaceConan(ConanFile):
     name = "libsolace"
-    description = "High performance components for mission critical applications"
-    topics = ("HPC", "High reliability", "P10", "solace", "performance", "c++", "conan")
+    description = "High-performance components for mission-critical applications"
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/abbyssoul/libsolace"
-    license = "Apache-2.0"
-    settings = "os", "compiler", "build_type", "arch"
+    topics = ("HPC", "High reliability", "P10", "solace", "performance", "c++")
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
     }
-    default_options = {"shared": False, "fPIC": True}
-    generators = "cmake"
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 17
 
     @property
-    def _supported_cppstd(self):
-        return ["17", "gnu17", "20", "gnu20"]
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "clang": "5",
+            "apple-clang": "9",
+        }
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
-        compiler_version = tools.Version(str(self.settings.compiler.version))
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
         if self.settings.os == "Windows":
-          raise ConanInvalidConfiguration("This library is not yet compatible with Windows")
-        # Exclude compilers that claims to support C++17 but do not in practice
-        if (self.settings.compiler == "gcc" and compiler_version < "7") or \
-           (self.settings.compiler == "clang" and compiler_version < "5") or \
-           (self.settings.compiler == "apple-clang" and compiler_version < "9"):
-          raise ConanInvalidConfiguration("This library requires C++17 or higher support standard. {} {} is not supported".format(self.settings.compiler, self.settings.compiler.version))
-        if self.settings.compiler.cppstd and not self.settings.compiler.cppstd in self._supported_cppstd:
-          raise ConanInvalidConfiguration("This library requires c++17 standard or higher. {} required".format(self.settings.compiler.cppstd))
+            raise ConanInvalidConfiguration("This library is not yet compatible with Windows")
+
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        cmake = CMake(self, parallel=True)
-        cmake.definitions["PKG_CONFIG"] = "OFF"
-        cmake.definitions["SOLACE_GTEST_SUPPORT"] = "OFF"
-        cmake.configure(source_folder=self._source_subfolder)
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["PKG_CONFIG"] = False
+        tc.cache_variables["SOLACE_GTEST_SUPPORT"] = False
+        tc.generate()
+
+    def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)\nconan_basic_setup()",
+                        "")
 
     def build(self):
-        cmake = self._configure_cmake()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
 
     def package_info(self):
         self.cpp_info.libs = ["solace"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

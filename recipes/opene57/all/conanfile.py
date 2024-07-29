@@ -1,123 +1,145 @@
-from conans import ConanFile, tools, CMake
-from conan.tools.microsoft import msvc_runtime_flag
-from conans.errors import ConanInvalidConfiguration
 import os
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, export_conandata_patches, get, replace_in_file
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.54.0"
+
 
 class Opene57Conan(ConanFile):
     name = "opene57"
-    description = "A C++ library for reading and writing E57 files, " \
-                  "fork of the original libE57 (http://libe57.org)"
-    topics = ("e57", "libe57", "3d", "astm")
+    description = "A C++ library for reading and writing E57 files, a fork of the original libE57 (http://libe57.org)"
+    license = ("MIT", "BSL-1.0")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/openE57/openE57"
-    license = ("MIT", "BSL-1.0")
-    settings = "os", "compiler", "arch", "build_type"
-    options = { "with_tools": [True, False],
-                "shared": [True, False],
-                "fPIC": [True, False]
-               }
+    topics = ("e57", "libe57", "3d", "astm")
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_tools": [True, False],
+        "with_docs":  [True, False]
+    }
     default_options = {
-                "with_tools": False,
-                "shared": False,
-                "fPIC": True
-               }
-    generators = "cmake", "cmake_find_package"
-    _cmake = None
+        "shared": False,
+        "fPIC": True,
+        "with_tools": False,
+        "with_docs":  False
+    }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def _min_cppstd(self):
+        return "17"
 
     @property
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "15",
+            "msvc": "191",
             "gcc": "7",
             "clang": "6",
             "apple-clang": "10",
         }
 
     def export_sources(self):
-        self.copy("CMakeLists.txt")
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
-
-        if self.options.with_tools:
-            self.options['boost'].multithreading = True
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    def validate(self):
+    def configure(self):
         if self.options.shared:
-            raise ConanInvalidConfiguration("OpenE57 cannot be built as shared library yet")
-            
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
+            self.options.rm_safe("fPIC")
+        if self.options.with_tools:
+            self.options["boost"].multithreading = True
 
-        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("C++17 support required, which your compiler does not support.")
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_tools:
-            self.requires("boost/1.78.0")
+            self.requires("boost/1.84.0")
 
-        if self.settings.os == "Linux" or tools.is_apple_os(self.settings.os):
-            self.requires("icu/70.1")
+        if self.options.with_docs:
+            self.requires("doxygen/1.9.4")
 
-        self.requires("xerces-c/3.2.3")
+        if self.settings.os != "Windows":
+            self.requires("icu/74.1")
+
+        self.requires("xerces-c/3.2.4")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["PROJECT_VERSION"] = self.version
-        self._cmake.definitions["BUILD_EXAMPLES"] = False
-        self._cmake.definitions["BUILD_TOOLS"] = self.options.with_tools
-        self._cmake.definitions["BUILD_TESTS"] = False
-        if self.settings.compiler == "Visual Studio":
-            self._cmake.definitions["BUILD_WITH_MT"] = "MT" in msvc_runtime_flag(self)
-        else:
-            self._cmake.definitions["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["PROJECT_VERSION"] = self.version
+        tc.variables["BUILD_EXAMPLES"] = False
+        tc.variables["BUILD_TOOLS"] = self.options.with_tools
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_DOCS"] = self.options.with_docs
+
+        if is_msvc(self):
+            tc.variables["BUILD_WITH_MT"] = is_msvc_static_runtime(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def _patch_sources(self):
+        # Do not raise an error for shared builds
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "message(FATAL_ERROR", "# ")
+        compiler_opts = os.path.join(self.source_folder, "src", "cmake", "compiler_options.cmake")
+        # Disable ASan and UBSan as these require linking against asan and ubsan runtime libraries
+        # FIXME: Figure out how to link against these using Conan
+        replace_in_file(self, compiler_opts, "$<$<CONFIG:DEBUG>:-fsanitize=address>", "")
+        replace_in_file(self, compiler_opts, "$<$<CONFIG:DEBUG>:-fsanitize=undefined>", "")
+        if self.settings.compiler == "apple-clang":
+            replace_in_file(self, compiler_opts, "$<$<CONFIG:DEBUG>:-fsanitize=leak>", "")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8":
+            replace_in_file(self, compiler_opts, "-fstack-clash-protection", "")
 
     def build(self):
-        cmake = self._configure_cmake()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="LICENSE.libE57", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE.libE57", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
         os.remove(os.path.join(self.package_folder, "CHANGELOG.md"))
-        tools.remove_files_by_mask(os.path.join(self.package_folder, "bin"), "*.dll")
 
     def package_info(self):
-        if self.options.with_tools:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH env: {}".format(bin_path))
-            self.env_info.PATH.append(bin_path)
-
         lib_suffix = "-d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = [f"openE57{lib_suffix}", f"openE57las{lib_suffix}"]
 
         self.cpp_info.defines.append(f"E57_REFIMPL_REVISION_ID={self.name}-{self.version}")
         self.cpp_info.defines.append("XERCES_STATIC_LIBRARY")
+        self.cpp_info.defines.append("CRCPP_INCLUDE_ESOTERIC_CRC_DEFINITIONS")
+        self.cpp_info.defines.append("CRCPP_USE_CPP11")
 
+        # TODO: to remove in conan v2
+        if self.options.with_tools:
+            bin_path = os.path.join(self.package_folder, "bin")
+            self.env_info.PATH.append(bin_path)

@@ -1,0 +1,15 @@
+diff --git a/src/vk_mem_alloc.h b/src/vk_mem_alloc.h
+index 32258b4..8da6bba 100644
+--- a/src/vk_mem_alloc.h
++++ b/src/vk_mem_alloc.h
+@@ -3470,6 +3470,10 @@ VMA_CALL_PRE void VMA_CALL_POST vmaDestroyImage(
+ #include <cstdlib>
+ #include <cstring>
+ 
++#if VMA_STATS_STRING_ENABLED
++    #include <cstdio> // For snprintf
++#endif
++
+ /*******************************************************************************
+ CONFIGURATION SECTION
+ 

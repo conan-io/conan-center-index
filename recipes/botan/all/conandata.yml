@@ -1,37 +1,7 @@
 sources:
-  "2.12.1":
-    url: "https://github.com/randombit/botan/archive/2.12.1.tar.gz"
-    sha256: "61d27332f053b0b1169659dc0fceb7de7d16cade230df3a14dfaa2c091888b98"
-  "2.13.0":
-    url: "https://github.com/randombit/botan/archive/2.13.0.tar.gz"
-    sha256: "29a57d8efd6ab297eab67cbf489a5a423b06e120e0520aff2583074e8aea151c"
-  "2.14.0":
-    url: "https://github.com/randombit/botan/archive/2.14.0.tar.gz"
-    sha256: "38e34b8ef7652e811382744425b82da1b1a7fb5f14cc281a7d3a18543eaf72f7"
-  "2.15.0":
-    url: "https://github.com/randombit/botan/archive/2.15.0.tar.gz"
-    sha256: "9a86b1a8adbac37fdff9cf5745b3a313020c33579d8fc51cb996c47d3adf5585"
-  "2.16.0":
-    url: "https://github.com/randombit/botan/archive/2.16.0.tar.gz"
-    sha256: "8f448b97120e884d755b946045753876d688b01f48f5e6a1cf37aebd5afecbe5"
-  "2.17.0":
-    url: "https://github.com/randombit/botan/archive/2.17.0.tar.gz"
-    sha256: "32874e4e14bf11428e1bc4919e5ee174a68e2f480d37bc79ed015b2b5ef87fef"
-  "2.17.1":
-    url: "https://github.com/randombit/botan/archive/2.17.1.tar.gz"
-    sha256: "ca562c00e61663c418bd9fdc6c70bdeaedafba8bef328cb6046a1d6390d39a71"
-  "2.17.2":
-    url: "https://github.com/randombit/botan/archive/2.17.2.tar.gz"
-    sha256: "3d99da64573abab6d6e8036a45f8c567a57721c8f23850e05aadd84fc2e0075c"
   "2.17.3":
     url: "https://github.com/randombit/botan/archive/2.17.3.tar.gz"
     sha256: "544c62e43be0c60fff7ac8707ee99fe134c75bef06bded217d04f0a4b333519a"
-  "2.18.0":
-    url: "https://github.com/randombit/botan/archive/2.18.0.tar.gz"
-    sha256: "8556991402f9ecf5f84f1f2c4de20ca3fd14a5ebd775f065ea6676b36646a77d"
-  "2.18.1":
-    url: "https://github.com/randombit/botan/archive/2.18.1.tar.gz"
-    sha256: "4afebf2dbfa2f047d161437dcc544003d5822f47ceac97ada6a24948297bd3ed"
   "2.18.2":
     url: "https://github.com/randombit/botan/archive/2.18.2.tar.gz"
     sha256: "10ded69c4fd4ade9d87527b394787beefa190b4ecb65ed04535bdd00e088cd96"
@@ -44,15 +14,48 @@ sources:
   "2.19.3":
     url: "https://github.com/randombit/botan/archive/2.19.3.tar.gz"
     sha256: "8f568bf74c2e476d92ac8a1cfc2ba8407ec038fe9458bd0a11e7da827a9b8199"
+  "2.19.4":
+    url: "https://github.com/randombit/botan/archive/2.19.4.tar.gz"
+    sha256: "5754a6b5ddc3c74b0cb8671531feea69d03a4f3b5bdafa5f75e4c73a1242e5b1"
+  "3.0.0":
+    url: "https://github.com/randombit/botan/archive/3.0.0.tar.gz"
+    sha256: "8bafe2e965fa9ccf92ef5741165d735c9fbbe6376c373bbf5702495ad2dfb814"
+  "3.1.0":
+    url: "https://github.com/randombit/botan/archive/3.1.0.tar.gz"
+    sha256: "f3680ab11122e581ac08993f149bf519030c7be13b32f5ac1e6bef0a2e6bb88e"
+  "3.1.1":
+    url: "https://github.com/randombit/botan/archive/3.1.1.tar.gz"
+    sha256: "2d0af0c3a7140572f3f7f1a22865f9c5eadc102a7fa58f03314709b0bee26c11"
+  "3.2.0":
+    url: "https://github.com/randombit/botan/archive/3.2.0.tar.gz"
+    sha256: "95af4935d56973000bb6ff20bb54ae56083f8764d5a2c89826cac26ac6127330"
+  "3.3.0":
+    url: "https://github.com/randombit/botan/archive/3.3.0.tar.gz"
+    sha256: "57fefda7b9ab6f8409329620cdaf26d2d7e962b6a10eb321d331e9ecb796f804"
+  "3.4.0":
+    url: "https://github.com/randombit/botan/archive/3.4.0.tar.gz"
+    sha256: "6ef2a16a0527b1cfc9648a644877f7b95c4d07e8ef237273b030c623418c5e5b"
+  "3.5.0":
+    url: "https://github.com/randombit/botan/archive/3.5.0.tar.gz"
+    sha256: "7d91d3349e6029e1a6929a50ab587f9fd4e29a9af3f3d698553451365564001f"
 patches:
-  "2.12.1":
-    - patch_file: "patches/dll-dir.patch"
-      base_path: "sources"
-    - patch_file: "patches/fix-unrecognized-linker-flag.patch"
-      base_path: "sources"
-  "2.17.2":
-    - patch_file: "patches/vs2015-install-fix.patch"
-      base_path: "sources"
   "2.18.2":
     - patch_file: "patches/fix-amalgamation-build.patch"
-      base_path: "sources"
+      patch_description: "Backport a fix for amalgamation build"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/randombit/botan/pull/2835"
+  "3.0.0":
+    - patch_file: "patches/backport-getrandom-via-syscall-to-3.0.0.patch"
+      patch_description: "Backport a fix to support getrandom() with glibc < 2.25"
+      patch_type: "portability"
+      patch_source: "https://github.com/randombit/botan/pull/3688"
+  "3.1.0":
+    - patch_file: "patches/backport-getrandom-via-syscall-to-3.1.0.patch"
+      patch_description: "Backport a fix to support getrandom() with glibc < 2.25"
+      patch_type: "portability"
+      patch_source: "https://github.com/randombit/botan/pull/3688"
+  "3.1.1":
+    - patch_file: "patches/backport-getrandom-via-syscall-to-3.1.0.patch"
+      patch_description: "Backport a fix to support getrandom() with glibc < 2.25"
+      patch_type: "portability"
+      patch_source: "https://github.com/randombit/botan/pull/3688"

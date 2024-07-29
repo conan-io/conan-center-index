@@ -193,53 +193,54 @@ class CapnprotoConan(ConanFile):
                               "function(CAPNP_GENERATE_CPP SOURCES HEADERS)",
                               find_execs)
 
+    @property
+    def _capnp_components(self):
+        def libm():
+            return ["m"] if self.settings.os in ["Linux", "FreeBSD"] else []
+
+        def pthread():
+            return ["pthread"] if self.settings.os in ["Linux", "FreeBSD"] else []
+
+        def ws2_32():
+            return ["ws2_32"] if self.settings.os == "Windows" else []
+
+        components = {
+            "capnp": {"requires": ["kj"]},
+            "capnp-json": {"requires": ["capnp", "kj"]},
+            "capnp-rpc": {"requires": ["capnp", "kj", "kj-async"]},
+            "capnpc": {"requires": ["capnp", "kj"], "system_libs": libm() + pthread()},
+            "kj": {"system_libs": libm() + pthread()},
+            "kj-async": {"requires": ["kj"], "system_libs": libm() + pthread() + ws2_32()},
+            "kj-http": {"requires": ["kj", "kj-async"]},
+            "kj-test": {"requires": ["kj"]},
+        }
+
+        if self.options.get_safe("with_zlib"):
+            components.update({"kj-gzip": {"requires": ["kj", "kj-async", "zlib::zlib"]}})
+            if Version(self.version) >= "1.0.0":
+                components["kj-http"].setdefault("requires", []).append("zlib::zlib")
+        if self.options.with_openssl:
+            components.update({"kj-tls": {"requires": ["kj", "kj-async", "openssl::openssl"]}})
+        if Version(self.version) >= "0.9.0":
+            components.update({"capnp-websocket": {"requires": ["capnp", "capnp-rpc", "kj-http", "kj-async", "kj"]}})
+
+        return components
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "CapnProto")
         capnprotomacros = os.path.join(self._cmake_folder, "CapnProtoMacros.cmake")
         self.cpp_info.set_property("cmake_build_modules", [capnprotomacros])
 
-        components = [
-            {"name": "capnp", "requires": ["kj"]},
-            {"name": "capnp-json", "requires": ["capnp", "kj"]},
-            {"name": "capnp-rpc", "requires": ["capnp", "kj", "kj-async"]},
-            {"name": "capnpc", "requires": ["capnp", "kj"]},
-            {"name": "kj", "requires": []},
-            {"name": "kj-async", "requires": ["kj"]},
-            {"name": "kj-http", "requires": ["kj", "kj-async"]},
-            {"name": "kj-test", "requires": ["kj"]},
-        ]
-        if self.options.get_safe("with_zlib"):
-            components.append({"name": "kj-gzip", "requires": ["kj", "kj-async", "zlib::zlib"]})
-        if self.options.with_openssl:
-            components.append({"name": "kj-tls", "requires": ["kj", "kj-async", "openssl::openssl"]})
-        if Version(self.version) >= "0.9.0":
-            components.append({
-                "name": "capnp-websocket",
-                "requires": ["capnp", "capnp-rpc", "kj-http", "kj-async", "kj"],
-            })
-
-        for component in components:
-            self._register_component(component)
-
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["capnpc"].system_libs = ["pthread", "m"]
-            self.cpp_info.components["kj"].system_libs = ["pthread", "m"]
-            self.cpp_info.components["kj-async"].system_libs = ["pthread", "m"]
-        elif self.settings.os == "Windows":
-            self.cpp_info.components["kj-async"].system_libs = ["ws2_32"]
+        for name, comp_info in self._capnp_components.items():
+            self.cpp_info.components[name].set_property("cmake_target_name", f"CapnProto::{name}")
+            self.cpp_info.components[name].builddirs.append(self._cmake_folder)
+            self.cpp_info.components[name].set_property("pkg_config_name", name)
+            self.cpp_info.components[name].libs = [name]
+            self.cpp_info.components[name].requires = comp_info.get("requires", [])
+            self.cpp_info.components[name].system_libs = comp_info.get("system_libs", [])
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "CapnProto"
         self.cpp_info.names["cmake_find_package_multi"] = "CapnProto"
         self.cpp_info.components["kj"].build_modules = [capnprotomacros]
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH env var with: {bin_path}")
-        self.env_info.PATH.append(bin_path)
-
-    def _register_component(self, component):
-        name = component["name"]
-        self.cpp_info.components[name].set_property("cmake_target_name", f"CapnProto::{name}")
-        self.cpp_info.components[name].builddirs.append(self._cmake_folder)
-        self.cpp_info.components[name].set_property("pkg_config_name", name)
-        self.cpp_info.components[name].libs = [name]
-        self.cpp_info.components[name].requires = component["requires"]
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

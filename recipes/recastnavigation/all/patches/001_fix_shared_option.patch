@@ -1,129 +1,50 @@
---- CMakeLists.txt	2020-05-11 12:26:17.000000000 -0400
-+++ CMakeLists.txt	2020-08-07 12:39:31.306787200 -0400
-@@ -9,7 +9,10 @@
- option(RECASTNAVIGATION_DEMO "Build demo" ON)
- option(RECASTNAVIGATION_TESTS "Build tests" ON)
- option(RECASTNAVIGATION_EXAMPLES "Build examples" ON)
--option(RECASTNAVIGATION_STATIC "Build static libraries" ON)
-+
-+if(MSVC AND BUILD_SHARED_LIBS)
-+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-+endif()
-
- add_subdirectory(DebugUtils)
- add_subdirectory(Detour)
-@@ -25,3 +28,4 @@
-     enable_testing()
-     add_subdirectory(Tests)
- endif ()
-+
 --- DebugUtils/CMakeLists.txt	2020-05-11 12:26:17.000000000 -0400
 +++ DebugUtils/CMakeLists.txt	2020-08-07 12:40:03.921473100 -0400
-@@ -1,10 +1,6 @@
- file(GLOB SOURCES Source/*.cpp)
-
--if (RECASTNAVIGATION_STATIC)
--    add_library(DebugUtils STATIC ${SOURCES})
--else()
--    add_library(DebugUtils SHARED ${SOURCES})
--endif()
-+add_library(DebugUtils ${SOURCES})
-
- add_library(RecastNavigation::DebugUtils ALIAS DebugUtils)
-
-@@ -26,6 +22,7 @@
+@@ -26,6 +26,7 @@
          )
 
  install(TARGETS DebugUtils
-+		RUNTIME DESTINATION bin
++        RUNTIME DESTINATION bin
          ARCHIVE DESTINATION lib
          LIBRARY DESTINATION lib
          COMPONENT library
 --- Detour/CMakeLists.txt	2020-05-11 12:26:17.000000000 -0400
 +++ Detour/CMakeLists.txt	2020-08-07 12:40:36.783319300 -0400
-@@ -1,10 +1,6 @@
- file(GLOB SOURCES Source/*.cpp)
-
--if(RECASTNAVIGATION_STATIC)
--    add_library(Detour STATIC ${SOURCES})
--else()
--    add_library(Detour SHARED ${SOURCES})
--endif()
-+add_library(Detour ${SOURCES})
-
- add_library(RecastNavigation::Detour ALIAS Detour)
-
-@@ -20,6 +16,7 @@
+@@ -20,6 +10,7 @@
          )
 
  install(TARGETS Detour
-+		RUNTIME DESTINATION bin
++        RUNTIME DESTINATION bin
          ARCHIVE DESTINATION lib
          LIBRARY DESTINATION lib
          COMPONENT library
 --- DetourCrowd/CMakeLists.txt	2020-05-11 12:26:17.000000000 -0400
 +++ DetourCrowd/CMakeLists.txt	2020-08-07 12:41:02.664066800 -0400
-@@ -1,10 +1,6 @@
- file(GLOB SOURCES Source/*.cpp)
-
--if (RECASTNAVIGATION_STATIC)
--    add_library(DetourCrowd STATIC ${SOURCES})
--else ()
--    add_library(DetourCrowd SHARED ${SOURCES})
--endif ()
-+add_library(DetourCrowd ${SOURCES})
-
- add_library(RecastNavigation::DetourCrowd ALIAS DetourCrowd)
-
-@@ -24,6 +20,7 @@
+@@ -24,6 +24,7 @@
          )
 
  install(TARGETS DetourCrowd
-+		RUNTIME DESTINATION bin
++        RUNTIME DESTINATION bin
          ARCHIVE DESTINATION lib
          LIBRARY DESTINATION lib
          COMPONENT library
 --- DetourTileCache/CMakeLists.txt	2020-05-11 12:26:17.000000000 -0400
 +++ DetourTileCache/CMakeLists.txt	2020-08-07 12:41:30.253060000 -0400
-@@ -1,10 +1,6 @@
- file(GLOB SOURCES Source/*.cpp)
-
--if (RECASTNAVIGATION_STATIC)
--    add_library(DetourTileCache STATIC ${SOURCES})
--else ()
--    add_library(DetourTileCache SHARED ${SOURCES})
--endif ()
-+add_library(DetourTileCache ${SOURCES})
-
- add_library(RecastNavigation::DetourTileCache ALIAS DetourTileCache)
-
-@@ -25,6 +21,7 @@
+@@ -25,6 +25,7 @@
 
 
  install(TARGETS DetourTileCache
-+		RUNTIME DESTINATION bin
++        RUNTIME DESTINATION bin
          ARCHIVE DESTINATION lib
          LIBRARY DESTINATION lib
          COMPONENT library
 --- Recast/CMakeLists.txt	2020-05-11 12:26:17.000000000 -0400
 +++ Recast/CMakeLists.txt	2020-08-07 12:41:53.370875500 -0400
-@@ -1,10 +1,6 @@
- file(GLOB SOURCES Source/*.cpp)
-
--if (RECASTNAVIGATION_STATIC)
--    add_library(Recast STATIC ${SOURCES})
--else ()
--    add_library(Recast SHARED ${SOURCES})
--endif ()
-+add_library(Recast ${SOURCES})
-
- add_library(RecastNavigation::Recast ALIAS Recast)
-
-@@ -20,6 +16,7 @@
+@@ -20,6 +20,7 @@
          )
 
  install(TARGETS Recast
-+		RUNTIME DESTINATION bin
++        RUNTIME DESTINATION bin
          ARCHIVE DESTINATION lib
          LIBRARY DESTINATION lib
          COMPONENT library

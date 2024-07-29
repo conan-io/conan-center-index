@@ -2,7 +2,7 @@ import os
 import re
 
 from conan import ConanFile
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, mkdir, rm, rmdir, save
 from conan.tools.gnu import AutotoolsToolchain
@@ -165,6 +165,7 @@ class SerfConan(ConanFile):
             for fn in os.listdir(os.path.join(self.package_folder, "lib")):
                 if any(re.finditer("\\.{}(\.?|$)".format(ext_to_remove), fn)):
                     os.unlink(os.path.join(self.package_folder, "lib", fn))
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
         libprefix = ""

@@ -1,4 +1,10 @@
 sources:
+  "3.1":
+    url: "https://github.com/p-ranav/argparse/archive/v3.1.tar.gz"
+    sha256: "d01733552ca4a18ab501ae8b8be878131baa32e89090fafdeef018ebfa4c6e46"
+  "3.0":
+    url: "https://github.com/p-ranav/argparse/archive/v3.0.tar.gz"
+    sha256: "ba7b465759bb01069d57302855eaf4d1f7d677f21ad7b0b00b92939645c30f47"
   "2.9":
     url: "https://github.com/p-ranav/argparse/archive/v2.9.tar.gz"
     sha256: "cd563293580b9dc592254df35b49cf8a19b4870ff5f611c7584cf967d9e6031e"

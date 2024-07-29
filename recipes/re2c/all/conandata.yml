@@ -1,4 +1,7 @@
 sources:
+  "3.1":
+    url: "https://github.com/skvadrik/re2c/releases/download/3.1/re2c-3.1.tar.xz"
+    sha256: "0ac299ad359e3f512b06a99397d025cfff81d3be34464ded0656f8a96676c029"
   "3.0":
     url: "https://github.com/skvadrik/re2c/releases/download/3.0/re2c-3.0.tar.xz"
     sha256: "b3babbbb1461e13fe22c630a40c43885efcfbbbb585830c6f4c0d791cf82ba0b"
@@ -15,20 +18,5 @@ sources:
     url: "https://github.com/skvadrik/re2c/releases/download/1.3/re2c-1.3.tar.xz"
     sha256: "f37f25ff760e90088e7d03d1232002c2c2672646d5844fdf8e0d51a5cd75a503"
 patches:
-  "3.0":
-    - patch_file: "patches/0001-add-msvc_cl-sh.patch"
-      base_path: ""
-  "2.2":
-    - patch_file: "patches/0001-add-msvc_cl-sh.patch"
-      base_path: ""
-  "2.1.1":
-    - patch_file: "patches/0001-add-msvc_cl-sh.patch"
-      base_path: ""
   "2.0.3":
-    - patch_file: "patches/0001-add-msvc_cl-sh.patch"
-      base_path: ""
     - patch_file: "patches/2.0.3-0001-add-missing-include.patch"
-      base_path: "source_subfolder"
-  "1.3":
-    - patch_file: "patches/0001-add-msvc_cl-sh.patch"
-      base_path: ""

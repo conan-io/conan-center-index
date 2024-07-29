@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm, save
 from conan.tools.scm import Version
 
 import os
@@ -81,15 +81,18 @@ class TesseractConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("leptonica/1.82.0")
+        if Version(self.version) >= "5.2.0":
+            self.requires("leptonica/1.83.1")
+        else:
+            self.requires("leptonica/1.82.0")
         if self.settings.os == "Windows" and Version(self.version) >= "5.0.0":
             self.requires("libtiff/4.6.0")
         # libarchive is required for 4.x so default value is true
         if self.options.get_safe("with_libarchive", default=True):
-            self.requires("libarchive/3.7.1")
+            self.requires("libarchive/3.7.2")
         # libcurl is not required for 4.x
         if self.options.get_safe("with_libcurl", default=False):
-            self.requires("libcurl/8.2.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -152,6 +155,7 @@ class TesseractConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
@@ -177,7 +181,7 @@ class TesseractConan(ConanFile):
     def package_info(self):
         # Official CMake imported target is:
         # - libtesseract if < 5.0.0
-        # - Tesseract::libtesseract if >= 5.0.0 (not yet released)
+        # - Tesseract::libtesseract if >= 5.0.0
         # We provide both targets
         self.cpp_info.set_property("cmake_file_name", "Tesseract")
         self.cpp_info.set_property("cmake_target_name", "Tesseract::libtesseract")
