@@ -6,10 +6,8 @@ Subject: [PATCH] use conan dependencies
 ---
  aten/src/ATen/CMakeLists.txt        | 10 +---------
  caffe2/CMakeLists.txt               |  1 +
- caffe2/serialize/CMakeLists.txt     |  4 ++--
- caffe2/serialize/inline_container.h |  5 +----
  cmake/Dependencies.cmake            | 20 ++++----------------
- 5 files changed, 9 insertions(+), 31 deletions(-)
+ 3 files changed, 6 insertions(+), 25 deletions(-)
 
 diff --git a/aten/src/ATen/CMakeLists.txt b/aten/src/ATen/CMakeLists.txt
 index 0087dd95d9..569bae4bab 100644
@@ -45,45 +43,6 @@ index 89c31fab11..ca7600b0df 100644
  endif()
  
  # This one needs to be unconditionally added as Functions.cpp is also unconditionally added
-diff --git a/caffe2/serialize/CMakeLists.txt b/caffe2/serialize/CMakeLists.txt
-index 1552b59d0d..ba4c11a4e6 100644
---- a/caffe2/serialize/CMakeLists.txt
-+++ b/caffe2/serialize/CMakeLists.txt
-@@ -2,14 +2,14 @@ file(GLOB tmp *_test.cc)
- 
- set(Caffe2_CPU_TEST_SRCS ${Caffe2_CPU_TEST_SRCS} ${tmp})
- list(APPEND Caffe2_CPU_SRCS
--  ${PROJECT_SOURCE_DIR}/third_party/miniz-2.1.0/miniz.c
-   ${CMAKE_CURRENT_SOURCE_DIR}/inline_container.cc
-   ${CMAKE_CURRENT_SOURCE_DIR}/istream_adapter.cc
-   ${CMAKE_CURRENT_SOURCE_DIR}/file_adapter.cc
-   ${CMAKE_CURRENT_SOURCE_DIR}/crc.cc
-   ${CMAKE_CURRENT_SOURCE_DIR}/read_adapter_interface.cc)
--list(APPEND Caffe2_CPU_INCLUDE ${PROJECT_SOURCE_DIR}/third_party/miniz-2.1.0)
-+list(APPEND Caffe2_DEPENDENCY_LIBS miniz::miniz)
- 
- set(Caffe2_CPU_TEST_SRCS ${Caffe2_CPU_TEST_SRCS} PARENT_SCOPE)
- set(Caffe2_CPU_SRCS ${Caffe2_CPU_SRCS} PARENT_SCOPE)
- set(Caffe2_CPU_INCLUDE ${Caffe2_CPU_INCLUDE} PARENT_SCOPE)
-+set(Caffe2_DEPENDENCY_LIBS ${Caffe2_DEPENDENCY_LIBS} PARENT_SCOPE)
-diff --git a/caffe2/serialize/inline_container.h b/caffe2/serialize/inline_container.h
-index 6a13d414fe..a7753aa163 100644
---- a/caffe2/serialize/inline_container.h
-+++ b/caffe2/serialize/inline_container.h
-@@ -15,12 +15,9 @@
- #include "caffe2/serialize/istream_adapter.h"
- #include "caffe2/serialize/read_adapter_interface.h"
- #include "caffe2/serialize/versions.h"
-+#include "miniz.h"
- 
- 
--extern "C" {
--typedef struct mz_zip_archive mz_zip_archive;
--}
--
- // PyTorch containers are a special zip archive with the following layout
- // archive_name.zip contains:
- //    archive_name/
 diff --git a/cmake/Dependencies.cmake b/cmake/Dependencies.cmake
 index c4661e39e1..9ddaed099e 100644
 --- a/cmake/Dependencies.cmake

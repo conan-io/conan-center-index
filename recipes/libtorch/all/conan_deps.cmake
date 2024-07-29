@@ -2,7 +2,6 @@
 
 find_package(cpuinfo REQUIRED CONFIG)
 find_package(fp16 REQUIRED CONFIG)
-find_package(miniz REQUIRED CONFIG)
 
 find_package(fmt REQUIRED CONFIG)
 add_library(fmt-header-only INTERFACE)

@@ -7,7 +7,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, Environment
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -147,6 +147,8 @@ class LibtorchConan(ConanFile):
         "with_xnnpack": "Use XNNPACK",
         "with_xpu": "Use XPU (SYCL) backend for Intel GPUs",
     }
+    no_copy_source = True
+    provides = ["miniz", "pocketfft", "kineto", "nnpack", "qnnpack"]
 
     @property
     def _min_cppstd(self):
@@ -259,7 +261,6 @@ class LibtorchConan(ConanFile):
         self.requires("protobuf/3.21.12")
         self.requires("fp16/cci.20210320")
         self.requires("cpp-httplib/0.16.0")
-        self.requires("miniz/3.0.2")
         self.requires("libbacktrace/cci.20210118")
         if self._depends_on_sleef:
             self.requires("sleef/3.6")
@@ -295,6 +296,8 @@ class LibtorchConan(ConanFile):
             self.requires("vulkan-loader/1.3.268.0")
         if self.options.with_mimalloc:
             self.requires("mimalloc/2.1.7")
+
+        # miniz cannot be unvendored due to being slightly modified
 
         # TODO: unvendor
         # - pocketfft
@@ -346,7 +349,6 @@ class LibtorchConan(ConanFile):
         if self.options.get_safe("with_xpu"):
             self.output.warning("xpu recipe is not available, assuming that Intel oneAPI is installed on your system")
 
-
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18 <4]")
         self.tool_requires("cpython/[~3.12]")
@@ -358,7 +360,7 @@ class LibtorchConan(ConanFile):
 
         # Keep only a restricted set of vendored dependencies.
         # Do it before build() to limit the amount of files to copy.
-        allowed = ["pocketfft", "kineto"]
+        allowed = ["pocketfft", "kineto", "miniz-2.1.0"]
         for path in Path(self.source_folder, "third_party").iterdir():
             if path.is_dir() and path.name not in allowed:
                 rmdir(self, path)
@@ -505,7 +507,7 @@ class LibtorchConan(ConanFile):
 
     def package_info(self):
         def _lib_exists(name):
-            return bool(Path(self.package_folder, "lib").glob(f"*{name}.*"))
+            return bool(list(Path(self.package_folder, "lib").glob(f"*{name}.*")))
 
         def _add_whole_archive_lib(component, libname, shared=False):
             # Reproduces https://github.com/pytorch/pytorch/blob/v2.4.0/cmake/TorchConfig.cmake.in#L27-L43
@@ -551,9 +553,6 @@ class LibtorchConan(ConanFile):
 
         def _xnnpack():
             return ["xnnpack::xnnpack"] if self.options.with_xnnpack else []
-
-        def _pthreadpool():
-            return ["pthreadpool::pthreadpool"] if self._use_nnpack_family else []
 
         def _libnuma():
             return ["libnuma::libnuma"] if self.options.get_safe("with_numa") else []
@@ -624,7 +623,7 @@ class LibtorchConan(ConanFile):
         ## (conan generators put exelinkflags/sharedlinkflags after system/external libs)
         self.cpp_info.components["torch_cpu"].requires.append("torch_cpu_link_order_workaround")
         self.cpp_info.components["torch_cpu_link_order_workaround"].requires.extend(
-            ["_headers", "c10", "miniz::miniz", "eigen::eigen", "fmt::fmt", "foxi::foxi", "cpp-httplib::cpp-httplib"] +
+            ["_headers", "c10", "eigen::eigen", "fmt::fmt", "foxi::foxi", "cpp-httplib::cpp-httplib"] +
             _fbgemm() + _sleef() + _onednn() + _protobuf() + _fbgemm() + _kineto() + _openblas() + _lapack() +
             _vulkan() + _opencl() + _openmp() + _nnpack() + _xnnpack() + _itt()
         )
