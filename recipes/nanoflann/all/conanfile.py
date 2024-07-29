@@ -47,3 +47,6 @@ class NanoflannConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "nanoflann")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        if self.settings.os in ("Linux", "FreeBSD"):
+            # If we ever support NANOFLANN_NO_THREADS, there would be no need to add this if set
+            self.cpp_info.system_libs.append("pthread")
