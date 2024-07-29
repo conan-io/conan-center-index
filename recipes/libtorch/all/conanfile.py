@@ -7,7 +7,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, Environment
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, save, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -40,6 +40,7 @@ class LibtorchConan(ConanFile):
         "with_gflags": [True, False],
         "with_glog": [True, False],
         "with_itt": [True, False],
+        "with_kineto": [True, False],
         "with_mimalloc": [True, False],
         "with_nnpack": [True, False],
         "with_numa": [True, False],
@@ -81,6 +82,7 @@ class LibtorchConan(ConanFile):
         "with_gflags": False,
         "with_glog": False,
         "with_itt": True,
+        "with_kineto": True,
         "with_mimalloc": False,
         "with_nnpack": True,
         "with_numa": True,
@@ -124,27 +126,27 @@ class LibtorchConan(ConanFile):
         "with_fbgemm": "Use FBGEMM (quantized 8-bit server operators)",
         "with_gflags": "Use GFLAGS",
         "with_glog": "Use GLOG",
-        "with_itt": "Use Intel(R) VTune Profiler ITT functionality",
-        "with_magma": "Use MAGMA",
+        "with_itt": "Use Intel VTune Profiler ITT functionality",
+        "with_kineto": "Use Kineto profiling library",
+        "with_magma": "Use MAGMA linear algebra library",
         "with_metal": "Use Metal for iOS build",
         "with_mimalloc": "Use mimalloc",
         "with_mkldnn": "Use MKLDNN. Only available on x86, x86_64, and AArch64.",
         "with_mps": "Use MPS for macOS build",
         "with_nccl": "Use NCCL and RCCL",
-        "with_nnapi": "Use NNAPI",
-        "with_nnpack": "Use NNPACK",
+        "with_nnapi": "Use NNAPI for Android build",
+        "with_nnpack": "Use NNPACK CPU acceleration library",
         "with_numa": "Use NUMA. Only available on Linux.",
         "with_nvrtc": "Use NVRTC",
         "with_opencl": "Use OpenCL",
         "with_openmp": "Use OpenMP for parallel code",
         "with_qnnpack": "Use ATen/QNNPACK (quantized 8-bit operators)",
-        "with_rocm": "Use ROCm",
+        "with_rocm": "Use ROCm (HIP)",
         "with_snpe": "Use Qualcomm's SNPE library",
         "with_vulkan": "Use Vulkan GPU backend",
         "with_xnnpack": "Use XNNPACK",
         "with_xpu": "Use XPU (SYCL) backend for Intel GPUs",
     }
-    no_copy_source = True
 
     @property
     def _min_cppstd(self):
@@ -250,9 +252,9 @@ class LibtorchConan(ConanFile):
     def requirements(self):
         self.requires("cpuinfo/cci.20231129")
         self.requires("eigen/3.4.0")
-        # fmt/11.x is not supported as of v2.4.0
+        # fmt/11.x is not yet supported as of v2.4.0
         self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
-        self.requires("foxi/cci.20210217")
+        self.requires("foxi/cci.20210217", libs=False)
         self.requires("onnx/1.16.1", transitive_headers=True, transitive_libs=True)
         self.requires("protobuf/3.21.12")
         self.requires("fp16/cci.20210320")
@@ -262,7 +264,7 @@ class LibtorchConan(ConanFile):
         if self._depends_on_sleef:
             self.requires("sleef/3.6")
         if self._depends_on_flatbuffers:
-            self.requires("flatbuffers/24.3.25")
+            self.requires("flatbuffers/24.3.25", libs=False)
         if self.options.blas == "openblas":
             # Also provides LAPACK, currently
             self.requires("openblas/0.3.27")
@@ -299,6 +301,13 @@ class LibtorchConan(ConanFile):
         # - kineto
         # - nnpack
         # - qnnpack
+        # TODO: add a recipe for
+        # - magma
+        # TODO: "distributed" option with sub-options for the following packages:
+        # - openmpi
+        # - ucc
+        # - gloo
+        # - tensorpipe
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -347,6 +356,13 @@ class LibtorchConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+        # Keep only a restricted set of vendored dependencies.
+        # Do it before build() to limit the amount of files to copy.
+        allowed = ["pocketfft", "kineto"]
+        for path in Path(self.source_folder, "third_party").iterdir():
+            if path.is_dir() and path.name not in allowed:
+                rmdir(self, path)
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_Torch_INCLUDE"] = "conan_deps.cmake"
@@ -367,7 +383,7 @@ class LibtorchConan(ConanFile):
         tc.variables["USE_STATIC_CUDNN"] = False
         tc.variables["USE_CUSPARSELT"] = self.options.get_safe("with_cusparselt", False)
         tc.variables["USE_FBGEMM"] = self.options.with_fbgemm
-        tc.variables["USE_KINETO"] = False
+        tc.variables["USE_KINETO"] = self.options.with_kineto
         tc.variables["USE_CUPTI_SO"] = True
         tc.variables["USE_FAKELOWP"] = self.options.get_safe("fakelowp", False)
         tc.variables["USE_GFLAGS"] = self.options.with_gflags
@@ -379,7 +395,7 @@ class LibtorchConan(ConanFile):
         tc.variables["USE_NATIVE_ARCH"] = False
         tc.variables["USE_MPS"] = self.options.get_safe("with_mps", False)
         tc.variables["USE_NCCL"] = self.options.get_safe("with_nccl", False)
-        tc.variables["USE_RCCL"] = self.options.get_safe("with_nccl", False)
+        tc.variables["USE_RCCL"] = self.options.get_safe("with_nccl", False) and self.options.get_safe("with_rocm", False)
         tc.variables["USE_STATIC_NCCL"] = False
         tc.variables["USE_SYSTEM_NCCL"] = True
         tc.variables["USE_NNAPI"] = self.options.get_safe("with_nnapi", False)
@@ -454,14 +470,10 @@ class LibtorchConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # Keep only a restricted set of vendored dependencies
-        allowed = ["pocketfft", "kineto"]
-        for path in Path(self.source_folder, "third_party").iterdir():
-            if path.is_dir() and path.name not in allowed:
-                rmdir(self, path)
         # Recreate some for add_subdirectory() to work
         for pkg in ["foxi", "fmt", "FXdiv", "psimd", "mimalloc"]:
             save(self, os.path.join(self.source_folder, "third_party", pkg, "CMakeLists.txt"), "")
+        # Use FindOpenMP from Conan or CMake
         modules_dir = os.path.join(self.source_folder, "cmake", "modules")
         rm(self, "FindOpenMP.cmake", modules_dir)
 
@@ -623,14 +635,14 @@ class LibtorchConan(ConanFile):
 
         if self.options.shared:
             ## TODO: Eventually remove this workaround in the future
-            self.cpp_info.components["torch_cpu_link_order_workaround"].requires.append(_protobuf())
+            self.cpp_info.components["torch_cpu_link_order_workaround"].requires.extend(_protobuf())
         else:
             # caffe2_protos
             _add_whole_archive_lib("libtorch_caffe2_protos", "caffe2_protos")
             self.cpp_info.components["torch_cpu"].requires.append("libtorch_caffe2_protos")
             ## TODO: Eventually remove this workaround in the future
             self.cpp_info.components["libtorch_caffe2_protos"].requires.append("libtorch_caffe2_protos_link_order_workaround")
-            self.cpp_info.components["libtorch_caffe2_protos_link_order_workaround"].requires.append(_protobuf())
+            self.cpp_info.components["libtorch_caffe2_protos_link_order_workaround"].requires.extend(_protobuf())
 
             if _lib_exists("Caffe2_perfkernels_avx"):
                 _add_whole_archive_lib("libtorch_caffe2_perfkernels_avx", "Caffe2_perfkernels_avx", shared=self.options.shared)

@@ -6,6 +6,9 @@ find_package(miniz REQUIRED CONFIG)
 
 find_package(fmt REQUIRED CONFIG)
 add_library(fmt-header-only INTERFACE)
+# TODO: remove after kineto is unvendored
+add_library(fmt INTERFACE)
+include_directories(${fmt_INCLUDE_DIRS})
 
 find_package(httplib REQUIRED CONFIG)
 link_libraries(httplib::httplib)
