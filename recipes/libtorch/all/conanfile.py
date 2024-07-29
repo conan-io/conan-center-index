@@ -554,6 +554,9 @@ class LibtorchConan(ConanFile):
         def _xnnpack():
             return ["xnnpack::xnnpack"] if self.options.with_xnnpack else []
 
+        def _qnnpack():
+            return ["pytorch_qnnpack"] if self.options.get_safe("with_qnnpack") else []
+
         def _libnuma():
             return ["libnuma::libnuma"] if self.options.get_safe("with_numa") else []
 
@@ -576,7 +579,7 @@ class LibtorchConan(ConanFile):
             return ["flatbuffers::flatbuffers"] if self._depends_on_flatbuffers else []
 
         def _kineto():
-            return []  # TODO
+            return ["kineto"] if self.options.with_kineto else []
 
         def _itt():
             return ["ittapi::ittapi"] if self.options.with_itt else []
@@ -597,6 +600,7 @@ class LibtorchConan(ConanFile):
         # TORCH_CXX_FLAGS    -- Additional (required) compiler flags
 
         self.cpp_info.components["_headers"].includedirs.append(os.path.join("include", "torch", "csrc", "api", "include"))
+        self.cpp_info.components["_headers"].resdirs = ["res"]
         self.cpp_info.components["_headers"].requires.extend(["onnx::onnx"] + _flatbuffers())
 
         self.cpp_info.components["c10"].set_property("cmake_target_name", "c10")
@@ -625,7 +629,7 @@ class LibtorchConan(ConanFile):
         self.cpp_info.components["torch_cpu_link_order_workaround"].requires.extend(
             ["_headers", "c10", "eigen::eigen", "fmt::fmt", "foxi::foxi", "cpp-httplib::cpp-httplib"] +
             _fbgemm() + _sleef() + _onednn() + _protobuf() + _fbgemm() + _kineto() + _openblas() + _lapack() +
-            _vulkan() + _opencl() + _openmp() + _nnpack() + _xnnpack() + _itt()
+            _vulkan() + _opencl() + _openmp() + _nnpack() + _xnnpack() + _qnnpack() + _itt()
         )
         if self.settings.os == "Linux":
             self.cpp_info.components["torch_cpu_link_order_workaround"].system_libs.extend(["dl", "m", "pthread", "rt"])
@@ -636,37 +640,33 @@ class LibtorchConan(ConanFile):
             ## TODO: Eventually remove this workaround in the future
             self.cpp_info.components["torch_cpu_link_order_workaround"].requires.extend(_protobuf())
         else:
-            # caffe2_protos
-            _add_whole_archive_lib("libtorch_caffe2_protos", "caffe2_protos")
-            self.cpp_info.components["torch_cpu"].requires.append("libtorch_caffe2_protos")
-            ## TODO: Eventually remove this workaround in the future
-            self.cpp_info.components["libtorch_caffe2_protos"].requires.append("libtorch_caffe2_protos_link_order_workaround")
-            self.cpp_info.components["libtorch_caffe2_protos_link_order_workaround"].requires.extend(_protobuf())
-
             if _lib_exists("Caffe2_perfkernels_avx"):
-                _add_whole_archive_lib("libtorch_caffe2_perfkernels_avx", "Caffe2_perfkernels_avx", shared=self.options.shared)
-                self.cpp_info.components["libtorch_caffe2_perfkernels_avx"].requires.append("c10")
-                self.cpp_info.components["torch_cpu"].requires.append("libtorch_caffe2_perfkernels_avx")
+                _add_whole_archive_lib("caffe2_perfkernels_avx", "Caffe2_perfkernels_avx", shared=self.options.shared)
+                self.cpp_info.components["caffe2_perfkernels_avx"].requires.append("c10")
+                self.cpp_info.components["torch_cpu"].requires.append("caffe2_perfkernels_avx")
 
             if _lib_exists("Caffe2_perfkernels_avx2"):
-                _add_whole_archive_lib("libtorch_caffe2_perfkernels_avx2", "Caffe2_perfkernels_avx2", shared=self.options.shared)
-                self.cpp_info.components["libtorch_caffe2_perfkernels_avx2"].requires.append("c10")
-                self.cpp_info.components["torch_cpu"].requires.append("libtorch_caffe2_perfkernels_avx2")
+                _add_whole_archive_lib("caffe2_perfkernels_avx2", "Caffe2_perfkernels_avx2", shared=self.options.shared)
+                self.cpp_info.components["caffe2_perfkernels_avx2"].requires.append("c10")
+                self.cpp_info.components["torch_cpu"].requires.append("caffe2_perfkernels_avx2")
 
             if _lib_exists("Caffe2_perfkernels_avx512"):
-                _add_whole_archive_lib("libtorch_caffe2_perfkernels_avx512", "Caffe2_perfkernels_avx512", shared=self.options.shared)
-                self.cpp_info.components["libtorch_caffe2_perfkernels_avx512"].requires.append("c10")
-                self.cpp_info.components["torch_cpu"].requires.append("libtorch_caffe2_perfkernels_avx512")
+                _add_whole_archive_lib("caffe2_perfkernels_avx512", "Caffe2_perfkernels_avx512", shared=self.options.shared)
+                self.cpp_info.components["caffe2_perfkernels_avx512"].requires.append("c10")
+                self.cpp_info.components["torch_cpu"].requires.append("caffe2_perfkernels_avx512")
 
         if self.options.observers:
-            _add_whole_archive_lib("libtorch_caffe2_observers", "caffe2_observers", shared=self.options.shared)
-            self.cpp_info.components["libtorch_caffe2_observers"].requires.append("torch")
+            _add_whole_archive_lib("caffe2_observers", "caffe2_observers", shared=self.options.shared)
+            self.cpp_info.components["caffe2_observers"].requires.append("torch")
 
         if self.options.get_safe("with_qnnpack"):
             self.cpp_info.components["clog"].libs = ["clog"]
-
-            self.cpp_info.components["libtorch_pytorch_qnnpack"].libs = ["pytorch_qnnpack"]
-            self.cpp_info.components["libtorch_pytorch_qnnpack"].requires.extend([
+            self.cpp_info.components["pytorch_qnnpack"].libs = ["pytorch_qnnpack"]
+            self.cpp_info.components["pytorch_qnnpack"].requires.extend([
                 "clog", "cpuinfo::cpuinfo", "fp16::fp16", "fxdiv::fxdiv", "psimd::psimd", "pthreadpool::pthreadpool"
             ])
-            self.cpp_info.components["torch_cpu"].requires.append("libtorch_pytorch_qnnpack")
+
+        if self.options.with_kineto:
+            self.cpp_info.components["kineto"].libs = ["kineto"]
+            self.cpp_info.components["kineto"].includedirs.append(os.path.join("include", "kineto"))
+            self.cpp_info.components["kineto"].requires.extend(["fmt::fmt"])
