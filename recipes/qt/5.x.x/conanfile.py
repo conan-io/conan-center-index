@@ -381,7 +381,7 @@ class QtConan(ConanFile):
             else:
                 self.requires("libjpeg/9e")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
-            self.requires("libpng/1.6.42")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
             self.requires("sqlite3/3.45.0")
         if self.options.get_safe("with_mysql", False):
@@ -404,7 +404,7 @@ class QtConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("expat/2.6.0")
+            self.requires("expat/[>=2.6.2 <3]")
             self.requires("opus/1.4")
             if not self.options.qtwayland:
                 self.requires("xorg-proto/2022.2")
@@ -445,9 +445,9 @@ class QtConan(ConanFile):
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and is_msvc(self):
-            self.tool_requires("jom/1.1.3")
+            self.tool_requires("jom/[>=1.1 <2]")
         if self.options.qtwebengine:
-            self.tool_requires("ninja/1.11.1")
+            self.tool_requires("ninja/[>=1.12 <2]")
             self.tool_requires("nodejs/18.15.0")
             self.tool_requires("gperf/3.1")
             # gperf, bison, flex, python >= 2.7.5 & < 3
