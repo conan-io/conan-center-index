@@ -1,13 +1,12 @@
 import os
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, can_run
+from conan.tools.build import check_min_cppstd, valid_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
@@ -54,6 +53,10 @@ class LibphonenumberConan(ConanFile):
        "use_std_mutex": "use C++ 2011 std::mutex for multi-threading",
     }
 
+    @property
+    def _min_cppstd(self):
+        return 11
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -86,7 +89,7 @@ class LibphonenumberConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} not supported in Windows yet, contributions welcome\n"
                                             "https://github.com/google/libphonenumber/blob/master/FAQ.md#what-about-windows")
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
 
         if not self.options.use_std_mutex and not self.options.use_boost and not self.options.get_safe("use_posix_thread"):
             raise ConanInvalidConfiguration("At least one of use_std_mutex, use_boost or use_posix_thread must be enabled")
@@ -122,6 +125,8 @@ class LibphonenumberConan(ConanFile):
         # Otherwise tries to use <tr1/unordered_map>, and requires the recipe to export a define accordingly.
         # The define can be set based only on a compilation test.
         tc.variables["USE_STD_MAP"] = True
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
