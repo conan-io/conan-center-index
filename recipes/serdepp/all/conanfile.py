@@ -59,15 +59,15 @@ class SerdeppConan(ConanFile):
         self.requires("nameof/0.10.3")
         self.requires("magic_enum/0.9.5")
         if self.options.with_toml11:
-            self.requires("toml11/3.7.1")
+            self.requires("toml11/3.8.1")
         if self.options.with_yamlcpp:
             self.requires("yaml-cpp/0.8.0")
         if self.options.with_rapidjson:
             self.requires("rapidjson/1.1.0")
         if self.options.with_fmt:
-            self.requires("fmt/10.1.0")
+            self.requires("fmt/10.2.1")
         if self.options.with_nlohmann_json:
-            self.requires("nlohmann_json/3.11.2")
+            self.requires("nlohmann_json/3.11.3")
 
     def package_id(self):
         self.info.clear()

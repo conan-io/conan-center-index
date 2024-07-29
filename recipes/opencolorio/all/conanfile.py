@@ -46,11 +46,11 @@ class OpenColorIOConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("expat/2.5.0")
+        self.requires("expat/[>=2.6.2 <3]")
         if Version(self.version) < "2.2.0":
             self.requires("openexr/2.5.7")
         else:
-            self.requires("openexr/3.2.1")
+            self.requires("openexr/3.2.3")
             self.requires("imath/3.1.9")
 
         if Version(self.version) < "2.0.0":
@@ -90,7 +90,7 @@ class OpenColorIOConan(ConanFile):
         # opencolorio>=2.2.0 requires minizip-ng with with_zlib
         if Version(self.version) >= "2.2.0" and \
             not self.dependencies["minizip-ng"].options.get_safe("with_zlib", False):
-            raise ConanInvalidConfiguration(f"{self.ref} requires minizip-ng with with_zlib = True.")
+            raise ConanInvalidConfiguration(f"{self.ref} requires minizip-ng with with_zlib = True. On Apple platforms with_libcomp = False is also needed to enable the with_zlib option.")
 
         if Version(self.version) == "1.1.1" and self.options.shared and self.dependencies["yaml-cpp"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires static build yaml-cpp")
