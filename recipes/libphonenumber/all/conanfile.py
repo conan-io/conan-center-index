@@ -7,6 +7,7 @@ from conan.tools.build import check_min_cppstd, valid_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
@@ -55,7 +56,7 @@ class LibphonenumberConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return 11 if Version(self.dependencies["abseil"].ref.version) < "20230125.0" else 14
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -100,7 +101,7 @@ class LibphonenumberConan(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/2.2.0")
         self.tool_requires("protobuf/<host_version>")
 
     def source(self):
