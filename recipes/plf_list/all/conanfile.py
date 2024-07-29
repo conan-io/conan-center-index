@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, replace_in_file
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.layout import basic_layout
 import os
 
@@ -33,11 +33,6 @@ class PlflistConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        # Do not set PLF_TYPE_TRAITS_SUPPORT fo GCC v5.
-        # Tries and fails to use std::allocator_traits<allocator_type>::is_always_equal otherwise.
-        replace_in_file(self, os.path.join(self.source_folder, "plf_list.h"),
-                        "#if __GNUC__ >= 5 // GCC v4.9 and below do not support std::is_trivially_copyable",
-                        "#if __GNUC__ >= 6 // GCC v4.9 and below do not support std::is_trivially_copyable")
 
     def package(self):
         copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
