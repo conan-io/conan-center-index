@@ -9,14 +9,13 @@ import os
 
 required_conan_version = ">=1.53.0"
 
-
 class MsdfgenConan(ConanFile):
     name = "msdfgen"
     description = "Multi-channel signed distance field generator"
     license = "MIT"
-    topics = ("msdf", "shape", "glyph", "font")
-    homepage = "https://github.com/Chlumsky/msdfgen"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/Chlumsky/msdfgen"
+    topics = ("msdf", "shape", "glyph", "font")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {

@@ -1,8 +1,8 @@
 diff --git a/tensorflow/lite/CMakeLists.txt b/tensorflow/lite/CMakeLists.txt
-index 24b8265..9e0d1e0 100644
+index 24b8265..d95c0ae 100644
 --- a/tensorflow/lite/CMakeLists.txt
 +++ b/tensorflow/lite/CMakeLists.txt
-@@ -142,31 +142,16 @@
+@@ -142,31 +142,17 @@ endmacro()
  find_package(absl REQUIRED)
  find_package(Eigen3 REQUIRED)
  find_package(farmhash REQUIRED)
@@ -32,6 +32,7 @@ index 24b8265..9e0d1e0 100644
 -  add_subdirectory(
 -    "${PTHREADPOOL_SOURCE_DIR}"
 -    "${CMAKE_BINARY_DIR}/pthreadpool")
++find_package(pthreadpool REQUIRED)
 +
 +if(TARGET flatbuffers::flatbuffers_shared)
 +  set(FLATBUFFERS_TARGET flatbuffers::flatbuffers_shared)
@@ -40,7 +41,7 @@ index 24b8265..9e0d1e0 100644
  endif()
  set(TF_TARGET_PRIVATE_OPTIONS "")
  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang$")
-@@ -180,6 +165,10 @@
+@@ -180,6 +166,10 @@ set(TFLITE_TARGET_PRIVATE_OPTIONS "")
  set(TFLITE_TARGET_PRIVATE_DEFINITIONS "")
  # Additional library dependencies based upon enabled features.
  set(TFLITE_TARGET_DEPENDENCIES "")
@@ -51,13 +52,12 @@ index 24b8265..9e0d1e0 100644
  if(CMAKE_CXX_COMPILER_ID MATCHES "Clang$")
    # TFLite uses deprecated methods in neon2sse which generates a huge number of
    # warnings so surpress these until they're fixed.
-@@ -429,13 +418,14 @@
+@@ -429,13 +419,13 @@ else()
  endif()
  if(TFLITE_ENABLE_XNNPACK)
    find_package(fp16_headers REQUIRED)
 -  find_package(XNNPACK REQUIRED)
 +  find_package(xnnpack REQUIRED)
-+  find_package(pthreadpool REQUIRED)
    populate_tflite_source_vars("delegates/xnnpack"
      TFLITE_DELEGATES_XNNPACK_SRCS
      FILTER ".*(_test|_tester)\\.(cc|h)"
@@ -68,7 +68,7 @@ index 24b8265..9e0d1e0 100644
    )
    list(APPEND TFLITE_TARGET_PUBLIC_OPTIONS "-DTFLITE_BUILD_WITH_XNNPACK_DELEGATE")
  endif()
-@@ -492,6 +482,7 @@
+@@ -492,6 +482,7 @@ populate_tflite_source_vars("kernels/internal/reference/sparse_ops"
    TFLITE_KERNEL_INTERNAL_REF_SPARSE_OPS_SRCS
  )
  set(TFLITE_PROFILER_SRCS
@@ -76,7 +76,7 @@ index 24b8265..9e0d1e0 100644
    ${TFLITE_SOURCE_DIR}/profiling/platform_profiler.cc
    ${TFLITE_SOURCE_DIR}/profiling/root_profiler.h
    ${TFLITE_SOURCE_DIR}/profiling/root_profiler.cc
-@@ -555,19 +546,18 @@
+@@ -555,19 +546,18 @@ target_include_directories(tensorflow-lite
  target_link_libraries(tensorflow-lite
    PUBLIC
      Eigen3::Eigen
