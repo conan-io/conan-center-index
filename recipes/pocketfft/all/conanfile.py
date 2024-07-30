@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.52.0"
@@ -33,6 +33,9 @@ class PocketfftConan(ConanFile):
         "vectorization": True,
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def configure(self):
         if not self.options.multithreading:
             del self.options.pthread
@@ -58,6 +61,7 @@ class PocketfftConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
+        apply_conandata_patches(self)
         copy(self, "LICENSE.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(self, "*.h", self.source_folder, os.path.join(self.package_folder, "include"))
 
