@@ -171,6 +171,7 @@ class LibtorchConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
+        copy(self, "conan-official-libtorch-vars.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -501,6 +502,11 @@ class LibtorchConan(ConanFile):
         cmake.install()
         os.rename(os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
         rmdir(self, os.path.join(self.package_folder, "res", "cmake"))
+        copy(self, "conan-official-libtorch-vars.cmake", self.source_folder, os.path.join(self.package_folder, self._modules_dir))
+
+    @property
+    def _modules_dir(self):
+        return os.path.join("lib", "cmake", "Torch")
 
     def package_info(self):
         def _lib_exists(name):
@@ -583,18 +589,10 @@ class LibtorchConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "Torch")
 
-        # TODO: export ATenConfig.cmake variables
-        # set(ATEN_FOUND 1)
-        # set(ATEN_INCLUDE_DIR "/usr/local/include")
-        # set(ATEN_LIBRARIES "")
-        # TODO: export Caffe2Config.cmake variables
-        # set(Caffe2_MAIN_LIBS torch_library)
-        # set(CAFFE2_INCLUDE_DIRS "${_INSTALL_PREFIX}/include")
-        # TODO: export TorchConfig.cmake variables
-        # TORCH_FOUND        -- True if the system has the Torch library
-        # TORCH_INCLUDE_DIRS -- The include directories for torch
-        # TORCH_LIBRARIES    -- Libraries to link against
-        # TORCH_CXX_FLAGS    -- Additional (required) compiler flags
+        # Export official CMake variables
+        self.cpp_info.builddirs.append(self._modules_dir)
+        cmake_vars_module = os.path.join(self._modules_dir, "conan-official-libtorch-vars.cmake")
+        self.cpp_info.set_property("cmake_build_modules", [cmake_vars_module])
 
         self.cpp_info.components["_headers"].includedirs.append(os.path.join("include", "torch", "csrc", "api", "include"))
         self.cpp_info.components["_headers"].resdirs = ["res"]

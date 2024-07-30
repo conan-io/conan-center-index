@@ -1,0 +1,12 @@
+# ATenConfig.cmake variables
+set(ATEN_FOUND 1)
+
+# Caffe2Config.cmake variables
+set(Caffe2_MAIN_LIBS torch)
+set(CAFFE2_INCLUDE_DIRS ${${CMAKE_FIND_PACKAGE_NAME}_INCLUDE_DIRS})
+
+# TorchConfig.cmake variables
+set(TORCH_FOUND TRUE)
+set(TORCH_INCLUDE_DIRS ${${CMAKE_FIND_PACKAGE_NAME}_INCLUDE_DIRS})
+set(TORCH_LIBRARIES ${${CMAKE_FIND_PACKAGE_NAME}_LIBRARIES})
+set(TORCH_CXX_FLAGS)
