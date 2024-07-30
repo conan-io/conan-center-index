@@ -87,7 +87,7 @@ class LibtorchConan(ConanFile):
         "with_nnpack": True,
         "with_numa": True,
         "with_opencl": False,
-        "with_openmp": True,
+        "with_openmp": False,  # TODO: enable after #22360
         "with_qnnpack": True,
         "with_vulkan": True,
         "with_xnnpack": True,
