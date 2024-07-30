@@ -1,5 +1,6 @@
 import os
 import yaml
+import re
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -7,7 +8,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, valid_min_cppstd, check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rmdir
+from conan.tools.files import apply_conandata_patches, copy, load, save, export_conandata_patches, get, rename, replace_in_file, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 
@@ -77,7 +78,7 @@ class GrpcConan(ConanFile):
 
     def export(self):
         copy(self, f"target_info/grpc_{self.version}.yml", src=self.recipe_folder, dst=self.export_folder)
-    
+
     def export_sources(self):
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
         copy(self, f"cmake/{self._grpc_plugin_template}", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
@@ -225,11 +226,20 @@ class GrpcConan(ConanFile):
                             'COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=$<JOIN:${CMAKE_LIBRARY_PATH},:>:$ENV{LD_LIBRARY_PATH}" ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}')
         if self.settings.os == "Macos" and Version(self.version) >= "1.64":
             # See https://github.com/grpc/grpc/issues/36654#issuecomment-2228569158
-            replace_in_file(self, cmakelists, "target_compile_features(upb_textformat_lib PUBLIC cxx_std_14)", 
+            replace_in_file(self, cmakelists, "target_compile_features(upb_textformat_lib PUBLIC cxx_std_14)",
             """target_compile_features(upb_textformat_lib PUBLIC cxx_std_14)
             target_link_options(upb_textformat_lib PRIVATE -Wl,-undefined,dynamic_lookup)
             target_link_options(upb_json_lib PRIVATE -Wl,-undefined,dynamic_lookup)
             """)
+
+        # Remove download_archive in CMakeLists.txt
+        pattern = r"if \(NOT EXISTS \$\{CMAKE_CURRENT_SOURCE_DIR\}/third_party(.|\n)*?endif\(\)"
+        cmakelist_file = os.path.join(self.source_folder, "CMakeLists.txt")
+        content = load(self, cmakelist_file)
+        updated_content = re.sub(pattern, "", content)
+        if content == updated_content:
+            raise ConanInvalidConfiguration(f"remove_in_file didn't find pattern: {pattern} in {cmakelist_file}")
+        save(self, cmakelist_file, updated_content)
 
     def build(self):
         self._patch_sources()
