@@ -20,3 +20,35 @@ sources:
   "0.10.13":
     url: "https://github.com/awslabs/aws-c-io/archive/v0.10.13.tar.gz"
     sha256: "ee34a93190e35a5c372ba73661dd69c48986e051a4b26dedb62bc5aa78f1660f"
+
+version_mappings:
+  # the versions of aws-c-common and aws-c-io are tied since aws-c-common/0.6.12 and aws-c-io/0.10.10
+  # Please refer https://github.com/conan-io/conan-center-index/issues/7763
+  "0.14.1":
+    aws-c-common: "0.9.12"
+    aws-c-cal: "0.6.9"
+    s2n: "1.4.1"
+  "0.13.35":
+    aws-c-common: "0.9.6"
+    aws-c-cal: "0.6.1"
+    s2n: "1.3.55"
+  "0.13.32":
+    aws-c-common: "0.9.6"
+    aws-c-cal: "0.6.1"
+    s2n: "1.3.55"
+  "0.13.4":
+    aws-c-common: "0.8.2"
+    aws-c-cal: "0.5.13"
+    s2n: "1.3.55"
+  "0.11.2":
+    aws-c-common: "0.8.2"
+    aws-c-cal: "0.5.13"
+    s2n: "1.3.55"
+  "0.10.20":
+    aws-c-common: "0.8.2"
+    aws-c-cal: "0.5.13"
+    s2n: "1.3.55"
+  "0.10.13":
+    aws-c-common: "0.8.2"
+    aws-c-cal: "0.5.13"
+    s2n: "1.3.55"

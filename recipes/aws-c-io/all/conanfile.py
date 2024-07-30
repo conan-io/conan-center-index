@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir, save
-from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -26,6 +25,10 @@ class AwsCIO(ConanFile):
         "fPIC": True,
     }
 
+    def _mapping_requires(self, dep, **kwargs):
+        required_version = self.conan_data["version_mappings"][self.version][dep]
+        self.requires(f"{dep}/{required_version}", **kwargs)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -40,23 +43,10 @@ class AwsCIO(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # the versions of aws-c-common and aws-c-io are tied since aws-c-common/0.6.12 and aws-c-io/0.10.10
-        # Please refer https://github.com/conan-io/conan-center-index/issues/7763
-        if Version(self.version) <= "0.13.4":
-            self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-cal/0.5.13")
-        elif Version(self.version) <= "0.13.35":
-            self.requires("aws-c-common/0.9.6", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-cal/0.6.1", transitive_headers=True, transitive_libs=True)
-        else:
-            self.requires("aws-c-common/0.9.12", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-cal/0.6.9", transitive_headers=True, transitive_libs=True)
-
+        self._mapping_requires("aws-c-common", transitive_headers=True, transitive_libs=True)
+        self._mapping_requires("aws-c-cal", transitive_headers=True, transitive_libs=True)
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-            if Version(self.version) <= "0.13.35":
-                self.requires("s2n/1.3.55")
-            else:
-                self.requires("s2n/1.4.1")
+            self._mapping_requires("s2n")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
