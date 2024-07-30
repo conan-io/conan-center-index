@@ -347,13 +347,13 @@ class QtConan(ConanFile):
             self.requires("harfbuzz/8.3.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/3.0.1")
+                self.requires("libjpeg-turbo/[>=3.0 <3.1]")
             else:
                 self.requires("libjpeg/9e")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
-            self.requires("libpng/1.6.42")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.45.0")
+            self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.1.0")
         if self.options.with_pq:
@@ -380,7 +380,7 @@ class QtConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.1.0")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
-            self.requires("expat/2.6.0")
+            self.requires("expat/[>=2.6.2 <3]")
             self.requires("opus/1.4")
             self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
@@ -400,9 +400,9 @@ class QtConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21.1 <4]")
-        self.tool_requires("ninja/1.11.1")
+        self.tool_requires("ninja/[>=1.12 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         if self.settings.os == "Windows":
             self.tool_requires('strawberryperl/5.32.1.1')
 
@@ -523,6 +523,11 @@ class QtConan(ConanFile):
 
         if not self.options.with_zstd:
             tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapZSTD"] = "ON"
+
+        # Prevent finding LibClang from the system
+        # this is needed by the QDoc tool inside Qt Tools
+        # See: https://github.com/conan-io/conan-center-index/issues/24729#issuecomment-2255291495
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapLibClang"] = "ON"
 
         for opt, conf_arg in [("with_glib", "glib"),
                               ("with_icu", "icu"),
@@ -803,6 +808,8 @@ class QtConan(ConanFile):
         if self.settings.os == "Macos":
             save(self, ".qmake.stash", "")
             save(self, ".qmake.super", "")
+            copy(self, "Info.plist.app.in", src=os.path.join(self.package_folder, "lib", "cmake", "Qt6", "macos"),
+                                            dst=os.path.join(self.package_folder, "res", "macos"))
         cmake = CMake(self)
         cmake.install()
         copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"),
@@ -837,6 +844,8 @@ class QtConan(ConanFile):
         filecontents += f"set(QT_VERSION_MAJOR {ver.major})\n"
         filecontents += f"set(QT_VERSION_MINOR {ver.minor})\n"
         filecontents += f"set(QT_VERSION_PATCH {ver.patch})\n"
+        if self.settings.os == "Macos":
+            filecontents += f'set(__qt_internal_cmake_apple_support_files_path "${{CMAKE_CURRENT_LIST_DIR}}/../../../res/macos")\n'
         targets = ["moc", "rcc", "tracegen", "cmake_automoc_parser", "qlalr", "qmake"]
         if self.options.with_dbus:
             targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
