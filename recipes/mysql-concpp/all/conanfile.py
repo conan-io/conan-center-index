@@ -6,6 +6,7 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.files import get, replace_in_file
+from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 
 required_conan_version = ">=1.64.1"
@@ -32,12 +33,24 @@ class MysqlCppConnRecipe(ConanFile):
 
     default_options = { "shared": False, "fPIC": True }
     
+    @property
+    def _compilers_minimum_version(self):
+        return {
+           "apple-clang": "15",
+        }
+    
     def validate(self):
         check_min_cppstd(self, "17")
         
         # Apple patches
         if is_apple_os(self) and cross_building(self):
-            raise ConanInvalidConfiguration("Cross building is not supported. PRs are welcome.") 
+            raise ConanInvalidConfiguration("Cross building is not supported. PRs are welcome.")
+        
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires apple-clang 15."
+            )
 
     def requirements(self):
         self.requires("lz4/1.9.4")
