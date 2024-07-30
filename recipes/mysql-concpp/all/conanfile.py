@@ -94,40 +94,19 @@ class MysqlCppConnRecipe(ConanFile):
                                 "set(LIB_NAME_STATIC \"${LIB_NAME}-mt\")",
                                 "set(LIB_NAME_STATIC \"${LIB_NAME_STATIC}-mt\")",
                                 strict=False)
-
-        # Apple patches
-        if is_apple_os(self) and cross_building(self):
-            # target_arch = str(self.settings_build.arch) if hasattr(self, 'settings_build') else str(self.settings.arch)
-            # if target_arch in ["armv8", "armv8.3"]:
-                # target_arch = "arm64"
-            target_arch = "arm64;x86_64"
-            print(f"Building for {target_arch}")
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                "PROJECT(MySQL_CONCPP)",
-                                "PROJECT(MySQL_CONCPP)\n"\
-                                f"set(CMAKE_OSX_ARCHITECTURES \"{target_arch}\" CACHE INTERNAL \"\" FORCE)\n",
-                                strict=False)
-            
-            # PROTOBUF patch
-            replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "protobuf", "CMakeLists.txt"),
-                                "enable_pic()",
-                                "enable_pic()\n"\
-                                f"set(CMAKE_OSX_ARCHITECTURES \"{target_arch}\" CACHE INTERNAL \"\" FORCE)\n",
-                                strict=False)
-
-            # ZSTD patch
-            replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "zstd", "CMakeLists.txt"),
-                                "enable_pic()",
-                                "enable_pic()\n"\
-                                f"set(CMAKE_OSX_ARCHITECTURES \"{target_arch}\" CACHE INTERNAL \"\" FORCE)\n"\
-                                "add_compile_definitions(-DZSTD_DISABLE_ASM=1)",
-                                strict=False)
-
-
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure()
+        options = {}
+
+        # Apple patches
+        if is_apple_os(self) and cross_building(self):
+            target_arch = str(self.settings_build.arch) if hasattr(self, 'settings_build') else str(self.settings.arch)
+            if target_arch in ["armv8", "armv8.3"]:
+                target_arch = "arm64"
+            options = {"CMAKE_OSX_ARCHITECTURES": target_arch, "ZSTD_DISABLE_ASM": 1}
+
+        cmake.configure(options)
         cmake.build()
 
     def package(self):
