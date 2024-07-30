@@ -445,14 +445,11 @@ class LibtorchConan(ConanFile):
         deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
         deps.set_property("fmt", "cmake_target_name", "fmt::fmt-header-only")
         deps.set_property("foxi", "cmake_target_name", "foxi_loader")
-        deps.set_property("fp16", "cmake_target_name", "fp16")
         deps.set_property("gflags", "cmake_target_name", "gflags")
         deps.set_property("ittapi", "cmake_file_name", "ITT")
         deps.set_property("libbacktrace", "cmake_file_name", "Backtrace")
         deps.set_property("mimalloc", "cmake_target_name", "mimalloc-static")
         deps.set_property("psimd", "cmake_target_name", "psimd")
-        deps.set_property("pthreadpool", "cmake_target_name", "pthreadpool")
-        deps.set_property("xnnpack", "cmake_target_name", "XNNPACK")
         deps.generate()
 
         VirtualBuildEnv(self).generate()
@@ -627,7 +624,7 @@ class LibtorchConan(ConanFile):
         ## (conan generators put exelinkflags/sharedlinkflags after system/external libs)
         self.cpp_info.components["torch_cpu"].requires.append("torch_cpu_link_order_workaround")
         self.cpp_info.components["torch_cpu_link_order_workaround"].requires.extend(
-            ["_headers", "c10", "eigen::eigen", "fmt::fmt", "foxi::foxi", "cpp-httplib::cpp-httplib"] +
+            ["_headers", "c10", "eigen::eigen", "fmt::fmt", "foxi::foxi"] +
             _fbgemm() + _sleef() + _onednn() + _protobuf() + _fbgemm() + _kineto() + _openblas() + _lapack() +
             _vulkan() + _opencl() + _openmp() + _nnpack() + _xnnpack() + _qnnpack() + _itt()
         )

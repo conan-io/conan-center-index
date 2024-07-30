@@ -16,3 +16,7 @@ patches:
     - patch_file: "patches/2.4.0/0004-add-a-missing-include.patch"
       patch_description: "Add a missing <iostream> include"
       patch_type: "bugfix"
+    - patch_file: "patches/2.4.0/0005-kineto-unvendor-fmt.patch"
+      patch_description: "Unvendor fmt in vendored kineto"
+      base_path: "third_party/kineto"
+      patch_type: "conan"
