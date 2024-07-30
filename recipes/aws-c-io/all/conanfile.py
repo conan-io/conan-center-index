@@ -40,7 +40,8 @@ class AwsCIO(ConanFile):
 
     def requirements(self):
         def _mapping_requires(dep, **kwargs):
-            self.requires(f"{dep}/{self.conan_data["version_mappings"][self.version][dep]}", **kwargs)
+            required_version = self.conan_data["version_mappings"][self.version][dep]
+            self.requires(f"{dep}/{required_version}", **kwargs)
 
         _mapping_requires("aws-c-common", transitive_headers=True, transitive_libs=True)
         _mapping_requires("aws-c-cal", transitive_headers=True, transitive_libs=True)
