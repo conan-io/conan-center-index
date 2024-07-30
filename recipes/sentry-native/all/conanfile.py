@@ -1,3 +1,5 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
@@ -7,7 +9,6 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-import os
 
 required_conan_version = ">=1.55.0"
 
@@ -51,7 +52,7 @@ class SentryNativeConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17"
+        return "17" if Version(self.version) < "0.7.7" else "20"
 
     @property
     def _minimum_compilers_version(self):
