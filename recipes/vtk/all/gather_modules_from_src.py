@@ -53,7 +53,7 @@ def parse_vtk_module(path):
     key = None
     values = []
     for line in lines:
-        if line.startswith("#") or line == "\n":
+        if line.lstrip().startswith("#") or line == "\n":
             continue
         if line.startswith("  "):
             values.append(line.strip())
