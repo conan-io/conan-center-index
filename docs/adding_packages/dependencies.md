@@ -178,7 +178,11 @@ for consumer, we do impose some limits on Conan features to provide a smoother f
 
 Version ranges are a useful Conan feature, [documentation here](https://docs.conan.io/2/tutorial/versioning/version_ranges.html).
 With the introduction of Conan 2.0, we are currently working to allow the use of version ranges and are allowing this for a handful of dependencies.
-Currently, these are (except if the recipe needs a newer lower/upper version bound for specific reasons):
+
+Version ranges are being progressively introduced by Conan team maintainers and are being rolled out in phases, and we do not intend
+to do it all at once.
+
+Version ranges for the following dependencies will be accepted in pull requests: 
 
 * OpenSSL: `[>=1.1 <4]` for libraries known to be compatible with OpenSSL 1.x and 3.x
 * CMake: `[>3.XX <4]`, where `3.XX` is the minimum version of CMake required by the relevant build scripts. Note that CCI recipes assume 3.15 is installed in the system, so add this
@@ -206,11 +210,14 @@ Conan maintainers may introduce this for other dependencies over time. Outside o
 
 #### Adding Version Ranges
 
-You might also see version ranges in some PR by CCI maintainers.
+You might also see version ranges being added in pull requests by Conan maintainers, that
+are not in the list above. These are being introduced on a case-by-case basis, and are being rolled out 
+in phases to ensure that they do not cause problems to users. Note that version ranges can
+only be used for libraries and tools that have strong compatibility guarantees - and may not
+be suitable in all cases.
 
-These are being done on a case-by-case basis, and are being rolled out in phases to ensure
-that they do not cause problems to users. Please do not open PRs that exclusively add version ranges to dependencies,
-unless they are solving current conflicts, in which case we welcome them and they will be prioritized.
+Please do not open PRs that exclusively add version ranges to dependencies, unless they are solving 
+current conflicts, in which case we welcome them and they will be prioritized.
 
 ## Handling "internal" dependencies
 
