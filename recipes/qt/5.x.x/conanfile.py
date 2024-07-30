@@ -157,7 +157,6 @@ class QtConan(ConanFile):
             # In any case, check its actual version for compatibility
             command_output = StringIO()
             cmd_v = f"\"{python_exe}\" -c \"import platform;print(platform.python_version())\""
-            
             self.run(cmd_v, command_output)
             verstr = command_output.getvalue().strip()
             version = Version(verstr)
