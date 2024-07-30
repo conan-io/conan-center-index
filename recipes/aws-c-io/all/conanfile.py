@@ -25,10 +25,6 @@ class AwsCIO(ConanFile):
         "fPIC": True,
     }
 
-    def _mapping_requires(self, dep, **kwargs):
-        required_version = self.conan_data["version_mappings"][self.version][dep]
-        self.requires(f"{dep}/{required_version}", **kwargs)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -43,10 +39,13 @@ class AwsCIO(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self._mapping_requires("aws-c-common", transitive_headers=True, transitive_libs=True)
-        self._mapping_requires("aws-c-cal", transitive_headers=True, transitive_libs=True)
+        def _mapping_requires(dep, **kwargs):
+            self.requires(f"{dep}/{self.conan_data["version_mappings"][self.version][dep]}", **kwargs)
+
+        _mapping_requires("aws-c-common", transitive_headers=True, transitive_libs=True)
+        _mapping_requires("aws-c-cal", transitive_headers=True, transitive_libs=True)
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-            self._mapping_requires("s2n")
+            _mapping_requires("s2n")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
