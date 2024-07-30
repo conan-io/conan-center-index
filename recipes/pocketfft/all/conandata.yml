@@ -1,0 +1,4 @@
+sources:
+  "cci.20240710":
+    url: "https://github.com/mreineck/pocketfft/archive/61f446c4fbcde161cedb6bad5832949f15177f18.tar.gz"
+    sha256: "aeda2a66b5619659084db75ef228b54de4756cbf4c5a32efe05efa8a4e2416f3"
