@@ -75,9 +75,8 @@ class PocketfftConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-
-        if self.options.get_safe("pthread"):
-            if self.settings.os in ["Linux", "FreeBSD"]:
+            if self.options.multithreading:
                 self.cpp_info.system_libs.append("pthread")
-            elif self.settings.os == "Windows":
-                self.cpp_info.system_libs.append("pthreads4w::pthreads4w")
+
+        if self.options.get_safe("pthread") and self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("pthreads4w::pthreads4w")
