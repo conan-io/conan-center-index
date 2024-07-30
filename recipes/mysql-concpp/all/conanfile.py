@@ -40,9 +40,10 @@ class MysqlCppConnRecipe(ConanFile):
     def requirements(self):
         self.requires("lz4/1.9.4")
         self.requires("openssl/3.2.2")
-        self.requires("boost/1.85.0")
-        self.requires("rapidjson/cci.20230929")
-        # self.requires("libmysqlclient/8.1.0")
+        # Apple patches
+        if not is_apple_os(self):
+            self.requires("boost/1.85.0")
+            self.requires("rapidjson/cci.20230929")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -79,8 +80,10 @@ class MysqlCppConnRecipe(ConanFile):
         # LZ4 patches
         tc.cache_variables["WITH_LZ4"] = self._package_folder_dep("lz4")
         tc.cache_variables["LZ4_DIR"] = self._package_folder_dep("lz4")
-        # Boost patches
-        tc.cache_variables["BOOST_DIR"] = self._package_folder_dep("boost")
+        # Apple patches
+        if not is_apple_os(self):
+            # Boost patches
+            tc.cache_variables["BOOST_DIR"] = self._package_folder_dep("boost")
         # OpenSSL patches
         tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
         tc.generate()
@@ -94,19 +97,11 @@ class MysqlCppConnRecipe(ConanFile):
                                 "set(LIB_NAME_STATIC \"${LIB_NAME}-mt\")",
                                 "set(LIB_NAME_STATIC \"${LIB_NAME_STATIC}-mt\")",
                                 strict=False)
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        options = {}
-
-        # Apple patches
-        if is_apple_os(self) and cross_building(self):
-            target_arch = str(self.settings_build.arch) if hasattr(self, 'settings_build') else str(self.settings.arch)
-            if target_arch in ["armv8", "armv8.3"]:
-                target_arch = "arm64"
-            options = {"CMAKE_OSX_ARCHITECTURES": target_arch, "ZSTD_DISABLE_ASM": 1}
-
-        cmake.configure(options)
+        cmake.configure()
         cmake.build()
 
     def package(self):
