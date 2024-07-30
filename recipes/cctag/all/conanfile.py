@@ -126,6 +126,7 @@ class CCTagConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
                               "${OpenCV_LIBS}",
                               "opencv_core opencv_videoio opencv_imgproc opencv_imgcodecs")
+        # From https://github.com/alicevision/CCTag/pull/210/files CCTAG_CUDA_CC_LIST_INIT0 variable doesn't exists anymore in favor of a chooseCudaCC() cmake function
         if Version(self.version) < "1.0.4":
             # Remove very old CUDA compute capabilities
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
