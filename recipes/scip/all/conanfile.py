@@ -76,11 +76,15 @@ class SCIPConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
+        def _mapping_requires(dep, **kwargs):
+            required_version = self.conan_data["version_mappings"][self.version][dep]
+            self.requires(f"{dep}/{required_version}", **kwargs)
+
         if self.options.with_gmp:
             self.requires("gmp/6.3.0")
         if Version(self.version) <= "9.0.1":
             self.requires("bliss/0.77")
-        self.requires(f"soplex/{self.conan_data['soplex_mapping'][self.version]}")
+        _mapping_requires("soplex")
         self.requires("zlib/[>=1.2.11 <2]")
 
     def configure(self):
