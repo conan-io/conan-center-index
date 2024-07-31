@@ -49,12 +49,12 @@ class MysqlCppConnRecipe(ConanFile):
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires apple-clang 15."
+                f"{self.ref} requires at least {self.settings.compiler} {minimum_version}"
             )
 
     def requirements(self):
         self.requires("lz4/1.9.4")
-        self.requires("openssl/3.2.2")
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("boost/1.85.0")
 
     def build_requirements(self):
@@ -86,9 +86,6 @@ class MysqlCppConnRecipe(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
-        # Random
-        tc.cache_variables["BUILD_STATIC"] = not self.options.shared
-        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         # LZ4 patches
         tc.cache_variables["WITH_LZ4"] = self._package_folder_dep("lz4")
         tc.cache_variables["LZ4_DIR"] = self._package_folder_dep("lz4")
