@@ -59,7 +59,8 @@ class CCTagConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.85.0", transitive_headers=True, transitive_libs=True)
+        # boost/1.85.0 not compatible because of "error: 'numeric' is not a namespace-name" error
+        self.requires("boost/1.84.0", transitive_headers=True, transitive_libs=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if Version(self.version) >= "1.0.3":
             self.requires("onetbb/2021.10.0")
@@ -130,8 +131,8 @@ class CCTagConan(ConanFile):
         if Version(self.version) < "1.0.4":
             # Remove very old CUDA compute capabilities
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                "set(CCTAG_CUDA_CC_LIST_INIT0 3.5 3.7 5.0 5.2)",
-                                "set(CCTAG_CUDA_CC_LIST_INIT0 5.0 5.2)")
+                              "set(CCTAG_CUDA_CC_LIST_INIT0 3.5 3.7 5.0 5.2)",
+                              "set(CCTAG_CUDA_CC_LIST_INIT0 5.0 5.2)")
 
     def build(self):
         self._patch_sources()
