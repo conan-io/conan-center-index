@@ -22,17 +22,26 @@ class GlazeConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 20
+        return "20" if Version(self.version) < "3.0.0" else "23"
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "17",
-            "msvc": "193",
-            "gcc": "11" if Version(self.version) < "2.6.3" else "12",
-            "clang": "14",
-            "apple-clang": "13.1",
-        }
+            "20": {
+                "Visual Studio": "17",
+                "msvc": "193",
+                "gcc": "11" if Version(self.version) < "2.6.3" else "12",
+                "clang": "14",
+                "apple-clang": "13.1",
+            },
+            "23": {
+                "Visual Studio": "17",
+                "msvc": "193",
+                "gcc": "12",
+                "clang": "15",
+                "apple-clang": "14",
+            },
+        }.get(self._min_cppstd, {})
 
     def layout(self):
         basic_layout(self, src_folder="src")

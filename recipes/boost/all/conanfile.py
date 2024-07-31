@@ -778,14 +778,14 @@ class BoostConan(ConanFile):
         if self._with_bzip2:
             self.requires("bzip2/1.0.8")
         if self._with_lzma:
-            self.requires("xz_utils/5.4.4")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self._with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5 <1.6]")
         if self._with_stacktrace_backtrace:
             self.requires("libbacktrace/cci.20210118", transitive_headers=True, transitive_libs=True)
 
         if self._with_icu:
-            self.requires("icu/73.2")
+            self.requires("icu/74.2")
         if self._with_iconv:
             self.requires("libiconv/1.17")
 
@@ -1878,6 +1878,8 @@ class BoostConan(ConanFile):
                 """ On MSVC, static libraries are built with a 'lib' prefix. Some libraries do not support shared, so are always built as a static library. """
                 libprefix = ""
                 if is_msvc(self) and (not self._shared or n in self._dependencies["static_only"]):
+                    libprefix = "lib"
+                elif self._toolset == "clang-win":
                     libprefix = "lib"
                 return libprefix + n
 
