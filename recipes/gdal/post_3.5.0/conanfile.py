@@ -189,7 +189,7 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
-            self.requires("arrow/16.0.0")
+            self.requires("arrow/17.0.0")
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
@@ -233,13 +233,13 @@ class GdalConan(ConanFile):
             # 0.9+ is not compatible as of v3.8.4
             self.requires("libjxl/0.8.2")
         if self.options.with_kea:
-            self.requires("kealib/1.4.14")
+            self.requires("kealib/1.5.2")
         if self.options.with_lerc:
             self.requires("lerc/4.0.1")
         if self.options.get_safe("with_libaec"):
             self.requires("libaec/1.0.6")
         if self.options.with_libarchive:
-            self.requires("libarchive/3.7.2")
+            self.requires("libarchive/3.7.4")
         if self.options.with_libdeflate:
             self.requires("libdeflate/1.19")
         if self.options.with_libiconv:
@@ -247,7 +247,7 @@ class GdalConan(ConanFile):
         if self.options.with_libkml:
             self.requires("libkml/1.3.0")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_mongocxx:
@@ -298,7 +298,7 @@ class GdalConan(ConanFile):
         if self.options.with_xml2:
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[^1.5]")
         # Use of external shapelib is not recommended and is currently broken.
         # https://github.com/OSGeo/gdal/issues/5711
         # if self.options.with_shapelib:
