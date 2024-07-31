@@ -11,11 +11,11 @@ required_conan_version = ">=1.53.0"
 
 class LibxlsxwriterConan(ConanFile):
     name = "libxlsxwriter"
+    description = "A C library for creating Excel XLSX files"
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jmcnamara/libxlsxwriter"
     topics = ("excel", "xlsx")
-    description = "A C library for creating Excel XLSX files"
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
