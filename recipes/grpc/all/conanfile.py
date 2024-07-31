@@ -196,6 +196,9 @@ class GrpcConan(ConanFile):
 
         if self._supports_libsystemd:
             tc.cache_variables["gRPC_USE_SYSTEMD"] = self.options.with_libsystemd
+        
+        if Version(self.version) >= "1.62.0":
+            tc.cache_variables["gRPC_DOWNLOAD_ARCHIVES"] = False
 
         tc.generate()
 
@@ -231,15 +234,6 @@ class GrpcConan(ConanFile):
             target_link_options(upb_textformat_lib PRIVATE -Wl,-undefined,dynamic_lookup)
             target_link_options(upb_json_lib PRIVATE -Wl,-undefined,dynamic_lookup)
             """)
-
-        # Remove download_archive in CMakeLists.txt
-        pattern = r"if \(NOT EXISTS \$\{CMAKE_CURRENT_SOURCE_DIR\}/third_party(.|\n)*?endif\(\)"
-        cmakelist_file = os.path.join(self.source_folder, "CMakeLists.txt")
-        content = load(self, cmakelist_file)
-        updated_content = re.sub(pattern, "", content)
-        if content == updated_content:
-            raise ConanInvalidConfiguration(f"remove_in_file didn't find pattern: {pattern} in {cmakelist_file}")
-        save(self, cmakelist_file, updated_content)
 
     def build(self):
         self._patch_sources()
