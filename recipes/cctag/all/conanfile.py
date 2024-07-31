@@ -59,7 +59,7 @@ class CCTagConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.84.0", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/1.85.0", transitive_headers=True, transitive_libs=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if Version(self.version) >= "1.0.3":
             self.requires("onetbb/2021.10.0")
