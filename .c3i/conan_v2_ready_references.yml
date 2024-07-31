@@ -58,6 +58,7 @@ required_for_references:
 - asyncly
 - asyncplusplus
 - asyncpp
+- atomic_queue
 - audiofile
 - autoconf
 - autoconf-archive
@@ -879,6 +880,7 @@ required_for_references:
 - lksctp-tools
 - llama-cpp
 - llhttp
+- llnl-units
 - llvm-openmp
 - lmdb
 - lodepng
