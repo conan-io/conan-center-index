@@ -5,7 +5,7 @@ from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import (
     apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename,
-    replace_in_file, rm, rmdir
+    replace_in_file, rm, rmdir, save, load
 )
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -192,7 +192,6 @@ class FFMpegConan(ConanFile):
     }
     # Fix for mslink: Argument list too long
     short_paths = True
-    _openssl_libs = None
 
     @property
     def _settings_build(self):
@@ -392,9 +391,10 @@ class FFMpegConan(ConanFile):
                                   "#define X264_API_IMPORTS 1", "")
         if self.options.with_ssl == "openssl":
             # https://trac.ffmpeg.org/ticket/5675
+            openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
             replace_in_file(self, os.path.join(self.source_folder, "configure"),
                                   "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
-                                  f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {self._openssl_libs} || ")
+                                  f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libs} || ")
 
         replace_in_file(self, os.path.join(self.source_folder, "configure"), "echo libx264.lib", "echo x264.lib")
 
@@ -669,7 +669,8 @@ class FFMpegConan(ConanFile):
         deps.generate()
 
         if self.options.with_ssl == "openssl":
-            self._openssl_libs = " ".join([f"-l{lib}" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs])
+            openssl_libs = " ".join([f"-l{lib}" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs])
+            save(self, os.path.join(self.build_folder, "openssl_libs.list"), openssl_libs)
 
     def _split_and_format_options_string(self, flag_name, options_list):
         if not options_list:
