@@ -51,6 +51,6 @@ patches:
     - "base_path": "qt5/qtlocation"
       "patch_description": "qtlocation missing utility header"
       "patch_file": "patches/5.15.14-macos-qtlocation-utility-header.patch"
-    - "base_path": "qt5/qtwebengine/qt5/qtwebengine/src/3rdparty"
+    - "base_path": "qt5/qtwebengine/src/3rdparty"
       "patch_description": "qtwebengine fix missing headers"
       "patch_file": "patches/5.15.14-qtwebengine-missing-deps.patch"
