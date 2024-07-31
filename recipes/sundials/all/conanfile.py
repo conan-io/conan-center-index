@@ -72,6 +72,8 @@ class SundialsConan(ConanFile):
         tc.variables["BUILD_KINSOL"] = self.options.build_kinsol
         tc.variables["EXAMPLES_ENABLE_C"] = False
         tc.variables["EXAMPLES_INSTALL"] = False
+        if Version(self.version) <= "5.4.0":
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):
