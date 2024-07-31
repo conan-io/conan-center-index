@@ -457,6 +457,9 @@ class QtConan(ConanFile):
         if self.options.qtwayland:
             self.tool_requires("wayland/<host_version>")
 
+        if self.options.qtdeclarative and is_apple_os(self):
+            self.tool_requires("gettext/0.22.5")
+
     @property
     def angle_path(self):
         return os.path.join(self.source_folder, "angle")
@@ -820,6 +823,10 @@ class QtConan(ConanFile):
                 for libpath in VirtualRunEnv(self).vars().get("DYLD_LIBRARY_PATH", "").split(":"):
                     # see https://doc.qt.io/qt-5/qmake-variable-reference.html#qmake-rpathdir
                     args += [f"QMAKE_RPATHDIR+=\"{libpath}\""]
+
+        if self.settings.compiler == "apple-clang" and self.options.qtmultimedia:
+            # TODO: only for c++17 and higher
+            args += ['QMAKE_CXXFLAGS+="-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION=1"']
 
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             args += ["-qt-webengine-ffmpeg",
