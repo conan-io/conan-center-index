@@ -33,7 +33,6 @@ class PoselibConan(ConanFile):
     def _min_cppstd(self):
         return 17
 
-    # in case the project requires C++14/17/20/... the minimum compiler version should be listed
     @property
     def _compilers_minimum_version(self):
         return {
@@ -66,6 +65,10 @@ class PoselibConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+
+        if self.settings.os == "Windows" and self.options.shared:
+            # Symbols are not exported
+            raise ConanInvalidConfiguration("Windows shared builds are not supported")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
