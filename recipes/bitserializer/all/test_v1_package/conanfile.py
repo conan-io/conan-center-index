@@ -20,6 +20,7 @@ class TestPackageConan(ConanFile):
         cmake.definitions["WITH_PUGIXML"] = self.options["bitserializer"].with_pugixml
         cmake.definitions["WITH_RAPIDYAML"] = self._bitserializer_option("with_rapidyaml", False)
         cmake.definitions["WITH_CSV"] = self._bitserializer_option("with_csv", False)
+        cmake.definitions["WITH_MSGPACK"] = self._bitserializer_option("with_msgpack", False)
         cmake.configure()
         cmake.build()
 

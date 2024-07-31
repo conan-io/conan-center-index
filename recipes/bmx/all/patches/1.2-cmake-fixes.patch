@@ -1,0 +1,141 @@
+diff --git CMakeLists.txt CMakeLists.txt
+index 6fe9540e7..8b2578852 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -34,7 +34,7 @@ if(BUILD_SHARED_LIBS OR NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
+     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ endif()
+ 
+-set(CMAKE_CXX_STANDARD 11)
++#set(CMAKE_CXX_STANDARD 11)
+ 
+ # Set the test samples output directory
+ if(BMX_TEST_SAMPLES_DIR STREQUAL "")
+@@ -75,7 +75,7 @@ if(MSVC)
+         endforeach()
+     endif()
+ else()
+-    add_compile_options(-W -Wall -O2)
++    add_compile_options(-W -Wall)
+ 
+     # Enable large file support on 32-bit systems.
+     add_definitions(
+@@ -93,11 +93,25 @@ add_custom_target(bmx_test_data)
+ 
+ include("${PROJECT_SOURCE_DIR}/cmake/libmxf.cmake")
+ include("${PROJECT_SOURCE_DIR}/cmake/libmxfpp.cmake")
+-include("${PROJECT_SOURCE_DIR}/cmake/ext_uuid.cmake")
+-include("${PROJECT_SOURCE_DIR}/cmake/ext_expat.cmake")
+-include("${PROJECT_SOURCE_DIR}/cmake/ext_uriparser.cmake")
++#include("${PROJECT_SOURCE_DIR}/cmake/ext_uuid.cmake")
++#include("${PROJECT_SOURCE_DIR}/cmake/ext_expat.cmake")
++#include("${PROJECT_SOURCE_DIR}/cmake/ext_uriparser.cmake")
++#if(BMX_BUILD_WITH_LIBCURL)
++#    include("${PROJECT_SOURCE_DIR}/cmake/ext_libcurl.cmake")
++#endif()
++
++find_package(expat REQUIRED)
++find_package(uriparser REQUIRED)
++if(UNIX AND NOT APPLE)
++    find_package(libuuid REQUIRED)
++    set(uuid_link_lib libuuid::libuuid)
++else()
++    # MSVC: "ole" will already be linked in
++    # APPLE: doesn't require uuid library
++    set(uuid_link_lib)
++endif()
+ if(BMX_BUILD_WITH_LIBCURL)
+-    include("${PROJECT_SOURCE_DIR}/cmake/ext_libcurl.cmake")
++    find_package(CURL REQUIRED)
+ endif()
+ 
+ configure_file(config.h.in config.h)
+diff --git deps/libMXF/CMakeLists.txt deps/libMXF/CMakeLists.txt
+index d36fde6c0..6a1af100b 100644
+--- deps/libMXF/CMakeLists.txt
++++ deps/libMXF/CMakeLists.txt
+@@ -35,7 +35,7 @@ if(BUILD_SHARED_LIBS OR NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
+     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ endif()
+ 
+-set(CMAKE_CXX_STANDARD 11)
++#set(CMAKE_CXX_STANDARD 11)
+ 
+ # Set the test samples output directory
+ if(LIBMXF_TEST_SAMPLES_DIR STREQUAL "")
+@@ -76,7 +76,7 @@ if(MSVC)
+         endforeach()
+     endif()
+ else()
+-    add_compile_options(-W -Wall -O2)
++    add_compile_options(-W -Wall)
+ 
+     # Enable large file support on 32-bit systems.
+     add_definitions(
+diff --git deps/libMXFpp/CMakeLists.txt deps/libMXFpp/CMakeLists.txt
+index 2272a2709..924fdf770 100644
+--- deps/libMXFpp/CMakeLists.txt
++++ deps/libMXFpp/CMakeLists.txt
+@@ -35,7 +35,7 @@ if(BUILD_SHARED_LIBS OR NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
+     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ endif()
+ 
+-set(CMAKE_CXX_STANDARD 11)
++#set(CMAKE_CXX_STANDARD 11)
+ 
+ if(MSVC)
+     add_compile_options(/W3 /EHsc)
+@@ -61,7 +61,7 @@ if(MSVC)
+         endforeach()
+     endif()
+ else()
+-    add_compile_options(-W -Wall -O2)
++    add_compile_options(-W -Wall)
+ 
+     # Enable large file support on 32-bit systems.
+     add_definitions(
+diff --git deps/libMXFpp/libMXF++/CMakeLists.txt deps/libMXFpp/libMXF++/CMakeLists.txt
+index 94d48c905..e6c6a63f9 100644
+--- deps/libMXFpp/libMXF++/CMakeLists.txt
++++ deps/libMXFpp/libMXF++/CMakeLists.txt
+@@ -32,6 +32,8 @@ add_library(MXFpp
+     ${MXFpp_sources}
+ )
+ 
++target_compile_features(MXFpp PUBLIC cxx_std_11)
++
+ target_include_directories(MXFpp PUBLIC
+     ${PROJECT_SOURCE_DIR}
+ )
+diff --git src/CMakeLists.txt src/CMakeLists.txt
+index 1c0824d8a..94f9c00d6 100644
+--- src/CMakeLists.txt
++++ src/CMakeLists.txt
+@@ -26,6 +26,8 @@ target_include_directories(bmx PUBLIC
+     ${PROJECT_SOURCE_DIR}/include
+ )
+ 
++target_compile_features(bmx PUBLIC cxx_std_11)
++
+ # Add path to header files if not included in MSVC distribution
+ if(MSVC)
+     include(CheckIncludeFile)
+@@ -65,13 +67,14 @@ target_link_libraries(bmx
+         ${MXFpp_link_lib}
+     PRIVATE
+         ${uuid_link_lib}
+-        ${expat_link_lib}
+-        ${uriparser_link_lib}
++        expat::expat
++        uriparser::uriparser
+ )
+ 
+ if(BMX_BUILD_WITH_LIBCURL)
+-    target_link_libraries(bmx PRIVATE
+-        ${libcurl_link_lib}
++    # Linking public to see if the shared library for curls dependencies correctly link
++    target_link_libraries(bmx PUBLIC
++        CURL::libcurl
+     )
+ endif()
+ 

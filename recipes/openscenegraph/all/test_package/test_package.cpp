@@ -4,14 +4,8 @@
 #include <osgDB/ReaderWriter>
 #include <osgDB/Registry>
 
-// OSG always builds the bmp plugin
-#define WITH_BMP 1
-
-// OSG builds the imageio plugin on apple platforms
-#ifdef __APPLE__
-#	define WITH_IMAGEIO 1
-#else
-#	define WITH_IMAGEIO 0
+#ifndef WITH_IMAGEIO
+#define WITH_IMAGEIO 0
 #endif
 
 #ifdef OSG_LIBRARY_STATIC

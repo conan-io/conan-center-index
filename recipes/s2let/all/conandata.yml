@@ -1,4 +1,7 @@
 sources:
+  "2.2.6":
+    url: "https://github.com/astro-informatics/s2let/archive/v2.2.6.tar.gz"
+    sha256: "0ce214e110305fdd3729875add515ca00c23dde3329af43d1fff763514607381"
   "2.2.3":
     url: "https://github.com/astro-informatics/s2let/archive/refs/tags/v2.2.3.tar.gz"
     sha256: "1321e1bc96ba200e4cd4056843cd4075de1c05be20e64185f065f48b9cefe3f8"

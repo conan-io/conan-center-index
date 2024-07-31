@@ -11,10 +11,11 @@ required_conan_version = ">=1.53.0"
 class TracyConan(ConanFile):
     name = "tracy"
     description = "C++ frame profiler"
-    topics = ("profiler", "performance", "gamedev")
-    homepage = "https://github.com/wolfpld/tracy"
-    url = "https://github.com/conan-io/conan-center-index"
     license = ["BSD-3-Clause"]
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/wolfpld/tracy"
+    topics = ("profiler", "performance", "gamedev")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
 
     # Existing CMake tracy options with default value
