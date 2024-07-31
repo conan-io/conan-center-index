@@ -13,10 +13,10 @@ class BitseryConan(ConanFile):
         "Header only C++ binary serialization library. It is designed around "
         "the networking requirements for real-time data delivery, especially for games."
     )
-    topics = ("serialization", "binary", "header-only")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/fraillt/bitsery"
-    license = "MIT"
+    topics = ("serialization", "binary", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True

@@ -1,0 +1,336 @@
+diff --git a/Makefile b/Makefile
+index 2f0cb07c..372a6765 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,44 +1,44 @@
+ #Makefile for linux
+ # Could be extended to support Mac in future
+ 
+ rsync ?= yes
+ 
+ ifeq ($(rsync),yes)
+ cp = rsync -u
+ else
+-cp = cp -u
++cp = cp
+ endif
+ 
+ ifeq ($(debug),1)
+ debug_specific_cflags = -g -O0
+ debug_csharp = /define:DEBUG /debug+
+ build_dir = Debug
+ openhome_configuration = Debug
+ android_ndk_debug = 1
+ else
+ debug_specific_cflags = -g -O2
+ debug_csharp = /optimize+ /debug:pdbonly
+ build_dir = Release
+ openhome_configuration = Release
+ android_ndk_debug=0
+ endif
+ 
+ 
+ 
+ # Figure out platform, openhome_system and openhome_architecture
+ 
+-gcc_machine = $(shell ${CROSS_COMPILE}gcc -dumpmachine)
++cc_machine = $(shell ${CROSS_COMPILE}$(CC) -dumpmachine)
+ MACHINE = $(shell uname -s)
+ 
+ $(info CROSS_COMPILE: ${CROSS_COMPILE})
+-$(info Machine reported by compiler is: ${gcc_machine})
++$(info Machine reported by compiler is: ${cc_machine})
+ $(info Machine reported by uname is: ${MACHINE})
+ $(info PLATFORM: ${PLATFORM})
+ 
+ ifeq ($(MACHINE),Darwin)
+   ifeq ($(iOs-arm64),1)
+     platform = iOS
+     detected_openhome_system = iOs
+     detected_openhome_architecture = arm64
+   else ifeq ($(iOs-x64),1)
+     platform = iOS
+@@ -50,88 +50,88 @@ ifeq ($(MACHINE),Darwin)
+       detected_openhome_architecture = rpi
+   else
+     platform = Mac
+     detected_openhome_system = Mac
+     ifeq ($(Mac-arm64),1)
+         detected_openhome_architecture = arm64
+     else
+         detected_openhome_architecture = x64
+     endif
+   endif
+-else ifneq (, $(findstring powerpc, $(gcc_machine)))
++else ifneq (, $(findstring powerpc, $(cc_machine)))
+     platform = Core-ppc32
+     detected_openhome_system = Core
+     detected_openhome_architecture = ppc32
+ else ifeq ($(Android-anycpu), 1)
+     platform = Android
+     detected_openhome_system = Android
+     detected_openhome_architecture = anycpu
+ else ifeq ($(freebsd), 1)
+     platform = FreeBSD
+     detected_openhome_system = FreeBSD
+     detected_openhome_architecture = x86
+-    compiler = gcc -o $(objdir)
+-    link = ${CROSS_COMPILE}g++ $(platform_linkflags)
++    compiler = $(CC) -o $(objdir)
++    link = ${CROSS_COMPILE}$(CXX) $(platform_linkflags)
+     ar = ${CROSS_COMPILE}ar rc $(objdir)
+ else ifneq (,$(findstring Linux-x86,${PLATFORM}))
+-    ifneq (,$(findstring x86_64,$(gcc_machine)))
++    ifneq (,$(findstring x86_64,$(cc_machine)))
+         platform = Vanilla
+         detected_openhome_system = Linux
+         detected_openhome_architecture = x86
+         CFLAGS = -m32
+         LDFLAGS = -m32
+     endif
+ else
+     # At present, platform == Vanilla is used for Kirkwood, x86 and x64 Posix builds.
+     platform ?= Vanilla
+     ifneq (,$(findstring Qnap,$(platform)))
+         detected_openhome_system = Qnap
+-    else ifneq (,$(findstring linux,$(gcc_machine)))
++    else ifneq (,$(findstring linux,$(cc_machine)))
+       detected_openhome_system = Linux
+     endif
+-    ifneq (,$(findstring arm,$(gcc_machine)))
+-        ifneq (,$(findstring linux-gnueabihf,$(gcc_machine)))
++    ifneq (,$(findstring arm,$(cc_machine)))
++        ifneq (,$(findstring linux-gnueabihf,$(cc_machine)))
+             detected_openhome_architecture = armhf
+         else ifeq (${detected_openhome_system},Qnap)
+             detected_openhome_architecture = x19
+         else
+             detected_openhome_architecture = armel
+         endif
+     endif
+-    ifneq (,$(findstring i686,$(gcc_machine)))
++    ifneq (,$(findstring i686,$(cc_machine)))
+       detected_openhome_architecture = x86
+     endif
+-    ifneq (,$(findstring i586,$(gcc_machine)))
++    ifneq (,$(findstring i586,$(cc_machine)))
+       detected_openhome_architecture = x86
+     endif
+-    ifneq (,$(findstring i486,$(gcc_machine)))
++    ifneq (,$(findstring i486,$(cc_machine)))
+       detected_openhome_architecture = x86
+     endif
+-    ifneq (,$(findstring i386,$(gcc_machine)))
++    ifneq (,$(findstring i386,$(cc_machine)))
+       detected_openhome_architecture = x86
+     endif
+-    ifneq (,$(findstring amd64,$(gcc_machine)))
++    ifneq (,$(findstring amd64,$(cc_machine)))
+       detected_openhome_architecture = x64
+     endif
+-    ifneq (,$(findstring x86_64,$(gcc_machine)))
++    ifneq (,$(findstring x86_64,$(cc_machine)))
+       detected_openhome_architecture = x64
+     endif
+-    ifneq (,$(findstring mipsel,$(gcc_machine)))
++    ifneq (,$(findstring mipsel,$(cc_machine)))
+       detected_openhome_architecture = mipsel
+     endif
+-    ifneq (,$(findstring mips,$(gcc_machine)))
++    ifneq (,$(findstring mips,$(cc_machine)))
+       detected_openhome_architecture = mipsel
+     endif
+-    ifneq (,$(findstring aarch64,$(gcc_machine)))
++    ifneq (,$(findstring aarch64,$(cc_machine)))
+       detected_openhome_architecture = arm64
+     endif
+-    ifneq (,$(findstring riscv64,$(gcc_machine)))
++    ifneq (,$(findstring riscv64,$(cc_machine)))
+       detected_openhome_architecture = riscv64
+     endif
+ endif
+ 
+ detected_openhome_system ?= Unknown
+ detected_openhome_architecture ?= Unknown
+ 
+ ifneq (${openhome_system},)
+   ifneq (${openhome_system},${detected_openhome_system})
+     $(warning Detected compiler is for system ${detected_openhome_system} but expected ${openhome_system}. Build will probably fail.)
+@@ -208,83 +208,89 @@ ifeq ($(platform),Mac)
+ 		openhome_architecture = x64
+ 	else
+ 		# building for arm64
+ 		platform_cflags = -DPLATFORM_MACOSX_GNU -arch arm64 -mmacosx-version-min=11
+ 		platform_linkflags = -arch arm64 -framework CoreFoundation -framework SystemConfiguration -framework IOKit
+ 		osbuilddir = Mac-arm64
+ 		openhome_architecture = arm64
+ 	endif
+ 
+ 	objdir = Build/Obj/$(osbuilddir)/$(build_dir)/
+-	compiler = clang -fPIC -stdlib=libc++ -o $(objdir)
++	compiler = clang -fPIC -Qunused-arguments -stdlib=libc++ -o $(objdir)
+ 	link = clang++ -pthread -stdlib=libc++ $(platform_linkflags)
+ 	ar = ar rc $(objdir)
+ 	openhome_system = Mac
+ 
+ 	dotnetRuntime = osx-x64
+ endif
+ 
+ ifeq ($(platform), Core-ppc32)
+     # platform == Core1
+     openhome_system = Core
+     openhome_architecture = ppc32
+     endian = BIG
+     platform_cflags = -mcpu=405
+     platform_linkflags = -mcpu=405 ${CROSS_LINKFLAGS}
+     linkopts_ohNet =
+     osdir = Core
+     osbuilddir = Core-ppc32
+     objdir = Build/Obj/$(osbuilddir)/$(build_dir)/
+     native_only = yes
+-    compiler = ${CROSS_COMPILE}gcc -o $(objdir)
+-    link = ${CROSS_COMPILE}g++ $(platform_linkflags)
++    compiler = ${CROSS_COMPILE}$(CC) -o $(objdir)
++    link = ${CROSS_COMPILE}$(CXX) $(platform_linkflags)
+     ar = ${CROSS_COMPILE}ar rc $(objdir)
+ endif
+ 
+ ifeq ($(platform), Core-armv6)
+     # platform == Core2
+     openhome_system = Core
+     openhome_architecture = armv6
+     endian = LITTLE
+     platform_cflags = -mcpu=arm926ej-s -Wno-psabi
+     platform_linkflags = -mcpu=arm926ej-s ${CROSS_LINKFLAGS}
+     linkopts_ohNet =
+     osdir = Core
+     osbuilddir = Core-armv6
+     objdir = Build/Obj/$(osbuilddir)/$(build_dir)/
+     native_only = yes
+-    compiler = ${CROSS_COMPILE}gcc -o $(objdir)
+-    link = ${CROSS_COMPILE}g++ $(platform_linkflags)
++    compiler = ${CROSS_COMPILE}$(CC) -o $(objdir)
++    link = ${CROSS_COMPILE}$(CXX) $(platform_linkflags)
+     ar = ${CROSS_COMPILE}ar rc $(objdir)
+ endif
+ 
+ ifneq (,$(findstring $(platform),Vanilla Qnap-x86 Qnap-x19 Linux-ppc32))
+   ifeq ($(gcc4_1), yes)
+     version_specific_cflags = ${CROSS_COMPILE_CFLAGS}
+     version_specific_cflags_third_party = -Wno-non-virtual-dtor
+     version_specific_java_cflags = -Wstrict-aliasing=0
+   else
+-    gcc_min_ver = $(shell ${CROSS_COMPILE}gcc -dumpversion | cut -f2 -d'.')
+-    version_specific_cflags = $(shell if [ $(gcc_min_ver) -ge 6 ]; then echo '-Wno-psabi'; fi)
++    version_specific_cflags = 
++    ifeq ($(CC), gcc)
++      gcc_min_ver = $(shell ${CROSS_COMPILE}gcc -dumpversion | cut -f2 -d'.')
++      gcc_ge_6 = $(shell if [ $(gcc_min_ver) -ge 6 ]; then echo 'yes'; fi)
++      ifeq ($(gcc_ge_6), yes)
++        version_specific_cflags = '-Wno-psabi'
++      endif
++    endif
+     version_specific_cflags += ${CROSS_COMPILE_CFLAGS}
+     version_specific_cflags_third_party =
+     version_specific_java_cflags =
+   endif
+ 
+   version_specific_linkflags = ${CROSS_COMPILE_LINKFLAGS}
+   version_specific_library_path = ${CROSS_COMPILE_LIBRARY_PATH}
+   version_specific_includes = ${CROSS_COMPILE_INCLUDES}
+ 
+   # Continuing with the non-Darwin settings...
+   objdir = Build/Obj/$(osdir)/$(build_dir)/
+-  compiler = ${CROSS_COMPILE}gcc -o $(objdir)
+-  link = $(version_specific_library_path) ${CROSS_COMPILE}g++ $(platform_linkflags)
++  compiler = ${CROSS_COMPILE}$(CC) -o $(objdir)
++  link = $(version_specific_library_path) ${CROSS_COMPILE}$(CXX) $(platform_linkflags)
+   ar = $(version_specific_library_path) ${CROSS_COMPILE}ar rc $(objdir)
+ endif
+ 
+ ifeq ($(platform), FreeBSD)
+     platform_cflags = $(version_specific_cflags) -fPIC -DPLATFORM_FREEBSD
+     platform_linkflags = $(version_specific_linkflags) -pthread
+     linkopts_ohNet = -Wl,-soname,libohNet.so
+     osbuilddir = Posix
+     objdir = Build/Obj/$(osbuilddir)/$(build_dir)/
+     osdir = Posix
+@@ -351,25 +357,25 @@ $(info Building for system ${openhome_system} and architecture ${openhome_archit
+ 
+ 
+ # Macros used by Common.mak
+ native_only ?= no
+ managed_only ?= no
+ no_shared_objects ?= no
+ endian ?= LITTLE
+ cflags_base = $(CFLAGS) -fexceptions -Wall $(version_specific_cflags_third_party) -pipe -D_GNU_SOURCE -D_REENTRANT -DDEFINE_$(endian)_ENDIAN -DDEFINE_TRACE $(debug_specific_cflags) -fvisibility=hidden $(platform_cflags)
+ cflags_third_party = $(cflags_base) -Wno-int-to-pointer-cast
+ ifeq ($(nocpp11), yes)
+-    cppflags = $(cflags_base) -Werror
++    cppflags = $(CPPFLAGS) $(cflags_base) -Werror
+ else ifeq ($(platform),Mac)
+-    cppflags = $(cflags_base) -std=c++11 -Werror
++    cppflags = $(CPPFLAGS) $(cflags_base) -std=c++11 -Werror
+ else
+-    cppflags = $(cflags_base) -std=c++0x -Werror
++    cppflags = $(CPPFLAGS) $(cflags_base) -std=c++0x -Werror
+ endif
+ cflags = $(cflags_base) -Werror
+ inc_build = Build/Include
+ includes = -IBuild/Include/ $(version_specific_includes)
+ bundle_build = Build/Bundles
+ mDNSdir = Build/mDNS
+ osdir ?= Posix
+ objext = o
+ libprefix = lib
+ libext = a
+@@ -383,21 +389,21 @@ else
+ endif
+ exeext = elf
+ linkoutput = -o
+ dllprefix = lib
+ ifeq ($(platform), iOS)
+ 	link_dll = $(toolroot)/clang++ -pthread -shared -stdlib=libc++ $(platform_linkflags)
+ else ifeq ($(MACHINE), Darwin)
+ 	link_dll = $(version_specific_library_path) clang++ -pthread  $(platform_linkflags) -shared -stdlib=libc++
+ else
+ 	CROSS_COMPILE_LIBGCC ?= -shared-libgcc
+-	link_dll = $(version_specific_library_path) ${CROSS_COMPILE}g++ -pthread  $(platform_linkflags) -shared ${CROSS_COMPILE_LIBGCC}
++	link_dll = $(version_specific_library_path) ${CROSS_COMPILE}$(CXX) -pthread  $(platform_linkflags) -shared ${CROSS_COMPILE_LIBGCC}
+ endif
+ 
+ csharp = mcs /nologo $(debug_csharp)
+ 
+ csharpdefines ?=
+ publicjavadir = OpenHome/Net/Bindings/Java/
+ 
+ ifeq ($(platform), Mac)
+ 	platform_java_cflags = -Wno-self-assign
+ 	# arm64 builds need JAVA_HOME to be set because the Mac SDK for arm64 doesn't contain Java includes or dylibs
+@@ -409,24 +415,24 @@ ifeq ($(platform), Mac)
+ 		link_jvm = ${MACOSX_SDK}/System/Library/Frameworks/JavaVM.framework/JavaVM
+ 	endif
+ 	javac = /usr/bin/javac
+ 	jar = /usr/bin/jar
+ else
+ 	platform_java_cflags =
+ 	includes_jni = -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
+         ifeq ($(platform), Linux-ppc32)
+             libjvm_dir ?= $(JAVA_HOME)/jre/lib/ppc/server
+         else
+-            ifneq (,$(findstring arm,$(gcc_machine)))
++            ifneq (,$(findstring arm,$(cc_machine)))
+                 libjvm_dir ?= $(JAVA_HOME)/jre/lib/arm/server
+             else
+-                ifneq (,$(findstring x64,$(gcc_machine)))
++                ifneq (,$(findstring x64,$(cc_machine)))
+                     libjvm_dir ?= $(JAVA_HOME)/jre/lib/amd64/server
+                 else
+                     libjvm_dir ?= $(JAVA_HOME)/jre/lib/i386/server
+                 endif
+             endif
+         endif
+ 	link_jvm = $(libjvm_dir)/libjvm.so
+ 	javac = $(JAVA_HOME)/bin/javac
+ 	jar = $(JAVA_HOME)/bin/jar
+ endif
