@@ -74,6 +74,8 @@ class FFMpegConan(ConanFile):
         "with_libsvtav1": [True, False],
         "with_libaom": [True, False],
         "with_libdav1d": [True, False],
+        "with_jni": [True, False],
+        "with_mediacodec": [True, False],
         "disable_everything": [True, False],
         "disable_all_encoders": [True, False],
         "disable_encoders": [None, "ANY"],
@@ -154,6 +156,8 @@ class FFMpegConan(ConanFile):
         "with_libsvtav1": True,
         "with_libaom": True,
         "with_libdav1d": True,
+        "with_jni": False,
+        "with_mediacodec": False,
         "disable_everything": False,
         "disable_all_encoders": False,
         "disable_encoders": None,
@@ -227,6 +231,7 @@ class FFMpegConan(ConanFile):
             "with_libsvtav1": ["avcodec"],
             "with_libaom": ["avcodec"],
             "with_libdav1d": ["avcodec"],
+            "with_mediacodec": ["with_jni"],
         }
 
     @property
@@ -254,6 +259,9 @@ class FFMpegConan(ConanFile):
             del self.options.with_videotoolbox
         if not is_apple_os(self):
             del self.options.with_avfoundation
+        if not self.settings.os == "Android":
+            del self.options.with_jni
+            del self.options.with_mediacodec
         if not self._version_supports_libsvtav1:
             self.options.rm_safe("with_libsvtav1")
 
@@ -499,6 +507,8 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("securetransport", self.options.with_ssl == "securetransport"),
             opt_enable_disable("vulkan", self.options.get_safe("with_vulkan")),
             opt_enable_disable("libdav1d", self.options.get_safe("with_libdav1d")),
+            opt_enable_disable("jni", self.options.get_safe("with_jni")),
+            opt_enable_disable("mediacodec", self.options.get_safe("with_mediacodec")),
             "--disable-cuda",  # FIXME: CUDA support
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
