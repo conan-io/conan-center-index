@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, mkdir, rmdir
 from conan.tools.scm import Version
 import glob
@@ -58,6 +59,25 @@ class SundialsConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        # https://github.com/LLNL/sundials/blob/v7.1.1/cmake/SUNDIALSConfig.cmake.in
+        # TODO: add support for optional dependencies:
+        # - openmp #22360
+        # - openmpi #18980
+        # - suitesparse-klu #23547
+        # - cuda
+        # - adiak
+        # - caliper
+        # - ginkgo
+        # - kokkos
+        # - mkl
+        # - raja
+        pass
+
+    def build_requirements(self):
+        if Version(self.version) >= "7.0":
+            self.tool_requires("cmake/[>=3.18 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -75,6 +95,7 @@ class SundialsConan(ConanFile):
         if Version(self.version) <= "5.4.0":
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
+        VirtualBuildEnv(self).generate()
 
     def build(self):
         cmake = CMake(self)
@@ -109,8 +130,6 @@ class SundialsConan(ConanFile):
         self.cpp_info.components["sundials_sunmatrixsparse"].libs = ["sundials_sunmatrixsparse"]
         self.cpp_info.components["sundials_sunnonlinsolfixedpoint"].libs = ["sundials_sunnonlinsolfixedpoint"]
         self.cpp_info.components["sundials_sunnonlinsolnewton"].libs = ["sundials_sunnonlinsolnewton"]
-        if Version(self.version) >= "5.8.0":
-            self.cpp_info.components["sundials_generic"].libs = ["sundials_generic"]
         if self.options.build_arkode:
             self.cpp_info.components["sundials_arkode"].libs = ["sundials_arkode"]
         if self.options.build_cvode:
@@ -123,6 +142,17 @@ class SundialsConan(ConanFile):
             self.cpp_info.components["sundials_idas"].libs = ["sundials_idas"]
         if self.options.build_kinsol:
             self.cpp_info.components["sundials_kinsol"].libs = ["sundials_kinsol"]
+
+        core_lib = None
+        if Version(self.version) >= "7.0":
+            core_lib = "sundials_core"
+        elif Version(self.version) >= "5.8.0":
+            core_lib = "sundials_generic"
+
+        if core_lib:
+            for name, component in self.cpp_info.components.items():
+                component.requires.append(core_lib)
+            self.cpp_info.components[core_lib].libs = [core_lib]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             for _, component in self.cpp_info.components.items():

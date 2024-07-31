@@ -1,4 +1,7 @@
 sources:
+  "7.1.1":
+    url: "https://github.com/LLNL/sundials/releases/download/v7.1.1/sundials-7.1.1.tar.gz"
+    sha256: "ea7d6edfb52448ddfdc1ec48f89a721fe6c0a259c10f8ef56f60fcded87a94bb"
   "6.7.0":
     url: "https://github.com/LLNL/sundials/releases/download/v6.7.0/sundials-6.7.0.tar.gz"
     sha256: "5f113a1564a9d2d98ff95249f4871a4c815a05dbb9b8866a82b13ab158c37adb"
