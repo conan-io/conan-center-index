@@ -303,7 +303,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_openh264:
             self.requires("openh264/2.3.1")
         if self.options.get_safe("with_openvino"):
-            self.requires("openvino/2023.2.0")
+            self.requires("openvino/2024.2.0")
         if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
         if self.options.with_opus:
