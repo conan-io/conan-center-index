@@ -101,6 +101,7 @@ class LibrdkafkaConan(ConanFile):
         tc.variables["WITH_SASL"] = self.options.sasl
         tc.variables["ENABLE_LZ4_EXT"] = True
         tc.variables["WITH_CURL"] = self.options.curl
+        tc.variables["WITH_SNAPPY"] = True
         tc.preprocessor_definitions["WITH_SYSLOG"] = "1" if self.options.syslog else "0"
         tc.generate()
 
