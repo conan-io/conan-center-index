@@ -1,38 +1,12 @@
-From a766045f65f934df3b5f1aa63bc86fbb3e003a09 Mon Sep 17 00:00:00 2001
-From: Anu Aliyas <anu.aliyas@qt.io>
-Date: Wed, 17 Apr 2024 12:35:58 +0200
-Subject: [PATCH] Add missing dependencies to avoid compilation errors
-
-Missing dependencies are added to resolve the dependencies issues
-encountered when compiling with Ninja 1.12.0
-
-Fixes:QTBUG-124375
-Change-Id: I0f23ef6c60a6f01ee11bffd46121fd7f98dc022c
-Reviewed-on: https://codereview.qt-project.org/c/qt/qtwebengine-chromium/+/555586
-Reviewed-by: Michal Klocek <michal.klocek@qt.io>
----
-
 diff --git a/chromium/content/public/browser/BUILD.gn b/chromium/content/public/browser/BUILD.gn
-index d38fa8d..c581311 100644
+index 7cf82a4..0e0dda2 100644
 --- a/chromium/content/public/browser/BUILD.gn
 +++ b/chromium/content/public/browser/BUILD.gn
-@@ -539,6 +539,7 @@
+@@ -469,6 +469,7 @@ jumbo_source_set("browser_sources") {
+     "//build:chromeos_buildflags",
      "//cc",
-     "//components/services/storage/public/cpp",
      "//components/viz/host",
 +    "//components/spellcheck:buildflags",
      "//content/browser",  # Must not be public_deps!
      "//device/fido",
      "//gpu",
-diff --git a/chromium/extensions/browser/api/declarative_net_request/BUILD.gn b/chromium/extensions/browser/api/declarative_net_request/BUILD.gn
-index 1fc492f..13a266e 100644
---- a/chromium/extensions/browser/api/declarative_net_request/BUILD.gn
-+++ b/chromium/extensions/browser/api/declarative_net_request/BUILD.gn
-@@ -23,6 +23,7 @@
-     "//extensions/common",
-     "//extensions/common/api",
-     "//services/preferences/public/cpp",
-+    "//components/web_cache/browser",
-   ]
- 
-   public_deps = [ "//extensions/browser:browser_sources" ]
