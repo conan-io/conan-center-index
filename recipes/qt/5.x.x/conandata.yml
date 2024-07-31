@@ -54,3 +54,6 @@ patches:
     - "base_path": "qt5/qtwebengine/src/3rdparty"
       "patch_description": "qtwebengine fix missing headers"
       "patch_file": "patches/5.15.14-qtwebengine-missing-deps.patch"
+    - "base_path": "qt5/qtwebengine/src/3rdparty"
+      "patch_description": "macos fix chromium build in newer macos SDKs"
+      "patch_file": "patches/5.15.14-macos-chromium-newer-sdks.patch"
