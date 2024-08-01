@@ -82,7 +82,7 @@ class BoostConan(ConanFile):
         "filesystem_no_deprecated": [True, False],
         "filesystem_use_std_fs": [True, False],
         "filesystem_version": [None, "3", "4"],
-        "layout": ["system", "versioned", "tagged", "b2-default"],
+        "layout": ["system", "versioned", "tagged"],
         "magic_autolink": [True, False],  # enables BOOST_ALL_NO_LIB
         "diagnostic_definitions": [True, False],  # enables BOOST_LIB_DIAGNOSTIC
         "python_executable": [None, "ANY"],  # system default python installation is used, if None
@@ -624,9 +624,6 @@ class BoostConan(ConanFile):
 
         if self.options.get_safe("without_stacktrace", True):
             self.options.rm_safe("with_stacktrace_backtrace")
-
-        if self.options.layout == "b2-default":
-            self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
 
         if self.options.without_fiber:
             self.options.rm_safe("numa")
