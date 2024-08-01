@@ -1,0 +1,4 @@
+sources:
+  "0.6":   
+    url: https://github.com/otofoto/Pole/archive/refs/heads/master.zip
+    sha256: "aec798295fc9b48375b6dda7ca944fb71b18e96a1c2ed8345f9c7885cf91a5a9"
