@@ -14,8 +14,7 @@ from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, rename, collect_libs, \
-    replace_in_file, load, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, rename, replace_in_file, load, save
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -69,7 +68,7 @@ class VtkConan(ConanFile):
         "with_hdf5": [True, False],
         "with_holoplaycore": [True, False],
         "with_ioss": [True, False],
-        "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"],
+        "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg", False],
         "with_jsoncpp": [True, False],
         "with_libharu": [True, False],
         "with_libproj": [True, False],
@@ -364,6 +363,15 @@ class VtkConan(ConanFile):
         if self.options.with_qt and not self.dependencies["qt"].options.widgets:
             raise ConanInvalidConfiguration(f"{self.ref} requires qt/*:widgets=True")
 
+        if self.options.with_mysql and not self.options.with_sqlite:
+            raise ConanInvalidConfiguration(f"{self.ref} requires with_sqlite=True when with_mysql=True")
+
+        if self.options.get_safe("with_liblas") and not self.options.with_boost:
+            raise ConanInvalidConfiguration(f"{self.ref} requires with_boost=True when with_liblas=True")
+
+        if self.options.with_xdmf3 and not self.options.with_boost:
+            raise ConanInvalidConfiguration(f"{self.ref} requires with_boost=True when with_xdmf3=True")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -374,9 +382,8 @@ class VtkConan(ConanFile):
         tc.variables["VTK_VERSIONED_INSTALL"] = False
         # Nothing gets installed without this ON at the moment.
         tc.variables["VTK_INSTALL_SDK"] = True
-        tc.variables["VTK_TARGET_SPECIFIC_COMPONENTS"] = True
 
-        # Enable KITs - Quote: "Compiles VTK into a smaller set of libraries."
+        # TODO: Enable KITs - Quote: "Compiles VTK into a smaller set of libraries."
         # Quote: "Can be useful on platforms where VTK takes a long time to launch due to expensive disk access."
         tc.variables["VTK_ENABLE_KITS"] = False
 
@@ -395,6 +402,7 @@ class VtkConan(ConanFile):
         tc.variables["VTK_ENABLE_CATALYST"] = self.options.get_safe("with_catalyst", False)
         tc.variables["VTK_ENABLE_LOGGING"] = self.options.enable_logging
         tc.variables["VTK_ENABLE_OSPRAY"] = self.options.get_safe("with_ospray", False)
+        tc.variables["VTK_ENABLE_VR_COLLABORATION"] = self.options.with_zeromq
         tc.variables["VTK_ENABLE_WEBGPU"] = True
         tc.variables["VTK_ENABLE_WRAPPING"] = False
         tc.variables["VTK_QT_VERSION"] = self.options.with_qt
@@ -721,10 +729,6 @@ class VtkConan(ConanFile):
         self._patch_remote_modules()
         cmake.build()
 
-    @property
-    def _cmake_targets_json(self):
-        return os.path.join(self.build_folder, "cmake_targets_info.json")
-
     def _parse_cmake_targets(self, targets_file):
         # Parse info from VTK-targets.cmake
         # Example:
@@ -749,22 +753,6 @@ class VtkConan(ConanFile):
                 value = value.split(";")
                 targets[name][prop.lower()] = value
         return targets
-
-    def package(self):
-        cmake = CMake(self)
-        cmake.install()
-
-        # VTK installs the licenses under the share/licenses/VTK directory, move it
-        rename(self, os.path.join(self.package_folder, "share", "licenses", "VTK"),
-               os.path.join(self.package_folder, "licenses"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-
-        # delete VTK-installed cmake files
-        # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-
-        targets_config = os.path.join(self.package_folder, "lib", "cmake", "vtk", "VTK-targets.cmake")
-        cmake_targets = self._parse_cmake_targets(targets_config)
-        save(self, self._cmake_targets_json, json.dumps(cmake_targets, indent=2))
 
     def _is_matching_cmake_platform(self, platform_id):
         if platform_id == "Darwin":
@@ -795,9 +783,7 @@ class VtkConan(ConanFile):
         return ["m", "dl", "pthread", "rt", "log", "embind", "socket", "nsl", "wsock32", "ws2_32"]
 
     def _transform_link_libraries(self, values):
-        """
-        Converts a list of LINK_LIBRARIES values into a list of component requirements, system_libs and frameworks.
-        """
+        # Converts a list of LINK_LIBRARIES values into a list of component requirements, system_libs and frameworks.
         requires = []
         system_libs = []
         frameworks = []
@@ -829,22 +815,167 @@ class VtkConan(ConanFile):
             return component
         return f"vtk{component}"
 
-    def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "VTK")
-
+    def _cmake_targets_to_conan_components(self, targets_info):
         # Fill in components based on VTK-targets.cmake
-        targets = load(self, self._cmake_targets_json)
-        for target_name, target_info in targets.items():
-            component = self.cpp_info.components[target_name]
-            component.includedirs = [os.path.join("include", "vtk")]
+        components = {}
+        for target_name, target_info in targets_info.items():
+            component = {}
             if not target_info["is_interface"]:
-                component.libs = self._vtk_component_to_libname(target_name)
+                component["libs"] = [self._vtk_component_to_libname(target_name)]
             for definition in target_info.get("compile_definitions", []):
                 if definition.startswith("-D"):
                     definition = definition[2:]
-                component.defines.append(definition)
-            (
-                component.requires,
-                component.system_libs,
-                component.frameworks,
-            ) = self._transform_link_libraries(target_info.get("link_libraries", []))
+                component["defines"].append(definition)
+            requires, system_libs, frameworks = self._transform_link_libraries(target_info.get("link_libraries", []))
+            component["requires"] = requires
+            component["system_libs"] = system_libs
+            component["frameworks"] = frameworks
+            components[target_name] = component
+        return components
+
+    @property
+    def _components_json(self):
+        return os.path.join(self.package_folder, "share", "conan_components.json")
+
+    def package(self):
+        cmake = CMake(self)
+        cmake.install()
+
+        # VTK installs the licenses under the share/licenses/VTK directory, move it
+        rename(self, os.path.join(self.package_folder, "share", "licenses", "VTK"),
+               os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
+        # Parse the VTK-targets.cmake file to generate Conan components
+        targets_config = os.path.join(self.package_folder, "lib", "cmake", "vtk", "VTK-targets.cmake")
+        cmake_target_props = self._parse_cmake_targets(targets_config)
+        components = self._cmake_targets_to_conan_components(cmake_target_props)
+        save(self, self._components_json, json.dumps(components, indent=2))
+
+        # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "VTK")
+
+        components = json.loads(load(self, self._components_json))
+        for name, info in components.items():
+            component = self.cpp_info.components[name]
+            component.includedirs = [os.path.join("include", "vtk")]
+            component.libs = info.get("libs", [])
+            component.defines = info.get("defines", [])
+            component.requires = info.get("requires", [])
+            component.system_libs = info.get("system_libs", [])
+            component.frameworks = info.get("frameworks", [])
+
+        # Add some missing private dependencies
+        self.cpp_info.components["CommonArchive"].requires.append("libarchive::libarchive")
+        if self.options.get_safe("with_memkind"):
+            self.cpp_info.components["CommonCore"].requires.append("memkind::memkind")
+        if self.options.smp_enable_tbb:
+            self.cpp_info.components["CommonCore"].requires.append("onetbb::libtbb")
+        if self.options.smp_enable_openmp:
+            self.cpp_info.components["CommonCore"].requires.append("openmp::openmp")
+        if "DomainsMicroscopy" in components:
+            self.cpp_info.components["DomainsMicroscopy"].requires.append("openslide::openslide")
+        if "InfovisBoost" in components:
+            self.cpp_info.components["InfovisBoost"].requires.append("boost::headers")
+        if "GeovisGDAL" in components:
+            self.cpp_info.components["GeovisGDAL"].requires.append("gdal::gdal")
+        if "GUISupportQt" in components:
+            self.cpp_info.components["GUISupportQt"].requires.extend(["qt::qtOpenGL", "qt::qtWidgets", "qt::qtOpenGLWidgets"])
+        if "GUISupportQtQuick" in components:
+            self.cpp_info.components["GUISupportQtQuick"].requires.extend(["qt::qtGui", "qt::qtOpenGL", "qt::qtQuick", "qt::qtQml"])
+        if "GUISupportQtSQL" in components:
+            self.cpp_info.components["GUISupportQtSQL"].requires.extend(["qt::qtWidgets", "qt::qtSql"])
+        if "InfovisBoost" in components:
+            self.cpp_info.components["InfovisBoost"].requires.append("boost::serialization")
+        if "InfovisBoostGraphAlgorithms" in components:
+            self.cpp_info.components["InfovisBoostGraphAlgorithms"].requires.append("boost::headers")
+        if "IOADIOS2" in components:
+            self.cpp_info.components["IOADIOS2"].requires.append("adios2::adios2")
+        if "IOCatalystConduit" in components:
+            self.cpp_info.components["IOCatalystConduit"].requires.append("catalyst::catalyst")
+        if "IOFFMPEG" in components:
+            self.cpp_info.components["IOFFMPEG"].requires.extend(["ffmpeg::avformat", "ffmpeg::avcodec", "ffmpeg::avutil", "ffmpeg::swscale", "ffmpeg::swresample"])
+        if "IOGDAL" in components:
+            self.cpp_info.components["IOGDAL"].requires.append("gdal::gdal")
+        if "IOLAS" in components:
+            self.cpp_info.components["IOLAS"].requires.append("liblas::liblas")
+            self.cpp_info.components["IOLAS"].requires.extend(["boost::program_options", "boost::thread", "boost::system", "boost::iostreams", "boost::filesystem"])
+        if "IOMySQL" in components:
+            if self.options.with_mysql == "mariadb-connector-c":
+                self.cpp_info.components["IOMySQL"].requires.append("mariadb-connector-c::mariadb-connector-c")
+            elif self.options.with_mysql == "libmysqlclient":
+                self.cpp_info.components["IOMySQL"].requires.append("libmysqlclient::libmysqlclient")
+        if "IOOCCT" in components:
+            self.cpp_info.components["IOOCCT"].requires.extend(["opencascade::occt_tkstep", "opencascade::occt_tkiges", "opencascade::occt_tkmesh", "opencascade::occt_tkxdestep", "opencascade::occt_tkxdeiges"])
+        if "IOODBC" in components:
+            self.cpp_info.components["IOODBC"].requires.append("odbc::odbc")
+        if "IOOpenVDB" in components:
+            self.cpp_info.components["IOOpenVDB"].requires.append("openvdb::openvdb")
+        if "IOPDAL" in components:
+            self.cpp_info.components["IOPDAL"].requires.append("pdal::pdal")
+        if "IOPostgreSQL" in components:
+            self.cpp_info.components["IOPostgreSQL"].requires.append("libpq::libpq")
+        if "RenderingLookingGlass" in components:
+            self.cpp_info.components["RenderingLookingGlass"].requires.append("holoplaycore::holoplaycore")
+        if "RenderingFreeTypeFontConfig" in components:
+            self.cpp_info.components["RenderingFreeTypeFontConfig"].requires.append("fontconfig::fontconfig")
+        if "RenderingOpenGL2" in components:
+            if self.options.with_sdl2:
+                self.cpp_info.components["RenderingOpenGL2"].requires.append("sdl::sdl")
+            if self.options.get_safe("with_x11"):
+                self.cpp_info.components["RenderingOpenGL2"].requires.extend(["xorg::x11", "xorg::xcursor"])
+            if self.options.get_safe("with_cocoa"):
+                self.cpp_info.components["RenderingOpenGL2"].frameworks.append("Cocoa")
+            if self.options.get_safe("with_directx"):
+                self.cpp_info.components["RenderingOpenGL2"].requires.extend(["directx::d3d11", "directx::dxgi"])
+        if "RenderingOpenVR" in components:
+            self.cpp_info.components["RenderingOpenVR"].requires.append("openvr::openvr")
+        if "RenderingOpenXR" in components:
+            self.cpp_info.components["RenderingOpenXR"].requires.append("openxr::openxr")
+        if "RenderingOpenXRRemoting" in components:
+            self.cpp_info.components["RenderingOpenXRRemoting"].requires.append("openxr::openxr")
+        if "RenderingQt" in components:
+            self.cpp_info.components["RenderingQt"].requires.append("qt::qtWidgets")
+        if "RenderingRayTracing" in components:
+            if self.options.get_safe("with_ospray"):
+                self.cpp_info.components["RenderingRayTracing"].requires.append("ospray::ospray")
+            if self.options.get_safe("with_openimagedenoise"):
+                self.cpp_info.components["RenderingRayTracing"].requires.append("openimagedenoise::openimagedenoise")
+        if "RenderingRayTracing" in components and self.options.get_safe("with_visrtx"):
+            self.cpp_info.components["RenderingRayTracing"].requires.append("visrtx::visrtx")
+        if "RenderingUI" in components:
+            if self.options.with_sdl2:
+                self.cpp_info.components["RenderingUI"].requires.append("sdl::sdl")
+            if self.options.get_safe("with_x11"):
+                self.cpp_info.components["RenderingUI"].requires.append("xorg::x11")
+            if self.options.get_safe("with_cocoa"):
+                self.cpp_info.components["RenderingUI"].frameworks.append("Cocoa")
+        if "RenderingVR" in components and self.options.with_zeromq:
+            self.cpp_info.components["RenderingVR"].requires.append("libzmq::libzmq")
+        if "RenderingWebGPU" in components:
+            self.cpp_info.components["RenderingWebGPU"].requires.append("sdl::sdl")
+            if self.settings.os != "Emscripten":
+                self.cpp_info.components["RenderingWebGPU"].requires.append("dawn::dawn")
+        if "RenderingZSpace" in components:
+            self.cpp_info.components["RenderingZSpace"].requires.append("zspace::zspace")
+        if "fides" in components:
+            self.cpp_info.components["fides"].requires.append("adios2::adios2")
+        if "xdmf3" in components:
+            self.cpp_info.components["xdmf3"].requires.append("boost::headers")
+        if "ViewsQt" in components:
+            self.cpp_info.components["ViewsQt"].requires.append("qt::qtWidgets")
+
+        for component_name, component in self.cpp_info.components.items():
+            self.output.debug(f"COMPONENT: {component_name}")
+            if component.libs:
+                self.output.debug(f" - libs: {component.libs}")
+            if component.defines:
+                self.output.debug(f" - defines: {component.defines}")
+            if component.requires:
+                self.output.debug(f" - requires: {component.requires}")
+            if component.system_libs:
+                self.output.debug(f" - system_libs: {component.system_libs}")
+            if component.frameworks:
+                self.output.debug(f" - frameworks: {component.frameworks}")
