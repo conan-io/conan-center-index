@@ -123,6 +123,23 @@ class MysqlConnectorCPPRecipe(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
+        cmakelists_path = os.path.join(self.source_folder, "CMakeLists.txt")
+
+        if os.path.exists(cmakelists_path):
+            with open(cmakelists_path, 'r') as file:
+                contents = file.read()
+                if "find_package(OpenSSL REQUIRED)" in contents:
+                    replace_in_file(self, cmakelists_path, "find_package(OpenSSL REQUIRED)",
+                                    "if(NOT TARGET OpenSSL::Crypto)\n    find_package(OpenSSL REQUIRED)\nendif()")
+
+        other_cmake_file = os.path.join(self.source_folder, "src", "cdk", "cmake", "FindOpenSSL.cmake")
+        if os.path.exists(other_cmake_file):
+            with open(other_cmake_file, 'r') as file:
+                contents = file.read()
+                if "find_package(OpenSSL REQUIRED)" in contents:
+                    replace_in_file(self, other_cmake_file, "find_package(OpenSSL REQUIRED)",
+                                    "if(NOT TARGET OpenSSL::Crypto)\n    find_package(OpenSSL REQUIRED)\nendif()")
+
        # INFO: Disable internal bootstrap to use Conan CMakeToolchain instead
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "bootstrap()", "")
         # INFO: Manage fPIC from recipe options
