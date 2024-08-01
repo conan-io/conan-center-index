@@ -83,6 +83,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.options["libmysqlclient"].shared = self.options.shared
+        self.options["openssl"].shared = self.options.shared
 
     def _package_folder_dep(self, dep):
         return self.dependencies[dep].package_folder.replace("\\", "/")
