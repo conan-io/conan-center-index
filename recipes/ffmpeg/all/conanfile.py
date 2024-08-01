@@ -5,7 +5,7 @@ from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import (
     apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename,
-    replace_in_file, rm, rmdir
+    replace_in_file, rm, rmdir, save, load
 )
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -75,6 +75,8 @@ class FFMpegConan(ConanFile):
         "with_libsvtav1": [True, False],
         "with_libaom": [True, False],
         "with_libdav1d": [True, False],
+        "with_jni": [True, False],
+        "with_mediacodec": [True, False],
         "disable_everything": [True, False],
         "disable_all_encoders": [True, False],
         "disable_encoders": [None, "ANY"],
@@ -156,6 +158,8 @@ class FFMpegConan(ConanFile):
         "with_libsvtav1": True,
         "with_libaom": True,
         "with_libdav1d": True,
+        "with_jni": False,
+        "with_mediacodec": False,
         "disable_everything": False,
         "disable_all_encoders": False,
         "disable_encoders": None,
@@ -230,6 +234,7 @@ class FFMpegConan(ConanFile):
             "with_libsvtav1": ["avcodec"],
             "with_libaom": ["avcodec"],
             "with_libdav1d": ["avcodec"],
+            "with_mediacodec": ["with_jni"],
         }
 
     @property
@@ -263,6 +268,9 @@ class FFMpegConan(ConanFile):
             del self.options.with_avfoundation
         if not self._version_supports_openvino:
             del self.options.with_openvino
+        if not self.settings.os == "Android":
+            del self.options.with_jni
+            del self.options.with_mediacodec
         if not self._version_supports_libsvtav1:
             self.options.rm_safe("with_libsvtav1")
 
@@ -293,7 +301,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_openh264:
             self.requires("openh264/2.3.1")
         if self.options.get_safe("with_openvino"):
-            self.requires("openvino/2024.2.0")
+            self.requires("openvino/2024.5.0")
         if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
         if self.options.with_opus:
@@ -404,11 +412,10 @@ class FFMpegConan(ConanFile):
                                   "#define X264_API_IMPORTS 1", "")
         if self.options.with_ssl == "openssl":
             # https://trac.ffmpeg.org/ticket/5675
-            openssl_libraries = " ".join(
-                [f"-l{lib}" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs])
+            openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
             replace_in_file(self, os.path.join(self.source_folder, "configure"),
                                   "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
-                                  f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libraries} || ")
+                                  f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libs} || ")
 
         replace_in_file(self, os.path.join(self.source_folder, "configure"), "echo libx264.lib", "echo x264.lib")
 
@@ -512,6 +519,8 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("securetransport", self.options.with_ssl == "securetransport"),
             opt_enable_disable("vulkan", self.options.get_safe("with_vulkan")),
             opt_enable_disable("libdav1d", self.options.get_safe("with_libdav1d")),
+            opt_enable_disable("jni", self.options.get_safe("with_jni")),
+            opt_enable_disable("mediacodec", self.options.get_safe("with_mediacodec")),
             "--disable-cuda",  # FIXME: CUDA support
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
@@ -684,6 +693,10 @@ class FFMpegConan(ConanFile):
 
         deps = PkgConfigDeps(self)
         deps.generate()
+
+        if self.options.with_ssl == "openssl":
+            openssl_libs = " ".join([f"-l{lib}" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs])
+            save(self, os.path.join(self.build_folder, "openssl_libs.list"), openssl_libs)
 
     def _split_and_format_options_string(self, flag_name, options_list):
         if not options_list:
