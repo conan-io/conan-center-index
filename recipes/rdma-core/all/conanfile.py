@@ -75,7 +75,8 @@ class PackageConan(ConanFile):
         # Otherwise get set to ${install_prefix}/car/run and the paths in
         # https://github.com/linux-rdma/rdma-core/blob/v52.0/buildlib/config.h.in
         # can exceed the 108-character limit for socket paths on Linux
-        tc.variables["CMAKE_INSTALL_RUNDIR"] = "/var/run"
+        if "CMAKE_INSTALL_RUNDIR" not in self.conf.get("tools.cmake.cmaketoolchain:extra_variables", check_type=dict, default={}):
+            tc.variables["CMAKE_INSTALL_RUNDIR"] = "/var/run"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
