@@ -34,6 +34,7 @@ patches:
       "patch_file": "patches/0001-Find-fontconfig-using-pkg-config.patch"
     - "base_path": "qt5/qtwebengine/src/3rdparty"
       "patch_file": "patches/Fix-errors-and-warnings-for-perfetto.patch"
+      "patch_description": "Fix qtwebengine build issues for vs 2022 (backport QTBUG-117073)"
     - "base_path": "qt5/qtbase"
       "patch_file": "patches/android-openssl.diff"
     - "base_path": "qt5/qtbase"
