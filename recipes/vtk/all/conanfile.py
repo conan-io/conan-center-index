@@ -55,12 +55,9 @@ class VtkConan(ConanFile):
         "with_cocoa": [True, False],
         "with_dawn": [True, False],
         "with_diy2": [True, False],
-        "with_doubleconversion": [True, False],
         "with_eigen": [True, False],
         "with_exodusII": [True, False],
         "with_expat": [True, False],
-        "with_exprtk": [True, False],
-        "with_fast_float": [True, False],
         "with_ffmpeg": [True, False],
         "with_fmt": [True, False],
         "with_fontconfig": [True, False],
@@ -74,15 +71,10 @@ class VtkConan(ConanFile):
         "with_ioss": [True, False],
         "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"],
         "with_jsoncpp": [True, False],
-        "with_kissfft": [True, False],
-        "with_kwiml": [True, False],
-        "with_libarchive": [True, False],
         "with_libharu": [True, False],
         "with_libproj": [True, False],
         "with_libxml2": [True, False],
         "with_loguru": [True, False],
-        "with_lz4": [True, False],
-        "with_lzma": [True, False],
         "with_metaio": [True, False],
         "with_mpi": [True, False],
         "with_mysql": ["libmysqlclient", "mariadb-connector-c", False],
@@ -100,13 +92,11 @@ class VtkConan(ConanFile):
         "with_pegtl": [True, False],
         "with_png": [True, False],
         "with_postgresql": [True, False],
-        "with_pugixml": [True, False],
         "with_qt": ["5", "6", False],
         "with_sdl2": [True, False],
         "with_sqlite": [True, False],
         "with_theora": [True, False],
         "with_tiff": [True, False],
-        "with_utf8": [True, False],
         "with_verdict": [True, False],
         "with_vpic": [True, False],
         "with_x11": [True, False],
@@ -114,7 +104,6 @@ class VtkConan(ConanFile):
         "with_xdmf3": [True, False],
         "with_zeromq": [True, False],
         "with_zfp": [True, False],
-        "with_zlib": [True, False],
         "with_zspace": [True, False],
     }
 
@@ -138,12 +127,9 @@ class VtkConan(ConanFile):
         "with_cocoa": True,
         "with_dawn": False,  # TODO: #24735
         "with_diy2": True,
-        "with_doubleconversion": True,
         "with_eigen": True,
         "with_exodusII": True,
         "with_expat": True,
-        "with_exprtk": True,
-        "with_fast_float": True,
         "with_ffmpeg": True,
         "with_fmt": True,
         "with_fontconfig": True,
@@ -157,15 +143,10 @@ class VtkConan(ConanFile):
         "with_ioss": True,
         "with_jpeg": "libjpeg",
         "with_jsoncpp": True,
-        "with_kissfft": True,
-        "with_kwiml": True,
-        "with_libarchive": True,
         "with_libharu": True,
         "with_libproj": True,
         "with_libxml2": True,
         "with_loguru": True,
-        "with_lz4": True,
-        "with_lzma": True,
         "with_metaio": True,
         "with_mpi": False,  # TODO: #18980 Should enable, since disabling this disables all parallel modules
         "with_mysql": "mariadb-connector-c",
@@ -183,13 +164,11 @@ class VtkConan(ConanFile):
         "with_pegtl": True,
         "with_png": True,
         "with_postgresql": True,
-        "with_pugixml": True,
         "with_qt": False,  # TODO: disabled due to too many conflicts
         "with_sdl2": True,
         "with_sqlite": True,
         "with_theora": True,
         "with_tiff": False,  # FIXME: linker errors for jbig
-        "with_utf8": True,
         "with_verdict": True,
         "with_vpic": True,
         "with_x11": True,
@@ -197,7 +176,6 @@ class VtkConan(ConanFile):
         "with_xdmf3": True,
         "with_zeromq": True,
         "with_zfp": True,
-        "with_zlib": True,
         "with_zspace": False,  # New zSpace device support, not ready for Linux
     }
 
@@ -233,6 +211,7 @@ class VtkConan(ConanFile):
             self.options.rm_safe("fPIC")
         # kissfft - we want the double format (also known as kiss_fft_scalar)
         self.options["kissfft"].datatype = "double"
+        self.options["pugixml"].wchar_mode = False
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -241,6 +220,18 @@ class VtkConan(ConanFile):
         del self.info.options.debug_modules
 
     def requirements(self):
+        # Always required by CommonArchive, CommonCore, CommonMath, CommonDataModel, CommonMisc, IOCore
+        self.requires("double-conversion/3.3.0")
+        self.requires("exprtk/0.0.2")
+        self.requires("fast_float/6.1.3")
+        self.requires("kissfft/131.1.0")
+        self.requires("libarchive/3.7.4")
+        self.requires("lz4/1.10.0", force=True)
+        self.requires("pugixml/1.14")
+        self.requires("utfcpp/4.0.4")
+        self.requires("xz_utils/[>=5.4.5 <6]")
+        self.requires("zlib/[>=1.2.11 <2]")
+
         if self.options.with_boost:
             self.requires("boost/1.85.0", force=True)
         if self.options.with_cgns:
@@ -249,16 +240,10 @@ class VtkConan(ConanFile):
             self.requires("cli11/2.4.2")
         if self.options.get_safe("with_dawn"):
             self.requires("dawn/cci.20240726")
-        if self.options.with_doubleconversion:
-            self.requires("double-conversion/3.3.0")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.with_expat:
             self.requires("expat/[>=2.6.2 <3]")
-        if self.options.with_exprtk:
-            self.requires("exprtk/0.0.2")
-        if self.options.with_fast_float:
-            self.requires("fast_float/6.1.3")
         if self.options.with_ffmpeg:
             self.requires("ffmpeg/6.1.1")
         if self.options.with_fmt:
@@ -281,10 +266,6 @@ class VtkConan(ConanFile):
             self.requires("mozjpeg/4.1.5")
         if self.options.with_jsoncpp:
             self.requires("jsoncpp/1.9.5")
-        if self.options.with_kissfft:
-            self.requires("kissfft/131.1.0")
-        if self.options.with_libarchive:
-            self.requires("libarchive/3.7.4")
         if self.options.with_libharu:
             self.requires("libharu/2.4.4")
         if self.options.with_libproj:
@@ -293,10 +274,6 @@ class VtkConan(ConanFile):
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_loguru:
             self.requires("loguru/cci.20230406")
-        if self.options.with_lz4:
-            self.requires("lz4/1.10.0", force=True)
-        if self.options.with_lzma:
-            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.with_mpi:
             self.requires("openmpi/4.1.6")
         if self.options.with_mysql == "libmysqlclient":
@@ -327,8 +304,6 @@ class VtkConan(ConanFile):
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_postgresql:
             self.requires("libpq/15.5")
-        if self.options.with_pugixml:
-            self.requires("pugixml/1.14")
         if self.options.with_qt == "5":
             self.requires("qt/[~5.15]")
         elif self.options.with_qt == "6":
@@ -342,16 +317,12 @@ class VtkConan(ConanFile):
         if self.options.with_tiff:
             # Getting jbig linker errors otherwise for some reason
             self.requires("libtiff/4.6.0", options={"jbig": False})
-        if self.options.with_utf8:
-            self.requires("utfcpp/4.0.4")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
         if self.options.with_zeromq:
             self.requires("zeromq/4.3.5")
         if self.options.with_zeromq:
             self.requires("zfp/1.0.1")
-        if self.options.with_zlib:
-            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.smp_enable_openmp:
             self.requires("openmp/system")
         if self.options.smp_enable_tbb:
@@ -384,10 +355,10 @@ class VtkConan(ConanFile):
         if self.options.enable_logging and not self.options.with_loguru:
             raise ConanInvalidConfiguration(f"{self.ref} requires with_loguru=True when enable_logging=True")
 
-        if "pugixml" in self.dependencies and self.dependencies["pugixml"].options.wchar_mode:
+        if self.dependencies["pugixml"].options.wchar_mode:
             raise ConanInvalidConfiguration(f"{self.ref} requires pugixml/*:wchar_mode=False")
 
-        if "kissfft" in self.dependencies and self.dependencies["kissfft"].options.datatype != "double":
+        if self.dependencies["kissfft"].options.datatype != "double":
             raise ConanInvalidConfiguration(f"{self.ref} requires kissfft/*:datatype=double")
 
         if self.options.with_qt and not self.dependencies["qt"].options.widgets:
@@ -477,7 +448,19 @@ class VtkConan(ConanFile):
             return "YES" if value else "NO"
 
         modules = {}
-        modules["CommonArchive"] = _want_no(self.options.with_libarchive)
+        # The common modules and their dependencies should always be available
+        modules["CommonArchive"] = "YES"
+        modules["CommonColor"] = "YES"
+        modules["CommonComputationalGeometry"] = "YES"
+        modules["CommonCore"] = "YES"
+        modules["CommonDataModel"] = "YES"
+        modules["CommonExecutionModel"] = "YES"
+        modules["CommonMath"] = "YES"
+        modules["CommonMisc"] = "YES"
+        modules["CommonPython"] = "NO"
+        modules["CommonSystem"] = "YES"
+        modules["CommonTransforms"] = "YES"
+        modules["IOCore"] = "YES"
         modules["DomainsMicroscopy"] = _want_no(self.options.with_openslide)
         modules["FiltersReebGraph"] = _want_no(self.options.with_boost)
         modules["GUISupportQt"] = _want_no(self.options.with_qt and qt.opengl != "no")
@@ -489,7 +472,7 @@ class VtkConan(ConanFile):
         modules["IOFFMPEG"] = _yes_no(self.options.with_ffmpeg)
         modules["IOGDAL"] = _yes_no(self.options.with_gdal)
         modules["IOLAS"] = _yes_no(self.options.get_safe("with_liblas") and self.options.with_boost)
-        modules["IOMySQL"] = _yes_no(self.options.with_mysql)
+        modules["IOMySQL"] = _yes_no(self.options.with_mysql and self.options.with_sqlite)
         modules["IOOCCT"] = _yes_no(self.options.with_opencascade)
         modules["IOODBC"] = _yes_no(self.options.with_odbc)
         modules["IOOpenVDB"] = _yes_no(self.options.with_openvdb)
@@ -510,12 +493,12 @@ class VtkConan(ConanFile):
         modules["cgns"] = _yes_no(self.options.with_cgns)
         modules["cli11"] = _yes_no(self.options.with_cli11)
         modules["diy2"] = _yes_no(self.options.with_diy2)
-        modules["doubleconversion"] = _yes_no(self.options.with_doubleconversion)
+        modules["doubleconversion"] = "YES"
         modules["eigen"] = _yes_no(self.options.with_eigen)
         modules["exodusII"] = _yes_no(self.options.with_exodusII)
         modules["expat"] = _yes_no(self.options.with_expat)
-        modules["exprtk"] = _yes_no(self.options.with_exprtk)
-        modules["fast_float"] = _yes_no(self.options.with_fast_float)
+        modules["exprtk"] = "YES"
+        modules["fast_float"] = "YES"
         modules["fides"] = _yes_no(self.options.get_safe("with_adios2"))
         modules["fmt"] = _yes_no(self.options.with_fmt)
         modules["freetype"] = _yes_no(self.options.with_freetype)
@@ -526,14 +509,14 @@ class VtkConan(ConanFile):
         modules["ioss"] = _yes_no(self.options.with_ioss)
         modules["jpeg"] = _yes_no(self.options.with_jpeg)
         modules["jsoncpp"] = _yes_no(self.options.with_jsoncpp)
-        modules["kissfft"] = _yes_no(self.options.with_kissfft)
-        modules["kwiml"] = _yes_no(self.options.with_kwiml)
+        modules["kissfft"] = "YES"
+        modules["kwiml"] = "YES"
         modules["libharu"] = _yes_no(self.options.with_libharu)
         modules["libproj"] = _yes_no(self.options.with_libproj)
         modules["libxml2"] = _yes_no(self.options.with_libxml2)
         modules["loguru"] = _yes_no(self.options.with_loguru)
-        modules["lz4"] = _yes_no(self.options.with_lz4)
-        modules["lzma"] = _yes_no(self.options.with_lzma)
+        modules["lz4"] = "YES"
+        modules["lzma"] = "YES"
         modules["metaio"] = _yes_no(self.options.with_metaio)
         modules["mpi"] = _yes_no(self.options.with_mpi)
         modules["netcdf"] = _yes_no(self.options.with_netcdf)
@@ -544,18 +527,18 @@ class VtkConan(ConanFile):
         modules["openvr"] = _yes_no(self.options.with_openvr)
         modules["pegtl"] = _yes_no(self.options.with_pegtl)
         modules["png"] = _yes_no(self.options.with_png)
-        modules["pugixml"] = _yes_no(self.options.with_pugixml)
+        modules["pugixml"] = "YES"
         modules["qt"] = _yes_no(self.options.with_qt)
         modules["sqlite"] = _yes_no(self.options.with_sqlite)
         modules["theora"] = _yes_no(self.options.with_theora)
         modules["tiff"] = _yes_no(self.options.with_tiff)
-        modules["utf8"] = _yes_no(self.options.with_utf8)
+        modules["utf8"] = "YES"
         modules["verdict"] = _yes_no(self.options.with_verdict)
         modules["vpic"] = _yes_no(self.options.with_vpic)
         modules["xdmf2"] = _yes_no(self.options.with_xdmf2)
         modules["xdmf3"] = _yes_no(self.options.with_xdmf3 and self.options.with_boost)
         modules["zfp"] = _yes_no(self.options.with_zfp)
-        modules["zlib"] = _yes_no(self.options.with_zlib)
+        modules["zlib"] = "YES"
 
         for pkg, value in modules.items():
             tc.variables[f"VTK_MODULE_ENABLE_VTK_{pkg}"] = value
@@ -669,9 +652,8 @@ class VtkConan(ConanFile):
 
         # double-version has their headers in <double-conversion/header> but VTK expects just <header>
         # TODO: this is not allowed, should patch instead
-        if self.options.with_doubleconversion:
-            double_conversion = self.dependencies["double-conversion"].cpp_info
-            double_conversion.includedirs[0] = os.path.join(double_conversion.includedirs[0], "double-conversion")
+        double_conversion = self.dependencies["double-conversion"].cpp_info
+        double_conversion.includedirs[0] = os.path.join(double_conversion.includedirs[0], "double-conversion")
 
         deps.generate()
 
