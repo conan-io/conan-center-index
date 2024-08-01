@@ -1,0 +1,116 @@
+From 772721b837c26db8182e422cc95ce1ce597052b9 Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Thu, 1 Aug 2024 13:52:40 +0300
+Subject: [PATCH] add missing external package support to some deps
+
+---
+ Common/Math/vtkFFT.h              |  2 +-
+ ThirdParty/kissfft/CMakeLists.txt | 19 ++++++++++++-------
+ ThirdParty/loguru/CMakeLists.txt  |  7 ++++++-
+ ThirdParty/zfp/CMakeLists.txt     | 29 +++++++++++++++++------------
+ 4 files changed, 36 insertions(+), 21 deletions(-)
+
+diff --git a/Common/Math/vtkFFT.h b/Common/Math/vtkFFT.h
+index dc3c3dc6cd..d9d14c7106 100644
+--- a/Common/Math/vtkFFT.h
++++ b/Common/Math/vtkFFT.h
+@@ -31,7 +31,7 @@
+ #include "vtk_kissfft.h" // kiss_fft_scalar, kiss_fft_cpx
+ // clang-format off
+ #include VTK_KISSFFT_HEADER(kiss_fft.h)
+-#include VTK_KISSFFT_HEADER(tools/kiss_fftr.h)
++#include VTK_KISSFFT_HEADER(kiss_fftr.h)
+ // clang-format on
+ 
+ #include <array>       // std::array
+diff --git a/ThirdParty/kissfft/CMakeLists.txt b/ThirdParty/kissfft/CMakeLists.txt
+index b93deb8864..4fdecd0e51 100644
+--- a/ThirdParty/kissfft/CMakeLists.txt
++++ b/ThirdParty/kissfft/CMakeLists.txt
+@@ -1,12 +1,17 @@
+ set(KISSFFT_SCALAR_TYPE "double")
+ 
+-vtk_module_third_party_internal(
+-  LICENSE_FILES           "vtkkissfft/COPYING"
+-  SPDX_LICENSE_IDENTIFIER "BSD-3-Clause"
+-  SPDX_COPYRIGHT_TEXT     "Copyright (c) 2003-2010 Mark Borgerding"
+-  SPDX_DOWNLOAD_LOCATION  "git+https://gitlab.kitware.com/third-party/kissfft.git@for/vtk-20211123-master-g6f09c27"
+-  VERSION                 "master"
+-  STANDARD_INCLUDE_DIRS)
++vtk_module_third_party(
++  INTERNAL
++    LICENSE_FILES           "vtkkissfft/COPYING"
++    SPDX_LICENSE_IDENTIFIER "BSD-3-Clause"
++    SPDX_COPYRIGHT_TEXT     "Copyright (c) 2003-2010 Mark Borgerding"
++    SPDX_DOWNLOAD_LOCATION  "git+https://gitlab.kitware.com/third-party/kissfft.git@for/vtk-20211123-master-g6f09c27"
++    VERSION                 "master"
++    STANDARD_INCLUDE_DIRS
++  EXTERNAL
++    PACKAGE kissfft
++    TARGETS kissfft::kissfft
++    STANDARD_INCLUDE_DIRS)
+ 
+ configure_file(
+   "${CMAKE_CURRENT_SOURCE_DIR}/vtk_kissfft.h.in"
+diff --git a/ThirdParty/loguru/CMakeLists.txt b/ThirdParty/loguru/CMakeLists.txt
+index 2c51381d88..83e4619ce2 100644
+--- a/ThirdParty/loguru/CMakeLists.txt
++++ b/ThirdParty/loguru/CMakeLists.txt
+@@ -1,4 +1,5 @@
+-vtk_module_third_party_internal(
++vtk_module_third_party(
++  INTERNAL
+     LICENSE_FILES
+       "vtkloguru/LICENSE"
+     SPDX_LICENSE_IDENTIFIER
+@@ -13,6 +14,10 @@ vtk_module_third_party_internal(
+       "PublicDomain-loguru"
+     VERSION
+       "2.1"
++    STANDARD_INCLUDE_DIRS
++  EXTERNAL
++    PACKAGE loguru
++    TARGETS loguru::loguru
+     STANDARD_INCLUDE_DIRS)
+ 
+ configure_file(
+diff --git a/ThirdParty/zfp/CMakeLists.txt b/ThirdParty/zfp/CMakeLists.txt
+index 9039e12c65..d55fed6997 100644
+--- a/ThirdParty/zfp/CMakeLists.txt
++++ b/ThirdParty/zfp/CMakeLists.txt
+@@ -1,15 +1,20 @@
+-vtk_module_third_party_internal(
+-  LICENSE_FILES
+-    "vtkzfp/LICENSE"
+-  SPDX_LICENSE_IDENTIFIER
+-    "BSD-3-Clause"
+-  SPDX_COPYRIGHT_TEXT
+-    "Copyright (c) 2014-2019, Lawrence Livermore National Security, LLC."
+-  SPDX_DOWNLOAD_LOCATION
+-    "git+https://gitlab.kitware.com/third-party/zfp.git@for/vtk-20190605-0.5.5"
+-  VERSION
+-    "0.5.5"
+-  STANDARD_INCLUDE_DIRS)
++vtk_module_third_party(
++  INTERNAL
++    LICENSE_FILES
++      "vtkzfp/LICENSE"
++    SPDX_LICENSE_IDENTIFIER
++      "BSD-3-Clause"
++    SPDX_COPYRIGHT_TEXT
++      "Copyright (c) 2014-2019, Lawrence Livermore National Security, LLC."
++    SPDX_DOWNLOAD_LOCATION
++      "git+https://gitlab.kitware.com/third-party/zfp.git@for/vtk-20190605-0.5.5"
++    VERSION
++      "0.5.5"
++    STANDARD_INCLUDE_DIRS
++  EXTERNAL
++    PACKAGE zfp
++    TARGETS zfp::zfp
++    STANDARD_INCLUDE_DIRS)
+ 
+ configure_file(
+   "${CMAKE_CURRENT_SOURCE_DIR}/vtk_zfp.h.in"
+-- 
+2.43.0
+

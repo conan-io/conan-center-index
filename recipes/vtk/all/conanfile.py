@@ -12,7 +12,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, rename, collect_libs
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, rename, collect_libs, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -185,7 +185,7 @@ class VtkConan(ConanFile):
         "with_sdl2": True,
         "with_sqlite": True,
         "with_theora": True,
-        "with_tiff": True,
+        "with_tiff": False,  # FIXME: linker errors for jbig
         "with_utf8": True,
         "with_verdict": True,
         "with_vpic": True,
@@ -279,7 +279,6 @@ class VtkConan(ConanFile):
         if self.options.with_jsoncpp:
             self.requires("jsoncpp/1.9.5")
         if self.options.with_kissfft:
-            # FIXME: external kissfft is not picked up by the project
             self.requires("kissfft/131.1.0")
         if self.options.with_libarchive:
             self.requires("libarchive/3.7.4")
@@ -347,7 +346,6 @@ class VtkConan(ConanFile):
         if self.options.with_zeromq:
             self.requires("zeromq/4.3.5")
         if self.options.with_zeromq:
-            # FIXME: external zfp is not picked up by the project
             self.requires("zfp/1.0.1")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
@@ -357,6 +355,7 @@ class VtkConan(ConanFile):
             self.requires("onetbb/2021.12.0", force=True)
 
         # Not available on CCI
+        # vtk-dicom
         # ADIOS2 | adios2::adios2
         # DirectX | DirectX::d3d11 DirectX::dxgi | VTK_USE_WIN32_OPENGL
         # HoloPlayCore | HoloPlayCore::HoloPlayCore
@@ -401,8 +400,7 @@ class VtkConan(ConanFile):
         tc.variables["VTK_VERSIONED_INSTALL"] = False
         # Nothing gets installed without this ON at the moment.
         tc.variables["VTK_INSTALL_SDK"] = True
-        # Disabled by default
-        tc.variables["VTK_TARGET_SPECIFIC_COMPONENTS"] = False
+        tc.variables["VTK_TARGET_SPECIFIC_COMPONENTS"] = True
 
         # Enable KITs - Quote: "Compiles VTK into a smaller set of libraries."
         # Quote: "Can be useful on platforms where VTK takes a long time to launch due to expensive disk access."
@@ -469,89 +467,95 @@ class VtkConan(ConanFile):
         if self.options.with_qt:
             qt = self.dependencies["qt"].options
 
+        def _want_no(value):
+            return "WANT" if value else "NO"
+
+        def _yes_no(value):
+            return "YES" if value else "NO"
+
         modules = {}
-        modules["CommonArchive"] = self.options.with_libarchive
-        modules["DomainsMicroscopy"] = self.options.with_openslide
-        modules["FiltersReebGraph"] = self.options.with_boost
-        modules["GUISupportQt"] = self.options.with_qt and qt.opengl != "no"
-        modules["GUISupportQtQuick"] = self.options.with_qt and qt.opengl != "no" and qt.gui and qt.qtshadertools and qt.qtdeclarative
-        modules["GUISupportQtSQL"] = self.options.with_qt
-        modules["GeovisGDAL"] = self.options.with_gdal
-        modules["IOADIOS2"] = self.options.get_safe("with_adios2")
-        modules["IOCatalystConduit"] = self.options.get_safe("with_catalyst")
-        modules["IOFFMPEG"] = self.options.with_ffmpeg
-        modules["IOGDAL"] = self.options.with_gdal
-        modules["IOLAS"] = self.options.get_safe("with_liblas") and self.options.with_boost
-        modules["IOMySQL"] = self.options.with_mysql
-        modules["IOOCCT"] = self.options.with_opencascade
-        modules["IOODBC"] = self.options.with_odbc
-        modules["IOOpenVDB"] = self.options.with_openvdb
-        modules["IOPDAL"] = self.options.with_pdal
-        modules["IOPostgreSQL"] = self.options.with_postgresql
-        modules["InfovisBoost"] = self.options.with_boost
-        modules["InfovisBoostGraphAlgorithms"] = self.options.with_boost
-        modules["Python"] = False
-        modules["RenderingFreeTypeFontConfig"] = self.options.with_fontconfig
-        modules["RenderingLookingGlass"] = self.options.with_holoplaycore
-        modules["RenderingOpenVR"] = self.options.with_openvr
-        modules["RenderingOpenXR"] = self.options.get_safe("with_openxr")
-        modules["RenderingOpenXRRemoting"] = self.options.get_safe("with_openxr")
-        modules["RenderingQt"] = self.options.with_qt
-        modules["RenderingWebGPU"] = self.options.with_sdl2 and self.options.get_safe("with_dawn", True)
-        modules["RenderingZSpace"] = self.options.with_zspace
-        modules["ViewsQt"] = self.options.with_qt
-        modules["cgns"] = self.options.with_cgns
-        modules["cli11"] = self.options.with_cli11
-        modules["diy2"] = self.options.with_diy2
-        modules["doubleconversion"] = self.options.with_doubleconversion
-        modules["eigen"] = self.options.with_eigen
-        modules["exodusII"] = self.options.with_exodusII
-        modules["expat"] = self.options.with_expat
-        modules["exprtk"] = self.options.with_exprtk
-        modules["fast_float"] = self.options.with_fast_float
-        modules["fides"] = self.options.get_safe("with_adios2")
-        modules["fmt"] = self.options.with_fmt
-        modules["freetype"] = self.options.with_freetype
-        modules["gl2ps"] = self.options.with_gl2ps
-        modules["glew"] = self.options.with_glew
-        modules["h5part"] = self.options.with_h5part
-        modules["hdf5"] = self.options.with_hdf5
-        modules["ioss"] = self.options.with_ioss
-        modules["jpeg"] = self.options.with_jpeg
-        modules["jsoncpp"] = self.options.with_jsoncpp
-        modules["kissfft"] = self.options.with_kissfft
-        modules["kwiml"] = self.options.with_kwiml
-        modules["libharu"] = self.options.with_libharu
-        modules["libproj"] = self.options.with_libproj
-        modules["libxml2"] = self.options.with_libxml2
-        modules["loguru"] = self.options.with_loguru
-        modules["lz4"] = self.options.with_lz4
-        modules["lzma"] = self.options.with_lzma
-        modules["metaio"] = self.options.with_metaio
-        modules["mpi"] = self.options.with_mpi
-        modules["netcdf"] = self.options.with_netcdf
-        modules["nlohmannjson"] = self.options.with_nlohmannjson
-        modules["octree"] = self.options.with_octree
-        modules["ogg"] = self.options.with_ogg
-        modules["opengl"] = self.options.with_opengl
-        modules["openvr"] = self.options.with_openvr
-        modules["pegtl"] = self.options.with_pegtl
-        modules["png"] = self.options.with_png
-        modules["pugixml"] = self.options.with_pugixml
-        modules["qt"] = self.options.with_qt
-        modules["sqlite"] = self.options.with_sqlite
-        modules["theora"] = self.options.with_theora
-        modules["tiff"] = self.options.with_tiff
-        modules["utf8"] = self.options.with_utf8
-        modules["verdict"] = self.options.with_verdict
-        modules["vpic"] = self.options.with_vpic
-        modules["xdmf2"] = self.options.with_xdmf2
-        modules["xdmf3"] = self.options.with_xdmf3 and self.options.with_boost
-        modules["zfp"] = self.options.with_zfp
-        modules["zlib"] = self.options.with_zlib
+        modules["CommonArchive"] = _want_no(self.options.with_libarchive)
+        modules["DomainsMicroscopy"] = _want_no(self.options.with_openslide)
+        modules["FiltersReebGraph"] = _want_no(self.options.with_boost)
+        modules["GUISupportQt"] = _want_no(self.options.with_qt and qt.opengl != "no")
+        modules["GUISupportQtQuick"] = _want_no(self.options.with_qt and qt.opengl != "no" and qt.gui and qt.qtshadertools and qt.qtdeclarative)
+        modules["GUISupportQtSQL"] = _want_no(self.options.with_qt)
+        modules["GeovisGDAL"] = _want_no(self.options.with_gdal)
+        modules["IOADIOS2"] = _yes_no(self.options.get_safe("with_adios2"))
+        modules["IOCatalystConduit"] = _yes_no(self.options.get_safe("with_catalyst"))
+        modules["IOFFMPEG"] = _yes_no(self.options.with_ffmpeg)
+        modules["IOGDAL"] = _yes_no(self.options.with_gdal)
+        modules["IOLAS"] = _yes_no(self.options.get_safe("with_liblas") and self.options.with_boost)
+        modules["IOMySQL"] = _yes_no(self.options.with_mysql)
+        modules["IOOCCT"] = _yes_no(self.options.with_opencascade)
+        modules["IOODBC"] = _yes_no(self.options.with_odbc)
+        modules["IOOpenVDB"] = _yes_no(self.options.with_openvdb)
+        modules["IOPDAL"] = _yes_no(self.options.with_pdal)
+        modules["IOPostgreSQL"] = _yes_no(self.options.with_postgresql)
+        modules["InfovisBoost"] = _yes_no(self.options.with_boost)
+        modules["InfovisBoostGraphAlgorithms"] = _want_no(self.options.with_boost)
+        modules["Python"] = "NO"
+        modules["RenderingFreeTypeFontConfig"] = _want_no(self.options.with_fontconfig)
+        modules["RenderingLookingGlass"] = _want_no(self.options.with_holoplaycore)
+        modules["RenderingOpenVR"] = _want_no(self.options.with_openvr)
+        modules["RenderingOpenXR"] = _want_no(self.options.get_safe("with_openxr"))
+        modules["RenderingOpenXRRemoting"] = _want_no(self.options.get_safe("with_openxr"))
+        modules["RenderingQt"] = _want_no(self.options.with_qt)
+        modules["RenderingWebGPU"] = _want_no(self.options.with_sdl2 and self.options.get_safe("with_dawn", True))
+        modules["RenderingZSpace"] = _want_no(self.options.with_zspace)
+        modules["ViewsQt"] = _want_no(self.options.with_qt)
+        modules["cgns"] = _yes_no(self.options.with_cgns)
+        modules["cli11"] = _yes_no(self.options.with_cli11)
+        modules["diy2"] = _yes_no(self.options.with_diy2)
+        modules["doubleconversion"] = _yes_no(self.options.with_doubleconversion)
+        modules["eigen"] = _yes_no(self.options.with_eigen)
+        modules["exodusII"] = _yes_no(self.options.with_exodusII)
+        modules["expat"] = _yes_no(self.options.with_expat)
+        modules["exprtk"] = _yes_no(self.options.with_exprtk)
+        modules["fast_float"] = _yes_no(self.options.with_fast_float)
+        modules["fides"] = _yes_no(self.options.get_safe("with_adios2"))
+        modules["fmt"] = _yes_no(self.options.with_fmt)
+        modules["freetype"] = _yes_no(self.options.with_freetype)
+        modules["gl2ps"] = _yes_no(self.options.with_gl2ps)
+        modules["glew"] = _yes_no(self.options.with_glew)
+        modules["h5part"] = _yes_no(self.options.with_h5part)
+        modules["hdf5"] = _yes_no(self.options.with_hdf5)
+        modules["ioss"] = _yes_no(self.options.with_ioss)
+        modules["jpeg"] = _yes_no(self.options.with_jpeg)
+        modules["jsoncpp"] = _yes_no(self.options.with_jsoncpp)
+        modules["kissfft"] = _yes_no(self.options.with_kissfft)
+        modules["kwiml"] = _yes_no(self.options.with_kwiml)
+        modules["libharu"] = _yes_no(self.options.with_libharu)
+        modules["libproj"] = _yes_no(self.options.with_libproj)
+        modules["libxml2"] = _yes_no(self.options.with_libxml2)
+        modules["loguru"] = _yes_no(self.options.with_loguru)
+        modules["lz4"] = _yes_no(self.options.with_lz4)
+        modules["lzma"] = _yes_no(self.options.with_lzma)
+        modules["metaio"] = _yes_no(self.options.with_metaio)
+        modules["mpi"] = _yes_no(self.options.with_mpi)
+        modules["netcdf"] = _yes_no(self.options.with_netcdf)
+        modules["nlohmannjson"] = _yes_no(self.options.with_nlohmannjson)
+        modules["octree"] = _yes_no(self.options.with_octree)
+        modules["ogg"] = _yes_no(self.options.with_ogg)
+        modules["opengl"] = _yes_no(self.options.with_opengl)
+        modules["openvr"] = _yes_no(self.options.with_openvr)
+        modules["pegtl"] = _yes_no(self.options.with_pegtl)
+        modules["png"] = _yes_no(self.options.with_png)
+        modules["pugixml"] = _yes_no(self.options.with_pugixml)
+        modules["qt"] = _yes_no(self.options.with_qt)
+        modules["sqlite"] = _yes_no(self.options.with_sqlite)
+        modules["theora"] = _yes_no(self.options.with_theora)
+        modules["tiff"] = _yes_no(self.options.with_tiff)
+        modules["utf8"] = _yes_no(self.options.with_utf8)
+        modules["verdict"] = _yes_no(self.options.with_verdict)
+        modules["vpic"] = _yes_no(self.options.with_vpic)
+        modules["xdmf2"] = _yes_no(self.options.with_xdmf2)
+        modules["xdmf3"] = _yes_no(self.options.with_xdmf3 and self.options.with_boost)
+        modules["zfp"] = _yes_no(self.options.with_zfp)
+        modules["zlib"] = _yes_no(self.options.with_zlib)
 
         for pkg, value in modules.items():
-            tc.variables[f"VTK_MODULE_ENABLE_VTK_{pkg}"] = "YES" if value else "NO"
+            tc.variables[f"VTK_MODULE_ENABLE_VTK_{pkg}"] = value
 
         missing_from_cci = {
             "diy2",
@@ -666,13 +670,17 @@ class VtkConan(ConanFile):
 
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
+    def _patch_remote_modules(self):
+        # These are only available after cmake.configure()
+        path = os.path.join(self.source_folder, "Remote", "MomentInvariants", "MomentInvariants", "vtkComputeMoments.cxx")
+        if os.path.exists(path):
+            replace_in_file(self, path, "tools/kiss_fftnd.h", "kiss_fftnd.h")
 
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
+        self._patch_remote_modules()
         cmake.build()
 
     def package(self):
@@ -685,10 +693,10 @@ class VtkConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
         # delete VTK-installed cmake files
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "VTK")
         self.cpp_info.set_property("cmake_target_name", "VTK::VTK")
         self.cpp_info.libs = collect_libs(self)
-        self.cpp_info.includedirs.append(os.path.join("include", "vtk"))
+        self.cpp_info.includedirs = [os.path.join("include", "vtk")]
