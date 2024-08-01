@@ -171,3 +171,4 @@ class MysqlConnectorCPPRecipe(ConanFile):
             self.cpp_info.system_libs = ["m", "resolv"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
+
