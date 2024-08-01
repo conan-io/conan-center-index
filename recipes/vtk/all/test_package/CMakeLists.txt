@@ -8,4 +8,4 @@ find_package (VTK COMPONENTS CommonCore RenderingFreeType REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 
-target_link_libraries(${PROJECT_NAME} VTK::VTK)
+target_link_libraries(${PROJECT_NAME} VTK::CommonCore VTK::RenderingFreeType)

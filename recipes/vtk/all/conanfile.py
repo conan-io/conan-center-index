@@ -4,15 +4,18 @@
 # General recipe design notes: readme-recipe-design.md
 # How to add a new version: readme-new-version.md
 # How to build a dependency through conan: readme-support-dependency.md
-
+import functools
+import json
 import os
+import re
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, rename, collect_libs, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, rename, collect_libs, \
+    replace_in_file, load, save
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -613,6 +616,7 @@ class VtkConan(ConanFile):
             "mariadb-connector-c": "MySQL",
             "memkind": "MEMKIND",
             "netcdf": "NetCDF",
+            "ogg": "OGG",
             "openslide": "OpenSlide",
             "openvr": "OpenVR",
             "openxr": "OpenXR",
@@ -644,6 +648,7 @@ class VtkConan(ConanFile):
             "mariadb-connector-c": "MySQL::MySQL",
             "memkind": "MEMKIND::MEMKIND",
             "netcdf": "NetCDF::NetCDF",
+            "ogg": "OGG::OGG",
             "openslide": "OpenSlide::OpenSlide",
             "openvr": "OpenVR::OpenVR",
             "openxr": "OpenXR::OpenXR",
@@ -670,6 +675,57 @@ class VtkConan(ConanFile):
 
         deps.generate()
 
+        # Store a mapping from CMake to Conan targets for later use in package_info()
+        targets_map = self._get_cmake_to_conan_targets_map(deps)
+        save(self, self._cmake_targets_map_json, json.dumps(targets_map, indent=2))
+
+    @property
+    def _cmake_targets_map_json(self):
+        return os.path.join(self.generators_folder, "cmake_to_conan_targets.json")
+
+    @property
+    @functools.lru_cache()
+    def _cmake_targets_map(self):
+        return json.loads(load(self, self._cmake_targets_map_json))
+
+    def _get_cmake_to_conan_targets_map(self, deps):
+        """
+        Returns a dict of Conan targets corresponding to generated CMake targets. E.g.:
+         'WebP::webpdecoder': 'libwebp::webpdecoder',
+         'WebP::webpdemux': 'libwebp::webpdemux',
+         'ZLIB::ZLIB': 'zlib::zlib',
+        """
+        def _get_targets(*args):
+            targets = [deps.get_property("cmake_target_name", *args),
+                       deps.get_property("cmake_module_target_name", *args)]
+            targets += deps.get_property("cmake_target_aliases", *args) or []
+            return list(filter(None, targets))
+
+        cmake_targets_map = {}
+        for req, dependency in self.dependencies.host.items():
+            dep_name = req.ref.name
+            for target in _get_targets(dependency):
+                cmake_targets_map[target] = f"{dep_name}::{dep_name}"
+            for component, _ in dependency.cpp_info.components.items():
+                for target in _get_targets(dependency, component):
+                    cmake_targets_map[target] = f"{dep_name}::{component}"
+
+        # System recipes need special handling since they rely on CMake's Find<Package> modules
+        cmake_targets_map.update({
+            "OpenMP::OpenMP_C": "openmp::openmp",
+            "OpenMP::OpenMP_CXX": "openmp::openmp",
+            "OpenGL::EGL": "egl::egl",
+            "OpenGL::GL": "opengl::opengl",
+            "OpenGL::GLES2": "opengl::opengl",
+            "OpenGL::GLES3": "opengl::opengl",
+            "OpenGL::GLU": "glu::glu",
+            "OpenGL::GLX": "opengl::opengl",
+            "OpenGL::OpenGL": "opengl::opengl",
+            "X11::X11": "xorg::x11",
+            "X11::Xcursor": "xorg::xcursor",
+        })
+        return cmake_targets_map
+
     def _patch_remote_modules(self):
         # These are only available after cmake.configure()
         path = os.path.join(self.source_folder, "Remote", "MomentInvariants", "MomentInvariants", "vtkComputeMoments.cxx")
@@ -683,6 +739,35 @@ class VtkConan(ConanFile):
         self._patch_remote_modules()
         cmake.build()
 
+    @property
+    def _cmake_targets_json(self):
+        return os.path.join(self.build_folder, "cmake_targets_info.json")
+
+    def _parse_cmake_targets(self, targets_file):
+        # Parse info from VTK-targets.cmake
+        # Example:
+        #   add_library(VTK::IOOggTheora SHARED IMPORTED)
+        #   set_target_properties(VTK::IOOggTheora PROPERTIES
+        #   INTERFACE_COMPILE_DEFINITIONS "VTK_HAS_OGGTHEORA_SUPPORT"
+        #   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include/vtk"
+        #   INTERFACE_LINK_LIBRARIES "VTK::CommonExecutionModel;VTK::IOMovie"
+        #   )
+        # The following properties are used by the project:
+        #   compile_definitions
+        #   compile_features (only sets CXX_STANDARD)
+        #   include_directories (always "${_IMPORT_PREFIX}/include/vtk")
+        #   link_libraries
+        #   system_include_directories (still include/vtk, but silent)
+        txt = load(self, targets_file)
+        raw_targets = re.findall(r"add_library\(VTK::(\S+) (\S+) IMPORTED\)", txt)
+        targets = {name: {"is_interface": kind == "INTERFACE"} for name, kind in raw_targets if name not in ["vtkbuild"]}
+        props_raw = re.findall(r"set_target_properties\(VTK::(\S+) PROPERTIES\n((?: *.+\n)+)\)", txt)
+        for name, body in props_raw:
+            for prop, value in re.findall(r"^ *INTERFACE_(\w+)\b \"(.+)\"$", body, re.M):
+                value = value.split(";")
+                targets[name][prop.lower()] = value
+        return targets
+
     def package(self):
         cmake = CMake(self)
         cmake.install()
@@ -695,8 +780,89 @@ class VtkConan(ConanFile):
         # delete VTK-installed cmake files
         # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
+        targets_config = os.path.join(self.package_folder, "lib", "cmake", "vtk", "VTK-targets.cmake")
+        cmake_targets = self._parse_cmake_targets(targets_config)
+        save(self, self._cmake_targets_json, json.dumps(cmake_targets, indent=2))
+
+    def _is_matching_cmake_platform(self, platform_id):
+        if platform_id == "Darwin":
+            return is_apple_os(self)
+        if platform_id == "Linux":
+            return self.settings.os in ["Linux", "FreeBSD"]
+        if platform_id in ["WIN32", "Windows"]:
+            return self.settings.os == "Windows"
+        if platform_id == "MinGW":
+            return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+        if platform_id in ["Android", "Emscripten", "SunOS"]:
+            return self.settings.os == platform_id
+        raise ConanException(f"Unexpected CMake PLATFORM_ID: '{platform_id}'")
+
+    def _cmake_target_to_conan_requirement(self, target):
+        if target.startswith("VTK::"):
+            # Internal target
+            return target[5:]
+        else:
+            # External target
+            req = self._cmake_targets_map.get(target, target)
+            if not req:
+                raise ConanException(f"Unexpected CMake target: '{target}'")
+            return req
+
+    @property
+    def _known_system_libs(self):
+        return ["m", "dl", "pthread", "rt", "log", "embind", "socket", "nsl", "wsock32", "ws2_32"]
+
+    def _transform_link_libraries(self, values):
+        """
+        Converts a list of LINK_LIBRARIES values into a list of component requirements, system_libs and frameworks.
+        """
+        requires = []
+        system_libs = []
+        frameworks = []
+        for v in values:
+            # strip "\$<LINK_ONLY:FontConfig::FontConfig>" etc.
+            v = re.sub(r"^\\\$<LINK_ONLY:(.*)>$", r"\1", v)
+            if not v:
+                continue
+            if "-framework " in v:
+                frameworks += re.findall(r"-framework (\S+)", v)
+            elif "PLATFORM_ID" in v:
+                # e.g. "\$<\$<PLATFORM_ID:WIN32>:wsock32>"
+                platform_id = re.search(r"PLATFORM_ID:(\w+)", v).group(1)
+                if self._is_matching_cmake_platform(platform_id):
+                    lib = re.search(":(.+)>$", v).group(1)
+                    system_libs.append(lib)
+            elif v.lower().replace(".lib", "") in self._known_system_libs:
+                system_libs.append(v)
+            elif v == "Threads::Threads":
+                if self.settings.os in ["Linux", "FreeBSD"]:
+                    system_libs.append("pthread")
+            else:
+                requires.append(self._cmake_target_to_conan_requirement(v))
+        return requires, system_libs, frameworks
+
+    @staticmethod
+    def _vtk_component_to_libname(component):
+        if component.startswith("vtk"):
+            return component
+        return f"vtk{component}"
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "VTK")
-        self.cpp_info.set_property("cmake_target_name", "VTK::VTK")
-        self.cpp_info.libs = collect_libs(self)
-        self.cpp_info.includedirs = [os.path.join("include", "vtk")]
+
+        # Fill in components based on VTK-targets.cmake
+        targets = load(self, self._cmake_targets_json)
+        for target_name, target_info in targets.items():
+            component = self.cpp_info.components[target_name]
+            component.includedirs = [os.path.join("include", "vtk")]
+            if not target_info["is_interface"]:
+                component.libs = self._vtk_component_to_libname(target_name)
+            for definition in target_info.get("compile_definitions", []):
+                if definition.startswith("-D"):
+                    definition = definition[2:]
+                component.defines.append(definition)
+            (
+                component.requires,
+                component.system_libs,
+                component.frameworks,
+            ) = self._transform_link_libraries(target_info.get("link_libraries", []))
