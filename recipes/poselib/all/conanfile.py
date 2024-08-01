@@ -67,8 +67,9 @@ class PoselibConan(ConanFile):
             )
 
         if self.settings.os == "Windows" and self.options.shared:
-            # Symbols are not exported
-            raise ConanInvalidConfiguration("Windows shared builds are not supported")
+            raise ConanInvalidConfiguration(
+                f"{self.ref} does not export symbols on Windows for a shared library build."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
