@@ -54,7 +54,6 @@ class VtkConan(ConanFile):
         "with_cgns": [True, False],
         "with_cli11": [True, False],
         "with_cocoa": [True, False],
-        "with_dawn": [True, False],
         "with_diy2": [True, False],
         "with_eigen": [True, False],
         "with_exodusII": [True, False],
@@ -125,7 +124,6 @@ class VtkConan(ConanFile):
         "with_cgns": True,
         "with_cli11": True,
         "with_cocoa": True,
-        "with_dawn": True,  # TODO: #24735
         "with_diy2": True,
         "with_eigen": True,
         "with_exodusII": True,
@@ -230,7 +228,7 @@ class VtkConan(ConanFile):
         if not is_apple_os(self):
             del self.options.with_cocoa
         if self.settings.os == "Emscripten":
-            del self.options.with_dawn
+            self.options.rm_safe("with_dawn")
         for opt in set(self._modules_from_all_versions) - set(self._module_opts):
             self.options.rm_safe(opt)
 
@@ -269,6 +267,9 @@ class VtkConan(ConanFile):
         if self.options.with_cli11:
             self.requires("cli11/2.4.2")
         if self.options.get_safe("with_dawn"):
+            # Dawn option has been disabled because its support is still very experimental.
+            # https://gitlab.kitware.com/vtk/vtk/-/blob/v9.3.1/Rendering/WebGPU/README.md?ref_type=tags#how-to-build-vtk-with-dawn-highly-experimental
+            # Dawn recipe is not yet merged: #24735
             self.requires("dawn/cci.20240726")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
@@ -456,7 +457,7 @@ class VtkConan(ConanFile):
         modules["RenderingOpenXR"] = _want_no(self.options.get_safe("with_openxr"))
         modules["RenderingOpenXRRemoting"] = _want_no(self.options.get_safe("with_openxr"))
         modules["RenderingQt"] = _want_no(self.options.with_qt)
-        modules["RenderingWebGPU"] = _want_no(self.options.with_sdl2 and self.options.get_safe("with_dawn", True))
+        modules["RenderingWebGPU"] = _want_no(self.options.with_sdl2 and (self.settings.os == "Emscripten" or self.options.get_safe("with_dawn")))
         modules["RenderingZSpace"] = _want_no(self.options.with_zspace)
         modules["ViewsQt"] = _want_no(self.options.with_qt)
         modules["cgns"] = _yes_no(self.options.with_cgns)
@@ -624,8 +625,6 @@ class VtkConan(ConanFile):
             tc.variables["NetCDF_HAS_PARALLEL"] = ""
         if self.options.with_libproj:
             tc.variables["LibPROJ_MAJOR_VERSION"] = Version(self.dependencies["proj"].ref.version).major
-        if self.options.with_dawn:
-            tc.variables["DAWN_LIBRARIES"] = "dawn::webgpu_dawn"
         tc.generate()
 
         deps = CMakeDeps(self)
