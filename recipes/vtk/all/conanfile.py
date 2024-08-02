@@ -73,6 +73,7 @@ class VtkConan(ConanFile):
         "with_ioss": [True, False],
         "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg", False],
         "with_jsoncpp": [True, False],
+        "with_kissfft": [True, False],
         "with_libharu": [True, False],
         "with_libproj": [True, False],
         "with_libxml2": [True, False],
@@ -146,9 +147,10 @@ class VtkConan(ConanFile):
         "with_h5part": True,
         "with_hdf5": True,
         "with_holoplaycore": True,
-        "with_ioss": True,
+        "with_ioss": False,
         "with_jpeg": "libjpeg",
         "with_jsoncpp": True,
+        "with_kissfft": False,  # Cannot unvendor by default because non-default datatype=double is required
         "with_libharu": True,
         "with_libproj": True,
         "with_libxml2": True,
@@ -261,14 +263,18 @@ class VtkConan(ConanFile):
         self.requires("double-conversion/3.3.0")
         self.requires("exprtk/0.0.2")
         self.requires("fast_float/6.1.3")
-        # Used in public vtkFFT.h
-        self.requires("kissfft/131.1.0", transitive_headers=True, transitive_libs=True)
         self.requires("libarchive/3.7.4")
         self.requires("lz4/1.9.4")
         self.requires("pugixml/1.14")
         self.requires("utfcpp/4.0.4")
         self.requires("xz_utils/[>=5.4.5 <6]")
         self.requires("zlib/[>=1.2.11 <2]")
+
+        # kissfft is always required, only replaces the vendored version if enabled.
+        # VTK mangles its symbols so not unvendoring it should still not cause conflicts.
+        if self.options.with_kissfft:
+            # Used in public vtkFFT.h
+            self.requires("kissfft/131.1.0", transitive_headers=True, transitive_libs=True)
 
         # The project uses modified loguru for logging, which cannot be unvendored
 
@@ -414,7 +420,7 @@ class VtkConan(ConanFile):
         if self.dependencies["pugixml"].options.wchar_mode:
             raise ConanInvalidConfiguration(f"{self.ref} requires pugixml/*:wchar_mode=False")
 
-        if self.dependencies["kissfft"].options.datatype != "double":
+        if self.options.with_kissfft and self.dependencies["kissfft"].options.datatype != "double":
             raise ConanInvalidConfiguration(f"{self.ref} requires kissfft/*:datatype=double")
 
         if self.options.with_qt and not self.dependencies["qt"].options.widgets:
@@ -428,6 +434,9 @@ class VtkConan(ConanFile):
 
         if self.options.with_xdmf3 and not self.options.with_boost:
             raise ConanInvalidConfiguration(f"{self.ref} requires with_boost=True when with_xdmf3=True")
+
+        if self.options.with_ioss and not self.options.with_cgns:
+            raise ConanInvalidConfiguration(f"{self.ref} requires with_cgns=True when with_ioss=True")
 
         # Just to check for conflicts
         self._compute_module_values()
@@ -649,6 +658,7 @@ class VtkConan(ConanFile):
         }
         for pkg in missing_from_cci:
             tc.variables[f"VTK_MODULE_USE_EXTERNAL_VTK_{pkg}"] = False
+        tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_kissfft"] = self.options.with_kissfft
         tc.variables["VTK_USE_EXTERNAL"] = True
 
         if self.options.with_netcdf:
@@ -791,17 +801,22 @@ class VtkConan(ConanFile):
         })
         return cmake_targets_map
 
-    def _patch_remote_modules(self):
-        # These are only available after cmake.configure()
-        path = os.path.join(self.source_folder, "Remote", "MomentInvariants", "MomentInvariants", "vtkComputeMoments.cxx")
-        if os.path.exists(path):
-            replace_in_file(self, path, "tools/kiss_fftnd.h", "kiss_fftnd.h")
+    def _patch_kissfft(self):
+        if self.options.with_kissfft:
+            # Using external kissfft, fix includes
+            # strict=False to cope with no_copy_source=True
+            replace_in_file(self, os.path.join(self.source_folder, "Common", "Math", "vtkFFT.h"),
+                            "tools/kiss_fftr.h", "kiss_fftr.h", strict=False)
+            # MomentInvariants is downloaded and only available after cmake.configure()
+            path = os.path.join(self.source_folder, "Remote", "MomentInvariants", "MomentInvariants", "vtkComputeMoments.cxx")
+            if os.path.exists(path):
+                replace_in_file(self, path, "tools/kiss_fftnd.h", "kiss_fftnd.h")
 
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
-        self._patch_remote_modules()
+        self._patch_kissfft()
         cmake.build()
 
     def _parse_cmake_targets(self, targets_file):
