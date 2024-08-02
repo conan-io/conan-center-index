@@ -12,7 +12,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import export_conandata_patches, get, rmdir, rename, replace_in_file, load, save, copy
+from conan.tools.files import export_conandata_patches, get, rmdir, rename, replace_in_file, load, save, copy, apply_conandata_patches
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
