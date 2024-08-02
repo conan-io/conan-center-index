@@ -8,6 +8,7 @@ import functools
 import json
 import os
 import re
+from collections import OrderedDict
 from pathlib import Path
 
 from conan import ConanFile
@@ -180,8 +181,9 @@ class VtkConan(ConanFile):
     }
     # NOTE: all non-third-party VTK modules are also available as options.
     # e.g. "IOGeoJSON": ["auto", "YES", "WANT", "DONT_WANT", "NO"], etc.
-    # There is almost no checks in the recipe for compatibility between them, though.
-    # We mostly rely on the checks done in the configure phase of the CMake build.
+    # See options/<version>.json for the full list of modules.
+    # Keep in mind that there is almost no validation done for compatibility between the module options.
+    # We mostly rely on the checks done in the configure phase of the CMake build instead.
 
     @property
     def _min_cppstd(self):
@@ -798,6 +800,19 @@ class VtkConan(ConanFile):
                 targets[name][prop.lower()] = value
         return targets
 
+    @staticmethod
+    def _strip_prefix(name):
+        if name.startswith("VTK::"):
+            return name[5:]
+
+    def _get_internal_deps_from_modules_json(self, modules_json):
+        modules = json.loads(load(self, modules_json))["modules"]
+        deps = {}
+        for module, info in modules.items():
+            module = self._strip_prefix(module)
+            deps[module] = list(map(self._strip_prefix, info.get("depends", []) + info.get("private_depends", [])))
+        return deps
+
     def _is_matching_cmake_platform(self, platform_id):
         if platform_id == "Darwin":
             return is_apple_os(self)
@@ -859,22 +874,35 @@ class VtkConan(ConanFile):
             return component
         return f"vtk{component}"
 
-    def _cmake_targets_to_conan_components(self, targets_info):
+    @staticmethod
+    def _remove_duplicates(values):
+        return list(OrderedDict.fromkeys(values))
+
+    def _cmake_targets_to_conan_components(self, targets_info, module_deps):
         # Fill in components based on VTK-targets.cmake
         components = {}
-        for target_name, target_info in targets_info.items():
+        for component_name, target_info in targets_info.items():
             component = {}
             if not target_info["is_interface"]:
-                component["libs"] = [self._vtk_component_to_libname(target_name)]
+                component["libs"] = [self._vtk_component_to_libname(component_name)]
             for definition in target_info.get("compile_definitions", []):
                 if definition.startswith("-D"):
                     definition = definition[2:]
+                if not "defines" in component:
+                    component["defines"] = []
                 component["defines"].append(definition)
             requires, system_libs, frameworks = self._transform_link_libraries(target_info.get("link_libraries", []))
-            component["requires"] = requires
-            component["system_libs"] = system_libs
-            component["frameworks"] = frameworks
-            components[target_name] = component
+            requires += module_deps.get(component_name, [])
+            if component_name in requires:
+                self.output.warning(f"CMake target VTK::{component_name} has a circular dependency on itself")
+                requires = [req for req in requires if req != component_name]
+            if requires:
+                component["requires"] = self._remove_duplicates(requires)
+            if system_libs:
+                component["system_libs"] = self._remove_duplicates(system_libs)
+            if frameworks:
+                component["frameworks"] = self._remove_duplicates(frameworks)
+            components[component_name] = component
         return components
 
     @property
@@ -893,7 +921,10 @@ class VtkConan(ConanFile):
         # Parse the VTK-targets.cmake file to generate Conan components
         targets_config = os.path.join(self.package_folder, "lib", "cmake", "vtk", "VTK-targets.cmake")
         cmake_target_props = self._parse_cmake_targets(targets_config)
-        components = self._cmake_targets_to_conan_components(cmake_target_props)
+        # Need to parse modules.json as well because private deps are missing from VTK-targets.cmake
+        modules_json = os.path.join(self.build_folder, "modules.json")
+        module_deps = self._get_internal_deps_from_modules_json(modules_json)
+        components = self._cmake_targets_to_conan_components(cmake_target_props, module_deps)
         save(self, self._components_json, json.dumps(components, indent=2))
 
         # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
@@ -904,6 +935,7 @@ class VtkConan(ConanFile):
         components = json.loads(load(self, self._components_json))
         for name, info in components.items():
             component = self.cpp_info.components[name]
+            component.set_property("cmake_target_name", f"VTK::{name}")
             component.includedirs = [os.path.join("include", "vtk")]
             component.libs = info.get("libs", [])
             component.defines = info.get("defines", [])
@@ -912,6 +944,7 @@ class VtkConan(ConanFile):
             component.frameworks = info.get("frameworks", [])
 
         # Add some missing private dependencies
+        self.cpp_info.components["pugixml"].requires.append("pugixml::pugixml")
         self.cpp_info.components["CommonArchive"].requires.append("libarchive::libarchive")
         if self.options.get_safe("with_memkind"):
             self.cpp_info.components["CommonCore"].requires.append("memkind::memkind")
