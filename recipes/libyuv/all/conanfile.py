@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -67,12 +68,13 @@ class LibyuvConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        replace_in_file(
-            self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "SET(CMAKE_POSITION_INDEPENDENT_CODE ON)",
-            "",
-        )
+        if Version(self.version) >= "1892":
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "CMakeLists.txt"),
+                "SET(CMAKE_POSITION_INDEPENDENT_CODE ON)",
+                "",
+            )
 
     def build(self):
         self._patch_sources()
