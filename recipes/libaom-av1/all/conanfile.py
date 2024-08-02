@@ -91,13 +91,12 @@ class LibaomAv1Conan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        if self.settings.os == "Windows" and os.path.exists(os.path.join(self.package_folder, "lib", "aom_dll.lib")):
-            # Make the names of aom_dll.lib and aom.dll consistent with each other and other platforms
-            os.rename(os.path.join(self.package_folder, "lib", "aom_dll.lib"),
-                      os.path.join(self.package_folder, "lib", "aom.lib"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "aom")
-        self.cpp_info.libs = ["aom"]
+        lib = "aom"
+        if Version(self.version) >= "3.8.0" and self.settings.os == "Windows" and self.options.shared:
+            lib = "aom_dll"
+        self.cpp_info.libs = [lib]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread", "m"]
