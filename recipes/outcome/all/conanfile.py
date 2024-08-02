@@ -42,6 +42,7 @@ class OutcomeConan(ConanFile):
     def requirements(self):
         if not self.options.single_header:
             self.requires("quickcpplib/cci.20231208")
+            self.requires("status-code/cci.20240614")
 
     def package_id(self):
         self.info.settings.clear()
