@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/0001-add-missing-external-package-support.patch"
       patch_description: "Add missing external package support to some deps"
       patch_type: "conan"
+    - patch_file: "patches/0002-make-libtiff-dependency-public.patch"
+      patch_description: "Make libtiff dependency public internally"
+      patch_type: "conan"

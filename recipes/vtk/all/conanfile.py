@@ -16,6 +16,7 @@ from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, rename, replace_in_file, load, save, copy
 from conan.tools.scm import Version
 
@@ -165,7 +166,7 @@ class VtkConan(ConanFile):
         "with_sdl2": True,
         "with_sqlite": True,
         "with_theora": True,
-        "with_tiff": True,  # FIXME: linker errors for jbig
+        "with_tiff": True,
         "with_verdict": True,
         "with_vpic": True,
         "with_x11": True,
@@ -223,6 +224,9 @@ class VtkConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        else:
+            # Uses windows.h
+            del self.options.with_zspace
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_x11
         if not is_apple_os(self):
@@ -344,8 +348,7 @@ class VtkConan(ConanFile):
         if self.options.with_theora:
             self.requires("theora/1.1.1")
         if self.options.with_tiff:
-            # Getting jbig linker errors otherwise for some reason
-            self.requires("libtiff/4.6.0", options={"jbig": False})
+            self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
         if self.options.with_zeromq:
@@ -374,7 +377,7 @@ class VtkConan(ConanFile):
         # catalyst | catalyst::catalyst
         # libLAS | ${libLAS_LIBRARIES}
         # ospray | ospray::ospray | VTK_ENABLE_OSPRAY
-        # zSpace | zSpace::zSpace | NOT VTK_ZSPACE_USE_COMPAT_SDK
+        # zSpace | zSpace::zSpace
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -458,7 +461,7 @@ class VtkConan(ConanFile):
         modules["RenderingOpenXRRemoting"] = _want_no(self.options.get_safe("with_openxr"))
         modules["RenderingQt"] = _want_no(self.options.with_qt)
         modules["RenderingWebGPU"] = _want_no(self.options.with_sdl2 and (self.settings.os == "Emscripten" or self.options.get_safe("with_dawn")))
-        modules["RenderingZSpace"] = _want_no(self.options.with_zspace)
+        modules["RenderingZSpace"] = _want_no(self.options.get_safe("with_zspace"))
         modules["ViewsQt"] = _want_no(self.options.with_qt)
         modules["cgns"] = _yes_no(self.options.with_cgns)
         modules["cli11"] = _yes_no(self.options.with_cli11)
@@ -519,11 +522,14 @@ class VtkConan(ConanFile):
 
         return modules
 
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        if self.options.with_qt:
+            # Qt's moc command fails to find libpcre2-16.so.0 otherwise
+            VirtualRunEnv(self).generate(scope="build")
+
         tc = CMakeToolchain(self)
 
         # No need for versions on installed names
@@ -578,7 +584,6 @@ class VtkConan(ConanFile):
         # VTK_USE_FUTURE_CONST
         # VTK_USE_OPENGL_DELAYED_LOAD
         # VTK_USE_WIN32_OPENGL
-        # VTK_ZSPACE_USE_COMPAT_SDK
         # TODO try VTK_USE_VIDEO_FOR_WINDOWS   for video capture
         # TODO try VTK_USE_VIDEO_FOR_WINDOWS_CAPTURE   for video capture
         # TODO try VTK_USE_MICROSOFT_MEDIA_FOUNDATION   for video capture (MP4)
@@ -953,8 +958,6 @@ class VtkConan(ConanFile):
             self.cpp_info.components["CommonCore"].requires.append("openmp::openmp")
         if "DomainsMicroscopy" in components:
             self.cpp_info.components["DomainsMicroscopy"].requires.append("openslide::openslide")
-        if "InfovisBoost" in components:
-            self.cpp_info.components["InfovisBoost"].requires.append("boost::headers")
         if "GeovisGDAL" in components:
             self.cpp_info.components["GeovisGDAL"].requires.append("gdal::gdal")
         if "GUISupportQt" in components:
@@ -964,7 +967,7 @@ class VtkConan(ConanFile):
         if "GUISupportQtSQL" in components:
             self.cpp_info.components["GUISupportQtSQL"].requires.extend(["qt::qtWidgets", "qt::qtSql"])
         if "InfovisBoost" in components:
-            self.cpp_info.components["InfovisBoost"].requires.append("boost::serialization")
+            self.cpp_info.components["InfovisBoost"].requires.extend(["boost::headers", "boost::serialization"])
         if "InfovisBoostGraphAlgorithms" in components:
             self.cpp_info.components["InfovisBoostGraphAlgorithms"].requires.append("boost::headers")
         if "IOADIOS2" in components:
@@ -1029,13 +1032,13 @@ class VtkConan(ConanFile):
             if self.options.get_safe("with_cocoa"):
                 self.cpp_info.components["RenderingUI"].frameworks.append("Cocoa")
         if "RenderingVR" in components and self.options.with_zeromq:
-            self.cpp_info.components["RenderingVR"].requires.append("libzmq::libzmq")
+            self.cpp_info.components["RenderingVR"].requires.append("zeromq::zeromq")
         if "RenderingWebGPU" in components:
             self.cpp_info.components["RenderingWebGPU"].requires.append("sdl::sdl")
             if self.settings.os != "Emscripten":
                 self.cpp_info.components["RenderingWebGPU"].requires.append("dawn::dawn")
-        if "RenderingZSpace" in components:
-            self.cpp_info.components["RenderingZSpace"].requires.append("zspace::zspace")
+        # if "RenderingZSpace" in components:
+        #     self.cpp_info.components["RenderingZSpace"].requires.append("zspace::zspace")
         if "fides" in components:
             self.cpp_info.components["fides"].requires.append("adios2::adios2")
         if "xdmf3" in components:
