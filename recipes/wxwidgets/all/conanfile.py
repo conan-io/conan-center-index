@@ -180,7 +180,7 @@ class wxWidgetsConan(ConanFile):
         if self.options.liblzma == "xz_utils":
             self.requires("xz_utils/[>=5.4.4 <6]")
         if self.options.expat == "expat":
-            self.requires("expat/2.5.0")
+            self.requires("expat/[>=2.6.2 <3]")
         if self.options.regex == "regex":
             self.requires("pcre2/10.42")
         if self.options.get_safe("svg") == "nanosvg":
