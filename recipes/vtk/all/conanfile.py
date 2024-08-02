@@ -112,12 +112,12 @@ class VtkConan(ConanFile):
         "shared": False,
         "fPIC": True,
         ### compile options ###
-        "enable_logging": False,
+        "enable_logging": True,
         ### symmetric multiprocessing ###
         "smp_implementation": "STDThread",
         "smp_enable_sequential": True,
         "smp_enable_stdthread": True,
-        "smp_enable_openmp": False,  # TODO: #22360
+        "smp_enable_openmp": True,  # TODO: #22360
         "smp_enable_tbb": True,
         ### debugging ###
         "debug_modules": True,
@@ -126,7 +126,7 @@ class VtkConan(ConanFile):
         "with_cgns": True,
         "with_cli11": True,
         "with_cocoa": True,
-        "with_dawn": False,  # TODO: #24735
+        "with_dawn": True,  # TODO: #24735
         "with_diy2": True,
         "with_eigen": True,
         "with_exodusII": True,
@@ -135,12 +135,12 @@ class VtkConan(ConanFile):
         "with_fmt": True,
         "with_fontconfig": True,
         "with_freetype": True,
-        "with_gdal": False,  # TODO #23233
+        "with_gdal": True,  # TODO #23233
         "with_gl2ps": True,
         "with_glew": True,
         "with_h5part": True,
         "with_hdf5": True,
-        "with_holoplaycore": False,  # not installed correctly
+        "with_holoplaycore": True,  # not installed correctly
         "with_ioss": True,
         "with_jpeg": "libjpeg",
         "with_jsoncpp": True,
@@ -149,27 +149,27 @@ class VtkConan(ConanFile):
         "with_libxml2": True,
         "with_loguru": True,
         "with_metaio": True,
-        "with_mpi": False,  # TODO: #18980 Should enable, since disabling this disables all parallel modules
+        "with_mpi": True,  # TODO: #18980 Should enable, since disabling this disables all parallel modules
         "with_mysql": "mariadb-connector-c",
         "with_netcdf": True,
         "with_nlohmannjson": True,
         "with_octree": True,
         "with_odbc": True,
         "with_ogg": True,
-        "with_opencascade": False,  # very heavy
+        "with_opencascade": True,  # very heavy
         "with_opengl": True,
-        "with_openslide": False,  # TODO: #21138
+        "with_openslide": True,  # TODO: #21138
         "with_openvdb": True,
         "with_openvr": True,
-        "with_pdal": False,  # TODO: #21296
+        "with_pdal": True,  # TODO: #21296
         "with_pegtl": True,
         "with_png": True,
         "with_postgresql": True,
-        "with_qt": False,  # TODO: disabled due to too many conflicts
+        "with_qt": "6",  # TODO: disabled due to too many conflicts
         "with_sdl2": True,
         "with_sqlite": True,
         "with_theora": True,
-        "with_tiff": False,  # FIXME: linker errors for jbig
+        "with_tiff": True,  # FIXME: linker errors for jbig
         "with_verdict": True,
         "with_vpic": True,
         "with_x11": True,
@@ -177,7 +177,7 @@ class VtkConan(ConanFile):
         "with_xdmf3": True,
         "with_zeromq": True,
         "with_zfp": True,
-        "with_zspace": False,  # New zSpace device support, not ready for Linux
+        "with_zspace": True,  # New zSpace device support, not ready for Linux
     }
     # NOTE: all non-third-party VTK modules are also available as options.
     # e.g. "IOGeoJSON": ["auto", "YES", "WANT", "DONT_WANT", "NO"], etc.
@@ -279,11 +279,11 @@ class VtkConan(ConanFile):
         if self.options.with_fmt:
             self.requires("fmt/10.2.1")
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.15.0")
+            self.requires("fontconfig/2.15.0", force=True)
         if self.options.with_freetype:
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/2.13.0", force=True)
         if self.options.with_gdal:
-            self.requires("gdal/3.8.3")
+            self.requires("gdal/3.9.1", force=True)
         if self.options.with_glew:
             self.requires("glew/2.2.0")
         if self.options.with_hdf5:
@@ -301,7 +301,7 @@ class VtkConan(ConanFile):
         if self.options.with_libproj:
             self.requires("proj/9.3.1")
         if self.options.with_libxml2:
-            self.requires("libxml2/[>=2.12.5 <3]")
+            self.requires("libxml2/[>=2.12.5 <3]", force=True)
         if self.options.with_loguru:
             self.requires("loguru/cci.20230406")
         if self.options.with_mpi:
@@ -323,17 +323,17 @@ class VtkConan(ConanFile):
         if self.options.with_opengl:
             self.requires("opengl/system")
         if self.options.with_openslide:
-            self.requires("openslide/0")
+            self.requires("openslide/4.0.0")
         if self.options.with_openvdb:
             self.requires("openvdb/11.0.0")
         if self.options.with_openvr:
             self.requires("openvr/1.16.8")
         if self.options.with_pdal:
-            self.requires("pdal/2.3.0")
+            self.requires("pdal/2.7.2")
         if self.options.with_png:
-            self.requires("libpng/[>=1.6 <2]")
+            self.requires("libpng/[>=1.6 <2]", force=True)
         if self.options.with_postgresql:
-            self.requires("libpq/15.5")
+            self.requires("libpq/15.5", force=True)
         if self.options.with_qt == "5":
             self.requires("qt/[~5.15]")
         elif self.options.with_qt == "6":
@@ -357,6 +357,10 @@ class VtkConan(ConanFile):
             self.requires("openmp/system")
         if self.options.smp_enable_tbb:
             self.requires("onetbb/2021.12.0", force=True)
+
+        self.requires("glib/2.78.3", override=True)
+        self.requires("hwloc/2.10.0", override=True)
+        self.requires("xkbcommon/1.6.0", override=True)
 
         # Not available on CCI
         # vtk-dicom
@@ -632,8 +636,9 @@ class VtkConan(ConanFile):
         deps = CMakeDeps(self)
 
         # allow newer major versions to be used
-        deps.set_property("fmt", "cmake_config_version_compat", "AnyNewerVersion")
         deps.set_property("fast_float", "cmake_config_version_compat", "AnyNewerVersion")
+        deps.set_property("fmt", "cmake_config_version_compat", "AnyNewerVersion")
+        deps.set_property("qt", "cmake_config_version_compat", "AnyNewerVersion")
 
         # VTK expects different find_package() filenames and targets (check ThirdParty/LIB/CMakeLists.txt)
         cmake_file_names = {
