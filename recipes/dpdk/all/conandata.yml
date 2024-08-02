@@ -1,0 +1,4 @@
+sources:
+  "24.07":
+    url: https://fast.dpdk.org/rel/dpdk-24.07.tar.xz
+    sha256: 9944f7e5f268e7ac9b4193e2cd54ef6d98f6e1d7dddc967c77ae4f6616d6fbbd
