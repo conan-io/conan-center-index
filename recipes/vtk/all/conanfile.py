@@ -5,6 +5,7 @@
 # How to add a new version: readme-new-version.md
 # How to build a dependency through conan: readme-support-dependency.md
 import functools
+import itertools
 import json
 import os
 import re
@@ -16,8 +17,8 @@ from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, rename, replace_in_file, load, save, copy
+from conan.tools.env import VirtualRunEnv
+from conan.tools.files import export_conandata_patches, get, rmdir, rename, replace_in_file, load, save, copy
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -788,7 +789,7 @@ class VtkConan(ConanFile):
         #   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include/vtk"
         #   INTERFACE_LINK_LIBRARIES "VTK::CommonExecutionModel;VTK::IOMovie"
         #   )
-        # The following properties are used by the project:
+        # The following properties are set by the project:
         #   compile_definitions
         #   compile_features (only sets CXX_STANDARD)
         #   include_directories (always "${_IMPORT_PREFIX}/include/vtk")
@@ -809,13 +810,17 @@ class VtkConan(ConanFile):
         if name.startswith("VTK::"):
             return name[5:]
 
-    def _get_internal_deps_from_modules_json(self, modules_json):
+    def _get_info_from_modules_json(self, modules_json):
         modules = json.loads(load(self, modules_json))["modules"]
-        deps = {}
-        for module, info in modules.items():
-            module = self._strip_prefix(module)
-            deps[module] = list(map(self._strip_prefix, info.get("depends", []) + info.get("private_depends", [])))
-        return deps
+        return {
+            self._strip_prefix(module): {
+                "deps": list(map(self._strip_prefix, mod_info.get("depends", []) + mod_info.get("private_depends", []))),
+                "lib_name": mod_info.get("library_name"),
+                "implementable": mod_info.get("implementable", False),
+                "implements": list(map(self._strip_prefix, mod_info.get("implements", []))),
+            }
+            for module, mod_info in modules.items()
+        }
 
     def _is_matching_cmake_platform(self, platform_id):
         if platform_id == "Darwin":
@@ -872,23 +877,24 @@ class VtkConan(ConanFile):
                 requires.append(self._cmake_target_to_conan_requirement(v))
         return requires, system_libs, frameworks
 
-    @staticmethod
-    def _vtk_component_to_libname(component):
-        if component.startswith("vtk"):
-            return component
-        return f"vtk{component}"
+    @property
+    def _lib_suffix(self):
+        return "d" if self.settings.os == "Windows" and self.settings.build_type == "Debug" else ""
 
     @staticmethod
     def _remove_duplicates(values):
         return list(OrderedDict.fromkeys(values))
 
-    def _cmake_targets_to_conan_components(self, targets_info, module_deps):
-        # Fill in components based on VTK-targets.cmake
+    def _cmake_targets_to_conan_components(self, targets_info, modules_info):
+        # Fill in components based on VTK-targets.cmake and modules.json
         components = {}
-        for component_name, target_info in targets_info.items():
+        for name, target_info in targets_info.items():
+            module_info = modules_info.get(name, {})
             component = {}
             if not target_info["is_interface"]:
-                component["libs"] = [self._vtk_component_to_libname(component_name)]
+                default_libname = f"vtk{name}" if not name.startswith("vtk") else name
+                lib = module_info.get("lib_name", default_libname)
+                component["libs"] = [lib + self._lib_suffix]
             for definition in target_info.get("compile_definitions", []):
                 if definition.startswith("-D"):
                     definition = definition[2:]
@@ -896,17 +902,23 @@ class VtkConan(ConanFile):
                     component["defines"] = []
                 component["defines"].append(definition)
             requires, system_libs, frameworks = self._transform_link_libraries(target_info.get("link_libraries", []))
-            requires += module_deps.get(component_name, [])
-            if component_name in requires:
-                self.output.warning(f"CMake target VTK::{component_name} has a circular dependency on itself")
-                requires = [req for req in requires if req != component_name]
+            requires += module_info.get("deps", [])
+            if name in requires:
+                # Only VTK::pugixml has this issue as of v9.3.1
+                self.output.warning(f"CMake target VTK::{name} has a circular dependency on itself")
+                requires = [req for req in requires if req != name]
             if requires:
                 component["requires"] = self._remove_duplicates(requires)
             if system_libs:
                 component["system_libs"] = self._remove_duplicates(system_libs)
             if frameworks:
                 component["frameworks"] = self._remove_duplicates(frameworks)
-            components[component_name] = component
+            if module_info.get("implementable", False):
+                component["implementable"] = True
+            implements = module_info.get("implements", [])
+            if implements:
+                component["implements"] = implements
+            components[name] = component
         return components
 
     @property
@@ -927,13 +939,88 @@ class VtkConan(ConanFile):
         cmake_target_props = self._parse_cmake_targets(targets_config)
         # Need to parse modules.json as well because private deps are missing from VTK-targets.cmake
         modules_json = os.path.join(self.build_folder, "modules.json")
-        module_deps = self._get_internal_deps_from_modules_json(modules_json)
-        components = self._cmake_targets_to_conan_components(cmake_target_props, module_deps)
+        modules_info = self._get_info_from_modules_json(modules_json)
+        # Generate components info for package_info()
+        components = self._cmake_targets_to_conan_components(cmake_target_props, modules_info)
         save(self, self._components_json, json.dumps(components, indent=2))
 
+        # Write autoinit headers
+        self._generate_autoinits(modules_info)
+
         # create a cmake module with our special variables
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         cmake_module_path = os.path.join(self.package_folder, "lib", "cmake", "vtk", "conan-official-vtk-variables.cmake")
         save(self, cmake_module_path, "set(VTK_ENABLE_KITS FALSE)\n")
+
+    def _generate_autoinits(self, modules_info):
+        ### VTK AUTOINIT ###
+        # VTK has a special factory registration system, and modules that implement others have to be registered.
+        # This mechanism was encoded into VTK's cmake autoinit system, which we (probably) can't use in a conan context.
+        # So, we will implement the required autoinit registration things here.
+        #
+        # This recipe will ultimately generate special header files that contain lines like:
+        #   #define vtkRenderingCore_AUTOINIT 2(vtkRenderingFreeType, vtkInteractionStyle)
+        #       (this module is implemented)              (by these modules)
+        #            IMPLEMENTABLE         by                 IMPLEMENTS
+        #
+        # There is one header per implementable module, and each user of an implementing-module must
+        # have a special #define that tells the VTK system where this header is.  The header will be
+        # included into the compilation and the autoinit system will register the implementing-module.
+        #
+        # But the trick is the library consumer will only declare they want to use an implementing module
+        # (eg vtkRenderingOpenGL2) but will not use that module directly.
+        # Instead, they will only use vtkRenderingCore and expect the OpenGL2 module to be magically built
+        # by the core factory.  OpenGL2 module has to register with the Core module, without the library
+        # consumer specifically calling the registration.
+        #
+        # VTK's cmake seems to generate headers for different combinations of components,
+        #   so they need to create a unique autoinit file when a downstream consumer calls cmake function
+        #   vtk_module_autoinit(TARGETS <target>... MODULES <module>...), so each target must know ALL
+        #   of the vtk modules they will use (at cmake-time), and a unique header will be made for that combination.
+        #  That header will be #included via a clever define for that target.
+        #
+        # This won't work in our case, and that would only work for cmake consumers.
+        #
+        # So I'm going to try a different approach:
+        #  * define a header for all possible combinations of implementer-modules for an implementable-module.
+        #  * use a define for each of the implementer-modules.  If a target is using that implementer-module,
+        #     it will activate the autoinit for that module thanks to the #define flag
+        #
+        # Also note we have to be clever with the ordering of the combinations, as we only want to pick ONE of the combos.
+        #
+        # The max number of implementer combinations as of v9.3.1 is 2^7 - 1 = 127 for RenderingCore, which is tolerable.
+        #
+        # Example of an autoinit file with two implementers:
+        ##  #if 0
+        ##
+        ##  #elif defined(VTK_CONAN_WANT_AUTOINIT_vtkRenderingOpenGL2) && defined(VTK_CONAN_WANT_AUTOINIT_vtkInteractionStyle)
+        ##  #  define vtkRenderingCore_AUTOINIT 2(vtkRenderingOpenGL2,vtkInteractionStyle)
+        ##
+        ##  #elif defined(VTK_CONAN_WANT_AUTOINIT_vtkRenderingOpenGL2)
+        ##  #  define vtkRenderingCore_AUTOINIT 1(vtkRenderingOpenGL2)
+        ##
+        ##  #elif defined(VTK_CONAN_WANT_AUTOINIT_vtkInteractionStyle)
+        ##  #  define vtkRenderingCore_AUTOINIT 1(vtkInteractionStyle)
+        ##
+        ##  #endif
+
+        # Gather all implementers for each implementable module
+        autoinits = {mod: set() for mod, info in modules_info.items() if info["implementable"]}
+        for module_name, module_info in modules_info.items():
+            for implementable in module_info["implements"]:
+                autoinits[implementable].add(module_name)
+        # Write those special autoinit header files
+        for implementable, all_implementers in autoinits.items():
+            self.output.debug(f"Generating autoinit headers for {implementable} with ({', '.join(all_implementers)}) implementers")
+            all_implementers = [f"vtk{impl}" for impl in sorted(all_implementers)]
+            content = "#if 0\n\n"
+            for L in range(len(all_implementers), 0, -1):
+                for combination in itertools.combinations(all_implementers, L):
+                    content += f"#elif {' && '.join(f'defined(VTK_CONAN_WANT_AUTOINIT_{comp})' for comp in combination)}\n"
+                    content += f"#  define vtk{implementable}_AUTOINIT {L}({','.join(combination)})\n\n"
+            content += "#endif\n"
+            autoinit_file = os.path.join(self.package_folder, "include", "vtk", "vtk-conan", f"vtk_autoinit_vtk{implementable}.h")
+            save(self, autoinit_file, content)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "VTK")
@@ -943,6 +1030,7 @@ class VtkConan(ConanFile):
         self.cpp_info.builddirs = [cmake_modules_dir]
         self.cpp_info.set_property("cmake_build_modules", [cmake_module_path])
 
+        # Define components based on the .json file generated in package()
         components = json.loads(load(self, self._components_json))
         for name, info in components.items():
             component = self.cpp_info.components[name]
@@ -953,6 +1041,10 @@ class VtkConan(ConanFile):
             component.requires = info.get("requires", [])
             component.system_libs = info.get("system_libs", [])
             component.frameworks = info.get("frameworks", [])
+            # Add any required autoinit definitions for this component
+            for implementable in info.get("implements", []):
+                component.defines.append(f'vtk{implementable}_AUTOINIT_INCLUDE="vtk-conan/vtk_autoinit_vtk{implementable}.h"')
+                component.defines.append(f"VTK_CONAN_WANT_AUTOINIT_vtk{name}")
 
         # Add some missing private dependencies
         self.cpp_info.components["pugixml"].requires.append("pugixml::pugixml")
