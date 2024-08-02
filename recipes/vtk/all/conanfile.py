@@ -111,7 +111,7 @@ class VtkConan(ConanFile):
         "smp_implementation": "STDThread",
         "smp_enable_sequential": True,
         "smp_enable_stdthread": True,
-        "smp_enable_openmp": True,  # TODO: #22360
+        "smp_enable_openmp": False,  # TODO: #22360
         "smp_enable_tbb": True,
         ### debugging ###
         "debug_modules": True,
@@ -128,12 +128,12 @@ class VtkConan(ConanFile):
         "with_fmt": True,
         "with_fontconfig": True,
         "with_freetype": True,
-        "with_gdal": True,  # TODO #23233
+        "with_gdal": False,  # TODO #23233
         "with_gl2ps": True,
         "with_glew": True,
         "with_h5part": True,
         "with_hdf5": True,
-        "with_holoplaycore": True,  # not installed correctly
+        "with_holoplaycore": True,
         "with_ioss": True,
         "with_jpeg": "libjpeg",
         "with_jsoncpp": True,
@@ -141,23 +141,23 @@ class VtkConan(ConanFile):
         "with_libproj": True,
         "with_libxml2": True,
         "with_metaio": True,
-        "with_mpi": True,  # TODO: #18980 Should enable, since disabling this disables all parallel modules
+        "with_mpi": False,  # TODO: #18980 Should enable, since disabling this disables all parallel modules
         "with_mysql": "mariadb-connector-c",
         "with_netcdf": True,
         "with_nlohmannjson": True,
         "with_octree": True,
         "with_odbc": True,
         "with_ogg": True,
-        "with_opencascade": True,  # very heavy
+        "with_opencascade": False,  # very heavy
         "with_opengl": True,
-        "with_openslide": True,  # TODO: #21138
+        "with_openslide": False,  # TODO: #21138
         "with_openvdb": True,
         "with_openvr": True,
-        "with_pdal": True,  # TODO: #21296
+        "with_pdal": False,  # TODO: #21296
         "with_pegtl": True,
         "with_png": True,
         "with_postgresql": True,
-        "with_qt": "6",  # TODO: disabled due to too many conflicts
+        "with_qt": False,  # TODO: disabled due to too many conflicts
         "with_sdl2": True,
         "with_sqlite": True,
         "with_theora": True,
@@ -169,7 +169,7 @@ class VtkConan(ConanFile):
         "with_xdmf3": True,
         "with_zeromq": True,
         "with_zfp": True,
-        "with_zspace": True,  # New zSpace device support, not ready for Linux
+        "with_zspace": True,
     }
     # NOTE: all non-third-party VTK modules are also available as options.
     # e.g. "IOGeoJSON": ["auto", "YES", "WANT", "DONT_WANT", "NO"], etc.
@@ -245,13 +245,14 @@ class VtkConan(ConanFile):
         del self.info.options.debug_modules
 
     def requirements(self):
-        # Always required by CommonArchive, CommonCore, CommonMath, CommonDataModel, CommonMisc, IOCore
+        # These are always required by CommonArchive, CommonCore, CommonMath, CommonDataModel, CommonMisc, IOCore
         self.requires("double-conversion/3.3.0")
         self.requires("exprtk/0.0.2")
         self.requires("fast_float/6.1.3")
-        self.requires("kissfft/131.1.0")
+        # Used in public vtkFFT.h
+        self.requires("kissfft/131.1.0", transitive_headers=True, transitive_libs=True)
         self.requires("libarchive/3.7.4")
-        self.requires("lz4/1.10.0", force=True)
+        self.requires("lz4/1.10.0")
         self.requires("pugixml/1.14")
         self.requires("utfcpp/4.0.4")
         self.requires("xz_utils/[>=5.4.5 <6]")
@@ -260,7 +261,8 @@ class VtkConan(ConanFile):
         # The project uses modified loguru for logging, which cannot be unvendored
 
         if self.options.with_boost:
-            self.requires("boost/1.85.0", force=True)
+            # Used in public vtkVariantBoostSerialization.h
+            self.requires("boost/1.85.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_cgns:
             self.requires("cgns/4.3.0")
         if self.options.with_cli11:
@@ -277,17 +279,20 @@ class VtkConan(ConanFile):
         if self.options.with_ffmpeg:
             self.requires("ffmpeg/6.1.1")
         if self.options.with_fmt:
-            self.requires("fmt/10.2.1")
+            # Used in public vtkloguru/loguru.hpp
+            self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.15.0", force=True)
+            self.requires("fontconfig/2.15.0")
         if self.options.with_freetype:
-            self.requires("freetype/2.13.0", force=True)
+            # Used in public vtkFreeTypeTools.h
+            self.requires("freetype/2.13.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_gdal:
-            self.requires("gdal/3.9.1", force=True)
+            self.requires("gdal/3.9.1")
         if self.options.with_glew:
-            self.requires("glew/2.2.0")
+            # Used in public vtk_glew.h
+            self.requires("glew/2.2.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.4.3", force=True)
+            self.requires("hdf5/1.14.4.3")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -301,15 +306,19 @@ class VtkConan(ConanFile):
         if self.options.with_libproj:
             self.requires("proj/9.3.1")
         if self.options.with_libxml2:
-            self.requires("libxml2/[>=2.12.5 <3]", force=True)
+            # Used in public vtk_libxml2.h
+            self.requires("libxml2/[>=2.12.5 <3]", transitive_headers=True, transitive_libs=True)
         if self.options.with_mpi:
-            self.requires("openmpi/4.1.6")
+            # Used in public vtk_mpi.h
+            self.requires("openmpi/4.1.6", transitive_headers=True, transitive_libs=True)
         if self.options.with_mysql == "libmysqlclient":
             self.requires("libmysqlclient/8.1.0")
         elif self.options.with_mysql == "mariadb-connector-c":
             self.requires("mariadb-connector-c/3.3.3")
         if self.options.with_netcdf:
-            self.requires("netcdf/4.8.1")
+            # Used in public vtkexodusII/include/exodusII.h
+            is_public = bool(self.options.with_exodusII)
+            self.requires("netcdf/4.8.1", transitive_headers=is_public, transitive_libs=is_public)
         if self.options.with_nlohmannjson:
             self.requires("nlohmann_json/3.11.3")
         if self.options.with_odbc:
@@ -319,47 +328,54 @@ class VtkConan(ConanFile):
         if self.options.with_opencascade:
             self.requires("opencascade/7.6.2")
         if self.options.with_opengl:
-            self.requires("opengl/system")
+            # Used in public vtk_glew.h
+            self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
         if self.options.with_openslide:
-            self.requires("openslide/4.0.0")
+            # Used in public vtkOpenSlideReader.h
+            self.requires("openslide/4.0.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_openvdb:
             self.requires("openvdb/11.0.0")
         if self.options.with_openvr:
-            self.requires("openvr/1.16.8")
+            # Used in public vtkOpenVRModel.h
+            self.requires("openvr/1.16.8", transitive_headers=True, transitive_libs=True)
         if self.options.with_pdal:
             self.requires("pdal/2.7.2")
         if self.options.with_png:
-            self.requires("libpng/[>=1.6 <2]", force=True)
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_postgresql:
-            self.requires("libpq/15.5", force=True)
+            self.requires("libpq/15.5")
         if self.options.with_qt == "5":
-            self.requires("qt/[~5.15]")
+            # Used in public vtkQWidgetWidget.h
+            self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
         elif self.options.with_qt == "6":
-            self.requires("qt/[>=6.7 <7]")
+            # Used in public vtkQWidgetWidget.h
+            self.requires("qt/[>=6.7 <7]", transitive_headers=True, transitive_libs=True)
         if self.options.with_sdl2:
-            self.requires("sdl/2.30.5")
+            # Used in public vtkSDL2OpenGLRenderWindow.h
+            self.requires("sdl/2.30.5", transitive_headers=True, transitive_libs=True)
         if self.options.with_sqlite:
-            self.requires("sqlite3/3.46.0", force=True)
+            self.requires("sqlite3/3.46.0")
         if self.options.with_theora:
             self.requires("theora/1.1.1")
         if self.options.with_tiff:
             self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_x11"):
-            self.requires("xorg/system")
+            # Used in public vtkXOpenGLRenderWindow.h
+            self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
         if self.options.with_zeromq:
             self.requires("zeromq/4.3.5")
         if self.options.with_zeromq:
             self.requires("zfp/1.0.1")
         if self.options.smp_enable_openmp:
-            self.requires("openmp/system")
+            # '#include <omp.h>' is used in public SMP/OpenMP/vtkSMPThreadLocalBackend.h
+            # '#pragma omp' is not used in any public headers
+            self.requires("openmp/system", transitive_headers=True, transitive_libs=True)
         if self.options.smp_enable_tbb:
-            self.requires("onetbb/2021.12.0", force=True)
-
-        self.requires("glib/2.78.3", override=True)
-        self.requires("hwloc/2.10.0", override=True)
-        self.requires("xkbcommon/1.6.0", override=True)
+            # Used in public SMP/TBB/vtkSMPToolsImpl.txx
+            self.requires("onetbb/2021.12.0", transitive_headers=True, transitive_libs=True)
 
         # Not available on CCI
+        # vtk-m
         # vtk-dicom
         # ADIOS2 | adios2::adios2
         # DirectX | DirectX::d3d11 DirectX::dxgi | VTK_USE_WIN32_OPENGL
@@ -574,14 +590,13 @@ class VtkConan(ConanFile):
 
         # TODO
         # VTK_ENABLE_VISRTX
-        # VTK_ENABLE_VR_COLLABORATION
         # VTK_USE_FUTURE_BOOL
         # VTK_USE_FUTURE_CONST
         # VTK_USE_OPENGL_DELAYED_LOAD
         # VTK_USE_WIN32_OPENGL
-        # TODO try VTK_USE_VIDEO_FOR_WINDOWS   for video capture
-        # TODO try VTK_USE_VIDEO_FOR_WINDOWS_CAPTURE   for video capture
-        # TODO try VTK_USE_MICROSOFT_MEDIA_FOUNDATION   for video capture (MP4)
+        # VTK_USE_VIDEO_FOR_WINDOWS   for video capture
+        # VTK_USE_VIDEO_FOR_WINDOWS_CAPTURE   for video capture
+        # VTK_USE_MICROSOFT_MEDIA_FOUNDATION   for video capture (MP4)
 
         # print out info about why modules are not available
         if self.options.debug_modules:
