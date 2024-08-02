@@ -53,8 +53,9 @@ class SVTAV1Conan(ConanFile):
 
     def validate(self):
         # https://gitlab.com/AOMediaCodec/SVT-AV1/-/issues/2081
-        if Version(self.version) < "2.1.0" and self.settings.os == "Android":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support Android before version 2.1.0.")
+        # https://gitlab.com/AOMediaCodec/SVT-AV1/-/commit/800a81b09db1cf8c9c289ecf6f70381d7888b98c
+        if Version(self.version) < "1.9.0" and self.settings.os == "Android":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Android before version 1.9.0.")
 
     def build_requirements(self):
         if Version(self.version) >= "1.3.0":
