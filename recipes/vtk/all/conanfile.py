@@ -117,14 +117,14 @@ class VtkConan(ConanFile):
         "debug_modules": True,
         ### external deps ###
         "with_boost": True,
-        "with_cgns": True,
+        "with_cgns": False,  # hdf5 conflict
         "with_cli11": True,
         "with_cocoa": True,
         "with_diy2": True,
         "with_eigen": True,
         "with_exodusII": True,
         "with_expat": True,
-        "with_ffmpeg": True,
+        "with_ffmpeg": False,
         "with_fmt": True,
         "with_fontconfig": True,
         "with_freetype": True,
@@ -252,7 +252,7 @@ class VtkConan(ConanFile):
         # Used in public vtkFFT.h
         self.requires("kissfft/131.1.0", transitive_headers=True, transitive_libs=True)
         self.requires("libarchive/3.7.4")
-        self.requires("lz4/1.10.0")
+        self.requires("lz4/1.9.4")
         self.requires("pugixml/1.14")
         self.requires("utfcpp/4.0.4")
         self.requires("xz_utils/[>=5.4.5 <6]")
@@ -285,14 +285,14 @@ class VtkConan(ConanFile):
             self.requires("fontconfig/2.15.0")
         if self.options.with_freetype:
             # Used in public vtkFreeTypeTools.h
-            self.requires("freetype/2.13.0", transitive_headers=True, transitive_libs=True)
+            self.requires("freetype/2.13.2", transitive_headers=True, transitive_libs=True)
         if self.options.with_gdal:
             self.requires("gdal/3.9.1")
         if self.options.with_glew:
             # Used in public vtk_glew.h
             self.requires("glew/2.2.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.4.3")
+            self.requires("hdf5/1.14.1")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -354,7 +354,7 @@ class VtkConan(ConanFile):
             # Used in public vtkSDL2OpenGLRenderWindow.h
             self.requires("sdl/2.30.5", transitive_headers=True, transitive_libs=True)
         if self.options.with_sqlite:
-            self.requires("sqlite3/3.46.0")
+            self.requires("sqlite3/3.45.3")
         if self.options.with_theora:
             self.requires("theora/1.1.1")
         if self.options.with_tiff:
@@ -372,7 +372,7 @@ class VtkConan(ConanFile):
             self.requires("openmp/system", transitive_headers=True, transitive_libs=True)
         if self.options.smp_enable_tbb:
             # Used in public SMP/TBB/vtkSMPToolsImpl.txx
-            self.requires("onetbb/2021.12.0", transitive_headers=True, transitive_libs=True)
+            self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
 
         # Not available on CCI
         # vtk-m
