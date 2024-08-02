@@ -75,7 +75,6 @@ class VtkConan(ConanFile):
         "with_libharu": [True, False],
         "with_libproj": [True, False],
         "with_libxml2": [True, False],
-        "with_loguru": [True, False],
         "with_metaio": [True, False],
         "with_mpi": [True, False],
         "with_mysql": ["libmysqlclient", "mariadb-connector-c", False],
@@ -147,7 +146,6 @@ class VtkConan(ConanFile):
         "with_libharu": True,
         "with_libproj": True,
         "with_libxml2": True,
-        "with_loguru": True,
         "with_metaio": True,
         "with_mpi": True,  # TODO: #18980 Should enable, since disabling this disables all parallel modules
         "with_mysql": "mariadb-connector-c",
@@ -262,6 +260,8 @@ class VtkConan(ConanFile):
         self.requires("xz_utils/[>=5.4.5 <6]")
         self.requires("zlib/[>=1.2.11 <2]")
 
+        # The project uses modified loguru for logging, which cannot be unvendored
+
         if self.options.with_boost:
             self.requires("boost/1.85.0", force=True)
         if self.options.with_cgns:
@@ -302,8 +302,6 @@ class VtkConan(ConanFile):
             self.requires("proj/9.3.1")
         if self.options.with_libxml2:
             self.requires("libxml2/[>=2.12.5 <3]", force=True)
-        if self.options.with_loguru:
-            self.requires("loguru/cci.20230406")
         if self.options.with_mpi:
             self.requires("openmpi/4.1.6")
         if self.options.with_mysql == "libmysqlclient":
@@ -385,9 +383,6 @@ class VtkConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-
-        if self.options.enable_logging and not self.options.with_loguru:
-            raise ConanInvalidConfiguration(f"{self.ref} requires with_loguru=True when enable_logging=True")
 
         if self.dependencies["pugixml"].options.wchar_mode:
             raise ConanInvalidConfiguration(f"{self.ref} requires pugixml/*:wchar_mode=False")
@@ -488,7 +483,7 @@ class VtkConan(ConanFile):
         modules["libharu"] = _yes_no(self.options.with_libharu)
         modules["libproj"] = _yes_no(self.options.with_libproj)
         modules["libxml2"] = _yes_no(self.options.with_libxml2)
-        modules["loguru"] = _yes_no(self.options.with_loguru)
+        modules["loguru"] = _yes_no(self.options.enable_logging)
         modules["lz4"] = "YES"
         modules["lzma"] = "YES"
         modules["metaio"] = _yes_no(self.options.with_metaio)

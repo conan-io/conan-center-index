@@ -1,4 +1,4 @@
-From 772721b837c26db8182e422cc95ce1ce597052b9 Mon Sep 17 00:00:00 2001
+From d17b443dbb27e415eb2cbbcc2c0fa4dc64a46e37 Mon Sep 17 00:00:00 2001
 From: Martin Valgur <martin.valgur@gmail.com>
 Date: Thu, 1 Aug 2024 13:52:40 +0300
 Subject: [PATCH] add missing external package support to some deps
@@ -6,9 +6,8 @@ Subject: [PATCH] add missing external package support to some deps
 ---
  Common/Math/vtkFFT.h              |  2 +-
  ThirdParty/kissfft/CMakeLists.txt | 19 ++++++++++++-------
- ThirdParty/loguru/CMakeLists.txt  |  7 ++++++-
  ThirdParty/zfp/CMakeLists.txt     | 29 +++++++++++++++++------------
- 4 files changed, 36 insertions(+), 21 deletions(-)
+ 3 files changed, 30 insertions(+), 20 deletions(-)
 
 diff --git a/Common/Math/vtkFFT.h b/Common/Math/vtkFFT.h
 index dc3c3dc6cd..d9d14c7106 100644
@@ -52,28 +51,6 @@ index b93deb8864..4fdecd0e51 100644
  
  configure_file(
    "${CMAKE_CURRENT_SOURCE_DIR}/vtk_kissfft.h.in"
-diff --git a/ThirdParty/loguru/CMakeLists.txt b/ThirdParty/loguru/CMakeLists.txt
-index 2c51381d88..83e4619ce2 100644
---- a/ThirdParty/loguru/CMakeLists.txt
-+++ b/ThirdParty/loguru/CMakeLists.txt
-@@ -1,4 +1,5 @@
--vtk_module_third_party_internal(
-+vtk_module_third_party(
-+  INTERNAL
-     LICENSE_FILES
-       "vtkloguru/LICENSE"
-     SPDX_LICENSE_IDENTIFIER
-@@ -13,6 +14,10 @@ vtk_module_third_party_internal(
-       "PublicDomain-loguru"
-     VERSION
-       "2.1"
-+    STANDARD_INCLUDE_DIRS
-+  EXTERNAL
-+    PACKAGE loguru
-+    TARGETS loguru::loguru
-     STANDARD_INCLUDE_DIRS)
- 
- configure_file(
 diff --git a/ThirdParty/zfp/CMakeLists.txt b/ThirdParty/zfp/CMakeLists.txt
 index 9039e12c65..d55fed6997 100644
 --- a/ThirdParty/zfp/CMakeLists.txt
