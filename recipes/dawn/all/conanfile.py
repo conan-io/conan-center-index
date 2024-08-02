@@ -56,7 +56,7 @@ class DawnConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["DAWN_BUILD_MONOLITHIC_LIBRARY"] = True  # TODO: the default behavior, but might want to expose as an option
         tc.variables["DAWN_ENABLE_INSTALL"] = True
-        tc.variables["DAWN_BUILD_SAMPLES"] = True
+        tc.variables["DAWN_BUILD_SAMPLES"] = False
         tc.variables["TINT_ENABLE_INSTALL"] = False
         tc.variables["TINT_BUILD_TESTS"] = False
         tc.variables["SPIRV_TOOLS_BUILD_STATIC"] = True
