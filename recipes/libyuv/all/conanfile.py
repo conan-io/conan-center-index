@@ -68,7 +68,7 @@ class LibyuvConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if Version(self.version) >= "1892":
+        if Version(self.version) >= "1892" and not self.options.get_safe("fPIC"):
             replace_in_file(
                 self,
                 os.path.join(self.source_folder, "CMakeLists.txt"),
