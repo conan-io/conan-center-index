@@ -9,6 +9,8 @@
 #include <QtConcurrent>
 #include <QDomText>
 #include <QSqlDatabase>
+#include <QLibraryInfo>
+#include <QDir>
 
 #include <qplatformdefs.h>
 
@@ -26,6 +28,36 @@ int main(int argc, char *argv[]){
     if (name.isEmpty()) {
         name = "World";
     }
+
+    // check for valid Qt-Plugins folder (see GitHub-Issue #23660; GitHub-PR #24193)
+    QString rootPluginFolder = QLibraryInfo::location(QLibraryInfo::PluginsPath);
+    QString logMessage;
+
+    if (rootPluginFolder.isEmpty())
+    {
+        logMessage = "Qt-Plugins folder not found!";
+        qCritical() << logMessage;
+        return 1;
+    }
+
+    QDir dir (rootPluginFolder);
+    QFileInfoList list = dir.entryInfoList(QDir::Dirs| QDir::NoSymLinks | QDir::NoDotAndDotDot);
+
+    if (list.isEmpty())
+    {
+        logMessage = "Qt-Plugins folder is empty!";
+        qCritical() << logMessage;
+        return 2;
+    }
+
+    logMessage = "List of Plugin Modules: ";
+    qDebug() << logMessage;
+    for (auto &l : list)
+    {
+        qDebug() << l.baseName();
+    }
+    // end: check for valid Qt-Plugins folder
+
 
     Greeter* greeter = new Greeter(name, &app);
     QObject::connect(greeter, SIGNAL(finished()), &app, SLOT(quit()));
