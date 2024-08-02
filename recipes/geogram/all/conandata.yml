@@ -1,19 +1,5 @@
 sources:
   "1.9.0":
     url:
-    - "https://github.com/BrunoLevy/geogram/releases/download/v1.9.0/geogram_1.9.0.tar.gz"
-    sha256: "09c0e28ffc08fdab1f2214ee32e49610d64972d052e890d3cc6dcb6bd25b5fc0"
-  "1.8.8":
-    url:
-    - "https://github.com/BrunoLevy/geogram/releases/download/v1.8.8/geogram_1.8.8.tar.gz"
-    sha256: "698bc9ad9d58139fe9fdf3eab0596f5b418c4edd593eee960de98c0ab646d47e"
-patches:
-  "1.1.0":
-    - patch_file: "patches/0001-fix-cmake.patch"
-      patch_description: "correct the order of cmake min and project"
-      patch_type: "backport"
-      patch_source: "https://github.com/owner/package/pulls/42"
-    - patch_file: "patches/0002-fix-linux.patch"
-      patch_description: "add missing header to support linux"
-      patch_type: "portability"
-      patch_source: "https://github.com/owner/package/issues/0"
+    - "https://github.com/BrunoLevy/geogram/archive/refs/tags/v1.9.0.tar.gz"
+    sha256: "22baa50539a56f0f88ce84adfc8bea50a379caf7120f03d3df834c4bd607a1d0"

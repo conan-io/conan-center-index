@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -23,7 +22,7 @@ class GeogramConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_graphics": True,
+        "with_graphics": False,
     }
     
     package_type = "library"
@@ -44,10 +43,15 @@ class GeogramConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("libmeshb/7.80")
+        self.requires("rply/1.1.4")
+        self.requires("amgcl/1.4.4")
+        
         if self.options.with_graphics:
-            # self.requires("xorg/system")
+            self.requires("xorg/system")
             self.requires("glfw/3.3.8")
-            # self.requires("imgui/cci.20230105+1.89.2.docking")
+            self.requires("imgui/1.91.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -56,24 +60,61 @@ class GeogramConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["VORPALINE_BUILD_DYNAMIC"] = self.options.shared
         tc.variables["GEOGRAM_WITH_GRAPHICS"] = self.options.with_graphics
-        tc.variables["GEOGRAM_LIB_ONLY"] = False
-        # To use glfw from conan cache
-        tc.variables["GEOGRAM_USE_SYSTEM_GLFW3"] = True
-        # tc.variables["GEOGRAM_SUB_BUILD"] = True
+        tc.variables["GEOGRAM_LIB_ONLY"] = True
         tc.variables["GEOGRAM_WITH_LEGACY_NUMERICS"] = False
-        
+        tc.variables["GEOGRAM_WITH_HLBFGS"] = False
+        tc.variables["GEOGRAM_WITH_TETGEN"] = False
+        tc.variables["GEOGRAM_WITH_TRIANGLE"] = False
+        tc.variables["GEOGRAM_WITH_LUA"] = False
+        tc.variables["GEOGRAM_WITH_FPG"] = False
+        # To use glfw from conan dependencies
+        tc.variables["GEOGRAM_USE_SYSTEM_GLFW3"] = True
+        tc.variables["GEOGRAM_WITH_GARGANTUA"] = False
+        tc.variables["GEOGRAM_WITH_TBB"] = False
         tc.generate()
-        
+
         tc = CMakeDeps(self)
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        # Remove gitmodules dependencies
+        rmdir(self, os.path.join(self.source_folder, "src/lib/geogram/third_party/amgcl"))
+        rmdir(self, os.path.join(self.source_folder, "src/lib/third_party/glfw"))
+        rmdir(self, os.path.join(self.source_folder, "src/lib/geogram_gfx/third_party/imgui"))
+        # rmdir(self, os.path.join(self.source_folder, "src/lib/geogram/third_party/libMeshb"))
+        rmdir(self, os.path.join(self.source_folder, "src/lib/geogram/third_party/rply"))
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(src/lib/third_party)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(doc)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "src", "lib", "geogram", "CMakeLists.txt"), "add_subdirectory(third_party)", 
+                        """
+                        add_subdirectory(third_party)
+                        
+                        find_package(libMeshb REQUIRED CONFIG)
+                        find_package(rply REQUIRED CONFIG)
+                        find_package(amgcl REQUIRED CONFIG)
+                        """)
+        replace_in_file(self, os.path.join(self.source_folder, "src", "lib", "geogram", "CMakeLists.txt"), "add_library(geogram ${SOURCES} $<TARGET_OBJECTS:geogram_third_party>)", 
+                        """
+                        add_library(geogram ${SOURCES} $<TARGET_OBJECTS:geogram_third_party>)
+
+                        target_link_libraries(geogram libMeshb::Meshb.7)
+                        target_link_libraries(geogram rply::rply)
+                        target_link_libraries(geogram amgcl::amgcl)
+                        """)
+
+        # Rework cpp includes to works with libmeshb conan dependency
+        replace_in_file(self, os.path.join(self.source_folder, "src/lib/geogram/mesh/mesh_io.cpp"), "#include <geogram/third_party/libMeshb/sources/libmeshb7.h>", "#include <libmeshb7.h>")
+        replace_in_file(self, os.path.join(self.source_folder, "src/lib/geogram/mesh/mesh_io.cpp"), "#include <geogram/third_party/rply/rply.h>", "#include <rply.h>")
+
+    def build(self):
+        self._patch_sources()
+        
         cmake = CMake(self)
         cmake.configure()
-        cmake.verbose = True
-        cmake.build(cli_args=["--verbose"], build_tool_args=["-j 10"])
-        # cmake.build()
+        # cmake.verbose = True
+        # cmake.build(cli_args=["--verbose"], build_tool_args=["-j 10"])
+        cmake.build()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
