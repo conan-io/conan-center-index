@@ -62,12 +62,12 @@ class PdalConan(ConanFile):
 
     def requirements(self):
         self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
-        self.requires("gdal/3.8.3", transitive_headers=True, transitive_libs=True)
+        self.requires("gdal/3.9.1", transitive_headers=True, transitive_libs=True)
         self.requires("h3/4.1.0")
         self.requires("json-schema-validator/2.3.0")
-        self.requires("libcurl/[>=7.78.0 <9]") # for arbiter
+        self.requires("libcurl/[>=7.78 <9]") # for arbiter
         self.requires("libgeotiff/1.7.1")
-        self.requires("nanoflann/1.5.2", transitive_headers=True, transitive_libs=True)
+        self.requires("nanoflann/1.6.0", transitive_headers=True, transitive_libs=True)
         self.requires("nlohmann_json/3.11.3", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]") # for arbiter
         self.requires("proj/9.3.1", transitive_headers=True, transitive_libs=True)
@@ -75,13 +75,13 @@ class PdalConan(ConanFile):
         self.requires("utfcpp/4.0.4")
         self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True, transitive_libs=True) # for arbiter
         if self.options.with_xml:
-            self.requires("libxml2/2.12.5", transitive_headers=True, transitive_libs=True)
+            self.requires("libxml2/[>=2.12.5 <3]", transitive_headers=True, transitive_libs=True)
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[^1.5]")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.get_safe("with_unwind"):
-            self.requires("libunwind/1.8.0")
+            self.requires("libunwind/1.8.1")
         # TODO: unvendor kazhdan (not on CCI, https://github.com/mkazhdan/PoissonRecon)
         # TODO: unvendor lazperf (not on CCI, https://github.com/hobuinc/laz-perf)
         # TODO: unvendor lepcc (not on CCI, https://github.com/Esri/lepcc)
