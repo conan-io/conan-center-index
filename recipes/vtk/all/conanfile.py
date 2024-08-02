@@ -8,13 +8,14 @@ import functools
 import json
 import os
 import re
+from pathlib import Path
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, rename, replace_in_file, load, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, rename, replace_in_file, load, save, copy
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -177,6 +178,10 @@ class VtkConan(ConanFile):
         "with_zfp": True,
         "with_zspace": False,  # New zSpace device support, not ready for Linux
     }
+    # NOTE: all non-third-party VTK modules are also available as options.
+    # e.g. "IOGeoJSON": ["auto", "YES", "WANT", "DONT_WANT", "NO"], etc.
+    # There is almost no checks in the recipe for compatibility between them, though.
+    # We mostly rely on the checks done in the configure phase of the CMake build.
 
     @property
     def _min_cppstd(self):
@@ -192,6 +197,28 @@ class VtkConan(ConanFile):
             "apple-clang": "11",
         }
 
+    def export(self):
+        copy(self, "*.json", self.recipe_folder, self.export_folder)
+
+    @property
+    def _modules_from_all_versions(self):
+        # Modules from all versions
+        all_modules = set()
+        for options_json in Path(self.recipe_folder, "options").glob("*.json"):
+            all_modules.update(json.loads(options_json.read_text())["modules"])
+        return sorted(all_modules)
+
+    def init(self):
+        all_modules = self._modules_from_all_versions
+        new_options = {mod: ["auto", "YES", "WANT", "DONT_WANT", "NO"] for mod in all_modules}
+        new_defaults = {mod: "auto" for mod in all_modules}
+        self.options.update(new_options, new_defaults)
+
+    @property
+    @functools.lru_cache()
+    def _module_opts(self):
+        return json.loads(Path(self.recipe_folder, "options", f"{self.version}.json").read_text())["modules"]
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -204,6 +231,8 @@ class VtkConan(ConanFile):
             del self.options.with_cocoa
         if self.settings.os == "Emscripten":
             del self.options.with_dawn
+        for opt in set(self._modules_from_all_versions) - set(self._module_opts):
+            self.options.rm_safe(opt)
 
     def configure(self):
         if self.options.shared:
@@ -372,80 +401,11 @@ class VtkConan(ConanFile):
         if self.options.with_xdmf3 and not self.options.with_boost:
             raise ConanInvalidConfiguration(f"{self.ref} requires with_boost=True when with_xdmf3=True")
 
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Just to check for conflicts
+        self._compute_module_values()
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-
-        # No need for versions on installed names
-        tc.variables["VTK_VERSIONED_INSTALL"] = False
-        # Nothing gets installed without this ON at the moment.
-        tc.variables["VTK_INSTALL_SDK"] = True
-
-        # TODO: Enable KITs - Quote: "Compiles VTK into a smaller set of libraries."
-        # Quote: "Can be useful on platforms where VTK takes a long time to launch due to expensive disk access."
-        tc.variables["VTK_ENABLE_KITS"] = False
-
-        # Turn these off for CCI
-        tc.variables["VTK_BUILD_TESTING"] = False
-        tc.variables["VTK_BUILD_EXAMPLES"] = False
-        tc.variables["VTK_BUILD_DOCUMENTATION"] = False
-        tc.variables["VTK_BUILD_SPHINX_DOCUMENTATION"] = False
-
-        # TODO: maybe this can be enabled
-        tc.variables["VTK_FORBID_DOWNLOADS"] = False
-
-        # Be sure to set this, otherwise vtkCompilerChecks.cmake will downgrade our CXX standard to 11
-        tc.variables["VTK_IGNORE_CMAKE_CXX11_CHECKS"] = True
-
-        tc.variables["VTK_ENABLE_CATALYST"] = self.options.get_safe("with_catalyst", False)
-        tc.variables["VTK_ENABLE_LOGGING"] = self.options.enable_logging
-        tc.variables["VTK_ENABLE_OSPRAY"] = self.options.get_safe("with_ospray", False)
-        tc.variables["VTK_ENABLE_VR_COLLABORATION"] = self.options.with_zeromq
-        tc.variables["VTK_ENABLE_WEBGPU"] = True
-        tc.variables["VTK_ENABLE_WRAPPING"] = False
-        tc.variables["VTK_QT_VERSION"] = self.options.with_qt
-        tc.variables["VTK_SMP_ENABLE_OPENMP"] = self.options.smp_enable_openmp
-        tc.variables["VTK_SMP_ENABLE_SEQUENTIAL"] = self.options.smp_enable_sequential
-        tc.variables["VTK_SMP_ENABLE_STDTHREAD"] = self.options.smp_enable_stdthread
-        tc.variables["VTK_SMP_ENABLE_TBB"] = self.options.smp_enable_tbb
-        tc.variables["VTK_SMP_IMPLEMENTATION_TYPE"] = self.options.smp_implementation
-        tc.variables["VTK_USE_COCOA"] = self.options.get_safe("with_cocoa", False)
-        tc.variables["VTK_USE_CUDA"] = False  # TODO
-        tc.variables["VTK_USE_HIP"] = False  # TODO
-        tc.variables["VTK_USE_KOKKOS"] = False
-        tc.variables["VTK_USE_MEMKIND"] = False
-        tc.variables["VTK_USE_MPI"] = self.options.with_mpi
-        tc.variables["VTK_USE_SDL2"] = self.options.with_sdl2
-        tc.variables["VTK_USE_TK"] = False  # requires wrap_python
-        tc.variables["VTK_USE_X"] = self.options.get_safe("with_x11", False)
-        tc.variables["VTK_WRAP_JAVA"] = False
-        tc.variables["VTK_WRAP_PYTHON"] = False
-
-        # TODO
-        # VTK_ENABLE_VISRTX
-        # VTK_ENABLE_VR_COLLABORATION
-        # VTK_USE_FUTURE_BOOL
-        # VTK_USE_FUTURE_CONST
-        # VTK_USE_OPENGL_DELAYED_LOAD
-        # VTK_USE_WIN32_OPENGL
-        # VTK_ZSPACE_USE_COMPAT_SDK
-        # TODO try VTK_USE_VIDEO_FOR_WINDOWS   for video capture
-        # TODO try VTK_USE_VIDEO_FOR_WINDOWS_CAPTURE   for video capture
-        # TODO try VTK_USE_MICROSOFT_MEDIA_FOUNDATION   for video capture (MP4)
-
-        # print out info about why modules are not available
-        if self.options.debug_modules:
-            tc.variables["VTK_DEBUG_MODULE"] = True
-            tc.variables["VTK_DEBUG_MODULE_ALL"] = True
-            tc.variables["VTK_DEBUG_MODULE_building"] = True
-            tc.variables["VTK_DEBUG_MODULE_enable"] = True
-            tc.variables["VTK_DEBUG_MODULE_kit"] = True
-            tc.variables["VTK_DEBUG_MODULE_module"] = True
-            tc.variables["VTK_DEBUG_MODULE_provide"] = True
-            tc.variables["VTK_DEBUG_MODULE_testing"] = True
-
+    @functools.lru_cache()
+    def _compute_module_values(self):
         if self.options.with_qt:
             qt = self.dependencies["qt"].options
 
@@ -548,7 +508,91 @@ class VtkConan(ConanFile):
         modules["zfp"] = _yes_no(self.options.with_zfp)
         modules["zlib"] = "YES"
 
-        for pkg, value in modules.items():
+        for mod in self._module_opts:
+            if self.options.get_safe(mod) != "auto":
+                value = self.options.get_safe(mod)
+                if mod in modules and modules[mod] != value and modules[mod] != "WANT":
+                    raise ConanInvalidConfiguration(f"Option '{mod}={value}' conflicts with value '{modules[mod]}' computed from 'with_*' options.")
+                modules[mod] = value
+
+        return modules
+
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+
+        # No need for versions on installed names
+        tc.variables["VTK_VERSIONED_INSTALL"] = False
+        # Nothing gets installed without this ON at the moment.
+        tc.variables["VTK_INSTALL_SDK"] = True
+
+        # TODO: Enable KITs - Quote: "Compiles VTK into a smaller set of libraries."
+        # Quote: "Can be useful on platforms where VTK takes a long time to launch due to expensive disk access."
+        tc.variables["VTK_ENABLE_KITS"] = False
+
+        # Turn these off for CCI
+        tc.variables["VTK_BUILD_TESTING"] = False
+        tc.variables["VTK_BUILD_EXAMPLES"] = False
+        tc.variables["VTK_BUILD_DOCUMENTATION"] = False
+        tc.variables["VTK_BUILD_SPHINX_DOCUMENTATION"] = False
+
+        # TODO: maybe this can be enabled
+        tc.variables["VTK_FORBID_DOWNLOADS"] = False
+
+        # Be sure to set this, otherwise vtkCompilerChecks.cmake will downgrade our CXX standard to 11
+        tc.variables["VTK_IGNORE_CMAKE_CXX11_CHECKS"] = True
+
+        tc.variables["VTK_ENABLE_CATALYST"] = self.options.get_safe("with_catalyst", False)
+        tc.variables["VTK_ENABLE_LOGGING"] = self.options.enable_logging
+        tc.variables["VTK_ENABLE_OSPRAY"] = self.options.get_safe("with_ospray", False)
+        tc.variables["VTK_ENABLE_VR_COLLABORATION"] = self.options.with_zeromq
+        tc.variables["VTK_ENABLE_WEBGPU"] = True
+        tc.variables["VTK_ENABLE_WRAPPING"] = False
+        tc.variables["VTK_QT_VERSION"] = self.options.with_qt
+        tc.variables["VTK_SMP_ENABLE_OPENMP"] = self.options.smp_enable_openmp
+        tc.variables["VTK_SMP_ENABLE_SEQUENTIAL"] = self.options.smp_enable_sequential
+        tc.variables["VTK_SMP_ENABLE_STDTHREAD"] = self.options.smp_enable_stdthread
+        tc.variables["VTK_SMP_ENABLE_TBB"] = self.options.smp_enable_tbb
+        tc.variables["VTK_SMP_IMPLEMENTATION_TYPE"] = self.options.smp_implementation
+        tc.variables["VTK_USE_COCOA"] = self.options.get_safe("with_cocoa", False)
+        tc.variables["VTK_USE_CUDA"] = False  # TODO
+        tc.variables["VTK_USE_HIP"] = False  # TODO
+        tc.variables["VTK_USE_KOKKOS"] = False
+        tc.variables["VTK_USE_MEMKIND"] = False
+        tc.variables["VTK_USE_MPI"] = self.options.with_mpi
+        tc.variables["VTK_USE_SDL2"] = self.options.with_sdl2
+        tc.variables["VTK_USE_TK"] = False  # requires wrap_python
+        tc.variables["VTK_USE_X"] = self.options.get_safe("with_x11", False)
+        tc.variables["VTK_WRAP_JAVA"] = False
+        tc.variables["VTK_WRAP_PYTHON"] = False
+
+        # TODO
+        # VTK_ENABLE_VISRTX
+        # VTK_ENABLE_VR_COLLABORATION
+        # VTK_USE_FUTURE_BOOL
+        # VTK_USE_FUTURE_CONST
+        # VTK_USE_OPENGL_DELAYED_LOAD
+        # VTK_USE_WIN32_OPENGL
+        # VTK_ZSPACE_USE_COMPAT_SDK
+        # TODO try VTK_USE_VIDEO_FOR_WINDOWS   for video capture
+        # TODO try VTK_USE_VIDEO_FOR_WINDOWS_CAPTURE   for video capture
+        # TODO try VTK_USE_MICROSOFT_MEDIA_FOUNDATION   for video capture (MP4)
+
+        # print out info about why modules are not available
+        if self.options.debug_modules:
+            tc.variables["VTK_DEBUG_MODULE"] = True
+            tc.variables["VTK_DEBUG_MODULE_ALL"] = True
+            tc.variables["VTK_DEBUG_MODULE_building"] = True
+            tc.variables["VTK_DEBUG_MODULE_enable"] = True
+            tc.variables["VTK_DEBUG_MODULE_kit"] = True
+            tc.variables["VTK_DEBUG_MODULE_module"] = True
+            tc.variables["VTK_DEBUG_MODULE_provide"] = True
+            tc.variables["VTK_DEBUG_MODULE_testing"] = True
+
+        for pkg, value in self._compute_module_values().items():
             tc.variables[f"VTK_MODULE_ENABLE_VTK_{pkg}"] = value
 
         missing_from_cci = {

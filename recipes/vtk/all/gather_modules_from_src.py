@@ -115,6 +115,7 @@ def load_vtk_info(root):
 
 def dump_options(vtk_info):
     modules = sorted(k.replace("VTK::", "") for k in vtk_info["modules"].keys())
+    modules = [mod for mod in modules if mod[0].isupper()]
     groups = sorted(set().union(*(module.get("groups", []) for module in vtk_info["modules"].values())))
     conditions = defaultdict(list)
     for module_name, module_info in vtk_info["modules"].items():
