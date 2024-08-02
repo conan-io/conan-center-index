@@ -8,8 +8,7 @@ from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=2.0.5"
-
+required_conan_version = ">=1.64"
 
 class DpdkConan(ConanFile):
     name = "dpdk"
@@ -62,7 +61,7 @@ class DpdkConan(ConanFile):
         # depending on the platform or the tools.system.package_manager:tool configuration
         # only one of these will be executed
         Apk(self).install(["py3-elftools", "numactl-dev"])
-        Apt(self).install(["python3-pyelftools", "libnuma-dev"])
+        Apt(self).install(["python3-pyelftools", "libnuma-dev"], update=True)
         Dnf(self).install(["python3-pyelftools", "numactl-devel"])
         Yum(self).install(["python3-pyelftools", "numactl-devel"])
 
