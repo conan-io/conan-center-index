@@ -931,10 +931,17 @@ class VtkConan(ConanFile):
         components = self._cmake_targets_to_conan_components(cmake_target_props, module_deps)
         save(self, self._components_json, json.dumps(components, indent=2))
 
-        # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        # create a cmake module with our special variables
+        cmake_module_path = os.path.join(self.package_folder, "lib", "cmake", "vtk", "conan-official-vtk-variables.cmake")
+        save(self, cmake_module_path, "set(VTK_ENABLE_KITS FALSE)\n")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "VTK")
+
+        cmake_modules_dir = os.path.join("lib", "cmake", "vtk")
+        cmake_module_path = os.path.join(cmake_modules_dir, "conan-official-vtk-variables.cmake")
+        self.cpp_info.builddirs = [cmake_modules_dir]
+        self.cpp_info.set_property("cmake_build_modules", [cmake_module_path])
 
         components = json.loads(load(self, self._components_json))
         for name, info in components.items():
