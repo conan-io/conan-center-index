@@ -1,9 +1,3 @@
-# RECIPE MAINTAINER NOTES:
-#   There are readme-*.md in the recipe folder.
-#
-# General recipe design notes: readme-recipe-design.md
-# How to add a new version: readme-new-version.md
-# How to build a dependency through conan: readme-support-dependency.md
 import functools
 import itertools
 import json
