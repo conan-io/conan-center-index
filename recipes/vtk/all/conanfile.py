@@ -45,6 +45,12 @@ class VtkConan(ConanFile):
         "smp_enable_tbb": [True, False],
         ### debugging ###
         "debug_modules": [True, False],
+        "debug_leaks": [True, False],
+        ### future proofing ###
+        "legacy_remove": [True, False],
+        "legacy_silent": [True, False],
+        "use_future_bool": [True, False],
+        "use_future_const": [True, False],
         ### external deps ###
         "with_boost": [True, False],
         "with_cgns": [True, False],
@@ -115,6 +121,12 @@ class VtkConan(ConanFile):
         "smp_enable_tbb": True,
         ### debugging ###
         "debug_modules": True,
+        "debug_leaks": False,
+        ### future proofing ###
+        "legacy_remove": False,
+        "legacy_silent": False,
+        "use_future_bool": False,
+        "use_future_const": False,
         ### external deps ###
         "with_boost": True,
         "with_cgns": False,  # hdf5 conflict
@@ -564,12 +576,15 @@ class VtkConan(ConanFile):
         # Be sure to set this, otherwise vtkCompilerChecks.cmake will downgrade our CXX standard to 11
         tc.variables["VTK_IGNORE_CMAKE_CXX11_CHECKS"] = True
 
+        tc.variables["VTK_DEBUG_LEAKS"] = self.options.debug_leaks
         tc.variables["VTK_ENABLE_CATALYST"] = self.options.get_safe("with_catalyst", False)
         tc.variables["VTK_ENABLE_LOGGING"] = self.options.enable_logging
         tc.variables["VTK_ENABLE_OSPRAY"] = self.options.get_safe("with_ospray", False)
         tc.variables["VTK_ENABLE_VR_COLLABORATION"] = self.options.with_zeromq
         tc.variables["VTK_ENABLE_WEBGPU"] = True
         tc.variables["VTK_ENABLE_WRAPPING"] = False
+        tc.variables["VTK_LEGACY_REMOVE"] = self.options.legacy_remove
+        tc.variables["VTK_LEGACY_SILENT"] = self.options.legacy_silent
         tc.variables["VTK_QT_VERSION"] = self.options.with_qt
         tc.variables["VTK_SMP_ENABLE_OPENMP"] = self.options.smp_enable_openmp
         tc.variables["VTK_SMP_ENABLE_SEQUENTIAL"] = self.options.smp_enable_sequential
@@ -578,8 +593,10 @@ class VtkConan(ConanFile):
         tc.variables["VTK_SMP_IMPLEMENTATION_TYPE"] = self.options.smp_implementation
         tc.variables["VTK_USE_COCOA"] = self.options.get_safe("with_cocoa", False)
         tc.variables["VTK_USE_CUDA"] = False  # TODO
+        tc.variables["VTK_USE_FUTURE_BOOL"] = self.options.use_future_bool
+        tc.variables["VTK_USE_FUTURE_CONST"] = self.options.use_future_const
         tc.variables["VTK_USE_HIP"] = False  # TODO
-        tc.variables["VTK_USE_KOKKOS"] = False
+        tc.variables["VTK_USE_KOKKOS"] = False  # TODO
         tc.variables["VTK_USE_MEMKIND"] = False
         tc.variables["VTK_USE_MPI"] = self.options.with_mpi
         tc.variables["VTK_USE_SDL2"] = self.options.with_sdl2
@@ -590,8 +607,6 @@ class VtkConan(ConanFile):
 
         # TODO
         # VTK_ENABLE_VISRTX
-        # VTK_USE_FUTURE_BOOL
-        # VTK_USE_FUTURE_CONST
         # VTK_USE_OPENGL_DELAYED_LOAD
         # VTK_USE_WIN32_OPENGL
         # VTK_USE_VIDEO_FOR_WINDOWS   for video capture
