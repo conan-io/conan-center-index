@@ -3,6 +3,7 @@ from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
 from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
 
@@ -50,11 +51,16 @@ class SVTAV1Conan(ConanFile):
     def requirements(self):
         self.requires("cpuinfo/cci.20231129")
 
+    def validate(self):
+        # https://gitlab.com/AOMediaCodec/SVT-AV1/-/issues/2081
+        if Version(self.version) < "2.1.0" and self.settings.os == "Android":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Android before version 2.1.0.")
+
     def build_requirements(self):
         if Version(self.version) >= "1.3.0":
             self.tool_requires("cmake/[>=3.16 <4]")
         if self.settings.arch in ("x86", "x86_64"):
-            self.tool_requires("nasm/2.15.05")
+            self.tool_requires("nasm/2.16.01")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
