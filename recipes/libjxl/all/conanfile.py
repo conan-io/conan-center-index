@@ -82,10 +82,10 @@ class LibjxlConan(ConanFile):
             # Fails with a missing DLL error in test_package
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared builds with MSVC")
 
-    # def build_requirements(self):
-    #     # Require newer CMake, which allows INCLUDE_DIRECTORIES to be set on INTERFACE targets
-    #     # Also, v0.9+ require CMake 3.16
-    #     self.tool_requires("cmake/[>=3.19 <4]")
+    def build_requirements(self):
+        # Require newer CMake, which allows INCLUDE_DIRECTORIES to be set on INTERFACE targets
+        # Also, v0.9+ require CMake 3.16
+        self.tool_requires("cmake/[>=3.19 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
