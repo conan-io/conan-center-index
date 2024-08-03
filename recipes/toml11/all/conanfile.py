@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.50.0"
@@ -32,13 +33,19 @@ class Toml11Conan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        copy(self, "toml.hpp", src=self.source_folder, dst=os.path.join(self.package_folder, "include", "toml11"))
-        copy(self, "*.hpp", src=os.path.join(self.source_folder, "toml"), dst=os.path.join(self.package_folder, "include", "toml11", "toml"))
+        if Version(self.version) < "4.0.0":
+            copy(self, "toml.hpp", src=self.source_folder, dst=os.path.join(self.package_folder, "include", "toml11"))
+            copy(self, "*.hpp", src=os.path.join(self.source_folder, "toml"), dst=os.path.join(self.package_folder, "include", "toml11", "toml"))
+        else:
+            copy(self, "*.hpp", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
         self.cpp_info.set_property("cmake_file_name", "toml11")
         self.cpp_info.set_property("cmake_target_name", "toml11::toml11")
-        self.cpp_info.bindirs = []
+
         self.cpp_info.includedirs.append(os.path.join("include", "toml11"))
-        self.cpp_info.libdirs = []

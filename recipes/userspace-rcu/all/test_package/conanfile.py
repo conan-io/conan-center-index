@@ -1,15 +1,23 @@
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.cmake import cmake_layout, CMake
 import os
 
-from conans import ConanFile, CMake
-from conan.tools.build import cross_building
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    test_type = "explicit"
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
 
     def build(self):
         cmake = CMake(self)
@@ -17,6 +25,7 @@ class TestPackageConan(ConanFile):
         cmake.build()
 
     def test(self):
-        if not cross_building(self):
+        if can_run(self):
             for test in ["", "-mb", "-signal"]:
-                self.run("test_package{}".format(test), run_environment=True)
+                bin_path = os.path.join(self.cpp.build.bindir, f"test_package{test}")
+                self.run(bin_path, env="conanrun")
