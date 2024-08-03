@@ -942,12 +942,15 @@ class VtkConan(ConanFile):
                 component["defines"].append(definition)
             requires, system_libs, frameworks = self._transform_link_libraries(target_info.get("link_libraries", []))
             requires += module_info.get("deps", [])
+            requires = self._remove_duplicates(requires)
             if name in requires:
                 # Only VTK::pugixml has this issue as of v9.3.1
                 self.output.warning(f"CMake target VTK::{name} has a circular dependency on itself")
-                requires = [req for req in requires if req != name]
+                requires.remove(name)
+            if "vtkbuild" in requires:
+                requires.remove("vtkbuild")
             if requires:
-                component["requires"] = self._remove_duplicates(requires)
+                component["requires"] = requires
             if system_libs:
                 component["system_libs"] = self._remove_duplicates(system_libs)
             if frameworks:
