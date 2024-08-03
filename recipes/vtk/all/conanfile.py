@@ -1053,7 +1053,7 @@ class VtkConan(ConanFile):
                 autoinits[implementable].add(module_name)
         # Write those special autoinit header files
         for implementable, all_implementers in autoinits.items():
-            self.output.debug(f"Generating autoinit headers for {implementable} with ({', '.join(all_implementers)}) implementers")
+            self.output.info(f"Generating autoinit headers for {implementable} with ({', '.join(all_implementers)}) implementers")
             all_implementers = [f"vtk{impl}" for impl in sorted(all_implementers)]
             content = "#if 0\n\n"
             for L in range(len(all_implementers), 0, -1):
@@ -1195,14 +1195,14 @@ class VtkConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", msg)
 
         for component_name, component in self.cpp_info.components.items():
-            self.output.debug(f"COMPONENT: {component_name}")
+            self.output.info(f"COMPONENT: {component_name}")
             if component.libs:
-                self.output.debug(f" - libs: {component.libs}")
+                self.output.info(f" - libs: {component.libs}")
             if component.defines:
-                self.output.debug(f" - defines: {component.defines}")
+                self.output.info(f" - defines: {component.defines}")
             if component.requires:
-                self.output.debug(f" - requires: {component.requires}")
+                self.output.info(f" - requires: {component.requires}")
             if component.system_libs:
-                self.output.debug(f" - system_libs: {component.system_libs}")
+                self.output.info(f" - system_libs: {component.system_libs}")
             if component.frameworks:
-                self.output.debug(f" - frameworks: {component.frameworks}")
+                self.output.info(f" - frameworks: {component.frameworks}")
