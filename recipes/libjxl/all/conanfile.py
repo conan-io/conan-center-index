@@ -30,6 +30,7 @@ class LibjxlConan(ConanFile):
         "avx512_spr": [True, False],
         "avx512_zen4": [True, False],
         "with_tcmalloc": [True, False],
+        "with_jpegli": [True, False],
     }
     default_options = {
         "shared": False,
@@ -38,6 +39,7 @@ class LibjxlConan(ConanFile):
         "avx512_spr": False,
         "avx512_zen4": False,
         "with_tcmalloc": False,
+        "with_jpegli": False,
     }
 
     def export_sources(self):
@@ -53,6 +55,8 @@ class LibjxlConan(ConanFile):
         # https://github.com/libjxl/libjxl/blob/v0.9.1/CMakeLists.txt#L52-L59
         if self.settings.os in ["Linux", "FreeBSD"] and self.settings.arch == "x86_64":
             self.options.with_tcmalloc = True
+        if Version(self.version) < "0.8.0":
+            del self.options.with_jpegli
 
     def configure(self):
         if self.options.shared:
@@ -78,16 +82,16 @@ class LibjxlConan(ConanFile):
             # Fails with a missing DLL error in test_package
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared builds with MSVC")
 
-    def build_requirements(self):
-        # Require newer CMake, which allows INCLUDE_DIRECTORIES to be set on INTERFACE targets
-        # Also, v0.9+ require CMake 3.16
-        self.tool_requires("cmake/[>=3.19 <4]")
+    # def build_requirements(self):
+    #     # Require newer CMake, which allows INCLUDE_DIRECTORIES to be set on INTERFACE targets
+    #     # Also, v0.9+ require CMake 3.16
+    #     self.tool_requires("cmake/[>=3.19 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
+        # VirtualBuildEnv(self).generate()
 
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_LIBJXL_INCLUDE"] = "conan_deps.cmake"
@@ -115,6 +119,9 @@ class LibjxlConan(ConanFile):
         tc.variables["JPEGXL_ENABLE_AVX512"] = self.options.get_safe("avx512", False)
         tc.variables["JPEGXL_ENABLE_AVX512_SPR"] = self.options.get_safe("avx512_spr", False)
         tc.variables["JPEGXL_ENABLE_AVX512_ZEN4"] = self.options.get_safe("avx512_zen4", False)
+        if "with_jpegli" in self.options:
+            tc.variables["JPEGXL_ENABLE_JPEGLI"] = self.options.with_jpegli
+            tc.variables["JPEGXL_INSTALL_JPEGLI_LIBJPEG"] = self.options.with_jpegli
         if cross_building(self):
             tc.variables["CMAKE_SYSTEM_PROCESSOR"] = str(self.settings.arch)
         # Allow non-cache_variables to be used
@@ -168,6 +175,11 @@ class LibjxlConan(ConanFile):
             if self.settings.compiler not in ["gcc", "clang"]:
                 replace_in_file(self, os.path.join(self.source_folder, "lib", "jxl.cmake"),
                                 "-Wl,--exclude-libs=ALL", "")
+
+        # Disable static link for libgcc and libstdc++
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+            '"${CMAKE_EXE_LINKER_FLAGS} -static -static-libgcc -static-libstdc++")',
+            '"${CMAKE_EXE_LINKER_FLAGS}")')
 
     def build(self):
         self._patch_sources()
