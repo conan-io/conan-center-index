@@ -848,6 +848,7 @@ class VtkConan(ConanFile):
     def _strip_prefix(name):
         if name.startswith("VTK::"):
             return name[5:]
+        return name
 
     def _get_info_from_modules_json(self, modules_json):
         modules = json.loads(load(self, modules_json))["modules"]
