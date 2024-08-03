@@ -14,3 +14,6 @@ sources:
   "0.11.2":
     url: "https://github.com/symengine/symengine/releases/download/v0.11.2/symengine-0.11.2.tar.gz"
     sha256: "f6972acd6a65354f6414e69460d2e175729470632bdac05919bc2f7f32e48cbd"
+  "0.12.0":
+    url: "https://github.com/symengine/symengine/archive/refs/tags/v0.12.0.tar.gz"
+    sha256: "1b5c3b0bc6a9f187635f93585649f24a18e9c7f2167cebcd885edeaaf211d956"

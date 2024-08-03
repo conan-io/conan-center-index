@@ -1,4 +1,7 @@
 sources:
+  "2.4.0":
+    url: "https://github.com/sammycage/lunasvg/archive/v2.4.0.tar.gz"
+    sha256: "0682c60501c91d75f4261d9c1a5cd44c2c9da8dba76f8402eab628448c9a4591"
   "2.3.9":
     url: "https://github.com/sammycage/lunasvg/archive/v2.3.9.tar.gz"
     sha256: "088bc9fd1191a004552c65bdcc260989b83da441b0bdaa965e79d984feba88fa"
@@ -18,6 +21,10 @@ sources:
     url: "https://github.com/sammycage/lunasvg/archive/refs/tags/v2.3.1.tar.gz"
     sha256: "6492bf0f51982f5382f83f1a42f247bb1bbcbaef4a15963bbd53073cd4944a25"
 patches:
+  "2.4.0":
+    - patch_file: "patches/2.3.9-0001-fix-cmake.patch"
+      patch_description: "use external plutovg and fix installation path for conan"
+      patch_type: "conan"
   "2.3.9":
     - patch_file: "patches/2.3.9-0001-fix-cmake.patch"
       patch_description: "use external plutovg and fix installation path for conan"

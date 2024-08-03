@@ -35,6 +35,7 @@ class SCIPConan(ConanFile):
         "with_sym": "bliss",
     }
     soplex_version_belonging_to_me = {
+        "9.0.1": "7.0.1",
         "8.1.0": "6.0.4",
         "8.0.4": "6.0.4",
         "8.0.3": "6.0.3"
@@ -71,6 +72,9 @@ class SCIPConan(ConanFile):
             raise ConanInvalidConfiguration("Bliss does not support libc++.")
         if self.dependencies["soplex"].options.with_gmp and not self.options.with_gmp:
             raise ConanInvalidConfiguration("The options 'with_gmp' should be aligned with 'soplex:with_gmp' too.")
+        if Version(self.version) >= "9.0.1" and is_msvc(self) and self.settings.build_type == "Debug":
+            # lpi_spx2.cpp : error C1128: number of sections exceeded object file format limit: compile with /bigobj
+            raise ConanInvalidConfiguration(f"{self.ref} can not be build in Debug with MSVC.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -120,6 +124,7 @@ class SCIPConan(ConanFile):
         tc.variables["PAPILO"] = False  # LGPL
         tc.variables["ZIMPL"] = False  # LPGL
         tc.variables["IPOPT"] = False  # no such coin package on conan center yet
+        tc.variables["BUILD_TESTING"] = False  # do not build documentation and examples
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("sopex", "cmake_file_name", "SOPEX")

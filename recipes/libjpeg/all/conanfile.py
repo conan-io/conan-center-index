@@ -93,19 +93,22 @@ class LibjpegConan(ConanFile):
                 # shared: "libjpeg.lib" (import), "libjpeg-9.dll" (DLL)
                 jpeg_vcxproj = os.path.join(self.source_folder, "jpeg.vcxproj")
                 target_name = "libjpeg-9" if self.options.shared else "libjpeg"
-                replace_in_file(self, jpeg_vcxproj, """<PropertyGroup Label="UserMacros" />""", 
+                replace_in_file(self, jpeg_vcxproj, """<PropertyGroup Label="UserMacros" />""",
                                 f""" <PropertyGroup Label="UserMacros" /><PropertyGroup Label="TargetName"> <TargetName>{target_name}</TargetName></PropertyGroup>
                                 """)
                 if self.options.shared:
                     replace_in_file(self, jpeg_vcxproj, "</SubSystem>",
                                     "</SubSystem><ImportLibrary>$(OutDir)libjpeg.lib</ImportLibrary>")
-                
+
                 # Support static/shared
                 if self.options.shared:
                     replace_in_file(self, jpeg_vcxproj,
                         "<ConfigurationType>StaticLibrary</ConfigurationType>",
                         "<ConfigurationType>DynamicLibrary</ConfigurationType>"
                     )
+
+                # Don't force LTO
+                replace_in_file(self, jpeg_vcxproj, "<WholeProgramOptimization>true</WholeProgramOptimization>", "")
 
                 # Inject conan-generated .props file
                 # Note: importing it right before Microsoft.Cpp.props also ensures we correctly
@@ -125,7 +128,6 @@ class LibjpegConan(ConanFile):
                     if self.settings.build_type == "Debug":
                         replacements.update({
                             "<Optimization>Full": "<Optimization>Disabled",
-                            "<WholeProgramOptimization>true": "<WholeProgramOptimization>False",
                             "NDEBUG;": "_DEBUG;",
                         })
                     for key, value in replacements.items():

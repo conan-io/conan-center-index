@@ -9,6 +9,14 @@ sources:
     url: "https://github.com/xiph/flac/archive/1.3.3.tar.gz"
     sha256: "668cdeab898a7dd43cf84739f7e1f3ed6b35ece2ef9968a5c7079fe9adfe1689"
 patches:
+  "1.4.3":
+    - patch_file: "patches/1.4.2-002-ignore-dll_export-define.patch"
+      patch_description: "Ignore autotools-specific DLL_EXPORT define in export.h"
+      patch_type: "conan"
+  "1.4.2":
+    - patch_file: "patches/1.4.2-002-ignore-dll_export-define.patch"
+      patch_description: "Ignore autotools-specific DLL_EXPORT define in export.h"
+      patch_type: "conan"
   "1.3.3":
     - patch_file: "patches/fix-cmake-1.3.3.patch"
       patch_description: "Various adaptations in CMakeLists.txt files to improve compatibility with Conan."

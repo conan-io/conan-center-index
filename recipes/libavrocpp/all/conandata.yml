@@ -1,4 +1,7 @@
 sources:
+  "1.11.3":
+    url: "https://github.com/apache/avro/archive/release-1.11.3.tar.gz"
+    sha256: "da377ac1cf8b91458bf702cbcfb214eecb5c399b267f0ca9c0aade6cabaf126e"
   "1.11.1":
     url: "https://github.com/apache/avro/archive/release-1.11.1.tar.gz"
     sha256: "599f96bb405f72a35154b2477caa6254d723bb4e3f6a0e54e9ae540664321752"
@@ -12,6 +15,22 @@ sources:
     url: "https://github.com/apache/avro/archive/release-1.10.1.tar.gz"
     sha256: "8fd1f850ce37e60835e6d8335c0027a959aaa316773da8a9660f7d33a66ac142"
 patches:
+  "1.11.3":
+    - patch_file: "patches/0001-add-iterator-include-1-11-0.patch"
+      patch_description: "include iterator"
+      patch_type: "portability"
+    - patch_file: "patches/0002-disable-tests-1-11-1.patch"
+      patch_description: "disable tests"
+      patch_type: "conan"
+    - patch_file: "patches/0003-allow-static-boost-linkage-1-11-0.patch"
+      patch_description: "remove boost linkage definitions"
+      patch_type: "conan"
+    - patch_file: "patches/0004-fix-windows-shared-installation-1-11-1.patch"
+      patch_description: "fix runtime installation path"
+      patch_type: "portability"
+    - patch_file: "patches/0006-disable-warn-as-error-1-11-3.patch"
+      patch_description: "disable warn as error for boost c++14 breaking change"
+      patch_type: "portability"
   "1.11.1":
     - patch_file: "patches/0001-add-iterator-include-1-11-0.patch"
       patch_description: "include iterator"

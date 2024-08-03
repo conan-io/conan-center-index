@@ -10,6 +10,6 @@ int main()
 	google::protobuf::util::TimeUtil::FromString("1972-01-01T10:00:20.021Z", &ts);
 	const auto nanoseconds = ts.nanos();
 
-	std::cout << nanoseconds << "\n";
+	std::cout << "1972-01-01T10:00:20.021Z in nanoseconds: " << nanoseconds << "\n";
 	return EXIT_SUCCESS;
 }

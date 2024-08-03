@@ -71,13 +71,15 @@ class LibCVDConan(ConanFile):
 
     def requirements(self):
         # https://github.com/edrosten/libcvd/blob/main/cmake/CVDFindAllDeps.cmake
+        # Used in a public header https://github.com/edrosten/libcvd/blob/RELEASE_2_5_0/cvd/canny.h#L4
+        self.requires("toon/3.2", transitive_headers=True, transitive_libs=True)
         if self.options.with_ffmpeg:
             # FFMPEG v5.x+ are not supported
             self.requires("ffmpeg/4.4.4", transitive_libs=True)
         if self.options.with_libdc1394:
-            self.requires("libdc1394/2.2.7")
             # FIXME: libidc1394 seems to be missing raw1394 dependency
             # test_package fails with "undefined reference to `raw1394_new_handle'" etc
+            self.requires("libdc1394/2.2.7")
         if self.options.with_libjpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.2")
         elif self.options.with_libjpeg == "libjpeg":
@@ -90,14 +92,7 @@ class LibCVDConan(ConanFile):
             self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_opengl", True):
             # https://github.com/edrosten/libcvd/blob/RELEASE_2_5_0/cvd/videodisplay.h#L18-L20
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.requires("libglvnd/1.7.0", transitive_headers=True, transitive_libs=True)
-                self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
-            else:
-                self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
-        # TODO: https://github.com/ankurhanda/TooN
-        # https://github.com/edrosten/libcvd/blob/RELEASE_2_5_0/cvd/canny.h#L4
-        # self.requires("toon/3.1.1", transitive_headers=True, transitive_libs=True)
+            self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -123,7 +118,6 @@ class LibCVDConan(ConanFile):
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_TIFF"] = not self.options.with_libtiff
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_OpenGL"] = not self.options.get_safe("with_opengl", True)
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_X11"] = not self.options.get_safe("with_opengl", True)
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_TooN"] = True
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
