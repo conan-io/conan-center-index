@@ -55,11 +55,14 @@ class AsioGrpcConan(ConanFile):
             self.options.local_allocator = "boost_container" if prefer_boost_container else "memory_resource"
 
     def requirements(self):
+        use_latest = Version(self.version) > "2.8"
         self.requires("grpc/1.54.3", transitive_headers=True, transitive_libs=True)
         if (self.options.get_safe("local_allocator") == "boost_container" and Version(self.version) < "3.0.0") or self.options.backend == "boost":
-            self.requires("boost/1.85.0", transitive_headers=True)
+            version = "1.85.0" if use_latest else "1.83.0"
+            self.requires(f"boost/{version}", transitive_headers=True)
         if self.options.backend == "asio":
-            self.requires("asio/1.30.2", transitive_headers=True)
+            version = "1.30.2" if use_latest else "1.29.0"
+            self.requires(f"asio/{version}", transitive_headers=True)
         if self.options.backend == "unifex":
             self.requires("libunifex/0.4.0", transitive_headers=True, transitive_libs=True)
 
