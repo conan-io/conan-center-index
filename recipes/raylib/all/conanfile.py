@@ -48,8 +48,8 @@ class RaylibConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.settings.os != "Android":
-            self.requires("glfw/3.3.8")
+        if self.settings.os not in ["Android", "Emscripten"]:
+            self.requires("glfw/3.4")
             self.requires("opengl/system")
         if self.settings.os == "Linux":
             self.requires("xorg/system")
@@ -60,6 +60,10 @@ class RaylibConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_EXAMPLES"] = False
+        if self.settings.os == "Emscripten":
+            tc.variables["PLATFORM"] = "Web"
+            tc.variables["USE_EXTERNAL_GLFW"] = "ON"
+            tc.variables["OPENGL_VERSION"] = "ES 2.0"
         if self.settings.os == "Android":
             tc.variables["PLATFORM"] = "Android"
             tc.variables["USE_EXTERNAL_GLFW"] = "OFF"

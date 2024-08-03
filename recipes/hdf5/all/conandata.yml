@@ -1,4 +1,7 @@
 sources:
+  "1.14.4.3":
+    url: "https://github.com/HDFGroup/hdf5/archive/refs/tags/hdf5_1.14.4.3.tar.gz"
+    sha256: "690c1db7ba0fed4ffac61709236675ffd99d95d191e8920ee79c58d7e7ea3361"
   "1.14.3":
     url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_14_3/hdf5-1_14_3.tar.gz"
     sha256: "df5ee33c74d5efb59738075ef96f4201588e1f1eeb233f047ac7fd1072dee1f6"

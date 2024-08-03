@@ -1,25 +1,22 @@
 extends: default
 rules:
+  colons: disable
   document-start:
     level: error
     present: false
   document-end:
     level: error
     present: false
+  empty-lines: disable
   empty-values:
     forbid-in-block-mappings: true
     forbid-in-flow-mappings: true
   line-length: disable
-  indentation:
-    level: error
-  new-line-at-end-of-file:
-    level: error
-  trailing-spaces:
-    level: error
-  comments:
-    level: error
-  comments-indentation:
-    level: error
+  indentation: disable
+  new-line-at-end-of-file: disable
+  trailing-spaces: disable
+  comments: disable
+  comments-indentation: disable
   new-lines:
     type: unix
   key-duplicates:

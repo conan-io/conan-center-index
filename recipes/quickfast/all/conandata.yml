@@ -1,14 +1,16 @@
 sources:
-  "1.5":
-    url: "https://github.com/objectcomputing/quickfast/archive/V1_5.tar.gz"
-    sha256: "7ae22d28cc13967a2815c09bec027ce01f2f3e30b6ed752bea00649581e728df"
   "cci.20170314":
     url: "https://github.com/objectcomputing/quickfast/archive/f9403cfb20ae5383a04772112728d233502e31c0.tar.gz"
     sha256: "29f40fa383643bfa381315148c6c985fe41159342706f0d0a274fcf45cf36f49"
-patches:
   "1.5":
-    - patch_file: "patches/00001-fix-boost-asio.patch"
-      base_path: "source_subfolder"
+    url: "https://github.com/objectcomputing/quickfast/archive/V1_5.tar.gz"
+    sha256: "7ae22d28cc13967a2815c09bec027ce01f2f3e30b6ed752bea00649581e728df"
+patches:
   "cci.20170314":
-    - patch_file: "patches/00002-fix-boost-asio.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/0001-cci.20170314-fix-boost-asio.patch"
+      patch_type: "portability"
+      patch_description: "Fix compilation issues with newer Boost.Asio"
+  "1.5":
+    - patch_file: "patches/0001-1.5-fix-boost-asio.patch"
+      patch_type: "portability"
+      patch_description: "Fix compilation issues with newer Boost.Asio"

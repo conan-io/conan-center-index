@@ -1,4 +1,11 @@
 sources:
+  "20.64.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.64.0.tar.gz"
+    sha256: "bb81fa773dcbd6bc738904ad496554fd131a33269570e0e86fa09213d82ba9ef"
+  "20.63.0":
+    url: "https://github.com/uNetworking/uWebSockets/archive/v20.63.0.tar.gz"
+    sha256: "3bcb3fab4242d312e227b05f34e21d8468960e5eea59e12799aa21a94f1b2b1f"
+  # keep 20.62.0, the last version to provide C-API
   "20.62.0":
     url: "https://github.com/uNetworking/uWebSockets/archive/v20.62.0.tar.gz"
     sha256: "03dfc8037cf43856a41e64bbc7fc5a7cf5e6369c9158682753074ecbbe09eed1"

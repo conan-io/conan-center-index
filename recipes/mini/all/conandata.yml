@@ -1,0 +1,4 @@
+sources:
+  "0.9.15":
+    url: "https://github.com/metayeti/mINI/archive/refs/tags/0.9.15.tar.gz"
+    sha256: "241e105ab074827ab8b40582aa7b04c6191f84b244603969965c0874ad4f942c"

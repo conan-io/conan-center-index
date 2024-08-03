@@ -8,7 +8,6 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-
 required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
 
@@ -68,6 +67,8 @@ class ProjConan(ConanFile):
             self.requires("libcurl/[>=7.78.0 <9]")
 
     def build_requirements(self):
+        if Version(self.version) >= "9.4.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
         if not self._is_legacy_one_profile:
             self.tool_requires("sqlite3/<host_version>")
 
@@ -109,6 +110,7 @@ class ProjConan(ConanFile):
             # Workaround for: https://github.com/conan-io/conan/issues/13560
             libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
             tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -118,19 +120,19 @@ class ProjConan(ConanFile):
         apply_conandata_patches(self)
 
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+
         replace_in_file(self, cmakelists, "/W4", "")
 
         # Fix up usage of SQLite3 finder outputs
-        rm(self, "FindSqlite3.cmake", os.path.join(self.source_folder, "cmake"))
-        replace_in_file(self, cmakelists, "SQLITE3_FOUND", "SQLite3_FOUND")
-        replace_in_file(self, cmakelists, "SQLITE3_VERSION", "SQLite3_VERSION")
-        replace_in_file(self, cmakelists, "find_package(Sqlite3 REQUIRED)", "find_package(SQLite3 REQUIRED)")
+        if Version(self.version) < "9.4.0":
+            rm(self, "FindSqlite3.cmake", os.path.join(self.source_folder, "cmake"))
+            replace_in_file(self, cmakelists, "SQLITE3_FOUND", "SQLite3_FOUND")
+            replace_in_file(self, cmakelists, "SQLITE3_VERSION", "SQLite3_VERSION")
+            replace_in_file(self, cmakelists, "find_package(Sqlite3 REQUIRED)", "find_package(SQLite3 REQUIRED)")
 
         # Let CMake install shared lib with a clean rpath !
-        if Version(self.version) >= "7.1.0" and Version(self.version) < "9.0.0":
-            replace_in_file(self, cmakelists,
-                                  "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)",
-                                  "")
+        if "7.1.0" <= Version(self.version) < "9.0.0":
+            replace_in_file(self, cmakelists, "set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)", "")
 
         # Aggressive workaround against SIP on macOS, to handle sqlite3 executable
         # linked to shared sqlite3 lib
@@ -154,6 +156,11 @@ class ProjConan(ConanFile):
         # unvendor nlohmann_json
         if Version(self.version) < "8.1.0":
             rmdir(self, os.path.join(self.source_folder, "include", "proj", "internal", "nlohmann"))
+
+        # Remove warning flags that are unfamiliar to GCC 5
+        if Version(self.version) >= "9.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8.0":
+            replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "${PROJ_C_WARN_FLAGS}", "")
+            replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), "${PROJ_CXX_WARN_FLAGS}", "")
 
     def build(self):
         self._patch_sources()

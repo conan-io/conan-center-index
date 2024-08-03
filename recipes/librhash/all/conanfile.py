@@ -1,17 +1,23 @@
-from conans import AutoToolsBuildEnvironment, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.53.0"
 
 
 class LibRHashConan(ConanFile):
     name = "librhash"
     description = "Great utility for computing hash sums"
-    topics = ("rhash", "hash", "checksum")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://rhash.sourceforge.net/"
-    license = "MIT"
+    topics = ("rhash", "hash", "checksum")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -24,16 +30,12 @@ class LibRHashConan(ConanFile):
         "with_openssl": True,
     }
 
-    exports_sources = "patches/*"
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src", "librhash"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -41,81 +43,51 @@ class LibRHashConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
-
-    def build_requirements(self):
-        if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-
-    def validate(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration("Visual Studio is not supported")
+            self.requires("openssl/[>=1.1 <4]")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_autotools(self):
-        if self._autotools:
-            return self._autotools
-        self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-        if self.settings.compiler in ("apple-clang", ):
-            if self.settings.arch in ("armv7", ):
-                self._autotools.link_flags.append("-arch armv7")
-            elif self.settings.arch in ("armv8", ):
-                self._autotools.link_flags.append("-arch arm64")
-        vars = self._autotools.vars
-        conf_args = [
-            # librhash's configure script does not understand `--enable-opt1=yes`
-            "--enable-openssl" if self.options.with_openssl else "--disable-openssl",
-            "--disable-gettext",
-            # librhash's configure script is custom and does not understand "--bindir=${prefix}/bin" arguments
-            "--prefix={}".format(tools.unix_path(self.package_folder)),
-            "--bindir={}".format(tools.unix_path(os.path.join(self.package_folder, "bin"))),
-            "--libdir={}".format(tools.unix_path(os.path.join(self.package_folder, "lib"))),
-            # the configure script does not use CPPFLAGS, so add it to CFLAGS/CXXFLAGS
-            "--extra-cflags={}".format("{} {}".format(vars["CFLAGS"], vars["CPPFLAGS"])),
-            "--extra-ldflags={}".format(vars["LDFLAGS"]),
-        ]
-        if self.options.shared:
-            conf_args.extend(["--enable-lib-shared", "--disable-lib-static"])
-        else:
-            conf_args.extend(["--disable-lib-shared", "--enable-lib-static"])
+    @property
+    def _xversion(self):
+        # https://github.com/rhash/RHash/blob/v1.4.4/configure#L339
+        version = Version(self.version)
+        return f"0x{version.major.value:02x}{version.minor.value:02x}{version.patch.value:02x}{0:02x}"
 
-        with tools.environment_append({
-            "BUILD_TARGET": tools.get_gnu_triplet(str(self.settings.os), str(self.settings.arch), str(self.settings.compiler)),
-        }):
-            self._autotools.configure(args=conf_args, use_default_install_dirs=False, build=False, host=False)
-        return self._autotools
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["USE_OPENSSL"] = self.options.with_openssl
+        tc.preprocessor_definitions["RHASH_XVERSION"] = self._xversion
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.make()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "librhash"))
+        cmake.build()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        with tools.chdir(self._source_subfolder):
-            autotools = self._configure_autotools()
-            autotools.install()
-            autotools.make(target="install-lib-headers")
-            with tools.chdir("librhash"):
-                if self.options.shared:
-                    autotools.make(target="install-so-link")
-        tools.rmdir(os.path.join(self.package_folder, "bin"))
-        tools.rmdir(os.path.join(self.package_folder, "etc"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "LibRHash")
+        self.cpp_info.set_property("cmake_target_name", "LibRHash::LibRHash")
+        self.cpp_info.set_property("pkg_config_name", "librhash")
+        self.cpp_info.libs = ["rhash"]
+        self.cpp_info.defines.append(f"RHASH_XVERSION={self._xversion}")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "LibRHash"
         self.cpp_info.names["cmake_find_package_multi"] = "LibRHash"
-        self.cpp_info.names["pkg_config"] = "librhash"
-        self.cpp_info.libs = ["rhash"]
