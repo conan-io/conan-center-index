@@ -1,4 +1,7 @@
 sources:
+  "1.0.4":
+    url: "https://github.com/alicevision/CCTag/archive/refs/tags/v1.0.4.tar.gz"
+    sha256: "f4ced6138419f4ad09d62d4373738c172586c91068faff8bf08c2caa5e76d516"
   "1.0.3":
     url: "https://github.com/alicevision/CCTag/archive/refs/tags/v1.0.3.tar.gz"
     sha256: "25396b03c4aa3c1be241a2a8518a29511cb4fff695caa5126203fbba8e8e444d"
