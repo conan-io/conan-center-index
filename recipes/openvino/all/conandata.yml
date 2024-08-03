@@ -1,4 +1,20 @@
 sources:
+  "2024.3.0":
+    "openvino":
+      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2024.3.0.tar.gz"
+      sha256: "53fccad05279d0975eca84ec75517a7c360be9b0f7bcd822da29a7949c12ce70"
+    "arm_compute":
+      url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v24.06.tar.gz"
+      sha256: "68e24589905638e406a98ad48236097ab30112f2849b35e196b7b1efb0ce74e6"
+    "onednn_cpu":
+      url: "https://github.com/openvinotoolkit/oneDNN/archive/f0f8defe2dff5058391f2a66e775e20b5de33b08.tar.gz"
+      sha256: "13bee5b8522177f297e095e3eba5948c1a7ee7a816d19d5a59ce0f717f82cedc"
+    "mlas":
+      url: "https://github.com/openvinotoolkit/mlas/archive/d1bc25ec4660cddd87804fcf03b2411b5dfb2e94.tar.gz"
+      sha256: "0a44fbfd4b13e8609d66ddac4b11a27c90c1074cde5244c91ad197901666004c"
+    "onednn_gpu":
+      url: "https://github.com/oneapi-src/oneDNN/archive/7ab8ee9adda866d675edeee7a3a6a29b2d0a1572.tar.gz"
+      sha256: "66363988363744e49fff55f4fcdb72318ff3f35fba6da68302c1662c837c22ac"
   "2024.2.0":
     "openvino":
       url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2024.2.0.tar.gz"
