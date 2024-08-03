@@ -52,7 +52,7 @@ class LibaomAv1Conan(ConanFile):
         if self.options.get_safe("assembly", False):
             self.tool_requires("nasm/2.15.05")
         if self._settings_build.os == "Windows":
-            self.tool_requires("strawberryperl/5.30.0.1")
+            self.tool_requires("strawberryperl/5.32.1.1")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -94,6 +94,9 @@ class LibaomAv1Conan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "aom")
-        self.cpp_info.libs = ["aom"]
+        lib = "aom"
+        if Version(self.version) >= "3.8.0" and self.settings.os == "Windows" and self.options.shared:
+            lib = "aom_dll"
+        self.cpp_info.libs = [lib]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["pthread", "m"]

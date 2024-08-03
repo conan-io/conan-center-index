@@ -1,6 +1,6 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, rmdir
+from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.tools.files import get, copy, rmdir, load, save, rename
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
@@ -72,16 +72,29 @@ class AwsLambdaRuntimeConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+    def _extract_cmake_module(self):
+        cmake_module = load(self, os.path.join(self.source_folder, "cmake", "aws-lambda-runtime-config.cmake"))
+        start = "set(AWS_LAMBDA_PACKAGING_SCRIPT ${CMAKE_CURRENT_LIST_DIR}/packager)"
+        start_index = cmake_module.find(start)
+        if start_index == -1:
+            raise ConanException("Could not extract aws_lambda_package_target from aws-lambda-runtime-config.cmake file.")
+        return cmake_module[start_index:]
+
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+
+        save(self, os.path.join(self.package_folder, "lib", "cmake", "aws_lambda_package_target.cmake"), self._extract_cmake_module())
+        rename(self, os.path.join(self.package_folder, "lib", "aws-lambda-runtime", "cmake", "packager"), os.path.join(self.package_folder, "lib", "cmake", "packager"))
         rmdir(self, os.path.join(self.package_folder, "lib", "aws-lambda-runtime"))
 
     def package_info(self):
         self.cpp_info.libs = ["aws-lambda-runtime"]
+        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
 
         self.cpp_info.set_property("cmake_file_name", "aws-lambda-runtime")
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-lambda-runtime")
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "aws_lambda_package_target.cmake")])
 
         self.cpp_info.system_libs.append("m")
