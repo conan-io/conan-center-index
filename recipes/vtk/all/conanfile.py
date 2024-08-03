@@ -1187,6 +1187,13 @@ class VtkConan(ConanFile):
         if "ViewsQt" in components:
             self.cpp_info.components["ViewsQt"].requires.append("qt::qtWidgets")
 
+        # Add a "poison" component to prohibit the use of the "vtk::vtk" Conan target.
+        # This matches the project's behavior of not providing an aggregate VTK::VTK CMake target.
+        msg = "_avoid_overlinking_against_the_whole_vtk_library_"
+        self.cpp_info.components[msg].system_libs = [msg]
+        self.cpp_info.set_property("cmake_target_name", msg)
+        self.cpp_info.set_property("pkg_config_name", msg)
+
         for component_name, component in self.cpp_info.components.items():
             self.output.debug(f"COMPONENT: {component_name}")
             if component.libs:
