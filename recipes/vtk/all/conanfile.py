@@ -938,7 +938,7 @@ class VtkConan(ConanFile):
             for definition in target_info.get("compile_definitions", []):
                 if definition.startswith("-D"):
                     definition = definition[2:]
-                if not "defines" in component:
+                if "defines" not in component:
                     component["defines"] = []
                 component["defines"].append(definition)
             requires, system_libs, frameworks = self._transform_link_libraries(target_info.get("link_libraries", []))
