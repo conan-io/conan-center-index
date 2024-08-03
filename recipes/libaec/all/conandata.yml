@@ -1,22 +1,7 @@
 sources:
+  "1.1.2":
+    url: "https://gitlab.dkrz.de/k202009/libaec/-/archive/v1.1.2/libaec-v1.1.2.tar.bz2"
+    sha256: "bdad8c7923537c3695327aa85afdcd714fb3d30a5f956a27ba2971ef98c043ac"
   "1.0.6":
-    url: "https://gitlab.dkrz.de/k202009/libaec/uploads/45b10e42123edd26ab7b3ad92bcf7be2/libaec-1.0.6.tar.gz"
-    sha256: "032961877231113bb094ef224085e6d66fd670f85a3e17f53d0f131abf24f2fd"
-  "1.0.4":
-    url: "https://gitlab.dkrz.de/k202009/libaec/uploads/ea0b7d197a950b0c110da8dfdecbb71f/libaec-1.0.4.tar.gz"
-    sha256: "f2b1b232083bd8beaf8a54a024225de3dd72a673a9bcdf8c3ba96c39483f4309"
-patches:
-  "1.0.4":
-    - patch_file: "patches/1.0.4-0001-Fix-static-library-builds.patch"
-      patch_type: "conan"
-      patch_description: "Fix static library builds"
-    - patch_file: "patches/1.0.4-0002-fix-install-ios.patch"
-      patch_type: "conan"
-      patch_description: "Fix install iOS"
-  "1.0.6":
-    - patch_file: "patches/1.0.6-0001-fix-library-builds.patch"
-      patch_type: "conan"
-      patch_description: "Fix library builds"
-    - patch_file: "patches/1.0.6-0002-fix-cmake-build-with-ninja.patch"
-      patch_type: "conan"
-      patch_description: "Ninja needs 'aec' binary to be put in a separate folder to an imaginary 'aec' object output"
+    url: "https://gitlab.dkrz.de/k202009/libaec/-/archive/v1.0.6/libaec-v1.0.6.tar.bz2"
+    sha256: "31fb65b31e835e1a0f3b682d64920957b6e4407ee5bbf42ca49549438795a288"

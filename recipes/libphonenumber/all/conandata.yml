@@ -1,0 +1,4 @@
+sources:
+  "8.13.42":
+    url: "https://github.com/google/libphonenumber/archive/refs/tags/v8.13.42.tar.gz"
+    sha256: "7fac3a3c5f37607108ea2ca4c334000a6c29fe1cd6b30db31505cba73ab96c7d"
