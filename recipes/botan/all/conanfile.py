@@ -53,6 +53,8 @@ class BotanConan(ConanFile):
         "with_powercrypto": [True, False],
         "enable_modules": [None, "ANY"],
         "disable_modules": [None, "ANY"],
+        "enable_experimental_features": [True, False],
+        "enable_deprecated_features": [True, False],
         "system_cert_bundle": [None, "ANY"],
         "module_policy": [None, "bsi", "modern", "nist"],
     }
@@ -81,6 +83,8 @@ class BotanConan(ConanFile):
         "with_powercrypto": True,
         "enable_modules": None,
         "disable_modules": None,
+        "enable_experimental_features": False,
+        "enable_deprecated_features": True,
         "system_cert_bundle": None,
         "module_policy": None,
     }
@@ -336,6 +340,20 @@ class BotanConan(ConanFile):
         if self._extra_cxxflags:
             botan_extra_cxx_flags.append(self._extra_cxxflags)
 
+        if Version(self.version) >= '3.4':
+            # Botan 3.4.0 introduced a 'module life cycle' feature, before that
+            # the experimental/deprecated feature switches are ignored.
+
+            if self.options.enable_experimental_features:
+                build_flags.append('--enable-experimental-features')
+            else:
+                build_flags.append('--disable-experimental-features')
+
+            if self.options.enable_deprecated_features:
+                build_flags.append('--enable-deprecated-features')
+            else:
+                build_flags.append('--disable-deprecated-features')
+
         if self.options.enable_modules:
             build_flags.append('--minimized-build')
             build_flags.append('--enable-modules={}'.format(self.options.enable_modules))
@@ -457,7 +475,7 @@ class BotanConan(ConanFile):
                          ' --extra-cxxflags="{cxxflags}"'
                          ' --cc={compiler}'
                          ' --cpu={cpu}'
-                         ' --prefix={prefix}'
+                         ' --prefix="{prefix}"'
                          ' --os={os}'
                          ' {build_flags}').format(
                              python_call=call_python,
@@ -516,6 +534,8 @@ class BotanConan(ConanFile):
         # https://github.com/conan-io/conan-center-index/pull/18079#issuecomment-1919206949
         # https://github.com/conan-io/conan-center-index/pull/18079#issuecomment-1919486839
 
+        if self.settings.os != 'Linux':
+            return False
         libver = platform.libc_ver()
         return (
             self.settings.os == 'Linux' and

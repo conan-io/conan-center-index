@@ -82,7 +82,7 @@ class OpenImageIOConan(ConanFile):
         self.requires("boost/1.84.0")
         self.requires("libtiff/4.6.0")
         self.requires("imath/3.1.9", transitive_headers=True)
-        self.requires("openexr/3.2.1")
+        self.requires("openexr/3.2.3")
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":

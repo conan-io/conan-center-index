@@ -1,0 +1,22 @@
+sources:
+  "3.9.0":
+    url: "https://github.com/odygrd/quill/archive/v3.9.0.tar.gz"
+    sha256: "6e6a46dc6ae94e8321aca00d27dae754dcc51ee83fe60078f8f1f3eb7b3b227b"
+  "3.8.0":
+    url: "https://github.com/odygrd/quill/archive/v3.8.0.tar.gz"
+    sha256: "d3e1b349c5d6904c9644e5b79ec65f21692e8094a3d75241a7fe071076eef4dd"
+  "3.7.0":
+    url: "https://github.com/odygrd/quill/archive/v3.7.0.tar.gz"
+    sha256: "53afe555c32b4263c9d31ec11bd0d858983374af7a5e79eb26124f803b192515"
+  "3.6.0":
+    url: "https://github.com/odygrd/quill/archive/v3.6.0.tar.gz"
+    sha256: "ba9dc3df262f2e65c57904580cc8407eba9a462001340c17bab7ae1dccddb4bd"
+  "3.5.1":
+    url: "https://github.com/odygrd/quill/archive/v3.5.1.tar.gz"
+    sha256: "9fa4ebe594c66ce2a409630c304724fa7a2ada0d842ba9c9aaf05f0a90b461f9"
+  "3.4.1":
+    url: "https://github.com/odygrd/quill/archive/v3.4.1.tar.gz"
+    sha256: "99f6497b8ba37c30c871fab89f14cd7bc989f3eaa921ccd940a521ee60a6a1c5"
+  "3.3.1":
+    url: "https://github.com/odygrd/quill/archive/v3.3.1.tar.gz"
+    sha256: "f929d54a115b45c32dd2acd1a9810336d35c31fde9f5581c51ad2b80f980d0d1"

@@ -38,7 +38,7 @@ class yomm2Recipe(ConanFile):
         return {
             "gcc": "8",
             "clang": "5",
-            "apple-clang": "12",
+            "apple-clang": "13",
             "msvc": "192"
         }
 
@@ -53,6 +53,10 @@ class yomm2Recipe(ConanFile):
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+        if self.settings.compiler == "apple-clang" and not bool(self.options.header_only):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} dynamic library builds are not supported on MacOS."
             )
 
     def build_requirements(self):
@@ -80,8 +84,9 @@ class yomm2Recipe(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        replace_in_file(self, cmakelists, "add_subdirectory(docs.in)", "")
+        if Version(self.version) <= "1.5.1":
+            cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+            replace_in_file(self, cmakelists, "add_subdirectory(docs.in)", "")
 
     def build(self):
         self._patch_sources()

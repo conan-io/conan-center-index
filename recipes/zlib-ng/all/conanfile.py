@@ -28,6 +28,7 @@ class ZlibNgConan(ConanFile):
         "with_new_strategies": [True, False],
         "with_native_instructions": [True, False],
         "with_reduced_mem": [True, False],
+        "with_runtime_cpu_detection": [True, False],
     }
     default_options = {
         "shared": False,
@@ -38,6 +39,7 @@ class ZlibNgConan(ConanFile):
         "with_new_strategies": True,
         "with_native_instructions": False,
         "with_reduced_mem": False,
+        "with_runtime_cpu_detection": True,
     }
 
     def config_options(self):
@@ -45,6 +47,8 @@ class ZlibNgConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) < "2.1.0":
             del self.options.with_reduced_mem
+        if Version(self.version) < "2.2.1":
+            del self.options.with_runtime_cpu_detection
 
     def configure(self):
         if self.options.shared:
@@ -76,6 +80,8 @@ class ZlibNgConan(ConanFile):
         tc.variables["WITH_NATIVE_INSTRUCTIONS"] = self.options.with_native_instructions
         if Version(self.version) >= "2.1.0":
             tc.variables["WITH_REDUCED_MEM"] = self.options.with_reduced_mem
+        if Version(self.version) >= "2.2.1":
+            tc.variables["WITH_RUNTIME_CPU_DETECTION"] = self.options.with_runtime_cpu_detection
         tc.generate()
 
     def build(self):
@@ -89,6 +95,7 @@ class ZlibNgConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         # upstream CMakeLists intentionally hardcodes install_name with full
         # install path (to match autootools behavior), instead of @rpath
         fix_apple_shared_install_name(self)

@@ -60,7 +60,7 @@ class XmlSecConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libxml2/2.12.4", transitive_headers=True)
+        self.requires("libxml2/[>=2.12.5 <3]", transitive_headers=True)
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
         if self.options.with_xslt:

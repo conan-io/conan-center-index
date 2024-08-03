@@ -13,7 +13,7 @@ class KDBindingsConan(ConanFile):
     homepage = "https://github.com/KDAB/KDBindings"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
-    settings = "os", "arch", "compiler", "build_type"
+    settings = "compiler"
     no_copy_source = True
 
     def package_id(self):
@@ -26,9 +26,10 @@ class KDBindingsConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "9",
-            "Visual Studio": "15.7",
             "clang": "7",
             "apple-clang": "11",
+            "Visual Studio": "15.7",
+            "msvc": "191",
         }
 
     def validate(self):
