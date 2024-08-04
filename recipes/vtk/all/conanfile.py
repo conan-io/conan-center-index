@@ -144,7 +144,7 @@ class VtkConan(ConanFile):
         "with_glew": False,  # FIXME: missing libglvnd binaries
         "with_h5part": True,
         "with_hdf5": True,
-        "with_holoplaycore": True,
+        "with_holoplaycore": False,  # FIXME: requires glew
         "with_ioss": False,
         "with_jpeg": "libjpeg",
         "with_jsoncpp": True,
@@ -164,7 +164,7 @@ class VtkConan(ConanFile):
         "with_opengl": False,  # FIXME: missing libglvnd binaries
         "with_openslide": False,  # TODO: #21138
         "with_openvdb": True,
-        "with_openvr": True,
+        "with_openvr": False,  # FIXME: requires glew
         "with_pdal": False,  # TODO: #21296
         "with_pegtl": True,
         "with_png": True,
@@ -422,15 +422,21 @@ class VtkConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires qt/*:widgets=True")
 
         for dep1, dep2 in [
+            ("dawn", "glew"),
             ("exodusII", "netcdf"),
+            ("fontconfig", "freetype"),
             ("gdal", "proj"),
             ("gl2ps", "opengl"),
             ("glew", "opengl"),
+            ("holoplaycore", "glew"),
             ("ioss", "cgns"),
             ("liblas", "boost"),
             ("mysql", "sqlite"),
             ("netcdf", "hdf5"),
+            ("openvr", "glew"),
+            ("openxr", "glew"),
             ("xdmf3", "boost"),
+            ("zspace", "opengl"),
         ]:
             if self.options.get_safe(f"with_{dep1}") and not self.options.get_safe(f"with_{dep2}"):
                 raise ConanInvalidConfiguration(f"'-o vtk/*:with_{dep1}=True' requires '-o vtk/*:with_{dep2}=True'")
@@ -463,7 +469,7 @@ class VtkConan(ConanFile):
         modules["CommonSystem"] = "YES"
         modules["CommonTransforms"] = "YES"
         modules["IOCore"] = "YES"
-        modules["DomainsMicroscopy"] = _want_no(self.options.with_openslide)
+        modules["DomainsMicroscopy"] = _yes_no(self.options.with_openslide)
         modules["FiltersReebGraph"] = _want_no(self.options.with_boost)
         modules["GUISupportQt"] = _want_no(self.options.with_qt and qt.opengl != "no")
         modules["GUISupportQtQuick"] = _want_no(self.options.with_qt and qt.opengl != "no" and qt.gui and qt.qtshadertools and qt.qtdeclarative)
