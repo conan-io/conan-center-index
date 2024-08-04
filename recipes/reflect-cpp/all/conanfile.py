@@ -3,10 +3,11 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.layout import basic_layout
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 import os
 
 required_conan_version = ">=1.51.1"
+
 
 class ReflectCppConan(ConanFile):
     name = "reflect-cpp"
@@ -14,22 +15,42 @@ class ReflectCppConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/getml/reflect-cpp"
-    topics = ("reflection", "serialization", "memory", "json", "xml", "flatbuffers", "yaml", "toml", "msgpack", "header-only")
-    package_type = "header-library"
-    settings = "os", "arch", "compiler", "build_type"
+    version = "0.14.0"
+    topics = (
+        "reflection",
+        "serialization",
+        "memory",
+        "cbor",
+        "flatbuffers",
+        "json",
+        "msgpack",
+        "toml",
+        "xml",
+        "yaml",
+    )
+    package_type = "library"
+    settings = "os", "compiler", "build_type", "arch"
     options = {
-        "with_json" : [True, False],
-        "with_xml" : [True, False],
-        "with_flatbuffers" : [True, False],
-        "with_yaml": [True, False],
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_cbor": [True, False],
+        "with_flatbuffers": [True, False],
+        "with_json": [True, False],
         "with_msgpack": [True, False],
+        "with_toml": [True, False],
+        "with_xml": [True, False],
+        "with_yaml": [True, False],
     }
     default_options = {
-        "with_json" : False,
-        "with_xml" : False,
-        "with_flatbuffers" : False,
-        "with_yaml" : False,
-        "with_msgpack":  False,
+        "shared": False,
+        "fPIC": True,
+        "with_cbor": False,
+        "with_flatbuffers": False,
+        "with_json": False,
+        "with_msgpack": False,
+        "with_toml": False,
+        "with_xml": False,
+        "with_yaml": False,
     }
 
     @property
@@ -46,50 +67,76 @@ class ReflectCppConan(ConanFile):
             "apple-clang": "15",
         }
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            self.options.rm_safe("fPIC")
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self)
+
+    def generate(self):
+        deps = CMakeDeps(self)
+        deps.generate()
+        tc = CMakeToolchain(self)
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        cmake = CMake(self)
+        cmake.install()
 
     def requirements(self):
-        if self.options.with_json:
-            self.requires("yyjson/0.8.0", transitive_headers=True)
-        if self.options.with_xml:
-            self.requires("pugixml/1.14", transitive_headers=True)
+        if self.options.with_cbor:
+            self.requires("tinycbor/0.6.0", transitive_headers=True)
         if self.options.with_flatbuffers:
             self.requires("flatbuffers/23.5.26", transitive_headers=True)
-        if self.options.with_yaml:
-            self.requires("yaml-cpp/0.8.0", transitive_headers=True)
+        if self.options.with_json:
+            self.requires("yyjson/0.8.0", transitive_headers=True)
         if self.options.with_msgpack:
             self.requires("msgpack-c/6.0.0", transitive_headers=True)
-
-        if Version(self.version) >= "0.11.1":
-            self.requires("ctre/3.9.0", transitive_headers=True)
-
-    def package_id(self):
-        self.info.clear()
-
-    def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        if self.options.with_toml:
+            self.requires("tomlplusplus/3.4.0", transitive_headers=True)
+        if self.options.with_xml:
+            self.requires("pugixml/1.14", transitive_headers=True)
+        if self.options.with_yaml:
+            self.requires("yaml-cpp/0.8.0", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self,
+            pattern="LICENSE*",
+            dst=os.path.join(self.package_folder, "licenses"),
+            src=self.source_folder,
+        )
+        copy(
+            self,
+            pattern="CMakeLists.txt",
+            dst=self.package_folder,
+            src=self.source_folder,
+        )
         copy(
             self,
             pattern="*.hpp",
             dst=os.path.join(self.package_folder, "include"),
             src=os.path.join(self.source_folder, "include"),
         )
+        copy(
+            self,
+            pattern="reflectcpp.cpp",
+            dst=os.path.join(self.package_folder, "src"),
+            src=os.path.join(self.source_folder, "src"),
+        )
 
     def package_info(self):
-        self.cpp_info.bindirs = []
-        self.cpp_info.libdirs = []
-        if Version(self.version) >= "0.11.1":
-            self.cpp_info.defines.append("REFLECTCPP_NO_BUNDLED_DEPENDENCIES")
+        self.cpp_info.libs = ["reflect-cpp"]
