@@ -66,8 +66,10 @@ class DpdkConan(ConanFile):
         self.requires("libnuma/2.0.16", options={"shared": True})
         self.requires("libelf/0.8.13")
         self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("linux-headers-generic/5.15.128", transitive_headers=True)
         if self.options.with_jansson:
-            self.requires("jansson/2.14")
+            # rte_metrics_telemetry.h
+            self.requires("jansson/2.14", transitive_headers=True, transitive_libs=True)
         if self.options.with_libarchive:
             self.requires("libarchive/3.7.4")
         if self.options.with_libbpf:
@@ -117,6 +119,7 @@ class DpdkConan(ConanFile):
         tc.project_options["tests"] = "false"
         tc.project_options["enable_stdatomic"] = "true" if self.options.enable_stdatomic else "false"
         tc.project_options["ibverbs_link"] = "shared"  # rdma-core is a shared-library package
+        tc.project_options["disable_drivers"] = "bus"
         tc.generate()
 
         deps = PkgConfigDeps(self)
