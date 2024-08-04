@@ -1,8 +1,10 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.apple import is_apple_os
 import os
 
 required_conan_version = ">=1.53.0"
@@ -41,6 +43,9 @@ class CigiClConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
+        if is_apple_os(self):
+            raise ConanInvalidConfiguration(f"{self.settings.os} is not supported")
+
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
 
