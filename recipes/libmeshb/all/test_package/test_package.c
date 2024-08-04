@@ -1,6 +1,7 @@
+#include "libmeshb7.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-#include "libmeshb7.h"
 
 int main(int argc, char **argv) {
     int64_t LibIdx;

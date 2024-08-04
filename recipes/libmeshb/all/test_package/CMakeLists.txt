@@ -5,4 +5,4 @@ project(test_package LANGUAGES C)
 find_package(libMeshb REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.c)
-target_link_libraries(${PROJECT_NAME} PRIVATE libmeshb::libmeshb)
+target_link_libraries(${PROJECT_NAME} PRIVATE libMeshb::Meshb.7)
