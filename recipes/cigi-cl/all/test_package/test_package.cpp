@@ -14,7 +14,7 @@ int main(void) {
     msgOut.BeginMsg();
     msgOut.pack(sofMsg);
 
-    Cigi_uint8* rawMsgData = nullptr;
+    Cigi_uint8* rawMsgData = NULL;
     int msgLength = 0;
     msgOut.PackageMsg(&rawMsgData, msgLength);
 
