@@ -35,6 +35,7 @@ class VtkConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "want_all_modules": [True, False],  # Whether to initialize all module to WANT or NOT_WANT
         ### compile options ###
         "enable_logging": [True, False],
         ### symmetric multiprocessing ###
@@ -109,6 +110,7 @@ class VtkConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "want_all_modules": True,
         ### compile options ###
         "enable_logging": True,
         ### symmetric multiprocessing ###
@@ -179,11 +181,11 @@ class VtkConan(ConanFile):
         "with_zeromq": False,
         "with_zspace": True,
     }
-    # NOTE: all non-third-party VTK modules are also available as options.
+    # All non-third-party VTK modules are also available as options.
     # e.g. "IOGeoJSON": ["auto", "YES", "WANT", "DONT_WANT", "NO"], etc.
     # See options/<version>.json for the full list of modules.
-    # Keep in mind that there is almost no validation done for compatibility between the module options.
-    # We mostly rely on the checks done in the configure phase of the CMake build instead.
+    # Note that only YES/NO values are validated in the Conan recipe,
+    # WANT/DONT_WANT are only checked in the CMake configure step.
 
     @property
     def _min_cppstd(self):
@@ -438,37 +440,59 @@ class VtkConan(ConanFile):
         # Just to check for conflicts
         self._compute_module_values()
 
+    @property
     @functools.lru_cache()
-    def _compute_module_values(self):
+    def _default_state(self):
+        return "WANT" if self.options.want_all_modules else "DONT_WANT"
+
+    def _initial_state(self, mod):
+        state = self.options.get_safe(mod, self._default_state)
+        return self._default_state if state == "auto" else state
+
+    def _validate_modules(self):
+        # Compute the set of modules available with the given set of external dependencies and
+        # check that no unused dependency options are enabled.
         enabled_deps = {opt.replace("with_", "") for opt, value in self.options.items() if opt.startswith("with_") and str(value) != "False"}
-        enabled_modules = set()
+        available_modules = set()
         used_deps = {"kissfft"}
         for mod, deps in self._module_ext_deps.items():
-            if enabled_deps.issuperset(deps):
-                enabled_modules.add(mod)
-                used_deps.update(deps)
-                opt_deps = self._module_opt_deps.get(mod, [])
-                used_deps.update(set(opt_deps) & enabled_deps)
-
+            state = self._initial_state(mod)
+            deps = set(deps)
+            if state != "NO":
+                if enabled_deps.issuperset(deps):
+                    available_modules.add(mod)
+                    used_deps.update(deps)
+                    opt_deps = self._module_opt_deps.get(mod, [])
+                    used_deps.update(set(opt_deps) & enabled_deps)
+                elif state == "YES":
+                    raise ConanInvalidConfiguration(f"Module '{mod}' is missing dependencies: {', '.join(deps - enabled_deps)}")
         unused_deps = enabled_deps - used_deps
         if unused_deps:
             msg = []
             for dep in unused_deps:
                 related_requires = set()
+                disabled_modules = set()
                 for mod, deps in self._module_ext_deps.items():
                     if dep in deps:
                         related_requires |= set(deps) - {dep}
-                msg.append(f"\n  - with_{dep}: requires {', '.join(related_requires)}")
+                        if self._initial_state(mod) not in ["WANT", "YES"]:
+                            disabled_modules.add(mod)
+                msg.append(f"\n  - with_{dep}: also requires {', '.join(related_requires)}")
+                if disabled_modules:
+                    msg.append(f"; used in disabled {', '.join(disabled_modules)} modules")
             raise ConanInvalidConfiguration(f"Unused dependency options:{''.join(msg)}")
+        return available_modules
+
+    @functools.lru_cache()
+    def _compute_module_values(self):
+        def _yes_no(value):
+            return "YES" if value else "NO"
+
+        def _maybe(value):
+            return self._default_state if value else "NO"
 
         if self.options.with_qt:
             qt = self.dependencies["qt"].options
-
-        def _want_no(value):
-            return "WANT" if value else "NO"
-
-        def _yes_no(value):
-            return "YES" if value else "NO"
 
         modules = {}
         # The common modules and their dependencies should always be available
@@ -484,35 +508,9 @@ class VtkConan(ConanFile):
         modules["CommonSystem"] = "YES"
         modules["CommonTransforms"] = "YES"
         modules["IOCore"] = "YES"
-        modules["DomainsMicroscopy"] = _yes_no(self.options.with_openslide)
-        modules["FiltersReebGraph"] = _want_no(self.options.with_boost)
-        modules["GUISupportQt"] = _want_no(self.options.with_qt and qt.opengl != "no")
-        modules["GUISupportQtQuick"] = _want_no(self.options.with_qt and qt.opengl != "no" and qt.gui and qt.qtshadertools and qt.qtdeclarative)
-        modules["GUISupportQtSQL"] = _want_no(self.options.with_qt)
-        modules["GeovisGDAL"] = _want_no(self.options.with_gdal)
-        modules["IOADIOS2"] = _yes_no(self.options.get_safe("with_adios2"))
-        modules["IOCatalystConduit"] = _yes_no(self.options.get_safe("with_catalyst"))
-        modules["IOFFMPEG"] = _yes_no(self.options.with_ffmpeg)
-        modules["IOGDAL"] = _yes_no(self.options.with_gdal)
-        modules["IOLAS"] = _yes_no(self.options.get_safe("with_liblas") and self.options.with_boost)
-        modules["IOMySQL"] = _yes_no(self.options.with_mysql and self.options.with_sqlite)
-        modules["IOOCCT"] = _yes_no(self.options.with_opencascade)
-        modules["IOODBC"] = _yes_no(self.options.with_odbc)
-        modules["IOOpenVDB"] = _yes_no(self.options.with_openvdb)
-        modules["IOPDAL"] = _yes_no(self.options.with_pdal)
-        modules["IOPostgreSQL"] = _yes_no(self.options.with_postgresql)
-        modules["InfovisBoost"] = _yes_no(self.options.with_boost)
-        modules["InfovisBoostGraphAlgorithms"] = _want_no(self.options.with_boost)
         modules["Python"] = "NO"
-        modules["RenderingFreeTypeFontConfig"] = _want_no(self.options.with_fontconfig)
-        modules["RenderingLookingGlass"] = _want_no(self.options.with_holoplaycore)
-        modules["RenderingOpenVR"] = _want_no(self.options.with_openvr)
-        modules["RenderingOpenXR"] = _want_no(self.options.get_safe("with_openxr"))
-        modules["RenderingOpenXRRemoting"] = _want_no(self.options.get_safe("with_openxr"))
-        modules["RenderingQt"] = _want_no(self.options.with_qt)
-        modules["RenderingWebGPU"] = _want_no(self.options.with_sdl2 and (self.settings.os == "Emscripten" or self.options.get_safe("with_dawn")))
-        modules["RenderingZSpace"] = _want_no(self.options.get_safe("with_zspace"))
-        modules["ViewsQt"] = _want_no(self.options.with_qt)
+        modules["GUISupportQtQuick"] = _maybe(self.options.with_qt and qt.opengl != "no" and qt.gui and qt.qtshadertools and qt.qtdeclarative)
+        modules["RenderingWebGPU"] = _maybe(self.options.with_sdl2 and (self.settings.os == "Emscripten" or self.options.get_safe("with_dawn")))
         modules["cgns"] = _yes_no(self.options.with_cgns)
         modules["diy2"] = _yes_no(self.options.with_diy2)
         modules["doubleconversion"] = "YES"
@@ -563,14 +561,22 @@ class VtkConan(ConanFile):
         modules["zfp"] = "NO"  # not used by any modules
         modules["zlib"] = "YES"
 
-        if conan_version.major != 1:
-            for mod in self._modules:
-                if self.options.get_safe(mod) != "auto":
-                    value = self.options.get_safe(mod)
-                    if mod in modules and modules[mod] != value and modules[mod] != "WANT":
-                        raise ConanInvalidConfiguration(f"Option '{mod}={value}' conflicts with value '{modules[mod]}' computed from 'with_*' options.")
-                    modules[mod] = value
-
+        # Validate module options
+        available_modules = self._validate_modules()
+        for mod in self._modules:
+            if mod not in available_modules:
+                modules[mod] = "NO"
+            elif mod not in modules:
+                modules[mod] = self._default_state
+            # Allow user to override the computed value
+            user_value = self._initial_state(mod)
+            if modules[mod] == self._default_state:
+                modules[mod] = user_value
+            # Raise if the user's value conflicts with the computed value
+            elif user_value in ["YES", "NO"] and modules[mod] != user_value:
+                raise ConanInvalidConfiguration(
+                    f"Option '{mod}={user_value}' conflicts with value '{modules[mod]}' computed from 'with_*' options."
+                )
         return modules
 
     def source(self):
@@ -653,8 +659,12 @@ class VtkConan(ConanFile):
             tc.variables["VTK_DEBUG_MODULE_provide"] = True
             tc.variables["VTK_DEBUG_MODULE_testing"] = True
 
-        for pkg, value in self._compute_module_values().items():
-            tc.variables[f"VTK_MODULE_ENABLE_VTK_{pkg}"] = value
+            self.output.info("Computed module values:")
+            for mod, value in sorted(self._compute_module_values().items()):
+                self.output.info(f"  {mod}: {value}")
+
+        for mod, value in self._compute_module_values().items():
+            tc.variables[f"VTK_MODULE_ENABLE_VTK_{mod}"] = value
 
         for pkg in self._vendored_deps:
             if pkg == "vtkm":
