@@ -1,0 +1,4 @@
+sources:
+  "2.2.0":
+    url: "https://gitlab.kitware.com/vtk/vtk-m/-/archive/v2.2.0/vtk-m-v2.2.0.tar.bz2"
+    sha256: "490ead6d6b89d3ce23c08d49a56200489a96f6fe52a0fb2b3ec23c12b0c330cb"
