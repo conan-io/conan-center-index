@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
     float (*Coords)[3];
 
     // Open the mesh file for reading
-    LibIdx = GmfOpenMesh( argv[1], GmfRead, &ver, &dim );
+    LibIdx = GmfOpenMesh( "test", GmfRead, &ver, &dim );
 
     // Get the number of vertices and triangles
     NmbVer = GmfStatKwd( LibIdx, GmfVertices  );

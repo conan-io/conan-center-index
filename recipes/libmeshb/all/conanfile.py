@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file,  rmdir
 from conan.tools.microsoft import is_msvc
 import os
 
@@ -44,10 +44,14 @@ class LibmeshbConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def validate(self):
+        # Windows shared build doesn't seems supported because code doesn't include dllexport
+        # See https://www.kitware.com/create-dlls-on-windows-without-declspec-using-new-cmake-export-all-feature/
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
+
     def generate(self):
         tc = CMakeToolchain(self)
-        # To support shared lib (DLL) on Windows
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["WITH_GMF_AIO"] = self.settings.os in ["Linux", "FreeBSD"]
         tc.generate()
 
