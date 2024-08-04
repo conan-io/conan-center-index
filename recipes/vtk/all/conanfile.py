@@ -926,8 +926,9 @@ class VtkConan(ConanFile):
                 if self.settings.os in ["Linux", "FreeBSD"]:
                     system_libs.append("pthread")
             else:
-                if not requires.startswith("vtkm::"):
-                    requires.append(self._cmake_target_to_conan_requirement(v))
+                # vtkm is the only internal dependency that does not use the VTK:: prefix
+                requires = [r for r in requires if not r.startswith("vtkm::")]
+                requires.append(self._cmake_target_to_conan_requirement(v))
         return requires, system_libs, frameworks
 
     @property
