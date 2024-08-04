@@ -215,13 +215,13 @@ class OpenMPIConan(ConanFile):
             self.cpp_info.components["ompi-cxx"].set_property("pkg_config_name", "ompi-cxx")
             self.cpp_info.components["ompi-cxx"].set_property("cmake_target_name", "MPI::MPI_CXX")
             self.cpp_info.components["ompi-cxx"].libs = ["mpi_cxx"]
-            self.cpp_info.components["ompi-cxx"].requires = ["mpi"]
+            self.cpp_info.components["ompi-cxx"].requires = ["ompi"]
 
         if self.options.fortran != "no":
             self.cpp_info.components["ompi-fort"].set_property("pkg_config_name", "ompi-fort")
             self.cpp_info.components["ompi-fort"].set_property("cmake_target_name", "MPI::MPI_Fortran")
             self.cpp_info.components["ompi-fort"].libs = ["mpi_mpifh"]
-            self.cpp_info.components["ompi-fort"].requires = ["mpi"]
+            self.cpp_info.components["ompi-fort"].requires = ["ompi"]
             # Aliases
             self.cpp_info.components["ompi-f77"].set_property("pkg_config_name", "ompi-f77")
             self.cpp_info.components["ompi-f77"].requires = ["ompi-fort"]
