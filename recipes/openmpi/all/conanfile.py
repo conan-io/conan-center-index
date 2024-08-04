@@ -184,7 +184,7 @@ class OpenMPIConan(ConanFile):
         if not is_apple_os(self):
             requires.append("libnl::libnl")
         if self.options.get_safe("with_verbs"):
-            requires.append("rdma-core::libibverbs")
+            requires.extend(["rdma-core::libibverbs", "rdma-core::librdmacm"])
 
         # The components are modelled based on OpenMPI's pkg-config files
 
