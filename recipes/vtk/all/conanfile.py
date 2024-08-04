@@ -130,20 +130,20 @@ class VtkConan(ConanFile):
         "use_future_const": False,
         ### external deps ###
         "with_boost": True,
-        "with_cgns": False,  # hdf5 conflict
+        "with_cgns": False,  # FIXME: hdf5 conflict
         "with_cli11": True,
         "with_cocoa": True,
         "with_diy2": True,
         "with_eigen": True,
-        "with_exodusII": True,
+        "with_exodusII": False,  # FIXME: requires netcdf
         "with_expat": True,
         "with_ffmpeg": False,
         "with_fmt": True,
         "with_fontconfig": True,
         "with_freetype": True,
         "with_gdal": False,  # TODO #23233
-        "with_gl2ps": True,
-        "with_glew": True,
+        "with_gl2ps": False,  # FIXME: missing libglvnd binaries
+        "with_glew": False,  # FIXME: missing libglvnd binaries
         "with_h5part": True,
         "with_hdf5": True,
         "with_holoplaycore": True,
@@ -152,18 +152,18 @@ class VtkConan(ConanFile):
         "with_jsoncpp": True,
         "with_kissfft": False,  # Cannot unvendor by default because non-default datatype=double is required
         "with_libharu": True,
-        "with_libproj": True,
+        "with_libproj": False,  # FIXME: missing binaries
         "with_libxml2": True,
         "with_metaio": True,
         "with_mpi": False,  # TODO: #18980 Should enable, since disabling this disables all parallel modules
-        "with_mysql": "mariadb-connector-c",
-        "with_netcdf": True,
+        "with_mysql": False,  # FIXME: missing binaries
+        "with_netcdf": False,  # FIXME: missing binaries
         "with_nlohmannjson": True,
         "with_octree": True,
         "with_odbc": True,
         "with_ogg": True,
         "with_opencascade": False,  # very heavy
-        "with_opengl": True,
+        "with_opengl": False,  # FIXME: missing libglvnd binaries
         "with_openslide": False,  # TODO: #21138
         "with_openvdb": True,
         "with_openvr": True,
@@ -171,10 +171,10 @@ class VtkConan(ConanFile):
         "with_pegtl": True,
         "with_png": True,
         "with_postgresql": True,
-        "with_qt": False,  # TODO: disabled due to too many conflicts
+        "with_qt": False,  # FIXME: too many version conflicts
         "with_sdl2": True,
         "with_sqlite": True,
-        "with_theora": True,
+        "with_theora": False,  # FIXME: missing binaries
         "with_tiff": True,
         "with_verdict": True,
         "with_vpic": True,
@@ -425,17 +425,19 @@ class VtkConan(ConanFile):
         if self.options.with_qt and not self.dependencies["qt"].options.widgets:
             raise ConanInvalidConfiguration(f"{self.ref} requires qt/*:widgets=True")
 
-        if self.options.with_mysql and not self.options.with_sqlite:
-            raise ConanInvalidConfiguration(f"{self.ref} requires with_sqlite=True when with_mysql=True")
-
-        if self.options.get_safe("with_liblas") and not self.options.with_boost:
-            raise ConanInvalidConfiguration(f"{self.ref} requires with_boost=True when with_liblas=True")
-
-        if self.options.with_xdmf3 and not self.options.with_boost:
-            raise ConanInvalidConfiguration(f"{self.ref} requires with_boost=True when with_xdmf3=True")
-
-        if self.options.with_ioss and not self.options.with_cgns:
-            raise ConanInvalidConfiguration(f"{self.ref} requires with_cgns=True when with_ioss=True")
+        for dep1, dep2 in [
+            ("exodusII", "netcdf"),
+            ("gdal", "proj"),
+            ("gl2ps", "opengl"),
+            ("glew", "opengl"),
+            ("ioss", "cgns"),
+            ("liblas", "boost"),
+            ("mysql", "sqlite"),
+            ("netcdf", "hdf5"),
+            ("xdmf3", "boost"),
+        ]:
+            if self.options.get_safe(f"with_{dep1}") and not self.options.get_safe(f"with_{dep2}"):
+                raise ConanInvalidConfiguration(f"'-o vtk/*:with_{dep1}=True' requires '-o vtk/*:with_{dep2}=True'")
 
         # Just to check for conflicts
         self._compute_module_values()
