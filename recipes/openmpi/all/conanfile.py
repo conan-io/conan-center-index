@@ -34,7 +34,7 @@ class OpenMPIConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "fortran": "no",
-        "cxx": False,
+        "cxx": True,
         "cxx_exceptions": False,
         "external_hwloc": True,
         "with_verbs": True,
