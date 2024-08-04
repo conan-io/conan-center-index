@@ -197,7 +197,7 @@ class OpenCVConan(ConanFile):
         "with_gdal": False,
         "with_gdcm": False,
         "with_imgcodec_hdr": False,
-        "with_imgcodec_pfm": False,
+        "with_imgcodec_pfm": True,
         "with_imgcodec_pxm": False,
         "with_imgcodec_sunraster": False,
         "with_msmf": True,
