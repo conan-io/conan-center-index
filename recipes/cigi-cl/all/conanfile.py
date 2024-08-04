@@ -90,7 +90,7 @@ class CigiClConan(ConanFile):
 
         copy(self, "license.html", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.pc", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pc", os.path.join(self.package_folder, "lib"), recursive=True)
 
     def package_info(self):
         build_type_suffix = ""
