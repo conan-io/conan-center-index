@@ -174,7 +174,7 @@ class VtkConan(ConanFile):
         "with_theora": False,  # FIXME: missing binaries
         "with_tiff": True,
         "with_vpic": True,
-        "with_vtkm": True,
+        "with_vtkm": False,  # FIXME: causes issues in recipe, should unvendor
         "with_x11": False,  # FIXME: requires opengl
         "with_xdmf2": True,
         "with_xdmf3": True,
