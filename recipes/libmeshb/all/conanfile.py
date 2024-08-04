@@ -46,6 +46,8 @@ class LibmeshbConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        # To support shared lib (DLL) on Windows
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["WITH_GMF_AIO"] = self.settings.os in ["Linux", "FreeBSD"]
         tc.generate()
 
