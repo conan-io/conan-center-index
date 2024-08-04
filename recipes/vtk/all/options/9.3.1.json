@@ -1,206 +1,478 @@
 {
-  "modules": [
-    "AcceleratorsVTKmCore",
-    "AcceleratorsVTKmDataModel",
-    "AcceleratorsVTKmFilters",
-    "ChartsCore",
-    "CommonArchive",
-    "CommonColor",
-    "CommonComputationalGeometry",
-    "CommonCore",
-    "CommonDataModel",
-    "CommonExecutionModel",
-    "CommonMath",
-    "CommonMisc",
-    "CommonPython",
-    "CommonSystem",
-    "CommonTransforms",
-    "DICOM",
-    "DICOMParser",
-    "DomainsChemistry",
-    "DomainsChemistryOpenGL2",
-    "DomainsMicroscopy",
-    "DomainsParallelChemistry",
-    "FiltersAMR",
-    "FiltersCellGrid",
-    "FiltersCore",
-    "FiltersExtraction",
-    "FiltersFlowPaths",
-    "FiltersGeneral",
-    "FiltersGeneric",
-    "FiltersGeometry",
-    "FiltersGeometryPreview",
-    "FiltersHybrid",
-    "FiltersHyperTree",
-    "FiltersImaging",
-    "FiltersModeling",
-    "FiltersOpenTURNS",
-    "FiltersParallel",
-    "FiltersParallelDIY2",
-    "FiltersParallelFlowPaths",
-    "FiltersParallelGeometry",
-    "FiltersParallelImaging",
-    "FiltersParallelMPI",
-    "FiltersParallelStatistics",
-    "FiltersParallelVerdict",
-    "FiltersPoints",
-    "FiltersProgrammable",
-    "FiltersPython",
-    "FiltersReduction",
-    "FiltersReebGraph",
-    "FiltersSMP",
-    "FiltersSelection",
-    "FiltersSources",
-    "FiltersStatistics",
-    "FiltersTensor",
-    "FiltersTexture",
-    "FiltersTopology",
-    "FiltersVerdict",
-    "GUISupportMFC",
-    "GUISupportQt",
-    "GUISupportQtQuick",
-    "GUISupportQtSQL",
-    "GeovisCore",
-    "GeovisGDAL",
-    "IOADIOS2",
-    "IOAMR",
-    "IOAsynchronous",
-    "IOCGNSReader",
-    "IOCONVERGECFD",
-    "IOCatalystConduit",
-    "IOCellGrid",
-    "IOCesium3DTiles",
-    "IOChemistry",
-    "IOCityGML",
-    "IOCore",
-    "IOEnSight",
-    "IOExodus",
-    "IOExport",
-    "IOExportGL2PS",
-    "IOExportPDF",
-    "IOFFMPEG",
-    "IOFLUENTCFF",
-    "IOFides",
-    "IOGDAL",
-    "IOGeoJSON",
-    "IOGeometry",
-    "IOH5Rage",
-    "IOH5part",
-    "IOHDF",
-    "IOIOSS",
-    "IOImage",
-    "IOImport",
-    "IOInfovis",
-    "IOLAS",
-    "IOLSDyna",
-    "IOLegacy",
-    "IOMINC",
-    "IOMPIImage",
-    "IOMPIParallel",
-    "IOMotionFX",
-    "IOMovie",
-    "IOMySQL",
-    "IONetCDF",
-    "IOOCCT",
-    "IOODBC",
-    "IOOMF",
-    "IOOggTheora",
-    "IOOpenVDB",
-    "IOPDAL",
-    "IOPIO",
-    "IOPLY",
-    "IOParallel",
-    "IOParallelExodus",
-    "IOParallelLSDyna",
-    "IOParallelNetCDF",
-    "IOParallelXML",
-    "IOParallelXdmf3",
-    "IOPostgreSQL",
-    "IOSQL",
-    "IOSegY",
-    "IOTRUCHAS",
-    "IOTecplotTable",
-    "IOVPIC",
-    "IOVeraOut",
-    "IOVideo",
-    "IOXML",
-    "IOXMLParser",
-    "IOXdmf2",
-    "IOXdmf3",
-    "ImagingColor",
-    "ImagingCore",
-    "ImagingFourier",
-    "ImagingGeneral",
-    "ImagingHybrid",
-    "ImagingMath",
-    "ImagingMorphological",
-    "ImagingOpenGL2",
-    "ImagingSources",
-    "ImagingStatistics",
-    "ImagingStencil",
-    "InfovisBoost",
-    "InfovisBoostGraphAlgorithms",
-    "InfovisCore",
-    "InfovisLayout",
-    "InteractionImage",
-    "InteractionStyle",
-    "InteractionWidgets",
-    "Java",
-    "MomentInvariants",
-    "ParallelCore",
-    "ParallelDIY",
-    "ParallelMPI",
-    "ParallelMPI4Py",
-    "ParallelMomentInvariants",
-    "Python",
-    "PythonContext2D",
-    "PythonInterpreter",
-    "RenderingAnnotation",
-    "RenderingCellGrid",
-    "RenderingContext2D",
-    "RenderingContextOpenGL2",
-    "RenderingCore",
-    "RenderingExternal",
-    "RenderingFFMPEGOpenGL2",
-    "RenderingFreeType",
-    "RenderingFreeTypeFontConfig",
-    "RenderingGL2PSOpenGL2",
-    "RenderingHyperTreeGrid",
-    "RenderingImage",
-    "RenderingLICOpenGL2",
-    "RenderingLOD",
-    "RenderingLabel",
-    "RenderingLookingGlass",
-    "RenderingMatplotlib",
-    "RenderingOpenGL2",
-    "RenderingOpenVR",
-    "RenderingOpenXR",
-    "RenderingOpenXRRemoting",
-    "RenderingParallel",
-    "RenderingParallelLIC",
-    "RenderingQt",
-    "RenderingRayTracing",
-    "RenderingSceneGraph",
-    "RenderingTk",
-    "RenderingUI",
-    "RenderingVR",
-    "RenderingVolume",
-    "RenderingVolumeAMR",
-    "RenderingVolumeOpenGL2",
-    "RenderingVtkJS",
-    "RenderingWebGPU",
-    "RenderingZSpace",
-    "UtilitiesBenchmarks",
-    "ViewsContext2D",
-    "ViewsCore",
-    "ViewsInfovis",
-    "ViewsQt",
-    "WebCore",
-    "WebGLExporter",
-    "WebPython",
-    "WrappingPythonCore",
-    "WrappingTools"
-  ],
+  "flat_external_deps": {
+    "AcceleratorsVTKmCore": [
+      "vtkm"
+    ],
+    "AcceleratorsVTKmDataModel": [
+      "vtkm"
+    ],
+    "AcceleratorsVTKmFilters": [],
+    "ChartsCore": [],
+    "DICOM": [],
+    "DICOMParser": [],
+    "DomainsChemistry": [],
+    "DomainsChemistryOpenGL2": [
+      "glew"
+    ],
+    "DomainsMicroscopy": [
+      "openslide"
+    ],
+    "DomainsParallelChemistry": [
+      "mpi"
+    ],
+    "FiltersAMR": [],
+    "FiltersCellGrid": [],
+    "FiltersExtraction": [],
+    "FiltersFlowPaths": [
+      "eigen"
+    ],
+    "FiltersGeneric": [],
+    "FiltersGeometry": [],
+    "FiltersGeometryPreview": [],
+    "FiltersHybrid": [],
+    "FiltersHyperTree": [],
+    "FiltersImaging": [],
+    "FiltersModeling": [],
+    "FiltersOpenTURNS": [],
+    "FiltersParallel": [],
+    "FiltersParallelDIY2": [],
+    "FiltersParallelFlowPaths": [],
+    "FiltersParallelGeometry": [],
+    "FiltersParallelImaging": [],
+    "FiltersParallelMPI": [],
+    "FiltersParallelStatistics": [],
+    "FiltersParallelVerdict": [],
+    "FiltersPoints": [],
+    "FiltersProgrammable": [],
+    "FiltersPython": [],
+    "FiltersReduction": [],
+    "FiltersReebGraph": [
+      "boost"
+    ],
+    "FiltersSMP": [],
+    "FiltersSelection": [],
+    "FiltersSources": [],
+    "FiltersStatistics": [
+      "eigen"
+    ],
+    "FiltersTensor": [],
+    "FiltersTexture": [],
+    "FiltersTopology": [],
+    "GUISupportMFC": [],
+    "GUISupportQt": [
+      "opengl",
+      "qt"
+    ],
+    "GUISupportQtQuick": [
+      "qt"
+    ],
+    "GUISupportQtSQL": [
+      "qt"
+    ],
+    "GeovisCore": [
+      "libproj"
+    ],
+    "GeovisGDAL": [
+      "gdal"
+    ],
+    "IOADIOS2": [
+      "adios2"
+    ],
+    "IOAMR": [
+      "hdf5"
+    ],
+    "IOAsynchronous": [],
+    "IOCGNSReader": [
+      "cgns",
+      "hdf5"
+    ],
+    "IOCONVERGECFD": [
+      "hdf5"
+    ],
+    "IOCatalystConduit": [
+      "catalyst"
+    ],
+    "IOCellGrid": [
+      "nlohmannjson"
+    ],
+    "IOCesium3DTiles": [
+      "libproj",
+      "nlohmannjson"
+    ],
+    "IOChemistry": [],
+    "IOCityGML": [],
+    "IOCore": [],
+    "IOEnSight": [],
+    "IOExodus": [
+      "exodusII"
+    ],
+    "IOExport": [
+      "libharu",
+      "nlohmannjson"
+    ],
+    "IOExportGL2PS": [
+      "gl2ps"
+    ],
+    "IOExportPDF": [
+      "libharu"
+    ],
+    "IOFFMPEG": [
+      "ffmpeg"
+    ],
+    "IOFLUENTCFF": [
+      "hdf5"
+    ],
+    "IOFides": [
+      "fides"
+    ],
+    "IOGDAL": [
+      "gdal"
+    ],
+    "IOGeoJSON": [
+      "jsoncpp"
+    ],
+    "IOGeometry": [
+      "nlohmannjson"
+    ],
+    "IOH5Rage": [
+      "hdf5"
+    ],
+    "IOH5part": [
+      "h5part",
+      "hdf5"
+    ],
+    "IOHDF": [
+      "hdf5"
+    ],
+    "IOIOSS": [
+      "ioss"
+    ],
+    "IOImage": [
+      "jpeg",
+      "metaio",
+      "png",
+      "tiff"
+    ],
+    "IOImport": [],
+    "IOInfovis": [
+      "libxml2"
+    ],
+    "IOLAS": [
+      "boost",
+      "liblas"
+    ],
+    "IOLSDyna": [],
+    "IOLegacy": [],
+    "IOMINC": [
+      "netcdf"
+    ],
+    "IOMPIImage": [
+      "mpi"
+    ],
+    "IOMPIParallel": [
+      "mpi"
+    ],
+    "IOMotionFX": [
+      "pegtl"
+    ],
+    "IOMovie": [],
+    "IOMySQL": [
+      "mysql"
+    ],
+    "IONetCDF": [
+      "libproj",
+      "netcdf"
+    ],
+    "IOOCCT": [
+      "opencascade"
+    ],
+    "IOODBC": [
+      "odbc"
+    ],
+    "IOOMF": [
+      "jsoncpp"
+    ],
+    "IOOggTheora": [
+      "theora"
+    ],
+    "IOOpenVDB": [
+      "openvdb"
+    ],
+    "IOPDAL": [
+      "pdal"
+    ],
+    "IOPIO": [],
+    "IOPLY": [],
+    "IOParallel": [
+      "jsoncpp"
+    ],
+    "IOParallelExodus": [
+      "exodusII",
+      "netcdf"
+    ],
+    "IOParallelLSDyna": [],
+    "IOParallelNetCDF": [
+      "mpi",
+      "netcdf"
+    ],
+    "IOParallelXML": [],
+    "IOParallelXdmf3": [
+      "mpi",
+      "xdmf3"
+    ],
+    "IOPostgreSQL": [
+      "postgresql"
+    ],
+    "IOSQL": [
+      "sqlite"
+    ],
+    "IOSegY": [],
+    "IOTRUCHAS": [
+      "hdf5"
+    ],
+    "IOTecplotTable": [],
+    "IOVPIC": [
+      "vpic"
+    ],
+    "IOVeraOut": [
+      "hdf5"
+    ],
+    "IOVideo": [],
+    "IOXML": [],
+    "IOXMLParser": [
+      "expat"
+    ],
+    "IOXdmf2": [
+      "libxml2",
+      "xdmf2"
+    ],
+    "IOXdmf3": [
+      "xdmf3"
+    ],
+    "ImagingColor": [],
+    "ImagingCore": [],
+    "ImagingFourier": [],
+    "ImagingGeneral": [],
+    "ImagingHybrid": [],
+    "ImagingMath": [],
+    "ImagingMorphological": [],
+    "ImagingOpenGL2": [],
+    "ImagingSources": [],
+    "ImagingStatistics": [],
+    "ImagingStencil": [],
+    "InfovisBoost": [
+      "boost"
+    ],
+    "InfovisBoostGraphAlgorithms": [
+      "boost"
+    ],
+    "InfovisCore": [],
+    "InfovisLayout": [],
+    "InteractionImage": [],
+    "InteractionStyle": [],
+    "InteractionWidgets": [],
+    "Java": [],
+    "MomentInvariants": [
+      "eigen"
+    ],
+    "ParallelCore": [],
+    "ParallelDIY": [
+      "diy2"
+    ],
+    "ParallelMPI": [
+      "mpi"
+    ],
+    "ParallelMPI4Py": [
+      "mpi",
+      "mpi4py"
+    ],
+    "ParallelMomentInvariants": [
+      "dfft",
+      "mpi"
+    ],
+    "Python": [],
+    "PythonContext2D": [],
+    "PythonInterpreter": [],
+    "RenderingAnnotation": [],
+    "RenderingCellGrid": [
+      "glew",
+      "opengl"
+    ],
+    "RenderingContext2D": [],
+    "RenderingContextOpenGL2": [
+      "glew",
+      "opengl"
+    ],
+    "RenderingCore": [],
+    "RenderingExternal": [
+      "glew",
+      "opengl"
+    ],
+    "RenderingFFMPEGOpenGL2": [],
+    "RenderingFreeType": [
+      "freetype"
+    ],
+    "RenderingFreeTypeFontConfig": [
+      "fontconfig"
+    ],
+    "RenderingGL2PSOpenGL2": [
+      "gl2ps",
+      "opengl"
+    ],
+    "RenderingHyperTreeGrid": [],
+    "RenderingImage": [],
+    "RenderingLICOpenGL2": [
+      "glew",
+      "opengl"
+    ],
+    "RenderingLOD": [],
+    "RenderingLabel": [
+      "octree"
+    ],
+    "RenderingLookingGlass": [
+      "holoplaycore",
+      "opengl"
+    ],
+    "RenderingMatplotlib": [],
+    "RenderingOpenGL2": [
+      "glew",
+      "opengl"
+    ],
+    "RenderingOpenVR": [
+      "glew",
+      "opengl",
+      "openvr"
+    ],
+    "RenderingOpenXR": [
+      "glew",
+      "jsoncpp",
+      "opengl",
+      "openxr"
+    ],
+    "RenderingOpenXRRemoting": [
+      "openxrremoting"
+    ],
+    "RenderingParallel": [
+      "glew",
+      "opengl"
+    ],
+    "RenderingParallelLIC": [
+      "glew"
+    ],
+    "RenderingQt": [
+      "qt"
+    ],
+    "RenderingRayTracing": [
+      "jsoncpp"
+    ],
+    "RenderingSceneGraph": [],
+    "RenderingTk": [],
+    "RenderingUI": [
+      "sdl2"
+    ],
+    "RenderingVR": [
+      "glew",
+      "opengl",
+      "zeromq"
+    ],
+    "RenderingVolume": [],
+    "RenderingVolumeAMR": [],
+    "RenderingVolumeOpenGL2": [
+      "glew",
+      "opengl"
+    ],
+    "RenderingVtkJS": [
+      "jsoncpp"
+    ],
+    "RenderingWebGPU": [
+      "glew",
+      "sdl2"
+    ],
+    "RenderingZSpace": [
+      "zspace"
+    ],
+    "UtilitiesBenchmarks": [],
+    "ViewsContext2D": [],
+    "ViewsCore": [],
+    "ViewsInfovis": [],
+    "ViewsQt": [
+      "qt"
+    ],
+    "WebCore": [],
+    "WebGLExporter": [],
+    "WebPython": [],
+    "WrappingPythonCore": [],
+    "WrappingTools": [],
+    "exodusII": [
+      "hdf5",
+      "netcdf"
+    ],
+    "fides": [
+      "adios2",
+      "vtkm"
+    ],
+    "gl2ps": [
+      "opengl",
+      "png"
+    ],
+    "h5part": [
+      "hdf5"
+    ],
+    "holoplaycore": [],
+    "ioss": [
+      "cgns",
+      "exodusII"
+    ],
+    "kwiml": [],
+    "metaio": [],
+    "mpi4py": [
+      "mpi"
+    ],
+    "octree": [],
+    "pegtl": [],
+    "verdict": [],
+    "vpic": [],
+    "vtkm": [],
+    "xdmf2": [
+      "hdf5",
+      "libxml2"
+    ],
+    "xdmf3": [
+      "boost",
+      "hdf5",
+      "libxml2"
+    ]
+  },
+  "optional_external_deps": {
+    "CommonCore": [
+      "memkind"
+    ],
+    "IOADIOS2": [
+      "mpi"
+    ],
+    "IOIOSS": [
+      "mpi"
+    ],
+    "RenderingOpenGL2": [
+      "cocoa",
+      "directx",
+      "sdl2",
+      "x11"
+    ],
+    "RenderingRayTracing": [
+      "openimagedenoise",
+      "ospray",
+      "visrtx"
+    ],
+    "RenderingUI": [
+      "cocoa",
+      "sdl2",
+      "x11"
+    ],
+    "RenderingWebGPU": [
+      "dawn"
+    ]
+  },
   "conditions": {
     "MSVC": [
       "GUISupportMFC"
@@ -237,15 +509,5 @@
     "WIN32": [
       "RenderingOpenXRRemoting"
     ]
-  },
-  "groups": [
-    "Imaging",
-    "MPI",
-    "Qt",
-    "Rendering",
-    "StandAlone",
-    "Tk",
-    "Views",
-    "Web"
-  ]
+  }
 }

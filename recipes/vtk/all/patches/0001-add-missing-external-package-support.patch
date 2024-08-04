@@ -5,8 +5,7 @@ Subject: [PATCH] add missing external package support to some deps
 
 ---
  ThirdParty/kissfft/CMakeLists.txt | 19 ++++++++++++-------
- ThirdParty/zfp/CMakeLists.txt     | 29 +++++++++++++++++------------
- 2 files changed, 29 insertions(+), 19 deletions(-)
+ 1 files changed, 12 insertions(+), 7 deletions(-)
 
 diff --git a/ThirdParty/kissfft/CMakeLists.txt b/ThirdParty/kissfft/CMakeLists.txt
 index b93deb8864..4fdecd0e51 100644
@@ -37,43 +36,6 @@ index b93deb8864..4fdecd0e51 100644
  
  configure_file(
    "${CMAKE_CURRENT_SOURCE_DIR}/vtk_kissfft.h.in"
-diff --git a/ThirdParty/zfp/CMakeLists.txt b/ThirdParty/zfp/CMakeLists.txt
-index 9039e12c65..d55fed6997 100644
---- a/ThirdParty/zfp/CMakeLists.txt
-+++ b/ThirdParty/zfp/CMakeLists.txt
-@@ -1,15 +1,20 @@
--vtk_module_third_party_internal(
--  LICENSE_FILES
--    "vtkzfp/LICENSE"
--  SPDX_LICENSE_IDENTIFIER
--    "BSD-3-Clause"
--  SPDX_COPYRIGHT_TEXT
--    "Copyright (c) 2014-2019, Lawrence Livermore National Security, LLC."
--  SPDX_DOWNLOAD_LOCATION
--    "git+https://gitlab.kitware.com/third-party/zfp.git@for/vtk-20190605-0.5.5"
--  VERSION
--    "0.5.5"
--  STANDARD_INCLUDE_DIRS)
-+vtk_module_third_party(
-+  INTERNAL
-+    LICENSE_FILES
-+      "vtkzfp/LICENSE"
-+    SPDX_LICENSE_IDENTIFIER
-+      "BSD-3-Clause"
-+    SPDX_COPYRIGHT_TEXT
-+      "Copyright (c) 2014-2019, Lawrence Livermore National Security, LLC."
-+    SPDX_DOWNLOAD_LOCATION
-+      "git+https://gitlab.kitware.com/third-party/zfp.git@for/vtk-20190605-0.5.5"
-+    VERSION
-+      "0.5.5"
-+    STANDARD_INCLUDE_DIRS
-+  EXTERNAL
-+    PACKAGE zfp
-+    TARGETS zfp::zfp
-+    STANDARD_INCLUDE_DIRS)
- 
- configure_file(
-   "${CMAKE_CURRENT_SOURCE_DIR}/vtk_zfp.h.in"
 -- 
 2.43.0
 

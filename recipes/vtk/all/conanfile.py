@@ -11,11 +11,11 @@ from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.env import VirtualRunEnv
+from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import export_conandata_patches, get, rmdir, rename, replace_in_file, load, save, copy, apply_conandata_patches
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
 
 class VtkConan(ConanFile):
@@ -60,7 +60,6 @@ class VtkConan(ConanFile):
         "with_exodusII": [True, False],
         "with_expat": [True, False],
         "with_ffmpeg": [True, False],
-        "with_fmt": [True, False],
         "with_fontconfig": [True, False],
         "with_freetype": [True, False],
         "with_gdal": [True, False],
@@ -98,13 +97,12 @@ class VtkConan(ConanFile):
         "with_sqlite": [True, False],
         "with_theora": [True, False],
         "with_tiff": [True, False],
-        "with_verdict": [True, False],
         "with_vpic": [True, False],
+        "with_vtkm": [True, False],
         "with_x11": [True, False],
         "with_xdmf2": [True, False],
         "with_xdmf3": [True, False],
         "with_zeromq": [True, False],
-        "with_zfp": [True, False],
         "with_zspace": [True, False],
     }
 
@@ -136,7 +134,6 @@ class VtkConan(ConanFile):
         "with_exodusII": False,  # FIXME: requires netcdf
         "with_expat": True,
         "with_ffmpeg": False,
-        "with_fmt": True,
         "with_fontconfig": True,
         "with_freetype": True,
         "with_gdal": False,  # TODO #23233
@@ -159,7 +156,7 @@ class VtkConan(ConanFile):
         "with_nlohmannjson": True,
         "with_octree": True,
         "with_odbc": True,
-        "with_ogg": True,
+        "with_ogg": False,  # FIXME: requires theora
         "with_opencascade": False,  # very heavy
         "with_opengl": False,  # FIXME: missing libglvnd binaries
         "with_openslide": False,  # TODO: #21138
@@ -174,13 +171,12 @@ class VtkConan(ConanFile):
         "with_sqlite": True,
         "with_theora": False,  # FIXME: missing binaries
         "with_tiff": True,
-        "with_verdict": True,
         "with_vpic": True,
-        "with_x11": True,
+        "with_vtkm": True,
+        "with_x11": False,  # FIXME: requires opengl
         "with_xdmf2": True,
         "with_xdmf3": True,
-        "with_zeromq": True,
-        "with_zfp": True,
+        "with_zeromq": False,
         "with_zspace": True,
     }
     # NOTE: all non-third-party VTK modules are also available as options.
@@ -210,7 +206,8 @@ class VtkConan(ConanFile):
     def _modules_from_all_versions(self):
         all_modules = set()
         for options_json in Path(self.recipe_folder, "options").glob("*.json"):
-            all_modules.update(json.loads(options_json.read_text())["modules"])
+            modules = [m for m in json.loads(options_json.read_text())["flat_external_deps"] if m[0].isupper()]
+            all_modules.update(modules)
         return sorted(all_modules)
 
     def init(self):
@@ -224,8 +221,22 @@ class VtkConan(ConanFile):
 
     @property
     @functools.lru_cache()
-    def _module_opts(self):
-        return json.loads(Path(self.recipe_folder, "options", f"{self.version}.json").read_text())["modules"]
+    def _module_ext_deps(self):
+        return json.loads(Path(self.recipe_folder, "options", f"{self.version}.json").read_text())["flat_external_deps"]
+    @property
+    @functools.lru_cache()
+    def _module_opt_deps(self):
+        return json.loads(Path(self.recipe_folder, "options", f"{self.version}.json").read_text())["optional_external_deps"]
+
+    @property
+    @functools.lru_cache()
+    def _modules(self):
+        return [mod for mod in self._module_ext_deps.keys() if mod[0].isupper()]
+
+    @property
+    @functools.lru_cache()
+    def _vendored_deps(self):
+        return [mod for mod in self._module_ext_deps.keys() if mod[0].islower()]
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -243,7 +254,7 @@ class VtkConan(ConanFile):
         if self.settings.os == "Emscripten":
             self.options.rm_safe("with_dawn")
         if conan_version.major != 1:
-            for opt in set(self._modules_from_all_versions) - set(self._module_opts):
+            for opt in set(self._modules_from_all_versions) - set(self._modules):
                 self.options.rm_safe(opt)
 
     def configure(self):
@@ -260,7 +271,7 @@ class VtkConan(ConanFile):
         del self.info.options.debug_modules
 
     def requirements(self):
-        # These are always required by CommonArchive, CommonCore, CommonMath, CommonDataModel, CommonMisc, IOCore
+        # These are always required by CommonArchive, CommonCore, CommonMath, CommonDataModel, CommonMisc, IOCore, FiltersCore, FiltersGeneral
         self.requires("double-conversion/3.3.0")
         self.requires("exprtk/0.0.2")
         self.requires("fast_float/6.1.3")
@@ -270,6 +281,8 @@ class VtkConan(ConanFile):
         self.requires("utfcpp/4.0.4")
         self.requires("xz_utils/[>=5.4.5 <6]")
         self.requires("zlib/[>=1.2.11 <2]")
+        # Used in public vtkloguru/loguru.hpp
+        self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
 
         # kissfft is always required, only replaces the vendored version if enabled.
         # VTK mangles its symbols so not unvendoring it should still not cause conflicts.
@@ -295,9 +308,6 @@ class VtkConan(ConanFile):
             self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_ffmpeg:
             self.requires("ffmpeg/6.1.1")
-        if self.options.with_fmt:
-            # Used in public vtkloguru/loguru.hpp
-            self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.15.0")
         if self.options.with_freetype:
@@ -381,8 +391,6 @@ class VtkConan(ConanFile):
             self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
         if self.options.with_zeromq:
             self.requires("zeromq/4.3.5")
-        if self.options.with_zeromq:
-            self.requires("zfp/1.0.1")
         if self.options.smp_enable_openmp:
             # '#include <omp.h>' is used in public SMP/OpenMP/vtkSMPThreadLocalBackend.h
             # '#pragma omp' is not used in any public headers
@@ -407,6 +415,10 @@ class VtkConan(ConanFile):
         # ospray | ospray::ospray | VTK_ENABLE_OSPRAY
         # zSpace | zSpace::zSpace
 
+    def tool_requirements(self):
+        if self.options.with_qt:
+            self.tool_requires("qt/<host_version>")
+
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
@@ -418,38 +430,37 @@ class VtkConan(ConanFile):
 
         if self.dependencies["pugixml"].options.wchar_mode:
             raise ConanInvalidConfiguration(f"{self.ref} requires pugixml/*:wchar_mode=False")
-
         if self.options.with_kissfft and self.dependencies["kissfft"].options.datatype != "double":
             raise ConanInvalidConfiguration(f"{self.ref} requires kissfft/*:datatype=double")
-
         if self.options.with_qt and not self.dependencies["qt"].options.widgets:
             raise ConanInvalidConfiguration(f"{self.ref} requires qt/*:widgets=True")
-
-        for dep1, dep2 in [
-            ("dawn", "glew"),
-            ("exodusII", "netcdf"),
-            ("fontconfig", "freetype"),
-            ("gdal", "proj"),
-            ("gl2ps", "opengl"),
-            ("glew", "opengl"),
-            ("holoplaycore", "glew"),
-            ("ioss", "cgns"),
-            ("liblas", "boost"),
-            ("mysql", "sqlite"),
-            ("netcdf", "hdf5"),
-            ("openvr", "glew"),
-            ("openxr", "glew"),
-            ("xdmf3", "boost"),
-            ("zspace", "opengl"),
-        ]:
-            if self.options.get_safe(f"with_{dep1}") and not self.options.get_safe(f"with_{dep2}"):
-                raise ConanInvalidConfiguration(f"'-o vtk/*:with_{dep1}=True' requires '-o vtk/*:with_{dep2}=True'")
 
         # Just to check for conflicts
         self._compute_module_values()
 
     @functools.lru_cache()
     def _compute_module_values(self):
+        enabled_deps = {opt.replace("with_", "") for opt, value in self.options.items() if opt.startswith("with_") and str(value) != "False"}
+        enabled_modules = set()
+        used_deps = {"kissfft"}
+        for mod, deps in self._module_ext_deps.items():
+            if enabled_deps.issuperset(deps):
+                enabled_modules.add(mod)
+                used_deps.update(deps)
+                opt_deps = self._module_opt_deps.get(mod, [])
+                used_deps.update(set(opt_deps) & enabled_deps)
+
+        unused_deps = enabled_deps - used_deps
+        if unused_deps:
+            msg = []
+            for dep in unused_deps:
+                related_requires = set()
+                for mod, deps in self._module_ext_deps.items():
+                    if dep in deps:
+                        related_requires |= set(deps) - {dep}
+                msg.append(f"\n  - with_{dep}: requires {', '.join(related_requires)}")
+            raise ConanInvalidConfiguration(f"Unused dependency options:{''.join(msg)}")
+
         if self.options.with_qt:
             qt = self.dependencies["qt"].options
 
@@ -511,7 +522,7 @@ class VtkConan(ConanFile):
         modules["exprtk"] = "YES"
         modules["fast_float"] = "YES"
         modules["fides"] = _yes_no(self.options.get_safe("with_adios2"))
-        modules["fmt"] = _yes_no(self.options.with_fmt)
+        modules["fmt"] = "YES"
         modules["freetype"] = _yes_no(self.options.with_freetype)
         modules["gl2ps"] = _yes_no(self.options.with_gl2ps)
         modules["glew"] = _yes_no(self.options.with_glew)
@@ -544,15 +555,16 @@ class VtkConan(ConanFile):
         modules["theora"] = _yes_no(self.options.with_theora)
         modules["tiff"] = _yes_no(self.options.with_tiff)
         modules["utf8"] = "YES"
-        modules["verdict"] = _yes_no(self.options.with_verdict)
+        modules["verdict"] = "YES"
         modules["vpic"] = _yes_no(self.options.with_vpic)
+        modules["vtkvtkm"] = _yes_no(self.options.with_vtkm)
         modules["xdmf2"] = _yes_no(self.options.with_xdmf2)
         modules["xdmf3"] = _yes_no(self.options.with_xdmf3 and self.options.with_boost)
-        modules["zfp"] = _yes_no(self.options.with_zfp)
+        modules["zfp"] = "NO"  # not used by any modules
         modules["zlib"] = "YES"
 
         if conan_version.major != 1:
-            for mod in self._module_opts:
+            for mod in self._modules:
                 if self.options.get_safe(mod) != "auto":
                     value = self.options.get_safe(mod)
                     if mod in modules and modules[mod] != value and modules[mod] != "WANT":
@@ -566,6 +578,7 @@ class VtkConan(ConanFile):
 
     def generate(self):
         if self.options.with_qt:
+            VirtualBuildEnv(self).generate()
             # Qt's moc command fails to find libpcre2-16.so.0 otherwise
             VirtualRunEnv(self).generate(scope="build")
 
@@ -643,27 +656,9 @@ class VtkConan(ConanFile):
         for pkg, value in self._compute_module_values().items():
             tc.variables[f"VTK_MODULE_ENABLE_VTK_{pkg}"] = value
 
-        missing_from_cci = {
-            "diy2",
-            "catalyst"
-            "exodusII",
-            "fides",
-            "gl2ps",
-            "h5part",
-            "holoplaycore",
-            "ioss",
-            "kwiml",
-            "metaio",
-            "mpi4py",
-            "octree",
-            "pegtl",
-            "verdict",
-            "vpic",
-            "vtkm",
-            "xdmf2",
-            "xdmf3",
-        }
-        for pkg in missing_from_cci:
+        for pkg in self._vendored_deps:
+            if pkg == "vtkm":
+                pkg = "vtkvtkm"
             tc.variables[f"VTK_MODULE_USE_EXTERNAL_VTK_{pkg}"] = False
         tc.variables["VTK_MODULE_USE_EXTERNAL_VTK_kissfft"] = self.options.with_kissfft
         tc.variables["VTK_USE_EXTERNAL"] = True
@@ -921,7 +916,8 @@ class VtkConan(ConanFile):
                 if self.settings.os in ["Linux", "FreeBSD"]:
                     system_libs.append("pthread")
             else:
-                requires.append(self._cmake_target_to_conan_requirement(v))
+                if not requires.startswith("vtkm::"):
+                    requires.append(self._cmake_target_to_conan_requirement(v))
         return requires, system_libs, frameworks
 
     @property
@@ -1097,58 +1093,56 @@ class VtkConan(ConanFile):
                 component.defines.append(f"VTK_CONAN_WANT_AUTOINIT_vtk{name}")
 
         # Add some missing private dependencies
-        self.cpp_info.components["pugixml"].requires.append("pugixml::pugixml")
-        self.cpp_info.components["CommonArchive"].requires.append("libarchive::libarchive")
-        if self.options.get_safe("with_memkind"):
-            self.cpp_info.components["CommonCore"].requires.append("memkind::memkind")
+        missing_reqs = {
+            "pugixml": ["pugixml::pugixml"],
+            "CommonArchive": ["libarchive::libarchive"],
+            "DomainsMicroscopy": ["openslide::openslide"],
+            "GeovisGDAL": ["gdal::gdal"],
+            "GUISupportQt": ["qt::qtOpenGL", "qt::qtWidgets", "qt::qtOpenGLWidgets"],
+            "GUISupportQtQuick": ["qt::qtGui", "qt::qtOpenGL", "qt::qtQuick", "qt::qtQml"],
+            "GUISupportQtSQL": ["qt::qtWidgets", "qt::qtSql"],
+            "InfovisBoost": ["boost::headers", "boost::serialization"],
+            "InfovisBoostGraphAlgorithms": ["boost::headers"],
+            "IOADIOS2": ["adios2::adios2"],
+            "IOCatalystConduit": ["catalyst::catalyst"],
+            "IOFFMPEG": ["ffmpeg::avformat", "ffmpeg::avcodec", "ffmpeg::avutil", "ffmpeg::swscale", "ffmpeg::swresample"],
+            "IOGDAL": ["gdal::gdal"],
+            "IOLAS": ["liblas::liblas", "boost::program_options", "boost::thread", "boost::system", "boost::iostreams", "boost::filesystem"],
+            "IOMySQL": ["mariadb-connector-c::mariadb-connector-c"] if self.options.with_mysql == "mariadb-connector-c" else ["libmysqlclient::libmysqlclient"],
+            "IOOCCT": ["opencascade::occt_tkstep", "opencascade::occt_tkiges", "opencascade::occt_tkmesh", "opencascade::occt_tkxdestep", "opencascade::occt_tkxdeiges"],
+            "IOODBC": ["odbc::odbc"],
+            "IOOpenVDB": ["openvdb::openvdb"],
+            "IOPDAL": ["pdal::pdal"],
+            "IOPostgreSQL": ["libpq::libpq"],
+            "RenderingLookingGlass": ["holoplaycore::holoplaycore"],
+            "RenderingFreeTypeFontConfig": ["fontconfig::fontconfig"],
+            "RenderingOpenVR": ["openvr::openvr"],
+            "RenderingOpenXR": ["openxr::openxr"],
+            "RenderingOpenXRRemoting": ["openxr::openxr"],
+            "RenderingQt": ["qt::qtWidgets"],
+            "RenderingVR": ["zeromq::zeromq"],
+            "RenderingWebGPU": ["sdl::sdl"],
+            "RenderingZSpace": ["zspace::zspace"],
+            "fides": ["adios2::adios2"],
+            "xdmf3": ["boost::headers"],
+            "ViewsQt": ["qt::qtWidgets"],
+        }
+        for component, reqs in missing_reqs.items():
+            if component in components:
+                self.cpp_info.components[component].requires.extend(reqs)
         if self.options.smp_enable_tbb:
             self.cpp_info.components["CommonCore"].requires.append("onetbb::libtbb")
         if self.options.smp_enable_openmp:
             self.cpp_info.components["CommonCore"].requires.append("openmp::openmp")
-        if "DomainsMicroscopy" in components:
-            self.cpp_info.components["DomainsMicroscopy"].requires.append("openslide::openslide")
-        if "GeovisGDAL" in components:
-            self.cpp_info.components["GeovisGDAL"].requires.append("gdal::gdal")
-        if "GUISupportQt" in components:
-            self.cpp_info.components["GUISupportQt"].requires.extend(["qt::qtOpenGL", "qt::qtWidgets", "qt::qtOpenGLWidgets"])
-        if "GUISupportQtQuick" in components:
-            self.cpp_info.components["GUISupportQtQuick"].requires.extend(["qt::qtGui", "qt::qtOpenGL", "qt::qtQuick", "qt::qtQml"])
-        if "GUISupportQtSQL" in components:
-            self.cpp_info.components["GUISupportQtSQL"].requires.extend(["qt::qtWidgets", "qt::qtSql"])
-        if "InfovisBoost" in components:
-            self.cpp_info.components["InfovisBoost"].requires.extend(["boost::headers", "boost::serialization"])
-        if "InfovisBoostGraphAlgorithms" in components:
-            self.cpp_info.components["InfovisBoostGraphAlgorithms"].requires.append("boost::headers")
-        if "IOADIOS2" in components:
-            self.cpp_info.components["IOADIOS2"].requires.append("adios2::adios2")
-        if "IOCatalystConduit" in components:
-            self.cpp_info.components["IOCatalystConduit"].requires.append("catalyst::catalyst")
-        if "IOFFMPEG" in components:
-            self.cpp_info.components["IOFFMPEG"].requires.extend(["ffmpeg::avformat", "ffmpeg::avcodec", "ffmpeg::avutil", "ffmpeg::swscale", "ffmpeg::swresample"])
-        if "IOGDAL" in components:
-            self.cpp_info.components["IOGDAL"].requires.append("gdal::gdal")
-        if "IOLAS" in components:
-            self.cpp_info.components["IOLAS"].requires.append("liblas::liblas")
-            self.cpp_info.components["IOLAS"].requires.extend(["boost::program_options", "boost::thread", "boost::system", "boost::iostreams", "boost::filesystem"])
-        if "IOMySQL" in components:
-            if self.options.with_mysql == "mariadb-connector-c":
-                self.cpp_info.components["IOMySQL"].requires.append("mariadb-connector-c::mariadb-connector-c")
-            elif self.options.with_mysql == "libmysqlclient":
-                self.cpp_info.components["IOMySQL"].requires.append("libmysqlclient::libmysqlclient")
-        if "IOOCCT" in components:
-            self.cpp_info.components["IOOCCT"].requires.extend(["opencascade::occt_tkstep", "opencascade::occt_tkiges", "opencascade::occt_tkmesh", "opencascade::occt_tkxdestep", "opencascade::occt_tkxdeiges"])
-        if "IOODBC" in components:
-            self.cpp_info.components["IOODBC"].requires.append("odbc::odbc")
-        if "IOOpenVDB" in components:
-            self.cpp_info.components["IOOpenVDB"].requires.append("openvdb::openvdb")
-        if "IOPDAL" in components:
-            self.cpp_info.components["IOPDAL"].requires.append("pdal::pdal")
-        if "IOPostgreSQL" in components:
-            self.cpp_info.components["IOPostgreSQL"].requires.append("libpq::libpq")
-        if "RenderingLookingGlass" in components:
-            self.cpp_info.components["RenderingLookingGlass"].requires.append("holoplaycore::holoplaycore")
-        if "RenderingFreeTypeFontConfig" in components:
-            self.cpp_info.components["RenderingFreeTypeFontConfig"].requires.append("fontconfig::fontconfig")
+        if self.options.get_safe("with_memkind"):
+            self.cpp_info.components["CommonCore"].requires.append("memkind::memkind")
+        if "RenderingRayTracing" in components:
+            if self.options.get_safe("with_visrtx"):
+                self.cpp_info.components["RenderingRayTracing"].requires.append("visrtx::visrtx")
+            if self.options.get_safe("with_ospray"):
+                self.cpp_info.components["RenderingRayTracing"].requires.append("ospray::ospray")
+            if self.options.get_safe("with_openimagedenoise"):
+                self.cpp_info.components["RenderingRayTracing"].requires.append("openimagedenoise::openimagedenoise")
         if "RenderingOpenGL2" in components:
             if self.options.with_sdl2:
                 self.cpp_info.components["RenderingOpenGL2"].requires.append("sdl::sdl")
@@ -1158,21 +1152,6 @@ class VtkConan(ConanFile):
                 self.cpp_info.components["RenderingOpenGL2"].frameworks.append("Cocoa")
             if self.options.get_safe("with_directx"):
                 self.cpp_info.components["RenderingOpenGL2"].requires.extend(["directx::d3d11", "directx::dxgi"])
-        if "RenderingOpenVR" in components:
-            self.cpp_info.components["RenderingOpenVR"].requires.append("openvr::openvr")
-        if "RenderingOpenXR" in components:
-            self.cpp_info.components["RenderingOpenXR"].requires.append("openxr::openxr")
-        if "RenderingOpenXRRemoting" in components:
-            self.cpp_info.components["RenderingOpenXRRemoting"].requires.append("openxr::openxr")
-        if "RenderingQt" in components:
-            self.cpp_info.components["RenderingQt"].requires.append("qt::qtWidgets")
-        if "RenderingRayTracing" in components:
-            if self.options.get_safe("with_ospray"):
-                self.cpp_info.components["RenderingRayTracing"].requires.append("ospray::ospray")
-            if self.options.get_safe("with_openimagedenoise"):
-                self.cpp_info.components["RenderingRayTracing"].requires.append("openimagedenoise::openimagedenoise")
-        if "RenderingRayTracing" in components and self.options.get_safe("with_visrtx"):
-            self.cpp_info.components["RenderingRayTracing"].requires.append("visrtx::visrtx")
         if "RenderingUI" in components:
             if self.options.with_sdl2:
                 self.cpp_info.components["RenderingUI"].requires.append("sdl::sdl")
@@ -1180,20 +1159,8 @@ class VtkConan(ConanFile):
                 self.cpp_info.components["RenderingUI"].requires.append("xorg::x11")
             if self.options.get_safe("with_cocoa"):
                 self.cpp_info.components["RenderingUI"].frameworks.append("Cocoa")
-        if "RenderingVR" in components and self.options.with_zeromq:
-            self.cpp_info.components["RenderingVR"].requires.append("zeromq::zeromq")
-        if "RenderingWebGPU" in components:
-            self.cpp_info.components["RenderingWebGPU"].requires.append("sdl::sdl")
-            if self.settings.os != "Emscripten":
-                self.cpp_info.components["RenderingWebGPU"].requires.append("dawn::dawn")
-        # if "RenderingZSpace" in components:
-        #     self.cpp_info.components["RenderingZSpace"].requires.append("zspace::zspace")
-        if "fides" in components:
-            self.cpp_info.components["fides"].requires.append("adios2::adios2")
-        if "xdmf3" in components:
-            self.cpp_info.components["xdmf3"].requires.append("boost::headers")
-        if "ViewsQt" in components:
-            self.cpp_info.components["ViewsQt"].requires.append("qt::qtWidgets")
+        if "RenderingWebGPU" in components and self.settings.os != "Emscripten":
+            self.cpp_info.components["RenderingWebGPU"].requires.append("dawn::dawn")
 
         # Add a "poison" component to prohibit the use of the "vtk::vtk" Conan target.
         # This matches the project's behavior of not providing an aggregate VTK::VTK CMake target.
