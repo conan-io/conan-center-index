@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, replace_in_file
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
@@ -82,6 +82,10 @@ class CigiClConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+
+        copy(self, "license.html", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.pc", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         build_type_suffix = ""
