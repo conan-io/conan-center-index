@@ -15,7 +15,7 @@ from conan.tools.env import VirtualRunEnv
 from conan.tools.files import export_conandata_patches, get, rmdir, rename, replace_in_file, load, save, copy, apply_conandata_patches
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.0"
 
 
 class VtkConan(ConanFile):
@@ -210,7 +210,6 @@ class VtkConan(ConanFile):
 
     @property
     def _modules_from_all_versions(self):
-        # Modules from all versions
         all_modules = set()
         for options_json in Path(self.recipe_folder, "options").glob("*.json"):
             all_modules.update(json.loads(options_json.read_text())["modules"])
