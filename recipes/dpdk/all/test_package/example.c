@@ -1,8 +1,8 @@
-#include <stdio.h>
-
 #include <rte_version.h>
 
-int main(int argc, char** argv)
+#include <stdio.h>
+
+int main()
 {
     puts(rte_version());
     return 0;
