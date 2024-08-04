@@ -6,7 +6,7 @@ import re
 from collections import OrderedDict
 from pathlib import Path
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
@@ -15,7 +15,7 @@ from conan.tools.env import VirtualRunEnv
 from conan.tools.files import export_conandata_patches, get, rmdir, rename, replace_in_file, load, save, copy, apply_conandata_patches
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.0.0"
+required_conan_version = ">=1.53.0"
 
 
 class VtkConan(ConanFile):
@@ -214,10 +214,13 @@ class VtkConan(ConanFile):
         return sorted(all_modules)
 
     def init(self):
-        all_modules = self._modules_from_all_versions
-        new_options = {mod: ["auto", "YES", "WANT", "DONT_WANT", "NO"] for mod in all_modules}
-        new_defaults = {mod: "auto" for mod in all_modules}
-        self.options.update(new_options, new_defaults)
+        # Skip module options support for Conan v1 because
+        # self.options.update(new_options, new_defaults) is not available
+        if conan_version.major != 1:
+            all_modules = self._modules_from_all_versions
+            new_options = {mod: ["auto", "YES", "WANT", "DONT_WANT", "NO"] for mod in all_modules}
+            new_defaults = {mod: "auto" for mod in all_modules}
+            self.options.update(new_options, new_defaults)
 
     @property
     @functools.lru_cache()
@@ -239,8 +242,9 @@ class VtkConan(ConanFile):
             del self.options.with_cocoa
         if self.settings.os == "Emscripten":
             self.options.rm_safe("with_dawn")
-        for opt in set(self._modules_from_all_versions) - set(self._module_opts):
-            self.options.rm_safe(opt)
+        if conan_version.major != 1:
+            for opt in set(self._modules_from_all_versions) - set(self._module_opts):
+                self.options.rm_safe(opt)
 
     def configure(self):
         if self.options.shared:
@@ -547,12 +551,13 @@ class VtkConan(ConanFile):
         modules["zfp"] = _yes_no(self.options.with_zfp)
         modules["zlib"] = "YES"
 
-        for mod in self._module_opts:
-            if self.options.get_safe(mod) != "auto":
-                value = self.options.get_safe(mod)
-                if mod in modules and modules[mod] != value and modules[mod] != "WANT":
-                    raise ConanInvalidConfiguration(f"Option '{mod}={value}' conflicts with value '{modules[mod]}' computed from 'with_*' options.")
-                modules[mod] = value
+        if conan_version.major != 1:
+            for mod in self._module_opts:
+                if self.options.get_safe(mod) != "auto":
+                    value = self.options.get_safe(mod)
+                    if mod in modules and modules[mod] != value and modules[mod] != "WANT":
+                        raise ConanInvalidConfiguration(f"Option '{mod}={value}' conflicts with value '{modules[mod]}' computed from 'with_*' options.")
+                    modules[mod] = value
 
         return modules
 
