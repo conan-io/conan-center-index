@@ -68,12 +68,12 @@ class OpenMPIConan(ConanFile):
         if not is_apple_os(self):
             self.requires("libnl/3.8.0")
         if self.options.external_hwloc:
-            self.requires("hwloc/2.10.0")
+            self.requires("hwloc/2.9.3")
         else:
             self.requires("libpciaccess/0.17")
             self.requires("libudev/system")
         if self.options.get_safe("with_verbs"):
-            self.requires("rdma-core/51.0")
+            self.requires("rdma-core/52.0")
 
     def validate(self):
         if self.settings.os == "Windows":
