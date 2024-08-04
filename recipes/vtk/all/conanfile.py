@@ -279,7 +279,7 @@ class VtkConan(ConanFile):
 
         if self.options.with_boost:
             # Used in public vtkVariantBoostSerialization.h
-            self.requires("boost/1.85.0", transitive_headers=True, transitive_libs=True)
+            self.requires("boost/1.84.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_cgns:
             self.requires("cgns/4.3.0")
         if self.options.with_cli11:
@@ -371,7 +371,7 @@ class VtkConan(ConanFile):
             # Used in public vtkSDL2OpenGLRenderWindow.h
             self.requires("sdl/2.30.5", transitive_headers=True, transitive_libs=True)
         if self.options.with_sqlite:
-            self.requires("sqlite3/3.45.3")
+            self.requires("sqlite3/3.44.2")
         if self.options.with_theora:
             self.requires("theora/1.1.1")
         if self.options.with_tiff:
