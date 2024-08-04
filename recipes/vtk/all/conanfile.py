@@ -54,7 +54,6 @@ class VtkConan(ConanFile):
         ### external deps ###
         "with_boost": [True, False],
         "with_cgns": [True, False],
-        "with_cli11": [True, False],
         "with_cocoa": [True, False],
         "with_diy2": [True, False],
         "with_eigen": [True, False],
@@ -131,7 +130,6 @@ class VtkConan(ConanFile):
         ### external deps ###
         "with_boost": True,
         "with_cgns": False,  # FIXME: hdf5 conflict
-        "with_cli11": True,
         "with_cocoa": True,
         "with_diy2": True,
         "with_eigen": True,
@@ -282,8 +280,6 @@ class VtkConan(ConanFile):
             self.requires("boost/1.84.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_cgns:
             self.requires("cgns/4.3.0")
-        if self.options.with_cli11:
-            self.requires("cli11/2.4.2")
         if self.options.get_safe("with_dawn"):
             # Dawn option has been disabled because its support is still very experimental.
             # https://gitlab.kitware.com/vtk/vtk/-/blob/v9.3.1/Rendering/WebGPU/README.md?ref_type=tags#how-to-build-vtk-with-dawn-highly-experimental
@@ -497,7 +493,6 @@ class VtkConan(ConanFile):
         modules["RenderingZSpace"] = _want_no(self.options.get_safe("with_zspace"))
         modules["ViewsQt"] = _want_no(self.options.with_qt)
         modules["cgns"] = _yes_no(self.options.with_cgns)
-        modules["cli11"] = _yes_no(self.options.with_cli11)
         modules["diy2"] = _yes_no(self.options.with_diy2)
         modules["doubleconversion"] = "YES"
         modules["eigen"] = _yes_no(self.options.with_eigen)
