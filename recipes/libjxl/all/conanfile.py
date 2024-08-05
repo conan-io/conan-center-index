@@ -63,10 +63,7 @@ class LibjxlConan(ConanFile):
 
     def requirements(self):
         self.requires("brotli/1.1.0")
-        if Version(self.version) >= "0.7":
-            self.requires("highway/1.1.0")
-        else:
-            self.requires("highway/0.12.2")
+        self.requires("highway/1.1.0")
         self.requires("lcms/2.16")
         if self.options.with_tcmalloc:
             self.requires("gperftools/2.15")
@@ -74,9 +71,6 @@ class LibjxlConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
-        if self.version == "0.6.1" and is_msvc(self) and self.options.shared:
-            # Fails with a missing DLL error in test_package
-            raise ConanInvalidConfiguration(f"{self.ref} does not support shared builds with MSVC")
 
     def build_requirements(self):
         # Require newer CMake, which allows INCLUDE_DIRECTORIES to be set on INTERFACE targets
@@ -92,7 +86,7 @@ class LibjxlConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_LIBJXL_INCLUDE"] = "conan_deps.cmake"
         tc.variables["BUILD_TESTING"] = False
-        tc.variables["JPEGXL_STATIC"] = not self.options.shared  # applies to tools only
+        tc.variables["JPEGXL_STATIC"] = False
         tc.variables["JPEGXL_BUNDLE_LIBPNG"] = False
         tc.variables["JPEGXL_ENABLE_BENCHMARK"] = False
         tc.variables["JPEGXL_ENABLE_DOXYGEN"] = False
@@ -160,14 +154,6 @@ class LibjxlConan(ConanFile):
             if os.path.exists(path):
                 fpic = "ON" if self.options.get_safe("fPIC", True) else "OFF"
                 replace_in_file(self, path, "POSITION_INDEPENDENT_CODE ON", f"POSITION_INDEPENDENT_CODE {fpic}")
-
-        if Version(self.version) < "0.7":
-            replace_in_file(self, os.path.join(self.source_folder, "lib", "jxl.cmake"),
-                            "  DESTINATION ${CMAKE_INSTALL_LIBDIR}",
-                            "  RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib")
-            if self.settings.compiler not in ["gcc", "clang"]:
-                replace_in_file(self, os.path.join(self.source_folder, "lib", "jxl.cmake"),
-                                "-Wl,--exclude-libs=ALL", "")
 
     def build(self):
         self._patch_sources()
