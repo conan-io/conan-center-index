@@ -53,7 +53,7 @@ class LibyuvConan(ConanFile):
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/[>=3.0.3 <4]")
         elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/[~4.1.5]")
+            self.requires("mozjpeg/4.1.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
