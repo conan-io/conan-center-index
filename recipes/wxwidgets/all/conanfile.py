@@ -149,20 +149,21 @@ class wxWidgetsConan(ConanFile):
     def requirements(self):
         if self.settings.os == "Linux":
             self.requires("xorg/system")
-            if self.options.get_safe("gtk") == "gtk":
+            gtk = self.options.get_safe("gtk")
+            if gtk == "gtk":
                 self.requires("gtk/3.24.24")
             else:
-                self.requires("gtk/system")
+                self.requires("gtk/system", options={"version": gtk})
             if self.options.get_safe("opengl", default=False):
                 self.requires("opengl/system")
-            self.requires("xkbcommon/1.6.0")
+            self.requires("xkbcommon/1.6.0", options={"with_x11": True})
             # TODO: Does not work right now
             # if self.options.get_safe("cairo"):
             #    self.requires("cairo/1.18.0")
             if self.options.mediactrl:
                 self.requires("gstreamer/1.22.3")
                 self.requires("gst-plugins-base/1.19.2")
-            if self.options.get_safe("secretstore") and self.options.get_safe("gtk") == "gtk":
+            if self.options.get_safe("secretstore") and gtk == "gtk":
                 self.requires("libsecret/0.20.5")
             self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.png == "libpng":
@@ -170,9 +171,9 @@ class wxWidgetsConan(ConanFile):
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/[>=3.0 <3.1]")
         elif self.options.jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.3")
+            self.requires("mozjpeg/4.1.5")
         if self.options.tiff == "libtiff":
             self.requires("libtiff/4.6.0")
         if self.options.zlib == "zlib":
@@ -184,7 +185,7 @@ class wxWidgetsConan(ConanFile):
         if self.options.regex == "regex":
             self.requires("pcre2/10.42")
         if self.options.get_safe("svg") == "nanosvg":
-            self.requires("nanosvg/cci.20210904")
+            self.requires("nanosvg/cci.20231025")
 
     def validate(self):
         if self.settings.os == "Linux":
