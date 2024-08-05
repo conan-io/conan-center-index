@@ -191,7 +191,7 @@ class OpenCVConan(ConanFile):
         "with_jpeg": "libjpeg",
         "with_png": True,
         "with_tiff": True,
-        "with_jpeg2000": "jasper",
+        "with_jpeg2000": "openjpeg",
         "with_openexr": True,
         "with_webp": True,
         "with_gdal": False,
@@ -358,6 +358,9 @@ class OpenCVConan(ConanFile):
             # in a big dependency graph
             if not self._has_with_wayland_option:
                 self.options.with_gtk = True
+
+        if Version(self.version) < "4.3.0":
+            self.options.with_jpeg2000 = "jasper"
 
     @property
     def _opencv_modules(self):
@@ -1212,6 +1215,9 @@ class OpenCVConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "viz module can't be enabled yet. It requires VTK which is not available in conan-center."
             )
+        if self.options.with_jpeg2000 == "openjpeg" and Version(self.version) < "4.3.0":
+            raise ConanInvalidConfiguration("openjpeg is ot available for OpenCV before 4.3.0")
+
 
     def build_requirements(self):
         if self.options.get_safe("with_protobuf"):
