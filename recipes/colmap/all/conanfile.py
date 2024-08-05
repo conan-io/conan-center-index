@@ -6,7 +6,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file, load, save
-from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -35,7 +34,7 @@ class ColmapConan(ConanFile):
     }
     default_options = {
         "fPIC": True,
-        "cgal": False,
+        "cgal": True,
         "cuda": False,
         "gui": False,
         "ipo": True,
@@ -74,7 +73,7 @@ class ColmapConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.85.0", transitive_headers=True, transitive_libs=True)
-        # Ceres 2.2.0 is not compatible as of v3.9.1
+        # Ceres 2.2.0 is not compatible as of v3.10
         self.requires("ceres-solver/2.1.0", transitive_headers=True, transitive_libs=True)
         self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
         self.requires("flann/1.9.2", transitive_headers=True, transitive_libs=True)
@@ -84,7 +83,7 @@ class ColmapConan(ConanFile):
         self.requires("sqlite3/3.45.3", transitive_headers=True, transitive_libs=True)
         self.requires("lz4/1.9.4")
         if self.options.openmp:
-            self.requires("llvm-openmp/18.1.8", transitive_headers=True, transitive_libs=True)
+            self.requires("openmp/system", transitive_headers=True, transitive_libs=True)
         if self.options.cgal:
             self.requires("cgal/5.6.1")
         if self.options.gui:
@@ -113,16 +112,16 @@ class ColmapConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CCACHE_ENABLED"] = False
-        tc.variables["CGAL_ENABLED"] = self.options.cgal
-        tc.variables["CUDA_ENABLED"] = self.options.cuda
-        tc.variables["GUI_ENABLED"] = self.options.gui
-        tc.variables["IPO_ENABLED"] = self.options.ipo
-        tc.variables["OPENGL_ENABLED"] = self.options.gui
-        tc.variables["OPENMP_ENABLED"] = self.options.openmp
-        tc.variables["SIMD_ENABLED"] = True  # only applied to VLFeat and when on x86
-        tc.variables["TESTS_ENABLED"] = False
-        tc.variables["CMAKE_CUDA_ARCHITECTURES"] = self.options.get_safe("cuda_architectures", "")
+        tc.cache_variables["CCACHE_ENABLED"] = False
+        tc.cache_variables["CGAL_ENABLED"] = self.options.cgal
+        tc.cache_variables["CUDA_ENABLED"] = self.options.cuda
+        tc.cache_variables["GUI_ENABLED"] = self.options.gui
+        tc.cache_variables["IPO_ENABLED"] = self.options.ipo
+        tc.cache_variables["OPENGL_ENABLED"] = self.options.gui
+        tc.cache_variables["OPENMP_ENABLED"] = self.options.openmp
+        tc.cache_variables["SIMD_ENABLED"] = True  # only applied to VLFeat and when on x86
+        tc.cache_variables["TESTS_ENABLED"] = False
+        tc.cache_variables["CMAKE_CUDA_ARCHITECTURES"] = self.options.get_safe("cuda_architectures", "")
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
@@ -206,18 +205,19 @@ class ColmapConan(ConanFile):
         util = _add_component("util", requires=["boost::headers", "boost::filesystem", "eigen::eigen", "glog::glog", "sqlite3::sqlite3"])
         _add_component("controllers", requires=["util", "estimators", "feature", "image", "math", "mvs", "retrieval", "sfm", "scene",
                                                 "ceres-solver::ceres", "boost::program_options"])
-        _add_component("estimators", requires=["util", "math", "feature", "geometry", "sensor", "image", "scene", "optim", "ceres-solver::ceres"])
+        _add_component("estimators", requires=["util", "math", "feature_types", "geometry", "sensor", "image", "scene", "optim", "ceres-solver::ceres"])
         exe = _add_component("exe", requires=["util", "controllers", "estimators", "geometry", "optim", "scene"])
-        feature = _add_component("feature", requires=["util", "math", "sensor", "vlfeat", "flann::flann", "lz4::lz4"])
+        _add_component("feature_types", requires=["util"])
+        feature = _add_component("feature", requires=["util", "feature_types", "geometry", "retrieval", "scene", "math", "sensor", "vlfeat", "flann::flann", "lz4::lz4"])
         _add_component("geometry", requires=["util", "math"])
         _add_component("image", requires=["util", "sensor", "scene", "lsd"])
         _add_component("math", requires=["util", "metis::metis", "boost::graph"])
         mvs = _add_component("mvs", requires=["util", "scene", "sensor", "image", "poisson_recon"])
         _add_component("optim", requires=["math"])
         _add_component("retrieval", requires=["math", "estimators", "optim", "flann::flann", "lz4::lz4"])
-        _add_component("scene", requires=["util", "sensor", "feature", "geometry"])
+        _add_component("scene", requires=["util", "sensor", "feature_types", "geometry"])
         _add_component("sensor", requires=["util", "vlfeat", "freeimage::FreeImage", "ceres-solver::ceres"])
-        _add_component("sfm", requires=["geometry", "image", "scene", "estimators"])
+        _add_component("sfm", requires=["util", "geometry", "image", "scene", "estimators"])
         _add_component("lsd", requires=[])
         poisson_recon = _add_component("poisson_recon", requires=[])
         vlfeat = _add_component("vlfeat", requires=[])
@@ -226,10 +226,14 @@ class ColmapConan(ConanFile):
             mvs.requires.append("cgal::cgal")
 
         if self.options.gui:
-            _add_component("ui", requires=["util", "image", "scene", "controllers", "qt::Core", "qt::OpenGL", "qt::Widgets"])
+            _add_component("ui", requires=["util", "image", "scene", "controllers", "qt::qtCore", "qt::qtOpenGL", "qt::qtWidgets"])
             util.requires.extend(["qt::Core", "qt::OpenGL", "opengl::opengl"])
-            feature.requires.extend(["qt::Widgets"])
+            feature.requires.extend(["qt::qtWidgets"])
             exe.requires.extend(["ui"])
+
+        if self.options.openmp:
+            poisson_recon.requires.append("openmp::openmp")
+            vlfeat.requires.append("openmp::openmp")
 
         if self.options.cuda:
             # CUDA dependencies are exported in the CMake module

@@ -1,4 +1,4 @@
 sources:
-  "3.9.1":
-    url: "https://github.com/colmap/colmap/archive/refs/tags/3.9.1.tar.gz"
-    sha256: "f947ad80802baa8f00f30f26d316d8c608ab2626465eac1c81cf325d57879862"
+  "3.10":
+    url: "https://github.com/colmap/colmap/archive/refs/tags/3.10.tar.gz"
+    sha256: "61850f323e201ab6a1abbfb0e4a8b3ba1c4cedbf55e0a5716bdea1df8ae1813a"
