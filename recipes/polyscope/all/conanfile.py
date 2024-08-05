@@ -91,7 +91,7 @@ class PolyscopeConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["CMAKE_PROJECT_polyscope_INCLUDE"] = "conan_deps.cmake"
         tc.variables["POLYSCOPE_BACKEND_OPENGL3_GLFW"] = self.options.backend_glfw
-        tc.variables["POLYSCOPE_BACKEND_OPENGL3_EGL"] = self.options.get_safe("backend_egl")
+        tc.variables["POLYSCOPE_BACKEND_OPENGL3_EGL"] = self.options.get_safe("backend_egl", False)
         tc.variables["POLYSCOPE_BACKEND_OPENGL_MOCK"] = self.options.backend_mock
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         if not valid_min_cppstd(self, self._min_cppstd):
