@@ -1216,7 +1216,7 @@ class OpenCVConan(ConanFile):
                 "viz module can't be enabled yet. It requires VTK which is not available in conan-center."
             )
         if self.options.with_jpeg2000 == "openjpeg" and Version(self.version) < "4.3.0":
-            raise ConanInvalidConfiguration("openjpeg is ot available for OpenCV before 4.3.0")
+            raise ConanInvalidConfiguration("openjpeg is not available for OpenCV before 4.3.0")
 
 
     def build_requirements(self):
