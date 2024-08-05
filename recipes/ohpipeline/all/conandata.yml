@@ -11,8 +11,8 @@ sources:
       url: "https://github.com/openhome/ohPipeline/archive/refs/tags/ohMediaPlayer_1.155.1133.tar.gz"
       sha256: "507bdf70fc6b9bf8e4605546a5c7ae99abbe537cce4b74b3e091764323939fae"
     cmake:
-      url: "https://raw.githubusercontent.com/merakiacoustic/ohPipeline/ohMediaPlayer_1.155.1133_meraki1/CMakeLists.txt"
-      sha256: "6f73357f1c9a2a8dfc48db39b74c10102df34e86ae68985ff0cecf95748ba89c"
+      url: "https://raw.githubusercontent.com/merakiacoustic/ohPipeline/ohMediaPlayer_1.155.1133_meraki2/CMakeLists.txt"
+      sha256: "0f8701552c2b3331edeedde4c3a1b8120dc419d493f6a2e05b21c9045729d6ff"
 patches:
   "1.139.1000":
     - patch_file: "patches/0001-missing-include.patch"
