@@ -120,6 +120,7 @@ class DpdkConan(ConanFile):
         tc.project_options["enable_stdatomic"] = "true" if self.options.enable_stdatomic else "false"
         tc.project_options["ibverbs_link"] = "shared"  # rdma-core is a shared-library package
         tc.project_options["disable_drivers"] = "bus"
+        tc.extra_cflags.append(f"-I{self.dependencies['linux-headers-generic'].cpp_info.includedir}")
         tc.generate()
 
         deps = PkgConfigDeps(self)
