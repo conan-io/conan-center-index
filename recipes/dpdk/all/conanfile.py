@@ -69,6 +69,7 @@ class DpdkConan(ConanFile):
         subprocess.run([sys.executable, "-m", "pip", "install", "pyelftools"], check=True)
 
     def build_requirements(self):
+        self.tool_requires("binutils/2.30")
         self.tool_requires("meson/1.5.0")
 
     def generate(self):
