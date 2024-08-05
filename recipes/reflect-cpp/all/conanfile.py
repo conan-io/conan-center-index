@@ -7,7 +7,7 @@ required_conan_version = ">=1.51.1"
 
 
 class ReflectCppConan(ConanFile):
-    name = "reflect-cpp"
+    name = "reflectcpp"
     description = "C++-20 library for fast serialization, deserialization and validation using reflection"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
@@ -110,4 +110,4 @@ class ReflectCppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package_info(self):
-        self.cpp_info.libs = ["reflect-cpp"]
+        self.cpp_info.libs = ["reflectcpp"]
