@@ -457,9 +457,6 @@ class QtConan(ConanFile):
         if self.options.qtwayland:
             self.tool_requires("wayland/<host_version>")
 
-        if self.options.qtdeclarative and is_apple_os(self):
-            self.tool_requires("gettext/0.22.5")
-
     @property
     def angle_path(self):
         return os.path.join(self.source_folder, "angle")
@@ -495,7 +492,6 @@ class QtConan(ConanFile):
             vre = VirtualRunEnv(self)
             vre.generate(scope="build")
         env = Environment()
-        env.define("MAKEFLAGS", f"j{build_jobs(self)}")
         env.define("ANGLE_DIR", self.angle_path)
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         if self.settings.os == "Windows":
@@ -503,12 +499,13 @@ class QtConan(ConanFile):
         env.vars(self).save_script("conan_qt_env_file")
 
     def _make_program(self):
+        build_jobs = build_jobs(self)
         if is_msvc(self):
             return "jom"
         elif self._settings_build.os == "Windows":
             return "mingw32-make"
         else:
-            return "make"
+            return f"make -j{build_jobs}"
 
     def _xplatform(self):
         if self.settings.os == "Linux":
@@ -825,7 +822,10 @@ class QtConan(ConanFile):
                     args += [f"QMAKE_RPATHDIR+=\"{libpath}\""]
 
         if self.settings.compiler == "apple-clang" and self.options.qtmultimedia:
-            # TODO: only for c++17 and higher
+            # XCode 14.3 finally removes std::unary_function, so compilation fails
+            # when using newer SDKs when using C++17 or higher.
+            # This macro re-enables them. Should be safe to pass this macro even 
+            # in earlier versions, as it would have no effect.
             args += ['QMAKE_CXXFLAGS+="-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION=1"']
 
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
