@@ -143,7 +143,7 @@ class CeresSolverConan(ConanFile):
     def requirements(self):
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.get_safe("use_glog"):
-            self.requires("glog/0.7.0", transitive_headers=True, transitive_libs=True)
+            self.requires("glog/0.6.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("use_suitesparse"):
             self.requires("suitesparse-cholmod/5.2.1")
             self.requires("suitesparse-spqr/4.3.3")
