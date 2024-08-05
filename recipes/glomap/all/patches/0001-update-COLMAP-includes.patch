@@ -1,0 +1,38 @@
+From 1aeec8c81b052b38ecb1e7e83b0f8ddd2aab2b2a Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Mon, 5 Aug 2024 18:22:21 +0300
+Subject: [PATCH 1/2] update COLMAP includes
+
+---
+ glomap/estimators/bundle_adjustment.cc  | 1 -
+ glomap/estimators/gravity_refinement.cc | 2 +-
+ 2 files changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/glomap/estimators/bundle_adjustment.cc b/glomap/estimators/bundle_adjustment.cc
+index a03bea5..a993590 100644
+--- a/glomap/estimators/bundle_adjustment.cc
++++ b/glomap/estimators/bundle_adjustment.cc
+@@ -1,7 +1,6 @@
+ #include "bundle_adjustment.h"
+ 
+ #include <colmap/estimators/cost_functions.h>
+-#include <colmap/estimators/manifold.h>
+ #include <colmap/sensor/models.h>
+ 
+ namespace glomap {
+diff --git a/glomap/estimators/gravity_refinement.cc b/glomap/estimators/gravity_refinement.cc
+index c4b2e2d..704d136 100644
+--- a/glomap/estimators/gravity_refinement.cc
++++ b/glomap/estimators/gravity_refinement.cc
+@@ -3,7 +3,7 @@
+ #include "glomap/estimators/cost_function.h"
+ #include "glomap/math/gravity.h"
+ 
+-#include <colmap/estimators/manifold.h>
++#include <colmap/estimators/cost_functions.h>
+ 
+ namespace glomap {
+ void GravityRefiner::RefineGravity(const ViewGraph& view_graph,
+-- 
+2.25.1
+
