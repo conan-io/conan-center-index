@@ -1,8 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy
-from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 import os
 
@@ -15,7 +12,6 @@ class ReflectCppConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/getml/reflect-cpp"
-    version = "0.14.0"
     topics = (
         "reflection",
         "serialization",
@@ -52,6 +48,7 @@ class ReflectCppConan(ConanFile):
         "with_xml": False,
         "with_yaml": False,
     }
+    src_folder = "src"
 
     @property
     def _min_cppstd(self):
@@ -111,32 +108,6 @@ class ReflectCppConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def package(self):
-        copy(
-            self,
-            pattern="LICENSE*",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
-        )
-        copy(
-            self,
-            pattern="CMakeLists.txt",
-            dst=self.package_folder,
-            src=self.source_folder,
-        )
-        copy(
-            self,
-            pattern="*.hpp",
-            dst=os.path.join(self.package_folder, "include"),
-            src=os.path.join(self.source_folder, "include"),
-        )
-        copy(
-            self,
-            pattern="reflectcpp.cpp",
-            dst=os.path.join(self.package_folder, "src"),
-            src=os.path.join(self.source_folder, "src"),
-        )
 
     def package_info(self):
         self.cpp_info.libs = ["reflect-cpp"]
