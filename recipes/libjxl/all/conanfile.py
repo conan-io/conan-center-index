@@ -92,7 +92,7 @@ class LibjxlConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_LIBJXL_INCLUDE"] = "conan_deps.cmake"
         tc.variables["BUILD_TESTING"] = False
-        tc.variables["JPEGXL_STATIC"] = not self.options.shared  # applies to tools only
+        tc.variables["JPEGXL_STATIC"] = False
         tc.variables["JPEGXL_BUNDLE_LIBPNG"] = False
         tc.variables["JPEGXL_ENABLE_BENCHMARK"] = False
         tc.variables["JPEGXL_ENABLE_DOXYGEN"] = False
@@ -168,11 +168,6 @@ class LibjxlConan(ConanFile):
             if self.settings.compiler not in ["gcc", "clang"]:
                 replace_in_file(self, os.path.join(self.source_folder, "lib", "jxl.cmake"),
                                 "-Wl,--exclude-libs=ALL", "")
-
-        # Disable static link for libgcc and libstdc++
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-            '"${CMAKE_EXE_LINKER_FLAGS} -static -static-libgcc -static-libstdc++")',
-            '"${CMAKE_EXE_LINKER_FLAGS}")')
 
     def build(self):
         self._patch_sources()
