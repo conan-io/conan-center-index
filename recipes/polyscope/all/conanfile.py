@@ -2,10 +2,12 @@ import os
 import textwrap
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, save
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -34,6 +36,16 @@ class PolyscopeConan(ConanFile):
         "backend_egl": True,
         "backend_mock": True,
     }
+
+    @property
+    def _min_cppstd(self):
+        return 11
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "6",
+        }
 
     def export_sources(self):
         copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
@@ -65,7 +77,12 @@ class PolyscopeConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -77,8 +94,8 @@ class PolyscopeConan(ConanFile):
         tc.variables["POLYSCOPE_BACKEND_OPENGL3_EGL"] = self.options.get_safe("backend_egl")
         tc.variables["POLYSCOPE_BACKEND_OPENGL_MOCK"] = self.options.backend_mock
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-        if not valid_min_cppstd(self, 11):
-            tc.variables["CMAKE_CXX_STANDARD"] = 11
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
 
         deps = CMakeDeps(self)
