@@ -284,6 +284,7 @@ class wxWidgetsConan(ConanFile):
         tc.variables["wxUSE_URL"] = self.options.protocol
         tc.variables["wxUSE_PROTOCOL"] = self.options.protocol
         tc.variables["wxUSE_FS_INET"] = self.options.fs_inet
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         for item in str(self.options.custom_enables).split(","):
             if len(item) > 0:
