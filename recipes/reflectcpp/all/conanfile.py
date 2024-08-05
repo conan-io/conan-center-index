@@ -49,6 +49,7 @@ class ReflectCppConan(ConanFile):
         "with_yaml": False,
     }
     src_folder = "src"
+    build_requires = "cmake/3.23.5"
 
     @property
     def _min_cppstd(self):
