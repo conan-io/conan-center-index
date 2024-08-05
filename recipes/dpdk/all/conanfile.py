@@ -63,17 +63,18 @@ class DpdkConan(ConanFile):
         # depending on the platform or the tools.system.package_manager:tool configuration
         # only one of these will be executed
         #Apk(self).install(["py3-elftools", "numactl-dev"])
-        Apt(self).install(["libnuma-dev"], update=True)
+        Apt(self).install(["linux-headers", "libnuma-dev"], update=True)
         Dnf(self).install(["numactl-devel"])
         Yum(self).install(["numactl-devel"])
         subprocess.run([sys.executable, "-m", "pip", "install", "pyelftools"], check=True)
 
     def build_requirements(self):
-        self.tool_requires("binutils/2.40")
+        self.tool_requires("binutils/2.42")
         self.tool_requires("meson/1.5.0")
 
     def generate(self):
         tc = MesonToolchain(self)
+        # tc.project_options["disable_drivers"] = "pci"
         tc.generate()
 
     def build(self):
