@@ -15,7 +15,7 @@ class PolyscopeConan(ConanFile):
     description = "A viewer for 3D data like meshes and point clouds"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/nmwsharp/polyscope"
+    homepage = "https://polyscope.run"
     topics = ("3d", "visualization", "meshes", "point-clouds")
 
     package_type = "library"
