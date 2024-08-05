@@ -1,9 +1,4 @@
 sources:
-  "cci.20240710":
-    url: "https://github.com/mreineck/pocketfft/archive/61f446c4fbcde161cedb6bad5832949f15177f18.tar.gz"
-    sha256: "aeda2a66b5619659084db75ef228b54de4756cbf4c5a32efe05efa8a4e2416f3"
-patches:
-  "cci.20240710":
-    - patch_file: "patches/add-cstddef.patch"
-      patch_description: "Add missing #include <cstddef> for GCC 5"
-      patch_type: "bugfix"
+  "0.0.0.cci.20240801":
+    url: "https://github.com/mreineck/pocketfft/archive/bb87ca50df0478415a12d9011dc374eeed4e9d93.tar.gz"
+    sha256: "434d6cfd38613fb17db2c006cd64991947bdf88fb3f750cf6bfbaa86083c5bbd"
