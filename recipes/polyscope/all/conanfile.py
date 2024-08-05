@@ -3,7 +3,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, save
 
@@ -77,6 +77,8 @@ class PolyscopeConan(ConanFile):
         tc.variables["POLYSCOPE_BACKEND_OPENGL3_EGL"] = self.options.get_safe("backend_egl")
         tc.variables["POLYSCOPE_BACKEND_OPENGL_MOCK"] = self.options.backend_mock
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        if not valid_min_cppstd(self, 11):
+            tc.variables["CMAKE_CXX_STANDARD"] = 11
         tc.generate()
 
         deps = CMakeDeps(self)
