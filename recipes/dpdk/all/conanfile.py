@@ -6,6 +6,8 @@ from conan.tools.files import chdir, collect_libs, copy, get, rename, rm, rmdir
 from conan.tools.system.package_manager import Apk, Apt, Dnf, Yum
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
+import sys
+import subprocess
 import os
 
 required_conan_version = ">=1.64"
@@ -60,10 +62,11 @@ class DpdkConan(ConanFile):
     def system_requirements(self):
         # depending on the platform or the tools.system.package_manager:tool configuration
         # only one of these will be executed
-        Apk(self).install(["py3-elftools", "numactl-dev"])
-        Apt(self).install(["python3-pyelftools", "libnuma-dev"], update=True)
-        Dnf(self).install(["python3-pyelftools", "numactl-devel"])
-        Yum(self).install(["python3-pyelftools", "numactl-devel"])
+        #Apk(self).install(["py3-elftools", "numactl-dev"])
+        Apt(self).install(["libnuma-dev"], update=True)
+        Dnf(self).install(["numactl-devel"])
+        Yum(self).install(["numactl-devel"])
+        subprocess.run([sys.executable, "-m", "pip", "install", "pyelftools"], check=True)
 
     def build_requirements(self):
         self.tool_requires("meson/1.5.0")
