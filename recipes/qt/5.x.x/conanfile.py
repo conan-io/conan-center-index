@@ -492,6 +492,7 @@ class QtConan(ConanFile):
             vre = VirtualRunEnv(self)
             vre.generate(scope="build")
         env = Environment()
+        env.define("MAKEFLAGS", f"j{build_jobs(self)}")
         env.define("ANGLE_DIR", self.angle_path)
         env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         if self.settings.os == "Windows":
@@ -499,13 +500,12 @@ class QtConan(ConanFile):
         env.vars(self).save_script("conan_qt_env_file")
 
     def _make_program(self):
-        build_jobs = build_jobs(self)
         if is_msvc(self):
             return "jom"
         elif self._settings_build.os == "Windows":
             return "mingw32-make"
         else:
-            return f"make -j{build_jobs}"
+            return "make"
 
     def _xplatform(self):
         if self.settings.os == "Linux":
