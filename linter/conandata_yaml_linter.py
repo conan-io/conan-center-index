@@ -31,7 +31,7 @@ def main():
     patch_fields = MapCombined(
         {
             "patch_file": Str(),
-            "patch_description": Str(),
+            Optional("patch_description"): Str(),
             Optional("patch_type"): Enum(
                 ["official", "conan", "portability", "bugfix", "vulnerability"]
             ),
