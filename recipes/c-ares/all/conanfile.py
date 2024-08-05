@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get, rm, rmdir, replace_in_file
+from conan.tools.files import collect_libs, copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
 import os
 
@@ -27,6 +27,9 @@ class CAresConan(ConanFile):
         "fPIC": True,
         "tools": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,10 +57,7 @@ class CAresConan(ConanFile):
         tc.generate()
 
     def build(self):
-        if Version(self.version) >= "1.33.0":
-            replace_in_file(self, os.path.join(self.source_folder, "src", "lib", "ares__socket.c"),
-                "#if defined(__linux__) && defined(MSG_FASTOPEN)",
-                "#if defined(__linux__) && defined(MSG_FASTOPEN) && defined(TCP_FASTOPEN_CONNECT)")
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
