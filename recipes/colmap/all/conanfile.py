@@ -72,7 +72,7 @@ class ColmapConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.85.0", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/1.84.0", transitive_headers=True, transitive_libs=True)
         # Ceres 2.2.0 is not compatible as of v3.10
         self.requires("ceres-solver/2.1.0", transitive_headers=True, transitive_libs=True)
         self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
