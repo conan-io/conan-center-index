@@ -56,7 +56,7 @@ class FixedMathConan(ConanFile):
             self.options.rm_safe("shared")
             self.options.rm_safe("fPIC")
             self.package_type = "header-library"
-        elif self.options.shared:
+        elif self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
