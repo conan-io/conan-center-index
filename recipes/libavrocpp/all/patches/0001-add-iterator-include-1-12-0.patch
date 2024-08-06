@@ -1,0 +1,65 @@
+diff --git a/lang/c++/impl/DataFile.cc b/lang/c++/impl/DataFile.cc
+index 66281ae..7f58033 100644
+--- a/lang/c++/impl/DataFile.cc
++++ b/lang/c++/impl/DataFile.cc
+@@ -19,7 +19,7 @@
+ #include "DataFile.hh"
+ #include "Compiler.hh"
+ #include "Exception.hh"
+-
++#include <iterator>
+ #include <sstream>
+ 
+ #include <boost/crc.hpp> // for boost::crc_32_type
+diff --git a/lang/c++/impl/Stream.cc b/lang/c++/impl/Stream.cc
+index 738b1e4..507a15e 100644
+--- a/lang/c++/impl/Stream.cc
++++ b/lang/c++/impl/Stream.cc
+@@ -18,7 +18,7 @@
+ 
+ #include "Stream.hh"
+ #include <vector>
+-
++#include <iterator>
+ namespace avro {
+ 
+ using std::vector;
+diff --git a/lang/c++/impl/parsing/JsonCodec.cc b/lang/c++/impl/parsing/JsonCodec.cc
+index 84b3666..841b7f8 100644
+--- a/lang/c++/impl/parsing/JsonCodec.cc
++++ b/lang/c++/impl/parsing/JsonCodec.cc
+@@ -21,7 +21,7 @@
+ #include <map>
+ #include <memory>
+ #include <string>
+-
++#include <iterator>
+ #include "Decoder.hh"
+ #include "Encoder.hh"
+ #include "Symbol.hh"
+diff --git a/lang/c++/impl/parsing/ResolvingDecoder.cc b/lang/c++/impl/parsing/ResolvingDecoder.cc
+index 1553b8a..22bd8cb 100644
+--- a/lang/c++/impl/parsing/ResolvingDecoder.cc
++++ b/lang/c++/impl/parsing/ResolvingDecoder.cc
+@@ -23,7 +23,7 @@
+ #include <set>
+ #include <string>
+ #include <utility>
+-
++#include <iterator>
+ #include "Decoder.hh"
+ #include "Encoder.hh"
+ #include "Generic.hh"
+diff --git a/lang/c++/impl/parsing/ValidatingCodec.cc b/lang/c++/impl/parsing/ValidatingCodec.cc
+index 7a1f8d9..e0db54a 100644
+--- a/lang/c++/impl/parsing/ValidatingCodec.cc
++++ b/lang/c++/impl/parsing/ValidatingCodec.cc
+@@ -23,7 +23,7 @@
+ #include <map>
+ #include <memory>
+ #include <utility>
+-
++#include <iterator>
+ #include "Decoder.hh"
+ #include "Encoder.hh"
+ #include "NodeImpl.hh"

@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, replace_in_file
-from conan.tools.build import check_min_cppstd, valid_min_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
@@ -22,7 +23,8 @@ class LibavrocppConan(ConanFile):
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
+        "fmt/*:header_only": True,
     }
     short_paths = True
 
@@ -43,11 +45,13 @@ class LibavrocppConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-        
+
     def requirements(self):
         # boost upper to 1.81.0 requires C++14 minimum
         self.requires("boost/1.81.0", transitive_headers=True)
         self.requires("snappy/1.1.9")
+        if Version(self.version) >= "1.12.0":
+            self.requires("fmt/10.2.1", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -104,3 +108,5 @@ class LibavrocppConan(ConanFile):
             "boost::headers", "boost::filesystem", "boost::iostreams", "boost::program_options",
             "boost::regex", "boost::system", "snappy::snappy",
         ]
+        if Version(self.version) >= "1.12.0":
+            self.cpp_info.requires.append("fmt::fmt")
