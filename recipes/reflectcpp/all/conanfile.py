@@ -25,7 +25,17 @@ class ReflectCppConan(ConanFile):
         "yaml",
     )
     package_type = "library"
-    settings = "os", "compiler", "build_type", "arch"
+    settings = {
+        "os": ["Linux", "Windows", "Macos"],
+        "compiler": {
+            "gcc": {"cppstd": [20]},
+            "msvc": {"cppstd": [20]},
+            "clang": {"cppstd": [20]},
+        },
+        "arch": None,
+        "build_type": None,
+    }
+
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
