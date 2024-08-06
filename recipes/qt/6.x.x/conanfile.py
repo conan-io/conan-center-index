@@ -257,7 +257,7 @@ class QtConan(ConanFile):
                 sdk_version = self.settings.get_safe("os.sdk_version")
                 visible_sdk_version = xcrun.sdk_version if platform.system() == "Darwin" else None
                 sdk_version = sdk_version or os_version or visible_sdk_version
-                if sdk_version < Version("12.0"):
+                if not sdk_version or sdk_version < Version("12.0"):
                     raise ConanInvalidConfiguration("macOS SDK versapple-clang >= 13.1 is required by qt >= 6.6.1 cf QTBUG-119490")
 
             elif Version(self.settings.compiler.version) < "13.1":
