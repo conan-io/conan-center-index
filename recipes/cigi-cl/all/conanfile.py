@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -14,7 +13,7 @@ class CigiClConan(ConanFile):
     description = "Industry standard communication with compliant image generators"
     license = "LGPL-2.1-only"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://sourceforge.net/projects/cigi/"
+    homepage = "https://cigi.sourceforge.io/product_ccl.php"
     topics = ("Simulation", "Interface Engines", "Data Visualization")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -26,10 +25,6 @@ class CigiClConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 98
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -45,9 +40,6 @@ class CigiClConan(ConanFile):
     def validate(self):
         if is_apple_os(self):
             raise ConanInvalidConfiguration(f"{self.settings.os} is not supported")
-
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -89,16 +81,18 @@ class CigiClConan(ConanFile):
         cmake.install()
 
         copy(self, "license.html", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.pc", os.path.join(self.package_folder, "lib"), recursive=True)
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.set_property("pkg_config_name", "cigicl")
         build_type_suffix = ""
         if self.settings.build_type == "Debug" and self.settings.os == "Windows":
             build_type_suffix = "D"
 
-        if not is_msvc(self):
-            self.cpp_info.system_libs.extend(["pthread"])
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["pthread", "m"])
 
         if self.options.shared:
             self.cpp_info.libs = ["ccl_dll" + build_type_suffix]
