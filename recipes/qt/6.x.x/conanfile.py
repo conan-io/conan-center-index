@@ -5,7 +5,7 @@ import platform
 import textwrap
 
 from conan import ConanFile
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
@@ -247,7 +247,26 @@ class QtConan(ConanFile):
             if self.options.get_safe("qtwebengine"):
                 self.options.with_fontconfig = True
 
+    def validate_build(self):
+        if Version(self.version) >= "6.6.1" and self.settings.compiler == "apple-clang":
+            if Version(self.settings.compiler.version) == "13":
+                # For generic apple-clang version 13, work out the effective SDK version,
+                # we need the SDK for version 12.0 or later
+                xcrun = XCRun(self)
+                os_version = self.settings.get_safe("os.version")
+                sdk_version = self.settings.get_safe("os.sdk_version")
+                visible_sdk_version = xcrun.sdk_version if platform.system() == "Darwin" else None
+                sdk_version = sdk_version or os_version or visible_sdk_version
+                if sdk_version < Version("12.0"):
+                    raise ConanInvalidConfiguration("macOS SDK versapple-clang >= 13.1 is required by qt >= 6.6.1 cf QTBUG-119490")
+
+            elif Version(self.settings.compiler.version) < "13.1":
+                raise ConanInvalidConfiguration("apple-clang >= 13.1 is required by qt >= 6.6.1 cf QTBUG-119490")
+
     def validate(self):
+        if self.settings.os != "Macos":
+            raise ConanInvalidConfiguration("DO NOT MERGE")
+    
         if os.getenv('CONAN_CENTER_BUILD_SERVICE') is not None:
             if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) >= "11" or \
                 self.info.settings.compiler == "clang" and Version(self.info.settings.compiler.version) >= "12":
@@ -264,9 +283,6 @@ class QtConan(ConanFile):
 
         if Version(self.version) >= "6.4.0" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("apple-clang >= 12 required by qt >= 6.4.0")
-
-        if Version(self.version) >= "6.6.1" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "13.1":
-            raise ConanInvalidConfiguration("apple-clang >= 13.1 is required by qt >= 6.6.1 cf QTBUG-119490")
 
         if self.settings.os == "Macos" and self.dependencies["double-conversion"].options.shared:
             raise ConanInvalidConfiguration("Test recipe fails because of Macos' SIP. Contributions are welcome.")
