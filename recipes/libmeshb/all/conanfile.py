@@ -25,15 +25,17 @@ class LibmeshbConan(ConanFile):
         "fPIC": True,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-        
+        # Windows shared build doesn't seems supported because code doesn't include dllexport
+        # See https://www.kitware.com/create-dlls-on-windows-without-declspec-using-new-cmake-export-all-feature/
+        if is_msvc(self):
+            self.package_type = "static-library"
+            del self.options.shared
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -43,12 +45,6 @@ class LibmeshbConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def validate(self):
-        # Windows shared build doesn't seems supported because code doesn't include dllexport
-        # See https://www.kitware.com/create-dlls-on-windows-without-declspec-using-new-cmake-export-all-feature/
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     def generate(self):
         tc = CMakeToolchain(self)
