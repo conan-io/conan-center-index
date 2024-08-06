@@ -33,7 +33,7 @@ class LLVMOpenMpConan(ConanFile):
         "build_libomptarget": [True, False],
     }
     default_options = {
-        "shared": False,
+        "shared": True,
         "fPIC": True,
         "build_libomptarget": False,
     }
