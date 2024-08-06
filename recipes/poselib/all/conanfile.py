@@ -86,8 +86,6 @@ class PoselibConan(ConanFile):
     def _patch_sources(self):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         replace_in_file(self, cmakelists, "-Werror -fPIC", "")
-        if Version(self.version) < "2.0.4":
-            replace_in_file(self, cmakelists, "-march=native", "")
 
     def build(self):
         self._patch_sources()
