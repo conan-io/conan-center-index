@@ -75,6 +75,8 @@ class FixedMathConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} does not support shared builds on Windows")
 
     def build_requirements(self):
         if not self.options.header_only:
@@ -89,12 +91,12 @@ class FixedMathConan(ConanFile):
         tc = CMakeToolchain(self)
         if is_msvc(self):
             tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus"
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         venv = VirtualBuildEnv(self)
         venv.generate(scope="build")
 
     def build(self):
+        # try to fix msvc compilation error https://github.com/arturbac/fixed_math/pull/5
         replace_in_file(self, os.path.join(self.source_folder, "fixed_lib", "include", "fixedmath", "fixed_math.hpp"),
             "template<typename arithmethic_type>\n  constexpr fixed_t arithmetic_to_fixed( arithmethic_type value ) noexcept;",
             "template<typename arithmethic_type, typename>\n  constexpr fixed_t arithmetic_to_fixed( arithmethic_type value ) noexcept;"
