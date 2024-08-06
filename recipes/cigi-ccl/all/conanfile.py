@@ -14,7 +14,7 @@ class CigiClConan(ConanFile):
     license = "LGPL-2.1-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://cigi.sourceforge.io/product_ccl.php"
-    topics = ("Simulation", "Interface Engines", "Data Visualization")
+    topics = ("simulation", "interface engines", "data visualization")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
