@@ -34,7 +34,6 @@ class BatteryEmbedConan(ConanFile):
 
     def export_sources(self):
         copy(self, "embed.cmake", src=self.recipe_folder, dst=self.export_sources_folder)
-        export_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
