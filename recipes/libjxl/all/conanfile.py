@@ -30,6 +30,7 @@ class LibjxlConan(ConanFile):
         "avx512_spr": [True, False],
         "avx512_zen4": [True, False],
         "with_tcmalloc": [True, False],
+        "with_jpegli": [True, False],
     }
     default_options = {
         "shared": False,
@@ -38,6 +39,7 @@ class LibjxlConan(ConanFile):
         "avx512_spr": False,
         "avx512_zen4": False,
         "with_tcmalloc": False,
+        "with_jpegli": False,
     }
 
     def export_sources(self):
@@ -53,6 +55,8 @@ class LibjxlConan(ConanFile):
         # https://github.com/libjxl/libjxl/blob/v0.9.1/CMakeLists.txt#L52-L59
         if self.settings.os in ["Linux", "FreeBSD"] and self.settings.arch == "x86_64":
             self.options.with_tcmalloc = True
+        if Version(self.version) < "0.8.0":
+            del self.options.with_jpegli
 
     def configure(self):
         if self.options.shared:
@@ -109,6 +113,10 @@ class LibjxlConan(ConanFile):
         tc.variables["JPEGXL_ENABLE_AVX512"] = self.options.get_safe("avx512", False)
         tc.variables["JPEGXL_ENABLE_AVX512_SPR"] = self.options.get_safe("avx512_spr", False)
         tc.variables["JPEGXL_ENABLE_AVX512_ZEN4"] = self.options.get_safe("avx512_zen4", False)
+        if "with_jpegli" in self.options:
+            tc.cache_variables["JPEGXL_ENABLE_JPEGLI"] = self.options.with_jpegli
+            tc.cache_variables["JPEGXL_ENABLE_JPEGLI_LIBJPEG"] = self.options.with_jpegli
+            tc.cache_variables["JPEGXL_INSTALL_JPEGLI_LIBJPEG"] = self.options.with_jpegli
         if cross_building(self):
             tc.variables["CMAKE_SYSTEM_PROCESSOR"] = str(self.settings.arch)
         # Allow non-cache_variables to be used
