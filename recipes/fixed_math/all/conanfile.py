@@ -47,7 +47,9 @@ class FixedMathConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
+            self.package_type = "static-library"
             del self.options.fPIC
+            del self.options.shared
 
     def configure(self):
         if self.options.header_only:
@@ -75,8 +77,6 @@ class FixedMathConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        if self.settings.os == "Windows" and self.options.get_safe("shared"):
-            raise ConanInvalidConfiguration(f"{self.ref} does not support shared builds on Windows")
 
     def build_requirements(self):
         if not self.options.header_only:
