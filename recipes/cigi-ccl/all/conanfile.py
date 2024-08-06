@@ -9,7 +9,7 @@ import os
 required_conan_version = ">=1.53.0"
 
 class CigiClConan(ConanFile):
-    name = "cigi-cl"
+    name = "cigi-ccl"
     description = "Industry standard communication with compliant image generators"
     license = "LGPL-2.1-only"
     url = "https://github.com/conan-io/conan-center-index"
