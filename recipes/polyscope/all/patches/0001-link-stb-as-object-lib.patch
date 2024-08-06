@@ -1,0 +1,10 @@
+--- a/deps/stb/CMakeLists.txt
++++ b/deps/stb/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ # Create a library for the viewer code
+ add_library(
+-    stb
++    stb OBJECT
+     stb_impl.cpp
+ )
+ 

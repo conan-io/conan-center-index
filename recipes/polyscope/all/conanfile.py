@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, save
+from conan.tools.files import copy, get, save, rm, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -48,6 +48,7 @@ class PolyscopeConan(ConanFile):
         }
 
     def export_sources(self):
+        export_conandata_patches(self)
         copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
@@ -73,7 +74,8 @@ class PolyscopeConan(ConanFile):
         self.requires("glm/cci.20230113", transitive_headers=True, transitive_libs=True)
         self.requires("imgui/1.90.5", transitive_headers=True, transitive_libs=True)
         self.requires("nlohmann_json/3.11.3")
-        self.requires("stb/cci.20240531")
+        # Using a newer unvendored stb causes "undefined symbol" errors on Windows
+        # self.requires("stb/cci.20240531")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -109,18 +111,8 @@ class PolyscopeConan(ConanFile):
              os.path.join(self.dependencies["imgui"].package_folder, "res", "bindings"),
              os.path.join(self.source_folder, "include", "backends"))
 
-    def _patch_sources(self):
-        # Adjust the implementation of https://github.com/nmwsharp/polyscope/blob/master/deps/stb/CMakeLists.txt
-        save(self, os.path.join(self.source_folder, "deps", "stb", "CMakeLists.txt"),
-             textwrap.dedent("""\
-                add_library(stb OBJECT stb_impl.cpp)
-                find_package(stb REQUIRED CONFIG)
-                target_link_libraries(stb PUBLIC stb::stb)
-                set_target_properties(stb PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-             """))
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

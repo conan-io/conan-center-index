@@ -2,3 +2,8 @@ sources:
   "2.2.1":
     url: "https://github.com/nmwsharp/polyscope/archive/refs/tags/v2.2.1.tar.gz"
     sha256: "1952d20722cb37c5531e88d5b7f5db88c2827c55fd7ada481c2ac425f3bc4d25"
+patches:
+  "2.2.1":
+    - patch_file: "patches/0001-link-stb-as-object-lib.patch"
+      patch_description: "Link the stb mini-library as an object library to embed it in the main lib"
+      patch_type: "conan"
