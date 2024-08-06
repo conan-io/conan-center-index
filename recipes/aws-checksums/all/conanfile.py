@@ -47,9 +47,9 @@ class AwsChecksums(ConanFile):
 
     def requirements(self):
         if self.version == "0.1.18":
-            self.requires("aws-c-common/0.9.15")
+            self.requires("aws-c-common/0.9.15", transitive_headers=True)
         if self.version == "0.1.12":
-            self.requires("aws-c-common/0.6.11")
+            self.requires("aws-c-common/0.6.11", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
