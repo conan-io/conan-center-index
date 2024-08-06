@@ -10,7 +10,7 @@ required_conan_version = ">=1.53.0"
 class FpngConan(ConanFile):
     name = "fpng"
     description = "Super fast C++ .PNG writer/reader"
-    license = "unlicense",
+    license = "Unlicense",
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/richgel999/fpng"
     topics = ("png", "writer", "reader")
