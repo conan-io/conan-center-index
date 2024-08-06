@@ -1,7 +1,7 @@
 sources:
   "0.6.14":
     url: "https://github.com/awslabs/aws-c-cal/archive/v0.6.14.tar.gz"
-    sha256: "46defd807034ca9d873cc1459bc60f0bb4662029f7120db1af464421907fb480"
+    sha256: "2326304b15bec45b212f6b738020c21afa41f9da295936687e103f9f2efb7b5e"
   "0.5.12":
     url: "https://github.com/awslabs/aws-c-cal/archive/v0.5.12.tar.gz"
     sha256: "350c29a288d5d498bd6574fca659cffc9453bf62691fbde5788399716c2bd132"
