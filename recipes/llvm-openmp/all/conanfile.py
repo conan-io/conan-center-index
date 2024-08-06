@@ -33,7 +33,7 @@ class LLVMOpenMpConan(ConanFile):
         "build_libomptarget": [True, False],
     }
     default_options = {
-        "shared": True,
+        "shared": False,
         "fPIC": True,
         "build_libomptarget": False,
     }
@@ -61,6 +61,12 @@ class LLVMOpenMpConan(ConanFile):
         copy(self, "*.cmake.in", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
+        # OpenMP is generally linked as a shared library by default.
+        # It's also slightly safer when mixing OpenMP runtimes by accident and
+        # leaves the user an option to swap out runtime implementations, if necessary.
+        # https://cpufun.substack.com/p/is-mixing-openmp-runtimes-safe
+        self.options.shared = True
+
         if self.settings.os == "Windows":
             del self.options.fPIC
         if is_apple_os(self) or self.settings.os == "Windows":
