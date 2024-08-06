@@ -5,7 +5,7 @@ from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import (
     apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename,
-    replace_in_file, rm, rmdir
+    replace_in_file, rm, rmdir, save, load
 )
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -74,6 +74,8 @@ class FFMpegConan(ConanFile):
         "with_libsvtav1": [True, False],
         "with_libaom": [True, False],
         "with_libdav1d": [True, False],
+        "with_jni": [True, False],
+        "with_mediacodec": [True, False],
         "disable_everything": [True, False],
         "disable_all_encoders": [True, False],
         "disable_encoders": [None, "ANY"],
@@ -154,6 +156,8 @@ class FFMpegConan(ConanFile):
         "with_libsvtav1": True,
         "with_libaom": True,
         "with_libdav1d": True,
+        "with_jni": False,
+        "with_mediacodec": False,
         "disable_everything": False,
         "disable_all_encoders": False,
         "disable_encoders": None,
@@ -227,6 +231,7 @@ class FFMpegConan(ConanFile):
             "with_libsvtav1": ["avcodec"],
             "with_libaom": ["avcodec"],
             "with_libdav1d": ["avcodec"],
+            "with_mediacodec": ["with_jni"],
         }
 
     @property
@@ -254,6 +259,9 @@ class FFMpegConan(ConanFile):
             del self.options.with_videotoolbox
         if not is_apple_os(self):
             del self.options.with_avfoundation
+        if not self.settings.os == "Android":
+            del self.options.with_jni
+            del self.options.with_mediacodec
         if not self._version_supports_libsvtav1:
             self.options.rm_safe("with_libsvtav1")
 
@@ -341,9 +349,21 @@ class FFMpegConan(ConanFile):
             # Linking fails with "Argument list too long" for some reason on Conan v1
             raise ConanInvalidConfiguration("MSVC shared build is not supported for Conan v1")
 
+        if Version(self.version) == "7.0.1" and self.settings.build_type == "Debug":
+            # FIXME: FFMpeg fails to build in Debug mode with the following error:
+            # ld: libavcodec/libavcodec.a(vvcdsp_init.o): in function `ff_vvc_put_pixels2_8_sse4':
+            # src/libavcodec/x86/vvc/vvcdsp_init.c:69: undefined reference to `ff_h2656_put_pixels2_8_sse4'
+            # May be related https://github.com/ffvvc/FFmpeg/issues/234
+            raise ConanInvalidConfiguration(f"{self.ref} Conan recipe does not support build_type=Debug. Contributions are welcome to fix this issue.")
+
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
-            self.tool_requires("yasm/1.3.0")
+            if Version(self.version) >= "7.0":
+                # INFO: FFmpeg 7.0+ added avcodec vvc_mc.asm which fails to assemble with yasm 1.3.0
+                # src/libavcodec/x86/vvc/vvc_mc.asm:55: error: operand 1: expression is not simple or relocatable
+                self.tool_requires("nasm/2.16.01")
+            else:
+                self.tool_requires("yasm/1.3.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         if self._settings_build.os == "Windows":
@@ -391,11 +411,10 @@ class FFMpegConan(ConanFile):
                                   "#define X264_API_IMPORTS 1", "")
         if self.options.with_ssl == "openssl":
             # https://trac.ffmpeg.org/ticket/5675
-            openssl_libraries = " ".join(
-                [f"-l{lib}" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs])
+            openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
             replace_in_file(self, os.path.join(self.source_folder, "configure"),
                                   "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
-                                  f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libraries} || ")
+                                  f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libs} || ")
 
         replace_in_file(self, os.path.join(self.source_folder, "configure"), "echo libx264.lib", "echo x264.lib")
 
@@ -499,6 +518,8 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("securetransport", self.options.with_ssl == "securetransport"),
             opt_enable_disable("vulkan", self.options.get_safe("with_vulkan")),
             opt_enable_disable("libdav1d", self.options.get_safe("with_libdav1d")),
+            opt_enable_disable("jni", self.options.get_safe("with_jni")),
+            opt_enable_disable("mediacodec", self.options.get_safe("with_mediacodec")),
             "--disable-cuda",  # FIXME: CUDA support
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
@@ -668,6 +689,10 @@ class FFMpegConan(ConanFile):
 
         deps = PkgConfigDeps(self)
         deps.generate()
+
+        if self.options.with_ssl == "openssl":
+            openssl_libs = " ".join([f"-l{lib}" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs])
+            save(self, os.path.join(self.build_folder, "openssl_libs.list"), openssl_libs)
 
     def _split_and_format_options_string(self, flag_name, options_list):
         if not options_list:
