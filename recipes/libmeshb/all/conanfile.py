@@ -37,7 +37,7 @@ class LibmeshbConan(ConanFile):
             del self.options.shared
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
