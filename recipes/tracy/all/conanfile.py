@@ -93,7 +93,7 @@ class TracyConan(ConanFile):
             check_min_cppstd(self, 11)
 
         # libunwind_backtrace is not supported in 0.11.0. https://github.com/wolfpld/tracy/pull/841
-        if self.options.get_safe("libunwind_backtrace"):
+        if Version(self.version) == "0.11.0" and self.options.get_safe("libunwind_backtrace"):
             raise ConanInvalidConfiguration(f"libunwind_backtrace is not supported in {self.ref}")
 
     def source(self):
