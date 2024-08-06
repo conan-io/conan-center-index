@@ -292,6 +292,9 @@ class VtkmConan(ConanFile):
             component.requires = info.get("requires", [])
             component.system_libs = info.get("system_libs", [])
 
+        if "vtkm_io" in components and self.options.with_hdf5:
+            self.cpp_info.components["vtkm_io"].requires.append("hdf5::hdf5_hl")
+
         for component_name, component in self.cpp_info.components.items():
             self.output.info(f"COMPONENT: {component_name}")
             if component.libs:
