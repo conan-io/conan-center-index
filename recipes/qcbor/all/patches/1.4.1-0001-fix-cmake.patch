@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 486946c..4234a59 100644
+index e4aa83f..4878a31 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -58,10 +58,10 @@ target_compile_definitions(qcbor
@@ -14,16 +14,13 @@ index 486946c..4234a59 100644
  # The math library is needed for floating-point support.
  # To avoid need for it #define QCBOR_DISABLE_FLOAT_HW_USE
  if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-@@ -75,3 +75,12 @@ endif()
- if (NOT BUILD_QCBOR_TEST STREQUAL "OFF")
-     add_subdirectory(test)
- endif()
-+
-+include(GNUInstallDirs)
-+install(TARGETS qcbor
-+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-+	PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
-+
-+install(DIRECTORY "inc/qcbor" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+@@ -88,6 +88,9 @@ set_target_properties(
+ include(GNUInstallDirs)
+ install(
+     TARGETS qcbor
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/qcbor"
+ )
+ 
