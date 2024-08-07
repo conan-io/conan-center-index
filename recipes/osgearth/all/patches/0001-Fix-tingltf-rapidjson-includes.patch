@@ -1,0 +1,36 @@
+From 42cf1e3f0f4db27a33540b4d0bea4bedfc2f7e03 Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Tue, 9 Jul 2024 11:23:40 +0300
+Subject: [PATCH 1/2] Fix tingltf rapidjson includes
+
+---
+ src/third_party/tinygltf/tiny_gltf.h | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/src/third_party/tinygltf/tiny_gltf.h b/src/third_party/tinygltf/tiny_gltf.h
+index 9bf35a594..37aba341f 100644
+--- a/src/third_party/tinygltf/tiny_gltf.h
++++ b/src/third_party/tinygltf/tiny_gltf.h
+@@ -1498,13 +1498,13 @@ class TinyGLTF {
+ 
+ #ifndef TINYGLTF_NO_INCLUDE_JSON
+ #ifndef TINYGLTF_USE_RAPIDJSON
+-#include "json.hpp"
++#include "nlohmann/json.hpp"
+ #else
+-#include "rapidjson.h"
+-#include "document.h"
+-#include "prettywriter.h"
+-#include "stringbuffer.h"
+-#include "writer.h"
++#include "rapidjson/rapidjson.h"
++#include "rapidjson/document.h"
++#include "rapidjson/prettywriter.h"
++#include "rapidjson/stringbuffer.h"
++#include "rapidjson/writer.h"
+ #endif
+ #endif
+ 
+-- 
+2.43.0
+
