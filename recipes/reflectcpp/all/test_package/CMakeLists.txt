@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.12)
+project(test_package LANGUAGES CXX)
 
-project(reflectcpp-test)
+find_package(reflectcpp REQUIRED CONFIG)
 
-find_package(reflectcpp CONFIG REQUIRED)
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE reflectcpp::reflectcpp)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
-add_executable(reflectcpp-test src/main.cpp)
-
-target_link_libraries(
-    reflectcpp-test
-    reflectcpp::reflectcpp
-)
+if(CONAN_TEST_WITH_MSGPACK)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE CONAN_TEST_WITH_MSGPACK)
+endif()
