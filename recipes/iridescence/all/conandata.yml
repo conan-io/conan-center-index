@@ -1,0 +1,12 @@
+sources:
+  "0.1.2":
+    url: "https://github.com/koide3/iridescence/archive/refs/tags/v0.1.2.tar.gz"
+    sha256: "3f0319c382b3f13bae334d137747f7bc3fbc86af4b21737ea0f8470abceec5ce"
+patches:
+  "0.1.2":
+    - patch_file: "patches/001-unvendor-deps.patch"
+      patch_description: "Use dependencies from Conan"
+      patch_type: "conan"
+    - patch_file: "patches/002-fix-guik-includes.patch"
+      patch_description: "Fix a missing include in guik/screen_capture.cpp"
+      patch_type: "bugfix"
