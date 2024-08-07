@@ -7,7 +7,7 @@ from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, mkdir, rm, rmdir, save
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, msvs_toolset
+from conan.tools.microsoft import is_msvc, msvs_toolset, msvc_runtime_flag
 from conan.tools.scm import Version
 from conan.tools.scons import SConsDeps
 
@@ -119,8 +119,9 @@ class SerfConan(ConanFile):
                                       "['$APR/include', '$APU/include']")
             content = content.replace("['shell32.lib', 'xml.lib']",
                                       "['shell32.lib']")
-            content = content.replace(", '/MDd'", "")
-            content = content.replace(", '/MD'", "")
+            runtime_flag = f", '/{msvc_runtime_flag(self)}'"
+            content = content.replace(", '/MDd'", runtime_flag)
+            content = content.replace(", '/MD'", runtime_flag)
             save(self, sconstruct, content)
 
         # Inject SConsDeps
