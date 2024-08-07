@@ -15,6 +15,7 @@ class QCBORConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/laurencelundblade/QCBOR"
     topics = ("serialization", "cbor", "rfc-7049", "rfc-8949")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,23 +33,24 @@ class QCBORConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
+            self.package_type = "static-library"
             del self.options.fPIC
+            del self.options.shared
 
         if Version(self.version) < "1.2":
             del self.options.disable_float
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
