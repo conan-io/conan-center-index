@@ -1,13 +1,14 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, rmdir
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.54"
 
 
 class ReflectCppConan(ConanFile):
@@ -36,7 +37,6 @@ class ReflectCppConan(ConanFile):
         "fPIC": [True, False],
         "with_cbor": [True, False],
         "with_flatbuffers": [True, False],
-        "with_json": [True, False],
         "with_msgpack": [True, False],
         "with_toml": [True, False],
         "with_xml": [True, False],
@@ -47,14 +47,11 @@ class ReflectCppConan(ConanFile):
         "fPIC": True,
         "with_cbor": False,
         "with_flatbuffers": False,
-        "with_json": True,
         "with_msgpack": False,
         "with_toml": False,
         "with_xml": False,
         "with_yaml": False,
     }
-    src_folder = "src"
-    build_requires = "cmake/3.30.1"
 
     @property
     def _min_cppstd(self):
@@ -65,8 +62,8 @@ class ReflectCppConan(ConanFile):
         return {
             "Visual Studio": "17",
             "msvc": "193",
-            "gcc": "11.4",
-            "clang": "16",
+            "gcc": "11",
+            "clang": "13",
             "apple-clang": "15",
         }
 
@@ -78,32 +75,13 @@ class ReflectCppConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-    def layout(self):
-        cmake_layout(self)
-
-    def generate(self):
-        deps = CMakeDeps(self)
-        deps.generate()
-        tc = CMakeToolchain(self)
-        tc.generate()
-
-    def build(self):
-        cmake = CMake(self)
-        cmake.configure(cli_args=["-DREFLECTCPP_USE_BUNDLED_DEPENDENCIES=OFF"])
-        cmake.build()
-
-    def package(self):
-        cmake = CMake(self)
-        cmake.install()
-
     def requirements(self):
         self.requires("ctre/3.9.0", transitive_headers=True)
+        self.requires("yyjson/0.10.0", transitive_headers=True)
         if self.options.with_cbor:
             self.requires("tinycbor/0.6.0", transitive_headers=True)
         if self.options.with_flatbuffers:
-            self.requires("flatbuffers/23.5.26", transitive_headers=True)
-        if self.options.with_json:
-            self.requires("yyjson/0.8.0", transitive_headers=True)
+            self.requires("flatbuffers/24.3.25", transitive_headers=True)
         if self.options.with_msgpack:
             self.requires("msgpack-c/6.0.0", transitive_headers=True)
         if self.options.with_toml:
@@ -113,8 +91,49 @@ class ReflectCppConan(ConanFile):
         if self.options.with_yaml:
             self.requires("yaml-cpp/0.8.0", transitive_headers=True)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.23 <4]")
+
+    def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+        tc = CMakeToolchain(self)
+        tc.cache_variables["REFLECTCPP_BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["REFLECTCPP_USE_BUNDLED_DEPENDENCIES"] = False
+        tc.cache_variables["REFLECTCPP_USE_VCPKG"] = False
+        tc.cache_variables["REFLECTCPP_CBOR"] = self.options.with_cbor
+        tc.cache_variables["REFLECTCPP_FLEXBUFFERS"] = self.options.with_flatbuffers
+        tc.cache_variables["REFLECTCPP_MSGPACK"] = self.options.with_msgpack
+        tc.cache_variables["REFLECTCPP_TOML"] = self.options.with_toml
+        tc.cache_variables["REFLECTCPP_XML"] = self.options.with_xml
+        tc.cache_variables["REFLECTCPP_YAML"] = self.options.with_yaml
+        tc.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["reflectcpp"]
