@@ -1,0 +1,11 @@
+--- Configure/Project.cpp
++++ Configure/Project.cpp
+@@ -178,7 +178,7 @@
+ 
+ bool Project::treatWarningAsError() const
+ {
+-  return(_magickProject && _wizard.isImageMagick7());
++  return false;
+ }
+ 
+ bool Project::useNasm() const
