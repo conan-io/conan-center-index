@@ -1,6 +1,6 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1,24 +1,29 @@
+@@ -1,26 +1,31 @@
 -cmake_minimum_required(VERSION 3.1)
 -project(apriltag)
 +cmake_minimum_required(VERSION 3.8)
@@ -10,13 +10,15 @@
  
  include_directories(.)
  aux_source_directory(common COMMON_SRC)
- aux_source_directory(. APRILTAG_SRCS)
+ set(APRILTAG_SRCS apriltag.c apriltag_pose.c apriltag_quad_thresh.c)
  
 -set(CMAKE_BUILD_TYPE Release)
  
  # Library
--add_library(${PROJECT_NAME} SHARED ${APRILTAG_SRCS} ${COMMON_SRC})
-+add_library(${PROJECT_NAME} ${APRILTAG_SRCS} ${COMMON_SRC})
+ file(GLOB TAG_FILES ${PROJECT_SOURCE_DIR}/tag*.c)
+ set_source_files_properties(SOURCE ${TAG_FILES} PROPERTIES COMPILE_FLAGS -O0)
+-add_library(${PROJECT_NAME} SHARED ${APRILTAG_SRCS} ${COMMON_SRC} ${TAG_FILES})
++add_library(${PROJECT_NAME} ${APRILTAG_SRCS} ${COMMON_SRC} ${TAG_FILES})
 +target_compile_features(${PROJECT_NAME} PRIVATE c_std_99)
  if (MSVC)
      # FindThreads will not find pthread.h with MSVC
@@ -28,7 +30,7 @@
 +    target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
  else()
      find_package(Threads REQUIRED)
--    target_link_libraries(${PROJECT_NAME} Threads::Threads m)
+-    target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads m)
 +    target_link_libraries(${PROJECT_NAME} Threads::Threads)
 +    include(CheckFunctionExists)
 +    check_function_exists(pow HAVE_MATH_SYSTEM)
@@ -38,30 +40,3 @@
  endif()
  
  set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 3 VERSION 3.1.0)
-@@ -39,6 +43,7 @@ set_source_files_properties(SOURCE ${TAG_FILES} PROPERTIES COMPILE_FLAGS -O0)
- 
- # install library
- install(TARGETS ${PROJECT_NAME} EXPORT apriltag
-+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
- )
-@@ -63,16 +68,13 @@ install(FILES "${PROJECT_BINARY_DIR}/apriltag.pc" DESTINATION "lib/pkgconfig/")
- 
- # Examples
- # apriltag_demo
--add_executable(apriltag_demo example/apriltag_demo.c)
--target_link_libraries(apriltag_demo apriltag)
- 
- # opencv_demo
--if(OpenCV_FOUND)
-+if(0)
-     add_executable(opencv_demo example/opencv_demo.cc)
-     target_link_libraries(opencv_demo apriltag ${OpenCV_LIBRARIES})
-     install(TARGETS opencv_demo RUNTIME DESTINATION bin)
--endif(OpenCV_FOUND)
-+endif()
- 
- # install example programs
--install(TARGETS apriltag_demo RUNTIME DESTINATION bin)
- 

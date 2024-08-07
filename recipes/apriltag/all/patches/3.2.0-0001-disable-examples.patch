@@ -1,0 +1,15 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -162,6 +162,7 @@
+ 
+ 
+ # Examples
++if(BUILD_EXAMPLES)
+ # apriltag_demo
+ add_executable(apriltag_demo example/apriltag_demo.c)
+ target_link_libraries(apriltag_demo apriltag)
+@@ -179,3 +180,4 @@
+ 
+ # install example programs
+ install(TARGETS apriltag_demo RUNTIME DESTINATION bin)
++endif()

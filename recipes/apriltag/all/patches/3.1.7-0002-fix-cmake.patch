@@ -1,0 +1,37 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -1,7 +1,5 @@
+ cmake_minimum_required(VERSION 3.1)
+ project(apriltag VERSION 3.1.0 LANGUAGES C CXX)
+-
+-option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+ 
+ # Set a default build type if none was specified
+ set(default_build_type "Release")
+
+@@ -20,15 +18,21 @@
+ 
+ # Library
+ file(GLOB TAG_FILES ${PROJECT_SOURCE_DIR}/tag*.c)
+-add_library(${PROJECT_NAME} SHARED ${APRILTAG_SRCS} ${COMMON_SRC} ${TAG_FILES})
++add_library(${PROJECT_NAME} ${APRILTAG_SRCS} ${COMMON_SRC} ${TAG_FILES})
+ if (MSVC)
+     # FindThreads will not find pthread.h with MSVC
+     # winmm is necessary for __imp_timeGetTime
+-    find_library(PTHREAD_LIBRARIES NAMES pthreads)
+-    target_link_libraries(${PROJECT_NAME} ${PTHREAD_LIBRARIES} winmm)
++    find_package(pthreads4w REQUIRED CONFIG)
++    target_link_libraries(${PROJECT_NAME} pthreads4w::pthreads4w winmm)
++    target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
+ else()
+     find_package(Threads REQUIRED)
+-    target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads m)
++    target_link_libraries(${PROJECT_NAME} Threads::Threads)
++    include(CheckFunctionExists)
++    check_function_exists(pow HAVE_MATH_SYSTEM)
++    if(NOT HAVE_MATH_SYSTEM)
++        target_link_libraries(${PROJECT_NAME} m)
++    endif()
+ endif()
+ 
+ set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 3 VERSION ${PROJECT_VERSION})
