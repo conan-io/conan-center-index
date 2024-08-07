@@ -1,0 +1,4 @@
+sources:
+  "1.0.0-alpha":
+    url: "https://github.com/jheruty/hscpp/archive/refs/tags/1.0.0-alpha.tar.gz"
+    sha256: "1c032bff3647c561231de98e819fb3248ea9ff2e9b247b78881170d6277f7c70"
