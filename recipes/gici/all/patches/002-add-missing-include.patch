@@ -1,0 +1,23 @@
+Fix undefined ::close(dev_) error.
+
+--- src/stream/streamer.cpp
++++ src/stream/streamer.cpp
+@@ -14,6 +14,7 @@
+ #include <sys/mman.h>
+ #include <linux/videodev2.h>
+ #include <sys/stat.h>
++#include <unistd.h>
+ 
+ namespace gici {
+ 
+--- include/gici/stream/streamer.h
++++ include/gici/stream/streamer.h
+@@ -274,7 +274,7 @@
+ 
+ protected:
+   Option option_;
+-  dev_t dev_;
++  int dev_;
+   uint8_t **v4l2_buf;
+ };
+ 
