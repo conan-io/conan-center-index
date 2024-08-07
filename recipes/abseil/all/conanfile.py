@@ -258,9 +258,13 @@ class _ABIFile:
 
     def replace_in_options_file(self, options_filepath):
         for name, value in self.abi.items():
-            replace_in_file(self.conanfile, options_filepath,
-                    "#define ABSL_OPTION_{} 2".format(name),
-                    "#define ABSL_OPTION_{} {}".format(name, value))
+            replace_in_file(
+                self.conanfile,
+                options_filepath,
+                "#define ABSL_OPTION_{} 2".format(name),
+                "#define ABSL_OPTION_{} {}".format(name, value),
+                strict=False,
+            )
 
     def cxx_std(self):
         return 17 if any([v == "1" for k, v in self.abi.items()]) else 11
