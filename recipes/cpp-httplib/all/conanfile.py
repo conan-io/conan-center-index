@@ -11,8 +11,8 @@ class CpphttplibConan(ConanFile):
     name = "cpp-httplib"
     description = "A C++11 single-file header-only cross platform HTTP/HTTPS library."
     license = "MIT"
-    homepage = "https://github.com/yhirose/cpp-httplib"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/yhirose/cpp-httplib"
     topics = ("http", "https", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
@@ -48,9 +48,6 @@ class CpphttplibConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def build(self):
-        pass
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
