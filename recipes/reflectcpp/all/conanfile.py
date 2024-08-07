@@ -97,9 +97,16 @@ class ReflectCppConan(ConanFile):
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
+        minimum_version = self._compilers_minimum_version.get(
+            str(self.settings.compiler), False
+        )
+        if (
+            minimum_version
+            and Version(self.settings.compiler.version) < minimum_version
+        ):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -130,25 +137,15 @@ class ReflectCppConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(
+            self,
+            pattern="LICENSE",
+            dst=os.path.join(self.package_folder, "licenses"),
+            src=self.source_folder,
+        )
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["reflectcpp"]
-
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            # Validate the minimum cpp standard supported when installing the package. For C++ projects only
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(
-            str(self.settings.compiler), False
-        )
-        if (
-            minimum_version
-            and Version(self.settings.compiler.version) < minimum_version
-        ):
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
