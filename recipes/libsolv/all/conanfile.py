@@ -1,9 +1,10 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 
 required_conan_version = ">=1.53.0"
 
@@ -32,10 +33,6 @@ class LibSolvConan(ConanFile):
         "enable_conda": [True, False],
         "enable_appdata": [True, False],
         "multi_semantics": [True, False],
-        "enable_lzma_compression": [True, False],
-        "enable_bzip2_compression": [True, False],
-        "enable_zstd_compression": [True, False],
-        "enable_zchunk_compression": [True, False],
         "with_libxml2": [True, False],
     }
     default_options = {
@@ -51,12 +48,11 @@ class LibSolvConan(ConanFile):
         "enable_conda": True,
         "enable_appdata": True,
         "multi_semantics": True,
-        "enable_lzma_compression": True,
-        "enable_bzip2_compression": True,
-        "enable_zstd_compression": True,
-        "enable_zchunk_compression": True,
         "with_libxml2": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")
@@ -66,17 +62,19 @@ class LibSolvConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("bzip2/1.0.8")
+        self.requires("xz_utils/5.4.5")
         self.requires("zlib/[>=1.2.11 <2]")
-        if self.options.enable_lzma_compression:
-            self.requires("xz_utils/5.4.5")
-        if self.options.enable_bzip2_compression:
-            self.requires("bzip2/1.0.8")
-        if self.options.enable_zstd_compression:
-            self.requires("zstd/1.5.6")
+        self.requires("zstd/1.5.6")
         if self.options.with_libxml2:
             self.requires("libxml2/2.12.7")
         else:
             self.requires("expat/2.6.2")
+
+    def validate(self):
+        if self.settings.os == "Windows":
+            # Fails with 'src\repo_write.c(191,12): error C2036: 'void *': unknown size' as of v0.7.30
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Windows")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
@@ -101,10 +99,10 @@ class LibSolvConan(ConanFile):
         tc.variables["ENABLE_CONDA"] = self.options.enable_conda
         tc.variables["ENABLE_APPDATA"] = self.options.enable_appdata
         tc.variables["MULTI_SEMANTICS"] = self.options.multi_semantics
-        tc.variables["ENABLE_LZMA_COMPRESSION"] = self.options.enable_lzma_compression
-        tc.variables["ENABLE_BZIP2_COMPRESSION"] = self.options.enable_bzip2_compression
-        tc.variables["ENABLE_ZSTD_COMPRESSION"] = self.options.enable_zstd_compression
-        tc.variables["ENABLE_ZCHUNK_COMPRESSION"] = self.options.enable_zchunk_compression
+        tc.variables["ENABLE_LZMA_COMPRESSION"] = True
+        tc.variables["ENABLE_BZIP2_COMPRESSION"] = True
+        tc.variables["ENABLE_ZSTD_COMPRESSION"] = True
+        tc.variables["ENABLE_ZCHUNK_COMPRESSION"] = False  # not on CCI
         tc.variables["WITH_LIBXML2"] = self.options.with_libxml2
         tc.variables["WITH_SYSTEM_ZCHUNK"] = False
         tc.variables["ENABLE_PERL"] = False
@@ -126,20 +124,13 @@ class LibSolvConan(ConanFile):
 
         deps = CMakeDeps(self)
         deps.set_property("xz_utils", "cmake_file_name", "LZMA")
+        deps.set_property("zstd", "cmake_target_name", "zstd::libzstd")
         deps.generate()
 
         VirtualBuildEnv(self).generate()
 
-    def _patch_sources(self):
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        replace_in_file(self, cmakelists, "${LZMA_LIBRARY}", "LibLZMA::LibLZMA")
-        replace_in_file(self, cmakelists, "${EXPAT_LIBRARY}", "expat::expat")
-        replace_in_file(self, cmakelists, "${LIBXML2_LIBRARIES}", "LibXml2::LibXml2")
-        # Workaround for "The CMake policy CMP0091 must be NEW, but is ''"
-        replace_in_file(self, cmakelists, "CMAKE_MINIMUM_REQUIRED (VERSION 2.8.5)", "CMAKE_MINIMUM_REQUIRED (VERSION 3.15)")
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
