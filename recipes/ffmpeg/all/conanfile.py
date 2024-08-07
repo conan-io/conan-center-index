@@ -262,12 +262,16 @@ class FFMpegConan(ConanFile):
             del self.options.with_mediacodec
         if not self._version_supports_libsvtav1:
             self.options.rm_safe("with_libsvtav1")
+        if self.settings.os == "Android":
+            del self.options.with_libfdk_aac
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        if self.settings.os == "Android" and self.options.shared and self.options.with_libvpx:
+            self.options["libvpx"].shared = False
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -286,7 +290,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.2")
         if self.options.with_openh264:
-            self.requires("openh264/2.3.1")
+            self.requires("openh264/2.4.1")
         if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
         if self.options.with_opus:
@@ -296,14 +300,14 @@ class FFMpegConan(ConanFile):
         if self.options.with_sdl:
             self.requires("sdl/2.28.5")
         if self.options.with_libx264:
-            self.requires("libx264/cci.20220602")
+            self.requires("libx264/cci.20240224")
         if self.options.with_libx265:
             self.requires("libx265/3.4")
         if self.options.with_libvpx:
-            self.requires("libvpx/1.13.1")
+            self.requires("libvpx/1.14.0")
         if self.options.with_libmp3lame:
             self.requires("libmp3lame/3.100")
-        if self.options.with_libfdk_aac:
+        if self.options.get_safe("with_libfdk_aac"):
             self.requires("libfdk_aac/2.0.3")
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.2")
@@ -322,11 +326,11 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.243.0")
         if self.options.get_safe("with_libsvtav1"):
-            self.requires("libsvtav1/1.6.0")
+            self.requires("libsvtav1/2.1.0")
         if self.options.with_libaom:
             self.requires("libaom-av1/3.6.1")
         if self.options.get_safe("with_libdav1d"):
-            self.requires("dav1d/1.2.1")
+            self.requires("dav1d/1.4.3")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -353,6 +357,10 @@ class FFMpegConan(ConanFile):
             # src/libavcodec/x86/vvc/vvcdsp_init.c:69: undefined reference to `ff_h2656_put_pixels2_8_sse4'
             # May be related https://github.com/ffvvc/FFmpeg/issues/234
             raise ConanInvalidConfiguration(f"{self.ref} Conan recipe does not support build_type=Debug. Contributions are welcome to fix this issue.")
+
+        if self.settings.os == "Android" and self.options.shared and self.dependencies["libvpx"].options.shared:
+            # https://github.com/conan-io/conan-center-index/pull/24861
+            raise ConanInvalidConfiguration(f"{self.ref} shared build with libvpx:shared=True is not supported on Android. Use -o 'libvpx/*:shared=False'")
 
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
@@ -496,7 +504,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("libx265", self.options.with_libx265),
             opt_enable_disable("libvpx", self.options.with_libvpx),
             opt_enable_disable("libmp3lame", self.options.with_libmp3lame),
-            opt_enable_disable("libfdk-aac", self.options.with_libfdk_aac),
+            opt_enable_disable("libfdk-aac", self.options.get_safe("with_libfdk_aac")),
             opt_enable_disable("libwebp", self.options.with_libwebp),
             opt_enable_disable("libaom", self.options.with_libaom),
             opt_enable_disable("openssl", self.options.with_ssl == "openssl"),
@@ -521,7 +529,7 @@ class FFMpegConan(ConanFile):
             "--disable-cuda",  # FIXME: CUDA support
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
-            opt_enable_disable("nonfree", self.options.with_libfdk_aac or (self.options.with_ssl and (
+            opt_enable_disable("nonfree", self.options.get_safe("with_libfdk_aac") or (self.options.with_ssl and (
                 self.options.with_libx264 or self.options.with_libx265 or self.options.postproc))),
             opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
         ]
@@ -841,6 +849,8 @@ class FFMpegConan(ConanFile):
                 avdevice.frameworks.append("AVFoundation")
             if self.options.get_safe("with_audiotoolbox"):
                 avdevice.frameworks.append("CoreAudio")
+            if self.settings.os == "Android" and not self.options.shared:
+                avdevice.system_libs.extend(["android", "camera2ndk", "mediandk"])
 
         if self.options.avcodec:
             if self.options.with_zlib:
@@ -865,7 +875,7 @@ class FFMpegConan(ConanFile):
                 avcodec.requires.append("libvpx::libvpx")
             if self.options.with_libmp3lame:
                 avcodec.requires.append("libmp3lame::libmp3lame")
-            if self.options.with_libfdk_aac:
+            if self.options.get_safe("with_libfdk_aac"):
                 avcodec.requires.append("libfdk_aac::libfdk_aac")
             if self.options.with_libwebp:
                 avcodec.requires.append("libwebp::libwebp")
