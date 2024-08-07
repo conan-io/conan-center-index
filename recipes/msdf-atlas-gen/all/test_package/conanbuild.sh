@@ -1,0 +1,1 @@
+. "/home/toge/src/conan-center-index/recipes/msdf-atlas-gen/all/test_package/conanbuildenv-release-x86_64.sh"
