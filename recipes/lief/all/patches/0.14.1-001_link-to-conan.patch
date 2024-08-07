@@ -1,0 +1,66 @@
+From 1a7db96b9be9316a9caaa44efc6c0087584db61f Mon Sep 17 00:00:00 2001
+From: Arenoros <arenoros@gmail.com>
+Date: Wed, 17 Apr 2024 20:01:56 +0300
+Subject: [PATCH] link to conan
+
+---
+ CMakeLists.txt | 15 ++++++++++-----
+ 1 file changed, 10 insertions(+), 5 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 50ba8cec..197b5211 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -74,6 +74,11 @@ endif()
+ # ============
+ set(THIRD_PARTY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/third-party/")
+ include(LIEFDependencies)
++set(LIEF_FROZEN_ENABLED 0)
++if (LIEF_SUPPORT_CXX14 AND NOT LIEF_DISABLE_FROZEN)
++  message(STATUS "Enable Frozen (C++14 support)")
++  set(LIEF_FROZEN_ENABLED 1)
++endif()
+ 
+ # iOS specific config
+ # ===================
+@@ -286,8 +291,7 @@ endif()
+ 
+ # Flags definition
+ # ----------------
+-set_target_properties(LIB_LIEF
+-  PROPERTIES POSITION_INDEPENDENT_CODE ON
++set_target_properties(LIB_LIEF PROPERTIES
+              CXX_STANDARD              17
+              CXX_STANDARD_REQUIRED     ON
+              CXX_VISIBILITY_PRESET     hidden
+@@ -466,9 +470,9 @@ if(LIEF_INSTALL)
+ 
+   # Installation
+   # ======================
+-
++  include(GNUInstallDirs)
++  if(0)
+   if(UNIX)
+-    include(GNUInstallDirs)
+     set(CMAKE_INSTALL_LIBDIR "lib")
+   else()
+     if(WIN32)
+@@ -482,13 +486,14 @@ if(LIEF_INSTALL)
+         message(FATAL_ERROR "System not UNIX nor WIN32 - not implemented yet")
+       endif()
+   endif()
++  endif()
+ 
+   install(
+     TARGETS LIB_LIEF lief_spdlog
+     EXPORT LIEFExport
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-    RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT libraries
+     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ 
+   install(
+-- 
+2.43.0.windows.1
+
