@@ -1,0 +1,22 @@
+diff --git a/tools/CMakeLists.txt b/tools/CMakeLists.txt
+index c025e36..ef3f6ce 100644
+--- a/tools/CMakeLists.txt
++++ b/tools/CMakeLists.txt
+@@ -12,7 +12,7 @@ include(GNUInstallDirs)
+ # PERFORMING CHECKS
+ #-------------------------------
+ 
+-find_package(EXPAT REQUIRED)
++find_package(expat REQUIRED)
+ 
+ #-------------------------------
+ # SOURCE FILES CONFIGURATION
+@@ -42,7 +42,7 @@ set(CMAKE_CXX_STANDARD 14)
+ #----------------------------------
+ 
+ add_executable(sdbus-c++-xml2cpp ${SDBUSCPP_XML2CPP_SRCS})
+-target_link_libraries (sdbus-c++-xml2cpp ${EXPAT_LIBRARIES})
++target_link_libraries (sdbus-c++-xml2cpp expat::expat)
+ target_include_directories(sdbus-c++-xml2cpp PRIVATE ${EXPAT_INCLUDE_DIRS})
+ 
+ #----------------------------------
