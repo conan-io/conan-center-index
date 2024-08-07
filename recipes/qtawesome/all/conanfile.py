@@ -60,7 +60,7 @@ class QtAwesomeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/6.6.2", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
