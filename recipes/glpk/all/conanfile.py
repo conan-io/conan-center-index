@@ -78,6 +78,7 @@ class GlpkConan(ConanFile):
             tc.extra_defines.append("__WOE__")
             if check_min_vs(self, 180, raise_invalid=False):
                 tc.extra_cflags.append("-FS")
+                tc.extra_cxxflags.append("-FS")
         tc.generate()
 
         if is_msvc(self):
@@ -118,7 +119,7 @@ class GlpkConan(ConanFile):
             env = Environment()
             env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in includedirs] + [f"-D{d}" for d in defines])
             env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in libs])
-            env.append("LDFLAGS", [f"-LIBPATH:{unix_path(self, p)}" for p in libdirs] + linkflags)
+            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in libdirs] + linkflags)
             env.append("CXXFLAGS", cxxflags)
             env.append("CFLAGS", cflags)
             env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
