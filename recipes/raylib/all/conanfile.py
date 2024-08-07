@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc
@@ -22,11 +23,33 @@ class RaylibConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "opengl_version": [None, "4.3", "3.3", "2.1", "1.1", "ES-2.0"],
+
+        "module_rshapes": [True, False],
+        "module_rtextures": [True, False],
+        "module_rtext": [True, False],
+        "module_rmodels": [True, False],
+        "module_raudio": [True, False],
+
+        "default_font": [True, False],
+        "events_waiting": [True, False],
+        "events_automation": [True, False],
+        "custom_frame_control": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "opengl_version": None,
+
+        "module_rshapes": True,
+        "module_rtextures": True,
+        "module_rtext": True,
+        "module_rmodels": True,
+        "module_raudio": True,
+
+        "default_font": True,
+        "events_waiting": False,
+        "events_automation": False,
+        "custom_frame_control": False
     }
 
     def export_sources(self):
@@ -54,6 +77,10 @@ class RaylibConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("xorg/system")
 
+    def validate(self):
+        if self.options.module_rtext and not self.options.module_rtextures:
+            raise ConanInvalidConfiguration('-o="raylib/*:module_rtext=True" needs -o="raylib/*:module_rtextures=True"')
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -72,14 +99,35 @@ class RaylibConan(ConanFile):
             tc.variables["USE_EXTERNAL_GLFW"] = "ON"
             tc.variables["OPENGL_VERSION"] = "OFF" if not self.options.opengl_version else self.options.opengl_version
         tc.variables["WITH_PIC"] = self.options.get_safe("fPIC", True)
+
+        tc.variables["CUSTOMIZE_BUILD"] = "ON"
+        on_off = lambda x: "ON" if x else "OFF"
+        tc.variables["SUPPORT_MODULE_RSHAPES"]   = on_off(self.options.module_rshapes)
+        tc.variables["SUPPORT_MODULE_RTEXTURES"] = on_off(self.options.module_rtextures)
+        tc.variables["SUPPORT_MODULE_RTEXT"]     = on_off(self.options.module_rtext)
+        tc.variables["SUPPORT_MODULE_RMODELS"]   = on_off(self.options.module_rmodels)
+        tc.variables["SUPPORT_MODULE_RAUDIO"]    = on_off(self.options.module_raudio)
+
+        # this makes it include the headers rcamera.h, rgesture.h and rprand.h
+        tc.variables["SUPPORT_CAMERA_SYSTEM"]    = "ON"
+        tc.variables["SUPPORT_GESTURES_SYSTEM"]  = "ON"
+        tc.variables["SUPPORT_RPRAND_GENERATOR"] = "ON"
+
+        tc.variables["SUPPORT_DEFAULT_FONT"]         = on_off(self.options.default_font)
+        tc.variables["SUPPORT_EVENTS_WAITING"]       = on_off(self.options.events_waiting)
+        tc.variables["SUPPORT_EVENTS_AUTOMATION"]    = on_off(self.options.events_automation)
+        tc.variables["SUPPORT_CUSTOM_FRAME_CONTROL"] = on_off(self.options.custom_frame_control)
+
         # Due to a specific logic of cmakedeps_macros.cmake used by CMakeDeps to try to locate shared libs on Windows
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0054"] = "NEW"
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
