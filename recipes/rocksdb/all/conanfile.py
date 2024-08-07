@@ -15,10 +15,10 @@ required_conan_version = ">=1.53.0"
 
 class RocksDBConan(ConanFile):
     name = "rocksdb"
-    homepage = "https://github.com/facebook/rocksdb"
+    description = "A library that provides an embeddable, persistent key-value store for fast storage"
     license = ("GPL-2.0-only", "Apache-2.0")
     url = "https://github.com/conan-io/conan-center-index"
-    description = "A library that provides an embeddable, persistent key-value store for fast storage"
+    homepage = "https://github.com/facebook/rocksdb"
     topics = ("database", "leveldb", "facebook", "key-value")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
