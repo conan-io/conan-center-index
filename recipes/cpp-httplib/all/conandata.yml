@@ -11,6 +11,10 @@ sources:
   "0.14.3":
     url: "https://github.com/yhirose/cpp-httplib/archive/v0.14.3.tar.gz"
     sha256: "dcf6486d9030937636d8a4f820ca9531808fd7edb283893dddbaa05f99357e63"
+  # keep 0.14.1 for enjincppsdk and microservice-essentials
+  "0.14.1":
+    url: "https://github.com/yhirose/cpp-httplib/archive/v0.14.1.tar.gz"
+    sha256: "2d4fb5544da643e5d0a82585555d8b7502b4137eb321a4abbb075e21d2f00e96"
   "0.13.3":
     url: "https://github.com/yhirose/cpp-httplib/archive/v0.13.3.tar.gz"
     sha256: "2a4503f9f2015f6878baef54cd94b01849cc3ed19dfe95f2c9775655bea8b73f"
