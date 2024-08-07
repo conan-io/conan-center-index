@@ -395,9 +395,13 @@ class QtConan(ConanFile):
             self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
+            if self.options.get_safe("opengl", "no") != "no":
+                self.requires("opengl/system")
+        if self.settings.os in ["FreeBSD", "Linux"] and ((not self.options.get_safe("with_x11") and self.options.get_safe("opengl", "no") != "no") or self.options.qtwebengine):
+            self.requires("egl/system")
         if self.options.get_safe("with_x11") or self.options.qtwayland:
             self.requires("xkbcommon/1.5.0")
-        if self.options.get_safe("opengl", "no") != "no":
+        if self.options.get_safe("opengl", "no") != "no" and self.settings.os not in ["FreeBSD", "Linux"]:
             self.requires("opengl/system")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
@@ -409,7 +413,6 @@ class QtConan(ConanFile):
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.93")
             self.requires("libdrm/2.4.119")
-            self.requires("egl/system")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
         if self.options.get_safe("with_pulseaudio", False):
@@ -1095,7 +1098,11 @@ Prefix = ..""")
                     gui_reqs.append("xkbcommon::xkbcommon")
                 if self.options.get_safe("with_x11", False):
                     gui_reqs.append("xorg::xorg")
-            if self.options.get_safe("opengl", "no") != "no":
+                    if self.options.get_safe("opengl", "no") != "no":
+                        gui_reqs.append("opengl::opengl")
+                elif self.options.get_safe("opengl", "no") != "no":
+                    gui_reqs.append("egl::egl")
+            if self.options.get_safe("opengl", "no") != "no" and self.settings.os not in ["FreeBSD", "Linux"]:
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
                 gui_reqs.append("vulkan-loader::vulkan-loader")
