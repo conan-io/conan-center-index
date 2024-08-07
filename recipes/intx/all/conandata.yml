@@ -1,4 +1,7 @@
 sources:
+  "0.11.0":
+    url: "https://github.com/chfast/intx/archive/v0.11.0.tar.gz"
+    sha256: "bff2a78e3a9a3b9bbabf50500feae65bc0ec50a2364f4a83768277d6eba7a844"
   "0.10.1":
     url: "https://github.com/chfast/intx/archive/v0.10.1.tar.gz"
     sha256: "4663073458b5e0564e92058e5aa1a7ce88634fc72827191856b17bd7335de29b"
