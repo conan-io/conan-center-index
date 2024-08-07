@@ -75,6 +75,8 @@ class FFMpegConan(ConanFile):
         "with_libaom": [True, False],
         "with_libdav1d": [True, False],
         "with_libdrm": [True, False],
+        "with_jni": False,
+        "with_mediacodec": False,
         "disable_everything": [True, False],
         "disable_all_encoders": [True, False],
         "disable_encoders": [None, "ANY"],
