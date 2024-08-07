@@ -1,0 +1,86 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d2b162c1..cf0024a5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -40,26 +40,7 @@ find_package(Threads REQUIRED)
+ # Enable/disable shader compilation support that pulls in glslang
+ set(VSG_SUPPORTS_ShaderCompiler  1 CACHE STRING "Optional shader compiler support, 0 for off, 1 for enabled." )
+ if (VSG_SUPPORTS_ShaderCompiler)
+-    if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/glslang/build_vars.cmake)
+-
+-        if (Git_FOUND)
+-
+-            set(glslang_URL "https://github.com/vsg-dev/glslang.git" CACHE STRING "URL of the glslang git repository")
+-            set(glslang_branch "VSG-1.0.x" CACHE STRING "branch/tag of the glslang git repository")
+-
+-            execute_process(COMMAND ${GIT_EXECUTABLE} clone --depth 1 --branch ${glslang_branch} ${glslang_URL}
+-                            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src
+-                            RESULT_VARIABLE GIT_SUBMOD_RESULT)
+-
+-            if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+-                message(WARNING "git clone of glslang failed. ShaderCompile support disabled.")
+-                set(VSG_SUPPORTS_ShaderCompiler 0)
+-            endif()
+-        else()
+-                message(WARNING "git clone of glslang failed. ShaderCompile support disabled.")
+-                set(VSG_SUPPORTS_ShaderCompiler 0)
+-        endif()
+-    endif()
++   find_package(glslang CONFIG REQUIRED)
+ endif()
+ 
+ set(VSG_SUPPORTS_Windowing  1 CACHE STRING "Optional native windowing support providing a default implementation of vsg::Window::create(), 0 for off, 1 for enabled." )
+diff --git a/src/vsg/CMakeLists.txt b/src/vsg/CMakeLists.txt
+index dbe8cf83..7bedfb74 100644
+--- a/src/vsg/CMakeLists.txt
++++ b/src/vsg/CMakeLists.txt
+@@ -225,18 +225,17 @@ set(SOURCES
+     utils/LoadPagedLOD.cpp
+ )
+ 
+-if (${VSG_SUPPORTS_ShaderCompiler})
+-
+-    # include glslang source code directly into the VulkanScenegraph library build.
+-    include(../glslang/build_vars.cmake)
+-endif()
+-
+ # set up library dependencies
+ set(LIBRARIES PUBLIC
+         Vulkan::Vulkan
+         Threads::Threads
+ )
+-
++if (${VSG_SUPPORTS_ShaderCompiler})
++    set(LIBRARIES ${LIBRARIES} PRIVATE 
++        glslang::SPIRV 
++        glslang::glslang
++    )
++endif()
+ # Check for std::atomic
+ if(NOT MSVC AND NOT ANDROID AND NOT APPLE)
+   include(CheckCXXSourceCompiles)
+@@ -372,10 +371,7 @@ target_compile_definitions(vsg PRIVATE ${EXTRA_DEFINES})
+ target_include_directories(vsg
+     PUBLIC
+         $<BUILD_INTERFACE:${VSG_SOURCE_DIR}/include>
+-        $<BUILD_INTERFACE:${VSG_BINARY_DIR}/include>
+-    PRIVATE
+-        $<BUILD_INTERFACE:${VSG_SOURCE_DIR}/src/glslang>
+-        $<BUILD_INTERFACE:${GLSLANG_GENERATED_INCLUDEDIR}>
++        $<BUILD_INTERFACE:${VSG_BINARY_DIR}/include>    
+ )
+ 
+ target_link_libraries(vsg ${LIBRARIES})
+diff --git a/src/vsg/utils/ShaderCompiler.cpp b/src/vsg/utils/ShaderCompiler.cpp
+index 71a7f09f..803f26a1 100644
+--- a/src/vsg/utils/ShaderCompiler.cpp
++++ b/src/vsg/utils/ShaderCompiler.cpp
+@@ -20,7 +20,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
+ #include <vsg/utils/ShaderCompiler.h>
+ 
+ #if VSG_SUPPORTS_ShaderCompiler
+-#    include <SPIRV/GlslangToSpv.h>
++#    include <glslang/SPIRV/GlslangToSpv.h>
+ #    include <glslang/Public/ResourceLimits.h>
+ #    include <glslang/Public/ShaderLang.h>
+ #endif

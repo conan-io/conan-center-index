@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import get, copy, rm, rmdir, collect_libs
+from conan.tools.files import apply_conandata_patches, get, copy, export_conandata_patches, rm, rmdir, collect_libs
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
@@ -11,7 +11,11 @@ required_conan_version = ">=1.53.0"
 
 class VsgConan(ConanFile):
     name = "vsg"
-    description = "VulkanSceneGraph"
+    description = "VulkanSceneGraph (VSG), is a modern, cross platform, \
+                   high performance scene graph library \
+                   built upon Vulkan graphics/compute API. \
+                   The software is written in C++17, \
+                   and follows the CppCoreGuidelines and FOSS Best Practices."
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.vulkanscenegraph.org"
@@ -20,11 +24,13 @@ class VsgConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
+        "shader_compiler": [True, False],
         "max_devices": [1,2,3,4],
         "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
+        "shader_compiler": True,
         "max_devices" : 1,
         "fPIC": True,
     }
@@ -40,9 +46,16 @@ class VsgConan(ConanFile):
             "clang": "7",
             "apple-clang": "10",
         }
+        
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.version < "1.0.5":
+            self.options.shader_compiler = False
 
     def configure(self):
         if self.options.shared:
@@ -50,6 +63,8 @@ class VsgConan(ConanFile):
 
     def requirements(self):
         self.requires("vulkan-loader/1.3.239.0", transitive_headers=True)
+        if self.options.shader_compiler and self.version >= "1.0.5":
+            self.requires("glslang/12.3.1", transitive_headers=True)
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -74,7 +89,7 @@ class VsgConan(ConanFile):
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = False
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["VSG_SUPPORTS_ShaderCompiler"] = 0
+        tc.variables["VSG_SUPPORTS_ShaderCompiler"] = 1 if self.options.shader_compiler else 0
         tc.variables["VSG_MAX_DEVICES"] = self.options.max_devices
         tc.generate()
 
@@ -83,6 +98,7 @@ class VsgConan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -96,7 +112,6 @@ class VsgConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         rm(self, "Find*.cmake", os.path.join(self.package_folder, "lib/cmake/vsg"))
@@ -110,9 +125,11 @@ class VsgConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-
+        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "vsg", "vsgMacros.cmake")])
+        
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "vsg"
         self.cpp_info.filenames["cmake_find_package_multi"] = "vsg"
         self.cpp_info.names["cmake_find_package"] = "VSG"
         self.cpp_info.names["cmake_find_package_multi"] = "vsg"
+       
