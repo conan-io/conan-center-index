@@ -98,11 +98,6 @@ class CgnsConan(ConanFile):
         else:
             replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
                             "set(install_targets ${install_targets} cgns_shared)", "")
-        # Fix fragile linking against HDF5 libs
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        'message (STATUS "HDF5 C libs:',
-                        ('link_libraries(HDF5::HDF5)\n'
-                         'message (STATUS "HDF5 C libs:'))
 
     def build(self):
         self._patch_sources()
