@@ -47,6 +47,7 @@ class DoxygenConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -81,6 +82,7 @@ class DoxygenConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_PROJECT_doxygen_INCLUDE"] = "conan_deps.cmake"
         tc.variables["build_parse"] = self.options.enable_parse
         tc.variables["build_search"] = self.options.enable_search
         tc.variables["build_app"] = self.options.enable_app
