@@ -71,6 +71,8 @@ class LibVPXConan(ConanFile):
             raise ConanInvalidConfiguration("M1 only supported since 1.10, please upgrade")
         if self.settings.os == "iOS" and (self.settings.os.sdk != "iphonesimulator" and self.settings.arch in ["x86_64", "x86"]):
             raise ConanInvalidConfiguration("iOS platform with x86/x86_64 architectures only supports 'iphonesimulator' SDK option")
+        if self.settings.os == "Android" and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} does not support shared libraries on Android. Build static libraries instead.")
 
     def build_requirements(self):
         self.tool_requires("yasm/1.3.0")
