@@ -1,4 +1,7 @@
 sources:
+  "b3438":
+    url: "https://github.com/ggerganov/llama.cpp/archive/refs/tags/b3438.tar.gz"
+    sha256: "263829c24fe1b2f477f94907216c7f5d2c78c18ff1097742e7ec24d593ce837a"
   "b3040":
     url: "https://github.com/ggerganov/llama.cpp/archive/refs/tags/b3040.tar.gz"
     sha256: "020e040139660eb40113503bb1057d5387677d249b990e008e04821532f7cd62"
