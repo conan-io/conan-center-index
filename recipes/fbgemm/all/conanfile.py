@@ -69,6 +69,10 @@ class FbgemmConan(ConanFile):
         # self.requires("openmp/system")
 
     def validate(self):
+        # https://github.com/pytorch/FBGEMM/issues/2074
+        if str(self.settings.arch).startswith("arm"):
+            raise ConanInvalidConfiguration("FBGEMM does not yet support ARM architectures")
+
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
