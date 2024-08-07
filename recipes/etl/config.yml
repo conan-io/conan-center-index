@@ -1,7 +1,5 @@
 versions:
-  "20.39.1":
-    folder: all
-  "20.39.0":
+  "20.39.2":
     folder: all
   "20.38.17":
     folder: all
