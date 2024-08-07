@@ -1,0 +1,4 @@
+sources:
+  "1.9.2":
+    url: "https://github.com/wjakob/nanobind/archive/refs/tags/v1.9.2.tar.gz"
+    sha256: "149a3da40b0a988513d8cf5e71db3037373823505a3c92f87b988c92d7e0ab34"
