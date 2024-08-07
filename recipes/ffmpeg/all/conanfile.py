@@ -270,8 +270,6 @@ class FFMpegConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-        if self.settings.os == "Android" and self.options.shared and self.options.with_libvpx:
-            self.options["libvpx"].shared = False
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -357,10 +355,6 @@ class FFMpegConan(ConanFile):
             # src/libavcodec/x86/vvc/vvcdsp_init.c:69: undefined reference to `ff_h2656_put_pixels2_8_sse4'
             # May be related https://github.com/ffvvc/FFmpeg/issues/234
             raise ConanInvalidConfiguration(f"{self.ref} Conan recipe does not support build_type=Debug. Contributions are welcome to fix this issue.")
-
-        if self.settings.os == "Android" and self.options.shared and self.dependencies["libvpx"].options.shared:
-            # https://github.com/conan-io/conan-center-index/pull/24861
-            raise ConanInvalidConfiguration(f"{self.ref} shared build with libvpx:shared=True is not supported on Android. Use -o 'libvpx/*:shared=False'")
 
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
