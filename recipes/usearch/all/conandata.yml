@@ -1,9 +1,9 @@
 sources:
-  "2.9.1":
-    url: "https://github.com/unum-cloud/usearch/archive/v2.9.1.tar.gz"
-    sha256: "a210d24303b9708601746b25760fb0ee2b47f253ecbff5ddc480440a67fc2b37"
+  "2.13.1":
+    url: "https://github.com/unum-cloud/usearch/archive/v2.13.1.tar.gz"
+    sha256: "58b17ec9625e5f489dcc78f29e9dcd809cb2d39567957181a1e514c43acf6392"
 patches:
-  "2.9.1":
+  "2.13.1":
     - patch_file: "patches/0001-fix-lib-installation.patch"
       patch_type: "conan"
       patch_description: "Fix C lib installation"

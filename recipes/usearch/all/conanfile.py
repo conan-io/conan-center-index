@@ -153,8 +153,9 @@ class USearchConan(ConanFile):
         else:
             prefix = "lib" if self.settings.os == "Windows" else ""
             self.cpp_info.libs = [prefix + "usearch_c"]
-            if stdcpp_library(self):
-                self.cpp_info.system_libs.append(stdcpp_library(self))
+
+        if stdcpp_library(self):
+            self.cpp_info.system_libs.append(stdcpp_library(self))
 
         self.cpp_info.defines += [
             f"USEARCH_USE_OPENMP={int(self.options.get_safe('with_openmp', False))}",
