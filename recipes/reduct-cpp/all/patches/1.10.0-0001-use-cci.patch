@@ -1,0 +1,39 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index af71f65..7e3a0e2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -16,7 +16,20 @@ set(CMAKE_CXX_STANDARD 20)
+ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+ 
+-include(cmake/InstallDependencies.cmake)
++find_package(fmt REQUIRED CONFIG)
++find_package(httplib REQUIRED CONFIG)
++find_package(nlohmann_json REQUIRED CONFIG)
++find_package(OpenSSL REQUIRED CONFIG)
++find_package(concurrentqueue REQUIRED CONFIG)
++find_package(date REQUIRED CONFIG)
++add_library(dependencies INTERFACE)
++target_link_libraries(dependencies INTERFACE 
++    fmt::fmt 
++    nlohmann_json::nlohmann_json
++    httplib::httplib 
++    concurrentqueue::concurrentqueue 
++    date::date
++)
+ 
+ configure_file(cmake/ReductCppConfig.cmake.in ${CMAKE_BINARY_DIR}/cmake/ReductCppConfig.cmake @ONLY)
+ configure_file(cmake/ReductCppConfigVersion.cmake.in ${CMAKE_BINARY_DIR}/cmake/ReductCppConfigVersion.cmake @ONLY)
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index a868531..7bc00f5 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -19,7 +19,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+ add_library(${CMAKE_PROJECT_NAME} STATIC ${SRC_FILES})
+ 
+ target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../3dparty)
++# target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../3dparty)
+ 
+ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE dependencies)
+ set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
