@@ -12,11 +12,10 @@ required_conan_version = ">=1.54.0"
 class CAFConan(ConanFile):
     name = "caf"
     description = "An open source implementation of the Actor Model in C++"
+    license = "BSD-3-Clause", "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/actor-framework/actor-framework"
-    topics = "actor-framework", "actor-model", "pattern-matching", "actors"
-    license = "BSD-3-Clause", "BSL-1.0"
-
+    topics = ("actor-framework", "actor-model", "pattern-matching", "actors")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -41,7 +40,7 @@ class CAFConan(ConanFile):
         return {
             "Visual Studio": "16",
             "msvc": "192",
-            "gcc": "7",
+            "gcc": "7" if Version(self.version) < "1.0.0" else "8",
             "clang": "6",   # Should be 5 but clang 5 has a bug that breaks compiling CAF
                             # see https://github.com/actor-framework/actor-framework/issues/1226
             "apple-clang": "10",
@@ -90,6 +89,8 @@ class CAFConan(ConanFile):
         tc = CMakeToolchain(self)
         if not valid_min_cppstd(self, self._min_cppstd):
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        else:
+            tc.variables["CAF_CXX_VERSION"] = str(self.settings.compiler.cppstd).replace("gnu", "")
         tc.variables["CAF_ENABLE_OPENSSL_MODULE"] = self.options.with_openssl
         tc.variables["CAF_ENABLE_EXAMPLES"] = False
         tc.variables["CAF_ENABLE_TOOLS"] = False

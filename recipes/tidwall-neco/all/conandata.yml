@@ -1,0 +1,4 @@
+sources:
+  "0.3.2":
+    url: "https://github.com/tidwall/neco/archive/refs/tags/v0.3.2.tar.gz"
+    sha256: "ae3cefa6217428e992da0b30f254502b9974079dd9973eee9c482ea89df3fcef"
