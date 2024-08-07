@@ -8,11 +8,7 @@ sources:
 patches:
   "2.50.0":
     - patch_file: "patches/enable_static_libs_2_50_0.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix_exporting_pango_init.patch"
-      base_path: "source_subfolder"
   "2.46.2":
     - patch_file: "patches/enable_static_libs_2_46_2.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix_exporting_pango_init.patch"
-      base_path: "source_subfolder"
