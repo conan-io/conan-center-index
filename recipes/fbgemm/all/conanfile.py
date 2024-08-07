@@ -1,7 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -115,7 +115,12 @@ class FbgemmConan(ConanFile):
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
-        cmake.build()
+        try:
+            cmake.build()
+        except ConanException:
+            # Workaround for C3I running out of memory during build
+            self.conf.define("tools.build:jobs", 1)
+            cmake.build()
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
