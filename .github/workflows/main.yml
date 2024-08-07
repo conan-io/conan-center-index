@@ -1,0 +1,59 @@
+name: Conan build
+on: [push]
+
+defaults:
+  run:
+    shell: bash
+    working-directory: recipes/llvm-core/all
+
+env:
+  LLVM_VERSION: 18.1.5
+  LLVM_OPTIONS: >-
+    -o "llvm-core/*:with_target_amdgpu=False"
+    -o "llvm-core/*:with_target_arm=False"
+    -o "llvm-core/*:with_target_avr=False"
+    -o "llvm-core/*:with_target_bpf=False"
+    -o "llvm-core/*:with_target_hexagon=False"
+    -o "llvm-core/*:with_target_lanai=False"
+    -o "llvm-core/*:with_target_loongarch=False"
+    -o "llvm-core/*:with_target_mips=False"
+    -o "llvm-core/*:with_target_msp430=False"
+    -o "llvm-core/*:with_target_nvptx=False"
+    -o "llvm-core/*:with_target_powerpc=False"
+    -o "llvm-core/*:with_target_riscv=False"
+    -o "llvm-core/*:with_target_sparc=False"
+    -o "llvm-core/*:with_target_systemz=False"
+    -o "llvm-core/*:with_target_ve=False"
+    -o "llvm-core/*:with_target_xcore=False"
+    -o "llvm-core/*:with_target_webassembly=False"
+  CONAN_SETTINGS: -s compiler.cppstd=17
+
+jobs:
+  build:
+    name: ${{ matrix.runner-os }}
+
+    strategy:
+      matrix:
+       runner-os: [macos-14, windows-latest, ubuntu-22.04]
+
+    runs-on: ${{ matrix.runner-os }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+
+    - name: install conan
+      run: |
+        pip install conan
+        conan profile detect
+
+    - name: create package
+      run: |
+        conan create . \
+          --version ${{ env.LLVM_VERSION }} \
+          ${{ env.LLVM_OPTIONS }} \
+          ${{ env.CONAN_SETTINGS }} \
+          --build=missing

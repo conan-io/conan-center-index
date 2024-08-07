@@ -1,4 +1,14 @@
 sources:
+  "18.1.7":
+    "llvm":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.7/llvm-18.1.7.src.tar.xz
+      sha256: 17ba3d57c3db185722c36e736a189b2110e8cb842cc9e53dcc74e938bdadb97e
+    "cmake":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.7/cmake-18.1.7.src.tar.xz
+      sha256: f0b67599f51cddcdbe604c35b6de97f2d0a447e18b9c30df300c82bf1ee25bd7
+    "third-party":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.7/third-party-18.1.7.src.tar.xz
+      sha256: 8d8192598b251b44cf900109dc83dd9cde33bb465d7930a8cdadf5586d632320
   "13.0.0":
     url: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/llvm-13.0.0.src.tar.xz
     sha256: 408d11708643ea826f519ff79761fcdfc12d641a2510229eec459e72f8163020
@@ -10,18 +20,62 @@ sources:
     sha256: ce8508e318a01a63d4e8b3090ab2ded3c598a50258cc49e2625b9120d4c03ea5
 
 patches:
-  "11.1.0":
-    - base_path: "source"
-      patch_file: "patches/11x/11.1.0-cmake.patch"
-    - base_path: "source"
-      patch_file: "patches/11x/11.1.0-native.patch"
-  "12.0.0":
-    - base_path: "source"
-      patch_file: "patches/12x/12.0.0-cmake.patch"
-    - base_path: "source"
-      patch_file: "patches/12x/12.0.0-native.patch"
+  "18.1.7":
+    - patch_file: patches/18x/0000-cmake-dependencies.patch
+      patch_description: fix references to third party libs to match conan variables and targets
+      patch_type: conan
+      base_path: llvm-main
   "13.0.0":
-    - base_path: "source"
-      patch_file: "patches/13x/13.0.0-cmake.patch"
-    - base_path: "source"
-      patch_file: "patches/13x/13.0.0-native.patch"
+    - patch_file: patches/13x/0000-cmake-dependencies.patch
+      patch_description: fix references to third party libs to match conan variables and targets
+      patch_type: conan
+    - patch_file: patches/13x/0001-calculate-job-pools.patch
+      patch_description: calculate resource limits for compiling LLVM
+      patch_type: portability
+      patch_source: https://github.com/llvm/llvm-project/pull/65274
+    - patch_file: patches/13x/0002-missing-includes.patch
+      patch_description: fix missing header files
+      patch_type: portability
+    - patch_file: patches/13x/0003-split-dwarf.patch
+      patch_description: enable split dwarf option from 14.x
+      patch_source: https://reviews.llvm.org/D108776
+      patch_type: bugfix
+    - patch_file: patches/13x/0004-no-build-with-install-rpath.patch
+      patch_description: do not build shared libs with install rpath
+      patch_type: conan
+  "12.0.0":
+    - patch_file: patches/12x/0000-cmake-dependencies.patch
+      patch_description: fix references to third party libs to match conan variables and targets
+      patch_type: conan
+    - patch_file: patches/12x/0001-calculate-job-pools.patch
+      patch_description: calculate resource limits for compiling LLVM
+      patch_type: portability
+      patch_source: https://github.com/llvm/llvm-project/pull/65274
+    - patch_file: patches/12x/0002-missing-includes.patch
+      patch_description: fix missing header files
+      patch_type: portability
+    - patch_file: patches/12x/0003-split-dwarf.patch
+      patch_description: enable split dwarf option from 14.x
+      patch_source: https://reviews.llvm.org/D108776
+      patch_type: bugfix
+    - patch_file: patches/12x/0004-no-build-with-install-rpath.patch
+      patch_description: do not build shared libs with install rpath
+      patch_type: conan
+  "11.1.0":
+    - patch_file: patches/11x/0000-cmake-dependencies.patch
+      patch_description: fix references to third party libs to match conan variables and targets
+      patch_type: conan
+    - patch_file: "patches/11x/0001-calculate-job-pools.patch"
+      patch_description: calculate resource limits for compiling LLVM
+      patch_type: portability
+      patch_source: https://github.com/llvm/llvm-project/pull/65274
+    - patch_file: patches/11x/0002-missing-includes.patch
+      patch_description: fix missing header files
+      patch_type: portability
+    - patch_file: patches/11x/0003-split-dwarf.patch
+      patch_description: enable split dwarf option from 14.x
+      patch_source: https://reviews.llvm.org/D108776
+      patch_type: bugfix
+    - patch_file: patches/11x/0004-no-build-with-install-rpath.patch
+      patch_description: do not build shared libs with install rpath
+      patch_type: conan
