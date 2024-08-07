@@ -5,6 +5,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
+
 import os
 
 required_conan_version = ">=1.54"
@@ -136,5 +137,18 @@ class ReflectCppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["reflectcpp"]
-        if self.settings.os in ["FreeBSD", "Linux"]:
-            self.cpp_info.system_libs = ["m"]
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            # Validate the minimum cpp standard supported when installing the package. For C++ projects only
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(
+            str(self.settings.compiler), False
+        )
+        if (
+            minimum_version
+            and Version(self.settings.compiler.version) < minimum_version
+        ):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
