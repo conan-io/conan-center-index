@@ -35,7 +35,7 @@ class SentryNativeConan(ConanFile):
         "with_crashpad": ["google", "sentry"],
         "crashpad_with_tls": ["openssl", False],
         "with_breakpad": ["google", "sentry"],
-        "wer" : [True, False],
+        "wer": [True, False],
     }
     default_options = {
         "shared": False,
@@ -46,7 +46,7 @@ class SentryNativeConan(ConanFile):
         "with_crashpad": "sentry",
         "crashpad_with_tls": "openssl",
         "with_breakpad": "sentry",
-        "wer": False
+        "wer": False,
     }
 
     @property
