@@ -30,13 +30,13 @@ class LibmeshbConan(ConanFile):
             del self.options.fPIC
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-        # Windows shared build doesn't seems supported because code doesn't include dllexport
-        # See https://www.kitware.com/create-dlls-on-windows-without-declspec-using-new-cmake-export-all-feature/
-        if is_msvc(self):
-            self.package_type = "static-library"
-            del self.options.shared
 
     def configure(self):
+        # Windows shared build doesn't seems supported because code doesn't include dllexport
+        # See https://www.kitware.com/create-dlls-on-windows-without-declspec-using-new-cmake-export-all-feature/
+        if self.settings.os == "Windows":
+            del self.options.shared
+            self.package_type = "static-library"
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
@@ -57,7 +57,7 @@ class LibmeshbConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "install (FILES LICENSE.txt copyright.txt DESTINATION share/libMeshb)", "")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "install (DIRECTORY sample_meshes DESTINATION share/libMeshb)", "")
         replace_in_file(self, os.path.join(self.source_folder, "sources/CMakeLists.txt"), "install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/ DESTINATION include)", "")
-        
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
@@ -75,7 +75,7 @@ class LibmeshbConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "libMeshb")
         self.cpp_info.set_property("cmake_target_name", "libMeshb::Meshb.7")
         self.cpp_info.libs = ["Meshb.7"]
-        
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("rt")
             self.cpp_info.system_libs.append("m")
