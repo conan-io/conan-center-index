@@ -240,6 +240,13 @@ class PopplerConan(ConanFile):
         #   Unsupported CMAKE_BUILD_TYPE:
         tc.cache_variables["CMAKE_BUILD_TYPE"] = str(self.settings.build_type)
 
+        if self.settings.os == "Windows" and self.options.with_libjpeg == "libjpeg":
+            # Workaround for
+            # C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\basetsd.h(77,29): error C2371: 'INT32': redefinition; different basic types
+            # due to libjpeg's jmorecfg.h defining INT32
+            # https://github.com/mapnik/node-mapnik/issues/276
+            tc.preprocessor_definitions["XMD_H"] = ""
+
         tc.generate()
 
         deps = CMakeDeps(self)
