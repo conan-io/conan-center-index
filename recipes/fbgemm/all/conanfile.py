@@ -109,7 +109,11 @@ class FbgemmConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         rmdir(self, os.path.join(self.source_folder, "third_party"))
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "-Werror", "")
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "-Werror", "")
+        # asmjit has been unvendored
+        replace_in_file(self, cmakelists, "$<TARGET_PDB_FILE:asmjit>", "")
+        replace_in_file(self, cmakelists, "install(TARGETS asmjit", "# install(TARGETS asmjit")
 
     def build(self):
         self._patch_sources()
