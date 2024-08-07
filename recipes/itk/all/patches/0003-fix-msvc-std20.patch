@@ -1,0 +1,20 @@
+--- a/Modules/Core/Common/include/itkThreadPool.h
++++ b/Modules/Core/Common/include/itkThreadPool.h
+@@ -85,9 +85,17 @@
+   template <class Function, class... Arguments>
+   auto
+   AddWork(Function && function, Arguments &&... arguments)
++#if((defined(_MSVC_LANG) && _MSVC_LANG >= 202002L) || __cplusplus >= 202002L)
++    -> std::future<typename std::invoke_result_t<Function, Arguments...>>
++#else
+     -> std::future<typename std::result_of<Function(Arguments...)>::type>
++#endif
+   {
++#if((defined(_MSVC_LANG) && _MSVC_LANG >= 202002L) || __cplusplus >= 202002L)
++    using return_type = typename std::invoke_result_t<Function, Arguments...>;
++#else
+     using return_type = typename std::result_of<Function(Arguments...)>::type;
++#endif
+
+     auto task = std::make_shared<std::packaged_task<return_type()>>(
+       std::bind(std::forward<Function>(function), std::forward<Arguments>(arguments)...));
