@@ -1,19 +1,22 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration, ConanException
-import functools
 import os
 
-required_conan_version = ">=1.43.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, get, replace_in_file, rmdir
+
+required_conan_version = ">=1.53.0"
 
 
 class MagnumIntegrationConan(ConanFile):
     name = "magnum-integration"
     description = "Integration libraries for the Magnum C++11/C++14 graphics engine"
     license = "MIT"
-    topics = ("magnum", "graphics", "rendering", "3d", "2d", "opengl")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://magnum.graphics"
+    topics = ("magnum", "graphics", "rendering", "3d", "2d", "opengl")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,32 +39,31 @@ class MagnumIntegrationConan(ConanFile):
         "with_ovr": False,
     }
 
-    exports_sources = "CMakeLists.txt"
-    generators = "cmake", "cmake_find_package"
-    short_paths = True
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("magnum/{}".format(self.version))
+        self.requires(f"magnum/{self.version}", transitive_headers=True, transitive_libs=True)
         if self.options.with_bullet:
-            self.requires("bullet3/3.22a")
+            # Used in Magnum/BulletIntegration/Integration.h
+            self.requires("bullet3/3.25", transitive_headers=True, transitive_libs=True)
         if self.options.with_eigen:
-            self.requires("eigen/3.4.0")
+            # Used in Magnum/EigenIntegration/Integration.h
+            self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.with_glm:
-            self.requires("glm/0.9.9.8")
+            # Used in Magnum/GlmIntegration/Integration.h
+            self.requires("glm/cci.20230113", transitive_headers=True, transitive_libs=True)
         if self.options.with_imgui:
-            self.requires("imgui/1.87")
+            # Used in Magnum/ImGuiIntegration/Integration.h
+            self.requires("imgui/1.90", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.options.with_dart:
@@ -72,63 +74,47 @@ class MagnumIntegrationConan(ConanFile):
             raise ConanInvalidConfiguration("OVR library is not available in ConanCenter (yet)")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_STATIC"] = not self.options.shared
-        cmake.definitions["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", True)
-        cmake.definitions["BUILD_TESTS"] = False
-        cmake.definitions["BUILD_GL_TESTS"] = False
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_STATIC"] = not self.options.shared
+        tc.variables["BUILD_STATIC_PIC"] = self.options.get_safe("fPIC", True)
+        tc.variables["BUILD_TESTS"] = False
+        tc.variables["BUILD_GL_TESTS"] = False
+        tc.variables["WITH_BULLET"] = self.options.with_bullet
+        tc.variables["WITH_DART"] = self.options.with_dart
+        tc.variables["WITH_EIGEN"] = self.options.with_eigen
+        tc.variables["WITH_GLM"] = self.options.with_glm
+        tc.variables["WITH_IMGUI"] = self.options.with_imgui
+        tc.variables["WITH_OVR"] = self.options.with_ovr
+        tc.variables["MAGNUM_INCLUDE_INSTALL_DIR"] = "include/Magnum"
+        tc.variables["MAGNUM_EXTERNAL_INCLUDE_INSTALL_DIR"] = "include/MagnumExternal"
+        tc.generate()
 
-        cmake.definitions["WITH_BULLET"] = self.options.with_bullet
-        cmake.definitions["WITH_DART"] = self.options.with_dart
-        cmake.definitions["WITH_EIGEN"] = self.options.with_eigen
-        cmake.definitions["WITH_GLM"] = self.options.with_glm
-        cmake.definitions["WITH_IMGUI"] = self.options.with_imgui
-        cmake.definitions["WITH_OVR"] = self.options.with_ovr
-
-        cmake.configure()
-        return cmake
+        deps = CMakeDeps(self)
+        deps.set_property("glm", "cmake_file_name", "GLM")
+        deps.set_property("glm", "cmake_target_name", "GLM::GLM")
+        deps.set_property("imgui", "cmake_file_name", "ImGui")
+        deps.set_property("imgui", "cmake_target_name", "ImGui::ImGui")
+        deps.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
-                              'set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})',
-                              "")
-        # Casing
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "GlmIntegration", "CMakeLists.txt"),
-                              "find_package(GLM REQUIRED)",
-                              "find_package(glm REQUIRED)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "GlmIntegration", "CMakeLists.txt"),
-                              "GLM::GLM",
-                              "glm::glm")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
-                              "find_package(ImGui REQUIRED Sources)",
-                              "find_package(imgui REQUIRED Sources)")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
-                              "ImGui::ImGui",
-                              "imgui::imgui")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
-                              "ImGui::Sources",
-                              "")
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "src", "Magnum", "ImGuiIntegration", "CMakeLists.txt"),
+                        "ImGui::Sources", "")
 
     def build(self):
         self._patch_sources()
-
-        cm = self._configure_cmake()
-        cm.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        cm = self._configure_cmake()
-        cm.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "MagnumIntegration")
@@ -142,7 +128,12 @@ class MagnumIntegrationConan(ConanFile):
             self.cpp_info.components["bullet"].names["cmake_find_package"] = "Bullet"
             self.cpp_info.components["bullet"].names["cmake_find_package_multi"] = "Bullet"
             self.cpp_info.components["bullet"].libs = ["MagnumBulletIntegration{}".format(lib_suffix)]
-            self.cpp_info.components["bullet"].requires = ["magnum::magnum_main", "magnum::gl", "magnum::shaders", "bullet3::bullet3"]
+            self.cpp_info.components["bullet"].requires = [
+                "magnum::magnum_main",
+                "magnum::gl",
+                "magnum::shaders",
+                "bullet3::bullet3",
+            ]
 
         if self.options.with_dart:
             raise ConanException("Recipe doesn't define this component 'dart'. Please contribute it")
@@ -157,15 +148,20 @@ class MagnumIntegrationConan(ConanFile):
             self.cpp_info.components["glm"].set_property("cmake_target_name", "MagnumIntegration::Glm")
             self.cpp_info.components["glm"].names["cmake_find_package"] = "Glm"
             self.cpp_info.components["glm"].names["cmake_find_package_multi"] = "Glm"
-            self.cpp_info.components["glm"].libs = ["MagnumGlmIntegration{}".format(lib_suffix)]
+            self.cpp_info.components["glm"].libs = [f"MagnumGlmIntegration{lib_suffix}"]
             self.cpp_info.components["glm"].requires = ["magnum::magnum_main", "glm::glm"]
 
         if self.options.with_imgui:
             self.cpp_info.components["imgui"].set_property("cmake_target_name", "MagnumIntegration::ImGui")
             self.cpp_info.components["imgui"].names["cmake_find_package"] = "ImGui"
             self.cpp_info.components["imgui"].names["cmake_find_package_multi"] = "ImGui"
-            self.cpp_info.components["imgui"].libs = ["MagnumImGuiIntegration{}".format(lib_suffix)]
-            self.cpp_info.components["imgui"].requires = ["magnum::magnum_main", "magnum::gl", "magnum::shaders", "imgui::imgui"]
+            self.cpp_info.components["imgui"].libs = [f"MagnumImGuiIntegration{lib_suffix}"]
+            self.cpp_info.components["imgui"].requires = [
+                "magnum::magnum_main",
+                "magnum::gl",
+                "magnum::shaders",
+                "imgui::imgui",
+            ]
 
         if self.options.with_ovr:
             raise ConanException("Recipe doesn't define this component 'ovr'. Please contribute it")
