@@ -39,21 +39,19 @@ class CalcephConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.shared
+            self.package_type = "static-library"
         if is_msvc(self):
             del self.options.threadsafe
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
-
-    def validate(self):
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared builds with Visual Studio yet")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and not is_msvc(self):
