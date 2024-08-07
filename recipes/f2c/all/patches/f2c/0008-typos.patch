@@ -1,0 +1,21 @@
+From: "Barak A. Pearlmutter" <barak+git@pearlmutter.net>
+Date: Mon, 15 Aug 2016 15:09:28 +0200
+Subject: typos
+
+---
+ pread.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/pread.c b/pread.c
+index cd58513..57f5c7d 100644
+--- a/pread.c
++++ b/pread.c
+@@ -809,7 +809,7 @@ argverify(int ftype, Extsym *p)
+ 			Pbadmsg("differing calling sequences",p);
+ 			i = t - tfirst + 1;
+ 			fprintf(stderr,
+-				"arg %d: here %s, prevously %s\n",
++				"arg %d: here %s, previously %s\n",
+ 				i, Argtype(k,buf1), Argtype(j,buf2));
+ 			return;
+ 			}

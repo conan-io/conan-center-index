@@ -1,0 +1,25 @@
+--- a/makefile.u
++++ b/makefile.u
+@@ -71,11 +71,18 @@
+ OFILES = $(MISC) $(POW) $(CX) $(DCX) $(REAL) $(DBL) $(INT) \
+ 	$(HALF) $(CMP) $(EFL) $(CHAR) $(I77) $(TIME)
+ 
+-all: f2c.h signal1.h sysdep1.h libf2c.a
+-
+-libf2c.a: $(OFILES)
+-	ar r libf2c.a $?
++all: f2c.h signal1.h sysdep1.h
++
++static: all $(OFILES)
++	ar r libf2c.a $(OFILES)
+ 	-ranlib libf2c.a
++
++shared_so: all $(OFILES)
++	$(CC) -shared -Wl,-soname,libf2c.so.2 $(LDFLAGS) -o libf2c.so.2.1 *.o -lc -lm
++
++shared_dylib: all $(OFILES)
++	$(CC) -dynamiclib -install_name @rpath/libf2c.dylib -o libf2c.dylib *.o
++
+ 
+ ## Shared-library variant: the following rule works on Linux
+ ## systems.  Details are system-dependent.  Under Linux, -fPIC
