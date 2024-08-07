@@ -1,0 +1,17 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index fd6713d..c6312b2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1079,7 +1079,11 @@
+ 
+ # Check for the math library so it can be explicitly linked.
+ IF(NOT WIN32)
+-  FIND_LIBRARY(HAVE_LIBM NAMES math m libm)
++  INCLUDE(CheckLibraryExists)
++  CHECK_LIBRARY_EXISTS(m log "" CAN_LINK_LIBM)
++  IF(CAN_LINK_LIBM)
++      SET(HAVE_LIBM m)
++  ENDIF()
+   IF(NOT HAVE_LIBM)
+     CHECK_FUNCTION_EXISTS(exp HAVE_LIBM_FUNC)
+     IF(NOT HAVE_LIBM_FUNC)

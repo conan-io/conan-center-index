@@ -104,6 +104,11 @@ class NetcdfConan(ConanFile):
         tc.variables["ENABLE_BYTERANGE"] = self.options.byterange
         tc.variables["USE_HDF5"] = self.options.with_hdf5
         tc.variables["NC_FIND_SHARED_LIBS"] = self.options.with_hdf5 and self.dependencies["hdf5"].options.shared
+
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
+        # The compilation check incorrectly fails on MSVC otherwise:
+        # error C2168: 'memmove': too few actual parameters for intrinsic function
+        tc.variables["HAVE_MEMMOVE"] = True
         tc.generate()
 
         tc = CMakeDeps(self)
