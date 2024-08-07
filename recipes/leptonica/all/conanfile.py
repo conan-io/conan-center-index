@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir, save
@@ -44,6 +45,17 @@ class LeptonicaConan(ConanFile):
         "with_webp": True,
     }
 
+    # in case the project requires C17... the minimum compiler version should be listed
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "apple-clang": "11",
+            "clang": "7",
+            "gcc": "8",
+            "msvc": "192",
+            "Visual Studio": "16",
+        }
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -84,10 +96,20 @@ class LeptonicaConan(ConanFile):
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
 
+    def validate(self):
+        if Version(self.version) >= "1.84.0":
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C17, which your compiler does not support."
+                )
+
     def build_requirements(self):
         if self.options.with_webp or self.options.with_openjpeg:
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
                 self.tool_requires("pkgconf/2.1.0")
+        if Version(self.version) >= "1.84.0":
+            self.tool_requires("cmake/[>=3.21 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -99,6 +121,9 @@ class LeptonicaConan(ConanFile):
         if Version(self.version) >= "1.83.0":
             tc.variables["LIBWEBP_SUPPORT"] = self.options.with_webp
             tc.variables["OPENJPEG_SUPPORT"] = self.options.with_openjpeg
+        if Version(self.version) >= "1.84.0" and self.options.with_openjpeg:
+            jp2k_include_dir = self.dependencies["openjpeg"].cpp_info.includedirs[1].replace("\\", "/")
+            tc.preprocessor_definitions["LIBJP2K_HEADER"] = f"<{jp2k_include_dir}/openjpeg.h>"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -145,7 +170,8 @@ class LeptonicaConan(ConanFile):
         ## We have to be more aggressive with dependencies found with pkgconfig
         ## Injection of libdirs is ensured by conan_basic_setup()
         ## openjpeg
-        replace_in_file(self, cmakelists_src, "${JP2K_LIBRARIES}", "openjp2")
+        if Version(self.version) < "1.84.0":
+            replace_in_file(self, cmakelists_src, "${JP2K_LIBRARIES}", "openjp2")
         if Version(self.version) < "1.83.0":
             # pkgconfig is prefered to CMake. Disable pkgconfig so only CMake is used
             replace_in_file(self, cmakelists, "pkg_check_modules(JP2K libopenjp2>=2.0 QUIET)", "")
@@ -154,10 +180,12 @@ class LeptonicaConan(ConanFile):
             if not self.options.with_openjpeg:
                 replace_in_file(self, cmakelists_src, "if (JP2K_FOUND)", "if(0)")
                 replace_in_file(self, cmake_configure, "if (JP2K_FOUND)", "if(0)")
-        else:
+        elif Version(self.version) < "1.84.0":
             replace_in_file(self, cmakelists, "set(JP2K_INCLUDE_DIRS ${OPENJPEG_INCLUDE_DIRS})", "set(JP2K_INCLUDE_DIRS ${OpenJPEG_INCLUDE_DIRS})")
             if not self.options.with_openjpeg:
                 replace_in_file(self, cmake_configure, "if (JP2K_FOUND)", "if(0)")
+        else:
+            replace_in_file(self, cmakelists_src, "target_include_directories  (leptonica PRIVATE ${OPENJPEG_INCLUDE_DIRS})", "target_include_directories  (leptonica PRIVATE ${OpenJPEG_INCLUDE_DIRS})")
 
         ## libwebp
         if Version(self.version) < "1.83.0":
@@ -167,13 +195,13 @@ class LeptonicaConan(ConanFile):
             if not self.options.with_webp:
                 replace_in_file(self, cmakelists_src, "if (WEBP_FOUND)", "if(0)")
                 replace_in_file(self, cmake_configure, "if (WEBP_FOUND)", "if(0)")
-        if Version(self.version) >= "1.83.0" or self.options.with_webp:
+        if "1.83.0" <= Version(self.version) < "1.84.0" and self.options.with_webp:
             replace_in_file(self, cmakelists_src,
                                 "if (WEBP_FOUND)",
                                 "if (WEBP_FOUND)\n"
                                 "target_link_directories(leptonica PRIVATE ${WEBP_LIBRARY_DIRS} ${WEBPMUX_LIBRARY_DIRS})\n"
                                 "target_compile_definitions(leptonica PRIVATE ${WEBP_CFLAGS_OTHER} ${WEBPMUX_CFLAGS_OTHER})")
-        replace_in_file(self, cmakelists_src, "${WEBP_LIBRARIES}", "${WEBP_LIBRARIES} ${WEBPMUX_LIBRARIES}")
+            replace_in_file(self, cmakelists_src, "${WEBP_LIBRARIES}", "${WEBP_LIBRARIES} ${WEBPMUX_LIBRARIES}")
 
         # Remove detection of fmemopen() on macOS < 10.13
         # CheckFunctionExists will find it in the link library.
@@ -186,6 +214,10 @@ class LeptonicaConan(ConanFile):
                                       "fmemopen\n    fstatat\n)",
                                       "set(functions_list\n    "
                                       "fstatat\n)")
+
+        if Version(self.version) >= "1.83.0":
+            libwebp_version = self.dependencies["libwebp"].ref.version
+            replace_in_file(self, cmakelists, "set(MINIMUM_WEBPMUX_VERSION 0.5.0)", f"set(MINIMUM_WEBPMUX_VERSION {libwebp_version})")
 
     def build(self):
         self._patch_sources()
