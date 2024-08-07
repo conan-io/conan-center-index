@@ -1,0 +1,11 @@
+sources:
+  "2.4.1":
+    mrcal:
+      url: "https://github.com/dkogan/mrcal/archive/refs/tags/v2.4.1.tar.gz"
+      sha256: "74c746bf74ed61e2eb5766f403f7f35d4b5d793020dfbc185113a6e929457531"
+    libdogleg:
+      url: "https://github.com/dkogan/libdogleg/archive/refs/tags/v0.16.tar.gz"
+      sha256: "961a522b29d57dea771fbb47e648e35332072ed43fe8883a9b62b63b95f78e49"
+    mrbuild:
+      url: "https://github.com/dkogan/mrbuild/archive/refs/tags/v1.10.tar.gz"
+      sha256: "b0184246da6b5175c39cd4ca7784cab81804ec5c31dbfa81d3c9806b7177467c"
