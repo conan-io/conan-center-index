@@ -1,0 +1,10 @@
+sources:
+  # Newer versions at the top
+  "0.1.2":
+    url: "https://github.com/MtFmT-Lib/mtfmt/archive/refs/tags/v0.1.2.tar.gz"
+    sha256: "beeecca986c2df0a1270af69a0c6818f29e21f717e30fe512af32003304018fe"
+patches:
+  "0.1.2":
+    - patch_file: "patches/0.1.2-0001-remove-hardcoded-stds.patch"
+      patch_description: "Remove hardcoded C/CXX standards"
+      patch_type: "conan"
