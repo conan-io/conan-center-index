@@ -5,3 +5,9 @@ sources:
 patches:
   "1.0.2":
     - patch_file: "patches/0001-cmake-fixes.patch"
+      patch_description: "Use dependencies from conan"
+      patch_type: "conan"
+    - patch_file: "patches/0002-fix-clang-errors.patch"
+      patch_description: "Fix compilation errors on Clang and AppleClang"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/facontidavide/rosx_introspection/pull/11"
