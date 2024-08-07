@@ -39,7 +39,8 @@ class CigiClConan(ConanFile):
 
     def validate(self):
         if is_apple_os(self):
-            raise ConanInvalidConfiguration(f"{self.settings.os} is not supported")
+            # CigiOutgoingMsg.cpp:196:38: error: use of undeclared identifier 'PTHREAD_MUTEX_RECURSIVE_NP'
+            raise ConanInvalidConfiguration(f"{self.settings.os} Conan recipe is not supported on Apple. Contributions are welcome.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
