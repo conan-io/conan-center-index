@@ -918,9 +918,6 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_vdpau"):
             avutil.requires.append("libvdpau::libvdpau")
 
-        if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
-            avutil.requires.append("vulkan-loader::vulkan-loader")
-
         if self.options.with_ssl == "openssl":
             avutil.requires.append("openssl::ssl")
 
