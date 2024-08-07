@@ -1,0 +1,13 @@
+diff --git a/include/system/uuid.inl b/include/system/uuid.inl
+index 9fc3c2a..08f6450 100644
+--- a/include/system/uuid.inl
++++ b/include/system/uuid.inl
+@@ -26,7 +26,7 @@ inline constexpr uint8_t unhex(char ch)
+ } // namespace Internals
+ //! @endcond
+ 
+-inline constexpr UUID::UUID(const char* uuid, size_t size)
++inline constexpr UUID::UUID(const char* uuid, size_t size) : _data()
+ {
+     char v1 = 0;
+     char v2 = 0;
