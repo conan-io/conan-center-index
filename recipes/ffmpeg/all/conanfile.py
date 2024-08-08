@@ -319,9 +319,9 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_pulse"):
             self.requires("pulseaudio/14.2")
         if self.options.get_safe("with_vaapi"):
-            self.requires("libva/2.20.0")
+            self.requires("vaapi/system")
         if self.options.get_safe("with_vdpau"):
-            self.requires("libvdpau/1.5")
+            self.requires("vdpau/system")
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.243.0")
         if self.options.get_safe("with_libsvtav1"):
@@ -911,14 +911,12 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_libdrm"):
             avutil.requires.append("libdrm::libdrm_libdrm")
         if self.options.get_safe("with_vaapi"):
-            avutil.requires.append("libva::libva_")
-            if self.options.get_safe("with_libdrm"):
-                avutil.requires.append("libva::libva-drm")
+            avutil.requires.append("vaapi::vaapi")
             if self.options.get_safe("with_xcb"):
-                avutil.requires.extend(["libva::libva-x11", "xorg::x11"])
+                avutil.requires.append("xorg::x11")
 
         if self.options.get_safe("with_vdpau"):
-            avutil.requires.append("libvdpau::libvdpau")
+            avutil.requires.append("vdpau::vdpau")
 
         if self.options.with_ssl == "openssl":
             avutil.requires.append("openssl::ssl")
