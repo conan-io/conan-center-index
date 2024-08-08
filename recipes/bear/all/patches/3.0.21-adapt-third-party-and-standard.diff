@@ -1,0 +1,76 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b5dc382..73a7234 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -11,10 +11,6 @@ option(ENABLE_UNIT_TESTS "Build and run unit test for this project" ON)
+ option(ENABLE_FUNC_TESTS "Build and run functional test for this project" ON)
+ option(ENABLE_MULTILIB "Enable to build with multilib support" OFF)
+ 
+-set(CMAKE_CXX_STANDARD 17)
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-set(CMAKE_CXX_EXTENSIONS OFF)
+-
+ set(default_build_type "Release")
+ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+     message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
+@@ -106,12 +102,6 @@ endif ()
+ 
+ # Install the project artifacts from the staged directory
+ include(GNUInstallDirs)
+-install(DIRECTORY
+-            ${STAGED_INSTALL_PREFIX}/
+-        DESTINATION
+-            .
+-        USE_SOURCE_PERMISSIONS
+-)
+ install(FILES
+             COPYING README.md INSTALL.md CONTRIBUTING.md CODE_OF_CONDUCT.md
+         DESTINATION
+diff --git a/source/CMakeLists.txt b/source/CMakeLists.txt
+index 6da1131..fe6b710 100644
+--- a/source/CMakeLists.txt
++++ b/source/CMakeLists.txt
+@@ -29,7 +29,7 @@ find_package(spdlog REQUIRED)
+ find_package(PkgConfig REQUIRED)
+ pkg_check_modules(gRPC REQUIRED IMPORTED_TARGET protobuf grpc++)
+ 
+-if (fmt_VERSION_MAJOR EQUAL 9)
++if (fmt_VERSION_MAJOR GREATER_EQUAL 9)
+     set(FMT_NEEDS_OSTREAM_FORMATTER 1)
+     set(HAVE_FMT_STD_H 1) # FIXME: this should be done with `check_include_file`
+ endif ()
+diff --git a/third_party/fmt/CMakeLists.txt b/third_party/fmt/CMakeLists.txt
+index 373faaf..114bfaf 100644
+--- a/third_party/fmt/CMakeLists.txt
++++ b/third_party/fmt/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ 
+ message(STATUS "Looking for fmt dependency")
+-find_package(fmt 6.1 QUIET CONFIG)
++find_package(fmt QUIET CONFIG)
+ if (fmt_FOUND)
+     message(STATUS "Looking for fmt dependency -- found")
+     add_custom_target(fmt_dependency)
+diff --git a/third_party/nlohmann_json/CMakeLists.txt b/third_party/nlohmann_json/CMakeLists.txt
+index 3adc669..de2b129 100644
+--- a/third_party/nlohmann_json/CMakeLists.txt
++++ b/third_party/nlohmann_json/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ message(STATUS "Looking for nlohman_json dependency")
+-find_package(nlohmann_json 3.7.3 QUIET)
++find_package(nlohmann_json QUIET)
+ if (nlohmann_json_FOUND)
+     message(STATUS "Looking for nlohman_json dependency -- found")
+     add_custom_target(nlohmann_json_dependency)
+diff --git a/third_party/spdlog/CMakeLists.txt b/third_party/spdlog/CMakeLists.txt
+index 6fe687f..e8e2bd5 100644
+--- a/third_party/spdlog/CMakeLists.txt
++++ b/third_party/spdlog/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ 
+ message(STATUS "Looking for spdlog dependency")
+-find_package(spdlog 1.5.0 QUIET CONFIG)
++find_package(spdlog QUIET CONFIG)
+ if (spdlog_FOUND)
+     message(STATUS "Looking for spdlog dependency -- found")
+     add_custom_target(spdlog_dependency)

@@ -19,6 +19,7 @@ class BearConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/rizsotto/Bear"
     topics = ("clang", "compilation", "database", "llvm")
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
 
     @property
@@ -40,12 +41,13 @@ class BearConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("fmt/[>=6.2.1 <=10.0.0]")
         self.requires("grpc/1.50.1")
-        self.requires("fmt/9.1.0")
-        self.requires("spdlog/1.11.0")
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("nlohmann_json/[>=3.7.3 <4]")
+        self.requires("spdlog/[<=1.11.0]")
 
     def build_requirements(self):
+        self.tool_requires("protobuf/3.21.12")
         self.tool_requires("grpc/1.50.1")
 
     def package_id(self):
@@ -74,7 +76,7 @@ class BearConan(ConanFile):
         # In case there are dependencies listed on requirements, CMakeDeps should be used
         tc = CMakeDeps(self)
         tc.generate()
-        
+
         pc = PkgConfigDeps(self)
         pc.generate()
 
