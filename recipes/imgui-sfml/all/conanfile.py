@@ -60,7 +60,7 @@ class ImGuiSFMLConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["IMGUI_SFML_FIND_SFML"] = self.options.with_sfml
         tc.variables["IMGUI_DIR"] = self.dependencies["imgui"].package_folder
-        tc.variables["IMGUI_INCLUDE_DIR"] = os.path.join(self.dependencies["imgui"].package_folder, "include")
+        tc.variables["IMGUI_INCLUDE_DIR"] = self.dependencies["imgui"].cpp_info.includedir
         tc.generate()
 
         tc = CMakeDeps(self)
