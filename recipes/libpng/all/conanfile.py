@@ -116,6 +116,8 @@ class LibpngConan(ConanFile):
             tc.variables["PNG_MIPS_MSA"] = self._neon_msa_sse_vsx_mapping[str(self.options.msa)]
         if self._has_sse_support:
             tc.variables["PNG_INTEL_SSE"] = self._neon_msa_sse_vsx_mapping[str(self.options.sse)]
+        else:
+            tc.variables["PNG_INTEL_SSE"] = "off"
         if self._has_vsx_support:
             tc.variables["PNG_POWERPC_VSX"] = self._neon_msa_sse_vsx_mapping[str(self.options.vsx)]
         if Version(self.version) >= "1.6.41":
