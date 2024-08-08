@@ -68,6 +68,7 @@ class Bullet3Conan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        # print("XXX", self.options.network_support)
         tc = CMakeToolchain(self)
         tc.variables["BUILD_BULLET3"] = self.options.bullet3
         tc.variables["INSTALL_LIBS"] = True
