@@ -26,7 +26,6 @@ class LlamaCppConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_examples": [True, False],
-        "with_metal": [True, False],
         "with_cuda": [True, False],
         "with_curl": [True, False],
     }
@@ -34,7 +33,6 @@ class LlamaCppConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_examples": False,
-        "with_metal": False,
         "with_cuda": False,
         "with_curl": False,
     }
@@ -55,8 +53,6 @@ class LlamaCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not is_apple_os(self):
-            del self.options.with_metal
 
     def configure(self):
         if self.options.shared:
@@ -92,8 +88,6 @@ class LlamaCppConan(ConanFile):
         tc.variables["LLAMA_CURL"] = self.options.get_safe("with_curl")
         tc.variables["BUILD_SHARED_LIBS"] = bool(self.options.shared)
         tc.variables["GGML_CUDA"] = self.options.get_safe("with_cuda")
-        if is_apple_os(self):
-            tc.variables["GGML_METAL"] = self.options.get_safe("with_metal")
         if hasattr(self, "settings_build") and cross_building(self):
             tc.variables["LLAMA_NATIVE"] = False
         tc.generate()
@@ -117,21 +111,18 @@ class LlamaCppConan(ConanFile):
         copy(self, "*common*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*common*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
 
-
     def package_info(self):
+        self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
+        self.cpp_info.components["common"].libs = ["common"]
+        self.cpp_info.components["common"].libdirs = ["lib"]
+        if self.version >= Version("b3240"):
+            self.cpp_info.components["common"].libs.append("ggml")
+
         self.cpp_info.components["llama"].libs = ["llama"]
         self.cpp_info.components["llama"].resdirs = ["res"]
         self.cpp_info.components["llama"].libdirs = ["lib"]
 
         if is_apple_os(self):
-            self.cpp_info.components["llama"].frameworks.extend(["Foundation", "Accelerate", "Metal"])
+            self.cpp_info.components["common"].frameworks = ["Metal", "Foundation", "Accelerate"]
         elif self.settings.os in ("Linux", "FreeBSD"):
-            self.cpp_info.components["llama"].system_libs.extend(["dl", "m", "pthread"])
-
-        self.cpp_info.components["common"].requires.append("llama")
-        self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
-        self.cpp_info.components["common"].libs = ["common"]
-        if self.version >= Version("b3240"):
-            self.cpp_info.components["common"].libs.append("ggml")
-
-
+            self.cpp_info.components["common"].system_libs.extend(["dl", "m", "pthread", "gomp"])
