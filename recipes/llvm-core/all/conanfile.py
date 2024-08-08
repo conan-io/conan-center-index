@@ -9,6 +9,7 @@ from conan.tools.files import (
     collect_libs,
     get,
     rmdir,
+    load,
     save,
     copy,
     export_conandata_patches,
@@ -21,7 +22,7 @@ from conan.tools.scm import Version
 
 import json
 import os
-from pathlib import Path
+from pathlib import PurePosixPath
 import re
 import textwrap
 
@@ -314,11 +315,9 @@ class LLVMCoreConan(ConanFile):
     def _is_windows(self):
         return self.settings.os == "Windows"
 
-    @staticmethod
-    def load(filename):
-        # regex fails on Windows when using conan's built in 'load' method
-        with open(filename, "r", encoding="utf-8")as fp:
-            return fp.read()
+    @property
+    def _package_folder_path(self):
+        return PurePosixPath(self.package_folder)
 
     def _update_component_dependencies(self, components):
         def _sanitized_components(deps_list):
@@ -364,7 +363,7 @@ class LLVMCoreConan(ConanFile):
                     data["requires"].append(component)
             return data
 
-        cmake_exports = self.load(Path(self.package_folder) / "lib" / "cmake" / "llvm" / "LLVMExports.cmake")
+        cmake_exports = load(self, self._package_folder_path / "lib" / "cmake" / "llvm" / "LLVMExports.cmake")
         match_dependencies = re.compile(
             r'''^set_target_properties\((\w+).*\n?\s*INTERFACE_LINK_LIBRARIES\s+"(\S+)"''', re.MULTILINE)
 
@@ -373,7 +372,7 @@ class LLVMCoreConan(ConanFile):
                 components[llvm_lib].update(_parse_deps(dependencies))
 
     def _llvm_build_info(self):
-        cmake_config = self.load(Path(self.package_folder) / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake")
+        cmake_config = load(self, self._package_folder_path / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake")
 
         match_cmake_var = re.compile(r"""^set\(LLVM_AVAILABLE_LIBS (?P<components>.*)\)$""", re.MULTILINE)
         match = match_cmake_var.search(cmake_config)
@@ -391,11 +390,11 @@ class LLVMCoreConan(ConanFile):
 
     @property
     def _cmake_module_path(self):
-        return Path("lib") / "cmake" / "llvm"
+        return PurePosixPath("lib") / "cmake" / "llvm"
 
     @property
     def _build_info_file(self):
-        return Path(self.package_folder) / self._cmake_module_path / "conan_llvm_build_info.json"
+        return self._package_folder_path / self._cmake_module_path / "conan_llvm_build_info.json"
 
     @property
     def _build_module_file_rel_path(self):
@@ -440,30 +439,29 @@ class LLVMCoreConan(ConanFile):
             return json.load(fp)
 
     def package(self):
-        copy(self, "LICENSE.TXT", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.TXT", self.source_folder, self._package_folder_path / "licences")
         cmake = CMake(self)
         cmake.install()
 
         build_info = self._write_build_info()
 
-        package_folder = Path(self.package_folder)
-        cmake_folder = package_folder / "lib" / "cmake" / "llvm"
+        cmake_folder = self._package_folder_path / "lib" / "cmake" / "llvm"
         rm(self, "LLVMConfig.cmake", cmake_folder)
         rm(self, "LLVMExports*", cmake_folder)
         rm(self, "Find*", cmake_folder)
-        rm(self, "*.pdb", package_folder / "lib")
-        rm(self, "*.pdb", package_folder / "bin")
+        rm(self, "*.pdb", self._package_folder_path / "lib")
+        rm(self, "*.pdb", self._package_folder_path / "bin")
         # need to rename this as Conan will flag it, but it's not actually a Config file and is needed by
         # downstream packages
         rename(self, cmake_folder / "LLVM-Config.cmake", cmake_folder / "LLVM-ConfigInternal.cmake")
         replace_in_file(self, cmake_folder / "AddLLVM.cmake", "LLVM-Config", "LLVM-ConfigInternal")
-        rmdir(self, package_folder / "share")
+        rmdir(self, self._package_folder_path / "share")
         if self.options.shared:
-            rm(self, "*.a", package_folder / "lib")
+            rm(self, "*.a", self._package_folder_path / "lib")
 
         self._create_cmake_build_module(
             build_info,
-            package_folder / self._build_module_file_rel_path
+            self._package_folder_path / self._build_module_file_rel_path
         )
 
     def package_info(self):
