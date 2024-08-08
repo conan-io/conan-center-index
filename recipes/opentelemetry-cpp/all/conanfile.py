@@ -1,7 +1,7 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir, replace_in_file, save
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, default_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
@@ -24,7 +24,7 @@ class OpenTelemetryCppConan(ConanFile):
         "fPIC": [True, False],
         "shared": [True, False],
         "with_no_deprecated_code": [True, False],
-        "with_stl": [True, False],
+        "with_stl": [True, False, "default"],
         "with_gsl": [True, False],
         "with_abseil": [True, False],
         "with_otlp": ["deprecated", True, False],
@@ -70,6 +70,18 @@ class OpenTelemetryCppConan(ConanFile):
         if self.options.with_abseil and Version(self.dependencies["abseil"].ref.version) >= "20230125":
             return 14
         return 11
+
+    @property
+    def _default_cppstd(self):
+        if self.options.with_stl == "default":
+            return default_cppstd(self).replace("gnu", "")
+        return self._min_cppstd
+
+    @property
+    def _default_stl_version(self):
+        if self.options.with_stl == "default":
+            return f"CXX{self._default_cppstd}"
+        return self.options.with_stl
 
     @property
     def _compilers_minimum_version(self):
@@ -137,7 +149,7 @@ class OpenTelemetryCppConan(ConanFile):
 
         if self.options.get_safe("with_jaeger"):
             self.requires("thrift/0.17.0")
-            self.requires("boost/1.84.0")
+            self.requires("boost/1.85.0")
 
     @property
     def _required_boost_components(self):
@@ -208,7 +220,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["BUILD_BENCHMARK"] = False
         tc.cache_variables["WITH_EXAMPLES"] = False
         tc.cache_variables["WITH_NO_DEPRECATED_CODE"] = self.options.with_no_deprecated_code
-        tc.cache_variables["WITH_STL"] = self.options.with_stl
+        tc.cache_variables["WITH_STL"] = self._default_stl_version
         tc.cache_variables["WITH_GSL"] = self.options.with_gsl
         tc.cache_variables["WITH_ABSEIL"] = self.options.with_abseil
         if Version(self.version) < "1.10":
@@ -228,7 +240,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_METRICS_EXEMPLAR_PREVIEW"] = self.options.with_metrics_exemplar_preview
         tc.cache_variables["OPENTELEMETRY_INSTALL"] = True
         if not self.settings.compiler.cppstd:
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+            tc.variables["CMAKE_CXX_STANDARD"] = self._default_cppstd
         tc.generate()
 
         deps = CMakeDeps(self)
