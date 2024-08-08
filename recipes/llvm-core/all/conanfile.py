@@ -93,8 +93,6 @@ class LLVMCoreConan(ConanFile):
         "with_zlib": [True, False],
         "with_xml2": [True, False],
         "with_z3": [True, False],
-        "ram_per_compile_job": ["ANY"],
-        "ram_per_link_job": ["ANY"],
     }
     options.update({f"with_target_{target.lower()}": [True, False] for target in LLVM_TARGETS})
     default_options = {
@@ -116,8 +114,6 @@ class LLVMCoreConan(ConanFile):
         "with_xml2": True,
         "with_z3": True,
         "with_zlib": True,
-        "ram_per_compile_job": "auto",
-        "ram_per_link_job": "auto"
     }
     default_options.update({f"with_target_{target.lower()}": True for target in LLVM_TARGETS})
 
@@ -213,10 +209,13 @@ class LLVMCoreConan(ConanFile):
                 "LLVM_RAM_PER_COMPILE_JOB": "2048"
             })
         else:
-            if self.options.ram_per_compile_job != "auto":
-                cmake_definitions["LLVM_RAM_PER_COMPILE_JOB"] = self.options.ram_per_compile_job
-            if self.options.ram_per_link_job != "auto":
-                cmake_definitions["LLVM_RAM_PER_LINK_JOB"] = self.options.ram_per_link_job
+            ram_per_compile_job = self.conf.get("user.llvm-core:ram_per_compile_job")
+            if ram_per_compile_job:
+                cmake_definitions["LLVM_RAM_PER_COMPILE_JOB"] = ram_per_compile_job
+
+            ram_per_link_job = self.conf.get("user.llvm-core:ram_per_link_job")
+            if ram_per_link_job:
+                cmake_definitions["LLVM_RAM_PER_LINK_JOB"] = ram_per_link_job
 
     @property
     def _targets_to_build(self):
@@ -465,10 +464,6 @@ class LLVMCoreConan(ConanFile):
             build_info,
             package_folder / self._build_module_file_rel_path
         )
-
-    def package_id(self):
-        del self.info.options.ram_per_compile_job
-        del self.info.options.ram_per_link_job
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "LLVM")
