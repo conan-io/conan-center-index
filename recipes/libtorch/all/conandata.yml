@@ -1,0 +1,22 @@
+sources:
+  "2.4.0":
+    url: "https://github.com/pytorch/pytorch/releases/download/v2.4.0/pytorch-v2.4.0.tar.gz"
+    sha256: "a890d4342149adbc6c8b116a9afe437fe347527a9ecc0650086cdec82ecdcfb7"
+patches:
+  "2.4.0":
+    - patch_file: "patches/2.4.0/0001-use-conan-dependencies.patch"
+      patch_description: "Use Conan dependencies"
+      patch_type: "conan"
+    - patch_file: "patches/2.4.0/0002-fix-a-minor-glog-incompatibility.patch"
+      patch_description: "Fix a small incompatibility with newer glog"
+      patch_type: "portability"
+    - patch_file: "patches/2.4.0/0003-fix-cmake-logic-bug.patch"
+      patch_description: "Fix a CMake logic bug when kineto is disabled"
+      patch_type: "portability"
+    - patch_file: "patches/2.4.0/0004-add-a-missing-include.patch"
+      patch_description: "Add a missing <iostream> include"
+      patch_type: "bugfix"
+    - patch_file: "patches/2.4.0/0005-kineto-unvendor-fmt.patch"
+      patch_description: "Unvendor fmt in vendored kineto"
+      base_path: "third_party/kineto"
+      patch_type: "conan"
