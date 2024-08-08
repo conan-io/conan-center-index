@@ -195,7 +195,8 @@ class LLVMCoreConan(ConanFile):
 
         if cross_building(self):
             # FIXME support cross compilation, at least for common cases like Apple Silicon -> X86
-            #  requires a host-compiled version of llvm-tablegen
+            #  requires a host-compiled version of llvm-tablegen.
+            #  see also https://llvm.org/docs/HowToCrossCompileLLVM.html
             raise ConanInvalidConfiguration("Cross compilation is not supported. Contributions are welcome!")
 
     def source(self):
