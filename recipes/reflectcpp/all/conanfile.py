@@ -53,20 +53,6 @@ class ReflectCppConan(ConanFile):
         "with_yaml": False,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 20
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "17",
-            "msvc": "193",
-            "gcc": "11",
-            "clang": "13",
-            "apple-clang": "15",
-        }
-
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
@@ -149,3 +135,17 @@ class ReflectCppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["reflectcpp"]
+
+    @property
+    def _min_cppstd(self):
+        return 20
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "17",
+            "msvc": "193",
+            "gcc": "11",
+            "clang": "13",
+            "apple-clang": "15",
+        }
