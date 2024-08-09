@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.android import android_abi
 from conan.tools.apple import is_apple_os
@@ -208,6 +208,10 @@ class QtConan(ConanFile):
         if self.settings.os != "Android":
             del self.options.android_sdk
 
+    def _debug_output(self, message):
+        if Version(conan_version) >= "2":
+            self.output.debug(message)
+
     def configure(self):
         # if self.settings.os != "Linux":
         #         self.options.with_libiconv = False # QTBUG-84708
@@ -252,7 +256,7 @@ class QtConan(ConanFile):
 
         for module in self._submodules:
             if module not in submodules_tree:
-                self.output.debug(f"qt5: removing {module} from options as it is not an option for this version, or it is ignored or obsolete")
+                self._debug_output(f"qt5: removing {module} from options as it is not an option for this version, or it is ignored or obsolete")
                 self.options.rm_safe(module)
 
         # Requested modules:
@@ -268,21 +272,28 @@ class QtConan(ConanFile):
                 if not is_disabled:
                     requested_modules.add(module)
                 else:
-                    self.output.debug(f"qt5: {module} requested because {status}_modules=True"
+                    self.output.warning(f"qt5: {module} requested because {status}_modules=True"
                                         f" but it has been explicitly disabled with {module}=False")
 
-        self.output.debug(f"qt5: requested modules {requested_modules}")
+        self.output.info(f"qt5: requested modules {list(requested_modules)}")
 
-        required_modules = set()
+        required_modules = {}
         for module in requested_modules:
-            required_modules.update(submodules_tree[module]["depends"])
+            deps = submodules_tree[module]["depends"]
+            for dep in deps:
+                required_modules.setdefault(dep,[]).append(module)
 
-        required_but_disabled = [m for m in required_modules if self.options.get_safe(m) == False]
-        self.output.debug(f"qt5: required_modules modules {required_modules}")
+        required_but_disabled = [m for m in required_modules.keys() if self.options.get_safe(m) == False]
+        if required_modules:
+            self._debug_output(f"qt5: required_modules modules {list(required_modules.keys())}")
         if required_but_disabled:
-            raise ConanInvalidConfiguration(f"Modules {', '.join(required_but_disabled)} are required by other options, but are explicitly disabled")
+            required_by = set()
+            for m in required_but_disabled:
+                required_by.update(required_modules[m])
+                raise ConanInvalidConfiguration(f"Modules {required_but_disabled} are explicitly disabled, "
+                                    f"but are required by {list(required_by)}, enabled by other options")
 
-        enabled_modules = requested_modules.union(required_modules)
+        enabled_modules = requested_modules.union(set(required_modules.keys()))
         enabled_modules.discard("qtbase")
 
         for module in list(enabled_modules):
@@ -305,12 +316,12 @@ class QtConan(ConanFile):
         for status in self._module_statuses:
             # These are convenience only, should not affect package_id
             option_name = f"{status}_modules"
-            self.output.debug(f"qt5 removing convenience option: {option_name},"
+            self._debug_output(f"qt5 removing convenience option: {option_name},"
                               f" see individual module options")
             self.options.rm_safe(option_name)
 
         for option in self.options.items():
-            self.output.debug(f"qt5 option {option[0]}={option[1]}")
+            self._debug_output(f"qt5 option {option[0]}={option[1]}")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):

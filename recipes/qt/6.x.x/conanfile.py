@@ -4,7 +4,7 @@ import os
 import platform
 import textwrap
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -199,6 +199,10 @@ class QtConan(ConanFile):
             "apple-clang": "12" if Version(self.version) >= "6.5.0" else "11"
         }
 
+    def _debug_output(self, message):
+        if Version(conan_version) >= "2":
+            self.output.debug(message)
+
     def configure(self):
         if not self.options.gui:
             del self.options.opengl
@@ -228,21 +232,28 @@ class QtConan(ConanFile):
                 if not is_disabled:
                     requested_modules.add(module)
                 else:
-                    self.output.debug(f"qt6: {module} requested because {status}_modules=True"
+                    self.output.warning(f"qt6: {module} requested because {status}_modules=True"
                                         f" but it has been explicitly disabled with {module}=False")
 
-        self.output.debug(f"qt6: requested modules {requested_modules}")
+        self.output.info(f"qt6: requested modules {list(requested_modules)}")
 
-        required_modules = set()
+        required_modules =  {}
         for module in requested_modules:
-            required_modules.update(self._get_module_tree[module]["depends"])
+            deps = self._get_module_tree[module]["depends"]
+            for dep in deps:
+                required_modules.setdefault(dep,[]).append(module)
 
-        required_but_disabled = [m for m in required_modules if self.options.get_safe(m) == False]
-        self.output.debug(f"qt6: required_modules modules {required_modules}")
+        required_but_disabled = [m for m in required_modules.keys() if self.options.get_safe(m) == False]
+        if required_modules:
+            self._debug_output(f"qt6: required_modules modules {list(required_modules.keys())}")
         if required_but_disabled:
-            raise ConanInvalidConfiguration(f"Modules {', '.join(required_but_disabled)} are required by other options, but are explicitly disabled")
+            required_by = set()
+            for m in required_but_disabled:
+                required_by.update(required_modules[m])
+            raise ConanInvalidConfiguration(f"Modules {required_but_disabled} are explicitly disabled, "
+                                            f"but are required by {list(required_by)}, enabled by other options")
 
-        enabled_modules = requested_modules.union(required_modules)
+        enabled_modules = requested_modules.union(set(required_modules.keys()))
         enabled_modules.discard("qtbase")
 
         for module in list(enabled_modules):
@@ -265,12 +276,12 @@ class QtConan(ConanFile):
         for status in self._module_statuses:
             # These are convenience only, should not affect package_id
             option_name = f"{status}_modules"
-            self.output.debug(f"qt5 removing convenience option: {option_name},"
+            self._debug_output(f"qt6 removing convenience option: {option_name},"
                               f" see individual module options")
             self.options.rm_safe(option_name)
 
         for option in self.options.items():
-            self.output.debug(f"qt6 option: {option}")
+            self._debug_output(f"qt6 option: {option}")
 
     def validate(self):
         if os.getenv('CONAN_CENTER_BUILD_SERVICE') is not None:
