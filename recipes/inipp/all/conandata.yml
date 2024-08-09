@@ -1,0 +1,4 @@
+sources:
+  "1.0.12":
+    url: "https://github.com/mcmtroffaes/inipp/archive/refs/tags/1.0.12.tar.gz"
+    sha256: "e37833ab689c7b38de09b1923635b131f80db42e9b22f37d88ae4d74a7cd3e78"
