@@ -344,6 +344,8 @@ class AwsSdkCppConan(ConanFile):
         self.requires("aws-c-common/0.8.2")
         self.requires("aws-c-event-stream/0.2.7")
         self.requires("aws-checksums/0.1.13")
+        if self.options.get_safe("s3-crt"):
+            self.requires("aws-c-s3/0.1.37")
         if self._use_aws_crt_cpp:
             self.requires("aws-c-cal/0.5.13")
             self.requires("aws-c-http/0.6.13")
@@ -547,6 +549,9 @@ class AwsSdkCppConan(ConanFile):
             self.cpp_info.components["core"].system_libs.append("atomic")
             if self.options.get_safe("text-to-speech"):
                 self.cpp_info.components["text-to-speech"].requires.append("pulseaudio::pulseaudio")
+
+        if self.options.get_safe("s3-crt"):
+            self.cpp_info.components["s3-crt"].requires.append("aws-c-s3::aws-c-s3")
 
         if self.settings.os == "Macos":
             if self.options.get_safe("text-to-speech"):
