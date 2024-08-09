@@ -95,7 +95,8 @@ class ZziplibConan(ConanFile):
 
         suffix = ""
         if self.settings.build_type == "Release" and \
-           (not self.options.shared or self.settings.os == "Windows" or is_apple_os(self)):
+            self.settings.os != "Windows" and \
+            not is_apple_os(self):
             suffix += f"-{Version(self.version).major}"
 
         # libzzip
