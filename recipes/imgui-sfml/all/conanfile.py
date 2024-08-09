@@ -66,8 +66,9 @@ class ImGuiSFMLConan(ConanFile):
         tc = CMakeDeps(self)
         tc.set_property("imgui", "cmake_file_name", "ImGui")
         tc.generate()
-        
+
     def _patch_sources(self):
+        # This is a workaround to avoid installing vendorized imgui headers as well to the package folder
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), 'list(APPEND IMGUI_SFML_PUBLIC_HEADERS "${IMGUI_PUBLIC_HEADERS}")', "")
 
     def build(self):
@@ -78,7 +79,6 @@ class ImGuiSFMLConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        mkdir(self, os.path.join(self.package_folder, "res", "misc", "cpp"))
         cmake = CMake(self)
         cmake.install()
 
