@@ -91,6 +91,13 @@ class RaylibConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
+        res_include_folder = os.path.join(self.package_folder, "res", "include")
+        copy(self, pattern="rcamera.h", src=os.path.join(self.source_folder, "src"), dst=res_include_folder, keep_path=False)
+        copy(self, pattern="rgestures.h", src=os.path.join(self.source_folder, "src"), dst=res_include_folder, keep_path=False)
+        copy(self, pattern="rlgl.h", src=os.path.join(self.source_folder, "src"), dst=res_include_folder, keep_path=False)
+        copy(self, pattern="raymath.h", src=os.path.join(self.source_folder, "src"), dst=res_include_folder, keep_path=False)
+        copy(self, pattern="raudio.h", src=os.path.join(self.source_folder, "src"), dst=res_include_folder, keep_path=False)
+
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self._create_cmake_module_alias_targets(
             os.path.join(self.package_folder, self._module_file_rel_path),
@@ -126,6 +133,13 @@ class RaylibConan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("winmm")
+
+        # Some useful files are not packaged by default
+        res_includes = os.path.join(self.package_folder, "res", "include")
+        self.cpp_info.resdirs = [res_includes]
+
+        if self.conf.get("user.raylib:include_res", default=False, check_type=bool):
+            self.cpp_info.includedirs.append(res_includes)
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
