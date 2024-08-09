@@ -1,7 +1,7 @@
 sources:
-  "0.7.7":
-    url: "https://github.com/getsentry/sentry-native/releases/download/0.7.7/sentry-native.zip"
-    sha256: "3c53ffcb85cb92e1aa02f11717155db4b9fd8f98a0f7f1d521171cdd65f2790c"
+  "0.7.8":
+    url: "https://github.com/getsentry/sentry-native/releases/download/0.7.8/sentry-native.zip"
+    sha256: "7cfde453866edf4ae7991f4300fc08a5cb4e6d679d31011ff93b4cfe5e3e5d8a"
   "0.7.6":
     url: "https://github.com/getsentry/sentry-native/releases/download/0.7.6/sentry-native.zip"
     sha256: "42180ad933a3a2bd86a1649ed0f1a41df20e783ce17c5cb1f86775f7caf06bc1"
