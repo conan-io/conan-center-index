@@ -1,4 +1,4 @@
 sources:
-  "0.1.2":
-    url: "https://github.com/koide3/small_gicp/archive/refs/tags/v0.1.2.tar.gz"
-    sha256: "dc3fc95236079c71dda63706e75bede03b0a2bb24447474da6fced91f0bf4a56"
+  "1.0.0":
+    url: "https://github.com/koide3/small_gicp/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "8ace22cfc79b1ea1c827d199c98f1efd01fd5a6686cda99e684ef21cb86ebbbf"
