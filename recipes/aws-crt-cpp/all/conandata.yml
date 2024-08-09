@@ -23,6 +23,10 @@ patches:
     - patch_file: "patches/0.17.23-fix-cast-error.patch"
       patch_description: "fix const cast error"
       patch_type: "portability"
+    - patch_file: "patches/0.17.23-fix-cpp20-windows.patch"
+      patch_description: "Fixes cpp 20 builds for windows."
+      patch_type: "bugfix"
+      patch_source: "https://github.com/awslabs/aws-crt-cpp/pull/364"
   "0.17.12":
     - patch_file: "patches/0.17.12-fix-cast-error.patch"
       patch_description: "fix const cast error"
