@@ -1,3 +1,5 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
@@ -5,9 +7,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir
-from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-import os
 
 required_conan_version = ">=1.55.0"
 
@@ -35,7 +35,7 @@ class SentryNativeConan(ConanFile):
         "with_crashpad": ["google", "sentry"],
         "crashpad_with_tls": ["openssl", False],
         "with_breakpad": ["google", "sentry"],
-        "wer" : [True, False],
+        "wer": [True, False],
     }
     default_options = {
         "shared": False,
@@ -46,12 +46,12 @@ class SentryNativeConan(ConanFile):
         "with_crashpad": "sentry",
         "crashpad_with_tls": "openssl",
         "with_breakpad": "sentry",
-        "wer": False
+        "wer": False,
     }
 
     @property
     def _min_cppstd(self):
-        return "17"
+        return "17" if Version(self.version) < "0.7.7" else "20"
 
     @property
     def _minimum_compilers_version(self):
@@ -63,7 +63,7 @@ class SentryNativeConan(ConanFile):
             "msvc": "191",
             "gcc": minimum_gcc_version,
             "clang": "3.4",
-            "apple-clang": "5.1",
+            "apple-clang": "10.0",
         }
 
     def config_options(self):
@@ -128,8 +128,6 @@ class SentryNativeConan(ConanFile):
             )
         if self.options.transport == "winhttp" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("The winhttp transport is only supported on Windows")
-        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "10.0":
-            raise ConanInvalidConfiguration("apple-clang < 10.0 not supported")
 
     def build_requirements(self):
         if self.settings.os == "Windows":
