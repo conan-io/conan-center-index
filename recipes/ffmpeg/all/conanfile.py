@@ -76,6 +76,7 @@ class FFMpegConan(ConanFile):
         "with_libdav1d": [True, False],
         "with_jni": [True, False],
         "with_mediacodec": [True, False],
+        "with_xlib": [True, False],
         "disable_everything": [True, False],
         "disable_all_encoders": [True, False],
         "disable_encoders": [None, "ANY"],
@@ -158,6 +159,7 @@ class FFMpegConan(ConanFile):
         "with_libdav1d": True,
         "with_jni": False,
         "with_mediacodec": False,
+        "with_xlib": True,
         "disable_everything": False,
         "disable_all_encoders": False,
         "disable_encoders": None,
@@ -230,6 +232,7 @@ class FFMpegConan(ConanFile):
             "with_libaom": ["avcodec"],
             "with_libdav1d": ["avcodec"],
             "with_mediacodec": ["with_jni"],
+            "with_xlib": ["avdevice"],
         }
 
     @property
@@ -249,6 +252,7 @@ class FFMpegConan(ConanFile):
             del self.options.with_xcb
             del self.options.with_libalsa
             del self.options.with_pulse
+            del self.options.with_xlib
         if self.settings.os != "Macos":
             del self.options.with_appkit
         if self.settings.os not in ["Macos", "iOS", "tvOS"]:
@@ -311,7 +315,7 @@ class FFMpegConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.10")
-        if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi"):
+        if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi") or self.options.get_safe("with_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_pulse"):
             self.requires("pulseaudio/14.2")
@@ -518,6 +522,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("libdav1d", self.options.get_safe("with_libdav1d")),
             opt_enable_disable("jni", self.options.get_safe("with_jni")),
             opt_enable_disable("mediacodec", self.options.get_safe("with_mediacodec")),
+            opt_enable_disable("xlib", self.options.get_safe("with_xlib")),
             "--disable-cuda",  # FIXME: CUDA support
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
@@ -833,6 +838,8 @@ class FFMpegConan(ConanFile):
                 avdevice.requires.append("libalsa::libalsa")
             if self.options.get_safe("with_xcb"):
                 avdevice.requires.extend(["xorg::xcb", "xorg::xcb-shm", "xorg::xcb-xfixes", "xorg::xcb-shape", "xorg::xv", "xorg::xext"])
+            if self.options.get_safe("with_xlib"):
+                avdevice.requires.extend(["xorg::x11", "xorg::xext", "xorg::xv"])
             if self.options.get_safe("with_pulse"):
                 avdevice.requires.append("pulseaudio::pulseaudio")
             if self.options.get_safe("with_appkit"):
