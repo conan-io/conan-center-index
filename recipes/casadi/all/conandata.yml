@@ -1,9 +1,9 @@
 sources:
-  "3.6.4":
-    url: "https://github.com/casadi/casadi/releases/download/3.6.4/casadi-source-v3.6.4.zip"
-    sha256: "d8d04465f817e6b531dc0a98b8797ebfe385ae548aeb689120a3a0c905b0ae57"
+  "3.6.6":
+    url: "https://github.com/casadi/casadi/releases/download/3.6.6/casadi-source-v3.6.6.zip"
+    sha256: "c8583e19a2a2acc633082f46b0d2f6db29f4e1816fa16930897b2b86e68f048c"
 patches:
-  "3.6.4":
+  "3.6.6":
     - patch_file: "patches/001-fix-cflags-added-as-defines.patch"
       patch_description: "Fix target_compile_definitions() being used to set CFLAGS"
       patch_source: "https://github.com/casadi/casadi/pull/3511"
