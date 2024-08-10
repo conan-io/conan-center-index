@@ -185,7 +185,7 @@ class QtConan(ConanFile):
 
         for submodule in self._submodules:
             if submodule not in self._get_module_tree:
-                self.output.debug(f"Qt6: Removing {submodule} option as it is not in the module tree for this version, or is marked as obsolete or ignore")
+                self._debug_output(f"Qt6: Removing {submodule} option as it is not in the module tree for this version, or is marked as obsolete or ignore")
                 self.options.rm_safe(submodule)
 
     @property
