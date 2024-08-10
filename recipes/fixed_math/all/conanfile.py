@@ -49,9 +49,10 @@ class FixedMathConan(ConanFile):
         if self.settings.os == "Windows":
             self.package_type = "static-library"
             del self.options.fPIC
-            del self.options.shared
 
     def configure(self):
+        if self.settings.os == "Windows":
+            self.options.rm_safe("shared")
         if self.options.header_only:
             self.options.rm_safe("shared")
             self.options.rm_safe("fPIC")
