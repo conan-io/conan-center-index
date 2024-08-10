@@ -1,0 +1,21 @@
+Fix try_compile() failing due to OpenMP_CXX_FLAGS flags being added to CMAKE_CXX_FLAGS and libomp not being found.
+
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.10.2)
++cmake_minimum_required(VERSION 3.15)
+ project(casadi C CXX)
+ 
+ set(CASADI_MAJOR_VERSION 3)
+@@ -303,8 +303,8 @@
+ if(WITH_OPENMP)
+   find_package(OpenMP REQUIRED)
+   if(OPENMP_FOUND)
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS} -DWITH_OPENMP")
+-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS} -DWITH_OPENMP")
++    link_libraries($<$<LINK_LANGUAGE:C>:OpenMP::OpenMP_C>)
++    link_libraries($<$<LINK_LANGUAGE:CXX>:OpenMP::OpenMP_CXX>)
+   endif()
+ endif()
+ 

@@ -8,3 +8,6 @@ patches:
       patch_description: "Fix target_compile_definitions() being used to set CFLAGS"
       patch_source: "https://github.com/casadi/casadi/pull/3511"
       patch_type: "bugfix"
+    - patch_file: "patches/002-fix-openmp-linking.patch"
+      patch_description: "Don't add OpenMP_CXX_FLAGS to global CMAKE_CXX_FLAGS"
+      patch_type: "portability"
