@@ -1,4 +1,9 @@
 sources:
+  "8.9.1":
+    url:
+      - "https://curl.se/download/curl-8.9.1.tar.xz"
+      - "https://github.com/curl/curl/releases/download/curl-8_9_1/curl-8.9.1.tar.xz"
+    sha256: "f292f6cc051d5bbabf725ef85d432dfeacc8711dd717ea97612ae590643801e5"
   "8.8.0":
     url:
       - "https://curl.se/download/curl-8.8.0.tar.xz"

@@ -195,15 +195,15 @@ class OpenCVConan(ConanFile):
         "with_jpeg": "libjpeg",
         "with_png": True,
         "with_tiff": True,
-        "with_jpeg2000": "jasper",
+        "with_jpeg2000": "openjpeg",
         "with_openexr": True,
         "with_webp": True,
         "with_gdal": False,
         "with_gdcm": False,
-        "with_imgcodec_hdr": False,
-        "with_imgcodec_pfm": False,
-        "with_imgcodec_pxm": False,
-        "with_imgcodec_sunraster": False,
+        "with_imgcodec_hdr": True,
+        "with_imgcodec_pfm": True,
+        "with_imgcodec_pxm": True,
+        "with_imgcodec_sunraster": True,
         "with_msmf": True,
         "with_msmf_dxva": True,
         # objdetect module options
@@ -393,6 +393,9 @@ class OpenCVConan(ConanFile):
             # in a big dependency graph
             if not self._has_with_wayland_option:
                 self.options.with_gtk = True
+
+        if Version(self.version) < "4.3.0":
+            self.options.with_jpeg2000 = "jasper"
 
     @property
     def _opencv_modules(self):
@@ -1286,6 +1289,10 @@ class OpenCVConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "viz module can't be enabled yet. It requires VTK which is not available in conan-center."
             )
+
+        if self.options.with_jpeg2000 == "openjpeg" and Version(self.version) < "4.3.0":
+            raise ConanInvalidConfiguration("openjpeg is not available for OpenCV before 4.3.0")
+
         if self.options.get_safe("with_aravis"):
             aravis_version = Version(self.dependencies["aravis"].ref.version)
             aravis_major_minor = f"{aravis_version.major}.{aravis_version.minor}"
