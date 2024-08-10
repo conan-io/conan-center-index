@@ -99,7 +99,7 @@ class OnnxRuntimeConan(ConanFile):
         if self.settings.os != "Windows":
             self.requires("nsync/1.26.0")
         else:
-            self.requires("wil/1.0.240122.1")
+            self.requires("wil/1.0.240803.1")
         if self.options.with_xnnpack:
             if Version(self.version) >= "1.17.0":
                 self.requires("xnnpack/cci.20230715")
