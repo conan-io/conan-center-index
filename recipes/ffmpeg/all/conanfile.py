@@ -194,8 +194,6 @@ class FFMpegConan(ConanFile):
         "disable_filters": None,
         "enable_filters": None,
     }
-    # Fix for mslink: Argument list too long
-    short_paths = True
 
     @property
     def _settings_build(self):
@@ -345,7 +343,7 @@ class FFMpegConan(ConanFile):
                 raise ConanInvalidConfiguration("FFmpeg '{}' option requires '{}' option to be enabled".format(
                     dependency, "' or '".join(features)))
 
-        if conan_version.major == 1 and is_msvc(self) and self.options.shared:
+        if Version(self.version) >= "6.1" and conan_version.major == 1 and is_msvc(self) and self.options.shared:
             # Linking fails with "Argument list too long" for some reason on Conan v1
             raise ConanInvalidConfiguration("MSVC shared build is not supported for Conan v1")
 

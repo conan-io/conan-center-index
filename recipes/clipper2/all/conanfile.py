@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
@@ -21,11 +21,15 @@ class Clipper2Conan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "usingz": ["ON", "OFF", "ONLY"],
+        "with_max_precision": ["ANY"],
+        "with_hi_precision": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "usingz": "ON",
+        "with_max_precision": 8,
+        "with_hi_precision": False,
     }
 
     @property
@@ -48,6 +52,10 @@ class Clipper2Conan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.2.4":
+            del self.options.with_max_precision
+        if Version(self.version) < "1.4.0":
+            del self.options.with_hi_precision
 
     def configure(self):
         if self.options.shared:
@@ -75,10 +83,18 @@ class Clipper2Conan(ConanFile):
         tc.variables["CLIPPER2_EXAMPLES"] = False
         tc.variables["CLIPPER2_TESTS"] = False
         tc.variables["CLIPPER2_USINGZ"] = self.options.usingz
+        if "with_hi_precision" in self.options:
+            tc.variables["CLIPPER2_HI_PRECISION"] = self.options.with_hi_precision
+        if "with_max_precision" in self.options:
+            tc.variables["CLIPPER2_MAX_PRECISION"] = self.options.with_max_precision
         tc.generate()
+    
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CPP", "CMakeLists.txt"), "-Werror", "")
 
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "CPP"))
         cmake.build()
@@ -89,6 +105,7 @@ class Clipper2Conan(ConanFile):
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         if self.options.usingz != "ONLY":
