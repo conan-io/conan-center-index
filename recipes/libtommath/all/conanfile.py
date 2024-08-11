@@ -54,6 +54,7 @@ class LibTomMathConan(ConanFile):
             # libtommath requires at least /O1 on MSVC for dead code elimination
             # https://github.com/libtom/libtommath/blob/42b3fb07e7d504f61a04c7fca12e996d76a25251/s_mp_rand_platform.c#L120-L138
             tc.cache_variables["CMAKE_CXX_FLAGS_DEBUG_INIT"] = "/O1"
+            tc.cache_variables["CMAKE_BUILD_TYPE"] = "RelWithDebInfo"
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
