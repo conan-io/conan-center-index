@@ -20,7 +20,7 @@ required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 class GStPluginsBaseConan(ConanFile):
     name = "gst-plugins-base"
     description = "GStreamer is a development framework for creating applications like media players, video editors, streaming media broadcasters and so on"
-    license = "GPL-2.0-only"
+    license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gstreamer.freedesktop.org/"
     topics = ("gstreamer", "multimedia", "video", "audio", "broadcasting", "framework", "media")
