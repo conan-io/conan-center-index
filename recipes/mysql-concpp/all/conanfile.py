@@ -13,7 +13,6 @@ required_conan_version = ">=1.64.1"
 
 class MysqlCppConnRecipe(ConanFile):
     name = "mysql-concpp"
-    version = "9.0.0"
     package_type = "library"
     short_paths = True
 
@@ -72,7 +71,7 @@ class MysqlCppConnRecipe(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
         
     def _package_folder_dep(self, dep):
         return self.dependencies[dep].package_folder.replace("\\", "/")
