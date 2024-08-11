@@ -35,12 +35,13 @@ class QCBORConan(ConanFile):
         if self.settings.os == "Windows":
             self.package_type = "static-library"
             del self.options.fPIC
-            del self.options.shared
 
         if Version(self.version) < "1.2":
             del self.options.disable_float
 
     def configure(self):
+        if self.settings.os == "Windows":
+            del self.options.shared
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
