@@ -1,4 +1,7 @@
 sources:
+  "3.5.17":
+    url: "https://gitlab.freedesktop.org/xorg/lib/libxpm/-/archive/libXpm-3.5.17/libxpm-libXpm-3.5.17.tar.gz"
+    sha256: "c63123e2de511edac5df33425a3a3b292e06973198c94470c454a9c973f211f6"
   "3.5.13":
+    url: "https://gitlab.freedesktop.org/xorg/lib/libxpm/-/archive/libXpm-3.5.13/libxpm-libXpm-3.5.13.tar.gz"
     sha256: "516fcb7a3cc5b491ca2b95df29018b1643c40649d72473d3c62379d8fdc472ff"
-    url: https://gitlab.freedesktop.org/xorg/lib/libxpm/-/archive/libXpm-3.5.13/libxpm-libXpm-3.5.13.tar.gz

@@ -9,21 +9,45 @@ reviewers:
   - user: "lasote"
     type: "team"
     request_reviews: false
-  - user: "jgsogo"
-    type: "community"
-    request_reviews: false
   - user: "czoido"
     type: "team"
     request_reviews: false
   - user: "memsharded"
     type: "team"
     request_reviews: false
-  - user: "SSE4"
-    type: "community"
-    request_reviews: false
   - user: "uilianries"
     type: "team"
     request_reviews: true
+  - user: "jcar87"
+    type: "team"
+    request_reviews: true
+  - user: "franramirez688"
+    type: "team"
+    request_reviews: true
+  - user: "AbrilRBS"
+    type: "team"
+    request_reviews: true
+  - user: "davidsanfal"
+    type: "team"
+    request_reviews: false
+  - user: "juansblanco"
+    type: "team"
+    request_reviews: false
+  - user: "perseoGI"
+    type: "team"
+    request_reviews: false
+  - user: "ErniGH"
+    type: "team"
+    request_reviews: false
+  ########
+  ### Begin community reviewers
+  ########
+  - user: "jgsogo"
+    type: "community"
+    request_reviews: false
+  - user: "SSE4"
+    type: "community"
+    request_reviews: false
   - user: "madebr"
     type: "community"
     request_reviews: false
@@ -31,9 +55,6 @@ reviewers:
     type: "community"
     request_reviews: false
   - user: "theirix"
-    type: "community"
-    request_reviews: false
-  - user: "ericLemanissier"
     type: "community"
     request_reviews: false
   - user: "prince-chrismc"
@@ -57,21 +78,12 @@ reviewers:
   - user: "MartinDelille"
     type: "community"
     request_reviews: false
-  - user: "jcar87"
-    type: "team"
-    request_reviews: true
-  - user: "franramirez688"
-    type: "team"
-    request_reviews: true
   - user: "paulocoutinhox"
     type: "community"
     request_reviews: false
   - user: "jwillikers"
     type: "community"
     request_reviews: false
-  - user: "RubenRBS"
-    type: "team"
-    request_reviews: true
   - user: "System-Arch"
     type: "community"
     request_reviews: false
@@ -80,12 +92,6 @@ reviewers:
     request_reviews: false
   - user: "StellaSmith"
     type: "community"
-    request_reviews: false
-  - user: "davidsanfal"
-    type: "team"
-    request_reviews: false
-  - user: "juansblanco"
-    type: "team"
     request_reviews: false
   - user: "valgur"
     type: "community"

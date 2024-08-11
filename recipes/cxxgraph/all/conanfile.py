@@ -14,7 +14,7 @@ required_conan_version = ">=1.52.0"
 class CxxgraphConan(ConanFile):
     name = "cxxgraph"
     description = "Header-Only C++ Library for Graph Representation and Algorithms"
-    license = "AGPL-3.0-later"
+    license = "MPL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/ZigRazor/CXXGraph/"
     topics = ("graph", "partitioning-algorithms", "dijkstra-algorithm", "graph-theory-algorithms", "header-only")
@@ -35,6 +35,10 @@ class CxxgraphConan(ConanFile):
             "Visual Studio": "17",
             "msvc": "193",
         }
+
+    def configure(self):
+        if Version(self.version) < "4.0.0":
+            self.license = "AGPL-3.0-later"
 
     def layout(self):
         basic_layout(self, src_folder="src")
