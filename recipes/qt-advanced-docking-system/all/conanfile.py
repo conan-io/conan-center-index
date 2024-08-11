@@ -69,7 +69,7 @@ class QtADS(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/6.7.0", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/[>=6.0 <7]", transitive_headers=True, transitive_libs=True)
         self.requires("libpng/[>=1.6 <2]")
 
     def validate(self):
