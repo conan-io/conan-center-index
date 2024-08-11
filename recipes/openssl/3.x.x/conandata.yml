@@ -1,4 +1,7 @@
 sources:
+  3.3.1:
+    url: "https://github.com/openssl/openssl/releases/download/openssl-3.3.1/openssl-3.3.1.tar.gz"
+    sha256: 777cd596284c883375a2a7a11bf5d2786fc5413255efab20c50d6ffe6d020b7e
   3.2.2:
     url: "https://github.com/openssl/openssl/releases/download/openssl-3.2.2/openssl-3.2.2.tar.gz"
     sha256: 197149c18d9e9f292c43f0400acaba12e5f52cacfe050f3d199277ea738ec2e7

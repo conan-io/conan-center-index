@@ -1,0 +1,71 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 11c96b2..441b2c2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -180,9 +180,9 @@ endif()
+ 
+ 
+ # jsoncpp
+-find_package(Jsoncpp REQUIRED)
+-target_link_libraries(${PROJECT_NAME} PUBLIC Jsoncpp_lib)
+-list(APPEND INCLUDE_DIRS_FOR_DYNAMIC_VIEW ${JSONCPP_INCLUDE_DIRS})
++find_package(jsoncpp REQUIRED)
++target_link_libraries(${PROJECT_NAME} PUBLIC jsoncpp_lib)
++list(APPEND INCLUDE_DIRS_FOR_DYNAMIC_VIEW ${jsoncpp_INCLUDE_DIRS})
+ 
+ # yamlcpp
+ if(BUILD_YAML_CONFIG)
+@@ -194,7 +194,7 @@ if(BUILD_YAML_CONFIG)
+                 message(STATUS "yaml-cpp not used")
+             else()
+                 message(STATUS "yaml-cpp found ")
+-                target_link_libraries(${PROJECT_NAME} PUBLIC ${YAML_CPP_LINK_LIBRARY})
++                target_link_libraries(${PROJECT_NAME} PUBLIC yaml-cpp)
+                 target_compile_definitions(${PROJECT_NAME} PUBLIC HAS_YAML_CPP)
+             endif()
+         else()
+@@ -432,7 +432,7 @@ if (BUILD_SQLITE)
+     find_package(SQLite3 QUIET)
+     find_package(unofficial-sqlite3 QUIET)
+     if (SQLite3_FOUND)
+-        target_link_libraries(${PROJECT_NAME} PRIVATE SQLite3_lib)
++        target_link_libraries(${PROJECT_NAME} PRIVATE SQLite::SQLite3)
+         set(DROGON_FOUND_SQLite3 TRUE)
+     elseif (unofficial-sqlite3_FOUND)
+         target_link_libraries(${PROJECT_NAME} PRIVATE unofficial::sqlite3::sqlite3)
+@@ -455,10 +455,10 @@ if (BUILD_SQLITE)
+ endif (BUILD_SQLITE)
+ 
+ if (BUILD_REDIS)
+-    find_package(Hiredis)
+-    if (Hiredis_FOUND)
++    find_package(hiredis)
++    if (hiredis_FOUND)
+         add_definitions(-DUSE_REDIS)
+-        target_link_libraries(${PROJECT_NAME} PRIVATE Hiredis_lib)
++        target_link_libraries(${PROJECT_NAME} PRIVATE hiredis::hiredis)
+         set(DROGON_SOURCES
+             ${DROGON_SOURCES}
+             nosql_lib/redis/src/RedisClientImpl.cc
+@@ -478,10 +478,10 @@ if (BUILD_REDIS)
+             nosql_lib/redis/src/SubscribeContext.h
+             nosql_lib/redis/src/RedisSubscriberImpl.h)
+ 
+-    endif (Hiredis_FOUND)
++    endif ()
+ endif (BUILD_REDIS)
+ 
+-if (NOT Hiredis_FOUND)
++if (NOT hiredis_FOUND)
+     set(DROGON_SOURCES
+         ${DROGON_SOURCES}
+         lib/src/RedisClientSkipped.cc
+@@ -490,7 +490,7 @@ if (NOT Hiredis_FOUND)
+     set(private_headers
+         ${private_headers}
+         lib/src/RedisClientManager.h)
+-endif (NOT Hiredis_FOUND)
++endif ()
+ 
+ if (BUILD_TESTING)
+     add_subdirectory(nosql_lib/redis/tests)

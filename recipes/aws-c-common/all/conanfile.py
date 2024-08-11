@@ -41,8 +41,6 @@ class AwsCCommon(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "0.6.11":
-            del self.options.cpu_extensions
 
     def configure(self):
         if self.options.shared:
@@ -64,8 +62,7 @@ class AwsCCommon(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["AWS_ENABLE_LTO"] = False
-        if Version(self.version) >= "0.6.0":
-            tc.variables["AWS_WARNINGS_ARE_ERRORS"] = False
+        tc.variables["AWS_WARNINGS_ARE_ERRORS"] = False
         if is_msvc(self):
             tc.variables["STATIC_CRT"] = is_msvc_static_runtime(self)
         tc.variables["USE_CPU_EXTENSIONS"] = self.options.get_safe("cpu_extensions", False)
