@@ -53,6 +53,8 @@ class EscapeConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        if self.setting.build_type == "Debug":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support debug installation.")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
