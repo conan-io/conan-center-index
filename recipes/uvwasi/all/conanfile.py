@@ -40,7 +40,7 @@ class UVWasiConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libuv/1.48.0", transitive_headers=True)
+        self.requires("libuv/[>=1 <2]", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
