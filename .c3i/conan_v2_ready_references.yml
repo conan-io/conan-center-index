@@ -58,6 +58,7 @@ required_for_references:
 - asyncly
 - asyncplusplus
 - asyncpp
+- atomic_queue
 - audiofile
 - autoconf
 - autoconf-archive
@@ -652,6 +653,7 @@ required_for_references:
 - lest
 - leveldb
 - lexbor
+- libaec
 - libaesgm
 - libaio
 - libalsa
@@ -782,6 +784,7 @@ required_for_references:
 - libpcap
 - libpciaccess
 - libpfm4
+- libphonenumber
 - libpng
 - libpq
 - libpqxx
@@ -879,6 +882,7 @@ required_for_references:
 - lksctp-tools
 - llama-cpp
 - llhttp
+- llnl-units
 - llvm-openmp
 - lmdb
 - lodepng
@@ -951,6 +955,7 @@ required_for_references:
 - mimalloc
 - mingw-builds
 - mingw-w64
+- minhook
 - mini
 - miniaudio
 - minicoro
@@ -1187,6 +1192,7 @@ required_for_references:
 - poppler-data
 - popt
 - portable-file-dialogs
+- poselib
 - poshlib
 - pprint
 - pranav-csv2
