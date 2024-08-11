@@ -1,4 +1,4 @@
 sources:
-  "0.0.2.cci.20240804":
-    url: "https://github.com/artivis/manif/archive/cd168210746dab9c589babd977401372f05d7aac.tar.gz"
-    sha256: "ffd5ec178ce0e63d8fcc73808f31b5f4b5ec8ceaf950767ee84864ee40c875bd"
+  "0.0.5":
+    url: "https://github.com/artivis/manif/archive/refs/tags/0.0.5.tar.gz"
+    sha256: "246a781c54a5c57179d48096faca0d108944e120f69d8fd7fb69e3cb4a0a67fb"
