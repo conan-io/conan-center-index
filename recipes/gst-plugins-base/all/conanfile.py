@@ -203,8 +203,8 @@ class GStPluginsBaseConan(ConanFile):
             tc.cpp_args.append(value)
 
         def add_linker_flag(value):
-            tc.c_link_args.appened(value)
-            tc.cpp_link_args.appened(value)
+            tc.c_link_args.append(value)
+            tc.cpp_link_args.append(value)
 
         VirtualBuildEnv(self).generate()
         if self._is_legacy_one_profile:
