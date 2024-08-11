@@ -40,12 +40,13 @@ class CalcephConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.shared
-            self.package_type = "static-library"
         if is_msvc(self):
             del self.options.threadsafe
 
     def configure(self):
+        if self.settings.os == "Windows":
+            del self.options.shared
+            self.package_type = "static-library"
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
