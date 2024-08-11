@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.files import get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
@@ -31,9 +31,6 @@ class SimdutfConan(ConanFile):
     def _min_cppstd(self):
         return 11
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -48,13 +45,11 @@ class SimdutfConan(ConanFile):
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        ## simdutf >= 4.0.0 requires _mm_storeu_si64
-        if Version(self.version) >= "4.0.0":
-            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.0":
-                raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 9.")
-            if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and \
-                Version(self.settings.compiler.version) < "10.0":
-                raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 10 with debug build")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.0":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 9.")
+        if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and \
+            Version(self.settings.compiler.version) < "10.0":
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc < 10 with debug build")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -62,10 +57,7 @@ class SimdutfConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["SIMDUTF_BENCHMARKS"] = False
-        if Version(self.version) >= "3.2.3":
-            tc.variables["SIMDUTF_TESTS"] = False
-        else:
-            tc.variables["BUILD_TESTING"] = False
+        tc.variables["SIMDUTF_TESTS"] = False
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "8":
             tc.variables["CMAKE_CXX_FLAGS"] = " -mavx512f"
         tc.variables["SIMDUTF_TOOLS"] = False
@@ -74,7 +66,6 @@ class SimdutfConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
