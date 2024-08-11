@@ -317,7 +317,6 @@ class GStPluginsBaseConan(ConanFile):
         if self.options.shared:
             self.runenv_info.define_path("GST_PLUGIN_PATH", gst_plugin_path)
             # TODO: Legacy, to be removed on Conan 2.0
-            self.output.info(f"Appending GST_PLUGIN_PATH env var : {gst_plugin_path}")
             self.env_info.GST_PLUGIN_PATH.append(gst_plugin_path)
 
         def _define_plugin_component(name, requires):
@@ -690,13 +689,12 @@ class GStPluginsBaseConan(ConanFile):
                     "wayland::wayland-client",
                     "wayland::wayland-cursor",
                     "wayland::wayland-egl",
-                    "wayland-protocols::wayland-protocols",
                 ]
             if self.settings.os == "Windows":
                 self.cpp_info.components["gstreamer-gl-1.0"].requires.append("wglext::wglext")
                 self.cpp_info.components["gstreamer-gl-1.0"].requires.append("glext::glext")
                 self.cpp_info.components["gstreamer-gl-1.0"].system_libs = ["gdi32"]
-            if self.settings.os in ["Macos", "iOS", "tvOS", "watchOS"]:
+            if is_apple_os(self):
                 self.cpp_info.components["gstreamer-gl-1.0"].frameworks = [
                     "CoreFoundation",
                     "Foundation",
@@ -708,7 +706,7 @@ class GStPluginsBaseConan(ConanFile):
             self.cpp_info.components["gstreamer-gl-1.0"].includedirs.append("include")
             self.cpp_info.components["gstreamer-gl-1.0"].includedirs.append(os.path.join(gst_plugin_path, "include"))
 
-            self.cpp_info.components["gstreamer-gl-prototypes-1.0"].names["pkg_config"] = "gstreamer-gl-prototypes-1.0"
+            self.cpp_info.components["gstreamer-gl-prototypes-1.0"].set_property("pkg_config_name", "gstreamer-gl-prototypes-1.0")
             self.cpp_info.components["gstreamer-gl-prototypes-1.0"].requires = [
                 "gstreamer-gl-1.0",
                 "opengl::opengl",
@@ -722,12 +720,11 @@ class GStPluginsBaseConan(ConanFile):
                 ]
 
             if self.options.get_safe("with_wayland"):
-                self.cpp_info.components["gstreamer-gl-wayland-1.0"].names["pkg_config"] = "gstreamer-gl-wayland-1.0"
+                self.cpp_info.components["gstreamer-gl-wayland-1.0"].set_property("pkg_config_name", "gstreamer-gl-wayland-1.0")
                 self.cpp_info.components["gstreamer-gl-wayland-1.0"].requires = [
                     "gstreamer-gl-1.0",
                     "wayland::wayland-client",
                     "wayland::wayland-egl",
-                    "wayland-protocols::wayland-protocols",
                 ]
 
             if self.options.get_safe("with_xorg"):
