@@ -97,11 +97,6 @@ class FixedMathConan(ConanFile):
         venv.generate(scope="build")
 
     def build(self):
-        # try to fix msvc compilation error https://github.com/arturbac/fixed_math/pull/5
-        replace_in_file(self, os.path.join(self.source_folder, "fixed_lib", "include", "fixedmath", "fixed_math.hpp"),
-            "template<typename arithmethic_type>\n  constexpr fixed_t arithmetic_to_fixed( arithmethic_type value ) noexcept;",
-            "template<typename arithmethic_type, typename>\n  constexpr fixed_t arithmetic_to_fixed( arithmethic_type value ) noexcept;"
-            )
         if not self.options.header_only:
             cmake = CMake(self)
             cmake.configure()
