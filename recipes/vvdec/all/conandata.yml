@@ -1,0 +1,9 @@
+sources:
+  "2.3.0":
+    url: "https://github.com/fraunhoferhhi/vvdec/archive/refs/tags/v2.3.0.tar.gz"
+    sha256: "91ab0c64a6f43627add65cfd2c14d074ad5830105d63fa013af274960efd4e6d"
+patches:
+  "2.3.0":
+    - patch_file: "patches/2.3.0-0001-use-cci.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"
