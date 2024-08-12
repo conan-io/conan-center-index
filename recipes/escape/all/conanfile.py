@@ -4,6 +4,7 @@ from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -34,8 +35,6 @@ class EscapeConan(ConanFile):
             "gcc": "8",
             "clang": "7",
             "apple-clang": "12",
-            "Visual Studio": "16",
-            "msvc": "192",
         }
 
     def config_options(self):
@@ -46,6 +45,8 @@ class EscapeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio.")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
