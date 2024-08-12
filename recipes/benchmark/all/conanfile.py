@@ -37,7 +37,7 @@ class BenchmarkConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14
+        return 14 if Version(self.version) >= "1.8.5" else 11
 
     @property
     def _compilers_minimum_version(self):
