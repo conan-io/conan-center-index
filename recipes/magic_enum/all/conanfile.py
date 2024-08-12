@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, mkdir, rmdir
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 import os
@@ -68,6 +68,9 @@ class MagicEnumConan(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+        if Version(self.version) >= "0.9.4" and Version(self.version) <= "0.9.6":
+            mkdir(self, os.path.join(self.package_folder, "include/magic_enum"))
+            copy(self, "*", src=os.path.join(self.package_folder, "include"), dst=os.path.join(self.package_folder, "include/magic_enum"))
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
