@@ -4,7 +4,7 @@ import os
 import platform
 import textwrap
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -122,9 +122,10 @@ class QtConan(ConanFile):
         "sysroot": None,
         "multiconfiguration": False,
         "disabled_features": "",
-        "essential_modules": not os.getenv('CONAN_CENTER_BUILD_SERVICE')
     }
-    default_options.update({f"{status}_modules": False for status in _module_statuses if status != "essential"})
+    # essential_modules, addon_modules, deprecated_modules, preview_modules:
+    #    these are only provided for convenience, set to False by default
+    default_options.update({f"{status}_modules": False for status in _module_statuses})
 
     short_paths = True
 
@@ -182,9 +183,10 @@ class QtConan(ConanFile):
         if self.settings.os != "Linux":
             self.options.qtwayland = False
 
-        for m in self._submodules:
-            if m not in self._get_module_tree:
-                delattr(self.options, m)
+        for submodule in self._submodules:
+            if submodule not in self._get_module_tree:
+                self._debug_output(f"Qt6: Removing {submodule} option as it is not in the module tree for this version, or is marked as obsolete or ignore")
+                self.options.rm_safe(submodule)
 
     @property
     def _minimum_compilers_version(self):
@@ -196,6 +198,10 @@ class QtConan(ConanFile):
             "clang": "9",
             "apple-clang": "12" if Version(self.version) >= "6.5.0" else "11"
         }
+
+    def _debug_output(self, message):
+        if Version(conan_version) >= "2":
+            self.output.debug(message)
 
     def configure(self):
         if not self.options.gui:
@@ -213,28 +219,48 @@ class QtConan(ConanFile):
         if self.options.multiconfiguration:
             del self.settings.build_type
 
-        def _enablemodule(mod):
-            if mod != "qtbase":
-                setattr(self.options, mod, True)
-                for req in self._get_module_tree[mod]["depends"]:
-                    _enablemodule(req)
+        # Requested modules:
+        # - any module for non-removed options that have 'True' value
+        # - any enabled via `xxx_modules` that does not have a 'False' value
+        # Note that at this point, the submodule options dont have a value unless one is given externally
+        # to the recipe (e.g. via the command line, a profile, or a consumer)
+        requested_modules = set([module for module in self._submodules if self.options.get_safe(module)])
+        for module in [m for m in self._submodules if m in self._get_module_tree]:
+            status = self._get_module_tree[module]['status']
+            is_disabled = self.options.get_safe(module) == False
+            if self.options.get_safe(f"{status}_modules"):
+                if not is_disabled:
+                    requested_modules.add(module)
+                else:
+                    self.output.warning(f"qt6: {module} requested because {status}_modules=True"
+                                        f" but it has been explicitly disabled with {module}=False")
 
-        # enable all modules which are
-        # - required by a module explicitely enabled by the consumer
-        for module_name, module in self._get_module_tree.items():
-            if getattr(self.options, module_name):
-                _enablemodule(module_name)
-            else:
-                for status in self._module_statuses:
-                    if getattr(self.options, f"{status}_modules") and module['status'] == status:
-                        _enablemodule(module_name)
-                        break
+        self.output.info(f"qt6: requested modules {list(requested_modules)}")
 
-        # disable all modules which are:
-        # - not explicitely enabled by the consumer and
-        # - not required by a module explicitely enabled by the consumer
-        for module in self._get_module_tree:
-            if getattr(self.options, module).value is None:
+        required_modules =  {}
+        for module in requested_modules:
+            deps = self._get_module_tree[module]["depends"]
+            for dep in deps:
+                required_modules.setdefault(dep,[]).append(module)
+
+        required_but_disabled = [m for m in required_modules.keys() if self.options.get_safe(m) == False]
+        if required_modules:
+            self._debug_output(f"qt6: required_modules modules {list(required_modules.keys())}")
+        if required_but_disabled:
+            required_by = set()
+            for m in required_but_disabled:
+                required_by.update(required_modules[m])
+            raise ConanInvalidConfiguration(f"Modules {required_but_disabled} are explicitly disabled, "
+                                            f"but are required by {list(required_by)}, enabled by other options")
+
+        enabled_modules = requested_modules.union(set(required_modules.keys()))
+        enabled_modules.discard("qtbase")
+
+        for module in list(enabled_modules):
+            setattr(self.options, module, True)
+
+        for module in self._submodules:
+            if module in self.options and not self.options.get_safe(module):
                 setattr(self.options, module, False)
 
         if not self.options.get_safe("qtmultimedia"):
@@ -246,6 +272,16 @@ class QtConan(ConanFile):
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.get_safe("qtwebengine"):
                 self.options.with_fontconfig = True
+
+        for status in self._module_statuses:
+            # These are convenience only, should not affect package_id
+            option_name = f"{status}_modules"
+            self._debug_output(f"qt6 removing convenience option: {option_name},"
+                              f" see individual module options")
+            self.options.rm_safe(option_name)
+
+        for option in self.options.items():
+            self._debug_output(f"qt6 option: {option}")
 
     def validate(self):
         if os.getenv('CONAN_CENTER_BUILD_SERVICE') is not None:
@@ -649,8 +685,6 @@ class QtConan(ConanFile):
                 self.info.settings.compiler.runtime_type = "Release/Debug"
         if self.info.settings.os == "Android":
             del self.info.options.android_sdk
-        for status in self._module_statuses:
-            delattr(self.info.options, f"{status}_modules")
 
     def source(self):
         destination = self.source_folder
