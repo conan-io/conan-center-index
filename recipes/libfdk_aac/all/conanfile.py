@@ -6,7 +6,9 @@ from conan.tools.files import chdir, copy, get, rename, replace_in_file, rm, rmd
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, NMakeToolchain
+from conan.tools.build import cross_building
 from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 
 required_conan_version = ">=1.55.0"
@@ -45,6 +47,12 @@ class LibFDKAACConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+    def validate_build(self):
+        if cross_building(self) and self.settings.os == "Android":
+            # https://github.com/mstorsjo/fdk-aac/issues/124#issuecomment-653473956
+            # INFO: It's possible to inject a log.h to fix the error, but there is no official support.
+            raise ConanInvalidConfiguration(f"{self.ref} cross-building for Android is not supported. Please, try native build.")
 
     def layout(self):
         if self._use_cmake:
