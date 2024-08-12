@@ -304,9 +304,6 @@ class QtConan(ConanFile):
         if Version(self.version) >= "6.6.1" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "13.1":
             raise ConanInvalidConfiguration("apple-clang >= 13.1 is required by qt >= 6.6.1 cf QTBUG-119490")
 
-        if self.settings.os == "Macos" and self.dependencies["double-conversion"].options.shared:
-            raise ConanInvalidConfiguration("Test recipe fails because of Macos' SIP. Contributions are welcome.")
-
         if self.options.get_safe("qtwebengine"):
             if not self.options.shared:
                 raise ConanInvalidConfiguration("Static builds of Qt WebEngine are not supported")
@@ -371,6 +368,7 @@ class QtConan(ConanFile):
             #       do not update either without checking both
             #       require exactly the same version of vulkan-headers
             self.requires("vulkan-loader/1.3.239.0")
+            self.requires("vulkan-headers/1.3.239.0", transitive_headers=True)
             if is_apple_os(self):
                 self.requires("moltenvk/1.2.2")
         if self.options.with_glib:
@@ -1129,6 +1127,7 @@ class QtConan(ConanFile):
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
                 gui_reqs.append("vulkan-loader::vulkan-loader")
+                gui_reqs.append("vulkan-headers::vulkan-headers")
                 if is_apple_os(self):
                     gui_reqs.append("moltenvk::moltenvk")
             if self.options.with_harfbuzz:
