@@ -48,11 +48,12 @@ class RosxIntrospectionConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        if self.settings.os == "Windows":
             # DLL symbols are not exported by the project
             del self.options.shared
             self.package_type = "static-library"
-
-    def configure(self):
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
