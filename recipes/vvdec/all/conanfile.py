@@ -103,3 +103,8 @@ class VVdeCConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
+
+        if self.settings.compiler == "gcc" and (self.settings.os == "Windows" or Version(self.settings.compiler.version) <= "7"):
+            self.cpp_info.cxxflags.append("-pthread")
+            self.cpp_info.sharedlinkflags.append("-pthread")
+            self.cpp_info.exelinkflags.append("-pthread")
