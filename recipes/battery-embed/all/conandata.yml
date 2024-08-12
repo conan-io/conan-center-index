@@ -1,4 +1,4 @@
 sources:
-  "1.2.15":
-    url: "https://github.com/batterycenter/embed/archive/refs/tags/v1.2.15.tar.gz"
-    sha256: "d49aebb59099e6d8fa0bd3a0214e6027ef19de85c56cf2cd2365b4221f963cf8"
+  "1.2.19":
+    url: "https://github.com/batterycenter/embed/archive/refs/tags/v1.2.19.tar.gz"
+    sha256: "d472655b6eec215cd7cd20411f3596f22f597ea6a82fbbc5a5d7271e102b610e"

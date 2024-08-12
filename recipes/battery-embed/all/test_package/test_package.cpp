@@ -1,6 +1,4 @@
-#include <cstdlib>
 #include <iostream>
-#include <cstdint>
 
 #include "battery/embed.hpp"
 
