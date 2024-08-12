@@ -1,5 +1,25 @@
 sources:
   # Newer versions at the top
+  "0.5.2":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.2.tar.gz"
+    sha256: "d148998e175b9c69ffb4383ab321a0d27487392e4eee3f39441d35b6856c8f78"
+  "0.5.1":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.1.tar.gz"
+    sha256: "27b9f862ec6185f570ee59c07fdd12bebb55a986191518e896621317d2654f26"
+  "0.5.0":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.0.tar.gz"
+    sha256: "dc034503aed3009618312c42c40e1f80bf14d4148c9bc8b3ea02cf971459120e"
+  "0.4.1":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.4.1.tar.gz"
+    sha256: "8b6e2c813cf2db332c1aa0502c38afd01a1e00ece0ecc7fcd82fcae4b34e5161"
+  "0.4.0":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: "eef368f5bed2d85c976ea90b325e4c9bfc1b9618cbbfa15bf088adc8fa98ff89"
   "0.3.1":
     url:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.3.1.tar.gz"
@@ -13,6 +33,20 @@ sources:
       - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.2.1.tar.gz"
     sha256: "3184f404c61b6b8ba6fe7c64fc40d1c3d6d87df59bcacf1845d846101bc22f9a"
 patches:
+  "0.5.2":
+    - patch_file: "patches/0.5.2/0001-msvc-bug.patch"
+      patch_type: "official"
+      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/599d6abd6cc74e80e8429fc309247be5f7edd5d7"
+      patch_description: "Workaround bug for old msvc"
+  "0.4.0":
+    - patch_file: "patches/0.4.0/0001-libdwarf_path.patch"
+      patch_type: "conan"
+      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/a1624238000c794243e20801dc2b35b2f847d492"
+      patch_description: "Use new libdwarf header placement"
+    - patch_file: "patches/0.4.0/0002-zstd.patch"
+      patch_type: "conan"
+      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/b7d14bc952111df973268c76133bb8ad99afdeb0"
+      patch_description: "Zstd is handled by libdwarf"
   "0.3.0":
     - patch_file: "patches/0.3.0/0001-cpptrace_export.patch"
       patch_type: "bugfix"

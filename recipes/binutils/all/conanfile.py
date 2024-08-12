@@ -199,8 +199,6 @@ class BinutilsConan(ConanFile):
         # v2 exports
         self.buildenv_info.append_path("PATH", bindir)
         self.buildenv_info.append_path("PATH", absolute_target_bindir)
-        self.conf_info.define("user.binutils:gnu_triplet", self.options.target_triplet)
-        self.conf_info.define("user.binutils:prefix", self.options.prefix)
 
         # Add recipe path to enable running the self test in the test package.
         # Don't use this property in production code. It's unsupported.

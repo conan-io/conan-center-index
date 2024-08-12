@@ -14,6 +14,9 @@ sources:
   "2.19.3":
     url: "https://github.com/randombit/botan/archive/2.19.3.tar.gz"
     sha256: "8f568bf74c2e476d92ac8a1cfc2ba8407ec038fe9458bd0a11e7da827a9b8199"
+  "2.19.4":
+    url: "https://github.com/randombit/botan/archive/2.19.4.tar.gz"
+    sha256: "5754a6b5ddc3c74b0cb8671531feea69d03a4f3b5bdafa5f75e4c73a1242e5b1"
   "3.0.0":
     url: "https://github.com/randombit/botan/archive/3.0.0.tar.gz"
     sha256: "8bafe2e965fa9ccf92ef5741165d735c9fbbe6376c373bbf5702495ad2dfb814"
@@ -26,6 +29,12 @@ sources:
   "3.2.0":
     url: "https://github.com/randombit/botan/archive/3.2.0.tar.gz"
     sha256: "95af4935d56973000bb6ff20bb54ae56083f8764d5a2c89826cac26ac6127330"
+  "3.3.0":
+    url: "https://github.com/randombit/botan/archive/3.3.0.tar.gz"
+    sha256: "57fefda7b9ab6f8409329620cdaf26d2d7e962b6a10eb321d331e9ecb796f804"
+  "3.4.0":
+    url: "https://github.com/randombit/botan/archive/3.4.0.tar.gz"
+    sha256: "6ef2a16a0527b1cfc9648a644877f7b95c4d07e8ef237273b030c623418c5e5b"
 patches:
   "2.18.2":
     - patch_file: "patches/fix-amalgamation-build.patch"

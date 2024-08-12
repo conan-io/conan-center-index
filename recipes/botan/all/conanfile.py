@@ -34,7 +34,6 @@ class BotanConan(ConanFile):
         "amalgamation": [True, False],
         "with_bzip2": [True, False],
         "with_openssl": [True, False],
-        "single_amalgamation": [True, False],
         "with_sqlite3": [True, False],
         "with_zlib": [True, False],
         "with_boost": [True, False],
@@ -63,7 +62,6 @@ class BotanConan(ConanFile):
         "amalgamation": True,
         "with_bzip2": False,
         "with_openssl": False,
-        "single_amalgamation": False,
         "with_sqlite3": False,
         "with_zlib": False,
         "with_boost": False,
@@ -126,11 +124,6 @@ class BotanConan(ConanFile):
             del self.options.with_altivec
             del self.options.with_powercrypto
 
-        # --single-amalgamation option is no longer available
-        # See also https://github.com/randombit/botan/pull/2246
-        if Version(self.version) >= '2.14.0':
-            del self.options.single_amalgamation
-
         # Support for the OpenSSL provider was removed in 2.19.2
         if Version(self.version) >= '2.19.2':
             del self.options.with_openssl
@@ -147,9 +140,9 @@ class BotanConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.38.5")
+            self.requires("sqlite3/3.45.1")
         if self.options.with_boost:
-            self.requires("boost/1.83.0")
+            self.requires("boost/1.84.0")
 
     @property
     def _required_boost_components(self):
@@ -216,15 +209,12 @@ class BotanConan(ConanFile):
 
         # Some older compilers cannot handle the amalgamated build anymore
         # See also https://github.com/randombit/botan/issues/2328
-        if Version(self.version) >= '2.14.0' and self.options.amalgamation:
+        if self.options.amalgamation:
             if (self.settings.compiler == 'apple-clang' and compiler_version < '10') or \
                (self.settings.compiler == 'gcc' and compiler_version < '8') or \
                (self.settings.compiler == 'clang' and compiler_version < '7'):
                 raise ConanInvalidConfiguration(
                     f"botan amalgamation is not supported for {compiler}/{compiler_version}")
-
-        if self.options.get_safe("single_amalgamation", False) and not self.options.amalgamation:
-            raise ConanInvalidConfiguration("botan:single_amalgamation=True requires botan:amalgamation=True")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -355,9 +345,6 @@ class BotanConan(ConanFile):
 
         if self.options.amalgamation:
             build_flags.append('--amalgamation')
-
-        if self.options.get_safe('single_amalgamation'):
-            build_flags.append('--single-amalgamation-file')
 
         if self.options.system_cert_bundle:
             build_flags.append('--system-cert-bundle={}'.format(self.options.system_cert_bundle))

@@ -1,4 +1,8 @@
 versions:
+  "1.90.4":
+    folder: all
+  "1.90.4-docking":
+    folder: all
   "1.90.3":
     folder: all
   "1.90.3-docking":

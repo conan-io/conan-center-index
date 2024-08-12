@@ -161,6 +161,66 @@ class BoostConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def _cppstd_flag(self, compiler_cppstd=None):
+        """Return the flag for the given C++ standard and compiler"""
+        # TODO: Replace it by Conan tool when available: https://github.com/conan-io/conan/issues/12603
+        compiler = self.settings.get_safe("compiler")
+        compiler_version = self.settings.get_safe("compiler.version")
+        cppstd = self.settings.get_safe("compiler.cppstd") or compiler_cppstd
+        if not compiler or not compiler_version or not cppstd:
+            return ""
+
+        def _cppstd_gcc(gcc_version, cppstd):
+            """Return the flag for the given C++ standard and GCC version"""
+            cppstd_flags = {}
+            cppstd_flags.setdefault("98", "98" if gcc_version >= "3.4" else None)
+            cppstd_flags.setdefault("11", "11" if gcc_version >= "4.7" else "0x" if gcc_version >= "4.3" else None)
+            cppstd_flags.setdefault("14", "14" if gcc_version >= "4.9" else "1y" if gcc_version >= "4.8" else None)
+            cppstd_flags.setdefault("17", "17" if gcc_version >= "5.2" else "1z" if gcc_version >= "5" else None)
+            cppstd_flags.setdefault("20", "2a" if gcc_version >= "8" else "20" if gcc_version >= "12" else None)
+            cppstd_flags.setdefault("23", "2b" if gcc_version >= "11" else None)
+            return cppstd_flags.get(cppstd.lstrip("gnu"))
+
+        def _cppstd_clang(clang_version, cppstd):
+            """Return the flag for the given C++ standard and Clang version"""
+            cppstd_flags = {}
+            cppstd_flags.setdefault("98", "98" if clang_version >= "2.1" else None)
+            cppstd_flags.setdefault("11", "11" if clang_version >= "3.1" else "0x" if clang_version >= "2.1" else None)
+            cppstd_flags.setdefault("14", "14" if clang_version >= "3.5" else "1y" if clang_version >= "3.4" else None)
+            cppstd_flags.setdefault("17", "17" if clang_version >= "5" else "1z" if clang_version >= "3.5" else None)
+            cppstd_flags.setdefault("20", "2a" if clang_version >= "6" else "20" if clang_version >= "12" else None)
+            cppstd_flags.setdefault("23", "2b" if clang_version >= "13"  else "23" if clang_version >= "17" else None)
+            return cppstd_flags.get(cppstd.lstrip("gnu"))
+
+
+        def _cppstd_apple_clang(clang_version, cppstd):
+            """Return the flag for the given C++ standard and Apple Clang version"""
+            cppstd_flags = {}
+            cppstd_flags.setdefault("98", "98" if clang_version >= "4.0" else None)
+            cppstd_flags.setdefault("11", "11" if clang_version >= "4.0" else None)
+            cppstd_flags.setdefault("14", "14" if clang_version >= "6.1" else "1y" if clang_version >= "5.1" else None)
+            cppstd_flags.setdefault("17", "17" if clang_version >= "9.1" else "1z" if clang_version >= "6.1" else None)
+            cppstd_flags.setdefault("20", "20" if clang_version >= "13.0" else "2a" if clang_version >= "10.0" else None)
+            cppstd_flags.setdefault("23", "2b" if clang_version >= "13.0" else None)
+            return cppstd_flags.get(cppstd.lstrip("gnu"))
+
+        def _cppstd_msvc(visual_version, cppstd):
+            """Return the flag for the given C++ standard and MSVC version"""
+            cppstd_flags = {}
+            cppstd_flags.setdefault("98", "98")
+            cppstd_flags.setdefault("11", "11")
+            cppstd_flags.setdefault("14", "14" if visual_version >= "190" else None)
+            cppstd_flags.setdefault("17", "17" if visual_version >= "191" else "latest" if visual_version >= "190" else None)
+            cppstd_flags.setdefault("20", "20" if visual_version >= "192" else "latest" if visual_version >= "191" else None)
+            cppstd_flags.setdefault("23", "latest" if visual_version >= "193" else None)
+            return cppstd_flags.get(cppstd)
+
+        func = {"gcc": _cppstd_gcc, "clang": _cppstd_clang, "apple-clang": _cppstd_apple_clang, "msvc": _cppstd_msvc}.get(compiler)
+        flag = cppstd
+        if func:
+            flag = func(Version(compiler_version), str(cppstd))
+        return flag
+
     @property
     def _min_compiler_version_default_cxx11(self):
         """ Minimum compiler version having c++ standard >= 11
@@ -183,6 +243,7 @@ class BoostConan(ConanFile):
             "msvc": 999,
         }.get(str(self.settings.compiler))
 
+    @property
     def _has_cppstd_11_supported(self):
         cppstd = self.settings.compiler.get_safe("cppstd")
         if cppstd:
@@ -1082,6 +1143,9 @@ class BoostConan(ConanFile):
         if self._with_zstd:
             add_defines("zstd")
 
+        for define in self.conf.get("tools.build:defines", default=[], check_type=list):
+            flags.append(f"define={define}")
+
         if is_msvc(self):
             flags.append(f"runtime-link={'static' if is_msvc_static_runtime(self) else 'shared'}")
             flags.append(f"runtime-debugging={'on' if 'd' in msvc_runtime_flag(self) else 'off'}")
@@ -1104,12 +1168,13 @@ class BoostConan(ConanFile):
 
         safe_cppstd = self.settings.get_safe("compiler.cppstd")
         if safe_cppstd:
-            cppstd_version = safe_cppstd.replace("gnu", "")
+            cppstd_version = self._cppstd_flag(safe_cppstd)
             flags.append(f"cxxstd={cppstd_version}")
             if "gnu" in safe_cppstd:
                 flags.append("cxxstd-dialect=gnu")
         elif self._has_cppstd_11_supported:
-            flags.append("cxxstd=11")
+            cppstd_version = self._cppstd_flag("11")
+            flags.append(f"cxxstd={cppstd_version}")
 
         # LDFLAGS
         link_flags = []
@@ -1683,6 +1748,8 @@ class BoostConan(ConanFile):
                 libs = []
                 for name in names:
                     if name in ("boost_stacktrace_windbg", "boost_stacktrace_windbg_cached") and self.settings.os != "Windows":
+                        continue
+                    if name in ("boost_math_c99l", "boost_math_tr1l") and str(self.settings.arch).startswith("ppc"):
                         continue
                     if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic",) and self.settings.os == "Windows":
                         continue

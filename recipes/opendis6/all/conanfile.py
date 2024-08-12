@@ -29,16 +29,16 @@ class OpenDis6Conan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17"
+        return "14"
 
     @property
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "8.5",
-            "clang": "6",
-            "apple-clang": "14",
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "10",
         }
 
     def config_options(self):

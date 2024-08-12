@@ -38,12 +38,6 @@ sources:
   "7.0.0":
     url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-7.0.0/apache-arrow-7.0.0.tar.gz?action=download"
     sha256: "e8f49b149a15ecef4e40fcfab1b87c113c6b1ee186005c169e5cdf95d31a99de"
-  "2.0.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-2.0.0/apache-arrow-2.0.0.tar.gz?action=download"
-    sha256: "be0342cc847bb340d86aeaef43596a0b6c1dbf1ede9c789a503d939e01c71fbe"
-  "1.0.0":
-    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-1.0.0/apache-arrow-1.0.0.tar.gz?action=download"
-    sha256: "86ddb9feb48203a5aaf9cc4f2827525e20a2ca4d7239e492af17e74532ccf243"
 patches:
   "8.0.1":
     - patch_file: "patches/8.0.0-0005-install-utils.patch"
@@ -64,25 +58,5 @@ patches:
       patch_description: "enable utilis installation"
       patch_type: "conan"
     - patch_file: "patches/7.0.0-0007-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "2.0.0":
-    - patch_file: "patches/2.0.0-0003-fix-shared-msvc.patch"
-      patch_description: "make shared enabled in msvc"
-      patch_type: "official"
-    - patch_file: "patches/2.0.0-0005-gandiva-engine.patch"
-      patch_description: "fix grandiva compilation error"
-      patch_type: "official"
-    - patch_file: "patches/2.0.0-0008-fix-cmake.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "1.0.0":
-    - patch_file: "patches/1.0.0-0003-fix-shared-msvc.patch"
-      patch_description: "make shared enabled in msvc"
-      patch_type: "official"
-    - patch_file: "patches/1.0.0-0005-fix-make12-namespace.patch"
-      patch_description: "fix ambiguous `make12` function between std and date"
-      patch_type: "official"
-    - patch_file: "patches/1.0.0-0006-fix-cmake.patch"
       patch_description: "use cci package"
       patch_type: "conan"

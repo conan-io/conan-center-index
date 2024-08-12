@@ -1,4 +1,7 @@
 sources:
+  "2.0.2":
+    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v2.0.2.tar.gz"
+    sha256: "a485076b8710576cf05fbc086d39499d16804575c0660b0dfaeeaf7823660a17"
   "2.0.1":
     url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v2.0.1.tar.gz"
     sha256: "f399d1b1f36f5d53a2d63fd2974797ab8f3f7e69c424d9661253830cb793b72e"
@@ -15,6 +18,10 @@ sources:
     url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v1.0.tar.gz"
     sha256: "5b8333e522206c2a74e57a9c9544c4fe4e7858cfe93e216905b463eaf91af5fe"
 patches:
+  "2.0.2":
+    - patch_file: "patches/2.0.0-0001-remove-re2-version.patch"
+      patch_description: "remove re2 version on find_package"
+      patch_type: "portability"
   "2.0.1":
     - patch_file: "patches/2.0.0-0001-remove-re2-version.patch"
       patch_description: "remove re2 version on find_package"

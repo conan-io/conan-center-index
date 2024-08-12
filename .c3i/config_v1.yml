@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 1.62.0
+  version: 1.64.0
 
 artifactory:
   url: "https://c3i.jfrog.io/c3i"
@@ -38,7 +38,6 @@ tasks:
     # * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
     check_runs:
       - name: "Lint changed files (YAML files)"
-      - name: "Lint changed conanfile.py (v2 migration)"
     status_checks:
       - name: "license/cla"
       - name: "continuous-integration/jenkins/pr-merge"
@@ -74,7 +73,7 @@ tasks:
   validate_infrastructure:
     macos_executors: 2
     windows_executors: 4
-    open_docs_pull-request: true
+    create_docs_pull-request: true
 
 # Profile configurations to build packages
 configurations:
