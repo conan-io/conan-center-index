@@ -20,3 +20,6 @@ patches:
       patch_description: "Unvendor fmt in vendored kineto"
       base_path: "third_party/kineto"
       patch_type: "conan"
+    - patch_file: "patches/2.4.0/0006-dont-build-protoc-on-apple.patch"
+      patch_description: "Don't build custom protoc on Apple OS-s"
+      patch_type: "conan"
