@@ -55,6 +55,8 @@ class EscapeConan(ConanFile):
             )
         if self.settings.build_type == "Debug":
             raise ConanInvalidConfiguration(f"{self.ref} does not support debug installation.")
+        if self.settings.compiler in ["clang", "apple-clang"] and self.settings.compiler.libcxx == "libc++":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support libc++.")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
