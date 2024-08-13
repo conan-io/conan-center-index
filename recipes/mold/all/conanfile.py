@@ -65,7 +65,7 @@ class MoldConan(ConanFile):
             raise ConanInvalidConfiguration("Clang version 12 or higher required")
         if self.settings.compiler == "apple-clang" and "armv8" == self.settings.arch :
             raise ConanInvalidConfiguration(f'{self.name} is still not supported by Mac M1.')
-        if Version(self.version) >= "2.33.0" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14":
+        if Version(self.version) == "2.33.0" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14":
             raise ConanInvalidConfiguration(f'{self.ref} doesn\'t support Apple-Clang < 14.')
 
     def build_requirements(self):
