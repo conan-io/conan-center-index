@@ -110,7 +110,7 @@ class OpenTelemetryCppConan(ConanFile):
             self.requires("ms-gsl/4.0.0")
 
         if self.options.with_abseil:
-            self.requires("abseil/20230125.3", transitive_headers=True)
+            self.requires("abseil/20230802.1", transitive_headers=True)
 
         if self.options.with_otlp_grpc or self.options.with_otlp_http:
             self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
