@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 0acebe3..cce835e 100644
+index 0acebe3..b17f3d5 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,4 +1,4 @@
@@ -93,3 +93,17 @@ index 0acebe3..cce835e 100644
  
  # SOURCE
  
+@@ -483,7 +470,7 @@ endif()
+ #  include_directories(${libpointmatcher_INCLUDE_DIRS})
+ #  target_link_libraries(executableName ${libpointmatcher_LIBRARIES})
+ #  ...
+-
++if(0)
+ # 1- local build #
+ 
+ # Install cmake config module
+@@ -574,3 +561,4 @@ if (NOT TARGET uninstall)
+   add_custom_target(uninstall
+ 	  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+ endif()
++endif()
