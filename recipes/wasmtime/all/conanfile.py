@@ -5,6 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc
+from conan.tools.apple import is_apple_os
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -115,3 +116,5 @@ class WasmtimeConan(ConanFile):
             self.cpp_info.system_libs = ["ws2_32", "bcrypt", "advapi32", "userenv", "ntdll", "shell32", "ole32"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl", "m", "rt"]
+        if is_apple_os(self):
+            self.cpp_info.frameworks.append("CoreFoundation")
