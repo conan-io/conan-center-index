@@ -86,3 +86,5 @@ class KeychainConan(ConanFile):
             self.cpp_info.frameworks = ["Security", "CoreFoundation"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["crypt32"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m"]
