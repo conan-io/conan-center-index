@@ -70,7 +70,7 @@ class AwsCrtCpp(ConanFile):
             self.requires("aws-c-auth/0.6.4", transitive_headers=True)
             self.requires("aws-c-common/0.6.11")
             self.requires("aws-c-io/0.10.9", transitive_headers=True)
-            self.requires("aws-c-checksums/0.1.12")
+            self.requires("aws-checksums/0.1.12")
             self.requires("aws-c-event-stream/0.2.7")
             self.requires("aws-c-s3/0.1.26")
 
