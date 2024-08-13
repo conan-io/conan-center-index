@@ -43,9 +43,10 @@ class LibpointmatcherConan(ConanFile):
         # https://github.com/norlab-ulaval/libpointmatcher/blob/1.4.3/CMakeLists.txt#L240
         return {
             "gcc": "9",
-            "Visual Studio": "19.0.23506",
             "clang": "5",
-            "apple-clang": "7.0",
+            "apple-clang": "7",
+            "msvc": "190",
+            "Visual Studio": "14",
         }
 
     def export_sources(self):
