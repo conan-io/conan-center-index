@@ -150,7 +150,7 @@ class GoogleCloudCppConan(ConanFile):
     def requirements(self):
         # These must remain pinned in conan index.
         self.requires("protobuf/3.21.12", transitive_headers=True)
-        self.requires("abseil/20230125.3", transitive_headers=True)
+        self.requires("abseil/[>=20230125.3 <=20230802.1]", transitive_headers=True)
         self.requires("grpc/1.54.3", transitive_headers=True)
         self.requires("nlohmann_json/3.11.3")
         self.requires("crc32c/1.1.2")
