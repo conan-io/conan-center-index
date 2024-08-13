@@ -15,7 +15,7 @@ class Box2dConan(ConanFile):
     homepage = "http://box2d.org/"
     topics = ("physics-engine", "graphic", "2d", "collision")
     package_type = "library"
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False]
@@ -40,7 +40,7 @@ class Box2dConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -69,3 +69,5 @@ class Box2dConan(ConanFile):
         self.cpp_info.libs = ["box2d"]
         if Version(self.version) >= "2.4.1" and self.options.shared:
             self.cpp_info.defines.append("B2_SHARED")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
