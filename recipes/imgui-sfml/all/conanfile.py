@@ -20,12 +20,10 @@ class ImGuiSFMLConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_sfml": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_sfml": True
     }
 
     @property
@@ -44,8 +42,7 @@ class ImGuiSFMLConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_sfml:
-            self.requires("sfml/2.6.1", transitive_headers=True)
+        self.requires("sfml/2.6.1", transitive_headers=True)
         self.requires("imgui/1.91.0")
         self.requires("opengl/system")
 
@@ -58,7 +55,6 @@ class ImGuiSFMLConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["IMGUI_SFML_FIND_SFML"] = self.options.with_sfml
         tc.variables["IMGUI_DIR"] = self.dependencies["imgui"].package_folder
         tc.variables["IMGUI_INCLUDE_DIR"] = self.dependencies["imgui"].cpp_info.includedir
         tc.generate()
@@ -90,7 +86,7 @@ class ImGuiSFMLConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = ["imgui-sfml"]
+        self.cpp_info.libs = ["ImGui-SFML"]
 
         self.cpp_info.set_property("cmake_file_name", "ImGui-SFML")
         self.cpp_info.set_property("cmake_target_name", "ImGui-SFML::ImGui-SFML")
