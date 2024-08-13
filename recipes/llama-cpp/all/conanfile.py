@@ -126,6 +126,7 @@ class LlamaCppConan(ConanFile):
         self.cpp_info.components["llama"].libdirs = ["lib"]
 
         if self.options.with_cuda and not self.options.shared:
+            self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
             module_path = os.path.join("lib", "cmake", "llama-cpp-cuda-static.cmake")
             self.cpp_info.set_property("cmake_build_modules", [module_path])
 
