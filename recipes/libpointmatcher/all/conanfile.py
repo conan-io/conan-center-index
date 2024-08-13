@@ -1,16 +1,12 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import (
-    apply_conandata_patches,
-    copy,
-    export_conandata_patches,
-    get,
-    rmdir,
-)
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -36,10 +32,21 @@ class LibpointmatcherConan(ConanFile):
         "fPIC": True,
         "with_openmp": False,
     }
+    short_paths = True
 
     @property
     def _min_cppstd(self):
         return "17"
+
+    @property
+    def _compilers_minimum_version(self):
+        # https://github.com/norlab-ulaval/libpointmatcher/blob/1.4.3/CMakeLists.txt#L240
+        return {
+            "gcc": "9",
+            "Visual Studio": "19.0.23506",
+            "clang": "5",
+            "apple-clang": "7.0",
+        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -63,11 +70,16 @@ class LibpointmatcherConan(ConanFile):
         self.requires("boost/1.81.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         self.requires("libnabo/1.0.7")
-        self.requires("yaml-cpp/0.7.0", transitive_headers=True)
+        self.requires("yaml-cpp/0.8.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -76,7 +88,7 @@ class LibpointmatcherConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["USE_OPEN_MP"] = self.options.with_openmp
         tc.cache_variables["USE_OPEN_CL"] = False
-        tc.cache_variables["SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["SHARED_LIBS"] = self.options.get_safe("shared")
         tc.cache_variables["BUILD_EXAMPLES"] = False
         tc.cache_variables["BUILD_EVALUATIONS"] = False
         tc.cache_variables["BUILD_TESTS"] = False
