@@ -56,6 +56,7 @@ class FlacConan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_DOCS"] = False
         tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
@@ -105,7 +106,6 @@ class FlacConan(ConanFile):
                 self.cpp_info.components["libflac"].system_libs += ["m"]
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
         # TODO: to remove in conan v2

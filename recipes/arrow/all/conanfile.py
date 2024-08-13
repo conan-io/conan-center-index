@@ -2,12 +2,13 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
 import os
 import glob
+import textwrap
 
 required_conan_version = ">=1.53.0"
 
@@ -409,19 +410,63 @@ class ArrowConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        cmake =CMake(self)
+        cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "cpp"))
         cmake.build()
 
     def package(self):
         copy(self, pattern="LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, pattern="NOTICE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        cmake =CMake(self)
+        cmake = CMake(self)
         cmake.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+
+        cmake_suffix = "shared" if self.options.shared else "static"
+
+        alias_map = { f"Arrow::arrow_{cmake_suffix}": f"arrow::arrow_{cmake_suffix}" }
+
+        if self.options.parquet:
+            alias_map[f"Parquet::parquet_{cmake_suffix}"] = f"arrow::parquet_{cmake_suffix}"
+
+        if self.options.get_safe("substrait"):
+            alias_map[f"Arrow::arrow_substrait_{cmake_suffix}"] = f"arrow::arrow_substrait_{cmake_suffix}"
+
+        if self.options.acero:
+            alias_map[f"Arrow::arrow_acero_{cmake_suffix}"] = f"arrow::arrow_acero_{cmake_suffix}"
+
+        if self.options.gandiva:
+            alias_map[f"Gandiva::gandiva_{cmake_suffix}"] = f"arrow::gandiva_{cmake_suffix}"
+
+        if self.options.with_flight_rpc:
+            alias_map[f"ArrowFlight::arrow_flight_sql_{cmake_suffix}"] = f"arrow::arrow_flight_sql_{cmake_suffix}"
+
+
+        self._create_cmake_module_alias_targets(
+            os.path.join(self.package_folder, self._module_file_rel_path), alias_map
+        )
+
+    def _create_cmake_module_alias_targets(self, module_file, targets):
+        content = ""
+        for alias, aliased in targets.items():
+            content += textwrap.dedent("""\
+                if(TARGET {aliased} AND NOT TARGET {alias})
+                    add_library({alias} INTERFACE IMPORTED)
+                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
+                endif()
+            """.format(alias=alias, aliased=aliased))
+        save(self, module_file, content)
+
+    @property
+    def _module_subfolder(self):
+        return os.path.join("lib", "cmake")
+
+    @property
+    def _module_file_rel_path(self):
+        return os.path.join(self._module_subfolder,
+                            f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         # FIXME: fix CMake targets of components
@@ -429,8 +474,10 @@ class ArrowConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Arrow")
 
         suffix = "_static" if is_msvc(self) and not self.options.shared else ""
+        cmake_suffix = "shared" if self.options.shared else "static"
 
         self.cpp_info.components["libarrow"].set_property("pkg_config_name", "arrow")
+        self.cpp_info.components["libarrow"].set_property("cmake_target_name", f"Arrow::arrow_{cmake_suffix}")
         self.cpp_info.components["libarrow"].libs = [f"arrow{suffix}"]
         if not self.options.shared:
             self.cpp_info.components["libarrow"].defines = ["ARROW_STATIC"]
@@ -439,6 +486,7 @@ class ArrowConan(ConanFile):
 
         if self.options.parquet:
             self.cpp_info.components["libparquet"].set_property("pkg_config_name", "parquet")
+            self.cpp_info.components["libparquet"].set_property("cmake_target_name", f"Parquet::parquet_{cmake_suffix}")
             self.cpp_info.components["libparquet"].libs = [f"parquet{suffix}"]
             self.cpp_info.components["libparquet"].requires = ["libarrow"]
             if not self.options.shared:
@@ -446,6 +494,7 @@ class ArrowConan(ConanFile):
 
         if self.options.get_safe("substrait"):
             self.cpp_info.components["libarrow_substrait"].set_property("pkg_config_name", "arrow_substrait")
+            self.cpp_info.components["libarrow_substrait"].set_property("cmake_target_name", f"Arrow::arrow_substrait_{cmake_suffix}")
             self.cpp_info.components["libarrow_substrait"].libs = [f"arrow_substrait{suffix}"]
             self.cpp_info.components["libarrow_substrait"].requires = ["libparquet", "dataset"]
 
@@ -453,6 +502,8 @@ class ArrowConan(ConanFile):
         del self.options.plasma
 
         if self.options.acero:
+            self.cpp_info.components["libacero"].set_property("pkg_config_name", "acero")
+            self.cpp_info.components["libacero"].set_property("cmake_target_name", f"Acero::arrow_acero_{cmake_suffix}")
             self.cpp_info.components["libacero"].libs = [f"arrow_acero{suffix}"]
             self.cpp_info.components["libacero"].names["cmake_find_package"] = "acero"
             self.cpp_info.components["libacero"].names["cmake_find_package_multi"] = "acero"
@@ -461,6 +512,7 @@ class ArrowConan(ConanFile):
 
         if self.options.gandiva:
             self.cpp_info.components["libgandiva"].set_property("pkg_config_name", "gandiva")
+            self.cpp_info.components["libgandiva"].set_property("cmake_target_name", f"Gandiva::gandiva_{cmake_suffix}")
             self.cpp_info.components["libgandiva"].libs = [f"gandiva{suffix}"]
             self.cpp_info.components["libgandiva"].requires = ["libarrow"]
             if not self.options.shared:
@@ -468,11 +520,13 @@ class ArrowConan(ConanFile):
 
         if self.options.with_flight_rpc:
             self.cpp_info.components["libarrow_flight"].set_property("pkg_config_name", "flight_rpc")
+            self.cpp_info.components["libarrow_flight"].set_property("cmake_target_name", f"ArrowFlight::arrow_flight_{cmake_suffix}")
             self.cpp_info.components["libarrow_flight"].libs = [f"arrow_flight{suffix}"]
             self.cpp_info.components["libarrow_flight"].requires = ["libarrow"]
 
         if self.options.get_safe("with_flight_sql"):
             self.cpp_info.components["libarrow_flight_sql"].set_property("pkg_config_name", "flight_sql")
+            self.cpp_info.components["libarrow_flight_sql"].set_property("cmake_target_name", f"ArrowFlightSql::arrow_flight_sql_{cmake_suffix}")
             self.cpp_info.components["libarrow_flight_sql"].libs = [f"arrow_flight_sql{suffix}"]
             self.cpp_info.components["libarrow_flight_sql"].requires = ["libarrow", "libarrow_flight"]
 
@@ -546,8 +600,6 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("zlib::zlib")
         if self.options.with_zstd:
             self.cpp_info.components["libarrow"].requires.append("zstd::zstd")
-        if self.options.with_boost:
-            self.cpp_info.components["libarrow"].requires.append("boost::boost")
         if self.options.with_grpc:
             self.cpp_info.components["libarrow"].requires.append("grpc::grpc")
         if self.options.with_flight_rpc:
@@ -556,22 +608,34 @@ class ArrowConan(ConanFile):
         # TODO: to remove in conan v2
         self.cpp_info.filenames["cmake_find_package"] = "Arrow"
         self.cpp_info.filenames["cmake_find_package_multi"] = "Arrow"
-        self.cpp_info.components["libarrow"].names["cmake_find_package"] = "arrow"
-        self.cpp_info.components["libarrow"].names["cmake_find_package_multi"] = "arrow"
+        self.cpp_info.components["libarrow"].names["cmake_find_package"] = f"arrow_{cmake_suffix}"
+        self.cpp_info.components["libarrow"].names["cmake_find_package_multi"] = f"arrow_{cmake_suffix}"
+        self.cpp_info.components["libarrow"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+        self.cpp_info.components["libarrow"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         if self.options.parquet:
-            self.cpp_info.components["libparquet"].names["cmake_find_package"] = "parquet"
-            self.cpp_info.components["libparquet"].names["cmake_find_package_multi"] = "parquet"
+            self.cpp_info.components["libparquet"].names["cmake_find_package"] = f"parquet_{cmake_suffix}"
+            self.cpp_info.components["libparquet"].names["cmake_find_package_multi"] = f"parquet_{cmake_suffix}"
+            self.cpp_info.components["libparquet"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+            self.cpp_info.components["libparquet"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         if self.options.get_safe("substrait"):
-            self.cpp_info.components["libarrow_substrait"].names["cmake_find_package"] = "arrow_substrait"
-            self.cpp_info.components["libarrow_substrait"].names["cmake_find_package_multi"] = "arrow_substrait"
+            self.cpp_info.components["libarrow_substrait"].names["cmake_find_package"] = f"arrow_substrait_{cmake_suffix}"
+            self.cpp_info.components["libarrow_substrait"].names["cmake_find_package_multi"] = f"arrow_substrait_{cmake_suffix}"
+            self.cpp_info.components["libarrow_substrait"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+            self.cpp_info.components["libarrow_substrait"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         if self.options.gandiva:
             self.cpp_info.components["libgandiva"].names["cmake_find_package"] = "gandiva"
             self.cpp_info.components["libgandiva"].names["cmake_find_package_multi"] = "gandiva"
+            self.cpp_info.components["libgandiva"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+            self.cpp_info.components["libgandiva"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         if self.options.with_flight_rpc:
             self.cpp_info.components["libarrow_flight"].names["cmake_find_package"] = "flight_rpc"
             self.cpp_info.components["libarrow_flight"].names["cmake_find_package_multi"] = "flight_rpc"
+            self.cpp_info.components["libarrow_flight"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+            self.cpp_info.components["libarrow_flight"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         if self.options.get_safe("with_flight_sql"):
             self.cpp_info.components["libarrow_flight_sql"].names["cmake_find_package"] = "flight_sql"
             self.cpp_info.components["libarrow_flight_sql"].names["cmake_find_package_multi"] = "flight_sql"
+            self.cpp_info.components["libarrow_flight_sql"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
+            self.cpp_info.components["libarrow_flight_sql"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
         if self.options.cli and (self.options.with_cuda or self.options.with_flight_rpc or self.options.parquet):
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

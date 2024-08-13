@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -50,8 +51,11 @@ class SonicCppConan(ConanFile):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
 
-        if self.settings.arch not in ["x86", "x86_64"]:
-            raise ConanInvalidConfiguration(f"{self.ref} support x86, x86_64 only.")
+        supported_archs = ["x86", "x86_64"]
+        if Version(self.version) >= "1.0.1":
+            supported_archs.extend(["armv8", "armv8.3"])
+        if self.settings.arch not in supported_archs:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support {self.settings.arch}.")
 
         if is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC now.")

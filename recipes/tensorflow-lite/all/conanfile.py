@@ -1,10 +1,9 @@
-import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches, replace_in_file
+from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches
 from conan.tools.scm import Version
 from os.path import join
 import textwrap
@@ -89,7 +88,7 @@ class TensorflowLiteConan(ConanFile):
             self.requires("intel-neon2sse/cci.20210225")
         if self.options.with_xnnpack:
             self.requires("xnnpack/cci.20231026")
-            # https://github.com/tensorflow/tensorflow/blob/359c3cdfc5fabac82b3c70b3b6de2b0a8c16874f/tensorflow/lite/delegates/xnnpack/xnnpack_delegate.cc#L165
+        if Version(self.version) >= "2.12.0" or self.options.with_xnnpack:
             self.requires("pthreadpool/cci.20231129")
         if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
             self.requires("fp16/cci.20210320")
