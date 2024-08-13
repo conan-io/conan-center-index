@@ -49,18 +49,29 @@ class AwsCrtCpp(ConanFile):
 
     def requirements(self):
         if self.version == "0.26.9":
-            self.requires("aws-c-event-stream/0.4.2")
+            # From add_subdirectory() calls in https://github.com/awslabs/aws-crt-cpp/blob/v0.26.9/CMakeLists.txt
+            self.requires("aws-c-common/0.9.15")
+            self.requires("aws-c-sdkutils/0.1.15")
+            self.requires("aws-c-io/0.14.7", transitive_headers=True)
+            self.requires("aws-c-cal/0.6.14")
+            self.requires("aws-c-compression/0.2.18")
             self.requires("aws-c-http/0.8.1", transitive_headers=True)
             self.requires("aws-c-auth/0.7.16", transitive_headers=True)
-            self.requires("aws-c-io/0.14.7", transitive_headers=True)
             self.requires("aws-c-mqtt/0.10.3", transitive_headers=True)
+            self.requires("aws-checksums/0.1.18")
+            self.requires("aws-c-event-stream/0.4.2")
             self.requires("aws-c-s3/0.5.5")
         if self.version == "0.17.1a":
-            self.requires("aws-c-event-stream/0.2.7")
+            # From add_subdirectory() calls in https://github.com/awslabs/aws-crt-cpp/blob/v0.17.1a/CMakeLists.txt#L95
             self.requires("aws-c-http/0.6.7", transitive_headers=True)
-            self.requires("aws-c-auth/0.6.4", transitive_headers=True)
-            self.requires("aws-c-io/0.10.9", transitive_headers=True)
             self.requires("aws-c-mqtt/0.7.8", transitive_headers=True)
+            self.requires("aws-c-cal/0.5.12")
+            self.requires("aws-c-compression/0.2.14")
+            self.requires("aws-c-auth/0.6.4", transitive_headers=True)
+            self.requires("aws-c-common/0.6.11")
+            self.requires("aws-c-io/0.10.9", transitive_headers=True)
+            self.requires("aws-c-checksums/0.1.12")
+            self.requires("aws-c-event-stream/0.2.7")
             self.requires("aws-c-s3/0.1.26")
 
     def validate(self):
