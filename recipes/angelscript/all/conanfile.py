@@ -90,7 +90,7 @@ class AngelScriptConan(ConanFile):
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["_angelscript"].libs = [f"angelscript{postfix}"]
         if self.settings.os in ("Linux", "FreeBSD", "SunOS"):
-            self.cpp_info.components["_angelscript"].system_libs.append("pthread")
+            self.cpp_info.components["_angelscript"].system_libs.extend(["m", "pthread"])
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Angelscript"
