@@ -2,6 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMakeDeps, CMakeToolchain, CMake
 from conan.tools.files import get, copy
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -84,7 +85,7 @@ class sqlite3mc(ConanFile):
         "enable_rtree": True,
         "enable_uuid": True,
         "use_uri": True,
-        "user_authentication": True,
+        "user_authentication": False,
         "enable_preupdate_hook": False,
         "enable_session": False,
         "shell_is_utf8": True,
@@ -114,6 +115,9 @@ class sqlite3mc(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.8.4":
+            # INFO: https://github.com/utelle/SQLite3MultipleCiphers/commit/3bb033956816b3301f026abb5e83087799de5bee
+            self.options.user_authentication = True
 
     def configure(self):
         if self.options.shared:

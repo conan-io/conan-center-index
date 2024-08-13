@@ -1,4 +1,7 @@
 sources:
+  "9.0.1":
+    url: "https://github.com/scipopt/scip/archive/refs/tags/v901.tar.gz"
+    sha256: "08ad3e7ad6f84f457d95bb70ab21fa7fc648dd43103099359ef8a8f30fcce32e"
   "8.1.0":
     url: "https://github.com/scipopt/scip/archive/refs/tags/v810.tar.gz"
     sha256: "b6daf54c37d02564b12fb32ec3bb7a105710eb0026adeafc602af4435fa94685"

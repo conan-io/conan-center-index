@@ -67,7 +67,7 @@ class ThriftConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.84.0", transitive_headers=True)
+        self.requires("boost/1.85.0", transitive_headers=True)
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_zlib:
@@ -75,7 +75,7 @@ class ThriftConan(ConanFile):
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
         if self.options.with_qt5:
-            self.requires("qt/5.15.12")
+            self.requires("qt/5.15.13")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":

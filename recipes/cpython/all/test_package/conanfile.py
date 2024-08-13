@@ -25,7 +25,7 @@ class TestPackageConan(ConanFile):
         # The interesting problem that arises here is if you have CMake installed
         # with your global pip, then it will fail to run in this test package.
         # To avoid that, just add a requirement on CMake.
-        self.tool_requires("cmake/[>=3.15 <4]")
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def layout(self):
         cmake_layout(self)
@@ -60,29 +60,12 @@ class TestPackageConan(ConanFile):
         return can_run(self) and self._supports_modules and self._py_version < "3.12"
 
     @property
-    def _cmake_try_FindPythonX(self):
-        return not is_msvc(self) or self.settings.build_type != "Debug"
-
-    @property
     def _supports_modules(self):
         return not is_msvc(self) or self._cpython_option("shared")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        version = self._py_version
         tc.cache_variables["BUILD_MODULE"] = self._supports_modules
-        tc.cache_variables["PY_VERSION_MAJOR_MINOR"] = f"{version.major}.{version.minor}"
-        tc.cache_variables["PY_VERSION"] = str(self._py_version)
-        tc.cache_variables["PY_VERSION_SUFFIX"] = "d" if self.settings.build_type == "Debug" else ""
-        tc.cache_variables["PYTHON_EXECUTABLE"] = self._python
-        tc.cache_variables["USE_FINDPYTHON_X"] = self._cmake_try_FindPythonX
-        tc.cache_variables["Python3_EXECUTABLE"] = self._python
-        tc.cache_variables["Python3_ROOT_DIR"] = self.dependencies["cpython"].package_folder
-        tc.cache_variables["Python3_USE_STATIC_LIBS"] = not self.dependencies["cpython"].options.shared
-        tc.cache_variables["Python3_FIND_FRAMEWORK"] = "NEVER"
-        tc.cache_variables["Python3_FIND_REGISTRY"] = "NEVER"
-        tc.cache_variables["Python3_FIND_IMPLEMENTATIONS"] = "CPython"
-        tc.cache_variables["Python3_FIND_STRATEGY"] = "LOCATION"
         tc.generate()
 
         deps = CMakeDeps(self)

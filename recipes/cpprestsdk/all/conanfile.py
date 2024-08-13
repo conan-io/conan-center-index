@@ -112,7 +112,13 @@ class CppRestSDKConan(ConanFile):
         # cpprestsdk_boost_internal
         self.cpp_info.components["cpprestsdk_boost_internal"].set_property("cmake_target_name", "cpprestsdk::cpprestsdk_boost_internal")
         self.cpp_info.components["cpprestsdk_boost_internal"].includedirs = []
-        self.cpp_info.components["cpprestsdk_boost_internal"].requires = ["boost::boost"]
+        ## List of Boost components cpprestsdk depends on:
+        ## see https://github.com/microsoft/cpprestsdk/blob/v2.10.19/Release/cmake/cpprest_find_boost.cmake#L77-L106
+        self.cpp_info.components["cpprestsdk_boost_internal"].requires = ["boost::headers", "boost::system"]
+        if self.settings.os != "Windows":
+            self.cpp_info.components["cpprestsdk_boost_internal"].requires.extend(["boost::random", "boost::thread", "boost::filesystem", "boost::chrono", "boost::atomic"])
+        if self.settings.os != "Android":
+            self.cpp_info.components["cpprestsdk_boost_internal"].requires.extend(["boost::date_time", "boost::regex"])
         # cpprestsdk_openssl_internal
         self.cpp_info.components["cpprestsdk_openssl_internal"].set_property("cmake_target_name", "cpprestsdk::cpprestsdk_openssl_internal")
         self.cpp_info.components["cpprestsdk_openssl_internal"].includedirs = []
