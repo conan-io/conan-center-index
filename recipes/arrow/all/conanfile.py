@@ -600,8 +600,6 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("zlib::zlib")
         if self.options.with_zstd:
             self.cpp_info.components["libarrow"].requires.append("zstd::zstd")
-        if self.options.with_boost:
-            self.cpp_info.components["libarrow"].requires.append("boost::boost")
         if self.options.with_grpc:
             self.cpp_info.components["libarrow"].requires.append("grpc::grpc")
         if self.options.with_flight_rpc:
