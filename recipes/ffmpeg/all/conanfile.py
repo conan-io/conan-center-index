@@ -157,7 +157,7 @@ class FFMpegConan(ConanFile):
         "with_libsvtav1": True,
         "with_libaom": True,
         "with_libdav1d": True,
-        "with_libdrm": True,
+        "with_libdrm": False,
         "with_jni": False,
         "with_mediacodec": False,
         "disable_everything": False,
