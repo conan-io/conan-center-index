@@ -64,7 +64,8 @@ class OptimLibConan(ConanFile):
         elif self.options.linear_alg_lib == "eigen":
             self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_openmp:
-            self.requires("openmp/system")
+            # '#pragma omp' is used in public headers
+            self.requires("openmp/system", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
         if self.info.options.header_only:
