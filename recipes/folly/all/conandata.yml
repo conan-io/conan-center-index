@@ -7,3 +7,4 @@ patches:
     - patch_file: "patches/001-add-missing-include.patch"
       patch_description: "Add a missing include to Elf.cpp"
       patch_type: "bugfix"
+      patch_source: "https://github.com/facebook/folly/pull/2245"
