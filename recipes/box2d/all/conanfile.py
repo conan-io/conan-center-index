@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rm, rmdir, copy
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -39,15 +39,31 @@ class Box2dConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def requirements(self):
+        if Version(self.version) >= "3.0.0":
+            self.requires("simde/0.8.2")
+
+    def build_requirements(self):
+        if Version(self.version) >= "3.0.0":
+            self.tool_requires("cmake/[>=3.22 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
-        tc.variables["BOX2D_BUILD_TESTBED"] = False
-        tc.variables["BOX2D_BUILD_UNIT_TESTS"] = False
+        if Version(self.version) < "3.0.0":
+            tc.variables["BOX2D_BUILD_TESTBED"] = False
+            tc.variables["BOX2D_BUILD_UNIT_TESTS"] = False
+        else:
+            tc.variables["BOX2D_SAMPLES"] = False
+            tc.variables["BOX2D_VALIDATE"] = False
+            tc.variables["BOX2D_UNIT_TESTS"] = False
         tc.generate()
+        if Version(self.version) >= "3.0.0":
+            deps = CMakeDeps(self)
+            deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
