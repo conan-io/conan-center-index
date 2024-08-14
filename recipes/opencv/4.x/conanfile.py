@@ -362,6 +362,43 @@ class OpenCVConan(ConanFile):
         if Version(self.version) < "4.3.0":
             self.options.with_jpeg2000 = "jasper"
 
+        if self.settings.os == "Emscripten":
+            # options taken from `platforms/js/build_js.py`
+            self.options.shared = False
+            self.options.fPIC = False
+            self.options.parallel = False
+            self.options.with_ipp = False
+            self.options.with_eigen = False
+            self.options.with_opencl = False
+            self.options.with_cuda = False
+            self.options.with_cublas = False
+            self.options.with_cufft = False
+            self.options.with_cudnn = False
+            self.options.cuda_arch_bin = False
+            self.options.cpu_baseline = ""
+            self.options.cpu_dispatch = ""
+            self.options.with_vulkan = False
+            self.options.dnn_cuda = False
+            self.options.with_qt = False
+            self.options.with_jpeg = False
+            self.options.with_png = False
+            self.options.with_tiff = False
+            self.options.with_jpeg2000 = False
+            self.options.with_openexr = False
+            self.options.with_webp = False
+            self.options.with_imgcodec_hdr = False
+            self.options.with_imgcodec_pfm = False
+            self.options.with_imgcodec_pxm = False
+            self.options.with_imgcodec_sunraster = False
+            self.options.with_quirc = False
+            self.options.with_ffmpeg = False
+            self.options.gapi = False
+            self.options.calib3d = True
+            self.options.dnn = True
+            self.options.flann = True
+            self.options.imgcodecs = False
+            self.options.videoio = False
+
     @property
     def _opencv_modules(self):
         def imageformats_deps():
@@ -1086,43 +1123,6 @@ class OpenCVConan(ConanFile):
                 self.options["jasper"].with_libjpeg = self.options.with_jpeg
             if self.options.get_safe("with_tiff"):
                 self.options["libtiff"].jpeg = self.options.with_jpeg
-        
-        if self.settings.os == "Emscripten":
-            # options taken from `platforms/js/build_js.py`
-            self.options.shared = False
-            self.options.fPIC = False
-            self.options.parallel = False
-            self.options.with_ipp = False
-            self.options.with_eigen = False
-            self.options.with_opencl = False
-            self.options.with_cuda = False
-            self.options.with_cublas = False
-            self.options.with_cufft = False
-            self.options.with_cudnn = False
-            self.options.cuda_arch_bin = False
-            self.options.cpu_baseline = ""
-            self.options.cpu_dispatch = ""
-            self.options.with_vulkan = False
-            self.options.dnn_cuda = False
-            self.options.with_qt = False
-            self.options.with_jpeg = False
-            self.options.with_png = False
-            self.options.with_tiff = False
-            self.options.with_jpeg2000 = False
-            self.options.with_openexr = False
-            self.options.with_webp = False
-            self.options.with_imgcodec_hdr = False
-            self.options.with_imgcodec_pfm = False
-            self.options.with_imgcodec_pxm = False
-            self.options.with_imgcodec_sunraster = False
-            self.options.with_quirc = False
-            self.options.with_ffmpeg = False
-            self.options.gapi = False
-            self.options.calib3d = True
-            self.options.dnn = True
-            self.options.flann = True
-            self.options.imgcodecs = False
-            self.options.videoio = False
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -1252,7 +1252,7 @@ class OpenCVConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "viz module can't be enabled yet. It requires VTK which is not available in conan-center."
             )
-        if self.options.with_jpeg2000 == "openjpeg" and Version(self.version) < "4.3.0":
+        if self.options.get_safe("with_jpeg2000") == "openjpeg" and Version(self.version) < "4.3.0":
             raise ConanInvalidConfiguration("openjpeg is not available for OpenCV before 4.3.0")
 
 
