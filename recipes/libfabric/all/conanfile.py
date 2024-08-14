@@ -87,6 +87,11 @@ class LibfabricConan(ConanFile):
             # shm2 and sm2 due to missing Linux-specific process_vm_readv syscall
             del self.options.shm
             del self.options.sm2
+            # rdma-core is not available on macOS
+            del self.options.efa
+            del self.options.opx
+            del self.options.usnic
+            del self.options.verbs
 
     def configure(self):
         if self.options.shared:
