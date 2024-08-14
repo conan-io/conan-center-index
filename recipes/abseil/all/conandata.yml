@@ -27,6 +27,10 @@ patches:
       patch_description: "Fix GCC 7 including <filesystem> in C++17 mode when it is not available (until GCC 8)"
       patch_type: "portability"
       patch_source: "https://github.com/abseil/abseil-cpp/commit/bb83aceacb554e79e7cd2404856f0be30bd00303"
+    - patch_file: "patches/0004-test-allocator-testonly.patch"
+      patch_description: "Do not build test_allocator target when tests are disabled"
+      patch_type: "portability"
+      patch_source: "https://github.com/abseil/abseil-cpp/commit/779a3565ac6c5b69dd1ab9183e500a27633117d5"
   "20240116.1":
     - patch_file: "patches/0003-absl-string-libm-20240116.patch"
       patch_description: "link libm to absl string"
@@ -36,6 +40,10 @@ patches:
       patch_description: "Fix GCC 7 including <filesystem> in C++17 mode when it is not available (until GCC 8)"
       patch_type: "portability"
       patch_source: "https://github.com/abseil/abseil-cpp/commit/bb83aceacb554e79e7cd2404856f0be30bd00303"
+    - patch_file: "patches/0004-test-allocator-testonly.patch"
+      patch_description: "Do not build test_allocator target when tests are disabled"
+      patch_type: "portability"
+      patch_source: "https://github.com/abseil/abseil-cpp/commit/779a3565ac6c5b69dd1ab9183e500a27633117d5"
   "20230802.1":
     - patch_file: "patches/0003-absl-string-libm-20230802.patch"
       patch_description: "link libm to absl string"

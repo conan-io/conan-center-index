@@ -1,7 +1,8 @@
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime, msvc_runtime_flag, unix_path
@@ -42,6 +43,10 @@ class LibffiConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+    
+    def validate(self):
+        if is_apple_os(self) and self.settings.arch == "armv8" and Version(self.version) < "3.4.0":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Apple ARM CPUs")
 
     def configure(self):
         if self.options.shared:
@@ -78,9 +83,12 @@ class LibffiConan(ConanFile):
         if self._settings_build.compiler == "apple-clang":
             tc.configure_args.append("--disable-multi-os-directory")
 
-        tc.extra_defines.append("FFI_BUILDING")
         if self.options.shared:
             tc.extra_defines.append("FFI_BUILDING_DLL")
+        if Version(self.version) < "3.4.6":
+            tc.extra_defines.append("FFI_BUILDING")
+        elif not self.options.shared:
+            tc.extra_defines.append("FFI_STATIC_BUILD")
 
         env = tc.environment()
         if self._settings_build.os == "Windows" and (is_msvc(self) or self.settings.compiler == "clang"):
@@ -134,22 +142,9 @@ class LibffiConan(ConanFile):
             env.define("INSTALL", unix_path(self, os.path.join(self.source_folder, "install-sh")))
         tc.generate(env=env)
 
-    def _patch_source(self):
+    def build(self):
         apply_conandata_patches(self)
 
-        if Version(self.version) < "3.3":
-            if self.settings.compiler == "clang" and Version(str(self.settings.compiler.version)) >= 7.0:
-                # https://android.googlesource.com/platform/external/libffi/+/ca22c3cb49a8cca299828c5ffad6fcfa76fdfa77
-                sysv_s_src = os.path.join(self.source_folder, "src", "arm", "sysv.S")
-                replace_in_file(self, sysv_s_src, "fldmiad", "vldmia")
-                replace_in_file(self, sysv_s_src, "fstmiad", "vstmia")
-                replace_in_file(self, sysv_s_src, "fstmfdd\tsp!,", "vpush")
-
-                # https://android.googlesource.com/platform/external/libffi/+/7748bd0e4a8f7d7c67b2867a3afdd92420e95a9f
-                replace_in_file(self, sysv_s_src, "stmeqia", "stmiaeq")
-
-    def build(self):
-        self._patch_source()
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
@@ -170,4 +165,5 @@ class LibffiConan(ConanFile):
         self.cpp_info.libs = ["{}ffi".format("lib" if is_msvc(self) else "")]
         self.cpp_info.set_property("pkg_config_name", "libffi")
         if not self.options.shared:
-            self.cpp_info.defines = ["FFI_BUILDING"]
+            static_define = "FFI_STATIC_BUILD" if Version(self.version) >= "3.4.6" else "FFI_BUILDING"
+            self.cpp_info.defines = [static_define]

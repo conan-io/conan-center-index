@@ -91,7 +91,7 @@ jobs:
           done
           echo "::remove-matcher owner=yamllint_matcher::"
 
-          for file in ${{ steps.changed_files_conandata.outputs.all_changed_files }}; do
+          for file in ${{ steps.changed_files_config.outputs.all_changed_files }}; do
             python3 linter/config_yaml_linter.py ${file}
           done
 

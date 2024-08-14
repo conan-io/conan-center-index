@@ -1,0 +1,22 @@
+--- include/FLAC/export.h
++++ include/FLAC/export.h
+@@ -74,7 +74,7 @@
+  */
+ #if defined(_WIN32)
+ 
+-#if defined(FLAC__NO_DLL) && !(defined(DLL_EXPORT))
++#if defined(FLAC__NO_DLL)
+ #define FLAC_API
+ #else
+ #ifdef FLAC_API_EXPORTS
+--- include/FLAC++/export.h
++++ include/FLAC++/export.h
+@@ -73,7 +73,7 @@
+  * by libtool, must override FLAC__NO_DLL on building shared components
+  */
+ #if defined(_WIN32)
+-#if defined(FLAC__NO_DLL) && !(defined(DLL_EXPORT))
++#if defined(FLAC__NO_DLL)
+ #define FLACPP_API
+ #else
+ #ifdef FLACPP_API_EXPORTS
