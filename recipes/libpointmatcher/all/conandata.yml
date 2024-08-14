@@ -7,3 +7,7 @@ patches:
     - patch_file: "patches/1.4.3-0001-fix-cmake.patch"
       patch_description: "Fix upstream CMakeLists"
       patch_type: "conan"
+    - patch_file: "patches/1.4.3-0002-fix-const-error.patch"
+      patch_description: "Fix ScalarType const_cast compile error"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/norlab-ulaval/libpointmatcher/pull/580"
