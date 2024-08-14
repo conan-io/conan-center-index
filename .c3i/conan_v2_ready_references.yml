@@ -111,6 +111,7 @@ required_for_references:
 - blaze
 - blend2d
 - bliss
+- bmx
 - boolean-lite
 - boolinq
 - boost
@@ -120,6 +121,7 @@ required_for_references:
 - botan
 - box2d
 - breakpad
+- bredis
 - brigand
 - brotli
 - brunsli
@@ -249,6 +251,7 @@ required_for_references:
 - cpython
 - cqrlib
 - cr
+- crashpad
 - crc32c
 - crc_cpp
 - crcpp
@@ -387,6 +390,7 @@ required_for_references:
 - ezc3d
 - faac
 - fakeit
+- faker-cxx
 - farmhash
 - fast-cdr
 - fast-cpp-csv-parser
@@ -510,6 +514,7 @@ required_for_references:
 - gtest
 - gtk
 - gtk-doc-stub
+- gtlab-logging
 - gtsam
 - guetzli
 - gumbo-parser
@@ -617,6 +622,7 @@ required_for_references:
 - kainjow-mustache
 - kaitai_struct_cpp_stl_runtime
 - kangaru
+- kcov
 - kcp
 - kdbindings
 - kealib
@@ -654,6 +660,7 @@ required_for_references:
 - libatomic_ops
 - libattr
 - libavif
+- libavrocpp
 - libb2
 - libbacktrace
 - libbasisu
@@ -859,6 +866,7 @@ required_for_references:
 - libzip
 - libzippp
 - lief
+- lielab
 - lightgbm
 - lightpcapng
 - linmath.h
@@ -897,6 +905,7 @@ required_for_references:
 - magic_enum
 - mailio
 - make
+- makefile-project-workspace-creator
 - mapbox-geometry
 - mapbox-variant
 - mapbox-wagyu
@@ -1108,6 +1117,7 @@ required_for_references:
 - ozz-animation
 - p-ranav-glob
 - p7zip
+- pagmo2
 - paho-mqtt-c
 - paho-mqtt-cpp
 - pango
@@ -1215,11 +1225,13 @@ required_for_references:
 - quaternions
 - quazip
 - quickcpplib
+- quickfast
 - quickfix
 - quickjs
 - quill
 - quirc
 - qwt
+- qxmpp
 - r8brain-free-src
 - rabbitmq-c
 - ragel
@@ -1262,6 +1274,7 @@ required_for_references:
 - rmm
 - roaring
 - robin-hood-hashing
+- rocket
 - rocksdb
 - rotor
 - rpclib
@@ -1284,6 +1297,7 @@ required_for_references:
 - sassc
 - sbepp
 - sbp
+- scc
 - scdoc
 - scip
 - scippp
@@ -1318,6 +1332,7 @@ required_for_references:
 - si
 - signals-light
 - sigslot
+- simd
 - simde
 - simdjson
 - simdutf
@@ -1560,6 +1575,7 @@ required_for_references:
 - wil
 - wildcards
 - wildmidi
+- wineditline
 - winflexbison
 - winmd
 - winreg
@@ -1605,6 +1621,7 @@ required_for_references:
 - yandex-ozo
 - yas
 - yasm
+- ydcpp-tcpcat
 - yder
 - yoga
 - yomm2

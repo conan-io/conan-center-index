@@ -1486,6 +1486,15 @@ class OpenCVConan(ConanFile):
             tc.variables["WITH_AVIF"] = self.options.get_safe("with_avif", False)
             tc.variables["WITH_FLATBUFFERS"] = self.options.get_safe("with_flatbuffers", False)
 
+        if Version(self.version) >= "4.10.0":
+            tc.variables["WITH_KLEIDICV"] = False
+            tc.variables["WITH_NDSRVP"] = False
+            tc.variables["OBSENSOR_USE_ORBBEC_SDK"] = False
+            if is_apple_os(self):
+                # default behavior for 4.9.0
+                tc.variables["WITH_OBSENSOR"] = False
+            tc.variables["WITH_ZLIB_NG"] = False
+
         # Special world option merging all enabled modules into one big library file
         tc.variables["BUILD_opencv_world"] = self.options.world
 
