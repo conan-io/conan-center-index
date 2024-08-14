@@ -28,8 +28,9 @@ class SplunkOpentelemetryConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "build_jaeger_exporter": False,  # FIXME: causes version conflicts via thrift
+        "build_jaeger_exporter": True,
     }
+
     @property
     def _min_cppstd(self):
         return 14
@@ -43,7 +44,6 @@ class SplunkOpentelemetryConan(ConanFile):
             "Visual Studio": "16",
             "msvc": "192",
         }
-
 
     def export_sources(self):
         export_conandata_patches(self)
