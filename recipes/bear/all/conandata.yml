@@ -1,15 +1,15 @@
 sources:
-  "3.1.4":
-    url: "https://github.com/rizsotto/Bear/archive/refs/tags/3.1.4.tar.gz"
-    sha256: "a1105023795b3e1b9abc29c088cdec5464cc9f3b640b5078dc90a505498da5ff"
+  # "3.1.4":
+  #   url: "https://github.com/rizsotto/Bear/archive/refs/tags/3.1.4.tar.gz"
+  #   sha256: "a1105023795b3e1b9abc29c088cdec5464cc9f3b640b5078dc90a505498da5ff"
   "3.0.21":
     url: "https://github.com/rizsotto/Bear/archive/refs/tags/3.0.21.tar.gz"
     sha256: "0c949a6a907bc61a1284661f8d9dab1788a62770c265f6142602669b6e5c389d"
 patches:
-  "3.1.4":
-    - patch_file: "patches/3.1.4-adapt-third-party-and-standard.diff"
-      patch_description: "Remove C++ standard versions, find_package strict versions on dependencies"
-      patch_type: "conan"
+  # "3.1.4":
+  #   - patch_file: "patches/3.1.4-adapt-third-party-and-standard.diff"
+  #     patch_description: "Remove C++ standard versions, find_package strict versions on dependencies"
+  #     patch_type: "conan"
   "3.0.21":
     - patch_file: "patches/3.0.21-adapt-third-party-and-standard.diff"
       patch_description: "Remove C++ standard versions, find_package strict versions on dependencies and fix fmt FMT_NEEDS_OSTREAM_FORMATTER"
