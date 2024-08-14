@@ -40,7 +40,7 @@ class BearConan(ConanFile):
     def requirements(self):
         self.requires("grpc/1.54.3")
         if Version(self.version) >= "3.1":
-            self.requires("fmt/10.2.0")
+            self.requires("fmt/10.2.1")
             self.requires("spdlog/1.12.0")
         else:
             self.requires("fmt/8.1.1")
@@ -51,6 +51,7 @@ class BearConan(ConanFile):
         if self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         self.tool_requires("grpc/<host_version>")
+        self.tool_requires("protobuf/<host_version>")
         # Older version of CMake fails to build object libraries in the correct order
         self.tool_requires("cmake/[>=3.20 <4]")
 
