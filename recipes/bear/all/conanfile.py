@@ -48,10 +48,9 @@ class BearConan(ConanFile):
         self.requires("nlohmann_json/3.11.3")
 
     def build_requirements(self):
-        if self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+        self.tool_requires("pkgconf/2.1.0")
         self.tool_requires("grpc/<host_version>")
-        self.tool_requires("protobuf/<host_version>")
+        self.tool_requires("protobuf/3.21.12")
         # Older version of CMake fails to build object libraries in the correct order
         self.tool_requires("cmake/[>=3.20 <4]")
 
