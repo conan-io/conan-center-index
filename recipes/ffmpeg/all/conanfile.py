@@ -919,8 +919,8 @@ class FFMpegConan(ConanFile):
             avutil.requires.append("libdrm::libdrm_libdrm")
         if self.options.get_safe("with_vaapi"):
             avutil.requires.append("vaapi::vaapi")
-            if self.options.get_safe("with_xcb"):
-                avutil.requires.append("xorg::x11")
+        if self.options.get_safe("with_xcb"):
+            avutil.requires.append("xorg::x11")
 
         if self.options.get_safe("with_vdpau"):
             avutil.requires.append("vdpau::vdpau")
