@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.env.virtualbuildenv import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
@@ -60,7 +61,7 @@ class LibfabricConan(ConanFile):
         "hook_debug": "yes",
         "hook_hmem": "yes",
         "mrail": "yes",
-        "opx": "yes",
+        "opx": "no",  # Fails to build
         "perf": "yes",
         "profile": "yes",
         "psm2": "no",  # library not available on CCI
@@ -75,7 +76,7 @@ class LibfabricConan(ConanFile):
         "ucx": "no",
         "udp": "yes",
         "usnic": "yes",
-        "verbs": "yes",
+        "verbs": "no",  # Configuration step fails
         "xpmem": "no",  # library not available on CCI
     }
 
@@ -127,6 +128,10 @@ class LibfabricConan(ConanFile):
             if not self.dependencies["rdma-core"].options.build_librdmacm:
                 raise ConanInvalidConfiguration("'-o rdma-core/*:build_librdmacm=True' is required when 'verbs' is enabled")
 
+    def build_requirements(self):
+        # Used in ./configure tests and build
+        self.tool_requires("libtool/2.4.7")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -172,6 +177,8 @@ class LibfabricConan(ConanFile):
 
         deps = AutotoolsDeps(self)
         deps.generate()
+
+        VirtualBuildEnv(self).generate()
 
     def build(self):
         autotools = Autotools(self)
