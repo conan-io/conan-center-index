@@ -162,7 +162,7 @@ class ArrowConan(ConanFile):
 
     def requirements(self):
         if self.options.with_thrift:
-            self.requires("thrift/0.17.0")
+            self.requires("thrift/0.20.0")
         if self.options.with_protobuf:
             self.requires("protobuf/3.21.12")
         if self.options.with_jemalloc:
@@ -203,11 +203,11 @@ class ArrowConan(ConanFile):
             self.requires("snappy/1.1.9")
         if self.options.get_safe("simd_level") != None or \
                 self.options.get_safe("runtime_simd_level") != None:
-            self.requires("xsimd/9.0.1")
+            self.requires("xsimd/13.0.0")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5 <1.6]")
         if self.options.with_re2:
             self.requires("re2/20230301")
         if self.options.with_utf8proc:
