@@ -99,15 +99,16 @@ class LibfabricConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
-    def requirements(self):
-        def is_enabled(opt):
-            return self.options.get_safe(opt) in ["yes", "dl"]
+    def _is_enabled(self, opt):
+        return self.options.get_safe(opt) in ["yes", "dl"]
 
-        if is_enabled("usnic"):
+    def requirements(self):
+
+        if self._is_enabled("usnic"):
             self.requires("libnl/3.8.0")
-        if is_enabled("efa") or is_enabled("opx") or is_enabled("usnic") or is_enabled("verbs"):
+        if self._is_enabled("efa") or self._is_enabled("opx") or self._is_enabled("usnic") or self._is_enabled("verbs"):
             self.requires("rdma-core/52.0")
-        if is_enabled("opx"):
+        if self._is_enabled("opx"):
             self.requires("libnuma/2.0.16")
             self.requires("util-linux-libuuid/2.39.2")
 
@@ -129,7 +130,7 @@ class LibfabricConan(ConanFile):
                         "(optionally with a 'dl:' prefix to build as a dynamic library)"
                     )
 
-        if self.options.verbs in ["yes", "dl"]:
+        if self._is_enabled("verbs"):
             if not self.dependencies["rdma-core"].options.build_librdmacm:
                 raise ConanInvalidConfiguration("'-o rdma-core/*:build_librdmacm=True' is required when 'verbs' is enabled")
 
@@ -165,7 +166,7 @@ class LibfabricConan(ConanFile):
         tc.configure_args.append("--with-dsa=no")
         tc.configure_args.append("--with-gdrcopy=no")
         tc.configure_args.append("--with-json-c=no")  # TODO
-        if self.options.usnic:
+        if self._is_enabled("usnic"):
             tc.configure_args.append(f"--with-libnl={self.dependencies['libnl'].package_folder}")
         else:
             tc.configure_args.append("--with-libnl=no")
