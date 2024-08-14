@@ -118,7 +118,7 @@ class LibfabricConan(ConanFile):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("libfabric is not available on Windows")
 
-        for opt, value in self.options.items():
+        for opt, _ in self.options.items():
             if opt in self._providers and self.options.get_safe(opt) not in ["yes", "no", "dl"]:
                 path = str(self.options.get_safe(opt))
                 if path.startswith("dl:"):
