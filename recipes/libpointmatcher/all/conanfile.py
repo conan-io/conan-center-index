@@ -71,7 +71,7 @@ class LibpointmatcherConan(ConanFile):
         self.requires("boost/1.81.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         self.requires("libnabo/1.0.7")
-        self.requires("yaml-cpp/0.8.0", transitive_headers=True)
+        self.requires("yaml-cpp/0.7.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
