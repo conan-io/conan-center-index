@@ -1,4 +1,7 @@
 sources:
+  "4.1.0":
+    url: "https://github.com/ToruNiina/toml11/archive/refs/tags/v4.1.0.tar.gz"
+    sha256: "fb4c02cc708ae28e6fc3496514e3625e4b6738ed4ce40897710ca4d7a29de4f7"
   "4.0.3":
     url: "https://github.com/ToruNiina/toml11/archive/refs/tags/v4.0.3.tar.gz"
     sha256: "c8cbc7839cb3f235153045ce550e559f55a04554dfcab8743ba8a1e8ef6a54bf"

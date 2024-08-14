@@ -53,3 +53,7 @@ class StatusCodeConan(ConanFile):
         # See https://github.com/ned14/status-code/blob/38e1e862386cb38d577664fd681ef829b0e03fba/CMakeLists.txt#L126
         self.cpp_info.set_property("cmake_file_name", "status-code")
         self.cpp_info.set_property("cmake_target_name", "status-code::hl")
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.components["hl"].names["cmake_find_package"] = "hl"
+        self.cpp_info.components["hl"].names["cmake_find_package_multi"] = "hl"
