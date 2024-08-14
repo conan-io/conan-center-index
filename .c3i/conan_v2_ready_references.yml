@@ -43,6 +43,7 @@ required_for_references:
 - args-parser
 - argtable2
 - argtable3
+- argz
 - armadillo
 - arrow
 - arsenalgear
@@ -453,6 +454,7 @@ required_for_references:
 - fusepp
 - fxdiv
 - g3log
+- gaia-ecs
 - gainput
 - gamenetworkingsockets
 - gamma
@@ -1348,6 +1350,7 @@ required_for_references:
 - simfil
 - simple-websocket-server
 - simple-yaml
+- simple_enum
 - sioclient
 - sjson-cpp
 - skyr-url
