@@ -1,5 +1,8 @@
 sources:
   # The C++ library uses a separate versioning scheme from the overall releases
+  "0.12.0":
+    url: "https://github.com/ouster-lidar/ouster_example/archive/refs/tags/20240703.tar.gz"
+    sha256: "aac9f82d8b8376bd11366204a57ab4e2a27e92a1a758238f2d3859e570be4914"
   "0.11.0":
     url: "https://github.com/ouster-lidar/ouster_example/archive/refs/tags/20240425.tar.gz"
     sha256: "f4f38f6787021e697633f2c290c95b544af81d388a18cb9f790234d4f592caf0"

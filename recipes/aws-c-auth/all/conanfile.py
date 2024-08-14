@@ -47,23 +47,17 @@ class AwsCAuth(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) <= "0.6.17":
-            self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-cal/0.5.13")
-            if Version(self.version) < "0.6.17":
-                self.requires("aws-c-io/0.10.20", transitive_headers=True, transitive_libs=True)
-                self.requires("aws-c-http/0.6.13", transitive_headers=True)
-            else:
-                self.requires("aws-c-io/0.13.4", transitive_headers=True, transitive_libs=True)
-                self.requires("aws-c-http/0.6.22", transitive_headers=True)
-            if Version(self.version) >= "0.6.5":
-                self.requires("aws-c-sdkutils/0.1.3", transitive_headers=True)
-        else:
-            self.requires("aws-c-common/0.9.6", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-cal/0.6.9")
-            self.requires("aws-c-io/0.13.35", transitive_headers=True, transitive_libs=True)
-            self.requires("aws-c-http/0.7.14", transitive_headers=True)
-            self.requires("aws-c-sdkutils/0.1.12", transitive_headers=True)
+        if self.version == "0.7.16":
+            self.requires("aws-c-common/0.9.15", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-cal/0.6.14")
+            self.requires("aws-c-io/0.14.7", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-http/0.8.1", transitive_headers=True)
+            self.requires("aws-c-sdkutils/0.1.15", transitive_headers=True)
+        if self.version == "0.6.4":
+            self.requires("aws-c-common/0.6.11", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-cal/0.5.12")
+            self.requires("aws-c-io/0.10.9", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-http/0.6.7", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
