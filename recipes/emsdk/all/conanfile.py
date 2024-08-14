@@ -29,7 +29,10 @@ class EmSDKConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nodejs/16.3.0")
+        if Version(self.version) < "3.1.64":
+            self.requires("nodejs/16.3.0")
+        else:
+            self.requires("nodejs/20.16.0")
         # self.requires("python")  # FIXME: Not available as Conan package
         # self.requires("wasm")  # FIXME: Not available as Conan package
 
@@ -38,8 +41,7 @@ class EmSDKConan(ConanFile):
         del self.info.settings.build_type
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _relative_paths(self):
