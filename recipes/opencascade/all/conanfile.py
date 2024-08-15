@@ -39,6 +39,7 @@ class OpenCascadeConan(ConanFile):
         "with_tbb": [True, False],
         "with_opengl": [True, False],
         "extended_debug_messages": [True, False],
+        "with_samples": [True, False],
     }
     default_options = {
         "shared": False,
@@ -52,6 +53,7 @@ class OpenCascadeConan(ConanFile):
         "with_tbb": False,
         "with_opengl": True,
         "extended_debug_messages": False,
+        "with_samples": False
     }
 
     short_paths = True
@@ -113,8 +115,7 @@ class OpenCascadeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_tk:
-            self.requires("tcl/8.6.10")
+        # self.requires("tcl/8.6.10")
         if self._link_tk:
             self.requires("tk/8.6.10")
         self.requires("freetype/2.13.2")
@@ -136,6 +137,8 @@ class OpenCascadeConan(ConanFile):
             self.requires("draco/1.5.6")
         if self.options.with_tbb:
             self.requires("onetbb/2021.10.0")
+        if self.options.with_samples:
+            self.requires("qt/6.7.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -160,9 +163,9 @@ class OpenCascadeConan(ConanFile):
                 tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         else:
             if not valid_min_cppstd(self, self._min_cppstd):
-                tc.cache_variables["BUILD_CPP_STANDARD"] = self._min_cppstd
+                tc.cache_variables["BUILD_CPP_STANDARD"] = "C++"+self._min_cppstd
             else:
-                tc.cache_variables["BUILD_CPP_STANDARD"] = str(self.settings.compiler.cppstd)
+                tc.cache_variables["BUILD_CPP_STANDARD"] = "C++"+str(self.settings.compiler.cppstd)
 
         tc.cache_variables["BUILD_LIBRARY_TYPE"] = "Shared" if self.options.shared else "Static"
         tc.cache_variables["INSTALL_TEST_CASES"] = False
@@ -184,7 +187,7 @@ class OpenCascadeConan(ConanFile):
 
         if is_msvc(self):
             tc.cache_variables["BUILD_SAMPLES_MFC"] = False
-        tc.cache_variables["BUILD_SAMPLES_QT"] = False
+        tc.cache_variables["BUILD_SAMPLES_QT"] = self.options.with_samples
         tc.cache_variables["BUILD_Inspector"] = False
         if is_apple_os(self):
             tc.cache_variables["USE_GLX"] = False
@@ -220,9 +223,6 @@ class OpenCascadeConan(ConanFile):
         occt_csf_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_csf.cmake")
         occt_defs_flags_cmake = os.path.join(self.source_folder, "adm", "cmake", "occt_defs_flags.cmake")
 
-        # modules = os.path.join(self.source_folder, "adm", "MODULES")
-        # replace_in_file(self, modules, "DETools TKExpress ExpToCasExe", "")
-            
         # Inject interface definitions of dependencies because opencascade
         # does not always link to CMake imported targets
         sorted_deps = [dep for dep in reversed(self.dependencies.host.topological_sort.values())]
@@ -278,18 +278,19 @@ class OpenCascadeConan(ConanFile):
             "set (CSF_FREETYPE \"freetype\")",
             f"set (CSF_FREETYPE \"{freetype_libs}\")",
         )
-        ## tcl
-        # deps_targets.append("tcl::tcl")
-        # replace_in_file(self, cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tcl\")", "find_package(TCL REQUIRED)")
-        # tcl_libs = " ".join(self.dependencies["tcl"].cpp_info.aggregated_components().libs)
-        # csf_tcl_libs = f"set (CSF_TclLibs \"{tcl_libs}\")"
-        # replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs     \"tcl86\")", csf_tcl_libs)
-        # replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   Tcl)", csf_tcl_libs)
-        # if Version(self.version) >= "7.6.0":
-        #     replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   \"tcl8.6\")", csf_tcl_libs)
-        # else:
-        #     replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs     \"tcl8.6\")", csf_tcl_libs)
-        ## tk
+        # tcl
+        if Version(self.version) <= "7.6.0":
+            deps_targets.append("tcl::tcl")
+        replace_in_file(self, cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tcl\")", "find_package(TCL REQUIRED)")
+        tcl_libs = " ".join(self.dependencies["tcl"].cpp_info.aggregated_components().libs)
+        csf_tcl_libs = f"set (CSF_TclLibs \"{tcl_libs}\")"
+        replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs     \"tcl86\")", csf_tcl_libs)
+        replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   Tcl)", csf_tcl_libs)
+        if Version(self.version) >= "7.6.0":
+            replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs   \"tcl8.6\")", csf_tcl_libs)
+        else:
+            replace_in_file(self, occt_csf_cmake, "set (CSF_TclLibs     \"tcl8.6\")", csf_tcl_libs)
+        # tk
         if self._link_tk:
             deps_targets.append("tk::tk")
             replace_in_file(self, cmakelists, "OCCT_INCLUDE_CMAKE_FILE (\"adm/cmake/tk\")", "find_package(tk REQUIRED)")
