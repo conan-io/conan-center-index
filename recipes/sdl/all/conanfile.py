@@ -217,6 +217,8 @@ class SDLConan(ConanFile):
                 "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
                 'find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED PATHS "${WAYLAND_BIN_DIR}" NO_DEFAULT_PATH)',
             )
+        if Version(self.version) >= "2.30.6" and not self.options.shared:
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "list(APPEND targets SDL2-static)", "set(targets SDL2-static)")
 
     def define_toolchain(self):
         tc = CMakeToolchain(self)
