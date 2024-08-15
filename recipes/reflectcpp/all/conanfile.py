@@ -145,7 +145,7 @@ class ReflectCppConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "17",
-            "msvc": "193",
+            "msvc": "1938",
             "gcc": "11",
             "clang": "13",
             "apple-clang": "15",
