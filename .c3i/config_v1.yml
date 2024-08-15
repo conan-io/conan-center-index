@@ -36,8 +36,6 @@ tasks:
     # Requirements to merge a given pull-request:
     # * check_runs refers to notifications from GH actions
     # * status_checks refers to notifications coming from external tools (Jenkins, CLA,...)
-    check_runs:
-      - name: "Lint changed files (YAML files)"
     status_checks:
       - name: "license/cla"
       - name: "continuous-integration/jenkins/pr-merge"
@@ -54,7 +52,7 @@ tasks:
   cci:
     conan_v2_run_export: false
     write_comments: true
-    detailed_status_checks: true
+    detailed_status_checks: false
     update_labels: true
     build_bump_deps_pr: false
     description_bump_deps_pr: ":vertical_traffic_light: Thank for your Bump dependencies PR. The build service will be triggered soon by a Conan team member."
@@ -163,6 +161,7 @@ pod_size:
   large:
     - "duckdb"
     - "ceres-solver"
+    - "simd"
   xlarge:
     - "llvm"
     - "opengv"
