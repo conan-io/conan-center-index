@@ -6,7 +6,6 @@
 #include "rfl/Generic.hpp"
 #include "rfl/json.hpp"
 
-
 int main(void) {
     auto person = rfl::Generic::Object();
     person["first_name"] = "John";
