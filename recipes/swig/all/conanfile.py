@@ -63,7 +63,11 @@ class SwigConan(ConanFile):
             if is_msvc(self):
                 self.tool_requires("cccl/1.3")
         if Version(self.version) >= "4.2":
-            self.tool_requires("bison/3.8.2")
+            if is_msvc(self):
+                # bison 3.8.2 is not ready for msvc
+                self.tool_requires("bison/3.7.6")
+            else:
+                self.tool_requires("bison/3.8.2")
         else:
             if is_msvc(self):
                 self.tool_requires("winflexbison/2.5.25")
