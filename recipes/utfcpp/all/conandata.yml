@@ -14,6 +14,9 @@ sources:
   "3.2.5":
     url: "https://github.com/nemtrif/utfcpp/archive/v3.2.5.tar.gz"
     sha256: "14fd1b3c466814cb4c40771b7f207b61d2c7a0aa6a5e620ca05c00df27f25afd"
+  "3.2.3":
+    url: "https://github.com/nemtrif/utfcpp/archive/v3.2.3.tar.gz"
+    sha256: "3ba9b0dbbff08767bdffe8f03b10e596ca351228862722e4c9d4d126d2865250"
   "3.1.2":
     url: "https://github.com/nemtrif/utfcpp/archive/v3.1.2.tar.gz"
     sha256: "fea3bfa39fb8bd7368077ea5e1e0db9a8951f7e6fb6d9400b00ab3d92b807c6d"
