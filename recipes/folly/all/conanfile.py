@@ -96,7 +96,8 @@ class FollyConan(ConanFile):
 
     @property
     def _required_boost_components(self):
-        return ["context", "filesystem", "program_options", "regex", "system", "thread"]
+        return ["context", "crc", "filesystem", "multi-index", "program_options", "regex",
+                "smart-ptr", "system", "thread", "variant"]
 
     @property
     def _required_boost_conan_components(self):
