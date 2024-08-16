@@ -34,7 +34,6 @@ class CPythonConan(ConanFile):
         "pymalloc": [True, False],
         "with_bz2": [True, False],
         "with_gdbm": [True, False],
-        "with_nis": [True, False],
         "with_sqlite3": [True, False],
         "with_tkinter": [True, False],
         "with_curses": [True, False],
@@ -52,7 +51,6 @@ class CPythonConan(ConanFile):
         "pymalloc": True,
         "with_bz2": True,
         "with_gdbm": True,
-        "with_nis": False,
         "with_sqlite3": True,
         "with_tkinter": True,
         "with_curses": True,
@@ -85,7 +83,6 @@ class CPythonConan(ConanFile):
             del self.options.pymalloc
             del self.options.with_curses
             del self.options.with_gdbm
-            del self.options.with_nis
 
         self.settings.compiler.rm_safe("libcxx")
         self.settings.compiler.rm_safe("cppstd")
@@ -130,9 +127,6 @@ class CPythonConan(ConanFile):
             self.requires("bzip2/1.0.8")
         if self.options.get_safe("with_gdbm", False):
             self.requires("gdbm/1.23")
-        if self.options.get_safe("with_nis", False):
-            # TODO: Add nis when available.
-            raise ConanInvalidConfiguration("nis is not available on CCI (yet)")
         if self.options.get_safe("with_sqlite3"):
             self.requires("sqlite3/3.45.2")
         if self.options.get_safe("with_tkinter"):
@@ -413,6 +407,10 @@ class CPythonConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "configure"),
                             'OPENSSL_LIBS="-lssl -lcrypto"',
                             'OPENSSL_LIBS="-lssl -lcrypto -lz"')
+        # Disable the libnsl dependency required by the deprecated nis module.
+        # Libnsl is no longer available on newer glibc versions.
+        replace_in_file(self, os.path.join(self.source_folder, "configure"), "$LIBNSL_CFLAGS", "")
+        replace_in_file(self, os.path.join(self.source_folder, "configure"), "$LIBNSL_LIBS", "")
         if is_msvc(self):
             runtime_library = {
                 "MT": "MultiThreaded",
@@ -882,8 +880,6 @@ class CPythonConan(ConanFile):
                 self.cpp_info.components["_hidden"].requires.append("tk::tk")
             self.cpp_info.components["_hidden"].includedirs = []
             self.cpp_info.components["_hidden"].libdirs = []
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["_hidden"].system_libs.append("nsl")
 
         if self.options.env_vars:
             bindir = os.path.join(self.package_folder, "bin")
