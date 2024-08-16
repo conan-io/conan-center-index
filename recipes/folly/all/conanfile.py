@@ -103,40 +103,39 @@ class FollyConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
 
         if is_apple_os(self) and self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration("Conan currently requires a 64bit target architecture for Folly on Macos")
+            # TODO: Validate this rule!!
+            raise ConanInvalidConfiguration(f"{self.ref} currently requires a 64bit target architecture for Folly on Macos.")
 
         if is_apple_os(self):
-            raise ConanInvalidConfiguration("Current recipe doesn't support Macos. Contributions are welcome.")
+            raise ConanInvalidConfiguration(f"{self.ref} current recipe doesn't support Macos. Contributions are welcome!")
 
         if self.settings.os == "Windows" and self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration("Folly requires a 64bit target architecture on Windows")
+            raise ConanInvalidConfiguration(f"{self.ref} Folly requires a 64bit target architecture on Windows.")
 
         if (is_apple_os(self) or self.settings.os == "Windows") and self.options.shared:
-            raise ConanInvalidConfiguration(f"Folly could not be built on {self.settings.os} as shared library")
+            raise ConanInvalidConfiguration(f"{self.ref} Folly could not be built on {self.settings.os} as shared library. Please, use static library.")
 
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f"{self.ref} could not be built on {self.settings.os}. PR's are welcome.")
+            raise ConanInvalidConfiguration(f"{self.ref} could not be built on {self.settings.os}. Contributions are welcome!")
 
         if self.settings.compiler == "clang" and self.options.shared:
-            raise ConanInvalidConfiguration(f"Folly {self.version} could not be built by clang as a shared library")
+            raise ConanInvalidConfiguration(f"{self.ref} could not be built by clang as a shared library.")
 
         glog = self.dependencies["glog"]
         if self.options.shared and not glog.options.shared:
-            raise ConanInvalidConfiguration(f"If Folly is built as shared lib, glog must be a shared lib too.")
+            raise ConanInvalidConfiguration(f"{self.ref} and {glog.ref} must be both shared or both static.")
 
         boost = self.dependencies["boost"]
         if boost.options.header_only:
-            raise ConanInvalidConfiguration("Folly could not be built with a header only Boost")
+            raise ConanInvalidConfiguration(f"{self.ref} could not be built with a header only Boost. Use -o 'boost/*:header_only=False'")
 
         miss_boost_required_comp = any(getattr(boost.options, f"without_{boost_comp}", True) for boost_comp in self._required_boost_components)
         if miss_boost_required_comp:
             required_components = ", ".join(self._required_boost_components)
-            raise ConanInvalidConfiguration(f"Folly requires these boost components: {required_components}")
+            raise ConanInvalidConfiguration(f"{self.ref} requires these Boost components: {required_components}. Try with '-o boost/*:without_{required_components}=False'")
 
         if self.options.get_safe("use_sse4_2") and str(self.settings.arch) not in ['x86', 'x86_64']:
             raise ConanInvalidConfiguration(f"{self.ref} can use the option use_sse4_2 only on x86 and x86_64 archs.")
