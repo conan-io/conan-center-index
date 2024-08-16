@@ -2,11 +2,11 @@
 #include <iostream>
 
 #include <folly/Format.h>
-#include <folly/FBString.h>
+#include <folly/IPAddress.h>
 
 
 int main() {
-    folly::fbstring message{"The answer is {}."};
-    std::cout << folly::format(message, 42);
+    folly::fbstring address{"127.0.0.1"};
+    folly::IPAddress::validate(address);
     return EXIT_SUCCESS;
 }
