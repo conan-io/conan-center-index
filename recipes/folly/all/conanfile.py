@@ -75,7 +75,7 @@ class FollyConan(ConanFile):
         self.requires("lz4/1.10.0", transitive_libs=True)
         self.requires("snappy/1.2.1")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("zstd/[~1.5.5]", transitive_libs=True)
+        self.requires("zstd/1.5.5", transitive_libs=True)
         if not is_msvc(self):
             self.requires("libdwarf/0.9.1")
         self.requires("libsodium/1.0.19")
@@ -96,7 +96,7 @@ class FollyConan(ConanFile):
 
     @property
     def _required_boost_components(self):
-        return ["context", "crc", "filesystem", "multi-index", "program_options", "regex",
+        return ["context", "filesystem", "multi-index", "program_options", "regex",
                 "smart-ptr", "system", "thread", "variant"]
 
     @property
