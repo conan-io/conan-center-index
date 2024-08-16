@@ -66,6 +66,10 @@ class SDLImageConan(ConanFile):
         "wic": False,
     }
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def export_sources(self):
         if Version(self.version) < "2.6":
             copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
@@ -200,7 +204,7 @@ class SDLImageConan(ConanFile):
     def package_info(self):
         lib_postfix = ""
         if Version(self.version) >= "2.6":
-            if self.settings.os == "Windows" and not self.options.shared:
+            if self._settings_build.os == "Windows" and not self.options.shared:
                 lib_postfix += "-static"
             if self.settings.build_type == "Debug":
                 lib_postfix += "d"
