@@ -8,7 +8,8 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+
+required_conan_version = ">=1.54.0"
 
 
 class FollyConan(ConanFile):
@@ -65,26 +66,34 @@ class FollyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.84.0", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/1.85.0", transitive_headers=True, transitive_libs=True)
         self.requires("bzip2/1.0.8")
         self.requires("double-conversion/3.3.0", transitive_headers=True, transitive_libs=True)
         self.requires("gflags/2.2.2")
-        self.requires("glog/0.7.0", transitive_headers=True, transitive_libs=True)
+        self.requires("glog/0.7.1", transitive_headers=True, transitive_libs=True)
         self.requires("libevent/2.1.12", transitive_headers=True, transitive_libs=True)
         self.requires("openssl/[>=1.1 <4]")
-        self.requires("lz4/1.9.4", transitive_libs=True)
+        self.requires("lz4/1.10.0", transitive_libs=True)
         self.requires("snappy/1.2.1")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("zstd/1.5.5", transitive_libs=True)
+        self.requires("zstd/[~1.5.5]", transitive_libs=True)
         if not is_msvc(self):
             self.requires("libdwarf/0.9.1")
         self.requires("libsodium/1.0.19")
-        self.requires("xz_utils/5.4.5")
-        # FIXME: Causing compilation issues on clang: self.requires("jemalloc/5.3.0")
+        self.requires("xz_utils/[>=5.4.5 <6]")
+        # FIXME: Causing compilation issues on clang:
+        #  self.requires("jemalloc/5.3.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/1.8.0")
-        self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
+        if self.settings.os == "Linux":
+            self.requires("libaio/0.3.113")
+            self.requires("liburing/2.6")
+        self.requires("fmt/11.0.2", transitive_headers=True, transitive_libs=True)
+
+    def build_requirements(self):
+        # INFO: Required due ZIP_LISTS CMake feature in conan_deps.cmake
+        self.tool_requires("cmake/[>=3.17 <4]")
 
     @property
     def _required_boost_components(self):
@@ -159,6 +168,7 @@ class FollyConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_PROJECT_folly_INCLUDE"] = "conan_deps.cmake"
 
         if can_run(self):
             for var in ["FOLLY_HAVE_UNALIGNED_ACCESS", "FOLLY_HAVE_LINUX_VDSO", "FOLLY_HAVE_WCHAR_SUPPORT", "HAVE_VSNPRINTF_ERRORS"]:
@@ -203,20 +213,19 @@ class FollyConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        # deps.set_property("backtrace", "cmake_file_name", "Backtrace")
         deps.set_property("boost", "cmake_file_name", "Boost")
         deps.set_property("bzip2", "cmake_file_name", "BZip2")
         deps.set_property("double-conversion", "cmake_file_name", "DoubleConversion")
         deps.set_property("fmt", "cmake_file_name", "fmt")
         deps.set_property("gflags", "cmake_file_name", "Gflags")
         deps.set_property("glog", "cmake_file_name", "Glog")
-        # deps.set_property("libaio", "cmake_file_name", "LibAIO")
         deps.set_property("libdwarf", "cmake_file_name", "LibDwarf")
         deps.set_property("libevent", "cmake_file_name", "LibEvent")
         deps.set_property("libiberty", "cmake_file_name", "Libiberty")
+        deps.set_property("libaio", "cmake_file_name", "LibAIO")
         deps.set_property("libsodium", "cmake_file_name", "Libsodium")
         deps.set_property("libunwind", "cmake_file_name", "LibUnwind")
-        # deps.set_property("liburing", "cmake_file_name", "LibUring")
+        deps.set_property("liburing", "cmake_file_name", "LibUring")
         deps.set_property("lz4", "cmake_file_name", "LZ4")
         deps.set_property("openssl", "cmake_file_name", "OpenSSL")
         deps.set_property("snappy", "cmake_file_name", "Snappy")
@@ -227,14 +236,8 @@ class FollyConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-
-        # -DCMAKE_PROJECT_folly_INCLUDE=conan_deps.cmake does not work in C3I for some reason, force the inclusion
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "project(${PACKAGE_NAME} CXX C ASM)",
-                        "project(${PACKAGE_NAME} CXX C ASM)\ninclude(conan_deps.cmake)")
-
         folly_deps = os.path.join(self.source_folder, "CMake", "folly-deps.cmake")
-        replace_in_file(self, folly_deps, " MODULE", " ")
+        replace_in_file(self, folly_deps, " MODULE", " REQUIRED CONFIG")
         replace_in_file(self, folly_deps, "${Boost_LIBRARIES}", f"{' '.join(self._required_boost_cmake_targets)}")
         replace_in_file(self, folly_deps, "OpenSSL 1.1.1", "OpenSSL")
 
@@ -277,12 +280,14 @@ class FollyConan(ConanFile):
             "zlib::zlib",
             "zstd::zstd",
             "libsodium::libsodium",
-            "xz_utils::xz_utils"
+            "xz_utils::xz_utils",
         ]
         if not is_msvc(self):
             self.cpp_info.components["libfolly"].requires.append("libdwarf::libdwarf")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libfolly"].requires.extend(["libiberty::libiberty", "libunwind::libunwind"])
+        if self.settings.os == "Linux":
+            self.cpp_info.components["libfolly"].requires.extend(["libaio::libaio", "liburing::liburing"])
             self.cpp_info.components["libfolly"].system_libs.extend(["pthread", "dl", "rt"])
             self.cpp_info.components["libfolly"].defines.extend(["FOLLY_HAVE_ELF", "FOLLY_HAVE_DWARF"])
         elif self.settings.os == "Windows":
@@ -334,7 +339,6 @@ class FollyConan(ConanFile):
         self.cpp_info.filenames["cmake_find_package_multi"] = "folly"
         self.cpp_info.names["cmake_find_package"] = "Folly"
         self.cpp_info.names["cmake_find_package_multi"] = "Folly"
-        self.cpp_info.names["pkg_config"] = "libfolly"
         self.cpp_info.components["libfolly"].names["cmake_find_package"] = "folly"
         self.cpp_info.components["libfolly"].names["cmake_find_package_multi"] = "folly"
 
