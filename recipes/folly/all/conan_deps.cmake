@@ -1,7 +1,8 @@
+cmake_minimum_required(VERSION 3.17)
 # Set the dependency flags expected by https://github.com/facebook/folly/blob/v2023.12.18.00/CMake/folly-deps.cmake
 
 macro(custom_find_package package_name variable_prefix)
-    find_package(${package_name} ${ARGN}
+    find_package(${package_name} REQUIRED CONFIG ${ARGN}
         # Allow only Conan packages
         NO_DEFAULT_PATH
         PATHS ${CMAKE_PREFIX_PATH}
@@ -13,20 +14,18 @@ macro(custom_find_package package_name variable_prefix)
         set(src_var ${package_name}_${from_substr})
         set(dst_var ${variable_prefix}_${to_substr})
         if (NOT DEFINED ${src_var})
-            # if Conan doesn't define any content for one of the properties
             continue()
         endif()
         if ((DEFINED ${dst_var}) AND ("${${dst_var}}" STREQUAL "${${src_var}}"))
             # if they're equal, skip
             continue()
         endif()
-        message(STATUS "custom_find_package definining ${dst_var} with ${src_var} contents: ${${src_var}}")
+        message(DEBUG "custom_find_package definining ${dst_var} with ${src_var} contents: ${${src_var}}")
         set(${dst_var} ${${src_var}})
     endforeach()
 endmacro()
 
 custom_find_package(BZip2 BZIP2)
-custom_find_package(Backtrace BACKTRACE)
 custom_find_package(DoubleConversion DOUBLE_CONVERSION REQUIRED)
 custom_find_package(Gflags LIBGFLAGS)
 custom_find_package(Glog GLOG)
