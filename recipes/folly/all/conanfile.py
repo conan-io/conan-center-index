@@ -116,11 +116,8 @@ class FollyConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration(f"{self.ref} Folly requires a 64bit target architecture on Windows.")
 
-        if (is_apple_os(self) or self.settings.os == "Windows") and self.options.shared:
+        if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} Folly could not be built on {self.settings.os} as shared library. Please, use static library.")
-
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f"{self.ref} could not be built on {self.settings.os}. Contributions are welcome!")
 
         if self.settings.compiler == "clang" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} could not be built by clang as a shared library.")
