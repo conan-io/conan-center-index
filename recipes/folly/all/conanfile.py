@@ -172,7 +172,6 @@ class FollyConan(ConanFile):
         if can_run(self):
             for var in ["FOLLY_HAVE_UNALIGNED_ACCESS", "FOLLY_HAVE_LINUX_VDSO", "FOLLY_HAVE_WCHAR_SUPPORT", "HAVE_VSNPRINTF_ERRORS"]:
                 tc.cache_variables[f"{var}_EXITCODE"] = "0"
-                tc.cache_variables[f"{var}_EXITCODE__TRYRUN_OUTPUT"] = ""
 
         if self.options.get_safe("use_sse4_2") and str(self.settings.arch) in ["x86", "x86_64"]:
             tc.preprocessor_definitions["FOLLY_SSE"] = "4"
@@ -189,21 +188,21 @@ class FollyConan(ConanFile):
         # Folly is not respecting this from the helper https://github.com/conan-io/conan-center-index/pull/15726/files#r1097068754
         tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         # Relocatable shared lib on Macos
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if is_apple_os(self):
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         # Honor Boost_ROOT set by boost recipe
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0074"] = "NEW"
 
-        cxx_std_value = self._cppstd_flag_value(self.settings.get_safe("compiler.cppstd", self._min_cppstd))
+
         # 2019.10.21.00 -> either MSVC_ flags or CXX_STD
         if is_msvc(self):
+            cxx_std_value = self._cppstd_flag_value(self.settings.get_safe("compiler.cppstd", self._min_cppstd))
             tc.cache_variables["MSVC_LANGUAGE_VERSION"] = cxx_std_value
             tc.cache_variables["MSVC_ENABLE_ALL_WARNINGS"] = False
             tc.cache_variables["MSVC_USE_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
             tc.preprocessor_definitions["NOMINMAX"] = ""
-        else:
-            tc.cache_variables["CXX_STD"] = cxx_std_value
 
         if not self.dependencies["boost"].options.header_only:
             tc.cache_variables["BOOST_LINK_STATIC"] = not self.dependencies["boost"].options.shared
