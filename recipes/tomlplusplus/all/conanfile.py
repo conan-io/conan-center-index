@@ -21,6 +21,12 @@ class TomlPlusPlusConan(ConanFile):
     license = "MIT"
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "exceptions": [True, False, None]
+    }
+    default_options = {
+        "exceptions": None
+    }
     no_copy_source = True
 
     @property
@@ -73,3 +79,8 @@ class TomlPlusPlusConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "tomlplusplus::tomlplusplus")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        # Casting as a String because None value would not be properly handled, this is a PackageOption, not the value itself
+        # which `is` never None
+        if str(self.options.exceptions) != "None":
+            define_value = "1" if self.options.exceptions is True else "0"
+            self.cpp_info.defines.append(f"TOML_EXCEPTIONS={define_value}")

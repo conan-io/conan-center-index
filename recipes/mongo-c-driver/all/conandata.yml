@@ -1,4 +1,13 @@
 sources:
+  "1.27.4":
+    url: "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/1.27.4.tar.gz"
+    sha256: "37898440ebfd6fedfdb9cbbff7b0c5813f7e157b584a881538f124d086f880df"
+  "1.27.3":
+    url: "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/1.27.3.tar.gz"
+    sha256: "2593048270f8426c3dc60f0a3c22c3da92ae00a3ef284da7e662a1348ca1685c"
+  "1.27.2":
+    url: "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/1.27.2.tar.gz"
+    sha256: "a53010803e2df097a2ea756be6ece34c8f52cda2c18e6ea21115097b75f5d4bf"
   "1.27.1":
     url: "https://github.com/mongodb/mongo-c-driver/archive/refs/tags/1.27.1.tar.gz"
     sha256: "cc97407b16da54ba9b27029237b9a7a13651ada04da15e3b5dcd8fee8db20eed"

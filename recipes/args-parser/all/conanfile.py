@@ -56,7 +56,10 @@ class ArgsParserConan(ConanFile):
         pass
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if Version(self.version) <= "6.3.3":
+            copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        else:
+            copy(self, "MIT.txt", src=os.path.join(self.source_folder, "LICENSES"), dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*.hpp", src=os.path.join(self.source_folder, "args-parser"), dst=os.path.join(self.package_folder, "include", "args-parser"))
 
     def package_info(self):

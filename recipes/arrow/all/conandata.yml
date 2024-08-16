@@ -1,4 +1,10 @@
 sources:
+  "17.0.0":
+    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-17.0.0/apache-arrow-17.0.0.tar.gz?action=download"
+    sha256: "9d280d8042e7cf526f8c28d170d93bfab65e50f94569f6a790982a878d8d898d"
+  "16.1.0":
+    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-16.1.0/apache-arrow-16.1.0.tar.gz?action=download"
+    sha256: "c9e60c7e87e59383d21b20dc874b17153729ee153264af6d21654b7dff2c60d7"
   "16.0.0":
     url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-16.0.0/apache-arrow-16.0.0.tar.gz?action=download"
     sha256: "9f4051ae9473c97991d9af801e2f94ae3455067719ca7f90b8137f9e9a700b8d"
