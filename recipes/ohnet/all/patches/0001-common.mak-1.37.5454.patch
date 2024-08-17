@@ -1,0 +1,27 @@
+diff --git a/Common.mak b/Common.mak
+index a25489c2..7189c9dc 100644
+--- a/Common.mak
++++ b/Common.mak
+@@ -385,21 +385,21 @@ $(objdir)nsec.$(objext) : $(mDNSdir)/nsec.c $(headers)
+ 	$(compiler)nsec.$(objext) -c $(cflags_third_party) $(includes) $(mDNSdir)/nsec.c
+ $(objdir)nsec3.$(objext) : $(mDNSdir)/nsec3.c $(headers)
+ 	$(compiler)nsec3.$(objext) -c $(cflags_third_party) $(includes) $(mDNSdir)/nsec3.c
+ $(objdir)uDNS.$(objext) : $(mDNSdir)/uDNS.c $(headers)
+ 	$(compiler)uDNS.$(objext) -c $(cflags_third_party) $(includes) $(mDNSdir)/uDNS.c
+ $(objdir)dnssd_clientshim.$(objext) : $(mDNSdir)/dnssd_clientshim.c $(headers)
+ 	$(compiler)dnssd_clientshim.$(objext) -c $(cflags_third_party) $(includes) $(mDNSdir)/dnssd_clientshim.c
+ $(objdir)dnssd_clientlib.$(objext) : $(mDNSdir)/dnssd_clientlib.c $(headers)
+ 	$(compiler)dnssd_clientlib.$(objext) -c $(cflags_third_party) $(includes) $(mDNSdir)/dnssd_clientlib.c
+ $(objdir)MdnsPlatform.$(objext) : OpenHome/Net/Device/Bonjour/MdnsPlatform.cpp $(headers)
+-	$(compiler)MdnsPlatform.$(objext) -c $(cflags_third_party) $(includes) OpenHome/Net/Device/Bonjour/MdnsPlatform.cpp
++	$(compiler)MdnsPlatform.$(objext) -c $(cflags_third_party) $(cppflags) $(includes) OpenHome/Net/Device/Bonjour/MdnsPlatform.cpp
+ $(objdir)MdnsProvider.$(objext) : OpenHome/Net/Device/Bonjour/MdnsProvider.cpp $(headers)
+ 	$(compiler)MdnsProvider.$(objext) -c $(cppflags) $(includes) OpenHome/Net/Device/Bonjour/MdnsProvider.cpp
+ $(objdir)Md5.$(objext) : OpenHome/md5.c $(headers)
+ 	$(compiler)Md5.$(objext) -c $(cflags_third_party) $(includes) OpenHome/md5.c
+ $(objdir)NetworkAdapterList.$(objext) : OpenHome/NetworkAdapterList.cpp $(headers)
+ 	$(compiler)NetworkAdapterList.$(objext) -c $(cppflags) $(includes) OpenHome/NetworkAdapterList.cpp
+ $(objdir)DnsChangeNotifier.$(objext) : OpenHome/DnsChangeNotifier.cpp $(headers)
+ 	$(compiler)DnsChangeNotifier.$(objext) -c $(cppflags) $(includes) OpenHome/DnsChangeNotifier.cpp
+ $(objdir)Network.$(objext) : OpenHome/Network.cpp $(headers)
+ 	$(compiler)Network.$(objext) -c $(cppflags) $(includes) OpenHome/Network.cpp
