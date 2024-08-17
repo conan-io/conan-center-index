@@ -1,4 +1,10 @@
 sources:
+  "0.8.0":
+    url: "https://github.com/spnda/fastgltf/archive/refs/tags/v0.8.0.tar.gz"
+    sha256: "0bc88a0858c88d94306443946a5a1606118b7d5e4960f1e6186a3632e9df38fb"
+  "0.7.2":
+    url: "https://github.com/spnda/fastgltf/archive/refs/tags/v0.7.2.tar.gz"
+    sha256: "292fc9d0d5a6726c90db88c1aadf09e6d152ffc0ebffe6fb968736c47288511c"
   "0.7.1":
     url: "https://github.com/spnda/fastgltf/archive/refs/tags/v0.7.1.tar.gz"
     sha256: "44bcb025dd5cd480236a3bc7a3f8c9a708a801ed773b7859677440d22e0e1e7c"
