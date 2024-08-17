@@ -1,5 +1,6 @@
 import os
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rm, rmdir, copy
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
@@ -25,6 +26,16 @@ class Box2dConan(ConanFile):
         "fPIC": True
     }
 
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "apple-clang": "10",
+            "clang": "7",
+            "gcc": "8",
+            "msvc": "192",
+            "Visual Studio": "16",
+        }
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -42,6 +53,13 @@ class Box2dConan(ConanFile):
     def requirements(self):
         if Version(self.version) >= "3.0.0":
             self.requires("simde/0.8.2")
+
+    def validate(self):
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C{self._min_cppstd}, which your compiler does not support."
+            )
 
     def build_requirements(self):
         if Version(self.version) >= "3.0.0":
