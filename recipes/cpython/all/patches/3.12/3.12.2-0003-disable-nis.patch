@@ -1,0 +1,11 @@
+--- a/Modules/Setup.stdlib.in
++++ b/Modules/Setup.stdlib.in
+@@ -113,7 +113,7 @@
+ @MODULE_MMAP_TRUE@mmap mmapmodule.c
+ # FreeBSD: nis/yp APIs are in libc
+ # Linux: glibc has deprecated SUN RPC, APIs are in libnsl and libtirpc (bpo-32521)
+-@MODULE_NIS_TRUE@nis nismodule.c
++# @MODULE_NIS_TRUE@nis nismodule.c
+ # needs sys/soundcard.h or linux/soundcard.h (Linux, FreeBSD)
+ @MODULE_OSSAUDIODEV_TRUE@ossaudiodev ossaudiodev.c
+ @MODULE__POSIXSUBPROCESS_TRUE@_posixsubprocess _posixsubprocess.c

@@ -407,10 +407,6 @@ class CPythonConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "configure"),
                             'OPENSSL_LIBS="-lssl -lcrypto"',
                             'OPENSSL_LIBS="-lssl -lcrypto -lz"')
-        # Disable the deprecated nis module and the related libnsl dependency.
-        # Libnsl is no longer available on newer glibc versions.
-        replace_in_file(self, os.path.join(self.source_folder, "Modules", "Setup.stdlib.in"),
-                        "@MODULE_NIS_TRUE@nis nismodule.c", "")
         if is_msvc(self):
             runtime_library = {
                 "MT": "MultiThreaded",

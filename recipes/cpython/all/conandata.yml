@@ -44,6 +44,9 @@ patches:
     - patch_file: "patches/3.12/3.12.1-0002-remove-module-deps.patch"
       patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
       patch_type: "conan"
+    - patch_file: "patches/3.12/3.12.2-0003-disable-nis.patch"
+      patch_description: "Avoid libnsl dependency, which is missing from newer glibc versions"
+      patch_type: "conan"
   "3.11.9":
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
       patch_description: "Fix ARM/ARM64 mismatch in project file"
@@ -56,6 +59,9 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/3.x-0002-remove-module-deps.patch"
       patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
+      patch_type: "conan"
+    - patch_file: "patches/3.11/3.11.9-0002-disable-nis.patch"
+      patch_description: "Avoid libnsl dependency, which is missing from newer glibc versions"
       patch_type: "conan"
   "3.10.14":
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
@@ -70,6 +76,9 @@ patches:
     - patch_file: "patches/3.x-0002-remove-module-deps.patch"
       patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
       patch_type: "conan"
+    - patch_file: "patches/3.10/3.10.14-0002-disable-nis.patch"
+      patch_description: "Avoid libnsl dependency, which is missing from newer glibc versions"
+      patch_type: "conan"
   "3.9.19":
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
       patch_description: "Fix ARM/ARM64 mismatch in project file"
@@ -83,6 +92,9 @@ patches:
     - patch_file: "patches/3.x-0002-remove-module-deps.patch"
       patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
       patch_type: "conan"
+    - patch_file: "patches/3.9/3.9.19-0004-disable-nis.patch"
+      patch_description: "Avoid libnsl dependency, which is missing from newer glibc versions"
+      patch_type: "conan"
   "3.8.19":
     - patch_file: "patches/3.8/3.8.12-0002-_ctypes-ffi.patch"
       patch_description: "Remove duplicate libffi symbols and support shared libffi"
@@ -92,4 +104,7 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/3.x-0002-remove-module-deps.patch"
       patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
+      patch_type: "conan"
+    - patch_file: "patches/3.8/3.8.19-0002-disable-nis.patch"
+      patch_description: "Avoid libnsl dependency, which is missing from newer glibc versions"
       patch_type: "conan"
