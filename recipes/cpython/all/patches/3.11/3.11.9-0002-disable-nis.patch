@@ -1,3 +1,14 @@
+--- a/setup.py
++++ b/setup.py
+@@ -1505,7 +1505,7 @@
+         ))
+ 
+     def detect_nis(self):
+-        self.addext(Extension('nis', ['nismodule.c']))
++        pass
+ 
+ 
+ class PyBuildInstall(install):
 --- a/Modules/Setup.stdlib.in
 +++ b/Modules/Setup.stdlib.in
 @@ -114,7 +114,7 @@

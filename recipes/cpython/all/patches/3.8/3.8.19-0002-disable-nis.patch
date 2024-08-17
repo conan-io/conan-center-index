@@ -1,10 +1,11 @@
---- a/Modules/Setup
-+++ b/Modules/Setup
-@@ -221,7 +221,6 @@
- # Some more UNIX dependent modules -- off by default, since these
- # are not supported by all UNIX systems:
+--- a/setup.py
++++ b/setup.py
+@@ -2257,7 +2257,7 @@
+                            depends=sha3_deps))
  
--#nis nismodule.c -lnsl	# Sun yellow pages -- not everywhere
- #termios termios.c	# Steen Lumholt's termios module
- #resource resource.c	# Jeremy Hylton's rlimit interface
+     def detect_nis(self):
+-        if MS_WINDOWS or CYGWIN or HOST_PLATFORM == 'qnx6':
++        if True:
+             self.missing.append('nis')
+             return
  
