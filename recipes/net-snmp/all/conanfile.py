@@ -61,6 +61,9 @@ class NetSnmpConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows" and not is_msvc(self):
             raise ConanInvalidConfiguration("net-snmp is set up to build only with MSVC on Windows")
+        if is_msvc(self):
+            # Linker errors against third-party dependencies
+            raise ConanInvalidConfiguration("MSVC is currently not supported. Contributions are welcome!")
 
     def build_requirements(self):
         if is_msvc(self):
