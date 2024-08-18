@@ -72,9 +72,8 @@ class NSSConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
+        env = VirtualRunEnv(self)
+        env.generate(scope="build")
         vc = VCVars(self)
         vc.generate()
 
