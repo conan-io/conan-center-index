@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -122,6 +122,7 @@ class TgbotConan(ConanFile):
              dst=os.path.join(self.package_folder, "licenses"),
              src=self.source_folder)
         fix_apple_shared_install_name(self)
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["TgBot"]
