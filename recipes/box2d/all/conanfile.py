@@ -55,10 +55,13 @@ class Box2dConan(ConanFile):
             self.requires("simde/0.8.2")
 
     def validate(self):
+        if Version(self.version) < "3.0.0":
+            return
+
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires C{self._min_cppstd}, which your compiler does not support."
+                f"{self.ref} requires C17, which your compiler does not support."
             )
 
     def build_requirements(self):
