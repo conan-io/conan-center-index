@@ -63,8 +63,8 @@ class NSSConan(ConanFile):
         if cross_building(self):
             self.tool_requires("sqlite3/<host_version>")
         # gyp is not compatible with Python 3.12
-        self.tool_requires("cpython/3.11.9")
-        self.tool_requires("ninja/1.12.1")
+        self.tool_requires("cpython/3.12.2")
+        self.tool_requires("ninja/[>=1.10.2 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
