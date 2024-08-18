@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 12c4039..2ea1805 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -47,7 +47,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
+ 
+ set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+ 
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
++# set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ 
+ # Create the compile command database for clang by default
+ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
