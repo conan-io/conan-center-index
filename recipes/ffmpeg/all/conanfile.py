@@ -74,8 +74,10 @@ class FFMpegConan(ConanFile):
         "with_libsvtav1": [True, False],
         "with_libaom": [True, False],
         "with_libdav1d": [True, False],
+        "with_libdrm": [True, False],
         "with_jni": [True, False],
         "with_mediacodec": [True, False],
+        "with_xlib": [True, False],
         "disable_everything": [True, False],
         "disable_all_encoders": [True, False],
         "disable_encoders": [None, "ANY"],
@@ -156,8 +158,10 @@ class FFMpegConan(ConanFile):
         "with_libsvtav1": True,
         "with_libaom": True,
         "with_libdav1d": True,
+        "with_libdrm": False,
         "with_jni": False,
         "with_mediacodec": False,
+        "with_xlib": True,
         "disable_everything": False,
         "disable_all_encoders": False,
         "disable_encoders": None,
@@ -194,8 +198,6 @@ class FFMpegConan(ConanFile):
         "disable_filters": None,
         "enable_filters": None,
     }
-    # Fix for mslink: Argument list too long
-    short_paths = True
 
     @property
     def _settings_build(self):
@@ -232,6 +234,7 @@ class FFMpegConan(ConanFile):
             "with_libaom": ["avcodec"],
             "with_libdav1d": ["avcodec"],
             "with_mediacodec": ["with_jni"],
+            "with_xlib": ["avdevice"],
         }
 
     @property
@@ -244,13 +247,15 @@ class FFMpegConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_vaapi
             del self.options.with_vdpau
             del self.options.with_vulkan
             del self.options.with_xcb
             del self.options.with_libalsa
             del self.options.with_pulse
+            del self.options.with_xlib
+            del self.options.with_libdrm
         if self.settings.os != "Macos":
             del self.options.with_appkit
         if self.settings.os not in ["Macos", "iOS", "tvOS"]:
@@ -313,7 +318,7 @@ class FFMpegConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.10")
-        if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi"):
+        if self.options.get_safe("with_xcb") or self.options.get_safe("with_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_pulse"):
             self.requires("pulseaudio/14.2")
@@ -329,6 +334,8 @@ class FFMpegConan(ConanFile):
             self.requires("libaom-av1/3.6.1")
         if self.options.get_safe("with_libdav1d"):
             self.requires("dav1d/1.2.1")
+        if self.options.get_safe("with_libdrm"):
+            self.requires("libdrm/2.4.119")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -345,7 +352,7 @@ class FFMpegConan(ConanFile):
                 raise ConanInvalidConfiguration("FFmpeg '{}' option requires '{}' option to be enabled".format(
                     dependency, "' or '".join(features)))
 
-        if conan_version.major == 1 and is_msvc(self) and self.options.shared:
+        if Version(self.version) >= "6.1" and conan_version.major == 1 and is_msvc(self) and self.options.shared:
             # Linking fails with "Argument list too long" for some reason on Conan v1
             raise ConanInvalidConfiguration("MSVC shared build is not supported for Conan v1")
 
@@ -505,6 +512,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("alsa", self.options.get_safe("with_libalsa")),
             opt_enable_disable("libpulse", self.options.get_safe("with_pulse")),
             opt_enable_disable("vaapi", self.options.get_safe("with_vaapi")),
+            opt_enable_disable("libdrm", self.options.get_safe("with_libdrm")),
             opt_enable_disable("vdpau", self.options.get_safe("with_vdpau")),
             opt_enable_disable("libxcb", self.options.get_safe("with_xcb")),
             opt_enable_disable("libxcb-shm", self.options.get_safe("with_xcb")),
@@ -520,6 +528,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("libdav1d", self.options.get_safe("with_libdav1d")),
             opt_enable_disable("jni", self.options.get_safe("with_jni")),
             opt_enable_disable("mediacodec", self.options.get_safe("with_mediacodec")),
+            opt_enable_disable("xlib", self.options.get_safe("with_xlib")),
             "--disable-cuda",  # FIXME: CUDA support
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
@@ -835,6 +844,8 @@ class FFMpegConan(ConanFile):
                 avdevice.requires.append("libalsa::libalsa")
             if self.options.get_safe("with_xcb"):
                 avdevice.requires.extend(["xorg::xcb", "xorg::xcb-shm", "xorg::xcb-xfixes", "xorg::xcb-shape", "xorg::xv", "xorg::xext"])
+            if self.options.get_safe("with_xlib"):
+                avdevice.requires.extend(["xorg::x11", "xorg::xext", "xorg::xv"])
             if self.options.get_safe("with_pulse"):
                 avdevice.requires.append("pulseaudio::pulseaudio")
             if self.options.get_safe("with_appkit"):
@@ -904,11 +915,18 @@ class FFMpegConan(ConanFile):
             if Version(self.version) >= "5.0" and is_apple_os(self):
                 avfilter.frameworks.append("Metal")
 
+        if self.options.get_safe("with_libdrm"):
+            avutil.requires.append("libdrm::libdrm_libdrm")
         if self.options.get_safe("with_vaapi"):
-            avutil.requires.extend(["vaapi::vaapi", "xorg::x11"])
+            avutil.requires.append("vaapi::vaapi")
+        if self.options.get_safe("with_xcb"):
+            avutil.requires.append("xorg::x11")
 
         if self.options.get_safe("with_vdpau"):
             avutil.requires.append("vdpau::vdpau")
+
+        if self.options.with_ssl == "openssl":
+            avutil.requires.append("openssl::ssl")
 
         if self.options.get_safe("with_vulkan"):
             avutil.requires.append("vulkan-loader::vulkan-loader")
