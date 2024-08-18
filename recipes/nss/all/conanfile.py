@@ -69,15 +69,6 @@ class NSSConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @property
-    def _site_packages_dir(self):
-        return os.path.join(self.build_folder, "site-packages")
-
-    @property
-    def _dist_dir(self):
-        # location for installed lib/ and bin/ subdirs
-        return os.path.join(self.source_folder, "dist", "Debug" if self.settings.build_type == "Debug" else "Release")
-
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -94,6 +85,19 @@ class NSSConan(ConanFile):
         # For 'shlibsign -v -i <dist_dir>/lib/libfreebl3.so' etc to work during build
         env.prepend_path("LD_LIBRARY_PATH", os.path.join(self._dist_dir, "lib"))
         env.vars(self, scope="build").save_script("conan_paths")
+
+    @property
+    def _dist_dir(self):
+        # location for installed lib/ and bin/ subdirs
+        dist_subdir = "Debug" if self.settings.build_type == "Debug" else "Release"
+        return os.path.join(self.source_folder, "dist", dist_subdir)
+
+    @property
+    def _site_packages_dir(self):
+        return os.path.join(self.build_folder, "site-packages")
+
+    def _pip_install(self, packages):
+        self.run(f"python -m pip install {' '.join(packages)} --no-cache-dir --target={self._site_packages_dir}")
 
     def _patch_sources(self):
         def adjust_path(path):
@@ -174,8 +178,7 @@ class NSSConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        # install gyp-next
-        self.run(f"python -m pip install gyp-next==0.18.0 --no-cache-dir --target={self._site_packages_dir}")
+        self._pip_install(["gyp-next"])
         self.run("gyp --version")
 
         with chdir(self, os.path.join(self.source_folder, "nss")):
