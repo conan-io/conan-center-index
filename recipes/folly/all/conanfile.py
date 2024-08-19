@@ -42,7 +42,7 @@ class FollyConan(ConanFile):
         return {
             "gcc": "10",
             "clang": "10",
-            "apple-clang": "10",
+            "apple-clang": "14",
             "msvc": "192",
             "Visual Studio": "16",
         }
