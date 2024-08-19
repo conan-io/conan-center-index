@@ -1,7 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import can_run, check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir, replace_in_file, save, rm
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -25,12 +26,10 @@ class FollyConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "use_sse4_2": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "use_sse4_2": False
     }
 
     @property
@@ -54,8 +53,6 @@ class FollyConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if str(self.settings.arch) not in ["x86", "x86_64"]:
-            del self.options.use_sse4_2
 
     def configure(self):
         if self.options.shared:
@@ -135,9 +132,6 @@ class FollyConan(ConanFile):
             required_components = ", ".join(self._required_boost_components)
             raise ConanInvalidConfiguration(f"{self.ref} requires these Boost components: {required_components}. Try with '-o boost/*:without_{required_components}=False'")
 
-        if self.options.get_safe("use_sse4_2") and str(self.settings.arch) not in ['x86', 'x86_64']:
-            raise ConanInvalidConfiguration(f"{self.ref} can use the option use_sse4_2 only on x86 and x86_64 archs.")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=False)
 
@@ -156,24 +150,16 @@ class FollyConan(ConanFile):
         return f"{prefix}++{year}"
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_folly_INCLUDE"] = "conan_deps.cmake"
 
-        if can_run(self):
+        if is_apple_os(self) and cross_building(self):
+            # INFO: Folly fails to configure Mac M1 -> Mac Intel:
+            # CMake Error: try_run() invoked in cross-compiling mode, please set the following cache variables appropriately: HAVE_VSNPRINTF_ERRORS_EXITCODE (advanced)
             for var in ["FOLLY_HAVE_UNALIGNED_ACCESS", "FOLLY_HAVE_LINUX_VDSO", "FOLLY_HAVE_WCHAR_SUPPORT", "HAVE_VSNPRINTF_ERRORS"]:
-                tc.cache_variables[f"{var}_EXITCODE"] = "0"
-
-        if self.options.get_safe("use_sse4_2") and str(self.settings.arch) in ["x86", "x86_64"]:
-            tc.preprocessor_definitions["FOLLY_SSE"] = "4"
-            tc.preprocessor_definitions["FOLLY_SSE_MINOR"] = "2"
-            if not is_msvc(self):
-                cflags = "-mfma"
-            else:
-                cflags = "/arch:FMA"
-            tc.blocks["cmake_flags_init"].template += (
-                f'string(APPEND CMAKE_CXX_FLAGS_INIT " {cflags}")\n'
-                f'string(APPEND CMAKE_C_FLAGS_INIT " {cflags}")\n'
-            )
+                tc.cache_variables[f"{var}_EXITCODE"] = 0
 
         # Folly is not respecting this from the helper https://github.com/conan-io/conan-center-index/pull/15726/files#r1097068754
         tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
