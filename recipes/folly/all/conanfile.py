@@ -57,6 +57,10 @@ class FollyConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if is_msvc(self):
+            # Folly does not support shared library on Windows: https://github.com/facebook/folly/issues/962
+            self.package_type = "static-library"
+            del self.options.shared
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -83,7 +87,8 @@ class FollyConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("libaio/0.3.113")
             self.requires("liburing/2.6")
-        self.requires("fmt/11.0.2", transitive_headers=True, transitive_libs=True)
+        # INFO: FMT 11.x is not compatible in Windows due utf-8: https://github.com/facebook/folly/issues/2250
+        self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         # INFO: Required due ZIP_LISTS CMake feature in conan_deps.cmake
@@ -111,9 +116,6 @@ class FollyConan(ConanFile):
         if self.settings.os == "Windows" and self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration(f"{self.ref} Folly requires a 64bit target architecture on Windows.")
 
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} Folly could not be built on {self.settings.os} as shared library. Please, use static library.")
-
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14.0":
             # https://github.com/facebook/folly/issues/2266
             raise ConanInvalidConfiguration(f"{self.ref} could not be built by apple-clang < 14.0. Use apple-clang >= 14.0")
@@ -139,7 +141,7 @@ class FollyConan(ConanFile):
             prefix = "c"
             year = cppstd
         if is_msvc(self):
-            prefix = ""
+            prefix = "c"
             if year > "17":
                 year = "latest"
         return f"{prefix}++{year}"
@@ -261,10 +263,9 @@ class FollyConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.components["libfolly"].system_libs.extend(["ws2_32", "iphlpapi", "crypt32"])
 
-        if str(self.settings.compiler.libcxx) == "libstdc++" or (
-            self.settings.compiler == "apple-clang" and
-            Version(self.settings.compiler.version.value) == "9.0" and
-            self.settings.compiler.libcxx == "libc++"):
+        if  self.settings.get_safe("compiler.libcxx") == "libstdc++" or \
+            (self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) == "9.0" and \
+              self.settings.get_safe("compiler.libcxx") == "libc++"):
             self.cpp_info.components["libfolly"].system_libs.append("atomic")
 
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "11.0":
