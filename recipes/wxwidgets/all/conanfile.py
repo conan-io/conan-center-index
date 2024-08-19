@@ -10,10 +10,6 @@ import os
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
 
-# Simplifying, check:
-# https://github.com/wxWidgets/wxWidgets/blob/9e1b62779757a83acd75304e7c3defb40bd6a99a/build/cmake/options.cmake
-# https://github.com/wxWidgets/wxWidgets/blob/9e1b62779757a83acd75304e7c3defb40bd6a99a/include/wx/setup_inc.h
-
 
 class wxWidgetsConan(ConanFile):
     name = "wxwidgets"
