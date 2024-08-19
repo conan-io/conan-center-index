@@ -76,7 +76,10 @@ class TreeGenConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
 
     def requirements(self):
-        self.requires("fmt/11.0.2", transitive_headers=True)
+        if Version(self.version) < "1.0.8":
+            self.requires("fmt/10.2.1", transitive_headers=True)
+        else:
+            self.requires("fmt/11.0.2", transitive_headers=True)
         self.requires("range-v3/0.12.0", transitive_headers=True)
 
     def source(self):
