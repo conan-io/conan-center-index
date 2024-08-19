@@ -363,7 +363,7 @@ class LLVMCoreConan(ConanFile):
                     data["requires"].append(component)
             return data
 
-        cmake_exports = load(self, self._package_folder_path / "lib" / "cmake" / "llvm" / "LLVMExports.cmake")
+        cmake_exports = load(self, (self._package_folder_path / "lib" / "cmake" / "llvm" / "LLVMExports.cmake").as_posix())
         match_dependencies = re.compile(
             r'''^set_target_properties\((\w+).*\n?\s*INTERFACE_LINK_LIBRARIES\s+"(\S+)"''', re.MULTILINE)
 
@@ -372,7 +372,7 @@ class LLVMCoreConan(ConanFile):
                 components[llvm_lib].update(_parse_deps(dependencies))
 
     def _llvm_build_info(self):
-        cmake_config = load(self, self._package_folder_path / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake")
+        cmake_config = load(self, (self._package_folder_path / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake").as_posix())
 
         match_cmake_var = re.compile(r"""^set\(LLVM_AVAILABLE_LIBS (?P<components>.*)\)$""", re.MULTILINE)
         match = match_cmake_var.search(cmake_config)
