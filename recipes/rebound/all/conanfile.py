@@ -37,8 +37,8 @@ class ReboundConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f"{self.ref} recipe does not support Windows, contributions welcomed!")
+        if self.settings.os in ["Windows", "Macos"]:
+            raise ConanInvalidConfiguration(f"{self.ref} recipe does not support {self.settings.os}, contributions welcomed!")
 
     def validate_build(self):
         if cross_building(self):
