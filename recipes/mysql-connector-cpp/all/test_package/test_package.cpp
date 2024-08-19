@@ -1,12 +1,12 @@
-#include <cstdlib>
 #include <iostream>
 
 #include <mysqlx/xdevapi.h>
 
 
 int main() {
-    auto driver = sql::mysql::get_mysql_driver_instance();
-    std::cout << "MySQL connector cpp works" << std::endl;
-
+    Session sess("mysqlx://root@127.0.0.1");
+    RowResult res = sess.sql("show variables like 'version'").execute();
+    version << res.fetchOne().get(1).get<string>();
+    std::cout << "mysqlx version: " << version << std::endl;
     return EXIT_SUCCESS;
 }
