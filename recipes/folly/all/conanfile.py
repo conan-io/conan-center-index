@@ -117,6 +117,10 @@ class FollyConan(ConanFile):
         if self.settings.compiler == "clang" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} could not be built by clang as a shared library.")
 
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14.0":
+            #
+            raise ConanInvalidConfiguration(f"{self.ref} could not be built by apple-clang < 14.0.")
+
         glog = self.dependencies["glog"]
         if self.options.shared and not glog.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} and {glog.ref} must be both shared or both static.")
