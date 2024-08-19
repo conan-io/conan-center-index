@@ -93,6 +93,8 @@ class LibpointmatcherConan(ConanFile):
         tc.cache_variables["BUILD_EXAMPLES"] = False
         tc.cache_variables["BUILD_EVALUATIONS"] = False
         tc.cache_variables["BUILD_TESTS"] = False
+        if not self.settings.compiler.cppstd:
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
