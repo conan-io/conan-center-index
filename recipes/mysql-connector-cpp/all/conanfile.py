@@ -20,8 +20,10 @@ class MysqlConnectorCPPRecipe(ConanFile):
     description = "A MySQL database connector for C++ applications that connect to MySQL servers"
     topics = ("mysql", "connector", "libmysqlclient", "jdbc")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
+    options = {"shared": [True, False], "fPIC": [True, False],
+               # https://dev.mysql.com/doc/connector-cpp/9.0/en/connector-cpp-apps-general-considerations.html
+               "use_legacy_jdbc_api": [True, False]}
+    default_options = {"shared": False, "fPIC": True, "use_legacy_jdbc_api": False}
 
     @property
     def _min_cppstd(self):
@@ -147,10 +149,14 @@ class MysqlConnectorCPPRecipe(ConanFile):
         rm(self, "INFO_SRC", self.package_folder)
         rm(self, "INFO_BIN", self.package_folder)
 
+    def package_id(self):
+        # The option is only used to propagate different linking flags
+        del self.info.options.use_legacy_jdbc_api
+
     def package_info(self):
         self.cpp_info.libdirs = ["lib/debug"] if self.settings.build_type == "Debug" else ["lib"]
         suffix = "" if self.options.shared else "-static"
-        self.cpp_info.libs = [f"mysqlcppconn8{suffix}", f"mysqlcppconn{suffix}"]
+        self.cpp_info.libs = [f"mysqlcppconn{suffix}" if self.options.use_legacy_jdbc_api else f"mysqlcppconn8{suffix}"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "resolv"]
         elif self.settings.os == "Windows":
