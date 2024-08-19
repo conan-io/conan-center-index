@@ -1,7 +1,10 @@
 sources:
-  "1.6.2":
-    sha256: 2d487e663cf43105b19653d34250fd45f947af839e327336b6878464a99d5423
-    url: https://github.com/openE57/openE57/archive/refs/tags/1.6.2.tar.gz
+  "1.6.5":
+    url: "https://github.com/openE57/openE57/archive/1.6.5.tar.gz"
+    sha256: "23f3c159550a70b6a1c2330f0f03ed816cbc27ff5656410bfee527bae31eb186"
+  "1.6.4":
+    url: "https://github.com/openE57/openE57/archive/1.6.4.tar.gz"
+    sha256: "97accc32ae294113a97b8d3f0ecf0d608057a6f0fcdfee17db0c5db4ab28ce69"
   "1.6.3":
-    sha256: e335afdda98a2707d05ec4bce99f362a6f7f0eb2e8bbf2d7346eae292046f827
-    url: https://github.com/openE57/openE57/archive/refs/tags/1.6.3.tar.gz
+    url: "https://github.com/openE57/openE57/archive/refs/tags/1.6.3.tar.gz"
+    sha256: "e335afdda98a2707d05ec4bce99f362a6f7f0eb2e8bbf2d7346eae292046f827"

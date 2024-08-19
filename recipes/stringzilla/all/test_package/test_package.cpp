@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <iostream>
+
 #include "stringzilla.h"
 
 int main(void) {
@@ -20,5 +21,5 @@ int main(void) {
   // Find a substring like it's Waldo 🕵️‍♂️
   size_t substring_position = strzl_naive_find_substr(haystack, needle);
 
-   return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }

@@ -4,6 +4,8 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -11,7 +13,7 @@ required_conan_version = ">=1.53.0"
 class FltkConan(ConanFile):
     name = "fltk"
     description = "Fast Light Toolkit is a cross-platform C++ GUI toolkit"
-    license = "LGPL-2.0-custom"
+    license = "LGPL-2.1-or-later WITH FLTK-exception"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.fltk.org"
     topics = ("gui",)
@@ -35,6 +37,14 @@ class FltkConan(ConanFile):
         "with_gdiplus": True,
         "with_xft": False,
     }
+
+    @property
+    def _is_cl_like(self):
+        return self.settings.compiler.get_safe("runtime") is not None
+
+    @property
+    def _is_cl_like_static_runtime(self):
+        return self._is_cl_like and "MT" in msvc_runtime_flag(self)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -68,15 +78,15 @@ class FltkConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("libjpeg/9e")
-        self.requires("libpng/1.6.40")
+        self.requires("libpng/[>=1.6 <2]")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_gl:
                 self.requires("opengl/system")
                 self.requires("glu/system")
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/2.15.0")
             self.requires("xorg/system")
             if self.options.with_xft:
-                self.requires("libxft/2.3.6")
+                self.requires("libxft/2.3.8")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -93,6 +103,13 @@ class FltkConan(ConanFile):
         tc.variables["OPTION_USE_XFT"] = self.options.with_xft
         if self.options.abi_version:
             tc.variables["OPTION_ABI_VERSION"] = self.options.abi_version
+        tc.variables["OPTION_USE_SYSTEM_LIBJPEG"] = True
+        tc.variables["OPTION_USE_SYSTEM_ZLIB"] = True
+        tc.variables["OPTION_USE_SYSTEM_LIBPNG"] = True
+        if Version(self.version) >= "1.3.9":
+            if self._is_cl_like:
+                tc.variables["FLTK_MSVC_RUNTIME_DLL"] = not self._is_cl_like_static_runtime
+
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()

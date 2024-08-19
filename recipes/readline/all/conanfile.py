@@ -11,6 +11,7 @@ from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
 
+
 class ReadLineConan(ConanFile):
     name = "readline"
     description = "A set of functions for use by applications that allow users to edit command lines as they are typed in"
@@ -18,6 +19,8 @@ class ReadLineConan(ConanFile):
     license = "GPL-3.0-only"
     homepage = "https://tiswww.case.edu/php/chet/readline/rltop.html"
     url = "https://github.com/conan-io/conan-center-index"
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -38,7 +41,7 @@ class ReadLineConan(ConanFile):
         if self.options.with_library == "termcap":
             self.requires("termcap/1.3.1")
         elif self.options.with_library == "curses":
-            self.requires("ncurses/6.2")
+            self.requires("ncurses/6.4", transitive_headers=True, transitive_libs=True)
 
     def configure(self):
         if self.options.shared:
@@ -69,14 +72,18 @@ class ReadLineConan(ConanFile):
         ])
         if cross_building(self):
             tc.configure_args.append("bash_cv_wcwidth_broken=yes")
+
+        tc.configure_args.append("--disable-install-examples")
+
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
 
     def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "shlib", "Makefile.in"), "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS)",
+        if self.options.with_library == "termcap":
+            replace_in_file(self, os.path.join(self.source_folder, "shlib", "Makefile.in"), "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS)",
                               "-o $@ $(SHARED_OBJ) $(SHLIB_LIBS) -ltermcap")
-        replace_in_file(self, os.path.join(self.source_folder, "Makefile.in"), "@TERMCAP_LIB@", "-ltermcap")
+            replace_in_file(self, os.path.join(self.source_folder, "Makefile.in"), "@TERMCAP_LIB@", "-ltermcap")
 
     def build(self):
         self._patch_sources()

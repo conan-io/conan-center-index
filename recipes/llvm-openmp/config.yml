@@ -1,4 +1,16 @@
 versions:
+  "17.0.6":
+    folder: all
+  "17.0.4":
+    folder: all
+  "16.0.6":
+    folder: all
+  "15.0.7":
+    folder: all
+  "14.0.6":
+    folder: all
+  "13.0.1":
+    folder: all
   "12.0.1":
     folder: all
   "11.1.0":

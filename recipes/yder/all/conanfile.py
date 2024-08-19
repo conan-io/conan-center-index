@@ -42,7 +42,7 @@ class YderConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def requirements(self):
-        self.requires("orcania/2.3.1")
+        self.requires("orcania/2.3.3")
         if self.options.get_safe("with_libsystemd"):
             self.requires("libsystemd/253.10")
 

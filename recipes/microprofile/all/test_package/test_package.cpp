@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include <microprofile/microprofile.h>
+#include <microprofile.h>
 
 int main() {
 #if MICROPROFILE_ENABLED

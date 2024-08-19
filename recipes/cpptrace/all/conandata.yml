@@ -1,0 +1,86 @@
+sources:
+  # Newer versions at the top
+  "0.6.3":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.6.3.tar.gz"
+    sha256: "665bf76645ec7b9e6d785a934616f0138862c36cdb58b0d1c9dd18dd4c57395a"
+  "0.6.2":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.6.2.tar.gz"
+    sha256: "02a0540b5b1be0788565f48b065b456d3eab81ae2323a50e75ed36449a0143ed"
+  "0.6.1":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.6.1.tar.gz"
+    sha256: "4bb478eedbe4b2c0093ef7af4f64795304850e03312e658076b25ef8d6019c75"
+  "0.6.0":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.6.0.tar.gz"
+    sha256: "7c2996f03d15f61016bc81fe7fa5220b1cc42498333c5c0e699ad2f96b918b96"
+  "0.5.4":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.4.tar.gz"
+    sha256: "bab0f76330f90c445216ccade1a3ff29c9c4bbd44805be34d52095cd95b02df4"
+  "0.5.3":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.3.tar.gz"
+    sha256: "fb84b8b021bf8c1265e650b4cc19ae8acc9c07b980eb1e34d9806acf15bb4fdf"
+  "0.5.2":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.2.tar.gz"
+    sha256: "d148998e175b9c69ffb4383ab321a0d27487392e4eee3f39441d35b6856c8f78"
+  "0.5.1":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.1.tar.gz"
+    sha256: "27b9f862ec6185f570ee59c07fdd12bebb55a986191518e896621317d2654f26"
+  "0.5.0":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.5.0.tar.gz"
+    sha256: "dc034503aed3009618312c42c40e1f80bf14d4148c9bc8b3ea02cf971459120e"
+  "0.4.1":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.4.1.tar.gz"
+    sha256: "8b6e2c813cf2db332c1aa0502c38afd01a1e00ece0ecc7fcd82fcae4b34e5161"
+  "0.4.0":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: "eef368f5bed2d85c976ea90b325e4c9bfc1b9618cbbfa15bf088adc8fa98ff89"
+  "0.3.1":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.3.1.tar.gz"
+    sha256: "3c4c5b3406c2b598e5cd2a8cb97f9e8e1f54d6df087a0e62564e6fb68fed852d"
+  "0.3.0":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.3.0.tar.gz"
+    sha256: "1650d760ff0c0f9763de7e1e04285033f2b0189df87398ba8bf76e9937d5a4ee"
+  "0.2.1":
+    url:
+      - "https://github.com/jeremy-rifkin/cpptrace/archive/refs/tags/v0.2.1.tar.gz"
+    sha256: "3184f404c61b6b8ba6fe7c64fc40d1c3d6d87df59bcacf1845d846101bc22f9a"
+patches:
+  "0.5.2":
+    - patch_file: "patches/0.5.2/0001-msvc-bug.patch"
+      patch_type: "official"
+      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/599d6abd6cc74e80e8429fc309247be5f7edd5d7"
+      patch_description: "Workaround bug for old msvc"
+  "0.4.0":
+    - patch_file: "patches/0.4.0/0001-libdwarf_path.patch"
+      patch_type: "conan"
+      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/a1624238000c794243e20801dc2b35b2f847d492"
+      patch_description: "Use new libdwarf header placement"
+    - patch_file: "patches/0.4.0/0002-zstd.patch"
+      patch_type: "conan"
+      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/b7d14bc952111df973268c76133bb8ad99afdeb0"
+      patch_description: "Zstd is handled by libdwarf"
+  "0.3.0":
+    - patch_file: "patches/0.3.0/0001-cpptrace_export.patch"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/b3b9d5fda6c7f53b069848e7e79454f3618ca356"
+      patch_description: "Fix an incorrect CPPTRACE_EXPORT annotation"
+  "0.2.1":
+    - patch_file: "patches/0.2.1/0001-to_uintptr.patch"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/jeremy-rifkin/cpptrace/commit/bda3e2b169796f2e9c7e751b27306aac6b4a7c26"
+      patch_description: "Fix for to_uintptr"
+    - patch_file: "patches/0.2.1/0002-conan-libdwarf.patch"
+      patch_type: "conan"
+      patch_description: "Tweaks to use libdwarf provided by conan"

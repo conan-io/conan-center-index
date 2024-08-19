@@ -68,7 +68,7 @@ class LibmikmodConan(ConanFile):
     def requirements(self):
         if self.settings.os == "Linux":
             if self.options.with_alsa:
-                self.requires("libalsa/1.2.7.2")
+                self.requires("libalsa/1.2.10")
             if self.options.with_pulse:
                 self.requires("pulseaudio/14.2")
 

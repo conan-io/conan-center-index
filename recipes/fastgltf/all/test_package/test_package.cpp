@@ -1,5 +1,7 @@
 #include <cstdio>
-#ifdef FASTGLTF_0_5_0_LATER
+#if defined(FASTGLTF_0_7_0_LATER)
+#  include <fastgltf/core.hpp>
+#elif defined(FASTGLTF_0_5_0_LATER)
 #  include <fastgltf/parser.hpp>
 #else
 #  include <fastgltf_parser.hpp>

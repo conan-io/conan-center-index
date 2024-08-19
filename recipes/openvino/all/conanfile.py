@@ -1,8 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import functools
 import os
@@ -13,7 +14,6 @@ required_conan_version = ">=1.60.0 <2.0 || >=2.0.8"
 class OpenvinoConan(ConanFile):
     name = "openvino"
 
-    # Optional metadata
     license = "Apache-2.0"
     homepage = "https://github.com/openvinotoolkit/openvino"
     url = "https://github.com/conan-io/conan-center-index"
@@ -100,6 +100,10 @@ class OpenvinoConan(ConanFile):
         return self.settings.os in ["Linux", "Windows"] and self._target_x86_64 and Version(self.version) < "2024.0.0"
 
     @property
+    def _npu_option_available(self):
+        return self.settings.os in ["Linux", "Windows"] and self._target_x86_64 and Version(self.version) >= "2024.1.0"
+
+    @property
     def _gpu_option_available(self):
         return self.settings.os != "Macos" and self._target_x86_64
 
@@ -116,6 +120,10 @@ class OpenvinoConan(ConanFile):
             "Visual Studio": "16",
             "msvc": "192",
         }
+
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["openvino"], strip_root=True)
@@ -146,14 +154,13 @@ class OpenvinoConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
             if self._protobuf_required:
-                # we need to use static protobuf to overcome potential issues with multiple registrations inside
-                # protobuf when frontends (implemented as plugins) are loaded multiple times in runtime
+                # even though OpenVINO can work with dynamic protobuf, it's still recommended to use static
                 self.options["protobuf"].shared = False
 
     def build_requirements(self):
         if self._target_arm:
             self.tool_requires("scons/4.3.0")
-        if cross_building(self):
+        if not self._is_legacy_one_profile:
             if self._protobuf_required:
                 self.tool_requires("protobuf/<host_version>")
             if self.options.enable_tf_lite_frontend:
@@ -162,8 +169,8 @@ class OpenvinoConan(ConanFile):
             self.tool_requires("cmake/[>=3.18 <4]")
 
     def requirements(self):
-        self.requires("onetbb/2021.9.0")
-        self.requires("pugixml/1.13")
+        self.requires("onetbb/2021.10.0")
+        self.requires("pugixml/1.14")
         if self._target_x86_64:
             self.requires("xbyak/6.73")
         if self.options.get_safe("enable_gpu"):
@@ -176,7 +183,7 @@ class OpenvinoConan(ConanFile):
         if self.options.enable_onnx_frontend:
             self.requires(self._require("onnx"))
         if self.options.enable_tf_lite_frontend:
-            self.requires("flatbuffers/22.9.24")
+            self.requires("flatbuffers/23.5.26")
         if self._preprocessing_available:
             self.requires(self._require("ade"))
 
@@ -184,6 +191,12 @@ class OpenvinoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        if self._is_legacy_one_profile:
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         deps = CMakeDeps(self)
         deps.generate()
 
@@ -195,6 +208,8 @@ class OpenvinoConan(ConanFile):
             toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = self.options.shared or not self.options.enable_cpu
         if self._gna_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GNA"] = False
+        if self._npu_option_available:
+            toolchain.cache_variables["ENABLE_INTEL_NPU"] = False
         # SW plugins
         toolchain.cache_variables["ENABLE_AUTO"] = self.options.enable_auto
         toolchain.cache_variables["ENABLE_MULTI"] = self.options.enable_auto
@@ -261,15 +276,11 @@ class OpenvinoConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support Debug build type")
 
     def validate(self):
-        # dynamically compiled frontends cannot be run against dynamic protobuf
-        if self._protobuf_required and self.options.shared and self.dependencies["protobuf"].options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref}:shared=True requires protobuf:shared=False for correct work.")
-
         if self.options.get_safe("enable_gpu") and not self.options.shared and self.options.enable_cpu:
             # GPU and CPU plugins cannot be simultaneously built statically, because they use different oneDNN versions
-            self.output.warning(f"{self.name} recipe builds GPU plugin without oneDNN (dGPU) support during static build,"
-                                "because CPU plugin compiled with different oneDNN version may cause ODR violation."
-                                "To enable oneDNN support for GPU plugin, please, either use shared build configuration"
+            self.output.warning(f"{self.name} recipe builds GPU plugin without oneDNN (dGPU) support during static build, "
+                                "because CPU plugin compiled with different oneDNN version may cause ODR violation. "
+                                "To enable oneDNN support for GPU plugin, please, either use shared build configuration "
                                 "or disable CPU plugin by setting 'enable_cpu' option to False.")
 
     def build(self):
@@ -304,6 +315,8 @@ class OpenvinoConan(ConanFile):
             openvino_runtime.system_libs.append("shlwapi")
             if self._preprocessing_available:
                 openvino_runtime.system_libs.extend(["wsock32", "ws2_32"])
+        if Version(self.version) < "2024.0.0":
+            openvino_runtime.includedirs.append(os.path.join("include", "ie"))
 
         # Have to expose all internal libraries for static libraries case
         if not self.options.shared:
@@ -336,19 +349,22 @@ class OpenvinoConan(ConanFile):
                 openvino_runtime.libs.extend(["openvino_onnx_frontend", "openvino_onnx_common"])
                 openvino_runtime.requires.extend(["protobuf::libprotobuf", "onnx::onnx"])
             if self.options.enable_tf_frontend:
-                openvino_runtime.libs.extend(["openvino_tensorflow_frontend", "openvino_tensorflow_common"])
+                openvino_runtime.libs.extend(["openvino_tensorflow_frontend"])
                 openvino_runtime.requires.extend(["protobuf::libprotobuf", "snappy::snappy"])
             if self.options.enable_tf_lite_frontend:
-                openvino_runtime.libs.extend(["openvino_tensorflow_lite_frontend", "openvino_tensorflow_common"])
+                openvino_runtime.libs.extend(["openvino_tensorflow_lite_frontend"])
                 openvino_runtime.requires.extend(["flatbuffers::flatbuffers"])
+            if self.options.enable_tf_frontend or self.options.enable_tf_lite_frontend:
+                openvino_runtime.libs.extend(["openvino_tensorflow_common"])
             if self.options.enable_paddle_frontend:
                 openvino_runtime.libs.append("openvino_paddle_frontend")
                 openvino_runtime.requires.append("protobuf::libprotobuf")
             if self.options.enable_pytorch_frontend:
                 openvino_runtime.libs.append("openvino_pytorch_frontend")
             # Common private dependencies should go last, because they satisfy dependencies for all other libraries
-            openvino_runtime.libs.extend(["openvino_reference", "openvino_builders",
-                                          "openvino_shape_inference", "openvino_itt",
+            if Version(self.version) < "2024.0.0":
+                openvino_runtime.libs.append("openvino_builders")
+            openvino_runtime.libs.extend(["openvino_reference", "openvino_shape_inference", "openvino_itt",
                                           # utils goes last since all others depend on it
                                           "openvino_util"])
             # set 'openvino' once again for transformations objects files (cyclic dependency)

@@ -70,15 +70,15 @@ class MongoCDriverConan(ConanFile):
         elif self.options.with_ssl == "libressl":
             self.requires("libressl/3.5.3")
         if self.options.with_sasl == "cyrus":
-            self.requires("cyrus-sasl/2.1.27")
+            self.requires("cyrus-sasl/2.1.28")
         if self.options.with_snappy:
             self.requires("snappy/1.1.10")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[^1.5]")
         if self.options.with_icu:
-            self.requires("icu/73.2")
+            self.requires("icu/74.2")
 
     def validate(self):
         if self.options.with_ssl == "darwin" and not is_apple_os(self):
@@ -91,7 +91,7 @@ class MongoCDriverConan(ConanFile):
     def build_requirements(self):
         if self.options.with_ssl == "libressl" or self.options.with_zstd:
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.0.3")
+                self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -118,10 +118,11 @@ class MongoCDriverConan(ConanFile):
         # therefore it defeats conan_toolchain variables, but it works fine with cache_variables
         tc.cache_variables["ENABLE_SSL"] = self._ssl_cmake_value
         tc.cache_variables["ENABLE_SASL"] = self._sasl_cmake_value
-        tc.cache_variables["ENABLE_STATIC"] = "OFF" if self.options.shared else "ON"
+        tc.cache_variables["ENABLE_SHARED"] = self.options.shared
+        tc.cache_variables["ENABLE_STATIC"] = not self.options.shared
         tc.cache_variables["ENABLE_TESTS"] = "OFF"
         tc.cache_variables["ENABLE_EXAMPLES"] = "OFF"
-        tc.cache_variables["ENABLE_SRV"] = "ON" if self.options.srv else "OFF"
+        tc.cache_variables["ENABLE_SRV"] = self.options.srv
         tc.cache_variables["ENABLE_MAINTAINER_FLAGS"] = "OFF"
         tc.cache_variables["ENABLE_AUTOMATIC_INIT_AND_CLEANUP"] = "ON"
         tc.cache_variables["ENABLE_CRYPTO_SYSTEM_PROFILE"] = "OFF"
@@ -130,29 +131,34 @@ class MongoCDriverConan(ConanFile):
         tc.cache_variables["ENABLE_SHM_COUNTERS"] = "OFF"
         tc.cache_variables["ENABLE_MONGOC"] = "ON"
         tc.cache_variables["ENABLE_BSON"] = "ON"
-        tc.cache_variables["ENABLE_SNAPPY"] = "ON" if self.options.with_snappy else "OFF"
+        tc.cache_variables["ENABLE_SNAPPY"] = self.options.with_snappy
         tc.cache_variables["ENABLE_ZLIB"] = "SYSTEM" if self.options.with_zlib else "OFF"
-        tc.cache_variables["ENABLE_ZSTD"] = "ON" if self.options.with_zstd else "OFF"
+        tc.cache_variables["ENABLE_ZSTD"] = self.options.with_zstd
         tc.cache_variables["ENABLE_MAN_PAGES"] = "OFF"
         tc.cache_variables["ENABLE_HTML_DOCS"] = "OFF"
         tc.cache_variables["ENABLE_EXTRA_ALIGNMENT"] = "ON"
         tc.cache_variables["ENABLE_RDTSCP"] = "OFF"
         tc.cache_variables["ENABLE_APPLE_FRAMEWORK"] = "OFF"
-        tc.cache_variables["ENABLE_ICU"] = "ON" if self.options.with_icu else "OFF"
+        tc.cache_variables["ENABLE_ICU"] = self.options.with_icu
         tc.cache_variables["ENABLE_UNINSTALL"] = "OFF"
         tc.cache_variables["ENABLE_CLIENT_SIDE_ENCRYPTION"] = "OFF"  # libmongocrypt recipe not yet in CCI
         tc.cache_variables["ENABLE_MONGODB_AWS_AUTH"] = "AUTO"
-        tc.cache_variables["ENABLE_PIC"] = "ON" if self.options.get_safe("fPIC", True) else "OFF"
+        tc.cache_variables["ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         # Avoid to install vc runtime stuff
         tc.variables["CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP"] = "TRUE"
         if self.options.with_ssl == "openssl":
             tc.variables["OPENSSL_ROOT_DIR"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
-        if Version(self.version) >= "1.20.0":
-            tc.variables["MONGO_USE_CCACHE"] = False
+        tc.variables["MONGO_USE_CCACHE"] = False
         if is_msvc(self):
             # Should be added because of
             # https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-initonceexecuteonce
             tc.preprocessor_definitions["_WIN32_WINNT"] = "0x0600"
+        tc.cache_variables["BUILD_VERSION"] = self.version
+        # Skip some fragile checks
+        # https://github.com/mongodb/mongo-c-driver/blob/1.25.3/src/libmongoc/CMakeLists.txt#L266-L276
+        tc.variables["HAVE_ASN1_STRING_GET0_DATA"] = True  # Requires OpenSSL 1.1.0+
+        # https://github.com/mongodb/mongo-c-driver/blob/1.25.3/src/libmongoc/CMakeLists.txt#L366-L375
+        tc.variables["SASL2_HAVE_SASL_CLIENT_DONE"] = True # Requires Cyrus-SASL 2.1.23+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -166,18 +172,14 @@ class MongoCDriverConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        to_replace_old_new = [
-            # Fix Snappy
-            {"old": "include (FindSnappy)\nif (SNAPPY_INCLUDE_DIRS)",
-             "new": "if(ENABLE_SNAPPY MATCHES \"ON\")\n  find_package(Snappy REQUIRED)"},
-            {"old": "SNAPPY_LIBRARIES", "new": "Snappy_LIBRARIES"},
-            {"old": "SNAPPY_INCLUDE_DIRS", "new": "Snappy_INCLUDE_DIRS"},
-            # Fix LibreSSL
-            {"old": "set (SSL_LIBRARIES -ltls -lcrypto)", "new": ""},
-        ]
-        for old_new in to_replace_old_new:
-            replace_in_file(self, os.path.join(self.source_folder, "src", "libmongoc", "CMakeLists.txt"),
-                                  old_new["old"], old_new["new"])
+        libmongoc_cmake = os.path.join(self.source_folder, "src", "libmongoc", "CMakeLists.txt")
+        replace_in_file(self, libmongoc_cmake,
+                        "include (FindSnappy)\nif (SNAPPY_INCLUDE_DIRS)",
+                        'if(ENABLE_SNAPPY MATCHES "ON")\n  find_package(Snappy REQUIRED)')
+        replace_in_file(self, libmongoc_cmake, "SNAPPY_LIBRARIES", "Snappy_LIBRARIES")
+        replace_in_file(self, libmongoc_cmake, "SNAPPY_INCLUDE_DIRS", "Snappy_INCLUDE_DIRS")
+        if Version(self.version) < "1.25":
+            replace_in_file(self, libmongoc_cmake, "set (SSL_LIBRARIES -ltls -lcrypto)", "")
         # cleanup rpath
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "set (CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)", "")

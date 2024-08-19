@@ -1,4 +1,7 @@
 sources:
+  "0.1.0":
+    url: "https://github.com/yandex/ozo/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "bf4f07c8105f9d5ccf0eebf88d3e33ee440b5668493f63e62de2cd184e80b39a"
   "cci.20210509":
     url: "https://github.com/yandex/ozo/archive/1b06a00ec3cea09108557bbec71cc7a6455dfb6b.tar.gz"
-    sha256: 97eaa2145be4366c390762e8a4d63e507e8be02a37f2c50e5ba0104a1ca192ee
+    sha256: "97eaa2145be4366c390762e8a4d63e507e8be02a37f2c50e5ba0104a1ca192ee"

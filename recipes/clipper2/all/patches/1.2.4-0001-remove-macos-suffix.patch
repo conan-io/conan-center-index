@@ -1,0 +1,13 @@
+diff --git a/CPP/CMakeLists.txt b/CPP/CMakeLists.txt
+index 817cf01..cd17e84 100644
+--- a/CPP/CMakeLists.txt
++++ b/CPP/CMakeLists.txt
+@@ -19,7 +19,7 @@ set(CLIPPER2_USINGZ "ON" CACHE STRING "Build Clipper2Z, either \"ON\" or \"OFF\"
+ set(CLIPPER2_MAX_PRECISION 8 CACHE STRING "Maximum precision allowed for double to int64 scaling")
+ 
+ if (APPLE)
+-    set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
++#    set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
+ endif ()
+ 
+ include(GNUInstallDirs)

@@ -1,0 +1,43 @@
+diff --git a/Makefile.in b/Makefile.in
+index ce2617c..77242fc 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -677,8 +677,7 @@ SQLITE3_SHELL_TARGET   = $(SQLITE3_SHELL_TARGET_@HAVE_WASI_SDK@)
+ # This is the default Makefile target.  The objects listed here
+ # are what get build when you type just "make" with no arguments.
+ #
+-all:	sqlite3.h libsqlcipher.la $(SQLITE3_SHELL_TARGET) \
+-  $(HAVE_TCL:1=libtclsqlite3.la)
++all:	sqlite3.h libsqlcipher.la
+ 
+ Makefile: $(TOP)/Makefile.in
+ 	./config.status
+@@ -1367,7 +1366,7 @@ fulltestonly:	$(TESTPROGS) fuzztest
+ # Fuzz testing
+ #
+ # WARNING: When the "fuzztest" target is run by the testrunner.tcl script,
+-# it does not actually run this code. Instead, it schedules equivalent 
++# it does not actually run this code. Instead, it schedules equivalent
+ # commands. Therefore, if this target is updated, then code in
+ # testrunner_data.tcl (search for "trd_fuzztest_data") must also be updated.
+ #
+@@ -1579,9 +1578,8 @@ lib_install:	libsqlcipher.la
+ 	$(INSTALL) -d $(DESTDIR)$(libdir)
+ 	$(LTINSTALL) libsqlcipher.la $(DESTDIR)$(libdir)
+ 
+-install:	sqlcipher$(TEXE) lib_install sqlite3.h sqlcipher.pc ${HAVE_TCL:1=tcl_install}
++install:	lib_install sqlite3.h sqlcipher.pc
+ 	$(INSTALL) -d $(DESTDIR)$(bindir)
+-	$(LTINSTALL) sqlcipher$(TEXE) $(DESTDIR)$(bindir)
+ 	$(INSTALL) -d $(DESTDIR)$(includedir)
+ 	$(INSTALL) -m 0644 sqlite3.h $(DESTDIR)$(includedir)
+ 	$(INSTALL) -m 0644 $(TOP)/src/sqlite3ext.h $(DESTDIR)$(includedir)
+@@ -1596,7 +1594,7 @@ tcl_install:	lib_install libtclsqlite3.la pkgIndex.tcl
+ 	rm -f $(DESTDIR)$(TCLLIBDIR)/libtclsqlite3.la $(DESTDIR)$(TCLLIBDIR)/libtclsqlite3.a
+ 	$(INSTALL) -m 0644 pkgIndex.tcl $(DESTDIR)$(TCLLIBDIR)
+ 
+-clean:	
++clean:
+ 	rm -f *.lo *.la *.o sqlcipher$(TEXE) libsqlcipher.la
+ 	rm -f sqlite3.h opcodes.*
+ 	rm -rf .libs .deps

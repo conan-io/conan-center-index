@@ -1,26 +1,7 @@
 sources:
-  "0.18.8":
-    url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.18.8.tar.gz"
-    sha256: "70ea622cf8c1a7028b24078e909ee5898990444436584178f58d61b50b5b197d"
-  "0.17.23":
-    url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.17.23.tar.gz"
-    sha256: "28061c3efa493519cfae46e4ea96389f03a81eeec7613d7da861dd8c5f4f6598"
-  "0.17.12":
-    url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.17.12.tar.gz"
-    sha256: "acdd8b83198c5a471f92702bc4101828fe55361005764143704c39acd6f80ffc"
-  "0.14.3":
-    url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.14.3.tar.gz"
-    sha256: "3ea16c43e691bab0c373ba1ad072f6535390c516ebda658dfaf4d074d920e0fb"
-patches:
-  "0.18.8":
-    - patch_file: "patches/0.17.23-fix-cast-error.patch"
-      patch_description: "fix const cast error"
-      patch_type: "portability"
-  "0.17.23":
-    - patch_file: "patches/0.17.23-fix-cast-error.patch"
-      patch_description: "fix const cast error"
-      patch_type: "portability"
-  "0.17.12":
-    - patch_file: "patches/0.17.12-fix-cast-error.patch"
-      patch_description: "fix const cast error"
-      patch_type: "portability"
+  "0.26.9":
+    url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.26.9.tar.gz"
+    sha256: "5b5760d34fbbfcc971f561296e828de4c788750472fd9bd3ac20068a083620f2"
+  "0.17.1a":
+    url: "https://github.com/awslabs/aws-crt-cpp/archive/v0.17.1a.tar.gz"
+    sha256: "64053c8237e350cfbec24984a3696aaf914bfa64e6200ef19bebe9cf5bb0692b"
