@@ -10,6 +10,10 @@ import os
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
 
+# Simplifying, check:
+# https://github.com/wxWidgets/wxWidgets/blob/9e1b62779757a83acd75304e7c3defb40bd6a99a/build/cmake/options.cmake
+# https://github.com/wxWidgets/wxWidgets/blob/9e1b62779757a83acd75304e7c3defb40bd6a99a/include/wx/setup_inc.h
+
 
 class wxWidgetsConan(ConanFile):
     name = "wxwidgets"
@@ -23,17 +27,20 @@ class wxWidgetsConan(ConanFile):
 
     options = {"shared": [True, False],
                "fPIC": [True, False],
-               "unicode": [True, False],
-               "compatibility": ["2.8", "3.0", "3.1", None],
-               "zlib": ["off", "zlib"],
-               "liblzma": ["off", "xz_utils"],
-               "png": ["off", "libpng"],
-               "jpeg": ["off", "libjpeg", "libjpeg-turbo", "mozjpeg"],
-               "tiff": ["off", "libtiff"],
-               "expat": ["off", "expat"],
-               "regex": ["off", "regex"],
-               "svg": ["off", "nanosvg"],
-               "gtk": [2, 3, "gtk"], # TODO: compile without system gtk
+               # NOT RECOMMENDED to be turned off by upstream
+               #"unicode": [True, False],
+               # this is mark_as_advanced in upstream
+               #"compatibility": ["2.8", "3.0", "3.1", None],
+               #"zlib": ["off", "zlib"],
+               # off by default in upstream
+               #"liblzma": ["off", "xz_utils"],
+               #"png": ["off", "libpng"],
+               #"jpeg": ["off", "libjpeg", "libjpeg-turbo", "mozjpeg"],
+               #"tiff": ["off", "libtiff"],
+               #"expat": ["off", "expat"],
+               #"regex": ["off", "regex"],
+               #"svg": ["off", "nanosvg"],
+               #"gtk": [2, 3], # TODO: compile without system gtk
                "secretstore": [True, False],
                "aui": [True, False],
                "opengl": [True, False],
@@ -59,17 +66,17 @@ class wxWidgetsConan(ConanFile):
     default_options = {
                "shared": False,
                "fPIC": True,
-               "unicode": True,
-               "compatibility": "3.0",
-               "zlib": "zlib",
-               "png": "libpng",
-               "jpeg": "libjpeg",
-               "tiff": "libtiff",
-               "liblzma": "xz_utils",
-               "expat": "expat",
-               "regex": "regex",
-               "svg": "nanosvg",
-               "gtk": 2,
+               #"unicode": True,
+               #"compatibility": "3.0",
+               #"zlib": "zlib",
+               #"png": "libpng",
+               #"jpeg": "libjpeg",
+               #"tiff": "libtiff",
+               #"liblzma": "xz_utils",
+               #"expat": "expat",
+               #"regex": "regex",
+               #"svg": "nanosvg",
+               #"gtk": 2,
                "secretstore": True,
                "aui": True,
                "opengl": True,
@@ -105,23 +112,23 @@ class wxWidgetsConan(ConanFile):
         if self.settings.os != "Linux":
             self.options.rm_safe("secretstore")
             self.options.rm_safe("cairo")
-            self.options.rm_safe("gtk")
-        else:
-            if self.version < "3.2.1":
-                # CMake find_package error in older versions
-                self.options.rm_safe("opengl")
+            #self.options.rm_safe("gtk")
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    @property
+    def _gtk_version(self):
+        return f"gtk{self.dependencies["gtk"].options.version}"
+
     def system_requirements(self):
         apt = package_manager.Apt(self)
         packages = []
-        if self.options.get_safe("secretstore") and self.options.get_safe("gtk") != "gtk":
+        if self.options.get_safe("secretstore"):
             packages.append("libsecret-1-dev")
         if self.options.webview:
-            if self.options.get_safe("gtk") == 2:
+            if self._gtk_version == "gtk2":
                 packages.extend(["libsoup2.4-dev",
                                  "libwebkitgtk-dev"])
             else:
@@ -133,7 +140,7 @@ class wxWidgetsConan(ConanFile):
 
         yum = package_manager.Yum(self)
         packages = []
-        if self.options.get_safe("secretstore") and self.options.get_safe("gtk") != "gtk":
+        if self.options.get_safe("secretstore"):
             packages.append("libsecret-devel")
         if self.options.webview:
                 packages.extend(["libsoup3-devel",
@@ -146,14 +153,15 @@ class wxWidgetsConan(ConanFile):
         self.tool_requires("ninja/1.11.1")
         self.tool_requires("cmake/[>=3.17]")
 
+    # TODO: add support for gtk non system version when it's ready for Conan 2
     def requirements(self):
         if self.settings.os == "Linux":
             self.requires("xorg/system")
-            gtk = self.options.get_safe("gtk")
-            if gtk == "gtk":
-                self.requires("gtk/3.24.24")
-            else:
-                self.requires("gtk/system", options={"version": gtk})
+            #gtk = self.options.get_safe("gtk")
+            #if gtk == "gtk":
+            #    self.requires("gtk/3.24.24")
+            #else:
+            self.requires("gtk/system")
             if self.options.get_safe("opengl", default=False):
                 self.requires("opengl/system")
             self.requires("xkbcommon/1.6.0", options={"with_x11": True})
@@ -163,37 +171,37 @@ class wxWidgetsConan(ConanFile):
             if self.options.mediactrl:
                 self.requires("gstreamer/1.22.3")
                 self.requires("gst-plugins-base/1.19.2")
-            if self.options.get_safe("secretstore") and gtk == "gtk":
-                self.requires("libsecret/0.20.5")
+            #if self.options.get_safe("secretstore") and gtk == "gtk":
+            #    self.requires("libsecret/0.20.5")
             self.requires("libcurl/[>=7.78.0 <9]")
-        if self.options.png == "libpng":
-            self.requires("libpng/[>=1.6 <2]")
-        if self.options.jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
-        elif self.options.jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/[>=3.0 <3.1]")
-        elif self.options.jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.5")
-        if self.options.tiff == "libtiff":
-            self.requires("libtiff/4.6.0")
-        if self.options.zlib == "zlib":
-            self.requires("zlib/[>=1.2.11 <2]")
-        if self.options.liblzma == "xz_utils":
-            self.requires("xz_utils/[>=5.4.4 <6]")
-        if self.options.expat == "expat":
-            self.requires("expat/[>=2.6.2 <3]")
-        if self.options.regex == "regex":
-            self.requires("pcre2/10.42")
-        if self.options.get_safe("svg") == "nanosvg":
-            self.requires("nanosvg/cci.20231025")
+        #if self.options.png == "libpng":
+        self.requires("libpng/[>=1.6 <2]")
+        #if self.options.jpeg == "libjpeg":
+        #    self.requires("libjpeg/9e")
+        #elif self.options.jpeg == "libjpeg-turbo":
+        self.requires("libjpeg-turbo/3.0.3")
+        #elif self.options.jpeg == "mozjpeg":
+        #    self.requires("mozjpeg/4.1.5")
+        #if self.options.tiff == "libtiff":
+        self.requires("libtiff/4.6.0")
+        #if self.options.zlib == "zlib":
+        self.requires("zlib/[>=1.2.11 <2]")
+        #if self.options.liblzma == "xz_utils":
+        #    self.requires("xz_utils/[>=5.4.4 <6]")
+        #if self.options.expat == "expat":
+        self.requires("expat/[>=2.6.2 <3]")
+        #if self.options.regex == "regex":
+        self.requires("pcre2/10.42")
+        #if self.options.get_safe("svg") == "nanosvg":
+        self.requires("nanosvg/cci.20231025")
 
     def validate(self):
         if self.settings.os == "Linux":
             if not self.dependencies.direct_host["xkbcommon"].options.with_x11:
                 raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled")
-            if self.dependencies.direct_host["gtk"].options.version != self.options.gtk:
-                print(self.dependencies.direct_host["gtk"].options.version, self.options.gtk)
-                raise ConanInvalidConfiguration("The 'version' option for the 'gtk' package must match the 'gtk' option")
+            # if self.dependencies.direct_host["gtk"].options.version != self.options.gtk:
+            #     print(self.dependencies.direct_host["gtk"].options.version, self.options.gtk)
+            #     raise ConanInvalidConfiguration("The 'version' option for the 'gtk' package must match the 'gtk' option")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -203,11 +211,10 @@ class wxWidgetsConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if self.version >= "3.1.5":
-            # Don't change library names when cross-compiling
-            replace_in_file(self, os.path.join(self.source_folder, "build", "cmake", "functions.cmake"),
-                            'set(cross_target "-${CMAKE_SYSTEM_NAME}")',
-                            'set(cross_target)')
+        # Don't change library names when cross-compiling
+        replace_in_file(self, os.path.join(self.source_folder, "build", "cmake", "functions.cmake"),
+                        'set(cross_target "-${CMAKE_SYSTEM_NAME}")',
+                        'set(cross_target)')
         # Don't override Conan's toolchain
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "CMAKE_OSX_DEPLOYMENT_TARGET",
@@ -219,12 +226,6 @@ class wxWidgetsConan(ConanFile):
                             f'cmake_minimum_required(VERSION {cmake_version})',
                             f'cmake_minimum_required(VERSION {cmake_version})\nadd_definitions(-D__STDC_WANT_LIB_EXT1__)')
 
-    @property
-    def _gtk_version(self):
-        if self.options.get_safe("gtk") == 2:
-            return "gtk2"
-        return "gtk3"
-
     def generate(self):
         tc = CMakeToolchain(self)
 
@@ -234,7 +235,7 @@ class wxWidgetsConan(ConanFile):
         tc.variables["wxBUILD_TESTS"] = "OFF"
         tc.variables["wxBUILD_DEMOS"] = "OFF"
         tc.variables["wxBUILD_INSTALL"] = True
-        tc.variables["wxBUILD_COMPATIBILITY"] = "NONE" if self.options.compatibility is None else self.options.compatibility
+        #tc.variables["wxBUILD_COMPATIBILITY"] = "NONE" if self.options.compatibility is None else self.options.compatibility
         if self.settings.compiler == "clang":
             tc.variables["wxBUILD_PRECOMP"] = "OFF"
 
@@ -253,17 +254,17 @@ class wxWidgetsConan(ConanFile):
             tc.variables["wxUSE_LIBMSPACK"] = "OFF"
             tc.variables["wxUSE_LIBGNOMEVFS"] = "OFF"
 
-        tc.variables["wxUSE_LIBPNG"] = "sys" if self.options.png != "off" else "OFF"
-        tc.variables["wxUSE_LIBJPEG"] = "sys" if self.options.jpeg != "off" else "OFF"
+        tc.variables["wxUSE_LIBPNG"] = "sys"
+        tc.variables["wxUSE_LIBJPEG"] = "sys"
         tc.variables["wxUSE_LIBTIFF"] = "sys" if self.options.tiff != "off" else "OFF"
-        tc.variables["wxUSE_ZLIB"] = "sys" if self.options.zlib != "off" else "OFF"
-        tc.variables["wxUSE_LIBLZMA"] = "sys" if self.options.liblzma != "off" else "OFF"
-        tc.variables["wxUSE_EXPAT"] = "sys" if self.options.expat != "off" else "OFF"
-        tc.variables["wxUSE_REGEX"] = "sys" if self.options.regex != "off" else "OFF"
-        tc.variables["wxUSE_NANOSVG"] = "sys" if self.options.svg != "off" else "OFF"
+        tc.variables["wxUSE_ZLIB"] = "sys"
+        #tc.variables["wxUSE_LIBLZMA"] = "sys" if self.options.liblzma != "off" else "OFF"
+        tc.variables["wxUSE_EXPAT"] = "sys"
+        tc.variables["wxUSE_REGEX"] = "sys"
+        tc.variables["wxUSE_NANOSVG"] = "sys"
 
         # wxWidgets features
-        tc.variables["wxUSE_UNICODE"] = self.options.unicode
+        #tc.variables["wxUSE_UNICODE"] = self.options.unicode
         tc.variables["wxUSE_SECRETSTORE"] = self.options.get_safe("secretstore")
 
         # wxWidgets libraries
