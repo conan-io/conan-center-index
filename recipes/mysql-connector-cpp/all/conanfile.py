@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
-from conan.tools.files import get, replace_in_file, rm
+from conan.tools.files import copy, get, replace_in_file, rm
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
@@ -141,7 +141,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rm(self, "INFO_SRC", self.package_folder)
