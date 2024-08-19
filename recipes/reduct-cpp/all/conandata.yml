@@ -1,18 +1,18 @@
 sources:
-  "1.10.0":
-    url: "https://github.com/reductstore/reduct-cpp/archive/refs/tags/v1.10.0.tar.gz"
-    sha256: "33339cbb23f87f3ee76670a7907d485701d4e11161c4bf49d7b8577d6e42a712"
+  "1.11.0":
+    url: "https://github.com/reductstore/reduct-cpp/archive/refs/tags/v1.11.0.tar.gz"
+    sha256: "e46593189ad4f6fd6dfab5cfcc093244e44c8426054f80a928cf118f7d5e592a"
 patches:
-  "1.10.0":
-    - patch_file: "patches/1.10.0-0001-use-cci.patch"
+  "1.11.0":
+    - patch_file: "patches/1.11.0-0001-use-cci.patch"
       patch_description: "use cci packages"
       patch_type: "conan"
-    - patch_file: "patches/1.10.0-0002-disable-fpic.patch"
+    - patch_file: "patches/1.11.0-0002-disable-fpic.patch"
       patch_description: "disable hardcoded fPIC"
       patch_type: "conan"
-    - patch_file: "patches/1.10.0-0003-remove-fmt-headeronly.patch"
+    - patch_file: "patches/1.11.0-0003-remove-fmt-headeronly.patch"
       patch_description: "remove FMT_HEADER_ONLY definition"
       patch_type: "conan"
-    - patch_file: "patches/1.10.0-0004-include-compare.patch"
+    - patch_file: "patches/1.11.0-0004-include-compare.patch"
       patch_description: "include compare header for spaceship operator"
       patch_type: "portability"

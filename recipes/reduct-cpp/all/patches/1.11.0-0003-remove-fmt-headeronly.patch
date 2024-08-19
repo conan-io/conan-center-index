@@ -1,5 +1,5 @@
 diff --git a/src/reduct/bucket.cc b/src/reduct/bucket.cc
-index e41e06d..bb6fca3 100644
+index 7d10b6d..aa59976 100644
 --- a/src/reduct/bucket.cc
 +++ b/src/reduct/bucket.cc
 @@ -1,8 +1,8 @@
@@ -10,9 +10,9 @@ index e41e06d..bb6fca3 100644
 -#include <fmt/core.h>
 +// #define FMT_HEADER_ONLY 1
 +#include <fmt/format.h>
+ #include <fmt/ranges.h>
  #if CONAN
  #include <moodycamel/concurrentqueue.h>
- #else
 diff --git a/src/reduct/error.cc b/src/reduct/error.cc
 index 2a5dbb4..d28cced 100644
 --- a/src/reduct/error.cc
