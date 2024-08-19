@@ -77,8 +77,6 @@ class FollyConan(ConanFile):
             self.requires("libdwarf/0.9.1")
         self.requires("libsodium/1.0.19")
         self.requires("xz_utils/[>=5.4.5 <6]")
-        # FIXME: Causing compilation issues on clang:
-        #  self.requires("jemalloc/5.3.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/1.8.0")
