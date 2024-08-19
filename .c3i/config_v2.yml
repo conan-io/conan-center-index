@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 2.3.1
+  version: 2.5.0
   backup_sources:
     upload_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
     download_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
@@ -46,7 +46,7 @@ tasks:
     parallel_strategy: unlimited
   cci:
     conan_v2_run_export: false
-    detailed_status_checks: false
+    detailed_status_checks: true
     write_comments: false
     update_labels: false
     build_bump_deps_pr: false
@@ -56,10 +56,12 @@ tasks:
       regression: "> **Regression**: Conan v2 builds are mandatory and they are required for the PR to be merged, because this recipe worked with Conan v2 previously."
       text_on_failure: "The v2 pipeline failed. Please, review the errors and note this is required for pull requests to be merged. In case this recipe is still not ported to Conan 2.x, please, ping `@conan-io/barbarians` on the PR and we will help you."
       collapse_on_success: false
-      collapse_on_failure: true
+      collapse_on_failure: false
   list_packages:
     update_yaml_list_path: ".c3i/conan_v2_ready_references"
     update_yaml_list_key: "required_for_references"
+  promote_packages:
+    additional_repo_target: "conan-center-v2-only"
   scheduled_export_check:
     report_issue_url: https://github.com/conan-io/conan-center-index/issues/15557
     report_issue_append: false

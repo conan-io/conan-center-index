@@ -27,7 +27,7 @@ class ThorvgConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_engines": ['sw', 'gl_beta', 'wg_beta'],
+        "with_engines": ['sw', 'gl_beta', 'wg_beta', "gl"],
         "with_loaders": [False, 'tvg', 'svg', 'png', 'jpg', 'lottie', 'ttf', 'webp', 'all'],
         "with_savers": [False, 'tvg', 'gif', 'all'],
         "with_bindings": [False, 'capi', 'wasm_beta'],
@@ -113,6 +113,11 @@ class ThorvgConan(ConanFile):
                 f"{self.ref} doesn't support debug build on MSVC."
             )
 
+        if Version(self.version) < "0.14.0" and self.options.with_engines in ["gl"]:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_engines=gl, use with_engines=gl_beta instead")
+        if Version(self.version) >= "0.14.0" and self.options.with_engines in ["gl_beta"]:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_engines=gl_beta, use with_engines=gl instead")
+
     def requirements(self):
         loaders_opt = str(self.options.with_loaders)
         if loaders_opt in ("all", "jpg"):
@@ -121,6 +126,9 @@ class ThorvgConan(ConanFile):
             self.requires("libpng/1.6.43")
         if loaders_opt in ("all", "webp"):
             self.requires("libwebp/1.4.0")
+        if self.settings.os == "Linux":
+            if self.options.with_engines in ["gl", "gl_beta"]:
+                self.requires("opengl/system")
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.0")

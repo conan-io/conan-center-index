@@ -1,4 +1,7 @@
 sources:
+  "1.8.6":
+    url: "https://github.com/utelle/SQLite3MultipleCiphers/archive/refs/tags/v1.8.6.tar.gz"
+    sha256: "7250e3d9ca4368df00d0ebfaa744add66b458a5de318728b95369d621ebf2028"
   "1.8.4":
     url: "https://github.com/utelle/SQLite3MultipleCiphers/archive/refs/tags/v1.8.4.tar.gz"
     sha256: "453e1938a02c91796a013169d56f746f153d7c7a77b59894bf8462b341a343ca"
