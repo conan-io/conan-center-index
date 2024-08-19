@@ -1,4 +1,7 @@
 sources:
+  "3.3.8":
+    url: "https://downloads.mariadb.com/Connectors/c/connector-c-3.3.8/mariadb-connector-c-3.3.8-src.tar.gz"
+    sha256: "f9f076b4aa9fb22cc94b24f82c80f9ef063805ecd6533a2eb5d5060cf93833e8"
   "3.3.3":
     url: "https://downloads.mariadb.com/Connectors/c/connector-c-3.3.3/mariadb-connector-c-3.3.3-src.tar.gz"
     sha256: "d77630e2376fe08185b5354621c877b0a203a6b186a0694574d37b764aeb2874"
@@ -12,15 +15,16 @@ sources:
     url: "https://downloads.mariadb.com/Connectors/c/connector-c-3.1.11/mariadb-connector-c-3.1.11-src.tar.gz"
     sha256: "3e6f6c399493fe90efdc21a3fe70c30434b7480e8195642a959f1dd7a0fa5b0f"
 patches:
-  "3.3.3":
-    - patch_file: "patches/3.3.3-0002-find-package-zstd.patch"
-      patch_description: "Use ZSTD cmake file from Conan"
-      patch_type: "conan"
-    - patch_file: "patches/3.3.3-0001-fix-install-and-static-or-shared.patch"
+  "3.3.8":
+    - patch_file: "patches/3.3.8-0001-fix-install-and-static-or-shared.patch"
       patch_description: "fix install path, separate static/shared build"
       patch_type: "conan"
-    - patch_file: "patches/3.1.19-0002-remove-wx-flag.patch"
-      patch_description: "remove WX flags in MSVC"
+    - patch_file: "patches/3.1.11-0004-include-mysqld_error-header.patch"
+      patch_description: "always include mysqld_error.h"
+      patch_type: "portability"
+  "3.3.3":
+    - patch_file: "patches/3.3.3-0001-fix-install-and-static-or-shared.patch"
+      patch_description: "fix install path, separate static/shared build"
       patch_type: "conan"
     - patch_file: "patches/3.1.11-0003-include-order-windows-winsock2.patch"
       patch_description: "fix include order for windows winsock2"
@@ -31,9 +35,6 @@ patches:
   "3.1.19":
     - patch_file: "patches/3.1.19-0001-fix-install-and-static-or-shared.patch"
       patch_description: "fix install path, separate static/shared build"
-      patch_type: "conan"
-    - patch_file: "patches/3.1.19-0002-remove-wx-flag.patch"
-      patch_description: "remove WX flags in MSVC"
       patch_type: "conan"
     - patch_file: "patches/3.1.11-0003-include-order-windows-winsock2.patch"
       patch_description: "fix include order for windows winsock2"

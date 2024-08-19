@@ -1,0 +1,4 @@
+sources:
+  "0.2.1":
+    url: "https://github.com/stephenberry/argz/archive/refs/tags/v0.2.1.tar.gz"
+    sha256: "1a9d85ef7e4722f81ce426c2cf8ceaa0a10cc42e7762cdf2465ae6484ece9c7e"
