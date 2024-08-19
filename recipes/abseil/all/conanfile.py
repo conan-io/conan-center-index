@@ -76,7 +76,8 @@ class AbseilConan(ConanFile):
 
     def build_requirements(self):
         # https://github.com/abseil/abseil-cpp/blob/20240722.0/CMakeLists.txt#L19
-        self.tool_requires("cmake/[>=3.16 <4]")
+        if Version(self.version) >= "20240722.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
