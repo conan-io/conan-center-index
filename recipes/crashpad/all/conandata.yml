@@ -6,7 +6,7 @@ sources:
     mini_chromium:
       url: "https://github.com/chromium/mini_chromium/archive/7eca85315879ea0ffd4cd83d8e754c8d36248f05.zip"  
       sha256: "B2B10480FCCE264856EA3603448FDE5092B827E7CE2B8D79EF194FA3AB816FD5"
-"cci.20220219":
+  "cci.20220219":
     crashpad:
       url: "https://github.com/chromium/crashpad/archive/e9937cb36cd12f24d73a07c4b91168cf1885b5db.tar.gz"
       sha256: "3876ada53bfb35ca58ac4c27fba79ec56d9436046ab28477fb06c9e8d1a97c7e"
@@ -20,7 +20,6 @@ patches:
     - patch_file: "patches/cci.20240812-0003-compilers-from-env.patch"
     - patch_file: "patches/cci.20240812-0004-use-conan-linux-syscall-support-package.patch"
     - patch_file: "patches/cci.20240812-0005-allow-all-archs.patch"
-    #- patch_file: "patches/cci.20240812-0006-mini_chromium-win_helper-py3.patch"
     # reused patch from cci.20210507
     - patch_file: "patches/cci.20210507-0007-use-system-zlib.patch"
     - patch_file: "patches/cci.20220219-0007-static-lib-tool_support.patch"
