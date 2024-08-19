@@ -120,7 +120,7 @@ class wxWidgetsConan(ConanFile):
 
     @property
     def _gtk_version(self):
-        return f"gtk{self.dependencies["gtk"].options.version}"
+        return f"gtk{self.dependencies['gtk'].options.version}"
 
     def system_requirements(self):
         apt = package_manager.Apt(self)
@@ -179,11 +179,11 @@ class wxWidgetsConan(ConanFile):
         #if self.options.jpeg == "libjpeg":
         #    self.requires("libjpeg/9e")
         #elif self.options.jpeg == "libjpeg-turbo":
-        self.requires("libjpeg-turbo/3.0.3")
+        self.requires("libjpeg-turbo/3.0.2")
         #elif self.options.jpeg == "mozjpeg":
         #    self.requires("mozjpeg/4.1.5")
         #if self.options.tiff == "libtiff":
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/4.6.0", options={"jpeg": "libjpeg-turbo"})
         #if self.options.zlib == "zlib":
         self.requires("zlib/[>=1.2.11 <2]")
         #if self.options.liblzma == "xz_utils":
@@ -256,7 +256,7 @@ class wxWidgetsConan(ConanFile):
 
         tc.variables["wxUSE_LIBPNG"] = "sys"
         tc.variables["wxUSE_LIBJPEG"] = "sys"
-        tc.variables["wxUSE_LIBTIFF"] = "sys" if self.options.tiff != "off" else "OFF"
+        tc.variables["wxUSE_LIBTIFF"] = "sys"
         tc.variables["wxUSE_ZLIB"] = "sys"
         #tc.variables["wxUSE_LIBLZMA"] = "sys" if self.options.liblzma != "off" else "OFF"
         tc.variables["wxUSE_EXPAT"] = "sys"
@@ -350,7 +350,6 @@ class wxWidgetsConan(ConanFile):
 
         _version = Version(self.version)
         version_suffix_major_minor = f"-{_version.major}.{_version.minor}"
-        unicode = "u" if self.options.unicode else ""
 
         # wx no longer uses a debug suffix for non-windows platforms from 3.1.3 onwards
         use_debug_suffix = False
@@ -381,13 +380,13 @@ class wxWidgetsConan(ConanFile):
                 suffix = version_suffix_major_minor
 
         def base_library_pattern(library):
-            return "{prefix}base{version}{unicode}{debug}_%s{suffix}" % library
+            return "{prefix}base{version}u{debug}_%s{suffix}" % library
 
         def library_pattern(library):
-            return "{prefix}{toolkit}{version}{unicode}{debug}_%s{suffix}" % library
+            return "{prefix}{toolkit}{version}u{debug}_%s{suffix}" % library
 
         libs = []
-        libs.append("{prefix}base{version}{unicode}{debug}{suffix}")
+        libs.append("{prefix}base{version}u{debug}{suffix}")
         libs.append(library_pattern("core"))
         libs.append(library_pattern("adv"))
         if self.options.sockets:
@@ -423,7 +422,6 @@ class wxWidgetsConan(ConanFile):
             self.cpp_info.libs.append(lib.format(prefix=prefix,
                                                  toolkit=toolkit,
                                                  version=version,
-                                                 unicode=unicode,
                                                  debug=debug,
                                                  suffix=suffix))
 
