@@ -81,3 +81,6 @@ class MMeterConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["mmeter"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("pthread")
