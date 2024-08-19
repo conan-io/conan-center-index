@@ -84,3 +84,4 @@ class MMeterConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.append("m")
