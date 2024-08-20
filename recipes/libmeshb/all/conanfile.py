@@ -17,10 +17,12 @@ class LibmeshbConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_gmf_asio": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_gmf_asio": False
     }
 
     def config_options(self):
