@@ -49,27 +49,27 @@ class PackageConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if is_msvc(self) and not self.options.shared:
+        if is_msvc(self):
             raise ConanInvalidConfiguration(
-                f"{self.ref} cannot be built statically for msvc"
+                f"{self.ref} cannot be built with msvc"
             )
 
     def requirements(self):
         self.requires("libjpeg/9e")
-        self.requires("libpng/1.6.39")
-        self.requires("glib/2.76.1")
+        self.requires("libpng/[>=1.6 <2]")
+        self.requires("glib/2.76.3")
         self.requires("libtiff/4.4.0")
-        self.requires("libxml2/2.9.14")
+        self.requires("libxml2/[>=2.12.5 <3]")
         self.requires("sqlite3/3.39.4")
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("openjpeg/2.5.0")
         self.requires("cairo/1.17.2")
         self.requires("gdk-pixbuf/2.42.10")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -94,15 +94,6 @@ class PackageConan(ConanFile):
         meson.configure()
         meson.build()
 
-    def _fix_library_names(self, path):
-        # https://github.com/mesonbuild/meson/issues/1412
-        if not self.options.shared and is_msvc(self):
-            with chdir(self, path):
-                for filename_old in glob.glob("*.a"):
-                    filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info(f"rename {filename_old} into {filename_new}")
-                    rename(self, filename_old, filename_new)
-
     def package(self):
         copy(self, pattern="COPYING.LESSER", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         meson = Meson(self)
@@ -113,7 +104,6 @@ class PackageConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
-        self._fix_library_names(os.path.join(self.package_folder, "lib"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
