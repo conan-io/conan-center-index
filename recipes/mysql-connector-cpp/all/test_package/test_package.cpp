@@ -4,12 +4,22 @@
 
 
 int main() {
-    mysqlx::Session sess("mysqlx://root@127.0.0.1");
-    mysqlx::RowResult res = sess.sql("show variables like 'version'").execute();
-    std::stringstream version;
-    version << res.fetchOne().get(1).get<std::string>();
+    mysqlx::Value col1("version");
+    mysqlx::Value col2("8.0.25");
+
+    mysqlx::Row simulatedRow;
+    simulatedRow.set(0, col1);
+    simulatedRow.set(1, col2);
+
+    std::string variable_name = simulatedRow[0].get<std::string>();
+    std::string version_value = simulatedRow[1].get<std::string>();
+
     int major_version;
-    version >> major_version;
-    std::cout << "mysqlx version: " << major_version << std::endl;
+    std::stringstream version_stream(version_value);
+    version_stream >> major_version;
+
+    std::cout << "Variable name: " << variable_name << std::endl;
+    std::cout << "Major version: " << major_version << std::endl;
+
     return EXIT_SUCCESS;
 }
