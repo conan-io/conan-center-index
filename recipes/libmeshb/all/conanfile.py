@@ -1,8 +1,6 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file,  rmdir
-from conan.tools.microsoft import is_msvc
+from conan.tools.files import copy, get, replace_in_file,  rmdir
 import os
 
 required_conan_version = ">=1.53.0"
@@ -48,11 +46,10 @@ class LibmeshbConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["WITH_GMF_AIO"] = self.settings.os in ["Linux", "FreeBSD"]
+        tc.variables["WITH_GMF_AIO"] = self.options.get_safe("with_gmf_asio", False)
         tc.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory (examples)", "")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "install (FILES LICENSE.txt copyright.txt DESTINATION share/libMeshb)", "")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "install (DIRECTORY sample_meshes DESTINATION share/libMeshb)", "")
