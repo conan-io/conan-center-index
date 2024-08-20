@@ -7,7 +7,6 @@ set_target_properties(mmeter PROPERTIES
 PUBLIC_HEADER ${MMETER_SRC_DIR}/include/MMeter.h
     WINDOWS_EXPORT_ALL_SYMBOLS ON
     CXX_EXTENSIONS OFF
-    CXX_STANDARD 17
 )
 
 include(GNUInstallDirs)

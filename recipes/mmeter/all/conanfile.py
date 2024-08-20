@@ -67,6 +67,8 @@ class MMeterConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["MMETER_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        if not self.settings.compiler.cppstd:
+            tc.cache_variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
 
     def build(self):
