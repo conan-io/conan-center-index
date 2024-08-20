@@ -439,7 +439,7 @@ class LLVMCoreConan(ConanFile):
             return json.load(fp)
 
     def package(self):
-        copy(self, "LICENSE.TXT", self.source_folder, (self._package_folder_path / "licences").as_posix())
+        copy(self, "LICENSE.TXT", self.source_folder, (self._package_folder_path / "licenses").as_posix())
         cmake = CMake(self)
         cmake.install()
 
