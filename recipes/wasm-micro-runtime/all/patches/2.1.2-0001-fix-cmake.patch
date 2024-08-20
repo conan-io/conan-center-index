@@ -1,13 +1,13 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 761ac57..09378dd 100644
+index c7f7666..c2ea2f7 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -121,10 +121,10 @@ set (WAMR_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
  
  include (${WAMR_ROOT_DIR}/build-scripts/runtime_lib.cmake)
  
--set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wformat -Wformat-security -Wshadow -Wno-unused-parameter")
-+# set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wformat -Wformat-security -Wshadow -Wno-unused-parameter")
+-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wformat -Wformat-security -Wshadow -Wno-unused-parameter -fvisibility=hidden")
++# set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wformat -Wformat-security -Wshadow -Wno-unused-parameter -fvisibility=hidden")
  # set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wconversion -Wsign-conversion")
  
 -set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wformat -Wformat-security -Wno-unused")
@@ -15,28 +15,29 @@ index 761ac57..09378dd 100644
  
  if (WAMR_BUILD_TARGET MATCHES "X86_.*" OR WAMR_BUILD_TARGET STREQUAL "AMD_64")
    if (NOT (CMAKE_C_COMPILER MATCHES ".*clang.*" OR CMAKE_C_COMPILER_ID MATCHES ".*Clang"))
-@@ -147,7 +147,11 @@ if (WAMR_BUILD_STATIC)
+@@ -150,7 +150,13 @@ if (WAMR_BUILD_STATIC)
      add_library(iwasm_static STATIC ${WAMR_RUNTIME_LIB_SOURCE})
      set_target_properties (iwasm_static PROPERTIES OUTPUT_NAME vmlib)
      target_include_directories(iwasm_static INTERFACE ${WAMR_ROOT_DIR}/core/iwasm/include)
--    target_link_libraries (iwasm_static INTERFACE ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS} -lm -ldl -lpthread)
-+    # target_link_libraries (iwasm_static INTERFACE ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS} -lm -ldl -lpthread)
-+    target_link_libraries (iwasm_static INTERFACE ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS})
+-    target_link_libraries (iwasm_static INTERFACE ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS} -lm -ldl ${CMAKE_THREAD_LIBS_INIT})
++    target_link_libraries (iwasm_static INTERFACE ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS} ${CMAKE_THREAD_LIBS_INIT})
 +    if(NOT MSVC)
-+      target_link_libraries (iwasm_static INTERFACE -lm -ldl -lpthread)
++      target_link_libraries (iwasm_static INTERFACE -lm -ldl)
++    endif()
++    if(WIN32)
++      target_link_libraries (iwasm_static PUBLIC ntdll)
 +    endif()
      if (WAMR_BUILD_WASM_CACHE EQUAL 1)
        target_link_libraries(iwasm_static INTERFACE boringssl_crypto)
      endif ()
-@@ -160,7 +164,14 @@ if (WAMR_BUILD_SHARED)
+@@ -163,7 +169,13 @@ if (WAMR_BUILD_SHARED)
      add_library (iwasm_shared SHARED ${WAMR_RUNTIME_LIB_SOURCE})
      set_target_properties (iwasm_shared PROPERTIES OUTPUT_NAME iwasm)
      target_include_directories(iwasm_shared INTERFACE ${WAMR_ROOT_DIR}/core/iwasm/include)
--    target_link_libraries (iwasm_shared INTERFACE ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS} -lm -ldl -lpthread)
-+    # target_link_libraries (iwasm_shared INTERFACE ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS} -lm -ldl -lpthread)
-+    target_link_libraries (iwasm_shared INTERFACE ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS})
+-    target_link_libraries (iwasm_shared INTERFACE ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS} -lm -ldl ${CMAKE_THREAD_LIBS_INIT})
++    target_link_libraries (iwasm_shared INTERFACE ${LLVM_AVAILABLE_LIBS} ${UV_A_LIBS} ${CMAKE_THREAD_LIBS_INIT})
 +    if(NOT MSVC)
-+      target_link_libraries (iwasm_shared INTERFACE -lm -ldl -lpthread)
++      target_link_libraries (iwasm_shared INTERFACE -lm -ldl)
 +    endif()
 +    if(WIN32)
 +      target_link_libraries (iwasm_shared PUBLIC ntdll)
@@ -44,4 +45,3 @@ index 761ac57..09378dd 100644
      if (WAMR_BUILD_WASM_CACHE EQUAL 1)
        target_link_libraries(iwasm_shared INTERFACE boringssl_crypto)
      endif ()
-
