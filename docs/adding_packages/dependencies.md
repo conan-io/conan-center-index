@@ -196,7 +196,7 @@ version range only when a requirement for a newer version is needed.
 * qt5: `[~5.15]`, if your library depends on qt5, only the 5.15 minor version is allowed
 * qt6: `[>=6.x <7]`, where 6.x is the lower bound of your needed qt6 version
 * c-ares: `[>=1.27 <2]`
-* zstd: `[^1.5]` it's equivalent to `[>=1.5 <1.6]`
+* zstd: `[~1.5]` it's equivalent to `[>=1.5 <1.6]`
 * ninja: `[>=1.10.2 <2]`
 * meson: `[>=1.2.3 <2]`
 * pkgconf: `[>=2.2 <3]`
