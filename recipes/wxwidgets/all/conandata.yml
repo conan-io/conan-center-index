@@ -1,0 +1,4 @@
+sources:
+  "3.2.5":
+    url: "https://github.com/wxWidgets/wxWidgets/archive/v3.2.5.tar.gz"
+    sha256: "c3a54d1c5dc3feefc2893c28923fd722c990c572253d5ad353eec99386ba11eb"
