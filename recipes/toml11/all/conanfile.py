@@ -42,8 +42,10 @@ class Toml11Conan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
         self.cpp_info.set_property("cmake_file_name", "toml11")
         self.cpp_info.set_property("cmake_target_name", "toml11::toml11")
-        self.cpp_info.bindirs = []
+
         self.cpp_info.includedirs.append(os.path.join("include", "toml11"))
-        self.cpp_info.libdirs = []
