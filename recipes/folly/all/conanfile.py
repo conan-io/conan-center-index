@@ -211,6 +211,8 @@ class FollyConan(ConanFile):
         # Disable custom find modules to use Conan CMakeDeps instead
         rm(self, "Find*.cmake", os.path.join(self.source_folder, "CMake"))
         rm(self, "Find*.cmake", os.path.join(self.source_folder, "build", "fbcode_builder", "CMake"))
+        # Skip generating .pc file to avoid Windows errors when trying to compile with pkg-config
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "gen_pkgconfig_vars(FOLLY_PKGCONFIG folly_deps)", "")
 
     def build(self):
         self._patch_sources()
