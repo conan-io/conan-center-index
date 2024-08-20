@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
@@ -184,6 +184,7 @@ class LibfabricConan(ConanFile):
         deps.generate()
 
         VirtualBuildEnv(self).generate()
+        VirtualRunEnv(self).generate(scope="build")
 
     def build(self):
         autotools = Autotools(self)
