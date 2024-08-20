@@ -151,6 +151,8 @@ class FollyConan(ConanFile):
         env.generate()
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_PROJECT_folly_INCLUDE"] = "conan_deps.cmake"
+        # Folly fails to check Gflags: https://github.com/conan-io/conan/issues/12012
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
 
         if is_apple_os(self) and cross_building(self):
             # INFO: Folly fails to configure Mac M1 -> Mac Intel:
