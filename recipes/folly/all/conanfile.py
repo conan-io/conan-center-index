@@ -132,15 +132,9 @@ class FollyConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=False)
 
     def _cppstd_flag_value(self, cppstd):
-        cppstd = str(cppstd)
-        if cppstd.startswith("gnu"):
-            prefix = "gnu"
-            year = cppstd[3:]
-        else:
-            prefix = "c"
-            year = cppstd
         if is_msvc(self):
             prefix = "c"
+            year = str(cppstd)
             if year > "17":
                 year = "latest"
         return f"{prefix}++{year}"
