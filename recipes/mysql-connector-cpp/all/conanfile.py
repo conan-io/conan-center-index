@@ -51,7 +51,7 @@ class MysqlConnectorCPPRecipe(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("lz4/1.9.4")
         self.requires("zstd/1.5.5")
-        self.requires("openssl/[>=1.1.1 <4]")
+        self.requires("openssl/[>=1.1.1 <4]", transitive_libs=False)
         self.requires("libmysqlclient/8.1.0")
 
     def source(self):
