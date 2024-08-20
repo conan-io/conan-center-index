@@ -86,7 +86,6 @@ class FollyConan(ConanFile):
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/1.8.0")
         if self.settings.os == "Linux":
-            self.requires("libaio/0.3.113")
             self.requires("liburing/2.6")
         self.requires("fmt/11.0.2", transitive_headers=True, transitive_libs=True)
 
@@ -195,7 +194,6 @@ class FollyConan(ConanFile):
         deps.set_property("libdwarf", "cmake_file_name", "LibDwarf")
         deps.set_property("libevent", "cmake_file_name", "LibEvent")
         deps.set_property("libiberty", "cmake_file_name", "Libiberty")
-        deps.set_property("libaio", "cmake_file_name", "LibAIO")
         deps.set_property("libsodium", "cmake_file_name", "Libsodium")
         deps.set_property("libunwind", "cmake_file_name", "LibUnwind")
         deps.set_property("liburing", "cmake_file_name", "LibUring")
@@ -260,7 +258,7 @@ class FollyConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libfolly"].requires.extend(["libiberty::libiberty", "libunwind::libunwind"])
         if self.settings.os == "Linux":
-            self.cpp_info.components["libfolly"].requires.extend(["libaio::libaio", "liburing::liburing"])
+            self.cpp_info.components["libfolly"].requires.append("liburing::liburing")
             self.cpp_info.components["libfolly"].system_libs.extend(["pthread", "dl", "rt"])
             self.cpp_info.components["libfolly"].defines.extend(["FOLLY_HAVE_ELF", "FOLLY_HAVE_DWARF"])
         elif self.settings.os == "Windows":
@@ -273,12 +271,6 @@ class FollyConan(ConanFile):
 
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "11.0":
             self.cpp_info.components["libfolly"].system_libs.append("c++abi")
-
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9":
-            self.cpp_info.components["libfolly"].system_libs.append("stdc++fs")
-
-        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "9":
-            self.cpp_info.components["libfolly"].system_libs.append("stdc++fs" if self.settings.compiler.libcxx in ["libstdc++", "libstdc++11"] else "c++fs")
 
         self.cpp_info.components["follybenchmark"].set_property("cmake_target_name", "Folly::follybenchmark")
         self.cpp_info.components["follybenchmark"].set_property("pkg_config_name", "libfollybenchmark")
