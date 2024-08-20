@@ -85,6 +85,10 @@ class MysqlCppConnRecipe(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
+        # Random
+        tc.cache_variables["BUILD_STATIC"] = not self.options.shared
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+
         # LZ4 patches
         tc.cache_variables["WITH_LZ4"] = self._package_folder_dep("lz4")
         tc.cache_variables["LZ4_DIR"] = self._package_folder_dep("lz4")
@@ -164,7 +168,7 @@ class MysqlCppConnRecipe(ConanFile):
         if is_msvc(self) and not self.options.shared and is_msvc_static_runtime(self):
             lib += "-mt"
         self.cpp_info.libs = [lib]
-        
+
         if not self.options.shared:
             self.cpp_info.defines = ["MYSQL_STATIC"]
             self.cpp_info.defines = ["STATIC_CONCPP"]
