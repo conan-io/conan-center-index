@@ -4,11 +4,8 @@ Date: Tue, 12 Apr 2022 14:42:26 -0400
 Subject: [PATCH] Fixes cpp 20 builds for windows. (#364)
 
 ---
- include/aws/crt/StringView.h | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
 diff --git a/include/aws/crt/StringView.h b/include/aws/crt/StringView.h
-index b90ad71e8..b8c6c6688 100644
+index a0fec83..dc2f05b 100644
 --- a/include/aws/crt/StringView.h
 +++ b/include/aws/crt/StringView.h
 @@ -15,7 +15,7 @@
@@ -20,7 +17,7 @@ index b90ad71e8..b8c6c6688 100644
  #    include <string_view>
  #endif
  
-@@ -58,7 +58,7 @@ namespace Aws
+@@ -53,7 +53,7 @@ namespace Aws
  
              basic_string_view &operator=(const basic_string_view &) noexcept = default;
  
@@ -29,4 +26,3 @@ index b90ad71e8..b8c6c6688 100644
              constexpr basic_string_view(const std::basic_string_view<CharT, Traits> &other) noexcept
                  : m_size(other.size()), m_data(other.data())
              {
-
