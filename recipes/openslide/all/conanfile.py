@@ -113,6 +113,9 @@ class OpenSlideConan(ConanFile):
         self.cpp_info.libs = ["openslide"]
         self.cpp_info.includedirs.append(os.path.join("include", "openslide"))
 
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks = ["CoreText"]
+
         self.cpp_info.requires = [
             "cairo::cairo_",
             "gdk-pixbuf::gdk-pixbuf",
