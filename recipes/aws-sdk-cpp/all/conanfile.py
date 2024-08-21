@@ -336,21 +336,21 @@ class AwsSdkCppConan(ConanFile):
 
     def requirements(self):
         if self.version == "1.11.352":
-            self.requires("aws-crt-cpp/0.26.9", transitive_headers=True)  # ok
-            # missing c-auth
-            self.requires("aws-c-cal/0.6.14")  # ok
-            self.requires("aws-c-common/0.9.15")  # ok
-            # missing c-compression
-            self.requires("aws-c-event-stream/0.4.2")  # ok
-            self.requires("aws-c-http/0.8.1")  # ok
-            self.requires("aws-c-io/0.14.7")  # ok
-            # Missing c-mqtt
+            self.requires("aws-crt-cpp/0.26.9", transitive_headers=True)
+            self.requires("aws-c-auth/0.7.16")
+            self.requires("aws-c-cal/0.6.14")
+            self.requires("aws-c-common/0.9.15")
+            self.requires("aws-c-compression/0.2.18")
+            self.requires("aws-c-event-stream/0.4.2")
+            self.requires("aws-c-http/0.8.1")
+            self.requires("aws-c-io/0.14.7")
+            self.requires("aws-c-mqtt/0.10.3")
             if self.options.get_safe("s3-crt"):
-                self.requires("aws-c-s3/0.5.5")   # ok
-            # missing c-sdkutils
-            self.requires("aws-checksums/0.1.18")  # ok
+                self.requires("aws-c-s3/0.5.5")
+            self.requires("aws-c-sdkutils/0.1.15")
+            self.requires("aws-checksums/0.1.18")
             # missing aws-lc
-            # missing s2n
+            self.requires("s2n/1.4.16")  # Upstream pins to .13
         if self.version == "1.9.234":
             self.requires("aws-c-common/0.6.11")
             self.requires("aws-c-event-stream/0.2.7")
