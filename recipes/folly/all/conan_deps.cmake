@@ -2,9 +2,7 @@ cmake_minimum_required(VERSION 3.17)
 # Set the dependency flags expected by https://github.com/facebook/folly/blob/v2023.12.18.00/CMake/folly-deps.cmake
 
 macro(custom_find_package package_name variable_prefix)
-    find_package(${package_name} REQUIRED CONFIG ${ARGN}
-        # Allow only Conan packages
-    )
+    find_package(${package_name} REQUIRED CONFIG ${ARGN})
     list(APPEND FROM FOUND VERSION VERSION_STRING INCLUDE_DIRS INCLUDE_DIR INCLUDE_DIR LIBRARIES LIBRARIES LIBRARIES DEFINITIONS)
     list(APPEND TO   FOUND VERSION VERSION_STRING INCLUDE_DIRS INCLUDE_DIR INCLUDE     LIB       LIBRARY   LIBRARIES DEFINITIONS)
 
