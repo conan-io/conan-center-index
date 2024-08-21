@@ -358,9 +358,13 @@ class AwsSdkCppConan(ConanFile):
         if self.settings.os != "Windows":
             self.requires("openssl/[>=1.1 <4]")
             self.requires("libcurl/[>=7.78.0 <9]")
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             if self.options.get_safe("text-to-speech"):
                 self.requires("pulseaudio/14.2")
+
+    def validate_build(self):
+        if self.settings_build.os == "Windows" and self.settings.os == "Android":
+            raise ConanInvalidConfiguration("Cross-building from Windows to Android is not supported")
 
     def validate(self):
         if (self.options.shared
@@ -372,12 +376,6 @@ class AwsSdkCppConan(ConanFile):
             )
         if is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Static runtime is not working for more recent releases")
-        else:
-            if self.settings.os == "Macos" and self.settings.arch == "armv8":
-                raise ConanInvalidConfiguration(
-                    "This version doesn't support arm8. "
-                    "See https://github.com/aws/aws-sdk-cpp/issues/1542"
-                )
 
     def package_id(self):
         for hl_comp in self._internal_requirements.keys():
@@ -444,15 +442,19 @@ class AwsSdkCppConan(ConanFile):
 
     def _create_project_cmake_module(self):
         # package files needed to build other components (e.g. aws-cdi-sdk) with this SDK
-        for file in [
+        dependant_files = [
             "cmake/compiler_settings.cmake",
             "cmake/initialize_project_version.cmake",
             "cmake/utilities.cmake",
             "cmake/sdk_plugin_conf.cmake",
             "toolchains/cmakeProjectConfig.cmake",
-            "toolchains/pkg-config.pc.in",
-            "aws-cpp-sdk-core/include/aws/core/VersionConfig.h"
-        ]:
+            "toolchains/pkg-config.pc.in"
+        ]
+        if Version(self.version) >= "1.11.352":
+            dependant_files.append("src/aws-cpp-sdk-core/include/aws/core/VersionConfig.h")
+        else:
+            dependant_files.append("aws-cpp-sdk-core/include/aws/core/VersionConfig.h")
+        for file in dependant_files:
             copy(self, file, src=self.source_folder, dst=os.path.join(self.package_folder, self._res_folder))
             replace_in_file(
                 self, os.path.join(self.package_folder, self._res_folder, file),
