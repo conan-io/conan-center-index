@@ -43,6 +43,7 @@ required_for_references:
 - args-parser
 - argtable2
 - argtable3
+- argz
 - armadillo
 - arrow
 - arsenalgear
@@ -58,6 +59,7 @@ required_for_references:
 - asyncly
 - asyncplusplus
 - asyncpp
+- atomic_queue
 - audiofile
 - autoconf
 - autoconf-archive
@@ -81,6 +83,7 @@ required_for_references:
 - aws-lambda-cpp
 - aws-libfabric
 - aws-sdk-cpp
+- azure-sdk-for-cpp
 - b2
 - b64
 - backport-cpp
@@ -451,6 +454,7 @@ required_for_references:
 - fusepp
 - fxdiv
 - g3log
+- gaia-ecs
 - gainput
 - gamenetworkingsockets
 - gamma
@@ -651,6 +655,7 @@ required_for_references:
 - lest
 - leveldb
 - lexbor
+- libaec
 - libaesgm
 - libaio
 - libalsa
@@ -739,6 +744,7 @@ required_for_references:
 - libipt
 - libjpeg
 - libjpeg-turbo
+- libjxl
 - libkml
 - libliftoff
 - liblsl
@@ -780,6 +786,7 @@ required_for_references:
 - libpcap
 - libpciaccess
 - libpfm4
+- libphonenumber
 - libpng
 - libpq
 - libpqxx
@@ -809,6 +816,7 @@ required_for_references:
 - libslz
 - libsmacker
 - libsndfile
+- libsndio
 - libsodium
 - libsolace
 - libspatialindex
@@ -876,6 +884,7 @@ required_for_references:
 - lksctp-tools
 - llama-cpp
 - llhttp
+- llnl-units
 - llvm-openmp
 - lmdb
 - lodepng
@@ -948,6 +957,7 @@ required_for_references:
 - mimalloc
 - mingw-builds
 - mingw-w64
+- minhook
 - mini
 - miniaudio
 - minicoro
@@ -1184,6 +1194,7 @@ required_for_references:
 - poppler-data
 - popt
 - portable-file-dialogs
+- poselib
 - poshlib
 - pprint
 - pranav-csv2
@@ -1339,6 +1350,7 @@ required_for_references:
 - simfil
 - simple-websocket-server
 - simple-yaml
+- simple_enum
 - sioclient
 - sjson-cpp
 - skyr-url
@@ -1404,6 +1416,7 @@ required_for_references:
 - svector
 - svgpp
 - svgwrite
+- swig
 - symengine
 - systemc
 - systemc-cci
