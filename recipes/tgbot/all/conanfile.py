@@ -141,3 +141,6 @@ class TgbotConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["TgBot"]
         self.cpp_info.defines = ["HAVE_CURL=1"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
