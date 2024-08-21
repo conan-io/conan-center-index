@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
@@ -80,6 +81,9 @@ class ITKConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
+        if Version(self.version) < "5.2" and is_apple_os(self) and self.settings.arch == "armv8":
+            # https://discourse.itk.org/t/error-building-v5-1-1-for-mac-big-sur-11-2-3/3959
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on on Apple armv8 architecture.")
         if self.options.shared and not self.dependencies["hdf5"].options.shared:
             raise ConanInvalidConfiguration("When building a shared itk, hdf5 needs to be shared too (or not linked to by the consumer).\n"
                                             "This is because H5::DataSpace::ALL might get initialized twice, which will cause a H5::DataSpaceIException to be thrown.")
