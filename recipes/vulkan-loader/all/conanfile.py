@@ -79,7 +79,7 @@ class VulkanLoaderConan(ConanFile):
     def build_requirements(self):
         if self._is_pkgconf_needed:
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.0.3")
+                self.tool_requires("pkgconf/2.1.0")
         if self._is_mingw:
             self.tool_requires("jwasm/2.13")
         if Version(self.version) >= "1.3.234":
@@ -132,12 +132,13 @@ class VulkanLoaderConan(ConanFile):
                                   "if(${configuration} MATCHES \"/MD\")",
                                   "if(FALSE)")
         else:
-            replace_in_file(
-                self,
-                cmakelists,
-                "set(TESTS_STANDARD_CXX_PROPERTIES ${LOADER_STANDARD_CXX_PROPERTIES} MSVC_RUNTIME_LIBRARY \"MultiThreaded$<$<CONFIG:Debug>:Debug>DLL\")",
-                "set(TESTS_STANDARD_CXX_PROPERTIES ${LOADER_STANDARD_CXX_PROPERTIES})",
-            )
+            if Version(self.version) < "1.3.275":
+                replace_in_file(
+                    self,
+                    cmakelists,
+                    "set(TESTS_STANDARD_CXX_PROPERTIES ${LOADER_STANDARD_CXX_PROPERTIES} MSVC_RUNTIME_LIBRARY \"MultiThreaded$<$<CONFIG:Debug>:Debug>DLL\")",
+                    "set(TESTS_STANDARD_CXX_PROPERTIES ${LOADER_STANDARD_CXX_PROPERTIES})",
+                )
             replace_in_file(
                 self,
                 cmakelists,

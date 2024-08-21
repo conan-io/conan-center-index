@@ -1,0 +1,19 @@
+sources:
+  "0.3.1":
+    url: "https://github.com/Klebert-Engineering/simfil/archive/refs/tags/v0.3.1.tar.gz"
+    sha256: "caddee2e338041ae5ec56c6a92f14e79ee3d5a0f7eaf327d6b8418fe06dd484e"
+  "0.3.0":
+    url: "https://github.com/Klebert-Engineering/simfil/archive/refs/tags/v0.3.0.tar.gz"
+    sha256: "dea7b063f3f062772fcb49b368954814fc04d66c55db327a53ea008d698cd171"
+  "0.2.1":
+    url: "https://github.com/Klebert-Engineering/simfil/archive/refs/tags/v0.2.1.tar.gz"
+    sha256: "d3114900f121013cbffe42b0a70c66a47846c9326f6327d2ce0dd2e841919fd9"
+  "0.1.3":
+    url: "https://github.com/Klebert-Engineering/simfil/archive/refs/tags/v0.1.3.tar.gz"
+    sha256: "e42004b46118950e95b22430e4580fb89d1e6d2a1399e209d1aa4310944962e5"
+  "0.1.2":
+    url: "https://github.com/Klebert-Engineering/simfil/archive/refs/tags/v0.1.2.tar.gz"
+    sha256: "a903658ff37fa304dc6d8cb65e7923b6857b825ce2ac205522b84e4785d80e8d"
+  "0.1.1":
+    url: "https://github.com/Klebert-Engineering/simfil/archive/refs/tags/v0.1.1.tar.gz"
+    sha256: "e82a9d92ec65b7e27776d5507c78571cecc234f2b6fcdacc7ffcece6198f7f9a"

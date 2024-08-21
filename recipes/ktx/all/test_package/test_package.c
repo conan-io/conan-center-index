@@ -4,16 +4,12 @@
 
 int main(int argc, char **argv)
 {
-    if (argc < 2) {
-        fprintf(stderr, "Need at least one argument\n");
-        return 1;
-    }
-
     ktxTexture* texture;
     KTX_error_code result;
-    result = ktxTexture_CreateFromNamedFile(argv[1],
+    result = ktxTexture_CreateFromNamedFile("fake-file.ktx",
                                             KTX_TEXTURE_CREATE_LOAD_IMAGE_DATA_BIT,
                                             &texture);
 
+    printf("Test: %s\n", ktxErrorString(result));
     return 0;
 }

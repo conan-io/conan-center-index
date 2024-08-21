@@ -1,24 +1,38 @@
 sources:
   "5.4.5":
-    url: "https://tukaani.org/xz/xz-5.4.5.tar.xz"
+    url:
+      - "https://tukaani.org/xz/xz-5.4.5.tar.xz"
+      - "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/da9dec6c12cf2ecf269c31ab65b5de18e8e52b96f35d5bcd08c12b43e6878803"
     sha256: "da9dec6c12cf2ecf269c31ab65b5de18e8e52b96f35d5bcd08c12b43e6878803"
   "5.4.4":
-    url: "https://tukaani.org/xz/xz-5.4.4.tar.gz"
+    url:
+      - "https://tukaani.org/xz/xz-5.4.4.tar.gz"
+      - "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/aae39544e254cfd27e942d35a048d592959bd7a79f9a624afb0498bb5613bdf8"
     sha256: "aae39544e254cfd27e942d35a048d592959bd7a79f9a624afb0498bb5613bdf8"
   "5.4.2":
-    url: "https://tukaani.org/xz/xz-5.4.2.tar.gz"
+    url:
+      - "https://tukaani.org/xz/xz-5.4.2.tar.gz"
+      - "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/87947679abcf77cc509d8d1b474218fd16b72281e2797360e909deaee1ac9d05"
     sha256: "87947679abcf77cc509d8d1b474218fd16b72281e2797360e909deaee1ac9d05"
   "5.4.0":
-    url: "https://tukaani.org/xz/xz-5.4.0.tar.gz"
+    url:
+      - "https://tukaani.org/xz/xz-5.4.0.tar.gz"
+      - "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/7471ef5991f690268a8f2be019acec2e0564b7b233ca40035f339fe9a07f830b"
     sha256: "7471ef5991f690268a8f2be019acec2e0564b7b233ca40035f339fe9a07f830b"
   "5.2.10":
-    url: "https://tukaani.org/xz/xz-5.2.10.tar.gz"
+    url:
+      - "https://tukaani.org/xz/xz-5.2.10.tar.gz"
+      - "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/eb7a3b2623c9d0135da70ca12808a214be9c019132baaa61c9e1d198d1d9ded3"
     sha256: "eb7a3b2623c9d0135da70ca12808a214be9c019132baaa61c9e1d198d1d9ded3"
   "5.2.5":
-    url: "https://tukaani.org/xz/xz-5.2.5.tar.gz"
+    url:
+      - "https://tukaani.org/xz/xz-5.2.5.tar.gz"
+      - "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/f6f4910fd033078738bd82bfba4f49219d03b17eb0794eb91efbae419f4aba10"
     sha256: "f6f4910fd033078738bd82bfba4f49219d03b17eb0794eb91efbae419f4aba10"
   "5.2.4":
-    url: "https://tukaani.org/xz/xz-5.2.4.tar.gz"
+    url:
+      - "https://tukaani.org/xz/xz-5.2.4.tar.gz"
+      - "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/b512f3b726d3b37b6dc4c8570e137b9311e7552e8ccbab4d39d47ce5f4177145"
     sha256: "b512f3b726d3b37b6dc4c8570e137b9311e7552e8ccbab4d39d47ce5f4177145"
 patches:
   "5.2.4":

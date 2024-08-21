@@ -40,11 +40,12 @@ class MoldConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("openssl/[>=1.1 <4]")
         self.requires("xxhash/0.8.2")
-        self.requires("onetbb/2021.10.0")
         if self.options.with_mimalloc:
             self.requires("mimalloc/2.1.2")
+        if Version(self.version) < "2.2.0":
+            # Newer versions use vendored-in BLAKE3
+            self.requires("openssl/[>=1.1 <4]")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -64,6 +65,8 @@ class MoldConan(ConanFile):
             raise ConanInvalidConfiguration("Clang version 12 or higher required")
         if self.settings.compiler == "apple-clang" and "armv8" == self.settings.arch :
             raise ConanInvalidConfiguration(f'{self.name} is still not supported by Mac M1.')
+        if Version(self.version) == "2.33.0" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14":
+            raise ConanInvalidConfiguration(f'{self.ref} doesn\'t support Apple-Clang < 14.')
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18.0 <4]")
@@ -75,7 +78,7 @@ class MoldConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["MOLD_USE_MIMALLOC"] = self.options.with_mimalloc
         tc.variables["MOLD_USE_SYSTEM_MIMALLOC"] = True
-        tc.variables["MOLD_USE_SYSTEM_TBB"] = True
+        tc.variables["MOLD_USE_SYSTEM_TBB"] = False # see https://github.com/conan-io/conan-center-index/pull/23575#issuecomment-2059154281
         tc.variables["CMAKE_INSTALL_LIBEXECDIR"] = "libexec"
         tc.generate()
 

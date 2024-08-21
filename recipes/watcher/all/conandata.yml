@@ -1,4 +1,13 @@
 sources:
+  "0.11.0":
+    url: "https://github.com/e-dant/watcher/archive/release/0.11.0.tar.gz"
+    sha256: "dd92496d77b6bc27e27ed28253faae4d81bc58b19407d154bb49504b2af73664"
+  "0.10.1":
+    url: "https://github.com/e-dant/watcher/archive/release/0.10.1.tar.gz"
+    sha256: "cc14b0adfc23ae90390cf8b4f20291abbc5bf0e358b5d12fa73f7e21d021ccd0"
+  "0.10.0":
+    url: "https://github.com/e-dant/watcher/archive/release/0.10.0.tar.gz"
+    sha256: "c15f088ddc41b58100921ea0b630bcbde83c9960aefecf82221da997f4d4b4ec"
   "0.9.5":
     url: "https://github.com/e-dant/watcher/archive/release/0.9.5.tar.gz"
     sha256: "41b74d138eec106c35a99e7544def599453a8bf4cf4887ad627e1c9e3355287c"
@@ -11,26 +20,3 @@ sources:
   "0.8.7":
     url: "https://github.com/e-dant/watcher/archive/release/0.8.7.tar.gz"
     sha256: "e83eaf097f8ebe9b87bee2962e6e18f6f2597ae4e76d8d0258adc2c62fa545d2"
-  "0.8.0":
-    url: "https://github.com/e-dant/watcher/archive/release/0.8.0.tar.gz"
-    sha256: "74530f5f6c083ec0348ec41938ae43b02bed1d125125623394f31038fec6f9d1"
-  "0.6.0":
-    url: "https://github.com/e-dant/watcher/archive/release/0.6.0.tar.gz"
-    sha256: "156669c92f9119d658954e124fcd9fc640999fb8a45e2bd915ea8b05e15b925a"
-  "0.5.5":
-    url: "https://github.com/e-dant/watcher/archive/release/0.5.5.tar.gz"
-    sha256: "55da2b7a22cbdba836a405d5cab31a461e84e4e686a117f06399a806d33b2d09"
-  "0.5.4":
-    url: "https://github.com/e-dant/watcher/archive/release/0.5.4.tar.gz"
-    sha256: "0dac1d89886252bb0b999c2dad85aff283022a2b4393922a993459b180b8c663"
-  "0.5.2":
-    url: "https://github.com/e-dant/watcher/archive/release/0.5.2.tar.gz"
-    sha256: "e18e663f9a72a59fca3e7a9e125ca77823b03a3388aa569398965777c5671173"
-  "0.4.3":
-    url: "https://github.com/e-dant/watcher/archive/release/0.4.3.tar.gz"
-    sha256: "8603b45edfa5023752d9e2fdd731efe5a556a542aaf03f6be0e69c68f552b25a"
-patches:
-  "0.5.5":
-    - patch_file: "patches/0.5.5-fix-limits_max.patch"
-      patch_description: "fix max macro error in windows"
-      patch_type: "portability"

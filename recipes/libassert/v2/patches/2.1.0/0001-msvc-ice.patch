@@ -1,0 +1,32 @@
+diff --git a/src/utils.hpp b/src/utils.hpp
+index 80b7ca4..18b90e5 100644
+--- a/src/utils.hpp
++++ b/src/utils.hpp
+@@ -97,7 +97,8 @@ namespace libassert::detail {
+         }
+     };
+
+-    // note: the use of U here is mainly to workaround a gcc 8 issue https://godbolt.org/z/bdsWhdGj3
++    #if LIBASSERT_IS_GCC && LIBASSERT_GCC_VERSION < 900
++    // note: the use of U here is to workaround a gcc 8 issue https://godbolt.org/z/bdsWhdGj3
+     template<typename T, typename U, std::size_t N, std::size_t... I>
+     constexpr std::array<std::remove_cv_t<T>, N> to_array_impl(U(&&a)[N], std::index_sequence<I...>) {
+         return {{std::move(a[I])...}};
+@@ -106,6 +107,17 @@ namespace libassert::detail {
+     constexpr std::array<std::remove_cv_t<T>, N> to_array(U(&&a)[N]) {
+         return to_array_impl<T>(std::move(a), std::make_index_sequence<N>{});
+     }
++    #else
++    // unfortunately the above workaround ICEs MSVC https://godbolt.org/z/bjMEcY9fM
++    template<typename T, std::size_t N, std::size_t... I>
++    constexpr std::array<std::remove_cv_t<T>, N> to_array_impl(T(&&a)[N], std::index_sequence<I...>) {
++        return {{std::move(a[I])...}};
++    }
++    template<typename T, std::size_t N>
++    constexpr std::array<std::remove_cv_t<T>, N> to_array(T(&&a)[N]) {
++        return to_array_impl<T>(std::move(a), std::make_index_sequence<N>{});
++    }
++    #endif
+
+     template<typename A, typename B>
+     constexpr void constexpr_swap(A& a, B& b) {
