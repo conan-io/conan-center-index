@@ -235,7 +235,7 @@ class ITKConan(ConanFile):
         # Ensure that new versions don't introduce any vendored libs by accident
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(ExternalProject)", "")
         # Truncate some third-party modules that are provided by conan_cmake_project_include.cmake
-        for pkg in ["DCMTK", "DoubleConversion", "GDCM"]:
+        for pkg in ["DCMTK", "DoubleConversion", "GDCM", "Expat"]:
             save(self, os.path.join(self.source_folder, "Modules", "ThirdParty", pkg, "CMakeLists.txt"),
                  f"project(ITK{pkg})\n"
                  f"set(ITK{pkg}_THIRD_PARTY 1)\n"

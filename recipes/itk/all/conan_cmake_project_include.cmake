@@ -21,7 +21,7 @@ set(ITKDoubleConversion_LIBRARIES double-conversion::double-conversion)
 
 # https://github.com/InsightSoftwareConsortium/ITK/blob/v5.4rc01/Modules/ThirdParty/Expat/CMakeLists.txt
 custom_find_package(EXPAT REQUIRED CONFIG)
-set(ITKExpat_LIBRARIES EXPAT::EXPAT)
+set(ITKExpat_LIBRARIES expat::expat)
 
 # https://github.com/InsightSoftwareConsortium/ITK/blob/v5.4rc01/CMake/itkExternal_FFTW.cmake#L180
 custom_find_package(FFTW REQUIRED CONFIG)
