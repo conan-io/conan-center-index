@@ -343,6 +343,8 @@ class AwsSdkCppConan(ConanFile):
             self.requires("aws-c-http/0.8.1")
             self.requires("aws-c-io/0.14.7")
             self.requires("aws-crt-cpp/0.26.9", transitive_headers=True)
+            if self.options.get_safe("s3-crt"):
+                self.requires("aws-c-s3/0.5.5")
         if self.version == "1.9.234":
             self.requires("aws-c-common/0.6.11")
             self.requires("aws-c-event-stream/0.2.7")
@@ -351,6 +353,8 @@ class AwsSdkCppConan(ConanFile):
             self.requires("aws-c-http/0.6.7")
             self.requires("aws-c-io/0.10.9")
             self.requires("aws-crt-cpp/0.17.1a", transitive_headers=True)
+            if self.options.get_safe("s3-crt"):
+                self.requires("aws-c-s3/0.1.26")
         if self.settings.os != "Windows":
             self.requires("openssl/[>=1.1 <4]")
             self.requires("libcurl/[>=7.78.0 <9]")
@@ -540,6 +544,9 @@ class AwsSdkCppConan(ConanFile):
             self.cpp_info.components["core"].system_libs.append("atomic")
             if self.options.get_safe("text-to-speech"):
                 self.cpp_info.components["text-to-speech"].requires.append("pulseaudio::pulseaudio")
+
+        if self.options.get_safe("s3-crt"):
+            self.cpp_info.components["s3-crt"].requires.append("aws-c-s3::aws-c-s3")
 
         if self.settings.os == "Macos":
             if self.options.get_safe("text-to-speech"):
