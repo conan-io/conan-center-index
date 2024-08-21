@@ -76,7 +76,7 @@ class FollyConan(ConanFile):
         self.requires("lz4/1.10.0", transitive_libs=True)
         self.requires("snappy/1.2.1")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("zstd/[~1.5]", transitive_libs=True)
+        self.requires("zstd/1.5.5", transitive_libs=True)
         if not is_msvc(self):
             self.requires("libdwarf/0.9.1")
         self.requires("libsodium/1.0.19")
@@ -85,7 +85,7 @@ class FollyConan(ConanFile):
             self.requires("libiberty/9.1.0")
             self.requires("libunwind/1.8.0")
         if self.settings.os == "Linux":
-            self.requires("liburing/2.7")
+            self.requires("liburing/2.6")
         # INFO: Folly does not support fmt 11 on MSVC: https://github.com/facebook/folly/issues/2250
         self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
 
