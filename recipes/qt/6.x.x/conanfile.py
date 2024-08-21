@@ -851,8 +851,6 @@ class QtConan(ConanFile):
         if self.settings.os == "Macos":
             save(self, ".qmake.stash", "")
             save(self, ".qmake.super", "")
-            copy(self, "Info.plist.app.in", src=os.path.join(self.package_folder, "lib", "cmake", "Qt6", "macos"),
-                                            dst=os.path.join(self.package_folder, "res", "macos"))
         cmake = CMake(self)
         cmake.install()
         copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"),
@@ -888,7 +886,7 @@ class QtConan(ConanFile):
         filecontents += f"set(QT_VERSION_MINOR {ver.minor})\n"
         filecontents += f"set(QT_VERSION_PATCH {ver.patch})\n"
         if self.settings.os == "Macos":
-            filecontents += f'set(__qt_internal_cmake_apple_support_files_path "${{CMAKE_CURRENT_LIST_DIR}}/../../../res/macos")\n'
+            filecontents += 'set(__qt_internal_cmake_apple_support_files_path "${CMAKE_CURRENT_LIST_DIR}/../../../lib/cmake/Qt6/macos")\n'
         targets = ["moc", "rcc", "tracegen", "cmake_automoc_parser", "qlalr", "qmake"]
         if self.options.with_dbus:
             targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
