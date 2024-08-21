@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir, replace_in_file, save, rm, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, copy, rmdir, replace_in_file, save, rm
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -48,7 +48,6 @@ class FollyConan(ConanFile):
         }
 
     def export_sources(self):
-        export_conandata_patches(self)
         copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
@@ -87,7 +86,8 @@ class FollyConan(ConanFile):
             self.requires("libunwind/1.8.0")
         if self.settings.os == "Linux":
             self.requires("liburing/2.6")
-        self.requires("fmt/11.0.2", transitive_headers=True, transitive_libs=True)
+        # INFO: Folly does not support fmt 11 on MSVC: https://github.com/facebook/folly/issues/2250
+        self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         # INFO: Required due ZIP_LISTS CMake feature in conan_deps.cmake
@@ -200,7 +200,6 @@ class FollyConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Make sure will consume Conan dependencies
         folly_deps = os.path.join(self.source_folder, "CMake", "folly-deps.cmake")
         replace_in_file(self, folly_deps, " MODULE", " REQUIRED CONFIG")
