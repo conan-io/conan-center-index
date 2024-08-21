@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, to_apple_arch
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
@@ -121,6 +121,9 @@ class Librasterlite2Conan(ConanFile):
             f"--enable-lz4={yes_no(self.options.with_lz4)}",
             f"--enable-zstd={yes_no(self.options.with_zstd)}",
         ])
+        if is_apple_os(self):
+            tc.extra_cflags.append(f"-arch {to_apple_arch(self)}")
+            tc.extra_ldflags.append(f"-arch {to_apple_arch(self)}")
         tc.generate()
 
         deps = AutotoolsDeps(self)
