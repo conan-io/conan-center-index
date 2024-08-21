@@ -4,8 +4,6 @@ cmake_minimum_required(VERSION 3.17)
 macro(custom_find_package package_name variable_prefix)
     find_package(${package_name} REQUIRED CONFIG ${ARGN}
         # Allow only Conan packages
-        NO_DEFAULT_PATH
-        PATHS ${CMAKE_PREFIX_PATH}
     )
     list(APPEND FROM FOUND VERSION VERSION_STRING INCLUDE_DIRS INCLUDE_DIR INCLUDE_DIR LIBRARIES LIBRARIES LIBRARIES DEFINITIONS)
     list(APPEND TO   FOUND VERSION VERSION_STRING INCLUDE_DIRS INCLUDE_DIR INCLUDE     LIB       LIBRARY   LIBRARIES DEFINITIONS)
