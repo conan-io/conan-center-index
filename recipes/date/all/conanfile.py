@@ -22,6 +22,7 @@ class DateConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "header_only": [True, False],
+        "install_all_headers" : [True, False],
         "use_system_tz_db": [True, False],
         "use_tz_db_in_dot": [True, False],
     }
@@ -29,6 +30,7 @@ class DateConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "header_only": False,
+        "install_all_headers" : False,
         "use_system_tz_db": False,
         "use_tz_db_in_dot": False,
     }
@@ -105,6 +107,11 @@ class DateConan(ConanFile):
             cmake.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
             rmdir(self, os.path.join(self.package_folder, "CMake"))
+            if self.options.install_all_headers:
+                src = os.path.join(self.source_folder, "include", "date")
+                dst = os.path.join(self.package_folder, "include", "date")
+                for header_file in ["ptz.h", "iso_week.h", "julian.h", "islamic.h"]:
+                    copy(self, header_file, dst=dst, src=src)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "date")
