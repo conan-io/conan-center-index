@@ -108,6 +108,11 @@ class TgbotConan(ConanFile):
             "set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)",
             "",
         )
+        # Don't force CMAKE_CXX_STANDARD
+        replace_in_file(self,
+            os.path.join(self.source_folder, "CMakeLists.txt"),
+            "set(CMAKE_CXX_STANDARD",
+            "#")
 
     def build(self):
         self._patch_sources()
