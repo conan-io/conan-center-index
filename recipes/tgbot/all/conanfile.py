@@ -96,6 +96,8 @@ class TgbotConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_TESTS"] = False
+        if not self.settings.compiler.cppstd:
+            tc.cache_variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
