@@ -270,6 +270,10 @@ class OpenvinoConan(ConanFile):
         if self.settings.os == "Emscripten":
             raise ConanInvalidConfiguration(f"{self.ref} does not support Emscripten")
 
+        # Failing on Conan Center CI due to memory usage
+        if os.getenv("CONAN_CENTER_BUILD_SERVICE") and self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Debug build type on Conan Center CI")
+
     def validate(self):
         if self.options.get_safe("enable_gpu") and not self.options.shared and self.options.enable_cpu:
             # GPU and CPU plugins cannot be simultaneously built statically, because they use different oneDNN versions
