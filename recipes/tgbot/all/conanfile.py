@@ -33,7 +33,7 @@ class TgbotConan(ConanFile):
     @property
     def _min_cppstd(self):
         # tgbot requiroes C++17 since 1.7.3
-        return "11" if Version(self.version) < "1.7.3" else "17"
+        return "14" if Version(self.version) < "1.7.3" else "17"
 
     @property
     def _compilers_minimum_version(self):
