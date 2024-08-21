@@ -51,6 +51,7 @@ class BatteryEmbedConan(ConanFile):
         del self.info.settings.arch
         del self.info.settings.compiler
         del self.info.settings.build_type
+        del self.info.settings.os
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
