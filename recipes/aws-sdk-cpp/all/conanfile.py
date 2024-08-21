@@ -548,7 +548,7 @@ class AwsSdkCppConan(ConanFile):
         else:
             self.cpp_info.components["core"].requires.extend(["libcurl::curl", "openssl::openssl"])
 
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             self.cpp_info.components["core"].system_libs.append("atomic")
             if self.options.get_safe("text-to-speech"):
                 self.cpp_info.components["text-to-speech"].requires.append("pulseaudio::pulseaudio")
