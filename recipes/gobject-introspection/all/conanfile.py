@@ -79,8 +79,8 @@ class GobjectIntrospectionConan(ConanFile):
             env.generate(scope="build")
         tc = MesonToolchain(self)
         tc.args = ["--wrap-mode=nofallback"]
-        tc.project_options["build_introspection_data"] = bool(self.dependencies["glib"].options.shared)
-        tc.project_options["datadir"] = os.path.join(self.package_folder, "res")
+        tc.project_options["build_introspection_data"] = "true" if self.dependencies["glib"].options.shared else "false"
+        tc.project_options["datadir"] = "res"
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
