@@ -79,7 +79,11 @@ class GobjectIntrospectionConan(ConanFile):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
         tc = MesonToolchain(self)
-        tc.project_options["build_introspection_data"] = "true" if self.dependencies["glib"].options.shared else "false"
+        if cross_building(self):
+            tc.project_options["gi_cross_use_prebuilt_gi"] = "false"
+            tc.project_options["build_introspection_data"] = "false"
+        else:
+            tc.project_options["build_introspection_data"] = "true" if self.dependencies["glib"].options.shared else "false"
         tc.project_options["datadir"] = "res"
         tc.generate()
         deps = PkgConfigDeps(self)
