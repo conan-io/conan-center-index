@@ -17,7 +17,7 @@ class GobjectIntrospectionConan(ConanFile):
     name = "gobject-introspection"
     description = ("GObject introspection is a middleware layer between "
                    "C libraries (using GObject) and language bindings")
-    license = "LGPL-2.1"
+    license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.gnome.org/GNOME/gobject-introspection"
     topics = ("gobject-instrospection",)
@@ -95,7 +95,6 @@ class GobjectIntrospectionConan(ConanFile):
 
     def build(self):
         self._patch_sources()
-        os.environ["PKG_CONFIG_PATH"] = os.path.join(self.build_folder, "conan")
         meson = Meson(self)
         meson.configure()
         meson.build()
