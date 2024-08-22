@@ -10,6 +10,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.env import Environment
 from conan.tools.scm import Version
+from conan.tools.apple import fix_apple_shared_install_name
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
@@ -78,7 +79,6 @@ class GobjectIntrospectionConan(ConanFile):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
         tc = MesonToolchain(self)
-        tc.args = ["--wrap-mode=nofallback"]
         tc.project_options["build_introspection_data"] = "true" if self.dependencies["glib"].options.shared else "false"
         tc.project_options["datadir"] = "res"
         tc.generate()
@@ -113,6 +113,7 @@ class GobjectIntrospectionConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "gobject-introspection-1.0")
