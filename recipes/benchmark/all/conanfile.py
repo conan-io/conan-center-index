@@ -115,11 +115,12 @@ class BenchmarkConan(ConanFile):
         tc.generate()
     
     def _patch_sources(self):
-        replace_in_file(self,
-            os.path.join(self.source_folder, "CMakeLists.txt"),
-            "set(CMAKE_CXX_STANDARD",
-            "#"
-        )
+        if Version(self.version) > "1.7.0":
+            replace_in_file(self,
+                os.path.join(self.source_folder, "CMakeLists.txt"),
+                "set(CMAKE_CXX_STANDARD",
+                "#"
+            )
 
     def build(self):
         self._patch_sources()
