@@ -235,8 +235,22 @@ class ITKConan(ConanFile):
                         "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}")
         # Ensure that new versions don't introduce any vendored libs by accident
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(ExternalProject)", "")
+        # Unvendor ZLIB
+        for path in [
+            os.path.join(self.source_folder, "Modules", "IO", "GIPL", "src", "itkGiplImageIO.cxx"),
+            os.path.join(self.source_folder, "Modules", "IO", "PhilipsREC", "src", "itkPhilipsRECImageIO.cxx"),
+            os.path.join(self.source_folder, "Modules", "Nonunit", "Review", "src", "itkVoxBoCUBImageIO.cxx"),
+            os.path.join(self.source_folder, "Modules", "ThirdParty", "GDCM", "src", "gdcm", "Utilities", "gdcm_zlib.h"),
+            os.path.join(self.source_folder, "Modules", "ThirdParty", "GIFTI", "src", "gifticlib", "gifti_io.h"),
+            os.path.join(self.source_folder, "Modules", "ThirdParty", "NIFTI", "src", "nifti", "znzlib", "znzlib.h"),
+            os.path.join(self.source_folder, "Modules", "ThirdParty", "MetaIO", "src", "MetaIO", "src", "localMetaConfiguration.h"),
+            os.path.join(self.source_folder, "Modules", "ThirdParty", "MINC", "src", "libminc", "nifti", "znzlib.h"),
+            os.path.join(self.source_folder, "Modules", "ThirdParty", "NrrdIO", "src", "NrrdIO", "unteem.pl"),
+            os.path.join(self.source_folder, "Modules", "ThirdParty", "NrrdIO", "src", "NrrdIO", "privateNrrd.h"),
+        ]:
+            replace_in_file(self, path, "itk_zlib.h", "zlib.h")
         # Truncate some third-party modules that are provided by conan_cmake_project_include.cmake
-        for pkg in ["DCMTK", "DoubleConversion", "GDCM", "Expat", "HDF5"]:
+        for pkg in ["DCMTK", "DoubleConversion", "GDCM", "Expat", "HDF5", "JPEG", "PNG", "TIFF", "ZLIB"]:
             save(self, os.path.join(self.source_folder, "Modules", "ThirdParty", pkg, "CMakeLists.txt"),
                  f"project(ITK{pkg})\n"
                  f"set(ITK{pkg}_THIRD_PARTY 1)\n"
