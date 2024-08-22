@@ -8,7 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.2.0")
 
     def build(self):
         if self.settings.os != 'Windows' and not tools.cross_building(self):
@@ -27,4 +27,3 @@ class TestPackageConan(ConanFile):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_basic")
             self.run(bin_path, run_environment=True)
-
