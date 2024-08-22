@@ -8,6 +8,7 @@ from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
+from conan.tools.env import Environment
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
@@ -78,11 +79,16 @@ class GobjectIntrospectionConan(ConanFile):
             env.generate(scope="build")
         tc = MesonToolchain(self)
         tc.args = ["--wrap-mode=nofallback"]
-        tc.project_options["build_introspection_data"] = self.dependencies["glib"].options.shared
+        tc.project_options["build_introspection_data"] = bool(self.dependencies["glib"].options.shared)
         tc.project_options["datadir"] = os.path.join(self.package_folder, "res")
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
+        # INFO: g-ir-scanner fails to find glib-2.0.pc, so we need to set PKG_CONFIG_PATH
+        env = Environment()
+        env.define("PKG_CONFIG_PATH", os.path.join(self.build_folder, "conan"))
+        envvars = env.vars(self)
+        envvars.save_script("pkg_config_env")
 
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
