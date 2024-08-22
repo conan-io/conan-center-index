@@ -10,7 +10,13 @@ patches:
     - patch_file: "patches/0001-use-conan-openjpeg.patch"
       patch_description: "Use OpenJPEG from Conan"
       patch_type: "conan"
+    - patch_file: "patches/0002-unvendor-hdf5.patch"
+      patch_description: "Use HDF5 from Conan"
+      patch_type: "conan"
   "5.1.0":
     - patch_file: "patches/0001-use-conan-openjpeg.patch"
       patch_description: "Use OpenJPEG from Conan"
+      patch_type: "conan"
+    - patch_file: "patches/0002-unvendor-hdf5.patch"
+      patch_description: "Use HDF5 from Conan"
       patch_type: "conan"

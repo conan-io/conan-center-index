@@ -1,9 +1,5 @@
 macro(custom_find_package name)
-    find_package(${name} ${ARGN}
-        # Allow only Conan packages
-        NO_DEFAULT_PATH
-        PATHS ${CMAKE_PREFIX_PATH}
-    )
+    find_package(${name} ${ARGN})
 endmacro()
 
 # https://github.com/InsightSoftwareConsortium/ITK/blob/v5.4rc01/Modules/ThirdParty/DCMTK/CMakeLists.txt#L99-L104

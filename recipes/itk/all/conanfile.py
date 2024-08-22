@@ -84,9 +84,6 @@ class ITKConan(ConanFile):
         if Version(self.version) < "5.2" and is_apple_os(self) and self.settings.arch == "armv8":
             # https://discourse.itk.org/t/error-building-v5-1-1-for-mac-big-sur-11-2-3/3959
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on on Apple armv8 architecture.")
-        if self.options.shared and not self.dependencies["hdf5"].options.shared:
-            raise ConanInvalidConfiguration("When building a shared itk, hdf5 needs to be shared too (or not linked to by the consumer).\n"
-                                            "This is because H5::DataSpace::ALL might get initialized twice, which will cause a H5::DataSpaceIException to be thrown.")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 190)
@@ -239,7 +236,7 @@ class ITKConan(ConanFile):
         # Ensure that new versions don't introduce any vendored libs by accident
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(ExternalProject)", "")
         # Truncate some third-party modules that are provided by conan_cmake_project_include.cmake
-        for pkg in ["DCMTK", "DoubleConversion", "GDCM", "Expat"]:
+        for pkg in ["DCMTK", "DoubleConversion", "GDCM", "Expat", "HDF5"]:
             save(self, os.path.join(self.source_folder, "Modules", "ThirdParty", pkg, "CMakeLists.txt"),
                  f"project(ITK{pkg})\n"
                  f"set(ITK{pkg}_THIRD_PARTY 1)\n"

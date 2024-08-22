@@ -1,0 +1,37 @@
+--- a/Modules/IO/HDF5/src/CMakeLists.txt
++++ b/Modules/IO/HDF5/src/CMakeLists.txt
+@@ -4,3 +4,4 @@
+   )
+ 
+ itk_module_add_library(ITKIOHDF5 ${ITKIOHDF5_SRCS})
++target_link_libraries(ITKIOHDF5 PRIVATE HDF5::HDF5)
+--- a/Modules/IO/HDF5/src/itkHDF5ImageIO.cxx
++++ b/Modules/IO/HDF5/src/itkHDF5ImageIO.cxx
+@@ -20,7 +20,7 @@
+ #include "itkMetaDataObject.h"
+ #include "itkArray.h"
+ #include "itksys/SystemTools.hxx"
+-#include "itk_H5Cpp.h"
++#include "H5Cpp.h"
+ 
+ #include <algorithm>
+ 
+--- a/Modules/IO/TransformHDF5/src/CMakeLists.txt
++++ b/Modules/IO/TransformHDF5/src/CMakeLists.txt
+@@ -4,3 +4,4 @@
+   )
+ 
+ itk_module_add_library(ITKIOTransformHDF5 ${ITKIOTransformHDF5_SRCS})
++target_link_libraries(ITKIOTransformHDF5 PRIVATE HDF5::HDF5)
+
+--- a/Modules/IO/TransformHDF5/src/itkHDF5TransformIO.cxx
++++ b/Modules/IO/TransformHDF5/src/itkHDF5TransformIO.cxx
+@@ -18,7 +18,7 @@
+ 
+ #define ITK_TEMPLATE_EXPLICIT_HDF5TransformIO
+ #include "itkHDF5TransformIO.h"
+-#include "itk_H5Cpp.h"
++#include "H5Cpp.h"
+ #include "itksys/SystemTools.hxx"
+ #include "itksys/SystemInformation.hxx"
+ #include "itkCompositeTransform.h"
