@@ -129,6 +129,7 @@ class GobjectIntrospectionConan(ConanFile):
         pkgconfig_variables = {
             "datadir": "${prefix}/res",
             "bindir": "${prefix}/bin",
+            "libdir": "${prefix}/lib",
             "g_ir_scanner": "${bindir}/g-ir-scanner",
             "g_ir_compiler": "${bindir}/g-ir-compiler%s" % exe_ext,
             "g_ir_generate": "${bindir}/g-ir-generate%s" % exe_ext,

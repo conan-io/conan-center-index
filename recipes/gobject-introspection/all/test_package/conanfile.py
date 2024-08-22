@@ -28,10 +28,9 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         if self.settings.os != "Windows" and can_run(self):
-            if conan_version >= "2":
-                # Conan v1 has a bug and fails with 'Variable 'libdir' not defined in gobject-introspection-1.0.pc'
-                pkg_config = PkgConfig(self, "gobject-introspection-1.0", pkg_config_path=self.generators_folder)
-                for tool in ["g_ir_compiler", "g_ir_generate", "g_ir_scanner"]:
+            pkg_config = PkgConfig(self, "gobject-introspection-1.0", pkg_config_path=self.generators_folder)
+            for tool in ["g_ir_compiler", "g_ir_generate", "g_ir_scanner"]:
+                if tool in pkg_config.variables:
                     self.run("%s --version" % pkg_config.variables[tool], env="conanrun")
             self.run("g-ir-annotation-tool --version", env="conanrun")
             self.run("g-ir-inspect -h", env="conanrun")

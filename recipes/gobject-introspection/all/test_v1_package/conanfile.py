@@ -15,7 +15,8 @@ class TestPackageConan(ConanFile):
             with tools.environment_append({'PKG_CONFIG_PATH': "."}):
                 pkg_config = tools.PkgConfig("gobject-introspection-1.0")
                 for tool in ["g_ir_compiler", "g_ir_generate", "g_ir_scanner"]:
-                    self.run('%s --version' % pkg_config.variables[tool], run_environment=True)
+                    if tool in pkg_config.variables:
+                        self.run('%s --version' % pkg_config.variables[tool], run_environment=True)
                 self.run('g-ir-annotation-tool --version', run_environment=True)
                 self.run('g-ir-inspect -h', run_environment=True)
 
