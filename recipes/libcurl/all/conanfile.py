@@ -30,6 +30,7 @@ class LibcurlConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "build_executable": [True, False],
         "with_ssl": [False, "openssl", "wolfssl", "schannel", "darwinssl", "mbedtls"],
         "with_file": [True, False],
         "with_ftp": [True, False],
@@ -78,6 +79,7 @@ class LibcurlConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "build_executable": False,
         "with_ssl": "openssl",
         "with_dict": True,
         "with_file": True,
@@ -135,6 +137,10 @@ class LibcurlConan(ConanFile):
     @property
     def _is_using_cmake_build(self):
         return is_msvc(self) or self._is_win_x_android
+
+    @property
+    def _is_apple_embedded_platform(self):
+        return self.settings.os in ["iOS", "watchOS", "tvOS"]
 
     def export_sources(self):
         copy(self, "lib_Makefile_add.am", self.recipe_folder, self.export_sources_folder)
@@ -203,6 +209,12 @@ class LibcurlConan(ConanFile):
                 raise ConanInvalidConfiguration("option with_ntlm=True requires openssl/*:no_des=False")
         if self.options.with_ssl == "wolfssl" and not self.dependencies["wolfssl"].options.with_curl:
             raise ConanInvalidConfiguration("option with_ssl=wolfssl requires wolfssl/*:with_curl=True")
+
+        if self.options.build_executable:
+            if self._is_mingw and self.options.shared:
+                raise ConanInvalidConfiguration("Building curl executable with shared library version of libcurl not supported with mingw compiler")
+            if self._is_apple_embedded_platform:
+                raise ConanInvalidConfiguration("Building curl executable not supprtoed on embedded apple platforms 'iOS', 'watchOS' and 'tvOS'")
 
     def build_requirements(self):
         if self._is_using_cmake_build:
@@ -287,9 +299,9 @@ class LibcurlConan(ConanFile):
         # - it makes recipe consistent with CMake build where we don't build curl tool
         top_makefile = os.path.join(self.source_folder, "Makefile.am")
         if Version(self.version) < "8.8.0":
-            replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
+            replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib src" if self.options.build_executable else "SUBDIRS = lib")
         else:
-            replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", "SUBDIRS = lib")
+            replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", "SUBDIRS = lib src" if self.options.build_executable else "SUBDIRS = lib")
 
         # `Makefile.inc` has been removed from 8.12.0 onwards
         if Version(self.version) < "8.12.0":
@@ -624,7 +636,7 @@ class LibcurlConan(ConanFile):
             tc = CMakeToolchain(self)
         tc.variables["ENABLE_UNICODE"] = True
         tc.variables["BUILD_TESTING"] = False
-        tc.variables["BUILD_CURL_EXE"] = False
+        tc.variables["BUILD_CURL_EXE"] = self.options.build_executable
         tc.cache_variables["ENABLE_CURL_MANUAL"] = False
         tc.variables["CURL_DISABLE_LDAP"] = not self.options.with_ldap
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
