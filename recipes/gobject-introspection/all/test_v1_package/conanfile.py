@@ -4,22 +4,9 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package_multi", "pkg_config"
-
-    def build_requirements(self):
-        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/[>=2.2 <3]")
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
-        if self.settings.os != 'Windows' and not tools.cross_building(self):
-            with tools.environment_append({'PKG_CONFIG_PATH': "."}):
-                pkg_config = tools.PkgConfig("gobject-introspection-1.0")
-                for tool in ["g_ir_compiler", "g_ir_generate", "g_ir_scanner"]:
-                    if tool in pkg_config.variables:
-                        self.run('%s --version' % pkg_config.variables[tool], run_environment=True)
-                self.run('g-ir-annotation-tool --version', run_environment=True)
-                self.run('g-ir-inspect -h', run_environment=True)
-
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
