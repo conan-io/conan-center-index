@@ -136,7 +136,8 @@ class XZUtilsConan(ConanFile):
                 replace_in_file(self, vcxproj_file, "x64", "ARM64")
             
         solution_file = os.path.join(build_script_folder, "xz_win.sln")
-        replace_in_file(self, solution_file, "x64", "ARM64")
+        if self.settings.arch == "armv8":
+            replace_in_file(self, solution_file, "x64", "ARM64")
 
         #==============================
 
