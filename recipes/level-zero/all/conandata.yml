@@ -1,0 +1,10 @@
+sources:
+  "1.17.28":
+    url: "https://github.com/oneapi-src/level-zero/archive/refs/tags/v1.17.28.tar.gz"
+    sha256: "54638426802df958af91f6a6013242d272b89f4bc9b0c9c4663eabc20210ab50"
+  "1.11.0":
+    url: "https://github.com/oneapi-src/level-zero/archive/refs/tags/v1.11.0.tar.gz"
+    sha256: "eee9805bdf0973aff5858a32a8c3ac98e0337b64648d96bb8adeaecc0bdda5bd"
+  "1.9.4":
+    url: "https://github.com/oneapi-src/level-zero/archive/refs/tags/v1.9.4.tar.gz"
+    sha256: "7f91ed993be1e643c752cf95a319a0fc64113d91ec481fbb8a2f478f433d3380"
