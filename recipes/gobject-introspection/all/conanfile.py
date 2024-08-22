@@ -86,7 +86,7 @@ class GobjectIntrospectionConan(ConanFile):
         deps.generate()
         # INFO: g-ir-scanner fails to find glib-2.0.pc, so we need to set PKG_CONFIG_PATH
         env = Environment()
-        env.define("PKG_CONFIG_PATH", os.path.join(self.build_folder, "conan"))
+        env.define("PKG_CONFIG_PATH", self.generators_folder)
         envvars = env.vars(self)
         envvars.save_script("pkg_config_env")
 
