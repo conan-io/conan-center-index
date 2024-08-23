@@ -119,10 +119,12 @@ class FbgemmConan(ConanFile):
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
+        if os.getenv("CONAN_CENTER_BUILD_SERVICE", False):
+            # Workaround for C3I running out of memory during build
+            self.conf.define("tools.build:jobs", 1)
         try:
             cmake.build()
         except ConanException:
-            # Workaround for C3I running out of memory during build
             self.conf.define("tools.build:jobs", 1)
             cmake.build()
 
