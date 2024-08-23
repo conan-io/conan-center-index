@@ -76,6 +76,7 @@ class PoselibConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["MARCH_NATIVE"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
@@ -83,8 +84,8 @@ class PoselibConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "-march=native -Wall -Werror -fPIC", "-Wall")
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "-march=native -Wall -Werror -fPIC", "")
 
     def build(self):
         self._patch_sources()
