@@ -11,9 +11,6 @@ sources:
   "1.19.2":
     url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.19.2/gstreamer-1.19.2.tar.gz"
     sha256: "6ec8494867d9b58f145c0c357da631faf21c2c72c7cd8b637b440188fe904ab8"
-  "1.19.1":
-    url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.19.1/gstreamer-1.19.1.tar.gz"
-    sha256: "2e51f61e59564e48883b5f1996871b0d1c404406aadb9aa1b306de8a2a331a90"
   "1.18.4":
     url: "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/archive/1.18.4/gstreamer-1.18.4.tar.gz"
     sha256: "f0956c2056281f5909d030945a9896810e55084f29b6bcfc401b53e91ddf1c7f"
