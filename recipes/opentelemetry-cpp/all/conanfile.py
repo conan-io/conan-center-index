@@ -200,8 +200,8 @@ class OpenTelemetryCppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        VirtualBuildEnv(self).generate(scope="build")
-        VirtualRunEnv(self).generate(scope="build")
+        VirtualBuildEnv(self).generate()
+        VirtualRunEnv(self).generate()
 
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_TESTING"] = False
