@@ -102,7 +102,7 @@ class GStPluginsBaseConan(ConanFile):
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_libalsa"):
-            self.requires("libalsa/1.2.10")
+            self.requires("libalsa/1.2.12")
         if self.options.get_safe("with_xorg"):
             self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
         if self.options.with_gl:
