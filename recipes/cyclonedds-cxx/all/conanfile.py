@@ -150,13 +150,15 @@ class CycloneDDSCXXConan(ConanFile):
         self.cpp_info.includedirs = ["include/ddscxx"]
         self.cpp_info.builddirs = [self._module_path]
         self.cpp_info.components["ddscxx"].libs = ["ddscxx"]
-        self.cpp_info.components["ddscxx"].includedirs = ["include/ddscxx"]
+        self.cpp_info.components["ddscxx"].includedirs = [os.path.join("include", "ddscxx")]
         self.cpp_info.components["ddscxx"].set_property("cmake_target_name", "CycloneDDS-CXX::ddscxx")
         self.cpp_info.components["ddscxx"].set_property("pkg_config_name", "CycloneDDS-CXX")
+        self.cpp_info.components["ddscxx"].requires = ["cyclonedds::CycloneDDS"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["ddscxx"].system_libs = ["m"]
         self.cpp_info.components["idlcxx"].libs = ["cycloneddsidlcxx"]
         self.cpp_info.components["idlcxx"].set_property("cmake_target_name", "CycloneDDS-CXX::idlcxx")
+        self.cpp_info.components["idlcxx"].requires = ["cyclonedds::idl"]
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
         self.buildenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))
         self.runenv_info.append_path("PATH", os.path.join(self.package_folder, "bin"))

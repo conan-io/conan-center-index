@@ -1,4 +1,10 @@
 versions:
+  "1.9.6":
+    folder: "all"
+  "1.9.5":
+    folder: "all"
+  "1.9.4":
+    folder: "all"
   "1.9.3":
     folder: "all"
   "1.9.2":
@@ -8,10 +14,4 @@ versions:
   "1.9.0":
     folder: "all"
   "1.8.7":
-    folder: "all"
-  "1.8.6":
-    folder: "all"
-  "1.8.5":
-    folder: "all"
-  "1.8.4":
     folder: "all"

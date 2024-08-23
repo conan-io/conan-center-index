@@ -24,6 +24,7 @@ class RotorConan(ConanFile):
         "enable_thread": [True, False],
         "multithreading": [True, False],  # enables multithreading support
         "enable_ev": [True, False],
+        "enable_fltk": [True, False],
     }
     default_options = {
         "fPIC": True,
@@ -32,6 +33,7 @@ class RotorConan(ConanFile):
         "enable_thread": False,
         "multithreading": True,
         "enable_ev": False,
+        "enable_fltk": False,
     }
 
     @property
@@ -56,6 +58,8 @@ class RotorConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) < "0.26":
             del self.options.enable_ev
+        if Version(self.version) < "0.30":
+            del self.options.enable_fltk
 
     def configure(self):
         if self.options.shared:
@@ -65,6 +69,8 @@ class RotorConan(ConanFile):
         self.requires("boost/1.84.0", transitive_headers=True)
         if self.options.get_safe("enable_ev", False):
             self.requires("libev/4.33")
+        if self.options.get_safe("enable_fltk", False):
+            self.requires("fltk/1.3.9")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -77,6 +83,8 @@ class RotorConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         if Version(self.version) >= "0.26":
             tc.variables["BUILD_EV"] = self.options.enable_ev
+        if Version(self.version) >= "0.30":
+            tc.variables["BUILD_FLTK"] = self.options.enable_fltk
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -126,3 +134,10 @@ class RotorConan(ConanFile):
         if self.options.get_safe("enable_ev", False):
             self.cpp_info.components["ev"].libs = ["rotor_ev"]
             self.cpp_info.components["ev"].requires = ["core", "libev::libev"]
+
+        if self.options.get_safe("enable_fltk", False):
+            self.cpp_info.components["fltk"].libs = ["rotor_fltk"]
+            self.cpp_info.components["fltk"].requires = ["core", "fltk::fltk"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["core"].system_libs.append("m")

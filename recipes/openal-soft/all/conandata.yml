@@ -13,3 +13,4 @@ patches:
   "1.22.2":
     - patch_file: "patches/1.22.2-0001-fix-al-optional-in-if-compile-error.patch"
       patch_source: "https://github.com/kcat/openal-soft/commit/650a6d49e9a511d005171940761f6dd6b440ee66"
+    - patch_file: "patches/1.22.2-0002-fix-pulseaudio-find-package-vars.patch"
