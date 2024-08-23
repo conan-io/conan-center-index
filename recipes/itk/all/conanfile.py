@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
@@ -79,6 +80,10 @@ class ITKConan(ConanFile):
         self.requires("openjpeg/2.5.2")
         self.requires("onetbb/2021.9.0")
         self.requires("zlib/[>=1.2.11 <2]")
+    
+    def build_requirements(self):
+        if Version(self.version) >= "5.3.0":
+            self.tool_requires("cmake/[>=3.16.3 <4]")
 
     def validate(self):
         if self.options.shared and not self.dependencies["hdf5"].options.shared:
@@ -237,6 +242,9 @@ class ITKConan(ConanFile):
 
         tc = CMakeDeps(self)
         tc.generate()
+
+        venv = VirtualBuildEnv(self)
+        venv.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
