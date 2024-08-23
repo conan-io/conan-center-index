@@ -62,7 +62,7 @@ class IridescenceConan(ConanFile):
         self.requires("assimp/5.4.2")
         self.requires("boost/1.84.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
-        self.requires("glm/cci.20230113")
+        self.requires("glm/1.0.1")
         self.requires("libjpeg/9e")
         self.requires("libpng/[>=1.6 <2]")
         self.requires("portable-file-dialogs/0.1.0", transitive_headers=True)
