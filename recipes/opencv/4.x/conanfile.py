@@ -191,15 +191,15 @@ class OpenCVConan(ConanFile):
         "with_jpeg": "libjpeg",
         "with_png": True,
         "with_tiff": True,
-        "with_jpeg2000": "jasper",
+        "with_jpeg2000": "openjpeg",
         "with_openexr": True,
         "with_webp": True,
         "with_gdal": False,
         "with_gdcm": False,
-        "with_imgcodec_hdr": False,
-        "with_imgcodec_pfm": False,
-        "with_imgcodec_pxm": False,
-        "with_imgcodec_sunraster": False,
+        "with_imgcodec_hdr": True,
+        "with_imgcodec_pfm": True,
+        "with_imgcodec_pxm": True,
+        "with_imgcodec_sunraster": True,
         "with_msmf": True,
         "with_msmf_dxva": True,
         # objdetect module options
@@ -319,10 +319,13 @@ class OpenCVConan(ConanFile):
         else:
             del self.options.with_ffmpeg
 
-        if "arm" not in self.settings.arch:
-            del self.options.neon
         if not self._has_with_jpeg2000_option:
             del self.options.with_jpeg2000
+        elif Version(self.version) < "4.3.0":
+            self.options.with_jpeg2000 = "jasper"
+
+        if "arm" not in self.settings.arch:
+            del self.options.neon
         if not self._has_with_tiff_option:
             del self.options.with_tiff
         if not self._has_superres_option:
@@ -1212,6 +1215,9 @@ class OpenCVConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "viz module can't be enabled yet. It requires VTK which is not available in conan-center."
             )
+        if self.options.get_safe("with_jpeg2000") == "openjpeg" and Version(self.version) < "4.3.0":
+            raise ConanInvalidConfiguration("openjpeg is not available for OpenCV before 4.3.0")
+
 
     def build_requirements(self):
         if self.options.get_safe("with_protobuf"):
