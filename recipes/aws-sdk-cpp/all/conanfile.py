@@ -340,17 +340,17 @@ class AwsSdkCppConan(ConanFile):
             self.requires("aws-c-auth/0.7.16")
             self.requires("aws-c-cal/0.6.14")
             self.requires("aws-c-common/0.9.15")
-            self.requires("aws-c-compression/0.2.18")
+            # self.requires("aws-c-compression/0.2.18")
             self.requires("aws-c-event-stream/0.4.2")
             self.requires("aws-c-http/0.8.1")
             self.requires("aws-c-io/0.14.7")
             self.requires("aws-c-mqtt/0.10.3")
             if self.options.get_safe("s3-crt"):
                 self.requires("aws-c-s3/0.5.5")
-            self.requires("aws-c-sdkutils/0.1.15")
+            # self.requires("aws-c-sdkutils/0.1.15")
             self.requires("aws-checksums/0.1.18")
             # missing aws-lc
-            self.requires("s2n/1.4.16")  # Upstream pins to .13
+            # self.requires("s2n/1.4.16")
         if self.version == "1.9.234":
             self.requires("aws-c-common/0.6.11")
             self.requires("aws-c-event-stream/0.2.7")
@@ -503,13 +503,11 @@ class AwsSdkCppConan(ConanFile):
             "aws-c-common::aws-c-common",
             "aws-c-event-stream::aws-c-event-stream",
             "aws-checksums::aws-checksums",
-        ]
-        self.cpp_info.components["core"].requires.extend([
             "aws-c-cal::aws-c-cal",
             "aws-c-http::aws-c-http",
             "aws-c-io::aws-c-io",
             "aws-crt-cpp::aws-crt-cpp",
-        ])
+        ]
 
         # other components
         enabled_sdks = [sdk for sdk in self._sdks if self.options.get_safe(sdk)]
