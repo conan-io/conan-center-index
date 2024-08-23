@@ -93,6 +93,9 @@ class ITKConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
+        if Version(self.version) < "5.2" and self.settings.os == "Macos":
+            raise ConanInvalidConfiguration(f"{self.ref} fails to compile in {self.settings.os}, fixed in 5.2.0")
+
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
