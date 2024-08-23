@@ -152,8 +152,8 @@ class OpenTelemetryCppConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} does not support building shared libraries only on Windows")
+        if self.settings.os != "Linux" and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} supports building shared libraries only on Linux")
 
         if self.options.with_otlp_grpc:
             if not self.dependencies["grpc"].options.cpp_plugin:
