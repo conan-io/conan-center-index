@@ -69,14 +69,14 @@ class ITKConan(ConanFile):
         #self.requires("dcmtk/3.6.7")
         self.requires("double-conversion/3.3.0")
         self.requires("eigen/3.4.0")
-        self.requires("expat/2.5.0")
+        self.requires("expat/[>=2.6.2 <3]")
         self.requires("fftw/3.3.10")
-        self.requires("gdcm/3.0.21")
-        self.requires("hdf5/1.14.1")
+        self.requires("gdcm/3.0.23")
+        self.requires("hdf5/1.14.3")
         self.requires("libjpeg/9e")
-        self.requires("libpng/1.6.40")
-        self.requires("libtiff/4.5.1")
-        self.requires("openjpeg/2.5.0")
+        self.requires("libpng/[>=1.6 <2]")
+        self.requires("libtiff/4.6.0")
+        self.requires("openjpeg/2.5.2")
         self.requires("onetbb/2021.9.0")
         self.requires("zlib/[>=1.2.11 <2]")
 
@@ -93,6 +93,9 @@ class ITKConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
+        if Version(self.version) < "5.2" and self.settings.os == "Macos":
+            raise ConanInvalidConfiguration(f"{self.ref} fails to compile in {self.settings.os}, fixed in 5.2.0")
+
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
