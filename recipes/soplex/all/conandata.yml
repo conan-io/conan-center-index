@@ -1,4 +1,7 @@
 sources:
+  "7.1.0":
+    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-710.tar.gz"
+    sha256: "ec177fdb688346287d5f211dd7ec4a0195c8ec9b3a5314d38aca383b6fa1418e"
   "7.0.1":
     url: "https://github.com/scipopt/soplex/archive/refs/tags/release-701.tar.gz"
     sha256: "80cce994dcbe45fd52b60e31a3aeb5d2c60a7ddbaae495e0ce6bf58481675696"

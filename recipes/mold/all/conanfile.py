@@ -45,7 +45,7 @@ class MoldConan(ConanFile):
             self.requires("mimalloc/2.1.2")
         if Version(self.version) < "2.2.0":
             # Newer versions use vendored-in BLAKE3
-            self.requires("openssl/[>=1.1 <4]")   
+            self.requires("openssl/[>=1.1 <4]")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -65,6 +65,8 @@ class MoldConan(ConanFile):
             raise ConanInvalidConfiguration("Clang version 12 or higher required")
         if self.settings.compiler == "apple-clang" and "armv8" == self.settings.arch :
             raise ConanInvalidConfiguration(f'{self.name} is still not supported by Mac M1.')
+        if Version(self.version) == "2.33.0" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14":
+            raise ConanInvalidConfiguration(f'{self.ref} doesn\'t support Apple-Clang < 14.')
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18.0 <4]")

@@ -49,7 +49,7 @@ class QuillConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-                del self.options.fPIC
+            del self.options.fPIC
 
     def layout(self):
         cmake_layout(self, src_folder="src")
