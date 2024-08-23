@@ -220,15 +220,10 @@ class LLVMOpenMpConan(ConanFile):
             raise ConanException(f"Unexpected LIBOMP_OMP_YEAR_MONTH value: {year_date}")
         return "5.0", "201611"
 
-    @property
-    def _lib_name(self):
-        return "libomp" if is_msvc(self) else "omp"
-
     def _write_cmake_module(self):
         omp_version, omp_spec_date = self._omp_runtime_version
         cmake_module = load(self, os.path.join(self.export_sources_folder, "cmake", "conan-llvm-openmp-vars.cmake.in"))
         cmake_module = cmake_module.replace("@OpenMP_FLAGS@", " ".join(self._openmp_flags))
-        cmake_module = cmake_module.replace("@OpenMP_LIB_NAMES@", ";".join([self._lib_name] + self._system_libs))
         cmake_module = cmake_module.replace("@OpenMP_SPEC_DATE@", omp_spec_date)
         cmake_module = cmake_module.replace("@OpenMP_VERSION_MAJOR@", str(Version(omp_version).major))
         cmake_module = cmake_module.replace("@OpenMP_VERSION_MINOR@", str(Version(omp_version).minor))
@@ -271,7 +266,7 @@ class LLVMOpenMpConan(ConanFile):
         omp = self.cpp_info.components["omp"]
         omp.set_property("cmake_target_name", "OpenMP::OpenMP")
         omp.set_property("cmake_target_aliases", ["OpenMP::OpenMP_C", "OpenMP::OpenMP_CXX"])
-        omp.libs = [self._lib_name]
+        omp.libs = ["libomp" if is_msvc(self) else "omp"]
         omp.system_libs = self._system_libs
         omp.cflags = self._openmp_flags
         omp.cxxflags = self._openmp_flags
