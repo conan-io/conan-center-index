@@ -1,7 +1,7 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir, replace_in_file, save
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
@@ -200,8 +200,11 @@ class OpenTelemetryCppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
-        VirtualRunEnv(self).generate()
+        VirtualBuildEnv(self).generate(scope="build")
+        if not cross_building(self):
+            VirtualRunEnv(self).generate(scope="build")
+        else:
+            VirtualRunEnv(self).generate(scope="run")
 
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_TESTING"] = False
