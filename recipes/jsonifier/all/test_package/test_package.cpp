@@ -17,7 +17,7 @@ int main() {
   MyObject obj("John", 30);
   jsonifier::jsonifier_core jsonifier{};
   std::string jsonBuffer{};
-  jsonifier.serializeJson<true>(obj, jsonBuffer);
+  jsonifier.serializeJson(obj, jsonBuffer);
 
   std::cout << jsonBuffer << std::endl;
 
