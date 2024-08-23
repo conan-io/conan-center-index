@@ -441,7 +441,7 @@ class QtConan(ConanFile):
         self.tool_requires("ninja/[>=1.12 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        if self.settings.os == "Windows":
+        if self._settings_build.os == "Windows" and Version(self.version) < "6.5.0":
             self.tool_requires('strawberryperl/5.32.1.1')
 
         if self.options.get_safe("qtwebengine"):
@@ -649,7 +649,7 @@ class QtConan(ConanFile):
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
             tc.variables["BUILD_WITH_PCH"] = "OFF"  # disabling PCH to save disk space
 
-        if self.settings.os == "Windows":
+        if self._settings_build.os == "Windows" and Version(self.version) < "6.5.0":
             tc.variables["HOST_PERL"] = self.dependencies.build["strawberryperl"].conf_info.get("user.strawberryperl:perl", check_type=str)
                                #"set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
                                #"set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
