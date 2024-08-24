@@ -348,10 +348,13 @@ class OpenCVConan(ConanFile):
         else:
             del self.options.with_ffmpeg
 
-        if "arm" not in self.settings.arch:
-            del self.options.neon
         if not self._has_with_jpeg2000_option:
             del self.options.with_jpeg2000
+        elif Version(self.version) < "4.3.0":
+            self.options.with_jpeg2000 = "jasper"
+
+        if "arm" not in self.settings.arch:
+            del self.options.neon
         if not self._has_with_tiff_option:
             del self.options.with_tiff
         if not self._has_with_gstreamer_option:
@@ -393,9 +396,6 @@ class OpenCVConan(ConanFile):
             # in a big dependency graph
             if not self._has_with_wayland_option:
                 self.options.with_gtk = True
-
-        if Version(self.version) < "4.3.0":
-            self.options.with_jpeg2000 = "jasper"
 
     @property
     def _opencv_modules(self):
@@ -1289,8 +1289,7 @@ class OpenCVConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "viz module can't be enabled yet. It requires VTK which is not available in conan-center."
             )
-
-        if self.options.with_jpeg2000 == "openjpeg" and Version(self.version) < "4.3.0":
+        if self.options.get_safe("with_jpeg2000") == "openjpeg" and Version(self.version) < "4.3.0":
             raise ConanInvalidConfiguration("openjpeg is not available for OpenCV before 4.3.0")
 
         if self.options.get_safe("with_aravis"):
