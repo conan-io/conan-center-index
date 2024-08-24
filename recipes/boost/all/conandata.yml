@@ -1,4 +1,9 @@
 sources:
+  "1.86.0":
+    url:
+      - "https://boostorg.jfrog.io/artifactory/main/release/1.86.0/source/boost_1_86_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.86.0/boost_1_86_0.tar.bz2"
+    sha256: "1bed88e40401b2cb7a1f76d4bab499e352fa4d0c5f31c0dbae64e24d34d7513b"
   "1.85.0":
     url:
       - "https://boostorg.jfrog.io/artifactory/main/release/1.85.0/source/boost_1_85_0.tar.bz2"
