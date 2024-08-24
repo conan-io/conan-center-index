@@ -41,7 +41,10 @@ class AudiowaveformConan(ConanFile):
         self.requires("libid3tag/0.15.1b")
         self.requires("libmad/0.15.1b")
         self.requires("libsndfile/1.2.2")
-        self.requires("boost/1.83.0")
+        self.requires("boost/1.85.0")
+
+    def package_id(self):
+        del self.info.settings.compiler
 
     def validate(self):
         if self.settings.compiler.cppstd:
