@@ -432,6 +432,8 @@ class BoostConan(ConanFile):
                 self.options.without_url = True
         if Version(self.version) >= "1.85.0" and not self._has_cppstd_14_supported:
             self.options.without_math = True
+        if Version(self.version) >= "1.86.0" and not self._has_cppstd_14_supported:
+            self.options.without_graph = True
 
         # iconv is off by default on Windows and Solaris
         if self._is_windows_platform or self.settings.os == "SunOS":
@@ -451,6 +453,14 @@ class BoostConan(ConanFile):
 
         def disable_math():
             super_modules = self._all_super_modules("math")
+            for smod in super_modules:
+                try:
+                    setattr(self.options, f"without_{smod}", True)
+                except ConanException:
+                    pass
+
+        def disable_graph():
+            super_modules = self._all_super_modules("graph")
             for smod in super_modules:
                 try:
                     setattr(self.options, f"without_{smod}", True)
@@ -565,6 +575,18 @@ class BoostConan(ConanFile):
                 elif not self._has_cppstd_14_supported:
                     disable_math()
 
+        if Version(self.version) >= "1.86.0":
+            # Boost 1.86.0 updated more components that require C++14 and C++17
+            # https://www.boost.org/users/history/version_1_86_0.html
+            if self.settings.compiler.get_safe("cppstd"):
+                if not valid_min_cppstd(self, 14):
+                    disable_graph()
+            else:
+                min_compiler_version = self._min_compiler_version_default_cxx14
+                if min_compiler_version is None:
+                    self.output.warning("Assuming the compiler supports c++14 by default")
+                elif not self._has_cppstd_14_supported:
+                    disable_graph()
 
     @property
     def _configure_options(self):
