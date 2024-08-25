@@ -88,6 +88,8 @@ class IphreeqcConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "IPhreeqc::IPhreeqc")
         self.cpp_info.libs = ["IPhreeqc"]
         self.cpp_info.defines.append("IPHREEQC_NO_FORTRAN_MODULE")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
         if not self.options.shared:
             libcxx = stdcpp_library(self)
             if libcxx:
