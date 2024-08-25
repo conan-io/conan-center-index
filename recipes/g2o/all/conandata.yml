@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/001-unvendor-freeglut.patch"
       patch_description: "Replace vendored FreeGLUT with a Conan version"
       patch_type: "conan"
+    - patch_file: "patches/002-use-openmp-target.patch"
+      patch_description: "Require OpenMP if enabled, use a target instead of plain compiler flags"
+      patch_type: "portability"
