@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -25,7 +26,7 @@ class SqliteOrmConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "5",
+            "gcc": "5" if Version(self.version) < "1.9" else "6",
             "Visual Studio": "14",
             "msvc": "190",
             "clang": "3.4",
