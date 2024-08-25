@@ -1,6 +1,6 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -297,7 +297,7 @@
+@@ -297,11 +297,11 @@
  # OpenMP (optional)
  option(WITH_OPENMP "Build with parallelization using OpenMP" TRUE)
  if(WITH_OPENMP)
@@ -8,7 +8,10 @@
 +  find_package(OpenMP REQUIRED COMPONENTS C CXX)
  endif()
  if(OpenMP_FOUND)
-   string(APPEND CMAKE_C_FLAGS " ${OpenMP_C_FLAGS}")
+-  string(APPEND CMAKE_C_FLAGS " ${OpenMP_C_FLAGS}")
+-  string(APPEND CMAKE_CXX_FLAGS " ${OpenMP_CXX_FLAGS}")
++  link_libraries(OpenMP::OpenMP_CXX)
++
 @@ -319,11 +319,11 @@
  find_package(Threads REQUIRED)
  
