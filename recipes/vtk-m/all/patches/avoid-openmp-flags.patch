@@ -1,0 +1,14 @@
+--- a/CMake/VTKmDeviceAdapters.cmake
++++ b/CMake/VTKmDeviceAdapters.cmake
+@@ -59,11 +59,6 @@
+ 
+   add_library(vtkm_openmp INTERFACE)
+   target_link_libraries(vtkm_openmp INTERFACE OpenMP::OpenMP_CXX)
+-  target_compile_options(vtkm_openmp INTERFACE $<$<COMPILE_LANGUAGE:CXX>:${OpenMP_CXX_FLAGS}>)
+-  if(VTKm_ENABLE_CUDA)
+-    string(REPLACE ";" "," openmp_cuda_flags "-Xcompiler=${OpenMP_CXX_FLAGS}")
+-    target_compile_options(vtkm_openmp INTERFACE $<$<COMPILE_LANGUAGE:CUDA>:${openmp_cuda_flags}>)
+-  endif()
+   set_target_properties(vtkm_openmp PROPERTIES EXPORT_NAME openmp)
+   install(TARGETS vtkm_openmp EXPORT ${VTKm_EXPORT_NAME})
+ endif()
