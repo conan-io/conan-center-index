@@ -7,7 +7,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, export_conandata_patches, get, load, replace_in_file, save, rmdir
+from conan.tools.files import copy, export_conandata_patches, get, load, replace_in_file, save, rmdir, apply_conandata_patches
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -170,6 +170,7 @@ class VtkmConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         replace_in_file(self, os.path.join(self.source_folder, "vtkm", "thirdparty", "diy", "vtkmdiy", "cmake", "DIYConfigureMPI.cmake"),
                         "${MPI_CXX_LIBRARIES}", "MPI::MPI_CXX")
 
