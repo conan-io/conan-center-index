@@ -65,9 +65,6 @@ class IphreeqcConan(ConanFile):
         tc.variables["IPHREEQC_ENABLE_MODULE"] = False
         tc.variables["IPHREEQC_FORTRAN_TESTING"] = False
         tc.variables["BUILD_CLR_LIBS"] = False
-        tc.variables["CMAKE_DEBUG_POSTFIX"] = ""
-        tc.variables["CMAKE_MINSIZEREL_POSTFIX"] = ""
-        tc.variables["CMAKE_RELWITHDEBINFO_POSTFIX"] = ""
         tc.generate()
 
     def build(self):
@@ -86,7 +83,14 @@ class IphreeqcConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "IPhreeqc")
         self.cpp_info.set_property("cmake_target_name", "IPhreeqc::IPhreeqc")
-        self.cpp_info.libs = ["IPhreeqc"]
+        postfix = ""
+        if self.settings.build_type == "Debug":
+            postfix += "d"
+        elif self.settings.build_type == "MinSizeRel":
+            postfix += "msr"
+        elif self.settings.build_type == "RelWithDebInfo":
+            postfix += "rwd"
+        self.cpp_info.libs = [f"IPhreeqc{postfix}"]
         self.cpp_info.defines.append("IPHREEQC_NO_FORTRAN_MODULE")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
