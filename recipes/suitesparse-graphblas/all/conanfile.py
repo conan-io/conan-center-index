@@ -107,6 +107,8 @@ class SuiteSparseGraphBlasConan(ConanFile):
             self.cpp_info.set_property("cmake_target_aliases", ["SuiteSparse::GraphBLAS_static"])
         self.cpp_info.set_property("pkg_config_name", "GraphBLAS")
 
+        self.cpp_info.includedirs.append(os.path.join("include", "suitesparse"))
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
 
