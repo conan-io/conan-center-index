@@ -3,6 +3,7 @@ import os
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
@@ -147,6 +148,9 @@ class OpenMPIConan(ConanFile):
 
         deps = AutotoolsDeps(self)
         deps.generate()
+
+        # Needed for ./configure to find libibnetdisc.so
+        VirtualRunEnv(self).generate(scope="build")
 
         # TODO: might want to enable reproducible builds by setting
         #  $SOURCE_DATE_EPOCH, $USER and $HOSTNAME
