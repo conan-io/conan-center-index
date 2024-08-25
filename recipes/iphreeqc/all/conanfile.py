@@ -78,6 +78,7 @@ class IphreeqcConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "src"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
