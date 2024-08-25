@@ -1,0 +1,87 @@
+from conan import ConanFile
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+
+required_conan_version = ">=1.53.0"
+
+class OpenJPH(ConanFile):
+    name = "openjph"
+    description = "Open-source implementation of JPEG2000 Part-15 (or JPH or HTJ2K)"
+    license = "BSD-2-Clause"
+    homepage = "https://github.com/aous72/OpenJPH"
+    url = "https://github.com/conan-io/conan-center-index"
+    topics = ("ht-j2k", "jpeg2000", "jp2", "openjph", "image", "multimedia", "format", "graphics")
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "with_tiff": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+        "with_tiff": True,
+    }
+
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        if self.options.with_tiff:
+            self.requires("libtiff/4.6.0")
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 14)
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.11 <4]")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["OJPH_ENABLE_TIFF_SUPPORT"] = self.options.with_tiff
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
+    def build(self):
+        self._patch_sources()
+
+        cm = CMake(self)
+        cm.configure()
+        cm.build()
+
+    def package(self):
+        cm = CMake(self)
+        cm.install()
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "openjph")
+        self.cpp_info.set_property("cmake_target_name", "openjph::openjph")
+        self.cpp_info.set_property("pkg_config_name", "openjph")
+
+        self.cpp_info.libs = ["openjph"]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
+        self.cpp_info.names["cmake_find_package"] = "openjph"
+        self.cpp_info.names["cmake_find_package_multi"] = "openjph"
+        self.cpp_info.names["pkg_config"] = "openjph"
