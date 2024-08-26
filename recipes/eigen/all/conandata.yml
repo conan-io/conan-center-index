@@ -1,5 +1,5 @@
 sources:
-  "cci.20240315":
+  "3.4.0.cci.20240315":
     url: "https://gitlab.com/libeigen/eigen/-/archive/9df21dc8b4b576a7aa5c0094daa8d7e8b8be60f0/eigen-9df21dc8b4b576a7aa5c0094daa8d7e8b8be60f0.tar.bz2"
     sha256: "bde2e293663204ffd28b788bda9a0b48aeb55d1773a314ea9eb5d440376a5167"
   "3.4.0":
