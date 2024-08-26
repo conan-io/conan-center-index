@@ -246,6 +246,8 @@ class VtkConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            # FIXME: System ODBC not found on Windows?
+            self.options.with_odbc = False
         else:
             # Uses windows.h
             del self.options.with_zspace
@@ -350,7 +352,8 @@ class VtkConan(ConanFile):
             self.requires("netcdf/4.8.1", transitive_headers=is_public, transitive_libs=is_public)
         if self.options.with_nlohmannjson:
             self.requires("nlohmann_json/3.11.3")
-        if self.options.with_odbc:
+        if self.options.with_odbc and self.settings.os != "Windows":
+            # odbc is a system lib on Windows
             self.requires("odbc/2.3.11")
         if self.options.with_ogg:
             self.requires("ogg/1.3.5")
@@ -409,6 +412,7 @@ class VtkConan(ConanFile):
         # HoloPlayCore | HoloPlayCore::HoloPlayCore
         # MEMKIND | MEMKIND::MEMKIND | VTK_USE_MEMKIND
         # OpenImageDenoise | OpenImageDenoise | VTK_ENABLE_OSPRAY AND VTKOSPRAY_ENABLE_DENOISER
+        # OpenTURNS | ${OPENTURNS_LIBRARY}
         # OpenXR | OpenXR::OpenXR
         # OpenXRRemoting | OpenXR::Remoting
         # VisRTX | VisRTX_DynLoad | VTK_ENABLE_VISRTX
@@ -507,10 +511,12 @@ class VtkConan(ConanFile):
         modules["CommonPython"] = "NO"
         modules["CommonSystem"] = "YES"
         modules["CommonTransforms"] = "YES"
+        modules["FiltersOpenTURNS"] = "NO"
         modules["IOCore"] = "YES"
         modules["Python"] = "NO"
         modules["GUISupportQtQuick"] = _maybe(self.options.with_qt and qt.opengl != "no" and qt.gui and qt.qtshadertools and qt.qtdeclarative)
         modules["RenderingWebGPU"] = _maybe(self.options.with_sdl2 and (self.settings.os == "Emscripten" or self.options.get_safe("with_dawn")))
+        modules["RenderingFreeTypeFontConfig"] = _yes_no(self.options.with_freetype and self.options.with_fontconfig)
         modules["cgns"] = _yes_no(self.options.with_cgns)
         modules["diy2"] = _yes_no(self.options.with_diy2)
         modules["doubleconversion"] = "YES"
@@ -846,7 +852,7 @@ class VtkConan(ConanFile):
         #   include_directories (always "${_IMPORT_PREFIX}/include/vtk")
         #   link_libraries
         #   system_include_directories (still include/vtk, but silent)
-        txt = load(self, targets_file)
+        txt = Path(targets_file).read_text("utf8")
         raw_targets = re.findall(r"add_library\(VTK::(\S+) (\S+) IMPORTED\)", txt)
         targets = {name: {"is_interface": kind == "INTERFACE"} for name, kind in raw_targets if name not in ["vtkbuild"]}
         props_raw = re.findall(r"set_target_properties\(VTK::(\S+) PROPERTIES\n((?: *.+\n)+)\)", txt)
@@ -900,7 +906,7 @@ class VtkConan(ConanFile):
 
     @property
     def _known_system_libs(self):
-        return ["m", "dl", "pthread", "rt", "log", "embind", "socket", "nsl", "wsock32", "ws2_32"]
+        return ["m", "dl", "pthread", "rt", "log", "embind", "socket", "nsl", "wsock32", "ws2_32", "dbghelp", "psapi"]
 
     def _transform_link_libraries(self, values):
         # Converts a list of LINK_LIBRARIES values into a list of component requirements, system_libs and frameworks.
@@ -918,7 +924,7 @@ class VtkConan(ConanFile):
                 # e.g. "\$<\$<PLATFORM_ID:WIN32>:wsock32>"
                 platform_id = re.search(r"PLATFORM_ID:(\w+)", v).group(1)
                 if self._is_matching_cmake_platform(platform_id):
-                    lib = re.search(":(.+)>$", v).group(1)
+                    lib = re.search(r":(\w+)>$", v).group(1)
                     system_libs.append(lib)
             elif v.lower().replace(".lib", "") in self._known_system_libs:
                 system_libs.append(v)
