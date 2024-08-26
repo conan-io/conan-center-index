@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualRunEnv
@@ -77,10 +77,6 @@ class OpenMPIConan(ConanFile):
 
         if self.version == "4.1.0" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("OpenMPI 4.1.0 doesn't support armv8")
-
-        if conan_version.major == 1 and self.settings.compiler in ["clang", "apple-clang"]:
-            # Fails with "configure: error: cannot run C compiled programs."
-            raise ConanInvalidConfiguration("Clang and AppleClang are not supported on Conan v1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
