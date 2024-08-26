@@ -83,10 +83,10 @@ class GobjectIntrospectionConan(ConanFile):
             tc.project_options["gi_cross_use_prebuilt_gi"] = "false"
             tc.project_options["build_introspection_data"] = "false"
         else:
-            tc.project_options["build_introspection_data"] = "true"
-            if self.dependencies["glib"].options.shared and not is_apple_os(self):
-                # FIXME: g-ir-scanner fails to load glib correctly, it fails to find libgnuintl
-                tc.project_options["build_introspection_data"] = "false"
+            tc.project_options["build_introspection_data"] = "true" if self.dependencies["glib"].options.shared else "false"
+        if is_apple_os(self):
+            # FIXME: g-ir-scanner fails to load glib correctly, it fails to find libgnuintl
+            tc.project_options["build_introspection_data"] = "false"
         tc.project_options["datadir"] = "res"
         tc.generate()
         deps = PkgConfigDeps(self)
