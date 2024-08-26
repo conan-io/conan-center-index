@@ -1,7 +1,9 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 
 import os
 
@@ -47,6 +49,10 @@ class OpenJPH(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 14)
+
+        if self.settings.compiler == "gcc" and \
+            Version(self.settings.compiler.version) < "6.0":
+            raise ConanInvalidConfiguration(f"{self.ref} requires gcc >= 6.0")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.11 <4]")
