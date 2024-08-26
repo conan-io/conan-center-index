@@ -20,6 +20,9 @@ sources:
   "5.6.1":
     sha256: cdb15e7ee31e0663589d3107a79988a37b7b1719df3d24f2058545d1bcdd5837
     url: https://github.com/CGAL/cgal/releases/download/v5.6.1/CGAL-5.6.1.tar.xz
+  "6.0-beta1":
+    sha256: 0af1c8e5de91b7aab4c81214b5ac50a9361a36b73b89043533a7c82b287d6c70
+    url: https://github.com/CGAL/cgal/releases/download/v6.0-beta1/CGAL-6.0-beta1.tar.xz
 patches:
   "5.3.2":
     - patch_file: "patches/0001-fix-for-conan.patch"
