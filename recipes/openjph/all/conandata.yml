@@ -2,3 +2,8 @@ sources:
   "0.15.0":
     url: "https://github.com/aous72/OpenJPH/archive/0.15.0.tar.gz"
     sha256: "36601fbd3b4e1fe54eef5e6fa51ac0eca7be94b2a3d7c0967e3c8da66687ff2c"
+patches:
+  "0.15.0":
+    - patch_file: "patches/0.15.0_cmake-remove-libversion-suffix-win.patch"
+      patch_description: "Ensure that the library isn't suffixed with the version name for better compatibility"
+      patch_type: "conan"
