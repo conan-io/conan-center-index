@@ -148,7 +148,7 @@ class LibfabricConan(ConanFile):
         for p in self._providers:
             if p == "verbs" and not self.options.get_safe(p, "no") == "no":
                 path = self.dependencies["rdma-core"].package_folder
-                if self.options.verbs == "dl":
+                if self.options.get_safe("verbs") == "dl":
                     tc.configure_args.append(f"--enable-verbs=dl:{path}")
                 else:
                     tc.configure_args.append(f"--enable-verbs={path}")
