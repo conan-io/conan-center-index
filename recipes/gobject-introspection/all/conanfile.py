@@ -10,7 +10,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.env import Environment
 from conan.tools.scm import Version
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
@@ -48,7 +48,7 @@ class GobjectIntrospectionConan(ConanFile):
     def requirements(self):
         # https://gitlab.gnome.org/GNOME/gobject-introspection/-/blob/1.76.1/meson.build?ref_type=tags#L127-131
         glib_minor = Version(self.version).minor
-        self.requires(f"glib/[>=2.{glib_minor}]", transitive_headers=True, transitive_libs=True)
+        self.requires(f"glib/[^2.{glib_minor}]", transitive_headers=True, transitive_libs=True)
         # FIXME: gobject-introspection links against system python3 libs, which is not reliable
 
     def validate(self):
@@ -83,7 +83,10 @@ class GobjectIntrospectionConan(ConanFile):
             tc.project_options["gi_cross_use_prebuilt_gi"] = "false"
             tc.project_options["build_introspection_data"] = "false"
         else:
-            tc.project_options["build_introspection_data"] = "true" if self.dependencies["glib"].options.shared else "false"
+            tc.project_options["build_introspection_data"] = "true"
+            if self.dependencies["glib"].options.shared and not is_apple_os(self):
+                # FIXME: g-ir-scanner fails to load glib correctly, it fails to find libgnuintl
+                tc.project_options["build_introspection_data"] = "false"
         tc.project_options["datadir"] = "res"
         tc.generate()
         deps = PkgConfigDeps(self)
