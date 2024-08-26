@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 import os
@@ -92,7 +93,12 @@ class OpenJPH(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "openjph::openjph")
         self.cpp_info.set_property("pkg_config_name", "openjph")
 
-        self.cpp_info.libs = ["openjph"]
+        version_suffix = ""
+        if is_msvc(self):
+            v = Version(self.version)
+            version_suffix = f".{v.major}.{v.minor}"
+            print('Lib Version', version_suffix)
+        self.cpp_info.libs = ["openjph" + version_suffix]
 
         # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "openjph"
