@@ -4,7 +4,7 @@ from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import copy, get, rm, rmdir, save
+from conan.tools.files import copy, get, rm, rmdir, save, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
@@ -158,6 +158,10 @@ class OpenMPIConan(ConanFile):
     def _patch_sources(self):
         # Not needed and fails with v5.0 due to additional Python dependencies
         save(self, os.path.join(self.source_folder, "docs", "Makefile.in"), "all:\ninstall:\n")
+        # Workaround for <cstddef> trying to include VERSION from source dir due to a case-insensitive filesystem on macOS
+        # Based on https://github.com/macports/macports-ports/blob/22dded99ae76a287f04a9685bbc820ecaa397fea/science/openmpi/files/patch-configure.diff
+        replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                        "-I$(top_srcdir) ", "-idirafter$(top_srcdir) ")
 
     def build(self):
         self._patch_sources()
