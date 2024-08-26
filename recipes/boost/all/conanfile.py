@@ -609,8 +609,12 @@ class BoostConan(ConanFile):
 
     @property
     def _stacktrace_from_exception_available(self):
-        if Version(self.version) >= "1.85.0":
+        if Version(self.version) == "1.85.0":
+            # https://github.com/boostorg/stacktrace/blob/boost-1.85.0/build/Jamfile.v2#L143
             return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
+        elif Version(self.version) >= "1.86.0":
+            # https://github.com/boostorg/stacktrace/blob/boost-1.86.0/build/Jamfile.v2#L148
+            return not self.options.header_only and self.settings.arch != "x86_64"
 
     def configure(self):
         if self.options.header_only:
@@ -1913,7 +1917,9 @@ class BoostConan(ConanFile):
                         continue
                     if name in ("boost_math_c99l", "boost_math_tr1l") and str(self.settings.arch).startswith("ppc"):
                         continue
-                    if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic", "boost_stacktrace_from_exception",) and self.settings.os == "Windows":
+                    if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic") and self.settings.os == "Windows":
+                        continue
+                    if name == "boost_stacktrace_from_exception" and not self._stacktrace_from_exception_available:
                         continue
                     if name == "boost_stacktrace_addr2line" and not self._stacktrace_addr2line_available:
                         continue
