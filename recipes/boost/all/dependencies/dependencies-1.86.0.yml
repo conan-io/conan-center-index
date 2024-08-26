@@ -128,8 +128,6 @@ dependencies:
   - stacktrace
   stacktrace_basic:
   - stacktrace
-  stacktrace_from_exception:
-  - stacktrace
   stacktrace_noop:
   - stacktrace
   stacktrace_windbg:
