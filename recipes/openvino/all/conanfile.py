@@ -14,7 +14,6 @@ required_conan_version = ">=1.60.0 <2.0 || >=2.0.8"
 class OpenvinoConan(ConanFile):
     name = "openvino"
 
-    # Optional metadata
     license = "Apache-2.0"
     homepage = "https://github.com/openvinotoolkit/openvino"
     url = "https://github.com/conan-io/conan-center-index"
@@ -99,6 +98,10 @@ class OpenvinoConan(ConanFile):
     @property
     def _gna_option_available(self):
         return self.settings.os in ["Linux", "Windows"] and self._target_x86_64 and Version(self.version) < "2024.0.0"
+
+    @property
+    def _npu_option_available(self):
+        return self.settings.os in ["Linux", "Windows"] and self._target_x86_64 and Version(self.version) >= "2024.1.0"
 
     @property
     def _gpu_option_available(self):
@@ -205,6 +208,8 @@ class OpenvinoConan(ConanFile):
             toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = self.options.shared or not self.options.enable_cpu
         if self._gna_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GNA"] = False
+        if self._npu_option_available:
+            toolchain.cache_variables["ENABLE_INTEL_NPU"] = False
         # SW plugins
         toolchain.cache_variables["ENABLE_AUTO"] = self.options.enable_auto
         toolchain.cache_variables["ENABLE_MULTI"] = self.options.enable_auto
@@ -265,10 +270,9 @@ class OpenvinoConan(ConanFile):
         if self.settings.os == "Emscripten":
             raise ConanInvalidConfiguration(f"{self.ref} does not support Emscripten")
 
-        # TODO: resolve it later, since it is not critical for now
-        # Conan Center CI fails with our of memory error when building OpenVINO
-        if self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support Debug build type")
+        # Failing on Conan Center CI due to memory usage
+        if os.getenv("CONAN_CENTER_BUILD_SERVICE") and self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Debug build type on Conan Center CI")
 
     def validate(self):
         if self.options.get_safe("enable_gpu") and not self.options.shared and self.options.enable_cpu:
@@ -344,19 +348,22 @@ class OpenvinoConan(ConanFile):
                 openvino_runtime.libs.extend(["openvino_onnx_frontend", "openvino_onnx_common"])
                 openvino_runtime.requires.extend(["protobuf::libprotobuf", "onnx::onnx"])
             if self.options.enable_tf_frontend:
-                openvino_runtime.libs.extend(["openvino_tensorflow_frontend", "openvino_tensorflow_common"])
+                openvino_runtime.libs.extend(["openvino_tensorflow_frontend"])
                 openvino_runtime.requires.extend(["protobuf::libprotobuf", "snappy::snappy"])
             if self.options.enable_tf_lite_frontend:
-                openvino_runtime.libs.extend(["openvino_tensorflow_lite_frontend", "openvino_tensorflow_common"])
+                openvino_runtime.libs.extend(["openvino_tensorflow_lite_frontend"])
                 openvino_runtime.requires.extend(["flatbuffers::flatbuffers"])
+            if self.options.enable_tf_frontend or self.options.enable_tf_lite_frontend:
+                openvino_runtime.libs.extend(["openvino_tensorflow_common"])
             if self.options.enable_paddle_frontend:
                 openvino_runtime.libs.append("openvino_paddle_frontend")
                 openvino_runtime.requires.append("protobuf::libprotobuf")
             if self.options.enable_pytorch_frontend:
                 openvino_runtime.libs.append("openvino_pytorch_frontend")
             # Common private dependencies should go last, because they satisfy dependencies for all other libraries
-            openvino_runtime.libs.extend(["openvino_reference", "openvino_builders",
-                                          "openvino_shape_inference", "openvino_itt",
+            if Version(self.version) < "2024.0.0":
+                openvino_runtime.libs.append("openvino_builders")
+            openvino_runtime.libs.extend(["openvino_reference", "openvino_shape_inference", "openvino_itt",
                                           # utils goes last since all others depend on it
                                           "openvino_util"])
             # set 'openvino' once again for transformations objects files (cyclic dependency)

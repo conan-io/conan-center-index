@@ -1,4 +1,10 @@
 sources:
+  "1.0.0":
+    url: "https://github.com/furfurylic/commata/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "ecf0a88f6a4616d10770522b4ef4838e4100511759eb640270f6b932e4b7df69"
+  "0.2.9":
+    url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.9.tar.gz"
+    sha256: "24c404e90e2f01a2f9e46e55c2f8121a3f146d1f2dfb819b8d7ab5cf13bd6a9f"
   "0.2.8":
     url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.8.tar.gz"
     sha256: "a762ec3ef1549aa5aebef78a160a40ee16d396fd976154f1f5c160837d145c8a"
@@ -15,6 +21,15 @@ sources:
     url: "https://github.com/furfurylic/commata/archive/refs/tags/v0.2.5.tar.gz"
     sha256: "d1be1f366267af6c466c29f846f5968f57626a8a6635a2ea9a3de3f6fb88e53b"
 patches:
+  "0.2.9":
+    - patch_file: "patches/0.2.9-0001-include-set.patch"
+      patch_description: "include <set> header"
+      patch_type: "portability"
+      patch_source: "https://github.com/furfurylic/commata/pull/3"
+    - patch_file: "patches/0.2.9-0002-additional-missing-includes.patch"
+      patch_description: "add more missing headers"
+      patch_type: "portability"
+      patch_source: "https://github.com/furfurylic/commata/commit/07c6f43f0fae0237569d12420aded35f8ccf792f"
   "0.2.7":
     - patch_file: "patches/0.2.7-0001-include-optional.patch"
       patch_description: "include <optional> header"

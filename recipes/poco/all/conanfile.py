@@ -29,14 +29,18 @@ class PocoConan(ConanFile):
         "fPIC": [True, False],
         "enable_fork": [True, False],
         "enable_active_record": [True, False, "deprecated"],
+        "log_debug": [True, False],
         "with_sql_parser": [True, False],
+        "comp_foundation_sharedlibrary_debug_suffix": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_fork": True,
         "enable_active_record": "deprecated",
+        "log_debug": False,
         "with_sql_parser": True,
+        "comp_foundation_sharedlibrary_debug_suffix": True,
     }
 
     _PocoComponent = namedtuple("_PocoComponent", ("option", "default_option", "dependencies", "external_dependencies", "is_lib"))
@@ -125,6 +129,8 @@ class PocoConan(ConanFile):
             del self.options.enable_prometheus
         if Version(self.version) < "1.13.0":
             del self.options.with_sql_parser
+        if self.settings.build_type != "Debug":
+            del self.options.comp_foundation_sharedlibrary_debug_suffix
 
     def configure(self):
         if self.options.enable_active_record != "deprecated":
@@ -149,9 +155,9 @@ class PocoConan(ConanFile):
             self.requires("pcre/8.45")
         else:
             self.requires("pcre2/10.42")
-        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("zlib/[>=1.2.11 <2]", transitive_headers=True)
         if self.options.enable_xml:
-            self.requires("expat/2.5.0", transitive_headers=True)
+            self.requires("expat/[>=2.6.2 <3]", transitive_headers=True)
         if self.options.enable_data_sqlite:
             self.requires("sqlite3/3.45.0")
         if self.options.enable_apacheconnector:
@@ -169,6 +175,7 @@ class PocoConan(ConanFile):
 
     def package_id(self):
         del self.info.options.enable_active_record
+        del self.info.options.log_debug
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -247,6 +254,9 @@ class PocoConan(ConanFile):
         tc.preprocessor_definitions["POCO_NO_AUTOMATIC_LIBS"] = "1"
         # Picked up from conan v1 CMake wrapper, don't know the rationale
         tc.preprocessor_definitions["XML_DTD"] = "1"
+        # Disable SharedLibrary::suffix() including "d" as part of the platform-specific filename suffix
+        if not self.options.get_safe("comp_foundation_sharedlibrary_debug_suffix", True):
+            tc.preprocessor_definitions["POCO_NO_SHARED_LIBRARY_DEBUG_SUFFIX"] = "1"
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -348,6 +358,9 @@ class PocoConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["poco_foundation"].system_libs.extend(["pthread", "dl", "rt"])
+
+        if self.options.log_debug:
+            self.cpp_info.components["poco_foundation"].defines.append("POCO_LOG_DEBUG")
 
         if is_msvc(self):
             self.cpp_info.components["poco_foundation"].defines.append("POCO_NO_AUTOMATIC_LIBS")

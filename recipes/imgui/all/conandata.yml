@@ -1,61 +1,46 @@
 sources:
-  "1.90.3":
-    url: "https://github.com/ocornut/imgui/archive/v1.90.3.tar.gz"
-    sha256: "40b302d01092c9393373b372fe07ea33ac69e9491893ebab3bf952b2c1f5fd23"
-  "1.90.3-docking":
-    url: "https://github.com/ocornut/imgui/archive/v1.90.3-docking.tar.gz"
-    sha256: "ebd1da0f76a95a7a690f8a0dfa119e1c6da4eee40383e582fb75374792be0891"
-  "1.90.2":
-    url: "https://github.com/ocornut/imgui/archive/v1.90.2.tar.gz"
-    sha256: "452d1c11e5c4b4dfcca272915644a65f1c076498e8318b141ca75cd30470dd68"
-  "1.90.2-docking":
-    url: "https://github.com/ocornut/imgui/archive/v1.90.2-docking.tar.gz"
-    sha256: "69f1cd78d49ec9cc847b7082d641434ea731f0be41c6930bea08a46a0794ac17"
-  "1.90.1":
-    url: "https://github.com/ocornut/imgui/archive/v1.90.1.tar.gz"
-    sha256: "21dcc985bb2ae8fe48047c86135dbc438d6980a8f2e08babbda5be820592f282"
-  "1.90.1-docking":
-    url: "https://github.com/ocornut/imgui/archive/v1.90.1-docking.tar.gz"
-    sha256: "6804c3d8dc6d83b892d3c5491d8164840079d9a795fb7c4cef2eaa1b04c86a0c"
-  "1.90":
-    url: "https://github.com/ocornut/imgui/archive/v1.90.tar.gz"
-    sha256: "170986e6a4b83d165bfc1d33c2c5a5bc2d67e5b97176287485c51a2299249296"
-  "1.90-docking":
-    url: "https://github.com/ocornut/imgui/archive/v1.90-docking.tar.gz"
-    sha256: "d4b7fd185443111a3a892d4625c85ab9666c6c9cb5484e3a447de6af419f8d2f"
+  "1.91.0":
+    url: "https://github.com/ocornut/imgui/archive/v1.91.0.tar.gz"
+    sha256: "6e62c87252e6b3725ba478a1c04dc604aa0aaeec78fedcf4011f1e52548f4cc9"
+  "1.91.0-docking":
+    url: "https://github.com/ocornut/imgui/archive/v1.91.0-docking.tar.gz"
+    sha256: "b08a569eedcf2bf25e763e034754fdbe37dfcb035072310781c92fa6e6504bf7"
+  "1.90.9":
+    url: "https://github.com/ocornut/imgui/archive/v1.90.9.tar.gz"
+    sha256: "04943919721e874ac75a2f45e6eb6c0224395034667bf508923388afda5a50bf"
+  "1.90.9-docking":
+    url: "https://github.com/ocornut/imgui/archive/v1.90.9-docking.tar.gz"
+    sha256: "48e7e4e4f154ad98d0946126a84e2375f849f6a67792129a805817dd60a34330"
+  "1.90.8":
+    url: "https://github.com/ocornut/imgui/archive/v1.90.8.tar.gz"
+    sha256: "f606b4fb406aa0f8dad36d4a9dd3d6f0fd39f5f0693e7468abc02d545fb505ae"
+  "1.90.8-docking":
+    url: "https://github.com/ocornut/imgui/archive/v1.90.8-docking.tar.gz"
+    sha256: "51845ed8b8e81490288c3c8165173d47e9bcf92f7d999aea800635f95587b9e7"
+  "1.90.7":
+    url: "https://github.com/ocornut/imgui/archive/v1.90.7.tar.gz"
+    sha256: "872574217643d4ad7e9e6df420bb8d9e0d468fb90641c2bf50fd61745e05de99"
+  "1.90.7-docking":
+    url: "https://github.com/ocornut/imgui/archive/v1.90.7-docking.tar.gz"
+    sha256: "582a9061a508b82b0ff6504aa17af6bb449bca9edf0a0f0f33bf729252cd3194"
+  "1.90.6":
+    url: "https://github.com/ocornut/imgui/archive/v1.90.6.tar.gz"
+    sha256: "70b4b05ac0938e82b4d5b8d59480d3e2ca63ca570dfb88c55023831f387237ad"
+  "1.90.6-docking":
+    url: "https://github.com/ocornut/imgui/archive/v1.90.6-docking.tar.gz"
+    sha256: "fc7f81d009ef718917aee0ac3ea1c74c8a5cfc8016049ad153b4d91d302b8aef"
+  "1.90.5":
+    url: "https://github.com/ocornut/imgui/archive/v1.90.5.tar.gz"
+    sha256: "e94b48dba7311c85ba8e3e6fe7c734d76a0eed21b2b42c5180fd5706d1562241"
+  "1.90.5-docking":
+    url: "https://github.com/ocornut/imgui/archive/v1.90.5-docking.tar.gz"
+    sha256: "8a5e1e594d6c8552e46e4c1ba8dd9deb51262067f04937904babc04384533ccc"
   "1.89.9":
     url: "https://github.com/ocornut/imgui/archive/v1.89.9.tar.gz"
     sha256: "1acc27a778b71d859878121a3f7b287cd81c29d720893d2b2bf74455bf9d52d6"
   "1.89.9-docking":
     url: "https://github.com/ocornut/imgui/archive/v1.89.9-docking.tar.gz"
     sha256: "2481489ce9091239b3cab8a330d0409ffdd9ee607ad1f3fe3a0b0b751c27a8eb"
-  "1.89.8":
-    url: "https://github.com/ocornut/imgui/archive/v1.89.8.tar.gz"
-    sha256: "6680ccc32430009a8204291b1268b2367d964bd6d1b08a4e0358a017eb8e8c9e"
-  "1.89.8-docking":
-    url: "https://github.com/ocornut/imgui/archive/v1.89.8-docking.tar.gz"
-    sha256: "d48c4856e42a8fa3e6df3efae7eae86012fa65d9dceb03d1a2080a2386063635"
-  "1.89.7":
-    url: "https://github.com/ocornut/imgui/archive/v1.89.7.tar.gz"
-    sha256: "115ee9e242af98a884302ac0f6ca3b2b26b1f10c660205f5e7ad9f1d1c96d269"
-  "1.89.7-docking":
-    url: "https://github.com/ocornut/imgui/archive/v1.89.7-docking.tar.gz"
-    sha256: "28216ec07e87f075b63486d8d5212e4d89542b69bd10a482f1b4b7dc6f1613a0"
-  "1.89.5":
-    url: "https://github.com/ocornut/imgui/archive/v1.89.5.tar.gz"
-    sha256: "eab371005c86dd029523a0c4ba757840787163740d45c1f4e5a110eb21820546"
-  "1.89.4":
-    url: "https://github.com/ocornut/imgui/archive/v1.89.4.tar.gz"
-    sha256: "69f1e83adcab3fdd27b522f5075f407361b0d3875e3522b13d33bc2ae2c7d48c"
-  "1.89.3":
-    url: "https://github.com/ocornut/imgui/archive/v1.89.3.tar.gz"
-    sha256: "3b665fadd5580b7ef494d5d8bb1c12b2ec53ee723034caf43332956381f5d631"
-  "1.89.2":
-    url: "https://github.com/ocornut/imgui/archive/v1.89.2.tar.gz"
-    sha256: "e110beffda505e6954feb7b13541d35a7c12a176b9723290c853684713df6a67"
-  "1.89.1":
-    url: "https://github.com/ocornut/imgui/archive/v1.89.1.tar.gz"
-    sha256: "6d02a0079514d869e4b5f8f590f9060259385fcddd93a07ef21298b6a9610cbd"
   "1.88":
     url: "https://github.com/ocornut/imgui/archive/v1.88.tar.gz"
     sha256: "9f14c788aee15b777051e48f868c5d4d959bd679fc5050e3d2a29de80d8fd32e"
@@ -68,16 +53,3 @@ sources:
   "1.85":
     url: "https://github.com/ocornut/imgui/archive/v1.85.tar.gz"
     sha256: "7ed49d1f4573004fa725a70642aaddd3e06bb57fcfe1c1a49ac6574a3e895a77"
-
-  # These versions belong to the docking branch in ImGUI repository. This branch is declared stable and production ready, and
-  # it is synced with `master` regularly. These versions are taken from that branch using the commit where `master` was synced
-  # after a regular release
-  "cci.20230105+1.89.2.docking":
-    url: "https://github.com/ocornut/imgui/archive/d822c65317ba881798bed8fce9ffba267d27dada.zip"
-    sha256: "0d2c09ae4c450d4c74f62e66667809752c9d11438354fc331ed9da5d5e850071"
-  "cci.20220621+1.88.docking":
-    url: "https://github.com/ocornut/imgui/archive/9cd9c2eff99877a3f10a7f9c2a3a5b9c15ea36c6.tar.gz"
-    sha256: "61fb1ce5d48089bce1b4f92e9320fd234b2ce960f35f965b313c4842b3c8e440"
-  "cci.20220207+1.87.docking":
-    url: "https://github.com/ocornut/imgui/archive/1ee252772ae9c0a971d06257bb5c89f628fa696a.tar.gz"
-    sha256: "c50e263660e1deb6e85b10a0382bf8a6fc861645e44b7012bd32da5460829ae0"

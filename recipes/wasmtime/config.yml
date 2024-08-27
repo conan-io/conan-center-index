@@ -1,4 +1,12 @@
 versions:
+  "21.0.0":
+    folder: all
+  "20.0.1":
+    folder: all
+  "19.0.2":
+    folder: all
+  "18.0.3":
+    folder: all
   "16.0.0":
     folder: all
   "12.0.2":
@@ -8,16 +16,4 @@ versions:
   "7.0.0":
     folder: all
   "6.0.1":
-    folder: all
-  "5.0.0":
-    folder: all
-  "4.0.0":
-    folder: all
-  "3.0.0":
-    folder: all
-  "2.0.0":
-    folder: all
-  "1.0.1":
-    folder: all
-  "0.39.1":
     folder: all

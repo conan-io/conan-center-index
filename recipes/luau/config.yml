@@ -1,4 +1,16 @@
 versions:
+  "0.640":
+    folder: all
+  "0.635":
+    folder: all
+  "0.630":
+    folder: all
+  "0.625":
+    folder: all
+  "0.620":
+    folder: all
+  "0.615":
+    folder: all
   "0.610":
     folder: all
   "0.607":

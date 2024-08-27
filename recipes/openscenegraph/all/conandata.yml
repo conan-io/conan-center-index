@@ -1,18 +1,38 @@
 sources:
   3.6.5:
-    sha256: aea196550f02974d6d09291c5d83b51ca6a03b3767e234a8c0e21322927d1e12
-    url: https://github.com/openscenegraph/OpenSceneGraph/archive/OpenSceneGraph-3.6.5.tar.gz
+    url: "https://github.com/openscenegraph/OpenSceneGraph/archive/OpenSceneGraph-3.6.5.tar.gz"
+    sha256: "aea196550f02974d6d09291c5d83b51ca6a03b3767e234a8c0e21322927d1e12"
 patches:
   3.6.5:
     - patch_file: patches/0001-fix-to_cmake_path-usage.patch
-      base_path: source_subfolder
-    - patch_file: patches/0002-Use-standard-CMake-name-for-gif.patch
-      base_path: source_subfolder
-    - patch_file: patches/0003-Correct-usage-of-_LIBRARY-to-_LIBRARIES.patch
-      base_path: source_subfolder
-    - patch_file: patches/0004-Allow-explicit-control-of-plugins.patch
-      base_path: source_subfolder
+      patch_description: Fix cmake paths
+      patch_type: portability
     - patch_file: patches/0005-use-JPEG-target-for-plugin.patch
-      base_path: source_subfolder
+      patch_description: This fixes building against a static libjpeg on windows
+      patch_type: portability
     - patch_file: patches/0006-Declare-result-as-LONG-for-Mingw-build.patch
-      base_path: source_subfolder
+      patch_description: Win32's ChangeDisplaySettingsEx() API function is documented as returning `LONG`, which evidently is not always the same as `unsigned int` (Mingw64.) This cause a compile error on Mingw with clang10.
+      patch_type: official
+      patch_source: https://github.com/openscenegraph/OpenSceneGraph/commit/67468cce344dd5e503aaa1063845f34720563f79
+    - patch_file: patches/0007-fix-msvc-with-std-c++17.patch
+      patch_description: Fix to be able to build with c++17 on MSVC
+      patch_type: official
+      patch_source: https://github.com/openscenegraph/OpenSceneGraph/pull/1055
+    - patch_file: patches/0008-replace-mem-fun-ref.patch
+      patch_description: Replaced std::mem_fun_ref usage to avoid compatiblity with modern compilers
+      patch_type: official
+      patch_source: https://github.com/openscenegraph/OpenSceneGraph/commit/8a0114a46a4bad9041297950fe3bfbb2aea6e1da
+    - patch_file: patches/0009-replace-auto-ptr-in-plugins.patch
+      patch_description: auto_ptr is removed in C++17.
+      patch_type: portability
+      patch_source: https://github.com/openscenegraph/OpenSceneGraph/pull/1246
+    - patch_file: patches/0010-replace-ptr-fun-in-obj-plugin.patch
+      patch_description: ptr_fun is removed in C++17
+      patch_type: portability
+      patch_source: https://github.com/openscenegraph/OpenSceneGraph/pull/1246
+    - patch_file: patches/0011-remove-deprecated-register.patch
+      patch_description: The "register" keyword is deprecated as of C++17
+      patch_type: bugfix
+      patch_source:
+        - https://github.com/openscenegraph/OpenSceneGraph/pull/1296
+        - https://github.com/openscenegraph/OpenSceneGraph/pull/951

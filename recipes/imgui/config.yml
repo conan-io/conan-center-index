@@ -1,41 +1,31 @@
 versions:
-  "1.90.3":
+  "1.91.0":
     folder: all
-  "1.90.3-docking":
+  "1.91.0-docking":
     folder: all
-  "1.90.2":
+  "1.90.9":
     folder: all
-  "1.90.2-docking":
+  "1.90.9-docking":
     folder: all
-  "1.90.1":
+  "1.90.8":
     folder: all
-  "1.90.1-docking":
+  "1.90.8-docking":
     folder: all
-  "1.90":
+  "1.90.7":
     folder: all
-  "1.90-docking":
+  "1.90.7-docking":
+    folder: all
+  "1.90.6":
+    folder: all
+  "1.90.6-docking":
+    folder: all
+  "1.90.5":
+    folder: all
+  "1.90.5-docking":
     folder: all
   "1.89.9":
     folder: all
   "1.89.9-docking":
-    folder: all
-  "1.89.8":
-    folder: all
-  "1.89.8-docking":
-    folder: all
-  "1.89.7":
-    folder: all
-  "1.89.7-docking":
-    folder: all
-  "1.89.5":
-    folder: all
-  "1.89.4":
-    folder: all
-  "1.89.3":
-    folder: all
-  "1.89.2":
-    folder: all
-  "1.89.1":
     folder: all
   "1.88":
     folder: all
@@ -46,12 +36,3 @@ versions:
   "1.85":
     folder: all
 
-  # These versions belong to the docking branch in ImGUI repository. This branch is declared stable and production ready, and
-  # it is synced with `master` regularly. These versions are taken from that branch using the commit where `master` was synced
-  # after a regular release
-  "cci.20230105+1.89.2.docking":
-    folder: all
-  "cci.20220621+1.88.docking":
-    folder: all
-  "cci.20220207+1.87.docking":
-    folder: all

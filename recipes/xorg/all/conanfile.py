@@ -29,10 +29,12 @@ class XorgConan(ConanFile):
                      "libxcomposite-dev", "libxcursor-dev", "libxdamage-dev", "libxdmcp-dev", "libxext-dev", "libxfixes-dev",
                      "libxi-dev", "libxinerama-dev", "libxkbfile-dev", "libxmu-dev", "libxmuu-dev",
                      "libxpm-dev", "libxrandr-dev", "libxrender-dev", "libxres-dev", "libxss-dev", "libxt-dev", "libxtst-dev",
-                     "libxv-dev", "libxxf86vm-dev", "libxcb-render0-dev",
+                     "libxv-dev", "libxxf86vm-dev", "libxcb-glx0-dev", "libxcb-render0-dev",
                      "libxcb-render-util0-dev", "libxcb-xkb-dev", "libxcb-icccm4-dev", "libxcb-image0-dev",
                      "libxcb-keysyms1-dev", "libxcb-randr0-dev", "libxcb-shape0-dev", "libxcb-sync-dev", "libxcb-xfixes0-dev",
-                     "libxcb-xinerama0-dev", "libxcb-dri3-dev", "uuid-dev", "libxcb-cursor-dev"], update=True, check=True)
+                     "libxcb-xinerama0-dev", "libxcb-dri3-dev", "uuid-dev", "libxcb-cursor-dev", "libxcb-dri2-0-dev",
+                     "libxcb-dri3-dev", "libxcb-present-dev", "libxcb-composite0-dev", "libxcb-ewmh-dev",
+                     "libxcb-res0-dev"], update=True, check=True)
         apt.install_substitutes(
             ["libxcb-util-dev"], ["libxcb-util0-dev"], update=True, check=True)
 
@@ -84,7 +86,8 @@ class XorgConan(ConanFile):
                      "xcb-xkb", "xcb-icccm", "xcb-image", "xcb-keysyms", "xcb-randr", "xcb-render",
                      "xcb-renderutil", "xcb-shape", "xcb-shm", "xcb-sync", "xcb-xfixes",
                      "xcb-xinerama", "xcb", "xcb-atom", "xcb-aux", "xcb-event", "xcb-util",
-                     "xcb-dri3", "xcb-cursor"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
+                     "xcb-dri3", "xcb-cursor", "xcb-dri2", "xcb-dri3", "xcb-glx", "xcb-present",
+                     "xcb-composite", "xcb-ewmh", "xcb-res"] + ([] if self.settings.os == "FreeBSD" else ["uuid"]):
             pkg_config = PkgConfig(self, name)
             pkg_config.fill_cpp_info(
                 self.cpp_info.components[name], is_system=self.settings.os != "FreeBSD")

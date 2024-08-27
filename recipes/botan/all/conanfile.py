@@ -34,7 +34,6 @@ class BotanConan(ConanFile):
         "amalgamation": [True, False],
         "with_bzip2": [True, False],
         "with_openssl": [True, False],
-        "single_amalgamation": [True, False],
         "with_sqlite3": [True, False],
         "with_zlib": [True, False],
         "with_boost": [True, False],
@@ -54,6 +53,8 @@ class BotanConan(ConanFile):
         "with_powercrypto": [True, False],
         "enable_modules": [None, "ANY"],
         "disable_modules": [None, "ANY"],
+        "enable_experimental_features": [True, False],
+        "enable_deprecated_features": [True, False],
         "system_cert_bundle": [None, "ANY"],
         "module_policy": [None, "bsi", "modern", "nist"],
     }
@@ -63,7 +64,6 @@ class BotanConan(ConanFile):
         "amalgamation": True,
         "with_bzip2": False,
         "with_openssl": False,
-        "single_amalgamation": False,
         "with_sqlite3": False,
         "with_zlib": False,
         "with_boost": False,
@@ -83,6 +83,8 @@ class BotanConan(ConanFile):
         "with_powercrypto": True,
         "enable_modules": None,
         "disable_modules": None,
+        "enable_experimental_features": False,
+        "enable_deprecated_features": True,
         "system_cert_bundle": None,
         "module_policy": None,
     }
@@ -126,11 +128,6 @@ class BotanConan(ConanFile):
             del self.options.with_altivec
             del self.options.with_powercrypto
 
-        # --single-amalgamation option is no longer available
-        # See also https://github.com/randombit/botan/pull/2246
-        if Version(self.version) >= '2.14.0':
-            del self.options.single_amalgamation
-
         # Support for the OpenSSL provider was removed in 2.19.2
         if Version(self.version) >= '2.19.2':
             del self.options.with_openssl
@@ -147,9 +144,9 @@ class BotanConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.38.5")
+            self.requires("sqlite3/3.45.1")
         if self.options.with_boost:
-            self.requires("boost/1.83.0")
+            self.requires("boost/1.84.0")
 
     @property
     def _required_boost_components(self):
@@ -200,7 +197,7 @@ class BotanConan(ConanFile):
             minimum_version = self._compilers_minimum_version.get(compiler_name, False)
             if minimum_version and Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support (minimum {compiler_name} {minimum_version})."
                 )
             if not minimum_version:
                 self.output.warning(f"{self.name} recipe lacks information about the {compiler_name} compiler support.")
@@ -216,15 +213,12 @@ class BotanConan(ConanFile):
 
         # Some older compilers cannot handle the amalgamated build anymore
         # See also https://github.com/randombit/botan/issues/2328
-        if Version(self.version) >= '2.14.0' and self.options.amalgamation:
+        if self.options.amalgamation:
             if (self.settings.compiler == 'apple-clang' and compiler_version < '10') or \
                (self.settings.compiler == 'gcc' and compiler_version < '8') or \
                (self.settings.compiler == 'clang' and compiler_version < '7'):
                 raise ConanInvalidConfiguration(
                     f"botan amalgamation is not supported for {compiler}/{compiler_version}")
-
-        if self.options.get_safe("single_amalgamation", False) and not self.options.amalgamation:
-            raise ConanInvalidConfiguration("botan:single_amalgamation=True requires botan:amalgamation=True")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -346,6 +340,20 @@ class BotanConan(ConanFile):
         if self._extra_cxxflags:
             botan_extra_cxx_flags.append(self._extra_cxxflags)
 
+        if Version(self.version) >= '3.4':
+            # Botan 3.4.0 introduced a 'module life cycle' feature, before that
+            # the experimental/deprecated feature switches are ignored.
+
+            if self.options.enable_experimental_features:
+                build_flags.append('--enable-experimental-features')
+            else:
+                build_flags.append('--disable-experimental-features')
+
+            if self.options.enable_deprecated_features:
+                build_flags.append('--enable-deprecated-features')
+            else:
+                build_flags.append('--disable-deprecated-features')
+
         if self.options.enable_modules:
             build_flags.append('--minimized-build')
             build_flags.append('--enable-modules={}'.format(self.options.enable_modules))
@@ -355,9 +363,6 @@ class BotanConan(ConanFile):
 
         if self.options.amalgamation:
             build_flags.append('--amalgamation')
-
-        if self.options.get_safe('single_amalgamation'):
-            build_flags.append('--single-amalgamation-file')
 
         if self.options.system_cert_bundle:
             build_flags.append('--system-cert-bundle={}'.format(self.options.system_cert_bundle))
@@ -470,7 +475,7 @@ class BotanConan(ConanFile):
                          ' --extra-cxxflags="{cxxflags}"'
                          ' --cc={compiler}'
                          ' --cpu={cpu}'
-                         ' --prefix={prefix}'
+                         ' --prefix="{prefix}"'
                          ' --os={os}'
                          ' {build_flags}').format(
                              python_call=call_python,
@@ -529,6 +534,8 @@ class BotanConan(ConanFile):
         # https://github.com/conan-io/conan-center-index/pull/18079#issuecomment-1919206949
         # https://github.com/conan-io/conan-center-index/pull/18079#issuecomment-1919486839
 
+        if self.settings.os != 'Linux':
+            return False
         libver = platform.libc_ver()
         return (
             self.settings.os == 'Linux' and

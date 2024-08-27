@@ -1,4 +1,22 @@
 sources:
+  "0.640":
+    url: "https://github.com/Roblox/luau/archive/0.640.tar.gz"
+    sha256: "63ada3e4c8c17e5aff8964b16951bfd1b567329dd81c11ae1144b6e95f354762"
+  "0.635":
+    url: "https://github.com/Roblox/luau/archive/0.635.tar.gz"
+    sha256: "b2ec66070bb53ab9c26e41608dd75c9672c942cf0738c4b965c5eb956a954910"
+  "0.630":
+    url: "https://github.com/Roblox/luau/archive/0.630.tar.gz"
+    sha256: "601938ebd428d37c2bb10697500bff4fe304f7c0651cf64721b9dc5600a30ed9"
+  "0.625":
+    url: "https://github.com/Roblox/luau/archive/0.625.tar.gz"
+    sha256: "4dd9295a67c2de6536b6e1208ea81cebfc5caefadcdacd7e09341c7a1dbbb9e2"
+  "0.620":
+    url: "https://github.com/Roblox/luau/archive/0.620.tar.gz"
+    sha256: "a6ae1f0396334e72b1241dabb73aa123037613f3276bf2e71d0dc75568b1eb52"
+  "0.615":
+    url: "https://github.com/Roblox/luau/archive/0.615.tar.gz"
+    sha256: "264192ff1cb1bc3d5c223e5fbe9c4c628d203e2ac6ff72100e09640f43f60a60"
   "0.610":
     url: "https://github.com/Roblox/luau/archive/0.610.tar.gz"
     sha256: "a6ee2cab90c816a86b86113f01d9da865378074ee09dc6122dbe8bfbdf819ede"

@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
 
@@ -27,6 +27,7 @@ class NngConan(ConanFile):
         "max_expire_threads": ["ANY"],
         "max_poller_threads": ["ANY"],
         "compat": [True, False],
+        "with_ipv6": [True, False],
     }
     default_options = {
         "shared": False,
@@ -38,6 +39,7 @@ class NngConan(ConanFile):
         "max_expire_threads": "8",
         "max_poller_threads": "8",
         "compat": True,
+        "with_ipv6": True,
     }
 
     def export_sources(self):
@@ -52,6 +54,8 @@ class NngConan(ConanFile):
             del self.options.max_poller_threads
         if Version(self.version) < "1.7.2":
             del self.options.compat
+        if Version(self.version) < "1.7.3":
+            del self.options.with_ipv6
 
     def configure(self):
         if self.options.shared:
@@ -102,7 +106,11 @@ class NngConan(ConanFile):
             tc.variables["NNG_MAX_POLLER_THREADS"] = self.options.max_poller_threads
         if "compat" in self.options:
             tc.variables["NNG_ENABLE_COMPAT"] = self.options.compat
+        if "with_ipv6" in self.options:
+            tc.variables["NNG_ENABLE_IPV6"] = self.options.with_ipv6
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)

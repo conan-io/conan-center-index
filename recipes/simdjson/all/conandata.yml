@@ -1,37 +1,31 @@
 sources:
+  "3.10.0":
+    url: "https://github.com/simdjson/simdjson/archive/v3.10.0.tar.gz"
+    sha256: "9c30552f1dd0ee3d0832bb1c6b7b97d813b18d5ef294c10dcb6fc242e5947de8"
+  "3.9.3":
+    url: "https://github.com/simdjson/simdjson/archive/v3.9.3.tar.gz"
+    sha256: "2e3d10abcde543d3dd8eba9297522cafdcebdd1db4f51b28f3bc95bf1d6ad23c"
+  "3.9.2":
+    url: "https://github.com/simdjson/simdjson/archive/v3.9.2.tar.gz"
+    sha256: "79fbe700f4ac3dd69c4f08275af58399daabd612bca0c0465aea959c60256651"
+  "3.9.1":
+    url: "https://github.com/simdjson/simdjson/archive/v3.9.1.tar.gz"
+    sha256: "a4b6e7cd83176e0ccb107ce38521da40a8df41c2d3c90566f2a0af05b0cd05c4"
+  "3.8.0":
+    url: "https://github.com/simdjson/simdjson/archive/v3.8.0.tar.gz"
+    sha256: "e28e3f46f0012d405b67de6c0a75e8d8c9a612b0548cb59687822337d73ca78b"
+  "3.7.0":
+    url: "https://github.com/simdjson/simdjson/archive/v3.7.0.tar.gz"
+    sha256: "27315c4861893b3e036c1f672b1c238ee86be6edb84c0824d1ed20dea5999777"
   "3.6.4":
     url: "https://github.com/simdjson/simdjson/archive/v3.6.4.tar.gz"
     sha256: "7e93d5094a47180a3d451cb261ba29ac66f3f6ceb7c2a0884955e9a2bb06d818"
-  "3.6.1":
-    url: "https://github.com/simdjson/simdjson/archive/v3.6.1.tar.gz"
-    sha256: "76601d1701232a212b62d25d3a6518219b2504ff84e8073c6df7393b2ead3176"
-  "3.6.0":
-    url: "https://github.com/simdjson/simdjson/archive/v3.6.0.tar.gz"
-    sha256: "9eab3197231382b8b99d14d8ca647d6ab6bea1b40008df086d25e6f687309bf6"
   "3.5.0":
     url: "https://github.com/simdjson/simdjson/archive/v3.5.0.tar.gz"
     sha256: "942c9462b3c046e12b898cbf5e198f31a377ab40bb2bde5be98440d1f9212ee0"
   "3.3.0":
     url: "https://github.com/simdjson/simdjson/archive/v3.3.0.tar.gz"
     sha256: "a8c9feff2f19c3ff281d42f0b6b4b18f02236513b99229756fa9a1b14787a58a"
-  "3.2.3":
-    url: "https://github.com/simdjson/simdjson/archive/v3.2.3.tar.gz"
-    sha256: "ab72701b8560c4f93a5de525657b3bf34094f99a1e63bd9db3195d1bcb90aa09"
-  "3.2.2":
-    url: "https://github.com/simdjson/simdjson/archive/v3.2.2.tar.gz"
-    sha256: "13a702536e051db612cdca82bf8585f2c69d9c6fd156ef291b170f13202c1b4c"
-  "3.2.1":
-    url: "https://github.com/simdjson/simdjson/archive/v3.2.1.tar.gz"
-    sha256: "121206c9bfe972a2202a74d4cddb8cb0561932427f96d6c4b70fb49a2a74560e"
   "3.2.0":
     url: "https://github.com/simdjson/simdjson/archive/v3.2.0.tar.gz"
     sha256: "75a684dbbe38cf72b8b3bdbdc430764813f3615899a6029931c26ddd89812da4"
-  "3.1.8":
-    url: "https://github.com/simdjson/simdjson/archive/v3.1.8.tar.gz"
-    sha256: "99e7eeb0a0038e0213da68f099e6a8b67bcaeea1586385ec5f752bea85d902d8"
-  "3.0.1":
-    url: "https://github.com/simdjson/simdjson/archive/v3.0.1.tar.gz"
-    sha256: "156b1bc5eb0561b2bd166b46d191fd3d95a3e709cc63761477d3b7aec2b6e9ed"
-  "2.2.3":
-    url: "https://github.com/simdjson/simdjson/archive/v2.2.3.tar.gz"
-    sha256: "4c62f2d82edec3dbc63650c10453dc471de9f1be689eb5b4bde89efed89db5d8"

@@ -82,7 +82,7 @@ class GlfwConan(ConanFile):
 
     def build_requirements(self):
         if self.options.get_safe("with_wayland"):
-            self.tool_requires("wayland-protocols/1.32")
+            self.tool_requires("wayland-protocols/1.33")
             if self._has_build_profile:
                 self.tool_requires("wayland/<host_version>")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
@@ -123,10 +123,8 @@ class GlfwConan(ConanFile):
             else:
                 # Manually generate pkgconfig file of wayland-protocols since
                 # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
-                # We must use legacy conan v1 deps_cpp_info because self.dependencies doesn't
-                # contain build requirements when using 1 profile.
-                wp_prefix = self.deps_cpp_info["wayland-protocols"].rootpath
-                wp_version = self.deps_cpp_info["wayland-protocols"].version
+                wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
+                wp_version = self.dependencies.build["wayland-protocols"].ref.version
                 wp_pkg_content = textwrap.dedent(f"""\
                     prefix={wp_prefix}
                     datarootdir=${{prefix}}/res
