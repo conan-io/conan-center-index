@@ -21,12 +21,18 @@ class OpenJPH(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_executables": [True, False],
         "with_tiff": [True, False],
+        "with_stream_expand_tool": [True, False],
+        "disable_simd": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_executables": True,
         "with_tiff": True,
+        "with_stream_expand_tool": False,
+        "disable_simd": False,
     }
 
     def export_sources(self):
@@ -44,12 +50,15 @@ class OpenJPH(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_tiff:
+        if self.options.with_executables and self.options.with_tiff:
             self.requires("libtiff/4.6.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 14)
+            required_cpp_version = 11
+            if self.options.with_stream_expand_tool:
+                required_conan_version = 14
+            check_min_cppstd(self, required_cpp_version)
 
         if self.settings.compiler == "gcc" and \
             Version(self.settings.compiler.version) < "6.0":
@@ -60,7 +69,10 @@ class OpenJPH(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["OJPH_BUILD_EXECUTABLES"] = self.options.with_executables
         tc.variables["OJPH_ENABLE_TIFF_SUPPORT"] = self.options.with_tiff
+        tc.variables["OJPH_BUILD_STREAM_EXPAND"] = self.options.with_stream_expand_tool
+        tc.variables["OJPH_DISABLE_SIMD"] = self.options.disable_simd
         tc.generate()
 
         deps = CMakeDeps(self)
