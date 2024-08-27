@@ -97,7 +97,6 @@ class OpenJPH(ConanFile):
         if is_msvc(self):
             v = Version(self.version)
             version_suffix = f".{v.major}.{v.minor}"
-            print('Lib Version', version_suffix)
         self.cpp_info.libs = ["openjph" + version_suffix]
 
         # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
