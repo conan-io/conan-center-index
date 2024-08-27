@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, can_run, cross_building
+from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import (
@@ -192,12 +192,6 @@ class LLVMCoreConan(ConanFile):
 
         if self.options.exceptions and not self.options.rtti:
             raise ConanInvalidConfiguration("Cannot enable exceptions without rtti support")
-
-        if cross_building(self):
-            # FIXME support cross compilation, at least for common cases like Apple Silicon -> X86
-            #  requires a host-compiled version of llvm-tablegen.
-            #  see also https://llvm.org/docs/HowToCrossCompileLLVM.html
-            raise ConanInvalidConfiguration("Cross compilation is not supported. Contributions are welcome!")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
