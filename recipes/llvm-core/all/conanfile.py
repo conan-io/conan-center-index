@@ -244,7 +244,7 @@ class LLVMCoreConan(ConanFile):
             "LLVM_STATIC_LINK_CXX_STDLIB": self.options.static_stdlib,
             "LLVM_ENABLE_UNWIND_TABLES": self.options.unwind_tables,
             "LLVM_ENABLE_EXPENSIVE_CHECKS": self.options.expensive_checks,
-            "LLVM_ENABLE_ASSERTIONS": self.settings.build_type,
+            "LLVM_ENABLE_ASSERTIONS": str(self.settings.build_type),
             "LLVM_USE_PERF": self.options.use_perf,
             "LLVM_ENABLE_LIBEDIT": self.options.get_safe("with_libedit", False),
             "LLVM_ENABLE_Z3_SOLVER": self.options.with_z3,
@@ -281,15 +281,12 @@ class LLVMCoreConan(ConanFile):
         else:
             cmake_variables["LLVM_USE_SANITIZER"] = self.options.use_sanitizer
 
+        self.output.info(cmake_variables)
         tc.cache_variables.update(cmake_variables)
         tc.generate()
 
         tc = CMakeDeps(self)
         tc.generate()
-
-        if can_run(self):
-            # For running llvm-tblgen during the build
-            VirtualRunEnv(self).generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)
