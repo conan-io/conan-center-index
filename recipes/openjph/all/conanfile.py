@@ -55,9 +55,6 @@ class OpenJPH(ConanFile):
             Version(self.settings.compiler.version) < "6.0":
             raise ConanInvalidConfiguration(f"{self.ref} requires gcc >= 6.0")
 
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.11 <4]")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
