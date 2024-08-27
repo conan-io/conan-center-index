@@ -15,6 +15,7 @@ class MysqlCppConnRecipe(ConanFile):
     name = "mysql-concpp"
     package_type = "library"
     short_paths = True
+    version= "9.0.0"
 
     # Optional metadata
     license = "GPL-2.0"
@@ -25,26 +26,26 @@ class MysqlCppConnRecipe(ConanFile):
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
-    options = { 
-               "shared": [True, False], 
+    options = {
+               "shared": [True, False],
                "fPIC": [True, False],
                }
 
-    default_options = { "shared": False, "fPIC": True }
-    
+    default_options = { "shared": True, "fPIC": True }
+
     @property
     def _compilers_minimum_version(self):
         return {
            "apple-clang": "15",
         }
-    
+
     def validate(self):
         check_min_cppstd(self, "17")
-        
+
         # Apple patches
         if is_apple_os(self) and cross_building(self):
             raise ConanInvalidConfiguration("Cross building is not supported. PRs are welcome.")
-        
+
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
@@ -52,12 +53,15 @@ class MysqlCppConnRecipe(ConanFile):
             )
 
     def requirements(self):
-        self.requires("lz4/1.9.4")
-        self.requires("openssl/[>=1.1 <4]")
-        self.requires("boost/1.85.0")
+        if self.settings.os == "Windows":
+            self.requires("openssl/[>=1.1 <4]")
+            self.requires("boost/1.85.0")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
+
+        if not is_msvc(self):
+            self.tool_requires("ninja/[>=1.10 <2]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -72,7 +76,7 @@ class MysqlCppConnRecipe(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-        
+
     def _package_folder_dep(self, dep):
         return self.dependencies[dep].package_folder.replace("\\", "/")
 
@@ -81,26 +85,32 @@ class MysqlCppConnRecipe(ConanFile):
 
     def _lib_folder_dep(self, dep):
         return self.dependencies[dep].cpp_info.libdirs[0].replace("\\", "/")
-    
-    def generate(self):
-        tc = CMakeToolchain(self)
 
-        # Random
+    def generate(self):
+
+        tc = CMakeToolchain(self, generator="Ninja") if not is_msvc(self) else CMakeToolchain(self)
+
+        # LZ4 patches
+        tc.cache_variables["WITH_LZ4"] = "TRUE"
+        # ZLIB patches
+        tc.cache_variables["WITH_ZLIB"] = "TRUE"
+        # ZSTD patches
+        tc.cache_variables["WITH_ZSTD"] = "TRUE"
+        # Build patches
         tc.cache_variables["BUILD_STATIC"] = not self.options.shared
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
 
-        # LZ4 patches
-        tc.cache_variables["WITH_LZ4"] = self._package_folder_dep("lz4")
-        tc.cache_variables["LZ4_DIR"] = self._package_folder_dep("lz4")
-        # Boost patches
-        tc.cache_variables["BOOST_DIR"] = self._package_folder_dep("boost")
-        # OpenSSL patches
-        tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
+        if is_msvc(self):
+            # Boost patches
+            tc.cache_variables["BOOST_DIR"] = self._package_folder_dep("boost")
+            # OpenSSL patches
+            tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
+
         tc.generate()
-        
+
         deps = CMakeDeps(self)
         deps.generate()
-        
+
     def _patch_sources(self):
         if not self.options.shared and is_msvc(self):
             replace_in_file(self, os.path.join(self.source_folder, "install_layout.cmake"),
@@ -117,9 +127,9 @@ class MysqlCppConnRecipe(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        
+
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        
+
     def package_info(self):
         # Set the VS version
         if self.settings.os == "Windows":
@@ -143,27 +153,31 @@ class MysqlCppConnRecipe(ConanFile):
             self.vs = f"vs{vs_version}"
         else:
             self.vs = ""
-        
+
         template_dirs = ["lib64", "lib64/debug", "lib", "lib/debug"]
         self.cpp_info.libdirs = template_dirs if not self.vs else [f"{lib}/{self.vs}" for lib in template_dirs]
         self.cpp_info.bindirs = template_dirs
-        
+
         if is_apple_os(self):
             self.cpp_info.system_libs.extend(["resolv"])
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["m", "resolv"])
-        
-        target = "concpp-xdevapi" if self.options.shared else "concpp-xdevapi-static"
-        target_alias = "concpp" if self.options.shared else "concpp-static"
-        
+            self.cpp_info.system_libs.extend(["m", "resolv", "ssl", "crypto"])
+
+        target = "concpp-xdevapi"
+        target_alias = "concpp"
+
+        if self.options.shared:
+            target += "-static"
+            target_alias += "-static"
+
         if self.settings.build_type == "Debug":
             target += "-debug"
             target_alias += "-debug"
-        
+
         # self.cpp_info.set_property("cmake_target_name", f"mysql::{target}")
         self.cpp_info.set_property("cmake_target_name", f"mysql::concpp")
         self.cpp_info.set_property("cmake_target_aliases", [f"mysql::{target_alias}"] )
-        
+
         lib = "mysqlcppconnx" if self.options.shared else "mysqlcppconnx-static"
         if is_msvc(self) and not self.options.shared and is_msvc_static_runtime(self):
             lib += "-mt"
@@ -172,8 +186,8 @@ class MysqlCppConnRecipe(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["MYSQL_STATIC"]
             self.cpp_info.defines = ["STATIC_CONCPP"]
-        
+
         self.cpp_info.set_property("cmake_find_package", "mysql-concpp")
         self.cpp_info.set_property("cmake_find_package_multi", "mysql-concpp")
         self.cpp_info.set_property("cmake_config_file", "mysql-concpp-config.cmake")
-        
+
