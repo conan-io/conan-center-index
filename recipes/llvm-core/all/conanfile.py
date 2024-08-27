@@ -270,7 +270,7 @@ class LLVMCoreConan(ConanFile):
         if not self.options.shared:
             cmake_variables.update({
                 "DISABLE_LLVM_LINK_LLVM_DYLIB": True,
-                "LLVM_ENABLE_PIC": self.options.get_safe("fPIC", default=False)
+                "LLVM_ENABLE_PIC": self.options.get_safe("fPIC", default=True)
             })
 
         if self.options.use_sanitizer == "None":
