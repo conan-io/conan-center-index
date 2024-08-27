@@ -194,18 +194,19 @@ class LLVMCoreConan(ConanFile):
     def _apply_resource_limits(self, cmake_definitions):
         if os.getenv("CONAN_CENTER_BUILD_SERVICE"):
             self.output.info("Applying CCI Resource Limits")
-            cmake_definitions.update({
-                "LLVM_RAM_PER_LINK_JOB": "16384",
-                "LLVM_RAM_PER_COMPILE_JOB": "2048"
-            })
+            default_ram_per_compile_job = 16384
+            default_ram_per_link_job = 2048
         else:
-            ram_per_compile_job = self.conf.get("user.llvm-core:ram_per_compile_job")
-            if ram_per_compile_job:
-                cmake_definitions["LLVM_RAM_PER_COMPILE_JOB"] = ram_per_compile_job
+            default_ram_per_compile_job = None
+            default_ram_per_link_job = None
 
-            ram_per_link_job = self.conf.get("user.llvm-core:ram_per_link_job")
-            if ram_per_link_job:
-                cmake_definitions["LLVM_RAM_PER_LINK_JOB"] = ram_per_link_job
+        ram_per_compile_job = self.conf.get("user.llvm-core:ram_per_compile_job", default_ram_per_compile_job)
+        if ram_per_compile_job:
+            cmake_definitions["LLVM_RAM_PER_COMPILE_JOB"] = ram_per_compile_job
+
+        ram_per_link_job = self.conf.get("user.llvm-core:ram_per_link_job", default_ram_per_link_job)
+        if ram_per_link_job:
+            cmake_definitions["LLVM_RAM_PER_LINK_JOB"] = ram_per_link_job
 
     @property
     def _targets_to_build(self):
