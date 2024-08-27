@@ -1,0 +1,88 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -18,6 +18,8 @@
+ set(DEFAULT_HEADER_INSTALL_DIRECTORY "include")
+ set(DEFAULT_LIBRARY_INSTALL_DIRECTORY "lib")
+ set(DEFAULT_EIGEN_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Eigen)
++
++set(CMAKE_CXX_STANDARD 11 CACHE STRING "")
+ 
+ # Detect platform
+ string(COMPARE EQUAL "Linux"   ${CMAKE_SYSTEM_NAME} LINUX)
+@@ -110,11 +112,11 @@
+ elseif(GCC OR CLANG)
+     # Treat warning return-type as error to avoid undefined behaviour
+     # when a non-void function does not return a value.
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m${BITNESS} -std=c++11 -Werror=return-type")
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")
+     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wno-long-long")
+ 
+ elseif(INTEL)
+-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m${BITNESS} -std=c++11")
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
+ endif()
+ 
+@@ -138,9 +140,10 @@
+ 
+ # Header directories
+ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+-include_directories(${EIGEN_DIRECTORY})
+ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/test)
+-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Catch)
++
++find_package(Eigen3 REQUIRED CONFIG)
++link_libraries(Eigen3::Eigen)
+ 
+ set(CINTERFACE_SRC_LIST
+     include/cinterface/cinterface.h
+@@ -215,10 +218,15 @@
+ add_library(${SHARED_LIBRARY} SHARED ${SRC_LIST})
+ add_library(${STATIC_LIBRARY} STATIC ${SRC_LIST})
+ 
+-# Testing executable
+-add_executable(${TEST} ${TEST_SRC_LIST})
+-target_link_libraries(${TEST} ${STATIC_LIBRARY})
+-
++if(BUILD_SHARED_LIBS)
++    set_target_properties(${SHARED_LIBRARY} PROPERTIES EXCLUDE_FROM_ALL FALSE)
++    set_target_properties(${STATIC_LIBRARY} PROPERTIES EXCLUDE_FROM_ALL TRUE)
++else()
++    set_target_properties(${SHARED_LIBRARY} PROPERTIES EXCLUDE_FROM_ALL TRUE)
++    set_target_properties(${STATIC_LIBRARY} PROPERTIES EXCLUDE_FROM_ALL FALSE)
++endif()
++
++if(0) # skip installation of MATLAB and Python wrappers
+ # Make the directory structure expected by the MatLab interface
+ # License file
+ install(
+@@ -263,25 +271,25 @@
+         TARGETS ${SHARED_LIBRARY}
+         DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/splinter-python/lib/${OS_STRING}/${ARCH}
+ )
++endif()
+ 
+ # Install the header files (including Eigen) to the header directory
+ install(
+     DIRECTORY
+     ${CMAKE_CURRENT_SOURCE_DIR}/include/
+-    ${EIGEN_DIRECTORY}/Eigen
+-    ${EIGEN_DIRECTORY}/unsupported
+     DESTINATION ${HEADER_INSTALL_DIRECTORY}/SPLINTER
+ )
+-# Install the shared library file
++if(BUILD_SHARED_LIBS)
+ install(
+     TARGETS ${SHARED_LIBRARY}
+     DESTINATION ${LIBRARY_INSTALL_DIRECTORY}
+ )
+-# Install the static library file
++else()
+ install(
+     TARGETS ${STATIC_LIBRARY}
+     DESTINATION ${LIBRARY_INSTALL_DIRECTORY}
+ )
++endif()
+ 
+ # Doxygen documentation
+ find_package(Doxygen)
