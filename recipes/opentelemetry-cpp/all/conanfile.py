@@ -240,12 +240,13 @@ class OpenTelemetryCppConan(ConanFile):
 
     def _patch_sources(self):
         if self.options.shared:
+            # Change internal target linkages here from PRIVATE to PUBLIC. These targets have transitive linkage
+            # to third-party libraries (libcurl/openssl). When cross-compiling link interface info needs to
+            # be available for other targets to locate the host shared libraries.
             replace_in_file(self, os.path.join(self.source_folder,"ext","src","http","client","curl","CMakeLists.txt"),
-                            "PRIVATE",
-                            "PUBLIC")
+                            "PRIVATE", "PUBLIC")
             replace_in_file(self, os.path.join(self.source_folder,"exporters","otlp","CMakeLists.txt"),
-                            "PRIVATE",
-                            "PUBLIC")
+                            "PRIVATE", "PUBLIC")
         if self.options.with_otlp_http or self.options.with_otlp_grpc:
             protos_path = self.dependencies.build["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root").replace("\\", "/")
             protos_cmake_path = os.path.join(self.source_folder, "cmake", "opentelemetry-proto.cmake")
