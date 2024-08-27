@@ -173,8 +173,6 @@ class LLVMCoreConan(ConanFile):
         if self.options.shared:
             if self.settings.os == "Windows":
                 raise ConanInvalidConfiguration("Shared builds are currently not supported on Windows")
-            if os.getenv("CONAN_CENTER_BUILD_SERVICE") and self.settings.build_type == "Debug":
-                raise ConanInvalidConfiguration("Shared Debug build is not supported on CCI due to resource limitations")
             if is_apple_os(self):
                 # FIXME iconv contains duplicate symbols in the libiconv and libcharset libraries (both of which are
                 #  provided by libiconv). This may be an issue with how conan packages libiconv
@@ -185,6 +183,10 @@ class LLVMCoreConan(ConanFile):
 
         if self.options.exceptions and not self.options.rtti:
             raise ConanInvalidConfiguration("Cannot enable exceptions without rtti support")
+
+    def validate_build(self):
+        if self.options.shared and os.getenv("CONAN_CENTER_BUILD_SERVICE") and self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration("Shared Debug build is not supported on CCI due to resource limitations")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
