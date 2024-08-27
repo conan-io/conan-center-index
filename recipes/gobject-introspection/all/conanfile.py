@@ -49,8 +49,7 @@ class GobjectIntrospectionConan(ConanFile):
 
     def requirements(self):
         # https://gitlab.gnome.org/GNOME/gobject-introspection/-/blob/1.76.1/meson.build?ref_type=tags#L127-131
-        glib_minor = Version(self.version).minor
-        self.requires(f"glib/[^2.{glib_minor}]", transitive_headers=True, transitive_libs=True)
+        self.requires(f"glib/2.76.3", transitive_headers=True, transitive_libs=True)
         # FIXME: gobject-introspection links against system python3 libs, which is not reliable
 
     def validate(self):
@@ -59,7 +58,8 @@ class GobjectIntrospectionConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Debug build on Windows is disabled due to debug version of Python libs likely not being available."
             )
-        if self.dependencies.build["glib"].options.shared:
+        glib_shared = self.dependencies.build["glib"].options.shared if hasattr(self, "settings_build") else self.dependencies["glib"].options.shared
+        if glib_shared:
             # FIXME: tools/g-ir-scanner', '--output=gir/GLib-2.0.gir' ... ERROR: can't resolve libraries to shared libraries: glib-2.0, gobject-2.0
             raise ConanInvalidConfiguration(f"{self.ref} fails to run g-ir-scanner due glib loaded as shared. Use -o 'glib/*:shared=False'. Contributions to fix this are welcome.")
 
