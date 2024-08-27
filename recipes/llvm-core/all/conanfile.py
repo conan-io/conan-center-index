@@ -9,7 +9,6 @@ from conan.tools.files import (
     collect_libs,
     get,
     rmdir,
-    load,
     save,
     copy,
     export_conandata_patches,
@@ -22,7 +21,7 @@ from conan.tools.scm import Version
 
 import json
 import os
-from pathlib import PurePosixPath
+from pathlib import Path
 import re
 import textwrap
 
@@ -317,7 +316,7 @@ class LLVMCoreConan(ConanFile):
 
     @property
     def _package_folder_path(self):
-        return PurePosixPath(self.package_folder)
+        return Path(self.package_folder)
 
     def _update_component_dependencies(self, components):
         def _sanitized_components(deps_list):
@@ -363,7 +362,8 @@ class LLVMCoreConan(ConanFile):
                     data["requires"].append(component)
             return data
 
-        cmake_exports = load(self, (self._package_folder_path / "lib" / "cmake" / "llvm" / "LLVMExports.cmake").as_posix())
+        # Can't use tools.files.load due to CRLF endings on Windows causing issues with Regular Expressions
+        cmake_exports = (self._package_folder_path / "lib" / "cmake" / "llvm" / "LLVMExports.cmake").read_text("utf-8")
         match_dependencies = re.compile(
             r'''^set_target_properties\((\w+).*\n?\s*INTERFACE_LINK_LIBRARIES\s+"(\S+)"''', re.MULTILINE)
 
@@ -372,7 +372,7 @@ class LLVMCoreConan(ConanFile):
                 components[llvm_lib].update(_parse_deps(dependencies))
 
     def _llvm_build_info(self):
-        cmake_config = load(self, (self._package_folder_path / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake").as_posix())
+        cmake_config = (self._package_folder_path / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake").read_text("utf-8")
 
         match_cmake_var = re.compile(r"""^set\(LLVM_AVAILABLE_LIBS (?P<components>.*)\)$""", re.MULTILINE)
         match = match_cmake_var.search(cmake_config)
@@ -390,7 +390,7 @@ class LLVMCoreConan(ConanFile):
 
     @property
     def _cmake_module_path(self):
-        return PurePosixPath("lib") / "cmake" / "llvm"
+        return Path("lib") / "cmake" / "llvm"
 
     @property
     def _build_info_file(self):
