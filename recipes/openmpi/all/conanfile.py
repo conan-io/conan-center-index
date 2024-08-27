@@ -19,24 +19,24 @@ class OpenMPIConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.open-mpi.org"
     topics = ("mpi", "openmpi")
-
+    provides = "mpi"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "fortran": ["yes", "mpifh", "usempi", "usempi80", "no"],
-        "cxx": [True, False],
-        "cxx_exceptions": [True, False],
+        "enable_cxx": [True, False],
+        "enable_cxx_exceptions": [True, False],
         "with_verbs": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "fortran": "no",
-        "cxx": True,
-        "cxx_exceptions": False,
-        "with_verbs": True,
+        "enable_cxx": False,
+        "enable_cxx_exceptions": False,
+        "with_verbs": False,
     }
 
     def config_options(self):
@@ -46,9 +46,10 @@ class OpenMPIConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if not self.options.cxx:
+        if not self.options.enable_cxx:
             self.settings.rm_safe("compiler.libcxx")
             self.settings.rm_safe("compiler.cppstd")
+            del self.options.enable_cxx_exceptions
         if is_apple_os(self):
             # Unavailable due to dependency on libnl
             del self.options.with_verbs
@@ -56,16 +57,12 @@ class OpenMPIConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def package_id(self):
-        if not self.info.options.cxx:
-            del self.info.options.cxx_exceptions
-
     def requirements(self):
         # OpenMPI public headers don't include anything besides stddef.h.
         # transitive_headers=True is not needed for any dependencies.
-        self.requires("hwloc/2.9.3")
+        self.requires("hwloc/2.10.0")
         self.requires("zlib/[>=1.2.11 <2]")
-        if not is_apple_os(self):
+        if self.settings.os == "Linux":
             self.requires("libnl/3.8.0")
         if self.options.get_safe("with_verbs"):
             self.requires("rdma-core/52.0")
@@ -75,8 +72,9 @@ class OpenMPIConan(ConanFile):
             # Requires Cygwin or WSL
             raise ConanInvalidConfiguration("OpenMPI doesn't support Windows")
 
-        if self.version == "4.1.0" and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("OpenMPI 4.1.0 doesn't support armv8")
+        if self.version == "4.1.0" and is_apple_os(self) and self.settings.arch == "armv8":
+            # INFO: https://github.com/open-mpi/ompi/issues/8410
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported in Mac M1. Use a newer version.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -91,8 +89,8 @@ class OpenMPIConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.configure_args += [
             f"--enable-mpi-fortran={self.options.fortran}",
-            f"--enable-mpi-cxx={yes_no(self.options.cxx)}",
-            f"--enable-cxx-exceptions={yes_no(self.options.get_safe('cxx_exceptions'))}",
+            f"--enable-mpi-cxx={yes_no(self.options.enable_cxx)}",
+            f"--enable-cxx-exceptions={yes_no(self.options.get_safe('enable_cxx_exceptions'))}",
             f"--with-hwloc={root('hwloc')}",
             f"--with-libnl={root('libnl') if not is_apple_os(self) else 'no'}",
             f"--with-verbs={root('rdma-core') if self.options.get_safe('with_verbs') else 'no'}",
@@ -145,8 +143,9 @@ class OpenMPIConan(ConanFile):
         deps = AutotoolsDeps(self)
         deps.generate()
 
-        # Needed for ./configure to find libibnetdisc.so
-        VirtualRunEnv(self).generate(scope="build")
+        if self.options.with_verbs:
+            # Needed for ./configure to find libibnetdisc.so
+            VirtualRunEnv(self).generate(scope="build")
 
         # TODO: might want to enable reproducible builds by setting
         #  $SOURCE_DATE_EPOCH, $USER and $HOSTNAME
@@ -186,7 +185,7 @@ class OpenMPIConan(ConanFile):
             "hwloc::hwloc",
             "zlib::zlib",
         ]
-        if not is_apple_os(self):
+        if self.settings.os == "Linux":
             requires.append("libnl::libnl")
         if self.options.get_safe("with_verbs"):
             requires.extend(["rdma-core::libibverbs", "rdma-core::librdmacm"])
@@ -200,7 +199,7 @@ class OpenMPIConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["orte"].system_libs = ["dl", "pthread", "rt", "util"]
         self.cpp_info.components["orte"].cflags = ["-pthread"]
-        if self.options.cxx_exceptions:
+        if self.options.get_safe("enable_cxx_exceptions"):
             self.cpp_info.components["orte"].cflags.append("-fexceptions")
         self.cpp_info.components["orte"].requires = requires
 
@@ -216,7 +215,7 @@ class OpenMPIConan(ConanFile):
         self.cpp_info.components["ompitrace"].libs = ["ompitrace"]
         self.cpp_info.components["ompitrace"].requires = ["ompi"]
 
-        if self.options.cxx:
+        if self.options.enable_cxx:
             self.cpp_info.components["ompi-cxx"].set_property("pkg_config_name", "ompi-cxx")
             self.cpp_info.components["ompi-cxx"].set_property("cmake_target_name", "MPI::MPI_CXX")
             self.cpp_info.components["ompi-cxx"].libs = ["mpi_cxx"]
@@ -257,7 +256,7 @@ class OpenMPIConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "MPI"
         self.cpp_info.names["cmake_find_package_multi"] = "MPI"
         self.cpp_info.components["ompi-c"].names["cmake_find_package"] = "MPI_C"
-        if self.options.cxx:
+        if self.options.enable_cxx:
             self.cpp_info.components["ompi-cxx"].names["cmake_find_package"] = "MPI_CXX"
         if self.options.fortran != "no":
             self.cpp_info.components["ompi-fort"].names["cmake_find_package"] = "MPI_Fortran"
