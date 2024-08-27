@@ -29,9 +29,9 @@ import textwrap
 required_conan_version = ">=1.62.0"
 
 # LLVM's default config is to enable all targets, but end users can significantly reduce
-# build times for the package by disabling the ones they don't need with the corresponding option
-# `-o llvm-core/*:with_target_<target name in lower case>=False`
-LLVM_TARGETS = [
+# build times for the package by specifying only the targets they need as a
+# semi-colon delimited string in the value of the 'targets' option
+LLVM_TARGETS = {
     "AArch64",
     "AMDGPU",
     "ARM",
@@ -51,7 +51,7 @@ LLVM_TARGETS = [
     "WebAssembly",
     "X86",
     "XCore"
-]
+}
 
 
 class LLVMCoreConan(ConanFile):
@@ -69,6 +69,7 @@ class LLVMCoreConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "components": ["ANY"],
+        "targets": ["ANY"],
         "exceptions": [True, False],
         "rtti": [True, False],
         "threads": [True, False],
@@ -94,11 +95,11 @@ class LLVMCoreConan(ConanFile):
         "with_xml2": [True, False],
         "with_z3": [True, False],
     }
-    options.update({f"with_target_{target.lower()}": [True, False] for target in LLVM_TARGETS})
     default_options = {
         "shared": False,
         "fPIC": True,
         "components": "all",
+        "targets": "all",
         "exceptions": True,
         "rtti": True,
         "threads": True,
@@ -115,7 +116,6 @@ class LLVMCoreConan(ConanFile):
         "with_z3": True,
         "with_zlib": True,
     }
-    default_options.update({f"with_target_{target.lower()}": True for target in LLVM_TARGETS})
 
     @property
     def _min_cppstd(self):
@@ -134,17 +134,10 @@ class LLVMCoreConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    @property
-    def _major_version(self):
-        return Version(self.version).major
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.with_libedit  # not supported on windows
-        if self._major_version < 14:
-            del self.options.with_target_loongarch  # experimental
-            del self.options.with_target_ve  # experimental
 
     def configure(self):
         if self.options.shared:
@@ -214,21 +207,25 @@ class LLVMCoreConan(ConanFile):
 
     @property
     def _targets_to_build(self):
-        return ";".join(target for target in LLVM_TARGETS if self.options.get_safe(f"with_target_{target.lower()}"))
+        return self.options.targets if self.options.targets != "all" else self._all_targets
 
     @property
     def _all_targets(self):
-        # This is not just LLVM_TARGETS as it is version specific
-        return ";".join(
-            target for target in LLVM_TARGETS if self.options.get_safe(f"with_target_{target.lower()}") is not None)
+        targets = LLVM_TARGETS if Version(self.version) >= "14" else LLVM_TARGETS - {"LoongArch", "VE"}
+        return ";".join(targets)
 
     def generate(self):
         tc = CMakeToolchain(self, generator="Ninja")
         # https://releases.llvm.org/12.0.0/docs/CMake.html
         # https://releases.llvm.org/13.0.0/docs/CMake.html
         cmake_variables = {
-            "LLVM_TARGETS_TO_BUILD": self._targets_to_build,
-            # See comment below on LLVM shared library builds
+            # Enables LLVM to find conan libraries during try_compile
+            "CMAKE_TRY_COMPILE_CONFIGURATION": str(self.settings.build_type),
+            # LLVM has two separate concepts of a "shared library build".
+            # "BUILD_SHARED_LIBS" builds shared versions of all the static components
+            # "LLVM_BUILD_LLVM_DYLIB" builds a single shared library containing all components.
+            # It is likely the latter that the user expects by a "shared library" build.
+            "BUILD_SHARED_LIBS": False,
             "LLVM_BUILD_LLVM_DYLIB": self.options.shared,
             "LLVM_LINK_LLVM_DYLIB": self.options.shared,
             "LLVM_DYLIB_COMPONENTS": self.options.components,
@@ -253,6 +250,8 @@ class LLVMCoreConan(ConanFile):
             "LLVM_ENABLE_LIBXML2": "FORCE_ON" if self.options.with_xml2 else False,
             "LLVM_ENABLE_TERMINFO": self.options.with_terminfo
         }
+        if self.options.targets != "all":
+            cmake_variables["LLVM_TARGETS_TO_BUILD"] = self.options.targets
 
         self._apply_resource_limits(cmake_variables)
 
@@ -279,16 +278,7 @@ class LLVMCoreConan(ConanFile):
         else:
             cmake_variables["LLVM_USE_SANITIZER"] = self.options.use_sanitizer
 
-        tc.variables.update(cmake_variables)
-        tc.cache_variables.update({
-            # Enables LLVM to find conan libraries during try_compile
-            "CMAKE_TRY_COMPILE_CONFIGURATION": str(self.settings.build_type),
-            # LLVM has two separate concepts of a "shared library build".
-            # "BUILD_SHARED_LIBS" builds shared versions of all the static components
-            # "LLVM_BUILD_LLVM_DYLIB" builds a single shared library containing all components.
-            # It is likely the latter that the user expects by a "shared library" build.
-            "BUILD_SHARED_LIBS": False
-        })
+        tc.cache_variables.update(cmake_variables)
         tc.generate()
 
         tc = CMakeDeps(self)
