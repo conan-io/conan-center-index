@@ -135,9 +135,6 @@ class OpenMPIConan(ConanFile):
         # Not adding it as it fails to be detected by ./configure in some cases.
         # https://github.com/open-mpi/ompi/blob/v4.1.6/opal/mca/dl/dl.h#L20-L25
         tc.configure_args.append("--with-libltdl=no")
-        # OpenMPI expects a single libevent.* library file,
-        # ./configure with a external libevent fails.
-        tc.configure_args.append("--with-libevent=internal")
         tc.generate()
 
         deps = AutotoolsDeps(self)
