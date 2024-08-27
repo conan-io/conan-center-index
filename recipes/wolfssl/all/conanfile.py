@@ -40,6 +40,8 @@ class WolfSSLConan(ConanFile):
         "sni": [True, False],
         "testcert": [True, False],
         "with_curl": [True, False],
+        "with_quic": [True, False],
+        "with_experimental": [True, False],
     }
     default_options = {
         "shared": False,
@@ -57,6 +59,8 @@ class WolfSSLConan(ConanFile):
         "sni": False,
         "testcert": False,
         "with_curl": False,
+        "with_quic": False,
+        "with_experimental": False,
     }
 
     @property
@@ -68,6 +72,10 @@ class WolfSSLConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) < "5.2.0":
             del self.options.with_curl
+        if Version(self.version) < "5.5.0":
+            del self.options.with_quic
+        if Version(self.version) < "5.7.0":
+            del self.options.with_experimental
 
     def configure(self):
         if self.options.shared:
@@ -108,7 +116,7 @@ class WolfSSLConan(ConanFile):
             "--enable-sslv3={}".format(yes_no(self.options.sslv3)),
             "--enable-alpn={}".format(yes_no(self.options.alpn)),
             "--enable-des3={}".format(yes_no(self.options.des3)),
-            "--enable-tls13={}".format(yes_no(self.options.tls13)),
+            "--enable-tls13={}".format(yes_no(self.options.tls13 or self.options.get_safe("with_quic"))),
             "--enable-certgen={}".format(yes_no(self.options.certgen)),
             "--enable-dsa={}".format(yes_no(self.options.dsa)),
             "--enable-ripemd={}".format(yes_no(self.options.ripemd)),
@@ -120,6 +128,10 @@ class WolfSSLConan(ConanFile):
         ])
         if self.options.get_safe("with_curl"):
             tc.configure_args.append("--enable-curl")
+        if self.options.get_safe("with_quic"):
+            tc.configure_args.append("--enable-quic")
+        if self.options.get_safe("with_experimental"):
+            tc.configure_args.append("--enable-experimental")
         if is_msvc(self):
             tc.extra_ldflags.append("-ladvapi32")
             if check_min_vs(self, "180", raise_invalid=False):

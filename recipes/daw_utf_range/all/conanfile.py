@@ -15,7 +15,7 @@ class DawUtfRangeConan(ConanFile):
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/beached/utf_range/"
-    topics = ("utf", "validator", "iterator")
+    topics = ("utf", "validator", "iterator", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
@@ -38,7 +38,8 @@ class DawUtfRangeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("daw_header_libraries/2.97.0")
+        corresponding_daw_header_version = self.conan_data["daw_headers_mapping"][self.version]
+        self.requires(f"daw_header_libraries/{corresponding_daw_header_version}")
 
     def package_id(self):
         self.info.clear()

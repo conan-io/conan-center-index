@@ -1,26 +1,40 @@
 sources:
-  "1.17.2":
-    sha256: "6b70d4655e2a47a22b101c666f4b29ba746eda4aa8a0f7255b32b2e9408801df"
+  "1.18.0":
+    sha256: "abf8fba4d510086a492783c3e0828e90b32734738fd80906595617d229d02bab"
+    url: "https://gitlab.freedesktop.org/cairo/cairo/-/archive/1.18.0/cairo-1.18.0.tar.bz2"
+  "1.17.8":
+    url: "https://gitlab.freedesktop.org/cairo/cairo/-/archive/1.17.8/cairo-1.17.8.tar.bz2"
+    sha256: "ead4724423eb969f98b456fe1e3ee1e1741fe1c8dfb1a41ca12afa81a6c1665f"
+  "1.17.6":
+    url: "https://gitlab.freedesktop.org/cairo/cairo/-/archive/1.17.6/cairo-1.17.6.tar.bz2"
+    sha256: "90496d135c9ef7612c98f8ee358390cdec0825534573778a896ea021155599d2"
+  "1.17.4":
     url:
-      - "https://www.cairographics.org/snapshots/cairo-1.17.2.tar.xz"
-      - "https://www.mirrorservice.org/sites/tinycorelinux.net/11.x/x86_64/tcz/src/cairo/cairo-1.17.2.tar.xz"
-  "1.16.0":
-    sha256: "5e7b29b3f113ef870d1e3ecf8adf21f923396401604bda16d44be45e66052331"
-    url:
-      - "https://www.cairographics.org/releases/cairo-1.16.0.tar.xz"
-      - "https://mirror.koddos.net/blfs/conglomeration/cairo/cairo-1.16.0.tar.xz"
+      - "https://www.cairographics.org/snapshots/cairo-1.17.4.tar.xz"
+      - "https://mirror.koddos.net/blfs/conglomeration/cairo/cairo-1.17.4.tar.xz"
+    sha256: "74b24c1ed436bbe87499179a3b27c43f4143b8676d8ad237a6fa787401959705"
 patches:
-  "1.17.2":
-    - patch_file: "patches/0001-msvc-update-build-scripts-to-compile-with-more-featu.patch"
+  "1.17.4":
     - patch_file: "patches/binutils-2.34-libbfd-fix.patch"
+      patch_type: "backport"
       patch_description: "fix build with newer versions of bfd"
-      patch_type: backport
-      patch_source: https://gitlab.freedesktop.org/cairo/cairo/-/merge_requests/128
+      patch_source: "https://gitlab.freedesktop.org/cairo/cairo/-/commit/e30259f6237571c61992433c110bc6e1ef900244"
       base_path: "util/cairo-trace"
-  "1.16.0":
-    - patch_file: "patches/0001-msvc-update-build-scripts-to-compile-with-more-featu.patch"
-    - patch_file: "patches/binutils-2.34-libbfd-fix.patch"
-      patch_description: "fix build with newer versions of bfd"
-      patch_type: backport
-      patch_source: https://gitlab.freedesktop.org/cairo/cairo/-/merge_requests/128
+    - patch_file: "patches/cairo-1.17.4-trace-cflags-fix.patch"
+      patch_type: "conan"
+      patch_description: |
+        Add missing 'PACKAGE' and 'PACKAGE_VERSION' defines for libbfd headers included by 'lookup-symbol.c'.
       base_path: "util/cairo-trace"
+    - patch_file: "patches/cairo-1.17.4-xlib-xrender-option.patch"
+      patch_type: "conan"
+      patch_description: >-
+        This patch adds option to enable or disable xlib-xrender component.
+        Without it 'xrender' is always required when 'xlib' option is enabled. @sh0
+    - patch_file: "patches/cairo-1.17.4-symbol-lookup-backport.patch"
+      patch_type: "backport"
+      patch_description: "add symbol-lookup option to allow disabling bfd/libiberty usage"
+      patch_source: "https://gitlab.freedesktop.org/cairo/cairo/-/commit/e0cf7b869fb1c6b73cf4a9aad2fc8aea4ff1f6ee"
+    - patch_file: "patches/cairo-1.17.4-encoding-backport.patch"
+      patch_type: "backport"
+      patch_description: "use encoding=utf-8 when reading/writing files in helper script"
+      patch_source: "https://gitlab.freedesktop.org/cairo/cairo/-/commit/9732f4e80f906fab85b97ae55ee44bfd3ee4945e"

@@ -1,4 +1,7 @@
 sources:
+  "9.4.1":
+    url: "https://github.com/OSGeo/PROJ/releases/download/9.4.1/proj-9.4.1.tar.gz"
+    sha256: "ffe20170ee2b952207adf8a195e2141eab12cda181e49fdeb54425d98c7171d7"
   "9.3.1":
     url: "https://github.com/OSGeo/PROJ/releases/download/9.3.1/proj-9.3.1.tar.gz"
     sha256: "b0f919cb9e1f42f803a3e616c2b63a78e4d81ecfaed80978d570d3a5e29d10bc"
@@ -8,18 +11,6 @@ sources:
   "9.2.1":
     url: "https://github.com/OSGeo/PROJ/releases/download/9.2.1/proj-9.2.1.tar.gz"
     sha256: "15ebf4afa8744b9e6fccb5d571fc9f338dc3adcf99907d9e62d1af815d4971a1"
-  "9.1.1":
-    url: "https://github.com/OSGeo/PROJ/releases/download/9.1.1/proj-9.1.1.tar.gz"
-    sha256: "003cd4010e52bb5eb8f7de1c143753aa830c8902b6ed01209f294846e40e6d39"
-  "9.1.0":
-    url: "https://github.com/OSGeo/PROJ/releases/download/9.1.0/proj-9.1.0.tar.gz"
-    sha256: "81b2239b94cad0886222cde4f53cb49d34905aad2a1317244a0c30a553db2315"
-  "9.0.1":
-    url: "https://github.com/OSGeo/PROJ/releases/download/9.0.1/proj-9.0.1.tar.gz"
-    sha256: "737eaacbe7906d0d6ff43f0d9ebedc5c734cccc9e6b8d7beefdec3ab22d9a6a3"
-  "9.0.0":
-    url: "https://github.com/OSGeo/PROJ/releases/download/9.0.0/proj-9.0.0.tar.gz"
-    sha256: "0620aa01b812de00b54d6c23e7c5cc843ae2cd129b24fabe411800302172b989"
   "8.2.1":
     url: "https://github.com/OSGeo/PROJ/releases/download/8.2.1/proj-8.2.1.tar.gz"
     sha256: "76ed3d0c3a348a6693dfae535e5658bbfd47f71cb7ff7eb96d9f12f7e068b1cf"
@@ -42,26 +33,6 @@ patches:
     - patch_file: "patches/0001-use-cmake-targets-9.2.1.patch"
       patch_type: "conan"
       patch_description: "Use cmake targets"
-  "9.1.1":
-    - patch_file: "patches/0001-use-cmake-targets-9.1.0.patch"
-      patch_type: "conan"
-      patch_description: "Use cmake targets"
-  "9.1.0":
-    - patch_file: "patches/0001-use-cmake-targets-9.1.0.patch"
-      patch_type: "conan"
-      patch_description: "Use cmake targets"
-  "9.0.1":
-    - patch_file: "patches/0001-use-cmake-targets-9.0.1.patch"
-      patch_type: "conan"
-      patch_description: "Use cmake targets"
-  "9.0.0":
-    - patch_file: "patches/0001-use-cmake-targets-9.0.0.patch"
-      patch_type: "conan"
-      patch_description: "Use cmake targets"
-    - patch_file: "patches/0002-cmake-configure-proj-pc.patch"
-      patch_type: "portability"
-      patch_description: "cmake configure proj pc"
-      patch_source: "https://github.com/OSGeo/PROJ/pull/3087"
   "8.2.1":
     - patch_file: "patches/0001-use-cmake-targets-8.2.0.patch"
       patch_type: "conan"

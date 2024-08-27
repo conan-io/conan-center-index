@@ -1,4 +1,7 @@
 sources:
+  "2.3.2":
+    url: "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v2.3.2.tar.gz"
+    sha256: "6bbf4e7fa4ea2f743a238cb22aff44890425771a2f57f62cece1574e46ceec2f"
   "2.3.1":
     url: "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v2.3.1.tar.gz"
     sha256: "7196e979a0449ce28afd46a78383476f3b8fc1cc1d3a417192be439ede83437b"
@@ -15,6 +18,10 @@ sources:
     url: "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v1.1.1.tar.gz"
     sha256: "c9b5b9def907e1dafb29e37336b702fff22cc6306d445a13b1621b8a754c14c8"
 patches:
+  "2.3.2":
+    - patch_file: "patches/2.3.1-0001-fix-cmake-source-dir-and-targets.patch"
+      patch_description: "use cci package, use PROJECT_BINARY_DIR/PROJECT_SOURCE_DIR"
+      patch_type: "conan"
   "2.3.1":
     - patch_file: "patches/2.3.1-0001-fix-cmake-source-dir-and-targets.patch"
       patch_description: "use cci package, use PROJECT_BINARY_DIR/PROJECT_SOURCE_DIR"

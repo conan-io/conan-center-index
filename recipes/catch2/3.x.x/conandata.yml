@@ -1,4 +1,16 @@
 sources:
+  "3.7.0":
+    url: "https://github.com/catchorg/Catch2/archive/v3.7.0.tar.gz"
+    sha256: "5b10cd536fa3818112a82820ce0787bd9f2a906c618429e7c4dea639983c8e88"
+  "3.6.0":
+    url: "https://github.com/catchorg/Catch2/archive/v3.6.0.tar.gz"
+    sha256: "485932259a75c7c6b72d4b874242c489ea5155d17efa345eb8cc72159f49f356"
+  "3.5.4":
+    url: "https://github.com/catchorg/Catch2/archive/v3.5.4.tar.gz"
+    sha256: "b7754b711242c167d8f60b890695347f90a1ebc95949a045385114165d606dbb"
+  "3.5.3":
+    url: "https://github.com/catchorg/Catch2/archive/v3.5.3.tar.gz"
+    sha256: "8d723b0535c94860ef8cf6231580fa47d67a3416757ecb10639e40d748ab6c71"
   "3.5.2":
     url: "https://github.com/catchorg/Catch2/archive/v3.5.2.tar.gz"
     sha256: "269543a49eb76f40b3f93ff231d4c24c27a7e16c90e47d2e45bcc564de470c6e"

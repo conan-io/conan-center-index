@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.layout import basic_layout
@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.64.0 <2 || >=2.2.0"
 
 
 class WaylandProtocolsConan(ConanFile):
@@ -38,7 +38,8 @@ class WaylandProtocolsConan(ConanFile):
 
     def generate(self):
         tc = MesonToolchain(self)
-        tc.project_options["datadir"] = os.path.join(self.package_folder, "res")
+        # Using relative folder because of this https://github.com/conan-io/conan/pull/15706
+        tc.project_options["datadir"] = "res"
         tc.project_options["tests"] = "false"
         tc.generate()
         virtual_build_env = VirtualBuildEnv(self)
@@ -68,10 +69,10 @@ class WaylandProtocolsConan(ConanFile):
             'datarootdir': '${prefix}/res',
             'pkgdatadir': '${datarootdir}/wayland-protocols',
         }
-        self.cpp_info.set_property(
-            "pkg_config_custom_content",
-            "\n".join(f"{key}={value}" for key,value in pkgconfig_variables.items()))
-
+        # TODO: Remove when Conan 1.x not supported
+        pkgconfig_variables = pkgconfig_variables if conan_version.major >= 2 \
+            else "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items())
+        self.cpp_info.set_property("pkg_config_custom_content", pkgconfig_variables)
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
         self.cpp_info.bindirs = []

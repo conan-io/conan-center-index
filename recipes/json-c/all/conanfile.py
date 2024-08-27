@@ -68,3 +68,4 @@ class JSONCConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "json-c::json-c")
         self.cpp_info.set_property("pkg_config_name", "json-c")
         self.cpp_info.libs = collect_libs(self)
+        self.cpp_info.includedirs = ["include", "include/json-c"]

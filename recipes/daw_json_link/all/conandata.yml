@@ -1,4 +1,10 @@
 sources:
+  "3.24.1":
+    url: "https://github.com/beached/daw_json_link/archive/refs/tags/v3.24.1.tar.gz"
+    sha256: "439b4678377950f165e3d49d472c0676f0ef2fae3c5e6e7febddd5633f6e4f39"
+  "3.23.2":
+    url: "https://github.com/beached/daw_json_link/archive/refs/tags/v3.23.2.tar.gz"
+    sha256: "fd1234a14c126c79076e0b6e6eceae42afd465c419dc7a7393c69c28aa7f53d4"
   "3.23.0":
     url: "https://github.com/beached/daw_json_link/archive/refs/tags/v3.23.0.tar.gz"
     sha256: "a01e9a3a48784a47dbb60bd21ecbe7e05a7d30cec75ea6d55b1789f6aefe5f05"
@@ -20,15 +26,23 @@ sources:
   "3.15.0":
     url: "https://github.com/beached/daw_json_link/archive/refs/tags/v3.15.0.tar.gz"
     sha256: "6f72c69944e33f56823d941b09c8d17ece44b224e802ae0a3416c32f2bdbec40"
-  "3.14.1":
-    url: "https://github.com/beached/daw_json_link/archive/refs/tags/v3.14.1.tar.gz"
-    sha256: "a761c594dabd14b7484f5d286db31e9272f633d2ad0dab44cdae5ff3f06db6fb"
-  "3.14.0":
-    url: "https://github.com/beached/daw_json_link/archive/refs/tags/v3.14.tar.gz"
-    sha256: "07171e1b8f09f525116627015b6618990dc9cfb32357ba821512c0508730c9a4"
-  "3.12.0":
-    url: "https://github.com/beached/daw_json_link/archive/v3.12.0.tar.gz"
-    sha256: "b32097954caae14071893232fd85febbfda1deec34bb939f6aad76c077c6c5d5"
-  "3.11.1":
-    url: "https://github.com/beached/daw_json_link/archive/v3.11.1.tar.gz"
-    sha256: "d2b5cb221892c6b1ecd30fd2e45d168d6b378e97d134e75349703104c5882309"
+daw_headers_mapping:
+  "3.24.1": "2.106.0"
+  "3.23.2": "2.101.0"
+  "3.23.0": "2.97.0"
+  "3.20.1": "2.97.0"
+  "3.19.0": "2.97.0"
+  "3.17.2": "2.97.0"
+  "3.17.1": "2.97.0"
+  "3.16.0": "2.97.0"
+  "3.15.0": "2.97.0"
+daw_utf_mapping:
+  "3.24.1": "2.2.5"
+  "3.23.2": "2.2.4"
+  "3.23.0": "2.2.3"
+  "3.20.1": "2.2.3"
+  "3.19.0": "2.2.3"
+  "3.17.2": "2.2.3"
+  "3.17.1": "2.2.3"
+  "3.16.0": "2.2.3"
+  "3.15.0": "2.2.3"

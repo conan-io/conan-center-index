@@ -1,15 +1,16 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2 || >=2.0.6"
 
 
 class PackageConan(ConanFile):
@@ -36,6 +37,10 @@ class PackageConan(ConanFile):
         "with_wayland": True,
         "with_win32": True,
     }
+
+    @property
+    def _has_build_profile(self):
+        return hasattr(self, "settings_build")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -76,9 +81,9 @@ class PackageConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built without at least one backend dev files.")
 
     def build_requirements(self):
-        if self.options.get_safe("with_wayland"):
-            self.tool_requires("wayland/1.22.0")
-        self.tool_requires("meson/1.3.1")
+        if self.options.get_safe("with_wayland") and self._has_build_profile:
+            self.tool_requires("wayland/<host_version>")
+        self.tool_requires("meson/1.3.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.1.0")
 
@@ -90,14 +95,30 @@ class PackageConan(ConanFile):
         tc.project_options["disable_drm"] = not self.options.get_safe("with_drm")
         for opt in ['with_x11', 'with_glx', 'with_wayland', 'with_win32']:
             tc.project_options[opt] = "yes" if self.options.get_safe(opt) else "no"
+        tc.project_options["build.pkg_config_path"] = self.generators_folder
         tc.generate()
-        tc = PkgConfigDeps(self)
-        tc.generate()
+        pkg_config_deps = PkgConfigDeps(self)
+        if self.options.get_safe("with_wayland") and self._has_build_profile:
+            pkg_config_deps.build_context_activated = ["wayland"]
+            pkg_config_deps.build_context_suffix = {"wayland": "_BUILD"}
+        pkg_config_deps.generate()
         tc = VirtualBuildEnv(self)
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        if self.options.get_safe("with_wayland") and self._has_build_profile:
+            # Patch the build system to use the pkg-config files generated for the build context.
+            meson_build_file = os.path.join(self.source_folder, "meson.build")
+            replace_in_file(
+                self,
+                meson_build_file,
+                "wayland_scanner_dep = dependency('wayland-scanner',",
+                "wayland_scanner_dep = dependency('wayland-scanner_BUILD',",
+            )
+
+    def build(self):
+        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
