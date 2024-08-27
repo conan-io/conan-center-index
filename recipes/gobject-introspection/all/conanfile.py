@@ -10,7 +10,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.env import Environment
 from conan.tools.scm import Version
-from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.apple import fix_apple_shared_install_name
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
@@ -41,6 +41,8 @@ class GobjectIntrospectionConan(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+        # FIXME: g-ir-scanner fails to load glib correctly, resulting in failure during the build
+        self.options["glib"].shared = False
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -57,6 +59,9 @@ class GobjectIntrospectionConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "Debug build on Windows is disabled due to debug version of Python libs likely not being available."
             )
+        if self.dependencies.build["glib"].options.shared:
+            # FIXME: tools/g-ir-scanner', '--output=gir/GLib-2.0.gir' ... ERROR: can't resolve libraries to shared libraries: glib-2.0, gobject-2.0
+            raise ConanInvalidConfiguration(f"{self.ref} fails to run g-ir-scanner due glib loaded as shared. Use -o 'glib/*:shared=False'. Contributions to fix this are welcome.")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
@@ -84,9 +89,6 @@ class GobjectIntrospectionConan(ConanFile):
             tc.project_options["build_introspection_data"] = "false"
         else:
             tc.project_options["build_introspection_data"] = "true" if self.dependencies["glib"].options.shared else "false"
-        if is_apple_os(self):
-            # FIXME: g-ir-scanner fails to load glib correctly, it fails to find libgnuintl
-            tc.project_options["build_introspection_data"] = "false"
         tc.project_options["datadir"] = "res"
         tc.generate()
         deps = PkgConfigDeps(self)
