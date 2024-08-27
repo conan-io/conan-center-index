@@ -175,6 +175,7 @@ class OpenMPIConan(ConanFile):
         # Based on https://cmake.org/cmake/help/latest/module/FindMPI.html#variables-for-using-mpi
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "MPI")
+        # TODO: Use None when available as Conan feature.
         self.cpp_info.set_property("pkg_config_name", "_ompi-do-not-use")
         # TODO: export a .cmake module to correctly set all variables set by CMake's FindMPI.cmake
 
