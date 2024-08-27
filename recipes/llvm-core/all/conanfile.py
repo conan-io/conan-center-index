@@ -159,7 +159,7 @@ class LLVMCoreConan(ConanFile):
             self.requires("z3/4.13.0")
 
     def build_requirements(self):
-        self.tool_requires("ninja/1.12.1")
+        self.tool_requires("ninja/[>=1.10.2 <2]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -171,7 +171,7 @@ class LLVMCoreConan(ConanFile):
             )
 
         if self.options.shared:
-            if self._is_windows:
+            if self.settings.os == "Windows":
                 raise ConanInvalidConfiguration("Shared builds are currently not supported on Windows")
             if os.getenv("CONAN_CENTER_BUILD_SERVICE") and self.settings.build_type == "Debug":
                 raise ConanInvalidConfiguration("Shared Debug build is not supported on CCI due to resource limitations")
@@ -211,7 +211,7 @@ class LLVMCoreConan(ConanFile):
 
     @property
     def _all_targets(self):
-        targets = LLVM_TARGETS if Version(self.version) >= "14" else LLVM_TARGETS - {"LoongArch", "VE"}
+        targets = LLVM_TARGETS if Version(self.version) >= 14 else LLVM_TARGETS - {"LoongArch", "VE"}
         return ";".join(targets)
 
     def generate(self):
@@ -293,10 +293,6 @@ class LLVMCoreConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-
-    @property
-    def _is_windows(self):
-        return self.settings.os == "Windows"
 
     @property
     def _package_folder_path(self):
