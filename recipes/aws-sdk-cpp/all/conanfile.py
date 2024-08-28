@@ -503,8 +503,10 @@ class AwsSdkCppConan(ConanFile):
             "aws-c-common::aws-c-common",
             "aws-c-event-stream::aws-c-event-stream",
             "aws-checksums::aws-checksums",
+            "aws-c-auth::aws-c-auth",
             "aws-c-cal::aws-c-cal",
             "aws-c-http::aws-c-http",
+            "aws-c-mqtt::aws-c-mqtt",
             "aws-c-io::aws-c-io",
             "aws-crt-cpp::aws-crt-cpp",
         ]
