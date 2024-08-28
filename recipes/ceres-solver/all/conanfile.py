@@ -145,10 +145,10 @@ class CeresSolverConan(ConanFile):
         if self.options.get_safe("use_glog"):
             self.requires("glog/0.6.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("use_suitesparse"):
-            self.requires("suitesparse-cholmod/5.2.1")
-            self.requires("suitesparse-spqr/4.3.3")
+            self.requires("suitesparse-cholmod/5.3.0")
+            self.requires("suitesparse-spqr/4.3.4")
             if Version(self.version) < "2.2.0":
-                self.requires("suitesparse-cxsparse/4.4.0")
+                self.requires("suitesparse-cxsparse/4.4.1")
         if self.options.get_safe("use_lapack"):
             self.requires("openblas/0.3.27")
         if self._require_metis:
