@@ -68,7 +68,7 @@ class GStPluginsUglyConan(ConanFile):
         self.requires("gst-plugins-base/1.19.1")
 
     def build_requirements(self):
-        self.build_requires("meson/0.54.2")
+        self.build_requires("meson/[>=1.2.3 <2]")
         if not tools.which("pkg-config"):
             self.build_requires("pkgconf/[>=2.2 <3]")
         if self.settings.os == 'Windows':
