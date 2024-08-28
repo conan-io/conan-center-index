@@ -1,0 +1,57 @@
+diff --git a/CM_definitions.cmake b/CM_definitions.cmake
+index dfb24d7..ae34f4f 100644
+--- a/CM_definitions.cmake
++++ b/CM_definitions.cmake
+@@ -14,7 +14,7 @@ ADD_DEFINITIONS ( "-std=gnu++11" )
+ ADD_DEFINITIONS ( "-fPIC" )
+ ADD_DEFINITIONS ( "-Wall" )
+ ADD_DEFINITIONS ( "-Wextra" )
+-ADD_DEFINITIONS ( "-Werror" )
++#ADD_DEFINITIONS ( "-Werror" )
+ ADD_DEFINITIONS ( "-Wno-unused-parameter" )
+ #ADD_DEFINITIONS ( "-fdiagnostics-color" )
+ #ADD_DEFINITIONS ( "-fmessage-length=120" )
+diff --git a/CM_dependencies.cmake b/CM_dependencies.cmake
+index 7b667cb..313a4c6 100644
+--- a/CM_dependencies.cmake
++++ b/CM_dependencies.cmake
+@@ -3,6 +3,6 @@
+ 
+ 
+ FIND_PACKAGE ( Threads		REQUIRED		)
+-FIND_LIBRARY ( maxminddb	NAMES maxminddb	)
++FIND_PACKAGE ( maxminddb	REQUIRED CONFIG	)
+ 
+-SET ( GeoLite2PP_EXTERNAL_LIBS "${maxminddb}" )
++SET ( GeoLite2PP_EXTERNAL_LIBS maxminddb::maxminddb Threads::Threads )
+diff --git a/src-lib/CMakeLists.txt b/src-lib/CMakeLists.txt
+index 58caf9a..02f11c1 100644
+--- a/src-lib/CMakeLists.txt
++++ b/src-lib/CMakeLists.txt
+@@ -14,8 +14,13 @@ TARGET_LINK_LIBRARIES	( geolite2++ ${CMAKE_THREAD_LIBS_INIT} ${GeoLite2PP_EXTERN
+ 
+ # this creates the shared library (.so)
+ ADD_LIBRARY				( geolite2++s SHARED ${LIB_SOURCE} )
++TARGET_LINK_LIBRARIES	( geolite2++s ${CMAKE_THREAD_LIBS_INIT} ${GeoLite2PP_EXTERNAL_LIBS} )
+ SET_TARGET_PROPERTIES	( geolite2++s PROPERTIES OUTPUT_NAME "geolite2++" )
+ SET_TARGET_PROPERTIES	( geolite2++s PROPERTIES PREFIX "lib" )
+-
+-INSTALL ( TARGETS geolite2++ geolite2++s ARCHIVE DESTINATION lib LIBRARY DESTINATION lib )
++include(GNUInstallDirs)
++if(BUILD_SHARED_LIBS)
++INSTALL ( TARGETS geolite2++s RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
++else()
++INSTALL ( TARGETS geolite2++ ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} )
++endif()
+ INSTALL ( FILES ${LIB_HEADERS} DESTINATION include/ )
+diff --git a/src-main/CMakeLists.txt b/src-main/CMakeLists.txt
+index b22a4b7..cc62ce1 100644
+--- a/src-main/CMakeLists.txt
++++ b/src-main/CMakeLists.txt
+@@ -5,5 +5,5 @@ FILE ( GLOB MAIN_SOURCE *.cpp )
+ LIST ( SORT MAIN_SOURCE )
+ 
+ ADD_EXECUTABLE			(			geolite2pp ${MAIN_SOURCE}						)
+-TARGET_LINK_LIBRARIES	(			geolite2pp ${CMAKE_THREAD_LIBS_INIT} geolite2++	)
++TARGET_LINK_LIBRARIES	(			geolite2pp ${CMAKE_THREAD_LIBS_INIT} geolite2++	${CMAKE_THREAD_LIBS_INIT} ${GeoLite2PP_EXTERNAL_LIBS})
+ INSTALL					( TARGETS	geolite2pp DESTINATION bin						)
