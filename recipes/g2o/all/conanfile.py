@@ -135,7 +135,7 @@ class G2oConan(ConanFile):
             self.requires("suitesparse-cxsparse/4.4.1")
 
         # TODO: optional dependencies
-        # self.requires("qt/5.15.12")
+        # self.requires("qt/[~5.15]")
         # self.requires("libqglviewer/x.y.z")
 
     def validate(self):
