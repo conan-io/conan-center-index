@@ -76,6 +76,7 @@ class CpptraceConan(ConanFile):
             tc.variables["CPPTRACE_USE_SYSTEM_LIBDWARF"] = True
         if self.options.unwind == "libunwind":
             tc.variables["CPPTRACE_UNWIND_WITH_LIBUNWIND"] = True
+        tc.cache_variables["CPPTRACE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
