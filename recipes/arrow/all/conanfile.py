@@ -579,7 +579,7 @@ class ArrowConan(ConanFile):
         if self._requires_rapidjson():
             self.cpp_info.components["libarrow"].requires.append("rapidjson::rapidjson")
         if self.options.with_s3:
-            self.cpp_info.components["libarrow"].requires.append("aws-sdk-cpp::s3")
+            self.cpp_info.components["libarrow"].requires.extend(["aws-sdk-cpp::identity-management", "aws-sdk-cpp::s3"])
         if self.options.get_safe("with_gcs"):
             self.cpp_info.components["libarrow"].requires.append("google-cloud-cpp::storage")
         if self.options.with_orc:
