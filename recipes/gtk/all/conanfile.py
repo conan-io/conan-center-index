@@ -31,18 +31,16 @@ class GtkConan(ConanFile):
         "with_ffmpeg": [True, False],
         "with_gstreamer": [True, False],
         "with_cups": [True, False],
-        "with_cloudprint": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_wayland": False,
+        "with_wayland": True,
         "with_x11": True,
         "with_pango": True,
         "with_ffmpeg": False,
         "with_gstreamer": False,
         "with_cups": False,
-        "with_cloudprint": False,
     }
 
     @property
@@ -64,6 +62,10 @@ class GtkConan(ConanFile):
             # The upstream meson file does not create a static library
             # See https://github.com/GNOME/gtk/commit/14f0a0addb9a195bad2f8651f93b95450b186bd6
             self.options.shared = True
+        else:
+            self.options.rm_safe("with_ffmpeg")
+            self.options.rm_safe("with_gstreamer")
+            self.options.rm_safe("with_cups")
         if self.settings.os not in ["Linux", "FreeBSD"]:
             self.options.rm_safe("with_wayland")
             self.options.rm_safe("with_x11")
@@ -113,15 +115,12 @@ class GtkConan(ConanFile):
         self.requires("libepoxy/1.5.10")
         if self.options.with_pango:
             self.requires("pango/1.51.0", transitive_headers=True, transitive_libs=True)
-        if self.options.with_ffmpeg:
+        if self.options.get_safe("with_ffmpeg"):
             self.requires("ffmpeg/6.1")
-        if self.options.with_gstreamer:
-            self.requires("gstreamer/1.22.6")
-        self.requires("fontconfig/2.15.0", override=True)
+        if self.options.get_safe("with_gstreamer"):
+            self.requires("gstreamer/1.24.7")
 
     def validate(self):
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration("this recipes does not support GCC before version 5. contributions are welcome")
         if is_msvc(self):
             if Version(self.version) < "4.2":
                 raise ConanInvalidConfiguration("MSVC support of this recipe requires at least gtk/4.2")
@@ -196,40 +195,71 @@ class GtkConan(ConanFile):
 
     def package_info(self):
         if self._gtk3:
+            self.cpp_info.components["gdk-3.0"].set_property("pkg_config_name", "gdk-3.0")
             self.cpp_info.components["gdk-3.0"].libs = ["gdk-3"]
             self.cpp_info.components["gdk-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
-            self.cpp_info.components["gdk-3.0"].requires = []
+            self.cpp_info.components["gdk-3.0"].requires = [
+                "gdk-pixbuf::gdk-pixbuf",
+                "libepoxy::libepoxy",
+            ]
             if self.options.with_pango:
                 self.cpp_info.components["gdk-3.0"].requires.extend(["pango::pango_", "pango::pangocairo"])
-            self.cpp_info.components["gdk-3.0"].requires.append("gdk-pixbuf::gdk-pixbuf")
             if not is_msvc(self):
                 self.cpp_info.components["gdk-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["gdk-3.0"].requires.extend(["glib::gio-unix-2.0", "cairo::cairo-xlib"])
                 if self.options.with_x11:
-                    self.cpp_info.components["gdk-3.0"].requires.append("xorg::xorg")
-            self.cpp_info.components["gdk-3.0"].requires.append("libepoxy::libepoxy")
-            self.cpp_info.components["gdk-3.0"].set_property("pkg_config_name", "gdk-3.0")
+                    self.cpp_info.components["gdk-3.0"].requires.extend([
+                        "xorg::x11",
+                        "xorg::xext",
+                        "xorg::xi",
+                        "xorg::xrandr",
+                        "xorg::xcursor",
+                        "xorg::xfixes",
+                        "xorg::xcomposite",
+                        "xorg::xdamage",
+                        "xorg::xinerama",
+                    ])
+                if self.options.with_wayland:
+                    self.cpp_info.components["gdk-3.0"].requires.extend([
+                        "wayland::wayland-client",
+                        "wayland::wayland-cursor",
+                        "wayland::wayland-egl",
+                        "wayland-protocols::wayland-protocols",
+                        "xkbcommon::xkbcommon",
+                    ])
 
+            self.cpp_info.components["gtk+-3.0"].set_property("pkg_config_name", "gtk+-3.0")
             self.cpp_info.components["gtk+-3.0"].libs = ["gtk-3"]
-            self.cpp_info.components["gtk+-3.0"].requires = ["gdk-3.0", "at-spi2-core::at-spi2-core"]
-            if not is_msvc(self):
-                self.cpp_info.components["gtk+-3.0"].requires.extend(["cairo::cairo", "cairo::cairo-gobject"])
-            self.cpp_info.components["gtk+-3.0"].requires.extend(["gdk-pixbuf::gdk-pixbuf", "glib::gio-2.0"])
+            self.cpp_info.components["gtk+-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
+            # skipping gtk+-3.0 requires that are covered by gdk-3.0
+            self.cpp_info.components["gtk+-3.0"].requires = ["gdk-3.0", "glib::gio-2.0"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["gtk+-3.0"].requires.append("at-spi2-core::at-spi2-core")
-            self.cpp_info.components["gtk+-3.0"].requires.append("libepoxy::libepoxy")
             if self.options.with_pango:
                 self.cpp_info.components["gtk+-3.0"].requires.append("pango::pangoft2")
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["gtk+-3.0"].requires.append("glib::gio-unix-2.0")
-            self.cpp_info.components["gtk+-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
-            self.cpp_info.components["gtk+-3.0"].set_property("pkg_config_name", "gtk+-3.0")
 
-            self.cpp_info.components["gail-3.0"].libs = ["gailutil-3"]
-            self.cpp_info.components["gail-3.0"].requires = ["gtk+-3.0", "at-spi2-core::at-spi2-core"]
-            self.cpp_info.components["gail-3.0"].includedirs = [os.path.join("include", "gail-3.0")]
+            self.cpp_info.components["gtk+-unix-print-3.0"].set_property("pkg_config_name", "gtk+-unix-print-3.0")
+            self.cpp_info.components["gtk+-unix-print-3.0"].requires = ["gtk+-3.0"]
+            self.cpp_info.components["gtk+-unix-print-3.0"].includedirs = [os.path.join("include", "gtk-3.0", "unix-print")]
+
             self.cpp_info.components["gail-3.0"].set_property("pkg_config_name", "gail-3.0")
+            self.cpp_info.components["gail-3.0"].libs = ["gailutil-3"]
+            self.cpp_info.components["gail-3.0"].requires = ["gtk+-3.0"]
+            self.cpp_info.components["gail-3.0"].includedirs = [os.path.join("include", "gail-3.0")]
+
+            gdk_aliases = []
+            gtk_aliases = []
+            if self.options.get_safe("with_x11"):
+                gdk_aliases.append("gdk-x11-3.0")
+                gtk_aliases.append("gtk+-x11-3.0")
+            if self.options.get_safe("with_wayland"):
+                gdk_aliases.append("gdk-wayland-3.0")
+                gtk_aliases.append("gtk+-wayland-3.0")
+            if gdk_aliases:
+                self.cpp_info.components["gdk-3.0"].set_property("pkg_config_aliases", gdk_aliases)
+                self.cpp_info.components["gtk+-3.0"].set_property("pkg_config_aliases", gtk_aliases)
+
         elif self._gtk4:
             self.cpp_info.set_property("pkg_config_name", "gtk4")
             self.cpp_info.libs = ["gtk-4"]

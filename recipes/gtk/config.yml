@@ -1,11 +1,9 @@
 versions:
   "system":
     folder: "system"
-  "4.14.3":
+  "4.15.6":
     folder: all
   "4.7.0":
     folder: all
-  "3.24.41":
-    folder: all
-  "3.24.24":
+  "3.24.43":
     folder: all

@@ -1,13 +1,10 @@
 sources:
-  "4.14.3":
-    url: "https://download.gnome.org/sources/gtk/4.14/gtk-4.14.3.tar.xz"
-    sha256: "2be5c858bdef1104d37848c9779c089372c8d31503f6efc4b94e53b546fc9a43"
+  "4.15.6":
+    url: "https://download.gnome.org/sources/gtk/4.15/gtk-4.15.6.tar.xz"
+    sha256: "959ae618ae15e4f2c178b9bec48e02dc2b08659d748351290c755a578a5c4371"
   "4.7.0":
     url: "https://download.gnome.org/sources/gtk/4.7/gtk-4.7.0.tar.xz"
     sha256: "913fcd9d065efb348723e18c3b9113e23b92072e927ebd2f61d32745c8228b94"
-  "3.24.41":
-    url: "https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.41.tar.xz"
-    sha256: "47da61487af3087a94bc49296fd025ca0bc02f96ef06c556e7c8988bd651b6fa"
-  "3.24.24":
-    url: "https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.24.tar.xz"
-    sha256: "cc9d4367c55b724832f6b09ab85481738ea456871f0381768a6a99335a98378a"
+  "3.24.43":
+    url: "https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.43.tar.xz"
+    sha256: "7e04f0648515034b806b74ae5d774d87cffb1a2a96c468cb5be476d51bf2f3c7"
