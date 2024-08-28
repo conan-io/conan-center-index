@@ -1,6 +1,6 @@
 --- CMakeLists.txt
 +++ CMakeLists.txt
-@@ -297,11 +297,10 @@
+@@ -297,8 +297,8 @@
  # OpenMP (optional)
  option(WITH_OPENMP "Build with parallelization using OpenMP" TRUE)
  if(WITH_OPENMP)
@@ -11,6 +11,7 @@
 -  string(APPEND CMAKE_C_FLAGS " ${OpenMP_C_FLAGS}")
 -  string(APPEND CMAKE_CXX_FLAGS " ${OpenMP_CXX_FLAGS}")
 +  link_libraries(OpenMP::OpenMP_CXX)
++
 @@ -365,7 +365,7 @@
  # LibPNG
  option(WITH_PNG "PNG file support" TRUE)
