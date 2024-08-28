@@ -1,0 +1,56 @@
+pylint:
+  # TODO: enable desired pylint rules which could make sense to apply
+  disable: all
+  enable:
+    - conan-forced-version
+    - conan-missing-name
+    - conan-import-errors
+    - conan-import-tools
+    - conan-package-type
+    - conan-license
+    - conan-internal-attrib-access
+    - conan-config-missing-version
+    - conan-unreachable-lower-version
+    - conan-unreachable-upper-version
+    - conan-unreachable-equal-version
+    - conan-useless-patches
+    - conan-insecure-option-access
+
+yamllint:
+  # Dont extend from default: make it all explicit!
+  # Retrieved from yamllint rules https://yamllint.readthedocs.io/en/stable/rules.html#rules
+  rules:
+    anchors: disable
+    braces: disable
+    brackets: disable
+    colons: disable
+    commas: disable
+    comments: disable
+    comments-indentation: disable
+    document-end:
+      level: error
+      present: false
+    document-start:
+      level: error
+      present: false
+    empty-lines: disable
+    empty-values:
+      level: error
+      forbid-in-block-mappings: true
+      forbid-in-flow-mappings: true
+    float-values: disable
+    hyphens: disable
+    indentation: disable
+    key-duplicates:
+      level: error
+    key-ordering: disable
+    line-length: disable
+    new-line-at-end-of-file: disable
+    new-lines:
+      level: error
+      type: unix
+    octal-values: disable
+    quoted-strings: disable
+    trailing-spaces: disable
+    truthy: disable
+

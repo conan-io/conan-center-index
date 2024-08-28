@@ -1,0 +1,5 @@
+#!/bin/bash
+
+echo Executing pre-commit hook
+
+conan cci:lint "$(git diff --cached --name-only --diff-filter=ACMRT)"
