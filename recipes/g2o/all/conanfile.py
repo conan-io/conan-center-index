@@ -130,9 +130,9 @@ class G2oConan(ConanFile):
             # Used in core/openmp_mutex.h, also '#pragma omp' is used in several core public headers
             self.requires("llvm-openmp/18.1.8", transitive_headers=True, transitive_libs=True)
         if self.options.with_cholmod:
-            self.requires("suitesparse-cholmod/5.2.1")
+            self.requires("suitesparse-cholmod/5.3.0")
         if self.options.with_csparse:
-            self.requires("suitesparse-cxsparse/4.4.0")
+            self.requires("suitesparse-cxsparse/4.4.1")
 
         # TODO: optional dependencies
         # self.requires("qt/5.15.12")
