@@ -21,12 +21,24 @@ class MtFmtConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "use_div": [True, False],
+        "use_malloc": [True, False],
         "use_stdout": [True, False],
+        "use_assert": [True, False],
+        "use_utf8": [True, False],
+        "use_fp32": [True, False],
+        "use_fp64": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "use_div": False,
+        "use_malloc": False,
         "use_stdout": False,
+        "use_assert": False,
+        "use_utf8": False,
+        "use_fp32": False,
+        "use_fp64": False,
     }
 
     def config_options(self):
@@ -55,8 +67,14 @@ class MtFmtConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["MTFMT_BUILD_SHARED"] = self.options.shared
-        tc.variables["MTFMT_RT_USE_STDOUT"] = self.options.use_stdout
+        tc.cache_variables["MTFMT_BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["MTFMT_RT_USE_DIV"] = self.options.use_div
+        tc.cache_variables["MTFMT_RT_USE_MALLOC"] = self.options.use_malloc
+        tc.cache_variables["MTFMT_RT_USE_STDOUT"] = self.options.use_stdout
+        tc.cache_variables["MTFMT_RT_USE_ASSERT"] = self.options.use_assert
+        tc.cache_variables["MTFMT_RT_USE_UTF8"] = self.options.use_utf8
+        tc.cache_variables["MTFMT_RT_USE_FP32"] = self.options.use_fp32
+        tc.cache_variables["MTFMT_RT_USE_FP64"] = self.options.use_fp64
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
@@ -82,11 +100,12 @@ class MtFmtConan(ConanFile):
     def package_info(self):
         suffix = "_d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = ["mtfmt" + suffix]
+
         libdir = os.path.join("mtfmt", "lib")
-        if not self.options.shared and self.settings.os == "Windows":
+
+        if not self.options.shared:
             libdir = os.path.join(libdir, "static")
+
         self.cpp_info.libdirs = [libdir]
         self.cpp_info.includedirs = [os.path.join("mtfmt", "include")]
         self.cpp_info.bindirs = [os.path.join("mtfmt", "bin")]
-        if self.options.use_stdout:
-            self.cpp_info.defines = ["_MSTR_USE_STD_IO"]
