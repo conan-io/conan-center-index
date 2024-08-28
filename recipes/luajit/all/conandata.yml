@@ -6,9 +6,6 @@ sources:
   "2.1.0-beta3":
     url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/1ad2e34b111c802f9d0cdf019e986909123237a28c746b21295b63c9e785d9c3"
     sha256: "1ad2e34b111c802f9d0cdf019e986909123237a28c746b21295b63c9e785d9c3"
-  "2.0.5":
-    url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/874b1f8297c697821f561f9b73b57ffd419ed8f4278c82e05b48806d30c1e979"
-    sha256: "874b1f8297c697821f561f9b73b57ffd419ed8f4278c82e05b48806d30c1e979"
 patches:
   "2.1.0-beta3":
     - patch_file: "patches/2.1.0-beta3-0001-remove-mac-deploy.patch"
