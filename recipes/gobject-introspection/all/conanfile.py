@@ -10,7 +10,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.env import Environment
 from conan.tools.scm import Version
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
@@ -89,6 +89,10 @@ class GobjectIntrospectionConan(ConanFile):
             tc.project_options["build_introspection_data"] = "false"
         else:
             tc.project_options["build_introspection_data"] = "true" if self.dependencies["glib"].options.shared else "false"
+        if is_apple_os(self):
+            # FIXME: g-ir-scanner fails to find libgnuintl
+            # giscanner/_giscanner.cpython-37m-darwin.so, 0x0002): Library not loaded: /lib/libgnuintl.8.dylib
+            tc.project_options["build_introspection_data"] = "false"
         tc.project_options["datadir"] = "res"
         tc.generate()
         deps = PkgConfigDeps(self)
