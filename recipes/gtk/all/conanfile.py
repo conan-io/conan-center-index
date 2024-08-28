@@ -160,9 +160,9 @@ class GtkConan(ConanFile):
         tc.project_options["tests" if self._gtk3 else "build-tests"] = "false"
         tc.project_options["examples" if self._gtk3 else "build-examples"] = "false"
         tc.project_options["demos"] = "false"
-        tc.project_options["datadir"] = os.path.join(self.package_folder, "res", "share")
-        tc.project_options["localedir"] = os.path.join(self.package_folder, "res", "share", "locale")
-        tc.project_options["sysconfdir"] = os.path.join(self.package_folder, "res", "etc")
+        tc.project_options["datadir"] = os.path.join("res", "share")
+        tc.project_options["localedir"] = os.path.join("res", "share", "locale")
+        tc.project_options["sysconfdir"] = os.path.join("res", "etc")
         if self._gtk4:
             enabled_disabled = lambda opt: "enabled" if opt else "disabled"
             tc.project_options["media-ffmpeg"] = enabled_disabled(self.options.with_ffmpeg)
