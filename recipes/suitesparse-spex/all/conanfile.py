@@ -70,6 +70,8 @@ class SuiteSparseSpexConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("gmp", "cmake_file_name", "GMP")
+        deps.set_property("mpfr", "cmake_file_name", "MPFR")
         deps.generate()
 
     def _patch_sources(self):
