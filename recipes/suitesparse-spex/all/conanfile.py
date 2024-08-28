@@ -3,7 +3,8 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, rm, rmdir, copy, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import get, rm, rmdir, copy
+from conan.tools.files.files import replace_in_file
 
 required_conan_version = ">=1.53.0"
 
@@ -26,9 +27,6 @@ class SuiteSparseSpexConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -74,8 +72,15 @@ class SuiteSparseSpexConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
+    def _patch_sources(self):
+        # Disable MATLAB wrapper generation, which otherwise fails with
+        # "get_filename_component called with incorrect number of arguments"
+        replace_in_file(self, os.path.join(self.source_folder, "SPEX", "CMakeLists.txt"),
+                        "if ( BUILD_SHARED_LIBS AND NOT SUITESPARSE_ROOT_CMAKELISTS )",
+                        "if ( FALSE )")
+
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "SPEX"))
         cmake.build()
