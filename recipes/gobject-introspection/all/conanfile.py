@@ -49,7 +49,7 @@ class GobjectIntrospectionConan(ConanFile):
 
     def requirements(self):
         # https://gitlab.gnome.org/GNOME/gobject-introspection/-/blob/1.76.1/meson.build?ref_type=tags#L127-131
-        self.requires(f"glib/2.76.3", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         # FIXME: gobject-introspection links against system python3 libs, which is not reliable
 
     def validate(self):
