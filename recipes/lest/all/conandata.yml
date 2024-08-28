@@ -1,4 +1,7 @@
 sources:
+  "1.35.2":
+    url: "https://github.com/martinmoene/lest/archive/v1.35.2.tar.gz"
+    sha256: "570031345d703587c4984b1fa918e611693735beeb37a6d889d234599b73c670"
   "1.35.1":
     url: "https://github.com/martinmoene/lest/archive/v1.35.1.tar.gz"
     sha256: "ca715833563f983c81d86623c2d1911d7a2aa04ce00459b0f3794a8e441265e0"

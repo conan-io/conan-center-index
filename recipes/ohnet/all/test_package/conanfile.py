@@ -9,6 +9,9 @@ class TestPackageConan(ConanFile):
     generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
     test_type = "explicit"
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>3.23 <4]")
+
     def requirements(self):
         self.requires(self.tested_reference_str)
 

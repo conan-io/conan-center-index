@@ -1,0 +1,20 @@
+Use updated includes from master to fix a missing <cassert> and <sys/types.h>
+https://github.com/SimonKagstrom/kcov/blob/1d036f7799f95fed025c5fa0665c19df38632ab4/src/engines/mach-engine.cc
+
+--- src/engines/mach-engine.cc
++++ src/engines/mach-engine.cc
+@@ -26,7 +26,14 @@
+ #include <set>
+ #include <signal.h>
+ #include <spawn.h>
++#include <sys/errno.h>
++// clang-format off
++// sys/ptrace.h needs sys/types.h, so make sure clang-format doesn't change the order
++#include <sys/types.h>
+ #include <sys/ptrace.h>
++// clang-format on
++#include <cassert>
++#include <iostream>
+ #include <unistd.h>
+ #include <unordered_map>
+ #include <utils.hh>
