@@ -87,7 +87,7 @@ class ColmapConan(ConanFile):
         if self.options.cgal:
             self.requires("cgal/5.6.1")
         if self.options.gui:
-            self.requires("qt/5.15.13", transitive_headers=True, transitive_libs=True)
+            self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
         if self.options.gui or self.options.cuda:
             self.requires("glew/2.2.0")
             self.requires("opengl/system")
