@@ -43,11 +43,11 @@ class GtkConan(ConanFile):
             # Fix segmentation fault
             self.options["cairo"].shared = True
         self.options["pango"].with_cairo = True
-        self.options["pango"].with_freetype = True
-        self.options["pango"].with_fontconfig = True
         if self.settings.os not in ["Linux", "FreeBSD"]:
             self.options.rm_safe("with_wayland")
             self.options.rm_safe("with_x11")
+        else:
+            self.options["pango"].with_freetype = True
 
     def configure(self):
         if self.options.shared:
@@ -87,20 +87,28 @@ class GtkConan(ConanFile):
         if self.options.get_safe("with_x11"):
             # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.10.0/gdk/x11/gdkx11display.h#L35-36
             self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
+            self.requires("fontconfig/2.15.0")
+
+        # TODO: gobject-introspection
+        # TODO: iso-codes
+        # TODO: tracker-sparql-3.0
+        # TODO: cloudproviders
+        # TODO: sysprof-capture-4
 
     def validate(self):
         if is_msvc(self):
             raise ConanInvalidConfiguration("MSVC support of this recipe requires at least gtk/4.2")
         if not self.dependencies["pango"].options.with_cairo:
             raise ConanInvalidConfiguration("pango must be built with '-o pango/*:with_cairo=True'")
-        if self.settings.os not in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD"]:
             if not self.options.with_x11 and not self.options.with_wayland:
                 # Fails with 'Problem encountered: No backends enabled' otherwise
                 raise ConanInvalidConfiguration("At least one of 'with_x11' or 'with_wayland' options must be enabled")
             if self.options.with_x11 and not self.dependencies["cairo"].options.with_xlib:
                 raise ConanInvalidConfiguration("cairo must be built with '-o cairo/*:with_xlib=True' when 'with_x11' is enabled")
-        if not self.dependencies["pango"].options.with_freetype:
-            raise ConanInvalidConfiguration("pango must be built with '-o pango/*:with_freetype=True'")
+        if self.options.get_safe("with_x11") or self.options.get_safe("with_wayland"):
+            if not self.dependencies["pango"].options.with_freetype:
+                raise ConanInvalidConfiguration(f"pango must be built with '-o pango/*:with_freetype=True' on {self.settings.os}")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
@@ -151,7 +159,7 @@ class GtkConan(ConanFile):
         self.cpp_info.components["gdk-3.0"].libs = ["gdk-3"]
         self.cpp_info.components["gdk-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
         self.cpp_info.components["gdk-3.0"].requires = [
-            "pango::pango_",
+            "pango::pango_" if self.settings.os != "Windows" else "pango::pangowin32",
             "pango::pangocairo",
             "gdk-pixbuf::gdk-pixbuf",
             "cairo::cairo_",
@@ -159,37 +167,42 @@ class GtkConan(ConanFile):
             "libepoxy::libepoxy",
             "fribidi::fribidi",
         ]
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os != "Windows":
             self.cpp_info.components["gdk-3.0"].requires.extend(["glib::gio-unix-2.0"])
-            if self.options.with_x11:
-                self.cpp_info.components["gdk-3.0"].requires.extend([
-                    "xorg::x11",
-                    "xorg::xext",
-                    "xorg::xi",
-                    "xorg::xrandr",
-                    "xorg::xcursor",
-                    "xorg::xfixes",
-                    "xorg::xcomposite",
-                    "xorg::xdamage",
-                    "xorg::xinerama",
-                    "cairo::cairo-xlib",
-                ])
-            if self.options.with_wayland:
-                self.cpp_info.components["gdk-3.0"].requires.extend([
-                    "wayland::wayland-client",
-                    "wayland::wayland-cursor",
-                    "wayland::wayland-egl",
-                    "wayland-protocols::wayland-protocols",
-                    "xkbcommon::xkbcommon",
-                ])
+        else:
+            self.cpp_info.components["gdk-3.0"].requires.extend(["glib::gio-windows-2.0"])
+        if self.options.get_safe("with_x11"):
+            self.cpp_info.components["gdk-3.0"].requires.extend([
+                "xorg::x11",
+                "xorg::xext",
+                "xorg::xi",
+                "xorg::xrandr",
+                "xorg::xcursor",
+                "xorg::xfixes",
+                "xorg::xcomposite",
+                "xorg::xdamage",
+                "xorg::xinerama",
+                "cairo::cairo-xlib",
+                "fontconfig::fontconfig",
+            ])
+        if self.options.get_safe("with_wayland"):
+            self.cpp_info.components["gdk-3.0"].requires.extend([
+                "wayland::wayland-client",
+                "wayland::wayland-cursor",
+                "wayland::wayland-egl",
+                "wayland-protocols::wayland-protocols",
+                "xkbcommon::xkbcommon",
+            ])
 
         self.cpp_info.components["gtk+-3.0"].set_property("pkg_config_name", "gtk+-3.0")
         self.cpp_info.components["gtk+-3.0"].libs = ["gtk-3"]
         self.cpp_info.components["gtk+-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
         # skipping gtk+-3.0 requires that are covered by gdk-3.0
-        self.cpp_info.components["gtk+-3.0"].requires = ["gdk-3.0", "glib::gio-2.0", "pango::pangoft2"]
+        self.cpp_info.components["gtk+-3.0"].requires = ["gdk-3.0", "glib::gio-2.0"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["gtk+-3.0"].requires.extend(["at-spi2-core::atk", "at-spi2-core::atk-bridge"])
+            self.cpp_info.components["gtk+-3.0"].requires.extend(["at-spi2-core::atk", "pango::pangoft2"])
+            if self.options.with_x11:
+                self.cpp_info.components["gtk+-3.0"].requires.append("at-spi2-core::atk-bridge")
 
         self.cpp_info.components["gtk+-unix-print-3.0"].set_property("pkg_config_name", "gtk+-unix-print-3.0")
         self.cpp_info.components["gtk+-unix-print-3.0"].requires = ["gtk+-3.0"]
