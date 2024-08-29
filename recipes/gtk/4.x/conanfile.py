@@ -1,5 +1,7 @@
 import io
 import os
+import re
+from pathlib import Path
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -33,6 +35,7 @@ class GtkConan(ConanFile):
         "with_wayland": [True, False],
         "with_x11": [True, False],
         "with_vulkan": [True, False],
+        "with_introspection": [True, False],
         # Only available as system libs
         "with_gstreamer": [True, False],
         "with_cups": [True, False],
@@ -51,6 +54,7 @@ class GtkConan(ConanFile):
         "with_wayland": True,
         "with_x11": True,
         "with_vulkan": True,
+        "with_introspection": False,
         "with_gstreamer": False,
         "with_cups": False,
         "with_cpdb": False,
@@ -99,6 +103,16 @@ class GtkConan(ConanFile):
                 self.options["xkbcommon"].with_x11 = self.options.with_x11
                 self.options["xkbcommon"].with_wayland = True
 
+        if self.options.with_introspection:
+            for dep in self._introspections_deps:
+                self.options[dep].with_introspection = True
+
+    @property
+    def _introspections_deps(self):
+        # Dependencies that must have introspection enabled as well if with_introspection is enabled
+        # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.15.6/gtk/meson.build?ref_type=tags#L1146
+        return ["cairo", "glib", "gdk-pixbuf", "pango"]
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -122,6 +136,8 @@ class GtkConan(ConanFile):
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/4.6.0")
         self.requires("libjpeg/9e")
+        if self.options.with_introspection:
+            self.requires("gobject-introspection/1.78.1")
         if self.settings.os == "Linux" and Version(self.version) >= "4.13.2":
             self.requires("libdrm/2.4.120")
         if self.options.get_safe("with_wayland"):
@@ -140,7 +156,6 @@ class GtkConan(ConanFile):
         # if self.options.with_gstreamer:
         #     self.requires("gstreamer/1.24.7")
 
-        # TODO: gobject-introspection
         # TODO: iso-codes
         # TODO: tracker-sparql-3.0
         # TODO: cloudproviders
@@ -166,6 +181,10 @@ class GtkConan(ConanFile):
             self.output.warning("The 'with_pango' option has been deprecated and will be removed in a future version")
         if self.options.with_cloudprint != "deprecated":
             self.output.warning("The 'with_cloudprint' option has been deprecated and will be removed in a future version. It never had any effect.")
+        if self.options.with_introspection:
+            for dep in self._introspections_deps:
+                if not self.dependencies[dep].options.get_safe("with_introspection"):
+                    raise ConanInvalidConfiguration(f"{dep} must be built with introspection enabled (-o {dep}/*:with_introspection=True)")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
@@ -176,6 +195,8 @@ class GtkConan(ConanFile):
         self.tool_requires("sassc/3.6.2")
         if self.options.with_vulkan:
             self.tool_requires("shaderc/2024.1")  # for glslc
+        if self.options.with_introspection:
+            self.tool_requires("gobject-introspection/<host_version>")  # for g-ir-scanner
 
     @property
     def _apt_packages(self):
@@ -225,7 +246,7 @@ class GtkConan(ConanFile):
             tc.project_options["print-cpdb"] = enabled_disabled(self.options.get_safe("with_cpdb"))
         tc.project_options["cloudproviders"] = enabled_disabled(self.options.get_safe("with_cloudproviders"))
         tc.project_options["tracker"] = enabled_disabled(self.options.get_safe("with_tracker"))
-        tc.project_options["introspection"] = "disabled"
+        tc.project_options["introspection"] = enabled_disabled(self.options.with_introspection)
 
         if self.version == "4.7.0":
             tc.project_options["gtk_doc"] = "false"
@@ -268,6 +289,23 @@ class GtkConan(ConanFile):
     def _patch_sources(self):
         if "4.6.2" <= Version(self.version) < "4.9.2":
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "dependency(is_msvc_like ? ", "dependency(false ? ")
+
+        # gobject-introspection lib is required even when not building tests
+        meson_build = Path(self.source_folder, "meson.build")
+        content = meson_build.read_text("utf8")
+        content, n = re.subn(r"get_option\('introspection'\)\.enabled\(\) and\s+get_option\('build-tests'\)",
+                             "get_option('introspection').enabled()", content, re.DOTALL)
+        assert n == 1
+        meson_build.write_text(content, "utf8")
+
+        # Inject gir dependencies
+        gir_paths = []
+        for dep in self._introspections_deps:
+            gir_paths.append(os.path.join(self.dependencies[dep].package_folder, "res", "gir-1.0").replace("\\", "/"))
+        gir_paths = ", ".join(f"'{path}'" for path in gir_paths)
+        replace_in_file(self, os.path.join(self.source_folder, "gtk", "meson.build"),
+                        "gnome.generate_gir(libgtk,",
+                        f"gnome.generate_gir(libgtk, include_directories: [{gir_paths}],")
 
     def build(self):
         self._patch_sources()
@@ -321,6 +359,9 @@ class GtkConan(ConanFile):
 
         if self.options.with_vulkan:
             self.cpp_info.components["gtk4"].requires.append("vulkan-loader::vulkan-loader")
+
+        if self.options.with_introspection:
+            self.cpp_info.components["gtk4"].requires.append("gobject-introspection::gobject-introspection")
 
         # if self.options.with_gstreamer:
         #     # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.15.6/modules/media/meson.build#L11
