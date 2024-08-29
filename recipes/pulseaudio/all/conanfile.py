@@ -1,3 +1,5 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
@@ -5,7 +7,6 @@ from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
-import os
 
 required_conan_version = ">=1.53.0"
 
@@ -111,6 +112,10 @@ class PulseAudioConan(ConanFile):
             "--with-udev-rules-dir=${prefix}/bin/udev/rules.d",
             f"--with-systemduserunitdir={os.path.join(self.build_folder, 'ignore')}",
         ])
+        # Workaround for https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=268250
+        # clang-15 works, but we need to skip the gnu11 flag check
+        if self.settings.compiler == "clang" and self.settings.compiler.version == 15:
+            tc.configure_args.append("ax_cv_check_cflags__pedantic__Werror__std_gnu11=yes")
         for lib in ["alsa", "x11", "openssl", "dbus"]:
             tc.configure_args.append(f"--enable-{lib}={yes_no(getattr(self.options, f'with_{lib}'))}")
         # TODO: to remove when automatically handled by AutotoolsToolchain
@@ -146,7 +151,7 @@ class PulseAudioConan(ConanFile):
         if self.options.get_safe("with_fftw"):
             self.cpp_info.components["pulse"].requires.append("fftw::fftw")
         if self.options.with_x11:
-            self.cpp_info.components["pulse"].requires.append("xorg::xorg")
+            self.cpp_info.components["pulse"].requires.extend(["xorg::x11", "xorg::x11-xcb"])
         if self.options.with_openssl:
             self.cpp_info.components["pulse"].requires.append("openssl::openssl")
         if self.options.with_dbus:

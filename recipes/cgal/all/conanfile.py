@@ -93,7 +93,7 @@ class CgalConan(ConanFile):
     def _create_cmake_module_variables(self, module_file):
         '''
         CGAL requires C++14, and specific compilers flags to enable the possibility to set FPU rounding modes.
-        This CMake module, from the upsream CGAL pull-request https://github.com/CGAL/cgal/pull/7512, takes
+        This CMake module, from the upstream CGAL pull-request https://github.com/CGAL/cgal/pull/7512, takes
         care of all the known compilers CGAL has ever supported.
         '''
         content = textwrap.dedent('''\

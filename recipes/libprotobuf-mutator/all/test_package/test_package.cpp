@@ -1,23 +1,11 @@
-#include <cmath>
-#include <iostream>
+#include <cstdlib>
 
-#include "msg.pb.h"
-#include <libprotobuf-mutator/src/libfuzzer/libfuzzer_macro.h>
+#include <libprotobuf-mutator/src/mutator.h>
 
-DEFINE_PROTO_FUZZER(const libfuzzer_example::Msg& message) {
-  protobuf_mutator::protobuf::FileDescriptorProto file;
-
-  // Emulate a bug.
-  if (message.optional_uint64() == std::hash<std::string>{}(message.optional_string()) &&
-      message.optional_string() == "abcdefghijklmnopqrstuvwxyz" &&
-      !std::isnan(message.optional_float()) &&
-      std::fabs(message.optional_float()) > 1000 &&
-      message.any().UnpackTo(&file) && !file.name().empty())
-  {
-    std::cerr << message.DebugString() << "\n";
-  }
-}
 
 int main() {
-    return 0;
+    protobuf_mutator::Mutator mutator{};
+    const auto seed_value{42};
+    mutator.Seed(seed_value);
+    return EXIT_SUCCESS;
 }

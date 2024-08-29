@@ -25,7 +25,9 @@ BOOST_GIT_URL = "https://github.com/boostorg/boost.git"
 # `conanfile.py` and re-run this script.
 CONFIGURE_OPTIONS = (
     "atomic",
+    "charconv",
     "chrono",
+    "cobalt",
     "container",
     "context",
     "contract",

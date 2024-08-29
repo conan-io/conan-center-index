@@ -42,15 +42,14 @@ class LibE57FormatConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("xerces-c/3.2.4")
+        self.requires("xerces-c/3.2.5")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "11")
 
     def build_requirements(self):
-        if Version(self.version) >= "1.17":
-            self.tool_requires("cmake/[>=3.16.3 <4]")
+        self.tool_requires("cmake/[>=3.16.3 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -69,10 +68,12 @@ class LibE57FormatConan(ConanFile):
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "POSITION_INDEPENDENT_CODE ON", "")
-        # Disable compiler warnings, which cause older versions of GCC to fail due to unrecognized flags
         if Version(self.version) >= "3.0":
+            # Disable compiler warnings, which cause older versions of GCC to fail due to unrecognized flags
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "CompilerWarnings.cmake"),
                             " -W", " # -W")
+            # Disable warnings as errors
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set_warning_as_error()", "")
 
     def build(self):
         self._patch_sources()

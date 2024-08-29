@@ -2,8 +2,8 @@ sources:
   "95.0.4629":
     pdfium-cmake:
       # FIXME: create release
-      url: "https://github.com/madebr/pdfium-cmake/archive/9611e37f688e9881b50aef7e7775accdda6cd98f.zip"
-      sha256: "9085c22bd9d21acede4f5f26be0b6a0f82346e2ea53cc8bcddd785a4190d7a84"
+      url: "https://github.com/madebr/pdfium-cmake/archive/e02962c2ebf6d1a2edc7b05bb4fc8cb73cac5b18.zip"
+      sha256: "e8454d098af887bc989fbbc955b32566b109b4f03350fb6c08cc7f2e359a909f"
     pdfium:
       url: "https://pdfium.googlesource.com/pdfium/+archive/refs/heads/chromium/4629.tar.gz"
       # sha256 is volatile on googlesource, no up-to-date github fork

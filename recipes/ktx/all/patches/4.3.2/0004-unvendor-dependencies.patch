@@ -1,0 +1,21 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -355,7 +355,6 @@
+     lib/basisu/transcoder/basisu_transcoder.cpp
+     lib/basisu/transcoder/basisu_transcoder.h
+     lib/basisu/transcoder/basisu.h
+-    lib/basisu/zstd/zstd.c
+     lib/checkheader.c
+     lib/dfdutils/createdfd.c
+     lib/dfdutils/colourspaces.c
+@@ -765,6 +764,10 @@
+     BASISD_SUPPORT_KTX2=0
+ )
+ 
++find_package(zstd REQUIRED CONFIG)
++target_link_libraries(ktx PUBLIC zstd::libzstd)
++target_link_libraries(ktx_read PUBLIC zstd::libzstd)
++
+ # Turn off these warnings until Rich fixes the occurences.
+ # It it not clear to me if generator expressions can be used here
+ # hence the long-winded way.

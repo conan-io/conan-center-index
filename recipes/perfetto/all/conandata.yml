@@ -1,4 +1,19 @@
 sources:
+  "47.0":
+    url: "https://github.com/google/perfetto/archive/refs/tags/v47.0.tar.gz"
+    sha256: "9bbd38a0f074038bde6ccbcf5f2ff32587eb60faec254932268ecb6f17f18186"
+  "45.0":
+    url: "https://github.com/google/perfetto/archive/refs/tags/v45.0.tar.gz"
+    sha256: "dcb815fb54370fa20a657552288016cb66e7a98237c1a1d47e7645a4325ac75e"
+  "44.0":
+    url: "https://github.com/google/perfetto/archive/refs/tags/v44.0.tar.gz"
+    sha256: "db4162ee6495b1fcc13ba7aca77d67f9fd1766d184743137a04af8b1e3906b9d"
+  "43.1":
+    url: "https://github.com/google/perfetto/archive/refs/tags/v43.1.tar.gz"
+    sha256: "0f23ba39520c9ec629c48dc36a3a4bb92ed9653ac6694445be22985205a3f4ce"
+  "42.0":
+    url: "https://github.com/google/perfetto/archive/refs/tags/v42.0.tar.gz"
+    sha256: "1c474a0f16cc2f9da826fd3f9e44ffd77785c433e997cdaf0ee390ae3d64b53e"
   "41.0":
     url: "https://github.com/google/perfetto/archive/refs/tags/v41.0.tar.gz"
     sha256: "4c8fe8a609fcc77ca653ec85f387ab6c3a048fcd8df9275a1aa8087984b89db8"
