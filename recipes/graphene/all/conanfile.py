@@ -4,11 +4,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir, replace_in_file
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file, load
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -119,6 +119,15 @@ class GrapheneConan(ConanFile):
         fix_apple_shared_install_name(self)
         fix_msvc_libname(self)
 
+    def _get_simd_config(self):
+        config = load(self, os.path.join(self.package_folder, "lib", "graphene-1.0", "include", "graphene-config.h"))
+        return {
+            "sse2": "GRAPHENE_HAS_SSE 1" in config,
+            "gcc": "GRAPHENE_HAS_GCC 1" in config,
+            "neon": "GRAPHENE_HAS_ARM_NEON 1" in config,
+            "scalar": "GRAPHENE_HAS_SCALAR 1" in config,
+        }
+
     def package_info(self):
         self.cpp_info.components["graphene-1.0"].set_property("pkg_config_name", "graphene-1.0")
         self.cpp_info.components["graphene-1.0"].libs = ["graphene-1.0"]
@@ -128,10 +137,25 @@ class GrapheneConan(ConanFile):
         if self.options.with_glib:
             self.cpp_info.components["graphene-1.0"].requires = ["glib::gobject-2.0"]
 
+        simd = self._get_simd_config()
+        if simd["sse2"]:
+            # https://salsa.debian.org/gnome-team/graphene/-/blob/1.10.0/meson.build?ref_type=tags#L274
+            if not is_msvc(self):
+                self.cpp_info.components["graphene-1.0"].cflags = ["-mfpmath=sse", "-msse", "-msse2"]
+        elif simd["neon"]:
+            # https://salsa.debian.org/gnome-team/graphene/-/blob/1.10.0/meson.build?ref_type=tags#L339-343
+            if not is_msvc(self):
+                self.cpp_info.components["graphene-1.0"].cflags = ["-mfpu=neon"]
+                if self.settings.os == "Android":
+                    self.cpp_info.components["graphene-1.0"].cflags.append("-mfloat-abi=softfp")
+
         if self.options.with_glib:
             self.cpp_info.components["graphene-gobject-1.0"].set_property("pkg_config_name","graphene-gobject-1.0")
             self.cpp_info.components["graphene-gobject-1.0"].includedirs = [os.path.join("include", "graphene-1.0")]
             self.cpp_info.components["graphene-gobject-1.0"].requires = ["graphene-1.0", "glib::gobject-2.0"]
+            # https://salsa.debian.org/gnome-team/graphene/-/blob/1.10.0/src/meson.build?ref_type=tags#L79-93
+            simd_info = "\n".join(f"graphene_has_{k}={int(v)}" for k, v in simd.items())
+            self.cpp_info.components["graphene-gobject-1.0"].set_property("pkg_config_custom_content", simd_info)
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
