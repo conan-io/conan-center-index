@@ -36,7 +36,7 @@ class MtFmtConan(ConanFile):
         "use_malloc": False,
         "use_stdout": False,
         "use_assert": False,
-        "use_utf8": False,
+        "use_utf8": True,
         "use_fp32": False,
         "use_fp64": False,
     }
