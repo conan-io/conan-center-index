@@ -1,9 +1,10 @@
+import io
 import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple.apple import is_apple_os
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -78,6 +79,9 @@ class GtkConan(ConanFile):
             del self.options.with_x11
         if Version(self.version) >= "4.13.7":
             del self.options.with_ffmpeg
+        if self.options.with_gstreamer:
+            # elfutils required by system gstreamer conflicts with libelf dep of glib otherwise
+            self.options["glib"].with_elf = False
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
@@ -132,7 +136,7 @@ class GtkConan(ConanFile):
             self.requires("vulkan-loader/1.3.290.0")
         if self.options.get_safe("with_ffmpeg"):
             self.requires("ffmpeg/5.0")
-        # FIXME: gstreamer is currently not compatible
+        # FIXME: gstreamer from CCI is currently not compatible
         # if self.options.with_gstreamer:
         #     self.requires("gstreamer/1.24.7")
 
@@ -173,14 +177,14 @@ class GtkConan(ConanFile):
         if self.options.with_vulkan:
             self.tool_requires("shaderc/2024.1")  # for glslc
 
-    def system_requirements(self):
-        apt = Apt(self)
+    @property
+    def _apt_packages(self):
         packages = []
         if self.options.with_cups:
             packages.append("libcups2-dev")
             packages.append("libcolord-dev")
         if self.options.with_cpdb:
-            packages.append("libcpdb-dev")
+            packages.append("libcpdb-frontend-dev")
         if self.options.with_cloudproviders:
             packages.append("libcloudproviders-dev")
         if self.options.with_tracker:
@@ -189,7 +193,14 @@ class GtkConan(ConanFile):
             packages.append("iso-codes")
         if self.options.with_gstreamer:
             packages.append("libgstreamer1.0-dev")
-        apt.install(packages, update=True, check=True)
+            # for gstreamer-player-1.0
+            packages.append("libgstreamer-plugins-bad1.0-dev")
+            # for gstreamer-gl-1.0 and gstreamer-allocators-1.0
+            packages.append("libgstreamer-plugins-base1.0-dev")
+        return packages
+
+    def system_requirements(self):
+        Apt(self).install(self._apt_packages, update=True, check=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -232,10 +243,27 @@ class GtkConan(ConanFile):
         tc.project_options["datadir"] = os.path.join("res", "share")
         tc.project_options["localedir"] = os.path.join("res", "share", "locale")
         tc.project_options["sysconfdir"] = os.path.join("res", "etc")
+
+        if self._apt_packages:
+            # Don't force generators folder as the only PKG_CONFIG_PATH if system packages are in use.
+            tc.pkg_config_path = None
+            env = Environment()
+            env.define_path("PKG_CONFIG_PATH", self.generators_folder)
+            env.append_path("PKG_CONFIG_PATH", self._get_system_pkg_config_paths())
+            env.vars(self).save_script("conan_pkg_config_path")
+
         tc.generate()
 
         deps = PkgConfigDeps(self)
         deps.generate()
+
+    def _get_system_pkg_config_paths(self):
+        # Global PKG_CONFIG_PATH is generally not filled by default, so ask for the default paths from pkg-config instead.
+        # Assumes that pkg-config is installed system-wide.
+        pkg_config = self.conf.get("tools.gnu:pkg_config", default="pkg-config", check_type=str)
+        output = io.StringIO()
+        self.run(f"{pkg_config} --variable pc_path pkg-config", output, scope=None)
+        return output.getvalue().strip()
 
     def _patch_sources(self):
         if "4.6.2" <= Version(self.version) < "4.9.2":
