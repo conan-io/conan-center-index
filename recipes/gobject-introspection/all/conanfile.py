@@ -42,7 +42,7 @@ class GobjectIntrospectionConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
         # FIXME: g-ir-scanner fails to load glib correctly, resulting in failure during the build
-        self.options["glib"].shared = False
+        self.options["glib"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
