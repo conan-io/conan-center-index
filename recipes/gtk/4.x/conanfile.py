@@ -10,6 +10,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
+from conan.tools.system.package_manager import Apt
 
 required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
@@ -31,7 +32,14 @@ class GtkConan(ConanFile):
         "with_wayland": [True, False],
         "with_x11": [True, False],
         "with_vulkan": [True, False],
+        # Only available as system libs
         "with_gstreamer": [True, False],
+        "with_cups": [True, False],
+        # Unavailable since v4.13.7
+        "with_ffmpeg": [True, False],
+        # Deprecated
+        "with_pango": ["deprecated", True, False],
+        "with_cloudprint": ["deprecated", True, False],
     }
     default_options = {
         "enable_broadway_backend": False,
@@ -39,6 +47,10 @@ class GtkConan(ConanFile):
         "with_x11": True,
         "with_vulkan": True,
         "with_gstreamer": False,
+        "with_cups": False,
+        "with_ffmpeg": False,
+        "with_pango": "deprecated",
+        "with_cloudprint": "deprecated",
     }
 
     def config_options(self):
@@ -54,8 +66,10 @@ class GtkConan(ConanFile):
         self.options["pango"].with_freetype = True
         self.options["pango"].with_fontconfig = True
         if self.settings.os not in ["Linux", "FreeBSD"]:
-            self.options.rm_safe("with_wayland")
-            self.options.rm_safe("with_x11")
+            del self.options.with_wayland
+            del self.options.with_x11
+        if Version(self.version) >= "4.13.7":
+            del self.options.with_ffmpeg
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
@@ -75,6 +89,10 @@ class GtkConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.options.with_pango = True
+        self.info.options.with_cloudprint = False
 
     def requirements(self):
         # INFO: https://gitlab.gnome.org/GNOME/gtk/-/blob/4.10.0/gdk/gdktypes.h?ref_type=tags#L34-38
@@ -104,8 +122,11 @@ class GtkConan(ConanFile):
             self.requires("fontconfig/2.15.0")
         if self.options.with_vulkan:
             self.requires("vulkan-loader/1.3.290.0")
-        if self.options.with_gstreamer:
-            self.requires("gstreamer/1.24.7")
+        if self.options.get_safe("with_ffmpeg"):
+            self.requires("ffmpeg/5.0")
+        # FIXME: gstreamer is currently not compatible
+        # if self.options.with_gstreamer:
+        #     self.requires("gstreamer/1.24.7")
 
         # TODO: gobject-introspection
         # TODO: iso-codes
@@ -129,6 +150,10 @@ class GtkConan(ConanFile):
                 raise ConanInvalidConfiguration("cairo must be built with '-o cairo/*:with_xlib=True' when 'with_x11' is enabled")
         if not self.dependencies["pango"].options.with_freetype:
             raise ConanInvalidConfiguration("pango must be built with '-o pango/*:with_freetype=True'")
+        if self.options.with_pango != "deprecated":
+            self.output.warning("The 'with_pango' option has been deprecated and will be removed in a future version")
+        if self.options.with_cloudprint != "deprecated":
+            self.output.warning("The 'with_cloudprint' option has been deprecated and will be removed in a future version. It never had any effect.")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
@@ -139,6 +164,16 @@ class GtkConan(ConanFile):
         self.tool_requires("sassc/3.6.2")
         if self.options.with_vulkan:
             self.tool_requires("shaderc/2024.1")  # for glslc
+
+    def system_requirements(self):
+        apt = Apt(self)
+        packages = []
+        if self.options.with_cups:
+            packages.append("libcups2-dev")
+            packages.append("libcolord-dev")
+        if self.options.with_gstreamer:
+            packages.append("libgstreamer1.0-dev")
+        apt.install(packages, update=True, check=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -153,16 +188,27 @@ class GtkConan(ConanFile):
         tc.project_options["wayland-backend"] = "true" if self.options.get_safe("with_wayland") else "false"
         tc.project_options["x11-backend"] = "true" if self.options.get_safe("with_x11") else "false"
         tc.project_options["broadway-backend"] = "true" if self.options.enable_broadway_backend else "false"
-        tc.project_options["media-gstreamer"] = enabled_disabled(self.options.with_gstreamer)
         tc.project_options["vulkan"] = enabled_disabled(self.options.with_vulkan)
+        tc.project_options["media-gstreamer"] = enabled_disabled(self.options.with_gstreamer)
+        if Version(self.version) < "4.13.7":
+            tc.project_options["media-ffmpeg"] = enabled_disabled(self.options.with_ffmpeg)
+        tc.project_options["print-cups"] = enabled_disabled(self.options.with_cups)
+        tc.project_options["colord"] = enabled_disabled(self.options.with_cups)
         tc.project_options["introspection"] = "disabled"
-        tc.project_options["documentation"] = "false"
-        tc.project_options["screenshots"] = "false"
+
+        if self.version == "4.7.0":
+            tc.project_options["gtk_doc"] = "false"
+            tc.project_options["update_screenshots"] = "false"
+            tc.project_options["demos"] = "false"
+        else:
+            tc.project_options["documentation"] = "false"
+            tc.project_options["screenshots"] = "false"
+            tc.project_options["build-demos"] = "false"
+            tc.project_options["build-testsuite"] = "false"
         tc.project_options["man-pages"] = "false"
         tc.project_options["build-tests"] = "false"
-        tc.project_options["build-testsuite"] = "false"
-        tc.project_options["build-demos"] = "false"
         tc.project_options["build-examples"] = "false"
+
         tc.project_options["datadir"] = os.path.join("res", "share")
         tc.project_options["localedir"] = os.path.join("res", "share", "locale")
         tc.project_options["sysconfdir"] = os.path.join("res", "etc")
@@ -235,6 +281,8 @@ class GtkConan(ConanFile):
                 "gstreamer::gstreamer-gl-1.0",
                 "gstreamer::gstreamer-allocators-1.0",
             ])
+        if self.options.get_safe("with_ffmpeg"):
+            self.cpp_info.components["gtk4"].requires.append("ffmpeg::ffmpeg")
 
         # TODO:
         # if self.options.get_safe("with_cups"):
