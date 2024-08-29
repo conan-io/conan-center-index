@@ -47,6 +47,7 @@ class ShadercConan(ConanFile):
     def _spirv_version(self):
         return {
             # TODO: bump me once newer versions are available on CCI
+            "2024.1": "1.3.261.1",
             # "2023.6": "1.3.261.1",
             "2023.6": "1.3.239.0",
             "2021.1": "1.3.224.0",
