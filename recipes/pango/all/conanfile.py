@@ -37,7 +37,7 @@ class PangoConan(ConanFile):
         "fPIC": True,
         "with_libthai": False,
         "with_cairo": True,
-        "with_xft": False,
+        "with_xft": True,
         "with_freetype": False,
         "with_fontconfig": False,
     }
@@ -45,18 +45,19 @@ class PangoConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-        if self.settings.os in ["FreeBSD", "Linux"]:
-            self.options.with_xft = True
-        if not self.settings.os in ["Macos", "Windows"]:
-            self.options.with_freetype = True
-            self.options.with_fontconfig = True
+        if self.settings.os not in ["FreeBSD", "Linux"]:
+            del self.options.with_xft
+        if self.settings.os in ["Macos", "Windows"]:
+            self.options.with_freetype = False
+            self.options.with_fontconfig = False
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+        self.options["cairo"].with_freetype = self.options.with_freetype
+        self.options["cairo"].with_fontconfig = self.options.with_fontconfig
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -64,17 +65,12 @@ class PangoConan(ConanFile):
     def requirements(self):
         if self.options.with_freetype:
             self.requires("freetype/2.13.2")
-
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.15.0")
-        if self.options.with_xft:
+        if self.options.get_safe("with_xft"):
             self.requires("libxft/2.3.8")
-        if (
-            self.options.with_xft
-            and self.options.with_fontconfig
-            and self.options.with_freetype
-        ):
-            self.requires("xorg/system")  # for xorg::xrender
+            if self.options.with_fontconfig and self.options.with_freetype:
+                self.requires("xorg/system")  # for xorg::xrender
         if self.options.with_cairo:
             # "pango/pangocairo.h" includes "cairo.h"
             self.requires("cairo/1.18.0", transitive_headers=True)
@@ -89,13 +85,10 @@ class PangoConan(ConanFile):
             and Version(self.settings.compiler.version) < "5"
         ):
             raise ConanInvalidConfiguration(f"{self.name} does not support GCC before version 5. Contributions are welcome.")
-        if self.options.with_xft and not self.settings.os in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("Xft can only be used on Linux and FreeBSD")
 
-        if self.options.with_xft and (
-            not self.options.with_freetype or not self.options.with_fontconfig
-        ):
-            raise ConanInvalidConfiguration("Xft requires freetype and fontconfig")
+        if self.options.get_safe("with_xft"):
+            if not self.options.with_freetype or not self.options.with_fontconfig:
+               raise ConanInvalidConfiguration("Xft requires freetype and fontconfig")
 
         if self.dependencies["glib"].options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
@@ -134,7 +127,7 @@ class PangoConan(ConanFile):
         tc.project_options["introspection"] = "disabled"
         tc.project_options["libthai"] = "enabled" if self.options.with_libthai else "disabled"
         tc.project_options["cairo"] = "enabled" if self.options.with_cairo else "disabled"
-        tc.project_options["xft"] = "enabled" if self.options.with_xft else "disabled"
+        tc.project_options["xft"] = "enabled" if self.options.get_safe("with_xft") else "disabled"
         tc.project_options["fontconfig"] = "enabled" if self.options.with_fontconfig else "disabled"
         tc.project_options["freetype"] = "enabled" if self.options.with_freetype else "disabled"
         tc.generate()
@@ -178,7 +171,7 @@ class PangoConan(ConanFile):
         if self.options.with_fontconfig:
             self.cpp_info.components["pango_"].requires.append("fontconfig::fontconfig")
 
-        if self.options.with_xft:
+        if self.options.get_safe("with_xft"):
             self.cpp_info.components["pango_"].requires.append("libxft::libxft")
             # Pango only uses xrender when Xft, fontconfig and freetype are enabled
             if self.options.with_fontconfig and self.options.with_freetype:
@@ -210,7 +203,7 @@ class PangoConan(ConanFile):
             if self.options.with_freetype:
                 self.cpp_info.components["pangoroot"].requires = ["pangoft2"]
 
-        if self.options.with_xft:
+        if self.options.get_safe("with_xft"):
             self.cpp_info.components["pangoxft"].libs = ["pangoxft-1.0"]
             self.cpp_info.components["pangoxft"].set_property("pkg_config_name", "pangoxft")
             self.cpp_info.components["pangoxft"].requires = ["pango_", "pangoft2"]
