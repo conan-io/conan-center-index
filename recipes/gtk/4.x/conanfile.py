@@ -35,6 +35,10 @@ class GtkConan(ConanFile):
         # Only available as system libs
         "with_gstreamer": [True, False],
         "with_cups": [True, False],
+        "with_cpdb": [True, False],
+        "with_cloudproviders": [True, False],
+        "with_tracker": [True, False],
+        "with_iso_codes": [True, False],
         # Unavailable since v4.13.7
         "with_ffmpeg": [True, False],
         # Deprecated
@@ -48,6 +52,10 @@ class GtkConan(ConanFile):
         "with_vulkan": True,
         "with_gstreamer": False,
         "with_cups": False,
+        "with_cpdb": False,
+        "with_cloudproviders": False,
+        "with_tracker": False,
+        "with_iso_codes": False,
         "with_ffmpeg": False,
         "with_pango": "deprecated",
         "with_cloudprint": "deprecated",
@@ -171,6 +179,14 @@ class GtkConan(ConanFile):
         if self.options.with_cups:
             packages.append("libcups2-dev")
             packages.append("libcolord-dev")
+        if self.options.with_cpdb:
+            packages.append("libcpdb-dev")
+        if self.options.with_cloudproviders:
+            packages.append("libcloudproviders-dev")
+        if self.options.with_tracker:
+            packages.append("libtracker-sparql-3.0-dev")
+        if self.options.with_iso_codes:
+            packages.append("iso-codes")
         if self.options.with_gstreamer:
             packages.append("libgstreamer1.0-dev")
         apt.install(packages, update=True, check=True)
@@ -194,6 +210,10 @@ class GtkConan(ConanFile):
             tc.project_options["media-ffmpeg"] = enabled_disabled(self.options.with_ffmpeg)
         tc.project_options["print-cups"] = enabled_disabled(self.options.with_cups)
         tc.project_options["colord"] = enabled_disabled(self.options.with_cups)
+        if Version(self.version) >= "4.10.0":
+            tc.project_options["print-cpdb"] = enabled_disabled(self.options.get_safe("with_cpdb"))
+        tc.project_options["cloudproviders"] = enabled_disabled(self.options.get_safe("with_cloudproviders"))
+        tc.project_options["tracker"] = enabled_disabled(self.options.get_safe("with_tracker"))
         tc.project_options["introspection"] = "disabled"
 
         if self.version == "4.7.0":
@@ -274,13 +294,13 @@ class GtkConan(ConanFile):
         if self.options.with_vulkan:
             self.cpp_info.components["gtk4"].requires.append("vulkan-loader::vulkan-loader")
 
-        if self.options.with_gstreamer:
-            # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.15.6/modules/media/meson.build#L11
-            self.cpp_info.components["gtk4"].requires.extend([
-                "gstreamer::gstreamer-player-1.0",
-                "gstreamer::gstreamer-gl-1.0",
-                "gstreamer::gstreamer-allocators-1.0",
-            ])
+        # if self.options.with_gstreamer:
+        #     # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.15.6/modules/media/meson.build#L11
+        #     self.cpp_info.components["gtk4"].requires.extend([
+        #         "gstreamer::gstreamer-player-1.0",
+        #         "gstreamer::gstreamer-gl-1.0",
+        #         "gstreamer::gstreamer-allocators-1.0",
+        #     ])
         if self.options.get_safe("with_ffmpeg"):
             self.cpp_info.components["gtk4"].requires.append("ffmpeg::ffmpeg")
 
@@ -289,8 +309,8 @@ class GtkConan(ConanFile):
         #     self.cpp_info.components["gtk4"].requires.append("cups::cups")
         #     if self.options.get_safe("with_colord"):
         #         self.cpp_info.components["gtk4"].requires.append("colord::colord")
-        # if self.options.get_safe("with_cpdp"):
-        #     self.cpp_info.components["gtk4"].requires.append("cpdp::cpdp")
+        # if self.options.get_safe("with_cpdb"):
+        #     self.cpp_info.components["gtk4"].requires.append("cpdb::cpdb")
         # if self.options.get_safe("with_cloudproviders"):
         #     self.cpp_info.components["gtk4"].requires.append("cloudproviders::cloudproviders")
 
