@@ -211,6 +211,25 @@ class GdkPixbufConan(ConanFile):
             self.cpp_info.exelinkflags = ldflags
             self.cpp_info.sharedlinkflags = ldflags
 
+        self.cpp_info.requires = [
+            "glib::gobject-2.0",
+            "glib::glib-2.0",
+            "glib::gmodule-no-export-2.0",
+            "glib::gio-2.0"
+        ]
+        if self.options.with_libpng:
+            self.cpp_info.requires.append("libpng::libpng")
+        if self.options.with_libtiff:
+            self.cpp_info.requires.append("libtiff::tiff")
+        if self.options.with_libjpeg == "libjpeg-turbo":
+            self.cpp_info.requires.append("libjpeg-turbo::jpeg")
+        elif self.options.with_libjpeg == "libjpeg":
+            self.cpp_info.requires.append("libjpeg::libjpeg")
+        elif self.options.with_libjpeg == "mozjpeg":
+            self.cpp_info.requires.append("mozjpeg::mozjpeg")
+        if self.options.with_introspection:
+            self.cpp_info.requires.append("gobject-introspection::gobject-introspection")
+
         # Breaking change since Conan >= 2.0.8
         # Related to https://github.com/conan-io/conan/pull/14233
         libdir_variable = "libdir1" if Version(conan_version) < "2.0" else "libdir"
