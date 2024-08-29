@@ -1,4 +1,10 @@
 sources:
+  "9.0.0":
+    url: "https://github.com/harfbuzz/harfbuzz/releases/download/9.0.0/harfbuzz-9.0.0.tar.xz"
+    sha256: "a41b272ceeb920c57263ec851604542d9ec85ee3030506d94662067c7b6ab89e"
+  "8.5.0":
+    url: "https://github.com/harfbuzz/harfbuzz/releases/download/8.5.0/harfbuzz-8.5.0.tar.xz"
+    sha256: "77e4f7f98f3d86bf8788b53e6832fb96279956e1c3961988ea3d4b7ca41ddc27"
   "8.3.0":
     url: "https://github.com/harfbuzz/harfbuzz/releases/download/8.3.0/harfbuzz-8.3.0.tar.xz"
     sha256: "109501eaeb8bde3eadb25fab4164e993fbace29c3d775bcaa1c1e58e2f15f847"
@@ -27,5 +33,5 @@ patches:
   "5.1.0":
     - patch_file: "patches/0000-fix-freetype-lookup-5.1.0.patch"
       patch_type: "portability"
-      patch_description: "fix fretype and icu dependency lookup"
+      patch_description: "fix freetype and icu dependency lookup"
       patch_source: "https://github.com/harfbuzz/harfbuzz/pull/3811"
