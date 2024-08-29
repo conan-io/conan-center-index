@@ -1,4 +1,13 @@
 sources:
+  "2.0.0":
+    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v2.0.0.tar.gz"
+    sha256: "88af4569161a0d0192f0f4a94582a1af4e75722499d06984fb7f91f638f5afb3"
+  "1.5.0":
+    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.5.0.tar.gz"
+    sha256: "577986929f911320fb9ef6a3e2badd464dc38411ebc25d2966f5cb85c39f0897"
+  "1.4.0":
+    url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.4.0.tar.gz"
+    sha256: "ca7405c7f0f9ae3023dcfa37bc68974c4b8a1c9ea2909b970e0aedc3e8657ee6"
   "1.3.0":
     url: "https://github.com/Kistler-Group/sdbus-cpp/archive/v1.3.0.tar.gz"
     sha256: "d44f59abdd64d8f1ca3af7db58bc6518cb081fc9ff16285c3d75a68f5c073d10"
@@ -26,3 +35,6 @@ patches:
       patch_description: "fix build error by adding missing headers"
       patch_type: "bugfix"
       patch_source: "https://github.com/Kistler-Group/sdbus-cpp/commit/fb008445b15b452f461c34667f4991f5ce06e481"
+  "2.0.0":
+    - patch_file: "patches/0003-fix-expat-casing-and-library-linkage.patch"
+      patch_type: "conan"

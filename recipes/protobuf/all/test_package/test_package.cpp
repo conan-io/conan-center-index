@@ -1,17 +1,15 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "addressbook.pb.h"
+#include <google/protobuf/timestamp.pb.h>
+#include <google/protobuf/util/time_util.h>
 
 int main()
 {
-	std::cout << "Bincrafters\n";
+	google::protobuf::Timestamp ts;
+	google::protobuf::util::TimeUtil::FromString("1972-01-01T10:00:20.021Z", &ts);
+	const auto nanoseconds = ts.nanos();
 
-	tutorial::Person p;
-	p.set_id(21);
-	p.set_name("conan-center-index");
-	p.set_email("info@conan.io");
-
-	std::cout << p.SerializeAsString() << "\n";
+	std::cout << "1972-01-01T10:00:20.021Z in nanoseconds: " << nanoseconds << "\n";
 	return EXIT_SUCCESS;
 }

@@ -30,19 +30,15 @@ class OpenALSoftConan(ConanFile):
     }
 
     @property
-    def _openal_cxx_backend(self):
-        return Version(self.version) >= "1.20"
-
-    @property
     def _min_cppstd(self):
-        return "11" if Version(self.version) < "1.21" else "14"
+        return 14
 
     @property
     def _minimum_compilers_version(self):
         return {
-            "Visual Studio": "13" if Version(self.version) < "1.21" else "15",
-            "msvc": "180" if Version(self.version) < "1.21" else "191",
-            "gcc": "5",
+            "Visual Studio": "15",
+            "msvc": "191",
+            "gcc": "6",
             "clang": "5",
         }
 
@@ -59,8 +55,6 @@ class OpenALSoftConan(ConanFile):
         # OpenAL's API is pure C, thus the c++ standard does not matter
         # Because the backend is C++, the C++ STL matters
         self.settings.rm_safe("compiler.cppstd")
-        if not self._openal_cxx_backend:
-            self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -70,23 +64,22 @@ class OpenALSoftConan(ConanFile):
             self.requires("libalsa/1.2.10")
 
     def validate(self):
-        if self._openal_cxx_backend:
-            if self.settings.compiler.get_safe("cppstd"):
-                check_min_cppstd(self, self._min_cppstd)
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
-            compiler = self.settings.compiler
+        compiler = self.settings.compiler
 
-            minimum_version = self._minimum_compilers_version.get(str(compiler), False)
-            if minimum_version and Version(compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
-                )
+        minimum_version = self._minimum_compilers_version.get(str(compiler), False)
+        if minimum_version and Version(compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
+            )
 
-            if compiler == "clang" and Version(compiler.version) < "9" and \
-               compiler.get_safe("libcxx") in ("libstdc++", "libstdc++11"):
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} cannot be built with {compiler} {compiler.version} and stdlibc++(11) c++ runtime",
-                )
+        if compiler == "clang" and Version(compiler.version) < "9" and \
+           compiler.get_safe("libcxx") in ("libstdc++", "libstdc++11"):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} cannot be built with {compiler} {compiler.version} and stdlibc++(11) c++ runtime",
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -155,9 +148,11 @@ class OpenALSoftConan(ConanFile):
                 self.cpp_info.frameworks.append("ApplicationServices")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["winmm", "ole32", "shell32", "user32"])
-        if self._openal_cxx_backend and not self.options.shared:
+        if not self.options.shared:
             libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
         if not self.options.shared:
             self.cpp_info.defines.append("AL_LIBTYPE_STATIC")
+        if self.settings.get_safe("compiler.libcxx") in ["libstdc++", "libstdc++11"]:
+            self.cpp_info.system_libs.append("atomic")

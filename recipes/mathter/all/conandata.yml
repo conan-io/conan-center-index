@@ -1,4 +1,13 @@
 sources:
+  "1.1.1":
+    url: "https://github.com/petiaccja/Mathter/archive/v1.1.1.tar.gz"
+    sha256: "510e6aa198cd7b207a44d319e4471021f207cba8c4d2d7e40086f1f042fe13ab"
+  "1.1.0":
+    url: "https://github.com/petiaccja/Mathter/archive/v1.1.0.tar.gz"
+    sha256: "a9a82126ecd80112854098a5646d38f72f0af03e9655b28ab8fa38b4c03b0870"
+  "1.0.1":
+    url: "https://github.com/petiaccja/Mathter/archive/v1.0.1.tar.gz"
+    sha256: "ab90736abfa8774103b53fe2b8962981c5f117dc582b01698c18d66cd2398b8c"
   "1.0.0":
     url: "https://github.com/petiaccja/Mathter/archive/v1.0.0.tar.gz"
     sha256: "c75cca8d8aec627935250908f2c0f9f1839561e7596a4199bcf80e12b0e6c53b"
