@@ -2,7 +2,7 @@ import os
 import textwrap
 
 from conan import ConanFile, conan_version
-from conan.tools.files import copy, get, rmdir, save
+from conan.tools.files import copy, get, rmdir, save, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
@@ -30,8 +30,6 @@ class MesonConan(ConanFile):
 
     def package_id(self):
         self.info.clear()
-        # Make package_id based on Conan version less than 2.7
-        # if it was possible, something like self.info.settings(?).conan_has_finalize = conan_version >= "2.7.0"
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -41,24 +39,28 @@ class MesonConan(ConanFile):
         copy(self, "*", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "bin", "test cases"))
 
-        cmd_bytecode_wrapper = "set PYTHONDONTWRITEBYTECODE=1" if conan_version < "2.7.0" else ""
-        bytecode_wrapper = "export PYTHONDONTWRITEBYTECODE=1" if conan_version < "2.7.0" else ""
-
         # create wrapper scripts
         save(self, os.path.join(self.package_folder, "bin", "meson.cmd"), textwrap.dedent(f"""\
             @echo off
-            {cmd_bytecode_wrapper}
+            set PYTHONDONTWRITEBYTECODE=1
             CALL python %~dp0/meson.py %*
         """))
         save(self, os.path.join(self.package_folder, "bin", "meson"), textwrap.dedent(f"""\
             #!/usr/bin/env bash
             meson_dir=$(dirname "$0")
-            {bytecode_wrapper}
+            export PYTHONDONTWRITEBYTECODE=1
             exec "$meson_dir/meson.py" "$@"
         """))
 
     def finalize(self):
         copy(self, "*", src=self.immutable_package_folder, dst=self.package_folder)
+        replace_in_file(self, os.path.join(self.package_folder, "bin", "meson.cmd"),
+                        "set PYTHONDONTWRITEBYTECODE=1",
+                        "")
+
+        replace_in_file(self, os.path.join(self.package_folder, "bin", "meson"),
+                        "export PYTHONDONTWRITEBYTECODE=1",
+                        "")
 
     @staticmethod
     def _chmod_plus_x(filename):
