@@ -94,7 +94,7 @@ class GdkPixbufConan(ConanFile):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         self.tool_requires("glib/<host_version>")
         if self.options.with_introspection:
-            self.tool_requires("gobject-introspection/1.72.0")
+            self.tool_requires("gobject-introspection/1.78.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -111,7 +111,11 @@ class GdkPixbufConan(ConanFile):
             env.generate(scope="build")
 
         deps = PkgConfigDeps(self)
+        if self.options.with_introspection:
+            # gnome.generate_gir() in Meson looks for gobject-introspection-1.0.pc
+            deps.build_context_activated = ["gobject-introspection"]
         deps.generate()
+
         tc = MesonToolchain(self)
         enabled_disabled = lambda v: "enabled" if v else "disabled"
         true_false = lambda v: "true" if v else "false"
@@ -193,7 +197,8 @@ class GdkPixbufConan(ConanFile):
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
+        os.rename(os.path.join(self.package_folder, "share"),
+                  os.path.join(self.package_folder, "res"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
         fix_apple_shared_install_name(self)
         fix_msvc_libname(self)
@@ -202,6 +207,7 @@ class GdkPixbufConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "gdk-pixbuf-2.0")
         self.cpp_info.libs = ["gdk_pixbuf-2.0"]
         self.cpp_info.includedirs = [os.path.join("include", "gdk-pixbuf-2.0")]
+        self.cpp_info.resdirs = ["res"]
         if not self.options.shared:
             self.cpp_info.defines.append("GDK_PIXBUF_STATIC_COMPILATION")
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -227,8 +233,6 @@ class GdkPixbufConan(ConanFile):
             self.cpp_info.requires.append("libjpeg::libjpeg")
         elif self.options.with_libjpeg == "mozjpeg":
             self.cpp_info.requires.append("mozjpeg::mozjpeg")
-        if self.options.with_introspection:
-            self.cpp_info.requires.append("gobject-introspection::gobject-introspection")
 
         # Breaking change since Conan >= 2.0.8
         # Related to https://github.com/conan-io/conan/pull/14233
@@ -250,6 +254,12 @@ class GdkPixbufConan(ConanFile):
         gdk_pixbuf_pixdata = os.path.join(self.package_folder, "bin", "gdk-pixbuf-pixdata")
         self.runenv_info.define_path("GDK_PIXBUF_PIXDATA", gdk_pixbuf_pixdata)
         self.env_info.GDK_PIXBUF_PIXDATA = gdk_pixbuf_pixdata # remove in conan v2?
+
+        if self.options.with_introspection:
+            self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "gir-1.0"))
+            self.buildenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
+            self.env_info.GI_GIR_PATH.append(os.path.join(self.package_folder, "res", "gir-1.0"))
+            self.env_info.GI_TYPELIB_PATH.append(os.path.join(self.package_folder, "lib", "girepository-1.0"))
 
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
