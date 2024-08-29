@@ -10,7 +10,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.env import Environment
 from conan.tools.scm import Version
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
@@ -28,15 +28,20 @@ class GobjectIntrospectionConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
+        "build_introspection_data": [True, False],
     }
     default_options = {
         "fPIC": True,
+        "build_introspection_data": True,
     }
     short_paths = True
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os in ["Windows", "Macos"] or cross_building(self):
+            # FIXME: tools/g-ir-scanner fails to load glib
+            self.options.build_introspection_data = False
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
@@ -49,19 +54,23 @@ class GobjectIntrospectionConan(ConanFile):
 
     def requirements(self):
         # https://gitlab.gnome.org/GNOME/gobject-introspection/-/blob/1.76.1/meson.build?ref_type=tags#L127-131
-        self.requires(f"glib/2.76.3", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         # FIXME: gobject-introspection links against system python3 libs, which is not reliable
 
     def validate(self):
         if self.settings.os == "Windows" and self.settings.build_type == "Debug":
             # fatal error LNK1104: cannot open file 'python37_d.lib'
             raise ConanInvalidConfiguration(
-                "Debug build on Windows is disabled due to debug version of Python libs likely not being available."
-            )
-        glib_shared = self.dependencies.build["glib"].options.shared if hasattr(self, "settings_build") else self.dependencies["glib"].options.shared
-        if glib_shared:
+                f"{self.ref} debug build on Windows is disabled due to debug version of Python libs likely not being available. Contributions to fix this are welcome.")
+        if self.options.build_introspection_data and not self.dependencies["glib"].options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} requires shared glib to be built as shared. Use -o 'glib/*:shared=True'.")
+        if self.options.build_introspection_data and self.settings.os in ["Windows", "Macos"]:
             # FIXME: tools/g-ir-scanner', '--output=gir/GLib-2.0.gir' ... ERROR: can't resolve libraries to shared libraries: glib-2.0, gobject-2.0
+            # FIXME: g-ir-scanner fails to find libgnuintl
+            # giscanner/_giscanner.cpython-37m-darwin.so, 0x0002): Library not loaded: /lib/libgnuintl.8.dylib
             raise ConanInvalidConfiguration(f"{self.ref} fails to run g-ir-scanner due glib loaded as shared. Use -o 'glib/*:shared=False'. Contributions to fix this are welcome.")
+        if self.options.build_introspection_data and cross_building(self):
+            raise ConanInvalidConfiguration(f"{self.ref} build_introspection_data is not supported when cross-building. Use '&:build_introspection_data=False'.")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
@@ -86,9 +95,7 @@ class GobjectIntrospectionConan(ConanFile):
         tc = MesonToolchain(self)
         if cross_building(self):
             tc.project_options["gi_cross_use_prebuilt_gi"] = "false"
-            tc.project_options["build_introspection_data"] = "false"
-        else:
-            tc.project_options["build_introspection_data"] = "true" if self.dependencies["glib"].options.shared else "false"
+        tc.project_options["build_introspection_data"] = self.options.build_introspection_data
         tc.project_options["datadir"] = "res"
         tc.generate()
         deps = PkgConfigDeps(self)
