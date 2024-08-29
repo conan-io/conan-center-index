@@ -72,6 +72,7 @@ class OnnxRuntimeConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.options["onnx"].disable_static_registration = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -202,14 +203,7 @@ class OnnxRuntimeConan(ConanFile):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        
-        # move the shared providers dll in the bin dir
-        lib_dir = os.path.join(self.package_folder, "lib")
-        bin_dir = os.path.join(self.package_folder, "bin")
-        copy(self, "*.dll", src=lib_dir, dst=bin_dir)
-        rm(self, "*.dll", lib_dir)
-        
-        pkg_config_dir = os.path.join(lib_dir, "pkgconfig")
+        pkg_config_dir = os.path.join(self.package_folder, "lib", "pkgconfig")
         rmdir(self, pkg_config_dir)
 
     def package_info(self):
