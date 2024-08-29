@@ -24,6 +24,8 @@ class MlpackConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if Version(self.version) >= "4.4.0":
+            return 17
         if is_msvc(self):
             return 17
         return 14
