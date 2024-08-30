@@ -308,7 +308,7 @@ class PopplerConan(ConanFile):
         if self.options.with_nss:
             self.cpp_info.components["libpoppler"].requires.append("nss::nss")
         if self.options.with_tiff:
-            self.cpp_info.components["libpoppler"].requires.append("libtiff::libtiff")
+            self.cpp_info.components["libpoppler"].requires.append("libtiff::tiff")
         if self.options.with_libcurl:
             self.cpp_info.components["libpoppler"].requires.append("libcurl::libcurl")
         if self.options.with_zlib:
