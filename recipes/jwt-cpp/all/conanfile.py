@@ -16,12 +16,12 @@ class JwtCppConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
-    options = { "enable_picojson": [True, False] }
-    default_options = { "enable_picojson" : False }
+    options = { "with_picojson": [True, False] }
+    default_options = { "with_picojson" : False }
 
     @property
-    def _enable_picojson(self):
-        return Version(self.version) < "0.5.0" or self.options.enable_picojson
+    def _with_picojson(self):
+        return Version(self.version) < "0.5.0" or self.options.with_picojson
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -31,7 +31,7 @@ class JwtCppConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
-        if self._enable_picojson:
+        if self._with_picojson:
             self.requires("picojson/1.3.0")
 
     def package_id(self):
@@ -52,7 +52,7 @@ class JwtCppConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         self.cpp_info.requires = ["openssl::openssl"]
-        if self._enable_picojson:
+        if self._with_picojson:
             self.cpp_info.requires.append("picojson::picojson")
         else:
             self.cpp_info.defines.append("JWT_DISABLE_PICOJSON")
