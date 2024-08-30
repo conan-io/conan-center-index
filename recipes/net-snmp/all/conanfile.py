@@ -59,11 +59,10 @@ class NetSnmpConan(ConanFile):
         self.requires("pcre/8.45")
 
     def validate(self):
-        if self.settings.os == "Windows" and not is_msvc(self):
-            raise ConanInvalidConfiguration("net-snmp is set up to build only with MSVC on Windows")
-        if is_msvc(self):
-            # Linker errors against third-party dependencies
-            raise ConanInvalidConfiguration("MSVC is currently not supported. Contributions are welcome!")
+        if is_msvc(self) and self.options.shared:
+            # FIXME: Linker errors against third-party dependencies:
+            # snmp_openssl.obj : error LNK2019: unresolved external symbol CRYPTO_free referenced in function _extract_oname
+            raise ConanInvalidConfiguration(f"{self.ref} fails when building as shared library, use -o '&:shared=False'. Contributions are welcome!")
 
     def build_requirements(self):
         if is_msvc(self):
