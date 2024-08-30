@@ -350,7 +350,7 @@ class PangolinConan(ConanFile):
         if self.options.with_raw:
             pango_image.requires.append("libraw::libraw")
         if self.options.with_tiff:
-            pango_image.requires.append("libtiff::libtiff")
+            pango_image.requires.append("libtiff::tiff")
         if self.options.with_zstd:
             self.cpp_info.requires.append("zstd::zstd")
 
