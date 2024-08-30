@@ -9,8 +9,9 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.env import Environment
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.scm import Version
-from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan import conan_version
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
@@ -55,7 +56,8 @@ class GobjectIntrospectionConan(ConanFile):
     def requirements(self):
         # https://gitlab.gnome.org/GNOME/gobject-introspection/-/blob/1.76.1/meson.build?ref_type=tags#L127-131
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
-        # FIXME: gobject-introspection links against system python3 libs, which is not reliable
+        # ffi.h exposed by plublic header gobject-introspection-1.0/girffi.h
+        self.requires("libffi/3.4.4", transitive_headers=True)
 
     def validate(self):
         if self.settings.os == "Windows" and self.settings.build_type == "Debug":
@@ -100,21 +102,40 @@ class GobjectIntrospectionConan(ConanFile):
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
-        # INFO: g-ir-scanner fails to find glib-2.0.pc, so we need to set PKG_CONFIG_PATH
+        # INFO: g-ir-scanner uses PKG_CONFIG_PATH directly instead of pkg-config Meson module
         env = Environment()
         env.define("PKG_CONFIG_PATH", self.generators_folder)
         envvars = env.vars(self)
         envvars.save_script("pkg_config_env")
 
     def _patch_sources(self):
+        # Disable tests
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
                         "subdir('tests')",
                         "#subdir('tests')")
-        # gir/meson.build expects the gio-unix-2.0 includedir to be passed as a build flag.
-        # Patch this for glib from Conan.
-        replace_in_file(self, os.path.join(self.source_folder, "gir", "meson.build"),
-                        "join_paths(giounix_dep.get_variable(pkgconfig: 'includedir'), 'gio-unix-2.0')",
-                        "giounix_dep.get_variable(pkgconfig: 'includedir')")
+         # Look for data files in res/ instead of share/
+        replace_in_file(self, os.path.join(self.source_folder, "tools", "g-ir-tool-template.in"),
+                        "os.path.join(filedir, '..', 'share')",
+                        "os.path.join(filedir, '..', 'res')")
+        if Version(conan_version) < "2":
+            # INFO: Conan 1.x generates PkgConfigDeps with libdir1 and includedir1 variables only for glib due its modules
+            replace_in_file(self, os.path.join(self.source_folder, "gir", "meson.build"),
+                            "glib_dep.get_variable(pkgconfig: 'libdir')",
+                            "glib_dep.get_variable(pkgconfig: 'libdir1')")
+            replace_in_file(self, os.path.join(self.source_folder, "gir", "meson.build"),
+                            "join_paths(glib_dep.get_variable(pkgconfig: 'includedir'), 'glib-2.0')",
+                            "join_paths(glib_dep.get_variable(pkgconfig: 'includedir1'), 'glib-2.0')")
+            # gir/meson.build expects the gio-unix-2.0 includedir to be passed as a build flag.
+            # Patch this for glib from Conan.
+            replace_in_file(self, os.path.join(self.source_folder, "gir", "meson.build"),
+                            "join_paths(giounix_dep.get_variable(pkgconfig: 'includedir'), 'gio-unix-2.0')",
+                            "giounix_dep.get_variable(pkgconfig: 'includedir1')")
+        else:
+            # gir/meson.build expects the gio-unix-2.0 includedir to be passed as a build flag.
+            # Patch this for glib from Conan.
+            replace_in_file(self, os.path.join(self.source_folder, "gir", "meson.build"),
+                            "join_paths(giounix_dep.get_variable(pkgconfig: 'includedir'), 'gio-unix-2.0')",
+                            "giounix_dep.get_variable(pkgconfig: 'includedir')")
 
     def build(self):
         self._patch_sources()
