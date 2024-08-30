@@ -224,7 +224,7 @@ class NetpbmConan(ConanFile):
                 "jasper::jasper",
                 "jbig::jbig",
                 "libpng::libpng",
-                "libtiff::libtiff",
+                "libtiff::tiff",
                 "libxml2::libxml2",
                 "zlib::zlib",
             ])
