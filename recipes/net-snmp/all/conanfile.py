@@ -111,21 +111,9 @@ class NetSnmpConan(ConanFile):
                 "--disable-mibs",
                 "--disable-embedded-perl",
             ]
-            if self.settings.os == "Neutrino":
-                tc.configure_args.append("--with-endianness=little")
-                if self.settings.os.version == "7.0":
-                    tc.configure_args.append("ac_cv_func_asprintf=no")
-
             if self.settings.os in ["Linux"]:
                 tc.extra_ldflags.append("-ldl")
                 tc.extra_ldflags.append("-lpthread")
-
-            if self.settings.os in ["Neutrino"]:
-                tc.extra_ldflags.append("-ldl")
-                tc.extra_ldflags.append("-lsocket")
-
-                if self.settings.os.version == "7.1":
-                    tc.extra_ldflags.append("-lregex")
             tc.generate()
 
             deps = AutotoolsDeps(self)
@@ -228,9 +216,3 @@ class NetSnmpConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["netsnmp"]
-
-        if self.settings.os == "Neutrino":
-            self.cpp_info.system_libs.append("socket")
-
-        if self.settings.os == "Neutrino" and self.settings.os.version == "7.1":
-            self.cpp_info.system_libs.append("regex")
