@@ -220,11 +220,15 @@ class NcbiCxxToolkit(ConanFile):
         apply_conandata_patches(self)
         rmdir(self, os.path.join(self.source_folder, "src", "build-system", "cmake", "unused"))
         rmdir(self, os.path.join(self.source_folder, "src", "build-system", "cmake", "modules"))
+        grpc = os.path.join(self.source_folder, "src", "build-system", "cmake", "CMake.NCBIptb.grpc.cmake")
         if self.settings.os == "Macos":
-            grpc = os.path.join(self.source_folder, "src", "build-system", "cmake", "CMake.NCBIptb.grpc.cmake")
             replace_in_file(self, grpc,
                 "COMMAND ${_cmd}",
                 "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}\" ${_cmd}")
+        elif self.settings.os == "Linux":
+            replace_in_file(self, grpc,
+                "COMMAND ${_cmd}",
+                "COMMAND ${CMAKE_COMMAND} -E env \"LD_LIBRARY_PATH=$<JOIN:${CMAKE_LIBRARY_PATH},:>:$ENV{LD_LIBRARY_PATH}\" ${_cmd}")
         root = os.path.join(self.source_folder, "CMakeLists.txt")
         with open(root, "w", encoding="utf-8") as f:
             f.write("cmake_minimum_required(VERSION 3.15)\n")
