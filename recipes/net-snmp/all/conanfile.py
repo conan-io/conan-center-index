@@ -9,7 +9,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, NMakeToolchain
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 
 required_conan_version = ">=1.53.0"
 
@@ -208,10 +208,11 @@ class NetSnmpConan(ConanFile):
             rm(self, "README", self.package_folder, recursive=True)
             rmdir(self, os.path.join(self.package_folder, "bin"))
             rm(self, "*.la", self.package_folder, recursive=True)
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["netsnmp"]
-        if self.settings.os == "Linux":
-            self.cpp_info.system_libs.extend(["rt", "pthread"])
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["rt", "pthread", "m"])
         if is_apple_os(self):
             self.cpp_info.frameworks.extend(["CoreFoundation", "DiskArbitration", "IOKit"])
