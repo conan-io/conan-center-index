@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.env import VirtualRunEnv
@@ -75,6 +75,10 @@ class OpenMPIConan(ConanFile):
         if self.version == "4.1.0" and is_apple_os(self) and self.settings.arch == "armv8":
             # INFO: https://github.com/open-mpi/ompi/issues/8410
             raise ConanInvalidConfiguration(f"{self.ref} is not supported in Mac M1. Use a newer version.")
+
+        if conan_version.major == 1 and self.settings.compiler in ["clang", "apple-clang"]:
+            # Fails with "configure: error: cannot run C compiled programs."
+            raise ConanInvalidConfiguration("Clang and AppleClang are not supported on Conan v1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
