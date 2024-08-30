@@ -27,13 +27,16 @@ class GtkConan(ConanFile):
         "fPIC": [True, False],
         "with_wayland": [True, False],
         "with_x11": [True, False],
+        "with_introspection": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_wayland": True,
         "with_x11": True,
+        "with_introspection": False,
     }
+    no_copy_source = True
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -89,7 +92,6 @@ class GtkConan(ConanFile):
             self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
             self.requires("fontconfig/2.15.0")
 
-        # TODO: gobject-introspection
         # TODO: iso-codes
         # TODO: tracker-sparql-3.0
         # TODO: cloudproviders
@@ -115,6 +117,8 @@ class GtkConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         self.tool_requires("glib/<host_version>")
+        if self.options.with_introspection:
+            self.tool_requires("gobject-introspection/1.78.1")  # for g-ir-scanner
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -127,7 +131,7 @@ class GtkConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["wayland_backend"] = "true" if self.options.get_safe("with_wayland") else "false"
         tc.project_options["x11_backend"] = "true" if self.options.get_safe("with_x11") else "false"
-        tc.project_options["introspection"] = "false"
+        tc.project_options["introspection"] = "true" if self.options.with_introspection else "false"
         tc.project_options["gtk_doc"] = "false"
         tc.project_options["man"] = "false"
         tc.project_options["tests"] = "false"
@@ -139,6 +143,9 @@ class GtkConan(ConanFile):
         tc.generate()
 
         deps = PkgConfigDeps(self)
+        if self.options.with_introspection:
+            # gnome.generate_gir() in Meson looks for gobject-introspection-1.0.pc
+            deps.build_context_activated = ["gobject-introspection"]
         deps.generate()
 
     def build(self):
@@ -158,6 +165,7 @@ class GtkConan(ConanFile):
         self.cpp_info.components["gdk-3.0"].set_property("pkg_config_name", "gdk-3.0")
         self.cpp_info.components["gdk-3.0"].libs = ["gdk-3"]
         self.cpp_info.components["gdk-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
+        self.cpp_info.components["gdk-3.0"].resdirs = ["res", os.path.join("res", "share")]
         self.cpp_info.components["gdk-3.0"].requires = [
             "pango::pango_" if self.settings.os != "Windows" else "pango::pangowin32",
             "pango::pangocairo",
@@ -193,6 +201,10 @@ class GtkConan(ConanFile):
                 "wayland-protocols::wayland-protocols",
                 "xkbcommon::xkbcommon",
             ])
+
+        if self.options.with_introspection:
+            self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "share", "gir-1.0"))
+            self.env_info.GI_GIR_PATH.append(os.path.join(self.package_folder, "res", "share", "gir-1.0"))
 
         self.cpp_info.components["gtk+-3.0"].set_property("pkg_config_name", "gtk+-3.0")
         self.cpp_info.components["gtk+-3.0"].libs = ["gtk-3"]
