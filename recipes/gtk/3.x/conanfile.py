@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
@@ -37,6 +37,9 @@ class GtkConan(ConanFile):
         "with_introspection": False,
     }
     no_copy_source = True
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -149,6 +152,7 @@ class GtkConan(ConanFile):
         deps.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
         meson.build()

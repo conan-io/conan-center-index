@@ -7,3 +7,5 @@ versions:
     folder: "4.x"
   "3.24.43":
     folder: "3.x"
+  "3.24.24":
+    folder: "3.x"
