@@ -182,6 +182,7 @@ class MysqlCppConnRecipe(ConanFile):
 
         if is_apple_os(self):
             self.cpp_info.system_libs.extend(["resolv"])
+            self.cpp_info.requires = ["openssl::openssl"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "resolv", "ssl", "crypto"])
 
