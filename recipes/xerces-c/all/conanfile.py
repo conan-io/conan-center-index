@@ -134,7 +134,7 @@ class XercesCConan(ConanFile):
 
         # Fix compatibility with Clang on Windows
         # https://issues.apache.org/jira/browse/XERCESC-2252
-        if self.settings.os == "Windows" and self.settings.compiler == "Clang":
+        if self.settings.os == "Windows" and self.settings.compiler == "clang":
             tc.cache_variables["CMAKE_RC_FLAGS"] = "-C 1252"
 
         tc.generate()
