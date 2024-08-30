@@ -72,6 +72,8 @@ class OnnxRuntimeConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        # onnxruntime forces this to be True
+        # https://github.com/microsoft/onnxruntime/blob/be76e1e1b8e2914e448d12a0cc683c00014c0490/cmake/external/onnxruntime_external_deps.cmake#L542
         self.options["onnx"].disable_static_registration = True
 
     def layout(self):
