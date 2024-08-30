@@ -53,11 +53,8 @@ class MysqlCppConnRecipe(ConanFile):
             )
 
     def requirements(self):
-        if is_apple_os(self):
-            self.requires("openssl/[>=1.1 <4]")
-        elif self.settings.os == "Windows":
-            self.requires("boost/1.85.0")
-            self.requires("openssl/[>=1.1 <4]")
+        self.requires("openssl/[>=1.1 <4]")
+        self.requires("boost/1.85.0")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
