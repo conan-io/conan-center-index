@@ -36,12 +36,12 @@ class SplinterConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
         if is_msvc(self):
             # The project does not export the necessary symbols for building as a shared library on Windows
             del self.options.shared
             self.package_type = "static-library"
-
-    def configure(self):
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
