@@ -31,7 +31,7 @@ class MysqlCppConnRecipe(ConanFile):
                "fPIC": [True, False],
                }
 
-    default_options = { "shared": True, "fPIC": True }
+    default_options = { "shared": False, "fPIC": True }
 
     @property
     def _compilers_minimum_version(self):
