@@ -986,7 +986,7 @@ class VtkConan(ConanFile):
 
     @property
     def _components_json(self):
-        return os.path.join(self.package_folder, "share", "conan_components.json")
+        return os.path.join(self.package_folder, "res", "conan_components.json")
 
     def package(self):
         cmake = CMake(self)
