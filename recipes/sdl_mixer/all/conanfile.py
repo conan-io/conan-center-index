@@ -31,7 +31,6 @@ class SDLMixerConan(ConanFile):
         "opus": [True, False],
         "mikmod": [True, False],
         "modplug": [True, False],
-        "fluidsynth": [True, False],
         "nativemidi": [True, False],
         "tinymidi": [True, False],
     }
@@ -47,7 +46,6 @@ class SDLMixerConan(ConanFile):
         "opus": True,
         "mikmod": True,
         "modplug": True,
-        "fluidsynth": False,
         "nativemidi": True,
         "tinymidi": True,
     }
@@ -93,8 +91,6 @@ class SDLMixerConan(ConanFile):
             self.requires("libmikmod/3.3.11.1")
         if self.options.modplug:
             self.requires("libmodplug/0.8.9.0")
-        if self.options.fluidsynth:
-            self.requires("fluidsynth/2.2")  # TODO: this package is missing on the conan-center-index
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.tinymidi:
                 self.requires("tinymidi/cci.20130325")
@@ -114,7 +110,7 @@ class SDLMixerConan(ConanFile):
         tc.variables["OPUS"] = self.options.opus
         tc.variables["MOD_MIKMOD"] = self.options.mikmod
         tc.variables["MOD_MODPLUG"] = self.options.modplug
-        tc.variables["MID_FLUIDSYNTH"] = self.options.fluidsynth
+        tc.variables["MID_FLUIDSYNTH"] = False
         if self.settings.os in ["Linux", "FreeBSD"]:
             tc.variables["MID_TINYMIDI"] = self.options.tinymidi
             tc.variables["MIDI_NATIVE"] = False
