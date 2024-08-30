@@ -140,7 +140,7 @@ class OpenMPIConan(ConanFile):
         deps = AutotoolsDeps(self)
         deps.generate()
 
-        if self.options.with_verbs:
+        if self.options.get_safe("with_verbs"):
             # Needed for ./configure to find libibnetdisc.so
             VirtualRunEnv(self).generate(scope="build")
 
