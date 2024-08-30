@@ -382,6 +382,7 @@ class OpenTelemetryCppConan(ConanFile):
 
         if self.options.with_stl:
             self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_CPP_STDLIB")
+            self.cpp_info.components["opentelemetry_common"].defines.append(f"OPENTELEMETRY_STL_VERSION=20{self._default_cppstd}")
 
         if self.options.with_gsl:
             self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_GSL")
