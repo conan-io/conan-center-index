@@ -113,7 +113,7 @@ class GtkConan(ConanFile):
         # Dependencies that must have introspection enabled as well if with_introspection is enabled
         # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.15.6/gtk/meson.build?ref_type=tags#L1146
         # cairo-1.0 and Gio-2.0 are provided by gobject-introspection
-        return ["gdk-pixbuf", "pango"]
+        return ["gdk-pixbuf", "pango", "graphene"]
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -312,6 +312,7 @@ class GtkConan(ConanFile):
         self.cpp_info.components["gtk4"].set_property("pkg_config_name", "gtk4")
         self.cpp_info.components["gtk4"].libs = ["gtk-4"]
         self.cpp_info.components["gtk4"].includedirs.append(os.path.join("include", "gtk-4.0"))
+        self.cpp_info.components["gtk4"].resdirs = ["res", os.path.join("res", "share")]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["gtk4"].system_libs = ["m", "rt"]
         # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.15.6/gdk/meson.build#L221-240
@@ -345,6 +346,10 @@ class GtkConan(ConanFile):
 
         if self.options.with_vulkan:
             self.cpp_info.components["gtk4"].requires.append("vulkan-loader::vulkan-loader")
+
+        if self.options.with_introspection:
+            self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "share", "gir-1.0"))
+            self.env_info.GI_GIR_PATH.append(os.path.join(self.package_folder, "res", "share", "gir-1.0"))
 
         # if self.options.with_gstreamer:
         #     # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.15.6/modules/media/meson.build#L11
