@@ -52,15 +52,15 @@ class PolyscopeConan(ConanFile):
         copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
+        if self.settings.os != "Linux":
+            del self.options.backend_egl
+
+    def configure(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
             # The project does not export the necessary symbols for a shared build
             self.package_type = "static-library"
             del self.options.shared
-        if self.settings.os != "Linux":
-            del self.options.backend_egl
-
-    def configure(self):
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
