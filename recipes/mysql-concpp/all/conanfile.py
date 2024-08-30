@@ -181,8 +181,8 @@ class MysqlCppConnRecipe(ConanFile):
         self.cpp_info.bindirs = template_dirs
 
         if is_apple_os(self):
-            self.cpp_info.requires = ["openssl::openssl"]
-            self.cpp_info.system_libs.extend(["resolv", "crypto", "ssl", "boost"])
+            self.cpp_info.requires = ["openssl::openssl", "boost::boost"]
+            self.cpp_info.system_libs.extend(["resolv", "crypto", "ssl"])
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "resolv", "ssl", "crypto"])
 
