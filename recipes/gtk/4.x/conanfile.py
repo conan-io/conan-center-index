@@ -1,7 +1,5 @@
 import io
 import os
-import re
-from pathlib import Path
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -183,7 +181,7 @@ class GtkConan(ConanFile):
             self.output.warning("The 'with_cloudprint' option has been deprecated and will be removed in a future version. It never had any effect.")
         if self.options.with_introspection:
             for dep in self._introspections_deps:
-                if not self.dependencies[dep].options.get_safe("with_introspection"):
+                if not self.dependencies[dep].options.with_introspection:
                     raise ConanInvalidConfiguration(f"{dep} must be built with introspection enabled (-o {dep}/*:with_introspection=True)")
 
     def build_requirements(self):
@@ -243,9 +241,9 @@ class GtkConan(ConanFile):
         tc.project_options["print-cups"] = enabled_disabled(self.options.with_cups)
         tc.project_options["colord"] = enabled_disabled(self.options.with_cups)
         if Version(self.version) >= "4.10.0":
-            tc.project_options["print-cpdb"] = enabled_disabled(self.options.get_safe("with_cpdb"))
-        tc.project_options["cloudproviders"] = enabled_disabled(self.options.get_safe("with_cloudproviders"))
-        tc.project_options["tracker"] = enabled_disabled(self.options.get_safe("with_tracker"))
+            tc.project_options["print-cpdb"] = enabled_disabled(self.options.with_cpdb)
+        tc.project_options["cloudproviders"] = enabled_disabled(self.options.with_cloudproviders)
+        tc.project_options["tracker"] = enabled_disabled(self.options.with_tracker)
         tc.project_options["introspection"] = enabled_disabled(self.options.with_introspection)
 
         if self.version == "4.7.0":
@@ -362,13 +360,11 @@ class GtkConan(ConanFile):
             self.cpp_info.components["gtk4"].requires.append("ffmpeg::ffmpeg")
 
         # TODO:
-        # if self.options.get_safe("with_cups"):
-        #     self.cpp_info.components["gtk4"].requires.append("cups::cups")
-        #     if self.options.get_safe("with_colord"):
-        #         self.cpp_info.components["gtk4"].requires.append("colord::colord")
-        # if self.options.get_safe("with_cpdb"):
+        # if self.options.with_cups:
+        #     self.cpp_info.components["gtk4"].requires.extend(["cups::cups", "colord::colord"])
+        # if self.options.with_cpdb:
         #     self.cpp_info.components["gtk4"].requires.append("cpdb::cpdb")
-        # if self.options.get_safe("with_cloudproviders"):
+        # if self.options.with_cloudproviders:
         #     self.cpp_info.components["gtk4"].requires.append("cloudproviders::cloudproviders")
 
         if self.options.enable_broadway_backend:
