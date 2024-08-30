@@ -579,10 +579,8 @@ class ArrowConan(ConanFile):
         if self._requires_rapidjson():
             self.cpp_info.components["libarrow"].requires.append("rapidjson::rapidjson")
         if self.options.with_s3:
-            # Arrow needs the identity-management and sts components when WITH_S3 is enabled, see:
             # https://github.com/apache/arrow/blob/6b268f62a8a172249ef35f093009c740c32e1f36/cpp/src/arrow/CMakeLists.txt#L98
-            # identity-management depends on cognito-identity and sts internally, we don't need to list them here.
-            self.cpp_info.components["libarrow"].requires.extend(["aws-sdk-cpp::identity-management", "aws-sdk-cpp::s3"])
+            self.cpp_info.components["libarrow"].requires.extend([f"aws-sdk-cpp::{x}" for x in ["cognito-identity", "core", "identity-management", "s3", "sts"]])
         if self.options.get_safe("with_gcs"):
             self.cpp_info.components["libarrow"].requires.append("google-cloud-cpp::storage")
         if self.options.with_orc:
