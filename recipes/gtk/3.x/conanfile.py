@@ -1,13 +1,15 @@
+import io
 import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.microsoft import is_msvc
+from conan.tools.system.package_manager import Apt
 
 required_conan_version = ">=1.56.0 <2 || >=2.0.6"
 
@@ -25,16 +27,27 @@ class GtkConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "enable_broadway_backend": [True, False],
         "with_wayland": [True, False],
         "with_x11": [True, False],
         "with_introspection": [True, False],
+        # Only available as system libs
+        "with_cups": [True, False],
+        "with_cloudproviders": [True, False],
+        "with_tracker": [True, False],
+        "with_iso_codes": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "enable_broadway_backend": False,
         "with_wayland": True,
         "with_x11": True,
         "with_introspection": False,
+        "with_cups": False,
+        "with_cloudproviders": False,
+        "with_tracker": False,
+        "with_iso_codes": False,
     }
     no_copy_source = True
 
@@ -99,6 +112,7 @@ class GtkConan(ConanFile):
         # TODO: tracker-sparql-3.0
         # TODO: cloudproviders
         # TODO: sysprof-capture-4
+        # TODO: cups, colord
 
     def validate(self):
         if is_msvc(self):
@@ -123,6 +137,23 @@ class GtkConan(ConanFile):
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.78.1")  # for g-ir-scanner
 
+    @property
+    def _apt_packages(self):
+        packages = []
+        if self.options.with_cups:
+            packages.append("libcups2-dev")
+            packages.append("libcolord-dev")
+        if self.options.with_cloudproviders:
+            packages.append("libcloudproviders-dev")
+        if self.options.with_tracker:
+            packages.append("libtracker-sparql-3.0-dev")
+        if self.options.with_iso_codes:
+            packages.append("iso-codes")
+        return packages
+
+    def system_requirements(self):
+        Apt(self).install(self._apt_packages, update=True, check=True)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -131,18 +162,35 @@ class GtkConan(ConanFile):
         # Required for glib-compile-resources
         VirtualRunEnv(self).generate(scope="build")
 
+        true_false = lambda opt: "true" if opt else "false"
         tc = MesonToolchain(self)
-        tc.project_options["wayland_backend"] = "true" if self.options.get_safe("with_wayland") else "false"
-        tc.project_options["x11_backend"] = "true" if self.options.get_safe("with_x11") else "false"
-        tc.project_options["introspection"] = "true" if self.options.with_introspection else "false"
+        tc.project_options["wayland_backend"] = true_false(self.options.get_safe("with_wayland"))
+        tc.project_options["x11_backend"] = true_false(self.options.get_safe("with_x11"))
+        tc.project_options["broadway_backend"] = true_false(self.options.enable_broadway_backend)
+        tc.project_options["print_backends"] = "file,lpr" + (",cups" if self.options.with_cups else "")
+        tc.project_options["colord"] = "yes" if self.options.with_cups else "no"
+        tc.project_options["cloudproviders"] = true_false(self.options.with_cloudproviders)
+        tc.project_options["tracker3"] = true_false(self.options.with_tracker)
+        tc.project_options["introspection"] = true_false(self.options.with_introspection)
+
         tc.project_options["gtk_doc"] = "false"
         tc.project_options["man"] = "false"
         tc.project_options["tests"] = "false"
         tc.project_options["examples"] = "false"
         tc.project_options["demos"] = "false"
+
         tc.project_options["datadir"] = os.path.join("res", "share")
         tc.project_options["localedir"] = os.path.join("res", "share", "locale")
         tc.project_options["sysconfdir"] = os.path.join("res", "etc")
+
+        if self._apt_packages:
+            # Don't force generators folder as the only PKG_CONFIG_PATH if system packages are in use.
+            tc.pkg_config_path = None
+            env = Environment()
+            env.define_path("PKG_CONFIG_PATH", self.generators_folder)
+            env.append_path("PKG_CONFIG_PATH", self._get_system_pkg_config_paths())
+            env.vars(self).save_script("conan_pkg_config_path")
+
         tc.generate()
 
         deps = PkgConfigDeps(self)
@@ -150,6 +198,14 @@ class GtkConan(ConanFile):
             # gnome.generate_gir() in Meson looks for gobject-introspection-1.0.pc
             deps.build_context_activated = ["gobject-introspection"]
         deps.generate()
+
+    def _get_system_pkg_config_paths(self):
+        # Global PKG_CONFIG_PATH is generally not filled by default, so ask for the default paths from pkg-config instead.
+        # Assumes that pkg-config is installed system-wide.
+        pkg_config = self.conf.get("tools.gnu:pkg_config", default="pkg-config", check_type=str)
+        output = io.StringIO()
+        self.run(f"{pkg_config} --variable pc_path pkg-config", output, scope=None)
+        return output.getvalue().strip()
 
     def build(self):
         apply_conandata_patches(self)
