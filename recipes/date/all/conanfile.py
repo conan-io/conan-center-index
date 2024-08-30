@@ -93,23 +93,17 @@ class DateConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        src = os.path.join(self.source_folder, "include", "date")
+        dst = os.path.join(self.package_folder, "include", "date")
         if self.options.header_only:
-            src = os.path.join(self.source_folder, "include", "date")
-            dst = os.path.join(self.package_folder, "include", "date")
-            copy(self, "date.h", dst=dst, src=src)
-            copy(self, "tz.h", dst=dst, src=src)
-            copy(self, "ptz.h", dst=dst, src=src)
-            copy(self, "iso_week.h", dst=dst, src=src)
-            copy(self, "julian.h", dst=dst, src=src)
-            copy(self, "islamic.h", dst=dst, src=src)
+            for header_file in ["date.h", "tz.h", "ptz.h", "iso_week.h", "julian.h", "islamic.h"]:
+                copy(self, header_file, dst=dst, src=src)
         else:
             cmake = CMake(self)
             cmake.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
             rmdir(self, os.path.join(self.package_folder, "CMake"))
             if self.options.install_all_headers:
-                src = os.path.join(self.source_folder, "include", "date")
-                dst = os.path.join(self.package_folder, "include", "date")
                 for header_file in ["ptz.h", "iso_week.h", "julian.h", "islamic.h"]:
                     copy(self, header_file, dst=dst, src=src)
 
@@ -127,18 +121,13 @@ class DateConan(ConanFile):
             lib_name = "{}tz".format("date-" if Version(self.version) >= "3.0.0" else "")
             self.cpp_info.components["date-tz"].libs = [lib_name]
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["date-tz"].system_libs.append("pthread")
-                self.cpp_info.components["date-tz"].system_libs.append("m")
+                self.cpp_info.components["date-tz"].system_libs.extend(["m", "pthread"])
 
             if not self.options.use_system_tz_db:
                 self.cpp_info.components["date-tz"].requires.append("libcurl::libcurl")
 
-            if self.options.use_system_tz_db and not self.settings.os == "Windows":
-                use_os_tzdb = 1
-            else:
-                use_os_tzdb = 0
-
-            defines = ["USE_OS_TZDB={}".format(use_os_tzdb)]
+            use_os_tzdb = 1 if self.options.use_system_tz_db and not self.settings.os == "Windows" else 0
+            defines = [f"USE_OS_TZDB={use_os_tzdb}"]
             if self.settings.os == "Windows" and self.options.shared:
                 defines.append("DATE_USE_DLL=1")
 
