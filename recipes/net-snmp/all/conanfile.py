@@ -201,9 +201,6 @@ class NetSnmpConan(ConanFile):
              src=self.source_folder)
         if is_msvc(self):
             cfg = "debug" if self._is_debug else "release"
-            copy(self, "netsnmp.dll",
-                 dst=os.path.join(self.package_folder, "bin"),
-                 src=os.path.join(self.source_folder, rf"win32\bin\{cfg}"))
             copy(self, "netsnmp.lib",
                  dst=os.path.join(self.package_folder, "lib"),
                  src=os.path.join(self.source_folder, rf"win32\lib\{cfg}"))
