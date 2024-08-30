@@ -10,3 +10,6 @@ patches:
     - patch_file: "patches/0002-make-libtiff-dependency-public.patch"
       patch_description: "Make libtiff dependency public internally"
       patch_type: "conan"
+    - patch_file: "patches/0003-relax-dep-version-requirements.patch"
+      patch_description: "Relax major version requirement for FastFloat"
+      patch_type: "conan"

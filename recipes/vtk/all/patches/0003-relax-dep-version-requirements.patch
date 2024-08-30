@@ -1,0 +1,15 @@
+--- a/ThirdParty/fast_float/CMakeLists.txt
++++ b/ThirdParty/fast_float/CMakeLists.txt
+@@ -8,12 +8,9 @@
+       "Copyright (c) 2021 The fast_float authors"
+     SPDX_DOWNLOAD_LOCATION
+       "git+https://gitlab.kitware.com/third-party/fast_float.git@for/vtk-20230309-3.9.0"
+-    VERSION
+-      "3.9.0"
+     STANDARD_INCLUDE_DIRS
+     HEADER_ONLY
+   EXTERNAL
+-    VERSION "3.9.0"
+     PACKAGE FastFloat
+     TARGETS FastFloat::fast_float
+     STANDARD_INCLUDE_DIRS

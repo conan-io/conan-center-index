@@ -278,7 +278,7 @@ class VtkConan(ConanFile):
         # These are always required by CommonArchive, CommonCore, CommonMath, CommonDataModel, CommonMisc, IOCore, FiltersCore, FiltersGeneral
         self.requires("double-conversion/3.3.0")
         self.requires("exprtk/0.0.2")
-        self.requires("fast_float/6.1.3")
+        self.requires("fast_float/6.1.4")
         self.requires("libarchive/3.7.4")
         self.requires("lz4/1.9.4")
         self.requires("pugixml/1.14")
