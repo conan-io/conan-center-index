@@ -31,6 +31,7 @@ class PangoConan(ConanFile):
         "with_xft": [True, False],
         "with_freetype": [True, False],
         "with_fontconfig": [True, False],
+        "with_introspection": [True, False],
     }
     default_options = {
         "shared": False,
@@ -40,6 +41,7 @@ class PangoConan(ConanFile):
         "with_xft": True,
         "with_freetype": True,
         "with_fontconfig": True,
+        "with_introspection": False,
     }
 
     def config_options(self):
@@ -114,22 +116,29 @@ class PangoConan(ConanFile):
         self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
+        if self.options.with_introspection:
+            self.tool_requires("gobject-introspection/1.78.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        virtual_build_env = VirtualBuildEnv(self)
-        virtual_build_env.generate()
-        pkg_config_deps = PkgConfigDeps(self)
-        pkg_config_deps.generate()
+        VirtualBuildEnv(self).generate()
+
+        deps = PkgConfigDeps(self)
+        if self.options.with_introspection:
+            # gnome.generate_gir() in Meson looks for gobject-introspection-1.0.pc
+            deps.build_context_activated = ["gobject-introspection"]
+        deps.generate()
+
+        enabled_disabled = lambda opt: "enabled" if opt else "disabled"
         tc = MesonToolchain(self)
-        tc.project_options["introspection"] = "disabled"
-        tc.project_options["libthai"] = "enabled" if self.options.with_libthai else "disabled"
-        tc.project_options["cairo"] = "enabled" if self.options.with_cairo else "disabled"
-        tc.project_options["xft"] = "enabled" if self.options.get_safe("with_xft") else "disabled"
-        tc.project_options["fontconfig"] = "enabled" if self.options.with_fontconfig else "disabled"
-        tc.project_options["freetype"] = "enabled" if self.options.with_freetype else "disabled"
+        tc.project_options["introspection"] = enabled_disabled(self.options.with_introspection)
+        tc.project_options["libthai"] = enabled_disabled(self.options.with_libthai)
+        tc.project_options["cairo"] = enabled_disabled(self.options.with_cairo)
+        tc.project_options["xft"] = enabled_disabled(self.options.get_safe("with_xft"))
+        tc.project_options["fontconfig"] = enabled_disabled(self.options.with_fontconfig)
+        tc.project_options["freetype"] = enabled_disabled(self.options.with_freetype)
         tc.generate()
 
     def build(self):
@@ -157,6 +166,9 @@ class PangoConan(ConanFile):
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
+        if self.options.with_introspection:
+            os.rename(os.path.join(self.package_folder, "share"),
+                      os.path.join(self.package_folder, "res"))
 
     def package_info(self):
         self.cpp_info.components["pango_"].libs = ["pango-1.0"]
@@ -181,6 +193,13 @@ class PangoConan(ConanFile):
         self.cpp_info.components["pango_"].includedirs = [
             os.path.join(self.package_folder, "include", "pango-1.0")
         ]
+
+        if self.options.with_introspection:
+            self.cpp_info.components["pango_"].resdirs = ["res"]
+            self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "gir-1.0"))
+            self.buildenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
+            self.env_info.GI_GIR_PATH.append(os.path.join(self.package_folder, "res", "gir-1.0"))
+            self.env_info.GI_TYPELIB_PATH.append(os.path.join(self.package_folder, "lib", "girepository-1.0"))
 
         if self.options.with_freetype:
             self.cpp_info.components["pangoft2"].libs = ["pangoft2-1.0"]
