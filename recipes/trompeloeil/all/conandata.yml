@@ -1,4 +1,7 @@
 sources:
+  "48":
+    url: "https://github.com/rollbear/trompeloeil/archive/v48.tar.gz"
+    sha256: "eebd18456975251ea3450b815e241cccfefba5b883e4a36bd309f9cf629bdec6"
   "47":
     url: "https://github.com/rollbear/trompeloeil/archive/v47.tar.gz"
     sha256: "4a1d79260c1e49e065efe0817c8b9646098ba27eed1802b0c3ba7d959e4e5e84"
