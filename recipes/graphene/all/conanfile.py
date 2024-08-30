@@ -27,11 +27,13 @@ class GrapheneConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_glib": [True, False],
-        }
+        "with_introspection": [True, False],
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_glib": True,
+        "with_introspection": False,
     }
 
     def config_options(self):
@@ -45,6 +47,8 @@ class GrapheneConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         if self.options.shared and self.options.with_glib:
             self.options["glib"].shared = True
+        if not self.options.with_glib:
+            del self.options.with_introspection
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -73,6 +77,8 @@ class GrapheneConan(ConanFile):
         self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False):
             self.tool_requires("pkgconf/[>=2.2 <3]")
+        if self.options.get_safe("with_introspection"):
+            self.tool_requires("gobject-introspection/1.78.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -82,6 +88,9 @@ class GrapheneConan(ConanFile):
         env.generate()
 
         deps = PkgConfigDeps(self)
+        if self.options.get_safe("with_introspection"):
+            # gnome.generate_gir() in Meson looks for gobject-introspection-1.0.pc
+            deps.build_context_activated = ["gobject-introspection"]
         deps.generate()
 
         meson = MesonToolchain(self)
@@ -92,9 +101,9 @@ class GrapheneConan(ConanFile):
         })
         meson.project_options["gobject_types"] = "true" if self.options.with_glib else "false"
         if Version(self.version) < "1.10.4":
-            meson.project_options["introspection"] = "false"
+            meson.project_options["introspection"] = "true" if self.options.get_safe("with_introspection") else "false"
         else:
-            meson.project_options["introspection"] = "disabled"
+            meson.project_options["introspection"] = "enabled" if self.options.get_safe("with_introspection") else "disabled"
         meson.generate()
 
     def _patch_sources(self):
@@ -115,6 +124,9 @@ class GrapheneConan(ConanFile):
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.options.get_safe("with_introspection"):
+            os.rename(os.path.join(self.package_folder, "share"),
+                      os.path.join(self.package_folder, "res"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
         fix_apple_shared_install_name(self)
         fix_msvc_libname(self)
@@ -136,6 +148,13 @@ class GrapheneConan(ConanFile):
             self.cpp_info.components["graphene-1.0"].system_libs = ["m", "pthread"]
         if self.options.with_glib:
             self.cpp_info.components["graphene-1.0"].requires = ["glib::gobject-2.0"]
+
+        if self.options.get_safe("with_introspection"):
+            self.cpp_info.components["graphene-1.0"].resdirs = ["res"]
+            self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "gir-1.0"))
+            self.buildenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
+            self.env_info.GI_GIR_PATH.append(os.path.join(self.package_folder, "res", "gir-1.0"))
+            self.env_info.GI_TYPELIB_PATH.append(os.path.join(self.package_folder, "lib", "girepository-1.0"))
 
         simd = self._get_simd_config()
         if simd["sse2"]:
