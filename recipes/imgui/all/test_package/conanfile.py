@@ -16,10 +16,37 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
+    @property
+    def _backends(self):
+        return [
+            "allegro5",
+            "android",
+            "dx9",
+            "dx10",
+            "dx11",
+            "dx12",
+            "glfw",
+            "glut",
+            "metal",
+            "opengl2",
+            "opengl3",
+            "osx",
+            "sdl2",
+            "sdlrenderer2",
+            "sdlrenderer3",
+            "vulkan",
+            "win32",
+            "wgpu",
+        ]
+
     def generate(self):
         with_docking = self.dependencies[self.tested_reference_str].conf_info.get("user.imgui:with_docking", False)
         tc = CMakeToolchain(self)
-        tc.variables["DOCKING"] = with_docking
+        if with_docking:
+            tc.preprocessor_definitions["DOCKING"] = ""
+        for backend in self._backends:
+            if str(self.dependencies[self.tested_reference_str].options.get_safe(f"backend_{backend}", False)) == "True":
+                tc.preprocessor_definitions[f"IMGUI_IMPL_{backend.upper()}"] = ""
         tc.generate()
 
     def build(self):
