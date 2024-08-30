@@ -36,15 +36,11 @@ class MysqlCppConnRecipe(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-           "apple-clang": "15",
+        #    "apple-clang": "15",
         }
 
     def validate(self):
         check_min_cppstd(self, "17")
-
-        # Apple patches
-        # if is_apple_os(self) and cross_building(self):
-            # raise ConanInvalidConfiguration("Cross building is not supported. PRs are welcome.")
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
