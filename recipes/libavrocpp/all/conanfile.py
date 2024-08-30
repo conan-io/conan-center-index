@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, replace_in_file
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
@@ -14,6 +14,7 @@ class LibavrocppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://avro.apache.org/"
     topics = ("serialization", "deserialization","avro")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -42,9 +43,10 @@ class LibavrocppConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
-
+        
     def requirements(self):
-        self.requires("boost/1.81.0")
+        # boost upper to 1.81.0 requires C++14 minimum
+        self.requires("boost/1.81.0", transitive_headers=True)
         self.requires("snappy/1.1.9")
 
     def validate(self):
@@ -93,7 +95,7 @@ class LibavrocppConan(ConanFile):
                 rm(self, dll_pattern_to_remove, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = ["avrocpp" if self.options.shared else "avrocpp_s"]
+        self.cpp_info.libs = ["avrocpp"] if self.options.shared else ["avrocpp_s"]
         if self.options.shared:
             self.cpp_info.defines.append("AVRO_DYN_LINK")
         if self.settings.os in ["Linux", "FreeBSD"]:
