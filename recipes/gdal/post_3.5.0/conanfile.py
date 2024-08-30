@@ -680,7 +680,7 @@ class GdalConan(ConanFile):
 
         self.cpp_info.requires.extend(["json-c::json-c"])
         self.cpp_info.requires.extend(["libgeotiff::libgeotiff"])
-        self.cpp_info.requires.extend(["libtiff::libtiff"])
+        self.cpp_info.requires.extend(["libtiff::tiff"])
         self.cpp_info.requires.extend(["proj::projlib"])
         self.cpp_info.requires.extend(["zlib::zlib"])
         if self.options.with_armadillo:
