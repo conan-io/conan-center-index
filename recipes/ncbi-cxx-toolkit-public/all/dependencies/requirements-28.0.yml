@@ -6,7 +6,7 @@ requirements:
     BerkeleyDB: ["libdb/5.3.28"]
     BZ2:        ["bzip2/1.0.8"]
     GIF:        ["giflib/5.2.1"]
-    GRPC:       ["grpc/[>=1.50.1 <=1.54.3]"]
+    GRPC:       ["grpc/[>=1.50.1 <=1.54.3]", "abseil/20230802.1", "protobuf/3.21.12"]
     JPEG:       ["libjpeg/9e"]
     LMDB:       ["lmdb/[>=0.9.29 <=0.9.31]"]
     LZO:        ["lzo/2.10"]
