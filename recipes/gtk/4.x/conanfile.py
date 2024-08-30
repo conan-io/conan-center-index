@@ -150,15 +150,21 @@ class GtkConan(ConanFile):
             self.requires("vulkan-loader/1.3.290.0")
         if self.options.get_safe("with_ffmpeg"):
             self.requires("ffmpeg/5.0")
+
         # FIXME: gstreamer from CCI is currently not compatible
         # if self.options.with_gstreamer:
         #     self.requires("gstreamer/1.24.7")
+
+        # TODO: fix libintl support on macOS by using gnuintl from gettext
+        # if self.settings.os != "Linux":
+        #     # for Linux, gettext is provided by libc
+        #     self.requires("libgettext/0.22", transitive_headers=True, transitive_libs=True)
 
         # TODO: iso-codes
         # TODO: tracker-sparql-3.0
         # TODO: cloudproviders
         # TODO: sysprof-capture-4
-        # TODO: openprinting / cpdb-frontend
+        # TODO: cpdb-frontend
         # TODO: cups, colord
 
     def validate(self):
@@ -311,15 +317,13 @@ class GtkConan(ConanFile):
         self.cpp_info.components["gtk4"].libs = ["gtk-4"]
         self.cpp_info.components["gtk4"].includedirs.append(os.path.join("include", "gtk-4.0"))
         self.cpp_info.components["gtk4"].resdirs = ["res", os.path.join("res", "share")]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["gtk4"].system_libs = ["m", "rt"]
         # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.15.6/gdk/meson.build#L221-240
         # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.15.6/gtk/meson.build#L1000-1015
         self.cpp_info.components["gtk4"].requires = [
-            "glib::gio-2.0",
             "glib::glib-2.0",
             "glib::gmodule-2.0",
             "glib::gobject-2.0",
+            "glib::gio-unix-2.0" if self.settings.os != "Windows" else "glib::gio-windows-2.0",
             "gdk-pixbuf::gdk-pixbuf",
             "cairo::cairo_",
             "cairo::cairo-gobject",
@@ -334,20 +338,15 @@ class GtkConan(ConanFile):
             "libpng::libpng",
             "libtiff::libtiff",
         ]
-        if self.settings.os == "Windows":
-            self.cpp_info.components["gtk4"].requires.extend(["glib::gio-windows-2.0"])
-        else:
-            self.cpp_info.components["gtk4"].requires.extend(["glib::gio-unix-2.0"])
-
         if self.settings.os == "Linux" and Version(self.version) >= "4.13.2":
             self.cpp_info.components["gtk4"].requires.append("libdrm::libdrm")
-
         if self.options.with_vulkan:
             self.cpp_info.components["gtk4"].requires.append("vulkan-loader::vulkan-loader")
-
-        if self.options.with_introspection:
-            self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "share", "gir-1.0"))
-            self.env_info.GI_GIR_PATH.append(os.path.join(self.package_folder, "res", "share", "gir-1.0"))
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["gtk4"].system_libs = ["m", "rt"]
+        elif self.settings.os == "Windows":
+            # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.15.6/gtk/meson.build#L1038-1044
+            self.cpp_info.components["gdk-3.0"].system_libs = ["advapi32", "comctl32", "crypt32", "dwmapi", "imm32", "setupapi", "winmm"]
 
         # if self.options.with_gstreamer:
         #     # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.15.6/modules/media/meson.build#L11
@@ -366,6 +365,8 @@ class GtkConan(ConanFile):
         #     self.cpp_info.components["gtk4"].requires.append("cpdb::cpdb")
         # if self.options.with_cloudproviders:
         #     self.cpp_info.components["gtk4"].requires.append("cloudproviders::cloudproviders")
+        # if self.options.with_tracker:
+        #     self.cpp_info.components["gtk4"].requires.append("tracker-sparql::tracker-sparql")
 
         if self.options.enable_broadway_backend:
             self.cpp_info.components["gtk4-broadway"].set_property("pkg_config_name", "gtk4-broadway")
@@ -433,6 +434,10 @@ class GtkConan(ConanFile):
             self.cpp_info.components["gtk4-unix-print"].set_property("pkg_config_name", "gtk4-unix-print")
             self.cpp_info.components["gtk4-unix-print"].requires = ["gtk4"]
             self.cpp_info.components["gtk4-unix-print"].includedirs.append(os.path.join("include", "gtk-4.0", "unix-print"))
+
+        if self.options.with_introspection:
+            self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "share", "gir-1.0"))
+            self.env_info.GI_GIR_PATH.append(os.path.join(self.package_folder, "res", "share", "gir-1.0"))
 
         # TODO: add the following info to all generated .pc files:
         # targets=wayland x11

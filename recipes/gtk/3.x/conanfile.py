@@ -3,6 +3,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
@@ -99,6 +100,7 @@ class GtkConan(ConanFile):
         self.requires("at-spi2-core/2.51.0", transitive_headers=True, transitive_libs=True)
         self.requires("libepoxy/1.5.10")
         self.requires("fribidi/1.0.13")
+        self.requires("harfbuzz/8.3.0")
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0")
             self.requires("wayland-protocols/1.33")
@@ -107,6 +109,11 @@ class GtkConan(ConanFile):
             # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.10.0/gdk/x11/gdkx11display.h#L35-36
             self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
             self.requires("fontconfig/2.15.0")
+
+        # TODO: fix libintl support on macOS by using gnuintl from gettext
+        # if self.settings.os != "Linux":
+        #     # for Linux, gettext is provided by libc
+        #     self.requires("libgettext/0.22", transitive_headers=True, transitive_libs=True)
 
         # TODO: iso-codes
         # TODO: tracker-sparql-3.0
@@ -226,73 +233,137 @@ class GtkConan(ConanFile):
         self.cpp_info.components["gdk-3.0"].libs = ["gdk-3"]
         self.cpp_info.components["gdk-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
         self.cpp_info.components["gdk-3.0"].resdirs = ["res", os.path.join("res", "share")]
+        # https://gitlab.gnome.org/GNOME/gtk/-/blob/3.24.43/gdk/meson.build#L200-212
         self.cpp_info.components["gdk-3.0"].requires = [
+            "glib::gio-unix-2.0" if self.settings.os != "Windows" else "glib::gio-windows-2.0",
+            "glib::glib-2.0",
             "pango::pango_" if self.settings.os != "Windows" else "pango::pangowin32",
             "pango::pangocairo",
-            "gdk-pixbuf::gdk-pixbuf",
             "cairo::cairo_",
             "cairo::cairo-gobject",
-            "libepoxy::libepoxy",
             "fribidi::fribidi",
+            "gdk-pixbuf::gdk-pixbuf",
+            "libepoxy::libepoxy",
         ]
-        if self.settings.os != "Windows":
-            self.cpp_info.components["gdk-3.0"].requires.extend(["glib::gio-unix-2.0"])
-        else:
-            self.cpp_info.components["gdk-3.0"].requires.extend(["glib::gio-windows-2.0"])
-        if self.options.get_safe("with_x11"):
-            self.cpp_info.components["gdk-3.0"].requires.extend([
-                "xorg::x11",
-                "xorg::xext",
-                "xorg::xi",
-                "xorg::xrandr",
-                "xorg::xcursor",
-                "xorg::xfixes",
-                "xorg::xcomposite",
-                "xorg::xdamage",
-                "xorg::xinerama",
-                "cairo::cairo-xlib",
-                "fontconfig::fontconfig",
-            ])
-        if self.options.get_safe("with_wayland"):
-            self.cpp_info.components["gdk-3.0"].requires.extend([
-                "wayland::wayland-client",
-                "wayland::wayland-cursor",
-                "wayland::wayland-egl",
-                "wayland-protocols::wayland-protocols",
-                "xkbcommon::xkbcommon",
-            ])
-
-        if self.options.with_introspection:
-            self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "share", "gir-1.0"))
-            self.env_info.GI_GIR_PATH.append(os.path.join(self.package_folder, "res", "share", "gir-1.0"))
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["gdk-3.0"].system_libs = ["m", "rt"]
+        elif self.settings.os == "Windows":
+            # https://gitlab.gnome.org/GNOME/gtk/-/blob/3.24.43/gdk/meson.build#L215-221
+            self.cpp_info.components["gdk-3.0"].system_libs = ["advapi32", "comctl32", "dwmapi", "imm32", "opengl32", "setupapi", "winmm"]
 
         self.cpp_info.components["gtk+-3.0"].set_property("pkg_config_name", "gtk+-3.0")
         self.cpp_info.components["gtk+-3.0"].libs = ["gtk-3"]
         self.cpp_info.components["gtk+-3.0"].includedirs = [os.path.join("include", "gtk-3.0")]
-        # skipping gtk+-3.0 requires that are covered by gdk-3.0
-        self.cpp_info.components["gtk+-3.0"].requires = ["gdk-3.0", "glib::gio-2.0"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["gtk+-3.0"].requires.extend(["at-spi2-core::atk", "pango::pangoft2"])
-            if self.options.with_x11:
-                self.cpp_info.components["gtk+-3.0"].requires.append("at-spi2-core::atk-bridge")
+        self.cpp_info.components["gtk+-3.0"].requires = ["gdk-3.0"]
+        # https://gitlab.gnome.org/GNOME/gtk/-/blob/3.24.43/gtk/meson.build#L834-851
+        self.cpp_info.components["gtk+-3.0"].requires.extend([
+            "glib::gmodule-2.0",
+            "glib::glib-2.0",
+            "glib::gobject-2.0",
+            "glib::gio-unix-2.0" if self.settings.os != "Windows" else "glib::gio-windows-2.0",
+            "pango::pango_" if self.settings.os != "Windows" else "pango::pangowin32",
+            "pango::pangocairo",
+            "cairo::cairo_",
+            "cairo::cairo-gobject",
+            "harfbuzz::harfbuzz_",
+            "fribidi::fribidi",
+            "gdk-pixbuf::gdk-pixbuf",
+            "at-spi2-core::atk",
+            "libepoxy::libepoxy",
+        ])
 
-        self.cpp_info.components["gtk+-unix-print-3.0"].set_property("pkg_config_name", "gtk+-unix-print-3.0")
-        self.cpp_info.components["gtk+-unix-print-3.0"].requires = ["gtk+-3.0"]
-        self.cpp_info.components["gtk+-unix-print-3.0"].includedirs = [os.path.join("include", "gtk-3.0", "unix-print")]
+        # TODO:
+        # if self.options.with_cups:
+        #     self.cpp_info.components["gtk+-3.0"].requires.extend(["cups::cups", "colord::colord"])
+        # if self.options.with_cloudproviders:
+        #     self.cpp_info.components["gtk+-3.0"].requires.append("cloudproviders::cloudproviders")
+        # if self.options.with_tracker:
+        #     self.cpp_info.components["gtk+-3.0"].requires.append("tracker-sparql::tracker-sparql")
+
+        if self.options.enable_broadway_backend:
+            self.cpp_info.components["gdk-broadway-3.0"].set_property("pkg_config_name", "gdk-broadway-3.0")
+            self.cpp_info.components["gdk-broadway-3.0"].requires = ["gdk-3.0"]
+            self.cpp_info.components["gtk-broadway-3.0"].set_property("pkg_config_name", "gtk-broadway-3.0")
+            self.cpp_info.components["gtk-broadway-3.0"].requires = ["gtk+-3.0"]
+            # https://gitlab.gnome.org/GNOME/gtk/-/blob/3.24.43/gdk/broadway/meson.build#L70
+            if self.settings.os == "Windows":
+                self.cpp_info.components["gdk-3.0"].system_libs.append("ws2_32")
+
+        if self.options.get_safe("with_x11"):
+            self.cpp_info.components["gdk-x11-3.0"].set_property("pkg_config_name", "gdk-x11-3.0")
+            self.cpp_info.components["gdk-x11-3.0"].requires = ["gdk-3.0"]
+            self.cpp_info.components["gtk-x11-3.0"].set_property("pkg_config_name", "gtk-x11-3.0")
+            self.cpp_info.components["gtk-x11-3.0"].requires = ["gtk+-3.0"]
+            # https://gitlab.gnome.org/GNOME/gtk/-/blob/3.24.43/gdk/x11/meson.build#L59-70
+            self.cpp_info.components["gdk-3.0"].requires.extend([
+                "xorg::xrender",
+                "xorg::xi",
+                "xorg::xext",
+                "xorg::x11",
+                "xorg::xcursor",
+                "xorg::xdamage",
+                "xorg::xfixes",
+                "xorg::xcomposite",
+                "xorg::xrandr",
+                "xorg::xinerama",
+            ])
+            # https://gitlab.gnome.org/GNOME/gtk/-/blob/3.24.43/meson.build#L497-500
+            self.cpp_info.components["gdk-3.0"].requires.append("cairo::cairo-xlib")
+            # https://gitlab.gnome.org/GNOME/gtk/-/blob/3.24.43/meson.build#L444-445
+            self.cpp_info.components["gdk-3.0"].requires.append("fontconfig::fontconfig")
+            self.cpp_info.components["gtk+-3.0"].requires.append("at-spi2-core::atk-bridge")
+            self.cpp_info.components["gtk+-3.0"].requires.append("pango::pangoft2")
+
+        if self.options.get_safe("with_wayland"):
+            self.cpp_info.components["gdk-wayland-3.0"].set_property("pkg_config_name", "gdk-wayland-3.0")
+            self.cpp_info.components["gdk-wayland-3.0"].requires = ["gdk-3.0"]
+            self.cpp_info.components["gtk-wayland-3.0"].set_property("pkg_config_name", "gtk-wayland-3.0")
+            self.cpp_info.components["gtk-wayland-3.0"].requires = ["gtk+-3.0"]
+            # https://gitlab.gnome.org/GNOME/gtk/-/blob/3.24.43/gdk/wayland/meson.build#L29-36
+            self.cpp_info.components["gdk-3.0"].requires.extend([
+                "xkbcommon::xkbcommon",
+                "wayland::wayland-client",
+                "wayland::wayland-cursor",
+                "wayland::wayland-egl",
+                "wayland-protocols::wayland-protocols",
+            ])
+            self.cpp_info.components["gtk+-3.0"].requires.append("pango::pangoft2")
+
+        if is_apple_os(self):
+            self.cpp_info.components["gdk-quartz-3.0"].set_property("pkg_config_name", "gdk-quartz-3.0")
+            self.cpp_info.components["gdk-quartz-3.0"].requires = ["gdk-3.0"]
+            self.cpp_info.components["gtk-quartz-3.0"].set_property("pkg_config_name", "gtk-quartz-3.0")
+            self.cpp_info.components["gtk-quartz-3.0"].requires = ["gtk+-3.0"]
+            # https://gitlab.gnome.org/GNOME/gtk/-/blob/3.24.43/gdk/quartz/meson.build#L48-53
+            self.cpp_info.components["gdk-3.0"].requires.append("cairo::cairo-quartz")
+            self.cpp_info.components["gdk-3.0"].frameworks.extend([
+                "CoreGraphics",
+                "AppKit",
+                "Cocoa",
+                "Carbon",
+                "QuartzCore",
+                "IOSurface",
+            ])
+
+        if self.settings.os == "Windows":
+            self.cpp_info.components["gdk-win32-3.0"].set_property("pkg_config_name", "gdk-win32-3.0")
+            self.cpp_info.components["gdk-win32-3.0"].requires = ["gdk-3.0"]
+            self.cpp_info.components["gtk-win32-3.0"].set_property("pkg_config_name", "gtk-win32-3.0")
+            self.cpp_info.components["gtk-win32-3.0"].requires = ["gtk+-3.0"]
+            # https://gitlab.gnome.org/GNOME/gtk/-/blob/3.24.43/gdk/win32/meson.build#L53-56
+            self.cpp_info.components["gdk-3.0"].requires.append("cairo::cairo-win32")
+            self.cpp_info.components["gdk-3.0"].system_libs.extend(["hid", "opengl32"])
+
+        if self.settings.os != "Windows":
+            self.cpp_info.components["gtk+-unix-print-3.0"].set_property("pkg_config_name", "gtk+-unix-print-3.0")
+            self.cpp_info.components["gtk+-unix-print-3.0"].requires = ["gtk+-3.0"]
+            self.cpp_info.components["gtk+-unix-print-3.0"].includedirs = [os.path.join("include", "gtk-3.0", "unix-print")]
 
         self.cpp_info.components["gail-3.0"].set_property("pkg_config_name", "gail-3.0")
         self.cpp_info.components["gail-3.0"].libs = ["gailutil-3"]
         self.cpp_info.components["gail-3.0"].requires = ["gtk+-3.0"]
         self.cpp_info.components["gail-3.0"].includedirs = [os.path.join("include", "gail-3.0")]
 
-        gdk_aliases = []
-        gtk_aliases = []
-        if self.options.get_safe("with_x11"):
-            gdk_aliases.append("gdk-x11-3.0")
-            gtk_aliases.append("gtk+-x11-3.0")
-        if self.options.get_safe("with_wayland"):
-            gdk_aliases.append("gdk-wayland-3.0")
-            gtk_aliases.append("gtk+-wayland-3.0")
-        if gdk_aliases:
-            self.cpp_info.components["gdk-3.0"].set_property("pkg_config_aliases", gdk_aliases)
-            self.cpp_info.components["gtk+-3.0"].set_property("pkg_config_aliases", gtk_aliases)
+        if self.options.with_introspection:
+            self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "share", "gir-1.0"))
+            self.env_info.GI_GIR_PATH.append(os.path.join(self.package_folder, "res", "share", "gir-1.0"))
