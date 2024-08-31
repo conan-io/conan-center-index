@@ -224,7 +224,7 @@ class HarfbuzzConan(ConanFile):
             self.cpp_info.components["icu"].libs = ["harfbuzz-icu"]
             self.cpp_info.components["icu"].requires = ["harfbuzz_", "icu::icu-uc"]
 
-        if self.options.with_glib:
+        if self.options.with_glib and can_run(self):
             self.cpp_info.components["gobject"].set_property("cmake_target_name", "harfbuzz::gobject")
             self.cpp_info.components["gobject"].set_property("pkg_config_name", "harfbuzz-gobject")
             self.cpp_info.components["gobject"].libs = ["harfbuzz-gobject"]
