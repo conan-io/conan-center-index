@@ -909,7 +909,13 @@ class VtkConan(ConanFile):
 
     @property
     def _known_system_libs(self):
-        return ["m", "dl", "pthread", "rt", "log", "embind", "socket", "nsl", "wsock32", "ws2_32", "dbghelp", "psapi"]
+        # System libraries used by VTK or its vendored dependencies
+        return [
+            "m", "dl", "pthread", "rt", "socket", "nsl", "execinfo", # Linux/FreeBSD
+            "android", "log", # Android
+            "embind", # Emscripten
+            "ws2_32", "wsock32", "dbghelp", "psapi", "opengl32", "comctl32", "import32", # Windows
+        ]
 
     def _transform_link_libraries(self, values):
         # Converts a list of LINK_LIBRARIES values into a list of component requirements, system_libs and frameworks.
