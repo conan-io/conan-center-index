@@ -36,7 +36,7 @@ class MysqlCppConnRecipe(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-        #    "apple-clang": "15",
+           "apple-clang": "15",
         }
 
     def validate(self):
@@ -181,8 +181,8 @@ class MysqlCppConnRecipe(ConanFile):
         self.cpp_info.bindirs = template_dirs
 
         if is_apple_os(self):
-            self.cpp_info.requires = ["openssl::openssl", "boost::boost"]
-            self.cpp_info.system_libs.extend(["resolv", "crypto", "ssl"])
+            self.cpp_info.system_libs.extend(["resolv"])
+            self.cpp_info.requires.extend(["openssl::openssl", "boost::boost"])
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "resolv", "ssl", "crypto"])
 
