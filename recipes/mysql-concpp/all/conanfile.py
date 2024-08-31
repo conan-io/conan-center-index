@@ -33,24 +33,13 @@ class MysqlCppConnRecipe(ConanFile):
 
     default_options = { "shared": False, "fPIC": True }
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-           "apple-clang": "15",
-        }
-
     def validate(self):
         check_min_cppstd(self, "17")
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires at least {self.settings.compiler} {minimum_version}"
-            )
 
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
         self.requires("boost/1.85.0")
+        self.requires("zlib/1.3.1")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -88,7 +77,8 @@ class MysqlCppConnRecipe(ConanFile):
         # LZ4 patches
         tc.cache_variables["WITH_LZ4"] = "TRUE"
         # ZLIB patches
-        tc.cache_variables["WITH_ZLIB"] = "TRUE"
+        tc.cache_variables["WITH_ZLIB"] = "SYSTEM"
+        tc.cache_variables["ZLIB_DIR"] = self._package_folder_dep("zlib")
         # ZSTD patches
         tc.cache_variables["WITH_ZSTD"] = "TRUE"
         # Build patches
@@ -116,29 +106,12 @@ class MysqlCppConnRecipe(ConanFile):
                                 "set(LIB_NAME_STATIC \"${LIB_NAME_STATIC}-mt\")",
                                 strict=False)
 
-            # Apple patches
-        if is_apple_os(self) and cross_building(self):
-            print(f"Building for {str(self.settings.arch)}")
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                "PROJECT(MySQL_CONCPP)",
-                                "PROJECT(MySQL_CONCPP)\n"\
-                                f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n",
-                                strict=False)
-
-            # ZSTD patch
-            replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "zstd", "CMakeLists.txt"),
-                                "enable_pic()",
-                                "enable_pic()\n"\
-                                f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n"\
-                                "add_compile_definitions(-DZSTD_DISABLE_ASM=1)",
-                                strict=False)
-
-            for lb in ["lz4", 'zlib', 'protobuf']:
-                replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", lb, "CMakeLists.txt"),
-                                    "enable_pic()",
-                                    "enable_pic()\n"\
-                                    f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n",
-                                    strict=False)
+        # ZSTD patch
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "zstd", "CMakeLists.txt"),
+                            "enable_pic()",
+                            "enable_pic()\n"\
+                            "add_compile_definitions(ZSTD_DISABLE_ASM)",
+                            strict=False)
 
     def build(self):
         self._patch_sources()
@@ -182,7 +155,6 @@ class MysqlCppConnRecipe(ConanFile):
 
         if is_apple_os(self):
             self.cpp_info.system_libs.extend(["resolv"])
-            self.cpp_info.requires.extend(["openssl::openssl", "boost::boost"])
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "resolv", "ssl", "crypto"])
 
