@@ -15,7 +15,7 @@ from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import export_conandata_patches, get, rmdir, rename, replace_in_file, load, save, copy, apply_conandata_patches
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.0.6"
+required_conan_version = ">=1.56 <2 || >=2.0.6"
 
 
 class VtkConan(ConanFile):
