@@ -15,7 +15,7 @@ from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import export_conandata_patches, get, rmdir, rename, replace_in_file, load, save, copy, apply_conandata_patches
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.56.0 <2 || >=2.0.6"
+required_conan_version = ">=2.0.6"
 
 
 class VtkConan(ConanFile):
@@ -225,6 +225,7 @@ class VtkConan(ConanFile):
     @functools.lru_cache()
     def _module_ext_deps(self):
         return json.loads(Path(self.recipe_folder, "options", f"{self.version}.json").read_text())["flat_external_deps"]
+
     @property
     @functools.lru_cache()
     def _module_opt_deps(self):
@@ -426,6 +427,8 @@ class VtkConan(ConanFile):
             self.tool_requires("qt/<host_version>")
 
     def validate(self):
+        if conan_version.major == 1:
+            raise ConanInvalidConfiguration("Conan v1 is not supported.")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
