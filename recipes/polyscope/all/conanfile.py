@@ -1,12 +1,13 @@
 import os
 import textwrap
+from pathlib import Path
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, save, rm, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import copy, get, save, rm, apply_conandata_patches, export_conandata_patches, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -101,6 +102,9 @@ class PolyscopeConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         if not valid_min_cppstd(self, self._min_cppstd):
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        if self.settings.os == "Windows" and not self.options.get_safe("shared"):
+            # Avoid the default IMGUI_API=__declspec(dllimport)
+            tc.preprocessor_definitions["IMGUI_API"] = ""
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -110,12 +114,14 @@ class PolyscopeConan(ConanFile):
         deps.set_property("imgui", "cmake_target_name", "imgui")
         deps.generate()
 
+    def _patch_sources(self):
+        apply_conandata_patches(self)
         copy(self, "*",
              os.path.join(self.dependencies["imgui"].package_folder, "res", "bindings"),
              os.path.join(self.source_folder, "include", "backends"))
 
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
