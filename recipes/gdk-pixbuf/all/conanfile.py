@@ -226,7 +226,7 @@ class GdkPixbufConan(ConanFile):
         if self.options.with_libpng:
             self.cpp_info.requires.append("libpng::libpng")
         if self.options.with_libtiff:
-            self.cpp_info.requires.append("libtiff::tiff")
+            self.cpp_info.requires.append("libtiff::libtiff")
         if self.options.with_libjpeg == "libjpeg-turbo":
             self.cpp_info.requires.append("libjpeg-turbo::jpeg")
         elif self.options.with_libjpeg == "libjpeg":
