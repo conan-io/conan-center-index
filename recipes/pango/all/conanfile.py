@@ -38,8 +38,8 @@ class PangoConan(ConanFile):
         "with_libthai": False,
         "with_cairo": True,
         "with_xft": True,
-        "with_freetype": False,
-        "with_fontconfig": False,
+        "with_freetype": True,
+        "with_fontconfig": True,
     }
 
     def config_options(self):
