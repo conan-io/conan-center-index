@@ -85,14 +85,14 @@ class MysqlCppConnRecipe(ConanFile):
         tc.cache_variables["BUILD_STATIC"] = not self.options.shared
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
 
-        if is_apple_os(self):
+        if is_apple_os(self) or self.settings.os == "Windows":
             # OpenSSL patches
-            tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
-        elif is_msvc(self):
-            # Boost patches
-            tc.cache_variables["BOOST_DIR"] = self._package_folder_dep("boost")
-            # OpenSSL patches
-            tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
+            tc.cache_variables["WITH_SSL"] = "SYSTEM"
+            tc.cache_variables["SSL_DIR"] = self._package_folder_dep("openssl")
+
+            if is_msvc(self):
+                # Boost patches
+                tc.cache_variables["BOOST_DIR"] = self._package_folder_dep("boost")
 
         tc.generate()
 
@@ -171,6 +171,7 @@ class MysqlCppConnRecipe(ConanFile):
 
         if is_apple_os(self):
             self.cpp_info.system_libs.extend(["resolv"])
+            self.cpp_info.requires.append("openssl::ssl")
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "resolv", "ssl", "crypto"])
 
