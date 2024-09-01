@@ -37,7 +37,7 @@ class MysqlCppConnRecipe(ConanFile):
         check_min_cppstd(self, "17")
 
     def requirements(self):
-        self.requires("openssl/[>=1.1 <4]")
+        self.requires("openssl/[>=1.1 <4]", libs=True)
         self.requires("boost/1.85.0")
         self.requires("zlib/1.3.1")
 
@@ -74,6 +74,8 @@ class MysqlCppConnRecipe(ConanFile):
 
         tc = CMakeToolchain(self, generator="Ninja") if not is_msvc(self) else CMakeToolchain(self)
 
+        # OpenSSL
+        # tc.cache_variables["WITH_SSL"] = "SYSTEM"
         # LZ4 patches
         tc.cache_variables["WITH_LZ4"] = "TRUE"
         # ZLIB patches
@@ -85,11 +87,10 @@ class MysqlCppConnRecipe(ConanFile):
         tc.cache_variables["BUILD_STATIC"] = not self.options.shared
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
 
-        if is_apple_os(self) or self.settings.os == "Windows":
+        # Windows patches
+        if self.settings.os == "Windows":
             # OpenSSL patches
-            tc.cache_variables["WITH_SSL"] = "SYSTEM"
             tc.cache_variables["SSL_DIR"] = self._package_folder_dep("openssl")
-
             if is_msvc(self):
                 # Boost patches
                 tc.cache_variables["BOOST_DIR"] = self._package_folder_dep("boost")
@@ -172,7 +173,7 @@ class MysqlCppConnRecipe(ConanFile):
         if is_apple_os(self) or self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["resolv"])
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs.extend(["m"])
+                self.cpp_info.system_libs.extend(["m", "crypto", "ssl"])
 
         target = "concpp-xdevapi"
         target_alias = "concpp"
@@ -186,7 +187,7 @@ class MysqlCppConnRecipe(ConanFile):
             target_alias += "-debug"
 
         # self.cpp_info.set_property("cmake_target_name", f"mysql::{target}")
-        self.cpp_info.set_property("cmake_target_name", f"mysql::concpp")
+        self.cpp_info.set_property("cmake_target_name", "mysql::concpp")
         self.cpp_info.set_property("cmake_target_aliases", [f"mysql::{target_alias}"] )
 
         lib = "mysqlcppconnx" if self.options.shared else "mysqlcppconnx-static"
@@ -201,4 +202,3 @@ class MysqlCppConnRecipe(ConanFile):
         self.cpp_info.set_property("cmake_find_package", "mysql-concpp")
         self.cpp_info.set_property("cmake_find_package_multi", "mysql-concpp")
         self.cpp_info.set_property("cmake_config_file", "mysql-concpp-config.cmake")
-
