@@ -1,12 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, can_run
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualRunEnv
 from conan.tools.files import (
     apply_conandata_patches,
-    collect_libs,
     get,
     rmdir,
     save,
@@ -468,4 +466,4 @@ class LLVMCoreConan(ConanFile):
                     self.cpp_info.components[component_name].system_libs += system_libs
         else:
             self.cpp_info.set_property("cmake_target_name", "LLVM")
-            self.cpp_info.libs = collect_libs(self)
+            self.cpp_info.libs = [f"LLVM-{Version(self.version).major}", "LTO", "Remarks"]
