@@ -37,7 +37,7 @@ class MysqlCppConnRecipe(ConanFile):
         check_min_cppstd(self, "17")
 
     def requirements(self):
-        self.requires("openssl/[>=1.1 <4]")
+        self.requires("openssl/[>=1.1 <4]", headers=True, libs=True)
         self.requires("boost/1.85.0")
         self.requires("zlib/1.3.1")
 
@@ -75,7 +75,8 @@ class MysqlCppConnRecipe(ConanFile):
         tc = CMakeToolchain(self, generator="Ninja") if not is_msvc(self) else CMakeToolchain(self)
 
         # OpenSSL
-        # tc.cache_variables["WITH_SSL"] = "SYSTEM"
+        tc.cache_variables["WITH_SSL"] = "SYSTEM"
+        tc.cache_variables["BUNDLE_DEPENDENCIES"] = "OFF"
         # LZ4 patches
         tc.cache_variables["WITH_LZ4"] = "TRUE"
         # ZLIB patches
