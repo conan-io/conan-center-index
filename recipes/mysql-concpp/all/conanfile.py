@@ -113,6 +113,22 @@ class MysqlCppConnRecipe(ConanFile):
                             "add_compile_definitions(ZSTD_DISABLE_ASM)",
                             strict=False)
 
+        # Apple patches
+        if is_apple_os(self) and cross_building(self):
+            print(f"Building for {str(self.settings.arch)}")
+            patch = f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n"
+
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                "PROJECT(MySQL_CONCPP)",
+                                f"PROJECT(MySQL_CONCPP)\n{patch}",
+                                strict=False)
+            # General patches
+            for lb in ["lz4", 'zlib', 'protobuf', 'zstd']:
+                replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", lb, "CMakeLists.txt"),
+                                    "enable_pic()",
+                                    f"enable_pic()\n{patch}",
+                                    strict=False)
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
