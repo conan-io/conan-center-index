@@ -145,32 +145,33 @@ class MysqlCppConnRecipe(ConanFile):
 
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
-    def package_info(self):
-        # Set the VS version
-        if self.settings.os == "Windows":
-            msvc_toolset_version = self.settings.get_safe("compiler.toolset")
-            msvc_version = self.settings.get_safe("compiler.version")
+    @property
+    def _vs_version(self):
+        msvc_toolset_version = self.settings.get_safe("compiler.toolset")
+        msvc_version = self.settings.get_safe("compiler.version")
 
-            if msvc_toolset_version:
-                vs_version = msvc_toolset_version[1:3]
-            elif msvc_version:
-                vs_version = msvc_version[:2]
-                if vs_version == "18":
-                    vs_version = "12"
-                elif vs_version == "19":
-                    vs_version = "14"
-            else:
-                self.output.warn("MSVC_TOOLSET_VERSION or MSVC_VERSION not defined")
-                vs_version = "unknown"
-
-            self.output.info(f"VS Version: {vs_version}")
-            self.vs_version = vs_version
-            self.vs = f"vs{vs_version}"
+        if msvc_toolset_version:
+            vs_version = msvc_toolset_version[1:3]
+        elif msvc_version:
+            vs_version = msvc_version[:2]
+            if vs_version == "18":
+                vs_version = "12"
+            elif vs_version == "19":
+                vs_version = "14"
         else:
-            self.vs = ""
+            self.output.warn("MSVC_TOOLSET_VERSION or MSVC_VERSION not defined")
+            vs_version = "unknown"
 
-        template_dirs = ["lib64", "lib64/debug", "lib", "lib/debug"]
-        self.cpp_info.libdirs = template_dirs if not self.vs else [f"{lib}/{self.vs}" for lib in template_dirs]
+        self.output.info(f"VS Version: {vs_version}")
+        return f"vs{vs_version}"
+
+    def package_info(self):
+        template_dirs = ["lib64", os.path.join("lib64", "debug"), "lib", os.path.join("lib", "debug")]
+        if is_msvc(self):
+            vs_version = self._vs_version
+            self.cpp_info.libdirs = [os.path.join(lib, vs_version) for lib in template_dirs]
+        else:
+            self.cpp_info.libdirs = template_dirs
         self.cpp_info.bindirs = template_dirs
 
         if is_apple_os(self) or self.settings.os in ["Linux", "FreeBSD"]:
@@ -201,7 +202,3 @@ class MysqlCppConnRecipe(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["MYSQL_STATIC"]
             self.cpp_info.defines = ["STATIC_CONCPP"]
-
-        self.cpp_info.set_property("cmake_find_package", "mysql-concpp")
-        self.cpp_info.set_property("cmake_find_package_multi", "mysql-concpp")
-        self.cpp_info.set_property("cmake_config_file", "mysql-concpp-config.cmake")
