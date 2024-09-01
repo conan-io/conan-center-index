@@ -29,6 +29,10 @@ patches:
     - patch_file: patches/13x/0004-no-build-with-install-rpath.patch
       patch_description: do not build shared libs with install rpath
       patch_type: conan
+    - patch_file: patches/13x/0005-remove-lto-exports.patch
+      patch_description: remove LTO exports causing link error with lld
+      patch_source: https://github.com/llvm/llvm-project-release-prs/pull/279
+      patch_type: portability
   "12.0.0":
     - patch_file: patches/12x/0000-cmake-dependencies.patch
       patch_description: fix references to third party libs to match conan variables and targets
@@ -48,6 +52,10 @@ patches:
     - patch_file: patches/12x/0004-no-build-with-install-rpath.patch
       patch_description: do not build shared libs with install rpath
       patch_type: conan
+    - patch_file: patches/12x/0005-remove-lto-exports.patch
+      patch_description: remove LTO exports causing link error with lld
+      patch_source: https://github.com/llvm/llvm-project-release-prs/pull/279
+      patch_type: portability
   "11.1.0":
     - patch_file: patches/11x/0000-cmake-dependencies.patch
       patch_description: fix references to third party libs to match conan variables and targets
@@ -67,3 +75,7 @@ patches:
     - patch_file: patches/11x/0004-no-build-with-install-rpath.patch
       patch_description: do not build shared libs with install rpath
       patch_type: conan
+    - patch_file: patches/11x/0005-remove-lto-exports.patch
+      patch_description: remove LTO exports causing link error with lld
+      patch_source: https://github.com/llvm/llvm-project-release-prs/pull/279
+      patch_type: portability
