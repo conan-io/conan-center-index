@@ -76,3 +76,7 @@ class GeoLite2PPConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["geolite2++"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+            self.cpp_info.system_libs.append("pthread")
