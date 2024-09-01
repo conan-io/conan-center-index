@@ -37,7 +37,7 @@ class MysqlCppConnRecipe(ConanFile):
         check_min_cppstd(self, "17")
 
     def requirements(self):
-        self.requires("openssl/[>=1.1 <4]", libs=True)
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("boost/1.85.0")
         self.requires("zlib/1.3.1")
 
@@ -98,6 +98,8 @@ class MysqlCppConnRecipe(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        # Alias for the OpenSSL target
+        deps.set_property("openssl", "cmake_target_name", "mysql::openssl")
         deps.generate()
 
     def _patch_sources(self):
