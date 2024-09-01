@@ -91,7 +91,6 @@ class MysqlCppConnRecipe(ConanFile):
 
         # OpenSSL
         tc.cache_variables["WITH_SSL"] = "SYSTEM"
-        tc.cache_variables["BUNDLE_DEPENDENCIES"] = "OFF"
         # LZ4 patches
         tc.cache_variables["WITH_LZ4"] = "TRUE"
         # ZLIB patches
@@ -114,8 +113,6 @@ class MysqlCppConnRecipe(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        # Alias for the OpenSSL target
-        deps.set_property("openssl", "cmake_target_name", "mysql::openssl")
         deps.generate()
 
     def _patch_sources(self):
