@@ -169,11 +169,10 @@ class MysqlCppConnRecipe(ConanFile):
         self.cpp_info.libdirs = template_dirs if not self.vs else [f"{lib}/{self.vs}" for lib in template_dirs]
         self.cpp_info.bindirs = template_dirs
 
-        if is_apple_os(self):
+        if is_apple_os(self) or self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["resolv"])
-            self.cpp_info.requires.extend(["openssl::ssl", "boost::boost", "zlib::zlib"])
-        elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["m", "resolv", "ssl", "crypto"])
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.system_libs.extend(["m"])
 
         target = "concpp-xdevapi"
         target_alias = "concpp"
