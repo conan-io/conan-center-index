@@ -34,12 +34,13 @@ class MysqlCppConnRecipe(ConanFile):
     default_options = { "shared": False, "fPIC": True }
 
     def validate(self):
-        check_min_cppstd(self, "17")
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, "17")
 
     def requirements(self):
-        self.requires("openssl/[>=1.1 <4]", headers=True, libs=True)
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("boost/1.85.0")
-        self.requires("zlib/1.3.1")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -119,8 +120,7 @@ class MysqlCppConnRecipe(ConanFile):
 
         # Apple patches
         if is_apple_os(self) and cross_building(self):
-            print(f"Building for {str(self.settings.arch)}")
-            patch = f"set(CMAKE_OSX_ARCHITECTURES \"{str(self.settings.arch)}\" CACHE INTERNAL \"\" FORCE)\n"
+            patch = f"set(CMAKE_OSX_ARCHITECTURES \"{self.settings.arch}\" CACHE INTERNAL \"\" FORCE)\n"
 
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                 "PROJECT(MySQL_CONCPP)",
