@@ -24,7 +24,7 @@ class CgalConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17"
+        return "17" if Version(self.version) >= "6.0" else "14"
 
     @property
     def _minimum_compilers_version(self):
