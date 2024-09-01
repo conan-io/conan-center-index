@@ -33,9 +33,23 @@ class MysqlCppConnRecipe(ConanFile):
 
     default_options = { "shared": False, "fPIC": True }
 
+    @property
+    def _minimum_compilers_version(self):
+        return {
+            "apple-clang": "15",
+        }
+
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, "17")
+
+        compiler = self.settings.compiler
+        compiler_name = str(compiler)
+        minimum_version = self._minimum_compilers_version.get(compiler_name, False)
+        if minimum_version and Version(compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"Requires compiler {compiler_name} minimum version: {minimum_version} with C++17 support."
+            )
 
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
