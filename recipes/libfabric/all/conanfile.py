@@ -120,7 +120,7 @@ class LibfabricConan(ConanFile):
 
         if self._is_enabled("verbs"):
             if not self.dependencies["rdma-core"].options.build_librdmacm:
-                raise ConanInvalidConfiguration("'-o rdma-core/*:build_librdmacm=True' is required when 'verbs' is enabled")
+                raise ConanInvalidConfiguration(f"{self.ref} '-o rdma-core/*:build_librdmacm=True' is required when '-o &:verbs=True'")
 
     def build_requirements(self):
         # Used in ./configure tests and build
