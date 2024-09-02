@@ -80,7 +80,7 @@ class CutlassConan(ConanFile):
         # Don't look for CUDA, we're only installing the headers
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(${CMAKE_CURRENT_SOURCE_DIR}/CUDA.cmake)",
                                                                                  """
-                                                                                 if(CUTLASS_ENABLE_HEADERS_ONLY)
+                                                                                 if(NOT CUTLASS_ENABLE_HEADERS_ONLY)
                                                                                  include(${CMAKE_CURRENT_SOURCE_DIR}/CUDA.cmake)
                                                                                  endif()""")
 
