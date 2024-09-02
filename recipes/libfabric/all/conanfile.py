@@ -28,7 +28,6 @@ class LibfabricConan(ConanFile):
         "hook_debug",
         "hook_hmem",
         "mrail",
-        "opx",
         "perf",
         "profile",
         "rxd",
@@ -56,7 +55,6 @@ class LibfabricConan(ConanFile):
         "hook_debug": "yes",
         "hook_hmem": "yes",
         "mrail": "yes",
-        "opx": "no",  # Fails to build
         "perf": "yes",
         "profile": "yes",
         "rxd": "yes",
@@ -81,7 +79,6 @@ class LibfabricConan(ConanFile):
             del self.options.sm2
             # rdma-core is not available on macOS
             del self.options.efa
-            del self.options.opx
             del self.options.verbs
 
     def configure(self):
@@ -94,14 +91,10 @@ class LibfabricConan(ConanFile):
         return str(self.options.get_safe(opt)) == "yes" or str(self.options.get_safe(opt)).startswith("dl")
 
     def requirements(self):
-
         if self._is_enabled("usnic"):
             self.requires("libnl/3.8.0")
-        if self._is_enabled("efa") or self._is_enabled("opx") or self._is_enabled("usnic") or self._is_enabled("verbs"):
+        if self._is_enabled("efa") or self._is_enabled("usnic") or self._is_enabled("verbs"):
             self.requires("rdma-core/52.0")
-        if self._is_enabled("opx"):
-            self.requires("libnuma/2.0.16")
-            self.requires("util-linux-libuuid/2.39.2")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -160,7 +153,7 @@ class LibfabricConan(ConanFile):
             tc.configure_args.append("--with-libnl=no")
         tc.configure_args.append("--with-lttng=no")
         tc.configure_args.append("--with-neuron=no")
-        tc.configure_args.append(f"--with-numa={yes_no_opt('opx')}")
+        tc.configure_args.append(f"--with-numa=no")
         tc.configure_args.append("--with-psm2-src=no")
         tc.configure_args.append("--with-psm3-rv=no")
         tc.configure_args.append("--with-rocr=no")
@@ -171,6 +164,7 @@ class LibfabricConan(ConanFile):
         tc.configure_args.append("--enable-psm3=no")
         tc.configure_args.append("--enable-xpmem=no")
         tc.configure_args.append("--enable-cxi=no")
+        tc.configure_args.append("--enable-opx=no")
         tc.generate()
 
         deps = AutotoolsDeps(self)
