@@ -219,3 +219,7 @@ class MysqlCppConnRecipe(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["MYSQL_STATIC"]
             self.cpp_info.defines = ["STATIC_CONCPP"]
+
+        self.cpp_info.set_property("cmake_find_package", "mysql-concpp")
+        self.cpp_info.set_property("cmake_find_package_multi", "mysql-concpp")
+        self.cpp_info.set_property("cmake_config_file", "mysql-concpp-config.cmake")
