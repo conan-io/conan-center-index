@@ -116,7 +116,8 @@ class LibfabricConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration("libfabric is not available on Windows")
+            # FIXME: libfabric provides msbuild project files.
+            raise ConanInvalidConfiguration(f"{self.ref} Conan recipes is not supported on Windows. Contributions are welcome.")
 
         for opt, _ in self.options.items():
             if opt in self._providers and self.options.get_safe(opt) not in ["yes", "no", "dl"]:
