@@ -34,8 +34,12 @@ class MysqlCppConnRecipe(ConanFile):
     default_options = { "shared": False, "fPIC": True }
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "17")
+        else:
+             raise ConanInvalidConfiguration(
+                    "This package requires c++17 support. The current compiler does not support it."
+                )
 
     def requirements(self):
         self.requires("openssl/1.0.2u")
@@ -197,7 +201,3 @@ class MysqlCppConnRecipe(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["MYSQL_STATIC"]
             self.cpp_info.defines = ["STATIC_CONCPP"]
-
-        self.cpp_info.set_property("cmake_find_package", "mysql-concpp")
-        self.cpp_info.set_property("cmake_find_package_multi", "mysql-concpp")
-        self.cpp_info.set_property("cmake_config_file", "mysql-concpp-config.cmake")
