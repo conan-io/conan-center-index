@@ -50,7 +50,7 @@ class LibfabricConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        **{ p: ["yes", "no", "dl"] for p in _providers },
+        **{ p: [None, "ANY"] for p in _providers },
     }
     default_options = {
         "shared": False,
@@ -119,16 +119,12 @@ class LibfabricConan(ConanFile):
             # FIXME: libfabric provides msbuild project files.
             raise ConanInvalidConfiguration(f"{self.ref} Conan recipes is not supported on Windows. Contributions are welcome.")
 
-        for opt, _ in self.options.items():
-            if opt in self._providers and self.options.get_safe(opt) not in ["yes", "no", "dl"]:
-                path = str(self.options.get_safe(opt))
-                if path.startswith("dl:"):
-                    path = path[3:]
-                if not os.path.isdir(path):
-                    raise ConanInvalidConfiguration(
-                        f"Option {opt} can only be 'yes', 'no', 'dl', or a directory path "
-                        "(optionally with a 'dl:' prefix to build as a dynamic library)"
-                    )
+        for provider in self._providers:
+            provider = str(self.options.get_safe(provider))
+            if provider.lower() not in ["yes", "no", "dl", "none"] and \
+                    not os.path.isdir(provider) and \
+                    (not provider.startswith("dl:") and not os.path.isdir(provider[3:])):
+                raise ConanInvalidConfiguration(f"{self.ref} provider option '{provider}' is not valid. It must be 'yes', 'no', 'dl', 'dl:<dir_path>' or a directory path.")
 
         if self._is_enabled("verbs"):
             if not self.dependencies["rdma-core"].options.build_librdmacm:
