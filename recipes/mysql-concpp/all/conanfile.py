@@ -166,7 +166,7 @@ class MysqlCppConnRecipe(ConanFile):
             os.remove(os.path.join(self.package_folder, file))
 
         for file in os.listdir(self.source_folder):
-            if file.endswith(".cmake") and file != "mysql-concpp-config.cmake": # Not the main config file
+            if file.endswith(".cmake"):
                 os.remove(os.path.join(self.source_folder, file))
 
     @property
@@ -226,6 +226,8 @@ class MysqlCppConnRecipe(ConanFile):
             self.cpp_info.defines = ["MYSQL_STATIC"]
             self.cpp_info.defines = ["STATIC_CONCPP"]
 
-        self.cpp_info.set_property("cmake_find_package", "mysql-concpp")
-        self.cpp_info.set_property("cmake_find_package_multi", "mysql-concpp")
-        self.cpp_info.set_property("cmake_config_file", "mysql-concpp-config.cmake")
+        # TODO: to remove in conan v2
+        self.cpp_info.filenames["cmake_find_package"] = self.name
+        self.cpp_info.filenames["cmake_find_package_multi"] = self.name
+        self.cpp_info.names["cmake_find_package"] = self.name
+        self.cpp_info.names["cmake_find_package_multi"] = self.name
