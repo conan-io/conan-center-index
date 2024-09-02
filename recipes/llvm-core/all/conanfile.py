@@ -1,10 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import (
     apply_conandata_patches,
+    collect_libs,
     get,
     rmdir,
     save,
@@ -12,7 +13,7 @@ from conan.tools.files import (
     export_conandata_patches,
     rm,
     rename,
-    replace_in_file, collect_libs
+    replace_in_file
 )
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.scm import Version
@@ -182,9 +183,13 @@ class LLVMCoreConan(ConanFile):
         if self.options.exceptions and not self.options.rtti:
             raise ConanInvalidConfiguration("Cannot enable exceptions without rtti support")
 
-    def validate_build(self):
-        if self.options.shared and os.getenv("CONAN_CENTER_BUILD_SERVICE") and self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration("Shared Debug build is not supported on CCI due to resource limitations")
+        if cross_building(self):
+            # FIXME support cross compilation
+            #  For Cross Building, LLVM builds a "native" toolchain in a subdirectory of the main build directory.
+            #  This subdirectory would need to have the conan cmake configuration files for the build platform
+            #  installed into it for a cross build to be successful.
+            #  see also https://llvm.org/docs/HowToCrossCompileLLVM.html
+            raise ConanInvalidConfiguration("Cross compilation is not supported. Contributions are welcome!")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
