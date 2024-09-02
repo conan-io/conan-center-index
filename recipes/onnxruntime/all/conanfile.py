@@ -110,6 +110,8 @@ class OnnxRuntimeConan(ConanFile):
                 self.requires("xnnpack/cci.20230715")
             else:
                 self.requires("xnnpack/cci.20220801")
+        if self.options.with_cuda:
+            self.requires("cutlass/3.5.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -154,7 +156,8 @@ class OnnxRuntimeConan(ConanFile):
 
         tc.variables["onnxruntime_USE_CUDA"] = self.options.with_cuda
         tc.variables["onnxruntime_BUILD_UNIT_TESTS"] = False
-        tc.variables["onnxruntime_DISABLE_CONTRIB_OPS"] = False
+        tc.variables["onnxruntime_DISABLE_CONTRIB_OPS"] = True
+        tc.variables["onnxruntime_USE_FLASH_ATTENTION"] = False
         tc.variables["onnxruntime_DISABLE_RTTI"] = False
         tc.variables["onnxruntime_DISABLE_EXCEPTIONS"] = False
 
@@ -190,6 +193,13 @@ class OnnxRuntimeConan(ConanFile):
         if Version(self.version) >= "15.0":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "CMakeLists.txt"),
                             "if (Git_FOUND)", "if (FALSE)")
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "onnxruntime_providers_cuda.cmake"),
+                        "include(cutlass)", "find_package(NvidiaCutlass)")
+        # https://github.com/microsoft/onnxruntime/commit/5bfca1dc576720627f3af8f65e25af408271079b
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "onnxruntime_providers_cuda.cmake"),
+                        'option(onnxruntime_NVCC_THREADS "Number of threads that NVCC can use for compilation." 1)', 
+                        'set(onnxruntime_NVCC_THREADS "1" CACHE STRING "Number of threads that NVCC can use for compilation.")')
+
 
     def build(self):
         self._patch_sources()
