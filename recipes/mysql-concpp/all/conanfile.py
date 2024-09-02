@@ -62,6 +62,7 @@ class MysqlCppConnRecipe(ConanFile):
     def requirements(self):
         self.requires("openssl/1.0.2u")
         self.requires("boost/1.85.0")
+        self.requires("zlib/1.3.1")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -101,7 +102,8 @@ class MysqlCppConnRecipe(ConanFile):
         # LZ4 patches
         tc.cache_variables["WITH_LZ4"] = "TRUE"
         # ZLIB patches
-        tc.cache_variables["WITH_ZLIB"] = "TRUE"
+        tc.cache_variables["WITH_ZLIB"] = "SYSTEM"
+        tc.cache_variables["ZLIB_DIR"] = self._package_folder_dep("zlib")
         # ZSTD patches
         tc.cache_variables["WITH_ZSTD"] = "TRUE"
         # Build patches
@@ -194,7 +196,7 @@ class MysqlCppConnRecipe(ConanFile):
         if is_apple_os(self) or self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["resolv"])
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs.extend(["m", "ssl", "crypto"])
+                self.cpp_info.system_libs.extend(["m", "crypto", "ssl"])
 
         target = "concpp-xdevapi"
         target_alias = "concpp"
