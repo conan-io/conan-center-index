@@ -74,7 +74,10 @@ class OpenTelemetryCppConan(ConanFile):
     @property
     def _default_cppstd(self):
         if self.options.with_stl == "default":
-            return default_cppstd(self).replace("gnu", "")
+            if self.settings.compiler.cppstd:
+                return str(self.settings.compiler.cppstd).replace("gnu", "")
+            else:
+                return default_cppstd(self).replace("gnu", "")
         return self._min_cppstd
 
     @property
