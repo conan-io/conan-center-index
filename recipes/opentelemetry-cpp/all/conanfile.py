@@ -24,7 +24,7 @@ class OpenTelemetryCppConan(ConanFile):
         "fPIC": [True, False],
         "shared": [True, False],
         "with_no_deprecated_code": [True, False],
-        "with_stl": [True, False, "default"],
+        "with_stl": [True, False, "default", "CXX11", "CXX14", "CXX17", "CXX20", "CXX23"],
         "with_gsl": [True, False],
         "with_abseil": [True, False],
         "with_otlp": ["deprecated", True, False],
@@ -72,15 +72,17 @@ class OpenTelemetryCppConan(ConanFile):
         return 11
 
     @property
-    def _default_cppstd(self):
+    def _cppstd(self):
         if self.options.with_stl == "default":
             return default_cppstd(self).replace("gnu", "")
+        if str(self.options.with_stl).startswith("CXX"):
+            return str(self.options.with_stl).replace("CXX", "")
         return self._min_cppstd
 
     @property
-    def _default_stl_version(self):
+    def _stl_version(self):
         if self.options.with_stl == "default":
-            return f"CXX{self._default_cppstd}"
+            return f"CXX{self._cppstd}"
         return self.options.with_stl
 
     @property
@@ -220,7 +222,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["BUILD_BENCHMARK"] = False
         tc.cache_variables["WITH_EXAMPLES"] = False
         tc.cache_variables["WITH_NO_DEPRECATED_CODE"] = self.options.with_no_deprecated_code
-        tc.cache_variables["WITH_STL"] = self._default_stl_version
+        tc.cache_variables["WITH_STL"] = self._stl_version
         tc.cache_variables["WITH_GSL"] = self.options.with_gsl
         tc.cache_variables["WITH_ABSEIL"] = self.options.with_abseil
         if Version(self.version) < "1.10":
@@ -240,7 +242,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_METRICS_EXEMPLAR_PREVIEW"] = self.options.with_metrics_exemplar_preview
         tc.cache_variables["OPENTELEMETRY_INSTALL"] = True
         if not self.settings.compiler.cppstd:
-            tc.variables["CMAKE_CXX_STANDARD"] = self._default_cppstd
+            tc.variables["CMAKE_CXX_STANDARD"] = self._cppstd
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -381,8 +383,8 @@ class OpenTelemetryCppConan(ConanFile):
             self.cpp_info.components["opentelemetry_common"].system_libs.extend(["pthread"])
 
         if self.options.with_stl:
-            self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_CPP_STDLIB")
-            self.cpp_info.components["opentelemetry_common"].defines.append(f"OPENTELEMETRY_STL_VERSION=20{self._default_cppstd}")
+            self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_CPP_STDLIB") # for versions < 1.12.0
+            self.cpp_info.components["opentelemetry_common"].defines.append(f"OPENTELEMETRY_STL_VERSION=20{self._cppstd}")
 
         if self.options.with_gsl:
             self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_GSL")
@@ -481,4 +483,3 @@ class OpenTelemetryCppConan(ConanFile):
             self.cpp_info.components["opentelemetry_exporter_etw"].requires.append(
                 "nlohmann_json::nlohmann_json",
             )
-
