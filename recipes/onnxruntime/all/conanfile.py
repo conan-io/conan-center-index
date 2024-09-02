@@ -156,7 +156,7 @@ class OnnxRuntimeConan(ConanFile):
 
         tc.variables["onnxruntime_USE_CUDA"] = self.options.with_cuda
         tc.variables["onnxruntime_BUILD_UNIT_TESTS"] = False
-        tc.variables["onnxruntime_DISABLE_CONTRIB_OPS"] = True
+        tc.variables["onnxruntime_DISABLE_CONTRIB_OPS"] = False
         tc.variables["onnxruntime_USE_FLASH_ATTENTION"] = False
         tc.variables["onnxruntime_DISABLE_RTTI"] = False
         tc.variables["onnxruntime_DISABLE_EXCEPTIONS"] = False
@@ -200,6 +200,9 @@ class OnnxRuntimeConan(ConanFile):
                         'option(onnxruntime_NVCC_THREADS "Number of threads that NVCC can use for compilation." 1)', 
                         'set(onnxruntime_NVCC_THREADS "1" CACHE STRING "Number of threads that NVCC can use for compilation.")')
 
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "onnxruntime_providers_cuda.cmake"),
+                      r'target_include_directories(${target} PRIVATE ${cutlass_SOURCE_DIR}/include ${cutlass_SOURCE_DIR}/examples ${cutlass_SOURCE_DIR}/tools/util/include)', 
+                      r'target_link_libraries(${target} PRIVATE nvidia::cutlass::cutlass)')
 
     def build(self):
         self._patch_sources()
