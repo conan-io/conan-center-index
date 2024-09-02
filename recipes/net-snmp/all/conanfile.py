@@ -58,6 +58,7 @@ class NetSnmpConan(ConanFile):
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
         self.requires("pcre/8.45")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if is_msvc(self) and self.options.shared:
