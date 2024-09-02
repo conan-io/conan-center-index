@@ -23,7 +23,6 @@ class LibfabricConan(ConanFile):
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     _providers = [
-        "cxi",
         "dmabuf_peer_mem",
         "efa",
         "hook_debug",
@@ -43,7 +42,6 @@ class LibfabricConan(ConanFile):
         "udp",
         "usnic",
         "verbs",
-        "xpmem",
     ]
     options = {
         "shared": [True, False],
@@ -53,7 +51,6 @@ class LibfabricConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "cxi": "no",  # library not available on CCI
         "dmabuf_peer_mem": "yes",
         "efa": "yes",
         "hook_debug": "yes",
@@ -73,7 +70,6 @@ class LibfabricConan(ConanFile):
         "udp": "yes",
         "usnic": "yes",
         "verbs": "no",  # Configuration step fails
-        "xpmem": "no",  # library not available on CCI
     }
 
     def config_options(self):
@@ -165,13 +161,16 @@ class LibfabricConan(ConanFile):
         tc.configure_args.append("--with-lttng=no")
         tc.configure_args.append("--with-neuron=no")
         tc.configure_args.append(f"--with-numa={yes_no_opt('opx')}")
-        tc.configure_args.append("--enable-psm")
         tc.configure_args.append("--with-psm2-src=no")
         tc.configure_args.append("--with-psm3-rv=no")
         tc.configure_args.append("--with-rocr=no")
         tc.configure_args.append("--with-synapseai=no")
         tc.configure_args.append("--with-uring=no")  # TODO
         tc.configure_args.append("--with-ze=no")
+        tc.configure_args.append("--enable-psm2=no")
+        tc.configure_args.append("--enable-psm3=no")
+        tc.configure_args.append("--enable-xpmem=no")
+        tc.configure_args.append("--enable-cxi=no")
         tc.generate()
 
         deps = AutotoolsDeps(self)
