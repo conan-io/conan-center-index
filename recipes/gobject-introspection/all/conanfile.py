@@ -104,7 +104,7 @@ class GobjectIntrospectionConan(ConanFile):
         deps.generate()
         # INFO: g-ir-scanner uses PKG_CONFIG_PATH directly instead of pkg-config Meson module
         env = Environment()
-        env.define("PKG_CONFIG_PATH", self.generators_folder)
+        env.define_path("PKG_CONFIG_PATH", self.generators_folder)
         envvars = env.vars(self)
         envvars.save_script("pkg_config_env")
 
