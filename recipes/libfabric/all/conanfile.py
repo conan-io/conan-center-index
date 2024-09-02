@@ -123,12 +123,9 @@ class LibfabricConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        def yes_no_opt(opt):
-            return "yes" if self.options.get_safe(opt) else "no"
-
         tc = AutotoolsToolchain(self)
         for p in self._providers:
-            if p == "verbs" and not self.options.get_safe(p, "no") == "no":
+            if p == "verbs" and self.options.get_safe(p, "no") != "no":
                 path = self.dependencies["rdma-core"].package_folder
                 if self.options.get_safe("verbs") == "dl":
                     tc.configure_args.append(f"--enable-verbs=dl:{path}")
@@ -138,8 +135,8 @@ class LibfabricConan(ConanFile):
                 tc.configure_args.append(f"--enable-{p}={self.options.get_safe(p, 'no')}")
         if self.settings.build_type == "Debug":
             tc.configure_args.append("--enable-debug")
-        tc.configure_args.append(f"--with-bgq-progress={yes_no_opt('with_bgq_progress')}")
-        tc.configure_args.append(f"--with-bgq-mr={yes_no_opt('with_bgq_mr')}")
+        tc.configure_args.append(f"--with-bgq-progress=no")
+        tc.configure_args.append(f"--with-bgq-mr=no")
         tc.configure_args.append("--with-cassin-headers=no")
         tc.configure_args.append("--with-cuda=no")  # TODO
         tc.configure_args.append("--with-curl=no")  # TODO
