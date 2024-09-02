@@ -32,8 +32,6 @@ class LibfabricConan(ConanFile):
         "opx",
         "perf",
         "profile",
-        "psm2",
-        "psm3",
         "rxd",
         "rxm",
         "shm",
@@ -64,8 +62,6 @@ class LibfabricConan(ConanFile):
         "opx": "no",  # Fails to build
         "perf": "yes",
         "profile": "yes",
-        "psm2": "no",  # library not available on CCI
-        "psm3": "no",  # library not available on CCI
         "rxd": "yes",
         "rxm": "yes",
         "shm": "yes",
@@ -99,7 +95,7 @@ class LibfabricConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def _is_enabled(self, opt):
-        return self.options.get_safe(opt) in ["yes", "dl"]
+        return str(self.options.get_safe(opt)) == "yes" or str(self.options.get_safe(opt)).startswith("dl")
 
     def requirements(self):
 
@@ -169,6 +165,7 @@ class LibfabricConan(ConanFile):
         tc.configure_args.append("--with-lttng=no")
         tc.configure_args.append("--with-neuron=no")
         tc.configure_args.append(f"--with-numa={yes_no_opt('opx')}")
+        tc.configure_args.append("--enable-psm")
         tc.configure_args.append("--with-psm2-src=no")
         tc.configure_args.append("--with-psm3-rv=no")
         tc.configure_args.append("--with-rocr=no")
