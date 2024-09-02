@@ -201,7 +201,7 @@ class MysqlCppConnRecipe(ConanFile):
         if is_apple_os(self) or self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["resolv"])
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs.extend(["m", "ssl", "crypto"])
+                self.cpp_info.system_libs.extend(["m"])
 
         target = "concpp-xdevapi"
         target_alias = "concpp"
