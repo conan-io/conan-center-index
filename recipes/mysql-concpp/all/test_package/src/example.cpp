@@ -7,7 +7,6 @@ using namespace ::mysqlx;
 
 int main(int argc, const char *argv[])
 {
-
     try
     {
         const char *url = (argc > 1 ? argv[1] : "mysqlx://root:password@127.0.0.1");

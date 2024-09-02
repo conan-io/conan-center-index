@@ -36,7 +36,7 @@ class MysqlCppConnRecipe(ConanFile):
     @property
     def _minimum_compilers_version(self):
         return {
-            "apple-clang": "15",
+            # "apple-clang": "15",
         }
 
     def validate(self):
@@ -52,7 +52,7 @@ class MysqlCppConnRecipe(ConanFile):
             )
 
     def requirements(self):
-        self.requires("openssl/[>=1.1 <4]")
+        self.requires("openssl/1.0.2u")
         self.requires("boost/1.85.0")
         self.requires("zlib/[>=1.2.11 <2]")
 
@@ -105,7 +105,7 @@ class MysqlCppConnRecipe(ConanFile):
         # Windows patches
         if self.settings.os == "Windows":
             # OpenSSL patches
-            tc.cache_variables["SSL_DIR"] = self._package_folder_dep("openssl")
+            tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
             if is_msvc(self):
                 # Boost patches
                 tc.cache_variables["BOOST_DIR"] = self._package_folder_dep("boost")
@@ -188,7 +188,7 @@ class MysqlCppConnRecipe(ConanFile):
         if is_apple_os(self) or self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["resolv"])
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs.extend(["m", "crypto", "ssl"])
+                self.cpp_info.system_libs.extend(["m", "ssl", "crypto"])
 
         target = "concpp-xdevapi"
         target_alias = "concpp"
