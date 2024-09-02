@@ -165,9 +165,9 @@ class MysqlCppConnRecipe(ConanFile):
         for file in ["INFO_BIN", "INFO_SRC"]:
             os.remove(os.path.join(self.package_folder, file))
 
-        for file in os.listdir(self.source_folder):
+        for file in os.listdir(self.package_folder):
             if file.endswith(".cmake"):
-                os.remove(os.path.join(self.source_folder, file))
+                os.remove(os.path.join(self.package_folder, file))
 
     @property
     def _vs_version(self):
