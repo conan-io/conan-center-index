@@ -167,7 +167,7 @@ class MysqlCppConnRecipe(ConanFile):
 
         for file in os.listdir(self.source_folder):
             if file.endswith(".cmake") and file != "mysql-concpp-config.cmake": # Not the main config file
-                os.remove(os.path.join(source_folder, file))
+                os.remove(os.path.join(self.source_folder, file))
 
     @property
     def _vs_version(self):
