@@ -55,7 +55,7 @@ class LibfabricConan(ConanFile):
         "hook_debug": "yes",
         "hook_hmem": "yes",
         "mrail": "yes",
-        "perf": "yes",
+        "perf": "no",
         "profile": "yes",
         "rxd": "yes",
         "rxm": "yes",
@@ -66,8 +66,8 @@ class LibfabricConan(ConanFile):
         "trace": "yes",
         "ucx": "no",
         "udp": "yes",
-        "usnic": "yes",
-        "verbs": "no",  # Configuration step fails
+        "usnic": "no",
+        "verbs": "yes"
     }
 
     def config_options(self):
@@ -157,11 +157,13 @@ class LibfabricConan(ConanFile):
         tc.configure_args.append("--with-synapseai=no")
         tc.configure_args.append("--with-uring=no")  # TODO
         tc.configure_args.append("--with-ze=no")
+        tc.configure_args.append("-enable-psm=no")
         tc.configure_args.append("--enable-psm2=no")
         tc.configure_args.append("--enable-psm3=no")
         tc.configure_args.append("--enable-xpmem=no")
         tc.configure_args.append("--enable-cxi=no")
         tc.configure_args.append("--enable-opx=no")
+        tc.configure_args.append("--enable-bgq=no")
         tc.generate()
 
         deps = AutotoolsDeps(self)
