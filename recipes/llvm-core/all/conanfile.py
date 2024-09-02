@@ -12,7 +12,7 @@ from conan.tools.files import (
     export_conandata_patches,
     rm,
     rename,
-    replace_in_file
+    replace_in_file, collect_libs
 )
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.scm import Version
@@ -466,4 +466,4 @@ class LLVMCoreConan(ConanFile):
                     self.cpp_info.components[component_name].system_libs += system_libs
         else:
             self.cpp_info.set_property("cmake_target_name", "LLVM")
-            self.cpp_info.libs = [f"LLVM-{Version(self.version).major}", "LTO", "Remarks"]
+            self.cpp_info.libs = collect_libs(self)
