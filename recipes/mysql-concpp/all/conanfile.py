@@ -62,7 +62,6 @@ class MysqlCppConnRecipe(ConanFile):
     def requirements(self):
         self.requires("openssl/1.0.2u")
         self.requires("boost/1.85.0")
-        self.requires("zlib/1.3.1")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -102,8 +101,7 @@ class MysqlCppConnRecipe(ConanFile):
         # LZ4 patches
         tc.cache_variables["WITH_LZ4"] = "TRUE"
         # ZLIB patches
-        tc.cache_variables["WITH_ZLIB"] = "SYSTEM"
-        tc.cache_variables["ZLIB_DIR"] = self._package_folder_dep("zlib")
+        tc.cache_variables["WITH_ZLIB"] = "TRUE"
         # ZSTD patches
         tc.cache_variables["WITH_ZSTD"] = "TRUE"
         # Build patches
@@ -162,7 +160,14 @@ class MysqlCppConnRecipe(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        # Clean
+        copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        for file in ["INFO_BIN", "INFO_SRC"]:
+            os.remove(os.path.join(self.package_folder, file))
+
+        for file in os.listdir(self.source_folder):
+            if file.endswith(".cmake") and file != "mysql-concpp-config.cmake": # Not the main config file
+                os.remove(os.path.join(source_folder, file))
 
     @property
     def _vs_version(self):
@@ -196,7 +201,7 @@ class MysqlCppConnRecipe(ConanFile):
         if is_apple_os(self) or self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["resolv"])
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs.extend(["m", "crypto", "ssl"])
+                self.cpp_info.system_libs.extend(["m", "ssl", "crypto"])
 
         target = "concpp-xdevapi"
         target_alias = "concpp"
@@ -209,7 +214,6 @@ class MysqlCppConnRecipe(ConanFile):
             target += "-debug"
             target_alias += "-debug"
 
-        # self.cpp_info.set_property("cmake_target_name", f"mysql::{target}")
         self.cpp_info.set_property("cmake_target_name", "mysql::concpp")
         self.cpp_info.set_property("cmake_target_aliases", [f"mysql::{target_alias}"] )
 
