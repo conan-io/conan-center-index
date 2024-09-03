@@ -238,9 +238,3 @@ class MysqlCppConnRecipe(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["MYSQL_STATIC"]
             self.cpp_info.defines = ["STATIC_CONCPP"]
-
-        # TODO: to remove in conan v2
-        self.cpp_info.filenames["cmake_find_package"] = self.name
-        self.cpp_info.filenames["cmake_find_package_multi"] = self.name
-        self.cpp_info.names["cmake_find_package"] = self.name
-        self.cpp_info.names["cmake_find_package_multi"] = self.name
