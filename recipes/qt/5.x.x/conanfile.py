@@ -1134,6 +1134,7 @@ Examples = bin/datadir/examples""")
                 gui_reqs.append("md4c::md4c")
             _create_module("Gui", gui_reqs)
             _add_build_module("qtGui", self._cmake_qt5_private_file("Gui"))
+            _create_plugin("QOffscreenIntegrationPlugin", "libqoffscreen", "platforms", ["Core", "Gui"])
 
             event_dispatcher_reqs = ["Core", "Gui"]
             if self.options.with_glib:
@@ -1228,6 +1229,7 @@ Examples = bin/datadir/examples""")
                 if self.options.get_safe("with_x11", False):
                     _create_module("XcbQpa", xcb_qpa_reqs, has_include_dir=False)
                     _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpa"])
+                    _create_plugin("QXcbGlxIntegrationPlugin", "qxcb-glx-integration", "xcbglintegrations", ["Core", "Gui"])
 
         if self.options.with_sqlite3:
             _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
