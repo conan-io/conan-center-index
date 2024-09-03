@@ -284,7 +284,11 @@ class LLVMCoreConan(ConanFile):
         else:
             cmake_variables["LLVM_USE_SANITIZER"] = self.options.use_sanitizer
 
-        self.output.info(cmake_variables)
+        if self.settings.os == "Linux":
+            # Workaround for: https://github.com/conan-io/conan/issues/13560
+            libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
+            tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
+
         tc.cache_variables.update(cmake_variables)
         tc.generate()
 
