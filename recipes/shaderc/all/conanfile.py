@@ -46,13 +46,7 @@ class ShadercConan(ConanFile):
 
     @property
     def _spirv_version(self):
-        return {
-            # TODO: bump me once newer versions are available on CCI
-            "2024.1": "1.3.261.1",
-            # "2023.6": "1.3.261.1",
-            "2023.6": "1.3.239.0",
-            "2021.1": "1.3.224.0",
-        }[str(self.version)]
+        return self.conan_data.get("siprv_mapping")[self.version]
 
     def requirements(self):
         # transitive_headers=True is not required for any of the dependencies
