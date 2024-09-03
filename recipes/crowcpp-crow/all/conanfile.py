@@ -14,6 +14,7 @@ class CrowConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://crowcpp.org/"
     topics = ("web", "microframework", "header-only")
+    package_type = "header-library"
     settings = "os", "compiler", "arch", "build_type"
     options = {
         "amalgamation": [True, False],

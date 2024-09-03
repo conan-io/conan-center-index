@@ -25,7 +25,4 @@ class TestPackageConan(ConanFile):
             return
 
         bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-        png_file = os.path.join(self.source_folder, "logo.png")
-        self.run(f"{bin_path} {png_file}", env="conanrun")
-
-        self.run(f"zstd --version", env="conanrun")
+        self.run(bin_path, env="conanrun")

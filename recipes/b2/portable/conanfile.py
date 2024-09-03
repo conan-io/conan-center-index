@@ -21,6 +21,8 @@ class B2Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
 
     settings = "os", "arch"
+    package_type = "application"
+
     '''
     * use_cxx_env: False, True
 
@@ -193,6 +195,7 @@ class B2Conan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.LICENSE", src=self._b2_engine_dir, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*b2", dst=self._pkg_bin_dir, src=self._b2_output_dir)
         copy(self, "*b2.exe", dst=self._pkg_bin_dir, src=self._b2_output_dir)
         copy(self, "*.jam", dst=self._pkg_bin_dir, src=self._b2_output_dir)

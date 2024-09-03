@@ -1,0 +1,16 @@
+sources:
+  "2.4.0":
+    url: "https://github.com/microsoft/proxy/archive/refs/tags/2.4.0.tar.gz"
+    sha256: "7eed973655938d681a90dcc0c200e6cc1330ea8611a9c1a9e1b30439514443cb"
+  "2.3.2":
+    url: "https://github.com/microsoft/proxy/archive/refs/tags/2.3.2.tar.gz"
+    sha256: "d592f70b82a452dc9834ac3a953039d4b0136eefc023503d37879aba5ced369f"
+  "2.3.1":
+    url: "https://github.com/microsoft/proxy/archive/refs/tags/2.3.1.tar.gz"
+    sha256: "bfec45ada9cd3dc576df34bbe877c5d03a81906a00759970c0197c3fa041c5c7"
+  "2.3.0":
+    url: "https://github.com/microsoft/proxy/archive/refs/tags/2.3.0.tar.gz"
+    sha256: "ff6f17c5360895776d29ce2b1235de7b42912468b52729810506431e352a78d0"
+  "2.2.1":
+    url: "https://github.com/microsoft/proxy/archive/refs/tags/2.2.1.tar.gz"
+    sha256: "096f0b2d793dffc54d41def2bca0ced594b6b8efe35ac5ae27db35802e742b96"

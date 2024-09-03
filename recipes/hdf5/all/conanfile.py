@@ -4,7 +4,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import can_run, check_min_cppstd, valid_min_cppstd
+from conan.tools.build import cross_building, check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
@@ -17,7 +17,7 @@ class Hdf5Conan(ConanFile):
     description = "HDF5 is a data model, library, and file format for storing and managing data."
     license = "BSD-3-Clause"
     topics = "hdf", "data"
-    homepage = "https://portal.hdfgroup.org/display/HDF5/HDF5"
+    homepage = "https://www.hdfgroup.org/solutions/hdf5/"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -85,9 +85,6 @@ class Hdf5Conan(ConanFile):
             self.requires("openmpi/4.1.0")
 
     def validate(self):
-        if not can_run(self):
-            # While building it runs some executables like H5detect
-            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
         if self.options.parallel and not self.options.enable_unsupported:
             if self.options.enable_cxx:
                 raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive, forcefully allow with enable_unsupported=True")
@@ -99,6 +96,11 @@ class Hdf5Conan(ConanFile):
             raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+
+    def validate_build(self):
+        if cross_building(self) and Version(self.version) < "1.14.4.3":
+            # While building it runs some executables like H5detect
+            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
 
     def build_requirements(self):
         if Version(self.version) >= "1.14.0":

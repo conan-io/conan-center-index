@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.15)
 project(liblzf LANGUAGES C)
 
 add_library(liblzf
-    src/lzf_c.c
-    src/lzf_d.c
+    lzf_c.c
+    lzf_d.c
+    liblzf.def
 )
 set_target_properties(liblzf PROPERTIES OUTPUT_NAME lzf)
 
@@ -20,14 +21,10 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     target_compile_options(liblzf PRIVATE "-funroll-all-loops")
 endif()
 
-set_target_properties(liblzf PROPERTIES
-    WINDOWS_EXPORT_ALL_SYMBOLS ON
-    PUBLIC_HEADER src/lzf.h
-)
-
+include(GNUInstallDirs)
 install(TARGETS liblzf
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
+install(FILES lzf.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

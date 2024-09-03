@@ -1,0 +1,10 @@
+sources:
+  "3.2":
+    url: "https://github.com/edrosten/TooN/archive/refs/tags/TOON_3.2.tar.gz"
+    sha256: "62f30dfb92a6f8873e6a42649760e2d1b54e61e1d3bc023d0bb171600b41c759"
+patches:
+  "3.2":
+    - patch_file: "patches/001-bugfixes-backport.patch"
+      patch_description: "apply unreleased minor fixes"
+      patch_type: "backport"
+      patch_source: "https://github.com/edrosten/TooN/compare/TOON_3.2...370dcd9"

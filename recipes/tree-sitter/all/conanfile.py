@@ -10,10 +10,10 @@ required_conan_version = ">=1.53.0"
 class TreeSitterConan(ConanFile):
     name = "tree-sitter"
     description = "Tree-sitter is a parser generator tool and an incremental parsing library. It can build a concrete syntax tree for a source file and efficiently update the syntax tree as the source file is edited."
-    topics = ("parser", "incremental", "rust")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tree-sitter.github.io/tree-sitter"
-    license = "MIT"
+    topics = ("parser", "incremental", "rust")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {

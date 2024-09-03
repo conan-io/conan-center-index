@@ -29,7 +29,7 @@ class OhNetConan(ConanFile):
     }
     short_paths = True
 
-    def _get_openhome_architecture(self, args):
+    def _fill_openhome_architecture(self, args):
         if is_apple_os(self):
             if str(self.settings.arch).startswith("armv8"):
                 openhome_architecture = "arm64"
@@ -66,43 +66,48 @@ class OhNetConan(ConanFile):
             tc.make_args.append("-j1")
             tc.generate()
 
+    def _fill_ohnet_args(self, args):
+        if self.settings.build_type == "Debug":
+            args.append("debug=1")
+
+        installlibdir = os.path.join(self.package_folder, "lib")
+        installincludedir = os.path.join(self.package_folder, "include")
+
+        args.extend([f"prefix={self.package_folder}",f"installdir={self.package_folder}",  f"installlibdir={installlibdir}", f"installincludedir={installincludedir}"])
+
+        if not is_msvc(self):
+            args = self._fill_openhome_architecture(args)
+            args.append("rsync=no")
+            if str(self.settings.compiler.libcxx) == "libc++":
+                args.extend(["CPPFLAGS=-stdlib=libc++", "LDFLAGS=-stdlib=libc++"])
+        return args
+
     def build(self):
         apply_conandata_patches(self)
         targets = "ohNetDll TestsNative proxies devices"
-        additional_options=""
+        args = []
+        self._fill_ohnet_args(args)
 
         with chdir(self, self.source_folder):
             if is_msvc(self):
-                if self.settings.build_type == "Debug":
-                    additional_options += " debug=1"
-                self.run(f"nmake /f OhNet.mak {targets} {additional_options}")
+                self.run(f"nmake /f OhNet.mak {targets} {' '.join(args)}")
             else:
-                args = []
-                args = self._get_openhome_architecture(args)
-                args.append("rsync=no")
-                if str(self.settings.compiler.libcxx) == "libc++":
-                    args.extend(["CPPFLAGS=-stdlib=libc++", "LDFLAGS=-stdlib=libc++"])
                 autotools = Autotools(self)
                 autotools.make(args=args, target=targets)
 
     def package(self):
-        installlibdir = os.path.join(self.package_folder, "lib")
-        installincludedir = os.path.join(self.package_folder, "include")
-        additional_options=""
-
         copy(self, "License.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
         copy(self, "*", src=os.path.join(self.source_folder, "OpenHome", "Net", "ServiceGen"), dst=os.path.join(self.package_folder, "lib", "ServiceGen"))
         mkdir(self, os.path.join(self.package_folder, "lib", "t4"))
 
+        args = []
+        self._fill_ohnet_args(args)
+
         with chdir(self, self.source_folder):
             if is_msvc(self):
-                if self.settings.build_type == "Debug":
-                    additional_options += " debug=1"
-                self.run(f"nmake /f OhNet.mak install installdir={self.package_folder} installlibdir={installlibdir} installincludedir={installincludedir} {additional_options}")
+                self.run(f"nmake /f OhNet.mak install {' '.join(args)}")
             else:
-                args = [f"prefix={self.package_folder}", f"installlibdir={installlibdir}", f"installincludedir={installincludedir}", "rsync=no"]
-                args = self._get_openhome_architecture(args)
                 autotools = Autotools(self)
                 autotools.make(args=args, target="install-libs install-includes")
                 if is_apple_os(self):
@@ -143,6 +148,7 @@ class OhNetConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "ohNet"
         self.cpp_info.names["cmake_find_package_multi"] = "ohNet"
         self.cpp_info.names["pkg_config"] = "ohNet"
+
         for component in ["ohNetCore", "OhNetDevices", "ohNetProxies", "TestFramework"]:
             self.cpp_info.components[component].names["cmake_find_package"] = component
             self.cpp_info.components[component].names["cmake_find_package_multi"] = component

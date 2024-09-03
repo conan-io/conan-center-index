@@ -1,8 +1,0 @@
-sources:
-  "0.14.1":
-    url: "https://github.com/redis/hiredis/archive/v0.14.1.tar.gz"
-    sha256: "2663b2aed9fd430507e30fc5e63274ee40cdd1a296026e22eafd7d99b01c8913"
-patches:
-  "0.14.1":
-    - patch_file: "patches/0001-fix-makefile.patch"
-      base_path: "source_subfolder"

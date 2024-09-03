@@ -1,4 +1,10 @@
 sources:
+  "20240702":
+    url: "https://github.com/google/re2/releases/download/2024-07-02/re2-2024-07-02.tar.gz"
+    sha256: "eb2df807c781601c14a260a507a5bb4509be1ee626024cb45acbd57cb9d4032b"
+  "20240301":
+    url: "https://github.com/google/re2/releases/download/2024-03-01/re2-2024-03-01.tar.gz"
+    sha256: "7b2b3aa8241eac25f674e5b5b2e23d4ac4f0a8891418a2661869f736f03f57f4"
   "20231101":
     url: "https://github.com/google/re2/releases/download/2023-11-01/re2-2023-11-01.tar.gz"
     sha256: "4e6593ac3c71de1c0f322735bc8b0492a72f66ffccfad76e259fa21c41d27d8a"

@@ -1,4 +1,16 @@
 sources:
+  "0.177.0":
+    url: "https://github.com/danielaparker/jsoncons/archive/refs/tags/v0.177.0.tar.gz"
+    sha256: "a381d58489f143a3a515484f4ad6e32ae4d977033e1a455fecf8cdc4e2c9a49e"
+  "0.176.0":
+    url: "https://github.com/danielaparker/jsoncons/archive/refs/tags/v0.176.0.tar.gz"
+    sha256: "2eb50b5cbe204265fef96c052511ed6e3b8808935c6e2c8d28e0aba7b08fda33"
+  "0.175.0":
+    url: "https://github.com/danielaparker/jsoncons/archive/refs/tags/v0.175.0.tar.gz"
+    sha256: "7f8a04cfd25a73d2ba2283be8eb98a39780df1e90600d8c75ddf19d52bd2c2c9"
+  "0.174.0":
+    url: "https://github.com/danielaparker/jsoncons/archive/refs/tags/v0.174.0.tar.gz"
+    sha256: "60507721a26c752c71fbb228568f7944ea3fd287e9b179a9128ca32d7ddbb386"
   "0.173.4":
     url: "https://github.com/danielaparker/jsoncons/archive/refs/tags/v0.173.4.tar.gz"
     sha256: "3e3525325c88b33f15af2e1f3cf7a1893a49e47aa787a2df723a098b3a4b20b1"

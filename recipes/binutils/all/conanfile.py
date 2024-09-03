@@ -132,10 +132,8 @@ class BinutilsConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type="str"):
                 self.tool_requires("msys2/cci.latest")
-
-        if self.version >= "2.39":
-            self.tool_requires("bison/3.8.2")
-            self.tool_requires("flex/2.6.4")
+        self.tool_requires("bison/3.8.2")
+        self.tool_requires("flex/2.6.4")
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
@@ -199,8 +197,6 @@ class BinutilsConan(ConanFile):
         # v2 exports
         self.buildenv_info.append_path("PATH", bindir)
         self.buildenv_info.append_path("PATH", absolute_target_bindir)
-        self.conf_info.define("user.binutils:gnu_triplet", self.options.target_triplet)
-        self.conf_info.define("user.binutils:prefix", self.options.prefix)
 
         # Add recipe path to enable running the self test in the test package.
         # Don't use this property in production code. It's unsupported.

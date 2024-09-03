@@ -1,0 +1,127 @@
+diff --git a/TooN/QR.h b/TooN/QR.h
+index e2273cc..10b33c3 100644
+--- a/TooN/QR.h
++++ b/TooN/QR.h
+@@ -29,6 +29,7 @@
+ #ifndef TOON_INC_QR_H
+ #define TOON_INC_QR_H
+ #include <TooN/TooN.h>
++#include <algorithm>
+ #include <cmath>
+ 
+ namespace TooN
+diff --git a/TooN/QR_Lapack.h b/TooN/QR_Lapack.h
+index 6b628d1..67f1fd0 100644
+--- a/TooN/QR_Lapack.h
++++ b/TooN/QR_Lapack.h
+@@ -29,6 +29,7 @@
+ 
+ #include <TooN/TooN.h>
+ #include <TooN/lapack.h>
++#include <algorithm>
+ #include <utility>
+ 
+ namespace TooN{
+diff --git a/TooN/SVD.h b/TooN/SVD.h
+index a74deed..e22a437 100644
+--- a/TooN/SVD.h
++++ b/TooN/SVD.h
+@@ -30,6 +30,7 @@
+ 
+ #include <TooN/TooN.h>
+ #include <TooN/lapack.h>
++#include <algorithm>
+ 
+ namespace TooN {
+ 
+diff --git a/TooN/SymEigen.h b/TooN/SymEigen.h
+index aa5b434..8c6d42f 100644
+--- a/TooN/SymEigen.h
++++ b/TooN/SymEigen.h
+@@ -28,6 +28,7 @@
+ #ifndef __SYMEIGEN_H
+ #define __SYMEIGEN_H
+ 
++#include <algorithm>
+ #include <iostream>
+ #include <cassert>
+ #include <cmath>
+diff --git a/TooN/functions/derivatives.h b/TooN/functions/derivatives.h
+index 791f71e..9749461 100644
+--- a/TooN/functions/derivatives.h
++++ b/TooN/functions/derivatives.h
+@@ -27,6 +27,7 @@
+ #define TOON_INCLUDE_DERIVATIVES_NUMERICAL_H
+ 
+ #include <TooN/TooN.h>
++#include <algorithm>
+ #include <vector>
+ #include <cmath>
+ 
+diff --git a/TooN/helpers.h b/TooN/helpers.h
+index 8204560..447bca3 100644
+--- a/TooN/helpers.h
++++ b/TooN/helpers.h
+@@ -32,6 +32,7 @@
+ 
+ #include <TooN/TooN.h>
+ #include <TooN/gaussian_elimination.h>
++#include <algorithm>
+ #include <cmath>
+ #include <functional>
+ #include <utility>
+diff --git a/TooN/optimization/brent.h b/TooN/optimization/brent.h
+index e117a80..3e60251 100644
+--- a/TooN/optimization/brent.h
++++ b/TooN/optimization/brent.h
+@@ -27,6 +27,7 @@
+ #define TOON_BRENT_H
+ #include <TooN/TooN.h>
+ #include <TooN/helpers.h>
++#include <algorithm>
+ #include <limits>
+ #include <cmath>
+ #include <cstdlib>
+diff --git a/doc/documentation.h b/doc/documentation.h
+index 2df5d9e..95276b1 100644
+--- a/doc/documentation.h
++++ b/doc/documentation.h
+@@ -1,15 +1,7 @@
+ /*
+     Copyright (c) 2005 Paul Smith, 2009, 2010, 2011, 2012, 2013, 2014, 2015 Edward Rosten
+ 
+-	Permission is granted to copy, distribute and/or modify this document under
+-	the terms of the GNU Free Documentation License, Version 1.2 or any later
+-	version published by the Free Software Foundation; with no Invariant
+-	Sections, no Front-Cover Texts, and no Back-Cover Texts.
+-
+-    You should have received a copy of the GNU Free Documentation License
+-    License along with this library; if not, write to the Free Software
+-    Foundation, Inc.
+-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
++    This library is free software, see COPYING file for details
+ 
+ */
+ ///////////////////////////////////////////////////////
+diff --git a/doc/linoperatorsdoc.h b/doc/linoperatorsdoc.h
+index b7aa503..f2ec6b1 100644
+--- a/doc/linoperatorsdoc.h
++++ b/doc/linoperatorsdoc.h
+@@ -1,16 +1,7 @@
+ /*
+     Copyright (c) 2005 Paul Smith
+ 
+-	Permission is granted to copy, distribute and/or modify this document under
+-	the terms of the GNU Free Documentation License, Version 1.2 or any later
+-	version published by the Free Software Foundation; with no Invariant
+-	Sections, no Front-Cover Texts, and no Back-Cover Texts.
+-
+-    You should have received a copy of the GNU Free Documentation License
+-    License along with this library; if not, write to the Free Software
+-    Foundation, Inc.
+-    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+-
++    This library is free software, see COPYING file for details
+ */
+ // A proxy version of the Matrix class,
+ // cleaned up to present a comprehensible

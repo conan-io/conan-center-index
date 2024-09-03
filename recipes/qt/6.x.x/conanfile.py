@@ -1,9 +1,10 @@
 import configparser
 import glob
 import os
+import platform
 import textwrap
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -12,7 +13,7 @@ from conan.tools.files import copy, get, replace_in_file, apply_conandata_patche
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanException, ConanInvalidConfiguration
 
 required_conan_version = ">=1.55.0"
 
@@ -27,6 +28,8 @@ class QtConan(ConanFile):
                    "qtremoteobjects", "qtpositioning", "qtlanguageserver",
                    "qtspeech", "qthttpserver", "qtquick3dphysics", "qtgrpc", "qtquickeffectmaker"]
     _submodules += ["qtgraphs"] # new modules for qt 6.6.0
+
+    _module_statuses = ["essential", "addon", "deprecated", "preview"]
 
     name = "qt"
     description = "Qt is a cross-platform framework for graphical user interfaces."
@@ -76,6 +79,7 @@ class QtConan(ConanFile):
         "disabled_features": [None, "ANY"],
     }
     options.update({module: [True, False] for module in _submodules})
+    options.update({f"{status}_modules": [True, False] for status in _module_statuses})
 
     # this significantly speeds up windows builds
     no_copy_source = True
@@ -119,6 +123,9 @@ class QtConan(ConanFile):
         "multiconfiguration": False,
         "disabled_features": "",
     }
+    # essential_modules, addon_modules, deprecated_modules, preview_modules:
+    #    these are only provided for convenience, set to False by default
+    default_options.update({f"{status}_modules": False for status in _module_statuses})
 
     short_paths = True
 
@@ -145,6 +152,8 @@ class QtConan(ConanFile):
                 continue
             status = str(config.get(section, "status"))
             if status not in ["obsolete", "ignore", "additionalLibrary"]:
+                if status not in self._module_statuses:
+                    raise ConanException(f"module {modulename} has status {status} which is not in self._module_statuses {self._module_statuses}")
                 assert modulename in self._submodules, f"module {modulename} not in self._submodules"
                 self._submodules_tree[modulename] = {"status": status,
                                 "path": str(config.get(section, "path")), "depends": []}
@@ -174,9 +183,10 @@ class QtConan(ConanFile):
         if self.settings.os != "Linux":
             self.options.qtwayland = False
 
-        for m in self._submodules:
-            if m not in self._get_module_tree:
-                delattr(self.options, m)
+        for submodule in self._submodules:
+            if submodule not in self._get_module_tree:
+                self._debug_output(f"Qt6: Removing {submodule} option as it is not in the module tree for this version, or is marked as obsolete or ignore")
+                self.options.rm_safe(submodule)
 
     @property
     def _minimum_compilers_version(self):
@@ -188,6 +198,10 @@ class QtConan(ConanFile):
             "clang": "9",
             "apple-clang": "12" if Version(self.version) >= "6.5.0" else "11"
         }
+
+    def _debug_output(self, message):
+        if Version(conan_version) >= "2":
+            self.output.debug(message)
 
     def configure(self):
         if not self.options.gui:
@@ -202,6 +216,53 @@ class QtConan(ConanFile):
             self.options.rm_safe("with_x11")
             self.options.rm_safe("with_egl")
 
+        if self.options.multiconfiguration:
+            del self.settings.build_type
+
+        # Requested modules:
+        # - any module for non-removed options that have 'True' value
+        # - any enabled via `xxx_modules` that does not have a 'False' value
+        # Note that at this point, the submodule options dont have a value unless one is given externally
+        # to the recipe (e.g. via the command line, a profile, or a consumer)
+        requested_modules = set([module for module in self._submodules if self.options.get_safe(module)])
+        for module in [m for m in self._submodules if m in self._get_module_tree]:
+            status = self._get_module_tree[module]['status']
+            is_disabled = self.options.get_safe(module) == False
+            if self.options.get_safe(f"{status}_modules"):
+                if not is_disabled:
+                    requested_modules.add(module)
+                else:
+                    self.output.warning(f"qt6: {module} requested because {status}_modules=True"
+                                        f" but it has been explicitly disabled with {module}=False")
+
+        self.output.info(f"qt6: requested modules {list(requested_modules)}")
+
+        required_modules =  {}
+        for module in requested_modules:
+            deps = self._get_module_tree[module]["depends"]
+            for dep in deps:
+                required_modules.setdefault(dep,[]).append(module)
+
+        required_but_disabled = [m for m in required_modules.keys() if self.options.get_safe(m) == False]
+        if required_modules:
+            self._debug_output(f"qt6: required_modules modules {list(required_modules.keys())}")
+        if required_but_disabled:
+            required_by = set()
+            for m in required_but_disabled:
+                required_by.update(required_modules[m])
+            raise ConanInvalidConfiguration(f"Modules {required_but_disabled} are explicitly disabled, "
+                                            f"but are required by {list(required_by)}, enabled by other options")
+
+        enabled_modules = requested_modules.union(set(required_modules.keys()))
+        enabled_modules.discard("qtbase")
+
+        for module in list(enabled_modules):
+            setattr(self.options, module, True)
+
+        for module in self._submodules:
+            if module in self.options and not self.options.get_safe(module):
+                setattr(self.options, module, False)
+
         if not self.options.get_safe("qtmultimedia"):
             self.options.rm_safe("with_libalsa")
             del self.options.with_openal
@@ -212,27 +273,15 @@ class QtConan(ConanFile):
             if self.options.get_safe("qtwebengine"):
                 self.options.with_fontconfig = True
 
-        if self.options.multiconfiguration:
-            del self.settings.build_type
+        for status in self._module_statuses:
+            # These are convenience only, should not affect package_id
+            option_name = f"{status}_modules"
+            self._debug_output(f"qt6 removing convenience option: {option_name},"
+                              f" see individual module options")
+            self.options.rm_safe(option_name)
 
-        def _enablemodule(mod):
-            if mod != "qtbase":
-                setattr(self.options, mod, True)
-                for req in self._get_module_tree[mod]["depends"]:
-                    _enablemodule(req)
-
-        # enable all modules which are
-        # - required by a module explicitely enabled by the consumer
-        for module in self._get_module_tree:
-            if getattr(self.options, module):
-                _enablemodule(module)
-
-        # disable all modules which are:
-        # - not explicitely enabled by the consumer and
-        # - not required by a module explicitely enabled by the consumer
-        for module in self._get_module_tree:
-            if getattr(self.options, module).value is None:
-                setattr(self.options, module, False)
+        for option in self.options.items():
+            self._debug_output(f"qt6 option: {option}")
 
     def validate(self):
         if os.getenv('CONAN_CENTER_BUILD_SERVICE') is not None:
@@ -254,9 +303,6 @@ class QtConan(ConanFile):
 
         if Version(self.version) >= "6.6.1" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "13.1":
             raise ConanInvalidConfiguration("apple-clang >= 13.1 is required by qt >= 6.6.1 cf QTBUG-119490")
-
-        if self.settings.os == "Macos" and self.dependencies["double-conversion"].options.shared:
-            raise ConanInvalidConfiguration("Test recipe fails because of Macos' SIP. Contributions are welcome.")
 
         if self.options.get_safe("qtwebengine"):
             if not self.options.shared:
@@ -317,7 +363,12 @@ class QtConan(ConanFile):
         if self.options.with_pcre2:
             self.requires("pcre2/10.42")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.268.0")
+            # Note: the versions of vulkan-loader and moltenvk
+            #       must be exactly part of the same Vulkan SDK version
+            #       do not update either without checking both
+            #       require exactly the same version of vulkan-headers
+            self.requires("vulkan-loader/1.3.239.0")
+            self.requires("vulkan-headers/1.3.239.0", transitive_headers=True)
             if is_apple_os(self):
                 self.requires("moltenvk/1.2.2")
         if self.options.with_glib:
@@ -334,13 +385,13 @@ class QtConan(ConanFile):
             self.requires("harfbuzz/8.3.0")
         if self.options.get_safe("with_libjpeg", False) and not self.options.multiconfiguration:
             if self.options.with_libjpeg == "libjpeg-turbo":
-                self.requires("libjpeg-turbo/3.0.1")
+                self.requires("libjpeg-turbo/[>=3.0 <3.1]")
             else:
                 self.requires("libjpeg/9e")
         if self.options.get_safe("with_libpng", False) and not self.options.multiconfiguration:
-            self.requires("libpng/1.6.42")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_sqlite3 and not self.options.multiconfiguration:
-            self.requires("sqlite3/3.45.0")
+            self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.1.0")
         if self.options.with_pq:
@@ -367,7 +418,7 @@ class QtConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.1.0")
         if self.options.get_safe("qtwebengine") and self.settings.os == "Linux":
-            self.requires("expat/2.6.0")
+            self.requires("expat/[>=2.6.2 <3]")
             self.requires("opus/1.4")
             self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
@@ -387,9 +438,9 @@ class QtConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21.1 <4]")
-        self.tool_requires("ninja/1.11.1")
+        self.tool_requires("ninja/[>=1.12 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         if self.settings.os == "Windows":
             self.tool_requires('strawberryperl/5.32.1.1')
 
@@ -465,12 +516,7 @@ class QtConan(ConanFile):
 
         tc = CMakeToolchain(self, generator="Ninja")
 
-        package_folder = self.package_folder.replace('\\', '/')
-        tc.variables["INSTALL_MKSPECSDIR"] = f"{package_folder}/res/archdatadir/mkspecs"
-        tc.variables["INSTALL_ARCHDATADIR"] = f"{package_folder}/res/archdatadir"
-        tc.variables["INSTALL_LIBEXECDIR"] = f"{package_folder}/bin"
-        tc.variables["INSTALL_DATADIR"] = f"{package_folder}/res/datadir"
-        tc.variables["INSTALL_SYSCONFDIR"] = f"{package_folder}/res/sysconfdir"
+        tc.absolute_paths = True
 
         tc.variables["QT_BUILD_TESTS"] = "OFF"
         tc.variables["QT_BUILD_EXAMPLES"] = "OFF"
@@ -513,6 +559,16 @@ class QtConan(ConanFile):
             tc.variables["FEATURE_dbus"] = "OFF"
         tc.variables["CMAKE_FIND_DEBUG_MODE"] = "FALSE"
 
+        if not self.options.with_zstd:
+            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapZSTD"] = "ON"
+
+        if not self.options.get_safe("with_vulkan"):
+            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapVulkanHeaders"] = "ON"
+
+        # Prevent finding LibClang from the system
+        # this is needed by the QDoc tool inside Qt Tools
+        # See: https://github.com/conan-io/conan-center-index/issues/24729#issuecomment-2255291495
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapLibClang"] = "ON"
 
         for opt, conf_arg in [("with_glib", "glib"),
                               ("with_icu", "icu"),
@@ -637,7 +693,7 @@ class QtConan(ConanFile):
 
     def source(self):
         destination = self.source_folder
-        if self.info.settings.os == "Windows":
+        if platform.system() == "Windows":
             # Don't use os.path.join, or it removes the \\?\ prefix, which enables long paths
             destination = rf"\\?\{self.source_folder}"
         get(self, **self.conan_data["sources"][self.version],
@@ -651,9 +707,6 @@ class QtConan(ConanFile):
                                   "  if (enable_precompiled_headers) {\n    if (false) {"
                                   )
 
-        replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", "QtInternalTargets.cmake"),
-                              "-Zc:wchar_t",
-                              "-Zc:wchar_t -Zc:twoPhase-")
         for f in ["FindPostgreSQL.cmake"]:
             file = os.path.join(self.source_folder, "qtbase", "cmake", f)
             if os.path.isfile(file):
@@ -672,6 +725,13 @@ class QtConan(ConanFile):
                         os.path.join(self.source_folder, "qtbase", "cmake", "QtAutoDetect.cmake" if Version(self.version) < "6.6.2" else "QtAutoDetectHelpers.cmake"),
                         "qt_auto_detect_vcpkg()",
                         "# qt_auto_detect_vcpkg()")
+
+        # Handle locating moltenvk headers when vulkan is enabled on macOS
+        replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", "FindWrapVulkanHeaders.cmake"),
+        "if(APPLE)", "if(APPLE)\n"
+                    " find_package(moltenvk REQUIRED QUIET)\n"
+                    " target_include_directories(WrapVulkanHeaders::WrapVulkanHeaders INTERFACE ${moltenvk_INCLUDE_DIR})"
+        )
 
     def _xplatform(self):
         if self.settings.os == "Linux":
@@ -807,7 +867,7 @@ class QtConan(ConanFile):
         rm(self, "*.la*", os.path.join(self.package_folder, "lib"), recursive=True)
         rm(self, "*.pdb*", self.package_folder, recursive=True)
         rm(self, "ensure_pro_file.cmake", self.package_folder, recursive=True)
-        os.remove(os.path.join(self.package_folder, "bin", "qt-cmake-private-install.cmake"))
+        os.remove(os.path.join(self.package_folder, "libexec" if Version(self.version) >= "6.5.0" and self.settings.os != "Windows" else "bin", "qt-cmake-private-install.cmake"))
 
         for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
             if os.path.isfile(os.path.join(self.package_folder, "lib", "cmake", m, f"{m}Macros.cmake")):
@@ -828,6 +888,8 @@ class QtConan(ConanFile):
         filecontents += f"set(QT_VERSION_MAJOR {ver.major})\n"
         filecontents += f"set(QT_VERSION_MINOR {ver.minor})\n"
         filecontents += f"set(QT_VERSION_PATCH {ver.patch})\n"
+        if self.settings.os == "Macos":
+            filecontents += 'set(__qt_internal_cmake_apple_support_files_path "${CMAKE_CURRENT_LIST_DIR}/../../../lib/cmake/Qt6/macos")\n'
         targets = ["moc", "rcc", "tracegen", "cmake_automoc_parser", "qlalr", "qmake"]
         if self.options.with_dbus:
             targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
@@ -846,7 +908,8 @@ class QtConan(ConanFile):
             targets.append("qsb")
         if self.options.qtdeclarative:
             targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
-            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview", "qmltestrunner"])
+            targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview"])
+            # Note: consider "qmltestrunner", see https://github.com/conan-io/conan-center-index/issues/24276
         if self.options.get_safe("qtremoteobjects"):
             targets.append("repc")
         if self.options.get_safe("qtscxml"):
@@ -854,10 +917,13 @@ class QtConan(ConanFile):
         for target in targets:
             exe_path = None
             for path_ in [f"bin/{target}{extension}",
-                          f"lib/{target}{extension}"]:
+                          f"lib/{target}{extension}",
+                          f"libexec/{target}{extension}"]:
                 if os.path.isfile(os.path.join(self.package_folder, path_)):
                     exe_path = path_
                     break
+            else:
+                assert False, f"Could not find executable {target}{extension} in {self.package_folder}"
             if not exe_path:
                 self.output.warning(f"Could not find path to {target}{extension}")
             filecontents += textwrap.dedent(f"""\
@@ -908,6 +974,8 @@ class QtConan(ConanFile):
             save(self, os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake"), textwrap.dedent("""\
                     set(QT_KNOWN_POLICY_QTP0001 TRUE)
                     """))
+            if self.options.gui and self.options.qtshadertools:
+                _create_private_module("Quick", ["CorePrivate", "GuiPrivate", "QmlPrivate", "Quick"])
 
         if self.settings.os in ["Windows", "iOS"]:
             contents = textwrap.dedent("""\
@@ -932,8 +1000,8 @@ class QtConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Qt6"
 
         # consumers will need the QT_PLUGIN_PATH defined in runenv
-        self.runenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "res", "archdatadir", "plugins"))
-        self.buildenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "res", "archdatadir", "plugins"))
+        self.runenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "plugins"))
+        self.buildenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "plugins"))
 
         self.buildenv_info.define("QT_HOST_PATH", self.package_folder)
 
@@ -990,7 +1058,7 @@ class QtConan(ConanFile):
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
             if not self.options.shared:
                 self.cpp_info.components[componentname].libs = [libname + libsuffix]
-            self.cpp_info.components[componentname].libdirs = [os.path.join("res", "archdatadir", "plugins", plugintype)]
+            self.cpp_info.components[componentname].libdirs = [os.path.join("plugins", plugintype)]
             self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
                 requires.append("Core")
@@ -1013,7 +1081,7 @@ class QtConan(ConanFile):
         _create_module("Core", core_reqs)
         pkg_config_vars = [
             "bindir=${prefix}/bin",
-            "libexecdir=${prefix}/bin",
+            "libexecdir=${prefix}/libexec",
             "exec_prefix=${prefix}",
         ]
         self.cpp_info.components["qtCore"].set_property("pkg_config_custom_content", "\n".join(pkg_config_vars))
@@ -1030,7 +1098,7 @@ class QtConan(ConanFile):
         self.cpp_info.components["qtPlatform"].set_property("cmake_target_name", "Qt6::Platform")
         self.cpp_info.components["qtPlatform"].names["cmake_find_package"] = "Platform"
         self.cpp_info.components["qtPlatform"].names["cmake_find_package_multi"] = "Platform"
-        self.cpp_info.components["qtPlatform"].includedirs = [os.path.join("res", "archdatadir", "mkspecs", self._xplatform())]
+        self.cpp_info.components["qtPlatform"].includedirs = [os.path.join("mkspecs", self._xplatform())]
         if self.options.with_dbus:
             _create_module("DBus", ["dbus::dbus"])
             if self.settings.os == "Windows":
@@ -1060,6 +1128,7 @@ class QtConan(ConanFile):
                 gui_reqs.append("opengl::opengl")
             if self.options.get_safe("with_vulkan", False):
                 gui_reqs.append("vulkan-loader::vulkan-loader")
+                gui_reqs.append("vulkan-headers::vulkan-headers")
                 if is_apple_os(self):
                     gui_reqs.append("moltenvk::moltenvk")
             if self.options.with_harfbuzz:
@@ -1099,7 +1168,11 @@ class QtConan(ConanFile):
                     "wtsapi32", "shcore", "comdlg32", "d3d9", "runtimeobject"
                 ]
                 _create_plugin("QWindowsIntegrationPlugin", "qwindows", "platforms", ["Core", "Gui"])
-                _create_plugin("QWindowsVistaStylePlugin", "qwindowsvistastyle", "styles", ["Core", "Gui"])
+                # https://github.com/qt/qtbase/commit/65d58e6c41e3c549c89ea4f05a8e467466e79ca3
+                if Version(self.version) >= "6.7.0":
+                    _create_plugin("QModernWindowsStylePlugin", "qmodernwindowsstyle", "styles", ["Core", "Gui"])
+                else:
+                    _create_plugin("QWindowsVistaStylePlugin", "qwindowsvistastyle", "styles", ["Core", "Gui"])
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/windows/CMakeLists.txt#L53-L69
                 self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs += [
                     "advapi32", "dwmapi", "gdi32", "imm32", "ole32", "oleaut32", "setupapi", "shell32", "shlwapi",
@@ -1205,6 +1278,7 @@ class QtConan(ConanFile):
             self.cpp_info.components["qtQmlImportScanner"].requires = _get_corrected_reqs(["Qml"])
             if qt_quick_enabled:
                 _create_module("Quick", ["Gui", "Qml", "QmlModels"])
+                _add_build_module("qtQuick", self._cmake_qt6_private_file("Quick"))
                 if self.options.widgets:
                     _create_module("QuickWidgets", ["Gui", "Qml", "Quick", "Widgets"])
                 _create_module("QuickShapes", ["Gui", "Qml", "Quick"])
@@ -1486,7 +1560,7 @@ class QtConan(ConanFile):
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/corelib/CMakeLists.txt#L1079-L1082
                     self.cpp_info.components["qtCore"].frameworks.append("WatchKit")
 
-        self.cpp_info.components["qtCore"].builddirs.append(os.path.join("res", "archdatadir", "bin"))
+        self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin"))
         _add_build_module("qtCore", self._cmake_executables_file)
         _add_build_module("qtCore", self._cmake_qt6_private_file("Core"))
         if self.settings.os in ["Windows", "iOS"]:
@@ -1522,10 +1596,8 @@ class QtConan(ConanFile):
                 component = "qt" + m[:m.find("_")]
                 if component not in self.cpp_info.components:
                     continue
-                submodules_dir = os.path.join(object_dir, m)
-                for sub_dir in os.listdir(submodules_dir):
-                    submodule_dir = os.path.join(submodules_dir, sub_dir)
-                    obj_files = [os.path.join(submodule_dir, file) for file in os.listdir(submodule_dir)]
+                for root, _, files in os.walk(os.path.join(object_dir, m)):
+                    obj_files = [os.path.join(root, file) for file in files]
                     self.cpp_info.components[component].exelinkflags.extend(obj_files)
                     self.cpp_info.components[component].sharedlinkflags.extend(obj_files)
 

@@ -14,9 +14,17 @@ sources:
 patches:
   "3.2.5":
     - patch_file: "patches/0002-find-icu-programs.patch"
+      patch_description: "Find ICU programs on environment"
+      patch_type: "conan"
   "3.2.4":
     - patch_file: "patches/0002-find-icu-programs.patch"
+      patch_description: "Find ICU programs on environment"
+      patch_type: "conan"
   "3.2.3":
     - patch_file: "patches/0002-find-icu-programs.patch"
+      patch_description: "Find ICU programs on environment"
+      patch_type: "conan"
   "3.2.2":
     - patch_file: "patches/0002-find-icu-programs.patch"
+      patch_description: "Find ICU programs on environment"
+      patch_type: "conan"

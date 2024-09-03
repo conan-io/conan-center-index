@@ -1,0 +1,13 @@
+diff --git a/src/config/pre.in b/src/config/pre.in
+index 3752174..98dbe0f 100644
+--- a/src/config/pre.in
++++ b/src/config/pre.in
+@@ -184,7 +184,7 @@ INSTALL_PROGRAM=@INSTALL_PROGRAM@ $(INSTALL_STRIP)
+ INSTALL_SCRIPT=@INSTALL_PROGRAM@
+ INSTALL_DATA=@INSTALL_DATA@
+ INSTALL_SHLIB=@INSTALL_SHLIB@
+-INSTALL_SETUID=$(INSTALL) $(INSTALL_STRIP) -m 4755 -o root
++INSTALL_SETUID=$(INSTALL) $(INSTALL_STRIP) -m 755
+ ## This is needed because autoconf will sometimes define @exec_prefix@ to be
+ ## ${prefix}.
+ prefix=@prefix@

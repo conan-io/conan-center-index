@@ -83,8 +83,11 @@ class Nghttp2Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ENABLE_SHARED_LIB"] = self.options.shared
-        tc.variables["ENABLE_STATIC_LIB"] = not self.options.shared
+        if Version(self.version) < "1.60.0":
+            tc.variables["ENABLE_SHARED_LIB"] = self.options.shared
+            tc.variables["ENABLE_STATIC_LIB"] = not self.options.shared
+        else:
+            tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["ENABLE_HPACK_TOOLS"] = self.options.with_hpack
         tc.variables["ENABLE_APP"] = self.options.with_app
         tc.variables["ENABLE_EXAMPLES"] = False
@@ -96,6 +99,9 @@ class Nghttp2Conan(ConanFile):
         tc.variables["WITH_JEMALLOC"] = self.options.get_safe("with_jemalloc", False)
         if Version(self.version) < "1.52.0":
             tc.variables["ENABLE_ASIO_LIB"] = self.options.with_asio
+        # To avoid overwriting dll import lib by static lib
+        if Version(self.version) >= "1.60.0" and self.options.shared:
+            tc.variables["STATIC_LIB_SUFFIX"] = "-static"
         if is_apple_os(self):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
             tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
@@ -107,7 +113,7 @@ class Nghttp2Conan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        if not self.options.shared:
+        if not self.options.shared and Version(self.version) < "1.60.0":
             # easier to patch here rather than have patch 'nghttp_static_include_directories' for each version
             save(self, os.path.join(self.source_folder, "lib", "CMakeLists.txt"),
                        "target_include_directories(nghttp2_static INTERFACE\n"
@@ -135,6 +141,8 @@ class Nghttp2Conan(ConanFile):
                                   "\n"
                                   "  target_link_libraries(nghttp2_asio\n"
                                  f"    {target_libnghttp2}\n")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(examples)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(tests)", "")
 
     def build(self):
         self._patch_sources()
@@ -148,6 +156,7 @@ class Nghttp2Conan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.components["nghttp2"].set_property("pkg_config_name", "libnghttp2")

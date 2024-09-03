@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rm, rmdir
+from conan.tools.files import get, copy, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -114,6 +114,13 @@ class CBlosc2Conan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        if self.options.with_lz4:
+            deps.set_property("lz4", "cmake_file_name", "LZ4")
+        if self.options.with_zlib =="zlib-ng":
+            deps.set_property("zlib-ng", "cmake_file_name", "ZLIB_NG")
+            deps.set_property("zlib-ng", "cmake_target_name", "ZLIB_NG::ZLIB_NG")
+        if self.options.with_zstd:
+            deps.set_property("zstd", "cmake_file_name", "ZSTD")
         deps.generate()
 
     def _patch_sources(self):

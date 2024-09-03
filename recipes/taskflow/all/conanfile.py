@@ -35,12 +35,14 @@ class TaskflowConan(ConanFile):
         return {
             "17": {
                 "Visual Studio": "16",
-                "gcc": "7.3",
+                "msvc": "192",
+                "gcc": "7.3" if Version(self.version) < "3.7.0" else "8.4",
                 "clang": "6.0",
                 "apple-clang": "10.0",
             },
             "14": {
                 "Visual Studio": "15",
+                "msvc": "191",
                 "gcc": "5",
                 "clang": "4.0",
                 "apple-clang": "8.0",

@@ -1,4 +1,13 @@
 sources:
+  "0.2.2":
+    url: "https://github.com/biojppm/c4core/releases/download/v0.2.2/c4core-0.2.2-src.tgz"
+    sha256: "beea43a5bdc64616d897cc0af728f408e35e2d75a8bb6014e6e25e90e0484578"
+  "0.2.1":
+    url: "https://github.com/biojppm/c4core/releases/download/v0.2.1/c4core-0.2.1-src.tgz"
+    sha256: "6447896444c59002af58c8543d0bc64184b9a5c5992c8fc09d6d71935d039f89"
+  "0.2.0":
+    url: "https://github.com/biojppm/c4core/releases/download/v0.2.0/c4core-0.2.0-src.tgz"
+    sha256: "7843e6fb41c200fff69fc71105dbbf56bb410bdbab6b330e02cbe18430fe23bd"
   "0.1.11":
     url: "https://github.com/biojppm/c4core/releases/download/v0.1.11/c4core-0.1.11-src.tgz"
     sha256: "67f4443f3742424f42453594e26e656f616dddfcf225a1d810e00473a741408c"
@@ -12,6 +21,18 @@ sources:
     url: "https://github.com/biojppm/c4core/releases/download/v0.1.8/c4core-0.1.8-src.tgz"
     sha256: "95c0663192c6bff7a098b50afcb05d22a34dd0fd8e6be2e1b61edad2b9675fde"
 patches:
+  "0.2.2":
+    - patch_file: "patches/0.2.2-0001-make-fast_float-external.patch"
+      patch_description: "use cci's fast_float recipe"
+      patch_type: "conan"
+  "0.2.1":
+    - patch_file: "patches/0.2.0-0001-make-fast_float-external.patch"
+      patch_description: "use cci's fast_float recipe"
+      patch_type: "conan"
+  "0.2.0":
+    - patch_file: "patches/0.2.0-0001-make-fast_float-external.patch"
+      patch_description: "use cci's fast_float recipe"
+      patch_type: "conan"
   "0.1.11":
     - patch_file: "patches/0.1.11-0001-make-fast_float-external.patch"
       patch_description: "use cci's fast_float recipe"

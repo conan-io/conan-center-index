@@ -61,6 +61,7 @@ class YyjsonConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "yyjson")
@@ -68,3 +69,6 @@ class YyjsonConan(ConanFile):
         self.cpp_info.libs = ["yyjson"]
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("YYJSON_IMPORTS")
+
+        if Version(self.version) >= "0.9.0":
+            self.cpp_info.set_property("pkg_config_name", "yyjson")

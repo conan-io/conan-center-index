@@ -131,6 +131,12 @@ class XercesCConan(ConanFile):
         # avoid picking up system dependency
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = self.options.get_safe("network_accessor") != "curl"
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_ICU"] = "icu" not in (self.options.transcoder, self.options.message_loader)
+
+        # Fix compatibility with Clang on Windows
+        # https://issues.apache.org/jira/browse/XERCESC-2252
+        if self.settings.os == "Windows" and self.settings.compiler == "clang":
+            tc.cache_variables["CMAKE_RC_FLAGS"] = "-C 1252"
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -166,7 +172,7 @@ class XercesCConan(ConanFile):
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["pthread", "nsl"])
 
         if Version(conan_version).major < 2:
             self.cpp_info.names["cmake_find_package"] = "XercesC"

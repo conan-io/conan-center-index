@@ -20,6 +20,12 @@ class MathterConan(ConanFile):
 
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "with_xsimd": [True, False] # XSimd is optionally used for hand-rolled vectorization.
+    }
+    default_options = {
+        "with_xsimd": True
+    }
     no_copy_source = True
 
     @property
@@ -34,6 +40,10 @@ class MathterConan(ConanFile):
             "gcc": 7,
             "Visual Studio": 16,
         }
+    
+    def config_options(self):
+        if Version(self.version) < "1.1":
+            del self.options.with_xsimd
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -53,6 +63,10 @@ class MathterConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def requirements(self):
+        if self.options.get_safe("with_xsimd"):
+            self.requires("xsimd/11.1.0")
+
     def package(self):
         if self.version == "1.0.0":
             copy(self, "LICENCE", self.source_folder, os.path.join(self.package_folder, "licenses"))
@@ -66,3 +80,5 @@ class MathterConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        if self.options.get_safe("with_xsimd"):
+            self.cpp_info.defines = ["MATHTER_USE_XSIMD=1"]
