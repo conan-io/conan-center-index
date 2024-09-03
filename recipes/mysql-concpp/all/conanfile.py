@@ -61,10 +61,6 @@ class MysqlCppConnRecipe(ConanFile):
 
     def requirements(self):
         self.requires("openssl/1.0.2u")
-        self.requires("boost/1.85.0")
-
-        if not self.settings.os == "Windows":
-            self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -104,20 +100,19 @@ class MysqlCppConnRecipe(ConanFile):
         # LZ4 patches
         tc.cache_variables["WITH_LZ4"] = "TRUE"
         # ZLIB patches
-        tc.cache_variables["WITH_ZLIB"] = self._package_folder_dep("zlib") if not self.settings.os == "Windows" else "TRUE"
+        tc.cache_variables["WITH_ZLIB"] = "TRUE" if self.settings.os == "Windows" else self._package_folder_dep("zlib")
         # ZSTD patches
         tc.cache_variables["WITH_ZSTD"] = "TRUE"
         # Build patches
         tc.cache_variables["BUILD_STATIC"] = not self.options.shared
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        # Disable Boost, only legacy JDBC connector needs it
+        tc.cache_variables["BOOST_DIR"] = "FALSE"
 
         # Windows patches
         if self.settings.os == "Windows":
             # OpenSSL patches
             tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
-            if is_msvc(self):
-                # Boost patches
-                tc.cache_variables["BOOST_DIR"] = self._package_folder_dep("boost")
 
         tc.generate()
 
@@ -137,6 +132,20 @@ class MysqlCppConnRecipe(ConanFile):
                             "enable_pic()\n"\
                             "add_compile_definitions(ZSTD_DISABLE_ASM)",
                             strict=False)
+
+        # Fix shared zlib build = duplicate references
+        if self.options.shared and self.settings.os in ["Linux", "FreeBSD"] :
+            # ZLIB patch
+            replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "protobuf", "protobuf-3.19.6", "cmake", "CMakeLists.txt"),
+                                "set(protobuf_WITH_ZLIB_DEFAULT ON)",
+                                "set(protobuf_WITH_ZLIB_DEFAULT OFF)",
+                                strict=False)
+
+            # mysqlx && ZLIB patch
+            replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"),
+                                "PRIVATE cdk_foundation ext::z ext::lz4 ext::zstd",
+                                "PRIVATE cdk_foundation ext::lz4 ext::zstd",
+                                strict=False)
 
         # Apple patches
         if is_apple_os(self) and cross_building(self):
