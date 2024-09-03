@@ -1148,6 +1148,7 @@ Prefix = ..""")
                 gui_reqs.append("md4c::md4c")
             _create_module("Gui", gui_reqs)
             _add_build_module("qtGui", self._cmake_qt5_private_file("Gui"))
+            _create_plugin("QOffscreenIntegrationPlugin", "qoffscreen", "platforms", ["Core", "Gui"])
 
             event_dispatcher_reqs = ["Core", "Gui"]
             if self.options.with_glib:
@@ -1242,6 +1243,7 @@ Prefix = ..""")
                 if self.options.get_safe("with_x11", False):
                     _create_module("XcbQpa", xcb_qpa_reqs, has_include_dir=False)
                     _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpa"])
+                    _create_plugin("QXcbGlxIntegrationPlugin", "qxcb-glx-integration", "xcbglintegrations", ["Core", "Gui"])
 
         if self.options.with_sqlite3:
             _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
@@ -1315,6 +1317,16 @@ Prefix = ..""")
         if self.options.qtwayland and self.options.gui:
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
             _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
+            _create_plugin("QWaylandIntegrationPlugin", "qwayland-generic", "platforms", ["Gui"])
+            _create_plugin("QWaylandEglPlatformIntegrationPlugin", "qwayland-egl", "platforms", ["Gui"])
+            _create_plugin("QWaylandXCompositeGlxPlatformIntegrationPlugin", "qwayland-xcomposite-glx", "platforms", ["Gui"])
+            _create_plugin("QWaylandWlShellIntegrationPlugin", "wl-shell", "wayland-shell-integration", ["WaylandClient"])
+            _create_plugin("QWaylandFullScreenShellV1IntegrationPlugin", "fullscreen-shell-v1", "wayland-shell-integration", ["WaylandClient"])
+            _create_plugin("QWaylandXdgShellIntegrationPlugin", "xdg-shell", "wayland-shell-integration", ["WaylandClient"])
+            _create_plugin("QWaylandIviShellIntegrationPlugin", "ivi-shell", "wayland-shell-integration", ["WaylandClient"])
+            _create_plugin("QWaylandEglClientBufferPlugin", "qt-plugin-wayland-egl", "wayland-graphics-integration-client", ["WaylandClient"])
+            _create_plugin("QWaylandXCompositeGlxClientBufferPlugin", "xcomposite-glx", "wayland-graphics-integration-client", ["WaylandClient"])
+            _create_plugin("QWaylandBradientDecorationPlugin", "bradient", "wayland-decoration-client", ["WaylandClient"])
 
         if self.options.qtlocation:
             _create_module("Positioning")
