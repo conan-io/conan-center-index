@@ -61,6 +61,7 @@ class MysqlCppConnRecipe(ConanFile):
 
     def requirements(self):
         self.requires("openssl/1.0.2u")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -144,7 +145,7 @@ class MysqlCppConnRecipe(ConanFile):
             # mysqlx && ZLIB patch
             replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"),
                                 "PRIVATE cdk_foundation ext::z ext::lz4 ext::zstd",
-                                "PRIVATE cdk_foundation ZLIB::ZLIB ext::lz4 ext::zstd",
+                                "PRIVATE cdk_foundation ext::lz4 ext::zstd",
                                 strict=False)
 
         # Apple patches
