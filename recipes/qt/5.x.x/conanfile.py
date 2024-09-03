@@ -210,7 +210,7 @@ class QtConan(ConanFile):
 
     def _debug_output(self, message):
         if Version(conan_version) >= "2":
-            self.output.debug(message)
+            self.output.info(message)
 
     def configure(self):
         # if self.settings.os != "Linux":
@@ -773,22 +773,22 @@ class QtConan(ConanFile):
             if package in [d.ref.name for d in self.dependencies.direct_host.values()]:
                 p = self.dependencies[package]
                 if package == "freetype":
-                    args.append("\"%s_INCDIR=%s\"" % (var, p.cpp_info.aggregated_components().includedirs[-1]))
-                args.append("\"%s_LIBS=%s\"" % (var, " ".join(self._gather_libs(p))))
+                    args.append(f'"{var}_INCDIR={p.cpp_info.aggregated_components().includedirs[-1]}"')
+                args.append(f'"{var}_LIBS={" ".join(self._gather_libs(p))}"')
 
         for dependency in self.dependencies.direct_host.values():
             args += [f"-I \"{s}\"" for s in dependency.cpp_info.aggregated_components().includedirs]
             args += [f"-D {s}" for s in dependency.cpp_info.aggregated_components().defines]
 
         libdirs = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
-        args.append("QMAKE_LIBDIR+=\"%s\"" % " ".join(libdirs))
+        args.append(f'QMAKE_LIBDIR+="{" ".join(libdirs)}"')
         if not is_msvc(self):
-            args.append("QMAKE_RPATHLINKDIR+=\"%s\"" % ":".join(libdirs))
+            args.append(f'QMAKE_RPATHLINKDIR+="{":".join(libdirs)}"')
 
         if "libmysqlclient" in [d.ref.name for d in self.dependencies.direct_host.values()]:
-            args.append("-mysql_config \"%s\"" % os.path.join(self.dependencies["libmysqlclient"].package_folder, "bin", "mysql_config"))
+            args.append(f'-mysql_config "{os.path.join(self.dependencies["libmysqlclient"].package_folder, "bin", "mysql_config")}"')
         if "libpq" in [d.ref.name for d in self.dependencies.direct_host.values()]:
-            args.append("-psql_config \"%s\"" % os.path.join(self.dependencies["libpq"].package_folder, "bin", "pg_config"))
+            args.append(f'-psql_config "{os.path.join(self.dependencies["libpq"].package_folder, "bin", "pg_config")}"')
         if self.settings.os == "Macos":
             args += ["-no-framework"]
             if self.settings.arch == "armv8":
@@ -976,9 +976,12 @@ Prefix = ..""")
         filecontents += 'set(CMAKE_AUTOMOC_MACRO_NAMES "Q_OBJECT" "Q_GADGET" "Q_GADGET_EXPORT" "Q_NAMESPACE" "Q_NAMESPACE_EXPORT")\n'
         save(self, os.path.join(self.package_folder, self._cmake_core_extras_file), filecontents)
 
-        def _create_private_module(module, dependencies=[]):
-            if "Core" not in dependencies:
+        def _create_private_module(module, dependencies=None):
+            if not dependencies:
+                dependencies = ["Core"]
+            elif "Core" not in dependencies:
                 dependencies.append("Core")
+
             dependencies_string = ';'.join(f'Qt5::{dependency}' for dependency in dependencies)
             contents = textwrap.dedent("""\
             if(NOT TARGET Qt5::{0}Private)
@@ -1047,7 +1050,10 @@ Prefix = ..""")
                 reqs.append(corrected_req)
             return reqs
 
-        def _create_module(module, requires=[], has_include_dir=True):
+        def _create_module(module, requires=None, has_include_dir=True):
+            if not requires:
+                requires = []
+
             componentname = f"qt{module}"
             assert componentname not in self.cpp_info.components, f"Module {module} already present in self.cpp_info.components"
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt5::{module}")
