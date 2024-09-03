@@ -144,7 +144,7 @@ class MysqlCppConnRecipe(ConanFile):
             # mysqlx && ZLIB patch
             replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"),
                                 "PRIVATE cdk_foundation ext::z ext::lz4 ext::zstd",
-                                "PRIVATE cdk_foundation ext::lz4 ext::zstd",
+                                "PRIVATE cdk_foundation ZLIB::ZLIB ext::lz4 ext::zstd",
                                 strict=False)
 
         # Apple patches
