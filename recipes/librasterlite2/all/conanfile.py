@@ -107,7 +107,8 @@ class Librasterlite2Conan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if not cross_building(self):
+        if not cross_building(self) or is_apple_os(self):
+            # Required to find libgnuintl.8.dylib on macOS
             env = VirtualRunEnv(self)
             env.generate(scope="build")
 
