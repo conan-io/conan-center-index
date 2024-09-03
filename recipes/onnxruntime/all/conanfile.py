@@ -170,7 +170,7 @@ class OnnxRuntimeConan(ConanFile):
         if Version(self.version) >= "1.17":
             tc.variables["onnxruntime_ENABLE_CUDA_EP_INTERNAL_TESTS"] = False
             tc.variables["onnxruntime_USE_NEURAL_SPEED"] = False
-            tc.variables["onnxruntime_USE_MEMORY_EFFICIENT_ATTENTION"] = True
+            tc.variables["onnxruntime_USE_MEMORY_EFFICIENT_ATTENTION"] = False
 
         # Disable a warning that gets converted to an error
         tc.preprocessor_definitions["_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS"] = "1"
@@ -275,6 +275,8 @@ class OnnxRuntimeConan(ConanFile):
             self.cpp_info.requires.append("wil::wil")
         if self.options.with_xnnpack:
             self.cpp_info.requires.append("xnnpack::xnnpack")
+        if self.options.with_cuda:
+            self.cpp_info.requires.append("cutlass::cutlass")
 
         # https://github.com/microsoft/onnxruntime/blob/v1.16.0/cmake/CMakeLists.txt#L1759-L1763
         self.cpp_info.set_property("cmake_file_name", "onnxruntime")
