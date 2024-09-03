@@ -198,7 +198,7 @@ class LLVMCoreConan(ConanFile):
         if os.getenv("CONAN_CENTER_BUILD_SERVICE"):
             self.output.info("Applying CCI Resource Limits")
             default_ram_per_compile_job = 16384
-            default_ram_per_link_job = 2048
+            default_ram_per_link_job = 4096
         else:
             default_ram_per_compile_job = None
             default_ram_per_link_job = None
