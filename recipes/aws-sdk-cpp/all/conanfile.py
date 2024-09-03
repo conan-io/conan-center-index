@@ -367,12 +367,15 @@ class AwsSdkCppConan(ConanFile):
             if self.options.get_safe("s3-crt"):
                 self.requires("aws-c-s3/0.1.26")
         if self.settings.os != "Windows":
-            self.requires("openssl/[>=1.1 <4]")
-            self.requires("libcurl/[>=7.78.0 <9]")
+            # Used transitively in core/utils/crypto/openssl/CryptoImpl.h public header
+            self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
+            # Used transitively in core/http/curl/CurlHandleContainer.h public header
+            self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True)
         if self.settings.os =="Linux":
             # Pulseaudio -> libcap, libalsa only support linux, don't use pulseaudio on other platforms
             if self.options.get_safe("text-to-speech"):
-                self.requires("pulseaudio/14.2")
+                # Used transitively in text-to-speech/PulseAudioPCMOutputDriver.h public header
+                self.requires("pulseaudio/14.2", transitive_headers=True, transitive_libs=True)
         # zlib is used if ENABLE_ZLIB_REQUEST_COMPRESSION is enabled, set ot ON by default
         self.requires("zlib/[>=1.2.11 <2]")
 
