@@ -315,5 +315,6 @@ class NcbiCxxToolkit(ConanFile):
             self.cpp_info.components["core"].frameworks = ["ApplicationServices"]
         self.cpp_info.components["core"].builddirs.append("res")
         build_modules = [self._module_file_rel_path]
-        self.cpp_info.components["core"].build_modules = build_modules
+        self.cpp_info.components["core"].build_modules["cmake_find_package"] = build_modules
+        self.cpp_info.components["core"].build_modules["cmake_find_package_multi"] = build_modules
         self.cpp_info.set_property("cmake_build_modules", build_modules)
