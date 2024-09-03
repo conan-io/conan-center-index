@@ -592,6 +592,7 @@ required_for_references:
 - inversify-cpp
 - iowow
 - ipaddress
+- iphreeqc
 - iqa
 - irrxml
 - isa-l
@@ -1328,6 +1329,7 @@ required_for_references:
 - sdf
 - sdl
 - sdl_image
+- sdl_mixer
 - sdl_net
 - sdl_ttf
 - seadex-essentials
