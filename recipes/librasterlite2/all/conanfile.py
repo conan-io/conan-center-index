@@ -138,16 +138,18 @@ class Librasterlite2Conan(ConanFile):
                               "SUBDIRS = headers src test tools examples",
                               "SUBDIRS = headers src")
         # fix MinGW
-        replace_in_file(
-            self, os.path.join(self.source_folder, "configure.ac"),
-            "AC_CHECK_LIB(z,",
-            "AC_CHECK_LIB({},".format(self.dependencies["zlib"].cpp_info.aggregated_components().libs[0]),
-        )
+        zlib_lib = self.dependencies["zlib"].cpp_info.aggregated_components().libs[0]
+        replace_in_file(self, os.path.join(self.source_folder, "configure.ac"),
+                        "AC_CHECK_LIB(z,",
+                        f"AC_CHECK_LIB({zlib_lib},")
 
     def build(self):
         self._patch_sources()
         autotools = Autotools(self)
         autotools.autoreconf()
+        # FIXME: remove, added to help debug ./configure failure on apple-clang
+        replace_in_file(self, os.path.join(self.source_folder, "configure"), "2>&5", "")
+        replace_in_file(self, os.path.join(self.source_folder, "configure"), ">&5", "")
         autotools.configure()
         autotools.make()
 
