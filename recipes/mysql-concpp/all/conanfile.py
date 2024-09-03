@@ -62,7 +62,9 @@ class MysqlCppConnRecipe(ConanFile):
     def requirements(self):
         self.requires("openssl/1.0.2u")
         self.requires("boost/1.85.0")
-        self.requires("zlib/[>=1.2.11 <2]", visible=False)
+
+        if not self.settings.os == "Windows":
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -102,7 +104,7 @@ class MysqlCppConnRecipe(ConanFile):
         # LZ4 patches
         tc.cache_variables["WITH_LZ4"] = "TRUE"
         # ZLIB patches
-        tc.cache_variables["WITH_ZLIB"] = "TRUE"
+        tc.cache_variables["WITH_ZLIB"] = self._package_folder_dep("zlib") if not self.settings.os == "Windows" else "TRUE"
         # ZSTD patches
         tc.cache_variables["WITH_ZSTD"] = "TRUE"
         # Build patches
