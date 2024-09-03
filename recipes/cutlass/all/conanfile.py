@@ -94,9 +94,6 @@ class CutlassConan(ConanFile):
         copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        # https://github.com/microsoft/onnxruntime/blame/bad00a36579eefc64bbf1926d2c403928a518b37/cmake/onnxruntime_providers_cuda.cmake#L225
-        copy(self, "*.h", os.path.join(self.source_folder, "examples"), os.path.join(self.package_folder, "examples"))
-        copy(self, "*.h", os.path.join(self.source_folder, "tools", "util", "include"), os.path.join(self.package_folder, "tools", "util", "include"))
         rmdir(self, os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "test"))
 
@@ -104,6 +101,5 @@ class CutlassConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "NvidiaCutlass")
         self.cpp_info.set_property("cmake_target_name", "nvidia::cutlass::cutlass")
-        self.cpp_info.includedirs.extend([os.path.join("tools", "util", "include"), "examples"])
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
