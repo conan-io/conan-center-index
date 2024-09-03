@@ -86,7 +86,7 @@ class Librasterlite2Conan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_zstd:
-            self.requires("zstd/[^1.5]")
+            self.requires("zstd/[~1.5]")
 
     def validate(self):
         if is_msvc(self):
