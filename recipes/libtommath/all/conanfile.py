@@ -50,11 +50,6 @@ class LibTomMathConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if is_msvc(self) and self.settings.build_type == "Debug":
-            # libtommath requires at least /O1 on MSVC for dead code elimination
-            # https://github.com/libtom/libtommath/blob/42b3fb07e7d504f61a04c7fca12e996d76a25251/s_mp_rand_platform.c#L120-L138
-            tc.cache_variables["CMAKE_CXX_FLAGS_DEBUG_INIT"] = "/O1"
-            tc.cache_variables["CMAKE_BUILD_TYPE"] = "RelWithDebInfo"
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
@@ -67,6 +62,16 @@ class LibTomMathConan(ConanFile):
             # Disable installation of docs, which is not valid for < 1.3
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "# Windows uses a different help sytem.\nif(", "if(0 AND")
+        if is_msvc(self):
+            # libtommath requires /O1 on MSVC Debug builds for dead code elimination.
+            # I could not find a way short of forcing settings.build_type=RelWithDebInfo to get that to work, though.
+            # Disabling the missing symbols directly instead.
+            # https://github.com/libtom/libtommath/blob/42b3fb07e7d504f61a04c7fca12e996d76a25251/s_mp_rand_platform.c#L120-L138
+            file = "bn_s_mp_rand_platform.c" if Version(self.version) <= "1.3.0" else "s_mp_rand_platform.c"
+            for symbol in ["s_read_getrandom", "s_read_ltm_rng", "s_read_arc4random", "s_read_urandom"]:
+                replace_in_file(self, os.path.join(self.source_folder, file),
+                                f"if ((err != MP_OKAY) && MP_HAS({symbol.upper()})",
+                                f"// if ((err != MP_OKAY) && MP_HAS({symbol.upper()})")
 
     def build(self):
         self._patch_sources()
