@@ -13,6 +13,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import export_conandata_patches, get, rmdir, rename, replace_in_file, load, save, copy, apply_conandata_patches
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.56 <2 || >=2.0.6"
@@ -428,7 +429,14 @@ class VtkConan(ConanFile):
 
     def validate(self):
         if conan_version.major == 1:
+            # The automatic component creation fails due to generator differences.
             raise ConanInvalidConfiguration("Conan v1 is not supported.")
+        if is_msvc(self) and self.options.shared:
+            # vtkCommonCore.lib(vtkSMPToolsAPI.obj) : error LNK2019: unresolved external symbol
+            # "public: bool __cdecl vtk::detail::smp::vtkSMPToolsImpl<1>::IsParallelScope(void)"
+            raise ConanInvalidConfiguration(
+                "-o shared=True is currently not supported on MSVC due to linker errors. Contributions are welcome!"
+            )
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
