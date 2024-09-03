@@ -59,7 +59,7 @@ class PackageConan(ConanFile):
         if self.options.with_python:
             self.requires("ncurses/6.4")
             self.requires("cpython/3.10.0")
-            self.requires("pybind11/2.12.0")
+            self.requires("pybind11/2.13.5")
 
     def validate(self):
         if is_apple_os(self):
