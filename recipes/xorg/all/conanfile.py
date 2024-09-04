@@ -84,7 +84,7 @@ class XorgConan(ConanFile):
                             "libxinerama-dev", "libxcb-dev", "xcb-util-dev", "xcb-util-cursor-dev"], update=True, check=True)
 
     def package_info(self):
-        if Version(conan_version.major) >= 2:
+        if Version(conan_version) >= 2:
             self.cpp_info.bindirs = []
             self.cpp_info.includedirs = []
             self.cpp_info.libdirs = []
