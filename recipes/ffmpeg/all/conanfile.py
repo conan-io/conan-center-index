@@ -354,10 +354,6 @@ class FFMpegConan(ConanFile):
                 raise ConanInvalidConfiguration("FFmpeg '{}' option requires '{}' option to be enabled".format(
                     dependency, "' or '".join(features)))
 
-        if Version(self.version) >= "6.1" and conan_version.major == 1 and is_msvc(self) and self.options.shared:
-            # Linking fails with "Argument list too long" for some reason on Conan v1
-            raise ConanInvalidConfiguration("MSVC shared build is not supported for Conan v1")
-
         if Version(self.version) == "7.0.1" and self.settings.build_type == "Debug":
             # FIXME: FFMpeg fails to build in Debug mode with the following error:
             # ld: libavcodec/libavcodec.a(vvcdsp_init.o): in function `ff_vvc_put_pixels2_8_sse4':
