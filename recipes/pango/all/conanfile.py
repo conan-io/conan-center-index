@@ -58,8 +58,6 @@ class PangoConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        self.options["cairo"].with_freetype = self.options.with_freetype
-        self.options["cairo"].with_fontconfig = self.options.with_fontconfig
 
     def layout(self):
         basic_layout(self, src_folder="src")
