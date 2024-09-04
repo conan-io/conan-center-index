@@ -367,6 +367,8 @@ class AwsSdkCppConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             if self.options.get_safe("text-to-speech"):
                 self.requires("pulseaudio/14.2")
+        # zlib is used if ENABLE_ZLIB_REQUEST_COMPRESSION is enabled, set ot ON by default
+        self.requires("zlib/[>=1.2.11 <2]")
 
     @property
     def _settings_build(self):
@@ -504,6 +506,7 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["core"].set_property("pkg_config_name", "aws-sdk-cpp-core")
         self.cpp_info.components["core"].libs = ["aws-cpp-sdk-core"]
         self.cpp_info.components["core"].requires = [
+            "zlib::zlib",
             "aws-c-common::aws-c-common",
             "aws-c-event-stream::aws-c-event-stream",
             "aws-checksums::aws-checksums",
