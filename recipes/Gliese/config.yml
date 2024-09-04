@@ -1,0 +1,6 @@
+versions:
+  # It's encouraged to add new versions on the top
+  "2.1.0":
+    folder: all
+  "2.0.0":
+    folder: all
