@@ -1,8 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get
-from conan.tools.scm import Git
-
 
 
 class poleRecipe(ConanFile):
@@ -33,9 +31,8 @@ class poleRecipe(ConanFile):
         export_conandata_patches(self)
 
     def source(self):
-        git = Git(self)
-        git.clone(url=self.conan_data["sources"][self.version]["url"], target=".")
-        git.checkout(commit= self.conan_data["sources"][self.version]["revision"])
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -58,4 +55,4 @@ class poleRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["pole"]
-
+        
