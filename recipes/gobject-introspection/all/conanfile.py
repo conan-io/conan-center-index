@@ -47,8 +47,9 @@ class GobjectIntrospectionConan(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-        # FIXME: g-ir-scanner fails to load glib correctly, resulting in failure during the build
-        self.options["glib"].shared = True
+        if self.options.get_safe("build_introspection_data"):
+            # INFO: g-ir-scanner looks for dynamic glib and gobject libraries when running
+            self.options["glib"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -65,6 +66,9 @@ class GobjectIntrospectionConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} debug build on Windows is disabled due to debug version of Python libs likely not being available. Contributions to fix this are welcome.")
         if self.options.build_introspection_data and not self.dependencies["glib"].options.shared:
+            # FIXME: tools/g-ir-scanner fails to load glib
+            # tools/g-ir-scanner --output=gir/GLib-2.0.gir ...
+            # ERROR: can't resolve libraries to shared libraries: glib-2.0, gobject-2.0
             raise ConanInvalidConfiguration(f"{self.ref} requires shared glib to be built as shared. Use -o 'glib/*:shared=True'.")
         if self.options.build_introspection_data and self.settings.os in ["Windows", "Macos"]:
             # FIXME: tools/g-ir-scanner', '--output=gir/GLib-2.0.gir' ... ERROR: can't resolve libraries to shared libraries: glib-2.0, gobject-2.0
