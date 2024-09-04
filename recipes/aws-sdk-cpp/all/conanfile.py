@@ -368,8 +368,12 @@ class AwsSdkCppConan(ConanFile):
             if self.options.get_safe("text-to-speech"):
                 self.requires("pulseaudio/14.2")
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def validate_build(self):
-        if self.settings_build.os == "Windows" and self.settings.os == "Android":
+        if self._settings_build.os == "Windows" and self.settings.os == "Android":
             raise ConanInvalidConfiguration("Cross-building from Windows to Android is not supported")
 
     def validate(self):
@@ -503,13 +507,17 @@ class AwsSdkCppConan(ConanFile):
             "aws-c-common::aws-c-common",
             "aws-c-event-stream::aws-c-event-stream",
             "aws-checksums::aws-checksums",
-            "aws-c-auth::aws-c-auth",
             "aws-c-cal::aws-c-cal",
             "aws-c-http::aws-c-http",
-            "aws-c-mqtt::aws-c-mqtt",
             "aws-c-io::aws-c-io",
             "aws-crt-cpp::aws-crt-cpp",
         ]
+
+        if Version(self.version) >= "1.11.352":
+            self.cpp_info.components["core"].requires.extend([
+                "aws-c-auth::aws-c-auth",
+                "aws-c-mqtt::aws-c-mqtt"
+            ])
 
         # other components
         enabled_sdks = [sdk for sdk in self._sdks if self.options.get_safe(sdk)]
