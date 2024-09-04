@@ -12,7 +12,7 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 required_conan_version = ">=1.64.1"
 
 class MysqlCppConnRecipe(ConanFile):
-    name = "mysql-concpp"
+    name = "mysql-connector-cpp"
     package_type = "library"
     short_paths = True
     version= "9.0.0"
@@ -214,7 +214,7 @@ class MysqlCppConnRecipe(ConanFile):
         if is_apple_os(self) or self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["resolv"])
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs.extend(["m"])
+                self.cpp_info.system_libs.extend(["m", "pthread"])
 
         target = "concpp-xdevapi"
         target_alias = "concpp"
