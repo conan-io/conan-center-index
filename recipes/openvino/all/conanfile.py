@@ -270,10 +270,9 @@ class OpenvinoConan(ConanFile):
         if self.settings.os == "Emscripten":
             raise ConanInvalidConfiguration(f"{self.ref} does not support Emscripten")
 
-        # TODO: resolve it later, since it is not critical for now
-        # Conan Center CI fails with our of memory error when building OpenVINO
-        if self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support Debug build type")
+        # Failing on Conan Center CI due to memory usage
+        if os.getenv("CONAN_CENTER_BUILD_SERVICE") and self.settings.build_type == "Debug":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Debug build type on Conan Center CI")
 
     def validate(self):
         if self.options.get_safe("enable_gpu") and not self.options.shared and self.options.enable_cpu:
@@ -349,11 +348,13 @@ class OpenvinoConan(ConanFile):
                 openvino_runtime.libs.extend(["openvino_onnx_frontend", "openvino_onnx_common"])
                 openvino_runtime.requires.extend(["protobuf::libprotobuf", "onnx::onnx"])
             if self.options.enable_tf_frontend:
-                openvino_runtime.libs.extend(["openvino_tensorflow_frontend", "openvino_tensorflow_common"])
+                openvino_runtime.libs.extend(["openvino_tensorflow_frontend"])
                 openvino_runtime.requires.extend(["protobuf::libprotobuf", "snappy::snappy"])
             if self.options.enable_tf_lite_frontend:
-                openvino_runtime.libs.extend(["openvino_tensorflow_lite_frontend", "openvino_tensorflow_common"])
+                openvino_runtime.libs.extend(["openvino_tensorflow_lite_frontend"])
                 openvino_runtime.requires.extend(["flatbuffers::flatbuffers"])
+            if self.options.enable_tf_frontend or self.options.enable_tf_lite_frontend:
+                openvino_runtime.libs.extend(["openvino_tensorflow_common"])
             if self.options.enable_paddle_frontend:
                 openvino_runtime.libs.append("openvino_paddle_frontend")
                 openvino_runtime.requires.append("protobuf::libprotobuf")

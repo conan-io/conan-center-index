@@ -1,0 +1,174 @@
+grpc_version: 1.65.0
+grpc_targets:
+    - name: "address_sorting"
+      lib: "address_sorting"
+    - name: "gpr"
+      lib: "gpr"
+      requires:
+        - abseil::absl_base
+        - abseil::absl_core_headers
+        - abseil::absl_log_severity
+        - abseil::absl_flags
+        - abseil::absl_flags_marshalling
+        - abseil::absl_any_invocable
+        - abseil::absl_check
+        - abseil::absl_log_globals
+        - abseil::absl_log
+        - abseil::absl_memory
+        - abseil::absl_random_random
+        - abseil::absl_status
+        - abseil::absl_cord
+        - abseil::absl_str_format
+        - abseil::absl_strings
+        - abseil::absl_synchronization
+        - abseil::absl_time
+        - abseil::absl_optional
+        - abseil::absl_variant
+    - name: "_grpc"
+      lib: "grpc"
+      requires:
+        - upb_json_lib
+        - upb_textformat_lib
+        - re2::re2
+        - zlib::zlib
+        - abseil::absl_algorithm_container
+        - abseil::absl_config
+        - abseil::absl_no_destructor
+        - abseil::absl_cleanup
+        - abseil::absl_flat_hash_map
+        - abseil::absl_flat_hash_set
+        - abseil::absl_inlined_vector
+        - abseil::absl_bind_front
+        - abseil::absl_function_ref
+        - abseil::absl_hash
+        - abseil::absl_type_traits
+        - abseil::absl_random_bit_gen_ref
+        - abseil::absl_random_distributions
+        - abseil::absl_statusor
+        - abseil::absl_span
+        - abseil::absl_utility
+        - c-ares::cares
+        - gpr
+        - openssl::ssl
+        - openssl::crypto
+        - address_sorting
+      frameworks: ['CoreFoundation']
+    - name: "grpc_unsecure"
+      lib: "grpc_unsecure"
+      requires:
+        - utf8_range_lib
+        - upb_message_lib
+        - zlib::zlib
+        - abseil::absl_algorithm_container
+        - abseil::absl_config
+        - abseil::absl_no_destructor
+        - abseil::absl_cleanup
+        - abseil::absl_flat_hash_map
+        - abseil::absl_flat_hash_set
+        - abseil::absl_inlined_vector
+        - abseil::absl_bind_front
+        - abseil::absl_function_ref
+        - abseil::absl_hash
+        - abseil::absl_type_traits
+        - abseil::absl_random_bit_gen_ref
+        - abseil::absl_random_distributions
+        - abseil::absl_statusor
+        - abseil::absl_span
+        - abseil::absl_utility
+        - c-ares::cares
+        - gpr
+        - address_sorting
+      frameworks: ['CoreFoundation']
+    - name: "upb_base_lib"
+      lib: "upb_base_lib"
+    - name: "upb_json_lib"
+      lib: "upb_json_lib"
+      requires:
+        - utf8_range_lib
+        - upb_message_lib
+    - name: "upb_mem_lib"
+      lib: "upb_mem_lib"
+    - name: "upb_message_lib"
+      lib: "upb_message_lib"
+      requires:
+        - upb_base_lib
+        - upb_mem_lib
+    - name: "upb_textformat_lib"
+      lib: "upb_textformat_lib"
+      requires:
+        - utf8_range_lib
+        - upb_message_lib
+    - name: "utf8_range_lib"
+      lib: "utf8_range_lib"
+    - name: "grpc++"
+      lib: "grpc++"
+      requires:
+        - abseil::absl_absl_check
+        - abseil::absl_absl_log
+        - _grpc
+        - protobuf::libprotobuf
+    - name: "grpc++_alts"
+      lib: "grpc++_alts"
+      requires:
+        - grpc++
+    - name: "grpc++_error_details"
+      lib: "grpc++_error_details"
+      requires:
+        - grpc++
+    - name: "grpc++_reflection"
+      lib: "grpc++_reflection"
+      requires:
+        - grpc++
+    - name: "grpc++_unsecure"
+      lib: "grpc++_unsecure"
+      requires:
+        - abseil::absl_absl_check
+        - abseil::absl_absl_log
+        - grpc_unsecure
+        - protobuf::libprotobuf
+    - name: "grpc_authorization_provider"
+      lib: "grpc_authorization_provider"
+      requires:
+        - utf8_range_lib
+        - upb_message_lib
+        - re2::re2
+        - zlib::zlib
+        - abseil::absl_config
+        - abseil::absl_no_destructor
+        - abseil::absl_cleanup
+        - abseil::absl_flat_hash_map
+        - abseil::absl_flat_hash_set
+        - abseil::absl_inlined_vector
+        - abseil::absl_function_ref
+        - abseil::absl_hash
+        - abseil::absl_type_traits
+        - abseil::absl_statusor
+        - abseil::absl_span
+        - abseil::absl_utility
+        - c-ares::cares
+        - gpr
+        - address_sorting
+    - name: "grpc_plugin_support"
+      lib: "grpc_plugin_support"
+      requires:
+        - protobuf::libprotobuf
+        - protobuf::libprotoc
+    - name: "grpcpp_channelz"
+      lib: "grpcpp_channelz"
+      requires:
+        - grpc++
+grpc_plugins:
+    - target: "gRPC::grpc_cpp_plugin"
+      executable: "grpc_cpp_plugin"
+    - target: "gRPC::grpc_csharp_plugin"
+      executable: "grpc_csharp_plugin"
+    - target: "gRPC::grpc_node_plugin"
+      executable: "grpc_node_plugin"
+    - target: "gRPC::grpc_objective_c_plugin"
+      executable: "grpc_objective_c_plugin"
+    - target: "gRPC::grpc_php_plugin"
+      executable: "grpc_php_plugin"
+    - target: "gRPC::grpc_python_plugin"
+      executable: "grpc_python_plugin"
+    - target: "gRPC::grpc_ruby_plugin"
+      executable: "grpc_ruby_plugin"

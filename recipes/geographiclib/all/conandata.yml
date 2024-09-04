@@ -1,4 +1,7 @@
 sources:
+  "2.4":
+    url: "https://github.com/geographiclib/geographiclib/archive/refs/tags/v2.4.tar.gz"
+    sha256: "aa7edc6d86fcc297be6e6d6d53ddb6e622a46ef36fe9317335cac91bf471b5a9"
   "2.3":
     url: "https://github.com/geographiclib/geographiclib/archive/refs/tags/v2.3.tar.gz"
     sha256: "18131077061ef8be14064f073f6dba2897a138519733803af807f861a01976c1"
