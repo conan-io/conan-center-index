@@ -95,7 +95,13 @@ class NativefiledialogConan(ConanFile):
 
     def build(self):
         with chdir(self, self._build_subdir):
-            generator = f"vs{self._vs_ide_year}" if is_msvc(self) else "gmake2"
+            if is_msvc(self):
+                ide_year = self._vs_ide_year
+                # 2022 is not directly supported as of v116
+                ide_year = "2019" if ide_year == "2022" else ide_year
+                generator = f"vs{ide_year}"
+            else:
+                generator = "gmake2"
             self.run(f"premake5 {generator}")
 
             if is_msvc(self):
