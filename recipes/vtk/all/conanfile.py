@@ -431,11 +431,11 @@ class VtkConan(ConanFile):
         if conan_version.major == 1:
             # The automatic component creation fails due to generator differences.
             raise ConanInvalidConfiguration("Conan v1 is not supported.")
-        if is_msvc(self) and self.options.shared:
+        if is_msvc(self) and not self.options.shared:
             # vtkCommonCore.lib(vtkSMPToolsAPI.obj) : error LNK2019: unresolved external symbol
             # "public: bool __cdecl vtk::detail::smp::vtkSMPToolsImpl<1>::IsParallelScope(void)"
             raise ConanInvalidConfiguration(
-                "-o shared=True is currently not supported on MSVC due to linker errors. Contributions are welcome!"
+                "-o shared=False is currently not supported on MSVC due to linker errors. Contributions are welcome!"
             )
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
