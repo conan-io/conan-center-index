@@ -111,8 +111,8 @@ class MysqlCppConnRecipe(ConanFile):
         # Disable Boost, only legacy JDBC connector needs it
         tc.cache_variables["BOOST_DIR"] = "FALSE"
         # Compiler patches
-        if self.settings.compiler == "clang" and self.settings.get_safe("compiler.libcxx") == "libc++":
-            tc.cache_variables["_GLIBCXX_USE_CXX11_ABI"] = "FALSE"
+        if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
+            raise ConanInvalidConfiguration(f"{self.ref} clang compiler requires -s compiler.libcxx=libstdc++")
 
         # Windows patches
         if self.settings.os == "Windows":
