@@ -72,35 +72,9 @@ class OpenMPIConan(ConanFile):
             # Requires Cygwin or WSL
             raise ConanInvalidConfiguration("OpenMPI doesn't support Windows")
 
-        if is_apple_os(self) and self.settings.arch == "armv8":
-            if self.version == "4.1.0":
-                # INFO: https://github.com/open-mpi/ompi/issues/8410
-                raise ConanInvalidConfiguration(f"{self.ref} is not supported in Mac M1. Use a newer version.")
-            if self.options.shared:
-                # --------------------------------------------------------------------------
-                # A system call failed during shared memory initialization that should not have.
-                #   Local host:  66617.local
-                #   System call: unlink(2) /var/folders/3p/1t7skbt51j71w8_h75hvtmqh0000gp/T//ompi.66617.502/pid.39273/1/vader_segment.66617.502.a05c0001.4
-                #   Error:       No such file or directory (errno 2)
-                # --------------------------------------------------------------------------
-                # [66617:39273] Signal: Segmentation fault: 11 (11)
-                # [66617:39273] Signal code: Invalid permissions (2)
-                # [66617:39273] Failing at address: 0x0
-                # [66617:39273] [ 0] 0   libsystem_platform.dylib            0x000000018711f584 _sigtramp + 56
-                # [66617:39273] [ 1] 0   libopen-rte.40.dylib                0x00000001008f0518 match + 48
-                # [66617:39273] [ 2] 0   libopen-rte.40.dylib                0x00000001008efbd8 get_tli + 96
-                # [66617:39273] [ 3] 0   libopen-rte.40.dylib                0x00000001008eeb4c show_help + 84
-                # [66617:39273] [ 4] 0   libopen-rte.40.dylib                0x00000001008eeab8 orte_show_help_recv + 396
-                # [66617:39273] [ 5] 0   libopen-rte.40.dylib                0x00000001009521bc orte_rml_base_process_msg + 824
-                # [66617:39273] [ 6] 0   libopen-pal.40.dylib                0x0000000100b63750 event_process_active_single_queue + 384
-                # [66617:39273] [ 7] 0   libopen-pal.40.dylib                0x0000000100b60560 event_process_active + 116
-                # [66617:39273] [ 8] 0   libopen-pal.40.dylib                0x0000000100b5f898 opal_libevent2022_event_base_loop + 572
-                # [66617:39273] [ 9] 0   orterun                             0x000000010037bb9c orterun + 628
-                # [66617:39273] [10] 0   orterun                             0x000000010037b91c main + 36
-                # [66617:39273] [11] 0   dyld                                0x0000000186d660e0 start + 2360
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} shared builds on {self.settings.os} {self.settings.arch} are currently disabled due to test_package failures"
-                )
+        if self.version == "4.1.0" and is_apple_os(self) and self.settings.arch == "armv8":
+            # INFO: https://github.com/open-mpi/ompi/issues/8410
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported in Mac M1. Use a newer version.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
