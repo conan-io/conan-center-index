@@ -51,6 +51,7 @@ class MysqlCppConnRecipe(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, "17")
 
+        # Compiler minimum version
         compiler = self.settings.compiler
         compiler_name = str(compiler)
         minimum_version = self._minimum_compilers_version.get(compiler_name, False)
@@ -109,8 +110,9 @@ class MysqlCppConnRecipe(ConanFile):
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         # Disable Boost, only legacy JDBC connector needs it
         tc.cache_variables["BOOST_DIR"] = "FALSE"
-        # Protobuf patches
-        tc.cache_variables["NDEBUG"] = "TRUE"
+        # Compiler patches
+        if self.settings.compiler == "clang" and self.settings.get_safe("compiler.libcxx") == "libc++":
+            tc.cache_variables["_GLIBCXX_USE_CXX11_ABI"] = "FALSE"
 
         # Windows patches
         if self.settings.os == "Windows":
