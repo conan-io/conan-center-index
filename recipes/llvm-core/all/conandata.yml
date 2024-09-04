@@ -22,14 +22,10 @@ patches:
       patch_description: fix missing header files
       patch_type: portability
       patch_source: https://github.com/llvm/llvm-project-release-prs/pull/3
-    - patch_file: patches/13x/0003-split-dwarf.patch
-      patch_description: enable split dwarf option from 14.x
-      patch_source: https://reviews.llvm.org/D108776
-      patch_type: bugfix
-    - patch_file: patches/13x/0004-no-build-with-install-rpath.patch
+    - patch_file: patches/13x/0003-no-build-with-install-rpath.patch
       patch_description: do not build shared libs with install rpath
       patch_type: conan
-    - patch_file: patches/13x/0005-remove-lto-exports.patch
+    - patch_file: patches/13x/0004-remove-lto-exports.patch
       patch_description: remove LTO exports causing link error with lld
       patch_source: https://github.com/llvm/llvm-project-release-prs/pull/279
       patch_type: portability
@@ -45,14 +41,10 @@ patches:
       patch_description: fix missing header files
       patch_type: portability
       patch_source: https://github.com/llvm/llvm-project-release-prs/pull/3
-    - patch_file: patches/12x/0003-split-dwarf.patch
-      patch_description: enable split dwarf option from 14.x
-      patch_source: https://reviews.llvm.org/D108776
-      patch_type: bugfix
-    - patch_file: patches/12x/0004-no-build-with-install-rpath.patch
+    - patch_file: patches/12x/0003-no-build-with-install-rpath.patch
       patch_description: do not build shared libs with install rpath
       patch_type: conan
-    - patch_file: patches/12x/0005-remove-lto-exports.patch
+    - patch_file: patches/12x/0004-remove-lto-exports.patch
       patch_description: remove LTO exports causing link error with lld
       patch_source: https://github.com/llvm/llvm-project-release-prs/pull/279
       patch_type: portability
@@ -68,14 +60,10 @@ patches:
       patch_description: fix missing header files
       patch_type: portability
       patch_source: https://github.com/llvm/llvm-project-release-prs/pull/3
-    - patch_file: patches/11x/0003-split-dwarf.patch
-      patch_description: enable split dwarf option from 14.x
-      patch_source: https://reviews.llvm.org/D108776
-      patch_type: bugfix
-    - patch_file: patches/11x/0004-no-build-with-install-rpath.patch
+    - patch_file: patches/11x/0003-no-build-with-install-rpath.patch
       patch_description: do not build shared libs with install rpath
       patch_type: conan
-    - patch_file: patches/11x/0005-remove-lto-exports.patch
+    - patch_file: patches/11x/0004-remove-lto-exports.patch
       patch_description: remove LTO exports causing link error with lld
       patch_source: https://github.com/llvm/llvm-project-release-prs/pull/279
       patch_type: portability
