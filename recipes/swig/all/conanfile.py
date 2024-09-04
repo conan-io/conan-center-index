@@ -155,7 +155,7 @@ class SwigConan(ConanFile):
         self._patch_sources()
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
-            self.run("./autogen.sh")
+            autotools.autoreconf(args=["--force", "--install", "-ITools/config"])
             autotools.configure()
             autotools.make()
 
