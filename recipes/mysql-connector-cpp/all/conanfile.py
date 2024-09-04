@@ -109,6 +109,8 @@ class MysqlCppConnRecipe(ConanFile):
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         # Disable Boost, only legacy JDBC connector needs it
         tc.cache_variables["BOOST_DIR"] = "FALSE"
+        # Protobuf patches
+        tc.cache_variables["NDEBUG"] = "TRUE"
 
         # Windows patches
         if self.settings.os == "Windows":
