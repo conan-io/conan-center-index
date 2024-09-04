@@ -2,6 +2,7 @@ from conan import ConanFile, conan_version
 from conan.tools.gnu import PkgConfig
 from conan.tools.system import package_manager
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.50.0"
 
@@ -83,7 +84,7 @@ class XorgConan(ConanFile):
                             "libxinerama-dev", "libxcb-dev", "xcb-util-dev", "xcb-util-cursor-dev"], update=True, check=True)
 
     def package_info(self):
-        if conan_version.major >= 2:
+        if Version(conan_version.major) >= 2:
             self.cpp_info.bindirs = []
             self.cpp_info.includedirs = []
             self.cpp_info.libdirs = []
