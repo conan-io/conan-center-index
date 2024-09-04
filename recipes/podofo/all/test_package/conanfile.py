@@ -10,7 +10,7 @@ class TestPackageConan(ConanFile):
     test_type = "explicit"
 
     def layout(self):
-    cmake_layout(self)
+        cmake_layout(self)
 
     def requirements(self):
         self.requires(self.tested_reference_str)
