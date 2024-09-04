@@ -1,4 +1,7 @@
 sources:
+  "2024b":
+    url: "https://github.com/eggert/tz/archive/refs/tags/2024b.tar.gz"
+    sha256: "557c41d8eb5c29387a9d496db87c4aeb4f2ac8a2b6d5f60e869a8cade26e679c"
   "2023c":
     url: "https://github.com/eggert/tz/archive/refs/tags/2023c.tar.gz"
     sha256: "9aa20ef838183e58f09acca92098cf6aa6d8e229aecf24e098c3af2a38e596f8"

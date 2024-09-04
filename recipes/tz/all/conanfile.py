@@ -9,11 +9,12 @@ required_conan_version = ">=1.53.0"
 
 class TzConan(ConanFile):
     name = "tz"
+    description = "The Time Zone Database contains data that represent the history of local time for many representative locations around the globe."
     license = "Unlicense"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.iana.org/time-zones"
-    description = "The Time Zone Database contains data that represent the history of local time for many representative locations around the globe."
     topics = ("tz", "tzdb", "time", "zone", "date")
+    package_type = "application"
     settings = "os", "build_type", "arch", "compiler"
 
     @property
