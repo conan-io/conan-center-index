@@ -31,6 +31,7 @@ class ReflectCppConan(ConanFile):
         "with_yaml" : False,
         "with_msgpack":  False,
     }
+    deprecated = "reflectcpp"
 
     @property
     def _min_cppstd(self):
