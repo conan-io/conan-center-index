@@ -191,6 +191,13 @@ class LLVMCoreConan(ConanFile):
             #  see also https://llvm.org/docs/HowToCrossCompileLLVM.html
             raise ConanInvalidConfiguration("Cross compilation is not supported. Contributions are welcome!")
 
+    def validate_build(self):
+        if os.getenv("CONAN_CENTER_BUILD_SERVICE") and self.settings.build_type == "Debug":
+            if self.settings.os == "Linux":
+                raise ConanInvalidConfiguration("Debug build is not supported on CCI due to resource limitations")
+            elif self.options.shared:
+                raise ConanInvalidConfiguration("Shared Debug build is not supported on CCI due to resource limitations")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -198,7 +205,7 @@ class LLVMCoreConan(ConanFile):
         if os.getenv("CONAN_CENTER_BUILD_SERVICE"):
             self.output.info("Applying CCI Resource Limits")
             default_ram_per_compile_job = 16384
-            default_ram_per_link_job = 4096
+            default_ram_per_link_job = 2048
         else:
             default_ram_per_compile_job = None
             default_ram_per_link_job = None
