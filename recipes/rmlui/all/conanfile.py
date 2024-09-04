@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, replace_in_file, copy, rmdir
+from conan.tools.files.patches import export_conandata_patches, apply_conandata_patches
 from conan.tools.scm import Version
 import os
 
@@ -19,20 +20,20 @@ class RmluiConan(ConanFile):
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
         "enable_rtti_and_exceptions": [True, False],
         "font_interface": ["freetype", None],
-        "fPIC": [True, False],
         "matrix_mode": ["column_major", "row_major"],
-        "shared": [True, False],
         "with_lua_bindings": [True, False],
         "with_thirdparty_containers": [True, False]
     }
     default_options = {
+        "shared": False,
+        "fPIC": True,
         "enable_rtti_and_exceptions": True,
         "font_interface": "freetype",
-        "fPIC": True,
         "matrix_mode": "column_major",
-        "shared": False,
         "with_lua_bindings": False,
         "with_thirdparty_containers": True
     }
@@ -55,6 +56,7 @@ class RmluiConan(ConanFile):
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -118,6 +120,7 @@ class RmluiConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         # If we are using robin_hood hashing provided by conan, we need to change its include path
         if self.options.with_thirdparty_containers:
             if Version(self.version) >= 4:

@@ -11,3 +11,8 @@ sources:
   "3.3":
     url: "https://github.com/mikke89/RmlUi/archive/3.3.tar.gz"
     sha256: "ab24539856045b0a039066a2257a3346712c28b516a60effa2eb1ea00ed1d192"
+patches:
+  "4.3":
+    - patch_file: "patches/4.3-fix-cmake-error.patch"
+      patch_description: "Fix a minor CMake error"
+      patch_type: "bugfix"
