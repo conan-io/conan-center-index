@@ -13,8 +13,10 @@ endif()
 target_link_libraries(${PROJECT_NAME} PRIVATE onnxruntime::onnxruntime)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CONAN_BIN_DIRS_ONNXRUNTIME}
-    $<TARGET_FILE_DIR:${PROJECT_NAME}>
-)
+if(WIN32 AND DEFINED CONAN_BIN_DIRS_ONNXRUNTIME AND EXISTS ${CONAN_BIN_DIRS_ONNXRUNTIME})
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CONAN_BIN_DIRS_ONNXRUNTIME}
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+endif()
