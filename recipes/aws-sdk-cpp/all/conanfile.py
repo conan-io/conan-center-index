@@ -20,6 +20,11 @@ class AwsSdkCppConan(ConanFile):
     topics = ("aws", "cpp", "cross-platform", "amazon", "cloud")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+    # This list comes from tools/code-generation/api-description, which then generate the sdk sources
+    # To generate the list, run the following snippet in said folder:
+    # sorted(list(set(n if "." not in n else "".join(n.split(".")[1:]) + "-" + n.split(".")[0] for n in [f.rsplit("-", 3)[0] for f in os.listdir(".")])))
+    # The .split("-") is to remove the version number (api date) from the file name
+    # The .split(".") shenanigans is to match the generated name with the one described in sdksCommon.cmake
     _sdks = (
         "access-management",
         "accessanalyzer",
@@ -364,7 +369,8 @@ class AwsSdkCppConan(ConanFile):
         if self.settings.os != "Windows":
             self.requires("openssl/[>=1.1 <4]")
             self.requires("libcurl/[>=7.78.0 <9]")
-        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
+        if self.settings.os =="Linux":
+            # Pulseaudio -> libcap, libalsa only support linux, don't use pulseaudio on other platforms
             if self.options.get_safe("text-to-speech"):
                 self.requires("pulseaudio/14.2")
         # zlib is used if ENABLE_ZLIB_REQUEST_COMPRESSION is enabled, set ot ON by default
@@ -559,10 +565,12 @@ class AwsSdkCppConan(ConanFile):
         else:
             self.cpp_info.components["core"].requires.extend(["libcurl::curl", "openssl::openssl"])
 
-        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-            self.cpp_info.components["core"].system_libs.append("atomic")
+        if self.settings.os == "Linux":
             if self.options.get_safe("text-to-speech"):
                 self.cpp_info.components["text-to-speech"].requires.append("pulseaudio::pulseaudio")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["core"].system_libs.append("atomic")
 
         if self.options.get_safe("s3-crt"):
             self.cpp_info.components["s3-crt"].requires.append("aws-c-s3::aws-c-s3")
