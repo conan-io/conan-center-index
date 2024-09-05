@@ -1,4 +1,7 @@
 sources:
+  "5.0.5":
+    url: "https://download.open-mpi.org/release/open-mpi/v5.0/openmpi-5.0.5.tar.bz2"
+    sha256: "6588d57c0a4bd299a24103f4e196051b29e8b55fbda49e11d5b3d32030a32776"
   "4.1.6":
     url: "https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.6.tar.bz2"
     sha256: "f740994485516deb63b5311af122c265179f5328a0d857a567b85db00b11e415"

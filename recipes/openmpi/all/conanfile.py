@@ -8,6 +8,7 @@ from conan.tools.files import copy, get, rm, rmdir, save, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -26,6 +27,11 @@ class OpenMPIConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "fortran": ["yes", "mpifh", "usempi", "usempi80", "no"],
+        "with_libfabric": [True, False],
+        # Added in v5.0
+        "with_curl": [True, False],
+        "with_jansson": [True, False],
+        # Removed in v5.0
         "enable_cxx": [True, False],
         "enable_cxx_exceptions": [True, False],
         "with_verbs": [True, False],
@@ -34,6 +40,11 @@ class OpenMPIConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "fortran": "no",
+        "with_libfabric": False,
+        # Added in v5.0
+        "with_curl": False,
+        "with_jansson": False,
+        # Removed in v5.0
         "enable_cxx": False,
         "enable_cxx_exceptions": False,
         "with_verbs": False,
@@ -42,17 +53,27 @@ class OpenMPIConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "5.0":
+            # No longer used in v5.0
+            del self.options.with_verbs
+            # The C++ bindings were deprecated in v2.2, removed from the standard in v3.0
+            # and were removed from the implementation in v5.0.
+            del self.options.enable_cxx
+            del self.options.enable_cxx_exceptions
+        else:
+            del self.options.with_curl
+            del self.options.with_jansson
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if not self.options.enable_cxx:
+        if not self.options.get_safe("enable_cxx"):
             self.settings.rm_safe("compiler.libcxx")
             self.settings.rm_safe("compiler.cppstd")
-            del self.options.enable_cxx_exceptions
+            self.options.rm_safe("enable_cxx_exceptions")
         if is_apple_os(self):
             # Unavailable due to dependency on libnl
-            del self.options.with_verbs
+            self.options.rm_safe("with_verbs")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -62,8 +83,16 @@ class OpenMPIConan(ConanFile):
         # transitive_headers=True is not needed for any dependencies.
         self.requires("hwloc/2.10.0")
         self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("libevent/2.1.12")
         if self.settings.os == "Linux":
             self.requires("libnl/3.8.0")
+        if self.options.get_safe("with_curl"):
+            self.requires("libcurl/[>=7.78 <9]")
+        if self.options.get_safe("with_jansson"):
+            # v2.14 is not compatible as of v5.0.5
+            self.requires("jansson/2.13.1")
+        if self.options.get_safe("with_libfabric"):
+            self.requires("libfabric/1.21.0")
         if self.options.get_safe("with_verbs"):
             self.requires("rdma-core/52.0")
 
@@ -88,14 +117,14 @@ class OpenMPIConan(ConanFile):
 
         tc = AutotoolsToolchain(self)
         tc.configure_args += [
+            "--with-pic" if self.options.get_safe("fPIC") else "--without-pic",
             f"--enable-mpi-fortran={self.options.fortran}",
-            f"--enable-mpi-cxx={yes_no(self.options.enable_cxx)}",
-            f"--enable-cxx-exceptions={yes_no(self.options.get_safe('enable_cxx_exceptions'))}",
             f"--with-hwloc={root('hwloc')}",
+            f"--with-libevent={root('libevent')}",
             f"--with-libnl={root('libnl') if not is_apple_os(self) else 'no'}",
-            f"--with-verbs={root('rdma-core') if self.options.get_safe('with_verbs') else 'no'}",
+            f"--with-ofi={root('libfabric') if self.options.get_safe('with_libfabric') else 'no'}",
             f"--with-zlib={root('zlib')}",
-            "--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic",
+            "--with-pmix=internal",
             "--disable-wrapper-rpath",
             "--disable-wrapper-runpath",
             "--exec-prefix=/",
@@ -103,28 +132,44 @@ class OpenMPIConan(ConanFile):
             # Disable other external libraries explicitly
             "--with-alps=no",  # ALPS
             "--with-cuda=no",  # CUDA
-            "--with-fca=no",  # FCA
             "--with-gpfs=no",  # Gpfs
             "--with-hcoll=no",  # hcoll
             "--with-ime=no",  # IME
             "--with-lsf=no",  # LSF
             "--with-lustre=no",  # Lustre
             "--with-memkind=no",  # memkind
-            "--with-moab=no",  # Moab
-            "--with-mxm=no",  # Mellanox MXM
-            "--with-ofi=no",  # libfabric, TODO: enable once libfabric is available
-            "--with-pmi=no",  # PMI
-            "--with-pmix=internal",  # PMIx
             "--with-portals4=no",  # Portals4
             "--with-psm2=no",  # PSM2
-            "--with-psm=no",  # PSM
             "--with-pvfs2=no",  # Pvfs2
             "--with-treematch=no",  # TreeMatch
             "--with-ucx=no",  # UCX
             "--with-valgrind=no",  # Valgrind
-            "--with-x=no",  # X11
-            "--with-xpmem=no",  # XPMEM
         ]
+        if Version(self.version) >= "5.0":
+            tc.configure_args += [
+                f"--with-curl={root('libcurl') if self.options.with_curl else 'no'}",
+                f"--with-jansson={root('jansson') if self.options.with_jansson else 'no'}",
+                "--with-prrte=internal",  # PMIx runtime
+                "--disable-sphinx",  # only used for docs
+                "--with-argobots=no",  # argobots
+                "--with-cxi=no",  # CXI
+                "--with-libev=no",  # not compatible with libevent, which cannot be disabled as of v5.0.5
+                "--with-munge=no",  # munge
+                "--with-qthreads=no",  # QThreads
+                "--with-rocm=no",  # ROCm
+            ]
+        else:
+            tc.configure_args += [
+                f"--enable-mpi-cxx={yes_no(self.options.enable_cxx)}",
+                f"--enable-cxx-exceptions={yes_no(self.options.get_safe('enable_cxx_exceptions'))}",
+                f"--with-verbs={root('rdma-core') if self.options.get_safe('with_verbs') else 'no'}",
+                "--with-fca=no",  # FCA
+                "--with-mxm=no",  # Mellanox MXM
+                "--with-pmi=no",  # PMI
+                "--with-psm=no",  # PSM
+                "--with-xpmem=no",  # XPMEM
+                "--with-x=no",  # X11
+            ]
         if is_apple_os(self):
             if self.settings.arch == "armv8":
                 tc.configure_args.append("--host=aarch64-apple-darwin")
@@ -151,8 +196,12 @@ class OpenMPIConan(ConanFile):
         save(self, os.path.join(self.source_folder, "docs", "Makefile.in"), "all:\ninstall:\n")
         # Workaround for <cstddef> trying to include VERSION from source dir due to a case-insensitive filesystem on macOS
         # Based on https://github.com/macports/macports-ports/blob/22dded99ae76a287f04a9685bbc820ecaa397fea/science/openmpi/files/patch-configure.diff
-        replace_in_file(self, os.path.join(self.source_folder, "configure"),
-                        "-I$(top_srcdir) ", "-idirafter$(top_srcdir) ")
+        if Version(self.version) >= "5.0":
+            replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                            "-I$(srcdir) ", "-idirafter$(srcdir) ")
+        else:
+            replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                            "-I$(top_srcdir) ", "-idirafter$(top_srcdir) ")
 
     def build(self):
         self._patch_sources()
@@ -166,6 +215,7 @@ class OpenMPIConan(ConanFile):
         autotools.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "etc"))
+        rmdir(self, os.path.join(self.package_folder, "res", "doc"))
         rmdir(self, os.path.join(self.package_folder, "res", "man"))
         rm(self, "*.la", self.package_folder, recursive=True)
         fix_apple_shared_install_name(self)
@@ -180,43 +230,61 @@ class OpenMPIConan(ConanFile):
 
         requires = [
             "hwloc::hwloc",
+            "libevent::libevent",
             "zlib::zlib",
         ]
         if self.settings.os == "Linux":
             requires.append("libnl::libnl")
+        if self.options.get_safe("with_curl"):
+            requires.append("libcurl::libcurl")
+        if self.options.get_safe("with_jansson"):
+            requires.append("jansson::jansson")
+        if self.options.get_safe("with_libfabric"):
+            requires.append("libfabric::libfabric")
         if self.options.get_safe("with_verbs"):
             requires.extend(["rdma-core::libibverbs", "rdma-core::librdmacm"])
 
         # The components are modelled based on OpenMPI's pkg-config files
-
-        # Run-time environment library
-        self.cpp_info.components["orte"].set_property("pkg_config_name", "orte")
-        self.cpp_info.components["orte"].libs = ["open-rte", "open-pal"]
-        self.cpp_info.components["orte"].includedirs.append(os.path.join("include", "openmpi"))
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["orte"].system_libs = ["dl", "pthread", "rt", "util"]
-        self.cpp_info.components["orte"].cflags = ["-pthread"]
-        if self.options.get_safe("enable_cxx_exceptions"):
-            self.cpp_info.components["orte"].cflags.append("-fexceptions")
-        self.cpp_info.components["orte"].requires = requires
-
         self.cpp_info.components["ompi"].set_property("pkg_config_name", "ompi")
         self.cpp_info.components["ompi"].libs = ["mpi"]
-        self.cpp_info.components["ompi"].requires = ["orte"]
+
+        if Version(self.version) >= "5.0":
+            self.cpp_info.components["pmix"].set_property("pkg_config_name", "pmix")
+            self.cpp_info.components["pmix"].libs = ["pmix"]
+            self.cpp_info.components["prrte"].set_property("pkg_config_name", "prrte")
+            self.cpp_info.components["prrte"].libs = ["prrte"]
+            self.cpp_info.components["prrte"].requires = ["pmix"]
+            self.cpp_info.components["ompi"].requires = ["pmix"]
+            main_component = self.cpp_info.components["ompi"]
+        else:
+            self.cpp_info.components["orte"].set_property("pkg_config_name", "orte")
+            self.cpp_info.components["orte"].libs = ["open-rte"]
+            self.cpp_info.components["ompi"].requires = ["orte"]
+            main_component = self.cpp_info.components["orte"]
+
+        main_component.libs.append("open-pal")
+        main_component.includedirs.append(os.path.join("include", "openmpi"))
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            main_component.system_libs = ["m", "dl", "pthread", "rt", "util"]
+        main_component.cflags = ["-pthread"]
+        main_component.requires += requires
+
+        if Version(self.version) < "5.0":
+            self.cpp_info.components["ompitrace"].set_property("pkg_config_name", "ompitrace")
+            self.cpp_info.components["ompitrace"].libs = ["ompitrace"]
+            self.cpp_info.components["ompitrace"].requires = ["ompi"]
 
         self.cpp_info.components["ompi-c"].set_property("pkg_config_name", "ompi-c")
         self.cpp_info.components["ompi-c"].set_property("cmake_target_name", "MPI::MPI_C")
         self.cpp_info.components["ompi-c"].requires = ["ompi"]
 
-        self.cpp_info.components["ompitrace"].set_property("pkg_config_name", "ompitrace")
-        self.cpp_info.components["ompitrace"].libs = ["ompitrace"]
-        self.cpp_info.components["ompitrace"].requires = ["ompi"]
-
-        if self.options.enable_cxx:
+        if self.options.get_safe("enable_cxx"):
             self.cpp_info.components["ompi-cxx"].set_property("pkg_config_name", "ompi-cxx")
             self.cpp_info.components["ompi-cxx"].set_property("cmake_target_name", "MPI::MPI_CXX")
             self.cpp_info.components["ompi-cxx"].libs = ["mpi_cxx"]
             self.cpp_info.components["ompi-cxx"].requires = ["ompi"]
+            if self.options.enable_cxx_exceptions:
+                self.cpp_info.components["orte"].cflags.append("-fexceptions")
 
         if self.options.fortran != "no":
             self.cpp_info.components["ompi-fort"].set_property("pkg_config_name", "ompi-fort")
@@ -253,7 +321,7 @@ class OpenMPIConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "MPI"
         self.cpp_info.names["cmake_find_package_multi"] = "MPI"
         self.cpp_info.components["ompi-c"].names["cmake_find_package"] = "MPI_C"
-        if self.options.enable_cxx:
+        if self.options.get_safe("enable_cxx"):
             self.cpp_info.components["ompi-cxx"].names["cmake_find_package"] = "MPI_CXX"
         if self.options.fortran != "no":
             self.cpp_info.components["ompi-fort"].names["cmake_find_package"] = "MPI_Fortran"
