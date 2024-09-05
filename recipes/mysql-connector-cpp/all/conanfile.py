@@ -110,9 +110,6 @@ class MysqlCppConnRecipe(ConanFile):
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         # Disable Boost, only legacy JDBC connector needs it
         tc.cache_variables["BOOST_DIR"] = "FALSE"
-        # Compiler patches
-        if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
-            raise ConanInvalidConfiguration(f"{self.ref} clang compiler requires -s compiler.libcxx=libstdc++")
 
         # Windows patches
         if self.settings.os == "Windows":
@@ -150,6 +147,13 @@ class MysqlCppConnRecipe(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"),
                                 "PRIVATE cdk_foundation ext::z ext::lz4 ext::zstd",
                                 "PRIVATE cdk_foundation ZLIB::ZLIB ext::lz4 ext::zstd",
+                                strict=False)
+
+        # Protobuf patches
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"),
+                                "target_link_libraries(cdk_proto_mysqlx",
+                                "target_link_libraries(cdk_proto_mysqlx PRIVATE ext::protobuf)\n"\
+                                "target_link_libraries(cdk_proto_mysqlx",
                                 strict=False)
 
         # Apple patches
