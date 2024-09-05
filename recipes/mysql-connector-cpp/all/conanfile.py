@@ -3,9 +3,8 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd, cross_building
-from conan.tools.files import get, replace_in_file
+from conan.tools.files import get, replace_in_file, copy, rm
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 
@@ -63,10 +62,9 @@ class MysqlCppConnRecipe(ConanFile):
     def requirements(self):
         self.requires("openssl/1.0.2u")
         self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("protobuf/3.21.12")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.24 <4]")
-
         if not is_msvc(self):
             self.tool_requires("ninja/[>=1.10 <2]")
 
@@ -110,6 +108,8 @@ class MysqlCppConnRecipe(ConanFile):
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         # Disable Boost, only legacy JDBC connector needs it
         tc.cache_variables["BOOST_DIR"] = "FALSE"
+        # Protobuf
+        tc.cache_variables["WITH_PROTOBUF"] = self._package_folder_dep("protobuf")
 
         # Windows patches
         if self.settings.os == "Windows":
@@ -122,6 +122,8 @@ class MysqlCppConnRecipe(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+
+        # Fix static lib naming
         if not self.options.shared and is_msvc(self):
             replace_in_file(self, os.path.join(self.source_folder, "install_layout.cmake"),
                                 "set(LIB_NAME_STATIC \"${LIB_NAME}-mt\")",
@@ -157,16 +159,29 @@ class MysqlCppConnRecipe(ConanFile):
                                 "PROJECT(MySQL_CONCPP)",
                                 f"PROJECT(MySQL_CONCPP)\n{patch}",
                                 strict=False)
-            # General patches
+            # Packages-Apple patches
             for lb in ["lz4", 'zlib', 'protobuf', 'zstd']:
                 replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", lb, "CMakeLists.txt"),
                                     "enable_pic()",
                                     f"enable_pic()\n{patch}",
                                     strict=False)
 
+        # Protobuf patches
+        protobuf = "protobufd" if self.dependencies["protobuf"].settings.build_type == "Debug" else "protobuf"
+        # INFO: Disable protobuf-lite to use Conan protobuf targets instead
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindProtobuf.cmake"), "LIBRARY protobuf-lite pb_libprotobuf-lite", "")
+        # INFO: Fix protobuf library name according to the build type
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindProtobuf.cmake"), "LIBRARY protobuf", f"LIBRARY {protobuf}")
+        # INFO: Disable protobuf-lite to use Conan protobuf targets instead
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"), "ext::protobuf-lite", f"ext::{protobuf}")
+        # INFO: Disable protobuf-lite to use Conan protobuf targets instead
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "core", "CMakeLists.txt"), "ext::protobuf-lite", f"ext::{protobuf}")
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
+        cmake.parallel = True
+        cmake.verbose = True
         cmake.configure()
         cmake.build()
 
@@ -175,13 +190,12 @@ class MysqlCppConnRecipe(ConanFile):
         cmake.install()
 
         # Clean
-        copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        for file in ["INFO_BIN", "INFO_SRC"]:
-            os.remove(os.path.join(self.package_folder, file))
+        rm(self, "INFO_SRC", self.package_folder)
+        rm(self, "INFO_BIN", self.package_folder)
+        rm(self, "*.cmake", self.package_folder)
 
-        for file in os.listdir(self.package_folder):
-            if file.endswith(".cmake"):
-                os.remove(os.path.join(self.package_folder, file))
+        # Add License
+        copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
     @property
     def _vs_version(self):
