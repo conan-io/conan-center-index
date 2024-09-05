@@ -43,7 +43,7 @@ class GetDnsConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        copy(self, "conan_deps.cmake", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -90,6 +90,7 @@ class GetDnsConan(ConanFile):
         VirtualBuildEnv(self).generate()
 
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_PROJECT_getdns_INCLUDE"] = "conan_deps.cmake"
         tc.variables["OPENSSL_USE_STATIC_LIBS"] = not self.dependencies["openssl"].options.shared
         tc.variables["ENABLE_SHARED"] = self.options.shared
         tc.variables["ENABLE_STATIC"] = not self.options.shared
@@ -129,12 +130,7 @@ class GetDnsConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        try:
-            cmake.configure(build_script_folder=self.source_path.parent)
-        except ConanException:
-            log = load(self, os.path.join(self.build_folder, "CMakeFiles/CMakeConfigureLog.yaml"))
-            self.output.error(log)
-            raise
+        cmake.configure()
         cmake.build()
 
     def package(self):

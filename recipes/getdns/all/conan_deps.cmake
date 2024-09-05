@@ -34,14 +34,3 @@ if(USE_GNUTLS)
     custom_find_package(Nettle)
     add_library(Nettle::Hogweed ALIAS Nettle::Nettle)
 endif()
-
-if(WIN32)
-    link_libraries(ws2_32)
-endif()
-
-add_subdirectory(src)
-
-if(NOT HAVE_DSA_SIG_SET0)
-    # This should have been found for OpenSSL from CCI
-    message(FATAL_ERROR "OpenSSL feature detection failed, probably due to a bug in getdns recipe.")
-endif()
