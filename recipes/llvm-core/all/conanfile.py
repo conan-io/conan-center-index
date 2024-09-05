@@ -268,14 +268,6 @@ class LLVMCoreConan(ConanFile):
 
         self._apply_resource_limits(cmake_variables)
 
-        # this capability is back-ported from LLVM 14.x
-        is_platform_ELF_based = self.settings.os in [
-            "Linux", "Android", "FreeBSD", "SunOS", "AIX", "Neutrino", "VxWorks"
-        ]
-        if is_platform_ELF_based:
-            self.output.info("ELF Platform Detected, optimizing memory usage during debug build linking.")
-            cmake_variables["LLVM_USE_SPLIT_DWARF"] = True
-
         if is_msvc(self):
             build_type = str(self.settings.build_type).upper()
             cmake_variables[f"LLVM_USE_CRT_{build_type}"] = msvc_runtime_flag(self)
