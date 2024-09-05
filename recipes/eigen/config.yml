@@ -1,6 +1,4 @@
 versions:
-  "3.4.0.cci.20240315":
-    folder: all
   "3.4.0":
     folder: all
   "3.3.9":
