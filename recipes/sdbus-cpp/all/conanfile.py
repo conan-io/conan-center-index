@@ -24,11 +24,13 @@ class SdbusCppConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_code_gen": [True, False],
+        "with_sdbus": ["systemd", "basu"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_code_gen": False,
+        "with_sdbus": "systemd",
     }
     generators = "PkgConfigDeps", "VirtualBuildEnv"
 
@@ -45,8 +47,22 @@ class SdbusCppConan(ConanFile):
             "clang": "6",
         }
 
+    @property
+    def _supported_os(self):
+        return (["Linux"] if Version(self.version) < "1.4.0"
+                else ["Linux", "FreeBSD"])
+
+    @property
+    def _with_sdbus(self):
+        return ("basu" if self.settings.os == "FreeBSD"
+                else self.options.get_safe("with_sdbus", "systemd"))
+
     def export_sources(self):
         export_conandata_patches(self)
+
+    def config_options(self):
+        if Version(self.version) < "1.4.0" or self.settings.os != "Linux":
+            del self.options.with_sdbus
 
     def configure(self):
         if Version(self.version) < "0.9.0":
@@ -56,11 +72,15 @@ class SdbusCppConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libsystemd/255.2")
+        if self._with_sdbus == "systemd":
+            self.requires("libsystemd/255.2")
+        elif self._with_sdbus == "basu":
+            self.requires("basu/0.2.1")
 
     def validate(self):
-        if self.info.settings.os != "Linux":
-            raise ConanInvalidConfiguration(f"{self.name} only supports Linux")
+        if self.settings.os not in self._supported_os:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} does not support {self.settings.os}")
 
         if self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._minimum_cpp_standard)
@@ -86,11 +106,15 @@ class SdbusCppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_CODE_GEN"] = self.options.with_code_gen
+        if Version(self.version) >= "2.0.0":
+            tc.variables["SDBUSCPP_BUILD_CODEGEN"] = self.options.with_code_gen
+        else:
+            tc.variables["BUILD_CODE_GEN"] = self.options.with_code_gen
         tc.variables["BUILD_DOC"] = False
         tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_LIBSYSTEMD"] = False
         tc.variables["SDBUSCPP_BUILD_DOCS"] = False
+        tc.variables["SDBUSCPP_SDBUS_LIB"] = self._with_sdbus
         tc.generate()
 
         # workaround for https://gitlab.kitware.com/cmake/cmake/-/issues/18150
@@ -132,8 +156,12 @@ class SdbusCppConan(ConanFile):
             "cmake_target_name", "SDBusCpp::sdbus-c++")
         self.cpp_info.components["sdbus-c++"].set_property(
             "pkg_config_name", "sdbus-c++")
-        self.cpp_info.components["sdbus-c++"].requires.append(
-            "libsystemd::libsystemd")
+        if self._with_sdbus == "systemd":
+            self.cpp_info.components["sdbus-c++"].requires.append(
+                "libsystemd::libsystemd")
+        elif self._with_sdbus == "basu":
+            self.cpp_info.components["sdbus-c++"].requires.append(
+                "basu::basu")
         if self.options.with_code_gen:
             bin_path = os.path.join(self.package_folder, "bin")
             self.env_info.PATH.append(bin_path)

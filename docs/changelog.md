@@ -1,5 +1,15 @@
 # Changelog
 
+### 10-Jul-2024 - 13:22 CEST
+
+- [feature] Add support for Conan 2.5.0 in the CI
+- [fix] Invalid configuration from tool requirement in Conan 1.x
+
+### 22-May-2024 - 12:04 CEST
+
+- [feature] Add support for Conan 2.3.1 in the CI
+- [feature] Add support for Conan 1.64.1 in the CI
+
 ### 03-April-2024 - 13:53 CEST
 
 - [feature] Add support for Conan 2.2.2 in the CI

@@ -28,17 +28,6 @@ class TestPackageConan(ConanFile):
         qt_conf = textwrap.dedent(f"""\
             [Paths]
             Prefix = {qt_install_prefix}
-            ArchData = bin/archdatadir
-            HostData = bin/archdatadir
-            Data = bin/datadir
-            Sysconf = bin/sysconfdir
-            LibraryExecutables = bin/archdatadir/bin
-            Plugins = bin/archdatadir/plugins
-            Imports = bin/archdatadir/imports
-            Qml2Imports = bin/archdatadir/qml
-            Translations = bin/datadir/translations
-            Documentation = bin/datadir/doc
-            Examples = bin/datadir/examples
         """)
         save(self, "qt.conf", qt_conf)
 

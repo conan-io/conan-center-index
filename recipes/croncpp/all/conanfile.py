@@ -1,9 +1,8 @@
-import os
-
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+import os
 
 required_conan_version = ">=1.52.0"
 
@@ -25,7 +24,7 @@ class CroncppConan(ConanFile):
         return 11
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -37,21 +36,18 @@ class CroncppConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.generate()
-
-    def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
-
     def package(self):
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        cmake = CMake(self)
-        cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(
+            self,
+            "*.h",
+            os.path.join(self.source_folder, "include"),
+            os.path.join(self.package_folder, "include"),
+        )
 
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+
+        self.cpp_info.set_property("cmake_file_name", "croncpp")
+        self.cpp_info.set_property("cmake_target_name","croncpp::croncpp")
