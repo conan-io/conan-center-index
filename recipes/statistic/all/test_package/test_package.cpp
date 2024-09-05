@@ -1,5 +1,5 @@
 #include <iostream>
-#if defined(__cplusplus) && __cplusplus >= 201703L
+#if defined __has_include && __has_include(<limits>)
 #  define HAVE_STDCXX_LIMITS 1
 #endif
 #include "Statistic.h"
