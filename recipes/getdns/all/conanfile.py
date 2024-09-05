@@ -23,8 +23,7 @@ class GetDnsConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "stub_only": ["auto", True, False],
-        "with_libev": ["auto", True, False],
+        "with_libev": [True, False],
         "with_libevent": [True, False],
         "with_libuv": [True, False],
         "with_libidn2": [True, False],
@@ -32,8 +31,7 @@ class GetDnsConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "stub_only": "auto",
-        "with_libev": "auto",
+        "with_libev": True,
         "with_libevent": True,
         "with_libuv": True,
         "with_libidn2": False,  # FIXME: enable once libidn2 has been migrated https://github.com/conan-io/conan-center-index/pull/18642
@@ -47,9 +45,6 @@ class GetDnsConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         self.options.with_libev = True
-        # FIXME: uncomment once libunbound is available
-        # self.options.stub_only = self.settings.os != "Windows"
-        # self.options.with_libev = self.settings.os == "Windows"
 
     def configure(self):
         if self.options.shared:
@@ -70,9 +65,6 @@ class GetDnsConan(ConanFile):
             self.requires("libuv/1.48.0")
         if self.options.with_libidn2:
             self.requires("libidn2/2.3.0")
-        if not self.options.stub_only:
-            # FIXME: missing libunbound recipe
-            raise ConanInvalidConfiguration("libunbound is not (yet) available on cci")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.20 <4]")
@@ -88,7 +80,7 @@ class GetDnsConan(ConanFile):
         tc.variables["OPENSSL_USE_STATIC_LIBS"] = not self.dependencies["openssl"].options.shared
         tc.variables["ENABLE_SHARED"] = self.options.shared
         tc.variables["ENABLE_STATIC"] = not self.options.shared
-        tc.variables["ENABLE_STUB_ONLY"] = self.options.stub_only
+        tc.variables["ENABLE_STUB_ONLY"] = True
         tc.variables["BUILD_LIBEV"] = self.options.with_libev
         tc.variables["BUILD_LIBEVENT2"] = self.options.with_libevent
         tc.variables["BUILD_LIBUV"] = self.options.with_libuv
