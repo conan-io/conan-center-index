@@ -16,7 +16,7 @@ class CutlassConan(ConanFile):
     description = "CUTLASS: CUDA Templates for Linear Algebra Subroutines"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/project/package"
+    homepage = "https://github.com/NVIDIA/cutlass"
     topics = ("linear-algebra", "gpu", "cuda", "deep-learning", "nvidia", "header-only")
 
     package_type = "header-library"
