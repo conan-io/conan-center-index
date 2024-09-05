@@ -14,7 +14,7 @@ class CpphttplibConan(ConanFile):
     homepage = "https://github.com/Nevermore1994/http-request"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("http", "https", "modern C++")
-    package_type = "library"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_openssl": [True, False]
@@ -44,6 +44,15 @@ class CpphttplibConan(ConanFile):
             "msvc": "192",
             "Visual Studio": "15.3",
     }
+
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def layout(self):
         basic_layout(self, src_folder="src")
