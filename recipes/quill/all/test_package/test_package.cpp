@@ -43,8 +43,13 @@ int main()
 
   // To log with a different format to the same sink, just create another logger
   auto console_sink_2 = quill::Frontend::get_sink("sink_id_1"); // get the created sink
+#ifdef QUILL_VERSION_7_x_x_
+  quill::Logger* logger_2 = quill::Frontend::create_or_get_logger(
+    "logger_2", std::move(console_sink_2), quill::PatternFormatterOptions{"%(time) %(log_level:<9) %(logger:<12) %(message)", "H%:%M:%S.%Qns", quill::Timezone::GmtTime});
+#else
   quill::Logger* logger_2 = quill::Frontend::create_or_get_logger(
     "logger_2", std::move(console_sink_2), "%(time) %(log_level:<9) %(logger:<12) %(message)");
+#endif
 
   logger_2->set_log_level(quill::LogLevel::TraceL3);
 
