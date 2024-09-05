@@ -23,7 +23,6 @@ class GetDnsConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "tls": ["openssl", "gnutls"],
         "stub_only": ["auto", True, False],
         "with_libev": ["auto", True, False],
         "with_libevent": [True, False],
@@ -34,7 +33,6 @@ class GetDnsConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "stub_only": "auto",
-        "tls": "openssl",
         "with_libev": "auto",
         "with_libevent": True,
         "with_libuv": True,
@@ -69,13 +67,9 @@ class GetDnsConan(ConanFile):
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
         if self.options.with_libuv:
-            self.requires("libuv/1.47.0")
+            self.requires("libuv/1.48.0")
         if self.options.with_libidn2:
             self.requires("libidn2/2.3.0")
-        if self.options.tls == "gnutls":
-            self.requires("gnutls/3.7.8")
-            self.requires("nettle/3.8.1")
-            raise ConanInvalidConfiguration("gnutls on CCI does not build the required libdane component")
         if not self.options.stub_only:
             # FIXME: missing libunbound recipe
             raise ConanInvalidConfiguration("libunbound is not (yet) available on cci")
@@ -99,7 +93,7 @@ class GetDnsConan(ConanFile):
         tc.variables["BUILD_LIBEVENT2"] = self.options.with_libevent
         tc.variables["BUILD_LIBUV"] = self.options.with_libuv
         tc.variables["USE_LIBIDN2"] = self.options.with_libidn2
-        tc.variables["USE_GNUTLS"] = self.options.tls == "gnutls"
+        tc.variables["USE_GNUTLS"] = False
         # Force use of internal strptime when cross-compiling
         tc.variables["FORCE_COMPAT_STRPTIME"] = True
         tc.variables["BUILD_TESTING"] = False
@@ -109,8 +103,6 @@ class GetDnsConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("gnutls", "cmake_file_name", "GnuTLS")
-        deps.set_property("gnutls", "cmake_target_name", "GnuTLS::GnuTLS")
         deps.set_property("libev", "cmake_file_name", "Libev")
         deps.set_property("libev", "cmake_target_name", "Libev::Libev")
         deps.set_property("libevent", "cmake_file_name", "Libevent2")
@@ -153,8 +145,6 @@ class GetDnsConan(ConanFile):
         self.cpp_info.components["libgetdns"].requires = ["openssl::openssl"]
         if self.options.with_libidn2:
             self.cpp_info.components["libgetdns"].requires.append("libidn2::libidn2")
-        if self.options.tls == "gnutls":
-            self.cpp_info.components["libgetdns"].requires.extend(["nettle::nettle", "gnutls::gnutls"])
         if self.settings.os == "Windows":
             self.cpp_info.components["libgetdns"].system_libs.extend(["ws2_32", "crypt32", "gdi32", "iphlpapi", "psapi", "userenv"])
 
