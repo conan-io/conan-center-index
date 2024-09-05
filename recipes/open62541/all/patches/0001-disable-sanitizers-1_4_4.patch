@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 8b3c2cebc..c03cbe8f9 100644
+index bbc1c4fc7..8cca43e73 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -650,20 +650,6 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+@@ -657,20 +657,6 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
      # Linker
      set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "") # cmake sets -rdynamic by default
  
