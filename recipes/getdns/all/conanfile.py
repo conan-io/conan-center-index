@@ -1,10 +1,9 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm, load
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
 from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
@@ -34,7 +33,7 @@ class GetDnsConan(ConanFile):
         "with_libev": True,
         "with_libevent": True,
         "with_libuv": True,
-        "with_libidn2": False,  # FIXME: enable once libidn2 has been migrated https://github.com/conan-io/conan-center-index/pull/18642
+        "with_libidn2": True
     }
 
     def export_sources(self):
@@ -44,7 +43,6 @@ class GetDnsConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        self.options.with_libev = True
 
     def configure(self):
         if self.options.shared:
@@ -80,11 +78,13 @@ class GetDnsConan(ConanFile):
         tc.variables["OPENSSL_USE_STATIC_LIBS"] = not self.dependencies["openssl"].options.shared
         tc.variables["ENABLE_SHARED"] = self.options.shared
         tc.variables["ENABLE_STATIC"] = not self.options.shared
+        # INFO: Disabling stub-only requires libunbound
         tc.variables["ENABLE_STUB_ONLY"] = True
         tc.variables["BUILD_LIBEV"] = self.options.with_libev
         tc.variables["BUILD_LIBEVENT2"] = self.options.with_libevent
         tc.variables["BUILD_LIBUV"] = self.options.with_libuv
         tc.variables["USE_LIBIDN2"] = self.options.with_libidn2
+        # INFO: GnuTLS requires libdane support and is not supported by MSVC
         tc.variables["USE_GNUTLS"] = False
         # Force use of internal strptime when cross-compiling
         tc.variables["FORCE_COMPAT_STRPTIME"] = True
@@ -103,8 +103,6 @@ class GetDnsConan(ConanFile):
         deps.set_property("libidn2", "cmake_target_name", "Libidn2::Libidn2")
         deps.set_property("libuv", "cmake_file_name", "Libuv")
         deps.set_property("libuv", "cmake_target_name", "Libuv::Libuv")
-        deps.set_property("nettle", "cmake_file_name", "Nettle")
-        deps.set_property("nettle", "cmake_target_name", "Nettle::Nettle")
         deps.generate()
 
     def _patch_sources(self):
@@ -155,5 +153,6 @@ class GetDnsConan(ConanFile):
             self.cpp_info.components["dns_ext_uv"].requires = ["libgetdns", "libuv::libuv"]
             self.cpp_info.components["dns_ext_uv"].set_property("pkg_config_name", "getdns_ext_uv")
 
+        # TODO: Remove after dropping support for Conan 1.x in ConanCenterIndex
         bin_path = os.path.join(self.package_folder, "bin")
         self.env_info.PATH.append(bin_path)
