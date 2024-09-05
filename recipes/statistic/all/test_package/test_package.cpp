@@ -1,4 +1,7 @@
 #include <iostream>
+#if defined(__cplusplus) && __cplusplus >= 201703L
+#  define HAVE_STDCXX_LIMITS 1
+#endif
 #include "Statistic.h"
 
 int main(void) {
