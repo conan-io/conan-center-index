@@ -92,8 +92,12 @@ class GetDnsConan(ConanFile):
         # To fix OpenSSL try_compile() checks
         # https://github.com/conan-io/conan/issues/12180
         tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
-        # INFO: https://github.com/getdnsapi/getdns/issues/544
-        tc.extra_cflags.append("-Wno-error=incompatible-function-pointer-types")
+        if self.settings.compiler in ["clang", "apple-clang"]:
+            # INFO: https://github.com/getdnsapi/getdns/issues/544
+            tc.extra_cflags.append("-Wno-error=incompatible-function-pointer-types")
+        if self.options.with_libidn2 and is_msvc(self):
+            # INFO: getdns_static.lib(convert.c.obj): error LNK2019: unresolved external symbol __imp_idn2_lookup_u8
+            tc.extra_cflags.extend([f"/D{it}" for it in self.dependencies["libidn2"].cpp_info.defines])
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -130,7 +134,6 @@ class GetDnsConan(ConanFile):
         libsuffix = ""
         if is_msvc(self) and not self.options.shared:
             libsuffix = "_static"
-
         self.cpp_info.components["libgetdns"].libs = ["getdns" + libsuffix]
         self.cpp_info.components["libgetdns"].includedirs.append(os.path.join("include", "getdns"))
         self.cpp_info.components["libgetdns"].set_property("pkg_config_name", "getdns")
