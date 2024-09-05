@@ -1,5 +1,8 @@
 sources:
-  "5.0.0":
+  "5.1.0":
+    url: "https://github.com/jrouwe/JoltPhysics/archive/refs/tags/v5.1.0.tar.gz"
+    sha256: "525c9d6fb79471b3995f9d621c9f843e71470aed286872c4d4065c1f7b7d049a"
+  "5.0.1":
     url: "https://github.com/jrouwe/JoltPhysics/archive/refs/tags/v5.0.0.tar.gz"
     sha256: "5231953d1b1d5b9cb617facf86341a11337e1cd04456949af6911b917a1646cb"
   "3.0.1":
