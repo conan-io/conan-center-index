@@ -91,7 +91,9 @@ class GetDnsConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         # To fix OpenSSL try_compile() checks
         # https://github.com/conan-io/conan/issues/12180
-        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        # INFO: https://github.com/getdnsapi/getdns/issues/544
+        tc.extra_cflags.append("-Wno-error=incompatible-function-pointer-types")
         tc.generate()
 
         deps = CMakeDeps(self)
