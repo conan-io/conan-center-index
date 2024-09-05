@@ -32,8 +32,8 @@ class Box2dConan(ConanFile):
             "apple-clang": "10",
             "clang": "7",
             "gcc": "8",
-            "msvc": "192",
-            "Visual Studio": "16",
+            "msvc": "193",
+            "Visual Studio": "17",
         }
 
     def export_sources(self):
