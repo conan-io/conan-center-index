@@ -24,7 +24,7 @@ class GslLiteConan(ConanFile):
     #  3. GSL_UNENFORCED_ON_CONTRACT_VIOLATION: nothing happens
     #
     options = {
-        "on_contract_violation": ["terminate", "throw", "unenforced"]
+        "on_contract_violation": ["terminate", "throw", "unenforced", "None"]
     }
     default_options = {
         "on_contract_violation": "terminate",
@@ -59,7 +59,8 @@ class GslLiteConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.components["gsllite"].defines = [self._contract_map[str(self.options.on_contract_violation)]]
+        if self.options.on_contract_violation != "None":
+            self.cpp_info.components["gsllite"].defines = [self._contract_map[str(self.options.on_contract_violation)]]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "gsl-lite"
