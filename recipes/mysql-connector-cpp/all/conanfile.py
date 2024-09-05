@@ -136,7 +136,7 @@ class MysqlCppConnRecipe(ConanFile):
                             strict=False)
 
         # Fix shared zlib build = duplicate references
-        if self.options.shared and self.settings.os in ["Linux", "FreeBSD"] :
+        if self.settings.os in ["Linux", "FreeBSD"] :
             # ZLIB patch
             replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "protobuf", "protobuf-3.19.6", "cmake", "CMakeLists.txt"),
                                 "set(protobuf_WITH_ZLIB_DEFAULT ON)",
@@ -147,13 +147,6 @@ class MysqlCppConnRecipe(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"),
                                 "PRIVATE cdk_foundation ext::z ext::lz4 ext::zstd",
                                 "PRIVATE cdk_foundation ZLIB::ZLIB ext::lz4 ext::zstd",
-                                strict=False)
-
-        # Protobuf patches
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"),
-                                "target_link_libraries(cdk_proto_mysqlx",
-                                "target_link_libraries(cdk_proto_mysqlx PRIVATE ext::protobuf)\n"\
-                                "target_link_libraries(cdk_proto_mysqlx",
                                 strict=False)
 
         # Apple patches
