@@ -198,6 +198,7 @@ class FFMpegConan(ConanFile):
         "disable_filters": None,
         "enable_filters": None,
     }
+    short_paths = True
 
     @property
     def _settings_build(self):
