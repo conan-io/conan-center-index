@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, to_apple_arch, XCRun
-from conan.tools.build import build_jobs, check_min_cppstd, cross_building, valid_min_cppstd, supported_cppstd
+from conan.tools.build import build_jobs, cross_building, valid_min_cppstd, supported_cppstd
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches, chdir, collect_libs, copy, export_conandata_patches,
@@ -82,7 +82,7 @@ class BoostConan(ConanFile):
         "filesystem_no_deprecated": [True, False],
         "filesystem_use_std_fs": [True, False],
         "filesystem_version": [None, "3", "4"],
-        "layout": ["system", "versioned", "tagged", "b2-default"],
+        "layout": ["system", "versioned", "tagged"],
         "magic_autolink": [True, False],  # enables BOOST_ALL_NO_LIB
         "diagnostic_definitions": [True, False],  # enables BOOST_LIB_DIAGNOSTIC
         "python_executable": [None, "ANY"],  # system default python installation is used, if None
@@ -432,6 +432,8 @@ class BoostConan(ConanFile):
                 self.options.without_url = True
         if Version(self.version) >= "1.85.0" and not self._has_cppstd_14_supported:
             self.options.without_math = True
+        if Version(self.version) >= "1.86.0" and not self._has_cppstd_14_supported:
+            self.options.without_graph = True
 
         # iconv is off by default on Windows and Solaris
         if self._is_windows_platform or self.settings.os == "SunOS":
@@ -451,6 +453,14 @@ class BoostConan(ConanFile):
 
         def disable_math():
             super_modules = self._all_super_modules("math")
+            for smod in super_modules:
+                try:
+                    setattr(self.options, f"without_{smod}", True)
+                except ConanException:
+                    pass
+
+        def disable_graph():
+            super_modules = self._all_super_modules("graph")
             for smod in super_modules:
                 try:
                     setattr(self.options, f"without_{smod}", True)
@@ -565,6 +575,18 @@ class BoostConan(ConanFile):
                 elif not self._has_cppstd_14_supported:
                     disable_math()
 
+        if Version(self.version) >= "1.86.0":
+            # Boost 1.86.0 updated more components that require C++14 and C++17
+            # https://www.boost.org/users/history/version_1_86_0.html
+            if self.settings.compiler.get_safe("cppstd"):
+                if not valid_min_cppstd(self, 14):
+                    disable_graph()
+            else:
+                min_compiler_version = self._min_compiler_version_default_cxx14
+                if min_compiler_version is None:
+                    self.output.warning("Assuming the compiler supports c++14 by default")
+                elif not self._has_cppstd_14_supported:
+                    disable_graph()
 
     @property
     def _configure_options(self):
@@ -587,8 +609,12 @@ class BoostConan(ConanFile):
 
     @property
     def _stacktrace_from_exception_available(self):
-        if Version(self.version) >= "1.85.0":
+        if Version(self.version) == "1.85.0":
+            # https://github.com/boostorg/stacktrace/blob/boost-1.85.0/build/Jamfile.v2#L143
             return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
+        elif Version(self.version) >= "1.86.0":
+            # https://github.com/boostorg/stacktrace/blob/boost-1.86.0/build/Jamfile.v2#L148
+            return not self.options.header_only and not self.options.without_stacktrace and self.settings.arch == "x86_64"
 
     def configure(self):
         if self.options.header_only:
@@ -624,9 +650,6 @@ class BoostConan(ConanFile):
 
         if self.options.get_safe("without_stacktrace", True):
             self.options.rm_safe("with_stacktrace_backtrace")
-
-        if self.options.layout == "b2-default":
-            self.options.layout = "versioned" if self.settings.os == "Windows" else "system"
 
         if self.options.without_fiber:
             self.options.rm_safe("numa")
@@ -1894,7 +1917,9 @@ class BoostConan(ConanFile):
                         continue
                     if name in ("boost_math_c99l", "boost_math_tr1l") and str(self.settings.arch).startswith("ppc"):
                         continue
-                    if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic", "boost_stacktrace_from_exception",) and self.settings.os == "Windows":
+                    if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic") and self.settings.os == "Windows":
+                        continue
+                    if name == "boost_stacktrace_from_exception" and not self._stacktrace_from_exception_available:
                         continue
                     if name == "boost_stacktrace_addr2line" and not self._stacktrace_addr2line_available:
                         continue
