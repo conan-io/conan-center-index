@@ -47,10 +47,10 @@ The notation shown below is used for publishing packages which do not match the 
 There are two cases to consider:
 
 * The library has not had any previous releases/tags. In this case, the version should be of the form
-  `0.0.cci.<YEAR MONTH DAY>`. For example, `0.0.cci.20240402`. When/if a version of the library is ever released.
+  `0.0.0.cci.<YEAR MONTH DAY>`. For example, `0.0.0.cci.20240402`. When/if a version of the library is ever released.
   this will allow version ranges to properly identify the release as a newer version.
 * The library has had previous releases/tags. In this case, the version should be of the form
-  `<MAJOR>.<MINOR>.cci.<YEAR MONTH DAY>`. For example, `1.2.cci.20240402`.
+  `<MAJOR>.<MINOR>.<PATCH>.cci.<YEAR MONTH DAY>`. For example, `1.2.0.cci.20240402`.
   This will allow version ranges to properly identify the release as a newer version.
 
 In order to create reproducible builds, we also "commit-lock" to the latest commit on that day, so the sources should point
