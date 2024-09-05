@@ -328,6 +328,7 @@ class Open62541Conan(ConanFile):
 
         tc.variables["UA_ENABLE_JSON_ENCODING"] = self.options.json_support
         tc.variables["UA_ENABLE_PUBSUB"] = self.options.pub_sub != False
+        tc.variables["UA_ENABLE_PUBSUB_INFORMATIONMODEL"] = tc.variables["UA_ENABLE_PUBSUB"]    
         tc.variables["UA_ENABLE_PUBSUB_ENCRYPTION"] = self.options.pub_sub_encryption != False
 
         if self.options.pub_sub != False:
