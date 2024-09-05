@@ -51,7 +51,7 @@ class SentryNativeConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17" if Version(self.version) < "0.7.7" else "20"
+        return "17"
 
     @property
     def _minimum_compilers_version(self):
@@ -63,7 +63,7 @@ class SentryNativeConan(ConanFile):
             "msvc": "191",
             "gcc": minimum_gcc_version,
             "clang": "3.4",
-            "apple-clang": "10.0",
+            "apple-clang": "5.1",
         }
 
     def config_options(self):
@@ -128,6 +128,8 @@ class SentryNativeConan(ConanFile):
             )
         if self.options.transport == "winhttp" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("The winhttp transport is only supported on Windows")
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "10.0":
+            raise ConanInvalidConfiguration("apple-clang < 10.0 not supported")
 
     def build_requirements(self):
         if self.settings.os == "Windows":
