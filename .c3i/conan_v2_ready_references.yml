@@ -84,6 +84,7 @@ required_for_references:
 - aws-libfabric
 - aws-sdk-cpp
 - azure-sdk-for-cpp
+- azure-storage-cpp
 - b2
 - b64
 - backport-cpp
@@ -93,6 +94,7 @@ required_for_references:
 - bandit
 - base64
 - basu
+- battery-embed
 - bazel
 - bdwgc
 - bear
@@ -180,6 +182,7 @@ required_for_references:
 - chipmunk2d
 - choc
 - chunkio
+- cigi-ccl
 - cimg
 - circularbuffer
 - cista
@@ -210,6 +213,7 @@ required_for_references:
 - coin-osi
 - coin-utils
 - commata
+- compute_library
 - concurrencpp
 - concurrentqueue
 - console_bridge
@@ -427,6 +431,7 @@ required_for_references:
 - fmi3
 - fmt
 - fmtlog
+- folly
 - fontconfig
 - foonathan-lexy
 - foonathan-memory
@@ -587,6 +592,7 @@ required_for_references:
 - inversify-cpp
 - iowow
 - ipaddress
+- iphreeqc
 - iqa
 - irrxml
 - isa-l
@@ -757,6 +763,7 @@ required_for_references:
 - libmd
 - libmediainfo
 - libmemcached
+- libmeshb
 - libmetalink
 - libmicrohttpd
 - libmikmod
@@ -788,6 +795,7 @@ required_for_references:
 - libpfm4
 - libphonenumber
 - libpng
+- libpointmatcher
 - libpq
 - libpqxx
 - libproperties
@@ -1265,6 +1273,7 @@ required_for_references:
 - readerwriterqueue
 - readline
 - readosm
+- rebound
 - recastnavigation
 - reckless
 - rectanglebinpack
@@ -1320,6 +1329,7 @@ required_for_references:
 - sdf
 - sdl
 - sdl_image
+- sdl_mixer
 - sdl_net
 - sdl_ttf
 - seadex-essentials
@@ -1598,6 +1608,7 @@ required_for_references:
 - wslay
 - wt
 - wtl
+- wxwidgets
 - wyhash
 - xapian-core
 - xbyak
