@@ -4,5 +4,5 @@ project(test_package LANGUAGES CXX)
 find_package(http-request REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE http_request::http_request)
+target_link_libraries(${PROJECT_NAME} PRIVATE http-request)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
