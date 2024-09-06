@@ -15,6 +15,7 @@ class MysqlCppConnRecipe(ConanFile):
     name = "mysql-connector-cpp"
     package_type = "library"
     short_paths = True
+    version= "9.0.0"
 
     # Optional metadata
     license = "GPL-2.0-only"
@@ -56,13 +57,13 @@ class MysqlCppConnRecipe(ConanFile):
             )
 
     def requirements(self):
-        self.requires("openssl/[>=1.1 <4]")
+        self.requires("openssl/1.0.2u")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("protobuf/3.21.12")
-        self.requires("zstd/[>=1.5 <1.6]")
-        self.requires("lz4/1.10.0")
 
     def build_requirements(self):
+        if not self.settings.os == "Windows":
+            self.tool_requires("ninja/[>=1.10 <2]")
         self.tool_requires("protobuf/<host_version>")
 
     def source(self):
@@ -92,16 +93,16 @@ class MysqlCppConnRecipe(ConanFile):
 
     def generate(self):
 
-        tc = CMakeToolchain(self)
+        tc = CMakeToolchain(self, generator="Ninja") if not self.settings.os == "Windows" else CMakeToolchain(self)
 
         # OpenSSL
-        tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
+        tc.cache_variables["WITH_SSL"] = "SYSTEM"
         # LZ4 patches
-        tc.cache_variables["WITH_LZ4"] = self._package_folder_dep("lz4")
+        tc.cache_variables["WITH_LZ4"] = "TRUE"
         # ZLIB patches
-        tc.cache_variables["WITH_ZLIB"] = self._package_folder_dep("zlib")
+        tc.cache_variables["WITH_ZLIB"] = "TRUE" if self.settings.os == "Windows" else self._package_folder_dep("zlib")
         # ZSTD patches
-        tc.cache_variables["WITH_ZSTD"] = self._package_folder_dep("zstd")
+        tc.cache_variables["WITH_ZSTD"] = "TRUE"
         # Build patches
         tc.cache_variables["BUILD_STATIC"] = not self.options.shared
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
@@ -109,6 +110,11 @@ class MysqlCppConnRecipe(ConanFile):
         tc.cache_variables["BOOST_DIR"] = "FALSE"
         # Protobuf
         tc.cache_variables["WITH_PROTOBUF"] = self._package_folder_dep("protobuf", "build")
+
+        # Windows patches
+        if self.settings.os == "Windows":
+            # OpenSSL patches
+            tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
 
         tc.generate()
 
@@ -124,14 +130,29 @@ class MysqlCppConnRecipe(ConanFile):
                                 "set(LIB_NAME_STATIC \"${LIB_NAME_STATIC}-mt\")",
                                 strict=False)
 
+        # ZSTD patch
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "zstd", "CMakeLists.txt"),
+                            "enable_pic()",
+                            "enable_pic()\n"\
+                            "add_compile_definitions(ZSTD_DISABLE_ASM)",
+                            strict=False)
+
+        # Fix shared zlib build = duplicate references
+        if self.options.shared and self.settings.os in ["Linux", "FreeBSD"] :
+            # mysqlx && ZLIB patch
+            replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"),
+                                "PRIVATE cdk_foundation ext::z ext::lz4 ext::zstd",
+                                "PRIVATE cdk_foundation ZLIB::ZLIB ext::lz4 ext::zstd",
+                                strict=False)
+
         # Apple patches
         if is_apple_os(self) and cross_building(self):
             patch = f"set(CMAKE_OSX_ARCHITECTURES \"{self.settings.arch}\" CACHE INTERNAL \"\" FORCE)\n"
-
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                                "PROJECT(MySQL_CONCPP)",
-                                f"PROJECT(MySQL_CONCPP)\n{patch}",
-                                strict=False)
+            # Package level
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "PROJECT(MySQL_CONCPP)", f"PROJECT(MySQL_CONCPP)\n{patch}", strict=False)
+            # SubPackages-Apple patches
+            for lb in ["lz4", 'zlib', 'zstd']:
+                replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", lb, "CMakeLists.txt"), "enable_pic()", f"enable_pic()\n{patch}", strict=False)
 
         # Protobuf patches
         protobuf = "protobufd" if self.dependencies.build["protobuf"].settings.build_type == "Debug" else "protobuf"
@@ -151,8 +172,6 @@ class MysqlCppConnRecipe(ConanFile):
         cmake.build()
 
     def package(self):
-        # Add License
-        copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 
@@ -161,6 +180,8 @@ class MysqlCppConnRecipe(ConanFile):
         rm(self, "INFO_BIN", self.package_folder)
         rm(self, "*.cmake", self.package_folder)
 
+        # Add License
+        copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
         # Just rename the lib64 dir
         source_dir = os.path.join(self.package_folder, "lib64")
@@ -179,6 +200,8 @@ class MysqlCppConnRecipe(ConanFile):
             self.cpp_info.system_libs.extend(["resolv"])
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.extend(["m", "pthread"])
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["dnsapi"])
 
         target = "concpp-xdevapi"
         target_alias = "concpp"
