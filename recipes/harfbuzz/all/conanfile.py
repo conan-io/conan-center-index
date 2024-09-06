@@ -47,7 +47,7 @@ class HarfbuzzConan(ConanFile):
         "with_uniscribe": True,
         "with_directwrite": False,
         "with_coretext": True,
-        "with_introspection": False,
+        "with_introspection": True,
         "with_subset": "deprecated",
     }
 
