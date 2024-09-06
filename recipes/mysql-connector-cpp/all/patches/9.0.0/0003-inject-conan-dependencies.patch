@@ -36,7 +36,7 @@ index 1fc785e3..f371e29a 100644
  
 -# Setup extrnal project that builds protobuf from  bundled sources
 -add_ext(protobuf google/protobuf/api.pb.h)
-+find_package(Protobuf REQUIRED CONFIG)
++find_package(Protobuf REQUIRED CONFIG GLOBAL)
  
 -if(NOT PROTOBUF_FOUND)
 -  message(FATAL_ERROR "Can't build without protobuf support")
