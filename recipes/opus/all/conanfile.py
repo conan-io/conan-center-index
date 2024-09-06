@@ -58,8 +58,8 @@ class OpusConan(ConanFile):
 
     def validate(self):
         check_min_vs(self, 190)
-        if self.version == ".1.5.2" and self.settings.compiler == "gcc" and self.settings.compiler.version == "5":
-            raise ConanInvalidConfiguration("GCC 5 not supported due to lack of AVX2 support")
+        if self.version == "1.5.2" and self.settings.compiler == "gcc" and self.settings.compiler.version in ["5", "7"]:
+            raise ConanInvalidConfiguration(f"GCC {self.settings.compiler.version} not supported due to lack of AVX2 support")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
