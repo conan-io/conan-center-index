@@ -1,0 +1,43 @@
+From e27ed801e587a6227464ec4638cad0333c9fa504 Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Fri, 6 Sep 2024 23:10:36 +0300
+Subject: [PATCH] Add target_include_directories for Conan v1
+
+---
+ cdk/foundation/CMakeLists.txt      | 1 +
+ cdk/protocol/mysqlx/CMakeLists.txt | 7 +++++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/cdk/foundation/CMakeLists.txt b/cdk/foundation/CMakeLists.txt
+index 3cd3bfc4..4d1b1e77 100644
+--- a/cdk/foundation/CMakeLists.txt
++++ b/cdk/foundation/CMakeLists.txt
+@@ -64,6 +64,7 @@ target_link_libraries(cdk_foundation
+   PUBLIC RapidJSON::rapidjson
+   PRIVATE OpenSSL::SSL
+ )
++target_include_directories(cdk_foundation PUBLIC ${RapidJSON_INCLUDE_DIRS})
+ 
+ IF(WIN32)
+   target_link_libraries(cdk_foundation PRIVATE dnsapi)
+diff --git a/cdk/protocol/mysqlx/CMakeLists.txt b/cdk/protocol/mysqlx/CMakeLists.txt
+index 2ee4f937..aa5bc8bc 100644
+--- a/cdk/protocol/mysqlx/CMakeLists.txt
++++ b/cdk/protocol/mysqlx/CMakeLists.txt
+@@ -139,6 +139,13 @@ target_link_libraries(cdk_proto_mysqlx
+   PRIVATE cdk_foundation ext::z ext::lz4 ext::zstd
+ )
+ 
++target_include_directories(cdk_proto_mysqlx PUBLIC
++  ${Protobuf_INCLUDE_DIRS} ${protobuf_INCLUDE_DIRS}
++  ${ZLIB_INCLUDE_DIRS} ${zlib_INCLUDE_DIRS}
++  ${LZ4_INCLUDE_DIRS} ${lz4_INCLUDE_DIRS}
++  ${ZStd_INCLUDE_DIRS} ${zstd_INCLUDE_DIRS}
++)
++
+ ADD_COVERAGE(cdk_proto_mysqlx)
+ 
+ source_group("Protobuf Definitions" FILES ${proto_mysqlx_defs})
+-- 
+2.45.2.windows.1
+

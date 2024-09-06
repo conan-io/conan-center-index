@@ -1,0 +1,45 @@
+From fdc950d95b215527fb1bd1790fb24b4c427bf807 Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Fri, 6 Sep 2024 17:56:39 +0300
+Subject: [PATCH 1/2] Set CMake policy version to 3.15, move project()
+
+---
+ CMakeLists.txt | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 341ed2de..4d747849 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -27,10 +27,10 @@
+ # 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ 
+ 
+-CMAKE_MINIMUM_REQUIRED(VERSION 3.8)
++CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
++PROJECT(MySQL_CONCPP)
++
+ 
+-CMAKE_POLICY(VERSION 3.1)
+-cmake_policy(SET CMP0022 NEW)
+ 
+ 
+ SET(BUILDTYPE_DOCSTRING
+@@ -73,7 +73,7 @@ endif()
+ 
+ ##########################################################################
+ 
+-PROJECT(MySQL_CONCPP)
++
+ 
+ # Load cmake modules
+ 
+@@ -87,7 +87,7 @@
+ # Detect if we are configured as stand-alone project, or sub-project.
+ #
+ 
+-if(PROJECT_NAME STREQUAL CMAKE_PROJECT_NAME)
++if(1)
+ 
+   SET(concpp_stand_alone 1)
+ 
