@@ -117,7 +117,7 @@ class OpenMPIConan(ConanFile):
 
         tc = AutotoolsToolchain(self)
         tc.configure_args += [
-            "--with-pic" if self.options.get_safe("fPIC") else "--without-pic",
+            "--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic",
             f"--enable-mpi-fortran={self.options.fortran}",
             f"--with-hwloc={root('hwloc')}",
             f"--with-libevent={root('libevent')}",
