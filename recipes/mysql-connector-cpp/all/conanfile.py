@@ -1,11 +1,12 @@
 import os
+import shutil
 from conan import ConanFile
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.build import check_min_cppstd, cross_building
-from conan.tools.files import get, replace_in_file, copy, rm
-from conan.tools.scm import Version
+from conan.tools.files import get, replace_in_file, copy, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 
 required_conan_version = ">=1.64.1"
@@ -179,18 +180,6 @@ class MysqlCppConnRecipe(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def package(self):
-        cmake = CMake(self)
-        cmake.install()
-
-        # Clean
-        rm(self, "INFO_SRC", self.package_folder)
-        rm(self, "INFO_BIN", self.package_folder)
-        rm(self, "*.cmake", self.package_folder)
-
-        # Add License
-        copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-
     @property
     def _package_dirs(self):
         template_dirs = ["lib64", "lib"] if self.settings.build_type == "Release" else  [os.path.join("lib64", "debug"), os.path.join("lib", "debug")]
@@ -203,10 +192,36 @@ class MysqlCppConnRecipe(ConanFile):
         template_dirs = [path for path in template_dirs if os.path.isdir(path)]
         return template_dirs
 
+    def package(self):
+        cmake = CMake(self)
+        cmake.install()
+
+        # Clean
+        rm(self, "INFO_SRC", self.package_folder)
+        rm(self, "INFO_BIN", self.package_folder)
+        rm(self, "*.cmake", self.package_folder)
+
+        # Add License
+        copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+
+        # List all files in the source directory
+        destination_dir = os.path.join(self.package_folder, "lib")
+        for _dir in self._package_dirs:
+            source_dir = os.path.join(self.package_folder, _dir)
+
+            # Move each file
+            for file_name in os.listdir(source_dir):
+                source_file = os.path.join(source_dir, file_name)
+                destination_file = os.path.join(destination_dir, file_name)
+
+                # Check if it's a file, then move it
+                if os.path.isfile(source_file):
+                    shutil.move(source_file, destination_file)
+
+            # Remove dir
+            rmdir(self, os.path.join(self.package_folder, _dir))
+
     def package_info(self):
-        dirs = self._package_dirs
-        self.cpp_info.bindirs = dirs
-        self.cpp_info.libdirs= dirs
 
         if is_apple_os(self) or self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["resolv"])
