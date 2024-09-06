@@ -15,10 +15,10 @@ required_conan_version = ">=1.55.0"
 class SDLConan(ConanFile):
     name = "sdl"
     description = "Access to audio, keyboard, mouse, joystick, and graphics hardware via OpenGL, Direct3D and Vulkan"
-    topics = ("sdl2", "audio", "keyboard", "graphics", "opengl")
+    license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libsdl.org"
-    license = "Zlib"
+    topics = ("sdl2", "audio", "keyboard", "graphics", "opengl")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -79,12 +79,12 @@ class SDLConan(ConanFile):
         "libunwind": True,
     }
     generators = "CMakeDeps", "PkgConfigDeps", "VirtualBuildEnv"
-    
+
     @property
     def _is_clang_cl(self):
         return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
                self.settings.compiler.get_safe("runtime")
-    
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -186,28 +186,28 @@ class SDLConan(ConanFile):
             self.build_requires("wayland/1.22.0")  # Provides wayland-scanner
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True,
-            destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
 
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        if self.settings.os == "Macos":
-            if self.options.iconv:
-                # If using conan-provided iconv, search for the symbol "libiconv_open"
-                replace_check = "check_library_exists(iconv libiconv_open"
-            else:
-                # When no tusing conan-provided icon, don't check for iconv at all
-                replace_check = "#check_library_exists(iconv iconv_open"
-            replace_in_file(self, cmakelists, "check_library_exists(iconv iconv_open",
-                            replace_check)
+        if Version(self.version) < "2.30.0":
+            cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+            if self.settings.os == "Macos":
+                if self.options.iconv:
+                    # If using conan-provided iconv, search for the symbol "libiconv_open"
+                    replace_check = "check_library_exists(iconv libiconv_open"
+                else:
+                    # When no tusing conan-provided icon, don't check for iconv at all
+                    replace_check = "#check_library_exists(iconv iconv_open"
+                replace_in_file(self, cmakelists, "check_library_exists(iconv iconv_open",
+                                replace_check)
 
-        # Avoid assuming iconv is available if it is provided by the C runtime,
-        # and let SDL build the fallback implementation
-        replace_in_file(self, cmakelists,
-                        'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
-                        '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
+            # Avoid assuming iconv is available if it is provided by the C runtime,
+            # and let SDL build the fallback implementation
+            replace_in_file(self, cmakelists,
+                            'check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)',
+                            '# check_library_exists(c iconv_open "" HAVE_BUILTIN_ICONV)')
 
         # Ensure to find wayland-scanner from wayland recipe in build requirements (or requirements if 1 profile)
         if self.options.get_safe("wayland"):
@@ -216,6 +216,8 @@ class SDLConan(ConanFile):
                 "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
                 'find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED PATHS "${WAYLAND_BIN_DIR}" NO_DEFAULT_PATH)',
             )
+        if Version(self.version) >= "2.30.6" and not self.options.shared:
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "list(APPEND targets SDL2-static)", "set(targets SDL2-static)")
 
     def define_toolchain(self):
         tc = CMakeToolchain(self)
@@ -237,6 +239,7 @@ class SDLConan(ConanFile):
             tc.variables["HAVE_LIBC"] = True
         tc.variables["SDL_SHARED"] = self.options.shared
         tc.variables["SDL_STATIC"] = not self.options.shared
+        tc.variables["SDL_TEST"] = False
         tc.variables["SDL_OPENGL"] = self.options.opengl
         tc.variables["SDL_OPENGLES"] = self.options.opengles
         tc.variables["SDL_VULKAN"] = self.options.vulkan
@@ -313,6 +316,9 @@ class SDLConan(ConanFile):
 
         if Version(self.version) >= "2.0.22":
             tc.variables["SDL2_DISABLE_SDL2MAIN"] = not self.options.sdl2main
+        if Version(self.version) >= "2.30.0":
+            tc.variables["SDL_LIBICONV"] = self.options.get_safe("iconv", False)
+            tc.variables["SDL_SYSTEM_ICONV"] = False
 
         # Add extra information collected from the deps
         tc.variables["EXTRA_LDFLAGS"] = ";".join(cmake_extra_ldflags)
@@ -320,6 +326,7 @@ class SDLConan(ConanFile):
         cmake_extra_cflags = ["-I{}".format(path) for _, dep in self.dependencies.items() for path in dep.cpp_info.includedirs]
         tc.variables["EXTRA_CFLAGS"] = ";".join(cmake_extra_cflags).replace(os.sep, '/')
         tc.variables["EXTRA_LIBS"] = ";".join(cmake_extra_libs)
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def build(self):
@@ -334,6 +341,8 @@ class SDLConan(ConanFile):
 
         copy(self, pattern="LICENSE.txt", src=os.path.join(self.source_folder), dst=os.path.join(self.package_folder, "licenses"))
         rm(self, "sdl2-config", os.path.join(self.package_folder, "bin"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

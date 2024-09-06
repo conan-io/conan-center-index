@@ -66,7 +66,7 @@ class PangoConan(ConanFile):
             self.requires("freetype/2.13.2")
 
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/2.15.0")
         if self.options.with_xft:
             self.requires("libxft/2.3.8")
         if (
@@ -78,7 +78,7 @@ class PangoConan(ConanFile):
         if self.options.with_cairo:
             # "pango/pangocairo.h" includes "cairo.h"
             self.requires("cairo/1.18.0", transitive_headers=True)
-        self.requires("glib/2.78.1", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         self.requires("fribidi/1.0.13")
         # "pango/pango-coverage.h" includes "hb.h"
         self.requires("harfbuzz/8.3.0", transitive_headers=True)
@@ -118,9 +118,9 @@ class PangoConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("glib/<host_version>")
-        self.tool_requires("meson/1.3.0")
+        self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -223,6 +223,8 @@ class PangoConan(ConanFile):
             self.cpp_info.components["pangowin32"].set_property("pkg_config_name", "pangowin32")
             self.cpp_info.components["pangowin32"].requires = ["pango_"]
             self.cpp_info.components["pangowin32"].system_libs.append("gdi32")
+            if Version(self.version) >= "1.50.12":
+                self.cpp_info.components["pangowin32"].system_libs.append("dwrite")
 
         if self.options.with_cairo:
             self.cpp_info.components["pangocairo"].libs = ["pangocairo-1.0"]

@@ -15,10 +15,10 @@ required_conan_version = ">=1.53.0"
 
 class RocksDBConan(ConanFile):
     name = "rocksdb"
-    homepage = "https://github.com/facebook/rocksdb"
+    description = "A library that provides an embeddable, persistent key-value store for fast storage"
     license = ("GPL-2.0-only", "Apache-2.0")
     url = "https://github.com/conan-io/conan-center-index"
-    description = "A library that provides an embeddable, persistent key-value store for fast storage"
+    homepage = "https://github.com/facebook/rocksdb"
     topics = ("database", "leveldb", "facebook", "key-value")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -163,6 +163,8 @@ class RocksDBConan(ConanFile):
         if self.options.with_jemalloc:
             deps.set_property("jemalloc", "cmake_file_name", "JeMalloc")
             deps.set_property("jemalloc", "cmake_target_name", "JeMalloc::JeMalloc")
+        if self.options.with_zstd:
+            deps.set_property("zstd", "cmake_target_name", "zstd::zstd")
         deps.generate()
 
     def build(self):

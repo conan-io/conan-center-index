@@ -9,7 +9,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.64.0 <2 || >=2.2.0"
 
 
 class LibdrmConan(ConanFile):
@@ -80,7 +80,7 @@ class LibdrmConan(ConanFile):
     def requirements(self):
         if self.options.intel:
             self.requires("libpciaccess/0.17")
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os == "Linux":
             self.requires("linux-headers-generic/6.5.9")
 
     def validate(self):
@@ -88,9 +88,9 @@ class LibdrmConan(ConanFile):
             raise ConanInvalidConfiguration("libdrm supports only Linux or FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.0")
+        self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/2.2.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -116,8 +116,9 @@ class LibdrmConan(ConanFile):
             else:
                 tc.project_options[o] = "true" if getattr(self.options, o) else "false"
 
-        tc.project_options["datadir"] = os.path.join(self.package_folder, "res")
-        tc.project_options["mandir"] = os.path.join(self.package_folder, "res", "man")
+        tc.project_options["datadir"] = "res"
+        tc.project_options["mandir"] = os.path.join("res", "man")
+        tc.project_options["man-pages"] = "disabled" if Version(self.version) >= "2.4.113" else "false"
         tc.generate()
 
     def build(self):
@@ -139,7 +140,7 @@ class LibdrmConan(ConanFile):
         self.cpp_info.components["libdrm_libdrm"].libs = ["drm"]
         self.cpp_info.components["libdrm_libdrm"].includedirs.append(os.path.join("include", "libdrm"))
         self.cpp_info.components["libdrm_libdrm"].set_property("pkg_config_name", "libdrm")
-        if self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os == "Linux":
             self.cpp_info.components["libdrm_libdrm"].requires = ["linux-headers-generic::linux-headers-generic"]
 
         if Version(self.version) < "2.4.111":
