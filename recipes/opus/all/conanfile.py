@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import check_min_vs
@@ -57,6 +58,8 @@ class OpusConan(ConanFile):
 
     def validate(self):
         check_min_vs(self, 190)
+        if self.version == ".1.5.2" and self.settings.compiler == "gcc" and self.settings.compiler.version == "5":
+            raise ConanInvalidConfiguration("GCC 5 not supported due to lack of AVX2 support")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
