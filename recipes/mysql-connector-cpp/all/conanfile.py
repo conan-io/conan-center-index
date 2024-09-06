@@ -81,7 +81,7 @@ class MysqlCppConnRecipe(ConanFile):
 
     def _package_folder_dep(self, dep, scope="host"):
         if scope == "build":
-            self.dependencies.build[dep].package_folder.replace("\\", "/")
+            return self.dependencies.build[dep].package_folder.replace("\\", "/")
         return self.dependencies[dep].package_folder.replace("\\", "/")
 
     def _include_folder_dep(self, dep):
@@ -132,15 +132,9 @@ class MysqlCppConnRecipe(ConanFile):
                                 "PROJECT(MySQL_CONCPP)",
                                 f"PROJECT(MySQL_CONCPP)\n{patch}",
                                 strict=False)
-            # Packages-Apple patches
-            for lb in ["lz4", 'zlib', 'protobuf', 'zstd']:
-                replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", lb, "CMakeLists.txt"),
-                                    "enable_pic()",
-                                    f"enable_pic()\n{patch}",
-                                    strict=False)
 
         # Protobuf patches
-        protobuf = "protobufd" if self.dependencies["protobuf"].settings.build_type == "Debug" else "protobuf"
+        protobuf = "protobufd" if self.dependencies.build["protobuf"].settings.build_type == "Debug" else "protobuf"
         # INFO: Disable protobuf-lite to use Conan protobuf targets instead
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindProtobuf.cmake"), "LIBRARY protobuf-lite pb_libprotobuf-lite", "")
         # INFO: Fix protobuf library name according to the build type
