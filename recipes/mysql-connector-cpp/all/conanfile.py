@@ -15,6 +15,7 @@ class MysqlCppConnRecipe(ConanFile):
     name = "mysql-connector-cpp"
     package_type = "library"
     short_paths = True
+    version = "9.0.0"
 
     # Optional metadata
     license = "GPL-2.0-only"
@@ -59,7 +60,7 @@ class MysqlCppConnRecipe(ConanFile):
         self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zstd/[>=1.5 <1.6]")
-        self.requires("lz4/1.10.0")
+        self.requires("lz4/[>=1.9.2 <=1.10.0]")
         self.requires("protobuf/3.21.12")
 
     def build_requirements(self):
@@ -97,9 +98,10 @@ class MysqlCppConnRecipe(ConanFile):
         tc = CMakeToolchain(self)
 
         # OpenSSL
+        tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
         tc.cache_variables["OPENSSL_ROOT_DIR"] = self._package_folder_dep("openssl")
         # LZ4 patches
-        tc.cache_variables["WITH_LZ4"] = self._package_folder_dep("lz4")
+        tc.cache_variables["WITH_lZ4"] = self._package_folder_dep("lz4")
         # ZLIB patches
         tc.cache_variables["WITH_ZLIB"] = self._package_folder_dep("zlib")
         # ZSTD patches
@@ -132,14 +134,21 @@ class MysqlCppConnRecipe(ConanFile):
             # Package level
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "PROJECT(MySQL_CONCPP)", f"PROJECT(MySQL_CONCPP)\n{patch}", strict=False)
 
+
+        # Remove old compression fetching
+        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"), "find_dependency(Compression)", "find_package(ZLIB REQUIRED)\nfind_package(zstd REQUIRED)\nfind_package(lz4 REQUIRED)")
+
         # ZLIB patch
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "add_ext(zlib zlib.h z ext_zlib)", "add_ext(zlib zlib.h zlib ext_zlib)")
+        zlib_name = "z" if not self.settings.os == "Windows" else "zlib"
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "add_ext(zlib zlib.h z ext_zlib)", f"add_ext(zlib zlib.h {zlib_name} ext_zlib)")
 
         # ZSTD patch
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "add_ext(zstd zstd.h zstd ext_zstd)", "add_ext(zstd zstd.h zstd_static ext_zstd)")
+        zstd_name = "zstd" if not self.settings.os == "Windows" else "zstd_static"
+        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "if(NOT LZ4_FOUND)", "if(NOT ZSTD_FOUND)")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "add_ext(zstd zstd.h zstd ext_zstd)", f"add_ext(zstd zstd.h {zstd_name} ext_zstd)")
 
         # Compression patch
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx","CMakeLists.txt"), "PRIVATE cdk_foundation ext::z ext::lz4 ext::zstd", "PRIVATE cdk_foundation ext::zlib ext::lz4 ext::zstd_static")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx","CMakeLists.txt"), "PRIVATE cdk_foundation ext::z ext::lz4 ext::zstd", f"PRIVATE cdk_foundation ext::{zlib_name} ext::lz4 ext::{zstd_name}")
 
         # OpenSSL patch
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "find_dependency(SSL)", "find_package(OpenSSL REQUIRED)")
