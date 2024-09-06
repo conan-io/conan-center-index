@@ -255,7 +255,7 @@ class OpenMPIConan(ConanFile):
             self.cpp_info.components["prrte"].libs = ["prrte"]
             self.cpp_info.components["prrte"].requires = ["pmix"]
             self.cpp_info.components["ompi"].requires = ["pmix"]
-            main_component = self.cpp_info.components["ompi"]
+            main_component = self.cpp_info.components["pmix"]
         else:
             self.cpp_info.components["orte"].set_property("pkg_config_name", "orte")
             self.cpp_info.components["orte"].libs = ["open-rte"]
