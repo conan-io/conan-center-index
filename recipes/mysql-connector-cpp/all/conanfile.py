@@ -15,7 +15,6 @@ class MysqlCppConnRecipe(ConanFile):
     name = "mysql-connector-cpp"
     package_type = "library"
     short_paths = True
-    version= "9.0.0"
 
     # Optional metadata
     license = "GPL-2.0-only"
@@ -57,13 +56,14 @@ class MysqlCppConnRecipe(ConanFile):
             )
 
     def requirements(self):
-        self.requires("openssl/1.0.2u")
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("protobuf/3.21.12")
+        self.requires("zstd/[>=1.5 <1.6]")
+        self.requires("lz4/1.10.0")
 
     def build_requirements(self):
-        if not is_msvc(self):
-            self.tool_requires("ninja/[>=1.10 <2]")
+        self.tool_requires("protobuf/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -79,7 +79,9 @@ class MysqlCppConnRecipe(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def _package_folder_dep(self, dep):
+    def _package_folder_dep(self, dep, scope="host"):
+        if scope == "build":
+            self.dependencies.build[dep].package_folder.replace("\\", "/")
         return self.dependencies[dep].package_folder.replace("\\", "/")
 
     def _include_folder_dep(self, dep):
@@ -90,28 +92,23 @@ class MysqlCppConnRecipe(ConanFile):
 
     def generate(self):
 
-        tc = CMakeToolchain(self, generator="Ninja") if not is_msvc(self) else CMakeToolchain(self)
+        tc = CMakeToolchain(self)
 
         # OpenSSL
-        tc.cache_variables["WITH_SSL"] = "SYSTEM"
+        tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
         # LZ4 patches
-        tc.cache_variables["WITH_LZ4"] = "TRUE"
+        tc.cache_variables["WITH_LZ4"] = self._package_folder_dep("lz4")
         # ZLIB patches
-        tc.cache_variables["WITH_ZLIB"] = "TRUE" if self.settings.os == "Windows" else self._package_folder_dep("zlib")
+        tc.cache_variables["WITH_ZLIB"] = self._package_folder_dep("zlib")
         # ZSTD patches
-        tc.cache_variables["WITH_ZSTD"] = "TRUE"
+        tc.cache_variables["WITH_ZSTD"] = self._package_folder_dep("zstd")
         # Build patches
         tc.cache_variables["BUILD_STATIC"] = not self.options.shared
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
         # Disable Boost, only legacy JDBC connector needs it
         tc.cache_variables["BOOST_DIR"] = "FALSE"
         # Protobuf
-        tc.cache_variables["WITH_PROTOBUF"] = self._package_folder_dep("protobuf")
-
-        # Windows patches
-        if self.settings.os == "Windows":
-            # OpenSSL patches
-            tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
+        tc.cache_variables["WITH_PROTOBUF"] = self._package_folder_dep("protobuf", "build")
 
         tc.generate()
 
@@ -125,27 +122,6 @@ class MysqlCppConnRecipe(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "install_layout.cmake"),
                                 "set(LIB_NAME_STATIC \"${LIB_NAME}-mt\")",
                                 "set(LIB_NAME_STATIC \"${LIB_NAME_STATIC}-mt\")",
-                                strict=False)
-
-        # ZSTD patch
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "zstd", "CMakeLists.txt"),
-                            "enable_pic()",
-                            "enable_pic()\n"\
-                            "add_compile_definitions(ZSTD_DISABLE_ASM)",
-                            strict=False)
-
-        # Fix shared zlib build = duplicate references
-        if self.options.shared and self.settings.os in ["Linux", "FreeBSD"] :
-            # ZLIB patch
-            replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "protobuf", "protobuf-3.19.6", "cmake", "CMakeLists.txt"),
-                                "set(protobuf_WITH_ZLIB_DEFAULT ON)",
-                                "set(protobuf_WITH_ZLIB_DEFAULT OFF)",
-                                strict=False)
-
-            # mysqlx && ZLIB patch
-            replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"),
-                                "PRIVATE cdk_foundation ext::z ext::lz4 ext::zstd",
-                                "PRIVATE cdk_foundation ZLIB::ZLIB ext::lz4 ext::zstd",
                                 strict=False)
 
         # Apple patches
@@ -181,6 +157,8 @@ class MysqlCppConnRecipe(ConanFile):
         cmake.build()
 
     def package(self):
+        # Add License
+        copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
 
@@ -189,8 +167,6 @@ class MysqlCppConnRecipe(ConanFile):
         rm(self, "INFO_BIN", self.package_folder)
         rm(self, "*.cmake", self.package_folder)
 
-        # Add License
-        copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
         # Just rename the lib64 dir
         source_dir = os.path.join(self.package_folder, "lib64")
