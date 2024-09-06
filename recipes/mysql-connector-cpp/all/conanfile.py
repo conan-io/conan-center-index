@@ -4,9 +4,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import get, copy, rm, export_conandata_patches, apply_conandata_patches
-from conan.tools.microsoft import is_msvc_static_runtime, is_msvc, msvs_toolset
+from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.55.0"
@@ -83,6 +83,8 @@ class MysqlConnectorCppConan(ConanFile):
 
     def generate(self):
         VirtualBuildEnv(self).generate()
+        if self.dependencies["protobuf"].options.shared:
+            VirtualRunEnv(self).generate(scope="build")
 
         tc = CMakeToolchain(self)
         tc.cache_variables["BUNDLE_DEPENDENCIES"] = False
@@ -117,10 +119,6 @@ class MysqlConnectorCppConan(ConanFile):
         rm(self, "INFO_BIN", self.package_folder)
         rm(self, "*.cmake", self.package_folder)
 
-    @property
-    def _abi_version_major(self):
-        return 2
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "mysql-concpp")
         self.cpp_info.set_property("cmake_target_name", "mysql::concpp")
@@ -140,11 +138,6 @@ class MysqlConnectorCppConan(ConanFile):
             lib += "-static"
             if is_msvc_static_runtime(self):
                 lib += "-mt"
-        elif self.settings.os == "Windows":
-            lib += f"-{self._abi_version_major}"
-            if is_msvc(self):
-                # e.g. v143 -> -vs14
-                lib += f"-vs{msvs_toolset(self)[1:-1]}"
         self.cpp_info.libs = [lib]
 
         if self.settings.os == "Windows":
