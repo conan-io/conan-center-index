@@ -33,10 +33,6 @@ class MysqlCppConnRecipe(ConanFile):
     default_options = { "shared": False, "fPIC": True }
 
     @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "14",
@@ -138,7 +134,7 @@ class MysqlCppConnRecipe(ConanFile):
                             strict=False)
 
         # Fix shared zlib build = duplicate references
-        if self.settings.os in ["Linux", "FreeBSD"] :
+        if self.options.shared and self.settings.os in ["Linux", "FreeBSD"] :
             # ZLIB patch
             replace_in_file(self, os.path.join(self.source_folder, "cdk", "extra", "protobuf", "protobuf-3.19.6", "cmake", "CMakeLists.txt"),
                                 "set(protobuf_WITH_ZLIB_DEFAULT ON)",
@@ -180,8 +176,6 @@ class MysqlCppConnRecipe(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.parallel = True
-        cmake.verbose = True
         cmake.configure()
         cmake.build()
 
@@ -198,33 +192,21 @@ class MysqlCppConnRecipe(ConanFile):
         copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
     @property
-    def _vs_version(self):
-        msvc_toolset_version = self.settings.get_safe("compiler.toolset")
-        msvc_version = self.settings.get_safe("compiler.version")
-
-        if msvc_toolset_version:
-            vs_version = msvc_toolset_version[1:3]
-        elif msvc_version:
-            vs_version = msvc_version[:2]
-            if vs_version == "18":
-                vs_version = "12"
-            elif vs_version == "19":
-                vs_version = "14"
+    def _package_dirs(self):
+        template_dirs = ["lib64", "lib"] if self.settings.build_type == "Release" else  [os.path.join("lib64", "debug"), os.path.join("lib", "debug")]
+        if is_msvc(self):
+            template_dirs = [os.path.join(lib, "vs14") for lib in template_dirs]
         else:
-            self.output.warn("MSVC_TOOLSET_VERSION or MSVC_VERSION not defined")
-            vs_version = "unknown"
+            template_dirs = template_dirs
 
-        self.output.info(f"VS Version: {vs_version}")
-        return f"vs{vs_version}"
+        # Clean out bad dirs
+        template_dirs = [path for path in template_dirs if os.path.isdir(path)]
+        return template_dirs
 
     def package_info(self):
-        template_dirs = ["lib64", os.path.join("lib64", "debug"), "lib", os.path.join("lib", "debug")]
-        if is_msvc(self):
-            vs_version = self._vs_version
-            self.cpp_info.libdirs = [os.path.join(lib, vs_version) for lib in template_dirs]
-        else:
-            self.cpp_info.libdirs = template_dirs
-        self.cpp_info.bindirs = template_dirs
+        dirs = self._package_dirs
+        self.cpp_info.bindirs = dirs
+        self.cpp_info.libdirs= dirs
 
         if is_apple_os(self) or self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["resolv"])
