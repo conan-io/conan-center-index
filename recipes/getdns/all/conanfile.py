@@ -97,7 +97,7 @@ class GetDnsConan(ConanFile):
             tc.blocks["cmake_flags_init"].template += '\nstring(APPEND CMAKE_C_FLAGS_INIT " -Wno-incompatible-function-pointer-types")'
         if self.options.with_libidn2 and is_msvc(self):
             # INFO: getdns_static.lib(convert.c.obj): error LNK2019: unresolved external symbol __imp_idn2_lookup_u8
-            tc.preprocessor_definitions.extend(self.dependencies["libidn2"].cpp_info.defines)
+            tc.preprocessor_definitions.update({it: 1 for it in self.dependencies["libidn2"].cpp_info.defines})
         tc.generate()
 
         deps = CMakeDeps(self)
