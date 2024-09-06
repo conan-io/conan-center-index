@@ -1,7 +1,9 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.build import check_min_cppstd
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.52.0"
@@ -28,6 +30,8 @@ class StatisticConan(ConanFile):
         self.info.clear()
 
     def validate(self):
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
