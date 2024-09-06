@@ -80,7 +80,7 @@ class HarfbuzzConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.with_subset = True
+        self.info.options.with_subset = True
 
     def requirements(self):
         if self.options.with_freetype:
