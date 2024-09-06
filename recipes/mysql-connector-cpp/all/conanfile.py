@@ -192,17 +192,18 @@ class MysqlCppConnRecipe(ConanFile):
         # Add License
         copy(self, "LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
-        # List all files in the source directory
-        destination_dir = os.path.join(self.package_folder, "lib")
-        source_dir = os.path.join(self.package_folder, "lib64")
-
         # Just rename the lib64 dir
+        source_dir = os.path.join(self.package_folder, "lib64")
         if os.path.isdir(source_dir):
-            shutil.move(source_dir, destination_dir)
+            shutil.move(source_dir, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
 
-        self.cpp_info.libdirs = ["lib"] if self.settings.build_type == "Release" else [os.path.join("lib", "debug")]
+        # Lib dir
+        lib_dir = ["lib"] if self.settings.build_type == "Release" else [os.path.join("lib", "debug")]
+        if is_msvc(self):
+            lib_dir = [os.path.join(lib_dir[0], "vs14")]
+        self.cpp_info.libdirs = lib_dir
 
         if is_apple_os(self) or self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["resolv"])
