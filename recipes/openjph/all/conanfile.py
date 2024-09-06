@@ -73,6 +73,11 @@ class OpenJPH(ConanFile):
         tc.variables["OJPH_ENABLE_TIFF_SUPPORT"] = self.options.with_tiff
         tc.variables["OJPH_BUILD_STREAM_EXPAND"] = self.options.with_stream_expand_tool
         tc.variables["OJPH_DISABLE_SIMD"] = self.options.disable_simd
+
+        # Workaround for Conan 1 where the CXX standard version isn't set to a fallback to gnu98 happens
+        if not self.settings.get_safe("compiler.cppstd"):
+            tc.cache_variables["CMAKE_CXX_STANDARD"] = 14 if self.options.with_stream_expand_tool else 11
+
         tc.generate()
 
         deps = CMakeDeps(self)
