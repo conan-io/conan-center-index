@@ -1,4 +1,7 @@
 sources:
+  "5.4.15":
+    url: "https://github.com/simdutf/simdutf/archive/v5.4.15.tar.gz"
+    sha256: "188a9516ee208659cab9a1e5063c1b8385d63d171c2381e9ce18af97936d9879"
   "5.3.7":
     url: "https://github.com/simdutf/simdutf/archive/v5.3.7.tar.gz"
     sha256: "731fb29c8c0b05c77b0a29dc37ab8eabe09533f000864a7c55e1ed2e1d33d1e7"
