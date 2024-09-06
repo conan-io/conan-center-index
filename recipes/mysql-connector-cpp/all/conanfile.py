@@ -15,7 +15,6 @@ class MysqlCppConnRecipe(ConanFile):
     name = "mysql-connector-cpp"
     package_type = "library"
     short_paths = True
-    version= "9.0.0"
 
     # Optional metadata
     license = "GPL-2.0-only"
@@ -98,7 +97,7 @@ class MysqlCppConnRecipe(ConanFile):
         tc = CMakeToolchain(self)
 
         # OpenSSL
-        tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
+        tc.cache_variables["OPENSSL_ROOT_DIR"] = self._package_folder_dep("openssl")
         # LZ4 patches
         tc.cache_variables["WITH_LZ4"] = self._package_folder_dep("lz4")
         # ZLIB patches
@@ -132,6 +131,29 @@ class MysqlCppConnRecipe(ConanFile):
             patch = f"set(CMAKE_OSX_ARCHITECTURES \"{self.settings.arch}\" CACHE INTERNAL \"\" FORCE)\n"
             # Package level
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "PROJECT(MySQL_CONCPP)", f"PROJECT(MySQL_CONCPP)\n{patch}", strict=False)
+
+        # ZLIB patch
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "add_ext(zlib zlib.h z ext_zlib)", "add_ext(zlib zlib.h zlib ext_zlib)")
+
+        # ZSTD patch
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "add_ext(zstd zstd.h zstd ext_zstd)", "add_ext(zstd zstd.h zstd_static ext_zstd)")
+
+        # Compression patch
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx","CMakeLists.txt"), "PRIVATE cdk_foundation ext::z ext::lz4 ext::zstd", "PRIVATE cdk_foundation ext::zlib ext::lz4 ext::zstd_static")
+
+        # OpenSSL patch
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "find_dependency(SSL)", "find_package(OpenSSL REQUIRED)")
+        # cdk target
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "find_dependency(SSL)", "find_package(OpenSSL REQUIRED)")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "add_config(WITH_SSL)", "add_config_option(WITH_SSL STRING DEFAULT system "")\nadd_config(WITH_SSL)")
+
+        extra_lib = "Crypt32" if self.settings.os == "Windows" else ""
+        # foundation target
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "include(CheckCXXSourceCompiles)", "find_package(OpenSSL REQUIRED)\ninclude(CheckCXXSourceCompiles)")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", f"PRIVATE OpenSSL::SSL OpenSSL::Crypto {extra_lib}")
+        # mysqlx target
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "if(MSVC)", "find_package(OpenSSL REQUIRED)\nif(MSVC)")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", f"PRIVATE OpenSSL::SSL OpenSSL::Crypto {extra_lib}")
 
         # Protobuf patches
         protobuf = "protobufd" if self.dependencies.build["protobuf"].settings.build_type == "Debug" else "protobuf"
@@ -170,17 +192,18 @@ class MysqlCppConnRecipe(ConanFile):
     def package_info(self):
 
         # Lib dir
-        lib_dir = ["lib"] if self.settings.build_type == "Release" else [os.path.join("lib", "debug")]
+        lib_dir = "lib" if self.settings.build_type == "Release" else os.path.join("lib", "debug")
         if is_msvc(self):
-            lib_dir = [os.path.join(lib_dir[0], "vs14")]
+            lib_dir = [os.path.join(lib_dir, "vs14")]
+        else:
+            lib_dir = [lib_dir]
         self.cpp_info.libdirs = lib_dir
+        self.cpp_info.bindirs = ["lib"]
 
         if is_apple_os(self) or self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["resolv"])
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.extend(["m", "pthread"])
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(["dnsapi"])
 
         target = "concpp-xdevapi"
         target_alias = "concpp"
