@@ -83,8 +83,11 @@ class MysqlCppConnRecipe(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def _package_folder_dep(self, dep, scope="host"):
-        if scope == "build":
-            return self.dependencies.build[dep].package_folder.replace("\\", "/")
+        try:
+            if scope == "build":
+                return self.dependencies.build[dep].package_folder.replace("\\", "/")
+        except:
+            self.output.info(f"Failed to get a build scoped package path for : {dep}")
         return self.dependencies[dep].package_folder.replace("\\", "/")
 
     def _include_folder_dep(self, dep):
