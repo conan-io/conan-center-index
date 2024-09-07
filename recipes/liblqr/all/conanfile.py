@@ -85,9 +85,13 @@ class LibLqrConan(ConanFile):
             env.generate()
 
             tc = AutotoolsToolchain(self)
+            yes_no = lambda v: "yes" if v else "no"
             tc.configure_args.append("--disable-install-man")
-            if self.settings.os == "Windows" and not self.options.shared:
-                tc.configure_args.append("--disable-declspec")
+            if self.settings.os == "Windows":
+                # This option in upstream configure.ac must be disabled for static
+                # windows build, to avoid adding __declspec(dllexport) in front
+                # of declarations during build.
+                tc.configure_args.append(f"--enable-declspec={yes_no(self.options.shared)}")
             tc.generate()
 
             deps = PkgConfigDeps(self)
