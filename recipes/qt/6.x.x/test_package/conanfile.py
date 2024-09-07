@@ -16,7 +16,7 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires(self.tested_reference_str, run=can_run(self))
+        self.requires(self.tested_reference_str, options={"qttools": True}, run=can_run(self))
 
     def build_requirements(self):
         if not can_run(self):

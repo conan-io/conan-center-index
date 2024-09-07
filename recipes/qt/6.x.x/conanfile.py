@@ -1190,7 +1190,7 @@ class QtConan(ConanFile):
                     self.cpp_info.components["qtGui"].frameworks.append("AGL")
                 if self.settings.os == "Macos":
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/gui/CMakeLists.txt#L362-L370
-                    self.cpp_info.components["qtGui"].frameworks += ["AppKit", "Carbon"]
+                    self.cpp_info.components["qtGui"].frameworks += ["AppKit", "Carbon", "Metal"]
                     _create_plugin("QCocoaIntegrationPlugin", "qcocoa", "platforms", ["Core", "Gui"])
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/cocoa/CMakeLists.txt#L51-L58
                     self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = [
@@ -1292,7 +1292,7 @@ class QtConan(ConanFile):
             _create_module("UiPlugin", ["Gui", "Widgets"])
             self.cpp_info.components["qtUiPlugin"].libs = [] # this is a collection of abstract classes, so this is header-only
             self.cpp_info.components["qtUiPlugin"].libdirs = []
-            _create_module("UiTools", ["UiPlugin", "Gui", "Widgets"])
+            _create_module("UiTools", ["UiPlugin", "Gui", "Widgets", "OpenGLWidgets"])
             _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
             _create_module("Help", ["Gui", "Sql", "Widgets"])
 
