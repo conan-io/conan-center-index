@@ -154,21 +154,24 @@ class MysqlCppConnRecipe(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx","CMakeLists.txt"), "PRIVATE cdk_foundation ext::z ext::lz4 ext::zstd", f"PRIVATE cdk_foundation ext::{zlib_name} ext::lz4 ext::{zstd_name}")
 
         # OpenSSL patch
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "find_dependency(SSL)", "find_package(OpenSSL REQUIRED)")
+        # replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "find_dependency(SSL)", "find_package(OpenSSL REQUIRED)")
         # cdk target
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "find_dependency(SSL)", "find_package(OpenSSL REQUIRED)")
+        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "find_dependency(SSL)", "find_package(OpenSSL REQUIRED)")
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "add_config(WITH_SSL)", "add_config_option(WITH_SSL STRING DEFAULT system "")\nadd_config(WITH_SSL)")
 
         extra_lib = "Crypt32" if self.settings.os == "Windows" else ""
         # foundation target
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "include(CheckCXXSourceCompiles)", "find_package(OpenSSL REQUIRED)\ninclude(CheckCXXSourceCompiles)")
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", f"PRIVATE OpenSSL::SSL OpenSSL::Crypto {extra_lib}")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", f"PRIVATE OpenSSL::SSL {extra_lib}")
         # mysqlx target
-        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "if(MSVC)", "find_package(OpenSSL REQUIRED)\nif(MSVC)")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "if(MSVC)", "find_package(OpenSSL REQUIRED)\nif(MSVC)")
         # replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", f"PRIVATE OpenSSL::SSL OpenSSL::Crypto {extra_lib}")
 
         # Protobuf patches
-        protobuf = "protobufd" if self.dependencies.build["protobuf"].settings.build_type == "Debug" else "protobuf"
+        try:
+            protobuf = "protobufd" if self.dependencies.build["protobuf"].settings.build_type == "Debug" else "protobuf"
+        except:
+            protobuf = "protobuf"
         # INFO: Disable protobuf-lite to use Conan protobuf targets instead
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindProtobuf.cmake"), "LIBRARY protobuf-lite pb_libprotobuf-lite", "")
         # INFO: Fix protobuf library name according to the build type
