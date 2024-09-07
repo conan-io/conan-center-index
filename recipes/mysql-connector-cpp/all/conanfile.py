@@ -76,6 +76,7 @@ class MysqlConnectorCppConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires {self.settings.compiler} {minimum_version} or newer")
 
     def build_requirements(self):
+        self.tool_requires("cmake/[>=3.24 <4]")
         self.tool_requires("protobuf/<host_version>")
 
     def source(self):
