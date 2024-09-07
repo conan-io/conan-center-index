@@ -76,9 +76,9 @@ class OpenTelemetryCppConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
                 return str(self.settings.compiler.cppstd).replace("gnu", "")
             else:
-            if self.settings.compiler == "apple-clang":
-                # default cppstd for every apple-clang version is still gnu98
-                return self._min_cppstd
+                if self.settings.compiler == "apple-clang":
+                    # default cppstd for every apple-clang version is still gnu98
+                    return self._min_cppstd
                 return default_cppstd(self).replace("gnu", "")
 
     @property
