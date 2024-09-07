@@ -49,6 +49,7 @@ class LlamaCppConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "cmake/*", dst=self.export_sources_folder, src=self.recipe_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -111,6 +112,7 @@ class LlamaCppConan(ConanFile):
         copy(self, "*common*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*common*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*common*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.cmake", src=os.path.join(self.export_sources_folder, "cmake"), dst=os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
@@ -122,6 +124,11 @@ class LlamaCppConan(ConanFile):
         self.cpp_info.components["llama"].libs = ["llama"]
         self.cpp_info.components["llama"].resdirs = ["res"]
         self.cpp_info.components["llama"].libdirs = ["lib"]
+
+        if self.options.with_cuda and not self.options.shared:
+            self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
+            module_path = os.path.join("lib", "cmake", "llama-cpp-cuda-static.cmake")
+            self.cpp_info.set_property("cmake_build_modules", [module_path])
 
         if is_apple_os(self):
             self.cpp_info.components["common"].frameworks.extend(["Foundation", "Accelerate", "Metal"])

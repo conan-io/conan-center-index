@@ -320,18 +320,12 @@ class AwsSdkCppConan(ConanFile):
             "transfer": ["s3"],
         }
 
-    @property
-    def _use_aws_crt_cpp(self):
-        return Version(self.version) >= "1.9"
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "1.9":
-            self.options.rm_safe("s3-crt")
 
     def configure(self):
         if self.options.shared:
@@ -341,14 +335,26 @@ class AwsSdkCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("aws-c-common/0.8.2")
-        self.requires("aws-c-event-stream/0.2.7")
-        self.requires("aws-checksums/0.1.13")
-        if self._use_aws_crt_cpp:
-            self.requires("aws-c-cal/0.5.13")
-            self.requires("aws-c-http/0.6.13")
-            self.requires("aws-c-io/0.10.20")
-            self.requires("aws-crt-cpp/0.17.23", transitive_headers=True)
+        if self.version == "1.11.352":
+            self.requires("aws-c-common/0.9.15")
+            self.requires("aws-c-event-stream/0.4.2")
+            self.requires("aws-checksums/0.1.18")
+            self.requires("aws-c-cal/0.6.14")
+            self.requires("aws-c-http/0.8.1")
+            self.requires("aws-c-io/0.14.7")
+            self.requires("aws-crt-cpp/0.26.9", transitive_headers=True)
+            if self.options.get_safe("s3-crt"):
+                self.requires("aws-c-s3/0.5.5")
+        if self.version == "1.9.234":
+            self.requires("aws-c-common/0.6.11")
+            self.requires("aws-c-event-stream/0.2.7")
+            self.requires("aws-checksums/0.1.12")
+            self.requires("aws-c-cal/0.5.12")
+            self.requires("aws-c-http/0.6.7")
+            self.requires("aws-c-io/0.10.9")
+            self.requires("aws-crt-cpp/0.17.1a", transitive_headers=True)
+            if self.options.get_safe("s3-crt"):
+                self.requires("aws-c-s3/0.1.26")
         if self.settings.os != "Windows":
             self.requires("openssl/[>=1.1 <4]")
             self.requires("libcurl/[>=7.78.0 <9]")
@@ -364,17 +370,8 @@ class AwsSdkCppConan(ConanFile):
                 "Doesn't support gcc5 / shared. "
                 "See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744"
             )
-        if (Version(self.version) < "1.9.234"
-            and self.settings.compiler == "gcc"
-            and Version(self.settings.compiler.version) >= "11.0"
-            and self.settings.build_type == "Release"):
-            raise ConanInvalidConfiguration(
-                "Versions prior to 1.9.234 don't support release builds on >= gcc 11 "
-                "See https://github.com/aws/aws-sdk-cpp/issues/1505"
-            )
-        if self._use_aws_crt_cpp:
-            if is_msvc(self) and is_msvc_static_runtime(self):
-                raise ConanInvalidConfiguration("Static runtime is not working for more recent releases")
+        if is_msvc(self) and is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration("Static runtime is not working for more recent releases")
         else:
             if self.settings.os == "Macos" and self.settings.arch == "armv8":
                 raise ConanInvalidConfiguration(
@@ -410,7 +407,7 @@ class AwsSdkCppConan(ConanFile):
             tc.cache_variables["ENABLE_OPENSSL_ENCRYPTION"] = True
 
         tc.cache_variables["MINIMIZE_SIZE"] = self.options.min_size
-        if is_msvc(self) and not self._use_aws_crt_cpp:
+        if is_msvc(self):
             tc.cache_variables["FORCE_SHARED_CRT"] = not is_msvc_static_runtime(self)
 
         if cross_building(self):
@@ -429,10 +426,11 @@ class AwsSdkCppConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         # Disable warnings as errors
-        replace_in_file(
-            self, os.path.join(self.source_folder, "cmake", "compiler_settings.cmake"),
-            'list(APPEND AWS_COMPILER_WARNINGS "-Wall" "-Werror" "-pedantic" "-Wextra")', "",
-        )
+        if self.version == "1.9.234":
+            replace_in_file(
+                self, os.path.join(self.source_folder, "cmake", "compiler_settings.cmake"),
+                'list(APPEND AWS_COMPILER_WARNINGS "-Wall" "-Werror" "-pedantic" "-Wextra")', "",
+            )
 
     def build(self):
         self._patch_sources()
@@ -498,13 +496,12 @@ class AwsSdkCppConan(ConanFile):
             "aws-c-event-stream::aws-c-event-stream",
             "aws-checksums::aws-checksums",
         ]
-        if self._use_aws_crt_cpp:
-            self.cpp_info.components["core"].requires.extend([
-                "aws-c-cal::aws-c-cal",
-                "aws-c-http::aws-c-http",
-                "aws-c-io::aws-c-io",
-                "aws-crt-cpp::aws-crt-cpp",
-            ])
+        self.cpp_info.components["core"].requires.extend([
+            "aws-c-cal::aws-c-cal",
+            "aws-c-http::aws-c-http",
+            "aws-c-io::aws-c-io",
+            "aws-crt-cpp::aws-crt-cpp",
+        ])
 
         # other components
         enabled_sdks = [sdk for sdk in self._sdks if self.options.get_safe(sdk)]
@@ -547,6 +544,9 @@ class AwsSdkCppConan(ConanFile):
             self.cpp_info.components["core"].system_libs.append("atomic")
             if self.options.get_safe("text-to-speech"):
                 self.cpp_info.components["text-to-speech"].requires.append("pulseaudio::pulseaudio")
+
+        if self.options.get_safe("s3-crt"):
+            self.cpp_info.components["s3-crt"].requires.append("aws-c-s3::aws-c-s3")
 
         if self.settings.os == "Macos":
             if self.options.get_safe("text-to-speech"):
