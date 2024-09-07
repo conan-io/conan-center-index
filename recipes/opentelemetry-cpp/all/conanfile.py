@@ -24,7 +24,7 @@ class OpenTelemetryCppConan(ConanFile):
         "fPIC": [True, False],
         "shared": [True, False],
         "with_no_deprecated_code": [True, False],
-        "with_stl": [True, False, "default"],
+        "with_stl": [True, False],
         "with_gsl": [True, False],
         "with_abseil": [True, False],
         "with_otlp": ["deprecated", True, False],
@@ -73,16 +73,17 @@ class OpenTelemetryCppConan(ConanFile):
 
     @property
     def _default_cppstd(self):
-        if self.options.with_stl == "default":
-            if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
                 return str(self.settings.compiler.cppstd).replace("gnu", "")
             else:
+            if self.settings.compiler == "apple-clang":
+                # default cppstd for every apple-clang version is still gnu98
+                return self._min_cppstd
                 return default_cppstd(self).replace("gnu", "")
-        return self._min_cppstd
 
     @property
     def _default_stl_version(self):
-        if self.options.with_stl == "default":
+        if self.options.with_stl and Version(self.version) >= "1.12":
             return f"CXX{self._default_cppstd}"
         return self.options.with_stl
 
@@ -159,7 +160,7 @@ class OpenTelemetryCppConan(ConanFile):
         return ["locale"] if self.options.get_safe("with_jaeger") else []
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -242,7 +243,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_ASYNC_EXPORT_PREVIEW"] = self.options.with_async_export_preview
         tc.cache_variables["WITH_METRICS_EXEMPLAR_PREVIEW"] = self.options.with_metrics_exemplar_preview
         tc.cache_variables["OPENTELEMETRY_INSTALL"] = True
-        if not self.settings.compiler.cppstd:
+        if not self.settings.compiler.get_safe("cppstd"):
             tc.variables["CMAKE_CXX_STANDARD"] = self._default_cppstd
         tc.generate()
 
