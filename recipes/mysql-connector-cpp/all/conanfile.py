@@ -161,8 +161,8 @@ class MysqlCppConnRecipe(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "include(CheckCXXSourceCompiles)", "find_package(OpenSSL REQUIRED)\ninclude(CheckCXXSourceCompiles)")
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", f"PRIVATE OpenSSL::SSL OpenSSL::Crypto {extra_lib}")
         # mysqlx target
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "if(MSVC)", "find_package(OpenSSL REQUIRED)\nif(MSVC)")
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", f"PRIVATE OpenSSL::SSL OpenSSL::Crypto {extra_lib}")
+        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "if(MSVC)", "find_package(OpenSSL REQUIRED)\nif(MSVC)")
+        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", f"PRIVATE OpenSSL::SSL OpenSSL::Crypto {extra_lib}")
 
         # Protobuf patches
         protobuf = "protobufd" if self.dependencies.build["protobuf"].settings.build_type == "Debug" else "protobuf"
