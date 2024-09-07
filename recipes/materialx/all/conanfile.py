@@ -35,7 +35,10 @@ class MaterialXConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 14
+        if Version(self.version) >= "1.39.0":
+            return 17
+        else:
+            return 14
 
     @property
     def _compilers_minimum_version(self):
@@ -59,12 +62,11 @@ class MaterialXConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_openimageio: 
-            self.requires("openimageio/2.5.10.1")
+            self.requires("openimageio/2.5.14.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("xorg/system")
             self.requires("opengl/system")
