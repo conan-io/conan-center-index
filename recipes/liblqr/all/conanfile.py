@@ -16,7 +16,7 @@ class LibLqrConan(ConanFile):
         "The LiquidRescale (lqr) library provides a C/C++ API for performing "
         "non-uniform resizing of images by the seam-carving technique."
     )
-    license = ("LGPL-3.0", "GPL-3.0")
+    license = ("LGPL-3.0-or-later", "GPL-3.0-or-later")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://liblqr.wikidot.com"
     topics = ("image", "resizing", "seam-carving")
