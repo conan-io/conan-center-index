@@ -19,3 +19,6 @@ patches:
     - patch_file: "patches/9.0.0/0005-simplify-install-directories.patch"
       patch_description: "Do not install libraries into subdirectories"
       patch_type: "conan"
+    - patch_file: "patches/9.0.0/0006-replace-merge_libraries-with-object-libs.patch"
+      patch_description: "Replace fragile merge_libraries() call with object libraries"
+      patch_type: "conan"
