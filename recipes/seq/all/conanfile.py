@@ -63,7 +63,7 @@ class PackageConan(ConanFile):
         venv.generate(scope="build")
 
     def build(self):
-        replace_in_file(self, os.path.join(self.source_folder, "seq", "type_traits.hpp"), "#if defined(__GNUG__) && (__GNUC__ < 5)", "#if not defined(__clang__) and defined(__GNUG__) && (__GNUC__ < 5)")
+        replace_in_file(self, os.path.join(self.source_folder, "seq", "type_traits.hpp"), "#if defined(__GNUG__) && (__GNUC__ < 5)", "#if !defined(__clang__) && defined(__GNUG__) && (__GNUC__ < 5)")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
