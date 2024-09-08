@@ -159,13 +159,14 @@ class MysqlCppConnRecipe(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "find_dependency(SSL)", "")
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "ADD_SUBDIRECTORY(extra)", "")
         # foundation target
-        self.output.info(f"RAPIDJSON LIB DIR: {self._include_folder_dep('rapidjson')}")
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "include(CheckCXXSourceCompiles)", "find_package(OpenSSL REQUIRED)")
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "# generated config.h", "\"${RAPIDJSON_INCLUDE_DIR}\"")
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", "PUBLIC OpenSSL::SSL")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", "OpenSSL::SSL")
         # mysqlx target
-        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "if(MSVC)", "find_package(OpenSSL REQUIRED)\nif(MSVC)")
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", "")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"),
+                        "target_link_libraries(cdk_mysqlx PUBLIC cdk_proto_mysqlx cdk_foundation)",
+                        "target_link_libraries(cdk_mysqlx PUBLIC cdk_foundation cdk_proto_mysqlx)")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "target_link_libraries(cdk_mysqlx PRIVATE OpenSSL::SSL)", "")
 
         # Protobuf patches
         try:
