@@ -114,7 +114,7 @@ class MysqlCppConnRecipe(ConanFile):
         # Disable Boost, only legacy JDBC connector needs it
         tc.cache_variables["BOOST_DIR"] = "FALSE"
         # Protobuf
-        tc.cache_variables["WITH_PROTOBUF"] = self._package_folder_dep("protobuf", "build")
+        tc.cache_variables["WITH_PROTOBUF"] = self._package_folder_dep("protobuf")
         # RapidJSON
         tc.cache_variables["RAPIDJSON_INCLUDE_DIR"] = self._include_folder_dep("rapidjson")
 
@@ -127,6 +127,7 @@ class MysqlCppConnRecipe(ConanFile):
 
         # Delete internal libs
         rmdir(self, os.path.join(self.source_folder, "cdk", "extra"))
+        rm(self, "DepFindSSL.cmake", os.path.join(self.source_folder, "cdk", "cmake"))
 
         # Fix static lib naming
         if not self.options.shared and is_msvc(self):
@@ -161,8 +162,10 @@ class MysqlCppConnRecipe(ConanFile):
         self.output.info(f"RAPIDJSON LIB DIR: {self._include_folder_dep('rapidjson')}")
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "include(CheckCXXSourceCompiles)", "find_package(OpenSSL REQUIRED)")
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "# generated config.h", "\"${RAPIDJSON_INCLUDE_DIR}\"")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", "PUBLIC OpenSSL::SSL")
         # mysqlx target
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "if(MSVC)", "find_package(OpenSSL REQUIRED)\nif(MSVC)")
+        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "if(MSVC)", "find_package(OpenSSL REQUIRED)\nif(MSVC)")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", "")
 
         # Protobuf patches
         try:
