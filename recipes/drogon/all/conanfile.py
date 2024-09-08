@@ -206,15 +206,18 @@ class DrogonConan(ConanFile):
         # Include official CMake modules and exported CMake variables
         # https://github.com/drogonframework/drogon/blob/v1.9.6/cmake/templates/DrogonConfig.cmake.in#L55-L57
         cmake_folder = os.path.join("lib", "cmake", "Drogon")
-        self.cpp_info.builddirs.append(cmake_folder)
-        self.cpp_info.set_property("cmake_build_modules", [
+        modules = [
             os.path.join(cmake_folder, "conan-official-variables.cmake"),
             os.path.join(cmake_folder, "DrogonUtilities.cmake"),
             os.path.join(cmake_folder, "ParseAndAddDrogonTests.cmake"),
-        ])
+        ]
+        self.cpp_info.builddirs.append(cmake_folder)
+        self.cpp_info.set_property("cmake_build_modules", modules)
 
         # TODO: Remove after Conan 2.0
         self.cpp_info.filenames["cmake_find_package"] = "Drogon"
         self.cpp_info.filenames["cmake_find_package_multi"] = "Drogon"
         self.cpp_info.names["cmake_find_package"] = "Drogon"
         self.cpp_info.names["cmake_find_package_multi"] = "Drogon"
+        self.cpp_info.build_modules["cmake_find_package"] = modules
+        self.cpp_info.build_modules["cmake_find_package_multi"] = modules
