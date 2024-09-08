@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
+from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.53.0"
@@ -47,6 +48,9 @@ class PackageConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -54,6 +58,8 @@ class PackageConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["HEADER_ONLY"] = True
         tc.generate()
+        venv = VirtualBuildEnv(self)
+        venv.generate(scope="build")
 
     def build(self):
         cmake = CMake(self)
