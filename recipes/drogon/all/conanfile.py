@@ -158,9 +158,12 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
         tc.variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
         if is_msvc(self):
-            tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
+            # TODO: use tc.extra_cxxflags after Conan 1 has been dropped on CCI
+            tc.blocks["cmake_flags_init"].template += '\nstring(APPEND CMAKE_CXX_FLAGS_INIT "/Zc:__cplusplus /EHsc")\n'
         if Version(self.version) >= "1.8.4":
             tc.variables["USE_SUBMODULE"] = False
+        # Required for tc.variables to work reliably on v3.5 < v3.12 CMake standard used by the project
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -178,6 +181,9 @@ class DrogonConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "Drogon")
+        self.cpp_info.set_property("cmake_target_name", "Drogon::Drogon")
+
         self.cpp_info.libs = ["drogon"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["rpcrt4", "ws2_32", "crypt32", "advapi32"])
@@ -186,11 +192,7 @@ class DrogonConan(ConanFile):
 
         if self.options.with_ctl:
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)
-
-        self.cpp_info.set_property("cmake_file_name", "Drogon")
-        self.cpp_info.set_property("cmake_target_name", "Drogon::Drogon")
 
         # TODO: Remove after Conan 2.0
         self.cpp_info.filenames["cmake_find_package"] = "Drogon"
