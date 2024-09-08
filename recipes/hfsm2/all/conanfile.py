@@ -34,7 +34,7 @@ class Hfsm2Conan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.hpp", self.source_folder, self.package_folder)
+        copy(self, "*.hpp", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
 
     def package_info(self):
         # For header-only packages, libdirs and bindirs are not used
