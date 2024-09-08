@@ -177,6 +177,9 @@ class GdalConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+        if not self.options.with_shapelib:
+            del self.options.rename_shapelib_symbols
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -335,10 +338,6 @@ class GdalConan(ConanFile):
             # So we print the error message manually.
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
-
-        # rename_shapelib_symbols is defaulted to false so if set and not using shapelib it was probably in error 
-        if (not self.options.rename_shapelib_symbols) and not self.options.with_shapelib:
-            raise ConanInvalidConfiguration("Must compile with shapelib to have shapelib symbols exported")
         
         if self.options.with_poppler and self.dependencies["poppler"].options.with_libjpeg != self.options.with_jpeg:
             msg = "poppler:with_libjpeg and gdal:with_jpeg must be set to the same value, either libjpeg or libjpeg-turbo."
