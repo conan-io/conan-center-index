@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
   UsdGeomMesh mesh = UsdGeomMesh::Define(stage, SdfPath("/root/mesh"));
   stage->SetDefaultPrim(xform.GetPrim());
 
-  stage->GetRootLayer()->Save();
+  // stage->GetRootLayer()->Save();
 
   return EXIT_SUCCESS;
 }
