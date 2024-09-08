@@ -62,10 +62,9 @@ class MysqlCppConnRecipe(ConanFile):
         self.requires("zstd/[>=1.5 <1.6]")
         self.requires("lz4/[>=1.9.2 <=1.10.0]")
         self.requires("protobuf/3.21.12")
+        self.requires("rapidjson/1.1.0")
 
     def build_requirements(self):
-        if not self.settings.os == "Windows":
-            self.tool_requires("ninja/[>=1.10 <2]")
         self.tool_requires("protobuf/<host_version>")
 
     def source(self):
@@ -104,7 +103,7 @@ class MysqlCppConnRecipe(ConanFile):
         tc.cache_variables["WITH_SSL"] = self._package_folder_dep("openssl")
         tc.cache_variables["OPENSSL_ROOT_DIR"] = self._package_folder_dep("openssl")
         # LZ4 patches
-        tc.cache_variables["WITH_lZ4"] = self._package_folder_dep("lz4")
+        tc.cache_variables["WITH_LZ4"] = self._package_folder_dep("lz4")
         # ZLIB patches
         tc.cache_variables["WITH_ZLIB"] = self._package_folder_dep("zlib")
         # ZSTD patches
@@ -116,6 +115,8 @@ class MysqlCppConnRecipe(ConanFile):
         tc.cache_variables["BOOST_DIR"] = "FALSE"
         # Protobuf
         tc.cache_variables["WITH_PROTOBUF"] = self._package_folder_dep("protobuf", "build")
+        # RapidJSON
+        tc.cache_variables["RAPIDJSON_INCLUDE_DIR"] = self._include_folder_dep("rapidjson")
 
         tc.generate()
 
@@ -123,6 +124,9 @@ class MysqlCppConnRecipe(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+
+        # Delete internal libs
+        rmdir(self, os.path.join(self.source_folder, "cdk", "extra"))
 
         # Fix static lib naming
         if not self.options.shared and is_msvc(self):
@@ -137,40 +141,28 @@ class MysqlCppConnRecipe(ConanFile):
             # Package level
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "PROJECT(MySQL_CONCPP)", f"PROJECT(MySQL_CONCPP)\n{patch}", strict=False)
 
-
-        # Remove old compression fetching
-        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx", "CMakeLists.txt"), "find_dependency(Compression)", "find_package(ZLIB REQUIRED)\nfind_package(zstd REQUIRED)\nfind_package(lz4 REQUIRED)")
-
         # ZLIB patch
         zlib_name = "z" if not self.settings.os == "Windows" else "zlib"
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "add_ext(zlib zlib.h z ext_zlib)", f"add_ext(zlib zlib.h {zlib_name} ext_zlib)")
 
         # ZSTD patch
         zstd_name = "zstd" if not self.settings.os == "Windows" else "zstd_static"
-        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "if(NOT LZ4_FOUND)", "if(NOT ZSTD_FOUND)")
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "cmake", "DepFindCompression.cmake"), "add_ext(zstd zstd.h zstd ext_zstd)", f"add_ext(zstd zstd.h {zstd_name} ext_zstd)")
 
         # Compression patch
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx","CMakeLists.txt"), "PRIVATE cdk_foundation ext::z ext::lz4 ext::zstd", f"PRIVATE cdk_foundation ext::{zlib_name} ext::lz4 ext::{zstd_name}")
 
         # OpenSSL patch
-        # replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "find_dependency(SSL)", "find_package(OpenSSL REQUIRED)")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "find_dependency(SSL)", "")
         # cdk target
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "find_dependency(SSL)", "")
-        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "find_dependency(SSL)", "find_package(OpenSSL REQUIRED)")
-        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "add_config(WITH_SSL)", "add_config_option(WITH_SSL STRING DEFAULT system "")\nadd_config(WITH_SSL)")
-        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "add_config(WITH_SSL)", "add_compile_definitions(WITH_SSL)")
-
-        extra_lib = "Crypt32" if self.settings.os == "Windows" else ""
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "ADD_SUBDIRECTORY(extra)", "")
         # foundation target
+        self.output.info(f"RAPIDJSON LIB DIR: {self._include_folder_dep('rapidjson')}")
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "include(CheckCXXSourceCompiles)", "find_package(OpenSSL REQUIRED)")
-        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", f"PRIVATE OpenSSL::SSL {extra_lib}")
-        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", "")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "# generated config.h", "\"${RAPIDJSON_INCLUDE_DIR}\"")
         # mysqlx target
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "if(MSVC)", "find_package(OpenSSL REQUIRED)\nif(MSVC)")
-        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", f"PRIVATE OpenSSL::SSL OpenSSL::Crypto {extra_lib}")
-        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", "")
 
         # Protobuf patches
         try:
