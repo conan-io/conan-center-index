@@ -116,6 +116,7 @@ class QtConan(ConanFile):
 
         "gui": True,
         "widgets": True,
+        "qttools": True,
 
         "device": None,
         "cross_compile": None,

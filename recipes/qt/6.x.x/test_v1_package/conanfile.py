@@ -15,9 +15,6 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake", "cmake_find_package_multi", "cmake_find_package", "pkg_config", "qmake"
 
-    def requirements(self):
-        self.requires(self.tested_reference_str, options={"qttools": True}, run=can_run(self))
-
     def build_requirements(self):
         self.tool_requires("cmake/3.25.3")
         if self._meson_supported():
