@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv
 import os
@@ -62,6 +62,7 @@ class PackageConan(ConanFile):
         venv.generate(scope="build")
 
     def build(self):
+        replace_in_file(self, os.path.join(self.source_folder, "seq", "type_traits.hpp"), "#if defined(__GNUG__) && (__GNUC__ < 5)", "#if not defined(__clang__) and defined(__GNUG__) && (__GNUC__ < 5)")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
