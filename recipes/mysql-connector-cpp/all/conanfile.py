@@ -110,12 +110,10 @@ class MysqlConnectorCppConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if is_apple_os(self):
-            # The CMAKE_OSX_ARCHITECTURES value set by Conan seems to be having no effect for some reason.
-            # This is a workaround for that.
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "PROJECT(MySQL_CONCPP)",
-                            f"PROJECT(MySQL_CONCPP)\n\nadd_compile_options(-arch {self.settings.arch})\n")
+        # Disable boostrap(), which is unnecessary and fragile with variables set by Conan
+        # https://github.com/mysql/mysql-connector-cpp/blob/9.0.0/CMakeLists.txt#L69-L71
+        # https://github.com/mysql/mysql-connector-cpp/blob/9.0.0/cdk/cmake/bootstrap.cmake#L55
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "bootstrap()", "")
 
     def build(self):
         self._patch_sources()
