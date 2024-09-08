@@ -1,12 +1,13 @@
 import os
+import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rmdir
-from conan.tools.scm import Version
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rm, save
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -130,7 +131,7 @@ class DrogonConan(ConanFile):
             self.requires("sqlite3/3.45.0")
         if self.options.get_safe("with_redis"):
             self.requires("hiredis/1.2.0")
-        if self.options.get_safe("with_yaml_cpp", False):
+        if self.options.get_safe("with_yaml_cpp"):
             self.requires("yaml-cpp/0.8.0")
 
     def source(self):
@@ -175,7 +176,18 @@ class DrogonConan(ConanFile):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        cmake_folder = os.path.join(self.package_folder, "lib", "cmake", "Drogon")
+        rm(self, "DrogonConfig*.cmake", cmake_folder)
+        rm(self, "DrogonTargets*.cmake", cmake_folder)
+        rm(self, "Find*.cmake", cmake_folder)
+        # https://github.com/drogonframework/drogon/blob/v1.9.6/cmake/templates/DrogonConfig.cmake.in#L60-L62
+        save(self, os.path.join(cmake_folder, "conan-official-variables.cmake"),
+             textwrap.dedent("""\
+                 set(DROGON_INCLUDE_DIRS "${${CMAKE_FIND_PACKAGE_NAME}_INCLUDE_DIRS}")
+                 set(DROGON_LIBRARIES "${${CMAKE_FIND_PACKAGE_NAME}_LIBRARIES}")
+                 set(DROGON_EXECUTABLE drogon_ctl)
+                 """)
+        )
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Drogon")
@@ -190,6 +202,16 @@ class DrogonConan(ConanFile):
         if self.options.with_ctl:
             bin_path = os.path.join(self.package_folder, "bin")
             self.env_info.PATH.append(bin_path)
+
+        # Include official CMake modules and exported CMake variables
+        # https://github.com/drogonframework/drogon/blob/v1.9.6/cmake/templates/DrogonConfig.cmake.in#L55-L57
+        cmake_folder = os.path.join("lib", "cmake", "Drogon")
+        self.cpp_info.builddirs.append(cmake_folder)
+        self.cpp_info.set_property("cmake_build_modules", [
+            os.path.join(cmake_folder, "conan-official-variables.cmake"),
+            os.path.join(cmake_folder, "DrogonUtilities.cmake"),
+            os.path.join(cmake_folder, "ParseAndAddDrogonTests.cmake"),
+        ])
 
         # TODO: Remove after Conan 2.0
         self.cpp_info.filenames["cmake_find_package"] = "Drogon"
