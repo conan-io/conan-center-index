@@ -155,17 +155,22 @@ class MysqlCppConnRecipe(ConanFile):
 
         # OpenSSL patch
         # replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "find_dependency(SSL)", "find_package(OpenSSL REQUIRED)")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "find_dependency(SSL)", "")
         # cdk target
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "find_dependency(SSL)", "")
         # replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "find_dependency(SSL)", "find_package(OpenSSL REQUIRED)")
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "add_config(WITH_SSL)", "add_config_option(WITH_SSL STRING DEFAULT system "")\nadd_config(WITH_SSL)")
+        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "add_config(WITH_SSL)", "add_config_option(WITH_SSL STRING DEFAULT system "")\nadd_config(WITH_SSL)")
+        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "add_config(WITH_SSL)", "add_compile_definitions(WITH_SSL)")
 
         extra_lib = "Crypt32" if self.settings.os == "Windows" else ""
         # foundation target
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "include(CheckCXXSourceCompiles)", "find_package(OpenSSL REQUIRED)\ninclude(CheckCXXSourceCompiles)")
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", f"PRIVATE OpenSSL::SSL {extra_lib}")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "include(CheckCXXSourceCompiles)", "find_package(OpenSSL REQUIRED)")
+        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", f"PRIVATE OpenSSL::SSL {extra_lib}")
+        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", "")
         # mysqlx target
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "if(MSVC)", "find_package(OpenSSL REQUIRED)\nif(MSVC)")
         # replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", f"PRIVATE OpenSSL::SSL OpenSSL::Crypto {extra_lib}")
+        # replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", "")
 
         # Protobuf patches
         try:
