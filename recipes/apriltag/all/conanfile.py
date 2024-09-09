@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, save
 from conan.tools.microsoft import is_msvc
@@ -47,11 +46,6 @@ class ApriltagConan(ConanFile):
     def requirements(self):
         if is_msvc(self) and Version(self.version) < "3.3.0":
             self.requires("pthreads4w/3.0.0", transitive_headers=True)
-
-    def validate(self):
-        if is_msvc(self) and self.settings.build_type == "Debug":
-            # segfault in test package...
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support Debug with msvc yet")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
