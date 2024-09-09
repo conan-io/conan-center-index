@@ -58,6 +58,16 @@ class SentryNativeConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
+        if Version(self.version) >= "0.7.8" and self.options.get_safe("with_crashpad") == "sentry":
+            # Sentry-native 0.7.8 requires C++20: Concepts and bit_cast
+            # https://github.com/chromium/mini_chromium/blob/e49947ad445c4ed4bc1bb4ed60bbe0fe17efe6ec/base/numerics/byte_conversions.h#L88
+            return {
+                "Visual Studio": "16",
+                "msvc": "192",
+                "gcc": "11",
+                "clang": "14",
+                "apple-clang": "14",
+            }
         minimum_gcc_version = "5"
         if self.options.get_safe("backend") == "breakpad" or self.options.get_safe("backend") == "crashpad":
             minimum_gcc_version = "7"
