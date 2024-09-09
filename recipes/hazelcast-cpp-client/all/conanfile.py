@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.scm import Version
 
 import os
 
@@ -44,7 +43,7 @@ class HazelcastCppClient(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.79.0", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/1.83.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
 
@@ -58,8 +57,6 @@ class HazelcastCppClient(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["WITH_OPENSSL"] = self.options.with_openssl
-        if Version(self.version) <= "4.0.0":
-            tc.variables["BUILD_STATIC_LIB"] = not self.options.shared
         tc.generate()
 
         deps = CMakeDeps(self)

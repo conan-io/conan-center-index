@@ -91,6 +91,10 @@ class Re2CConan(ConanFile):
              src=self.source_folder,
              dst=os.path.join(self.package_folder, "licenses"),
              keep_path=False)
+        copy(self, "*.re",
+             src=os.path.join(self.source_folder, "include"),
+             dst=os.path.join(self.package_folder, "include"),
+             keep_path=False)
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
             autotools.install()
@@ -102,6 +106,10 @@ class Re2CConan(ConanFile):
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
 
+        include_dir = os.path.join(self.package_folder, "include")
+        self.buildenv_info.define("RE2C_STDLIB_DIR", include_dir)
+
         # TODO: to remove in conan v2
         bin_path = os.path.join(self.package_folder, "bin")
         self.env_info.PATH.append(bin_path)
+        self.env_info.RE2C_STDLIB_DIR = include_dir

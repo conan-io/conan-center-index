@@ -1,7 +1,5 @@
 versions:
-  "cci.20230205":
+  "0.0.4":
     folder: all
-  "cci.20221030":
-    folder: all
-  "cci.20220103":
+  "0.0.1":
     folder: all

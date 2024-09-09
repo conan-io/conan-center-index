@@ -1,0 +1,21 @@
+diff --git a/meson.build b/meson.build
+index e4b27ed..1e7288c 100644
+--- a/meson.build
++++ b/meson.build
+@@ -356,11 +356,11 @@ library_build_type = get_option('default_library')
+ pkg_conf_data.set('LIBXMLXX_STATIC', library_build_type == 'static')
+ 
+ 
+-if cpp_compiler.get_argument_syntax() == 'msvc'
+-  if library_build_type == 'both'
+-    error('Dynamic+Static builds are not supported by MSVC-style builds')
+-  endif
+-endif
++#if cpp_compiler.get_argument_syntax() == 'msvc'
++#  if library_build_type == 'both'
++#    error('Dynamic+Static builds are not supported by MSVC-style builds')
++#  endif
++#endif
+ 
+ configure_file(
+   input: 'libxml++.pc.in',

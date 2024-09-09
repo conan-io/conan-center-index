@@ -66,9 +66,9 @@ class TrantorConan(ConanFile):
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.22.0")
+            self.requires("c-ares/1.25.0")
         if self.options.get_safe("with_spdlog"):
-            self.requires("spdlog/1.12.0")
+            self.requires("spdlog/1.13.0")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
@@ -93,8 +93,7 @@ class TrantorConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         # TODO: support other tls providers
-        if Version(self.version) >= "1.5.12":
-            tc.variables["TRANTOR_USE_TLS"] = "openssl"
+        tc.variables["TRANTOR_USE_TLS"] = "openssl"
         tc.variables["BUILD_C-ARES"] = self.options.with_c_ares
         tc.variables["USE_SPDLOG"] = self.options.get_safe("with_spdlog")
         tc.generate()

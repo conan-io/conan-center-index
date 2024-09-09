@@ -97,7 +97,7 @@ class Libxml2Conan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.lzma:
-            self.requires("xz_utils/5.4.4")
+            self.requires("xz_utils/5.4.5")
         if self.options.iconv:
             self.requires("libiconv/1.17", transitive_headers=True, transitive_libs=True)
         if self.options.icu:
@@ -107,7 +107,7 @@ class Libxml2Conan(ConanFile):
         if not (is_msvc(self) or self._is_mingw_windows):
             if self.options.zlib or self.options.lzma or self.options.icu:
                 if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                    self.tool_requires("pkgconf/2.0.3")
+                    self.tool_requires("pkgconf/2.1.0")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -346,8 +346,8 @@ class Libxml2Conan(ConanFile):
                 set(LIBXML2_INCLUDE_DIR ${{LibXml2_INCLUDE_DIRS}})
                 set(LIBXML2_INCLUDE_DIRS ${{LibXml2_INCLUDE_DIRS}})
             elseif(DEFINED libxml2_INCLUDE_DIRS)
-                set(LIBXML2_LIBRARIES ${{libxml2_INCLUDE_DIRS}})
-                set(LIBXML2_LIBRARY ${{libxml2_INCLUDE_DIRS}})
+                set(LIBXML2_INCLUDE_DIR ${{libxml2_INCLUDE_DIRS}})
+                set(LIBXML2_INCLUDE_DIRS ${{libxml2_INCLUDE_DIRS}})
             endif()
             if(DEFINED LibXml2_LIBRARIES)
                 set(LIBXML2_LIBRARIES ${{LibXml2_LIBRARIES}})

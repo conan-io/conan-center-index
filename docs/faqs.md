@@ -41,6 +41,7 @@ This section gathers the most common questions from the community related to pac
   * [How to watch only specific recipes?](#how-to-watch-only-specific-recipes)
   * [Is it possible to disable Pylint?](#is-it-possible-to-disable-pylint)
   * [How long can I be inactive before being removed from the authorized users list?](#how-long-can-i-be-inactive-before-being-removed-from-the-authorized-users-list)
+  * [What happens in case I change my user name?](#what-happens-in-case-i-change-my-user-name)
   * [Can we add package which are parts of bigger projects like Boost?](#can-we-add-package-which-are-parts-of-bigger-projects-like-boost)
     * [Can I add my project which I will submit to Boost?](#can-i-add-my-project-which-i-will-submit-to-boost)
   * [Can I add options that do not affect `package_id` or the package contents](#can-i-add-options-that-do-not-affect-package_id-or-the-package-contents)
@@ -431,6 +432,14 @@ difficult to understand [linter errors](linters.md), please comment on your pull
 
 Please, read [Inactivity and user removal section](adding_packages/README.md#inactivity-and-user-removal).
 
+## What happens in case I change my user name?
+
+Your Github user name is used to identify you in the authorized users list. If you change your user name, you will need to communicate or, in the #4, or opening a new issue.
+Otherwise, the CI will not be able to find you and will not build your pull requests.
+In case you change you user name just after asking for authorization in #4, please, communicate the change in the same issue.
+Users are revised before being added to the authorized users list, in case the user name is not found in #4, it will be asked in the pull request `Update authorized users list`.
+If the user does not answer, the user will be moved to the `waitlist_users.yml` file, until having further communication.
+
 ## Can we add package which are parts of bigger projects like Boost?
 
 Sadly no. There have been many efforts in the past and we feel it's not sustainable given the number of combinations of libraries and version.
@@ -443,6 +452,8 @@ and does not install libraries with the boost prefix.
 ### Can I add my project which I will submit to Boost?
 
 Yes, but make sure it does not have Boost in the name. Use the [`author-name` convention](https://github.com/conan-io/conan-center-index/blob/master/docs/faqs.md#what-is-the-policy-on-recipe-name-collisions) so there are no conflicts. In addition to follow the rules outlined above.
+
+**NOTE**: In case you have no intention to submit to Boost, then you can use the project name as is (e.g `boost-foobar`).
 
 ## Can I add options that do not affect `package_id` or the package contents
 

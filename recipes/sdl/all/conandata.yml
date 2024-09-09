@@ -1,4 +1,25 @@
 sources:
+  "2.30.7":
+    url: "https://www.libsdl.org/release/SDL2-2.30.7.tar.gz"
+    sha256: "2508c80438cd5ff3bbeb8fe36b8f3ce7805018ff30303010b61b03bb83ab9694"
+  "2.30.6":
+    url: "https://www.libsdl.org/release/SDL2-2.30.6.tar.gz"
+    sha256: "c6ef64ca18a19d13df6eb22df9aff19fb0db65610a74cc81dae33a82235cacd4"
+  "2.30.5":
+    url: "https://www.libsdl.org/release/SDL2-2.30.5.tar.gz"
+    sha256: "f374f3fa29c37dfcc20822d4a7d7dc57e58924d1a5f2ad511bfab4c8193de63b"
+  "2.30.4":
+    url: "https://www.libsdl.org/release/SDL2-2.30.4.tar.gz"
+    sha256: "59c89d0ed40d4efb23b7318aa29fe7039dbbc098334b14f17f1e7e561da31a26"
+  "2.30.3":
+    url: "https://www.libsdl.org/release/SDL2-2.30.3.tar.gz"
+    sha256: "820440072f8f5b50188c1dae104f2ad25984de268785be40c41a099a510f0aec"
+  "2.30.2":
+    url: "https://www.libsdl.org/release/SDL2-2.30.2.tar.gz"
+    sha256: "891d66ac8cae51361d3229e3336ebec1c407a8a2a063b61df14f5fdf3ab5ac31"
+  "2.30.1":
+    url: "https://www.libsdl.org/release/SDL2-2.30.1.tar.gz"
+    sha256: "01215ffbc8cfc4ad165ba7573750f15ddda1f971d5a66e9dcaffd37c587f473a"
   "2.28.5":
     url: "https://www.libsdl.org/release/SDL2-2.28.5.tar.gz"
     sha256: "332cb37d0be20cb9541739c61f79bae5a477427d79ae85e352089afdaf6666e4"

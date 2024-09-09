@@ -13,12 +13,15 @@ class JwtCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Thalhammer/jwt-cpp"
     topics = ("json", "jwt", "jws", "jwe", "jwk", "jwks", "jose", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
+
+    options = { "with_picojson": [True, False] }
+    default_options = { "with_picojson" : False }
 
     @property
-    def _supports_generic_json(self):
-        return Version(self.version) >= "0.5.0"
+    def _with_picojson(self):
+        return Version(self.version) < "0.5.0" or self.options.with_picojson
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -28,15 +31,14 @@ class JwtCppConan(ConanFile):
 
     def requirements(self):
         self.requires("openssl/[>=1.1 <4]")
-        if not self._supports_generic_json:
+        if self._with_picojson:
             self.requires("picojson/1.3.0")
 
     def package_id(self):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
@@ -49,13 +51,11 @@ class JwtCppConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
+        self.cpp_info.requires = ["openssl::openssl"]
+        if self._with_picojson:
+            self.cpp_info.requires.append("picojson::picojson")
+        else:
+            self.cpp_info.defines.append("JWT_DISABLE_PICOJSON")
         self.cpp_info.set_property("cmake_file_name", "jwt-cpp")
         self.cpp_info.set_property("cmake_target_name", "jwt-cpp::jwt-cpp")
 
-        if self._supports_generic_json:
-            self.cpp_info.defines.append("JWT_DISABLE_PICOJSON")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "jwt-cpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "jwt-cpp"
