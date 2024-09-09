@@ -623,12 +623,14 @@ class OgreConanFile(ConanFile):
 
         if self.options.get_safe("build_rendersystem_d3d9"):
             _add_rendersystem_component("RenderSystem_Direct3D9")
-            # FIXME: add DirectX9 system libs
+            # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/Packages/FindDirectX.cmake#L58-L60
+            self.cpp_info.components["RenderSystem_Direct3D9"].system_libs += ["d3d9", "d3dx9", "dxguid"]
         if self.options.get_safe("build_rendersystem_d3d11"):
             _add_rendersystem_component("RenderSystem_Direct3D11")
             if self.settings.compiler == "gcc":
                 self.cpp_info.components["RenderSystem_Direct3D11"].system_libs += ["psapi", "d3dcompiler"]
-            # FIXME: add DirectX11 system libs
+            # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/Packages/FindDirectX11.cmake#L95-L100
+            self.cpp_info.components["RenderSystem_Direct3D11"].system_libs += ["dxerr", "dxguid", "dxgi", "d3dcompiler", "d3d11", "d3dx11"]
         if self.options.get_safe("build_rendersystem_gl"):
             _add_rendersystem_component("RenderSystem_GL", requires=["libglvnd::libglvnd"])
         if self.options.get_safe("build_rendersystem_gl3plus"):
