@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -47,14 +48,19 @@ class ApriltagConan(ConanFile):
         if is_msvc(self) and Version(self.version) < "3.3.0":
             self.requires("pthreads4w/3.0.0", transitive_headers=True)
 
+    def build_requirements(self):
+        if Version(self.version) >= "3.4.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_PYTHON_WRAPPER"] = False
-        if Version(self.version) < "3.4":
+        if Version(self.version) < "3.4.0":
             # Newer versions set it in the project CMakelists.txt
             tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         if self.settings.os == "Windows":
