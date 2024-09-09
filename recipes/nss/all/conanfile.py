@@ -7,7 +7,7 @@ from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.files import chdir, copy, get, rm, replace_in_file
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, VCVars
+from conan.tools.microsoft import is_msvc, VCVars, unix_path
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
 
@@ -22,12 +22,6 @@ class NSSConan(ConanFile):
 
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "fPIC": True,
-    }
 
     @property
     def _settings_build(self):
@@ -60,6 +54,8 @@ class NSSConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
         if self.settings.os == "Windows":
             self.tool_requires("mozilla-build/4.0.2")
+            if is_msvc(self):
+                self.tool_requires("vswhere/3.1.7")
         if cross_building(self):
             self.tool_requires("sqlite3/<host_version>")
         self.tool_requires("cpython/3.12.2")
@@ -79,7 +75,9 @@ class NSSConan(ConanFile):
         env = Environment()
         # Add temporary site-packages to PYTHONPATH for gyp-next
         env.prepend_path("PYTHONPATH", self._site_packages_dir)
-        env.prepend_path("PYTHONPATH", self._site_packages_dir.replace("\\", "/"))
+        if self.settings.os == "Windows":
+            # An additional forward-slash path is needed for MSYS2 bash
+            env.prepend_path("PYTHONPATH", self._site_packages_dir.replace("\\", "/"))
         env.prepend_path("PATH", os.path.join(self._site_packages_dir, "bin"))
         # For 'shlibsign -v -i <dist_dir>/lib/libfreebl3.so' etc to work during build
         env.prepend_path("LD_LIBRARY_PATH", os.path.join(self._dist_dir, "lib"))
@@ -100,50 +98,42 @@ class NSSConan(ConanFile):
         self.run(f"python -m pip install {' '.join(packages)} --no-cache-dir --target={site_packages_dir}",)
 
     def _patch_sources(self):
-        def adjust_path(path):
-            """
-            adjusts path to be safely passed to the compiler command line
-            for Windows bash, ensures path is in format according to the subsystem
-            for path with spaces, places double quotes around it
-            converts slashes to backslashes, or vice versa
-            """
-            if is_msvc(self):
-                path = path.replace('/', '\\')
-            else:
-                path = path.replace('\\', '/')
-            return f'"{path}"' if ' ' in path else path
-
         def _format_library_paths(library_paths):
-            pattern = "-LIBPATH:%s" if is_msvc(self) else "-L%s"
-            return [pattern % adjust_path(library_path)
+            flag = "-LIBPATH:" if is_msvc(self) else "-L"
+            return [flag + unix_path(self, library_path)
                     for library_path in library_paths if library_path]
 
-        def _format_libraries(libraries):
+        def _format_libraries(libraries, libdir):
             result = []
             for library in libraries:
                 if is_msvc(self):
                     if not library.endswith(".lib"):
                         library += ".lib"
-                    result.append(library)
+                    result.append(os.path.join(libdir, library).replace("\\", "/"))
                 else:
                     result.append(f"-l{library}")
             return result
 
         sqlite_info = self.dependencies["sqlite3"].cpp_info.aggregated_components()
-        sqlite_flags = " ".join([f"-I{sqlite_info.includedir}"] +
-                                _format_libraries(sqlite_info.libs) +
+        sqlite_flags = " ".join([f"-I{unix_path(self, sqlite_info.includedir)}"] +
+                                _format_libraries(sqlite_info.libs, sqlite_info.libdir) +
                                 _format_library_paths(sqlite_info.libdirs))
         replace_in_file(self, os.path.join(self.source_folder, "nss", "lib", "sqlite", "sqlite.gyp"),
                         "'libraries': ['<(sqlite_libs)'],",
                         f"'libraries': ['{sqlite_flags}'],")
 
         zlib_info = self.dependencies["zlib"].cpp_info.aggregated_components()
-        zlib_flags = " ".join([f"-I{zlib_info.includedir}"] +
-                                _format_libraries(zlib_info.libs) +
+        zlib_flags = " ".join([f"-I{unix_path(self, zlib_info.includedir)}"] +
+                                _format_libraries(zlib_info.libs, zlib_info.libdir) +
                                 _format_library_paths(zlib_info.libdirs))
         replace_in_file(self, os.path.join(self.source_folder, "nss", "lib", "zlib", "zlib.gyp"),
                         "'libraries': ['<@(zlib_libs)'],",
                         f"'libraries': ['{zlib_flags}'],")
+
+        # NSPR Windows libs on CCI don't include a lib prefix
+        replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "config.gypi"),
+                        "'nspr_libs%': ['libnspr4.lib', 'libplc4.lib', 'libplds4.lib'],",
+                        "'nspr_libs%': ['nspr4.lib', 'plc4.lib', 'plds4.lib'],")
 
         # Do not hide shlibsign errors in subprocess.check_call()
         replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "shlibsign.py"),
@@ -169,8 +159,8 @@ class NSSConan(ConanFile):
         if not self.options.get_safe("shared", True):
             args.append("--static")
         nspr_root = self.dependencies["nspr"].package_folder
-        nspr_includedir = os.path.join(nspr_root, "include", "nspr").replace("\\", "/")
-        nspr_libdir = os.path.join(nspr_root, "lib").replace("\\", "/")
+        nspr_includedir = unix_path(self, os.path.join(nspr_root, "include", "nspr"))
+        nspr_libdir = unix_path(self, os.path.join(nspr_root, "lib"))
         args.append(f"--with-nspr={nspr_includedir}:{nspr_libdir}")
         args.append("--system-sqlite")
         args.append("--enable-legacy-db")  # for libnssdbm3
