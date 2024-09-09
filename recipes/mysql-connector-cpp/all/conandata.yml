@@ -4,9 +4,6 @@ sources:
     sha256: "9d4b90a4efe8861e821136fb3024074d14875749d8b69d1821361b2f2b8bfe55"
 patches:
   "9.0.0":
-    - patch_file: "patches/9.0.0/0001-override-cmake-policy-version.patch"
-      patch_description: "Set CMake policy version to 3.15, move project() statement"
-      patch_type: "conan"
     - patch_file: "patches/9.0.0/0002-rename-find_dependency.patch"
       patch_description: "Rename find_dependency() to avoid conflicts with the official CMake function"
       patch_type: "conan"
