@@ -262,7 +262,7 @@ class OgreConanFile(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zziplib/0.13.72")
         if self.options.get_safe("build_component_bites") or self.options.get_safe("build_rendersystem_tiny"):
-            self.requires("sdl/2.30.2")
+            self.requires("sdl/2.30.7")
         if self._build_opengl:
             self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -272,11 +272,11 @@ class OgreConanFile(ConanFile):
         if self.options.build_component_overlay:
             self.requires("freetype/2.13.2")
             if self.options.build_component_overlay_imgui:
-                self.requires("imgui/1.90.5")
+                self.requires("imgui/1.91.0")
         if self.options.build_plugin_assimp:
-            self.requires("assimp/5.3.1")
+            self.requires("assimp/5.4.2")
         if self.options.build_plugin_exrcodec:
-            self.requires("openexr/2.5.7")
+            self.requires("openexr/3.2.4")
         if self.options.build_plugin_freeimage:
             self.requires("freeimage/3.18.0")
 
@@ -319,7 +319,7 @@ class OgreConanFile(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/2.2.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
