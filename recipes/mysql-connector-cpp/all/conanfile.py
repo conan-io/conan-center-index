@@ -151,13 +151,11 @@ class MysqlConnectorCppConan(ConanFile):
         self.cpp_info.libs = [lib]
 
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("dnsapi")
-            self.cpp_info.system_libs.append("ws2_32")
+            self.cpp_info.system_libs.extend(["dnsapi", "ws2_32"])
         elif self.settings.os != "FreeBSD":
             self.cpp_info.system_libs.append("resolv")
         if self.settings.os == "SunOS":
-            self.cpp_info.system_libs.append("socket")
-            self.cpp_info.system_libs.append("nsl")
+            self.cpp_info.system_libs.append(["socket", "nsl"])
 
         if not self.options.shared:
             self.cpp_info.defines = ["MYSQL_STATIC", "STATIC_CONCPP"]
