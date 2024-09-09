@@ -2,7 +2,6 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
@@ -153,16 +152,12 @@ class MysqlConnectorCppConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["dnsapi", "ws2_32"])
-        elif self.settings.os != "FreeBSD":
-            self.cpp_info.system_libs.append("resolv")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
         if self.settings.os == "SunOS":
             self.cpp_info.system_libs.append(["socket", "nsl"])
+        if self.settings.os not in ["Windows", "FreeBSD"]:
+            self.cpp_info.system_libs.append("resolv")
 
         if not self.options.shared:
             self.cpp_info.defines = ["MYSQL_STATIC", "STATIC_CONCPP"]
-
-
-        if is_apple_os(self) or self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["resolv"])
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
