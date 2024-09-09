@@ -165,4 +165,4 @@ class MysqlConnectorCppConan(ConanFile):
         if is_apple_os(self) or self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["resolv"])
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs.extend(["m", "pthread"])
+                self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
