@@ -62,7 +62,6 @@ class NSSConan(ConanFile):
             self.tool_requires("mozilla-build/4.0.2")
         if cross_building(self):
             self.tool_requires("sqlite3/<host_version>")
-        # gyp is not compatible with Python 3.12
         self.tool_requires("cpython/3.12.2")
         self.tool_requires("ninja/[>=1.10.2 <2]")
 
@@ -80,6 +79,7 @@ class NSSConan(ConanFile):
         env = Environment()
         # Add temporary site-packages to PYTHONPATH for gyp-next
         env.prepend_path("PYTHONPATH", self._site_packages_dir)
+        env.prepend_path("PYTHONPATH", self._site_packages_dir.replace("\\", "/"))
         env.prepend_path("PATH", os.path.join(self._site_packages_dir, "bin"))
         # For 'shlibsign -v -i <dist_dir>/lib/libfreebl3.so' etc to work during build
         env.prepend_path("LD_LIBRARY_PATH", os.path.join(self._dist_dir, "lib"))
@@ -96,7 +96,8 @@ class NSSConan(ConanFile):
         return os.path.join(self.build_folder, "site-packages")
 
     def _pip_install(self, packages):
-        self.run(f"python -m pip install {' '.join(packages)} --no-cache-dir --target={self._site_packages_dir}")
+        site_packages_dir = self._site_packages_dir.replace("\\", "/")
+        self.run(f"python -m pip install {' '.join(packages)} --no-cache-dir --target={site_packages_dir}",)
 
     def _patch_sources(self):
         def adjust_path(path):
@@ -178,7 +179,7 @@ class NSSConan(ConanFile):
     def build(self):
         self._patch_sources()
         self._pip_install(["gyp-next"])
-        self.run("gyp --version")
+        self.run(f"gyp --version")
 
         with chdir(self, os.path.join(self.source_folder, "nss")):
             self.run(f"./build.sh {' '.join(self._build_args)}")
