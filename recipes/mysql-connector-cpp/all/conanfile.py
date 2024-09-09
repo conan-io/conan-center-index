@@ -154,6 +154,7 @@ class MysqlCppConnRecipe(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "protocol", "mysqlx","CMakeLists.txt"), "PRIVATE cdk_foundation ext::z ext::lz4 ext::zstd", f"PRIVATE cdk_foundation ext::{zlib_name} ext::lz4 ext::{zstd_name}")
 
         # OpenSSL patch
+        replace_in_file(self, os.path.join(self.source_folder, "mysql-concpp-config.cmake.in"), "find_deps()", "")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "find_dependency(SSL)", "")
         # cdk target
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "find_dependency(SSL)", "")
