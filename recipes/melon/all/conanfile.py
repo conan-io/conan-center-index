@@ -15,8 +15,8 @@ class PackageConan(ConanFile):
     # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
     # In case it's not listed there, use "LicenseRef-<license-file-name>"
     license = "BSL-1.0"
-    url = "https://github.com/fhamonic/melon"
-    homepage = "https://github.com/project/package"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/fhamonic/melon"
     # Do not put "conan" nor the project name in topics. Use topics from the upstream listed on GH
     # Keep 'header-only' as topic
     topics = ("graph", "algorithm", "ranges", "c++20", "header-only")
