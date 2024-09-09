@@ -22,6 +22,7 @@ class CivetwebConan(ConanFile):
         "fPIC": [True, False],
         "shared": [True, False],
         "ssl_dynamic_loading": [True, False],
+        "thread_stack_size": [None, "ANY"],
         "with_caching": [True, False],
         "with_cgi": [True, False],
         "with_cxx": [True, False],
@@ -39,6 +40,7 @@ class CivetwebConan(ConanFile):
         "fPIC": True,
         "shared": False,
         "ssl_dynamic_loading": False,
+        "thread_stack_size": None,
         "with_caching": True,
         "with_cgi": True,
         "with_cxx": True,
@@ -82,13 +84,18 @@ class CivetwebConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1t")
+            if Version(self.version) < "1.16":
+                self.requires("openssl/1.1.1w")
+            else:
+                self.requires("openssl/[>=1 <4]")
         if self.options.get_safe("with_zlib"):
-            self.requires("zlib/1.2.13")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.options.get_safe("ssl_dynamic_loading") and not self.dependencies["openssl"].options.shared:
             raise ConanInvalidConfiguration("ssl_dynamic_loading requires shared openssl")
+        if self.options.thread_stack_size and not str(self.options.thread_stack_size).isdigit():
+            raise ConanInvalidConfiguration("-o='civetweb/*:thread_stack_size' should be a positive integer")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -97,11 +104,13 @@ class CivetwebConan(ConanFile):
         tc = CMakeToolchain(self)
 
         if self.options.with_ssl:
-            openssl_version = Version(str(self.dependencies["openssl"].ref.version)[:-1])
+            openssl_version = Version(self.dependencies["openssl"].ref.version)
             tc.variables["CIVETWEB_ENABLE_SSL"] = self.options.with_ssl
             tc.variables["CIVETWEB_ENABLE_SSL_DYNAMIC_LOADING"] = self.options.ssl_dynamic_loading
-            tc.variables["CIVETWEB_SSL_OPENSSL_API_1_0"] = openssl_version.minor == "0"
-            tc.variables["CIVETWEB_SSL_OPENSSL_API_1_1"] = openssl_version.minor == "1"
+            tc.variables["CIVETWEB_SSL_OPENSSL_API_1_0"] = openssl_version.major == "1" and openssl_version.minor == "0"
+            tc.variables["CIVETWEB_SSL_OPENSSL_API_1_1"] = openssl_version.major == "1" and openssl_version.minor == "1"
+            if Version(self.version) >= "1.16":
+                tc.variables["CIVETWEB_SSL_OPENSSL_API_3_0"] = openssl_version.major == "3"
 
         tc.variables["CIVETWEB_BUILD_TESTING"] = False
         tc.variables["CIVETWEB_CXX_ENABLE_LTO"] = False
@@ -117,6 +126,8 @@ class CivetwebConan(ConanFile):
         tc.variables["CIVETWEB_ENABLE_THIRD_PARTY_OUTPUT"] = self.options.with_third_party_output
         tc.variables["CIVETWEB_ENABLE_WEBSOCKETS"] = self.options.with_websockets
         tc.variables["CIVETWEB_SERVE_NO_FILES"] = not self.options.with_static_files
+        if self.options.thread_stack_size:
+            tc.variables["CIVETWEB_THREAD_STACK_SIZE"] = self.options.thread_stack_size
 
         if self._has_zlib_option:
             tc.variables["CIVETWEB_ENABLE_ZLIB"] = self.options.with_zlib

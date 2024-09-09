@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
@@ -62,26 +62,33 @@ class PodofoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("freetype/2.12.1")
-        self.requires("zlib/1.2.13")
+        self.requires("freetype/2.13.2")
+        self.requires("zlib/[>=1.2.11 <2]")
         if self.settings.os != "Windows":
-            self.requires("fontconfig/2.13.93")
+            self.requires("fontconfig/2.15.0")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1s")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_libidn:
             self.requires("libidn/1.36")
         if self.options.with_jpeg:
             self.requires("libjpeg/9e")
         if self.options.with_tiff:
-            self.requires("libtiff/4.4.0")
+            self.requires("libtiff/4.6.0")
         if self.options.with_png:
-            self.requires("libpng/1.6.38")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_unistring:
             self.requires("libunistring/0.9.10")
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd") and Version(self.version) >= "0.9.7":
             check_min_cppstd(self, 11)
+        if conan_version.major >= 2 and Version(self.version) < "0.9.7":
+            # FIXME: linter complains, but function is there
+            # https://docs.conan.io/2.0/reference/tools/build.html?highlight=check_min_cppstd#conan-tools-build-check-max-cppstd
+            import sys
+            check_max_cppstd = getattr(sys.modules['conan.tools.build'], 'check_max_cppstd')
+            # INFO: error: no template named 'auto_ptr' in namespace 'std'. Removed in C++17.
+            check_max_cppstd(self, 14)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

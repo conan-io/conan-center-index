@@ -1,35 +1,46 @@
-import os.path
+import os
 
-from conans import ConanFile, CMake, tools, RunEnvironment
-from conans.errors import ConanException
+from conan import ConanFile, conan_version
+from conan.tools.apple import is_apple_os
+from conan.tools.build import can_run
+from conan.tools.cmake import cmake_layout, CMake
+from conan.tools.env import VirtualRunEnv
 
 
-class FlatccTestConan(ConanFile):
+class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "cmake", "cmake_find_package_multi"
+    generators = "CMakeDeps", "CMakeToolchain"
+    test_type = "explicit"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
+
+    def layout(self):
+        cmake_layout(self)
+
+    @property
+    def _skip_shared_macos(self):
+        return conan_version.major == 1 and self.options["flatcc"].shared and is_apple_os(self)
+
+    def generate(self):
+        VirtualRunEnv(self).generate(scope="build")
+        VirtualRunEnv(self).generate(scope="run")
+
 
     def build(self):
-        if tools.cross_building(self):
+        if self._skip_shared_macos:
             return
-
-        env_build = RunEnvironment(self)
-        with tools.environment_append(env_build.vars):
-            cmake = CMake(self)
-            if tools.os_info.is_macos and self.options["flatcc"].shared:
-                # Because of MacOS System Integraty Protection it is currently not possible to run the flatcc
-                # executable from cmake if it is linked shared. As a temporary work-around run flatcc here in
-                # the build function.
-                tools.mkdir(os.path.join(self.build_folder, "generated"))
-                self.run("flatcc -a -o " + os.path.join(self.build_folder, "generated") + " " + os.path.join(self.source_folder, "monster.fbs"), run_environment=True)
-                cmake.definitions["MACOS_SIP_WORKAROUND"] = True
-            cmake.configure()
-            cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def test(self):
-        if tools.cross_building(self):
-            bin_path = os.path.join(self.deps_cpp_info["flatcc"].rootpath, "bin", "flatcc")
-            if not os.path.isfile(bin_path) or not os.access(bin_path, os.X_OK):
-                raise ConanException("flatcc doesn't exist.")
-        else:
-            bin_path = os.path.join(self.build_folder, "bin", "monster")
-            self.run(bin_path, cwd=self.source_folder, run_environment=True)
+        if self._skip_shared_macos:
+            return
+        if can_run(self):
+            self.run("flatcc --version")
+            bin_path = os.path.join(self.cpp.build.bindir, "monster")
+            self.run(bin_path, env="conanrun")

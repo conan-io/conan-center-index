@@ -1,4 +1,18 @@
 versions:
+  "3.1.50":
+    folder: all
+  "3.1.49":
+    folder: all
+  "3.1.48":
+    folder: all
+  "3.1.47":
+    folder: all
+  "3.1.46":
+    folder: all
+  "3.1.45":
+    folder: all
+  "3.1.44":
+    folder: all
   "3.1.31":
     folder: all
   "3.1.30":

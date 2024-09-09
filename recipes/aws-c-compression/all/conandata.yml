@@ -1,10 +1,7 @@
 sources:
-  "0.2.15":
-    url: "https://github.com/awslabs/aws-c-compression/archive/v0.2.15.tar.gz"
-    sha256: "11d58a229e2961b2b36493155a981dea2c8a0bc0d113b0073deb8c3189cfa04e"
+  "0.2.18":
+    url: "https://github.com/awslabs/aws-c-compression/archive/v0.2.18.tar.gz"
+    sha256: "517c361f3b7fffca08efd5ad251a20489794f056eab0dfffacc6d5b341df8e86"
   "0.2.14":
     url: "https://github.com/awslabs/aws-c-compression/archive/v0.2.14.tar.gz"
     sha256: "8737863ced57d92f5a0bdde554bf0fe70eaa76aae118fec09a6c361dfc55d0d5"
-  "0.2.13":
-    url: "https://github.com/awslabs/aws-c-compression/archive/v0.2.13.tar.gz"
-    sha256: "6b6ebb223408b48a8b2c74ba7042ff61e5333dc900acd67c40ca1cd4b382c137"

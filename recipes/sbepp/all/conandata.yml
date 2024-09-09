@@ -1,0 +1,16 @@
+sources:
+  "1.4.0":
+    url: "https://github.com/OleksandrKvl/sbepp/archive/refs/tags/1.4.0.tar.gz"
+    sha256: "64112ed22d6c82debc70a4c097f3fcd05a4bd280dca7e2013edbd6bebfd1da56"
+  "1.3.0":
+    url: "https://github.com/OleksandrKvl/sbepp/archive/refs/tags/1.3.0.tar.gz"
+    sha256: "44caa61681c7f94c840a2f2a247a0385e9e61c6e8639b9f7561c9d62125f9486"
+  "1.2.0":
+    url: "https://github.com/OleksandrKvl/sbepp/archive/refs/tags/1.2.0.tar.gz"
+    sha256: "068cb8bc940316f8817af8da5c8de577ab49281308b2125c30f2f4e00431a68a"
+  "1.1.0":
+    url: "https://github.com/OleksandrKvl/sbepp/archive/refs/tags/1.1.0.tar.gz"
+    sha256: "a5787c7204a2509c8d1eb6c65f0143020d7c7ceadd4a53d2cb9a64dc4f6b9e9a"
+  "1.0.1":
+    url: "https://github.com/OleksandrKvl/sbepp/archive/refs/tags/1.0.1.tar.gz"
+    sha256: "c8ee54df0ae670bd7508a48947da6c6987eeb72481f1ab8cc05b8d4d03aaec8b"

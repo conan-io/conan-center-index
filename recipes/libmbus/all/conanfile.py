@@ -1,36 +1,31 @@
 import os
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+
+required_conan_version = ">=1.53.0"
 
 
 class LibMbusConan(ConanFile):
     name = "libmbus"
+    description = "Meter-bus library and utility programs"
     license = "BSD-3-Clause"
-    homepage = "https://github.com/rscada/libmbus"
     url = "https://github.com/conan-io/conan-center-index"
-    description = """Meter-bus library and utility programs"""
-    topics = "conan", "mbus", "metering", "iot", "meter", "bus", "protocol"
-    exports_sources = "CMakeLists.txt"
-    settings = "os", "compiler", "build_type", "arch"
+    homepage = "https://github.com/rscada/libmbus"
+    topics = ("mbus", "metering", "iot", "meter", "bus", "protocol")
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False]
+        "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
     }
-    generators = "cmake", "cmake_find_package"
-
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,43 +33,41 @@ class LibMbusConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
         if self.settings.os not in ["Linux"]:
-            raise ConanInvalidConfiguration("Only Linux supported")
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            raise ConanInvalidConfiguration("Only Linux is supported")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        extracted_dir = self.name + "-" + \
-            os.path.basename(
-                self.conan_data["sources"][self.version]["url"]).split(".")[0]
-        os.rename(extracted_dir, self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions['LIBMBUS_ENABLE_COVERAGE'] = False
-        self._cmake.definitions['LIBMBUS_BUILD_TESTS'] = False
-        self._cmake.definitions['LIBMBUS_BUILD_EXAMPLES'] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["LIBMBUS_ENABLE_COVERAGE"] = False
+        tc.variables["LIBMBUS_BUILD_TESTS"] = False
+        tc.variables["LIBMBUS_BUILD_EXAMPLES"] = False
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
-        tools.rmdir(os.path.join(self.package_folder,
-                                 "lib", "libmbus", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "libmbus", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
-        if self.settings.os == "Linux":
+        self.cpp_info.libs = ["libmbus"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "m"]

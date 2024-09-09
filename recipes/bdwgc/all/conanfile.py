@@ -1,11 +1,11 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.scm import Version
-from conan.tools.files import apply_conandata_patches, get, save, rmdir, copy, load
 from conan.errors import ConanException
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, save, rmdir, load
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.53.0"
 
 
 class BdwGcConan(ConanFile):
@@ -57,8 +57,7 @@ class BdwGcConan(ConanFile):
         default_options[option] = default
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -66,28 +65,19 @@ class BdwGcConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
         if Version(self.version) < "8.2.0":
             del self.options.throw_bad_alloc_library
         if not self.options.cplusplus:
-            try:
-                del self.settings.compiler.libcxx
-            except Exception:
-                pass
-            try:
-                del self.settings.compiler.cppstd
-            except Exception:
-                pass
+            self.settings.rm_safe("compiler.libcxx")
+            self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.settings.os == "Windows":
-            self.requires("libatomic_ops/7.6.14")
+            self.requires("libatomic_ops/7.8.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

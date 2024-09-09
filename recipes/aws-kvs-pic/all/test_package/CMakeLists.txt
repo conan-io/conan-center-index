@@ -1,8 +1,5 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES C)
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBKVSPIC REQUIRED IMPORTED_TARGET libkvspic)

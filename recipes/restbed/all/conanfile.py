@@ -8,7 +8,7 @@ from conan.tools.scm import Version
 import os
 import re
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class RestbedConan(ConanFile):
@@ -18,7 +18,7 @@ class RestbedConan(ConanFile):
     topics = ("restful", "server", "client", "json", "http", "ssl", "tls")
     url = "https://github.com/conan-io/conan-center-index"
     license = "AGPL-3.0-or-later", "LicenseRef-CPL"  # Corvusoft Permissive License (CPL)
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -51,15 +51,19 @@ class RestbedConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.ipc
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        if self.settings.os in ("Windows", ):
-            del self.options.ipc
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("asio/1.27.0")
+        if self.options.with_openssl:
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if getattr(self.info.settings.compiler, "cppstd"):
@@ -71,17 +75,8 @@ class RestbedConan(ConanFile):
                     f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support."
                 )
 
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
-    def requirements(self):
-        self.requires("asio/1.24.0")
-        if self.options.with_openssl:
-            self.requires("openssl/3.0.5")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

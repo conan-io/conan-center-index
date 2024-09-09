@@ -15,8 +15,7 @@
 #  include <netdb.h>
 #endif
 
-int
-main(int argc, const char* const* argv) {
+int test() {
 #ifdef _WIN32
 	WORD versionWanted = MAKEWORD(1, 1);
 	WSADATA wsaData;
@@ -26,8 +25,7 @@ main(int argc, const char* const* argv) {
 	}
 #endif
 
-	int port = 0;
-	int sock = mdns_socket_open_ipv4(port);
+	int sock = mdns_socket_open_ipv4(NULL);
 	if (sock < 0) {
 		printf("Failed to open socket: %s\n", strerror(errno));
 		return -1;
@@ -35,9 +33,15 @@ main(int argc, const char* const* argv) {
 
 	printf("socket cleanup\n");
 	mdns_socket_close(sock);
+
 #ifdef _WIN32
 	WSACleanup();
 #endif
+}
 
+
+int main() {
+    // Do not run test() to not open a socket unnecessarily.
+    // Verifying that the function compiles is sufficient.
 	return 0;
 }

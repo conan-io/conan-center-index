@@ -1,11 +1,11 @@
 versions:
-  "72.1":
+  "75.1":
     folder: all
-  "71.1":
+  "74.2":
     folder: all
-  "70.1":
+  "74.1":
     folder: all
-  "69.1":
+  "73.2":
     folder: all
-  "68.2":
+  "73.1":
     folder: all

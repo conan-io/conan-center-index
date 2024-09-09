@@ -4,6 +4,7 @@ from conan.tools.cmake import cmake_layout, CMake
 from conan.tools.files import mkdir
 import os
 
+
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
@@ -22,9 +23,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            input_file = os.path.join(self.source_folder, "DCMTK_JPEGExt_12Bits.dcm")
-            test_dir = "test_dir"
-            mkdir(self, test_dir)
-            output_file = os.path.join(test_dir, "output.dcm")
-            self.run(f"\"{bin_path}\" \"{input_file}\" \"{output_file}\"", env="conanrun")
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
+            self.run(bin_path, env="conanrun")

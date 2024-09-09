@@ -1,0 +1,13 @@
+sources:
+  "0.8.2":
+    url: "https://github.com/simd-everywhere/simde/archive/refs/tags/v0.8.2.tar.gz"
+    sha256: "ed2a3268658f2f2a9b5367628a85ccd4cf9516460ed8604eed369653d49b25fb"
+  "0.8.0":
+    # same as 0.7.6
+    url: "https://github.com/simd-everywhere/simde/archive/refs/tags/v0.8.0.tar.gz"
+    sha256: "d7c1aef6dd9ef0fbe6f521d1ca3e79afc26deda7d8f857544ca020b42a4b9b97"
+  "0.7.6":
+    # A release tarball exists, but I want to use the archive tarball.
+    # Because the release tarball has only amalgatated(with lots of duplicate lines) header files.
+    url: "https://github.com/simd-everywhere/simde/archive/refs/tags/v0.7.6.tar.gz"
+    sha256: "c63e6c61392e324728da1c7e5de308cb31410908993a769594f5e21ff8de962b"

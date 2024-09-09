@@ -1,0 +1,36 @@
+sources:
+  "4.0.0":
+    urdfdom:
+      url: "https://github.com/ros/urdfdom/archive/refs/tags/4.0.0.tar.gz"
+      sha256: "9848d106dc88dc0b907d5667c09da3ca53241fbcf17e982d8c234fe3e0d6ddcc"
+    urdfdom_headers:
+      url: "https://github.com/ros/urdfdom_headers/archive/refs/tags/1.1.1.zip"
+      sha256: "dde77e3dd96ffa41e2ee0a20bddcd6ef05863e95ce0143ede77130d8cd46c644"
+  "3.1.1":
+    urdfdom:
+      url: "https://github.com/ros/urdfdom/archive/refs/tags/3.1.1.tar.gz"
+      sha256: "dd69b2077b8fc1bd2b67022c1dc861cd896ac882df065aa08cabdf2f945a9ac0"
+    urdfdom_headers:
+      # Latest unreleased version from 2023-04-25.
+      # Identical to the latest v1.0.5 release, except headers have been conveniently moved to include/.
+      # We merge the headers into the main source tree instead of packaging them separately.
+      url: "https://github.com/ros/urdfdom_headers/archive/1fd21b64ed78493508a174f98af982605d1e4607.zip"
+      sha256: "aba42c1c83d6d1fb94e54ec84680a8b9e2417337fbaa85424da0e069d0cc89b6"
+patches:
+  "4.0.0":
+    - patch_file: "patches/4.0.0/001-optional-build-apps.patch"
+      patch_type: "conan"
+      patch_description: "Disable building of apps by default"
+    - patch_file: "patches/4.0.0/002-use-conan-dependencies.patch"
+      patch_type: "conan"
+      patch_description: "Use dependencies from Conan, use merged urdfdom_headers"
+  "3.1.1":
+    - patch_file: "patches/3.1.1/001-optional-build-apps.patch"
+      patch_type: "conan"
+      patch_description: "Disable building of apps by default"
+    - patch_file: "patches/3.1.1/002-use-conan-dependencies.patch"
+      patch_type: "conan"
+      patch_description: "Use dependencies (console_bridge, TinyXML) from Conan"
+    - patch_file: "patches/3.1.1/003-use-merged-urdfdom_headers.patch"
+      patch_type: "conan"
+      patch_description: "Use merged urdfdom_headers instead of a separate package"

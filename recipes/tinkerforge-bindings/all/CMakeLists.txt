@@ -1,26 +1,22 @@
-cmake_minimum_required(VERSION 3.4)
-project(tinkerforge_bindings)
+cmake_minimum_required(VERSION 3.15)
+project(tinkerforge_bindings LANGUAGES C)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+file(GLOB TINK_SOURCES ${TINKERFORGE_BINDINGS_SRC_DIR}/source/*.c)
+file(GLOB TINK_HEADERS ${TINKERFORGE_BINDINGS_SRC_DIR}/source/*.h)
 
-file(GLOB SOURCES ${CMAKE_SOURCE_DIR}/source_subfolder/source/*.c)
-file(GLOB HEADERS ${CMAKE_SOURCE_DIR}/source_subfolder/source/*.h)
-
-if(WIN32 AND BUILD_SHARED_LIBS)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+add_library(${PROJECT_NAME} ${TINK_SOURCES})
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    PUBLIC_HEADER "${TINK_HEADERS}"
+    WINDOWS_EXPORT_ALL_SYMBOLS ON
+)
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32 advapi32)
 endif()
 
-add_library(${PROJECT_NAME} ${SOURCES})
-
-if(MSVC)
-        target_link_libraries(${PROJECT_NAME} PRIVATE ws2_32 advapi32)
-endif()
-
-set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${HEADERS}")
+include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME}
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin
-        PUBLIC_HEADER DESTINATION include
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )

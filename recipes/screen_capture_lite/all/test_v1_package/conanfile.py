@@ -1,6 +1,5 @@
 from conans import ConanFile, CMake
 from conan.tools.build import cross_building
-from conan.tools.microsoft import is_msvc
 import os
 
 

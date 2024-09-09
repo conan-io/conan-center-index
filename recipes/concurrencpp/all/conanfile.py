@@ -38,6 +38,7 @@ class ConcurrencppConan(ConanFile):
             "Visual Studio": "16",
             "msvc": "192",
             "clang": "11",
+            "gcc": "13",
         }
 
     def export_sources(self):
@@ -60,7 +61,7 @@ class ConcurrencppConan(ConanFile):
         if Version(self.version) <= "0.1.5" and self.options.shared and is_msvc(self):
             # see https://github.com/David-Haim/concurrencpp/issues/75
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared builds with Visual Studio")
-        if self.settings.compiler == "gcc":
+        if Version(self.version) <= "0.1.6" and self.settings.compiler == "gcc":
             raise ConanInvalidConfiguration("gcc is not supported by concurrencpp")
         if Version(self.version) >= "0.1.5" and self.settings.compiler == "apple-clang":
             # apple-clang does not seem to support the C++20 synchronization library which concurrencpp 0.1.5 depends on

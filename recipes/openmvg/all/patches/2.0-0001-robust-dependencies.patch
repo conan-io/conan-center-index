@@ -1,0 +1,198 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -98,7 +98,7 @@ endif()
+ # ==============================================================================
+ # Check that submodule have been initialized and updated
+ # ==============================================================================
+-if (NOT EXISTS ${PROJECT_SOURCE_DIR}/dependencies/cereal/include)
++if (0)
+   message(FATAL_ERROR
+     "\n submodule(s) are missing, please update your repository:\n"
+     "  > git submodule update -i\n")
+@@ -193,12 +193,6 @@ if (OpenMVG_BUILD_OPENGL_EXAMPLES)
+ endif (OpenMVG_BUILD_OPENGL_EXAMPLES)
+ 
+ # Dependencies install rules
+-install(
+-  DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/
+-  DESTINATION include/openMVG_dependencies
+-  COMPONENT headers
+-  FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h"
+-)
+ 
+ # ==============================================================================
+ # --END-- SUBMODULE CONFIGURATION
+@@ -261,7 +255,7 @@ if (NOT Eigen3_FOUND)
+   set(OpenMVG_USE_INTERNAL_EIGEN ON)
+   find_package(Eigen QUIET)
+ else()
+-  set(EIGEN_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
++  set(EIGEN_INCLUDE_DIRS ${Eigen3_INCLUDE_DIRS})
+ endif()
+ 
+ # ==============================================================================
+@@ -288,12 +282,12 @@ endif()
+ # - internal by default (flann),
+ # - external if FLANN_INCLUDE_DIR_HINTS and a valid Flann setup is found
+ # ==============================================================================
+-if (NOT DEFINED FLANN_INCLUDE_DIR_HINTS)
++if (0)
+   set(FLANN_INCLUDE_DIR_HINTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/flann/src/cpp)
+   set(OpenMVG_USE_INTERNAL_FLANN ON)
+ endif()
+-find_package(Flann QUIET)
+-if (NOT FLANN_FOUND OR OpenMVG_USE_INTERNAL_FLANN)
++find_package(Flann REQUIRED CONFIG)
++if (0)
+   set(FLANN_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/flann/src/cpp)
+ endif()
+ 
+@@ -303,14 +297,14 @@ endif()
+ # - internal by default (CoinUtils),
+ # - external if COINUTILS_INCLUDE_DIR_HINTS and a valid CoinUtils setup is found
+ # ==============================================================================
+-if (NOT DEFINED COINUTILS_INCLUDE_DIR_HINTS)
++if (0)
+   set(COINUTILS_INCLUDE_DIR_HINTS ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/osi_clp/CoinUtils/src/)
+   set(OpenMVG_USE_INTERNAL_COINUTILS ON)
+   find_package(CoinUtils QUIET)
+   set(COINUTILS_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/osi_clp/CoinUtils/src/)
+   set(COINUTILS_LIBRARY lib_CoinUtils)
+ else()
+-  find_package(CoinUtils QUIET)
++  find_package(coin-utils REQUIRED CONFIG)
+ endif()
+ 
+ ## ==============================================================================
+@@ -319,7 +313,7 @@ endif()
+ ## - internal by default (Clp),
+ ## - external if CLP_INCLUDE_DIR_HINTS and a valid Clp setup is found
+ ## ==============================================================================
+-if (NOT DEFINED CLP_INCLUDE_DIR_HINTS)
++if (0)
+   set(CLP_INCLUDE_DIR_HINTS ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/osi_clp/Clp/src/)
+   set(OpenMVG_USE_INTERNAL_CLP ON)
+   find_package(Clp QUIET)
+@@ -328,7 +322,7 @@ if (NOT DEFINED CLP_INCLUDE_DIR_HINTS)
+      ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/osi_clp/Clp/src/OsiClp/)
+   set(CLP_LIBRARIES lib_clp lib_OsiClpSolver)
+ else()
+-  find_package(Clp QUIET)
++  find_package(coin-clp REQUIRED CONFIG)
+ endif()
+ 
+ # ==============================================================================
+@@ -337,14 +331,14 @@ endif()
+ # - internal by default (Osi),
+ # - external if OSI_INCLUDE_DIR_HINTS and a valid Osi setup is found
+ # ==============================================================================
+-if (NOT DEFINED OSI_INCLUDE_DIR_HINTS)
++if (0)
+   set(OSI_INCLUDE_DIR_HINTS ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/osi_clp/Osi/src/)
+   set(OpenMVG_USE_INTERNAL_OSI ON)
+   find_package(Osi QUIET)
+   set(OSI_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/osi_clp/Osi/src/Osi/)
+   set(OSI_LIBRARY lib_Osi)
+ else()
+-  find_package(Osi QUIET)
++  find_package(coin-osi REQUIRED CONFIG)
+ endif()
+ 
+ # ==============================================================================
+@@ -364,11 +358,11 @@ endif()
+ # - internal by default (Lemon),
+ # - external if LEMON_INCLUDE_DIR_HINTS and a valid Lemon setup is found
+ # ==============================================================================
+-if (NOT DEFINED LEMON_INCLUDE_DIR_HINTS)
++if (0)
+   set(LEMON_INCLUDE_DIR_HINTS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/lemon)
+   set(OpenMVG_USE_INTERNAL_LEMON ON)
+ endif()
+-find_package(Lemon QUIET)
++find_package(LEMON REQUIRED CONFIG)
+ if (NOT LEMON_FOUND OR OpenMVG_USE_INTERNAL_LEMON)
+   set(LEMON_INCLUDE_DIRS
+     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/lemon
+--- a/src/openMVG/graph/CMakeLists.txt
++++ b/src/openMVG/graph/CMakeLists.txt
+@@ -1,7 +1,7 @@
+ 
+ add_library(openMVG_graph INTERFACE)
+ target_compile_features(openMVG_graph INTERFACE ${CXX11_FEATURES})
+-target_link_libraries(openMVG_graph INTERFACE ${LEMON_LIBRARY})
++target_link_libraries(openMVG_graph INTERFACE LEMON::LEMON)
+ install(TARGETS openMVG_graph DESTINATION lib EXPORT openMVG-targets)
+ 
+ UNIT_TEST(openMVG_graph connectedComponent "openMVG_testing;openMVG_graph")
+--- a/src/openMVG/linearProgramming/CMakeLists.txt
++++ b/src/openMVG/linearProgramming/CMakeLists.txt
+@@ -15,9 +15,9 @@ target_link_libraries(openMVG_linearProgramming
+   PUBLIC
+     openMVG_numeric
+   PRIVATE
+-    ${CLP_LIBRARIES}     # clp + solver wrapper
+-    ${COINUTILS_LIBRARY} # container tools
+-    ${OSI_LIBRARY}       # generic LP
++    coin-clp::coin-clp
++    coin-utils::coin-utils
++    coin-osi::coin-osi
+ )
+ 
+ target_include_directories(openMVG_linearProgramming
+--- a/src/openMVG/matching/CMakeLists.txt
++++ b/src/openMVG/matching/CMakeLists.txt
+@@ -40,7 +40,7 @@ target_link_libraries(openMVG_matching
+ if (NOT DEFINED OpenMVG_USE_INTERNAL_FLANN)
+ target_link_libraries(openMVG_matching
+   PUBLIC
+-    ${FLANN_LIBRARIES}
++    $<IF:$<TARGET_EXISTS:flann::flann_cpp>,flann::flann_cpp,flann::flann_cpp_s>
+ )
+ endif()
+ set_target_properties(openMVG_matching PROPERTIES SOVERSION ${OPENMVG_VERSION_MAJOR} VERSION "${OPENMVG_VERSION_MAJOR}.${OPENMVG_VERSION_MINOR}")
+--- a/src/openMVG/multiview/CMakeLists.txt
++++ b/src/openMVG/multiview/CMakeLists.txt
+@@ -29,9 +29,9 @@ target_link_libraries(openMVG_multiview
+     openMVG_numeric
+ )
+ target_link_libraries(openMVG_multiview
+-  LINK_PRIVATE
++  PRIVATE
+     openMVG_graph
+-    ${CERES_LIBRARIES}
++    Ceres::ceres
+ )
+ target_include_directories(openMVG_multiview
+   PRIVATE
+--- a/src/openMVG/sfm/CMakeLists.txt
++++ b/src/openMVG/sfm/CMakeLists.txt
+@@ -30,11 +30,11 @@ target_link_libraries(openMVG_sfm
+ )
+ 
+ target_link_libraries(openMVG_sfm
+-  LINK_PRIVATE
++  PRIVATE
+     openMVG_image
+     openMVG_lInftyComputerVision
+     openMVG_system
+-    ${CERES_LIBRARIES}
++    Ceres::ceres
+     ${STLPLUS_LIBRARY}
+ )
+ target_include_directories(openMVG_sfm
+--- a/src/software/SfM/CMakeLists.txt
++++ b/src/software/SfM/CMakeLists.txt
+@@ -191,12 +191,9 @@ target_link_libraries(openMVG_main_FrustumFiltering
+ )
+ 
+ add_executable(openMVG_main_ComputeStructureFromKnownPoses main_ComputeStructureFromKnownPoses.cpp)
+-target_include_directories(openMVG_main_ComputeStructureFromKnownPoses
+-  PRIVATE
+-    ${CERES_INCLUDE_DIRS}
+-)
+ target_link_libraries(openMVG_main_ComputeStructureFromKnownPoses
+   PRIVATE
++    Ceres::ceres
+     openMVG_system
+     openMVG_features
+     openMVG_sfm

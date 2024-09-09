@@ -1,23 +1,29 @@
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.43.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+
+required_conan_version = ">=1.52.0"
 
 
 class CertifyConan(ConanFile):
     name = "certify"
     description = "Platform-specific TLS keystore abstraction for use with Boost.ASIO and OpenSSL"
-    topics = ("boost", "asio", "tls", "ssl", "https")
+    license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/djarek/certify"
-    license = "BSL-1.0"
+    topics = ("boost", "asio", "tls", "ssl", "https", "header-only")
+
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 17
 
     @property
     def _compilers_minimum_version(self):
@@ -28,17 +34,19 @@ class CertifyConan(ConanFile):
             "apple-clang": "11",
         }
 
-    @property
-    def _min_cppstd(self):
-        return "17"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.79.0")
-        self.requires("openssl/1.1.1q")
+        self.requires("boost/1.83.0")
+        self.requires("openssl/[>=1.1 <4]")
+
+    def package_id(self):
+        self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._min_cppstd)
+            check_min_cppstd(self, self._min_cppstd)
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -48,29 +56,38 @@ class CertifyConan(ConanFile):
 
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if not minimum_version:
-            self.output.warn("{} requires C++17. Your compiler is unknown. Assuming it supports C++17.".format(self.name))
+            self.output.warning(
+                f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17."
+            )
         elif lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
-            raise ConanInvalidConfiguration("{} requires C++17, which your compiler does not support.".format(self.name))
-
-    def package_id(self):
-        self.info.header_only()
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires C++17, which your compiler does not support."
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
-        self.copy(pattern="LICENSE_1_0.txt", dst="licenses",
-                  src=self._source_subfolder)
-        self.copy(pattern="*", dst="include",
-                  src=os.path.join(self._source_subfolder, "include"))
+        copy(
+            self,
+            pattern="LICENSE_1_0.txt",
+            dst=os.path.join(self.package_folder, "licenses"),
+            src=self.source_folder,
+        )
+        copy(
+            self,
+            pattern="*",
+            dst=os.path.join(self.package_folder, "include"),
+            src=os.path.join(self.source_folder, "include"),
+        )
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "certify")
         self.cpp_info.set_property("cmake_target_name", "certify::core")
-        self.cpp_info.components["_certify"].requires = ["boost::boost", "openssl::openssl"]
 
+        self.cpp_info.components["_certify"].requires = ["boost::boost", "openssl::openssl"]
         self.cpp_info.components["_certify"].names["cmake_find_package"] = "core"
         self.cpp_info.components["_certify"].names["cmake_find_package_multi"] = "core"
+
         self.cpp_info.names["cmake_find_package"] = "certify"
         self.cpp_info.names["cmake_find_package_multi"] = "certify"

@@ -2,8 +2,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -29,6 +30,9 @@ class FastCDRConan(ConanFile):
         "fPIC": True,
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -39,6 +43,10 @@ class FastCDRConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def build_requirements(self):
+        if Version(self.version) >= "1.1.0":
+            self.tool_requires("cmake/[>=3.16.3 <4]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -59,6 +67,7 @@ class FastCDRConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -99,6 +108,9 @@ class FastCDRConan(ConanFile):
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os == "Windows" and self.options.shared:
             self.cpp_info.defines.append("FASTCDR_DYN_LINK")
+
+        if self.settings.os in ["Linux"]:
+            self.cpp_info.system_libs.append("m")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "fastcdr"

@@ -1,0 +1,16 @@
+sources:
+  "7.1.0":
+    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-710.tar.gz"
+    sha256: "ec177fdb688346287d5f211dd7ec4a0195c8ec9b3a5314d38aca383b6fa1418e"
+  "7.0.1":
+    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-701.tar.gz"
+    sha256: "80cce994dcbe45fd52b60e31a3aeb5d2c60a7ddbaae495e0ce6bf58481675696"
+  "7.0.0":
+    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-700.tar.gz"
+    sha256: "ab1906d3afb1793a6f129a5baef9dd8eee929ee945aade427cb9f0b17888239c"
+  "6.0.4":
+    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-604.tar.gz"
+    sha256: "691f5b593cb85c2586522d5de5a5a7692958d22ff1ddffb4fc395f4696590b6f"
+  "6.0.3":
+    url: "https://github.com/scipopt/soplex/archive/refs/tags/release-603.tar.gz"
+    sha256: "2bdf9adc9ac6ad48f98056679b7b852e626ac4aaaf277e7d4ce17794ed1097be"

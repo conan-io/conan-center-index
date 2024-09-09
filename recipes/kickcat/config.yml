@@ -1,0 +1,7 @@
+versions:
+  "v2.0-rc1":
+    folder: all
+  "v2-alpha4":
+    folder: all
+  "v2-alpha3":
+    folder: all

@@ -66,7 +66,7 @@ class LibpqxxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libpq/14.5")
+        self.requires("libpq/15.4")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -104,6 +104,12 @@ class LibpqxxConan(ConanFile):
         tc.variables["BUILD_TEST"] = False
         # Set `-mmacosx-version-min` to enable C++17 standard library support.
         tc.variables["CMAKE_OSX_DEPLOYMENT_TARGET"] = self._mac_os_minimum_required_version
+        if Version(self.version) < "7.0":
+            if self.options.shared:
+                tc.variables["SKIP_PQXX_STATIC"] = True
+            else:
+                tc.variables["SKIP_PQXX_SHARED"] = True
+
         tc.generate()
 
         deps = CMakeDeps(self)

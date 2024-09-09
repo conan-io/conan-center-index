@@ -1,32 +1,33 @@
-from conans import ConanFile, CMake, tools
-import functools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import get, copy, replace_in_file
+from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
+import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.54"
 
 class ImplotConan(ConanFile):
     name = "implot"
+    description = "Advanced 2D Plotting for Dear ImGui"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/epezent/implot"
-    description = "Advanced 2D Plotting for Dear ImGui"
     topics = ("imgui", "plot", "graphics", )
-    license = "MIT"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-
-    exports_sources = ["CMakeLists.txt"]
-    generators = "cmake"
-
     options = {
         "shared": [True, False],
-         "fPIC": [True, False]
+         "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
-        "fPIC": True
+        "fPIC": True,
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -34,31 +35,54 @@ class ImplotConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
-        if tools.Version(self.version) >= "0.13":
-            self.requires("imgui/1.87")
+        if Version(self.version) >= "0.14":
+            self.requires("imgui/1.90.5", transitive_headers=True)
+        elif Version(self.version) >= "0.13":
+            # imgui 1.89 renamed ImGuiKeyModFlags_* to  ImGuiModFlags_*
+            self.requires("imgui/1.88", transitive_headers=True)
         else:
-            self.requires("imgui/1.86")
+            self.requires("imgui/1.86", transitive_headers=True)
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def validate(self):
+        if Version(self.version) < "0.13" and is_msvc(self) and self.dependencies["imgui"].options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared imgui.")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["IMPLOT_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        if Version(self.version) < "0.16":
+            # Set in code since v0.16 https://github.com/epezent/implot/commit/33c5a965f55f80057f197257d1d1cdb06523e963
+            tc.preprocessor_definitions["IMGUI_DEFINE_MATH_OPERATORS"] = ""
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def _patch_sources(self):
+        if Version(self.version) == "0.14" and Version(self.dependencies["imgui"].ref.version) >= "1.89.7":
+            # https://github.com/ocornut/imgui/commit/51f564eea6333bae9242f40c983a3e29d119a9c2
+            replace_in_file(self, os.path.join(self.source_folder, "implot.cpp"),
+                            "ImGuiButtonFlags_AllowItemOverlap",
+                            "ImGuiButtonFlags_AllowOverlap")
 
     def build(self):
-        cmake = self._configure_cmake()
+        self._patch_sources()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="implot*.cpp", dst=os.path.join(self.package_folder, "res", "src"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):

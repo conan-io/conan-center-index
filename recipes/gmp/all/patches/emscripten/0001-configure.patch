@@ -1,0 +1,14 @@
+--- configure-orig	2023-08-23 10:38:02
++++ configure	2023-08-23 10:38:02
+@@ -4078,8 +4078,10 @@
+ 
+ 
+ # abilist needs to be non-empty, "standard" is just a generic name here
+-abilist="standard"
++abilist="standard longlong"
++limb_longlong=longlong
+ 
++
+ # FIXME: We'd like to prefer an ANSI compiler, perhaps by preferring
+ # c89 over cc here.  But note that on HP-UX c89 provides a castrated
+ # environment, and would want to be excluded somehow.  Maybe

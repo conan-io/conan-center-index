@@ -1,25 +1,66 @@
---- configure
-+++ configure
-@@ -21,7 +21,7 @@
+--- configure	2018-12-31 23:47:09.000000000 +0100
++++ configure	2023-08-20 17:40:14.170994800 +0200
+@@ -9,6 +9,7 @@
+ pkgversion=1.21
+ progname=lzip
+ srctrigger=doc/${pkgname}.texi
++extension=
+ 
+ # clear some things potentially inherited from environment.
+ LC_ALL=C
+@@ -20,7 +21,7 @@
+ datarootdir='$(prefix)/share'
  infodir='$(datarootdir)/info'
  mandir='$(datarootdir)/man'
 -CXX=g++
--CPPFLAGS=
--CXXFLAGS='-Wall -W -O2'
--LDFLAGS=
-+#CXX=g++
-+#CPPFLAGS=
-+#CXXFLAGS='-Wall -W -O2'
-+#LDFLAGS=
++CXX="${CXX:-g++}"
+ CPPFLAGS=
+ CXXFLAGS='-Wall -W -O2'
+ LDFLAGS=
+@@ -118,6 +119,19 @@
+ 	fi
+ done
  
-@@ -28,8 +28,8 @@
- # checking whether we are using GNU C++.
- /bin/sh -c "${CXX} --version" > /dev/null 2>&1 ||
- 	{
--	CXX=c++
--	CXXFLAGS=-O2
-+	echo "hello" # CXX=c++
-+	echo "hello" # CXXFLAGS=-O2
- 	}
++rm -f dummy*
++cat << EOT > dummy.c
++int main(int argc, char ** argv) {
++    return 0;
++}
++EOT
++
++${CXX} -o dummy dummy.c
++
++if [ -f dummy.exe ] ; then
++  extension=".exe"
++fi
++
+ # Find the source files, if location was not specified.
+ srcdirtext=
+ if [ -z "${srcdir}" ] ; then
+@@ -158,6 +172,7 @@
+ echo "creating Makefile"
+ echo "VPATH = ${srcdir}"
+ echo "prefix = ${prefix}"
++echo "executable extension = ${extension}"
+ echo "exec_prefix = ${exec_prefix}"
+ echo "bindir = ${bindir}"
+ echo "datarootdir = ${datarootdir}"
+@@ -179,6 +194,7 @@
+ pkgname = ${pkgname}
+ pkgversion = ${pkgversion}
+ progname = ${progname}
++extension = ${extension}
+ VPATH = ${srcdir}
+ prefix = ${prefix}
+ exec_prefix = ${exec_prefix}
+--- Makefile.in	2018-03-21 13:21:16.000000000 +0100
++++ Makefile.in	2023-08-20 17:32:44.011055100 +0200
+@@ -64,7 +64,7 @@
  
- # Loop over all args
+ install-bin : all
+ 	if [ ! -d "$(DESTDIR)$(bindir)" ] ; then $(INSTALL_DIR) "$(DESTDIR)$(bindir)" ; fi
+-	$(INSTALL_PROGRAM) ./$(progname) "$(DESTDIR)$(bindir)/$(progname)"
++	$(INSTALL_PROGRAM) ./$(progname)$(extension) "$(DESTDIR)$(bindir)/$(progname)$(extension)"
+ 
+ install-bin-strip : all
+ 	$(MAKE) INSTALL_PROGRAM='$(INSTALL_PROGRAM) -s' install-bin

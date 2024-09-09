@@ -7,8 +7,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.53.0"
 
 class DacapClipConan(ConanFile):
     name = "dacap-clip"
@@ -17,57 +18,61 @@ class DacapClipConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/dacap/clip/"
     topics = ("clipboard", "copy", "paste")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "with_png": [True, False],
+        "with_image": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_png": True,
+        "with_image": True,
     }
 
-    def export_sources(self):
-        copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
+    @property
+    def _min_cppstd(self):
+        return 11
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            del self.options.with_png
+        if Version(self.version) < "1.8":
+            del self.options.with_image
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        if self.settings.os not in ["Linux", "FreeBSD"]:
-            del self.options.with_png
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.get_safe("with_png", False):
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/[>=1.6 <2]")
         if self.settings.os == "Linux":
             self.requires("xorg/system")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
         if is_msvc(self) and self.info.settings.build_type == "Debug" and self.info.options.shared == True:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support MSVC debug shared build (now).")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         toolchain = CMakeToolchain(self)
         toolchain.variables["CLIP_EXAMPLES"] = False
         toolchain.variables["CLIP_TESTS"] = False
         toolchain.variables["CLIP_X11_WITH_PNG"] = self.options.get_safe("with_png", False)
+        toolchain.variables["CLIP_ENABLE_IMAGE"] = self.options.get_safe("with_image", False)
         if is_msvc(self):
             toolchain.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = bool(self.options.shared)
         toolchain.generate()
@@ -94,6 +99,8 @@ class DacapClipConan(ConanFile):
 
         if self.options.get_safe("with_png", False):
             self.cpp_info.requires.append("libpng::libpng")
+        if self.options.get_safe("with_image", False):
+            self.cpp_info.defines.append("CLIP_ENABLE_IMAGE=1")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.requires.append("xorg::xcb")
@@ -109,6 +116,6 @@ class DacapClipConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "clip")
         self.cpp_info.set_property("cmake_target_name", "clip::clip")
 
-        # TODO: Remove on Conan 2.0
+    # TODO: Remove on Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "clip"
         self.cpp_info.names["cmake_find_package_multi"] = "clip"

@@ -1,4 +1,10 @@
 sources:
+  "1.10.0":
+    url: "https://github.com/OctoMap/octomap/archive/v1.10.0.tar.gz"
+    sha256: "8da2576ec6a0993e8900db7f91083be8682d8397a7be0752c85d1b7dd1b8e992"
+  "1.9.8":
+    url: "https://github.com/OctoMap/octomap/archive/v1.9.8.tar.gz"
+    sha256: "417af6da4e855e9a83b93458aa98b01a2c88f880088baad2b59d323ce162586e"
   "1.9.7":
     url: "https://github.com/OctoMap/octomap/archive/v1.9.7.tar.gz"
     sha256: "3e9ac020686ceb4e17e161bffc5a0dafd9cccab33adeb9adee59a61c418ea1c1"
@@ -12,11 +18,47 @@ sources:
     url: "https://github.com/OctoMap/octomap/archive/v1.9.3.tar.gz"
     sha256: "8488de97ed2c8f4757bfbaf3225e82a9e36783dce1f573b3bde1cf968aa89696"
 patches:
+  "1.10.0":
+    - patch_file: "patches/1.10.0-0001-separate-static-shared-build.patch"
+      patch_description: "CMake: build either shared or static"
+      patch_type: "conan"
+  "1.9.8":
+    - patch_file: "patches/1.9.5-0001-targets-outputname-collision.patch"
+      patch_description: "CMake: build either shared or static, and avoid name collision"
+      patch_type: "conan"
+    - patch_file: "patches/1.9.8-0001-cpp17-compat.patch"
+      patch_description: "Robust C++17 compatibility"
+      patch_type: "portability"
+      patch_source: "https://github.com/OctoMap/octomap/pull/394"
   "1.9.7":
-    - patch_file: "patches/targets-outputname-collision-1.9.5.patch"
+    - patch_file: "patches/1.9.5-0001-targets-outputname-collision.patch"
+      patch_description: "CMake: build either shared or static, and avoid name collision"
+      patch_type: "conan"
+    - patch_file: "patches/1.9.6-0001-cpp17-compat.patch"
+      patch_description: "Robust C++17 compatibility"
+      patch_type: "portability"
+      patch_source: "https://github.com/OctoMap/octomap/pull/394"
   "1.9.6":
-    - patch_file: "patches/targets-outputname-collision-1.9.5.patch"
+    - patch_file: "patches/1.9.5-0001-targets-outputname-collision.patch"
+      patch_description: "CMake: build either shared or static, and avoid name collision"
+      patch_type: "conan"
+    - patch_file: "patches/1.9.6-0001-cpp17-compat.patch"
+      patch_description: "Robust C++17 compatibility"
+      patch_type: "portability"
+      patch_source: "https://github.com/OctoMap/octomap/pull/394"
   "1.9.5":
-    - patch_file: "patches/targets-outputname-collision-1.9.5.patch"
+    - patch_file: "patches/1.9.5-0001-targets-outputname-collision.patch"
+      patch_description: "CMake: build either shared or static, and avoid name collision"
+      patch_type: "conan"
+    - patch_file: "patches/1.9.3-0002-cpp17-compat.patch"
+      patch_description: "Robust C++17 compatibility"
+      patch_type: "portability"
+      patch_source: "https://github.com/OctoMap/octomap/pull/394"
   "1.9.3":
-    - patch_file: "patches/targets-outputname-collision-1.9.3.patch"
+    - patch_file: "patches/1.9.3-0001-targets-outputname-collision.patch"
+      patch_description: "CMake: build either shared or static, and avoid name collision"
+      patch_type: "conan"
+    - patch_file: "patches/1.9.3-0002-cpp17-compat.patch"
+      patch_description: "Robust C++17 compatibility"
+      patch_type: "portability"
+      patch_source: "https://github.com/OctoMap/octomap/pull/394"

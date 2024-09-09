@@ -23,17 +23,19 @@ class LibPcapConan(ConanFile):
     description = "libpcap is an API for capturing network traffic"
     license = "BSD-3-Clause"
     topics = ("networking", "pcap", "sniffing", "network-traffic")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_libusb": [True, False],
+        "with_snf": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_libusb": False,
+        "with_snf": False,
     }
 
     # TODO: Add dbus-glib when available
@@ -77,15 +79,14 @@ class LibPcapConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} can not be built static on Windows")
 
     def build_requirements(self):
-        if is_msvc(self, build_context=True):
+        if self._settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.24")
         else:
             self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         VirtualBuildEnv(self).generate()
@@ -115,7 +116,9 @@ class LibPcapConan(ConanFile):
                 "--disable-packet-ring",
                 "--disable-dbus",
                 "--disable-rdma",
+                f"--with-snf={yes_no(self.options.get_safe('with_snf'))}",
             ])
+            
             if cross_building(self):
                 target_os = "linux" if self.settings.os == "Linux" else "null"
                 tc.configure_args.append(f"--with-pcap={target_os}")
@@ -172,3 +175,5 @@ class LibPcapConan(ConanFile):
         self.cpp_info.libs = [f"pcap{suffix}"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
+        if self.options.get_safe("with_snf"):
+            self.cpp_info.system_libs.append("snf")

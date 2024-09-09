@@ -1,0 +1,22 @@
+--- a/onnxruntime/core/framework/kernel_type_str_resolver.cc
++++ b/onnxruntime/core/framework/kernel_type_str_resolver.cc
+@@ -20,7 +20,7 @@ Status KernelTypeStrResolver::ResolveKernelTypeStr(const Node& node, std::string
+   ORT_RETURN_IF(op_it == op_kernel_type_str_map_.end(), "Failed to find op_id: ", op_id);
+   const auto& type_str_map = op_it->second;
+ 
+-#ifdef DISABLE_ABSEIL
++#ifndef ABSL_USES_STD_STRING_VIEW
+   // TODO(edgchen1) maybe we can use transparent hash/eq to enable lookup with string_view
+   const auto type_str_it = type_str_map.find(std::string(kernel_type_str));
+ #else
+--- a/onnxruntime/core/framework/ort_value_name_idx_map.h
++++ b/onnxruntime/core/framework/ort_value_name_idx_map.h
+@@ -33,7 +33,7 @@ class OrtValueNameIdxMap {
+   common::Status GetIdx(std::string_view name, int& idx) const {
+     idx = -1;
+ 
+-#ifdef DISABLE_ABSEIL
++#ifndef ABSL_USES_STD_STRING_VIEW
+     auto it = map_.find(std::string(name));
+ #else
+     auto it = map_.find(name);

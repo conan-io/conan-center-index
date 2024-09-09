@@ -1,4 +1,16 @@
 sources:
+  "3.4.0":
+    url: "https://github.com/skypjack/uvw/archive/v3.4.0_libuv_v1.48.tar.gz"
+    sha256: "c16600573871a5feeb524234b378ab832c8971b2a68d030c6bd0e3077d416ade"
+  "3.3.0":
+    url: "https://github.com/skypjack/uvw/archive/v3.3.0_libuv_v1.47.tar.gz"
+    sha256: "aabb17d3d8f0b3481b44e981c889dd4a2a6a3f1a96a4d01055e669f4b7d37d0e"
+  "3.2.0":
+    url: "https://github.com/skypjack/uvw/archive/v3.2.0_libuv_v1.46.tar.gz"
+    sha256: "bd5aed741765950074b1ea2507291dce81e528abdf56c406991ad4a27d8d1714"
+  "3.1.0":
+    url: "https://github.com/skypjack/uvw/archive/v3.1.0_libuv_v1.45.tar.gz"
+    sha256: "0a612bd243150fbbe1365cdaf48203d32061c1d14f93825a31876b183922f93b"
   "2.12.1":
     url: "https://github.com/skypjack/uvw/archive/v2.12.1_libuv_v1.44.tar.gz"
     sha256: "3460842778e91e7d2fae4201e49e4521e9d94fbbf3891ae6c52d3c9fc0673598"
@@ -8,12 +20,11 @@ sources:
   "2.10.0":
     url: "https://github.com/skypjack/uvw/archive/v2.10.0_libuv_v1.42.tar.gz"
     sha256: "30b0ba97a94d5e652490c6b1b32c95e608263f21cf3bc606308d09b3e3a114bf"
-  "2.9.0":
-    url: "https://github.com/skypjack/uvw/archive/v2.9.0_libuv_v1.41.tar.gz"
-    sha256: "dd610cb1626b8a7779ed251584bcc0362fb98fcee13e699680f61828a1ba55de"
-  "2.8.0":
-    url: "https://github.com/skypjack/uvw/archive/v2.8.0_libuv_v1.40.tar.gz"
-    sha256: "aa5769f5b9ba50de72ab02a8f8acf298b4aa9ceaef07992418a13a0fa119ce7d"
-  "2.6.0":
-    url: "https://github.com/skypjack/uvw/archive/v2.6.0_libuv-v1.38.tar.gz"
-    sha256: "2695276bb4b154174ac0a6401bde5c0768bca99a43c9a469af67526f7e2e9410"
+libuv_version_mapping:
+  "3.4.0": "1.48.0"
+  "3.3.0": "1.47.0"
+  "3.2.0": "1.46.0"
+  "3.1.0": "1.45.0"
+  "2.12.1": "1.44.2"
+  "2.11.0": "1.43.0"
+  "2.10.0": "1.42.0"

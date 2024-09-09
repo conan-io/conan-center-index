@@ -1,3 +1,4 @@
+#define CL_TARGET_OPENCL_VERSION 120
 #include <CL/opencl.h>
 
 int main() {

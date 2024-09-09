@@ -5,16 +5,22 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "cmake", "cmake_find_package_multi"
+    test_type = "explicit"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str)
+
+    def build_requirements(self):
+        if hasattr(self, "settings_build"):
+            self.build_requires(self.tested_reference_str)
 
     def build(self):
-        # TODO: Add some test for the cross-building scenario
-
-        if not tools.cross_building(self):
+        with tools.no_op() if hasattr(self, "settings_build") else tools.run_environment(self):
             calc_wsdl = os.path.join(self.source_folder, os.pardir, "test_package", "calc.wsdl")
             self.output.info(f"Generating code from WSDL '{calc_wsdl}'")
-            self.run(f"wsdl2h -o calc.h {calc_wsdl}", run_environment=True)
+            self.run(f"wsdl2h -o calc.h {calc_wsdl}")
             import_dir = os.path.join(self.deps_cpp_info["gsoap"].rootpath, "bin", "import")
-            self.run(f"soapcpp2 -j -CL -I{import_dir} calc.h", run_environment=True)
+            self.run(f"soapcpp2 -j -CL -I{import_dir} calc.h")
 
             cmake = CMake(self)
             cmake.configure()

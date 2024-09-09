@@ -30,6 +30,7 @@ class CocoyaxiConan(ConanFile):
         "with_libcurl": False,
         "with_openssl": False,
     }
+    deprecated = "coost"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -37,13 +38,13 @@ class CocoyaxiConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         if self.options.with_libcurl:
-            self.requires("libcurl/7.80.0")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.with_libcurl or self.options.with_openssl:
-            self.requires("openssl/1.1.1q")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -95,3 +96,7 @@ class CocoyaxiConan(ConanFile):
             self.cpp_info.components["co"].requires.append("libcurl::libcurl")
         if self.options.with_libcurl or self.options.with_openssl:
             self.cpp_info.components["co"].requires.append("openssl::openssl")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["co"].system_libs.extend(["pthread", "dl", "m"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["co"].system_libs.append("ws2_32")

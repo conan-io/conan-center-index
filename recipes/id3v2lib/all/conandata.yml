@@ -1,0 +1,4 @@
+sources:
+  "2.1":
+    url: "https://github.com/larsbs/id3v2lib/archive/refs/tags/2.1.tar.gz"
+    sha256: "c91d185e227254d800617f18bee53181f126cb654bfee6041ed9c04172cea95a"

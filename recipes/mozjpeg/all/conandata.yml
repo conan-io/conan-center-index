@@ -1,4 +1,10 @@
 sources:
+  "4.1.5":
+    url: "https://github.com/mozilla/mozjpeg/archive/v4.1.5.tar.gz"
+    sha256: "9fcbb7171f6ac383f5b391175d6fb3acde5e64c4c4727274eade84ed0998fcc1"
+  "4.1.3":
+    url: "https://github.com/mozilla/mozjpeg/archive/v4.1.3.tar.gz"
+    sha256: "f6ce89f616b30c498d1fb3b0f0940914557d8393a79c9e7aafff72032446bca0"
   "4.1.1":
     url: "https://github.com/mozilla/mozjpeg/archive/v4.1.1.tar.gz"
     sha256: "66b1b8d6b55d263f35f27f55acaaa3234df2a401232de99b6d099e2bb0a9d196"
@@ -9,6 +15,14 @@ sources:
     url: "https://github.com/mozilla/mozjpeg/archive/v3.3.1.tar.gz"
     sha256: "aebbea60ea038a84a2d1ed3de38fdbca34027e2e54ee2b7d08a97578be72599d"
 patches:
+  "4.1.5":
+    - patch_file: "patches/4.1.5-0001-cmake-fixes.patch"
+      patch_description: "fix install folder and disable /NODEFAULT in MSVC"
+      patch_type: "conan"
+  "4.1.3":
+    - patch_file: "patches/4.1.3-0001-cmake-fixes.patch"
+      patch_description: "fix install folder and disable /NODEFAULT in MSVC"
+      patch_type: "conan"
   "4.1.1":
     - patch_file: "patches/4.1.1-0001-cmake-fixes.patch"
       patch_description: "fix install folder and disable /NODEFAULT in MSVC"

@@ -4,11 +4,7 @@ sources:
     sha256: d1f5c60a62e0e61e14c92b37d6f1420ed4bb3c6fd19ced67c84b7e0e0e3f07c5
 patches:
   "2.1.1":
-  - base_path: source_subfolder
-    patch_file: patches/0001-cmake-disable-app-build.patch
-  - base_path: source_subfolder
-    patch_file: patches/0002-cmake-fix-install.patch
-  - base_path: source_subfolder
-    patch_file: patches/0003-cmake-fix-flags.patch
-  - base_path: source_subfolder
-    patch_file: patches/0004-missing-utils-header.patch
+    - patch_file: patches/0001-cmake-disable-app-build.patch
+    - patch_file: patches/0002-cmake-fix-install.patch
+    - patch_file: patches/0003-cmake-fix-flags.patch
+    - patch_file: patches/0004-missing-utils-header.patch

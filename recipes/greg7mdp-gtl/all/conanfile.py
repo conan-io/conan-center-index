@@ -17,11 +17,12 @@ class Greg7mdpGtlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/greg7mdp/gtl"
     topics = ("bitset", "memoize", "containers", "bitvector", "unordered-set", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 20
 
     @property
@@ -42,14 +43,13 @@ class Greg7mdpGtlConan(ConanFile):
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.get_safe("compiler.version")) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -60,9 +60,7 @@ class Greg7mdpGtlConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         self.cpp_info.set_property("cmake_file_name", "gtl")
         self.cpp_info.set_property("cmake_target_name", "gtl::gtl")

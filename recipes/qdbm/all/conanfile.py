@@ -1,17 +1,22 @@
-from conans import ConanFile, CMake, tools
-import functools
+import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
+
+required_conan_version = ">=1.53.0"
 
 
 class QDBMConan(ConanFile):
     name = "qdbm"
     description = "QDBM is a library of routines for managing a database."
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://fallabs.com/qdbm/"
-    topics = ("qdbm", "database", "db")
     license = "LGPL-2.1-or-later"
-    settings = ("os", "arch", "compiler", "build_type")
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://dbmx.net/qdbm/"
+    topics = ("database", "db")
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -27,52 +32,50 @@ class QDBMConan(ConanFile):
         "with_zlib": True,
     }
 
-    generators = "cmake", "cmake_find_package"
-    exports_sources = "CMakeLists.txt"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            del self.options.with_pthread
+            self.options.rm_safe("with_pthread")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_iconv:
-            self.requires("libiconv/1.16")
+            self.requires("libiconv/1.17")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["CONAN_qdbm_VERSION"] = self.version
-        cmake.definitions["MYICONV"] = self.options.with_iconv
-        cmake.definitions["MYZLIB"] = self.options.with_zlib
-        cmake.definitions["MYPTHREAD"] = self.options\
-            .get_safe("with_pthread", False)
-        cmake.configure()
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CONAN_qdbm_VERSION"] = self.version
+        tc.variables["MYICONV"] = self.options.with_iconv
+        tc.variables["MYZLIB"] = self.options.with_zlib
+        tc.variables["MYPTHREAD"] = self.options.get_safe("with_pthread", False)
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=self.export_sources_folder)
         cmake.build()
 
     def package(self):
-        self.copy("COPYING", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
     def package_info(self):

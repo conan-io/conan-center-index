@@ -1,4 +1,7 @@
 sources:
+  "cci.20211201":
+    url: "https://github.com/lieff/minimp3/archive/afb604c06bc8beb145fecd42c0ceb5bda8795144.zip"
+    sha256: "94f847efbb83349ed38dd05888e54bdd8dc6d7bbc3616efd4a1ac899a16bb82e"
   "20200304":
     url: "https://github.com/lieff/minimp3/archive/55da78cbeea5fb6757f8df672567714e1e8ca3e9.zip"
     sha256: "108074684c080a34f0d08f23a709128ea518d48651c8381bce91b73b29185479"

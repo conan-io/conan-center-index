@@ -5,4 +5,3 @@ sources:
 patches:
   "1.15.0":
     - patch_file: "patches/cmakelist_build_lib.patch"
-      base_path: "source_subfolder"

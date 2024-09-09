@@ -29,10 +29,6 @@ class BisonConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -96,8 +92,9 @@ class BisonConan(ConanFile):
             tc.extra_cflags.append("-FS")
         env = tc.environment()
         if is_msvc(self):
-            compile_wrapper = unix_path(self, self._user_info_build["automake"].compile)
-            ar_wrapper = unix_path(self, self._user_info_build["automake"].ar_lib)
+            automake_conf = self.dependencies.build["automake"].conf_info
+            compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
+            ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")

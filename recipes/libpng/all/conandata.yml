@@ -1,4 +1,16 @@
 sources:
+  "1.6.43":
+    url: "https://sourceforge.net/projects/libpng/files/libpng16/1.6.43/libpng-1.6.43.tar.xz"
+    sha256: "6a5ca0652392a2d7c9db2ae5b40210843c0bbc081cbd410825ab00cc59f14a6c"
+  "1.6.42":
+    url: "https://sourceforge.net/projects/libpng/files/libpng16/1.6.42/libpng-1.6.42.tar.xz"
+    sha256: "c919dbc11f4c03b05aba3f8884d8eb7adfe3572ad228af972bb60057bdb48450"
+  "1.6.41":
+    url: "https://sourceforge.net/projects/libpng/files/libpng16/1.6.41/libpng-1.6.41.tar.xz"
+    sha256: "d6a49a7a4abca7e44f72542030e53319c081fea508daccf4ecc7c6d9958d190f"
+  "1.6.40":
+    url: "https://sourceforge.net/projects/libpng/files/libpng16/1.6.40/libpng-1.6.40.tar.xz"
+    sha256: "535b479b2467ff231a3ec6d92a525906fb8ef27978be4f66dbe05d3f3a01b3a1"
   "1.6.39":
     url: "https://sourceforge.net/projects/libpng/files/libpng16/1.6.39/libpng-1.6.39.tar.xz"
     sha256: "1f4696ce70b4ee5f85f1e1623dc1229b210029fa4b7aee573df3e2ba7b036937"
@@ -8,17 +20,9 @@ sources:
   "1.6.37":
     url: "https://sourceforge.net/projects/libpng/files/libpng16/1.6.37/libpng-1.6.37.tar.xz"
     sha256: "505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca"
+  "1.6.32":
+    url: "https://sourceforge.net/projects/libpng/files/libpng16/older-releases/1.6.32/libpng-1.6.32.tar.xz"
+    sha256: "c918c3113de74a692f0a1526ce881dc26067763eb3915c57ef3a0f7b6886f59b"
   "1.5.30":
     url: "https://sourceforge.net/projects/libpng/files/libpng15/1.5.30/libpng-1.5.30.tar.xz"
     sha256: "7d76275fad2ede4b7d87c5fd46e6f488d2a16b5a69dc968ffa840ab39ba756ed"
-patches:
-  "1.6.37":
-    - patch_file: "patches/0001-1.6.37-cmakefile-zlib.patch"
-      patch_description: "Update ZLib include and library paths for conan to provide\
-        \ lib. Remove Zlib dll definition."
-      patch_type: "conan"
-  "1.5.30":
-    - patch_file: "patches/0001-1.5.30-cmakefile-zlib.patch"
-      patch_description: "Update ZLib include and library paths for conan to provide\
-        \ lib. Remove Zlib dll definition."
-      patch_type: "conan"

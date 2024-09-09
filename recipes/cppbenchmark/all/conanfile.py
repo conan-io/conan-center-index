@@ -15,6 +15,7 @@ class CppBenchmark(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/chronoxor/CppBenchmark"
     topics = ("utils", "library", "benchmark")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -28,6 +29,7 @@ class CppBenchmark(ConanFile):
     @property
     def _min_cppstd(self):
         return 17
+
     @property
     def _compilers_minimum_version(self):
         return {
@@ -35,7 +37,7 @@ class CppBenchmark(ConanFile):
             "clang": 6,
             "gcc": 7,
             "Visual Studio": 16,
-            "msvc": 191,
+            "msvc": 192,
         }
 
     def export_sources(self):
@@ -53,11 +55,11 @@ class CppBenchmark(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("hdrhistogram-c/0.11.1")
+        self.requires("hdrhistogram-c/0.11.6")
         self.requires("cpp-optparse/cci.20171104")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -65,20 +67,8 @@ class CppBenchmark(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output=output)
-            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
-
     def build_requirements(self):
-        if not self._cmake_new_enough("3.20"):
-            self.tool_requires("cmake/3.25.1")
+        self.tool_requires("cmake/[>=3.20 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

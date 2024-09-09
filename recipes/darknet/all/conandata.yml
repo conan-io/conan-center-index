@@ -5,4 +5,3 @@ sources:
 patches:
   cci.20180914:
     - patch_file: "patches/include_conan_flags.patch"
-      base_path: "source_subfolder"

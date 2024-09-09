@@ -20,6 +20,7 @@ class UniAlgoConan(ConanFile):
     homepage = "https://github.com/uni-algo/uni-algo"
     topics = ("unicode", "utf-8", "utf-16", "header-only")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],

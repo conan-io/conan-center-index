@@ -1,30 +1,22 @@
 sources:
-  "4.8.8":
-    url: "https://github.com/Z3Prover/z3/archive/z3-4.8.8.tar.gz"
-    sha256: "6962facdcdea287c5eeb1583debe33ee23043144d0e5308344e6a8ee4503bcff"
+  "4.13.0":
+    url: "https://github.com/Z3Prover/z3/archive/z3-4.13.0.tar.gz"
+    sha256: "01bcc61c8362e37bb89fd2430f7e3385e86df7915019bd2ce45de9d9bd934502"
+  "4.12.4":
+    url: "https://github.com/Z3Prover/z3/archive/z3-4.12.4.tar.gz"
+    sha256: "25e9b18d04ee22f1d872dfe0daaf4c39034744525214e34fedd206e25140e96e"
+  "4.12.2":
+    url: "https://github.com/Z3Prover/z3/archive/refs/tags/z3-4.12.2.tar.gz"
+    sha256: "9f58f3710bd2094085951a75791550f547903d75fe7e2fcb373c5f03fc761b8f"
+  "4.12.1":
+    url: "https://github.com/Z3Prover/z3/archive/refs/tags/z3-4.12.1.tar.gz"
+    sha256: "a3735fabf00e1341adcc70394993c05fd3e2ae167a3e9bb46045e33084eb64a3"
+  "4.11.2":
+    url: "https://github.com/Z3Prover/z3/archive/refs/tags/z3-4.11.2.tar.gz"
+    sha256: "e3a82431b95412408a9c994466fad7252135c8ed3f719c986cd75c8c5f234c7e"
   "4.10.2":
-    url: "https://github.com/Z3Prover/z3/archive/z3-4.10.2.tar.gz"
+    url: "https://github.com/Z3Prover/z3/archive/refs/tags/z3-4.10.2.tar.gz"
     sha256: "889fd035b833775c8cd2eb4723eb011bf916a3e9bf08ce66b31c548acee7a321"
-
-patches:
-  "4.8.8":
-    - patch_file: "patches/0001-cmake-use-conan-mpir-4.8.8.patch"
-      patch_description: "Support building with MPIR"
-      patch_type: "conan"
-      base_path: "source_subfolder"
-
-    - patch_file: "patches/0002-python-interp-3-4.8.8.patch"
-      patch_description: "Fix finding the Python interpreter"
-      patch_type: "backport"
-      base_path: "source_subfolder"
-
-  "4.10.2":
-    - patch_file: "patches/0001-cmake-use-conan-mpir-4.10.2.patch"
-      patch_description: "Support building with MPIR"
-      patch_type: "conan"
-      base_path: "source_subfolder"
-
-    - patch_file: "patches/0003-cmake-try-compile-flags-4.10.2.patch"
-      patch_description: "Fix flag transmission to CMake try_compile"
-      patch_type: "portability"
-      base_path: "source_subfolder"
+  "4.9.1":
+    url: "https://github.com/Z3Prover/z3/archive/refs/tags/z3-4.9.1.tar.gz"
+    sha256: "ca08ba933481242507b2f8b303c3ebdf5d16b0005d397fb45018321dc639a0d7"

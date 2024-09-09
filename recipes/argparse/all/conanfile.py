@@ -11,12 +11,15 @@ required_conan_version = ">=1.50.0"
 
 class ArgparseConan(ConanFile):
     name = "argparse"
+    description = "Argument Parser for Modern C++"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/p-ranav/argparse"
-    topics = ("argparse", "argument", "parsing")
-    license = "MIT"
-    description = "Argument Parser for Modern C++"
+    topics = ("argument", "parsing", "header-only")
+
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
     def _min_cppstd(self):
@@ -39,6 +42,9 @@ class ArgparseConan(ConanFile):
         for p in self.conan_data.get("patches", {}).get(self.version, []):
             copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def package_id(self):
         self.info.clear()
 
@@ -54,12 +60,8 @@ class ArgparseConan(ConanFile):
         if Version(self.version) > "2.1" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libstdc++":
             raise ConanInvalidConfiguration("This recipe does not permit >2.1 with clang and stdlibc++. There may be an infrastructure issue in CCI.")
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
@@ -73,12 +75,11 @@ class ArgparseConan(ConanFile):
         copy(self, "*.hpp", src=os.path.join(self.source_folder, "include"), dst=include_dst)
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
         self.cpp_info.set_property("cmake_file_name", "argparse")
         self.cpp_info.set_property("cmake_target_name", "argparse::argparse")
         self.cpp_info.set_property("pkg_config_name", "argparse")
         if Version(self.version) <= "2.1":
             self.cpp_info.includedirs.append(os.path.join("include", "argparse"))
-        self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
-        self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []

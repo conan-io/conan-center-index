@@ -62,15 +62,15 @@ class SociConan(ConanFile):
 
     def requirements(self):
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.41.1")
+            self.requires("sqlite3/3.44.2")
         if self.options.with_odbc and self.settings.os != "Windows":
             self.requires("odbc/2.3.11")
         if self.options.with_mysql:
-            self.requires("libmysqlclient/8.0.31")
+            self.requires("libmysqlclient/8.1.0")
         if self.options.with_postgresql:
-            self.requires("libpq/14.7")
+            self.requires("libpq/15.4")
         if self.options.with_boost:
-            self.requires("boost/1.81.0")
+            self.requires("boost/1.83.0")
 
     @property
     def _minimum_compilers_version(self):
@@ -110,6 +110,8 @@ class SociConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
+        # MacOS @rpath
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.variables["SOCI_SHARED"] = self.options.shared
         tc.variables["SOCI_STATIC"] = not self.options.shared
         tc.variables["SOCI_TESTS"] = False
@@ -126,6 +128,9 @@ class SociConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("mysql", "cmake_file_name", "MYSQL")
+        deps.set_property("libpq", "cmake_file_name", "POSTGRESQL")
+        deps.set_property("sqlite3", "cmake_file_name", "SQLITE3")
         deps.generate()
 
     def build(self):

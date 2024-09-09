@@ -1,0 +1,216 @@
+--- a/octomap/include/octomap/AbstractOcTree.h
++++ b/octomap/include/octomap/AbstractOcTree.h
+@@ -51,7 +51,7 @@ namespace octomap {
+     friend class StaticMapInit;
+   public:
+     AbstractOcTree();
+-    virtual ~AbstractOcTree() {};
++    virtual ~AbstractOcTree() {}
+ 
+     /// virtual constructor: creates a new object of same type
+     virtual AbstractOcTree* create() const = 0;
+--- a/octomap/include/octomap/AbstractOccupancyOcTree.h
++++ b/octomap/include/octomap/AbstractOccupancyOcTree.h
+@@ -52,7 +52,7 @@ namespace octomap {
+   class AbstractOccupancyOcTree : public AbstractOcTree {
+   public:
+     AbstractOccupancyOcTree();
+-    virtual ~AbstractOccupancyOcTree() {};
++    virtual ~AbstractOccupancyOcTree() {}
+ 
+     //-- IO
+ 
+--- a/octomap/include/octomap/ColorOcTree.h
++++ b/octomap/include/octomap/ColorOcTree.h
+@@ -192,7 +192,7 @@ namespace octomap {
+          * StaticMemberInitializer, causing this tree failing to register.
+          * Needs to be called from the constructor of this octree.
+          */
+-         void ensureLinking() {};
++         void ensureLinking() {}
+     };
+     /// static member to ensure static initialization (only once)
+     static StaticMemberInitializer colorOcTreeMemberInit;
+--- a/octomap/include/octomap/CountingOcTree.h
++++ b/octomap/include/octomap/CountingOcTree.h
+@@ -110,7 +110,7 @@ namespace octomap {
+          * StaticMemberInitializer, causing this tree failing to register.
+          * Needs to be called from the constructor of this octree.
+          */
+-         void ensureLinking() {};
++         void ensureLinking() {}
+     };
+     /// static member to ensure static initialization (only once)
+     static StaticMemberInitializer countingOcTreeMemberInit;
+--- a/octomap/include/octomap/OcTree.h
++++ b/octomap/include/octomap/OcTree.h
+@@ -59,7 +59,7 @@ namespace octomap {
+      */
+     OcTree(std::string _filename);
+ 
+-    virtual ~OcTree(){};
++    virtual ~OcTree(){}
+ 
+     /// virtual constructor: creates a new object of same type
+     /// (Covariant return type requires an up-to-date compiler)
+@@ -89,7 +89,7 @@ namespace octomap {
+ 	     * StaticMemberInitializer, causing this tree failing to register.
+ 	     * Needs to be called from the constructor of this octree.
+ 	     */
+-	    void ensureLinking() {};
++	    void ensureLinking() {}
+     };
+ 
+     /// to ensure static initialization (only once)
+--- a/octomap/include/octomap/OcTreeBase.h
++++ b/octomap/include/octomap/OcTreeBase.h
+@@ -43,7 +43,7 @@ namespace octomap {
+   template <class NODE>
+   class OcTreeBase : public OcTreeBaseImpl<NODE,AbstractOcTree> {
+   public:
+-    OcTreeBase<NODE>(double res) : OcTreeBaseImpl<NODE,AbstractOcTree>(res) {};
++    OcTreeBase(double res) : OcTreeBaseImpl<NODE,AbstractOcTree>(res) {}
+ 
+     /// virtual constructor: creates a new object of same type
+     /// (Covariant return type requires an up-to-date compiler)
+--- a/octomap/include/octomap/OcTreeBaseImpl.h
++++ b/octomap/include/octomap/OcTreeBaseImpl.h
+@@ -244,7 +244,7 @@ namespace octomap {
+     virtual size_t memoryUsage() const;
+ 
+     /// \return Memory usage of a single octree node
+-    virtual inline size_t memoryUsageNode() const {return sizeof(NODE); };
++    virtual inline size_t memoryUsageNode() const {return sizeof(NODE); }
+ 
+     /// \return Memory usage of a full grid of the same size as the OcTree in bytes (for comparison)
+     /// \note this can be larger than the adressable memory - size_t may not be enough to hold it!
+@@ -324,12 +324,12 @@ namespace octomap {
+     typedef leaf_iterator iterator;
+ 
+     /// @return beginning of the tree as leaf iterator
+-    iterator begin(unsigned char maxDepth=0) const {return iterator(this, maxDepth);};
++    iterator begin(unsigned char maxDepth=0) const {return iterator(this, maxDepth);}
+     /// @return end of the tree as leaf iterator
+-    const iterator end() const {return leaf_iterator_end;}; // TODO: RVE?
++    const iterator end() const {return leaf_iterator_end;} // TODO: RVE?
+ 
+     /// @return beginning of the tree as leaf iterator
+-    leaf_iterator begin_leafs(unsigned char maxDepth=0) const {return leaf_iterator(this, maxDepth);};
++    leaf_iterator begin_leafs(unsigned char maxDepth=0) const {return leaf_iterator(this, maxDepth);}
+     /// @return end of the tree as leaf iterator
+     const leaf_iterator end_leafs() const {return leaf_iterator_end;}
+ 
+--- a/octomap/include/octomap/OcTreeDataNode.h
++++ b/octomap/include/octomap/OcTreeDataNode.h
+@@ -100,9 +100,9 @@ namespace octomap {
+     OCTOMAP_DEPRECATED(bool hasChildren() const);
+ 
+     /// @return value stored in the node
+-    T getValue() const{return value;};
++    T getValue() const{return value;}
+     /// sets value to be stored in the node
+-    void setValue(T v) {value = v;};
++    void setValue(T v) {value = v;}
+ 
+     // file IO:
+ 
+--- a/octomap/include/octomap/OcTreeIterator.hxx
++++ b/octomap/include/octomap/OcTreeIterator.hxx
+@@ -95,7 +95,7 @@
+         maxDepth = other.maxDepth;
+         stack = other.stack;
+         return *this;
+-      };
++      }
+ 
+       /// Ptr operator will return the current node in the octree which the
+       /// iterator is referring to
+@@ -213,7 +213,7 @@
+        * @param tree OcTreeBaseImpl on which the iterator is used on
+        * @param depth Maximum depth to traverse the tree. 0 (default): unlimited
+        */
+-      tree_iterator(OcTreeBaseImpl<NodeType,INTERFACE> const* ptree, uint8_t depth=0) : iterator_base(ptree, depth) {};
++      tree_iterator(OcTreeBaseImpl<NodeType,INTERFACE> const* ptree, uint8_t depth=0) : iterator_base(ptree, depth) {}
+ 
+       /// postfix increment operator of iterator (it++)
+       tree_iterator operator++(int){
+@@ -280,7 +280,7 @@
+             }
+           }
+ 
+-          leaf_iterator(const leaf_iterator& other) : iterator_base(other) {};
++          leaf_iterator(const leaf_iterator& other) : iterator_base(other) {}
+ 
+           /// postfix increment operator of iterator (it++)
+           leaf_iterator operator++(int){
+@@ -334,7 +334,7 @@
+      */
+     class leaf_bbx_iterator : public iterator_base {
+     public:
+-      leaf_bbx_iterator() : iterator_base() {};
++      leaf_bbx_iterator() : iterator_base() {}
+       /**
+       * Constructor of the iterator. The bounding box corners min and max are
+       * converted into an OcTreeKey first.
+@@ -425,7 +425,7 @@
+ 
+ 
+         return *this;
+-      };
++      }
+ 
+     protected:
+ 
+--- a/octomap/include/octomap/OcTreeStamped.h
++++ b/octomap/include/octomap/OcTreeStamped.h
+@@ -116,7 +116,7 @@ namespace octomap {
+       * StaticMemberInitializer, causing this tree failing to register.
+       * Needs to be called from the constructor of this octree.
+       */
+-      void ensureLinking() {};
++      void ensureLinking() {}
+     };
+     /// to ensure static initialization (only once)
+     static StaticMemberInitializer ocTreeStampedMemberInit;
+--- a/octomap/include/octomap/ScanGraph.h
++++ b/octomap/include/octomap/ScanGraph.h
+@@ -115,7 +115,7 @@ namespace octomap {
+ 
+    public:
+ 
+-    ScanGraph() {};
++    ScanGraph() {}
+     ~ScanGraph();
+ 
+     /// Clears all nodes and edges, and will delete the corresponding objects
+--- a/octomap/src/Pointcloud.cpp
++++ b/octomap/src/Pointcloud.cpp
+@@ -38,7 +38,7 @@
+ 
+ #if defined(_MSC_VER) || defined(_LIBCPP_VERSION)
+   #include <algorithm>
+-  #if __cplusplus > 199711L
++  #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201103L) || __cplusplus >= 201103L)
+     #include <random>
+   #endif
+ #else
+@@ -213,7 +213,7 @@ namespace octomap {
+   #if defined(_MSC_VER) || defined(_LIBCPP_VERSION)
+     samples.reserve(this->size());
+     samples.insert(samples.end(), this->begin(), this->end());
+-    #if __cplusplus > 199711L
++    #if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201103L) || __cplusplus >= 201103L)
+       std::random_device r;
+       std::mt19937 urbg(r());
+       std::shuffle(samples.begin(), samples.end(), urbg);
+--- a/octomap/src/compare_octrees.cpp
++++ b/octomap/src/compare_octrees.cpp
+@@ -132,7 +132,7 @@ int main(int argc, char** argv) {
+       else
+         kld +=log(p1/p2)*p1 + log((1-p1)/(1-p2))*(1-p1);
+ 
+-#if __cplusplus >= 201103L
++#if ((defined(_MSVC_LANG) && _MSVC_LANG >= 201103L) || __cplusplus >= 201103L)
+       if (std::isnan(kld)){
+ #else
+       if (isnan(kld)){

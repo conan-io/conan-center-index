@@ -1,13 +1,31 @@
 sources:
-  "0.1.0":
-    url: "https://gitlab.com/dvd0101/svgwrite/-/archive/v0.1.0/svgwrite-v0.1.0.tar.gz"
-    sha256: "beca35ebd5f95fd8a09f6c5b612990c633fd1101e4dd4f72769d819e91ef27bb"
   "0.2.0":
     url: "https://gitlab.com/dvd0101/svgwrite/-/archive/v0.2.0/svgwrite-v0.2.0.tar.gz"
     sha256: "aec13438ac991b13c840488a8f7e878255bdbdf24e757aa3f75de4482eae8812"
-patches:
   "0.1.0":
-    - patch_file: "patches/0001-remove-gcc-flags.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-span-lite-ns.patch"
-      base_path: "source_subfolder"
+    url: "https://gitlab.com/dvd0101/svgwrite/-/archive/v0.1.0/svgwrite-v0.1.0.tar.gz"
+    sha256: "beca35ebd5f95fd8a09f6c5b612990c633fd1101e4dd4f72769d819e91ef27bb"
+patches:
+  "0.2.0":
+    - patch_file: "patches/0.2.0-0001-fix-cmake.patch"
+      patch_description: "remove old conan features"
+      patch_type: "conan"
+    - patch_file: "patches/0.2.0-0002-include-cstdint.patch"
+      patch_description: "include cstdint for gcc 13 or later"
+      patch_type: "portability"
+    - patch_file: "patches/0.1.0-0004-add-fmt-runtime.patch"
+      patch_description: "add fmt::runtime to non-constexpr string"
+      patch_type: "portability"
+  "0.1.0":
+    - patch_file: "patches/0.1.0-0001-fix-cmake.patch"
+      patch_description: "remove old conan features"
+      patch_type: "conan"
+    - patch_file: "patches/0.1.0-0002-remove-gcc-flags.patch"
+      patch_description: "disable gcc flags"
+      patch_type: "portability"
+    - patch_file: "patches/0.1.0-0003-span-lite-ns.patch"
+      patch_description: "fix target name"
+      patch_type: "conan"
+    - patch_file: "patches/0.1.0-0004-add-fmt-runtime.patch"
+      patch_description: "add fmt::runtime to non-constexpr string"
+      patch_type: "portability"

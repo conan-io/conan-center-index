@@ -1,68 +1,89 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment, CMake
+from conan import ConanFile
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.layout import basic_layout
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 import os
-import glob
 
+required_conan_version = ">=1.53.0"
 
 class RagelConan(ConanFile):
     name = "ragel"
     description = "Ragel compiles executable finite state machines from regular languages"
-    homepage = "http://www.colm.net/open-source/ragel"
-    url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-2.0-or-later"
-    topics = ("ragel", "FSM", "regex", "fsm-compiler")
-    exports_sources = ["CMakeLists.txt", "config.h", "patches/*"]
-    generators = "cmake"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "http://www.colm.net/open-source/ragel"
+    topics = ("FSM", "regex", "fsm-compiler")
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-    _cmake = None
-    _autotools = None
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
+        copy(self, "config.h", src=self.recipe_folder, dst=self.export_sources_folder)
+        export_conandata_patches(self)
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder,
-                  strip_root=True)
-
-    def _configure_autotools(self):
-        if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self)
-            self._autotools.configure(configure_dir=self._source_subfolder)
-        return self._autotools
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure()
-        return self._cmake
-
-    def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
+    def layout(self):
         if self.settings.os == "Windows":
-            cmake = self._configure_cmake()
-            cmake.build()
+            cmake_layout(self, src_folder="src")
         else:
-            autotools = self._configure_autotools()
-            autotools.make()
-
-    def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        self.copy(pattern="CREDITS", dst="licenses", src=self._source_subfolder)
-        if self.settings.os == "Windows":
-            cmake = self._configure_cmake()
-            cmake.install()
-        else:
-            autotools = self._configure_autotools()
-            autotools.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+            basic_layout(self, src_folder="src")
 
     def package_id(self):
         del self.info.settings.compiler
 
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        if self.settings.os == "Windows":
+            tc = CMakeToolchain(self)
+            tc.variables["RAGEL_SOURCE_DIR"] = self.source_folder.replace("\\", "/")
+            tc.generate()
+
+            dpes = CMakeDeps(self)
+            dpes.generate()
+        else:
+            env = VirtualBuildEnv(self)
+            env.generate()
+            if not cross_building(self):
+                env = VirtualRunEnv(self)
+                env.generate(scope="build")
+            tc = AutotoolsToolchain(self)
+            tc.generate()
+
+            deps = AutotoolsDeps(self)
+            deps.generate()
+
+    def build(self):
+        apply_conandata_patches(self)
+
+        if self.settings.os == "Windows":
+            cmake = CMake(self)
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+            cmake.build()
+        else:
+            autotools = Autotools(self)
+            autotools.configure()
+            autotools.make()
+
+    def package(self):
+        copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="CREDITS", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        if self.settings.os == "Windows":
+            cmake = CMake(self)
+            cmake.install()
+        else:
+            autotools = Autotools(self)
+            autotools.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
     def package_info(self):
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
+
         self.env_info.RAGEL_ROOT = self.package_folder
         bindir = os.path.join(self.package_folder, "bin")
         self.output.info("Appending PATH environment variable: {}".format(bindir))

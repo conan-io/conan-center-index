@@ -15,6 +15,7 @@ class CsLibguardedConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/copperspice/libguarded"
     topics = ("multithreading", "templates", "cpp14", "mutexes", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -66,7 +67,7 @@ class CsLibguardedConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler ({compiler}-{version}) does not support")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)

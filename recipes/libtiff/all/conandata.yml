@@ -1,23 +1,32 @@
 sources:
+  "4.6.0":
+    url: "https://download.osgeo.org/libtiff/tiff-4.6.0.tar.gz"
+    sha256: "88b3979e6d5c7e32b50d7ec72fb15af724f6ab2cbf7e10880c360a77e4b5d99a"
+  "4.5.1":
+    url: "https://download.osgeo.org/libtiff/tiff-4.5.1.tar.gz"
+    sha256: "d7f38b6788e4a8f5da7940c5ac9424f494d8a79eba53d555f4a507167dca5e2b"
+  "4.5.0":
+    url: "https://download.osgeo.org/libtiff/tiff-4.5.0.tar.gz"
+    sha256: "c7a1d9296649233979fa3eacffef3fa024d73d05d589cb622727b5b08c423464"
   "4.4.0":
-    url: "http://download.osgeo.org/libtiff/tiff-4.4.0.tar.gz"
+    url: "https://download.osgeo.org/libtiff/tiff-4.4.0.tar.gz"
     sha256: "917223b37538959aca3b790d2d73aa6e626b688e02dcda272aec24c2f498abed"
   "4.3.0":
-    url: "http://download.osgeo.org/libtiff/tiff-4.3.0.tar.gz"
+    url: "https://download.osgeo.org/libtiff/tiff-4.3.0.tar.gz"
     sha256: "0e46e5acb087ce7d1ac53cf4f56a09b221537fc86dfc5daaad1c2e89e1b37ac8"
-  "4.2.0":
-    url: "http://download.osgeo.org/libtiff/tiff-4.2.0.tar.gz"
-    sha256: "eb0484e568ead8fa23b513e9b0041df7e327f4ee2d22db5a533929dfc19633cb"
-  "4.1.0":
-    url: "http://download.osgeo.org/libtiff/tiff-4.1.0.tar.gz"
-    sha256: "5d29f32517dadb6dbcd1255ea5bbc93a2b54b94fbf83653b4d65c7d6775b8634"
-  "4.0.9":
-    url: "http://download.osgeo.org/libtiff/tiff-4.0.9.tar.gz"
-    sha256: "6e7bdeec2c310734e734d19aae3a71ebe37a4d842e0e23dbb1b8921c0026cfcd"
-  "4.0.8":
-    url: "http://download.osgeo.org/libtiff/tiff-4.0.8.tar.gz"
-    sha256: "59d7a5a8ccd92059913f246877db95a2918e6c04fb9d43fd74e5c3390dac2910"
 patches:
+  "4.6.0":
+    - patch_file: "patches/4.5.1-0001-cmake-dependencies.patch"
+      patch_description: "CMake: robust handling of dependencies"
+      patch_type: "conan"
+  "4.5.1":
+    - patch_file: "patches/4.5.1-0001-cmake-dependencies.patch"
+      patch_description: "CMake: robust handling of dependencies"
+      patch_type: "conan"
+  "4.5.0":
+    - patch_file: "patches/4.5.0-0001-cmake-dependencies.patch"
+      patch_description: "CMake: robust handling of dependencies"
+      patch_type: "conan"
   "4.4.0":
     - patch_file: "patches/4.4.0-0001-cmake-dependencies.patch"
       patch_description: "CMake: robust handling of dependencies"
@@ -26,27 +35,3 @@ patches:
     - patch_file: "patches/4.3.0-0001-cmake-dependencies.patch"
       patch_description: "CMake: robust handling of dependencies"
       patch_type: "conan"
-  "4.2.0":
-    - patch_file: "patches/4.2.0-0001-cmake-dependencies.patch"
-      patch_description: "CMake: robust handling of dependencies"
-      patch_type: "conan"
-  "4.1.0":
-    - patch_file: "patches/4.1.0-0001-cmake-dependencies.patch"
-      patch_description: "CMake: robust handling of dependencies"
-      patch_type: "conan"
-    - patch_file: "patches/4.1.0-0002-no-libm-mingw.patch"
-      patch_source: "https://gitlab.com/libtiff/libtiff/-/merge_requests/73"
-  "4.0.9":
-    - patch_file: "patches/4.0.8-0001-cmake-dependencies.patch"
-      patch_description: "CMake: robust handling of dependencies"
-      patch_type: "conan"
-    - patch_file: "patches/4.0.8-0002-no-libm-mingw.patch"
-      patch_source: "https://gitlab.com/libtiff/libtiff/-/merge_requests/73"
-  "4.0.8":
-    - patch_file: "patches/4.0.8-0001-cmake-dependencies.patch"
-      patch_description: "CMake: robust handling of dependencies"
-      patch_type: "conan"
-    - patch_file: "patches/4.0.8-0002-no-libm-mingw.patch"
-      patch_source: "https://gitlab.com/libtiff/libtiff/-/merge_requests/73"
-    - patch_file: "patches/4.0.8-0003-file-offsets-bits-mingw.patch"
-      patch_source: "https://gitlab.com/libtiff/libtiff/-/commit/f2a3b020402943f90957552a884788e70ece6cd7"

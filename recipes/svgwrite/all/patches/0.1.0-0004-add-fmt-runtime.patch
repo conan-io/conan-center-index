@@ -1,0 +1,13 @@
+diff --git a/src/writer.cpp b/src/writer.cpp
+index 81da66e..cd2419b 100644
+--- a/src/writer.cpp
++++ b/src/writer.cpp
+@@ -56,7 +56,7 @@ namespace svgw::v1 {
+ 		template <typename... Args>
+ 		void print(std::ostream& os, std::vector<char>& buffer, std::string_view format_str, Args&&... args) {
+ 			buffer.clear();
+-			fmt::format_to(std::back_inserter(buffer), format_str, args...);
++			fmt::format_to(std::back_inserter(buffer), fmt::runtime(format_str), args...);
+ 			buffer.push_back(0);
+ 			os << buffer.data();
+ 		}

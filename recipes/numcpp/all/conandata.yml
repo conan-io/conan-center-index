@@ -1,4 +1,16 @@
 sources:
+  "2.12.1":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.12.1.tar.gz"
+    sha256: "f462ecd27126e6057b31fa38f1f72cef2c4223c9d848515412970714a5bb6d16"
+  "2.12.0":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.12.0.tar.gz"
+    sha256: "4c7266d405c8058f87467732129362b5a5c810d36df91e8655defa4d93fc141b"
+  "2.11.0":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.11.0.tar.gz"
+    sha256: "ea675775c3535589f268224efa31ae6003a68e95a465e92c99496a0c9366bdc2"
+  "2.10.1":
+    url: "https://github.com/dpilger26/NumCpp/archive/Version_2.10.1.tar.gz"
+    sha256: "847382a780bea2a9b804c1835dcc5f9addabd0d1e3eb9c8339cde9422a5008d6"
   "2.9.0":
     url: "https://github.com/dpilger26/NumCpp/archive/Version_2.9.0.tar.gz"
     sha256: "1c15e23beb4f3d4933d7a6e8d5eb0259e825685973c8f0219485d3f606e5378a"

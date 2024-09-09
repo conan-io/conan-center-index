@@ -5,4 +5,10 @@ sources:
 patches:
   "0.10.0":
     - patch_file: "patches/0001-support-macosx.patch"
-      base_path: "source_subfolder"
+      patch_description: "Enables building on MacOS"
+      patch_type: "portability"
+      patch_source: "https://github.com/NixOS/nixpkgs/blob/1016bfcff1df163aff75d908df1e00f897a29b9b/pkgs/development/libraries/libbsd/darwin.patch"
+    - patch_file: "patches/0002-fix-getentropy-conditional.patch"
+      patch_description: "Fix check if getentropy needs building"
+      patch_type: "backport"
+      patch_source: "https://gitlab.freedesktop.org/libbsd/libbsd/-/commit/5cfa39e5cde6b64ccf3d1335cee4d4744d4ce242.patch"

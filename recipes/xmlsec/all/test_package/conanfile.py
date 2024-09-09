@@ -23,6 +23,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            xml_file = os.path.join(self.source_folder, "sign1-tmpl.xml")
-            pem_file = os.path.join(self.source_folder, "rsakey.pem")
-            self.run(f"{bin_path} {xml_file} {pem_file}", env="conanrun")
+            self.run(bin_path, env="conanrun")

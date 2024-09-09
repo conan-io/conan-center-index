@@ -1,4 +1,10 @@
 sources:
+  "1.21.5":
+    url: "https://github.com/Blosc/c-blosc/archive/v1.21.5.tar.gz"
+    sha256: "32e61961bbf81ffea6ff30e9d70fca36c86178afd3e3cfa13376adec8c687509"
+  "1.21.4":
+    url: "https://github.com/Blosc/c-blosc/archive/v1.21.4.tar.gz"
+    sha256: "e72bd03827b8564bbb3dc3ea0d0e689b4863871ce3861d946f2efd7a186ecf3e"
   "1.21.3":
     url: "https://github.com/Blosc/c-blosc/archive/v1.21.3.tar.gz"
     sha256: "941016c4564bca662080bb01aea74f06630bd665e598c6f6967fd91b2e2e0bb6"
@@ -24,6 +30,14 @@ sources:
     url: "https://github.com/Blosc/c-blosc/archive/v1.17.1.tar.gz"
     sha256: "19a6948b579c27e8ac440b4f077f99fc90e7292b1d9cb896bec0fd781d68fba2"
 patches:
+  "1.21.5":
+    - patch_file: "patches/cmake-dependencies-1.21.4+.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "1.21.4":
+    - patch_file: "patches/cmake-dependencies-1.21.4+.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
   "1.21.3":
     - patch_file: "patches/cmake-dependencies-1.21.2+.patch"
       patch_description: "use cci package"

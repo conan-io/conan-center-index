@@ -1,0 +1,61 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e8c2ce1..be74c3d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -4,13 +4,6 @@ cmake_minimum_required(VERSION 3.14)
+ 
+ set(logr_root_prj logr_root)
+ 
+-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake-scripts/cpp_standard.cmake")
+-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake-scripts/libcxx.cmake")
+-include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake-scripts/static_runtime.cmake" )
+-
+-message(STATUS "ENABLE C++17")
+-cxx_17()
+-
+ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+ 
+ # ------------------------------------------------------------------------------
+@@ -30,8 +23,6 @@ message( STATUS "Use package manager: ${LOGR_PKG_PROVIDER}")
+ 
+ 
+ if( "${logr_pkg_provider_lowercase}" STREQUAL "conan" )
+-    set(CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR} ${CMAKE_MODULE_PATH})
+-    set(CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR} ${CMAKE_PREFIX_PATH})
+ elseif ( "${logr_pkg_provider_lowercase}" STREQUAL "vcpkg" )
+     if( NOT CMAKE_TOOLCHAIN_FILE )
+         message( FATAL_ERROR "CMAKE_TOOLCHAIN_FILE must be defined when using vcpkg")
+@@ -65,18 +56,6 @@ option(LOGR_WITH_LOG4CPLUS_BACKEND "Provide logr with log4cplus backend" ON)
+ # ------------------------------------------------------------------------------
+ 
+ project(${logr_root_prj} CXX)
+-handle_explicit_libcxx_if_necessary()
+-handle_explicit_static_runtime_if_necessary()
+-
+-# ------------------------------------------------------------------------------
+-# Various helpers:
+-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake-scripts/common_options.cmake")
+-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake-scripts/compiler_flags.cmake")
+-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake-scripts/find_program_required.cmake")
+-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake-scripts/append_src_files.cmake")
+-include("${CMAKE_CURRENT_SOURCE_DIR}/cmake-scripts/link_threads_if_necessary.cmake")
+-include( "${CMAKE_CURRENT_SOURCE_DIR}/cmake-scripts/static_analysis.cmake" )
+-# ------------------------------------------------------------------------------
+ 
+ # ------------------------------------------------------------------------------
+ # A piece to define hint for pretty source files paths.
+@@ -98,6 +77,14 @@ else ()
+ endif ()
+ # ------------------------------------------------------------------------------
+ 
++
++message(STATUS "*** dump start cmake variables ***")
++get_cmake_property(_variableNames VARIABLES)
++foreach(_variableName ${_variableNames})
++    message(STATUS "${_variableName}=${${_variableName}}")
++endforeach()
++message(STATUS "*** dump end ***")
++
+ find_package(fmt        REQUIRED)
+ 
+ if (LOGR_WITH_SPDLOG_BACKEND)

@@ -1,0 +1,19 @@
+sources:
+  "2.15":
+    url: "https://github.com/gperftools/gperftools/releases/download/gperftools-2.15/gperftools-2.15.tar.gz"
+    sha256: "c69fef855628c81ef56f12e3c58f2b7ce1f326c0a1fe783e5cae0b88cbbe9a80"
+  "2.14.0":
+    url: "https://github.com/gperftools/gperftools/releases/download/gperftools-2.14/gperftools-2.14.tar.gz"
+    sha256: "6b561baf304b53d0a25311bd2e29bc993bed76b7c562380949e7cb5e3846b299"
+  "2.13.0":
+    url: "https://github.com/gperftools/gperftools/releases/download/gperftools-2.13/gperftools-2.13.tar.gz"
+    sha256: "4882c5ece69f8691e51ffd6486df7d79dbf43b0c909d84d3c0883e30d27323e7"
+  "2.12.0":
+    url: "https://github.com/gperftools/gperftools/releases/download/gperftools-2.12/gperftools-2.12.tar.gz"
+    sha256: "fb611b56871a3d9c92ab0cc41f9c807e8dfa81a54a4a9de7f30e838756b5c7c6"
+  "2.11.0":
+    url: "https://github.com/gperftools/gperftools/releases/download/gperftools-2.11/gperftools-2.11.tar.gz"
+    sha256: "8ffda10e7c500fea23df182d7adddbf378a203c681515ad913c28a64b87e24dc"
+  "2.10.0":
+    url: "https://github.com/gperftools/gperftools/releases/download/gperftools-2.10/gperftools-2.10.tar.gz"
+    sha256: "83e3bfdd28b8bcf53222c3798d4d395d52dadbbae59e8730c4a6d31a9c3732d8"

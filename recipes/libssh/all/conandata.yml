@@ -1,0 +1,16 @@
+sources:
+  "0.10.6":
+    url: "https://www.libssh.org/files/0.10/libssh-0.10.6.tar.xz"
+    sha256: "1861d498f5b6f1741b6abc73e608478491edcf9c9d4b6630eef6e74596de9dc1"
+patches:
+  "0.10.6":
+    - patch_file: patches/0.10.6-0001-fix-cmake.patch
+      patch_description: "cmake: fix OpenSSL compatibility checks, fix ZLIB targets"
+      patch_type: "conan"
+    - patch_file: patches/0.10.6-0002-fix-cmake.patch
+      patch_description: "cmake: fix MbedTLS and GCrypt compatibility"
+      patch_type: "conan"
+    - patch_file: patches/0.10.6-0003-fix-mbedtls-private-struct.patch
+      patch_description: "Fix mbedTLS issues caused by v3 API changes"
+      patch_type: "bugfix"
+      patch_source: "https://gitlab.com/libssh/libssh-mirror/-/merge_requests/480"

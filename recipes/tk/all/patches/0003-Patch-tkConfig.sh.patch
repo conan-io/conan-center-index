@@ -1,0 +1,89 @@
+Subject: [PATCH] Patch tkConfig.sh to remove TK_BUILD_ directories and
+ TK_SRC_DIR
+
+---
+ unix/tkConfig.sh.in | 8 ++++----
+ win/tkConfig.sh.in  | 8 ++++----
+ 2 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/unix/tkConfig.sh.in b/unix/tkConfig.sh.in
+index bb85ad0a2..e564ec1f9 100644
+--- a/unix/tkConfig.sh.in
++++ b/unix/tkConfig.sh.in
+@@ -53,7 +53,7 @@ TK_LIB_FLAG='@TK_LIB_FLAG@'
+ 
+ # String to pass to linker to pick up the Tk library from its
+ # build directory.
+-TK_BUILD_LIB_SPEC='@TK_BUILD_LIB_SPEC@'
++#TK_BUILD_LIB_SPEC='@TK_BUILD_LIB_SPEC@'
+ 
+ # String to pass to linker to pick up the Tk library from its
+ # installed directory.
+@@ -69,7 +69,7 @@ TK_INCLUDE_SPEC='@TK_INCLUDE_SPEC@'
+ # different place than the directory containing the source files, this
+ # points to the location of the sources, not the location where Tk was
+ # compiled.
+-TK_SRC_DIR='@TK_SRC_DIR@'
++#TK_SRC_DIR='@TK_SRC_DIR@'
+ 
+ # Needed if you want to make a 'fat' shared library library
+ # containing tk objects or link a different wish.
+@@ -84,14 +84,14 @@ TK_STUB_LIB_FLAG='@TK_STUB_LIB_FLAG@'
+ 
+ # String to pass to linker to pick up the Tk stub library from its
+ # build directory.
+-TK_BUILD_STUB_LIB_SPEC='@TK_BUILD_STUB_LIB_SPEC@'
++#TK_BUILD_STUB_LIB_SPEC='@TK_BUILD_STUB_LIB_SPEC@'
+ 
+ # String to pass to linker to pick up the Tk stub library from its
+ # installed directory.
+ TK_STUB_LIB_SPEC='@TK_STUB_LIB_SPEC@'
+ 
+ # Path to the Tk stub library in the build directory.
+-TK_BUILD_STUB_LIB_PATH='@TK_BUILD_STUB_LIB_PATH@'
++#TK_BUILD_STUB_LIB_PATH='@TK_BUILD_STUB_LIB_PATH@'
+ 
+ # Path to the Tk stub library in the install directory.
+ TK_STUB_LIB_PATH='@TK_STUB_LIB_PATH@'
+diff --git a/win/tkConfig.sh.in b/win/tkConfig.sh.in
+index c511312f0..d5330b829 100644
+--- a/win/tkConfig.sh.in
++++ b/win/tkConfig.sh.in
+@@ -47,7 +47,7 @@ TK_LIB_FLAG='@TK_LIB_FLAG@'
+ 
+ # String to pass to linker to pick up the Tk library from its
+ # build directory.
+-TK_BUILD_LIB_SPEC='@TK_BUILD_LIB_SPEC@'
++#TK_BUILD_LIB_SPEC='@TK_BUILD_LIB_SPEC@'
+ 
+ # String to pass to linker to pick up the Tk library from its
+ # installed directory.
+@@ -59,7 +59,7 @@ TK_LIB_SPEC='@TK_LIB_SPEC@'
+ # different place than the directory containing the source files, this
+ # points to the location of the sources, not the location where Tk was
+ # compiled.
+-TK_SRC_DIR='@TK_SRC_DIR@'
++#TK_SRC_DIR='@TK_SRC_DIR@'
+ 
+ # Needed if you want to make a 'fat' shared library library
+ # containing tk objects or link a different wish.
+@@ -74,14 +74,14 @@ TK_STUB_LIB_FLAG='@TK_STUB_LIB_FLAG@'
+ 
+ # String to pass to linker to pick up the Tk stub library from its
+ # build directory.
+-TK_BUILD_STUB_LIB_SPEC='@TK_BUILD_STUB_LIB_SPEC@'
++#TK_BUILD_STUB_LIB_SPEC='@TK_BUILD_STUB_LIB_SPEC@'
+ 
+ # String to pass to linker to pick up the Tk stub library from its
+ # installed directory.
+ TK_STUB_LIB_SPEC='@TK_STUB_LIB_SPEC@'
+ 
+ # Path to the Tk stub library in the build directory.
+-TK_BUILD_STUB_LIB_PATH='@TK_BUILD_STUB_LIB_PATH@'
++#TK_BUILD_STUB_LIB_PATH='@TK_BUILD_STUB_LIB_PATH@'
+ 
+ # Path to the Tk stub library in the install directory.
+ TK_STUB_LIB_PATH='@TK_STUB_LIB_PATH@'
+-- 
+2.40.0
+

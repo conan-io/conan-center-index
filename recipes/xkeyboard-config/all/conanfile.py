@@ -8,6 +8,7 @@ required_conan_version = ">=1.50.0"
 
 class XkeyboardConfigConan(ConanFile):
     name = "xkeyboard-config"
+    package_type = "application"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
     homepage = "https://www.freedesktop.org/wiki/Software/XKeyboardConfig/"

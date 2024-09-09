@@ -1,4 +1,19 @@
 sources:
+  "5.0.1":
+    url: "https://github.com/capstone-engine/capstone/archive/refs/tags/5.0.1.tar.gz"
+    sha256: "2b9c66915923fdc42e0e32e2a9d7d83d3534a45bb235e163a70047951890c01a"
+  "5.0":
+    url: "https://github.com/capstone-engine/capstone/archive/refs/tags/5.0.tar.gz"
+    sha256: "df24344407baa7415eeb006f742afc9b92cd33abf2c4c120a6e97cfb376882dc"
   "4.0.2":
     url: "https://github.com/capstone-engine/capstone/archive/refs/tags/4.0.2.tar.gz"
     sha256: "7c81d798022f81e7507f1a60d6817f63aa76e489aa4e7055255f21a22f5e526a"
+patches:
+  "5.0.1":
+    - patch_file: "patches/5.0-0001-disable-warning-flags.patch"
+      patch_description: "disable warning flags for older compilers"
+      patch_type: "portability"
+  "5.0":
+    - patch_file: "patches/5.0-0001-disable-warning-flags.patch"
+      patch_description: "disable warning flags for older compilers"
+      patch_type: "portability"

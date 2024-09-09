@@ -1,0 +1,13 @@
+sources:
+  "1.4.3":
+    url: "https://github.com/ethz-asl/libpointmatcher/archive/refs/tags/1.4.3.tar.gz"
+    sha256: "7f8f56d4e561206fb5720ece6fecf6d27e9fd214d4dd326d228fddbea8289cda"
+patches:
+  "1.4.3":
+    - patch_file: "patches/1.4.3-0001-fix-cmake.patch"
+      patch_description: "Fix upstream CMakeLists"
+      patch_type: "conan"
+    - patch_file: "patches/1.4.3-0002-fix-const-error.patch"
+      patch_description: "Fix ScalarType const_cast compile error"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/norlab-ulaval/libpointmatcher/pull/580"

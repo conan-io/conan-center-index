@@ -1,8 +1,6 @@
 sources:
   "20140427":
     - url: https://tweetnacl.cr.yp.to/20140427/tweetnacl.c
-      sha256: 02e65bc3013ff2168983365e55906bc783c4c7e0a60d8100f17bb303a17175c4
+      sha256: "02e65bc3013ff2168983365e55906bc783c4c7e0a60d8100f17bb303a17175c4"
     - url: https://tweetnacl.cr.yp.to/20140427/tweetnacl.h
-      sha256: 43f29ad721d9927b747b0100ab4160c119e7bb180c7c98a66e4bf79d31244287
-    - url: https://unlicense.org/UNLICENSE
-      sha256: 7e12e5df4bae12cb21581ba157ced20e1986a0508dd10d0e8a4ab9a4cf94e85c
+      sha256: "43f29ad721d9927b747b0100ab4160c119e7bb180c7c98a66e4bf79d31244287"

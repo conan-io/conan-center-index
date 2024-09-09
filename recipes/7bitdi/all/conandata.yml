@@ -1,0 +1,25 @@
+sources:
+  "3.4.0":
+    url: "https://github.com/7bitcoder/7bitDI/archive/refs/tags/v3.4.0.tar.gz"
+    sha256: "8381102f5966a5d83cf590b8fa45904d055d74ec90822628240786ab100fb929"
+  "3.3.0":
+    url: "https://github.com/7bitcoder/7bitDI/archive/refs/tags/v3.3.0.tar.gz"
+    sha256: "b9ddb2fc263c79cb414544e97d44dcc8cd1e1a91b38129d96b7051728a4583b9"
+  "3.2.0":
+    url: "https://github.com/7bitcoder/7bitDI/archive/refs/tags/v3.2.0.tar.gz"
+    sha256: "4549b651a28b309a31cb3b879b7f31069cbca041cfb9ffad82ccc26f78b8e5e0"
+  "3.1.0":
+    url: "https://github.com/7bitcoder/7bitDI/archive/refs/tags/v3.1.0.tar.gz"
+    sha256: "345bf91e2a33cfe98628cac98c75488ddd55232b8c4bcfeba9b5001fec8d4f7c"
+  "3.0.0":
+    url: "https://github.com/7bitcoder/7bitDI/archive/refs/tags/v3.0.0.tar.gz"
+    sha256: "aabb8e907c0cafb8e4b7c8367ed5dbb3cba2d83af090bdef9a7f855c0778c8f3"
+  "2.1.0":
+    url: "https://github.com/7bitcoder/7bitDI/archive/refs/tags/v2.1.0.tar.gz"
+    sha256: "54edceb4f90bf652126310ca0b78150d05a02d7081cef3c9ccaba5f4dd112935"
+  "2.0.0":
+    url: "https://github.com/7bitcoder/7bitDI/archive/refs/tags/v2.0.0.tar.gz"
+    sha256: "ae6d01c677b928a9c0979b9b2395692f9a3d876e07189d9b191e7b55c13d9ef4"
+  "1.0.0":
+    url: "https://github.com/7bitcoder/7bitDI/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "4a5bfc541bf98b9943a54003c7ad1f8a2a3f879143022be805aaa343852d8279"

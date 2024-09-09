@@ -1,8 +1,10 @@
 sources:
+  "1.1.0":
+    url: "https://github.com/awslabs/amazon-kinesis-video-streams-pic/archive/refs/tags/v1.1.0.tar.gz"
+    sha256: "ef45723cd439f855bae2304d9488b68cd6d1e0dc3203c97ebd1cbb26197edb55"
+  "1.0.1":
+    url: "https://github.com/awslabs/amazon-kinesis-video-streams-pic/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "d04732217c74687c5498665b353cb089d725ca7f5b5da61a3f984f7fbefb2ac9"
   "cci.20210812":
     url: "https://github.com/awslabs/amazon-kinesis-video-streams-pic/archive/bbf0e4ba749a6c045fc3958951c1c3a61a808dd0.tar.gz"
     sha256: "5a6d8da62af766ec86423ead2a45d9ff00cd80ddea679ce228ff9696a490fae5"
-patches:
-  "cci.20210812":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-do-not-enforce-fpic.patch"

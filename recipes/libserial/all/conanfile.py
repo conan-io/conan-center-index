@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, rm, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
@@ -17,6 +17,7 @@ class LibserialConan(ConanFile):
     homepage = "https://github.com/crayzeewulf/libserial"
     topics = ("serial-ports", "rs232", "usb-serial")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -36,6 +37,9 @@ class LibserialConan(ConanFile):
             "gcc": "7",
             "clang": "7",
         }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
@@ -57,7 +61,7 @@ class LibserialConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -70,6 +74,7 @@ class LibserialConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

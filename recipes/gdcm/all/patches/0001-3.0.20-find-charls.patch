@@ -1,0 +1,28 @@
+Allow using charls >= 2.2.0
+https://github.com/malaterre/GDCM/pull/157
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -352,8 +352,8 @@ else()
+ endif()
+ 
+ if(GDCM_USE_SYSTEM_CHARLS)
+-  find_package(CharLS 2.0.0 REQUIRED)
+-  set(GDCM_CHARLS_LIBRARIES ${CHARLS_LIBRARIES})
++  find_package(charls 2.2.0 REQUIRED)
++  set(GDCM_CHARLS_LIBRARIES charls)
+ else()
+   set(GDCM_CHARLS_LIBRARIES gdcmcharls)
+ endif()
+--- a/Utilities/gdcm_charls.h
++++ b/Utilities/gdcm_charls.h
+@@ -17,8 +17,8 @@
+ /* Use the charls library configured for gdcm.  */
+ #include "gdcmTypes.h"
+ #ifdef GDCM_USE_SYSTEM_CHARLS
+-// It is expected that version 2.0.0 is used
+-# include <CharLS/charls.h>
++// It is expected that version >= 2.2.0 is used
++# include <charls/charls.h>
+ #else
+ #include "gdcmcharls/charls.h"
+ #endif
