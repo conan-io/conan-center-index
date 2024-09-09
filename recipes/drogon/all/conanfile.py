@@ -157,7 +157,7 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
         if is_msvc(self):
             # TODO: use tc.extra_cxxflags after Conan 1 has been dropped on CCI
-            tc.blocks["cmake_flags_init"].template += '\nstring(APPEND CMAKE_CXX_FLAGS_INIT "/Zc:__cplusplus /EHsc")\n'
+            tc.blocks["cmake_flags_init"].template += '\nstring(APPEND CMAKE_CXX_FLAGS_INIT " /Zc:__cplusplus /EHsc")\n'
         if Version(self.version) >= "1.8.4":
             tc.variables["USE_SUBMODULE"] = False
         # Required for tc.variables to work reliably on v3.5 < v3.12 CMake standard used by the project
