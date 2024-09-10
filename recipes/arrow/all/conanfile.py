@@ -203,7 +203,10 @@ class ArrowConan(ConanFile):
             self.requires("snappy/1.1.9")
         if self.options.get_safe("simd_level") != None or \
                 self.options.get_safe("runtime_simd_level") != None:
-            self.requires("xsimd/13.0.0")
+            if Version(self.version) < 8:
+                self.requires("xsimd/9.0.1")
+            else:
+                self.requires("xsimd/13.0.0")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
