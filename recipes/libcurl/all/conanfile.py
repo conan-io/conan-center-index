@@ -168,11 +168,11 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/5.6.6")
+            self.requires("wolfssl/5.7.0")
         elif self.options.with_ssl == "mbedtls":
-            self.requires("mbedtls/3.5.0")
+            self.requires("mbedtls/3.6.1")
         if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.59.0")
+            self.requires("libnghttp2/1.61.0")
         if self.options.with_libssh2:
             self.requires("libssh2/1.11.0")
         if self.options.with_zlib:
@@ -180,7 +180,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_brotli:
             self.requires("brotli/1.1.0")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5 <1.6]")
         if self.options.with_c_ares:
             self.requires("c-ares/[>=1.27 <2]")
         if self.options.get_safe("with_libpsl"):
@@ -201,11 +201,11 @@ class LibcurlConan(ConanFile):
     def build_requirements(self):
         if self._is_using_cmake_build:
             if self._is_win_x_android:
-                self.tool_requires("ninja/1.11.1")
+                self.tool_requires("ninja/[>=1.10.2 <2]")
         else:
             self.tool_requires("libtool/2.4.7")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.1.0")
+                self.tool_requires("pkgconf/[>=2.2 <3]")
             if self.settings.os in [ "tvOS", "watchOS" ]:
                 self.tool_requires("gnu-config/cci.20210814")
             if self._settings_build.os == "Windows":
