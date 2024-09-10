@@ -170,8 +170,9 @@ class MysqlCppConnRecipe(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "ADD_SUBDIRECTORY(extra)", "")
         # foundation target
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "include(CheckCXXSourceCompiles)", "find_package(OpenSSL REQUIRED)")
+        extra_lib = "Crypt32" if self.settings.os == "Windows" else ""
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "# generated config.h", "\"${RAPIDJSON_INCLUDE_DIR}\"")
-        replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", "OpenSSL::SSL")
+        replace_in_file(self, os.path.join(self.source_folder, "cdk", "foundation", "CMakeLists.txt"), "PRIVATE OpenSSL::SSL", f"OpenSSL::SSL {extra_lib}")
         # mysqlx target
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "mysqlx", "CMakeLists.txt"),
                         "target_link_libraries(cdk_mysqlx PUBLIC cdk_proto_mysqlx cdk_foundation)",
