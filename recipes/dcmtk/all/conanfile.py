@@ -95,15 +95,15 @@ class DCMTKConan(ConanFile):
         if self.options.charset_conversion == "libiconv":
             self.requires("libiconv/1.17")
         elif self.options.charset_conversion == "icu":
-            self.requires("icu/73.2")
+            self.requires("icu/75.1")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.11.4")
+            self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_openssl:
             self.requires("openssl/[>=1 <4]")
         if self.options.with_libpng:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_libtiff:
             self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_tcpwrappers"):
