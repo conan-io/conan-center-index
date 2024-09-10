@@ -1,10 +1,25 @@
 sources:
+  "2.33.0":
+    url: "https://github.com/rui314/mold/archive/refs/tags/v2.33.0.tar.gz"
+    sha256: "37b3aacbd9b6accf581b92ba1a98ca418672ae330b78fe56ae542c2dcb10a155"
+  "2.32.1":
+    url: "https://github.com/rui314/mold/archive/refs/tags/v2.32.1.tar.gz"
+    sha256: "f3c9a527d884c635834fe7d79b3de959b00783bf9446280ea274d996f0335825"
+  "2.32.0":
+    url: "https://github.com/rui314/mold/archive/refs/tags/v2.32.0.tar.gz"
+    sha256: "4b7e4146ea0f52be9adae8b417399f3676a041e65b55e3f25f088120d30a320b"
+  "2.31.0":
+    url: "https://github.com/rui314/mold/archive/refs/tags/v2.31.0.tar.gz"
+    sha256: "3dc3af83a5d22a4b29971bfad17261851d426961c665480e2ca294e5c74aa1e5"
   "2.4.0":
     url: "https://github.com/rui314/mold/archive/refs/tags/v2.4.0.tar.gz"
     sha256: "be65f3d785d32ece7b3204ecaa57810847fdd25c232cf704cbfff2dafb1ac107"
   "2.0.0":
     url: "https://github.com/rui314/mold/archive/refs/tags/v2.0.0.tar.gz"
     sha256: "2ae8a22db09cbff626df74c945079fa29c1e5f60bbe02502dcf69191cf43527b"
+  "1.11.0":
+    url: "https://github.com/rui314/mold/archive/refs/tags/v1.11.0.tar.gz"
+    sha256: "99318eced81b09a77e4c657011076cc8ec3d4b6867bd324b8677974545bc4d6f"
   "1.4.2":
     url: "https://github.com/rui314/mold/archive/refs/tags/v1.4.2.tar.gz"
     sha256: "47e6c48d20f49e5b47dfb8197dd9ffcb11a8833d614f7a03bd29741c658a69cd"
@@ -17,6 +32,3 @@ sources:
   "1.8.0":
     url: "https://github.com/rui314/mold/archive/refs/tags/v1.8.0.tar.gz"
     sha256: "7210225478796c2528aae30320232a5a3b93a640292575a8c55aa2b140041b5c"
-  "1.11.0":
-    url: "https://github.com/rui314/mold/archive/refs/tags/v1.11.0.tar.gz"
-    sha256: "99318eced81b09a77e4c657011076cc8ec3d4b6867bd324b8677974545bc4d6f"

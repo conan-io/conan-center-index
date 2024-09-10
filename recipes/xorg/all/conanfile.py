@@ -2,6 +2,7 @@ from conan import ConanFile, conan_version
 from conan.tools.gnu import PkgConfig
 from conan.tools.system import package_manager
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.50.0"
 
@@ -73,8 +74,17 @@ class XorgConan(ConanFile):
                            "libXScrnSaver", "xcb-util-wm", "xcb-util-image", "xcb-util-keysyms", "xcb-util-renderutil",
                            "libxxf86vm", "libxv", "xkeyboard-config", "xcb-util", "xcb-util-cursor"], update=True, check=True)
 
+        if Version(conan_version) >= "2.0.10":
+            alpine = package_manager.Apk(self)
+            alpine.install(["libx11-dev", "	libxcb-dev", "libfontenc-dev", "libice-dev", "libsm-dev", "	libxau-dev", "libxaw-dev",
+                            "libxcomposite-dev", "libxcursor-dev", "libxdamage-dev", "libxdmcp-dev", "	libxext-dev", "libxfixes-dev", "libxi-dev",
+                            "libxinerama-dev", "libxkbfile-dev", "	libxmu-dev", "libxpm-dev", "libxrandr-dev", "libxrender-dev", "libxres-dev",
+                            "libxscrnsaver-dev", "libxt-dev", "libxtst-dev", "libxv-dev", "libxxf86vm-dev",
+                            "xcb-util-wm-dev", "xcb-util-image-dev", "xcb-util-keysyms-dev", "xcb-util-renderutil-dev",
+                            "libxinerama-dev", "libxcb-dev", "xcb-util-dev", "xcb-util-cursor-dev"], update=True, check=True)
+
     def package_info(self):
-        if conan_version.major >= 2:
+        if Version(conan_version) >= 2:
             self.cpp_info.bindirs = []
             self.cpp_info.includedirs = []
             self.cpp_info.libdirs = []

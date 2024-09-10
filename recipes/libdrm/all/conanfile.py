@@ -9,7 +9,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.64.0 <2 || >=2.2.0"
 
 
 class LibdrmConan(ConanFile):
@@ -88,9 +88,9 @@ class LibdrmConan(ConanFile):
             raise ConanInvalidConfiguration("libdrm supports only Linux or FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.0")
+        self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/2.2.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -116,8 +116,9 @@ class LibdrmConan(ConanFile):
             else:
                 tc.project_options[o] = "true" if getattr(self.options, o) else "false"
 
-        tc.project_options["datadir"] = os.path.join(self.package_folder, "res")
-        tc.project_options["mandir"] = os.path.join(self.package_folder, "res", "man")
+        tc.project_options["datadir"] = "res"
+        tc.project_options["mandir"] = os.path.join("res", "man")
+        tc.project_options["man-pages"] = "disabled" if Version(self.version) >= "2.4.113" else "false"
         tc.generate()
 
     def build(self):
