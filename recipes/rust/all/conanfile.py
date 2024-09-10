@@ -15,6 +15,8 @@ class RustConan(ConanFile):
 
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
+    upload_policy = "skip"
+    build_policy = "missing"
 
     def layout(self):
         pass
