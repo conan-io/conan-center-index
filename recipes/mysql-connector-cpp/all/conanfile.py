@@ -65,6 +65,7 @@ class MysqlCppConnRecipe(ConanFile):
         self.requires("rapidjson/1.1.0")
 
     def build_requirements(self):
+        self.tool_requires("cmake/[>=3.24 <4]")
         self.tool_requires("protobuf/<host_version>")
 
     def source(self):
@@ -121,6 +122,12 @@ class MysqlCppConnRecipe(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("protobuf::libprotobuf", "cmake_target_name", "ext::protobuf")
+        deps.set_property("protobuf::libprotobuf-lite", "cmake_target_name", "ext::protobuf-lite")
+        deps.set_property("rapidjson", "cmake_target_name", "RapidJSON::rapidjson")
+        deps.set_property("zlib", "cmake_target_name", "ext::z")
+        deps.set_property("lz4", "cmake_target_name", "ext::lz4")
+        deps.set_property("zstd", "cmake_target_name", "ext::zstd")
         deps.generate()
 
     def _patch_sources(self):
@@ -156,6 +163,8 @@ class MysqlCppConnRecipe(ConanFile):
         # OpenSSL patch
         replace_in_file(self, os.path.join(self.source_folder, "mysql-concpp-config.cmake.in"), "find_deps()", "")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "find_dependency(SSL)", "")
+        # Remove problematic func
+        # replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "bootstrap()", "#bootstrap()")
         # cdk target
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "find_dependency(SSL)", "")
         replace_in_file(self, os.path.join(self.source_folder, "cdk", "CMakeLists.txt"), "ADD_SUBDIRECTORY(extra)", "")
@@ -217,10 +226,12 @@ class MysqlCppConnRecipe(ConanFile):
         self.cpp_info.libdirs = lib_dir
         self.cpp_info.bindirs = ["lib"]
 
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["dnsapi", "ws2_32"])
         if is_apple_os(self) or self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["resolv"])
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs.extend(["m", "pthread"])
+                self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
 
         target = "concpp-xdevapi"
         target_alias = "concpp"
