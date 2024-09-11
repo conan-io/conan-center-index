@@ -121,9 +121,9 @@ class ThorvgConan(ConanFile):
     def requirements(self):
         loaders_opt = str(self.options.with_loaders)
         if loaders_opt in ("all", "jpg"):
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/3.0.3")
         if loaders_opt in ("all", "png"):
-            self.requires("libpng/1.6.43")
+            self.requires("libpng/[>=1.6 <2]")
         if loaders_opt in ("all", "webp"):
             self.requires("libwebp/1.4.0")
         if self.settings.os == "Linux":
@@ -131,9 +131,9 @@ class ThorvgConan(ConanFile):
                 self.requires("opengl/system")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.4.0")
+        self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
