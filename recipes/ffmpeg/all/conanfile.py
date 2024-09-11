@@ -287,7 +287,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
         if self.options.with_freetype:
@@ -303,7 +303,7 @@ class FFMpegConan(ConanFile):
         if self.options.with_zeromq:
             self.requires("zeromq/4.3.5")
         if self.options.with_sdl:
-            self.requires("sdl/2.28.5")
+            self.requires("sdl/2.30.7")
         if self.options.with_libx264:
             self.requires("libx264/cci.20240224")
         if self.options.with_libx265:
@@ -315,29 +315,29 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_libfdk_aac"):
             self.requires("libfdk_aac/2.0.3")
         if self.options.with_libwebp:
-            self.requires("libwebp/1.3.2")
+            self.requires("libwebp/1.4.0")
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_libalsa"):
-            self.requires("libalsa/1.2.10")
+            self.requires("libalsa/1.2.12")
         if self.options.get_safe("with_xcb") or self.options.get_safe("with_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_pulse"):
-            self.requires("pulseaudio/14.2")
+            self.requires("pulseaudio/17.0")
         if self.options.get_safe("with_vaapi"):
             self.requires("vaapi/system")
         if self.options.get_safe("with_vdpau"):
             self.requires("vdpau/system")
         if self.options.get_safe("with_vulkan"):
-            self.requires("vulkan-loader/1.3.243.0")
+            self.requires("vulkan-loader/1.3.290.0")
         if self.options.get_safe("with_libsvtav1"):
-            self.requires("libsvtav1/2.1.0")
+            self.requires("libsvtav1/2.1.2")
         if self.options.with_libaom:
-            self.requires("libaom-av1/3.6.1")
+            self.requires("libaom-av1/3.8.0")
         if self.options.get_safe("with_libdav1d"):
             self.requires("dav1d/1.4.3")
         if self.options.get_safe("with_libdrm"):
-            self.requires("libdrm/2.4.119")
+            self.requires("libdrm/2.4.120")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -374,7 +374,7 @@ class FFMpegConan(ConanFile):
             else:
                 self.tool_requires("yasm/1.3.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
