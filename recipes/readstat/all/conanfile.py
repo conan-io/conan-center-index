@@ -1,14 +1,16 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, load, save
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, NMakeDeps, NMakeToolchain
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, unix_path
 import os
+import platform
 
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=1.57.0"
 
 class ReadstatConan(ConanFile):
     name = "readstat"
@@ -31,6 +33,15 @@ class ReadstatConan(ConanFile):
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _is_clang_cl(self):
+        return self.settings.compiler == "clang" and self.settings.os == "Windows" and \
+               self.settings.compiler.get_safe("runtime")
+
+    @property
+    def _msvc_tools(self):
+        return ("clang-cl", "llvm-lib", "lld-link") if self._is_clang_cl else ("cl", "lib", "link")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -58,43 +69,138 @@ class ReadstatConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
+        if self._settings_build.os == "Macos":
+            self.tool_requires("libtool/2.4.7")
 
+    def _sys_compiler(self):
+        return self.info.settings.compiler
+    
+    @property
+    def _is_windows_msvc(self):
+        try:
+             return self.settings.os == "Windows"
+        except:
+            return self.info.settings.os == "Windows"
+    
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # if platform.system() == "Windows": # 'self.settings' access in 'source()' method was forbidden
+        #     print("微软Windows")
+        #     print(self.conan_data["sources"][self.version][0])
+        #     get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
+        # else:
+        #     get(self, **self.conan_data["sources"][self.version][1], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version][1], strip_root=True)
+
+    def _msbuild_configuration(self):
+        return "Debug" if self.settings.build_type == "Debug" else "Release"
+    
+    # def generate(self):
+    #     if is_msvc(self):
+    #         tc = MSBuildToolchain(self)
+    #         tc.configuration = self._msbuild_configuration
+    #         tc.generate()
+    #         deps = MSBuildDeps(self)
+    #         deps.configuration = self._msbuild_configuration
+    #         deps.generate()
+    #     else:
+    #         env = VirtualBuildEnv(self)
+    #         env.generate()
+    #         if not cross_building(self):
+    #             env = VirtualRunEnv(self)
+    #             env.generate(scope="build")
+    #         tc = AutotoolsToolchain(self)
+    #         tc.generate()
+    #         deps = AutotoolsDeps(self)
+    #         deps.generate()
 
     def generate(self):
-        if is_msvc(self):
-            tc = NMakeToolchain(self)
-            tc.generate()
-            deps = NMakeDeps(self)
-            deps.generate()
-        else:
-            env = VirtualBuildEnv(self)
-            env.generate()
-            if not cross_building(self):
-                env = VirtualRunEnv(self)
-                env.generate(scope="build")
-            tc = AutotoolsToolchain(self)
-            tc.generate()
-            deps = AutotoolsDeps(self)
-            deps.generate()
+        env = VirtualBuildEnv(self)
+        env.generate()
 
-    def build(self):
+        tc = AutotoolsToolchain(self)
+        if self.settings.os == "Windows" and self.settings.compiler == "gcc":
+            if self.settings.arch == "x86":
+                tc.update_configure_args({
+                    "--host": "i686-w64-mingw32",
+                    "RC": "windres --target=pe-i386",
+                    "WINDRES": "windres --target=pe-i386",
+                })
+            elif self.settings.arch == "x86_64":
+                tc.update_configure_args({
+                    "--host": "x86_64-w64-mingw32",
+                    "RC": "windres --target=pe-x86-64",
+                    "WINDRES": "windres --target=pe-x86-64",
+                })
+        
+        if cross_building(self) and is_msvc(self):
+            triplet_arch_windows = {"x86_64": "x86_64", "x86": "i686", "armv8": "aarch64"}
+            # ICU doesn't like GNU triplet of conan for msvc (see https://github.com/conan-io/conan/issues/12546)
+            host_arch = triplet_arch_windows.get(str(self.settings.arch))
+            build_arch = triplet_arch_windows.get(str(self._settings_build.arch))
+
+            if host_arch and build_arch:
+                host = f"{host_arch}-w64-mingw32"
+                build = f"{build_arch}-w64-mingw32"
+                tc.configure_args.extend([
+                    f"--host={host}",
+                    f"--build={build}",
+                ])
+        env = tc.environment()
+        # if is_msvc(self) or self._is_clang_cl:
+        #     cc, lib, link = self._msvc_tools
+        #     build_aux_path = os.path.join(self.source_folder, "build-aux")
+        #     lt_compile = unix_path(self, os.path.join(build_aux_path, "compile"))
+        #     lt_ar = unix_path(self, os.path.join(build_aux_path, "ar-lib"))
+        #     env.define("CC", f"{lt_compile} {cc} -nologo")
+        #     env.define("CXX", f"{lt_compile} {cc} -nologo")
+        #     env.define("LD", link)
+        #     env.define("STRIP", ":")
+        #     env.define("AR", f"{lt_ar} {lib}")
+        #     env.define("RANLIB", ":")
+        #     env.define("NM", "dumpbin -symbols")
+        #     env.define("win32_target", "_WIN32_WINNT_VISTA")
+        tc.generate(env)
+    
+    def _print_directory_structure(self, folder):
+        self.output.info(f"Directory structure for: {folder}")
+        for root, dirs, files in os.walk(folder):
+            level = root.replace(folder, '').count(os.sep)
+            indent = ' ' * 4 * level
+            self.output.info(f"{indent}{os.path.basename(root)}/")
+            subindent = ' ' * 4 * (level + 1)
+            for f in files:
+                self.output.info(f"{subindent}{f}")
+
+
+    def build(self): 
         apply_conandata_patches(self)
-        if is_msvc(self):
-            args = "readstat_i.lib READSTAT_EXPORT=-DDLL_EXPORT" if self.options.shared else "readstat.lib"
-            with chdir(self, self.source_folder):
-                self.run(f"nmake -f makefile.vc {args}")
-        else:
-            autotools = Autotools(self)
-            # autotools.autoreconf()
-            autotools.configure()
-            autotools.make()
-            
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
+
+    # def build(self):
+    #     apply_conandata_patches(self)
+    #     if is_msvc(self):
+    #         msbuild = MSBuild(self)
+    #         msbuild.build_type = self._msbuild_configuration
+
+    #         self._print_directory_structure(self.source_folder)
+    #         self.output.info(f"Using solution file at: {self.source_folder}")
+
+    #         msbuild.build(sln=os.path.join(self.source_folder, "VS17", "ReadStat.sln"))
+    #     else:
+    #         autotools = Autotools(self)
+    #         autotools.configure()
+    #         autotools.make()
+
     def package(self):
-        copy(self, pattern="LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        # upstream didn't pack license file into distribution
+        copy(self, "NEWS", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
             copy(self, "readstat.h", src=os.path.join(self.source_folder, "headers"), dst=os.path.join(self.package_folder, "include"))
+            copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
             copy(self, "*.lib", src=self.source_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
             copy(self, "*.dll", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         else:
@@ -103,6 +209,7 @@ class ReadstatConan(ConanFile):
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
             rmdir(self, os.path.join(self.package_folder, "share"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "readstat")
