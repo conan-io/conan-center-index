@@ -233,7 +233,8 @@ class SundialsConan(ConanFile):
 
     def package_info(self):
         # https://github.com/LLNL/sundials/blob/v7.1.1/cmake/SUNDIALSConfig.cmake.in
-        self.cpp_info.set_property("cmake_file_name", "SUNDIALS")
+        if Version(self.version) >= "5.8.0":
+            self.cpp_info.set_property("cmake_file_name", "SUNDIALS")
 
         suffix = ""
         if Version(self.version) >= "7.0" and self.settings.os == "Windows":
@@ -246,9 +247,14 @@ class SundialsConan(ConanFile):
             core_lib = "generic"
 
         def _add_lib(name, requires=None, system_libs=None, interface=False):
-            component = self.cpp_info.components[name]
-            component.set_property("cmake_target_name", f"SUNDIALS::{name}")
-            component.set_property("cmake_target_aliases", [f"SUNDIALS::{name}_{'shared' if self.options.shared else 'static'}"])
+            if Version(self.version) >= "5.8.0":
+                component = self.cpp_info.components[name]
+                component.set_property("cmake_target_name", f"SUNDIALS::{name}")
+                component.set_property("cmake_target_aliases", [f"SUNDIALS::{name}_{'shared' if self.options.shared else 'static'}"])
+            else:
+                # For backward compatibility with old recipe versions
+                component = self.cpp_info.components[f"sundials_{name}"]
+                requires = [f"sundials_{r}" if "::" not in r else r for r in requires or []]
             if not interface:
                 component.libs = [f"sundials_{name}{suffix}"]
             component.requires = requires or []
