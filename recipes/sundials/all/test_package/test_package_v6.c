@@ -6,7 +6,7 @@
 int main()
 {
   SUNContext sunctx;
-  SUNContext_Create(NULL, &sunctx);
+  SUNContext_Create(0, &sunctx);
   N_Vector y = N_VNew_Serial(1, sunctx);
   NV_DATA_S(y)[0] = 2.0;
   SUNMatrix A = SUNDenseMatrix(1, 1, sunctx);
