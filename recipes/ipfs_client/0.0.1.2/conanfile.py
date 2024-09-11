@@ -27,10 +27,7 @@ class IpfsChromium(ConanFile):
         'openssl/1.1.1w',
         _PB,
     ]
-    default_options = {
-        "boost/*:bzip2": True,
-        "boost/*:with_stacktrace_backtrace": True
-    }
+    default_options = {"boost/*:bzip2": True}
     tool_requires = [
         'cmake/3.22.6',
         'ninja/1.11.1',
@@ -93,8 +90,8 @@ class IpfsChromium(ConanFile):
 
     def validate(self):
         cc_nm = str(self.settings.compiler)
-        if cc_nm not in [ "gcc", "msvc", "apple-clang"]:
-            raise ConanInvalidConfiguration("TODO: support for (non-Apple) Clang should be nigh-trivial in next release")
+        if cc_nm not in [ "gcc", "apple-clang"]:
+            raise ConanInvalidConfiguration(f"TODO: support for {cc_nm} not in this release")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 20)
         minimum_version = self._minimum_compilers_version.get(cc_nm, False)
