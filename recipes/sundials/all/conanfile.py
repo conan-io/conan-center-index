@@ -3,13 +3,13 @@ import os
 import shutil
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, mkdir, rmdir, replace_in_file, save
 from conan.tools.scm import Version
-from conans.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
 
