@@ -1,0 +1,14 @@
+sources:
+  "2.14.1":
+    url: "https://www.riverbankcomputing.com/static/Downloads/QScintilla/2.14.0/QScintilla_src-2.14.0.tar.gz"
+    sha256: "449353928340300804c47b3785c3e62096f918a723d5eed8a5439764e6507f4c"
+patches:
+  "2.14.1":
+    - patch_file: "patches/0004-remove-logo-privacy-issue.patch"
+      patch_description: "Fix logo privacy issue"
+      patch_type: "conan"
+      patch_source: "https://salsa.debian.org/python-team/packages/qscintilla2/-/blob/debian/2.14.1+dfsg-1/debian/patches/0004-remove-logo-privacy-issue.diff.patch"
+    - patch_file: "patches/0010-Add-import-QUrl.patch"
+      patch_description: "Add QUrl include"
+      patch_type: "bugfix"
+      patch_source: "https://salsa.debian.org/python-team/packages/qscintilla2/-/blob/debian/2.14.1+dfsg-1/debian/patches/0010-Add-import-QUrl.patch"

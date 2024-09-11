@@ -1,0 +1,33 @@
+From: "Gudjon I. Gudjonsson" <gudjon@gudjon.org>
+Date: Mon, 26 Aug 2019 06:49:17 +0200
+Subject: Add import QUrl
+
+---
+ src/Qsci/qsciscintilla.h     | 1 +
+ src/Qsci/qsciscintillabase.h | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/src/Qsci/qsciscintilla.h b/src/Qsci/qsciscintilla.h
+index c8f1eee..31a5529 100644
+--- a/src/Qsci/qsciscintilla.h
++++ b/src/Qsci/qsciscintilla.h
+@@ -22,6 +22,7 @@
+ #ifndef QSCISCINTILLA_H
+ #define QSCISCINTILLA_H
+ 
++#include <QUrl>
+ #include <QByteArray>
+ #include <QList>
+ #include <QObject>
+diff --git a/src/Qsci/qsciscintillabase.h b/src/Qsci/qsciscintillabase.h
+index a253b11..1b1f8b6 100644
+--- a/src/Qsci/qsciscintillabase.h
++++ b/src/Qsci/qsciscintillabase.h
+@@ -23,6 +23,7 @@
+ 
+ #include <qglobal.h>
+ 
++#include <QUrl>
+ #include <QAbstractScrollArea>
+ #include <QByteArray>
+ #include <QPoint>
