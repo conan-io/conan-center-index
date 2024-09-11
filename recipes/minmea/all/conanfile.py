@@ -1,6 +1,6 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, copy, get, replace_in_file, rename, apply_conandata_patches, export_conandata_patches
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 import os
