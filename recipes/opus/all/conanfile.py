@@ -22,18 +22,12 @@ class OpusConan(ConanFile):
         "fPIC": [True, False],
         "fixed_point": [True, False],
         "stack_protector": [True, False],
-        "osce": [True, False],
-        "deep_plc": [True, False],
-        "dred": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "fixed_point": False,
         "stack_protector": True,
-        "osce": False,
-        "deep_plc": False,
-        "dred": False,
     }
 
     def build_requirements(self):
@@ -71,11 +65,6 @@ class OpusConan(ConanFile):
         tc.cache_variables["OPUS_BUILD_SHARED_LIBRARY"] = self.options.shared
         tc.cache_variables["OPUS_FIXED_POINT"] = self.options.fixed_point
         tc.cache_variables["OPUS_STACK_PROTECTOR"] = self.options.stack_protector
-        # INFO: Any of the following options require DNN and will fail without pre-build steps
-        # https://gitlab.xiph.org/xiph/opus/-/blob/v1.5.2/dnn/torch/fargan/README.md#L37
-        tc.cache_variables["OPUS_OSCE"] = self.options.osce
-        tc.cache_variables["OPUS_DEEP_PLC"] = self.options.deep_plc
-        tc.cache_variables["OPUS_DRED"] = self.options.dred
         if Version(self.version) >= "1.5.2" and is_msvc(self):
            tc.cache_variables["OPUS_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
