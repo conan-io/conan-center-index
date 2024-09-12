@@ -2,7 +2,8 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.microsoft import check_min_vs
+from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -15,7 +16,6 @@ class OpusConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://opus-codec.org"
     license = "BSD-3-Clause"
-
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -67,12 +67,17 @@ class OpusConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["OPUS_FIXED_POINT"] = self.options.fixed_point
-        tc.variables["OPUS_STACK_PROTECTOR"] = self.options.stack_protector
-        tc.variables["OPUS_OSCE"] = self.options.osce
-        tc.variables["OPUS_DEEP_PLC"] = self.options.deep_plc
-        tc.variables["OPUS_DRED"] = self.options.dred
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+
+        tc.cache_variables["OPUS_BUILD_SHARED_LIBRARY"] = self.options.shared
+        tc.cache_variables["OPUS_FIXED_POINT"] = self.options.fixed_point
+        tc.cache_variables["OPUS_STACK_PROTECTOR"] = self.options.stack_protector
+        # INFO: Any of the following options require DNN and will fail without pre-build steps
+        # https://gitlab.xiph.org/xiph/opus/-/blob/v1.5.2/dnn/torch/fargan/README.md#L37
+        tc.cache_variables["OPUS_OSCE"] = self.options.osce
+        tc.cache_variables["OPUS_DEEP_PLC"] = self.options.deep_plc
+        tc.cache_variables["OPUS_DRED"] = self.options.dred
+        if Version(self.version) >= "1.5.2" and is_msvc(self):
+           tc.cache_variables["OPUS_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
 
     def build(self):
