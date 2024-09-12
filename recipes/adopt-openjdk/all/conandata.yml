@@ -3,7 +3,7 @@ sources:
     "Windows":
       "x86_64":
         url: "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4%2B7/OpenJDK21U-jdk_x64_windows_hotspot_21.0.4_7.zip"
-        sha256: "b58f6117d26a138da4cb962b974efc4be4b88b65093366146965d16ad3c45e75"
+        sha256: "c725540d911531c366b985e5919efc8a73dd4030965cd9a740c3d2cd92c72c74"
     "Linux":
       "x86_64":
         url: "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4%2B7/OpenJDK21U-jdk_x64_linux_hotspot_21.0.4_7.tar.gz"
