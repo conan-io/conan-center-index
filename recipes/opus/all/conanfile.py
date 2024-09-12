@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.scm import Version
 import os
 
@@ -31,7 +32,7 @@ class OpusConan(ConanFile):
     }
 
     def build_requirements(self):
-        if self.version == "1.5.2":
+        if self.version >= "1.5.2":
             self.tool_requires("cmake/[>=3.16 <4]")
 
     def export_sources(self):
@@ -52,16 +53,18 @@ class OpusConan(ConanFile):
 
     def validate(self):
         check_min_vs(self, 190)
-        if self.version == "1.5.2" and self.settings.compiler == "gcc" and self.settings.compiler.version in ["5", "7"]:
-            raise ConanInvalidConfiguration(f"GCC {self.settings.compiler.version} not supported due to lack of AVX2 support")
+        if self.version >= "1.5.2" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8":
+            raise ConanInvalidConfiguration(f"{self.ref} GCC-{self.settings.compiler.version} not supported due to lack of AVX2 support. Use GCC >=8.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
     def generate(self):
+        if Version(self.version) >= "1.5.2":
+            env = VirtualBuildEnv(self)
+            env.generate()
         tc = CMakeToolchain(self)
-
         tc.cache_variables["OPUS_BUILD_SHARED_LIBRARY"] = self.options.shared
         tc.cache_variables["OPUS_FIXED_POINT"] = self.options.fixed_point
         tc.cache_variables["OPUS_STACK_PROTECTOR"] = self.options.stack_protector
