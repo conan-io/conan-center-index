@@ -68,12 +68,11 @@ class HppFclConan(ConanFile):
         tc.variables["INSTALL_DOCUMENTATION"] = self.options.install_documentation
         tc.variables["HPP_FCL_ENABLE_LOGGING"] = self.options.enable_logging
         tc.variables["HPP_FCL_HAS_OCTOMAP"] = self.options.has_octomap
-        if Version(self.version) < "2.4.5":
-            tc.variables["HPP_FCL_HAS_QHULL"] = self.options.has_qhull
-            del self.options.turn_assert_into_exception
-        else:
+        tc.variables["HPP_FCL_HAS_QHULL"] = self.options.has_qhull
+        if Version(self.version) >= "2.4.5":
             tc.variables["HPP_FCL_TURN_ASSERT_INTO_EXCEPTION"] = self.options.turn_assert_into_exception
-            del self.options.has_qhull
+        else:
+            del self.options.turn_assert_into_exception
         tc.generate()
 
     def build(self):
