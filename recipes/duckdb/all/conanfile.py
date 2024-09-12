@@ -76,6 +76,8 @@ class DuckdbConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) >= "0.9.0":
             del self.options.with_parquet
+        if Version(self.version) >= "1.1.0":
+            del self.options.with_odbc
 
     def configure(self):
         if self.options.shared:
@@ -86,7 +88,7 @@ class DuckdbConan(ConanFile):
 
     def requirements(self):
         # FIXME: duckdb vendors a bunch of deps by modify the source code to have their own namespace
-        if self.options.with_odbc:
+        if self.options.get_safe("with_odbc"):
             self.requires("odbc/2.3.11")
         if self.options.with_httpfs:
             self.requires("openssl/[>=1.1 <4]")
@@ -148,7 +150,8 @@ class DuckdbConan(ConanFile):
             tc.variables["BUILD_EXCEL_EXTENSION"] = self.options.with_excel
             tc.variables["BUILD_SQLSMITH_EXTENSION"] = self.options.with_sqlsmith
 
-        tc.variables["BUILD_ODBC_DRIVER"] = self.options.with_odbc
+        if "self.options" in self.options:
+            tc.variables["BUILD_ODBC_DRIVER"] = self.options.with_odbc
         tc.variables["FORCE_QUERY_LOG"] = self.options.with_query_log
         tc.variables["BUILD_SHELL"] = self.options.with_shell
         tc.variables["DISABLE_THREADS"] = not self.options.with_threads
