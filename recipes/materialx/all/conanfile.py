@@ -95,7 +95,8 @@ class MaterialXConan(ConanFile):
         tc.variables["MATERIALX_BUILD_GEN_MSL"] = self.options.build_gen_msl and is_apple_os
         # TODO: Remove when Conan 1 support is dropped
         if not self.settings.compiler.cppstd:
-            tc.cache_variable["CMAKE_CXX_STANDARD"] = self._min_cppstd
+            tc.variables["MATERIALX_BUILD_USE_CCACHE"] = self._min_cppstd
+        tc.variables["MATERIALX_BUILD_USE_CCACHE"] = False
         tc.generate()
 
         tc = CMakeDeps(self)
