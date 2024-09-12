@@ -112,6 +112,9 @@ class ITKConan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_DOCUMENTATION"] = False
+        tc.variables["DO_NOT_BUILD_ITK_TEST_DRIVER"] = True
+        tc.variables["DO_NOT_INSTALL_ITK_TEST_DRIVER"] = True
+        tc.variables["DISABLE_MODULE_TESTS"] = True
         tc.variables["ITK_SKIP_PATH_LENGTH_CHECKS"] = True
 
         tc.variables["ITK_USE_SYSTEM_LIBRARIES"] = True
