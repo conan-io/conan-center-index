@@ -15,7 +15,7 @@ class ZlibConan(ConanFile):
     license = "Zlib"
     description = ("A Massively Spiffy Yet Delicately Unobtrusive Compression Library "
                    "(Also Free, Not to Mention Unencumbered by Patents)")
-    topics = ("zlib", "compression")
+    topics = ("zlib", "compression", "testing")
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
