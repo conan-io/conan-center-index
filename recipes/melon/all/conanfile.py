@@ -12,25 +12,18 @@ required_conan_version = ">=1.52.0"
 class PackageConan(ConanFile):
     name = "melon"
     description = "A modern and efficient graph library using C++20 ranges and concepts."
-    # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
-    # In case it's not listed there, use "LicenseRef-<license-file-name>"
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/fhamonic/melon"
-    # Do not put "conan" nor the project name in topics. Use topics from the upstream listed on GH
-    # Keep 'header-only' as topic
     topics = ("graph", "algorithm", "ranges", "c++20", "header-only")
     package_type = "header-library"
-    # Keep these or explain why it's not required for this particular case
     settings = "os", "arch", "compiler", "build_type"
-    # Do not copy sources to build folder for header only projects, unless you need to apply patches
     no_copy_source = True
 
     @property
     def _min_cppstd(self):
         return 20
 
-    # In case the project requires C++14/17/20/... the minimum compiler version should be listed
     @property
     def _compilers_minimum_version(self):
         return {
@@ -41,28 +34,21 @@ class PackageConan(ConanFile):
             "Visual Studio": "17",
         }
 
-    # Use the export_sources(self) method instead of the exports_sources attribute.
-    # This allows finer grain exportation of patches per version
     def export_sources(self):
         export_conandata_patches(self)
 
     def layout(self):
-        # src_folder must use the same source folder name than the project
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # Prefer self.requires method instead of requires attribute
-        # Direct dependencies of header only libs are always transitive since they are included in public headers
-        self.requires("range-v3/[>=0.11.0]", transitive_headers=True)
-        self.requires("fmt/[>=10.0.0]", transitive_headers=True)
+        self.requires("range-v3/[>=0.11.0]")
+        self.requires("fmt/[>=10.0.0]")
 
-    # same package ID for any package
     def package_id(self):
         self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            # Validate the minimum cpp standard supported when installing the package. For C++ projects only
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -70,12 +56,7 @@ class PackageConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        # In case this library does not work in some another configuration, it should be validated here too
-        if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f"{self.ref} can not be used on Windows.")
-
     def source(self):
-        # Download source package and extract to source folder
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     # Not mandatory when there is no patch, but will suppress warning message about missing build() method
@@ -83,7 +64,6 @@ class PackageConan(ConanFile):
         # The attribute no_copy_source should not be used when applying patches in build
         apply_conandata_patches(self)
 
-    # Copy all files to the package folder
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(
@@ -94,24 +74,8 @@ class PackageConan(ConanFile):
         )
 
     def package_info(self):
-        # Folders not used for header-only
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        # Set these to the appropriate values if the package has an official FindPACKAGE.cmake
-        # listed in https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules
-        # examples: bzip2, freetype, gdal, icu, libcurl, libjpeg, libpng, libtiff, openssl, sqlite3, zlib...
-        # self.cpp_info.set_property("cmake_module_file_name", "melon")
-        # self.cpp_info.set_property("cmake_module_target_name", "melon::melon")
-
-        # Set these to the appropriate values if package provides a CMake config file
-        # (package-config.cmake or packageConfig.cmake, with package::package target, usually installed in <prefix>/lib/cmake/<package>/)
-        # self.cpp_info.set_property("cmake_file_name", "melon")
-        # self.cpp_info.set_property("cmake_target_name", "melon::melon")
-        # Set this to the appropriate value if the package provides a pkgconfig file
-        # (package.pc, usually installed in <prefix>/lib/pkgconfig/)
-        # self.cpp_info.set_property("pkg_config_name", "melon")
-
-        # Add m, pthread and dl if needed in Linux/FreeBSD
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["pthread"])
