@@ -1,4 +1,7 @@
 sources:
+  "0.0.4":
+    url: "https://github.com/sammycage/plutovg/archive/refs/tags/v0.0.4.tar.gz"
+    sha256: "6d7c6ad1ef3cf0085e0a375b770590a8cea79d4754b732e892635639c5546076"
   "0.0.1":
     url: "https://github.com/sammycage/plutovg/archive/refs/tags/v0.0.1.tar.gz"
     sha256: "593653d226dd54dc322bc0874c19bd0a80314b5471ae4da6b9cd9e12211e3261"
