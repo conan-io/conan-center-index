@@ -17,6 +17,7 @@ class OpusConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://opus-codec.org"
     license = "BSD-3-Clause"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -69,7 +70,7 @@ class OpusConan(ConanFile):
         tc.cache_variables["OPUS_FIXED_POINT"] = self.options.fixed_point
         tc.cache_variables["OPUS_STACK_PROTECTOR"] = self.options.stack_protector
         if Version(self.version) >= "1.5.2" and is_msvc(self):
-           tc.cache_variables["OPUS_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+            tc.cache_variables["OPUS_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
 
     def build(self):
