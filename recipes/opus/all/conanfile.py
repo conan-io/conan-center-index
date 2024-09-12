@@ -32,7 +32,7 @@ class OpusConan(ConanFile):
     }
 
     def build_requirements(self):
-        if self.version >= "1.5.2":
+        if Version(self.version) >= "1.5.2":
             self.tool_requires("cmake/[>=3.16 <4]")
 
     def export_sources(self):
@@ -53,7 +53,7 @@ class OpusConan(ConanFile):
 
     def validate(self):
         check_min_vs(self, 190)
-        if self.version >= "1.5.2" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8":
+        if Version(self.version) >= "1.5.2" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8":
             raise ConanInvalidConfiguration(f"{self.ref} GCC-{self.settings.compiler.version} not supported due to lack of AVX2 support. Use GCC >=8.")
 
     def source(self):
