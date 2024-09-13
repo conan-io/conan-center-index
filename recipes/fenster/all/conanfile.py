@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.files import copy, export_conandata_patches, get
+from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.52.0"
@@ -26,9 +26,6 @@ class FensterConan(ConanFile):
         "enable_graphics": True,
         "enable_audio": False,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
