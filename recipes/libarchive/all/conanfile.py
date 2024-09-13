@@ -101,7 +101,7 @@ class LibarchiveConan(ConanFile):
         if self.options.with_libb2:
             self.requires("libb2/20190723")
         if self.options.with_lz4:
-            self.requires("lz4/1.10.0")
+            self.requires("lz4/1.9.4")
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_lzma:
