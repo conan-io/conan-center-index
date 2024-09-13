@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file
+from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 
 required_conan_version = ">=1.53.0"
 
@@ -28,6 +28,9 @@ class Gl2psConan(ConanFile):
         "with_png": True,
         "with_zlib": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -56,17 +59,15 @@ class Gl2psConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["ENABLE_PNG"] = self.options.with_png
         tc.cache_variables["ENABLE_ZLIB"] = self.options.with_zlib
+        # Only used for tests
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_GLUT"] = True
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_LATEX"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "cmake_minimum_required(VERSION 2.8 FATAL_ERROR)",
-                        "cmake_minimum_required(VERSION 3.15)")
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -76,9 +77,13 @@ class Gl2psConan(ConanFile):
         copy(self, "COPYING.LGPL", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["gl2ps"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
 
         if self.options.with_png:
             self.cpp_info.defines.append("GL2PS_HAVE_LIBPNG")
