@@ -183,7 +183,9 @@ class F2cConan(ConanFile):
         fc_path = os.path.join(self.package_folder, "bin", "fc")
         if self.options.fc_wrapper:
             self.buildenv_info.define_path("FC", fc_path)
+            self.buildenv_info.define_path("F77", fc_path)
             self.env_info.FC = fc_path
+            self.env_info.F77 = fc_path
 
         includedir = unix_path(self, os.path.join(self.package_folder, "include"))
         libdir = unix_path(self, os.path.join(self.package_folder, "lib"))
