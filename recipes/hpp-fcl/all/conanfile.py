@@ -10,6 +10,7 @@ required_conan_version = ">=1.53.0"
 class HppFclConan(ConanFile):
     name = "hpp-fcl"
     description = "An extension of the Flexible Collision Library"
+    topics = ("geometry", "collision")
     license = "BSD-3-Clause"
     homepage = "https://github.com/humanoid-path-planner/hpp-fcl"
     url = "https://github.com/conan-io/conan-center-index"

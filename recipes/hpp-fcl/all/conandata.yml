@@ -1,7 +1,7 @@
 sources:
   "2.4.5":
     url: "https://github.com/humanoid-path-planner/hpp-fcl/archive/refs/tags/v2.4.5.tar.gz"
-    sha256: "14ddfdecdbde323dedf988083e4929d05b5b125ec04effac3c2eec4daa099b43"
+    sha256: "6ab99242d3510b1d898358378113b5e42f0c8351b3c6edf3a58ac1e7a0996bdf"
   "2.4.4":
     url: "https://github.com/humanoid-path-planner/hpp-fcl/archive/refs/tags/v2.4.4.tar.gz"
     sha256: "0aca57ddb538a2296cf986ae7b0dae5da397c81aff85168d4c4e5e745b1a66ec"
