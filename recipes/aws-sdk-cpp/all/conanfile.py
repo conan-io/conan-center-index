@@ -397,9 +397,9 @@ class AwsSdkCppConan(ConanFile):
             )
         if is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Static runtime is not working for more recent releases")
-        if (is_msvc(self) and self.options.shared and self.settings.build_type == "Debug"
+        if (is_msvc(self) and self.options.shared
                 and not self.dependencies["aws-c-common"].options.shared):
-            raise ConanInvalidConfiguration(f"{self.ref} with shared and Debug build is not supported with aws-c-common static")
+            raise ConanInvalidConfiguration(f"{self.ref} with shared is not supported with aws-c-common static")
 
     def package_id(self):
         for hl_comp in self._internal_requirements.keys():
