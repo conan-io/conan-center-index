@@ -7,3 +7,6 @@ patches:
     - patch_file: "patches/0001-disable-static-on-shared.patch"
       patch_description: "disable building static library on shared=True"
       patch_type: "conan"
+    - patch_file: "patches/0002-disable-cpp11.patch"
+      patch_description: "disable specifying C++11"
+      patch_type: "conan"
