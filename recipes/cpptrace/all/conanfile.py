@@ -95,12 +95,12 @@ class CpptraceConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
 
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        # rmdir(self, os.path.join(self.package_folder, "share"))
+        # rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        # rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
+        # rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = ["cpptrace"]
