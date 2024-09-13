@@ -20,7 +20,6 @@ class HppFclConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_py_interface": [True, False],
         "install_documentation": [True, False],
         "turn_assert_into_exception": [True, False],
         "enable_logging": [True, False],
@@ -30,7 +29,6 @@ class HppFclConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_py_interface": False,
         "install_documentation": False,
         "turn_assert_into_exception": False,
         "enable_logging": False,
@@ -65,7 +63,7 @@ class HppFclConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_PYTHON_INTERFACE"] = self.options.with_py_interface
+        tc.variables["BUILD_PYTHON_INTERFACE"] = False
         tc.variables["INSTALL_DOCUMENTATION"] = self.options.install_documentation
         tc.variables["HPP_FCL_ENABLE_LOGGING"] = self.options.enable_logging
         tc.variables["HPP_FCL_HAS_OCTOMAP"] = self.options.has_octomap
