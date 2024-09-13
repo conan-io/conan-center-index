@@ -1,4 +1,4 @@
 sources:
-  "0.0.0.cci.20240909":
-    url: "https://github.com/zserge/fenster/archive/92aa0ecd30f1c1c8175d72042c319268568434fb.tar.gz"
-    sha256: "5defca3fcfc80ba071dd3e55d78ec994ee32d2d5f5da5bf68c1d30e07e187c3f"
+  "0.1.0":
+    url: "https://github.com/zserge/fenster/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "058bc7c7a28c66da5760bedfcc2a28b0f29f5cec640049b10e5ad2551b51d8de"
