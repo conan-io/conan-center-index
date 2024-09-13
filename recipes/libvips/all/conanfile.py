@@ -158,8 +158,6 @@ class LibvipsConan(ConanFile):
             self.requires("imagemagick/7.0.11-14")
         if self.options.with_matio:
             self.requires("matio/1.5.24")
-        if self.options.with_nifti:
-            self.requires("nifti_clib/3.0.0")
         if self.options.with_openexr:
             self.requires("openexr/3.2.3")
         if self.options.with_openjpeg:
@@ -205,6 +203,8 @@ class LibvipsConan(ConanFile):
 
         if self.options.with_imagequant:
             raise ConanInvalidConfiguration("libimagequant recipe not available in conancenter yet")
+        if self.options.with_nifti:
+            raise ConanInvalidConfiguration("nifti recipe not available in conancenter yet")
         if self.options.with_openslide:
             raise ConanInvalidConfiguration("openslide recipe not available in conancenter yet")
         if self.options.with_orc:
