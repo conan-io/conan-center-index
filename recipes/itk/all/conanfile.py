@@ -475,7 +475,11 @@ class ITKConan(ConanFile):
         lib_suffix = f"{itk_version.major}.{itk_version.minor}"
 
         content = textwrap.dedent("""\
+                                  if (CONAN_LIB_DIRS_ITK)
+                                  set(ITK_CMAKE_DIR "${CONAN_LIB_DIRS_ITK}/cmake/ITK-%(version)s")
+                                  else()
                                   set(ITK_CMAKE_DIR "${itk_LIB_DIRS_RELEASE}/cmake/ITK-%(version)s")
+                                  endif()
                                   """ % {"version":lib_suffix})
 
         save(self, os.path.join(self.package_folder, self._module_variables_file_rel_path), content)
@@ -492,6 +496,14 @@ class ITKConan(ConanFile):
             """)
         save(self, os.path.join(self.package_folder, self._module_file_rel_path), content)
 
+    @property
+    def _itk_modules_files(self):
+        cmake_files = []
+        if Version(self.version) >= "5.3":
+            cmake_files.extend(["ITKFactoryRegistration.cmake", "ITKInitializeCXXStandard.cmake"])
+        cmake_files.append("UseITK.cmake")
+        return cmake_files
+
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
@@ -501,11 +513,10 @@ class ITKConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, self._cmake_module_dir, "Modules"))
 
-        keep_list =["UseITK.cmake", "ITKFactoryRegistration.cmake", "ITKInitializeCXXStandard.cmake"]
         # Do not remove UseITK.cmake, ITKFactoryRegistration.cmake, ITKInitializeCXXStandard.cmake  and *.h.in files
         for cmake_file in glob.glob(os.path.join(self.package_folder, self._cmake_module_dir, "*.cmake")):
             file_name = os.path.basename(cmake_file)
-            if file_name not in keep_list:
+            if file_name not in self._itk_modules_files:
                 os.remove(cmake_file)
 
         self._create_cmake_module_variables()
@@ -514,16 +525,8 @@ class ITKConan(ConanFile):
     def package_info(self):
         itk_version = Version(self.version)
         lib_suffix = f"-{itk_version.major}.{itk_version.minor}"
-        build_modules = [os.path.join(self._cmake_module_dir, f"conan-official-{self.name}-variables.cmake")]
-        #itk5.3 added two more additional cmake files.
-        if lib_suffix == "-5.3":
-            # Add two additional items to build_modules
-            build_modules.extend([
-                os.path.join(self._cmake_module_dir, "ITKFactoryRegistration.cmake"),
-                os.path.join(self._cmake_module_dir, "ITKInitializeCXXStandard.cmake")
-            ])
-        build_modules.append(os.path.join(self._cmake_module_dir, "UseITK.cmake"))
-
+        build_modules = [self._module_variables_file_rel_path]
+        build_modules.extend([os.path.join(self._cmake_module_dir, f) for f in self._itk_modules_files])
         self.cpp_info.set_property("cmake_file_name", "ITK")
         self.cpp_info.set_property("cmake_build_modules", build_modules)
 
@@ -543,8 +546,9 @@ class ITKConan(ConanFile):
             # TODO: to remove in conan v2 once cmake_find_package* generators removed
             for generator in ["cmake_find_package", "cmake_find_package_multi"]:
                 self.cpp_info.components[name].names[generator] = name
-                self.cpp_info.components[name].build_modules[generator].append(self._module_file_rel_path)
-                self.cpp_info.components[name].build_modules[generator].append(os.path.join(self._cmake_module_dir, "UseITK.cmake"))
+                self.cpp_info.components[name].build_modules[generator].extend([self._module_file_rel_path, self._module_variables_file_rel_path])
+                self.cpp_info.components[name].build_modules[generator].extend(
+                    [os.path.join(self._cmake_module_dir, f) for f in self._itk_modules_files])
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         for generator in ["cmake_find_package", "cmake_find_package_multi"]:
