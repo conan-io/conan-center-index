@@ -3,8 +3,13 @@ cmake_minimum_required(VERSION 3.15)
 project(QScintilla LANGUAGES CXX)
 
 option(QSCINTILLA_BUILD_DESIGNER_PLUGIN "Build the QScintilla designer plugin" OFF)
-option(CMAKE_POSITION_INDEPENDENT_CODE "Generate position-independent code" ON)
-option(CMAKE_CXX_STANDARD "C++ standard to use" 11)
+
+if(NOT DEFINED CMAKE_POSITION_INDEPENDENT_CODE)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 11)
+endif()
 set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED)
