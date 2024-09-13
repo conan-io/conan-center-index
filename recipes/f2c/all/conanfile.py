@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMakeToolchain, CMake
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, copy, download, export_conandata_patches, apply_conandata_patches, chdir, mkdir, rename, replace_in_file, load, save
@@ -58,7 +59,7 @@ class F2cConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("shared builds are not supported on Windows")
-    
+
     def build_requirements(self):
         if self.settings.os != "Linux":
             self.tool_requires("gnu-getopt/2.40", visible=True)
