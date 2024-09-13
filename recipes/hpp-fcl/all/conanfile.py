@@ -36,6 +36,8 @@ class HppFclConan(ConanFile):
         "has_octomap": False
     }
 
+    short_paths = True
+
     def requirements(self):
         self.requires("eigen/[>=3.4.0]", package_id_mode="minor_mode")
         self.requires("boost/1.76.0")
