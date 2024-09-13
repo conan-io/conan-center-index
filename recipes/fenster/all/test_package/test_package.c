@@ -1,4 +1,5 @@
 #include <fenster.h>
+#include <fenster_audio.h>
 
 #define W 320
 #define H 240
