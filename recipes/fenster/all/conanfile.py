@@ -14,14 +14,16 @@ class FensterConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zserge/fenster"
-    topics = ("gui", "minimal")
+    topics = ("gui", "audio", "minimal")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
     options = {
+        "enable_graphics": [True, False],
         "enable_audio": [True, False],
     }
     default_options = {
+        "enable_graphics": True,
         "enable_audio": False,
     }
 
@@ -33,7 +35,8 @@ class FensterConan(ConanFile):
 
     def requirements(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("xorg/system")
+            if self.options.enable_graphics:
+                self.requires("xorg/system")
             if self.options.enable_audio:
                 self.requires("libalsa/1.2.12")
 
@@ -51,12 +54,13 @@ class FensterConan(ConanFile):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.requires.append("xorg::x11")
-        elif is_apple_os(self):
-            self.cpp_info.frameworks.append("Cocoa")
-        elif self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("gdi32")
+        if self.options.enable_graphics:
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.requires.append("xorg::x11")
+            elif is_apple_os(self):
+                self.cpp_info.frameworks.append("Cocoa")
+            elif self.settings.os == "Windows":
+                self.cpp_info.system_libs.append("gdi32")
 
         if self.options.enable_audio:
             if self.settings.os in ["Linux", "FreeBSD"]:

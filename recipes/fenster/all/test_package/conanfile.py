@@ -13,7 +13,10 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        self.requires(self.tested_reference_str, options={"enable_audio": True})
+        self.requires(self.tested_reference_str, options={
+            "enable_graphics": True,
+            "enable_audio": True,
+        })
 
     def build(self):
         cmake = CMake(self)
