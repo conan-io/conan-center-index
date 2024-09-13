@@ -141,8 +141,6 @@ class MimallocConan(ConanFile):
 
         if self.options.get_safe("single_object"):
             rm(self, "*.a", os.path.join(self.package_folder, "lib"))
-            shutil.move(os.path.join(self.package_folder, self._obj_name + ".o"),
-                        os.path.join(self.package_folder, "lib"))
             shutil.copy(os.path.join(self.package_folder, "lib", self._obj_name + ".o"),
                         os.path.join(self.package_folder, "lib", self._obj_name))
 
