@@ -1,6 +1,7 @@
 import os
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
@@ -36,6 +37,11 @@ class FensterConan(ConanFile):
                 self.requires("xorg/system")
             if self.options.enable_audio:
                 self.requires("libalsa/1.2.12")
+
+    def validate(self):
+        if conan_version.major == 1:
+            # linking against asound fails on C3I for v1 but not v2
+            raise ConanInvalidConfiguration("This recipe is only compatible with Conan 2.0 or newer")
 
     def package_id(self):
         self.info.clear()
