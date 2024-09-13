@@ -22,3 +22,8 @@ patches:
       patch_description: "Adds assert to enable compilation with libcxx + gcc"
       patch_type: "portability"
       patch_source: "https://github.com/jbeder/yaml-cpp/pull/947"
+  "0.6.2-0f9a586-p1":
+    - patch_file: "patches/0003-update-0.6.2-0f9a586-p1.patch"
+      patch_description: "Adapt to CPP 11 standard"
+      patch_type: "portability"
+      patch_source: "https://github.com/simbahebinbo/yaml-cpp/commit/b633ec8ef18b6ca4f02972a6a99691f2d8210abe"
