@@ -36,7 +36,8 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/1.9.7-0003-include-exception.patch"
       patch_description: "include exception for exception_ptr"
-      patch_type: "conan"
+      patch_type: "portability"
+      patch_source: "https://github.com/drogonframework/drogon/pull/2159"
   "1.9.6":
     - patch_file: "patches/1.8.5-0001-remove-shared-libs.patch"
       patch_description: "remove shared libs option"
