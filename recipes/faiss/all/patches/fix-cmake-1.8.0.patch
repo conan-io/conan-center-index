@@ -1,0 +1,269 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6cdc37c4..5a818297 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -51,11 +51,19 @@ set(CMAKE_CXX_STANDARD 17)
+ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+ 
+ # Valid values are "generic", "avx2", "avx512".
+-option(FAISS_OPT_LEVEL "" "generic")
++option(FAISS_WITH_OPT_GENERIC "Building a library without optimization" OFF)
++option(FAISS_WITH_OPT_AVX2 "Building a library with avx2 optimization" ON)
++option(FAISS_WITH_OPT_AVX512 "Building a library with avx512 optimization" OFF)
+ option(FAISS_ENABLE_GPU "Enable support for GPU indexes." ON)
+ option(FAISS_ENABLE_RAFT "Enable RAFT for GPU indexes." OFF)
+ option(FAISS_ENABLE_PYTHON "Build Python extension." ON)
+ option(FAISS_ENABLE_C_API "Build C API." OFF)
++option(BUILD_SHARED_LIBS "Building shared library" ON)
++option(FAISS_WITH_PIC "Building static lib with PIC" ON)
++
++if(BUILD_SHARED_LIBS)
++  set(FAISS_WITH_PIC ON)
++endif()
+ 
+ if(FAISS_ENABLE_GPU)
+   set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
+diff --git a/faiss/CMakeLists.txt b/faiss/CMakeLists.txt
+index a890a46f..4ee7152f 100644
+--- a/faiss/CMakeLists.txt
++++ b/faiss/CMakeLists.txt
+@@ -229,117 +229,81 @@ endif()
+ # Export FAISS_HEADERS variable to parent scope.
+ set(FAISS_HEADERS ${FAISS_HEADERS} PARENT_SCOPE)
+ 
+-add_library(faiss ${FAISS_SRC})
+-
+-add_library(faiss_avx2 ${FAISS_SRC})
+-if(NOT FAISS_OPT_LEVEL STREQUAL "avx2" AND NOT FAISS_OPT_LEVEL STREQUAL "avx512")
+-  set_target_properties(faiss_avx2 PROPERTIES EXCLUDE_FROM_ALL TRUE)
+-endif()
+-if(NOT WIN32)
+-  target_compile_options(faiss_avx2 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mavx2 -mfma -mf16c -mpopcnt>)
+-else()
+-  # MSVC enables FMA with /arch:AVX2; no separate flags for F16C, POPCNT
+-  # Ref. FMA (under /arch:AVX2): https://docs.microsoft.com/en-us/cpp/build/reference/arch-x64
+-  # Ref. F16C (2nd paragraph): https://walbourn.github.io/directxmath-avx2/
+-  # Ref. POPCNT: https://docs.microsoft.com/en-us/cpp/intrinsics/popcnt16-popcnt-popcnt64
+-  target_compile_options(faiss_avx2 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/arch:AVX2>)
+-  # we need bigobj for the swig wrapper
+-  add_compile_options(/bigobj)
+-endif()
+-
+-add_library(faiss_avx512 ${FAISS_SRC})
+-if(NOT FAISS_OPT_LEVEL STREQUAL "avx512")
+-  set_target_properties(faiss_avx512 PROPERTIES EXCLUDE_FROM_ALL TRUE)
+-endif()
+-if(NOT WIN32)
+-  # All modern CPUs support F, CD, VL, DQ, BW extensions.
+-  # Ref: https://en.wikipedia.org/wiki/AVX512
+-  target_compile_options(faiss_avx512 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mavx2 -mfma -mf16c -mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw -mpopcnt>)
+-else()
+-  target_compile_options(faiss_avx512 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/arch:AVX512>)
+-  # we need bigobj for the swig wrapper
+-  add_compile_options(/bigobj)
+-endif()
+-
+-# Handle `#include <faiss/foo.h>`.
+-target_include_directories(faiss PUBLIC
+-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
+-# Handle `#include <faiss/foo.h>`.
+-target_include_directories(faiss_avx2 PUBLIC
+-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
+-# Handle `#include <faiss/foo.h>`.
+-target_include_directories(faiss_avx512 PUBLIC
+-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
+-
+-set_target_properties(faiss PROPERTIES
+-  POSITION_INDEPENDENT_CODE ON
+-  WINDOWS_EXPORT_ALL_SYMBOLS ON
+-)
+-set_target_properties(faiss_avx2 PROPERTIES
+-  POSITION_INDEPENDENT_CODE ON
+-  WINDOWS_EXPORT_ALL_SYMBOLS ON
+-)
+-set_target_properties(faiss_avx512 PROPERTIES
+-  POSITION_INDEPENDENT_CODE ON
+-  WINDOWS_EXPORT_ALL_SYMBOLS ON
+-)
+-
+-if(WIN32)
+-  target_compile_definitions(faiss PRIVATE FAISS_MAIN_LIB)
+-  target_compile_definitions(faiss_avx2 PRIVATE FAISS_MAIN_LIB)
+-  target_compile_definitions(faiss_avx512 PRIVATE FAISS_MAIN_LIB)
+-endif()
+-
+-target_compile_definitions(faiss PRIVATE FINTEGER=int)
+-target_compile_definitions(faiss_avx2 PRIVATE FINTEGER=int)
+-target_compile_definitions(faiss_avx512 PRIVATE FINTEGER=int)
+-
+ find_package(OpenMP REQUIRED)
+-target_link_libraries(faiss PRIVATE OpenMP::OpenMP_CXX)
+-target_link_libraries(faiss_avx2 PRIVATE OpenMP::OpenMP_CXX)
+-target_link_libraries(faiss_avx512 PRIVATE OpenMP::OpenMP_CXX)
+-
+ find_package(MKL)
+-if(MKL_FOUND)
+-  target_link_libraries(faiss PRIVATE ${MKL_LIBRARIES})
+-  target_link_libraries(faiss_avx2 PRIVATE ${MKL_LIBRARIES})
+-  target_link_libraries(faiss_avx512 PRIVATE ${MKL_LIBRARIES})
+-else()
++if(NOT MKL_FOUND)
+   find_package(BLAS REQUIRED)
+-  target_link_libraries(faiss PRIVATE ${BLAS_LIBRARIES})
+-  target_link_libraries(faiss_avx2 PRIVATE ${BLAS_LIBRARIES})
+-  target_link_libraries(faiss_avx512 PRIVATE ${BLAS_LIBRARIES})
+-
+   find_package(LAPACK REQUIRED)
+-  target_link_libraries(faiss PRIVATE ${LAPACK_LIBRARIES})
+-  target_link_libraries(faiss_avx2 PRIVATE ${LAPACK_LIBRARIES})
+-  target_link_libraries(faiss_avx512 PRIVATE ${LAPACK_LIBRARIES})
+ endif()
+ 
+-install(TARGETS faiss
+-  EXPORT faiss-targets
+-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+-)
+-if(FAISS_OPT_LEVEL STREQUAL "avx2")
+-  install(TARGETS faiss_avx2
+-    EXPORT faiss-targets
+-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++function(faiss_create_library lib_name)
++  add_library(${lib_name} ${FAISS_LIB_TYPE} ${FAISS_SRC})
++  message(STATUS "FAISS: add library ${lib_name}")
++
++  # Handle `#include <faiss/foo.h>`.
++  target_include_directories(${lib_name} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
++  set_target_properties(${lib_name} PROPERTIES
++    POSITION_INDEPENDENT_CODE ${FAISS_WITH_PIC}
++    WINDOWS_EXPORT_ALL_SYMBOLS ${FAISS_WITH_PIC}
+   )
+-endif()
+-if(FAISS_OPT_LEVEL STREQUAL "avx512")
+-  install(TARGETS faiss_avx2 faiss_avx512
++  if(WIN32)
++    target_compile_definitions(${lib_name} PRIVATE FAISS_MAIN_LIB)
++  endif()
++  target_compile_definitions(${lib_name} PRIVATE FINTEGER=int)
++  target_link_libraries(${lib_name} PRIVATE OpenMP::OpenMP_CXX)
++
++  if(MKL_FOUND)
++    target_link_libraries(${lib_name} PRIVATE ${MKL_LIBRARIES})
++  else()
++    target_link_libraries(${lib_name} PRIVATE ${BLAS_LIBRARIES})
++    target_link_libraries(${lib_name} PRIVATE ${LAPACK_LIBRARIES})
++  endif()
++
++  install(TARGETS ${lib_name}
+     EXPORT faiss-targets
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+   )
++endfunction()
++
++if(FAISS_WITH_OPT_GENERIC)
++  faiss_create_library(faiss)
++endif()
++
++if(FAISS_WITH_OPT_AVX2)
++  faiss_create_library(faiss_avx2)
++
++  if(NOT WIN32)
++    target_compile_options(faiss_avx2 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mavx2 -mfma -mf16c -mpopcnt>)
++  else()
++    # MSVC enables FMA with /arch:AVX2; no separate flags for F16C, POPCNT
++    # Ref. FMA (under /arch:AVX2): https://docs.microsoft.com/en-us/cpp/build/reference/arch-x64
++    # Ref. F16C (2nd paragraph): https://walbourn.github.io/directxmath-avx2/
++    # Ref. POPCNT: https://docs.microsoft.com/en-us/cpp/intrinsics/popcnt16-popcnt-popcnt64
++    target_compile_options(faiss_avx2 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/arch:AVX2>)
++    # we need bigobj for the swig wrapper
++    add_compile_options(/bigobj)
++  endif()
++endif()
++
++if(FAISS_WITH_OPT_AVX512)
++  faiss_create_library(faiss_avx512)
++
++  if(NOT WIN32)
++    # All modern CPUs support F, CD, VL, DQ, BW extensions.
++    # Ref: https://en.wikipedia.org/wiki/AVX512
++    target_compile_options(faiss_avx512 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mavx2 -mfma -mf16c -mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw -mpopcnt>)
++  else()
++    target_compile_options(faiss_avx512 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/arch:AVX512>)
++    # we need bigobj for the swig wrapper
++    add_compile_options(/bigobj)
++  endif()
+ endif()
+ 
+ foreach(header ${FAISS_HEADERS})
+-  get_filename_component(dir ${header} DIRECTORY )
++  get_filename_component(dir ${header} DIRECTORY)
+   install(FILES ${header}
+     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/faiss/${dir}
+   )
+diff --git a/faiss/gpu/CMakeLists.txt b/faiss/gpu/CMakeLists.txt
+index 126cbe50..ab4d9448 100644
+--- a/faiss/gpu/CMakeLists.txt
++++ b/faiss/gpu/CMakeLists.txt
+@@ -251,8 +251,8 @@ endif()
+ 
+ add_library(faiss_gpu STATIC ${FAISS_GPU_SRC})
+ set_target_properties(faiss_gpu PROPERTIES
+-  POSITION_INDEPENDENT_CODE ON
+-  WINDOWS_EXPORT_ALL_SYMBOLS ON
++  POSITION_INDEPENDENT_CODE ${FAISS_WITH_PIC}
++  WINDOWS_EXPORT_ALL_SYMBOLS ${FAISS_WITH_PIC}
+ )
+ target_include_directories(faiss_gpu PUBLIC
+   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
+@@ -289,9 +289,19 @@ endif()
+ # Export FAISS_GPU_HEADERS variable to parent scope.
+ set(FAISS_GPU_HEADERS ${FAISS_GPU_HEADERS} PARENT_SCOPE)
+ 
++if(BUILD_SHARED_LIBS)
+ target_link_libraries(faiss PRIVATE  "$<LINK_LIBRARY:WHOLE_ARCHIVE,faiss_gpu>")
+ target_link_libraries(faiss_avx2 PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,faiss_gpu>")
+ target_link_libraries(faiss_avx512 PRIVATE "$<LINK_LIBRARY:WHOLE_ARCHIVE,faiss_gpu>")
++else()
++  install(TARGETS faiss_gpu
++    EXPORT faiss-targets
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++  )
++endif()
+ 
+ foreach(header ${FAISS_GPU_HEADERS})
+   get_filename_component(dir ${header} DIRECTORY )
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index 10243b9a..d12f69ec 100644
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -58,18 +58,16 @@ if(FAISS_OPT_LEVEL STREQUAL "avx512")
+   target_link_libraries(faiss_test PRIVATE faiss_avx512)
+ endif()
+ 
+-include(FetchContent)
+-FetchContent_Declare(googletest
+-  URL "https://github.com/google/googletest/archive/release-1.12.1.tar.gz")
+ set(BUILD_GMOCK CACHE BOOL OFF)
+ set(INSTALL_GTEST CACHE BOOL OFF)
+-FetchContent_MakeAvailable(googletest)
++find_package(GTest REQUIRED CONFIG)
+ 
+ find_package(OpenMP REQUIRED)
+ 
+ target_link_libraries(faiss_test PRIVATE
+   OpenMP::OpenMP_CXX
+-  gtest_main
++  GTest::gtest
++  GTest::gtest_main
+   $<$<BOOL:${FAISS_ENABLE_RAFT}>:raft::raft>
+ )
+ 

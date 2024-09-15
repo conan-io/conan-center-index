@@ -1,0 +1,252 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index fa1e3124..2f1b07a8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -18,10 +18,17 @@ set(CMAKE_CXX_STANDARD 11)
+ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+ 
+ # Valid values are "generic", "avx2".
+-option(FAISS_OPT_LEVEL "" "generic")
++option(FAISS_WITH_OPT_GENERIC "Building a library without optimization" OFF)
++option(FAISS_WITH_OPT_AVX2 "Building a library with avx2 optimization" ON)
+ option(FAISS_ENABLE_GPU "Enable support for GPU indexes." ON)
+ option(FAISS_ENABLE_PYTHON "Build Python extension." ON)
+ option(FAISS_ENABLE_C_API "Build C API." OFF)
++option(BUILD_SHARED_LIBS "Building shared library" ON)
++option(FAISS_WITH_PIC "Building static with pic" ON)
++
++if(BUILD_SHARED_LIBS)
++  set(FAISS_WITH_PIC ON)
++endif()
+ 
+ if(FAISS_ENABLE_GPU)
+   set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER})
+diff --git a/faiss/CMakeLists.txt b/faiss/CMakeLists.txt
+index 1fea676c..120107f5 100644
+--- a/faiss/CMakeLists.txt
++++ b/faiss/CMakeLists.txt
+@@ -221,83 +221,75 @@ endif()
+ # Export FAISS_HEADERS variable to parent scope.
+ set(FAISS_HEADERS ${FAISS_HEADERS} PARENT_SCOPE)
+ 
+-add_library(faiss ${FAISS_SRC})
+-
+-add_library(faiss_avx2 ${FAISS_SRC})
+-if(NOT FAISS_OPT_LEVEL STREQUAL "avx2")
+-  set_target_properties(faiss_avx2 PROPERTIES EXCLUDE_FROM_ALL TRUE)
+-endif()
+-if(NOT WIN32)
+-  target_compile_options(faiss_avx2 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mavx2 -mfma -mf16c -mpopcnt>)
+-else()
+-  # MSVC enables FMA with /arch:AVX2; no separate flags for F16C, POPCNT
+-  # Ref. FMA (under /arch:AVX2): https://docs.microsoft.com/en-us/cpp/build/reference/arch-x64
+-  # Ref. F16C (2nd paragraph): https://walbourn.github.io/directxmath-avx2/
+-  # Ref. POPCNT: https://docs.microsoft.com/en-us/cpp/intrinsics/popcnt16-popcnt-popcnt64
+-  target_compile_options(faiss_avx2 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/arch:AVX2>)
+-  # we need bigobj for the swig wrapper
+-  add_compile_options(/bigobj)
++find_package(OpenMP REQUIRED)
++find_package(MKL)
++if(NOT MKL_FOUND)
++  find_package(BLAS REQUIRED)
++  find_package(LAPACK REQUIRED)
+ endif()
+ 
+-# Handle `#include <faiss/foo.h>`.
+-target_include_directories(faiss PUBLIC
+-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
+-# Handle `#include <faiss/foo.h>`.
+-target_include_directories(faiss_avx2 PUBLIC
+-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
+-
+-set_target_properties(faiss PROPERTIES
+-  POSITION_INDEPENDENT_CODE ON
+-  WINDOWS_EXPORT_ALL_SYMBOLS ON
+-)
+-set_target_properties(faiss_avx2 PROPERTIES
+-  POSITION_INDEPENDENT_CODE ON
+-  WINDOWS_EXPORT_ALL_SYMBOLS ON
+-)
+-
+-if(WIN32)
+-  target_compile_definitions(faiss PRIVATE FAISS_MAIN_LIB)
+-  target_compile_definitions(faiss_avx2 PRIVATE FAISS_MAIN_LIB)
++if(BUILD_SHARED_LIBS)
++  set(FAISS_LIB_TYPE SHARED)
++else()
++  set(FAISS_LIB_TYPE STATIC)
+ endif()
+ 
+-target_compile_definitions(faiss PRIVATE FINTEGER=int)
+-target_compile_definitions(faiss_avx2 PRIVATE FINTEGER=int)
++function(faiss_create_library lib_name)
++  add_library(${lib_name} ${FAISS_LIB_TYPE} ${FAISS_SRC})
++  message(STATUS "FAISS: add library ${lib_name}")
+ 
+-find_package(OpenMP REQUIRED)
+-target_link_libraries(faiss PRIVATE OpenMP::OpenMP_CXX)
+-target_link_libraries(faiss_avx2 PRIVATE OpenMP::OpenMP_CXX)
+-
+-find_package(MKL)
+-if(MKL_FOUND)
+-  target_link_libraries(faiss PRIVATE ${MKL_LIBRARIES})
+-  target_link_libraries(faiss_avx2 PRIVATE ${MKL_LIBRARIES})
+-else()
+-  find_package(BLAS REQUIRED)
+-  target_link_libraries(faiss PRIVATE ${BLAS_LIBRARIES})
+-  target_link_libraries(faiss_avx2 PRIVATE ${BLAS_LIBRARIES})
++  # Handle `#include <faiss/foo.h>`.
++  target_include_directories(${lib_name} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
++  set_target_properties(${lib_name} PROPERTIES
++    POSITION_INDEPENDENT_CODE ${FAISS_WITH_PIC}
++    WINDOWS_EXPORT_ALL_SYMBOLS ${FAISS_WITH_PIC}
++  )
++  target_compile_definitions(${lib_name} PRIVATE FINTEGER=int)
++  target_link_libraries(${lib_name} PRIVATE OpenMP::OpenMP_CXX)
+ 
+-  find_package(LAPACK REQUIRED)
+-  target_link_libraries(faiss PRIVATE ${LAPACK_LIBRARIES})
+-  target_link_libraries(faiss_avx2 PRIVATE ${LAPACK_LIBRARIES})
+-endif()
++  if(MKL_FOUND)
++    target_link_libraries(${lib_name} PRIVATE ${MKL_LIBRARIES})
++  else()
++    target_link_libraries(${lib_name} PRIVATE ${BLAS_LIBRARIES})
++    target_link_libraries(${lib_name} PRIVATE ${LAPACK_LIBRARIES})
++  endif()
+ 
+-install(TARGETS faiss
+-  EXPORT faiss-targets
+-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+-)
+-if(FAISS_OPT_LEVEL STREQUAL "avx2")
+-  install(TARGETS faiss_avx2
++  install(TARGETS ${lib_name}
+     EXPORT faiss-targets
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+   )
++endfunction()
++
++if(FAISS_WITH_OPT_GENERIC)
++  faiss_create_library(faiss)
++
++  if(WIN32)
++    target_compile_definitions(faiss PRIVATE FAISS_MAIN_LIB)
++  endif()
++endif()
++
++if(FAISS_WITH_OPT_AVX2)
++  faiss_create_library(faiss_avx2)
++
++  if(NOT WIN32)
++    target_compile_options(faiss_avx2 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mavx2 -mfma -mf16c -mpopcnt>)
++  else()
++    target_compile_definitions(faiss_avx2 PRIVATE FAISS_MAIN_LIB)
++    # MSVC enables FMA with /arch:AVX2; no separate flags for F16C, POPCNT
++    # Ref. FMA (under /arch:AVX2): https://docs.microsoft.com/en-us/cpp/build/reference/arch-x64
++    # Ref. F16C (2nd paragraph): https://walbourn.github.io/directxmath-avx2/
++    # Ref. POPCNT: https://docs.microsoft.com/en-us/cpp/intrinsics/popcnt16-popcnt-popcnt64
++    target_compile_options(faiss_avx2 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/arch:AVX2>)
++    # we need bigobj for the swig wrapper
++    add_compile_options(/bigobj)
++  endif()
+ endif()
+ 
+ foreach(header ${FAISS_HEADERS})
+-  get_filename_component(dir ${header} DIRECTORY )
++  get_filename_component(dir ${header} DIRECTORY)
+   install(FILES ${header}
+     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/faiss/${dir}
+   )
+diff --git a/faiss/gpu/CMakeLists.txt b/faiss/gpu/CMakeLists.txt
+index 6fb69476..37b23e34 100644
+--- a/faiss/gpu/CMakeLists.txt
++++ b/faiss/gpu/CMakeLists.txt
+@@ -166,18 +166,23 @@ set(FAISS_GPU_HEADERS
+ # Export FAISS_GPU_HEADERS variable to parent scope.
+ set(FAISS_GPU_HEADERS ${FAISS_GPU_HEADERS} PARENT_SCOPE)
+ 
+-target_sources(faiss PRIVATE ${FAISS_GPU_SRC})
+-target_sources(faiss_avx2 PRIVATE ${FAISS_GPU_SRC})
+-
+ foreach(header ${FAISS_GPU_HEADERS})
+-  get_filename_component(dir ${header} DIRECTORY )
++  get_filename_component(dir ${header} DIRECTORY)
+   install(FILES ${header}
+     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/faiss/gpu/${dir}
+   )
+ endforeach()
+ 
+ find_package(CUDAToolkit REQUIRED)
+-target_link_libraries(faiss PRIVATE CUDA::cudart CUDA::cublas)
+-target_link_libraries(faiss_avx2 PRIVATE CUDA::cudart CUDA::cublas)
+-target_compile_options(faiss PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xfatbin=-compress-all>)
+-target_compile_options(faiss_avx2 PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xfatbin=-compress-all>)
++
++if(FAISS_WITH_OPT_GENERIC)
++  target_sources(faiss PRIVATE ${FAISS_GPU_SRC})
++  target_link_libraries(faiss PRIVATE CUDA::cudart CUDA::cublas)
++  target_compile_options(faiss PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xfatbin=-compress-all>)
++endif()
++
++if(FAISS_WITH_OPT_AVX2)
++  target_sources(faiss_avx2 PRIVATE ${FAISS_GPU_SRC})
++  target_link_libraries(faiss_avx2 PRIVATE CUDA::cudart CUDA::cublas)
++  target_compile_options(faiss_avx2 PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-Xfatbin=-compress-all>)
++endif()
+diff --git a/faiss/gpu/test/CMakeLists.txt b/faiss/gpu/test/CMakeLists.txt
+index def3ef31..3c0a656e 100644
+--- a/faiss/gpu/test/CMakeLists.txt
++++ b/faiss/gpu/test/CMakeLists.txt
+@@ -6,11 +6,12 @@
+ 
+ find_package(CUDAToolkit REQUIRED)
+ 
++find_package(GTest REQUIRED CONFIG)
+ # Defines `gtest_discover_tests()`.
+ include(GoogleTest)
+ 
+ add_library(faiss_gpu_test_helper TestUtils.cpp)
+-target_link_libraries(faiss_gpu_test_helper PUBLIC faiss gtest CUDA::cudart)
++target_link_libraries(faiss_gpu_test_helper PUBLIC faiss GTest::gtest CUDA::cudart)
+ 
+ macro(faiss_gpu_test file)
+   get_filename_component(test_name ${file} NAME_WE)
+@@ -33,4 +34,4 @@ add_executable(demo_ivfpq_indexing_gpu EXCLUDE_FROM_ALL
+   demo_ivfpq_indexing_gpu.cpp)
+ 
+ target_link_libraries(demo_ivfpq_indexing_gpu
+-  PRIVATE faiss gtest_main CUDA::cudart)
++  PRIVATE faiss GTest::gtest_main CUDA::cudart)
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index 55455bd7..ec0e955d 100644
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -40,18 +40,16 @@ else()
+   target_link_libraries(faiss_test PRIVATE faiss)
+ endif()
+ 
+-include(FetchContent)
+-FetchContent_Declare(googletest
+-  URL "https://github.com/google/googletest/archive/release-1.12.1.tar.gz")
+ set(BUILD_GMOCK CACHE BOOL OFF)
+ set(INSTALL_GTEST CACHE BOOL OFF)
+-FetchContent_MakeAvailable(googletest)
++find_package(GTest REQUIRED CONFIG)
+ 
+ find_package(OpenMP REQUIRED)
+ 
+ target_link_libraries(faiss_test PRIVATE
+   OpenMP::OpenMP_CXX
+-  gtest_main
++  GTest::gtest
++  GTest::gtest_main
+ )
+ 
+ # Defines `gtest_discover_tests()`.
