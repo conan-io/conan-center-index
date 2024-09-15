@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "fixed_math/fixed_math.hpp"
-#include "fixed_math/iostream.h"
+#include "fixedmath/fixed_math.hpp"
+#include "fixedmath/iostream.h"
 
 using fixedmath::fixed_t;
 using fixedmath::operator ""_fix;

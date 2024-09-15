@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
 from conan.tools.env import VirtualBuildEnv
@@ -98,6 +98,10 @@ class FixedMathConan(ConanFile):
 
     def build(self):
         if not self.options.header_only:
+            # fix install path (https://github.com/arturbac/fixed_math/issues/8)
+            replace_in_file(self, os.path.join(self.source_folder, "fixed_lib", "CMakeLists.txt"),
+                            "${CMAKE_INSTALL_INCLUDEDIR}/fixed_math",
+                            "${CMAKE_INSTALL_INCLUDEDIR}/fixedmath")
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
@@ -109,17 +113,18 @@ class FixedMathConan(ConanFile):
             cmake.install()
             rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         else:
+            # fix install path (https://github.com/arturbac/fixed_math/issues/8)
             copy(
                 self,
                 "*.h",
                 os.path.join(self.source_folder, "fixed_lib", "include", "fixedmath"),
-                os.path.join(self.package_folder, "include", "fixed_math"),
+                os.path.join(self.package_folder, "include", "fixedmath"),
             )
             copy(
                 self,
                 "*.hpp",
                 os.path.join(self.source_folder, "fixed_lib", "include", "fixedmath"),
-                os.path.join(self.package_folder, "include", "fixed_math"),
+                os.path.join(self.package_folder, "include", "fixedmath"),
             )
 
     def package_info(self):

@@ -1,11 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.files import copy, get
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.microsoft import is_msvc
 import os
 
@@ -20,6 +18,7 @@ class FixedMathConan(ConanFile):
     topics = ("mathematics", "fixed-point", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
+    no_copy_source = True
 
     @property
     def _min_cppstd(self):
@@ -53,23 +52,19 @@ class FixedMathConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def build(self):
-        replace_in_file(self, os.path.join(self.source_folder, "fixed_lib", "include", "fixedmath", "detail", "common.h"),
-                        "#include <fixedmath/detail/type_traits.h>", "#include <fixed_math/detail/type_traits.h>")
-
     def package(self):
         copy(self, "LICENCE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(
             self,
             "*.h",
-            os.path.join(self.source_folder, "fixed_lib", "include", "fixedmath"),
-            os.path.join(self.package_folder, "include", "fixed_math"),
+            os.path.join(self.source_folder, "fixed_lib", "include"),
+            os.path.join(self.package_folder, "include"),
         )
         copy(
             self,
             "*.hpp",
-            os.path.join(self.source_folder, "fixed_lib", "include", "fixedmath"),
-            os.path.join(self.package_folder, "include", "fixed_math"),
+            os.path.join(self.source_folder, "fixed_lib", "include"),
+            os.path.join(self.package_folder, "include"),
         )
 
     def package_info(self):
