@@ -103,8 +103,9 @@ patches:
       patch_description: "use cci package"
       patch_type: "conan"
     - patch_file: "patches/8.0.0-0004-fix-msvc-build.patch"
-      patch_description: "see commit a53f2bda5dfa50f2d1dbfd9d7fbc98d8c9725564 from arrow's repo"
-      patch_type: "portability"
+      patch_description: "patch Arrow such that it can be built using MSVC"
+      patch_type: "backport"
+      patch_source: "https://github.com/apache/arrow/pull/13108"
   "8.0.0":
     - patch_file: "patches/8.0.0-0001-static-analyzers.patch"
       patch_description: "do not look for static analyzers"
@@ -116,8 +117,9 @@ patches:
       patch_description: "use cci package"
       patch_type: "conan"
     - patch_file: "patches/8.0.0-0004-fix-msvc-build.patch"
-      patch_description: "see commit a53f2bda5dfa50f2d1dbfd9d7fbc98d8c9725564 from arrow's repo"
-      patch_type: "portability"
+      patch_description: "patch Arrow such that it can be built using MSVC"
+      patch_type: "backport"
+      patch_source: "https://github.com/apache/arrow/pull/13108"
   "7.0.0":
     - patch_file: "patches/7.0.0-0001-static-analyzers.patch"
       patch_description: "do not look for static analyzers"
