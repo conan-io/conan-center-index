@@ -67,3 +67,5 @@ class AnnConan(ConanFile):
         self.cpp_info.libs = ["ANN"]
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.defines.append("ANN_STATIC")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
