@@ -14,8 +14,9 @@ index 4f550b5..ca97e64 100644
 @@ -126,16 +126,16 @@ SET_TARGET_PROPERTIES(${PROJECT_NAME}_static PROPERTIES OUTPUT_NAME ${PROJECT_NA
  # so we add a "lib" prefix (which is default on other platforms anyway):
  SET_TARGET_PROPERTIES(${PROJECT_NAME}_static PROPERTIES PREFIX "lib")
- target_link_libraries(${PROJECT_NAME}_static ${CURL_LIBRARIES} ${CONAN_LIBS})
+-target_link_libraries(${PROJECT_NAME}_static ${CURL_LIBRARIES} ${CONAN_LIBS})
 -
++target_link_libraries(${PROJECT_NAME}_static CURL::libcurl ${CONAN_LIBS})
 +endif()
  # install headers
  install(FILES "${PROJECT_SOURCE_DIR}/cmake/curlppConfig.cmake" DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/curlpp")
