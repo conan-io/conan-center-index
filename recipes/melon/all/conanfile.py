@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
@@ -34,15 +34,12 @@ class PackageConan(ConanFile):
             "Visual Studio": "17",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("range-v3/[>=0.11.0]")
-        self.requires("fmt/[>=10.0.0]")
+        self.requires("range-v3/0.12.0")
+        self.requires("fmt/10.2.1")
 
     def package_id(self):
         self.info.clear()
@@ -59,10 +56,8 @@ class PackageConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    # Not mandatory when there is no patch, but will suppress warning message about missing build() method
     def build(self):
-        # The attribute no_copy_source should not be used when applying patches in build
-        apply_conandata_patches(self)
+        pass
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
