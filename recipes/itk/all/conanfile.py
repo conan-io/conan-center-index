@@ -471,17 +471,7 @@ class ITKConan(ConanFile):
         }
 
     def _create_cmake_module_variables(self):
-        itk_version = Version(self.version)
-        lib_suffix = f"{itk_version.major}.{itk_version.minor}"
-
-        content = textwrap.dedent("""\
-                                  if (CONAN_LIB_DIRS_ITK)
-                                  set(ITK_CMAKE_DIR "${CONAN_LIB_DIRS_ITK}/cmake/ITK-%(version)s")
-                                  else()
-                                  set(ITK_CMAKE_DIR "${itk_LIB_DIRS_RELEASE}/cmake/ITK-%(version)s")
-                                  endif()
-                                  """ % {"version":lib_suffix})
-
+        content = 'set(ITK_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}")'
         save(self, os.path.join(self.package_folder, self._module_variables_file_rel_path), content)
 
     def _create_cmake_module_alias_targets(self):
