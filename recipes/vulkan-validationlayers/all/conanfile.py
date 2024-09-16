@@ -23,7 +23,7 @@ class VulkanValidationLayersConan(ConanFile):
     topics = ("vulkan", "validation-layers")
     homepage = "https://github.com/KhronosGroup/Vulkan-ValidationLayers"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_wsi_xcb": [True, False],
@@ -153,9 +153,12 @@ class VulkanValidationLayersConan(ConanFile):
             tc.variables["VULKAN_HEADERS_INSTALL_DIR"] = self.dependencies["vulkan-headers"].package_folder.replace("\\", "/")
         tc.variables["USE_CCACHE"] = False
         if self.settings.os in ["Linux", "FreeBSD"]:
-            tc.variables["BUILD_WSI_XCB_SUPPORT"] = self.options.with_wsi_xcb
-            tc.variables["BUILD_WSI_XLIB_SUPPORT"] = self.options.with_wsi_xlib
-            tc.variables["BUILD_WSI_WAYLAND_SUPPORT"] = self.options.with_wsi_wayland
+            tc.variables["BUILD_WSI_XCB_SUPPORT"] = self.options.get_safe("with_wsi_xcb")
+            tc.variables["BUILD_WSI_XLIB_SUPPORT"] = self.options.get_safe("with_wsi_xlib")
+            tc.variables["BUILD_WSI_WAYLAND_SUPPORT"] = self.options.get_safe("with_wsi_wayland")
+        elif self.settings.os == "Android":
+            tc.variables["BUILD_WSI_XCB_SUPPORT"] = False
+            tc.variables["BUILD_WSI_XLIB_SUPPORT"] = False
         tc.variables["BUILD_WERROR"] = False
         tc.variables["BUILD_TESTS"] = False
         tc.variables["INSTALL_TESTS"] = False
@@ -190,6 +193,11 @@ class VulkanValidationLayersConan(ConanFile):
                 os.path.join(self.generators_folder, "SPIRV-ToolsConfig.cmake"),
                 os.path.join(self.generators_folder, "SPIRV-Tools-optConfig.cmake"),
             )
+        if self.settings.os == "Android":
+            # INFO: libVkLayer_utils.a: error: undefined symbol: __android_log_print
+            # https://github.com/KhronosGroup/Vulkan-ValidationLayers/commit/a26638ae9fdd8c40b56d4c7b72859a5b9a0952c9
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "VkLayer_utils PUBLIC Vulkan::Headers", "VkLayer_utils PUBLIC Vulkan::Headers -landroid -llog")
 
     def build(self):
         self._patch_sources()
