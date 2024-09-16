@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save, copy
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -23,57 +24,125 @@ class SfmlConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        # modules
         "window": [True, False],
         "graphics": [True, False],
         "network": [True, False],
         "audio": [True, False],
+        # window module options
+        "opengl": ["es", "desktop"],
+        "use_drm": [True, False],  # Linux only
+        # "use_mesa3d": [True, False],  # Windows only, not available in CCI
+
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "window": True,
-        "graphics": True,
-        "network": True,
-        "audio": True,
+        "graphics": False,
+        "network": False,
+        "audio": False,
+        "opengl": "desktop",
+        "use_drm": False,
+        # "use_mesa3d": False,
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
+    @property
+    def _min_cppstd(self):
+        return 17
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        else:
+            pass
+            # del self.options.use_mesa3d
+
+        if self.settings.os == "Android":
+            del self.options.shared
+            self.package_type = "shared-library"
 
     def configure(self):
+        if self.settings.os == "Android":
+            del self.options.shared
+            self.options.rm_safe("fPIC")
+            self.package_type = "shared-library"
+
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+        if not self.options.window:
+            del self.options.opengl
+            del self.options.use_drm
+        elif self.settings.os != "Linux":
+            del self.options.use_drm
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.window:
-            # FIXME: use cci's glad
-            if self.settings.os in ["Windows", "Linux", "FreeBSD", "Macos"]:
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                # if(SFML_USE_DRM)
+                #     find_package(DRM REQUIRED)
+                #     find_package(GBM REQUIRED)
+                #     target_link_libraries(sfml-window PRIVATE DRM::DRM GBM::GBM)
+                # else()
+                #     find_package(X11 REQUIRED COMPONENTS Xrandr Xcursor Xi)
+                #     target_link_libraries(sfml-window PRIVATE X11::X11 X11::Xrandr X11::Xcursor X11::Xi)
+                # endif()
+                if self.options.get_safe("use_drm"):
+                    self.requires("libdrm/2.4.120")
+                    # self.requires("libgbm/20.3.0")  # Missing in CCI
+                else:
+                    self.requires("xorg/system")
+                if self.settings.os == "Linux":
+                    self.requires("libudev/system")
+                if self.settings.os == "FreeBSD":
+                    # TODO: usbhid
+                    pass
+
+            if self.settings.os == "Android":
+                # TODO: EGL, GLES
+                pass
+            elif self.settings.os != "iOS":  # Handled as a framework
                 self.requires("opengl/system")
-            if self.settings.os == "Linux":
-                self.requires("libudev/system")
-                self.requires("xorg/system")
-        if self.options.graphics:
-            self.requires("freetype/2.13.2")
-            self.requires("stb/cci.20230920")
-        if self.options.audio:
-            self.requires("flac/1.4.3")
-            self.requires("openal-soft/1.22.2")
-            self.requires("vorbis/1.3.7")
-            if Version(self.version) >= "2.6.0":
-                self.requires("minimp3/cci.20211201")
+
+        #     # FIXME: use cci's glad
+        #     if self.settings.os in ["Windows", "Linux", "FreeBSD", "Macos"]:
+        #         self.requires("opengl/system")
+        #     if self.settings.os == "Linux":
+        #         self.requires("libudev/system")
+        #         self.requires("xorg/system")
+        # if self.options.graphics:
+        #     self.requires("freetype/2.13.2")
+        #     self.requires("stb/cci.20230920")
+        # if self.options.audio:
+        #     self.requires("flac/1.4.3")
+        #     self.requires("openal-soft/1.22.2")
+        #     self.requires("vorbis/1.3.7")
+        #     if Version(self.version) >= "2.6.0":
+        #         self.requires("minimp3/cci.20211201")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.24 <4]")
 
     def validate(self):
+        if self.options.graphics and not self.options.window:
+            raise ConanInvalidConfiguration(f"-o={self.ref}:graphics=True requires -o={self.ref}:window=True")
+
+        if self.options.get_safe("shared") and is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support shared libraries with static runtime")
+
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+
         if self.settings.os not in ["Windows", "Linux", "FreeBSD", "Android", "Macos", "iOS"]:
             raise ConanInvalidConfiguration(f"{self.ref} not supported on {self.settings.os}")
-        if self.options.graphics and not self.options.window:
-            raise ConanInvalidConfiguration("sfml:graphics=True requires sfml:window=True")
+
+    def validate_build(self):
+        if self.settings.os == "Macos" and self.settings.compiler != "apple-clang":
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os} with {self.settings.compiler}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -83,20 +152,35 @@ class SfmlConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["SFML_DEPENDENCIES_INSTALL_PREFIX"] = self.package_folder.replace("\\", "/")
-        tc.cache_variables["SFML_MISC_INSTALL_PREFIX"] = os.path.join(self.package_folder, "licenses").replace("\\", "/")
+
         tc.variables["SFML_BUILD_WINDOW"] = self.options.window
         tc.variables["SFML_BUILD_GRAPHICS"] = self.options.graphics
         tc.variables["SFML_BUILD_NETWORK"] = self.options.network
         tc.variables["SFML_BUILD_AUDIO"] = self.options.audio
+
+        if self.options.window:
+            tc.variables["SFML_OPENGL_ES"] = True if self.options.opengl == "es" else False
+
+            if self.settings.os == "Linux":
+                tc.variables["SFML_USE_DRM"] = self.options.use_drm
+
+        tc.variables["SFML_GENERATE_PDB"] = False  # PDBs not allowed in CCI
+
+        if self.settings.os == "Windows":
+            tc.cache_variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
+
+        tc.cache_variables["SFML_USE_SYSTEM_DEPS"] = True
+
+        if self.settings.os == "Windows":
+            tc.cache_variables["SFML_USE_MESA3D"] = False  # self.options.use_mesa3d
+
         tc.variables["SFML_INSTALL_PKGCONFIG_FILES"] = False
-        tc.variables["SFML_GENERATE_PDB"] = False
-        tc.variables["SFML_USE_SYSTEM_DEPS"] = True
-        tc.variables["WARNINGS_AS_ERRORS"] = False
-        if Version(self.version) >= "2.6.0":
-            tc.variables["CMAKE_CXX_STANDARD"] = 11
-        if is_msvc(self):
-            tc.variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
+        tc.variables["SFML_CONFIGURE_EXTRAS"] = False
+
+        tc.cache_variables["SFML_WARNINGS_AS_ERRORS"] = False
+
+        # tc.cache_variables["SFML_MISC_INSTALL_PREFIX"] = os.path.join(self.package_folder, "licenses").replace("\\", "/")
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -108,210 +192,99 @@ class SfmlConan(ConanFile):
         cmake.build()
 
     def package(self):
-        if Version(self.version) >= "2.6.0":
-            copy(self, pattern="license.md", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "license.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {values["target"]: f"SFML::{component}" for component, values in self._sfml_components.items()}
-        )
+    def _default_module(self, name):
+        libname = f"sfml-{name}"
+        if self.options.get_safe("shared"):
+            if self.settings.os == "Windows":
+                # TODO: Handle Windows versioning
+                pass
+            elif self.settings.build_type == "Debug":
+                libname += "-d"
+        else:
+            libname += "-s"
+            self.cpp_info.components[name].defines = ["SFML_STATIC"]
+            if self.settings.build_type == "Debug":
+                libname += "-d"
+        self.cpp_info.components[name].libs = [libname]
 
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
-    @property
-    def _sfml_components(self):
-        def gdi32():
-            return ["gdi32"] if self.settings.os == "Windows" else []
-
-        def winmm():
-            return ["winmm"] if self.settings.os == "Windows" else []
-
-        def ws2_32():
-            return ["ws2_32"] if self.settings.os == "Windows" else []
-
-        def dl():
-            return ["dl"] if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "2.6.0" else []
-
-        def libudev():
-            return ["libudev::libudev"] if self.settings.os == "Linux" else []
-
-        def xorg():
-            return ["xorg::xorg"] if self.settings.os == "Linux" else []
-
-        def pthread():
-            return ["pthread"] if self.settings.os in ["Linux", "FreeBSD"] else []
-
-        def rt():
-            return ["rt"] if self.settings.os in ["Linux", "FreeBSD"] else []
-
-        def usbhid():
-            return ["usbhid"] if self.settings.os == "FreeBSD" else []
-
-        def android():
-            return ["android"] if self.settings.os == "Android" else []
-
-        def log():
-            return ["log"] if self.settings.os == "Android" else []
-
-        def foundation():
-            return ["Foundation"] if is_apple_os(self) else []
-
-        def appkit():
-            return ["AppKit"] if self.settings.os == "Macos" else []
-
-        def carbon():
-            return ["Carbon"] if self.settings.os == "Macos" else []
-
-        def iokit():
-            return ["IOKit"] if self.settings.os == "Macos" else []
-
-        def coreservices():
-            return ["CoreServices"] if self.settings.os == "Macos" else []
-
-        def coregraphics():
-            return ["CoreGraphics"] if self.settings.os == "iOS" else []
-
-        def coremotion():
-            return ["CoreMotion"] if self.settings.os == "iOS" else []
-
-        def quartzcore():
-            return ["QuartzCore"] if self.settings.os == "iOS" else []
-
-        def uikit():
-            return ["UIKit"] if self.settings.os == "iOS" else []
-
-        def opengl():
-            return ["opengl::opengl"] if self.settings.os in ["Windows", "Linux", "FreeBSD", "Macos"] else []
-
-        def opengles_android():
-            return ["EGL", "GLESv1_CM"] if self.settings.os == "Android" else []
-
-        def opengles_ios():
-            return ["OpenGLES"] if self.settings.os == "iOS" else []
-
-        def objc():
-            return ["-ObjC"] if not self.options.shared and self.settings.os == "Macos" else []
-
-        suffix = "" if self.options.shared else "-s"
-        suffix += "-d" if self.settings.build_type == "Debug" else ""
-
-        sfml_components = {
-            "system": {
-                "target": "sfml-system",
-                "libs": [f"sfml-system{suffix}"],
-                "system_libs": winmm() + pthread() + rt() + android() + log(),
-            },
-        }
-        if self.settings.os in ["Windows", "Android", "iOS"]:
-            sfml_main_suffix = "-d" if self.settings.build_type == "Debug" else ""
-            sfmlmain_libs = [f"sfml-main{sfml_main_suffix}"]
-            if self.settings.os == "Android":
-                sfmlmain_libs.append(f"sfml-activity{suffix}")
-            sfml_components.update({
-                "main": {
-                    "target": "sfml-main",
-                    "libs": sfmlmain_libs,
-                    "system_libs": android() + log(),
-                },
-            })
-        if self.options.window:
-            sfml_components.update({
-                "window": {
-                    "target": "sfml-window",
-                    "libs": [f"sfml-window{suffix}"],
-                    "requires": ["system"] + opengl() + xorg() + libudev(),
-                    "system_libs": dl() + gdi32() + winmm() + usbhid() + android() + opengles_android(),
-                    "frameworks": foundation() + appkit() + iokit() + carbon() +
-                                  uikit() + coregraphics() + quartzcore() +
-                                  coreservices() + coremotion() + opengles_ios(),
-                    "exelinkflags": objc(),
-                },
-            })
-        if self.options.graphics:
-            sfml_components.update({
-                "graphics": {
-                    "target": "sfml-graphics",
-                    "libs": [f"sfml-graphics{suffix}"],
-                    "requires": ["window", "freetype::freetype", "stb::stb"],
-                },
-            })
-        if self.options.network:
-            sfml_components.update({
-                "network": {
-                    "target": "sfml-network",
-                    "libs": [f"sfml-network{suffix}"],
-                    "requires": ["system"],
-                    "system_libs": ws2_32(),
-                },
-            })
-        if self.options.audio:
-            audio_requires = ["system", "flac::flac", "openal-soft::openal-soft", "vorbis::vorbis"]
-            if Version(self.version) >= "2.6.0":
-                audio_requires.append("minimp3::minimp3")
-            sfml_components.update({
-                "audio": {
-                    "target": "sfml-audio",
-                    "libs": [f"sfml-audio{suffix}"],
-                    "requires": audio_requires,
-                    "system_libs": android(),
-                },
-            })
-
-        return sfml_components
+        # TODO:
+        # if(SFML_COMPILER_GCC OR SFML_COMPILER_CLANG)
+        #                 # on Windows + gcc/clang get rid of "lib" prefix for shared libraries,
+        #                 # and transform the ".dll.a" suffix into ".a" for import libraries
+        #                 set_target_properties(${target} PROPERTIES PREFIX "")
+        #                 set_target_properties(${target} PROPERTIES IMPORT_SUFFIX ".a")
+        #             endif()
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SFML")
         self.cpp_info.set_property("pkg_config_name", "sfml-all")
 
-        def _register_components(components):
-            defines = [] if self.options.shared else ["SFML_STATIC"]
-            for component, values in components.items():
-                target = values.get("target", [])
-                libs = values.get("libs", [])
-                requires = values.get("requires", [])
-                system_libs = values.get("system_libs", [])
-                frameworks = values.get("frameworks", [])
-                exelinkflags = values.get("exelinkflags", [])
-                # TODO: Properly model COMPONENTS names in CMakeDeps for find_package() call
-                #       (see https://github.com/conan-io/conan/issues/10258)
-                #       It should be:
-                #         find_package(SFML REQUIRED COMPONENTS system window graphics network audio)
-                #         target_link_libraries(myApp sfml-system sfml-window sfml-graphics sfml-network sfml-audio)
-                #       Do not use cmake_target_aliases to model this, names are too generic!
-                self.cpp_info.components[component].set_property("cmake_target_name", target)
-                self.cpp_info.components[component].set_property("pkg_config_name", target)
-                self.cpp_info.components[component].libs = libs
-                self.cpp_info.components[component].defines = defines
-                self.cpp_info.components[component].requires = requires
-                self.cpp_info.components[component].system_libs = system_libs
-                self.cpp_info.components[component].frameworks = frameworks
-                self.cpp_info.components[component].exelinkflags = exelinkflags
+        # if self.options.get_safe("opengl") == "desktop":
+        # -DSFML_OPENGL_ES
+        # -DGL_GLEXT_PROTOTYPES
 
-                # TODO: to remove in conan v2 once cmake_find_package* generators removed
-                self.cpp_info.components[component].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-                self.cpp_info.components[component].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
+        # TODO: libatomic when gcc for graphics and audio, but only iof not available?
+        # code says: (e.g. Raspberry Pi 3 armhf), GCC requires linking libatomic to use <atomic> features
 
-        _register_components(self._sfml_components)
+        modules = ["system"]
+        if self.settings.os in ["Windows", "iOS", "Android"]:
+            modules.append("main")
+
+        modules.extend(module for module in ["window", "graphics", "network", "audio"] if self.options.get_safe(module))
+
+        for module in modules:
+            self._default_module(module)
+            if hasattr(self, f"_{module}_module"):
+                getattr(self, f"_{module}_module")()
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "SFML"
         self.cpp_info.names["cmake_find_package_multi"] = "SFML"
         self.cpp_info.names["pkgconfig"] = "sfml-all"
+
+    def _system_module(self):
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["system"].system_libs = ["pthread", "rt"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["system"].system_libs = ["winmm"]
+        elif self.settings.os == "Android":
+            # TODO: Android
+            self.cpp_info.components["system"].system_libs = ["log"]
+
+    def _window_module(self):
+        if self.options.window:
+            self.cpp_info.components["window"].requires = ["system"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["window"].system_libs.append("dl")
+
+            if self.settings.os == "iOS":
+                self.cpp_info.components["window"].frameworks = ["OpenGLES"]
+            elif self.settings.os == "Android":
+                # TODO: EGL, GLES
+                pass
+            else:
+                self.cpp_info.components["window"].requires.append("opengl::opengl")
+
+            if self.settings.os == "Linux":
+                self.cpp_info.components["window"].requires.append("libudev::libudev")
+            elif self.settings.os == "Windows":
+                self.cpp_info.components["window"].system_libs.extend(["gdi32", "winmm"])
+            elif self.settings.os == "FreeBSD":
+                # TODO: usbhid
+                pass
+            elif self.settings.os == "Macos":
+                self.cpp_info.components["window"].frameworks = ["Foundation", "AppKit", "IOKit", "Carbon"]
+            elif self.settings.os == "iOS":
+                self.cpp_info.components["window"].frameworks = ["Foundation", "UIKit", "CoreGraphics", "QuartzCore", "CoreMotion"]
+            elif self.settings.os == "Android":
+                # TODO: android
+                pass
+
+            # TODO: Atomic
