@@ -103,7 +103,7 @@ class MtFmtConan(ConanFile):
 
         libdir = os.path.join("mtfmt", "lib")
 
-        if not self.options.shared:
+        if not self.options.shared or self.settings.os == "Windows":
             libdir = os.path.join(libdir, "static")
 
         self.cpp_info.libdirs = [libdir]
