@@ -758,6 +758,7 @@ required_for_references:
 - libjxl
 - libkml
 - libliftoff
+- liblqr
 - liblsl
 - libltc
 - liblzf
@@ -982,6 +983,7 @@ required_for_references:
 - miniz
 - minizip
 - minizip-ng
+- minmea
 - mio
 - mlpack
 - mm_file
@@ -1118,6 +1120,7 @@ required_for_references:
 - openmvg
 - openpam
 - openscenegraph
+- openslide
 - openssh
 - openssl
 - opensubdiv
