@@ -197,6 +197,12 @@ class SundialsConan(ConanFile):
         tc.variables["BUILD_SUNMATRIX_CUSPARSE"] = self.options.get_safe("with_cuda", False) and self.options.index_size == 32
         tc.variables["BUILD_SUNLINSOL_CUSOLVERSP"] = self.options.get_safe("with_cuda", False) and self.options.index_size == 32
 
+        # Configure default LAPACK naming conventions for OpenBLAS.
+        # Needed to avoid a Fortran compiler requirement to detect the correct name mangling scheme.
+        # https://github.com/LLNL/sundials/blob/v7.1.1/cmake/SundialsSetupCompilers.cmake#L269-L360
+        tc.variables["SUNDIALS_LAPACK_CASE"] = "lower"
+        tc.variables["SUNDIALS_LAPACK_UNDERSCORES"] = "one"
+
         tc.generate()
 
         deps = CMakeDeps(self)
