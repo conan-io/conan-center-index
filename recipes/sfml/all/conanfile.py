@@ -93,6 +93,7 @@ class SfmlConan(ConanFile):
                 # endif()
                 if self.options.get_safe("use_drm"):
                     self.requires("libdrm/2.4.120")
+                    # TODO
                     # self.requires("libgbm/20.3.0")  # Missing in CCI
                 else:
                     self.requires("xorg/system")
@@ -263,6 +264,12 @@ class SfmlConan(ConanFile):
             self.cpp_info.components["window"].requires = ["system"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["window"].system_libs.append("dl")
+                if self.options.get_safe("use_drm"):
+                    self.cpp_info.components["window"].requires.append("libdrm::libdrm")
+                    # TODO
+                    # self.cpp_info.components["window"].requires.append("libgbm::libgbm")
+                else:
+                    self.cpp_info.components["window"].requires.extend(["xorg::x11", "xorg::xrandr", "xorg::xcursor", "xorg::xi"])
 
             if self.settings.os == "iOS":
                 self.cpp_info.components["window"].frameworks = ["OpenGLES"]

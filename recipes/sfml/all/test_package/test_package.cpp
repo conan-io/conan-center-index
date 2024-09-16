@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <SFML/System.hpp>
 
 #ifdef SFML_WITH_WINDOW
@@ -16,10 +18,10 @@
 int main()
 {
     sf::Clock clock;
-    clock.getElapsedTime().asSeconds();
+
 
 #ifdef SFML_WITH_WINDOW
-    sf::VideoMode videoMode(720, 480);
+    sf::VideoMode videoMode{};
 #endif
 
 #ifdef SFML_WITH_GRAPHICS
@@ -37,6 +39,8 @@ int main()
     sf::Sound sound;
     sound.setBuffer(buffer);
 #endif
+
+std::cout << clock.getElapsedTime().asSeconds() << std::endl;
 
     return 0;
 }
