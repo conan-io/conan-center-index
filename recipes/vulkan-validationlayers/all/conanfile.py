@@ -23,7 +23,7 @@ class VulkanValidationLayersConan(ConanFile):
     topics = ("vulkan", "validation-layers")
     homepage = "https://github.com/KhronosGroup/Vulkan-ValidationLayers"
     url = "https://github.com/conan-io/conan-center-index"
-    package_type = "shared-library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_wsi_xcb": [True, False],
