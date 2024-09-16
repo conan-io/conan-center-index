@@ -92,7 +92,7 @@ class VulkanValidationLayersConan(ConanFile):
             del self.options.with_wsi_xcb
             del self.options.with_wsi_xlib
             del self.options.with_wsi_wayland
-        elif self.settings.os == "Windows":
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def layout(self):
