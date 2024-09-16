@@ -26,11 +26,13 @@ class VulkanValidationLayersConan(ConanFile):
     package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "fPIC": [True, False],
         "with_wsi_xcb": [True, False],
         "with_wsi_xlib": [True, False],
         "with_wsi_wayland": [True, False],
     }
     default_options = {
+        "fPIC": True,
         "with_wsi_xcb": True,
         "with_wsi_xlib": True,
         "with_wsi_wayland": True,
@@ -90,6 +92,8 @@ class VulkanValidationLayersConan(ConanFile):
             del self.options.with_wsi_xcb
             del self.options.with_wsi_xlib
             del self.options.with_wsi_wayland
+        elif self.settings.os == "Windows":
+            del self.options.fPIC
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -198,6 +202,9 @@ class VulkanValidationLayersConan(ConanFile):
             # https://github.com/KhronosGroup/Vulkan-ValidationLayers/commit/a26638ae9fdd8c40b56d4c7b72859a5b9a0952c9
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "VkLayer_utils PUBLIC Vulkan::Headers", "VkLayer_utils PUBLIC Vulkan::Headers -landroid -llog")
+        if not self.options.get_safe("fPIC"):
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "CMAKE_POSITION_INDEPENDENT_CODE ON", "CMAKE_POSITION_INDEPENDENT_CODE OFF")
 
     def build(self):
         self._patch_sources()
