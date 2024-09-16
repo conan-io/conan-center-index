@@ -43,7 +43,8 @@ class CurlppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libcurl/8.9.1", transitive_headers=True)
+        # As it's a wrapper, it includes curl symbols in its public headers 
+        self.requires("libcurl/8.9.1", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
