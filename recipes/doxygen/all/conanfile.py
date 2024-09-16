@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -41,9 +41,6 @@ class DoxygenConan(ConanFile):
             "msvc": "191",
         }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -52,8 +49,6 @@ class DoxygenConan(ConanFile):
             self.requires("xapian-core/1.4.19")
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.enable_app or self.options.enable_parse:
-            # INFO: Before https://github.com/doxygen/doxygen/pull/10888 was merged,
-            # Doxygen used upper case CMake variables to link/include IConv, so we are using patches for targets.
             self.requires("libiconv/1.17")
 
     def compatibility(self):
@@ -87,13 +82,6 @@ class DoxygenConan(ConanFile):
         deps.generate()
 
     def build(self):
-        rm(self, "FindIconv.cmake", os.path.join(self.source_folder, "cmake"))
-        for cmake_file in ["CMakeLists.txt", os.path.join("src", "CMakeLists.txt"), os.path.join("addon", "doxyapp", "CMakeLists.txt"), os.path.join("addon", "doxyparse", "CMakeLists.txt")]:
-            cmake_file = os.path.join(self.source_folder, cmake_file)
-            replace_in_file(self, cmake_file, "find_package(Iconv REQUIRED)\n", "find_package(Iconv REQUIRED)\nget_target_property(ICONV_INCLUDE_DIR Iconv::Iconv INTERFACE_INCLUDE_DIRECTORIES)\n", strict=False)
-            replace_in_file(self, cmake_file, "find_package(Iconv)\\n", "find_package(Iconv)\nget_target_property(ICONV_INCLUDE_DIR Iconv::Iconv INTERFACE_INCLUDE_DIRECTORIES)\n", strict=False)
-            replace_in_file(self, cmake_file, "${ICONV_LIBRARIES}", "Iconv::Iconv", strict=False)
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.verbose = True
         cmake.configure()
