@@ -285,13 +285,14 @@ class SfmlConan(ConanFile):
 
     def _network_module(self):
         if self.options.network:
+            self.cpp_info.components["network"].requires = ["system"]
+
             if self.settings.os == "Windows":
-                self.cpp_info.components["network"].requires = ["system"]
                 self.cpp_info.components["network"].system_libs = ["ws2_32"]
 
     def _audio_module(self):
         if self.options.audio:
-            self.cpp_info.components["audio"].requires = ["vorbis::vorbis", "flac::flac"]
+            self.cpp_info.components["audio"].requires = ["vorbis::vorbis", "flac::flac", "system"]
             if self.settings.os == "iOS":
                 self.cpp_info.components["audio"].frameworks = ["Foundation", "CoreFoundation", "CoreAudio", "AudioToolbox", "AVFoundation"]
             else:
