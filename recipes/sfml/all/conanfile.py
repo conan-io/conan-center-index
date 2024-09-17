@@ -42,7 +42,7 @@ class SfmlConan(ConanFile):
         "window": True,
         "graphics": True,
         "network": True,
-        "audio": False,
+        "audio": True,
         "opengl": "desktop",
         "use_drm": False,
         # "use_mesa3d": False,
@@ -116,21 +116,9 @@ class SfmlConan(ConanFile):
                 self.requires("bzip2/1.0.8")
             self.requires("freetype/2.13.2")
 
-        #     # FIXME: use cci's glad
-        #     if self.settings.os in ["Windows", "Linux", "FreeBSD", "Macos"]:
-        #         self.requires("opengl/system")
-        #     if self.settings.os == "Linux":
-        #         self.requires("libudev/system")
-        #         self.requires("xorg/system")
-        # if self.options.graphics:
-        #     self.requires("freetype/2.13.2")
-        #     self.requires("stb/cci.20230920")
-        # if self.options.audio:
-        #     self.requires("flac/1.4.3")
-        #     self.requires("openal-soft/1.22.2")
-        #     self.requires("vorbis/1.3.7")
-        #     if Version(self.version) >= "2.6.0":
-        #         self.requires("minimp3/cci.20211201")
+        if self.options.audio:
+            self.requires("vorbis/1.3.7")
+            self.requires("flac/1.4.3")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -156,9 +144,6 @@ class SfmlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        # sfml/2.6.0 uses minimp3 and glad in extlibs
-        if Version(self.version) < "2.6.0":
-            rmdir(self, os.path.join(self.source_folder, "extlibs"))
 
     def generate(self):
         venv = VirtualBuildEnv(self)
@@ -195,6 +180,7 @@ class SfmlConan(ConanFile):
 
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("flac", "cmake_file_name", "FLAC")
         deps.generate()
 
     def _patch_sources(self):
@@ -326,3 +312,22 @@ class SfmlConan(ConanFile):
             if self.settings.os == "Windows":
                 self.cpp_info.components["network"].requires = ["system"]
                 self.cpp_info.components["network"].system_libs = ["ws2_32"]
+
+    def _audio_module(self):
+        if self.options.audio:
+            self.cpp_info.components["audio"].requires = ["vorbis::vorbis", "flac::flac"]
+            if self.settings.os == "iOS":
+                self.cpp_info.components["audio"].frameworks = ["Foundation", "CoreFoundation", "CoreAudio", "AudioToolbox", "AVFoundation"]
+            else:
+                self.cpp_info.components["audio"].requires.extend(["vorbis::vorbisfile", "vorbis::vorbisenc"])
+
+            if self.settings.os == "Android":
+                # TODO: target_link_libraries(sfml-audio PRIVATE android OpenSLES)
+                pass
+
+            if self.settings.os == "Linux":
+                self.cpp_info.components["audio"].system_libs = ["dl"]
+            # self.cpp_info.components["audio"].requires = ["system"]
+            # self.cpp_info.components["audio"].requires.extend(["flac::flac", "openal-soft::openal-soft", "vorbis::vorbis"])
+            # if Version(self.version) >= "2.6.0":
+            #     self.cpp_info.components["audio"].requires.append("minimp3::minimp3")

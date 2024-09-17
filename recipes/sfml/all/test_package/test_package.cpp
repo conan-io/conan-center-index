@@ -36,8 +36,7 @@ int main()
 
 #ifdef SFML_WITH_AUDIO
     sf::SoundBuffer buffer;
-    sf::Sound sound;
-    sound.setBuffer(buffer);
+    sf::Sound sound(buffer);
 #endif
 
 std::cout << clock.getElapsedTime().asSeconds() << std::endl;

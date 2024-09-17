@@ -23,7 +23,7 @@ endif()
 if(SFML_WITH_AUDIO)
     target_compile_definitions(${PROJECT_NAME} PRIVATE SFML_WITH_AUDIO)
     list(APPEND SFML_COMPONENTS audio)
-    list(APPEND SFML_TARGETS sfml-audio)
+    list(APPEND SFML_TARGETS sfml::audio)
 endif()
 
 find_package(SFML REQUIRED ${SFML_COMPONENTS} CONFIG)
