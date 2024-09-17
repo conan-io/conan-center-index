@@ -325,4 +325,5 @@ class SfmlConan(ConanFile):
     def _network_module(self):
         if self.options.network:
             if self.settings.os == "Windows":
+                self.cpp_info.components["network"].requires = ["system"]
                 self.cpp_info.components["network"].system_libs = ["ws2_32"]
