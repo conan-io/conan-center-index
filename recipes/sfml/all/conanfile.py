@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save, copy, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -199,6 +199,9 @@ class SfmlConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join("src", "CMakeLists.txt"),
+                        'set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_LIBDIR}/${CMAKE_ANDROID_ARCH_ABI}")',
+                        '')
 
     def build(self):
         self._patch_sources()
