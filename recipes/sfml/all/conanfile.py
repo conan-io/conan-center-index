@@ -249,8 +249,7 @@ class SfmlConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.components["system"].system_libs = ["winmm"]
         elif self.settings.os == "Android":
-            # TODO: Android
-            self.cpp_info.components["system"].system_libs = ["log"]
+            self.cpp_info.components["system"].system_libs = ["log", "android"]
 
     def _window_module(self):
         if self.options.window:
@@ -285,8 +284,7 @@ class SfmlConan(ConanFile):
             elif self.settings.os == "iOS":
                 self.cpp_info.components["window"].frameworks = ["Foundation", "UIKit", "CoreGraphics", "QuartzCore", "CoreMotion"]
             elif self.settings.os == "Android":
-                # TODO: android
-                pass
+                self.cpp_info.components["window"].system_libs = ["android"]
 
     def _graphics_module(self):
         if self.options.graphics:
@@ -313,8 +311,7 @@ class SfmlConan(ConanFile):
                 self.cpp_info.components["audio"].requires.extend(["vorbis::vorbisfile", "vorbis::vorbisenc"])
 
             if self.settings.os == "Android":
-                # TODO: target_link_libraries(sfml-audio PRIVATE android OpenSLES)
-                pass
+                self.cpp_info.components["audio"].system_libs = ["android", "OpenSLES"]
 
             if self.settings.os == "Linux":
                 self.cpp_info.components["audio"].system_libs = ["dl"]
