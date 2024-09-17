@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save, copy
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
@@ -39,7 +40,7 @@ class SfmlConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "window": True,
-        "graphics": False,
+        "graphics": True,
         "network": False,
         "audio": False,
         "opengl": "desktop",
@@ -50,6 +51,9 @@ class SfmlConan(ConanFile):
     @property
     def _min_cppstd(self):
         return 17
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -75,7 +79,7 @@ class SfmlConan(ConanFile):
             del self.options.opengl
             del self.options.use_drm
         elif self.settings.os != "Linux":
-            del self.options.use_drm
+            del self.options.use_drm  # For Window module but only available on Linux
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -94,7 +98,7 @@ class SfmlConan(ConanFile):
                 if self.options.get_safe("use_drm"):
                     self.requires("libdrm/2.4.120")
                     # TODO
-                    # self.requires("libgbm/20.3.0")  # Missing in CCI
+                    # self.requires("libgbm/20.3.0")  # Missing in CCI?
                 else:
                     self.requires("xorg/system")
                 if self.settings.os == "Linux":
@@ -108,6 +112,13 @@ class SfmlConan(ConanFile):
                 pass
             elif self.settings.os != "iOS":  # Handled as a framework
                 self.requires("opengl/system")
+
+        if self.options.graphics:
+            if self.settings.os == "Android" or self.settings.os == "iOS":
+                self.requires("zlib/[>=1.2.11 <2]")
+            if self.settings.os == "iOS":
+                self.requires("bzip2/1.0.8")
+            self.requires("freetype/2.13.2")
 
         #     # FIXME: use cci's glad
         #     if self.settings.os in ["Windows", "Linux", "FreeBSD", "Macos"]:
@@ -127,6 +138,8 @@ class SfmlConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def validate(self):
         if self.options.graphics and not self.options.window:
@@ -152,6 +165,8 @@ class SfmlConan(ConanFile):
             rmdir(self, os.path.join(self.source_folder, "extlibs"))
 
     def generate(self):
+        venv = VirtualBuildEnv(self)
+        venv.generate()
         tc = CMakeToolchain(self)
 
         tc.variables["SFML_BUILD_WINDOW"] = self.options.window
@@ -186,8 +201,11 @@ class SfmlConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -294,4 +312,14 @@ class SfmlConan(ConanFile):
                 # TODO: android
                 pass
 
+    def _graphics_module(self):
+        if self.options.graphics:
+            self.cpp_info.components["graphics"].requires = ["window"]
+            if self.settings.os == "Android" or self.settings.os == "iOS":
+                self.cpp_info.components["graphics"].requires.append("zlib::zlib")
+            if self.settings.os == "iOS":
+                self.cpp_info.components["graphics"].requires.append("bzip2::bzip2")
+            self.cpp_info.components["graphics"].requires.append("freetype::freetype")
             # TODO: Atomic
+
+
