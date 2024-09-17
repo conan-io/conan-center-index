@@ -89,14 +89,8 @@ class SfmlConan(ConanFile):
                     self.requires("xorg/system")
                 if self.settings.os == "Linux":
                     self.requires("libudev/system")
-                if self.settings.os == "FreeBSD":
-                    # TODO: usbhid
-                    pass
 
-            if self.settings.os == "Android":
-                # TODO: EGL, GLES
-                pass
-            elif self.settings.os != "iOS":  # Handled as a framework
+            if self.settings.os not in ("iOS", "Android"):  # Handled as a framework
                 self.requires("opengl/system")
 
         if self.options.graphics:
@@ -112,8 +106,6 @@ class SfmlConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
-        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def validate(self):
         if self.options.graphics and not self.options.window:
@@ -127,6 +119,10 @@ class SfmlConan(ConanFile):
 
         if self.settings.os not in ["Windows", "Linux", "FreeBSD", "Android", "Macos", "iOS"]:
             raise ConanInvalidConfiguration(f"{self.ref} not supported on {self.settings.os}")
+
+        # TODO: Mesa support, or another way to get gbm
+        if self.options.get_safe("use_drm"):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support -o=use_drm=True, contributions are welcome")
 
     def validate_build(self):
         if self.settings.os == "Macos" and self.settings.compiler != "apple-clang":
@@ -193,11 +189,12 @@ class SfmlConan(ConanFile):
     def _default_module(self, name):
         libname = f"sfml-{name}"
         if name != "main" and (self.options.get_safe("shared") or self.settings.os == "Android"):
-            if self.settings.os == "Windows":
-                # TODO: Handle Windows versioning
-                pass
-            elif self.settings.build_type == "Debug":
+            if self.settings.build_type == "Debug":
                 libname += "-d"
+            if self.settings.os == "Windows":
+                # TODO: Windows shared does set_target_properties(${target} PROPERTIES SUFFIX "-${PROJECT_VERSION_MAJOR}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+                # Should we handle it here? It compiles either way
+                pass
         else:
             libname += "-s"
             self.cpp_info.components[name].defines = ["SFML_STATIC"]
@@ -208,14 +205,6 @@ class SfmlConan(ConanFile):
         if self.settings.os == "Android":
             self.cpp_info.components[name].libdirs = [os.path.join("lib", android_abi(self))]
 
-        # TODO:
-        # if(SFML_COMPILER_GCC OR SFML_COMPILER_CLANG)
-        #                 # on Windows + gcc/clang get rid of "lib" prefix for shared libraries,
-        #                 # and transform the ".dll.a" suffix into ".a" for import libraries
-        #                 set_target_properties(${target} PROPERTIES PREFIX "")
-        #                 set_target_properties(${target} PROPERTIES IMPORT_SUFFIX ".a")
-        #             endif()
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SFML")
         self.cpp_info.set_property("pkg_config_name", "sfml-all")
@@ -224,7 +213,7 @@ class SfmlConan(ConanFile):
         # -DSFML_OPENGL_ES
         # -DGL_GLEXT_PROTOTYPES
 
-        # TODO: libatomic when gcc for graphics and audio, but only iof not available?
+        # TODO: libatomic when gcc for graphics and audio, but only if not available?
         # code says: (e.g. Raspberry Pi 3 armhf), GCC requires linking libatomic to use <atomic> features
 
         modules = ["system"]
@@ -267,7 +256,6 @@ class SfmlConan(ConanFile):
                 self.cpp_info.components["window"].frameworks = ["OpenGLES"]
             elif self.settings.os == "Android":
                 self.cpp_info.components["window"].system_libs.extend(["egl", "GLESv2"])
-                pass
             else:
                 self.cpp_info.components["window"].requires.append("opengl::opengl")
 
@@ -276,8 +264,8 @@ class SfmlConan(ConanFile):
             elif self.settings.os == "Windows":
                 self.cpp_info.components["window"].system_libs.extend(["gdi32", "winmm"])
             elif self.settings.os == "FreeBSD":
-                # TODO: usbhid
-                pass
+                # TODO: Check that this works, it's available since FreeBSD 13
+                self.cpp_info.components["window"].system_libs.append("usbhid")
             elif self.settings.os == "Macos":
                 self.cpp_info.components["window"].frameworks = ["Foundation", "AppKit", "IOKit", "Carbon"]
             elif self.settings.os == "iOS":
