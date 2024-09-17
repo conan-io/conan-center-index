@@ -1,14 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save, copy, replace_in_file
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc_static_runtime
 import os
-import textwrap
 
 required_conan_version = ">=1.53.0"
 
@@ -83,14 +80,6 @@ class SfmlConan(ConanFile):
     def requirements(self):
         if self.options.window:
             if self.settings.os in ["Linux", "FreeBSD"]:
-                # if(SFML_USE_DRM)
-                #     find_package(DRM REQUIRED)
-                #     find_package(GBM REQUIRED)
-                #     target_link_libraries(sfml-window PRIVATE DRM::DRM GBM::GBM)
-                # else()
-                #     find_package(X11 REQUIRED COMPONENTS Xrandr Xcursor Xi)
-                #     target_link_libraries(sfml-window PRIVATE X11::X11 X11::Xrandr X11::Xcursor X11::Xi)
-                # endif()
                 if self.options.get_safe("use_drm"):
                     self.requires("libdrm/2.4.120")
                     # TODO
@@ -327,7 +316,3 @@ class SfmlConan(ConanFile):
 
             if self.settings.os == "Linux":
                 self.cpp_info.components["audio"].system_libs = ["dl"]
-            # self.cpp_info.components["audio"].requires = ["system"]
-            # self.cpp_info.components["audio"].requires.extend(["flac::flac", "openal-soft::openal-soft", "vorbis::vorbis"])
-            # if Version(self.version) >= "2.6.0":
-            #     self.cpp_info.components["audio"].requires.append("minimp3::minimp3")
