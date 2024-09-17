@@ -64,14 +64,10 @@ class SfmlConan(ConanFile):
 
         if self.settings.os == "Android":
             del self.options.shared
+            del self.options.fPIC
             self.package_type = "shared-library"
 
     def configure(self):
-        if self.settings.os == "Android":
-            self.options.rm_safe("shared")
-            self.options.rm_safe("fPIC")
-            self.package_type = "shared-library"
-
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
@@ -220,7 +216,7 @@ class SfmlConan(ConanFile):
 
     def _default_module(self, name):
         libname = f"sfml-{name}"
-        if self.options.get_safe("shared"):
+        if self.options.get_safe("shared") or self.settings.os == "Android":
             if self.settings.os == "Windows":
                 # TODO: Handle Windows versioning
                 pass
