@@ -187,6 +187,8 @@ class SfmlConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def _default_module(self, name):
+        self.cpp_info.components[name].set_property("cmake_target_name", f"SFML::{name.capitalize()}")
+
         libname = f"sfml-{name}"
         if name != "main" and (self.options.get_safe("shared") or self.settings.os == "Android"):
             if self.settings.build_type == "Debug":
