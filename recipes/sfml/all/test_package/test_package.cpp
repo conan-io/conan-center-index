@@ -31,7 +31,7 @@ int main()
 
 #ifdef SFML_WITH_NETWORK
     sf::TcpListener listener;
-    listener.isBlocking();
+    std::cout << "Is tcp listener blocking?: " << listener.isBlocking() << std::endl;
 #endif
 
 #ifdef SFML_WITH_AUDIO

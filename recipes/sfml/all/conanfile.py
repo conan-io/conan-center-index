@@ -41,7 +41,7 @@ class SfmlConan(ConanFile):
         "fPIC": True,
         "window": True,
         "graphics": True,
-        "network": False,
+        "network": True,
         "audio": False,
         "opengl": "desktop",
         "use_drm": False,
@@ -322,4 +322,7 @@ class SfmlConan(ConanFile):
             self.cpp_info.components["graphics"].requires.append("freetype::freetype")
             # TODO: Atomic
 
-
+    def _network_module(self):
+        if self.options.network:
+            if self.settings.os == "Windows":
+                self.cpp_info.components["network"].system_libs = ["ws2_32"]
