@@ -199,7 +199,7 @@ class SfmlConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join("src", "CMakeLists.txt"),
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         'set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_LIBDIR}/${CMAKE_ANDROID_ARCH_ABI}")',
                         '')
 
