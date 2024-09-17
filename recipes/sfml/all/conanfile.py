@@ -266,8 +266,7 @@ class SfmlConan(ConanFile):
             if self.settings.os == "iOS":
                 self.cpp_info.components["window"].frameworks = ["OpenGLES"]
             elif self.settings.os == "Android":
-                # TODO: EGL, GLES, this is experimental
-                # self.cpp_info.components["window"].system_libs.extend(["egl", "GLESv2"])
+                self.cpp_info.components["window"].system_libs.extend(["egl", "GLESv2"])
                 pass
             else:
                 self.cpp_info.components["window"].requires.append("opengl::opengl")
