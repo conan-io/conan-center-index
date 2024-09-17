@@ -219,7 +219,7 @@ class SfmlConan(ConanFile):
 
     def _default_module(self, name):
         libname = f"sfml-{name}"
-        if self.options.get_safe("shared") or self.settings.os == "Android":
+        if name != "main" and (self.options.get_safe("shared") or self.settings.os == "Android"):
             if self.settings.os == "Windows":
                 # TODO: Handle Windows versioning
                 pass
