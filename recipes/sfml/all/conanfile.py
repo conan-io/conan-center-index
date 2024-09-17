@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.android import android_abi
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -174,9 +175,6 @@ class SfmlConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        'set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_LIBDIR}/${CMAKE_ANDROID_ARCH_ABI}")',
-                        '')
 
     def build(self):
         self._patch_sources()
@@ -206,6 +204,9 @@ class SfmlConan(ConanFile):
             if self.settings.build_type == "Debug":
                 libname += "-d"
         self.cpp_info.components[name].libs = [libname]
+
+        if self.settings.os == "Android":
+            self.cpp_info.components[name].libdirs = [os.path.join("lib", android_abi(self))]
 
         # TODO:
         # if(SFML_COMPILER_GCC OR SFML_COMPILER_CLANG)
@@ -266,7 +267,8 @@ class SfmlConan(ConanFile):
             if self.settings.os == "iOS":
                 self.cpp_info.components["window"].frameworks = ["OpenGLES"]
             elif self.settings.os == "Android":
-                # TODO: EGL, GLES
+                # TODO: EGL, GLES, this is experimental
+                # self.cpp_info.components["window"].system_libs.extend(["egl", "GLESv2"])
                 pass
             else:
                 self.cpp_info.components["window"].requires.append("opengl::opengl")
