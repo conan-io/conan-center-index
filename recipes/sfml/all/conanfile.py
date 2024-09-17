@@ -68,11 +68,11 @@ class SfmlConan(ConanFile):
 
     def configure(self):
         if self.settings.os == "Android":
-            del self.options.shared
+            self.options.rm_safe("shared")
             self.options.rm_safe("fPIC")
             self.package_type = "shared-library"
 
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
         if not self.options.window:
