@@ -311,7 +311,7 @@ class SfmlConan(ConanFile):
                 self.cpp_info.components["audio"].requires.extend(["vorbis::vorbisfile", "vorbis::vorbisenc"])
 
             if self.settings.os == "Android":
-                self.cpp_info.components["audio"].system_libs = ["android", "OpenSLES"]
+                self.cpp_info.components["audio"].system_libs = ["android", "OpenSLES_fopfofofofo"]
 
             if self.settings.os == "Linux":
                 self.cpp_info.components["audio"].system_libs = ["dl"]
