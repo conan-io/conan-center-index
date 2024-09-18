@@ -2,9 +2,9 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.build import cross_building, stdcpp_library
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import stdcpp_library
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, export_conandata_patches, get, rm, rmdir, replace_in_file, save
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -161,8 +161,6 @@ class LibcacaConan(ConanFile):
         self.cpp_info.components["caca"].set_property("pkg_config_name", "caca")
         self.cpp_info.components["caca"].libs = ["caca"]
         self.cpp_info.components["caca"].requires = ["zlib::zlib"]
-        # if is_apple_os(self):
-        #     self.cpp_info.components["caca"].frameworks.append("Cocoa")
         if self.options.with_opengl:
             self.cpp_info.components["caca"].requires.extend(["opengl::opengl", "freeglut::freeglut"])
         if self.options.with_ncurses:
