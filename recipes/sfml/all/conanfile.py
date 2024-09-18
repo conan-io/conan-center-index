@@ -173,9 +173,16 @@ class SfmlConan(ConanFile):
             tc.cache_variables["SFML_USE_MESA3D"] = False  # self.options.use_mesa3d
 
         tc.variables["SFML_INSTALL_PKGCONFIG_FILES"] = False
-        tc.variables["SFML_CONFIGURE_EXTRAS"] = False
+        #  TODO: Back to false when no more testing is needed
+        tc.variables["SFML_CONFIGURE_EXTRAS"] = True
+        # TODO: Remove when no longer testing, this is useful for now to check
+        tc.variables["SFML_BUILD_EXAMPLES"] = True
 
         tc.cache_variables["SFML_WARNINGS_AS_ERRORS"] = False
+
+        # TODO: Remove in Conan 2
+        if not self.settings.compiler.cppstd:
+            tc.cache_variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
 
         # tc.cache_variables["SFML_MISC_INSTALL_PREFIX"] = os.path.join(self.package_folder, "licenses").replace("\\", "/")
 
