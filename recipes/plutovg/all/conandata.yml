@@ -1,10 +1,12 @@
 sources:
-  "cci.20230205":
-    url: "https://github.com/sammycage/plutovg/archive/ccaa687ac6092ef548b840144820a757c24e718b.tar.gz"
-    sha256: "e7cb644a76612bcbaeb26f401adf7eff9cc45fbef69aadc7a9d0f84416f0ea98"
-  "cci.20221030":
-    url: "https://github.com/sammycage/plutovg/archive/4d0eee77ce7d1850aac4d90e20ddaaa313d83e6a.tar.gz"
-    sha256: "bb44b1107d1cd41032fecdf3e16cff59a1a06f15a92527029aacb73c5c4d059e"
-  "cci.20220103":
-    url: "https://github.com/sammycage/plutovg/archive/51f1a79e04fbb42ec9e93499a18869eea06f3054.tar.gz"
-    sha256: "c2ce39b8085e0a8795263666f62af15239c36964330865fd54b9db25c67e063b"
+  "0.0.4":
+    url: "https://github.com/sammycage/plutovg/archive/refs/tags/v0.0.4.tar.gz"
+    sha256: "6d7c6ad1ef3cf0085e0a375b770590a8cea79d4754b732e892635639c5546076"
+  "0.0.1":
+    url: "https://github.com/sammycage/plutovg/archive/refs/tags/v0.0.1.tar.gz"
+    sha256: "593653d226dd54dc322bc0874c19bd0a80314b5471ae4da6b9cd9e12211e3261"
+patches:
+  "0.0.1":
+    - patch_file: "patches/0.0.1-0001-include-stdint.patch"
+      patch_description: "include stdint.h"
+      patch_type: "portability"
