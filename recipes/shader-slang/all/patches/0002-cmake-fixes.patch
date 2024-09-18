@@ -1,0 +1,155 @@
+From a54fe4b1a9099bbccada6336d3261d6aad03e112 Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Wed, 18 Sep 2024 14:41:18 +0300
+Subject: [PATCH 2/2] CMake fixes
+
+---
+ CMakeLists.txt | 39 +++++++++++++++++++++++++++++++--------
+ 1 file changed, 31 insertions(+), 8 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e1225022..495bd4fe 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -198,20 +198,36 @@ if(SLANG_SLANG_LLVM_FLAVOR STREQUAL "USE_SYSTEM_LLVM")
+     find_package(Clang REQUIRED CONFIG)
+ endif()
+ 
+-add_subdirectory(external)
++include_directories(external_headers)
+ 
+ #
+ # Our targets
+ #
+ 
++find_package(glslang REQUIRED)
++find_package(SPIRV-Headers REQUIRED)
++find_package(SPIRV-Tools REQUIRED)
++find_package(miniz REQUIRED)
++find_package(lz4 REQUIRED)
++find_package(unordered_dense REQUIRED)
++find_package(Threads REQUIRED)
++
++link_libraries(unordered_dense::unordered_dense)
++
+ slang_add_target(
+     source/core
+     STATIC
+     EXCLUDE_FROM_ALL
+     USE_EXTRA_WARNINGS
+-    LINK_WITH_PRIVATE miniz lz4_static Threads::Threads ${CMAKE_DL_LIBS}
++    LINK_WITH_PRIVATE miniz::miniz lz4::lz4 Threads::Threads ${CMAKE_DL_LIBS}
+     INCLUDE_DIRECTORIES_PUBLIC source include
+ )
++target_link_libraries(core PUBLIC
++    SPIRV-Tools-opt
++    glslang::glslang
++    glslang::SPIRV
++    SPIRV-Headers::SPIRV-Headers
++)
+ 
+ if(SLANG_ENABLE_SLANGRT)
+     slang_add_target(
+@@ -220,7 +236,7 @@ if(SLANG_ENABLE_SLANGRT)
+         # This compiles 'core' again with the SLANG_RT_DYNAMIC_EXPORT macro defined
+         EXTRA_SOURCE_DIRS source/core
+         USE_EXTRA_WARNINGS
+-        LINK_WITH_PRIVATE miniz lz4_static Threads::Threads ${CMAKE_DL_LIBS}
++        LINK_WITH_PRIVATE miniz::miniz lz4::lz4 Threads::Threads ${CMAKE_DL_LIBS}
+         EXPORT_MACRO_PREFIX SLANG_RT
+         INCLUDE_DIRECTORIES_PUBLIC include
+         INSTALL
+@@ -336,7 +352,7 @@ if(SLANG_ENABLE_SLANG_GLSLANG)
+         source/slang-glslang
+         MODULE
+         USE_FEWER_WARNINGS
+-        LINK_WITH_PRIVATE glslang SPIRV SPIRV-Tools-opt
++        LINK_WITH_PRIVATE SPIRV-Tools-opt glslang::glslang glslang::SPIRV SPIRV-Headers::SPIRV-Headers
+         INCLUDE_DIRECTORIES_PRIVATE include
+         INSTALL
+     )
+@@ -469,6 +485,12 @@ if(SLANG_ENABLE_PREBUILT_BINARIES)
+ endif()
+ 
+ if(SLANG_ENABLE_GFX)
++    find_package(VulkanHeaders REQUIRED)
++    find_package(imgui REQUIRED)
++    if(APPLE)
++        find_package(metal-cpp REQUIRED)
++    endif()
++
+     #
+     # `platform` contains all the platform abstractions for a GUI application.
+     #
+@@ -479,7 +501,7 @@ if(SLANG_ENABLE_GFX)
+         USE_FEWER_WARNINGS
+         LINK_WITH_PRIVATE
+             core
+-            imgui
++            imgui::imgui
+             $<$<BOOL:${SLANG_ENABLE_XLIB}>:X11::X11>
+             "$<$<PLATFORM_ID:Darwin>:-framework Cocoa>"
+             "$<$<PLATFORM_ID:Darwin>:-framework QuartzCore>"
+@@ -505,8 +527,8 @@ if(SLANG_ENABLE_GFX)
+         LINK_WITH_PRIVATE
+             core
+             slang
+-            Vulkan-Headers
+-            metal-cpp
++            Vulkan::Headers
++            $<$<BOOL:${APPLE}>:metal-cpp::metal-cpp>
+             $<$<BOOL:${SLANG_ENABLE_XLIB}>:X11::X11>
+             $<$<BOOL:${SLANG_ENABLE_CUDA}>:CUDA::cuda_driver>
+         LINK_WITH_FRAMEWORK
+@@ -529,7 +551,7 @@ if(SLANG_ENABLE_GFX)
+         INSTALL
+         FOLDER gfx
+     )
+-    set(modules_dest_dir $<TARGET_FILE_DIR:slang-test>)
++    set(modules_dest_dir ${CMAKE_BINARY_DIR}/slang-test)
+     add_custom_target(
+         copy-gfx-slang-modules
+         COMMAND ${CMAKE_COMMAND} -E make_directory ${modules_dest_dir}
+diff --git a/source/slang/CMakeLists.txt b/source/slang/CMakeLists.txt
+index fd20bbe2..ac0de655 100644
+--- a/source/slang/CMakeLists.txt
++++ b/source/slang/CMakeLists.txt
+@@ -153,7 +153,7 @@ target_include_directories(
+ #
+ 
+ set(SLANG_LOOKUP_GENERATOR_INPUT_JSON
+-    "${slang_SOURCE_DIR}/external/spirv-headers/include/spirv/unified1/extinst.glsl.std.450.grammar.json"
++    "${SPIRV-Headers_INCLUDE_DIR}/spirv/unified1/extinst.glsl.std.450.grammar.json"
+ )
+ set(SLANG_LOOKUP_GENERATOR_OUTPUT_DIR
+     "${CMAKE_CURRENT_BINARY_DIR}/slang-lookup-tables/"
+@@ -179,7 +179,7 @@ add_custom_command(
+ )
+ 
+ set(SLANG_SPIRV_CORE_SOURCE_JSON
+-    "${slang_SOURCE_DIR}/external/spirv-headers/include/spirv/unified1/spirv.core.grammar.json"
++    "${SPIRV-Headers_INCLUDE_DIR}/spirv/unified1/spirv.core.grammar.json"
+ )
+ set(SLANG_SPIRV_CORE_GRAMMAR_SOURCE
+     "${SLANG_LOOKUP_GENERATOR_OUTPUT_DIR}/slang-spirv-core-grammar-embed.cpp"
+@@ -201,7 +201,7 @@ slang_add_target(
+     OBJECT
+     USE_EXTRA_WARNINGS
+     EXPLICIT_SOURCE ${SLANG_LOOKUP_GENERATED_SOURCE} ${SLANG_SPIRV_CORE_GRAMMAR_SOURCE}
+-    LINK_WITH_PRIVATE core SPIRV-Headers
++    LINK_WITH_PRIVATE core SPIRV-Headers::SPIRV-Headers
+     EXCLUDE_FROM_ALL
+     FOLDER generated
+ )
+@@ -253,7 +253,7 @@ set(slang_common_args
+         slang-capability-lookup
+         slang-reflect-headers
+         slang-lookup-tables
+-        SPIRV-Headers
++        SPIRV-Headers::SPIRV-Headers
+     EXTRA_COMPILE_OPTIONS_PRIVATE
+         # a warning is disabled for a memset boundary check.
+         # everything looked fine and it is unclear why the checking fails
+-- 
+2.25.1
+

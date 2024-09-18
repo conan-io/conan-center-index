@@ -1,0 +1,202 @@
+From 0cf4d7dd8ed237ec954f5579c4e61e5f4867bac6 Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Wed, 18 Sep 2024 14:23:20 +0300
+Subject: [PATCH 1/2] Update unvendored dependency includes
+
+---
+ source/compiler-core/slang-dxc-compiler.cpp     |  4 ++--
+ source/compiler-core/slang-spirv-core-grammar.h |  2 +-
+ source/core/slang-dictionary.h                  |  2 +-
+ source/core/slang-hash.h                        |  2 +-
+ source/core/slang-lz4-compression-system.cpp    |  2 +-
+ source/slang-glslang/slang-glslang.cpp          | 13 +++++++------
+ source/slang/slang-ir-glsl-legalize.cpp         |  2 +-
+ tools/gfx/open-gl/render-gl.cpp                 |  6 +++---
+ tools/platform/gui.h                            |  2 +-
+ tools/platform/model.cpp                        | 12 ++++++------
+ tools/platform/vector-math.h                    |  8 ++++----
+ 17 files changed, 40 insertions(+), 39 deletions(-)
+
+diff --git a/source/compiler-core/slang-dxc-compiler.cpp b/source/compiler-core/slang-dxc-compiler.cpp
+index 3a949b3b..527e5d91 100644
+--- a/source/compiler-core/slang-dxc-compiler.cpp
++++ b/source/compiler-core/slang-dxc-compiler.cpp
+@@ -40,9 +40,9 @@
+ #   ifdef _WIN32
+ #       include <windows.h>
+ #       include <unknwn.h>
+-#       include "../../external/dxc/dxcapi.h"
++#       include "dxc/dxcapi.h"
+ #   else
+-#       include "../../external/dxc/dxcapi.h"
++#       include "dxc/dxcapi.h"
+ 
+ #       ifdef __uuidof
+             // DXC's WinAdapter.h defines __uuidof(T) over types, but the existing
+diff --git a/source/compiler-core/slang-spirv-core-grammar.h b/source/compiler-core/slang-spirv-core-grammar.h
+index 958aaaef..7391b086 100644
+--- a/source/compiler-core/slang-spirv-core-grammar.h
++++ b/source/compiler-core/slang-spirv-core-grammar.h
+@@ -4,7 +4,7 @@
+ #include "../core/slang-string.h"
+ #include "../core/slang-string-slice-pool.h"
+ #include "../core/slang-dictionary.h"
+-#include "../../external/spirv-headers/include/spirv/unified1/spirv.h"
++#include <spirv/unified1/spirv.h>
+ #include <optional>
+ 
+ namespace Slang
+diff --git a/source/core/slang-dictionary.h b/source/core/slang-dictionary.h
+index ba467274..d31e89fc 100644
+--- a/source/core/slang-dictionary.h
++++ b/source/core/slang-dictionary.h
+@@ -8,7 +8,7 @@
+ #include "slang-exception.h"
+ #include "slang-math.h"
+ #include "slang-hash.h"
+-#include "../../external/unordered_dense/include/ankerl/unordered_dense.h"
++#include <ankerl/unordered_dense.h>
+ #include <initializer_list>
+ 
+ namespace Slang
+diff --git a/source/core/slang-hash.h b/source/core/slang-hash.h
+index 784f7fd2..b6884d6a 100644
+--- a/source/core/slang-hash.h
++++ b/source/core/slang-hash.h
+@@ -3,7 +3,7 @@
+ 
+ #include "../../include/slang.h"
+ #include "slang-math.h"
+-#include "../../external/unordered_dense/include/ankerl/unordered_dense.h"
++#include <ankerl/unordered_dense.h>
+ #include <cstring>
+ #include <type_traits>
+ 
+diff --git a/source/core/slang-lz4-compression-system.cpp b/source/core/slang-lz4-compression-system.cpp
+index c20b457d..1e2ab955 100644
+--- a/source/core/slang-lz4-compression-system.cpp
++++ b/source/core/slang-lz4-compression-system.cpp
+@@ -5,7 +5,7 @@
+ 
+ #include "slang-blob.h"
+ 
+-#include "../../external/lz4/lib/lz4.h"
++#include <lz4.h>
+ 
+ namespace Slang
+ {
+diff --git a/source/slang-glslang/slang-glslang.cpp b/source/slang-glslang/slang-glslang.cpp
+index 2dd1b46a..f440c179 100644
+--- a/source/slang-glslang/slang-glslang.cpp
++++ b/source/slang-glslang/slang-glslang.cpp
+@@ -4,8 +4,8 @@
+ 
+ #include "glslang/Public/ResourceLimits.h"
+ #include "glslang/Public/ShaderLang.h"
+-#include "SPIRV/GlslangToSpv.h"
+-#include "SPIRV/disassemble.h"
++#include "glslang/SPIRV/GlslangToSpv.h"
++#include "glslang/SPIRV/disassemble.h"
+ 
+ #include "slang.h"
+ 
+diff --git a/source/slang/slang-ir-glsl-legalize.cpp b/source/slang/slang-ir-glsl-legalize.cpp
+index d8c1aa91..54646e26 100644
+--- a/source/slang/slang-ir-glsl-legalize.cpp
++++ b/source/slang/slang-ir-glsl-legalize.cpp
+@@ -11,7 +11,7 @@
+ #include "slang-ir-clone.h"
+ #include "slang-ir-single-return.h"
+ #include "slang-glsl-extension-tracker.h"
+-#include "../../external/spirv-headers/include/spirv/unified1/spirv.h"
++#include <spirv/unified1/spirv.h>
+ 
+ namespace Slang
+ {
+diff --git a/tools/gfx/open-gl/render-gl.cpp b/tools/gfx/open-gl/render-gl.cpp
+index abb17837..e7970368 100644
+--- a/tools/gfx/open-gl/render-gl.cpp
++++ b/tools/gfx/open-gl/render-gl.cpp
+@@ -9,7 +9,7 @@
+ #include "core/slang-basic.h"
+ #include "core/slang-blob.h"
+ #include "core/slang-secure-crt.h"
+-#include "external/stb/stb_image_write.h"
++#include "stb_image_write.h"
+ 
+ #if SLANG_WIN64 || SLANG_WIN64
+ #define ENABLE_GL_IMPL 1
+@@ -35,8 +35,8 @@
+ #pragma comment(lib, "opengl32")
+ 
+ #include <GL/GL.h>
+-#include "external/glext.h"
+-#include "external/wglext.h"
++#include "glext.h"
++#include "wglext.h"
+ 
+ // We define an "X-macro" for mapping over loadable OpenGL
+ // extension entry point that we will use, so that we can
+diff --git a/tools/platform/gui.h b/tools/platform/gui.h
+index e3975f3f..465ba87b 100644
+--- a/tools/platform/gui.h
++++ b/tools/platform/gui.h
+@@ -5,7 +5,7 @@
+ #include "vector-math.h"
+ #include "window.h"
+ #include "slang-com-ptr.h"
+-#include "external/imgui/imgui.h"
++#include "imgui.h"
+ #include "source/core/slang-basic.h"
+ 
+ namespace platform {
+diff --git a/tools/platform/model.cpp b/tools/platform/model.cpp
+index a48d499b..51803bda 100644
+--- a/tools/platform/model.cpp
++++ b/tools/platform/model.cpp
+@@ -4,17 +4,17 @@
+ #include "window.h"
+ 
+ #define TINYOBJLOADER_IMPLEMENTATION
+-#include "../../external/tinyobjloader/tiny_obj_loader.h"
++#include "tiny_obj_loader.h"
+ 
+ #define STB_IMAGE_IMPLEMENTATION
+-#include "../../external/stb/stb_image.h"
++#include "stb_image.h"
+ 
+ #define STB_IMAGE_RESIZE_IMPLEMENTATION
+-#include "../../external/stb/stb_image_resize.h"
++#include "stb_image_resize.h"
+ 
+-#include "../../external/glm/glm/glm.hpp"
+-#include "../../external/glm/glm/gtc/matrix_transform.hpp"
+-#include "../../external/glm/glm/gtc/constants.hpp"
++#include "glm/glm.hpp"
++#include "glm/gtc/matrix_transform.hpp"
++#include "glm/gtc/constants.hpp"
+ 
+ #include <memory>
+ #include <unordered_map>
+diff --git a/tools/platform/vector-math.h b/tools/platform/vector-math.h
+index e35cb46a..8b59fb91 100644
+--- a/tools/platform/vector-math.h
++++ b/tools/platform/vector-math.h
+@@ -3,10 +3,10 @@
+ 
+ // We will use the GLM library for our vector math types, just for simplicity.
+ 
+-#include "../../external/glm/glm/glm.hpp"
+-#include "../../external/glm/glm/gtc/matrix_transform.hpp"
+-#include "../../external/glm/glm/gtc/constants.hpp"
+-#include "../../external/glm/glm/gtc/quaternion.hpp"
++#include "glm/glm.hpp"
++#include "glm/gtc/matrix_transform.hpp"
++#include "glm/gtc/constants.hpp"
++#include "glm/gtc/quaternion.hpp"
+ 
+ namespace gfx {
+ 
+-- 
+2.25.1
+
