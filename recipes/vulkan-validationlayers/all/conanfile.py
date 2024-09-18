@@ -255,3 +255,6 @@ class VulkanValidationLayersConan(ConanFile):
 
         # TODO: to remove after conan v2, it allows to not break consumers still relying on virtualenv generator
         self.env_info.VK_LAYER_PATH.append(vk_layer_path)
+
+        if self.settings.os == "Android":
+            self.cpp_info.system_libs.extend(["android", "log"])
