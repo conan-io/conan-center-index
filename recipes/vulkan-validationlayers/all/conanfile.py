@@ -163,6 +163,7 @@ class VulkanValidationLayersConan(ConanFile):
         elif self.settings.os == "Android":
             tc.variables["BUILD_WSI_XCB_SUPPORT"] = False
             tc.variables["BUILD_WSI_XLIB_SUPPORT"] = False
+            tc.variables["BUILD_WSI_WAYLAND_SUPPORT"] = False
         tc.variables["BUILD_WERROR"] = False
         tc.variables["BUILD_TESTS"] = False
         tc.variables["INSTALL_TESTS"] = False
