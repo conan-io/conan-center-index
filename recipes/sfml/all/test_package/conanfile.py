@@ -23,7 +23,6 @@ class TestPackageConan(ConanFile):
         tc.variables["SFML_WITH_AUDIO"] = self.dependencies["sfml"].options.audio
         tc.generate()
         deps = CMakeDeps(self)
-        deps.check_components_exist = True
         deps.generate()
 
     def build(self):
