@@ -4,7 +4,7 @@ from conan.tools.android import android_abi
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save, copy, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy
 from conan.tools.microsoft import is_msvc_static_runtime
 import os
 
@@ -45,6 +45,14 @@ class SfmlConan(ConanFile):
         "use_drm": False,
         # "use_mesa3d": False,
     }
+
+    # TODO: Fill as needed, can't find an official source,
+    #  going by compilation failures right now
+    @property
+    def _min_compiler_versions(self):
+        return {
+            "gcc": 7
+        }
 
     @property
     def _min_cppstd(self):
@@ -110,14 +118,18 @@ class SfmlConan(ConanFile):
         self.tool_requires("cmake/[>=3.24 <4]")
 
     def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+
+        compiler_version = self._min_compiler_versions.get(str(self.settings.compiler))
+        if compiler_version and (self.settings.compiler.version < compiler_version):
+            raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd} with {self.settings.compiler} {compiler_version} or newer")
+
         if self.options.graphics and not self.options.window:
             raise ConanInvalidConfiguration(f"-o={self.ref}:graphics=True requires -o={self.ref}:window=True")
 
         if self.options.get_safe("shared") and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(f"{self.ref} does not support shared libraries with static runtime")
-
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
 
         if self.settings.os not in ["Windows", "Linux", "FreeBSD", "Android", "Macos", "iOS"]:
             raise ConanInvalidConfiguration(f"{self.ref} not supported on {self.settings.os}")
@@ -207,6 +219,7 @@ class SfmlConan(ConanFile):
                 libname += "-d"
         self.cpp_info.components[name].libs = [libname]
 
+        # CMakeLists.txt#L87 - Android libs are in lib/<CMAKE_ANDROID_ARCH_ABI>
         if self.settings.os == "Android":
             self.cpp_info.components[name].libdirs = [os.path.join("lib", android_abi(self))]
 
