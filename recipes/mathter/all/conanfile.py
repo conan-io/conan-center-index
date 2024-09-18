@@ -8,7 +8,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.0.0"
+required_conan_version = ">=1.52.0"
 
 
 class MathterConan(ConanFile):
