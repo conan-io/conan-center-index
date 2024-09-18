@@ -105,7 +105,7 @@ class LibcacaConan(ConanFile):
             f"--enable-cxx={yes_no(self.options.get_safe('enable_cxx'))}",
             f"--enable-network={yes_no(self.options.get_safe('enable_network'))}",
             f"--enable-win32={yes_no(self.settings.os == 'Windows')}",
-            f"--enable-cocoa={yes_no(is_apple_os(self))}",
+            f"--enable-cocoa=no",  # compilation fails: https://github.com/cacalabs/libcaca/issues/62
             f"--enable-slang={yes_no(self.options.get_safe('with_slang'))}",
             f"--enable-ncurses={yes_no(self.options.get_safe('with_ncurses'))}",
             f"--enable-x11={yes_no(self.options.get_safe('with_x11'))}",
@@ -161,8 +161,8 @@ class LibcacaConan(ConanFile):
         self.cpp_info.components["caca"].set_property("pkg_config_name", "caca")
         self.cpp_info.components["caca"].libs = ["caca"]
         self.cpp_info.components["caca"].requires = ["zlib::zlib"]
-        if is_apple_os(self):
-            self.cpp_info.components["caca"].frameworks.append("Cocoa")
+        # if is_apple_os(self):
+        #     self.cpp_info.components["caca"].frameworks.append("Cocoa")
         if self.options.with_opengl:
             self.cpp_info.components["caca"].requires.extend(["opengl::opengl", "freeglut::freeglut"])
         if self.options.with_ncurses:
