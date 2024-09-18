@@ -4,7 +4,7 @@ from conan.tools.android import android_abi
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy, replace_in_file
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
@@ -193,6 +193,10 @@ class SfmlConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        # Remove cocoa example - xcode needed
+        # TODO: Remove once we no longer build examples
+        replace_in_file(self, os.path.join(self.source_folder, "examples", "CMakeLists.txt"),
+                        "add_subdirectory(cocoa)", "")
 
     def build(self):
         self._patch_sources()
