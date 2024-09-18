@@ -1,0 +1,36 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9d41c8b2..9338d246 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,7 +1,7 @@
+ cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+ 
+-file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/src/oatpp/core/base/Environment.hpp" OATPP_VERSION_MACRO REGEX "#define OATPP_VERSION \"[0-9]+.[0-9]+.[0-9]+\"$")
+-string(REGEX REPLACE "#define OATPP_VERSION \"([0-9]+.[0-9]+.[0-9]+)\"$" "\\1" oatpp_VERSION "${OATPP_VERSION_MACRO}")
++file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/src/oatpp/core/base/Environment.hpp" OATPP_VERSION_MACRO REGEX "#define OATPP_VERSION \"[0-9]+.[0-9]+.[0-9]+.*\"$")
++string(REGEX REPLACE "#define OATPP_VERSION \"([0-9]+.[0-9]+.[0-9]+.*)\"$" "\\1" oatpp_VERSION "${OATPP_VERSION_MACRO}")
+ 
+ ###################################################################################################
+ ## These variables are passed to oatpp-module-install.cmake script
+@@ -12,7 +12,7 @@ set(OATPP_THIS_MODULE_VERSION ${oatpp_VERSION}) ## version of the module (also s
+ 
+ ###################################################################################################
+ 
+-project(oatpp VERSION ${OATPP_THIS_MODULE_VERSION} LANGUAGES CXX)
++project(oatpp VERSION 1.3.0 LANGUAGES CXX)
+ 
+ option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+ option(OATPP_INSTALL "Create installation target for oat++" ON)
+diff --git a/src/oatpp/core/base/Environment.hpp b/src/oatpp/core/base/Environment.hpp
+index 05d5c949..0a580b5d 100644
+--- a/src/oatpp/core/base/Environment.hpp
++++ b/src/oatpp/core/base/Environment.hpp
+@@ -39,7 +39,7 @@
+ #include <stdexcept>
+ #include <cstdlib>
+ 
+-#define OATPP_VERSION "1.3.0"
++#define OATPP_VERSION "1.3.0-latest"
+ 
+ typedef unsigned char v_char8;
+ typedef v_char8 *p_char8;
