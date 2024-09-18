@@ -52,7 +52,7 @@ class SfmlConan(ConanFile):
     @property
     def _min_compiler_versions(self):
         return {
-            "gcc": 7
+            "gcc": 9
         }
 
     @property
