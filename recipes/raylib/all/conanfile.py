@@ -24,15 +24,9 @@ class RaylibConan(ConanFile):
         "fPIC": [True, False],
         "opengl_version": [None, "4.3", "3.3", "2.1", "1.1", "ES-2.0"],
 
-        "module_rshapes": [True, False],
-        "module_rtextures": [True, False],
-        "module_rtext": [True, False],
-        "module_rmodels": [True, False],
         "module_raudio": [True, False],
 
-        "default_font": [True, False],
         "events_waiting": [True, False],
-        "events_automation": [True, False],
         "custom_frame_control": [True, False]
     }
     default_options = {
@@ -40,15 +34,9 @@ class RaylibConan(ConanFile):
         "fPIC": True,
         "opengl_version": None,
 
-        "module_rshapes": True,
-        "module_rtextures": True,
-        "module_rtext": True,
-        "module_rmodels": True,
         "module_raudio": True,
 
-        "default_font": True,
         "events_waiting": False,
-        "events_automation": False,
         "custom_frame_control": False
     }
 
@@ -77,10 +65,6 @@ class RaylibConan(ConanFile):
         if self.settings.os == "Linux":
             self.requires("xorg/system")
 
-    def validate(self):
-        if self.options.module_rtext and not self.options.module_rtextures:
-            raise ConanInvalidConfiguration('-o="raylib/*:module_rtext=True" needs -o="raylib/*:module_rtextures=True"')
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -102,10 +86,6 @@ class RaylibConan(ConanFile):
 
         tc.variables["CUSTOMIZE_BUILD"] = "ON"
         on_off = lambda x: "ON" if x else "OFF"
-        tc.variables["SUPPORT_MODULE_RSHAPES"]   = on_off(self.options.module_rshapes)
-        tc.variables["SUPPORT_MODULE_RTEXTURES"] = on_off(self.options.module_rtextures)
-        tc.variables["SUPPORT_MODULE_RTEXT"]     = on_off(self.options.module_rtext)
-        tc.variables["SUPPORT_MODULE_RMODELS"]   = on_off(self.options.module_rmodels)
         tc.variables["SUPPORT_MODULE_RAUDIO"]    = on_off(self.options.module_raudio)
 
         # this makes it include the headers rcamera.h, rgesture.h and rprand.h
@@ -113,9 +93,7 @@ class RaylibConan(ConanFile):
         tc.variables["SUPPORT_GESTURES_SYSTEM"]  = "ON"
         tc.variables["SUPPORT_RPRAND_GENERATOR"] = "ON"
 
-        tc.variables["SUPPORT_DEFAULT_FONT"]         = on_off(self.options.default_font)
         tc.variables["SUPPORT_EVENTS_WAITING"]       = on_off(self.options.events_waiting)
-        tc.variables["SUPPORT_EVENTS_AUTOMATION"]    = on_off(self.options.events_automation)
         tc.variables["SUPPORT_CUSTOM_FRAME_CONTROL"] = on_off(self.options.custom_frame_control)
 
         # Due to a specific logic of cmakedeps_macros.cmake used by CMakeDeps to try to locate shared libs on Windows
