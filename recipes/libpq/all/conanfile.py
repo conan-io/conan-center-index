@@ -16,11 +16,12 @@ required_conan_version = ">=1.54.0"
 class LibpqConan(ConanFile):
     name = "libpq"
     description = "The library used by all the standard PostgreSQL tools."
-    topics = ("libpq", "postgresql", "database", "db")
+    topics = ("postgresql", "database", "db")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.postgresql.org/docs/current/static/libpq.html"
     license = "PostgreSQL"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -243,7 +244,7 @@ class LibpqConan(ConanFile):
                     autotools.install()
             with chdir(self, os.path.join(self.source_folder, "src", "bin", "pg_config")):
                 autotools.install()
-            copy(self, "*.h", src=os.path.join(self.build_folder, "src", "include", "catalog"),
+            copy(self, "*.h", src=os.path.join(self.source_folder, "src", "include", "catalog"),
                               dst=os.path.join(self.package_folder, "include", "catalog"))
             rmdir(self, os.path.join(self.package_folder, "share"))
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))

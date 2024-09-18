@@ -70,13 +70,20 @@ class QuillConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(
-            self,
-            "*.h",
-            os.path.join(self.source_folder, "quill", "include"),
-            os.path.join(self.package_folder, "include"),
-        )
-
+        if Version(self.version) < "7.0.0":
+            copy(
+                self,
+                "*.h",
+                os.path.join(self.source_folder, "quill", "include"),
+                os.path.join(self.package_folder, "include"),
+            )
+        else:
+            copy(
+                self,
+                "*.h",
+                os.path.join(self.source_folder, "include"),
+                os.path.join(self.package_folder, "include"),
+            )
 
     def package_info(self):
         self.cpp_info.bindirs = []
@@ -84,5 +91,7 @@ class QuillConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
+            if Version(self.version) >= "4.4.0":
+                self.cpp_info.system_libs.append("rt")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
             self.cpp_info.system_libs.append("stdc++fs")

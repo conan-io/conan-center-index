@@ -32,7 +32,7 @@ class OnnxConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "disable_static_registration": False,
+        "disable_static_registration": True,
     }
 
     @property
