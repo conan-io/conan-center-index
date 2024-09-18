@@ -58,8 +58,10 @@ class SfmlConan(ConanFile):
             del self.options.fPIC
         else:
             pass
+            # TODO: Handle mesa3d
             # del self.options.use_mesa3d
 
+        # As per CMakeLists.txt#L44, Android is always shared
         if self.settings.os == "Android":
             del self.options.shared
             del self.options.fPIC
@@ -190,6 +192,7 @@ class SfmlConan(ConanFile):
         self.cpp_info.components[name].set_property("cmake_target_name", f"SFML::{name.capitalize()}")
 
         libname = f"sfml-{name}"
+        # main is always static as per SFML/Main/CMakeLists.txt#L16 STATIC definition
         if name != "main" and (self.options.get_safe("shared") or self.settings.os == "Android"):
             if self.settings.build_type == "Debug":
                 libname += "-d"
@@ -266,7 +269,6 @@ class SfmlConan(ConanFile):
             elif self.settings.os == "Windows":
                 self.cpp_info.components["window"].system_libs.extend(["gdi32", "winmm"])
             elif self.settings.os == "FreeBSD":
-                # TODO: Check that this works, it's available since FreeBSD 13
                 self.cpp_info.components["window"].system_libs.append("usbhid")
             elif self.settings.os == "Macos":
                 self.cpp_info.components["window"].frameworks = ["Foundation", "AppKit", "IOKit", "Carbon"]
