@@ -6,6 +6,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy
 from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -122,7 +123,7 @@ class SfmlConan(ConanFile):
             check_min_cppstd(self, self._min_cppstd)
 
         compiler_version = self._min_compiler_versions.get(str(self.settings.compiler))
-        if compiler_version and (self.settings.compiler.version < compiler_version):
+        if compiler_version and (Version(self.settings.compiler.version) < compiler_version):
             raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd} with {self.settings.compiler} {compiler_version} or newer")
 
         if self.options.graphics and not self.options.window:
