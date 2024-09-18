@@ -31,7 +31,7 @@ class FixedMathConan(ConanFile):
             "msvc": "193",
             "gcc": "12",
             "clang": "15",
-            "apple-clang": "14",
+            "apple-clang": "16",
         }
 
     def layout(self):
