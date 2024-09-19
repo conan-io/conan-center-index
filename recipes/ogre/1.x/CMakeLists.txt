@@ -31,9 +31,11 @@ if(OGRE_BUILD_RENDERSYSTEM_GL OR OGRE_BUILD_RENDERSYSTEM_GL3PLUS OR OGRE_BUILD_R
     link_libraries(glad::glad)
 endif()
 
-# https://github.com/OGRECave/ogre/blob/v14.2.6/PlugIns/GLSLang/CMakeLists.txt#L22-L35
-find_package(glslang QUIET CONFIG)
-find_package(SPIRV-Tools QUIET CONFIG)
+if(OGRE_BUILD_PLUGIN_GLSLANG)
+    # https://github.com/OGRECave/ogre/blob/v14.2.6/PlugIns/GLSLang/CMakeLists.txt#L22-L35
+    find_package(glslang REQUIRED CONFIG)
+    find_package(SPIRV-Tools REQUIRED CONFIG)
+endif()
 
 add_subdirectory(src)
 
@@ -42,6 +44,10 @@ if(TARGET Codec_FreeImage)
 endif()
 if(TARGET Codec_EXR)
     target_link_libraries(Codec_EXR openexr::openexr)
+endif()
+if(TARGET Codec_STBI)
+    find_package(stb REQUIRED CONFIG)
+    target_link_libraries(Codec_STBI PRIVATE stb::stb)
 endif()
 if(TARGET OgreOverlay)
     target_link_libraries(OgreOverlay PUBLIC Freetype::Freetype)
