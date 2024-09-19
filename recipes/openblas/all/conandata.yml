@@ -26,6 +26,3 @@ sources:
   "0.3.12":
     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.12.tar.gz"
     sha256: "65a7d3a4010a4e3bd5c0baa41a234797cd3a1735449a4a5902129152601dc57b"
-  "0.3.10":
-    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.10.tar.gz"
-    sha256: "0484d275f87e9b8641ff2eecaa9df2830cbe276ac79ad80494822721de6e1693"
