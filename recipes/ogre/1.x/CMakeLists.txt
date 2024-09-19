@@ -24,6 +24,10 @@ custom_find_package(OpenEXR QUIET CONFIG)
 custom_find_package(assimp QUIET CONFIG)
 custom_find_package(pugixml REQUIRED CONFIG)
 
+# https://github.com/OGRECave/ogre/blob/v14.2.6/PlugIns/GLSLang/CMakeLists.txt#L22-L35
+custom_find_package(glslang QUIET CONFIG)
+custom_find_package(SPIRV-Tools QUIET CONFIG)
+
 add_subdirectory(src)
 
 if(TARGET Codec_FreeImage)

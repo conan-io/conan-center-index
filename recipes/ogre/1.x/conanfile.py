@@ -55,6 +55,7 @@ class OgreConanFile(ConanFile):
         "build_plugin_dot_scene": [True, False],
         "build_plugin_exrcodec": [True, False],
         "build_plugin_freeimage": [True, False],
+        "build_plugin_glslang": [True, False],
         "build_plugin_octree": [True, False],
         "build_plugin_pcz": [True, False],
         "build_plugin_pfx": [True, False],
@@ -105,6 +106,7 @@ class OgreConanFile(ConanFile):
         "build_plugin_dot_scene": True,
         "build_plugin_exrcodec": True,
         "build_plugin_freeimage": False, # FIXME: set to true after https://github.com/conan-io/conan-center-index/pull/23138 is merged
+        "build_plugin_glslang": True,
         "build_plugin_octree": True,
         "build_plugin_pcz": True,
         "build_plugin_pfx": True,
@@ -256,6 +258,9 @@ class OgreConanFile(ConanFile):
             self.requires("openexr/2.5.7")
         if self.options.build_plugin_freeimage:
             self.requires("freeimage/3.18.0")
+        if self.options.build_plugin_glslang:
+            self.requires("glslang/1.3.268.0")
+            self.requires("spirv-tools/1.3.268.0")
 
         # TODO: RenderSystem_Vulkan
         # TODO: Plugin_GLSLangProgramManager
@@ -344,7 +349,7 @@ class OgreConanFile(ConanFile):
         tc.variables["OGRE_BUILD_TESTS"] = False
         tc.variables["OGRE_BUILD_PLUGIN_ASSIMP"] = self.options.build_plugin_assimp
         tc.variables["OGRE_BUILD_PLUGIN_BSP"] = self.options.build_plugin_bsp
-        tc.variables["OGRE_BUILD_PLUGIN_GLSLANG"] = False  # TODO
+        tc.variables["OGRE_BUILD_PLUGIN_GLSLANG"] = self.options.build_plugin_glslang
         tc.variables["OGRE_BUILD_PLUGIN_OCTREE"] = self.options.build_plugin_octree
         tc.variables["OGRE_BUILD_PLUGIN_PFX"] = self.options.build_plugin_pfx
         tc.variables["OGRE_BUILD_PLUGIN_DOT_SCENE"] = self.options.build_plugin_dot_scene
@@ -399,6 +404,8 @@ class OgreConanFile(ConanFile):
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "PlugIns", "Assimp", "CMakeLists.txt"),
                         "fix::assimp", "assimp::assimp")
+        replace_in_file(self, os.path.join(self.source_folder, "PlugIns", "GLSLang", "CMakeLists.txt"),
+                        " glslang OSDependent SPIRV ", " glslang::glslang ")
 
     def build(self):
         self._patch_sources()
@@ -584,6 +591,10 @@ class OgreConanFile(ConanFile):
             _add_plugin_component("Codec_EXR", requires=["openexr::openexr"])
         if self.options.build_plugin_freeimage:
             _add_plugin_component("Codec_FreeImage", requires=["freeimage::freeimage"])
+        if self.options.build_plugin_glslang:
+            _add_plugin_component("Plugin_GLSLangProgramManager", requires=[
+                "glslang::glslang", "spirv-tools::spirv-tools-core", "spirv-tools::spirv-tools-opt"
+            ])
         if self.options.build_plugin_octree:
             _add_plugin_component("Plugin_OctreeSceneManager")
         if self.options.build_plugin_pcz:
