@@ -38,7 +38,7 @@ class MathterConan(ConanFile):
         return {
             "apple-clang": 10,
             "clang": 6,
-            "gcc": 7,
+            "gcc": 9,
             "Visual Studio": 16,
         }
 
