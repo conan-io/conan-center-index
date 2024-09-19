@@ -228,7 +228,8 @@ class OgreConanFile(ConanFile):
         if not self.options.get_safe("build_component_overlay"):
             self.options.rm_safe("build_component_overlay_imgui")
             self.options.rm_safe("build_component_bites")
-        if self.options.shared or not self.options.get_safe("build_component_bites"):
+        if not self.options.get_safe("build_component_bites") or not self.options.shared:
+            # bites_static_plugins is always enabled for static builds
             self.options.rm_safe("bites_static_plugins")
         if not self.options.get_safe("build_component_rtshadersystem"):
             self.options.rm_safe("build_rtshadersystem_shaders")
@@ -261,9 +262,10 @@ class OgreConanFile(ConanFile):
             self.requires("bullet3/3.25")
         if self.options.build_component_overlay:
             self.requires("freetype/2.13.2")
-            if self.options.build_component_overlay_imgui:
-                # Used in Overlay/OgreImGuiOverlay.h public heder
-                self.requires("imgui/1.91.0", transitive_headers=True, transitive_libs=True)
+            # TODO: unvendor imgui
+            # if self.options.build_component_overlay_imgui:
+            #     # Used in Overlay/OgreImGuiOverlay.h public heder
+            #     self.requires("imgui/1.91.0", transitive_headers=True, transitive_libs=True)
         if self.options.build_plugin_assimp:
             self.requires("assimp/5.4.2")
         if self.options.build_plugin_exrcodec:
@@ -281,7 +283,6 @@ class OgreConanFile(ConanFile):
             self.requires("volk/1.3.268.0", transitive_headers=True, transitive_libs=True)
 
         # TODO: Qt support in OgreBites
-        # TODO: unvendor imgui in Overlay
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -549,27 +550,21 @@ class OgreConanFile(ConanFile):
             )
 
         def _add_plugin_component(comp, *, requires=None):
-            if comp.startswith("Codec_"):
-                dirname = f"{comp.replace('Codec_', '')}Codec"
+            if comp.startswith("RenderSystem_"):
+                includedir = os.path.join(self._include_dir, "RenderSystems", comp.replace("RenderSystem_", ""))
+            elif comp.startswith("Codec_"):
+                includedir = os.path.join(self._include_dir, "Plugins", f"{comp.replace('Codec_', '')}Codec")
             else:
-                dirname = comp.replace("Plugin_", "")
+                includedir = os.path.join(self._include_dir, "Plugins", comp.replace("Plugin_", ""))
             _add_component(
                 comp,
                 libs=[self._plugin_libname(comp)],
                 libdirs=[self._plugins_dir],
-                extra_includedirs=[os.path.join(self._include_dir, "Plugins", dirname)],
+                extra_includedirs=[includedir],
                 requires=requires,
             )
-
-        def _add_rendersystem_component(comp, *, requires=None):
-            dirname = comp.replace("RenderSystem_", "")
-            _add_component(
-                comp,
-                libs=[self._plugin_libname(comp)],
-                libdirs=[self._plugins_dir],
-                extra_includedirs=[os.path.join(self._include_dir, "RenderSystems", dirname)],
-                requires=requires,
-            )
+            if self.options.get_safe("bites_static_plugins", not self.options.shared):
+                self.cpp_info.components["Bites"].requires.append(comp)
 
         _add_component(
             "OgreMain",
@@ -588,8 +583,8 @@ class OgreConanFile(ConanFile):
             _add_core_component("MeshLodGenerator")
         if self.options.build_component_overlay:
             _add_core_component("Overlay", requires=["freetype::freetype"])
-            if self.options.get_safe("build_component_overlay_imgui"):
-                self.cpp_info.components["Overlay"].requires.append("imgui::imgui")
+            # if self.options.get_safe("build_component_overlay_imgui"):
+            #     self.cpp_info.components["Overlay"].requires.append("imgui::imgui")
         if self.options.build_component_paging:
             _add_core_component("Paging")
         if self.options.build_component_property:
@@ -633,30 +628,30 @@ class OgreConanFile(ConanFile):
             _add_plugin_component("Codec_STBI", requires=["stb::stb"])
 
         if self.options.get_safe("build_rendersystem_d3d9"):
-            _add_rendersystem_component("RenderSystem_Direct3D9")
+            _add_plugin_component("RenderSystem_Direct3D9")
             # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/Packages/FindDirectX.cmake#L58-L60
             self.cpp_info.components["RenderSystem_Direct3D9"].system_libs += ["d3d9", "d3dx9", "dxguid"]
         if self.options.get_safe("build_rendersystem_d3d11"):
-            _add_rendersystem_component("RenderSystem_Direct3D11")
+            _add_plugin_component("RenderSystem_Direct3D11")
             if self.settings.compiler == "gcc":
                 self.cpp_info.components["RenderSystem_Direct3D11"].system_libs += ["psapi", "d3dcompiler"]
             # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/Packages/FindDirectX11.cmake#L95-L100
             self.cpp_info.components["RenderSystem_Direct3D11"].system_libs += ["dxerr", "dxguid", "dxgi", "d3dcompiler", "d3d11", "d3dx11"]
         if self.options.get_safe("build_rendersystem_gl"):
-            _add_rendersystem_component("RenderSystem_GL", requires=opengl_reqs)
+            _add_plugin_component("RenderSystem_GL", requires=opengl_reqs)
         if self.options.get_safe("build_rendersystem_gl3plus"):
-            _add_rendersystem_component("RenderSystem_GL3Plus", requires=opengl_reqs)
+            _add_plugin_component("RenderSystem_GL3Plus", requires=opengl_reqs)
         if self.options.get_safe("build_rendersystem_gles2"):
-            _add_rendersystem_component("RenderSystem_GLES2", requires=opengl_reqs)
+            _add_plugin_component("RenderSystem_GLES2", requires=opengl_reqs)
         if self.options.get_safe("build_rendersystem_metal"):
-            _add_rendersystem_component("RenderSystem_Metal")
+            _add_plugin_component("RenderSystem_Metal")
             if self.settings.os == "iOS":
                 self.cpp_info.components["RenderSystem_Metal"].frameworks += ["Metal", "QuartzCore"]
             else:
                 self.cpp_info.components["RenderSystem_Metal"].frameworks += ["Metal", "AppKit", "QuartzCore"]
         if self.options.get_safe("build_rendersystem_tiny"):
-            _add_rendersystem_component("RenderSystem_Tiny", requires=["sdl::sdl"])
+            _add_plugin_component("RenderSystem_Tiny", requires=["sdl::sdl"])
             if self.options.with_openmp:
                 self.cpp_info.components["RenderSystem_Tiny"].requires.append("openmp::openmp")
         if self.options.get_safe("build_rendersystem_vulkan"):
-            _add_rendersystem_component("RenderSystem_Vulkan", requires=["vulkan-headers::vulkan-headers", "volk::volk"])
+            _add_plugin_component("RenderSystem_Vulkan", requires=["vulkan-headers::vulkan-headers", "volk::volk"])
