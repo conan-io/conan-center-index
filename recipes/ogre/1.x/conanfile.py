@@ -262,10 +262,9 @@ class OgreConanFile(ConanFile):
             self.requires("bullet3/3.25")
         if self.options.build_component_overlay:
             self.requires("freetype/2.13.2")
-            # TODO: unvendor imgui
-            # if self.options.build_component_overlay_imgui:
-            #     # Used in Overlay/OgreImGuiOverlay.h public heder
-            #     self.requires("imgui/1.91.0", transitive_headers=True, transitive_libs=True)
+            if self.options.build_component_overlay_imgui:
+                # Used in Overlay/OgreImGuiOverlay.h public heder
+                self.requires("imgui/1.91.0", transitive_headers=True, transitive_libs=True)
         if self.options.build_plugin_assimp:
             self.requires("assimp/5.4.2")
         if self.options.build_plugin_exrcodec:
@@ -407,6 +406,8 @@ class OgreConanFile(ConanFile):
         tc.variables["OGRE_PLUGINS_PATH"] = self._to_cmake_path(self._plugins_dir)
         tc.variables["OGRE_MEDIA_PATH"] = self._to_cmake_path(self._media_dir)
         tc.variables["OGRE_CFG_INSTALL_PATH"] = self._to_cmake_path(self._config_dir)
+        if self.options.get_safe("build_component_overlay_imgui"):
+            tc.variables["CONAN_IMGUI_SRC"] = os.path.join(self.dependencies["imgui"].package_folder, "res")
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -433,6 +434,12 @@ class OgreConanFile(ConanFile):
         rmdir(self, os.path.join(self.source_folder, "PlugIns", "STBICodec", "src", "stbi"))
         replace_in_file(self, os.path.join(self.source_folder, "PlugIns", "STBICodec", "src", "OgreSTBICodec.cpp"),
                         '#include "stbi/', '#include "')
+        # Unvendor imgui in Overlay
+        # https://github.com/OGRECave/ogre/blob/v14.2.6/Components/Overlay/CMakeLists.txt#L21-L43
+        replace_in_file(self, os.path.join(self.source_folder, "Components", "Overlay", "CMakeLists.txt"),
+                        "if(OGRE_BUILD_COMPONENT_OVERLAY_IMGUI)", "if(0)")
+        replace_in_file(self, os.path.join(self.source_folder, "Components", "Overlay", "CMakeLists.txt"),
+                        "list(REMOVE_ITEM SOURCE_FILES", "# list(REMOVE_ITEM SOURCE_FILES")
 
     def build(self):
         self._patch_sources()
@@ -583,8 +590,8 @@ class OgreConanFile(ConanFile):
             _add_core_component("MeshLodGenerator")
         if self.options.build_component_overlay:
             _add_core_component("Overlay", requires=["freetype::freetype"])
-            # if self.options.get_safe("build_component_overlay_imgui"):
-            #     self.cpp_info.components["Overlay"].requires.append("imgui::imgui")
+            if self.options.get_safe("build_component_overlay_imgui"):
+                self.cpp_info.components["Overlay"].requires.append("imgui::imgui")
         if self.options.build_component_paging:
             _add_core_component("Paging")
         if self.options.build_component_property:

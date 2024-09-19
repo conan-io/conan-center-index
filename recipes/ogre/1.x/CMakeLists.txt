@@ -39,6 +39,12 @@ endif()
 
 add_subdirectory(src)
 
+if(TARGET OgreOverlay AND OGRE_BUILD_COMPONENT_OVERLAY_IMGUI)
+    find_package(imgui REQUIRED CONFIG)
+    target_sources(OgreOverlay PRIVATE ${CONAN_IMGUI_SRC}/misc/freetype/imgui_freetype.cpp)
+    target_include_directories(OgreOverlay PRIVATE ${CONAN_IMGUI_SRC}/misc/freetype)
+    target_link_libraries(OgreOverlay PUBLIC imgui::imgui)
+endif()
 if(TARGET Codec_FreeImage)
     target_link_libraries(Codec_FreeImage PUBLIC freeimage::freeimage)
 endif()
