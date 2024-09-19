@@ -35,6 +35,7 @@ class OgreConanFile(ConanFile):
         "build_rendersystem_gles2": [True, False],
         "build_rendersystem_metal": [True, False],
         "build_rendersystem_tiny": [True, False],
+        "build_rendersystem_vulkan": [True, False],
         "build_component_paging": [True, False],
         "build_component_meshlodgenerator": [True, False],
         "build_component_terrain": [True, False],
@@ -86,6 +87,7 @@ class OgreConanFile(ConanFile):
         "build_rendersystem_gles2": True,
         "build_rendersystem_metal": True,
         "build_rendersystem_tiny": False,
+        "build_rendersystem_vulkan": True,
         "build_component_paging": True,
         "build_component_meshlodgenerator": True,
         "build_component_terrain": True,
@@ -242,15 +244,19 @@ class OgreConanFile(ConanFile):
         if self.options.get_safe("build_component_bites") or self.options.get_safe("build_rendersystem_tiny"):
             self.requires("sdl/2.30.7")
         if self._build_opengl:
+            # Used in the public headers of RenderSystems
             self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
+            self.requires("glad/0.1.36", transitive_headers=True, transitive_libs=True)
+            self.requires("khrplatform/cci.20200529", transitive_headers=True)
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
+            self.requires("xorg/system")
         if self.options.build_component_bullet:
             self.requires("bullet3/3.25")
         if self.options.build_component_overlay:
             self.requires("freetype/2.13.2")
             if self.options.build_component_overlay_imgui:
-                self.requires("imgui/1.91.0")
+                # Used in Overlay/OgreImGuiOverlay.h public heder
+                self.requires("imgui/1.91.0", transitive_headers=True, transitive_libs=True)
         if self.options.build_plugin_assimp:
             self.requires("assimp/5.4.2")
         if self.options.build_plugin_exrcodec:
@@ -261,11 +267,13 @@ class OgreConanFile(ConanFile):
         if self.options.build_plugin_glslang:
             self.requires("glslang/1.3.268.0")
             self.requires("spirv-tools/1.3.268.0")
+        if self.options.build_rendersystem_vulkan:
+            self.requires("vulkan-headers/1.3.268.0")
+            self.requires("volk/1.3.268.0", transitive_headers=True, transitive_libs=True)
 
-        # TODO: RenderSystem_Vulkan
-        # TODO: Plugin_GLSLangProgramManager
         # TODO: OpenMP for RenderSystem_Tiny
         # TODO: unvendor stb in Plugin_STBI
+        # TODO: Qt support in OgreBites
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -326,7 +334,7 @@ class OgreConanFile(ConanFile):
         tc.variables["OGRE_BUILD_RENDERSYSTEM_GLES2"] = self.options.get_safe("build_rendersystem_gles2", False)
         tc.variables["OGRE_BUILD_RENDERSYSTEM_METAL"] = self.options.get_safe("build_rendersystem_metal", False)
         tc.variables["OGRE_BUILD_RENDERSYSTEM_TINY"] = self.options.get_safe("build_rendersystem_tiny", False)
-        tc.variables["OGRE_BUILD_RENDERSYSTEM_VULKAN"] = False  # TODO
+        tc.variables["OGRE_BUILD_RENDERSYSTEM_VULKAN"] = self.options.get_safe("build_rendersystem_vulkan", False)
         tc.variables["OGRE_BUILD_COMPONENT_PAGING"] = self.options.build_component_paging
         tc.variables["OGRE_BUILD_COMPONENT_MESHLODGENERATOR"] = self.options.build_component_meshlodgenerator
         tc.variables["OGRE_BUILD_COMPONENT_TERRAIN"] = self.options.build_component_terrain
@@ -575,11 +583,12 @@ class OgreConanFile(ConanFile):
         if self.options.build_component_volume:
             _add_core_component("Volume")
 
+        opengl_reqs = ["opengl::opengl", "glad::glad", "khrplatform::khrplatform"]
         if self._build_opengl:
             if not self.options.shared:
-                _add_core_component("GLSupport", requires=["opengl::opengl"])
+                _add_core_component("GLSupport", requires=opengl_reqs)
             else:
-                self.cpp_info.components["OgreMain"].requires.append("opengl::opengl")
+                self.cpp_info.components["OgreMain"].requires.extend(opengl_reqs)
 
         if self.options.build_plugin_assimp:
             _add_plugin_component("Codec_Assimp", requires=["assimp::assimp"])
@@ -616,11 +625,11 @@ class OgreConanFile(ConanFile):
             # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/Packages/FindDirectX11.cmake#L95-L100
             self.cpp_info.components["RenderSystem_Direct3D11"].system_libs += ["dxerr", "dxguid", "dxgi", "d3dcompiler", "d3d11", "d3dx11"]
         if self.options.get_safe("build_rendersystem_gl"):
-            _add_rendersystem_component("RenderSystem_GL", requires=["opengl::opengl"])
+            _add_rendersystem_component("RenderSystem_GL", requires=opengl_reqs)
         if self.options.get_safe("build_rendersystem_gl3plus"):
-            _add_rendersystem_component("RenderSystem_GL3Plus", requires=["opengl::opengl"])
+            _add_rendersystem_component("RenderSystem_GL3Plus", requires=opengl_reqs)
         if self.options.get_safe("build_rendersystem_gles2"):
-            _add_rendersystem_component("RenderSystem_GLES2", requires=["opengl::opengl"])
+            _add_rendersystem_component("RenderSystem_GLES2", requires=opengl_reqs)
         if self.options.get_safe("build_rendersystem_metal"):
             _add_rendersystem_component("RenderSystem_Metal")
             if self.settings.os == "iOS":
@@ -629,3 +638,5 @@ class OgreConanFile(ConanFile):
                 self.cpp_info.components["RenderSystem_Metal"].frameworks += ["Metal", "AppKit", "QuartzCore"]
         if self.options.get_safe("build_rendersystem_tiny"):
             _add_rendersystem_component("RenderSystem_Tiny", requires=["sdl::sdl"])
+        if self.options.get_safe("build_rendersystem_vulkan"):
+            _add_rendersystem_component("RenderSystem_Vulkan", requires=["vulkan-headers::vulkan-headers", "volk::volk"])

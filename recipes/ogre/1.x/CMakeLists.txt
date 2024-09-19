@@ -24,9 +24,16 @@ custom_find_package(OpenEXR QUIET CONFIG)
 custom_find_package(assimp QUIET CONFIG)
 custom_find_package(pugixml REQUIRED CONFIG)
 
+if(OGRE_BUILD_RENDERSYSTEM_GL OR OGRE_BUILD_RENDERSYSTEM_GL3PLUS OR OGRE_BUILD_RENDERSYSTEM_GLES2)
+    find_package(khrplatform REQUIRED CONFIG)
+    link_libraries(khrplatform::khrplatform)
+    find_package(glad REQUIRED CONFIG)
+    link_libraries(glad::glad)
+endif()
+
 # https://github.com/OGRECave/ogre/blob/v14.2.6/PlugIns/GLSLang/CMakeLists.txt#L22-L35
-custom_find_package(glslang QUIET CONFIG)
-custom_find_package(SPIRV-Tools QUIET CONFIG)
+find_package(glslang QUIET CONFIG)
+find_package(SPIRV-Tools QUIET CONFIG)
 
 add_subdirectory(src)
 
@@ -44,4 +51,9 @@ if(TARGET Plugin_DotScene)
 endif()
 if(TARGET OgreXMLConverter)
     target_link_libraries(OgreXMLConverter pugixml::pugixml)
+endif()
+if(TARGET RenderSystem_Vulkan)
+    find_package(VulkanHeaders REQUIRED CONFIG)
+    find_package(volk REQUIRED CONFIG)
+    target_link_libraries(RenderSystem_Vulkan PUBLIC Vulkan::Headers volk::volk)
 endif()
