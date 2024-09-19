@@ -10,7 +10,6 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir, save, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -138,6 +137,7 @@ class OgreConanFile(ConanFile):
         "build_rendersystem_gles2": "Build OpenGL ES 2.x RenderSystem",
         "build_rendersystem_metal": "Build Metal RenderSystem",
         "build_rendersystem_tiny": "Build Tiny RenderSystem (software-rendering)",
+        "build_rendersystem_vulkan": "Build Vulkan RenderSystem",
         "build_component_paging": "Build Paging component",
         "build_component_meshlodgenerator": "Build MeshLodGenerator component",
         "build_component_terrain": "Build Terrain component",
@@ -186,6 +186,13 @@ class OgreConanFile(ConanFile):
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
+    @property
+    def _build_opengl(self):
+        # https://github.com/OGRECave/ogre/blob/v14.2.6/RenderSystems/CMakeLists.txt#L32-L34
+        return (self.options.get_safe("build_rendersystem_gl") or
+                self.options.get_safe("build_rendersystem_gles2") or
+                self.options.get_safe("build_rendersystem_gl3plus"))
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -219,6 +226,8 @@ class OgreConanFile(ConanFile):
             self.options.rm_safe("build_rtshadersystem_shaders")
         if not self.options.get_safe("build_rendersystem_gles2"):
             self.options.rm_safe("config_enable_gles2_glsl_optimiser")
+        if not self._build_opengl:
+            self.options.rm_safe("config_enable_gl_state_cache_support")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -247,26 +256,18 @@ class OgreConanFile(ConanFile):
         if self.options.build_plugin_freeimage:
             self.requires("freeimage/3.18.0")
 
+        # TODO: RenderSystem_Vulkan
+        # TODO: Plugin_GLSLangProgramManager
         # TODO: OpenMP for RenderSystem_Tiny
         # TODO: unvendor stb in Plugin_STBI
-
-    @property
-    def _build_opengl(self):
-        # https://github.com/OGRECave/ogre/blob/v14.2.4/RenderSystems/CMakeLists.txt#L32-L34
-        return (self.options.get_safe("build_rendersystem_gl") or
-                self.options.get_safe("build_rendersystem_gles2") or
-                self.options.get_safe("build_rendersystem_gl3plus"))
 
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
 
-        # https://github.com/OGRECave/ogre/blob/v14.2.4/CMake/ConfigureBuild.cmake#L21-L25
+        # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/ConfigureBuild.cmake#L21-L25
         if self.options.shared and is_apple_os(self) and self.settings.os != "Macos":
             raise ConanInvalidConfiguration(f"OGRE shared library is not available on {self.settings.os}")
-
-        if self.options.config_enable_gl_state_cache_support and not self._build_opengl:
-            raise ConanInvalidConfiguration("config_enable_gl_state_cache_support requires GL, GLES2 or GL3PLUS RenderSystem")
 
         def _missing_dep_warning(opt, dep):
             if self.options.get_safe(opt):
@@ -283,12 +284,33 @@ class OgreConanFile(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    @property
+    def _include_dir(self):
+        return os.path.join("include", "OGRE")
+
+    @property
+    def _plugins_dir(self):
+        # Match https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/InstallResources.cmake#L33-L43
+        return "lib" if self.settings.os == "Windows" else os.path.join("lib", "OGRE")
+
+    @property
+    def _media_dir(self):
+        return os.path.join("res", "Media")
+
+    @property
+    def _config_dir(self):
+        return "res"
+
+    @staticmethod
+    def _to_cmake_path(path):
+        return path.replace("\\", "/")
+
     def generate(self):
         venv = VirtualBuildEnv(self)
         venv.generate()
 
         tc = CMakeToolchain(self)
-        # https://github.com/OGRECave/ogre/blob/v14.2.4/CMakeLists.txt#L281-L420
+        # https://github.com/OGRECave/ogre/blob/v14.2.6/CMakeLists.txt#L281-L420
         tc.variables["OGRE_STATIC"] = not self.options.shared
         tc.variables["OGRE_RESOURCEMANAGER_STRICT"] = 2 if self.options.resourcemanager_strict == "STRICT" else 1
         tc.variables["OGRE_BUILD_RENDERSYSTEM_D3D9"] = self.options.get_safe("build_rendersystem_d3d9", False)
@@ -298,6 +320,7 @@ class OgreConanFile(ConanFile):
         tc.variables["OGRE_BUILD_RENDERSYSTEM_GLES2"] = self.options.get_safe("build_rendersystem_gles2", False)
         tc.variables["OGRE_BUILD_RENDERSYSTEM_METAL"] = self.options.get_safe("build_rendersystem_metal", False)
         tc.variables["OGRE_BUILD_RENDERSYSTEM_TINY"] = self.options.get_safe("build_rendersystem_tiny", False)
+        tc.variables["OGRE_BUILD_RENDERSYSTEM_VULKAN"] = False  # TODO
         tc.variables["OGRE_BUILD_COMPONENT_PAGING"] = self.options.build_component_paging
         tc.variables["OGRE_BUILD_COMPONENT_MESHLODGENERATOR"] = self.options.build_component_meshlodgenerator
         tc.variables["OGRE_BUILD_COMPONENT_TERRAIN"] = self.options.build_component_terrain
@@ -327,6 +350,7 @@ class OgreConanFile(ConanFile):
         tc.variables["OGRE_BUILD_PLUGIN_PCZ"] = self.options.build_plugin_pcz
         tc.variables["OGRE_BUILD_PLUGIN_CG"] = False  # Cg is legacy and not worth adding support for on CCI, most likely
         tc.variables["OGRE_BUILD_PLUGIN_EXRCODEC"] = self.options.build_plugin_exrcodec
+        tc.variables["OGRE_BUILD_PLUGIN_FREEIMAGE"] = self.options.build_plugin_freeimage
         tc.variables["OGRE_BUILD_PLUGIN_RSIMAGE"] = False  # Requires Rust support on CCI
         tc.variables["OGRE_BUILD_PLUGIN_STBI"] = self.options.build_plugin_stbi
         tc.variables["OGRE_CONFIG_DOUBLE"] = self.options.config_double
@@ -353,9 +377,13 @@ class OgreConanFile(ConanFile):
         tc.variables["OGRE_LIB_DIRECTORY"] = "lib"
         tc.variables["OGRE_BIN_DIRECTORY"] = "bin"
         tc.variables["OGRE_INSTALL_VSPROPS"] = False
-        # https://github.com/OGRECave/ogre/blob/v14.2.4/CMake/ConfigureBuild.cmake#L63-L69
+        # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/ConfigureBuild.cmake#L63-L69
         tc.variables["OGRE_ASSERT_MODE"] = self.options.assert_mode
         tc.variables["OGRE_BUILD_DEPENDENCIES"] = False
+        # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/InstallResources.cmake
+        tc.variables["OGRE_PLUGINS_PATH"] = self._to_cmake_path(self._plugins_dir)
+        tc.variables["OGRE_MEDIA_PATH"] = self._to_cmake_path(self._media_dir)
+        tc.variables["OGRE_CFG_INSTALL_PATH"] = self._to_cmake_path(self._config_dir)
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -379,27 +407,34 @@ class OgreConanFile(ConanFile):
 
     @property
     def _ogre_cmake_packages(self):
-        return ["Cg", "DirectX", "DirectX11", "Softimage", "GLSLOptimizer", "HLSL2GLSL"]
+        return ["DirectX", "DirectX11", "Softimage", "GLSLOptimizer", "HLSL2GLSL"]
 
-    def _create_cmake_module_variables(self, module_file, version):
+    def _create_cmake_module_variables(self, module_file):
+        # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/Templates/OGREConfig.cmake.in
         content = textwrap.dedent(f"""\
-            set(OGRE_PREFIX_DIR ${{CMAKE_CURRENT_LIST_DIR}}/../..)
-            set(OGRE{version.major}_VERSION_MAJOR {version.major})
-            set(OGRE{version.major}_VERSION_MINOR {version.minor})
-            set(OGRE{version.major}_VERSION_PATCH {version.patch})
-            set(OGRE{version.major}_VERSION_STRING "{version.major}.{version.minor}.{version.patch}")
-
-            set(OGRE_MEDIA_DIR "${{OGRE_PREFIX_DIR}}/share/OGRE/Media")
-            set(OGRE_PLUGIN_DIR "${{OGRE_PREFIX_DIR}}/lib/OGRE")
-            set(OGRE_CONFIG_DIR "${{OGRE_PREFIX_DIR}}/share/OGRE")
+            set(OGRE_STATIC {'OFF' if self.options.shared else 'ON'})
+            get_filename_component(OGRE_PREFIX_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../../../" ABSOLUTE)
+            set(OGRE_LIBRARY_DIRS "${{OGRE_PREFIX_DIR}}/lib")
+            set(OGRE_INCLUDE_DIRS "${{OGRE_PREFIX_DIR}}/{self._to_cmake_path(self._include_dir)}")
+            set(OGRE_MEDIA_DIR "${{OGRE_PREFIX_DIR}}/{self._to_cmake_path(self._media_dir)}")
+            set(OGRE_PLUGIN_DIR "${{OGRE_PREFIX_DIR}}/{self._to_cmake_path(self._plugins_dir)}")
+            set(OGRE_CONFIG_DIR "${{OGRE_PREFIX_DIR}}/{self._to_cmake_path(self._config_dir)}")
         """)
-        # Some hacky dependency resolution for packages that are not available from Conan
+
+        # TODO:
+        #  - OGRE_LIBRARIES
+        #  - OGRE_PLUGINS
+        #  - OGRE_COMPONENTS
+        #  - OGRE_${COMPONENT}_FOUND
+        #  - OGRE_${COMPONENT}_LIBRARIES
+
+        # A hacky dependency resolution for packages that are not available from Conan
         for pkg in self._ogre_cmake_packages:
             content += textwrap.dedent(f"""\
                 find_package({pkg} MODULE QUIET)
                 if({pkg}_FOUND OR {pkg.upper()}_FOUND)
-                    target_link_libraries(OGRE::OgreMain INTERFACE ${{{pkg}}}_LIBRARIES}} ${{{pkg.upper()}}}_LIBRARIES}})
-                    target_include_directories(OGRE::OgreMain INTERFACE ${{{pkg}}}_INCLUDE_DIRS}} ${{{pkg.upper()}}}_INCLUDE_DIRS}})
+                    target_link_libraries(OgreMain INTERFACE ${{{pkg}}}_LIBRARIES}} ${{{pkg.upper()}}}_LIBRARIES}})
+                    target_include_directories(OgreMain INTERFACE ${{{pkg}}}_INCLUDE_DIRS}} ${{{pkg.upper()}}}_INCLUDE_DIRS}})
                 endif()
             """)
         save(self, module_file, content)
@@ -407,17 +442,11 @@ class OgreConanFile(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        copy(self, "License.md",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=os.path.join(self.source_folder, "Docs"))
+        copy(self, "License.md", os.path.join(self.source_folder, "Docs"), os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "OGRE", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake", "OGRE"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        self._create_cmake_module_variables(
-            os.path.join(self.package_folder, self._module_file_rel_path), Version(self.version)
-        )
+        self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_file_rel_path))
         # Include modules for packages that are not available from Conan
         for pkg in self._ogre_cmake_packages:
             copy(self, f"Find{pkg}.cmake",
@@ -435,14 +464,6 @@ class OgreConanFile(ConanFile):
     def _module_file_rel_path(self):
         return os.path.join(self._module_file_rel_dir, f"conan-official-{self.name}-variables.cmake")
 
-    def _format_lib(self, lib):
-        # https://github.com/OGRECave/ogre/blob/v14.2.4/CMake/ConfigureBuild.cmake#L140-L145
-        if not self.options.shared:
-            lib += "Static"
-        if self.settings.os == "Windows" and self.settings.build_type == "Debug":
-            lib += "_d"
-        return lib
-
     @property
     def _shared_extension(self):
         if self.settings.os == "Windows":
@@ -452,84 +473,76 @@ class OgreConanFile(ConanFile):
         else:
             return ".so"
 
+    def _core_libname(self, lib):
+        # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/ConfigureBuild.cmake#L140-L145
+        if not self.options.shared:
+            lib += "Static"
+        if self.settings.os == "Windows" and self.settings.build_type == "Debug":
+            lib += "_d"
+        return lib
+
+    def _plugin_libname(self, lib):
+        if self.options.shared:
+            # Adding the extension for a full name since the plugin libs don't include a 'lib' prefix
+            return self._core_libname(lib) + self._shared_extension
+        return self._core_libname(lib)
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OGRE")
-        self.cpp_info.set_property("cmake_target_name", "OGRE::OGRE")
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
 
-        include_prefix = os.path.join("include", "OGRE")
-        plugin_lib_dir = os.path.join("lib", "OGRE")
-
-        def _add_component(comp, *, requires=None, libs=None, includedirs=None, libdirs=None, cmake_target=None, pkg_config_name=None):
-            self.cpp_info.components[comp].set_property("cmake_target_name", cmake_target)
-            self.cpp_info.components[comp].set_property("pkg_config_name", pkg_config_name)
+        def _add_component(comp, *, requires=None, libs=None, extra_includedirs=None, libdirs=None):
+            self.cpp_info.components[comp].set_property("cmake_target_name", comp)
+            self.cpp_info.components[comp].set_property("pkg_config_name", "OGRE" if comp == "OgreMain" else f"OGRE-{comp}")
             if comp != "OgreMain":
                 self.cpp_info.components[comp].requires = ["OgreMain"]
             self.cpp_info.components[comp].requires += requires or []
-            self.cpp_info.components[comp].libs = [self._format_lib(lib) for lib in (libs or [])]
-            self.cpp_info.components[comp].includedirs = includedirs or []
+            self.cpp_info.components[comp].libs = libs or []
+            self.cpp_info.components[comp].includedirs = ["include", self._include_dir] + (extra_includedirs or [])
             self.cpp_info.components[comp].libdirs = libdirs or []
+            self.cpp_info.components[comp].resdirs = ["res"]
             self.cpp_info.components[comp].builddirs.append(self._module_file_rel_dir)
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components[comp].system_libs.append("pthread")
 
-            # TODO: Legacy, to be removed on Conan 2.0
-            self.cpp_info.components[comp].names["cmake_find_package"] = comp
-            self.cpp_info.components[comp].names["cmake_find_package_multi"] = comp
-            self.cpp_info.components[comp].names["cmake_paths"] = comp
-            self.cpp_info.components[comp].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components[comp].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-            self.cpp_info.components[comp].build_modules["cmake_paths"] = [self._module_file_rel_path]
-
         def _add_core_component(comp, *, requires=None):
             _add_component(
                 comp,
-                cmake_target=f"OGRE::{comp}",
-                pkg_config_name=f"OGRE-{comp}",
-                libs=[f"Ogre{comp}"],
+                libs=[self._core_libname(f"Ogre{comp}")],
                 libdirs=["lib"],
-                includedirs=["include", include_prefix, os.path.join(include_prefix, comp)],
+                extra_includedirs=[os.path.join(self._include_dir, comp)],
                 requires=requires,
             )
 
-        def _add_plugin_component(comp, *, requires=None, extra_libs=None):
+        def _add_plugin_component(comp, *, requires=None):
             if comp.startswith("Codec_"):
                 dirname = f"{comp.replace('Codec_', '')}Codec"
             else:
                 dirname = comp.replace("Plugin_", "")
             _add_component(
                 comp,
-                cmake_target=None,
-                pkg_config_name=None,
-                # Adding the extension for a full name since the plugin libs don't include the standard 'lib' prefix
-                libs=[comp + self._shared_extension] + (extra_libs or []),
-                libdirs=[plugin_lib_dir],
-                includedirs=["include", include_prefix, os.path.join(include_prefix, "Plugins", dirname)],
+                libs=[self._plugin_libname(comp)],
+                libdirs=[self._plugins_dir],
+                extra_includedirs=[os.path.join(self._include_dir, "Plugins", dirname)],
                 requires=requires,
             )
 
-        def _add_rendersystem_component(comp, *, requires=None, extra_libs=None):
+        def _add_rendersystem_component(comp, *, requires=None):
             dirname = comp.replace("RenderSystem_", "")
             _add_component(
                 comp,
-                cmake_target=None,
-                pkg_config_name=None,
-                libs=[comp + self._shared_extension] + (extra_libs or []),
-                libdirs=[plugin_lib_dir],
-                includedirs=["include", include_prefix, os.path.join(include_prefix, "RenderSystems", dirname)],
+                libs=[self._plugin_libname(comp)],
+                libdirs=[self._plugins_dir],
+                extra_includedirs=[os.path.join(self._include_dir, "RenderSystems", dirname)],
                 requires=requires,
             )
 
         _add_component(
             "OgreMain",
-            cmake_target="OGRE::OgreMain",
-            pkg_config_name="OGRE",
-            libs=["OgreMain"],
+            libs=[self._core_libname("OgreMain")],
             libdirs=["lib"],
-            includedirs=["include", include_prefix],
             requires=["pugixml::pugixml", "zlib::zlib", "zziplib::zziplib"],
         )
-
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["OgreMain"].requires.append("xorg::xorg")
 
@@ -604,9 +617,3 @@ class OgreConanFile(ConanFile):
                 self.cpp_info.components["RenderSystem_Metal"].frameworks += ["Metal", "AppKit", "QuartzCore"]
         if self.options.get_safe("build_rendersystem_tiny"):
             _add_rendersystem_component("RenderSystem_Tiny", requires=["sdl::sdl"])
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = "OGRE"
-        self.cpp_info.names["cmake_find_package_multi"] = "OGRE"
-        self.cpp_info.names["cmake_paths"] = "OGRE"
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

@@ -2,11 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(OGRE)
 
 macro(custom_find_package name)
-    find_package(${name} ${ARGN}
-        # Allow only Conan packages
-        NO_DEFAULT_PATH
-        PATHS ${CMAKE_PREFIX_PATH}
-    )
+    find_package(${name} ${ARGN})
     string(TOUPPER ${name} name_upper)
     set(${name_upper}_FOUND TRUE)
     set(${name_upper}_VERSION_STRING ${${name}_VERSION_STRING})

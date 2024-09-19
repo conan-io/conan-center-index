@@ -1,12 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-find_package(OGRE ${OGRE_VERSION} COMPONENTS OgreMain REQUIRED)
+find_package(OGRE COMPONENTS OgreMain REQUIRED)
 
 add_executable(ogre_main ogre_main.cpp)
-target_link_libraries(ogre_main OGRE::OgreMain)
-set_target_properties(ogre_main PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED ON
-    CXX_EXTENSIONS ON
-)
+target_link_libraries(ogre_main OgreMain)
+target_compile_features(ogre_main PRIVATE cxx_std_11)
