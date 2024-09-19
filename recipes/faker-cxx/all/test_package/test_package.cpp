@@ -1,7 +1,13 @@
 #include <iostream>
-#include "faker-cxx/Internet.h"
-#include "faker-cxx/String.h"
-#include "faker-cxx/Date.h"
+#ifdef FAKER_CXX_2
+    #include "faker-cxx/Internet.h"
+    #include "faker-cxx/String.h"
+    #include "faker-cxx/Date.h"
+#else
+    #include "faker-cxx/internet.h"
+    #include "faker-cxx/string.h"
+    #include "faker-cxx/date.h"
+#endif
 
 int main()
 {

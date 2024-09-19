@@ -562,6 +562,9 @@ class QtConan(ConanFile):
         if not self.options.with_zstd:
             tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapZSTD"] = "ON"
 
+        if not self.options.get_safe("with_vulkan"):
+            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapVulkanHeaders"] = "ON"
+
         # Prevent finding LibClang from the system
         # this is needed by the QDoc tool inside Qt Tools
         # See: https://github.com/conan-io/conan-center-index/issues/24729#issuecomment-2255291495

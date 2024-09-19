@@ -1,3 +1,5 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
@@ -5,9 +7,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir
-from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-import os
 
 required_conan_version = ">=1.55.0"
 
@@ -35,7 +35,7 @@ class SentryNativeConan(ConanFile):
         "with_crashpad": ["google", "sentry"],
         "crashpad_with_tls": ["openssl", False],
         "with_breakpad": ["google", "sentry"],
-        "wer" : [True, False],
+        "wer": [True, False],
     }
     default_options = {
         "shared": False,
@@ -46,15 +46,28 @@ class SentryNativeConan(ConanFile):
         "with_crashpad": "sentry",
         "crashpad_with_tls": "openssl",
         "with_breakpad": "sentry",
-        "wer": False
+        "wer": False,
     }
 
     @property
     def _min_cppstd(self):
-        return "17"
+        if Version(self.version) >= "0.7.8" and self.options.get_safe("with_crashpad") == "sentry":
+            return "20"
+        else:
+            return "17"
 
     @property
     def _minimum_compilers_version(self):
+        if Version(self.version) >= "0.7.8" and self.options.get_safe("with_crashpad") == "sentry":
+            # Sentry-native 0.7.8 requires C++20: Concepts and bit_cast
+            # https://github.com/chromium/mini_chromium/blob/e49947ad445c4ed4bc1bb4ed60bbe0fe17efe6ec/base/numerics/byte_conversions.h#L88
+            return {
+                "Visual Studio": "16",
+                "msvc": "192",
+                "gcc": "11",
+                "clang": "14",
+                "apple-clang": "14",
+            }
         minimum_gcc_version = "5"
         if self.options.get_safe("backend") == "breakpad" or self.options.get_safe("backend") == "crashpad":
             minimum_gcc_version = "7"

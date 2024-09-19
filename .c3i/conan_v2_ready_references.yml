@@ -84,6 +84,7 @@ required_for_references:
 - aws-libfabric
 - aws-sdk-cpp
 - azure-sdk-for-cpp
+- azure-storage-cpp
 - b2
 - b64
 - backport-cpp
@@ -93,6 +94,7 @@ required_for_references:
 - bandit
 - base64
 - basu
+- battery-embed
 - bazel
 - bdwgc
 - bear
@@ -180,6 +182,7 @@ required_for_references:
 - chipmunk2d
 - choc
 - chunkio
+- cigi-ccl
 - cimg
 - circularbuffer
 - cista
@@ -210,6 +213,7 @@ required_for_references:
 - coin-osi
 - coin-utils
 - commata
+- compute_library
 - concurrencpp
 - concurrentqueue
 - console_bridge
@@ -279,6 +283,7 @@ required_for_references:
 - cuda-samples
 - cunit
 - cute_headers
+- cutlass
 - cvplot
 - cwalk
 - cxxgraph
@@ -412,6 +417,7 @@ required_for_references:
 - fftw
 - fire-hpp
 - fixed-containers
+- fixed_math
 - flac
 - flann
 - flatbuffers
@@ -427,6 +433,7 @@ required_for_references:
 - fmi3
 - fmt
 - fmtlog
+- folly
 - fontconfig
 - foonathan-lexy
 - foonathan-memory
@@ -470,6 +477,7 @@ required_for_references:
 - geographiclib
 - geos
 - geotrans
+- getdns
 - getopt-for-visual-studio
 - gettext
 - gf-complete
@@ -500,6 +508,7 @@ required_for_references:
 - gnu-config
 - gnulib
 - gnutls
+- gobject-introspection
 - godot-cpp
 - godot_headers
 - googleapis
@@ -587,6 +596,7 @@ required_for_references:
 - inversify-cpp
 - iowow
 - ipaddress
+- iphreeqc
 - iqa
 - irrxml
 - isa-l
@@ -711,6 +721,7 @@ required_for_references:
 - libevdev
 - libevent
 - libexif
+- libfabric
 - libfdk_aac
 - libffi
 - libfork
@@ -747,6 +758,7 @@ required_for_references:
 - libjxl
 - libkml
 - libliftoff
+- liblqr
 - liblsl
 - libltc
 - liblzf
@@ -757,6 +769,7 @@ required_for_references:
 - libmd
 - libmediainfo
 - libmemcached
+- libmeshb
 - libmetalink
 - libmicrohttpd
 - libmikmod
@@ -788,6 +801,7 @@ required_for_references:
 - libpfm4
 - libphonenumber
 - libpng
+- libpointmatcher
 - libpq
 - libpqxx
 - libproperties
@@ -969,6 +983,7 @@ required_for_references:
 - miniz
 - minizip
 - minizip-ng
+- minmea
 - mio
 - mlpack
 - mm_file
@@ -1016,6 +1031,7 @@ required_for_references:
 - nasm
 - ncurses
 - neargye-semver
+- net-snmp
 - netcdf
 - nettle
 - newmat
@@ -1100,9 +1116,11 @@ required_for_references:
 - openjpeg
 - openldap
 - openmesh
+- openmpi
 - openmvg
 - openpam
 - openscenegraph
+- openslide
 - openssh
 - openssl
 - opensubdiv
@@ -1265,6 +1283,7 @@ required_for_references:
 - readerwriterqueue
 - readline
 - readosm
+- rebound
 - recastnavigation
 - reckless
 - rectanglebinpack
@@ -1320,6 +1339,7 @@ required_for_references:
 - sdf
 - sdl
 - sdl_image
+- sdl_mixer
 - sdl_net
 - sdl_ttf
 - seadex-essentials
@@ -1598,6 +1618,7 @@ required_for_references:
 - wslay
 - wt
 - wtl
+- wxwidgets
 - wyhash
 - xapian-core
 - xbyak

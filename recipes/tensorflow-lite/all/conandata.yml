@@ -30,6 +30,10 @@ patches:
     - patch_file: "patches/2.12.0-0003-use-cci-dependencies.patch"
       patch_description: "Dependency compatibility: Patch CMakeLists.txt, updating package names, target names, etc"
       patch_type: "conan"
+    - patch_file: "patches/2.12.0-0004-use-add-stdint-for-int-types.patch"
+      patch_description: "Add stdint.h for int types in internal::Spectrogram"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/tensorflow/tensorflow/pull/60299"
   "2.10.0":
     - patch_file: "patches/2.10.0-0001-remove_simple_memory_arena_debug_dump.patch"
       patch_description: "Shared build fails on Windows with error LNK2005. Resolve the conflict by removing the conflicting implementation for now."
@@ -39,3 +43,7 @@ patches:
     - patch_file: "patches/2.10.0-0003-use-cci-dependencies.patch"
       patch_description: "Dependency compatibility: Patch CMakeLists.txt, updating package names, target names, etc"
       patch_type: "conan"
+    - patch_file: "patches/2.10.0-0004-use-add-stdint-for-int-types.patch"
+      patch_description: "Add stdint.h for int types in internal::Spectrogram"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/tensorflow/tensorflow/pull/60299"
