@@ -22,12 +22,12 @@ jobs:
             linter/**
             .github/workflows/linter-conan-v2.yml
 
-      - name: Get Conan v1 version
-        id: parse_conan_v1_version
+      - name: Get Conan v2 version
+        id: parse_conan_v2_version
         if: steps.changed_files.outputs.any_changed == 'true'
         uses: mikefarah/yq@master
         with:
-          cmd: yq '.conan.version' '.c3i/config_v1.yml'
+          cmd: yq '.conan.version' '.c3i/config_v2.yml'
 
       - uses: actions/setup-python@v4
         if: steps.changed_files.outputs.any_changed == 'true'
@@ -37,7 +37,7 @@ jobs:
       - name: Install requirements
         if: steps.changed_files.outputs.any_changed == 'true'
         run: |
-          pip install ${{ env.REQUIREMENTS }} conan==${{ steps.parse_conan_v1_version.outputs.result }}
+          pip install ${{ env.REQUIREMENTS }} conan==${{ steps.parse_conan_v2_version.outputs.result }}
 
       - name: Execute linter over all recipes in the repository
         id: linter_recipes
@@ -68,12 +68,12 @@ jobs:
         with:
           files: |
             recipes/*/*/conanfile.py
-      - name: Get Conan v1 version
-        id: parse_conan_v1_version
+      - name: Get Conan v2 version
+        id: parse_conan_v2_version
         if: steps.changed-files.outputs.any_changed == 'true'
         uses: mikefarah/yq@master
         with:
-          cmd: yq '.conan.version' '.c3i/config_v1.yml'
+          cmd: yq '.conan.version' '.c3i/config_v2.yml'
       - uses: actions/setup-python@v4
         if: steps.changed-files.outputs.any_changed == 'true'
         with:
@@ -81,7 +81,7 @@ jobs:
       - name: Install dependencies
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
-          pip install ${{ env.REQUIREMENTS }} conan==${{ steps.parse_conan_v1_version.outputs.result }}
+          pip install ${{ env.REQUIREMENTS }} conan==${{ steps.parse_conan_v2_version.outputs.result }}
       - name: Run linter
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
@@ -101,12 +101,12 @@ jobs:
         with:
           files: |
             recipes/*/*/test_*/conanfile.py
-      - name: Get Conan v1 version
-        id: parse_conan_v1_version
+      - name: Get Conan v2 version
+        id: parse_conan_v2_version
         if: steps.changed-files.outputs.any_changed == 'true'
         uses: mikefarah/yq@master
         with:
-          cmd: yq '.conan.version' '.c3i/config_v1.yml'
+          cmd: yq '.conan.version' '.c3i/config_v2.yml'
       - uses: actions/setup-python@v4
         if: steps.changed-files.outputs.any_changed == 'true'
         with:
@@ -114,11 +114,11 @@ jobs:
       - name: Install dependencies
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
-          pip install ${{ env.REQUIREMENTS }} conan==${{ steps.parse_conan_v1_version.outputs.result }}
+          pip install ${{ env.REQUIREMENTS }} conan==${{ steps.parse_conan_v2_version.outputs.result }}
       - name: Run linter
         if: steps.changed-files.outputs.any_changed == 'true'
         run: |
           echo "::add-matcher::linter/recipe_linter.json"
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            pylint --rcfile=linter/pylintrc_testpackage --ignore-paths="recipes/[^/]*/[^/]*/test_v1[^/]*/conanfile.py" --output-format=parseable ${file}
+            pylint --rcfile=linter/pylintrc_testpackage --ignore-paths="recipes/[^/]*/[^/]*/test_v2[^/]*/conanfile.py" --output-format=parseable ${file}
           done
