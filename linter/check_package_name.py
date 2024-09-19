@@ -13,11 +13,6 @@ class PackageName(BaseChecker):
 
     name = "conan-package-name"
     msgs = {
-        "E9004": (
-            "Reference name should be all lowercase",
-            "conan-bad-name",
-            "Use only lower-case on the package name: `name = 'foobar'`."
-        ),
         "E9005": (
             "Missing name attribute",
             "conan-missing-name",
@@ -44,9 +39,6 @@ class PackageName(BaseChecker):
                     if is_test:
                         self.add_message("conan-test-no-name", node=attr, line=attr.lineno)
                         return
-                    value = children[1].as_string()
-                    if value.lower() != value:
-                        self.add_message("conan-bad-name", node=attr, line=attr.lineno)
                     return
             if not is_test:
                 self.add_message("conan-missing-name", node=node)
