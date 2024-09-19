@@ -75,6 +75,7 @@ class OgreConanFile(ConanFile):
         "config_enable_gl_state_cache_support": [True, False],
         "config_filesystem_unicode": [True, False],
         "assert_mode": [0, 1, 2],
+        "enable_openmp": [True, False],
     }
     default_options = {
         "shared": False,
@@ -127,6 +128,7 @@ class OgreConanFile(ConanFile):
         "config_enable_gl_state_cache_support": False,
         "config_filesystem_unicode": True,
         "assert_mode": 1,
+        "enable_openmp": True,
     }
     options_description = {
         "resourcemanager_strict": (
@@ -186,6 +188,7 @@ class OgreConanFile(ConanFile):
             "1 - Standard asserts in debug builds, exceptions in release builds.\n"
             "2 - Exceptions in debug builds, exceptions in release builds."
         ),
+        "enable_openmp": "Enable OpenMP support in RenderSystem_Tiny",
     }
 
     def export_sources(self):
@@ -233,6 +236,8 @@ class OgreConanFile(ConanFile):
             self.options.rm_safe("config_enable_gles2_glsl_optimiser")
         if not self._build_opengl:
             self.options.rm_safe("config_enable_gl_state_cache_support")
+        if not self.options.get_safe("build_rendersystem_tiny"):
+            self.options.rm_safe("enable_openmp")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -243,6 +248,8 @@ class OgreConanFile(ConanFile):
         self.requires("zziplib/0.13.72")
         if self.options.get_safe("build_component_bites") or self.options.get_safe("build_rendersystem_tiny"):
             self.requires("sdl/2.30.7")
+        if self.options.get_safe("build_rendersystem_tiny") and self.options.enable_openmp:
+            self.requires("openmp/system")
         if self._build_opengl:
             # Used in the public headers of RenderSystems
             self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
@@ -271,7 +278,6 @@ class OgreConanFile(ConanFile):
             self.requires("vulkan-headers/1.3.268.0")
             self.requires("volk/1.3.268.0", transitive_headers=True, transitive_libs=True)
 
-        # TODO: OpenMP for RenderSystem_Tiny
         # TODO: unvendor stb in Plugin_STBI
         # TODO: Qt support in OgreBites
 
@@ -414,6 +420,9 @@ class OgreConanFile(ConanFile):
                         "fix::assimp", "assimp::assimp")
         replace_in_file(self, os.path.join(self.source_folder, "PlugIns", "GLSLang", "CMakeLists.txt"),
                         " glslang OSDependent SPIRV ", " glslang::glslang ")
+        replace_in_file(self, os.path.join(self.source_folder, "RenderSystems", "Tiny", "CMakeLists.txt"),
+                        "find_package(OpenMP QUIET)",
+                        "find_package(OpenMP REQUIRED)" if self.options.get_safe("enable_openmp") else "set(OpenMP_CXX_FOUND FALSE)")
 
     def build(self):
         self._patch_sources()
@@ -638,5 +647,7 @@ class OgreConanFile(ConanFile):
                 self.cpp_info.components["RenderSystem_Metal"].frameworks += ["Metal", "AppKit", "QuartzCore"]
         if self.options.get_safe("build_rendersystem_tiny"):
             _add_rendersystem_component("RenderSystem_Tiny", requires=["sdl::sdl"])
+            if self.options.enable_openmp:
+                self.cpp_info.components["RenderSystem_Tiny"].requires.append("openmp::openmp")
         if self.options.get_safe("build_rendersystem_vulkan"):
             _add_rendersystem_component("RenderSystem_Vulkan", requires=["vulkan-headers::vulkan-headers", "volk::volk"])
