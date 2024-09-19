@@ -110,6 +110,16 @@ class OpenblasConan(ConanFile):
         "max_threads": "The maximum number of parallel threads you expect to need (defaults to the number of cores in the build cpu)",
         "max_omp_parallel": "Number of OpenMP instances that your code may use for parallel calls into OpenBLAS",
     }
+    options_description = {
+        "ilp64": "Build with ILP64 interface instead of LP64 (incompatible with the standard API)",
+        "build_lapack": "Build LAPACK and LAPACKE",
+        "build_relapack": "Build with ReLAPACK (recursive implementation of several LAPACK functions on top of standard LAPACK)",
+        "build_bfloat16": "Build with bfloat16 support",
+        "use_openmp": "Enable OpenMP support",
+        "use_thread": "Enable threads support",
+        "use_locking": "Use locks even in single-threaded builds to make them callable from multiple threads",
+        "dynamic_arch": "Include support for multiple CPU targets, with automatic selection at runtime (x86/x86_64, aarch64 or ppc only)",
+    }
     short_paths = True
 
     @property
