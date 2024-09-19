@@ -46,18 +46,13 @@ class OgreConanFile(ConanFile):
         "build_component_bites": [True, False],
         "build_component_bullet": [True, False],
         "bites_static_plugins": [True, False],
-        "build_component_python": [True, False],
-        "build_component_java": [True, False],
-        "build_component_csharp": [True, False],
         "build_component_rtshadersystem": [True, False],
         "build_rtshadersystem_shaders": [True, False],
-        "build_samples": [True, False],
         "build_tools": [True, False],
         "build_xsiexporter": [True, False],
         # "build_libs_as_frameworks": [True, False],
         "build_plugin_assimp": [True, False],
         "build_plugin_bsp": [True, False],
-        "build_plugin_cg": [True, False],
         "build_plugin_dot_scene": [True, False],
         "build_plugin_exrcodec": [True, False],
         "build_plugin_freeimage": [True, False],
@@ -75,14 +70,9 @@ class OgreConanFile(ConanFile):
         "config_enable_astc": [True, False],
         "config_enable_quad_buffer_stereo": [True, False],
         "config_enable_viewport_orientationmode": [True, False],
-        "config_enable_gles2_cg_support": [True, False],
         "config_enable_gles2_glsl_optimiser": [True, False],
         "config_enable_gl_state_cache_support": [True, False],
         "config_filesystem_unicode": [True, False],
-        "install_docs": [True, False],
-        "install_pdb": [True, False],
-        "profiling": [True, False],
-        "install_vsprops": [True, False],
         "assert_mode": [0, 1, 2],
     }
     default_options = {
@@ -106,18 +96,13 @@ class OgreConanFile(ConanFile):
         "build_component_bites": True,
         "build_component_bullet": True,
         "bites_static_plugins": False,
-        "build_component_python": False,
-        "build_component_java": False,
-        "build_component_csharp": False,
         "build_component_rtshadersystem": True,
         "build_rtshadersystem_shaders": True,
-        "build_samples": False,
         "build_tools": False,
         "build_xsiexporter": False,
         # "build_libs_as_frameworks": True,
         "build_plugin_assimp": True,
         "build_plugin_bsp": True,
-        "build_plugin_cg": False,
         "build_plugin_dot_scene": True,
         "build_plugin_exrcodec": True,
         "build_plugin_freeimage": False, # FIXME: set to true after https://github.com/conan-io/conan-center-index/pull/23138 is merged
@@ -135,14 +120,9 @@ class OgreConanFile(ConanFile):
         "config_enable_astc": True,
         "config_enable_quad_buffer_stereo": False,
         "config_enable_viewport_orientationmode": False,
-        "config_enable_gles2_cg_support": False,
         "config_enable_gles2_glsl_optimiser": False,
         "config_enable_gl_state_cache_support": False,
         "config_filesystem_unicode": True,
-        "install_docs": False,
-        "install_pdb": False,
-        "profiling": False,
-        "install_vsprops": False,
         "assert_mode": 1,
     }
     options_description = {
@@ -168,18 +148,13 @@ class OgreConanFile(ConanFile):
         "build_component_bites": "Build OgreBites component",
         "build_component_bullet": "Build Bullet physics component",
         "bites_static_plugins": "Skip plugins.cfg and statically load plugins via OgreBites",
-        "build_component_python": "Build Python bindings",
-        "build_component_java": "Build Java (JNI) bindings",
-        "build_component_csharp": "Build Csharp bindings",
         "build_component_rtshadersystem": "Build RTShader System component",
         "build_rtshadersystem_shaders": "Build RTShader System FFP shaders",
-        "build_samples": "Build Ogre demos",
         "build_tools": "Build the command-line tools",
         "build_xsiexporter": "Build the Softimage exporter",
         # "build_libs_as_frameworks": "Build frameworks for libraries on OS X.",
         "build_plugin_assimp": "Build Open Asset Import plugin",
         "build_plugin_bsp": "Build BSP SceneManager plugin",
-        "build_plugin_cg": "Build Cg plugin",
         "build_plugin_dot_scene": "Build .scene plugin",
         "build_plugin_exrcodec": "Build EXR Codec plugin",
         "build_plugin_freeimage": "Build FreeImage codec.",
@@ -197,14 +172,9 @@ class OgreConanFile(ConanFile):
         "config_enable_astc": "Build ASTC codec.",
         "config_enable_quad_buffer_stereo": "Enable stereoscopic 3D support",
         "config_enable_viewport_orientationmode": "Include Viewport orientation mode support.",
-        "config_enable_gles2_cg_support": "Enable Cg support to ES 2 render system",
         "config_enable_gles2_glsl_optimiser": "Enable GLSL optimiser use in GLES 2 render system",
         "config_enable_gl_state_cache_support": "Enable OpenGL state cache management",
         "config_filesystem_unicode": "paths expected to be in UTF-8 and wchar_t file IO routines are used",
-        "install_docs": "Install documentation.",
-        "install_pdb": "Install debug pdb files",
-        "profiling": "Enable internal instrumentation.",
-        "install_vsprops": "Install Visual Studio Property Page.",
         "assert_mode": (
             "Enable Ogre asserts and exceptions. Possible values:\n"
             "0 - Standard asserts in debug builds, nothing in release builds.\n"
@@ -227,7 +197,6 @@ class OgreConanFile(ConanFile):
             self.options.rm_safe("build_rendersystem_gl3plus")
             self.options.rm_safe("build_rendersystem_gl")
             self.options.rm_safe("build_rendersystem_gles2")
-            self.options.rm_safe("build_plugin_cg")
         if not is_apple_os(self):
             self.options.rm_safe("build_rendersystem_metal")
             self.options.rm_safe("build_libs_as_frameworks")
@@ -237,8 +206,6 @@ class OgreConanFile(ConanFile):
             self.options.rm_safe("build_tools")
         if not is_msvc(self):
             self.options.rm_safe("config_filesystem_unicode")
-            self.options.rm_safe("install_pdb")
-            self.options.rm_safe("install_vsprops")
 
     def configure(self):
         if self.options.shared:
@@ -251,7 +218,6 @@ class OgreConanFile(ConanFile):
         if not self.options.get_safe("build_component_rtshadersystem"):
             self.options.rm_safe("build_rtshadersystem_shaders")
         if not self.options.get_safe("build_rendersystem_gles2"):
-            self.options.rm_safe("config_enable_gles2_cg_support")
             self.options.rm_safe("config_enable_gles2_glsl_optimiser")
 
     def layout(self):
@@ -276,15 +242,13 @@ class OgreConanFile(ConanFile):
         if self.options.build_plugin_assimp:
             self.requires("assimp/5.4.2")
         if self.options.build_plugin_exrcodec:
-            self.requires("openexr/3.2.4")
+            # OpenEXR 3.x is not compatible
+            self.requires("openexr/2.5.7")
         if self.options.build_plugin_freeimage:
             self.requires("freeimage/3.18.0")
 
         # TODO: OpenMP for RenderSystem_Tiny
         # TODO: unvendor stb in Plugin_STBI
-        # TODO: add Cg recipe
-        # TODO: OGRE_BUILD_PLUGIN_GLSLANG
-        # TODO: OGRE_BUILD_PLUGIN_RSIMAGE
 
     @property
     def _build_opengl(self):
@@ -301,9 +265,6 @@ class OgreConanFile(ConanFile):
         if self.options.shared and is_apple_os(self) and self.settings.os != "Macos":
             raise ConanInvalidConfiguration(f"OGRE shared library is not available on {self.settings.os}")
 
-        if not self.options.shared and (self.options.get_safe("build_component_python") or self.options.get_safe("build_component_java") or self.options.get_safe("build_component_csharp")):
-            raise ConanInvalidConfiguration("OGRE static library does not support bindings for Python/Java/C#")
-
         if self.options.config_enable_gl_state_cache_support and not self._build_opengl:
             raise ConanInvalidConfiguration("config_enable_gl_state_cache_support requires GL, GLES2 or GL3PLUS RenderSystem")
 
@@ -312,14 +273,12 @@ class OgreConanFile(ConanFile):
                 self.output.warning(f"{opt} requires {dep}, which is not available in Conan Center Index. "
                                     "Assuming it is provided by the system.")
 
-        _missing_dep_warning("build_plugin_cg", "Cg")
-        _missing_dep_warning("config_enable_gles2_cg_support", "Cg")
         _missing_dep_warning("config_enable_quad_buffer_stereo", "NVAPI")
         _missing_dep_warning("build_xsiexporter", "Softimage")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.2.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -349,24 +308,26 @@ class OgreConanFile(ConanFile):
         tc.variables["OGRE_BUILD_COMPONENT_BITES"] = self.options.get_safe("build_component_bites", False)
         tc.variables["OGRE_BUILD_COMPONENT_BULLET"] = self.options.build_component_bullet
         tc.variables["OGRE_BITES_STATIC_PLUGINS"] = self.options.get_safe("bites_static_plugins", False)
-        tc.variables["OGRE_BUILD_COMPONENT_PYTHON"] = self.options.build_component_python
-        tc.variables["OGRE_BUILD_COMPONENT_JAVA"] = self.options.build_component_java
-        tc.variables["OGRE_BUILD_COMPONENT_CSHARP"] = self.options.build_component_csharp
+        tc.variables["OGRE_BUILD_COMPONENT_PYTHON"] = False
+        tc.variables["OGRE_BUILD_COMPONENT_JAVA"] = False
+        tc.variables["OGRE_BUILD_COMPONENT_CSHARP"] = False
         tc.variables["OGRE_BUILD_COMPONENT_RTSHADERSYSTEM"] = self.options.build_component_rtshadersystem
         tc.variables["OGRE_BUILD_RTSHADERSYSTEM_SHADERS"] = self.options.get_safe("build_rtshadersystem_shaders", False)
-        tc.variables["OGRE_BUILD_SAMPLES"] = self.options.get_safe("build_samples", False)
+        tc.variables["OGRE_BUILD_SAMPLES"] = False
         tc.variables["OGRE_BUILD_TOOLS"] = self.options.get_safe("build_tools", False)
         tc.variables["OGRE_BUILD_XSIEXPORTER"] = self.options.get_safe("build_xsiexporter", False)
         tc.variables["OGRE_BUILD_LIBS_AS_FRAMEWORKS"] = False  # TODO: requires additional package_info() logic
         tc.variables["OGRE_BUILD_TESTS"] = False
         tc.variables["OGRE_BUILD_PLUGIN_ASSIMP"] = self.options.build_plugin_assimp
         tc.variables["OGRE_BUILD_PLUGIN_BSP"] = self.options.build_plugin_bsp
+        tc.variables["OGRE_BUILD_PLUGIN_GLSLANG"] = False  # TODO
         tc.variables["OGRE_BUILD_PLUGIN_OCTREE"] = self.options.build_plugin_octree
         tc.variables["OGRE_BUILD_PLUGIN_PFX"] = self.options.build_plugin_pfx
         tc.variables["OGRE_BUILD_PLUGIN_DOT_SCENE"] = self.options.build_plugin_dot_scene
         tc.variables["OGRE_BUILD_PLUGIN_PCZ"] = self.options.build_plugin_pcz
-        tc.variables["OGRE_BUILD_PLUGIN_CG"] = self.options.get_safe("build_plugin_cg", False)
+        tc.variables["OGRE_BUILD_PLUGIN_CG"] = False  # Cg is legacy and not worth adding support for on CCI, most likely
         tc.variables["OGRE_BUILD_PLUGIN_EXRCODEC"] = self.options.build_plugin_exrcodec
+        tc.variables["OGRE_BUILD_PLUGIN_RSIMAGE"] = False  # Requires Rust support on CCI
         tc.variables["OGRE_BUILD_PLUGIN_STBI"] = self.options.build_plugin_stbi
         tc.variables["OGRE_CONFIG_DOUBLE"] = self.options.config_double
         tc.variables["OGRE_CONFIG_NODE_INHERIT_TRANSFORM"] = self.options.config_node_inherit_transform
@@ -379,19 +340,19 @@ class OgreConanFile(ConanFile):
         tc.variables["OGRE_CONFIG_ENABLE_QUAD_BUFFER_STEREO"] = self.options.get_safe("config_enable_quad_buffer_stereo", False)
         tc.variables["OGRE_CONFIG_ENABLE_ZIP"] = True
         tc.variables["OGRE_CONFIG_ENABLE_VIEWPORT_ORIENTATIONMODE"] = self.options.config_enable_viewport_orientationmode
-        tc.variables["OGRE_CONFIG_ENABLE_GLES2_CG_SUPPORT"] = self.options.get_safe("config_enable_gles2_cg_support", False)
+        tc.variables["OGRE_CONFIG_ENABLE_GLES2_CG_SUPPORT"] = False
         tc.variables["OGRE_CONFIG_ENABLE_GLES2_GLSL_OPTIMISER"] = self.options.get_safe("config_enable_gles2_glsl_optimiser", False)
         tc.variables["OGRE_CONFIG_ENABLE_GL_STATE_CACHE_SUPPORT"] = self.options.get_safe("config_enable_gl_state_cache_support", False)
         tc.variables["OGRE_CONFIG_FILESYSTEM_UNICODE"] = self.options.get_safe("config_filesystem_unicode", False)
         tc.variables["OGRE_CONFIG_STATIC_LINK_CRT"] = is_msvc_static_runtime(self)
-        tc.variables["OGRE_INSTALL_SAMPLES"] = self.options.get_safe("build_samples", False)
+        tc.variables["OGRE_INSTALL_SAMPLES"] = False
         tc.variables["OGRE_INSTALL_TOOLS"] = self.options.get_safe("build_tools", False)
-        tc.variables["OGRE_INSTALL_DOCS"] = self.options.get_safe("install_docs", False)
-        tc.variables["OGRE_INSTALL_PDB"] = self.options.get_safe("install_pdb", False)
-        tc.variables["OGRE_PROFILING"] = self.options.profiling
+        tc.variables["OGRE_INSTALL_DOCS"] = False
+        tc.variables["OGRE_INSTALL_PDB"] = False
+        tc.variables["OGRE_PROFILING"] = False
         tc.variables["OGRE_LIB_DIRECTORY"] = "lib"
         tc.variables["OGRE_BIN_DIRECTORY"] = "bin"
-        tc.variables["OGRE_INSTALL_VSPROPS"] = self.options.get_safe("install_vsprops", False)
+        tc.variables["OGRE_INSTALL_VSPROPS"] = False
         # https://github.com/OGRECave/ogre/blob/v14.2.4/CMake/ConfigureBuild.cmake#L63-L69
         tc.variables["OGRE_ASSERT_MODE"] = self.options.assert_mode
         tc.variables["OGRE_BUILD_DEPENDENCIES"] = False
@@ -603,8 +564,6 @@ class OgreConanFile(ConanFile):
             _add_plugin_component("Codec_Assimp", requires=["assimp::assimp"])
         if self.options.build_plugin_bsp:
             _add_plugin_component("Plugin_BSPSceneManager")
-        if self.options.get_safe("build_plugin_cg"):
-            _add_plugin_component("Plugin_CgProgramManager") #, requires=["cg::cg"])
         if self.options.build_plugin_dot_scene:
             _add_plugin_component("Plugin_DotScene", requires=["pugixml::pugixml"])
         if self.options.build_plugin_exrcodec:
