@@ -595,9 +595,9 @@ class OgreConanFile(ConanFile):
 
         if self._build_opengl:
             if not self.options.shared:
-                _add_core_component("GLSupport", requires=["libglvnd::libglvnd"])
+                _add_core_component("GLSupport", requires=["opengl::opengl"])
             else:
-                self.cpp_info.components["OgreMain"].requires.append("libglvnd::libglvnd")
+                self.cpp_info.components["OgreMain"].requires.append("opengl::opengl")
 
         if self.options.build_plugin_assimp:
             _add_plugin_component("Codec_Assimp", requires=["assimp::assimp"])
@@ -632,11 +632,11 @@ class OgreConanFile(ConanFile):
             # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/Packages/FindDirectX11.cmake#L95-L100
             self.cpp_info.components["RenderSystem_Direct3D11"].system_libs += ["dxerr", "dxguid", "dxgi", "d3dcompiler", "d3d11", "d3dx11"]
         if self.options.get_safe("build_rendersystem_gl"):
-            _add_rendersystem_component("RenderSystem_GL", requires=["libglvnd::libglvnd"])
+            _add_rendersystem_component("RenderSystem_GL", requires=["opengl::opengl"])
         if self.options.get_safe("build_rendersystem_gl3plus"):
-            _add_rendersystem_component("RenderSystem_GL3Plus", requires=["libglvnd::libglvnd"])
+            _add_rendersystem_component("RenderSystem_GL3Plus", requires=["opengl::opengl"])
         if self.options.get_safe("build_rendersystem_gles2"):
-            _add_rendersystem_component("RenderSystem_GLES2", requires=["libglvnd::libglvnd"])
+            _add_rendersystem_component("RenderSystem_GLES2", requires=["opengl::opengl"])
         if self.options.get_safe("build_rendersystem_metal"):
             _add_rendersystem_component("RenderSystem_Metal")
             if self.settings.os == "iOS":
