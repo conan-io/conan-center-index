@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc
@@ -24,9 +23,9 @@ class RaylibConan(ConanFile):
         "fPIC": [True, False],
         "opengl_version": [None, "4.3", "3.3", "2.1", "1.1", "ES-2.0"],
 
-        "module_raudio": [True, False],
-
-        "events_waiting": [True, False],
+        "customize_build": [True, False],  
+        "module_raudio": [True, False],  
+        "events_waiting": [True, False],  
         "custom_frame_control": [True, False]
     }
     default_options = {
@@ -34,9 +33,9 @@ class RaylibConan(ConanFile):
         "fPIC": True,
         "opengl_version": None,
 
-        "module_raudio": True,
-
-        "events_waiting": False,
+        "customize_build": False,  
+        "module_raudio": True,  
+        "events_waiting": False,  
         "custom_frame_control": False
     }
 
@@ -54,6 +53,11 @@ class RaylibConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+
+        if not self.options.customize_build:
+            del self.options.module_raudio
+            del self.options.events_waiting
+            del self.options.custom_frame_control
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -84,17 +88,16 @@ class RaylibConan(ConanFile):
             tc.variables["OPENGL_VERSION"] = "OFF" if not self.options.opengl_version else self.options.opengl_version
         tc.variables["WITH_PIC"] = self.options.get_safe("fPIC", True)
 
-        tc.variables["CUSTOMIZE_BUILD"] = "ON"
-        on_off = lambda x: "ON" if x else "OFF"
-        tc.variables["SUPPORT_MODULE_RAUDIO"]    = on_off(self.options.module_raudio)
+        tc.variables["CUSTOMIZE_BUILD"] = self.options.customize_build  
+        if self.options.customize_build:  
+            tc.variables["SUPPORT_MODULE_RAUDIO"] = self.options.get_safe("module_raudio")  
+            tc.variables["SUPPORT_EVENTS_WAITING"] = self.options.get_safe("events_waiting")  
+            tc.variables["SUPPORT_CUSTOM_FRAME_CONTROL"] = self.options.get_safe("custom_frame_control")
 
         # this makes it include the headers rcamera.h, rgesture.h and rprand.h
         tc.variables["SUPPORT_CAMERA_SYSTEM"]    = "ON"
         tc.variables["SUPPORT_GESTURES_SYSTEM"]  = "ON"
         tc.variables["SUPPORT_RPRAND_GENERATOR"] = "ON"
-
-        tc.variables["SUPPORT_EVENTS_WAITING"]       = on_off(self.options.events_waiting)
-        tc.variables["SUPPORT_CUSTOM_FRAME_CONTROL"] = on_off(self.options.custom_frame_control)
 
         # Due to a specific logic of cmakedeps_macros.cmake used by CMakeDeps to try to locate shared libs on Windows
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0054"] = "NEW"
