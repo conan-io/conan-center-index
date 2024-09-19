@@ -3,8 +3,8 @@
 This is expected for recipes to be updates in each pull request.
 
 - Updated helpers are expected, this is enforced by the [v2_linter](v2_linter.md)
-- Once a recipe publishes v2 packages, it must pass the v2 pipeline
-- The v2 pipeline with **shortly be required** for changes to be merged.
+- Once a recipe publishes v2 packages, it must pass the v2 pipeline always.
+- The v2 pipeline with **is required** for changes to be merged.
 
 <!-- toc -->
 ## Contents
@@ -127,7 +127,7 @@ generators using the ``set_property(property_name, value)`` method.
 Both of these two models **will live together in recipes** to make
 recipes compatible for both 1.x and 2.0 users. Deprecated feilds are not to be removed at this time.
 
-To understand the impact of these and the relation between different generates, refer to the 
+To understand the impact of these and the relation between different generates, refer to the
 [migrating properties](https://docs.conan.io/1/migrating_to_2.0/properties.html) documentation.
 
 ### Translating .names information to cmake_target_name, cmake_module_target_name and cmake_file_name
