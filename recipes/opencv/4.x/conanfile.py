@@ -1173,6 +1173,23 @@ class OpenCVConan(ConanFile):
         del self.info.options.contrib_sfm
         del self.info.options.with_ade
 
+        # https://docs.conan.io/en/latest/creating_packages/define_abi_compatibility.html
+        compiler_version = Version(str(self.settings.compiler.version))
+        compiler_compatibility = 'gcc or clang'
+        compiler_version_compatibility = 'gcc 4.8 and up or clang 5.0 and up'
+        if self.settings.compiler == 'gcc':
+            if self.settings.os == 'Linux':
+                if compiler_version >= '4.8':
+                    self.info.settings.compiler = compiler_compatibility
+                    self.info.settings.compiler.version = compiler_version_compatibility
+            else:
+                if compiler_version >= '7.0':
+                    self.info.settings.compiler.version = 'gcc 7.0 and up'
+        if self.settings.os == 'Linux' and self.settings.compiler == 'clang':
+            if compiler_version >= '5.0':
+                self.info.settings.compiler = compiler_compatibility
+                self.info.settings.compiler.version = compiler_version_compatibility
+
     def _check_mandatory_options(self, opencv_modules):
         disabled_options = self._get_mandatory_disabled_options(opencv_modules)
         direct_disabled_mandatory_options = disabled_options["direct"]
