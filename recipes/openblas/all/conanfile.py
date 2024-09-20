@@ -150,8 +150,8 @@ class OpenblasConan(ConanFile):
                 self.options.target = target
 
     def requirements(self):
-        if self.options.use_openmp:
-            self.requires("openmp/system")
+        if self.options.use_openmp and self.settings.compiler in ["clang", "apple-clang"]:
+            self.requires("llvm-openmp/17.0.6")
 
     def validate(self):
         if Version(self.version) < "0.3.24" and self.settings.arch == "armv8":
@@ -311,8 +311,19 @@ class OpenblasConan(ConanFile):
                 self.cpp_info.components["openblas_component"].system_libs.append("pthread")
             if self.options.build_lapack and self._fortran_compiler:
                 self.cpp_info.components["openblas_component"].system_libs.append("gfortran")
+
         if self.options.use_openmp:
-            self.cpp_info.components["openblas_component"].requires.append("openmp::openmp")
+            if self.options.use_openmp and self.settings.compiler in ["clang", "apple-clang"]:
+                self.cpp_info.components["openblas_component"].requires.append("llvm-openmp::llvm-openmp")
+            else:
+                if is_msvc(self):
+                    openmp_flags = ["-openmp"]
+                elif self.settings.compiler == "gcc":
+                    openmp_flags = ["-fopenmp"]
+                elif self.settings.compiler == "intel-cc":
+                    openmp_flags = ["-Qopenmp"]
+                self.cpp_info.exelinkflags.extend(openmp_flags)
+                self.cpp_info.sharedlinkflags.extend(openmp_flags)
 
         # OpenBLAS always has one and only one of these components defined: openmp, pthread or serial.
         if self.options.use_openmp:
