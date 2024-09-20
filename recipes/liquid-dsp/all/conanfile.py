@@ -67,7 +67,7 @@ class LiquidDspConan(ConanFile):
         if cross_building(self):
             raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
         if is_msvc(self):
-            raise ConanInvalidConfiguration("MSVC is not supported due to missing 'complex' support data type support")
+            raise ConanInvalidConfiguration("MSVC is not supported due to missing 'complex' data type support")
 
     def build_requirements(self):
         # For ./bootstrap.sh
