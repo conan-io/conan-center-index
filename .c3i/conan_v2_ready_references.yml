@@ -283,6 +283,7 @@ required_for_references:
 - cuda-samples
 - cunit
 - cute_headers
+- cutlass
 - cvplot
 - cwalk
 - cxxgraph
@@ -416,6 +417,7 @@ required_for_references:
 - fftw
 - fire-hpp
 - fixed-containers
+- fixed_math
 - flac
 - flann
 - flatbuffers
@@ -475,6 +477,7 @@ required_for_references:
 - geographiclib
 - geos
 - geotrans
+- getdns
 - getopt-for-visual-studio
 - gettext
 - gf-complete
@@ -505,6 +508,7 @@ required_for_references:
 - gnu-config
 - gnulib
 - gnutls
+- gobject-introspection
 - godot-cpp
 - godot_headers
 - googleapis
@@ -717,6 +721,7 @@ required_for_references:
 - libevdev
 - libevent
 - libexif
+- libfabric
 - libfdk_aac
 - libffi
 - libfork
@@ -753,6 +758,7 @@ required_for_references:
 - libjxl
 - libkml
 - libliftoff
+- liblqr
 - liblsl
 - libltc
 - liblzf
@@ -977,6 +983,7 @@ required_for_references:
 - miniz
 - minizip
 - minizip-ng
+- minmea
 - mio
 - mlpack
 - mm_file
@@ -1024,6 +1031,7 @@ required_for_references:
 - nasm
 - ncurses
 - neargye-semver
+- net-snmp
 - netcdf
 - nettle
 - newmat
@@ -1108,9 +1116,11 @@ required_for_references:
 - openjpeg
 - openldap
 - openmesh
+- openmpi
 - openmvg
 - openpam
 - openscenegraph
+- openslide
 - openssh
 - openssl
 - opensubdiv

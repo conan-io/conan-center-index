@@ -70,13 +70,20 @@ class QuillConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(
-            self,
-            "*.h",
-            os.path.join(self.source_folder, "quill", "include"),
-            os.path.join(self.package_folder, "include"),
-        )
-
+        if Version(self.version) < "7.0.0":
+            copy(
+                self,
+                "*.h",
+                os.path.join(self.source_folder, "quill", "include"),
+                os.path.join(self.package_folder, "include"),
+            )
+        else:
+            copy(
+                self,
+                "*.h",
+                os.path.join(self.source_folder, "include"),
+                os.path.join(self.package_folder, "include"),
+            )
 
     def package_info(self):
         self.cpp_info.bindirs = []
