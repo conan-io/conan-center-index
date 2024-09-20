@@ -175,7 +175,7 @@ class ReadstatConan(ConanFile):
             vcxproj_file = os.path.join(self.source_folder, "VS17", "ReadStat.vcxproj")
             
             replace_in_file(self, vcxproj_file, "<WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>", "")
-            replace_in_file(self, vcxproj_file, "<PlatformToolset>v141</PlatformToolset>", f"<PlatformToolset>v143</PlatformToolset>")
+            replace_in_file(self, vcxproj_file, "<PlatformToolset>v141</PlatformToolset>", f"<PlatformToolset>v142</PlatformToolset>")
             
             msbuild.build(sln=os.path.join(self.source_folder, "VS17", "ReadStat.sln"))
         else:
