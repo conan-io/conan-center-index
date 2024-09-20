@@ -1,4 +1,7 @@
 sources:
+  "0.3.28":
+    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.28.tar.gz"
+    sha256: "f1003466ad074e9b0c8d421a204121100b0751c96fc6fcf3d1456bd12f8a00a1"
   "0.3.27":
     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.27.tar.gz"
     sha256: "aa2d68b1564fe2b13bc292672608e9cdeeeb6dc34995512e65c3b10f4599e897"
@@ -14,15 +17,3 @@ sources:
   "0.3.20":
     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.20.tar.gz"
     sha256: "8495c9affc536253648e942908e88e097f2ec7753ede55aca52e5dead3029e3c"
-  "0.3.17":
-    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.17.tar.gz"
-    sha256: "df2934fa33d04fd84d839ca698280df55c690c86a5a1133b3f7266fce1de279f"
-  "0.3.15":
-    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.15.tar.gz"
-    sha256: "30a99dec977594b387a17f49904523e6bc8dd88bd247266e83485803759e4bbe"
-  "0.3.13":
-    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz"
-    sha256: "79197543b17cc314b7e43f7a33148c308b0807cd6381ee77f77e15acf3e6459e"
-  "0.3.12":
-    url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.12.tar.gz"
-    sha256: "65a7d3a4010a4e3bd5c0baa41a234797cd3a1735449a4a5902129152601dc57b"
