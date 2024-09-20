@@ -306,6 +306,7 @@ class OpenTelemetryCppConan(ConanFile):
                 libraries.append("opentelemetry_exporter_otlp_grpc")
                 libraries.append("opentelemetry_exporter_otlp_grpc_metrics")
                 libraries.append("opentelemetry_exporter_otlp_grpc_client")
+                libraries.append("opentelemetry_proto_grpc")
                 if Version(self.version) >= "1.11" or self.options.with_logs_preview:
                     libraries.append("opentelemetry_exporter_otlp_grpc_log")
             if self.options.with_otlp_http:
@@ -396,6 +397,7 @@ class OpenTelemetryCppConan(ConanFile):
             self.cpp_info.components["opentelemetry_exporter_otlp_grpc_client"].requires.extend([
                 "grpc::grpc++",
                 "opentelemetry_proto",
+                "opentelemetry_proto_grpc",
             ])
 
             self.cpp_info.components["opentelemetry_exporter_otlp_grpc"].requires.extend([
