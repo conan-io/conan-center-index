@@ -17,3 +17,28 @@ sources:
   "0.3.20":
     url: "https://github.com/xianyi/OpenBLAS/archive/v0.3.20.tar.gz"
     sha256: "8495c9affc536253648e942908e88e097f2ec7753ede55aca52e5dead3029e3c"
+patches:
+  "0.3.28":
+    - patch_file: "patches/0001-use-openmp-target.patch"
+      patch_description: "Use OpenMP target instead of flags for llvm-openmp"
+      patch_type: "conan"
+  "0.3.27":
+    - patch_file: "patches/0001-use-openmp-target.patch"
+      patch_description: "Use OpenMP target instead of flags for llvm-openmp"
+      patch_type: "conan"
+  "0.3.26":
+    - patch_file: "patches/0001-use-openmp-target.patch"
+      patch_description: "Use OpenMP target instead of flags for llvm-openmp"
+      patch_type: "conan"
+  "0.3.25":
+    - patch_file: "patches/0001-use-openmp-target.patch"
+      patch_description: "Use OpenMP target instead of flags for llvm-openmp"
+      patch_type: "conan"
+  "0.3.24":
+    - patch_file: "patches/0001-use-openmp-target.patch"
+      patch_description: "Use OpenMP target instead of flags for llvm-openmp"
+      patch_type: "conan"
+  "0.3.20":
+    - patch_file: "patches/0001-use-openmp-target.patch"
+      patch_description: "Use OpenMP target instead of flags for llvm-openmp"
+      patch_type: "conan"

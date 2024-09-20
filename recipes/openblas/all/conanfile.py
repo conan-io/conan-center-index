@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.files import copy, get, replace_in_file, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.scm import Version
 import os
@@ -120,6 +120,9 @@ class OpenblasConan(ConanFile):
             return comp_exe["fortran"]
         return None
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -206,6 +209,9 @@ class OpenblasConan(ConanFile):
 
         tc.variables["MSVC_STATIC_CRT"] = is_msvc_static_runtime(self)
 
+        # Needed for $<$<LINK_LANGUAGE:C>:OpenMP::OpenMP_C> to work correctly
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0022"] = "NEW"
+
         # This is a workaround to add the libm dependency on linux,
         # which is required to successfully compile on older gcc versions.
         tc.variables["ANDROID"] = self.settings.os in ["Linux", "Android"]
@@ -220,6 +226,7 @@ class OpenblasConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         if Version(self.version) <= "0.3.15":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "utils.cmake"),
                 "set(obj_defines ${defines_in})", textwrap.dedent("""\
