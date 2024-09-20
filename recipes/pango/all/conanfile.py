@@ -236,6 +236,8 @@ class PangoConan(ConanFile):
             if self.options.with_freetype:
                 # pangoft2 is always built if pango has fontconfig and freetype support
                 self.cpp_info.components["pangofc"].requires = ["freetype::freetype", "harfbuzz::harfbuzz", "pangoft2"]
+        elif self.options.with_freetype:
+            self.cpp_info.components["pango_"].requires.append("freetype::freetype")
 
         if self.settings.os != "Windows":
             self.cpp_info.components["pangoroot"].set_property("pkg_config_name", "pangoroot")
