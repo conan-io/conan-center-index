@@ -164,7 +164,10 @@ class B2Conan(ConanFile):
             cxx_env = envvars.get("CXX")
             if cxx_env:
                 command += f" --cxx={cxx_env}"
-                self._write_project_config(cxx_env)
+                # The b2 recipe fails to build on Sparc and AIX because it's unable to find
+                # the cxx project jam file via _write_project_config(). Sparc and AIX build
+                # when the following line is disabled.
+                #self._write_project_config(cxx_env)
 
             cxxflags_env = envvars.get("CXXFLAGS")
             if cxxflags_env:
