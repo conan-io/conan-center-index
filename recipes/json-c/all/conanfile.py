@@ -70,3 +70,6 @@ class JSONCConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "json-c::json-c")
         self.cpp_info.set_property("pkg_config_name", "json-c")
         self.cpp_info.includedirs = ["include", os.path.join("include", "json-c")]
+
+        if Version(self.version) >= "0.17" and self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["m",])
