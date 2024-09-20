@@ -146,6 +146,11 @@ class OpenblasConan(ConanFile):
         if not self.options.use_openmp:
             del self.options.max_omp_parallel
 
+        if not self.options.use_thread:
+            del self.options.max_threads
+        if not self.options.use_openmp:
+            del self.options.max_omp_parallel
+
         # When cross-compiling, OpenBLAS requires explicitly setting TARGET
         if cross_building(self, skip_x64_x86=True) and not self.options.target:
             # Try inferring the target from settings.arch
