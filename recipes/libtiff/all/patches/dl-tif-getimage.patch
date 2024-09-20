@@ -1,0 +1,44 @@
+diff --git a/libtiff/tif_getimage.c b/libtiff/tif_getimage.c
+index 3460af74..ec4ef5b1 100644
+--- a/libtiff/tif_getimage.c
++++ b/libtiff/tif_getimage.c
+@@ -1794,22 +1794,29 @@
+  * 8-bit packed CMYK samples w/o Map => RGB
+  *
+  * NB: The conversion of CMYK->RGB is *very* crude.
++  */
++/* DLADD MattK: Actually, the conversion has been removed.
++ *   Sends infomation back in CMYK order, unconverted.
++ *   Means we lose support for transparent CMYK TIFF
++ *   images, but how often does one see one of _those_?
+  */
+ DECLAREContigPutFunc(putRGBcontig8bitCMYKtile)
+ {
+     int samplesperpixel = img->samplesperpixel;
+-    uint16_t r, g, b, k;
++    /* uint16_t r, g, b, k; */
+ 
+-    (void)x;
+-    (void)y;
++    (void) x; (void) y;
+     fromskew *= samplesperpixel;
+-    for (; h > 0; --h)
+-    {
+-        UNROLL8(w, NOP, k = 255 - pp[3]; r = (k * (255 - pp[0])) / 255;
+-                g = (k * (255 - pp[1])) / 255; b = (k * (255 - pp[2])) / 255;
+-                *cp++ = PACK(r, g, b); pp += samplesperpixel);
+-        cp += toskew;
+-        pp += fromskew;
++    for( ; h > 0; --h) {
++	UNROLL8(w, NOP,
++	    pp[0];
++	    pp[1];
++	    pp[2];
++	    pp[3];
++	    *cp++ = PACK4(pp[0], pp[1], pp[2], pp[3]);
++	    pp += samplesperpixel);
++	cp += toskew;
++	pp += fromskew;
+     }
+ }
+ 

@@ -86,6 +86,7 @@ class LibtiffConan(ConanFile):
             raise ConanInvalidConfiguration("libtiff:libdeflate=True requires libtiff:zlib=True")
 
     def build_requirements(self):
+        return None  # DLADD no cmake from Conan
         if Version(self.version) >= "4.5.1":
             # https://github.com/conan-io/conan/issues/3482#issuecomment-662284561
             self.tool_requires("cmake/[>=3.18 <4]")
