@@ -9,12 +9,12 @@ required_conan_version = ">=1.52.0"
 
 class PcapplusplusConan(ConanFile):
     name = "pcapplusplus"
-    package_type = "static-library"
-    license = "Unlicense"
     description = "PcapPlusPlus is a multiplatform C++ library for capturing, parsing and crafting of network packets"
-    topics = ("pcap", "network", "security", "packet")
+    license = "Unlicense"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/seladb/PcapPlusPlus"
+    topics = ("pcap", "network", "security", "packet")
+    package_type = "static-library"
     settings = "os", "arch", "build_type", "compiler"
     options = {
         "immediate_mode": [True, False],

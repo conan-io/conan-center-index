@@ -1,11 +1,11 @@
 versions:
-  "21.05":
-    folder: all
-  "21.11":
+  "23.09":
+    folder: cmake
+  "22.11":
     folder: all
   "22.05":
     folder: all
-  "22.11":
+  "21.11":
     folder: all
-  "23.09":
-    folder: cmake
+  "21.05":
+    folder: all
