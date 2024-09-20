@@ -1,4 +1,6 @@
 versions:
+  "24.09":
+    folder: cmake
   "23.09":
     folder: cmake
   "22.11":
