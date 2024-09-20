@@ -1,11 +1,12 @@
 from conan import ConanFile, conan_version
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, load, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, load, save, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.microsoft import is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild, unix_path
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 import os
 import platform
 
@@ -65,10 +66,11 @@ class ReadstatConan(ConanFile):
 
     # if another tool than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
-            self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-                self.tool_requires("msys2/cci.latest")
+        # if self._settings_build.os == "Windows":
+        #     self.win_bash = True
+        #     if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+        #         self.tool_requires("msys2/cci.latest")
+        #     self.win_bash = True
         if self._settings_build.os == "Macos":
             self.tool_requires("libtool/2.4.7")
 
@@ -83,13 +85,12 @@ class ReadstatConan(ConanFile):
             return self.info.settings.os == "Windows"
     
     def source(self):
-        # if platform.system() == "Windows": # 'self.settings' access in 'source()' method was forbidden
-        #     print("微软Windows")
-        #     print(self.conan_data["sources"][self.version][0])
-        #     get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
-        # else:
-        #     get(self, **self.conan_data["sources"][self.version][1], strip_root=True)
-        get(self, **self.conan_data["sources"][self.version][1], strip_root=True)
+        if platform.system() == "Windows": # 'self.settings' access in 'source()' method was forbidden
+            print(self.conan_data["sources"][self.version][0])
+            get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
+        else:
+            get(self, **self.conan_data["sources"][self.version][1], strip_root=True)
+        #get(self, **self.conan_data["sources"][self.version][1], strip_root=True)
 
     def _msbuild_configuration(self):
         return "Debug" if self.settings.build_type == "Debug" else "Release"
@@ -131,7 +132,10 @@ class ReadstatConan(ConanFile):
                     "RC": "windres --target=pe-x86-64",
                     "WINDRES": "windres --target=pe-x86-64",
                 })
-        
+        msvc_version = {"Visual Studio": "12", "msvc": "180"}
+        #if is_msvc(self) and Version(self.settings.compiler.version) >= msvc_version[str(self.settings.compiler)]:
+            # https://github.com/conan-io/conan/issues/6514
+        #    tc.extra_cflags.append("-FS")
         if cross_building(self) and is_msvc(self):
             triplet_arch_windows = {"x86_64": "x86_64", "x86": "i686", "armv8": "aarch64"}
             # ICU doesn't like GNU triplet of conan for msvc (see https://github.com/conan-io/conan/issues/12546)
@@ -146,19 +150,6 @@ class ReadstatConan(ConanFile):
                     f"--build={build}",
                 ])
         env = tc.environment()
-        # if is_msvc(self) or self._is_clang_cl:
-        #     cc, lib, link = self._msvc_tools
-        #     build_aux_path = os.path.join(self.source_folder, "build-aux")
-        #     lt_compile = unix_path(self, os.path.join(build_aux_path, "compile"))
-        #     lt_ar = unix_path(self, os.path.join(build_aux_path, "ar-lib"))
-        #     env.define("CC", f"{lt_compile} {cc} -nologo")
-        #     env.define("CXX", f"{lt_compile} {cc} -nologo")
-        #     env.define("LD", link)
-        #     env.define("STRIP", ":")
-        #     env.define("AR", f"{lt_ar} {lib}")
-        #     env.define("RANLIB", ":")
-        #     env.define("NM", "dumpbin -symbols")
-        #     env.define("win32_target", "_WIN32_WINNT_VISTA")
         tc.generate(env)
     
     def _print_directory_structure(self, folder):
@@ -170,28 +161,27 @@ class ReadstatConan(ConanFile):
             subindent = ' ' * 4 * (level + 1)
             for f in files:
                 self.output.info(f"{subindent}{f}")
-
-
-    def build(self): 
+                
+    def build(self):
         apply_conandata_patches(self)
-        autotools = Autotools(self)
-        autotools.configure()
-        autotools.make()
+        if is_msvc(self):
+            msbuild = MSBuild(self)
+            #msbuild.build_type = self._msbuild_configuration
 
-    # def build(self):
-    #     apply_conandata_patches(self)
-    #     if is_msvc(self):
-    #         msbuild = MSBuild(self)
-    #         msbuild.build_type = self._msbuild_configuration
+            self._print_directory_structure(self.source_folder)
+            self.output.info(f"Using solution file at: {self.source_folder}")
 
-    #         self._print_directory_structure(self.source_folder)
-    #         self.output.info(f"Using solution file at: {self.source_folder}")
-
-    #         msbuild.build(sln=os.path.join(self.source_folder, "VS17", "ReadStat.sln"))
-    #     else:
-    #         autotools = Autotools(self)
-    #         autotools.configure()
-    #         autotools.make()
+            platform_toolset = MSBuildToolchain(self).toolset
+            vcxproj_file = os.path.join(self.source_folder, "VS17", "ReadStat.vcxproj")
+            
+            replace_in_file(self, vcxproj_file, "<WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>", "")
+            replace_in_file(self, vcxproj_file, "<PlatformToolset>v141</PlatformToolset>", f"<PlatformToolset>v143</PlatformToolset>")
+            
+            msbuild.build(sln=os.path.join(self.source_folder, "VS17", "ReadStat.sln"))
+        else:
+            autotools = Autotools(self)
+            autotools.configure()
+            autotools.make()
 
     def package(self):
         # upstream didn't pack license file into distribution
