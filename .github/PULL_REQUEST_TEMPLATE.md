@@ -1,15 +1,13 @@
+- _List changes here_
+-
 
-### Summary
-Changes to recipe:  **lib/[version]**
+#### Fulfills JIRA issue [EXAMPLE-1](https://datalogics-jira.atlassian.net/browse/EXAMPLE-1)
 
-#### Motivation
-<!-- Please explain why this PR is needed, if it is a bugfix, please describe the bug or link to an existing issue. -->
+#### Checklist for approving this pull request
 
-#### Details
-<!-- Explanation of the changes in the PR - this greatly simplifies the task of the reviewing team! -->
+(**PR Author:** amend this with more conditions if necessary)\
+(**PR Reviewer:** ensure all following items are fulfilled before merging)
 
-
----
-- [ ] Read the [contributing guidelines](https://github.com/conan-io/conan-center-index/blob/master/CONTRIBUTING.md)
-- [ ] Checked that this PR is not a duplicate: [list of PRs by recipe](https://github.com/conan-io/conan-center-index/discussions/24240)
-- [ ] Tested locally with at least one configuration using a recent version of Conan
+- [ ] The **Pull Request Title** has JIRA issue number, a space, and then a short but descriptive summary.
+- [ ] **Commit messages** are well formed: [A note about Git commit messages](http://www.tpope.net/node/106)
+- [ ] **Automated tests pass**.

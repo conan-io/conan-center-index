@@ -1,84 +1,64 @@
-<p align="center">
-    <img src="assets/JFrogConanCenter.png" width="600"/>
-</p>
+# conan-center-index
 
-Conan Center Index is the source index of recipes of the [ConanCenter](https://conan.io/center) package repository for [Conan](https://conan.io).
+This is the Datalogics fork of
+[conan-io/conan-center-index](https://github.com/conan-io/conan-center-index).
 
-This repository includes a Continuous Integration system that will build automatically the Conan packages for the recipes submitted via
-[Pull Request](https://github.com/conan-io/conan-center-index/pulls).
+It contains curated branches, and Datalogics-local modifications of recipes.
 
-### Server Status
+It also has Invoke tasks and CI implementations that:
 
-The current Conan Center Index CI status can be found on https://status.conan.io/
+- Upload recipes to our own repositories on Artifactory.
+- Pre-build tools with specific profiles and upload them to Artifactory.
 
-Any maintenance, outage or important event related to the CI will be informed there.
+## DL Documentation
 
+### Configuration and daily operations
 
-### Add ConanCenter remote
+- [Using the Curated Conan Center Index Conan repositories](dl-docs/using-the-ccci-repositories.md)
+  - [Building against the staging repository](dl-docs/using-the-ccci-repositories.md#building-against-the-staging-repository)
+  - [Using standard build profiles](dl-docs/using-the-ccci-repositories.md#using-standard-build-profiles)
+- [Updating a recipe](dl-docs/updating-a-recipe.md)
+  - [Adding a new revision of a recipe](dl-docs/updating-a-recipe.md#adding-a-new-revision-of-a-recipe)
+    - [In conjunction with a contribution to `conan-io/conan-center-index`](dl-docs/updating-a-recipe.md#in-conjunction-with-a-contribution-to-conan-ioconan-center-index)
+    - [At DL only](dl-docs/updating-a-recipe.md#at-dl-only)
+  - [Testing the updated recipe with DL projects](dl-docs/updating-a-recipe.md#testing-the-updated-recipe-with-dl-projects)
+  - [Bringing updates to production](dl-docs/updating-a-recipe.md#bringing-updates-to-production)
+- [Specifying automatic builds of tools](dl-docs/automatic-tool-builds.md)
+  - [Configurations for tools](dl-docs/automatic-tool-builds.md#configurations-for-tools)
+    - [Standard build profiles](dl-docs/automatic-tool-builds.md#standard-build-profiles)
+    - [Using specific compilers](dl-docs/automatic-tool-builds.md#using-specific-compilers)
+  - [Specifying which tools to build](dl-docs/automatic-tool-builds.md#specifying-which-tools-to-build)
+    - [Using a dictionary](dl-docs/automatic-tool-builds.md#using-a-dictionary)
+      - [Limiting which tool configs to use](dl-docs/automatic-tool-builds.md#limiting-which-tool-configs-to-use)
+      - [Specifying options for building the tool](dl-docs/automatic-tool-builds.md#specifying-options-for-building-the-tool)
+    - [Using version ranges](dl-docs/automatic-tool-builds.md#using-version-ranges)
+    - [Configurations for tools](dl-docs/automatic-tool-builds.md#configurations-for-tools)
+      - [Standard build profiles](dl-docs/automatic-tool-builds.md#standard-build-profiles)
+      - [Using specific compilers](dl-docs/automatic-tool-builds.md#using-specific-compilers)
+  - [Using version ranges](dl-docs/automatic-tool-builds.md#using-version-ranges)
+- [Jenkins jobs](dl-docs/jenkins-jobs.md)
+  - [Recipe uploads](dl-docs/jenkins-jobs.md#recipe-uploads)
+    - [Forcing an upload of all recipes](dl-docs/jenkins-jobs.md#forcing-an-upload-of-all-recipes)
+  - [Nightly tool builds](dl-docs/jenkins-jobs.md#nightly-tool-builds)
+    - [Requesting a full rebuild](dl-docs/jenkins-jobs.md#requesting-a-full-rebuild)
+    - [Building individual tools](dl-docs/jenkins-jobs.md#building-individual-tools)
+  - [Merges from `conan-io/conan-center-index` to `develop`](dl-docs/jenkins-jobs.md#merges-from-conan-ioconan-center-index-to-develop)
+    - [Controlling the interval of automated merges](dl-docs/jenkins-jobs.md#controlling-the-interval-of-automated-merges)
+    - [Requesting a merge](dl-docs/jenkins-jobs.md#requesting-a-merge)
+  - [Merging `develop` to `master` to put recipes into production](dl-docs/jenkins-jobs.md#merging-develop-to-master-to-put-recipes-into-production)
+    - [Criteria](dl-docs/jenkins-jobs.md#criteria)
+    - [Performing the merge](dl-docs/jenkins-jobs.md#performing-the-merge)
 
-ConanCenter remote is configured by default in any Conan client installation. If, for any reason, you need to add it manually, just execute:
+### Troubleshooting
 
-```
-conan remote add conancenter https://center.conan.io
-```
+- [Analyzing build failures](dl-docs/troubleshooting.md#analyzing-build-failures)
+- [Using pytest to run the tools builders](dl-docs/troubleshooting.md#using-pytest-to-run-the-tools-builders)
+- [Resolving merge conflicts from the upstream repo](dl-docs/troubleshooting.md#resolving-merge-conflicts-from-the-upstream-repo)
+- [Requesting a full build of the tools and their requirements](dl-docs/jenkins-jobs.md#requesting-a-full-rebuild)
+- [Requesting a full (non-incremental) recipe upload](dl-docs/jenkins-jobs.md#forcing-an-upload-of-all-recipes)
 
-### How to consume recipes
+### Reference
 
-Starting to use recipes from this repository is as easy as running
-one simple command after installing Conan:
-
-```
-conan install name/version@ [-g <generator>]
-```
-
-Of course, we really encourage you to use a `conanfile.txt` or `conanfile.py`
-to list all the requirements or your project and install them all together
-(Conan will build a single graph and ensure congruency).
-
-:warning: It is very important to notice that recipes will evolve over time
-and, while they are fixing some issues, they might introduce new features and
-improvements, and your project can break if you upgrade them
-([How to prevent these breaking changes in my project?](docs/consuming_recipes.md)).
-
-
-
-### Documentation
-
-All the documentation is available in this same repository in the [`docs/` subfolder](docs/README.md).
-
-This is a list of shortcuts to some interesting topics:
-
-* :rocket: If you want to learn how to **contribute new recipes**, please read [docs/adding_packages/](docs/adding_packages/README.md).
-* :speech_balloon: **FAQ**: most common questions are listed in [docs/faqs.md](docs/faqs.md).
-* :warning: The conan-center **hook errors** reported by CCI Bot can be found in the [docs/error_knowledge_base.md](docs/error_knowledge_base.md).
-* :hammer_and_wrench: The internal changes related to infrastructure can be checked in [docs/changelog.md](docs/changelog.md).
-* :world_map: There are various community lead initiatives which are outlined in [docs/community_resources.md](docs/community_resources.md).
-* :magic_wand: To start preparing your recipes for **Conan 2.0**, please check [docs/v2_migration.md](docs/v2_migration.md).
-
-### Reporting Issues
-
-You can open issues in the [issue tracker](https://github.com/conan-io/conan-center-index/issues) to:
-
-* :bug: Report **bugs/issues** in a package:
-    - Use the `[package]` tag in the title of the issue to help identifying them.
-    - If you detect any issue or missing feature in a package, for example, a build failure or a recipe that not support a specific configuration.
-    - Specify the name and version (`zlib/1.2.11`) and any relevant details about the fail configuration: Applied profile, building machine...
-
-* :bulb: Request a **new library** to be added:
-    - Use the `[request]` label to search the library in the issue tracker in case it was already requested.
-    - If not, use the same `[request]` tag in the title of the issue to help identifying them.
-    - Indicate the name and the version of the library you would like to have in the repository. Also links to the project's website,
-      source download/repository and in general any relevant information that helps creating a recipe for it.
-
-*  :robot: Report **a failure** in the CI system:
-    - If you open a Pull Request and get an unexpected error you might comment in the failing PR.
-    - If the service or repository is down or failing, use the `[service]` tag in the title of a new issue to help identifying them.
-
-If your issue is not appropriate for a public discussion, please contact us via e-mail at `info@conan.io`. Thanks!
-
-
-### License
-
-All the Conan recipes in this repository are distributed under the [MIT](LICENSE) license. There
-are other files, like patches or examples used to test the packages, that could use different licenses,
-for those files specific license and credit must be checked in the file itself.
+- [`merge-upstream` task](dl-docs/merge-upstream.md)
+  - [Automatically Resolved Merge Conflicts](dl-docs/auto-merge-conflict-resolution.md)
+- [`merge-staging-to-production` task](dl-docs/merge-staging-to-production.md)

@@ -1,0 +1,5 @@
+# Conflicts that should always resolve in favor of Datalogics
+# See the section "Merge Strategies" at the end of
+# https://www.git-scm.com/book/en/v2/Customizing-Git-Git-Attributes
+/README.md merge=ours
+/.github/** merge=ours

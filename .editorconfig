@@ -7,15 +7,28 @@ insert_final_newline = true
 indent_style = space
 tab_width = 4
 trim_trailing_whitespace = true
+indent_size = 4
+
+[{docs,linter,recipes}/**.py]
+max_line_length = 200
 
 [*.py]
-max_line_length = 200
+max_line_length = 120
 
 [*.yml]
 tab_width = 2
+indent_size = 2
 
-[{Makefile,Makefile.am,Makefile.in}]
+[dlproject.yaml]
+tab_width = 4
+indent_size = 4
+
+[{Makefile,Makefile.am,Makefile.in,*.mak}]
 indent_style = tab
+indent_size = 8
 
-[*.{diff,patch}]
+[*.{diff,patch,md}]
 trim_trailing_whitespace = false
+
+[*.md]
+max_line_length = 80

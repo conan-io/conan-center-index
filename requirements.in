@@ -1,0 +1,16 @@
+tox
+dl-conan-build-tools~=3.4
+node-semver
+flake8
+flake8-printf-formatting
+pipdeptree
+certifi
+pytest
+pytest-html
+pre-commit; sys_platform != 'aix' and sys_platform != 'sunos5' and platform_machine != 'ARM64'
+dl-pre-commit-hooks; sys_platform != 'aix' and sys_platform != 'sunos5' and platform_machine != 'ARM64'
+coloredlogs
+colorama; sys_platform == 'win32'
+pylint
+dacite
+pyyaml!=6.0.0,!=5.4.0,!=5.4.1

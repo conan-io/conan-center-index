@@ -1,0 +1,848 @@
+---
+config:
+    # Basic configuration variables
+    global:
+        # Base configurations, may be overridden by platform
+
+        # Conan configuration. `conan config install` installs configuration file from this URL.
+        # See: https://docs.conan.io/en/latest/reference/commands/consumer/config.html#conan-config-install
+        # This is usually a pointer to a Git repo, from which it clones the repo.
+        # The config_args are passed to the 'git clone' command and can select
+        # a branch or tag
+        config_url: git@octocat.dlogics.com:datalogics/conan-config.git
+
+        # Conan profile that's used to configure the compiler
+        # default is the profile Conan makes in the user's home directory
+        profile:
+            - default
+
+        # It's possible to use a list of profiles.
+        # For instance, this can be used to add a profile that has build
+        # tools in the [build_requires] section, making those tools available
+        # to the locally-built project via the conan.install task.
+        #
+        # Of course, the profile can be placed in a platform dictionary as well.
+        # profile:
+        #     - default
+        #     - build_tools
+
+        # Multiple build configurations in the IDE
+        multi: false
+
+        # Regex that indicates a release branch
+        stable_branch_pattern: release-.*
+
+        # Which dependencies are built. Takes a number of keywords, also the names
+        # of packages, which can also contain a wildcard.
+        # See https://docs.conan.io/en/latest/reference/commands/consumer/install.html#build-options
+        # for the full list of options.
+        build:
+            - missing
+
+        # CMake project generator
+        # Set this based on the build system the project uses
+        # (on Mac, this may be overridden to Xcode if bootstrap-xcode is run)
+        # Note: if unset, the Conan CMake build helper will choose the generator
+        # automatically, including using the correct Visual Studio generator on
+        # Windows
+        # cmake_generator: Unix Makefiles
+
+        # options for the ConanMultiPackager
+        # These state which compilers and architectures are built when doing conan.package
+        packager:
+            # Build tools. This profile is installed to a temporary directory to
+            # provide tools for building packages via the
+            # conan.install-all-configurations or conan.package tasks.
+            #
+            # Optional. Add this to your project if you want to automatically
+            # include build tools. May also be customized per platform.
+            # build_tools: build_tools
+
+            archs:
+                - x86_64
+            apple_clang_versions:
+                # quirk: must be string
+                - "9.1"
+            visual_versions:
+                # Visual Studio
+                # quirk: must be integer
+                - 12
+            # Specify the toolsets for which this package should be built.
+            # There is a key for each visual_version, which is a list of
+            # toolset designators.
+            # Quirk: The compiler version keys must be strings.
+            # visual_toolsets:
+            #     "16":
+            #         - v141
+            visual_runtimes:
+                # Permitted runtime versions for Visual Studio.
+                - MT
+                - MD
+                - MTd
+                - MDd
+            # Set this to false to make the package set up the vcvars before the build.
+            # But beware, this can mess up some recipes, especially if toolsets are around.
+            exclude_vcvars_precommand: true
+            clang_versions:
+                # quirk: must be string
+                - "5.0"
+            # gcc_versions:
+            #     # quirk: must be string
+            #     - "7"
+            # cppstds:
+            #     # quirk: must be string
+            #     - "11"
+            # libcxx:
+            #     # Permitted libcxx settings
+            #     - stdlibc++
+            shared:
+                # Permitted states for the shared option.
+                - true
+                - false
+
+            # Build types. If missing, defaults to Debug and Release.
+            # build_types:
+            #     - Debug
+            #     - Release
+
+            # You can also add additional options with values; all of these
+            # will be passed through to each package build.
+            # options:
+            #     some_option: "some_value"
+
+            # You can also add additional settings with values; all of these
+            # will be passed through to each package build.
+            # settings:
+            #     some_setting: "some_value"
+
+            # Allow making DLLs with static runtimes.
+            # Normally, that's not done, but set this to true to allow
+            # those special cases into the build matrix.
+            dll_with_static_runtime: false
+
+            # Set to true if this is a pure C project
+            pure_c: false
+
+            # Set to true if this project supports a header_only option
+            header_only: false
+
+    # Configs based on platform information
+    #
+    # Keys can be (and are merged in this order)
+    #
+    # system
+    # system-machine
+    # system-version
+    # system-version-machine
+    #
+    # Where:
+    #   system is macos, windows, or the name of the linux distribution (redhat includes centos)
+    #   version is the major version number (major.minor on macos)
+    #   machine is the processor architecture, i.e. x86_64
+    #
+    # items from global and modify them here.
+    # When merging:
+    #     Dictionary keys override the base
+    #     Lists are appended
+
+    macos-x86_64:
+        # Per-platform profiles can be set here. Profiles can be a string or a
+        # list of strings as seen below. By using a list, the build_tools
+        # profile can be added, and adds the build tools for development builds.
+        #
+        # profile:
+        #     - apple-clang-10.0-macos-10.9
+        #     - build_tools
+        common: &macOSCommon
+            # Note: split build/host profiles aren't supported by recipes in Conan Center Index
+            # profile_build:
+            #     - apple-clang-12.0-macos-10.9-cppstd-14
+            build:
+                - missing
+        config:
+            Release: &macOSRelease
+                <<: *macOSCommon
+                build_folder: build-release
+                description: macOS Release
+                profile_host:
+                    - apple-clang-14.0-intel-cppstd-14
+            Debug: &macOSDebug
+                <<: *macOSRelease
+                build_folder: build
+                description: macOS Debug
+                settings:
+                    - build_type=Debug
+            ReleaseTool: &macOSReleaseTool
+                <<: *macOSCommon
+                build_folder: build-release
+                description: macOS Release
+                profile_host:
+                    - build-profile-macos-intel
+                    - profiles/cmake-tool
+            ReleaseToolCMake:
+                <<: *macOSCommon
+                build_folder: build-release
+                description: macOS Release
+                profile_host:
+                    - build-profile-macos-intel
+            DebugTool: &macOSDebugTool
+                include:
+                    - ReleaseTool
+                build_folder: build
+                description: macOS Debug
+                settings:
+                    - build_type=Debug
+        # If the entry is a string, it's taken to be the package name,
+        # else the entry can be a dictionary of package name and options
+        prebuilt_tools:
+            - package: cmake/[>=3.23.0]
+              configs:
+                  - ReleaseToolCMake
+            - package: cmake/[~3.24.0]
+              configs:
+                  - ReleaseToolCMake
+            - package: doxygen/1.9.1
+              options:
+                  - doxygen:enable_search=False
+              configs:
+                  - ReleaseTool
+            - package: doxygen/1.9.2
+              options:
+                  - doxygen:enable_search=False
+              configs:
+                  - ReleaseTool
+            - package: ninja/[~1.10.0]
+              configs:
+                  - ReleaseTool
+            - package: ninja/[>=1.0.0]
+              configs:
+                  - ReleaseTool
+            - package: b2/4.8.2
+              configs:
+                  - ReleaseTool
+            - package: b2/4.9.6
+              configs:
+                  - ReleaseTool
+            - package: b2/[~4.9]
+              configs:
+                  - ReleaseTool
+            # Here, and afterward, building pcre without bzip2, because DLE
+            # sets that option in its conanfile.py. Currently, the only
+            # tool being built that uses bzip2 or pcre is SWIG.
+            # TODO: Should this be in the build-profile-* ?
+            - package: swig/1.3.40+dl.1
+              options:
+                  - pcre:with_bzip2=False
+              configs:
+                  - ReleaseTool
+            - package: swig/4.0.2+dl.2
+              options:
+                  - pcre:with_bzip2=False
+              configs:
+                  - ReleaseTool
+        prebuilt_tools_configs:
+            - ReleaseTool
+            - ReleaseToolCMake
+
+
+    macos-arm64:
+        # Per-platform profiles can be set here. Profiles can be a string or a
+        # list of strings as seen below. By using a list, the build_tools
+        # profile can be added, and adds the build tools for development builds.
+        #
+        # profile:
+        #     - apple-clang-10.0-macos-10.9
+        #     - build_tools
+        config:
+            Release:
+                <<: *macOSCommon
+                build_folder: build-release
+                description: macOS Release
+                profile_host:
+                    - apple-clang-14.0-arm-cppstd-14
+            Debug:
+                <<: *macOSRelease
+                build_folder: build
+                description: macOS Debug
+                settings:
+                    - build_type=Debug
+            ReleaseTool:
+                <<: *macOSCommon
+                build_folder: build-release
+                description: macOS Release
+                profile_host:
+                    - build-profile-macos-arm
+                    - profiles/cmake-tool
+            ReleaseToolCMake:
+                <<: *macOSCommon
+                build_folder: build-release
+                description: macOS Release
+                profile_host:
+                    - build-profile-macos-arm
+            DebugTool:
+                include:
+                    - ReleaseTool
+                build_folder: build
+                description: macOS Debug
+                settings:
+                    - build_type=Debug
+        # If the entry is a string, it's taken to be the package name,
+        # else the entry can be a dictionary of package name and options
+        prebuilt_tools:
+            - package: cmake/[~3.24.0]
+              configs:
+                  - ReleaseToolCMake
+            - package: cmake/[>=3.23.0]
+              configs:
+                  - ReleaseToolCMake
+            - package: doxygen/1.9.1
+              options:
+                  - doxygen:enable_search=False
+              configs:
+                  - ReleaseTool
+            - package: doxygen/1.9.2
+              options:
+                  - doxygen:enable_search=False
+              configs:
+                  - ReleaseTool
+            - package: ninja/[~1.10.0]
+              configs:
+                  - ReleaseTool
+            - package: ninja/[>=1.0.0]
+              configs:
+                  - ReleaseTool
+            - package: b2/4.8.2
+              configs:
+                  - ReleaseTool
+            - package: b2/4.9.6
+              configs:
+                  - ReleaseTool
+            - package: b2/[~4.9]
+              configs:
+                  - ReleaseTool
+            - package: swig/1.3.40+dl.1
+              options:
+                  - pcre:with_bzip2=False
+              configs:
+                  - ReleaseTool
+            - package: swig/4.0.2+dl.2
+              options:
+                  - pcre:with_bzip2=False
+              configs:
+                  - ReleaseTool
+        prebuilt_tools_configs:
+            - ReleaseTool
+            - ReleaseToolCMake
+
+
+    redhat-6-x86_64:
+        common: &redhatCommon
+            build:
+                - missing
+        config: &redhat6Config
+            Release: &redhatRelease
+                <<: *redhatCommon
+                build_folder: build-release
+                description: RedHat Release
+                profile_host:
+                    - llvm-toolset-7-cppstd-14
+            Debug: &redhatDebug
+                <<: *redhatRelease
+                build_folder: build-debug
+                description: RedHat Debug
+                settings:
+                    - build_type=Debug
+            Release32: &redhatRelease32
+                <<: *redhatCommon
+                build_folder: build-release-32
+                description: RedHat Release 32
+                profile_host:
+                    - llvm-toolset-7-cppstd-14
+                settings:
+                    - arch=x86
+            Debug32: &redhatDebug32
+                <<: *redhatRelease32
+                build_folder: build-debug-32
+                description: RedHat Debug 32
+                settings:
+                    - build_type=Debug
+            ReleaseTool: &redhatReleaseTool
+                <<: *redhatCommon
+                build_folder: build-release-tool
+                description: RedHat Release Tool
+                profile_host:
+                    - build-profile-linux-intel
+                    - profiles/cmake-path
+            ReleaseToolCMake:
+                <<: *redhatCommon
+                build_folder: build-release-tool
+                description: RedHat Release Tool
+                profile_host:
+                    - build-profile-linux-intel
+            DebugTool: &redhatDebugTool
+                include: ReleaseTool
+                build_folder: build-debug-tool
+                description: RedHat Debug Tool
+                settings:
+                    - build_type=Debug
+        prebuilt_tools: &redhat6Tools
+            - package: cmake/[>=3.23.0]
+              configs:
+                  - ReleaseToolCMake
+            - package: cmake/[~3.24.0]
+              configs:
+                  - ReleaseToolCMake
+            - package: doxygen/1.9.1
+              configs:
+                  - ReleaseTool
+            - package: doxygen/1.9.2
+              configs:
+                  - ReleaseTool
+            - package: doxygen/1.9.1
+              options:
+                  - doxygen:enable_search=False
+              configs:
+                  - ReleaseTool
+            - package: doxygen/1.9.2
+              options:
+                  - doxygen:enable_search=False
+              configs:
+                  - ReleaseTool
+            - package: ninja/[~1.10.0]
+              configs:
+                  - ReleaseTool
+            - package: b2/4.8.2
+              configs:
+                  - ReleaseTool
+            - package: b2/4.9.6
+              configs:
+                  - ReleaseTool
+            - package: b2/[~4.9]
+              configs:
+                  - ReleaseTool
+            - package: swig/1.3.40+dl.1
+              options:
+                  - pcre:with_bzip2=False
+              configs:
+                  - ReleaseTool
+            - package: swig/4.0.2+dl.2
+              options:
+                  - pcre:with_bzip2=False
+              configs:
+                  - ReleaseTool
+        prebuilt_tools_configs:
+            # Build 64-bit tools on RHEL 6, because they're used for 64-bit DLE for APDFL 15
+            - ReleaseTool
+
+    redhat-7-x86_64:
+        config: *redhat6Config
+        profile_host:
+            - profiles/cmake-tool
+        prebuilt_tools:
+            - package: ninja/[>=1.0.0]
+              configs:
+                  - ReleaseTool
+        prebuilt_tools_configs:
+            - ReleaseTool
+
+    redhat-aarch64:
+        common: &redhatARMCommon
+            build:
+                - missing
+        config:
+            Release: &redhatARMRelease
+                <<: *redhatARMCommon
+                build_folder: build-release
+                description: RedHat Release
+                profile_host:
+                    - llvm-toolset-7.0-armv8
+            Debug: &redhatARMDebug
+                <<: *redhatARMRelease
+                build_folder: build-debug
+                description: RedHat Debug
+                settings:
+                    - build_type=Debug
+            ReleaseTool:
+                build_folder: build-release-tool
+                description: RedHat Release
+                profile_host:
+                    - build-profile-linux-arm
+                    - profiles/cmake-tool
+            ReleaseToolCMake:
+                build_folder: build-release-tool
+                description: RedHat Release
+                profile_host:
+                    - build-profile-linux-arm
+            DebugTool:
+                build_folder: build-debug-tool
+                description: RedHat Debug
+                include:
+                    - ReleaseTool
+                settings:
+                    - build_type=Debug
+        prebuilt_tools:
+            - package: cmake/[>=3.23.0]
+              configs:
+                  - ReleaseToolCMake
+            - package: cmake/[~3.24.0]
+              configs:
+                  - ReleaseToolCMake
+            - package: doxygen/1.9.1
+              configs:
+                  - ReleaseTool
+            - package: doxygen/1.9.2
+              configs:
+                  - ReleaseTool
+            - package: doxygen/1.9.1
+              options:
+                  - doxygen:enable_search=False
+              configs:
+                  - ReleaseTool
+            - package: doxygen/1.9.2
+              options:
+                  - doxygen:enable_search=False
+              configs:
+                  - ReleaseTool
+            - package: ninja/[~1.10.0]
+              configs:
+                  - ReleaseTool
+            - package: ninja/[>=1.0.0]
+              configs:
+                  - ReleaseTool
+            - package: b2/4.8.2
+              configs:
+                  - ReleaseTool
+            - package: b2/4.9.6
+              configs:
+                  - ReleaseTool
+            - package: b2/[~4.9]
+              configs:
+                  - ReleaseTool
+            - package: swig/1.3.40+dl.1
+              options:
+                  - pcre:with_bzip2=False
+              configs:
+                  - ReleaseTool
+            - package: swig/4.0.2+dl.2
+              options:
+                  - pcre:with_bzip2=False
+              configs:
+                  - ReleaseTool
+        prebuilt_tools_configs:
+            - ReleaseTool
+            - ReleaseToolCMake
+
+    windows-x86_64:
+        # Can set the generator differently on a per-machine basis (but automatic is
+        # better)
+        # cmake_generator: Visual Studio 12 2013 Win64
+        multi: true
+
+        # Can override packager build_tools on a per-platform basis:
+        # packager:
+        #     build_tools: build_tools_windows
+        config:
+            Release:
+                build_folder: build-release
+                description: Windows Release
+                profile_host: visual-studio-16
+                settings:
+                    compiler.toolset=v141
+                build:
+                    - missing
+            Debug: &windowsDebug
+                include: Release
+                build_folder: build-debug
+                description: Windows Debug
+                settings:
+                    - build_type=Debug
+            Release32:
+                include: Release
+                build_folder: build-release-32
+                description: Windows Release 32
+                settings:
+                    - arch=x86
+            Debug32:
+                include: Release32
+                build_folder: build-debug-32
+                description: Windows Debug 32
+                settings:
+                    - build_type=Debug
+            ReleaseTool:
+                build_folder: build-release-tool
+                description: Windows Release
+                profile_host:
+                    - build-profile-windows-intel
+                    - profiles/cmake-tool
+            ReleaseToolCMake:
+                build_folder: build-release-tool
+                description: Windows Release
+                profile_host:
+                    - build-profile-windows-intel
+            DebugTool:
+                build_folder: build-debug-tool
+                description: Windows Debug Tool
+                include:
+                    - ReleaseTool
+                settings:
+                    - build-type=Debug
+            default: *windowsDebug
+        prebuilt_tools:
+            - package: cmake/[>=3.23.0]
+              configs:
+                  - ReleaseToolCMake
+            - package: cmake/[~3.24.0]
+              configs:
+                  - ReleaseToolCMake
+            - package: doxygen/1.9.1
+              configs:
+                  # xapian-core doesn't work for cross-building x86_64 to x86
+                  - ReleaseTool
+            - package: doxygen/1.9.2
+              configs:
+                  # xapian-core doesn't work for cross-building x86_64 to x86
+                  - ReleaseTool
+            - package: doxygen/1.9.1
+              options:
+                  - doxygen:enable_search=False
+              configs:
+                  - ReleaseTool
+            - package: doxygen/1.9.2
+              options:
+                  - doxygen:enable_search=False
+              configs:
+                  - ReleaseTool
+            - package: ninja/[~1.10.0]
+              configs:
+                  - ReleaseTool
+            - package: ninja/[>=1.0.0]
+              configs:
+                  - ReleaseTool
+            - package: b2/4.8.2
+              configs:
+                  - ReleaseTool
+            - package: b2/4.9.6
+              configs:
+                  - ReleaseTool
+            - package: b2/[~4.9]
+              configs:
+                  - ReleaseTool
+            - package: swig/1.3.40+dl.1
+              options:
+                  - pcre:with_bzip2=False
+              configs:
+                  - ReleaseTool
+            - package: swig/4.0.2+dl.2
+              options:
+                  - pcre:with_bzip2=False
+              configs:
+                  - ReleaseTool
+            - package: innoextract/1.9.0
+              configs:
+                  - ReleaseTool
+        prebuilt_tools_configs:
+            - ReleaseTool
+            - ReleaseToolCMake
+
+    aix:
+        common: &aixCommon
+            build:
+                - missing
+        config:
+            Release: &aixRelease
+                <<: *aixCommon
+                build_folder: build-release
+                description: AIX Release
+                profile_host: gcc-10-aix72-64-cppstd-14
+                env_host:
+                    - PATH+=(path)/opt/cmake-3.28/bin
+            Debug: &aixDebug
+                <<: *aixRelease
+                build_folder: build-debug
+                description: AIX Debug
+                settings:
+                    - build_type=Debug
+            ReleaseTool:
+                <<: *aixCommon
+                build_folder: build-release-tool
+                description: AIX Release
+                profile_host:
+                    - gcc-10-aix72-64-cppstd-14
+                profile_build:
+                    - gcc-10-aix72-64-cppstd-14
+            DebugTool:
+                build_folder: build-debug-tool
+                description: AIX Debug Tool
+                include:
+                    - Debug
+        prebuilt_tools:
+            - package: ninja/[~1.10.0]
+              configs:
+                  - ReleaseTool
+            - package: ninja/[>=1.0.0]
+              configs:
+                  - ReleaseTool
+            - package: b2/4.8.2
+              configs:
+                  - ReleaseTool
+            - package: b2/4.9.6
+              configs:
+                  - ReleaseTool
+            - package: b2/[~4.9]
+              configs:
+                  - ReleaseTool
+        prebuilt_tools_configs:
+            - ReleaseTool
+
+    sunos:
+        common: &sparcCommon
+            build:
+                - missing
+        config:
+            Release: &sparcRelease
+                <<: *sparcCommon
+                build_folder: build-release
+                description: Sparc Release
+                profile_host: gcc-9-sparc-solaris
+                env_host:
+                    - PATH+=(path)/opt/cmake-3.28/bin
+            Debug: &sparcDebug
+                <<: *sparcRelease
+                build_folder: build-debug
+                description: Sparc Debug
+                settings:
+                    - build_type=Debug
+            ReleaseTool:
+                build_folder: build-release-tool
+                description: Sparc Release Tool
+                profile_host:
+                    - build-profile-solaris-sparc
+            DebugTool:
+                build_folder: build-debug-tool
+                description: Sparc Debug Tool
+                include:
+                    - ReleaseTool
+                settings:
+                    - build_type=Debug
+        prebuilt_tools:
+            - package: doxygen/1.9.1
+              options:
+                  - doxygen:enable_search=False
+              configs:
+                  - ReleaseTool
+            - package: ninja/[~1.10.0]
+              configs:
+                  - ReleaseTool
+            - package: ninja/[>=1.0.0]
+              configs:
+                  - ReleaseTool
+            - package: b2/4.8.2
+              configs:
+                  - ReleaseTool
+            - package: b2/4.9.6
+              configs:
+                  - ReleaseTool
+            - package: b2/[~4.9]
+              configs:
+                  - ReleaseTool
+            - package: swig/1.3.40+dl.1
+              options:
+                  - pcre:with_bzip2=False
+              configs:
+                  - ReleaseTool
+            - package: swig/4.0.2+dl.2
+              options:
+                  - pcre:with_bzip2=False
+              configs:
+                  - ReleaseTool
+        prebuilt_tools_configs:
+            - ReleaseTool
+
+    windows-arm64:
+        config:
+            Release:
+                build_folder: build-release
+                description: Windows Release
+                profile_host: visual-studio-17-arm64-cppstd-14
+                profile_build:
+                  - win-arm64-wsl
+                  - visual-studio-17-arm64-cppstd-17
+                build:
+                    - missing
+            Debug: &winArmDebug
+                include: Release
+                build_folder: build-debug
+                description: Windows Debug
+                settings:
+                    - build_type=Debug
+            ReleaseTool:
+                build_folder: build-release-tool
+                description: Windows Release
+                profile_host:
+                    - visual-studio-17-arm64
+                    - profiles/cmake-tool
+            DebugTool:
+                build_folder: build-debug-tool
+                description: Windows Debug Tool
+                include:
+                    - ReleaseTool
+                settings:
+                    - build-type=Debug
+            default: *winArmDebug
+        prebuilt_tools:
+            - package: ninja/[~1.10.0]
+              configs:
+                  - ReleaseTool
+            - package: ninja/[>=1.0.0]
+              configs:
+                  - ReleaseTool
+            - package: automake/1.16.4
+              configs:
+                  - ReleaseTool
+            - package: b2/4.9.6
+              configs:
+                  - ReleaseTool
+            - package: b2/[~4.9]
+              configs:
+                  - ReleaseTool
+            - package: swig/4.0.2+dl.2
+              options:
+                  - pcre:with_bzip2=False
+              configs:
+                  - ReleaseTool
+        prebuilt_tools_configs:
+            - ReleaseTool
+
+    byhost:
+        # Configs based on hostname.
+        # These are applied last. Consider this for only the most extreme cases
+        kamcentos6:
+merge_upstream:
+    # Overrides the defaults in the MergeUpstreamConfig class in tasks/merge_upstream.py
+    # Note the use of nested dataclasses; use nested dictionaries here.
+    pull_request:
+        reviewers: [saharay]
+        assignee: saharay
+    # Defaults:
+    #    cci:
+    #        url: git@github.com:conan-io/conan-center-index.git
+    #        branch: master
+    #    upstream:
+    #        host: octocat.dlogics.com
+    #        organization: datalogics
+    #        branch: develop
+    #        remote_name: merge-upstream-remote
+    #    pull_request:
+    #        host: octocat.dlogics.com
+    #        fork: <current username>
+    #        merge_branch_name: merge-from-conan-io
+    #        reviewers: [ ]
+    #        assignee: null
+    #        labels:
+    #            - from-conan-io
+merge_staging_to_production:
+    # Defaults:
+    #    host: octocat.dlogics.com
+    #    organization: datalogics
+    #    staging_branch: develop
+    #    production_branch: master
