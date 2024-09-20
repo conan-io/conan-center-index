@@ -83,6 +83,8 @@ class Libxml2Conan(ConanFile):
             del self.options.docbook
         if Version(self.version) >= "2.11.0":
             self.options.rm_safe("run-debug")
+        if Version(self.version) >= "2.13.0":
+            self.options.rm_safe("mem-debug")
 
     def configure(self):
         if self.options.shared:
