@@ -1,0 +1,1005 @@
+diff -u -N -a -r a/jdapimin.c b/jdapimin.c
+--- a/jdapimin.c	2023-03-13 18:44:27
++++ b/jdapimin.c	2023-03-13 18:44:27
+@@ -169,27 +169,24 @@
+     cid2 = cinfo->comp_info[2].component_id;
+     cid3 = cinfo->comp_info[3].component_id;
+ 
+-    /* For robust detection of standard colorspaces
+-     * regardless of the presence of special markers,
+-     * check component IDs from SOF marker first.
+-     */
+-    if      (cid0 == 0x01 && cid1 == 0x02 && cid2 == 0x03 && cid3 == 0x04)
++    if (cinfo->saw_Adobe_marker) {
++        switch (cinfo->Adobe_transform) {
++        case 0:
++            cinfo->jpeg_color_space = JCS_CMYK;
++            break;
++        case 2:
++            cinfo->jpeg_color_space = JCS_YCCK;
++            break;
++        default:
++            WARNMS1(cinfo, JWRN_ADOBE_XFORM, cinfo->Adobe_transform);
++            cinfo->jpeg_color_space = JCS_YCCK;	/* assume it's YCCK */
++        }
++    }
++    else if      (cid0 == 0x01 && cid1 == 0x02 && cid2 == 0x03 && cid3 == 0x04)
+       cinfo->jpeg_color_space = JCS_YCCK;
+     else if (cid0 == 0x43 && cid1 == 0x4D && cid2 == 0x59 && cid3 == 0x4B)
+       cinfo->jpeg_color_space = JCS_CMYK;   /* ASCII 'C', 'M', 'Y', 'K' */
+-    else if (cinfo->saw_Adobe_marker) {
+-      switch (cinfo->Adobe_transform) {
+-      case 0:
+-	cinfo->jpeg_color_space = JCS_CMYK;
+-	break;
+-      case 2:
+-	cinfo->jpeg_color_space = JCS_YCCK;
+-	break;
+-      default:
+-	WARNMS1(cinfo, JWRN_ADOBE_XFORM, cinfo->Adobe_transform);
+-	cinfo->jpeg_color_space = JCS_YCCK;	/* assume it's YCCK */
+-      }
+-    } else {
++    else {
+       /* Unknown IDs and no special markers, assume straight CMYK. */
+       cinfo->jpeg_color_space = JCS_CMYK;
+     }
+diff -u -N -a -r a/Makefile.am b/Makefile.am
+--- a/Makefile.am	2021-12-06 06:42:58.000000000 -0600
++++ b/Makefile.am	2023-01-03 20:45:09.000000000 -0600
+@@ -13,17 +13,17 @@
+         jddctmgr.c jdhuff.c jdinput.c jdmainct.c jdmarker.c jdmaster.c \
+         jdmerge.c jdpostct.c jdsample.c jdtrans.c jerror.c jfdctflt.c \
+         jfdctfst.c jfdctint.c jidctflt.c jidctfst.c jidctint.c jquant1.c \
+-        jquant2.c jutils.c jmemmgr.c @MEMORYMGR@.c
++        jquant2.c jutils.c jmemmgr.c @MEMORYMGR@.c jphotoshop.c iccprofile.c transupp.c
+ 
+ # System dependent sources
+ SYSDEPSOURCES = jmemansi.c jmemname.c jmemnobs.c jmemdos.c jmemmac.c
+ 
+ # Headers which are installed to support the library
+-INSTINCLUDES  = jerror.h jmorecfg.h jpeglib.h
++INSTINCLUDES  = jerror.h jmorecfg.h jpeglib.h transupp.h jphotoshop.h iccprofile.h
+ 
+ # Headers which are not installed
+ OTHERINCLUDES = cderror.h cdjpeg.h jdct.h jinclude.h jmemsys.h jpegint.h \
+-        jversion.h transupp.h
++        jversion.h
+ 
+ # Manual pages (Automake uses 'MANS' for itself)
+ DISTMANS= cjpeg.1 djpeg.1 jpegtran.1 rdjpgcom.1 wrjpgcom.1
+@@ -88,7 +88,7 @@
+ djpeg_SOURCES    = djpeg.c wrppm.c wrgif.c wrtarga.c wrrle.c wrbmp.c \
+         rdcolmap.c cdjpeg.c
+ djpeg_LDADD      = libjpeg.la
+-jpegtran_SOURCES = jpegtran.c rdswitch.c cdjpeg.c transupp.c
++jpegtran_SOURCES = jpegtran.c rdswitch.c cdjpeg.c
+ jpegtran_LDADD   = libjpeg.la
+ rdjpgcom_SOURCES = rdjpgcom.c
+ wrjpgcom_SOURCES = wrjpgcom.c
+diff -u -N -a -r a/Makefile.in b/Makefile.in
+--- a/Makefile.in	2022-01-01 05:56:51.000000000 -0600
++++ b/Makefile.in	2023-01-03 20:45:09.000000000 -0600
+@@ -156,7 +156,8 @@
+ 	jdmaster.lo jdmerge.lo jdpostct.lo jdsample.lo jdtrans.lo \
+ 	jerror.lo jfdctflt.lo jfdctfst.lo jfdctint.lo jidctflt.lo \
+ 	jidctfst.lo jidctint.lo jquant1.lo jquant2.lo jutils.lo \
+-	jmemmgr.lo @MEMORYMGR@.lo
++	jmemmgr.lo @MEMORYMGR@.lo jphotoshop.lo iccprofile.lo \
++	transupp.lo
+ am_libjpeg_la_OBJECTS = $(am__objects_1)
+ libjpeg_la_OBJECTS = $(am_libjpeg_la_OBJECTS)
+ AM_V_lt = $(am__v_lt_@AM_V@)
+@@ -177,7 +178,7 @@
+ djpeg_OBJECTS = $(am_djpeg_OBJECTS)
+ djpeg_DEPENDENCIES = libjpeg.la
+ am_jpegtran_OBJECTS = jpegtran.$(OBJEXT) rdswitch.$(OBJEXT) \
+-	cdjpeg.$(OBJEXT) transupp.$(OBJEXT)
++	cdjpeg.$(OBJEXT)
+ jpegtran_OBJECTS = $(am_jpegtran_OBJECTS)
+ jpegtran_DEPENDENCIES = libjpeg.la
+ am_rdjpgcom_OBJECTS = rdjpgcom.$(OBJEXT)
+@@ -422,18 +423,18 @@
+         jddctmgr.c jdhuff.c jdinput.c jdmainct.c jdmarker.c jdmaster.c \
+         jdmerge.c jdpostct.c jdsample.c jdtrans.c jerror.c jfdctflt.c \
+         jfdctfst.c jfdctint.c jidctflt.c jidctfst.c jidctint.c jquant1.c \
+-        jquant2.c jutils.c jmemmgr.c @MEMORYMGR@.c
++        jquant2.c jutils.c jmemmgr.c @MEMORYMGR@.c jphotoshop.c iccprofile.c transupp.c
+ 
+ 
+ # System dependent sources
+ SYSDEPSOURCES = jmemansi.c jmemname.c jmemnobs.c jmemdos.c jmemmac.c
+ 
+ # Headers which are installed to support the library
+-INSTINCLUDES = jerror.h jmorecfg.h jpeglib.h
++INSTINCLUDES = jerror.h jmorecfg.h jpeglib.h transupp.h jphotoshop.h iccprofile.h
+ 
+ # Headers which are not installed
+ OTHERINCLUDES = cderror.h cdjpeg.h jdct.h jinclude.h jmemsys.h jpegint.h \
+-        jversion.h transupp.h
++        jversion.h
+ 
+ 
+ # Manual pages (Automake uses 'MANS' for itself)
+diff -u -N -a -r a/iccprofile.c b/iccprofile.c
+--- a/iccprofile.c	1969-12-31 18:00:00.000000000 -0600
++++ b/iccprofile.c	2023-01-03 20:45:09.000000000 -0600
+@@ -0,0 +1,248 @@
++/*
++ * iccprofile.c
++ *
++ * This file provides code to read and write International Color Consortium
++ * (ICC) device profiles embedded in JFIF JPEG image files.  The ICC has
++ * defined a standard format for including such data in JPEG "APP2" markers.
++ * The code given here does not know anything about the internal structure
++ * of the ICC profile data; it just knows how to put the profile data into
++ * a JPEG file being written, or get it back out when reading.
++ *
++ * This code depends on new features added to the IJG JPEG library as of
++ * IJG release 6b; it will not compile or work with older IJG versions.
++ *
++ * NOTE: this code would need surgery to work on 16-bit-int machines
++ * with ICC profiles exceeding 64K bytes in size.  If you need to do that,
++ * change all the "unsigned int" variables to "INT32".  You'll also need
++ * to find a malloc() replacement that can allocate more than 64K.
++ */
++
++#include "iccprofile.h"
++#include <stdlib.h>                     /* define malloc() */
++
++
++/*
++ * Since an ICC profile can be larger than the maximum size of a JPEG marker
++ * (64K), we need provisions to split it into multiple markers.  The format
++ * defined by the ICC specifies one or more APP2 markers containing the
++ * following data:
++ *      Identifying string      ASCII "ICC_PROFILE\0"  (12 bytes)
++ *      Marker sequence number  1 for first APP2, 2 for next, etc (1 byte)
++ *      Number of markers       Total number of APP2's used (1 byte)
++ *      Profile data            (remainder of APP2 data)
++ * Decoders should use the marker sequence numbers to reassemble the profile,
++ * rather than assuming that the APP2 markers appear in the correct sequence.
++ */
++
++#define ICC_MARKER  (JPEG_APP0 + 2)     /* JPEG marker code for ICC */
++#define ICC_OVERHEAD_LEN  14            /* size of non-profile data in APP2 */
++#define MAX_BYTES_IN_MARKER  65533      /* maximum data len of a JPEG marker */
++#define MAX_DATA_BYTES_IN_MARKER  (MAX_BYTES_IN_MARKER - ICC_OVERHEAD_LEN)
++
++
++/*
++ * This routine writes the given ICC profile data into a JPEG file.
++ * It *must* be called AFTER calling jpeg_start_compress() and BEFORE
++ * the first call to jpeg_write_scanlines().
++ * (This ordering ensures that the APP2 marker(s) will appear after the
++ * SOI and JFIF or Adobe markers, but before all else.)
++ */
++
++void
++write_icc_profile (j_compress_ptr cinfo,
++                   const JOCTET *icc_data_ptr,
++                   unsigned int icc_data_len)
++{
++  unsigned int num_markers;     /* total number of markers we'll write */
++  int cur_marker = 1;           /* per spec, counting starts at 1 */
++  unsigned int length;          /* number of bytes to write in this marker */
++
++  /* Calculate the number of markers we'll need, rounding up of course */
++  num_markers = icc_data_len / MAX_DATA_BYTES_IN_MARKER;
++  if (num_markers * MAX_DATA_BYTES_IN_MARKER != icc_data_len)
++    num_markers++;
++
++  while (icc_data_len > 0) {
++    /* length of profile to put in this marker */
++    length = icc_data_len;
++    if (length > MAX_DATA_BYTES_IN_MARKER)
++      length = MAX_DATA_BYTES_IN_MARKER;
++    icc_data_len -= length;
++
++    /* Write the JPEG marker header (APP2 code and marker length) */
++    jpeg_write_m_header(cinfo, ICC_MARKER,
++                        (unsigned int) (length + ICC_OVERHEAD_LEN));
++
++    /* Write the marker identifying string "ICC_PROFILE" (null-terminated).
++     * We code it in this less-than-transparent way so that the code works
++     * even if the local character set is not ASCII.
++     */
++    jpeg_write_m_byte(cinfo, 0x49);
++    jpeg_write_m_byte(cinfo, 0x43);
++    jpeg_write_m_byte(cinfo, 0x43);
++    jpeg_write_m_byte(cinfo, 0x5F);
++    jpeg_write_m_byte(cinfo, 0x50);
++    jpeg_write_m_byte(cinfo, 0x52);
++    jpeg_write_m_byte(cinfo, 0x4F);
++    jpeg_write_m_byte(cinfo, 0x46);
++    jpeg_write_m_byte(cinfo, 0x49);
++    jpeg_write_m_byte(cinfo, 0x4C);
++    jpeg_write_m_byte(cinfo, 0x45);
++    jpeg_write_m_byte(cinfo, 0x0);
++
++    /* Add the sequencing info */
++    jpeg_write_m_byte(cinfo, cur_marker);
++    jpeg_write_m_byte(cinfo, (int) num_markers);
++
++    /* Add the profile data */
++    while (length--) {
++      jpeg_write_m_byte(cinfo, *icc_data_ptr);
++      icc_data_ptr++;
++    }
++    cur_marker++;
++  }
++}
++
++
++/*
++ * Prepare for reading an ICC profile
++ */
++
++void
++setup_read_icc_profile (j_decompress_ptr cinfo)
++{
++  /* Tell the library to keep any APP2 data it may find */
++  jpeg_save_markers(cinfo, ICC_MARKER, 0xFFFF);
++}
++
++
++/*
++ * Handy subroutine to test whether a saved marker is an ICC profile marker.
++ */
++
++static boolean
++marker_is_icc (jpeg_saved_marker_ptr marker)
++{
++  return
++    marker->marker == ICC_MARKER &&
++    marker->data_length >= ICC_OVERHEAD_LEN &&
++    /* verify the identifying string */
++    GETJOCTET(marker->data[0]) == 0x49 &&
++    GETJOCTET(marker->data[1]) == 0x43 &&
++    GETJOCTET(marker->data[2]) == 0x43 &&
++    GETJOCTET(marker->data[3]) == 0x5F &&
++    GETJOCTET(marker->data[4]) == 0x50 &&
++    GETJOCTET(marker->data[5]) == 0x52 &&
++    GETJOCTET(marker->data[6]) == 0x4F &&
++    GETJOCTET(marker->data[7]) == 0x46 &&
++    GETJOCTET(marker->data[8]) == 0x49 &&
++    GETJOCTET(marker->data[9]) == 0x4C &&
++    GETJOCTET(marker->data[10]) == 0x45 &&
++    GETJOCTET(marker->data[11]) == 0x0;
++}
++
++
++/*
++ * See if there was an ICC profile in the JPEG file being read;
++ * if so, reassemble and return the profile data.
++ *
++ * TRUE is returned if an ICC profile was found, FALSE if not.
++ * If TRUE is returned, *icc_data_ptr is set to point to the
++ * returned data, and *icc_data_len is set to its length.
++ *
++ * IMPORTANT: the data at **icc_data_ptr has been allocated with malloc()
++ * and must be freed by the caller with free() when the caller no longer
++ * needs it.  (Alternatively, we could write this routine to use the
++ * IJG library's memory allocator, so that the data would be freed implicitly
++ * at jpeg_finish_decompress() time.  But it seems likely that many apps
++ * will prefer to have the data stick around after decompression finishes.)
++ *
++ * NOTE: if the file contains invalid ICC APP2 markers, we just silently
++ * return FALSE.  You might want to issue an error message instead.
++ */
++
++boolean
++read_icc_profile (j_decompress_ptr cinfo,
++                  JOCTET **icc_data_ptr,
++                  unsigned int *icc_data_len)
++{
++  jpeg_saved_marker_ptr marker;
++  int num_markers = 0;
++  int seq_no;
++  JOCTET *icc_data;
++  unsigned int total_length;
++#define MAX_SEQ_NO  255         /* sufficient since marker numbers are bytes */
++  char marker_present[MAX_SEQ_NO+1];      /* 1 if marker found */
++  unsigned int data_length[MAX_SEQ_NO+1]; /* size of profile data in marker */
++  unsigned int data_offset[MAX_SEQ_NO+1]; /* offset for data in marker */
++
++  *icc_data_ptr = NULL;         /* avoid confusion if FALSE return */
++  *icc_data_len = 0;
++
++  /* This first pass over the saved markers discovers whether there are
++   * any ICC markers and verifies the consistency of the marker numbering.
++   */
++
++  for (seq_no = 1; seq_no <= MAX_SEQ_NO; seq_no++)
++    marker_present[seq_no] = 0;
++
++  for (marker = cinfo->marker_list; marker != NULL; marker = marker->next) {
++    if (marker_is_icc(marker)) {
++      if (num_markers == 0)
++        num_markers = GETJOCTET(marker->data[13]);
++      else if (num_markers != GETJOCTET(marker->data[13]))
++        return FALSE;           /* inconsistent num_markers fields */
++      seq_no = GETJOCTET(marker->data[12]);
++      if (seq_no <= 0 || seq_no > num_markers)
++        return FALSE;           /* bogus sequence number */
++      if (marker_present[seq_no])
++        return FALSE;           /* duplicate sequence numbers */
++      marker_present[seq_no] = 1;
++      data_length[seq_no] = marker->data_length - ICC_OVERHEAD_LEN;
++    }
++  }
++
++  if (num_markers == 0)
++    return FALSE;
++
++  /* Check for missing markers, count total space needed,
++   * compute offset of each marker's part of the data.
++   */
++
++  total_length = 0;
++  for (seq_no = 1; seq_no <= num_markers; seq_no++) {
++    if (marker_present[seq_no] == 0)
++      return FALSE;             /* missing sequence number */
++    data_offset[seq_no] = total_length;
++    total_length += data_length[seq_no];
++  }
++
++  if (total_length <= 0)
++    return FALSE;               /* found only empty markers? */
++
++  /* Allocate space for assembled data */
++  icc_data = (JOCTET *) malloc(total_length * sizeof(JOCTET));
++  if (icc_data == NULL)
++    return FALSE;               /* oops, out of memory */
++
++  /* and fill it in */
++  for (marker = cinfo->marker_list; marker != NULL; marker = marker->next) {
++    if (marker_is_icc(marker)) {
++      JOCTET FAR *src_ptr;
++      JOCTET *dst_ptr;
++      unsigned int length;
++      seq_no = GETJOCTET(marker->data[12]);
++      dst_ptr = icc_data + data_offset[seq_no];
++      src_ptr = marker->data + ICC_OVERHEAD_LEN;
++      length = data_length[seq_no];
++      while (length--) {
++        *dst_ptr++ = *src_ptr++;
++      }
++    }
++  }
++
++  *icc_data_ptr = icc_data;
++  *icc_data_len = total_length;
++
++  return TRUE;
++}
+diff -u -N -a -r a/iccprofile.h b/iccprofile.h
+--- a/iccprofile.h	1969-12-31 18:00:00.000000000 -0600
++++ b/iccprofile.h	2023-01-03 20:45:09.000000000 -0600
+@@ -0,0 +1,73 @@
++/*
++ * iccprofile.h
++ *
++ * This file provides code to read and write International Color Consortium
++ * (ICC) device profiles embedded in JFIF JPEG image files.  The ICC has
++ * defined a standard format for including such data in JPEG "APP2" markers.
++ * The code given here does not know anything about the internal structure
++ * of the ICC profile data; it just knows how to put the profile data into
++ * a JPEG file being written, or get it back out when reading.
++ *
++ * This code depends on new features added to the IJG JPEG library as of
++ * IJG release 6b; it will not compile or work with older IJG versions.
++ *
++ * NOTE: this code would need surgery to work on 16-bit-int machines
++ * with ICC profiles exceeding 64K bytes in size.  See iccprofile.c
++ * for details.
++ */
++
++#include <stdio.h>              /* needed to define "FILE", "NULL" */
++#include "jpeglib.h"
++
++
++/*
++ * This routine writes the given ICC profile data into a JPEG file.
++ * It *must* be called AFTER calling jpeg_start_compress() and BEFORE
++ * the first call to jpeg_write_scanlines().
++ * (This ordering ensures that the APP2 marker(s) will appear after the
++ * SOI and JFIF or Adobe markers, but before all else.)
++ */
++
++extern void write_icc_profile JPP((j_compress_ptr cinfo,
++                                   const JOCTET *icc_data_ptr,
++                                   unsigned int icc_data_len));
++
++
++/*
++ * Reading a JPEG file that may contain an ICC profile requires two steps:
++ *
++ * 1. After jpeg_create_decompress() but before jpeg_read_header(),
++ *    call setup_read_icc_profile().  This routine tells the IJG library
++ *    to save in memory any APP2 markers it may find in the file.
++ *
++ * 2. After jpeg_read_header(), call read_icc_profile() to find out
++ *    whether there was a profile and obtain it if so.
++ */
++
++
++/*
++ * Prepare for reading an ICC profile
++ */
++
++extern void setup_read_icc_profile JPP((j_decompress_ptr cinfo));
++
++
++/*
++ * See if there was an ICC profile in the JPEG file being read;
++ * if so, reassemble and return the profile data.
++ *
++ * TRUE is returned if an ICC profile was found, FALSE if not.
++ * If TRUE is returned, *icc_data_ptr is set to point to the
++ * returned data, and *icc_data_len is set to its length.
++ *
++ * IMPORTANT: the data at **icc_data_ptr has been allocated with malloc()
++ * and must be freed by the caller with free() when the caller no longer
++ * needs it.  (Alternatively, we could write this routine to use the
++ * IJG library's memory allocator, so that the data would be freed implicitly
++ * at jpeg_finish_decompress() time.  But it seems likely that many apps
++ * will prefer to have the data stick around after decompression finishes.)
++ */
++
++extern boolean read_icc_profile JPP((j_decompress_ptr cinfo,
++                                     JOCTET **icc_data_ptr,
++                                     unsigned int *icc_data_len));
+diff -u -N -a -r a/jphotoshop.c b/jphotoshop.c
+--- a/jphotoshop.c	1969-12-31 18:00:00.000000000 -0600
++++ b/jphotoshop.c	2023-01-03 20:45:09.000000000 -0600
+@@ -0,0 +1,352 @@
++/*
++ * jphotoshop.c
++ *
++ * This file provides code to read Photoshop APP13 markers containing image
++ * resources. These image resources contain extended metadata for the file.
++ * Current support is limited to the topic of interest, which is reading
++ * resolution data and populating the density fields of jpeg_decompress_struct.
++ * 
++ * This code depends on new features added to the IJG JPEG library as of
++ * IJG release 6b; it will not compile or work with older IJG versions.
++ */
++
++#include "jphotoshop.h"
++#include <stdlib.h>                     /* define malloc() */
++/* DLADD: RickK 22Nov06 - x64 port - Added #include of string.h */
++/* DLADD: to get definition of memset. */
++#include <string.h>
++
++
++/*
++ * The Photoshop image 
++ * following data:
++ *      Identifying string      ASCII "Photoshop 3.0\0"  (14 bytes)
++ *      Image resources         8BIM resources, see Adobe doc.
++ * Decoders should use the marker sequence numbers to reassemble the profile,
++ * rather than assuming that the APP2 markers appear in the correct sequence.
++ */
++
++#define PHOTOSHOP_MARKER  (JPEG_APP0 + 13)     /* JPEG marker code for Photoshop */
++#define PHOTOSHOP_OVERHEAD_LEN  14            /* size of non-profile data in APP2 */
++#define MAX_BYTES_IN_MARKER  65533      /* maximum data len of a JPEG marker */
++#define MAX_DATA_BYTES_IN_MARKER  (MAX_BYTES_IN_MARKER - ICC_OVERHEAD_LEN)
++
++#define GetBELong(p) (((*(p) & 0xff) << 24) + ((*((p) + 1) & 0xff) << 16) + \
++                          ((*((p) + 2) & 0xff) << 8) + (*((p) + 3) & 0xff))
++
++#define GetBEULong(p) ((unsigned long)GetBELong(p))
++
++#define GetBEUShort(p) ((unsigned short)(((*(p) & 0xff) << 8) + (*((p) + 1) & 0xff)))
++
++#define GetBackBEUShort(p) ((unsigned short)(((*((p) + 1) & 0xff) << 8) + (*(p) & 0xff)))
++
++#define GetBackBELong(p) (((*((p) + 3) & 0xff) << 24) + ((*((p) + 2) & 0xff) << 16) + \
++    ((*((p) + 1) & 0xff) << 8) + (*(p) & 0xff))
++
++#define GetBackBEULong(p) ((unsigned long)GetBackBELong(p))
++
++/*
++ * Prepare for reading Photoshop data
++ */
++
++void
++setup_read_photoshop (j_decompress_ptr cinfo)
++{
++  /* Tell the library to keep any APP2 data it may find */
++  jpeg_save_markers(cinfo, PHOTOSHOP_MARKER, 0xFFFF);
++}
++
++
++/*
++ * Handy subroutine to test whether a saved marker is an ICC profile marker.
++ */
++
++static boolean
++marker_is_photoshop (jpeg_saved_marker_ptr marker)
++{
++  return 
++    (marker->marker == PHOTOSHOP_MARKER &&
++    marker->data_length >= PHOTOSHOP_OVERHEAD_LEN &&
++    /* verify the identifying string */
++    GETJOCTET(marker->data[0]) == 0x50 &&
++    GETJOCTET(marker->data[1]) == 0x68 &&
++    GETJOCTET(marker->data[2]) == 0x6F &&
++    GETJOCTET(marker->data[3]) == 0x74 &&
++    GETJOCTET(marker->data[4]) == 0x6F &&
++    GETJOCTET(marker->data[5]) == 0x73 &&
++    GETJOCTET(marker->data[6]) == 0x68 &&
++    GETJOCTET(marker->data[7]) == 0x6F &&
++    GETJOCTET(marker->data[8]) == 0x70 &&
++    GETJOCTET(marker->data[9]) == 0x20 &&
++    GETJOCTET(marker->data[10]) == 0x33 &&
++    GETJOCTET(marker->data[11]) == 0x2E &&
++    GETJOCTET(marker->data[12]) == 0x30 &&
++    GETJOCTET(marker->data[13]) == 0x0);
++}
++
++
++/*
++ * See if there was an ICC profile in the JPEG file being read;
++ * if so, reassemble and return the profile data.
++ *
++ * TRUE is returned if an ICC profile was found, FALSE if not.
++ * If TRUE is returned, *icc_data_ptr is set to point to the
++ * returned data, and *icc_data_len is set to its length.
++ *
++ * IMPORTANT: the data at **icc_data_ptr has been allocated with malloc()
++ * and must be freed by the caller with free() when the caller no longer
++ * needs it.  (Alternatively, we could write this routine to use the
++ * IJG library's memory allocator, so that the data would be freed implicitly
++ * at jpeg_finish_decompress() time.  But it seems likely that many apps
++ * will prefer to have the data stick around after decompression finishes.)
++ *
++ * NOTE: if the file contains invalid ICC APP2 markers, we just silently
++ * return FALSE.  You might want to issue an error message instead.
++ */
++
++boolean
++read_photoshop_data (j_decompress_ptr cinfo,
++                     JOCTET **photoshop_data_ptr,
++                     unsigned int *photoshop_data_len)
++{
++  jpeg_saved_marker_ptr marker;
++  int num_markers = 0;
++  JOCTET *photoshop_data;
++  unsigned int total_length = 0;
++  unsigned int running_length;
++  
++  *photoshop_data_ptr = NULL;         /* avoid confusion if FALSE return */
++  *photoshop_data_len = 0;
++
++  /* This first pass over the saved markers discovers how much data we have */
++
++  for (marker = cinfo->marker_list; marker != NULL; marker = marker->next) {
++    if (marker_is_photoshop(marker)) {
++      total_length += marker->data_length - PHOTOSHOP_OVERHEAD_LEN;
++    }
++  }
++
++  if (total_length <= 0)
++    return FALSE;               /* found only empty markers? */
++
++  /* Allocate space for assembled data */
++  photoshop_data = (JOCTET *) malloc(total_length * sizeof(JOCTET));
++  if (photoshop_data == NULL)
++    return FALSE;               /* oops, out of memory */
++
++  /* and fill it in */
++  running_length = 0;
++  for (marker = cinfo->marker_list; marker != NULL; marker = marker->next) {
++    if (marker_is_photoshop(marker)) {
++      JOCTET FAR *src_ptr;
++      JOCTET *dst_ptr;
++      unsigned int length;
++
++      dst_ptr = photoshop_data + running_length;
++      src_ptr = marker->data + PHOTOSHOP_OVERHEAD_LEN;
++      length = marker->data_length - PHOTOSHOP_OVERHEAD_LEN;
++      running_length = length;
++      
++      memcpy(dst_ptr, src_ptr, length);
++    }
++  }
++
++  *photoshop_data_ptr = photoshop_data;
++  *photoshop_data_len = total_length;
++
++  return TRUE;
++}
++
++int 
++get_exif_bytes_per_component(unsigned int dataFormat)
++{
++    int bytesPerComponent = 1;
++    switch(dataFormat)
++    {
++    case 1:
++    case 2:
++    case 6:
++    case 7:
++        bytesPerComponent = 1; break;
++    case 3:
++    case 8:
++        bytesPerComponent = 2; break;
++    case 4:
++    case 9:
++    case 11:
++        bytesPerComponent = 4; break;
++    case 5:
++    case 10:
++    case 12:
++        bytesPerComponent = 8; break;
++    default: bytesPerComponent = 1; break;
++    }
++
++    return bytesPerComponent;
++}
++
++boolean
++read_exif_resolution(j_decompress_ptr cinfo)
++{
++    int i;
++    int offsetEndPoint;
++    int HEADER_LEN = 6;
++    int OFFSET_TO_IFD0 = 16;    //6 bytes for an Exif header, 8 bytes for an bytes order and tag mark 0x002a and offset to IFD0 and 2 bytes it is IFD0 entries count;
++    jpeg_saved_marker_ptr marker;
++    boolean is_motorola;
++    unsigned int ifdEntryBytesCount = 12;
++    unsigned int density;
++    cinfo->X_density = 0;
++    cinfo->Y_density = 0;
++    for (marker = cinfo->marker_list; marker != NULL; marker = marker->next)
++    {
++        if (marker->marker == JPEG_APP0 + 1 &&
++            marker->data_length >= HEADER_LEN &&
++            /* verify the identifying string */
++            GETJOCTET(marker->data[0]) == 0x45 &&
++            GETJOCTET(marker->data[1]) == 0x78 &&
++            GETJOCTET(marker->data[2]) == 0x69 &&
++            GETJOCTET(marker->data[3]) == 0x66 &&
++            GETJOCTET(marker->data[4]) == 0 &&
++            GETJOCTET(marker->data[5]) == 0)
++        {
++            is_motorola = GetBEUShort(&marker->data[6]) == 0x4D4D;
++            /* Check Tag Mark */
++            if(is_motorola)
++            {
++                if GETJOCTET(marker->data[8] != 0x0) return FALSE;
++                if GETJOCTET(marker->data[9] != 0x2A) return FALSE;
++            } 
++            else 
++            {
++                if GETJOCTET(marker->data[9] != 0x0) return FALSE;
++                if GETJOCTET(marker->data[8] != 0x2A) return FALSE;
++            }
++
++            offsetEndPoint = (is_motorola ? GetBEUShort(&marker->data[14]) 
++                                     : GetBackBEUShort(&marker->data[14])) * ifdEntryBytesCount + OFFSET_TO_IFD0; //12 bytes per IFD Entry plus header offset
++
++            for(i = OFFSET_TO_IFD0; i < offsetEndPoint; i += ifdEntryBytesCount)
++            {
++                unsigned short marker_tag = is_motorola ? GetBEUShort(&marker->data[i]) : GetBackBEUShort(&marker->data[i]);
++                if(marker_tag == 0x011a || marker_tag == 0x011b)
++                {
++                    int bytesPerComponent = get_exif_bytes_per_component(is_motorola ? GetBEUShort(&marker->data[i + 2]) : GetBackBEUShort(&marker->data[i + 2]));
++                    int dataFormat = is_motorola ? GetBEULong(&marker->data[i + 4]) : GetBackBEULong(&marker->data[i + 4]);
++                    int dataOffset = (is_motorola ? GetBEULong(&marker->data[i + 8]) : GetBackBEULong(&marker->data[i + 8])) + HEADER_LEN;
++                    int index = bytesPerComponent * dataFormat > 4 ? dataOffset : i + 8; // calculate marker->data[i+8] field - if bytesPerComponent*dataFormat > 4 
++                                                                                // then it is offset where is resolution is stored or resolution otherwise.
++                    density = is_motorola ? GetBEULong(&marker->data[index]) : GetBackBEULong(&marker->data[index]);
++
++                    if(marker_tag == 0x011a ) 
++                    {
++                        cinfo->X_density = density;
++                    } else if(marker_tag == 0x011b) 
++                    {
++                        cinfo->Y_density = density;
++                    }
++
++                    if(cinfo->X_density != 0 && cinfo->Y_density != 0)
++                    {
++                        // got what we're looking for, so set density_unit and return
++                        cinfo->density_unit = 1;
++                        break;
++                    }
++                }
++            }
++            return TRUE;
++        }
++    }
++    return FALSE;
++}
++
++boolean
++read_jfif_resolution(j_decompress_ptr cinfo)
++{
++  JOCTET *data;
++  unsigned int len;
++  JOCTET *end;
++  JOCTET *scan;
++  unsigned int size;
++  unsigned short id; /* Photoshop Image Resource ID */
++  
++  if (!read_photoshop_data(cinfo, &data, &len))
++      return FALSE;
++  
++  end = data + len;
++  
++  for (scan = data; scan < end;)
++  {
++    /* parse 8BIM, which starts every resource */
++    if (*scan++ != 0x38) goto fail;
++    if (*scan++ != 0x42) goto fail;
++    if (*scan++ != 0x49) goto fail;
++    if (*scan++ != 0x4d) goto fail;
++    
++    /* get id */
++    id = GetBEUShort(scan);
++    scan += 2;
++    
++    /* skip over Pascal string name */
++    size = *scan + 1;
++    /* All strings are padded to take up even amounts of space */
++    size = (size + 1) & ~1;
++    scan += size;
++    
++    /* get length */
++    size = GetBEULong(scan);
++    scan += 4;
++    
++    /* see if it's a resolution marker */
++    if (id == 0x03ed)
++    {
++      /* The resolution has the following form:
++         
++         Fixed     X resolution in pixels per inch
++         int16     1 = display X pixels per inch, 2 = display X pixels per cm
++         int16     units to display width (not important here)
++         Fixed     Y resolution in pixels per inch
++         int16     1 = display Y pixels per inch, 2 = display Y pixels per cm
++         int16     units to display height (not important here)
++         
++         The way I read it, the resolution is always in PPI, the other values simply
++         tell the program how to display those units.
++      */
++      
++      cinfo->density_unit = 1; /* dots per inch */
++      
++      /* These two values are in 16.16 fixed format */
++      cinfo->X_density = GetBELong(scan) / 65536;
++      cinfo->Y_density = GetBELong(scan + 8) / 65536;
++      
++      /* got what we're looking for */
++      goto succeed;
++    }
++    
++    /* skip to next item */
++    scan += size;
++
++	/* DLADD mattk - 21Jul2005 ARS 18726 - Several tags gives a size which is off-by-one; 
++	dunno if it's the writer of the file, or that's how the data for that 8BIM
++	tag is to be processed ('cause there's no doc... of course).  So, if we're
++	one away from the next tag, & not going to sail past the end of data --
++	give it a lil' nudge.  */
++	if (end - scan > 5 && *scan != 0x38)
++		++scan;
++
++  }
++  
++succeed:
++  free(data);
++  return TRUE;
++  
++fail:
++  free(data);
++  return FALSE;
++}
++
++boolean
++read_photoshop_resolution(j_decompress_ptr cinfo)
++{
++    return read_jfif_resolution(cinfo) || read_exif_resolution(cinfo);
++}
+diff -u -N -a -r a/jphotoshop.h b/jphotoshop.h
+--- a/jphotoshop.h	1969-12-31 18:00:00.000000000 -0600
++++ b/jphotoshop.h	2023-01-03 20:45:09.000000000 -0600
+@@ -0,0 +1,48 @@
++/*
++ * jphotoshop.h
++ *
++ * This file provides code to read Photoshop APP13 markers containing image
++ * resources. These image resources contain extended metadata for the file.
++ * Current support is limited to the topic of interest, which is reading
++ * resolution data and populating the density fields of jpeg_decompress_struct.
++ * 
++ * This code depends on new features added to the IJG JPEG library as of
++ * IJG release 6b; it will not compile or work with older IJG versions.
++ */
++
++#include <stdio.h>              /* needed to define "FILE", "NULL" */
++#include "jpeglib.h"
++
++
++/*
++ * Prepare for reading Photoshop image resources
++ */
++
++extern void setup_read_photoshop JPP((j_decompress_ptr cinfo));
++
++
++/*
++ * See if there was Photoshop image resource data in the file being read.
++ *
++ * TRUE is returned if Photoshop image data was found, FALSE if not.
++ * If TRUE is returned, *photoshop_data_ptr is set to point to the
++ * returned data, and *photoshop_data_len is set to its length.
++ *
++ * IMPORTANT: the data at **photoshop_data_ptr has been allocated with malloc()
++ * and must be freed by the caller with free() when the caller no longer
++ * needs it.  (Alternatively, we could write this routine to use the
++ * IJG library's memory allocator, so that the data would be freed implicitly
++ * at jpeg_finish_decompress() time.  But it seems likely that many apps
++ * will prefer to have the data stick around after decompression finishes.)
++ */
++
++extern boolean read_photoshop_data JPP((j_decompress_ptr cinfo,
++                                       JOCTET **photoshop_data_ptr,
++                                       unsigned int *photoshop_data_len));
++/*
++ * Read the APP13 data, if any, and find the resolution information,
++ * if any. Set the density_unit, X_density, and Y_density values 
++ * in cinfo
++ */
++
++extern boolean read_photoshop_resolution JPP((j_decompress_ptr cinfo));
+diff -u -N -a -r a/makefile.vc b/makefile.vc
+--- a/makefile.vc	2021-11-18 08:55:36.000000000 -0600
++++ b/makefile.vc	2023-01-03 20:45:09.000000000 -0600
+@@ -43,12 +39,12 @@
+         jddctmgr.c jdhuff.c jdinput.c jdmainct.c jdmarker.c jdmaster.c \
+         jdmerge.c jdpostct.c jdsample.c jdtrans.c jerror.c jfdctflt.c \
+         jfdctfst.c jfdctint.c jidctflt.c jidctfst.c jidctint.c jquant1.c \
+-        jquant2.c jutils.c jmemmgr.c
++        jquant2.c jutils.c jmemmgr.c jphotoshop.c iccprofile.c transupp.c
+ # memmgr back ends: compile only one of these into a working library
+ SYSDEPSOURCES= jmemansi.c jmemname.c jmemnobs.c jmemdos.c jmemmac.c
+ # source files: cjpeg/djpeg/jpegtran applications, also rdjpgcom/wrjpgcom
+ APPSOURCES= cjpeg.c djpeg.c jpegtran.c rdjpgcom.c wrjpgcom.c cdjpeg.c \
+-        rdcolmap.c rdswitch.c transupp.c rdppm.c wrppm.c rdgif.c wrgif.c \
++        rdcolmap.c rdswitch.c rdppm.c wrppm.c rdgif.c wrgif.c \
+         rdtarga.c wrtarga.c rdbmp.c wrbmp.c rdrle.c wrrle.c
+ SOURCES= $(LIBSOURCES) $(SYSDEPSOURCES) $(APPSOURCES)
+ # files included by source files
+@@ -83,7 +83,8 @@
+ DISTFILES= $(DOCS) $(MKFILES) $(CONFIGFILES) $(SOURCES) $(INCLUDES) \
+         $(CONFIGUREFILES) $(OTHERFILES) $(TESTFILES)
+ # library object files common to compression and decompression
+-COMOBJECTS= jaricom.obj jcomapi.obj jutils.obj jerror.obj jmemmgr.obj $(SYSDEPMEM)
++COMOBJECTS= jaricom.obj jcomapi.obj jutils.obj jerror.obj jmemmgr.obj $(SYSDEPMEM) \
++        jphotoshop.obj iccprofile.obj transupp.obj
+ # compression library object files
+ CLIBOBJECTS= jcapimin.obj jcapistd.obj jcarith.obj jctrans.obj jcparam.obj \
+         jdatadst.obj jcinit.obj jcmaster.obj jcmarker.obj jcmainct.obj \
+@@ -101,8 +102,8 @@
+ COBJECTS= cjpeg.obj rdppm.obj rdgif.obj rdtarga.obj rdrle.obj rdbmp.obj \
+         rdswitch.obj cdjpeg.obj
+ DOBJECTS= djpeg.obj wrppm.obj wrgif.obj wrtarga.obj wrrle.obj wrbmp.obj \
+         rdcolmap.obj cdjpeg.obj
+-TROBJECTS= jpegtran.obj rdswitch.obj cdjpeg.obj transupp.obj
++TROBJECTS= jpegtran.obj rdswitch.obj cdjpeg.obj
+ 
+ # Template command for compiling .c to .obj
+ .c.obj:
+--- a/makefile.vs
++++ b/makefile.vs
+@@ -42,12 +38,12 @@
+         jddctmgr.c jdhuff.c jdinput.c jdmainct.c jdmarker.c jdmaster.c \
+         jdmerge.c jdpostct.c jdsample.c jdtrans.c jerror.c jfdctflt.c \
+         jfdctfst.c jfdctint.c jidctflt.c jidctfst.c jidctint.c jquant1.c \
+-        jquant2.c jutils.c jmemmgr.c
++        jquant2.c jutils.c jmemmgr.c jphotoshop.c iccprofile.c transupp.c
+ # memmgr back ends: compile only one of these into a working library
+ SYSDEPSOURCES= jmemansi.c jmemname.c jmemnobs.c jmemdos.c jmemmac.c
+ # source files: cjpeg/djpeg/jpegtran applications, also rdjpgcom/wrjpgcom
+ APPSOURCES= cjpeg.c djpeg.c jpegtran.c rdjpgcom.c wrjpgcom.c cdjpeg.c \
+-        rdcolmap.c rdswitch.c transupp.c rdppm.c wrppm.c rdgif.c wrgif.c \
++        rdcolmap.c rdswitch.c rdppm.c wrppm.c rdgif.c wrgif.c \
+         rdtarga.c wrtarga.c rdbmp.c wrbmp.c rdrle.c wrrle.c
+ SOURCES= $(LIBSOURCES) $(SYSDEPSOURCES) $(APPSOURCES)
+ # files included by source files
+@@ -82,7 +82,8 @@
+ DISTFILES= $(DOCS) $(MKFILES) $(CONFIGFILES) $(SOURCES) $(INCLUDES) \
+         $(CONFIGUREFILES) $(OTHERFILES) $(TESTFILES)
+ # library object files common to compression and decompression
+-COMOBJECTS= jaricom.obj jcomapi.obj jutils.obj jerror.obj jmemmgr.obj $(SYSDEPMEM)
++COMOBJECTS= jaricom.obj jcomapi.obj jutils.obj jerror.obj jmemmgr.obj $(SYSDEPMEM) \
++        jphotoshop.obj iccprofile.obj transupp.obj
+ # compression library object files
+ CLIBOBJECTS= jcapimin.obj jcapistd.obj jcarith.obj jctrans.obj jcparam.obj \
+         jdatadst.obj jcinit.obj jcmaster.obj jcmarker.obj jcmainct.obj \
+@@ -100,8 +101,8 @@
+ COBJECTS= cjpeg.obj rdppm.obj rdgif.obj rdtarga.obj rdrle.obj rdbmp.obj \
+         rdswitch.obj cdjpeg.obj
+ DOBJECTS= djpeg.obj wrppm.obj wrgif.obj wrtarga.obj wrrle.obj wrbmp.obj \
+         rdcolmap.obj cdjpeg.obj
+-TROBJECTS= jpegtran.obj rdswitch.obj cdjpeg.obj transupp.obj
++TROBJECTS= jpegtran.obj rdswitch.obj cdjpeg.obj
+ 
+ # Template command for compiling .c to .obj
+ .c.obj:
+diff -u -N -a -r a/makejfil.v16 b/makejfil.v16
+--- a/makejfil.v16
++++ b/makejfil.v16
+@@ -42,6 +42,15 @@
+     <ClInclude Include="jversion.h">
+       <Filter>Header Files</Filter>
+     </ClInclude>
++    <ClInclude Include="iccprofile.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="jphotoshop.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
++    <ClInclude Include="transupp.h">
++      <Filter>Header Files</Filter>
++    </ClInclude>
+   </ItemGroup>
+   <ItemGroup>
+     <ClCompile Include="jaricom.c">
+@@ -182,5 +191,14 @@
+     <ClCompile Include="jutils.c">
+       <Filter>Source Files</Filter>
+     </ClCompile>
++    <ClCompile Include="iccprofile.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="jphotoshop.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
++    <ClCompile Include="transupp.c">
++      <Filter>Source Files</Filter>
++    </ClCompile>
+   </ItemGroup>
+ </Project>
+diff -u -N -a -r a/makejvcx.v16 b/makejvcx.v16
+--- a/makejvcx.v16
++++ b/makejvcx.v16
+@@ -19,6 +19,7 @@
+     </ProjectConfiguration>
+   </ItemGroup>
+   <ItemGroup>
++    <ClInclude Include="iccprofile.h" />
+     <ClInclude Include="jconfig.h" />
+     <ClInclude Include="jdct.h" />
+     <ClInclude Include="jerror.h" />
+@@ -27,9 +28,12 @@
+     <ClInclude Include="jmorecfg.h" />
+     <ClInclude Include="jpegint.h" />
+     <ClInclude Include="jpeglib.h" />
++    <ClInclude Include="jphotoshop.h" />
+     <ClInclude Include="jversion.h" />
++    <ClInclude Include="transupp.h" />
+   </ItemGroup>
+   <ItemGroup>
++    <ClCompile Include="iccprofile.c" />
+     <ClCompile Include="jaricom.c" />
+     <ClCompile Include="jcapimin.c" />
+     <ClCompile Include="jcapistd.c" />
+@@ -73,9 +77,11 @@
+     <ClCompile Include="jidctint.c" />
+     <ClCompile Include="jmemmgr.c" />
+     <ClCompile Include="jmemnobs.c" />
++    <ClCompile Include="jphotoshop.c" />
+     <ClCompile Include="jquant1.c" />
+     <ClCompile Include="jquant2.c" />
+     <ClCompile Include="jutils.c" />
++    <ClCompile Include="transupp.c" />
+   </ItemGroup>
+   <PropertyGroup Label="Globals">
+     <ProjectGuid>{019DBD2A-273D-4BA4-BF86-B5EFE2ED76B1}</ProjectGuid>

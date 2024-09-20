@@ -149,7 +149,7 @@ class LibjpegConan(ConanFile):
     def package(self):
         copy(self, "README", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self) or self._is_clang_cl:
-            for filename in ["jpeglib.h", "jerror.h", "jconfig.h", "jmorecfg.h"]:
+            for filename in ["jpeglib.h", "jerror.h", "jconfig.h", "jmorecfg.h", "transupp.h", "jphotoshop.h", "iccprofile.h"]:
                 copy(self, filename, src=self.source_folder, dst=os.path.join(self.package_folder, "include"), keep_path=False)
 
             copy(self, "*.lib", src=self.source_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
