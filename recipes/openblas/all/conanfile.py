@@ -80,8 +80,8 @@ class OpenblasConan(ConanFile):
         "use_locking": [True, False],
         "dynamic_arch": [True, False],
         "target": [None] + available_openblas_targets,
-        "num_threads": [None, "ANY"],
-        "num_parallel": ["ANY"],
+        "max_threads": ["auto", "ANY"],
+        "max_omp_parallel": ["ANY"],
     }
     default_options = {
         "shared": False,
@@ -95,8 +95,8 @@ class OpenblasConan(ConanFile):
         "use_locking": True,
         "dynamic_arch": False,
         "target": None,
-        "num_threads": 512,
-        "num_parallel": 1,
+        "max_threads": 64,
+        "max_omp_parallel": 1,
     }
     options_description = {
         "ilp64": "Build with ILP64 interface instead of LP64 (incompatible with the standard API)",
@@ -108,8 +108,8 @@ class OpenblasConan(ConanFile):
         "use_locking": "Use locks even in single-threaded builds to make them callable from multiple threads",
         "dynamic_arch": "Include support for multiple CPU targets, with automatic selection at runtime (x86/x86_64, aarch64 or ppc only)",
         "target": "OpenBLAS TARGET variable (see TargetList.txt)",
-        "num_threads": "The maximum number of parallel threads you expect to need (defaults to the number of cores in the build cpu)",
-        "num_parallel": "Number of OpenMP instances that your code may use for parallel calls into OpenBLAS",
+        "max_threads": "The maximum number of parallel threads you expect to need (defaults to the number of cores in the build cpu)",
+        "max_omp_parallel": "Number of OpenMP instances that your code may use for parallel calls into OpenBLAS",
     }
     short_paths = True
 
@@ -135,6 +135,11 @@ class OpenblasConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+        if not self.options.use_thread:
+            del self.options.max_threads
+        if not self.options.use_openmp:
+            del self.options.max_omp_parallel
 
         # When cross-compiling, OpenBLAS requires explicitly setting TARGET
         if cross_building(self, skip_x64_x86=True) and not self.options.target:
@@ -203,9 +208,10 @@ class OpenblasConan(ConanFile):
         tc.variables["USE_OPENMP"] = self.options.use_openmp
         tc.variables["USE_THREAD"] = self.options.use_thread
         tc.variables["USE_LOCKING"] = self.options.use_locking
-        tc.variables["NUM_PARALLEL"] = self.options.num_parallel
-        if self.options.num_threads.value is not None:
-            tc.variables["NUM_THREADS"] = self.options.num_threads
+        if self.options.get_safe("max_threads", "auto") != "auto":
+            tc.variables["NUM_PARALLEL"] = self.options.max_threads
+        if self.options.get_safe("max_omp_parallel"):
+            tc.variables["NUM_THREADS"] = self.options.max_omp_parallel
 
         tc.variables["MSVC_STATIC_CRT"] = is_msvc_static_runtime(self)
 
