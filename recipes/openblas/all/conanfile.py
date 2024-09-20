@@ -93,7 +93,7 @@ class OpenblasConan(ConanFile):
         "use_locking": True,
         "dynamic_arch": False,
         "target": None,
-        "max_threads": 64,
+        "max_threads": 128,
         "max_omp_parallel": 1,
     }
     options_description = {
