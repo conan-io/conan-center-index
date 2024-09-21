@@ -2,6 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
 
@@ -38,6 +39,12 @@ class PcapplusplusConan(ConanFile):
     def validate(self):
         if self.settings.os not in ("FreeBSD", "Linux", "Macos", "Windows"):
             raise ConanInvalidConfiguration(f"{self.settings.os} is not supported")
+
+        compiler_version = Version(self.settings.compiler.version)
+        if self.settings.compiler == "gcc" and compiler_version < "5.1":
+            raise ConanInvalidConfiguration("PcapPlusPlus requires GCC >= 5.1")
+
+        if self.settings
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
