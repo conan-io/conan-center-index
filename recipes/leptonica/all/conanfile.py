@@ -89,8 +89,15 @@ class LeptonicaConan(ConanFile):
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
                 self.tool_requires("pkgconf/2.1.0")
 
+    def validate(self):
+        libtiff = self.dependencies["libtiff"]
+        if libtiff.options.jpeg != self.info.options.with_jpeg:
+            raise ConanInvalidConfiguration(f"{self.ref} requires option value {self.name}:with_jpeg equal to libtiff:jpeg.")
+
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -151,6 +158,11 @@ class LeptonicaConan(ConanFile):
             replace_in_file(self, cmakelists, "pkg_check_modules(JP2K libopenjp2>=2.0 QUIET)", "")
             # versions below 1.83.0 do not have an option toggle
             replace_in_file(self, cmakelists, "if(NOT JP2K)", "if(0)")
+            replace_in_file(self, cmakelists_src,
+                              "if (JP2K_FOUND)",
+                              "if (JP2K_FOUND)\n"
+                              "target_link_directories(leptonica PRIVATE ${JP2K_LIBRARY_DIRS})\n"
+                              "target_compile_definitions(leptonica PRIVATE ${JP2K_CFLAGS_OTHER})")
             if not self.options.with_openjpeg:
                 replace_in_file(self, cmakelists_src, "if (JP2K_FOUND)", "if(0)")
                 replace_in_file(self, cmake_configure, "if (JP2K_FOUND)", "if(0)")
