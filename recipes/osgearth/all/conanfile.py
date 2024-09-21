@@ -105,13 +105,13 @@ class OsgearthConan(ConanFile):
         self.requires("opengl/system")
         self.requires("gdal/3.4.3")
         self.requires("openscenegraph/3.6.5")
-        self.requires("libcurl/7.83.1")
+        self.requires("libcurl/8.2.0")
         self.requires("lerc/2.2")
         self.requires("rapidjson/1.1.0")
 
-        self.requires("zlib/1.2.12", override=True)
-        self.requires("libtiff/4.3.0", override=True)
-        self.requires("openssl/1.1.1l", override=True)
+        self.requires("zlib/[>=1.2.11 <2]")  # override
+        self.requires("libtiff/4.5.1")  # override
+        self.requires("libpng/1.6.40")  # override
 
         # if self.options.build_triton_nodekit:
         #     self.requires("triton_nodekit")
@@ -122,11 +122,11 @@ class OsgearthConan(ConanFile):
         if self.options.build_rocksdb_cache:
             self.requires("rocksdb/6.20.3")
         if self.options.build_zip_plugin:
-            self.requires("zstd/1.4.9")  # override
+            self.requires("zstd/1.5.5")  # override
         if self.options.with_geos:
-            self.requires("geos/3.10.2")
+            self.requires("geos/3.11.1")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.38.5")
+            self.requires("sqlite3/3.42.0")
         if self.options.with_draco:
             self.requires("draco/1.4.3")
         # if self.options.with_basisu:
@@ -134,9 +134,9 @@ class OsgearthConan(ConanFile):
         # if self.options.with_glew:
         #     self.requires("glew/2.2.0")
         if self.options.with_protobuf:
-            self.requires("protobuf/3.17.1")
+            self.requires("protobuf/3.21.9")
         if self.options.with_webp:
-            self.requires("libwebp/1.2.0")
+            self.requires("libwebp/1.3.1")
 
     def _patch_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

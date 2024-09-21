@@ -15,11 +15,11 @@ class XnnpackConan(ConanFile):
                   "neural network inference operators for ARM, WebAssembly, " \
                   "and x86 platforms."
     license = "BSD-3-Clause"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/google/XNNPACK"
     topics = ("neural-network", "inference", "multithreading", "inference-optimization",
               "matrix-multiplication", "simd")
-    homepage = "https://github.com/google/XNNPACK"
-    url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -46,7 +46,6 @@ class XnnpackConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # for plain C projects only
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
@@ -54,23 +53,35 @@ class XnnpackConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpuinfo/cci.20220228")
+        if self.version in ["cci.20220801", "cci.20220621", "cci.20211210"]:
+            self.requires("cpuinfo/cci.20220228")
+        else:
+            self.requires("cpuinfo/cci.20231129")
         self.requires("fp16/cci.20210320")
-        #  https://github.com/google/XNNPACK/blob/ed5f9c0562e016a08b274a4579de5ef500fec134/include/xnnpack.h#L15      
-        self.requires("pthreadpool/cci.20210218", transitive_headers=True)
+        #  https://github.com/google/XNNPACK/blob/ed5f9c0562e016a08b274a4579de5ef500fec134/include/xnnpack.h#L15
+        self.requires("pthreadpool/cci.20231129", transitive_headers=True)
         self.requires("fxdiv/cci.20200417")
 
     def validate(self):
         check_min_vs(self, 192)
-        compiler = self.info.settings.compiler
+        compiler = self.settings.compiler
         compiler_version = Version(compiler.version)
-        if (compiler == "gcc" and compiler_version < "6") or \
-           (compiler == "clang" and compiler_version < "5"):
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")
+        if self.version < "cci.20230715":
+            if (compiler == "gcc" and compiler_version < "6") or \
+                (compiler == "clang" and compiler_version < "5"):
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")
+        else:
+            # since cci.20230715, xnnpack requires avx512 header file
+            if (compiler == "gcc" and compiler_version < "11") or \
+                (compiler == "clang" and compiler_version < "8"):
+                raise ConanInvalidConfiguration(f"{self.ref} doesn't support {compiler} {compiler.version}")
+        if self.options.assembly and compiler == "clang" and self.settings.arch == "armv6":
+            # clang assembly validator fails on XNNPACK's math.h for armv6:
+            # https://github.com/google/XNNPACK/issues/4348#issuecomment-1445437613
+            raise ConanInvalidConfiguration(f"{self.ref} assembly option is incompatible with clang+armv6")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -100,7 +111,7 @@ class XnnpackConan(ConanFile):
         # The CMake scripts don't use targets prefixed with `namespace::`
         # so we can coerce CMakeDeps to define the exact target names that
         # are expected. This works in tandem with the file
-        # `CMAKE_PROJECT_XNNPACK_INCLUDE` which ensure an early call to 
+        # `CMAKE_PROJECT_XNNPACK_INCLUDE` which ensure an early call to
         # the relevant `find_package`
         deps.set_property("cpuinfo", "cmake_target_name", "cpuinfo")
         deps.set_property("cpuinfo", "cmake_target_aliases", ["clog"] )
@@ -113,6 +124,12 @@ class XnnpackConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                               "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}",
                               "LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}")
+        if self.settings.compiler == "clang" and self.settings.arch == "armv7":
+            # https://github.com/google/XNNPACK/issues/4348
+            # XNNPACK targets armv6, but clang fails to compile to due to a bug in the assembler (see linked issue).
+            # The user is targetting armv7, so adjust XNNPACK's -march accordingly to avoid the bug.
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                                  "-march=armv6 -mfpu=vfp", "-march=armv7-a -mfpu=neon")
 
     def build(self):
         self._patch_sources()

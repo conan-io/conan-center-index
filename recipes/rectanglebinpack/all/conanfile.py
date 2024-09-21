@@ -1,19 +1,23 @@
-from conans import ConanFile, CMake, tools
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, save
+
+required_conan_version = ">=1.53.0"
 
 
 class RectangleBinPackConan(ConanFile):
     name = "rectanglebinpack"
-    license = "Unlicense"
+    description = "The code can be used to solve the problem of packing a set of 2D rectangles into a larger bin."
+    license = "LicenseRef-rectanglebinpack-public-domain"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/juj/RectangleBinPack"
-    description = "The code can be used to solve the problem of packing a set of 2D rectangles into a larger bin."
     topics = ("rectangle", "packing", "bin")
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
-    settings = "os", "compiler", "build_type", "arch"
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -23,15 +27,8 @@ class RectangleBinPackConan(ConanFile):
         "fPIC": True,
     }
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -39,40 +36,58 @@ class RectangleBinPackConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version][0],
-                  strip_root=True, destination=self._source_subfolder)
-        tools.download(filename="LICENSE", **self.conan_data["sources"][self.version][1])
+        get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def _extract_license(self):
+        readme_content = load(self, os.path.join(self.source_folder, "Readme.txt"), encoding="latin-1")
+        license_content = "\n".join(readme_content.splitlines()[-4:])
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_content)
 
     def package(self):
-        self.copy("LICENSE", dst="licenses")
-        self.copy("*.h", dst=os.path.join("include", self.name), src=self._source_subfolder, excludes="old/**")
-        self.copy("*.dll", dst="bin", keep_path=False)
-        self.copy("*.lib", dst="lib", keep_path=False)
-        self.copy("*.so", dst="lib", keep_path=False)
-        self.copy("*.dylib", dst="lib", keep_path=False)
-        self.copy("*.a", dst="lib", keep_path=False)
+        self._extract_license()
+        copy(self, "*.h",
+             dst=os.path.join(self.package_folder, "include", self.name),
+             src=self.source_folder,
+             excludes="old/**")
+        copy(self, "*.dll",
+             dst=os.path.join(self.package_folder, "bin"),
+             src=self.build_folder,
+             keep_path=False)
+        for pattern in ["*.lib", "*.so", "*.dylib", "*.a"]:
+            copy(self, pattern,
+                 dst=os.path.join(self.package_folder, "lib"),
+                 src=self.build_folder,
+                 keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["RectangleBinPack"]
+        self.cpp_info.set_property("cmake_file_name", "RectangleBinPack")
+        self.cpp_info.set_property("cmake_target_name", "RectangleBinPack::RectangleBinPack")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["m"]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "RectangleBinPack"
         self.cpp_info.names["cmake_find_package_multi"] = "RectangleBinPack"

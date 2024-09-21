@@ -1,4 +1,7 @@
 sources:
+  "1.3.0":
+    url: "https://github.com/jamesdbrock/hffix/archive/v1.3.0.tar.gz"
+    sha256: "db3584c9daa5cfb76a096e02d945355294558a78d0128b5c2e82b8849fa26d77"
   "1.1.1":
     url: "https://github.com/jamesdbrock/hffix/archive/refs/tags/v1.1.1.tar.gz"
     sha256: "25dcaee8ded3590dd04225bd98909c9d78c8e39c26fb3c9880ec001a35464c07"

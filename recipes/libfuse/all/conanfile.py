@@ -15,7 +15,7 @@ class LibfuseConan(ConanFile):
     homepage = "https://github.com/libfuse/libfuse"
     license = "LGPL-2.1"
     description = "The reference implementation of the Linux FUSE interface"
-    topics = ("fuse", "libfuse", "filesystem", "linux")
+    topics = ("fuse", "filesystem", "linux")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -27,9 +27,13 @@ class LibfuseConan(ConanFile):
         "fPIC": True,
     }
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
@@ -41,7 +45,7 @@ class LibfuseConan(ConanFile):
             raise ConanInvalidConfiguration("libfuse supports only Linux and FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
+        self.tool_requires("meson/1.2.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -72,6 +76,5 @@ class LibfuseConan(ConanFile):
         self.cpp_info.libs = ["fuse3"]
         self.cpp_info.includedirs = [os.path.join("include", "fuse3")]
         self.cpp_info.system_libs = ["pthread"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "rt"])
-

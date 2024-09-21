@@ -1,11 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
@@ -38,6 +39,9 @@ class WolfSSLConan(ConanFile):
         "sessioncerts": [True, False],
         "sni": [True, False],
         "testcert": [True, False],
+        "with_curl": [True, False],
+        "with_quic": [True, False],
+        "with_experimental": [True, False],
     }
     default_options = {
         "shared": False,
@@ -54,6 +58,9 @@ class WolfSSLConan(ConanFile):
         "sessioncerts": False,
         "sni": False,
         "testcert": False,
+        "with_curl": False,
+        "with_quic": False,
+        "with_experimental": False,
     }
 
     @property
@@ -63,6 +70,12 @@ class WolfSSLConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "5.2.0":
+            del self.options.with_curl
+        if Version(self.version) < "5.5.0":
+            del self.options.with_quic
+        if Version(self.version) < "5.7.0":
+            del self.options.with_experimental
 
     def configure(self):
         if self.options.shared:
@@ -103,7 +116,7 @@ class WolfSSLConan(ConanFile):
             "--enable-sslv3={}".format(yes_no(self.options.sslv3)),
             "--enable-alpn={}".format(yes_no(self.options.alpn)),
             "--enable-des3={}".format(yes_no(self.options.des3)),
-            "--enable-tls13={}".format(yes_no(self.options.tls13)),
+            "--enable-tls13={}".format(yes_no(self.options.tls13 or self.options.get_safe("with_quic"))),
             "--enable-certgen={}".format(yes_no(self.options.certgen)),
             "--enable-dsa={}".format(yes_no(self.options.dsa)),
             "--enable-ripemd={}".format(yes_no(self.options.ripemd)),
@@ -113,6 +126,12 @@ class WolfSSLConan(ConanFile):
             "--enable-shared={}".format(yes_no(self.options.shared)),
             "--enable-static={}".format(yes_no(not self.options.shared)),
         ])
+        if self.options.get_safe("with_curl"):
+            tc.configure_args.append("--enable-curl")
+        if self.options.get_safe("with_quic"):
+            tc.configure_args.append("--enable-quic")
+        if self.options.get_safe("with_experimental"):
+            tc.configure_args.append("--enable-experimental")
         if is_msvc(self):
             tc.extra_ldflags.append("-ladvapi32")
             if check_min_vs(self, "180", raise_invalid=False):
@@ -157,3 +176,7 @@ class WolfSSLConan(ConanFile):
                 self.cpp_info.system_libs.extend(["m", "pthread"])
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs.extend(["advapi32", "ws2_32"])
+                if Version(self.version) >= "5.6.0":
+                    self.cpp_info.system_libs.append("crypt32")
+            elif is_apple_os(self) and Version(self.version) >= "5.6.0":
+                self.cpp_info.frameworks.extend(["CoreFoundation", "Security"])

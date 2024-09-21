@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.scm import Version
 import os
 import textwrap
@@ -29,6 +29,9 @@ class OpenEXRConan(ConanFile):
         "fPIC": True,
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -38,7 +41,7 @@ class OpenEXRConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("zlib/1.2.13")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if Version(self.version) < "2.5.0" and hasattr(self, "settings_build") and cross_building(self):
@@ -69,6 +72,8 @@ class OpenEXRConan(ConanFile):
         cd.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
+
         pkg_version = Version(self.version)
         if pkg_version < "2.5.2" and self.settings.os == "Windows":
             # This fixes symlink creation on Windows.
@@ -135,6 +140,9 @@ class OpenEXRConan(ConanFile):
         # FIXME: we should generate 2 CMake config files: OpenEXRConfig.cmake and IlmBaseConfig.cmake
         #        waiting an implementation of https://github.com/conan-io/conan/issues/9000
         self.cpp_info.set_property("cmake_file_name", "OpenEXR")
+
+        # Avoid conflict in PkgConfigDeps with OpenEXR.pc file coming from openexr_ilmimf component
+        self.cpp_info.set_property("pkg_config_name", "openexr_conan_full_package")
 
         lib_suffix = ""
         if not self.options.shared or self.settings.os == "Windows":

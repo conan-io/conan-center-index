@@ -1,7 +1,7 @@
 import argparse
 from strictyaml import (
-    load,
-    Map,
+    dirty_load,
+    MapCombined,
     Str,
     YAMLValidationError,
     MapPattern,
@@ -28,30 +28,34 @@ def main():
     )
     args = parser.parse_args()
 
-    patch_fields = Map(
+    patch_fields = MapCombined(
         {
             "patch_file": Str(),
-            "patch_description": Str(),
-            "patch_type": Enum(
+            Optional("patch_description"): Str(),
+            Optional("patch_type"): Enum(
                 ["official", "conan", "portability", "bugfix", "vulnerability"]
             ),
             Optional("patch_source"): Str(),
             # No longer required for v2 recipes with layouts
             Optional("base_path"): Str(),
-        }
+        },
+        Str(),
+        Any()
     )
-    schema = Map(
+    schema = MapCombined(
         {
             "sources": MapPattern(Str(), Any(), minimum_keys=1),
             Optional("patches"): MapPattern(Str(), Seq(Any()), minimum_keys=1),
-        }
+        },
+        Str(),
+        Any(),
     )
 
     with open(args.path, encoding="utf-8") as f:
         content = f.read()
 
     try:
-        parsed = load(content, schema)
+        parsed = dirty_load(content, schema, allow_flow_style=True)
     except YAMLValidationError as error:
         pretty_print_yaml_validate_error(args, error) # Error when "source" is missing or when "patches" has no versions
         return
@@ -78,30 +82,6 @@ def main():
                     pretty_print_yaml_validate_warning(args, error) # Warning when patch fields are not followed
                     continue
 
-                # Make sure `patch_source` exists where it's encouraged
-                type = parsed["patches"][version][i]["patch_type"]
-                if (
-                    type in ["official", "bugfix", "vulnerability"]
-                    and not "patch_source" in patch
-                ):
-                    print(
-                        f"::warning file={args.path},line={type.start_line},endline={type.end_line},"
-                        f"title=conandata.yml schema warning"
-                        f"::'patch_type' should have 'patch_source' as per {CONANDATA_YAML_URL}#patch_type"
-                        " it is expected to have a source (e.g. a URL) to where it originates from to help with"
-                        " reviewing and consumers to evaluate patches"
-                    )
-
-                # v2 migrations suggestion
-                if "base_path" in parsed["patches"][version][i]:
-                    base_path = parsed["patches"][version][i]["base_path"]
-                    print(
-                        f"::notice file={args.path},line={base_path.start_line},endline={base_path.end_line},"
-                        f"title=conandata.yml v2 migration suggestion"
-                        "::'base_path' should not be required once a recipe has been upgraded to take advantage of"
-                        " layouts (see https://docs.conan.io/en/latest/reference/conanfile/tools/layout.html) and"
-                        " the new helper (see https://docs.conan.io/en/latest/reference/conanfile/tools/files/patches.html#conan-tools-files-apply-conandata-patches)"
-                    )
 
 
 def pretty_print_yaml_validate_error(args, error):

@@ -1,14 +1,23 @@
 sources:
+  "1.3.2":
+    url: "https://github.com/jinja2cpp/Jinja2Cpp/archive/1.3.2.tar.gz"
+    sha256: "227afb9d16eb1a47c3f3ca10c2f589dd2791c5d8b4767c73e26a0b8997e4c03e"
   "1.2.1":
-    url: "https://github.com/jinja2cpp/Jinja2Cpp/archive/refs/tags/1.2.1.tar.gz"
+    url: "https://github.com/jinja2cpp/Jinja2Cpp/archive/1.2.1.tar.gz"
     sha256: "2e61516fd4fd77452c8dd7a6f958ad47c42990df9b7bdc62cf2deb8aa7819b6c"
   "1.1.0":
     url: "https://github.com/jinja2cpp/Jinja2Cpp/archive/1.1.0.tar.gz"
     sha256: "3d321a144f3774702d3a6252e3a6370cdaff9c96d8761d850bb79cdb45b372c5"
 patches:
+  "1.3.2":
+    - patch_file: "patches/fix-cmake-1.3.2.patch"
+      patch_description: "use cci package, fix compilation error on MSVC"
+      patch_type: "conan"
   "1.2.1":
     - patch_file: "patches/fix-cmake-1.2.1.patch"
-      base_path: "source_subfolder"
+      patch_description: "use cci package, fix compilation error on MSVC"
+      patch_type: "conan"
   "1.1.0":
     - patch_file: "patches/fix-cmake-1.1.0.patch"
-      base_path: "source_subfolder"
+      patch_description: "use cci package, include mutex for std::unique_lock"
+      patch_type: "conan"

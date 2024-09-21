@@ -1,4 +1,10 @@
 sources:
+  "2.11.10":
+    url: "https://github.com/coin-or/CoinUtils/archive/releases/2.11.10.tar.gz"
+    sha256: "80c7c215262df8d6bd2ba171617c5df844445871e9891ec6372df12ccbe5bcfd"
+  "2.11.9":
+    url: "https://github.com/coin-or/CoinUtils/archive/releases/2.11.9.tar.gz"
+    sha256: "15d572ace4cd3b7c8ce117081b65a2bd5b5a4ebaba54fadc99c7a244160f88b8"
   "2.11.6":
     url: "https://github.com/coin-or/CoinUtils/archive/releases/2.11.6.tar.gz"
     sha256: "6ea31d5214f7eb27fa3ffb2bdad7ec96499dd2aaaeb4a7d0abd90ef852fc79ca"
@@ -6,6 +12,16 @@ sources:
     url: "https://github.com/coin-or/CoinUtils/archive/releases/2.11.4.tar.gz"
     sha256: "d4effff4452e73356eed9f889efd9c44fe9cd68bd37b608a5ebb2c58bd45ef81"
 patches:
+  "2.11.10":
+    - patch_file: "patches/0001-no-check-pkgconfig.patch"
+    - patch_file: "patches/0003-cpp17-compat.patch"
+      patch_description: "C++17 compatibility"
+      patch_type: "portability"
+  "2.11.9":
+    - patch_file: "patches/0001-no-check-pkgconfig.patch"
+    - patch_file: "patches/0003-cpp17-compat.patch"
+      patch_description: "C++17 compatibility"
+      patch_type: "portability"
   "2.11.6":
     - patch_file: "patches/0001-no-check-pkgconfig.patch"
     - patch_file: "patches/0002-cpp17-compat.patch"

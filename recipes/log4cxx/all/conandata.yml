@@ -1,14 +1,46 @@
 sources:
+  "1.2.0":
+    url: "https://archive.apache.org/dist/logging/log4cxx/1.2.0/apache-log4cxx-1.2.0.tar.gz"
+    sha256: "09f4748aa5675ef5c0770bedbf5e00488668933c5a935a43ac5b85be2436c48a"
+  "1.1.0":
+    url: "https://archive.apache.org/dist/logging/log4cxx/1.1.0/apache-log4cxx-1.1.0.tar.gz"
+    sha256: "1fc7d82697534184bc0f757348d969d24852b948f63d6b17283fd1ee29c2c28a"
+  "0.13.0":
+    url: "https://archive.apache.org/dist/logging/log4cxx/0.13.0/apache-log4cxx-0.13.0.tar.gz"
+    sha256: "4e5be64b6b1e6de8525f8b87635270b81f772a98902d20d7ac646fdf1ac08284"
   "0.12.1":
     url: "https://archive.apache.org/dist/logging/log4cxx/0.12.1/apache-log4cxx-0.12.1.tar.gz"
     sha256: "7bea5cb477f0e31c838f0e1f4f498cc3b30c2eae74703ddda923e7e8c2268d22"
-  "0.12.0":
-    url: "https://archive.apache.org/dist/logging/log4cxx/0.12.0/apache-log4cxx-0.12.0.tar.gz"
-    sha256: "bd5b5009ca914c8fa7944b92ea6b4ca6fb7d146f65d526f21bf8b3c6a0520e44"
 patches:
+  "1.2.0":
+    - patch_file: "patches/1.2.0-0001-find-apr.patch"
+      patch_description: "use cci's package name"
+      patch_type: "conan"
+  "1.1.0":
+    - patch_file: "patches/1.1.0-0001-find-apr.patch"
+      patch_description: "use cci's package name"
+      patch_type: "conan"
+  "0.13.0":
+    - patch_file: "patches/0.13.0-0001-find-apr.patch"
+      patch_type: "conan"
+      patch_description: "Use conan generated apr, apr-util target names"
+    - patch_file: "patches/0.13.0-0001-logchar-type.patch"
+      patch_type: "bugfix"
+      patch_description: "Prevent compilation errors when with_wchar_t=False"
+      patch_source: "https://github.com/apache/logging-log4cxx/commit/5109466a844d1e5fb8b455a23077765a30325a24"
+    - patch_file: "patches/0.13.0-0001-visual-studio-15.patch"
+      patch_type: "bugfix"
+      patch_description: "Prevent Visual Studio 2017 compilation error"
+      patch_source: "https://github.com/apache/logging-log4cxx/commit/f59bf53f831b8b68ef3a2f3a6705ae626090758e"
+    - patch_file: "patches/0.13.0-0001-fix-static-library-compilation.patch"
+      patch_type: "bugfix"
+      patch_description: "Prevent compilation error when shared=False"
+      patch_source: "https://github.com/apache/logging-log4cxx/commit/09b5b723a1a210c28bf8b05b0676bb2b104359ba"
   "0.12.1":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-find-apr.patch"
-  "0.12.0":
-    - base_path: "source_subfolder"
-      patch_file: "patches/0001-find-apr.patch"
+    - patch_file: "patches/0.12.1-0001-find-apr.patch"
+      patch_description: "use cci's package name"
+      patch_type: "conan"
+    - patch_file: "patches/0.12.1-0001-logchar-type.patch"
+      patch_type: "bugfix"
+      patch_description: "Prevent compilation errors when with_wchar_t=False"
+      patch_source: "https://github.com/apache/logging-log4cxx/commit/5109466a844d1e5fb8b455a23077765a30325a24"

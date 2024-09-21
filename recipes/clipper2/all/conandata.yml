@@ -1,0 +1,25 @@
+sources:
+  "1.4.0":
+    url: "https://github.com/AngusJohnson/Clipper2/archive/refs/tags/Clipper2_1.4.0.tar.gz"
+    sha256: "b83f71bb6a338f4f82116089c5ae867dbc43a2d651b5441380970dd966edd959"
+  "1.3.0":
+    url: "https://github.com/AngusJohnson/Clipper2/archive/refs/tags/Clipper2_1.3.0.tar.gz"
+    sha256: "8e537ec320e140afaa8fba1f23120416693cc1d71b0f76ad801d24b88b5e0b3c"
+  "1.2.4":
+    url: "https://github.com/AngusJohnson/Clipper2/archive/refs/tags/Clipper2_1.2.4.tar.gz"
+    sha256: "a013d391c25c5f665cdb5cbd75cdd842dcc28f6e1bd098454beb359f6f212f33"
+  "1.2.3":
+    url: "https://github.com/AngusJohnson/Clipper2/archive/refs/tags/Clipper2_1.2.3.tar.gz"
+    sha256: "d65bd45f50331e9dd2de3c68137c6be069fe25732095bef0128d547c997b1fda"
+  "1.2.2":
+    url: "https://github.com/AngusJohnson/Clipper2/files/11071418/Clipper2_1.2.2.zip"
+    sha256: "ec28bc4e05a86cb0be81a872e8d90a4d575b63882ef3ac78f06662358e410f89"
+patches:
+  "1.2.4":
+    - patch_file: "patches/1.2.4-0001-remove-macos-suffix.patch"
+      patch_description: "fix install for windows shared build"
+      patch_type: "portability"
+  "1.2.2":
+    - patch_file: "patches/1.2.2-0001-fix-install.patch"
+      patch_description: "fix install for windows shared build"
+      patch_type: "portability"

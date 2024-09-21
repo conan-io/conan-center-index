@@ -1,12 +1,58 @@
 sources:
-  "3.1.5":
-    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.1.5.tar.gz"
-    sha256: "93925805c1fc4f8162b35f0ae109c4a75344e6decae5a240afdfce25f8a433ec"
-  "3.1.4":
-    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.1.4.tar.gz"
-    sha256: "cb019c3c69ada47fe340f7fa6c8b863ca0515804dc60bdb25c942c1da886930b"
+  "3.2.4":
+    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.2.4.tar.gz"
+    sha256: "81e6518f2c4656fdeaf18a018f135e96a96e7f66dbe1c1f05860dd94772176cc"
+  "3.2.3":
+    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.2.3.tar.gz"
+    sha256: "f3f6c4165694d5c09e478a791eae69847cadb1333a2948ca222aa09f145eba63"
+  "3.2.2":
+    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.2.2.tar.gz"
+    sha256: "65de6459c245a4977ce4d7777e70b30d7ef48ec38e0cfb10205706ca50a8bf2e"
+  "3.2.1":
+    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.2.1.tar.gz"
+    sha256: "61e175aa2203399fb3c8c2288752fbea3c2637680d50b6e306ea5f8ffdd46a9b"
+  "3.1.9":
+    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.1.9.tar.gz"
+    sha256: "103e902d3902800ab07b5f3a298be7afd2755312737b2cdbfa01326ff99dac07"
+  "3.1.7":
+    url: "https://github.com/AcademySoftwareFoundation/openexr/archive/refs/tags/v3.1.7.tar.gz"
+    sha256: "78dbca39115a1c526e6728588753955ee75fa7f5bb1a6e238bed5b6d66f91fd7"
 patches:
-  "3.1.5":
-    - patch_file: "patches/v3.1.4-gcc5-bug-workaround.patch"
-  "3.1.4":
-    - patch_file: "patches/v3.1.4-gcc5-bug-workaround.patch"
+  "3.2.4":
+    - patch_file: "patches/3.2.1-gcc5-bug-workaround.patch"
+      patch_description: "Workaround for GCC 5 bug"
+      patch_type: "portability"
+      patch_source: "https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82336"
+  "3.2.3":
+    - patch_file: "patches/3.2.1-gcc5-bug-workaround.patch"
+      patch_description: "Workaround for GCC 5 bug"
+      patch_type: "portability"
+      patch_source: "https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82336"
+  "3.2.2":
+    - patch_file: "patches/3.2.1-gcc5-bug-workaround.patch"
+      patch_description: "Workaround for GCC 5 bug"
+      patch_type: "portability"
+      patch_source: "https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82336"
+    - patch_file: "patches/3.2.1-find-libdeflate.patch"
+      patch_description: "Use find_package for libdeflate"
+      patch_type: "backport"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openexr/pull/1613"
+  "3.2.1":
+    - patch_file: "patches/3.2.1-gcc5-bug-workaround.patch"
+      patch_description: "Workaround for GCC 5 bug"
+      patch_type: "portability"
+      patch_source: "https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82336"
+    - patch_file: "patches/3.2.1-find-libdeflate.patch"
+      patch_description: "Use find_package for libdeflate"
+      patch_type: "backport"
+      patch_source: "https://github.com/AcademySoftwareFoundation/openexr/pull/1613"
+  "3.1.9":
+    - patch_file: "patches/3.1.4-gcc5-bug-workaround.patch"
+      patch_description: "Workaround for GCC 5 bug"
+      patch_type: "portability"
+      patch_source: "https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82336"
+  "3.1.7":
+    - patch_file: "patches/3.1.4-gcc5-bug-workaround.patch"
+      patch_description: "Workaround for GCC 5 bug"
+      patch_type: "portability"
+      patch_source: "https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82336"

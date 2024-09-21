@@ -1,15 +1,3 @@
-From 48a5162899ebeb0ba3ca3141b587a53d2eda4223 Mon Sep 17 00:00:00 2001
-From: Samuel Dowling <samuel.dowling@protonmail.com>
-Date: Thu, 30 Sep 2021 23:51:35 +0930
-Subject: [PATCH] Guard dependency discovery
-
-* Add guards to prevent usage of custom cmake find package scripts.
-* Remove ability to inject hdf5 include directory into compiled binary
----
- CMakeLists.txt                          | 72 ++++++++++++++++++++-----
- include/armadillo_bits/config.hpp.cmake |  2 +-
- 2 files changed, 60 insertions(+), 14 deletions(-)
-
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 7857f8c..5f87f7e 100644
 --- a/CMakeLists.txt

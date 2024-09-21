@@ -1,12 +1,16 @@
 sources:
+  "4.3.2":
+    url: "https://github.com/KhronosGroup/KTX-Software/archive/refs/tags/v4.3.2.tar.gz"
+    sha256: "74a114f465442832152e955a2094274b446c7b2427c77b1964c85c173a52ea1f"
   "4.0.0":
     url: "https://github.com/KhronosGroup/KTX-Software/archive/refs/tags/v4.0.0.tar.gz"
     sha256: "6091f5064d0cfd54c6155bb6c0d2ba7287f312d109010e9b702839ac78529fd3"
 patches:
+  "4.3.2":
+    - patch_file: "patches/4.3.2/0001-objutil-cxx-std.patch"
+    - patch_file: "patches/4.3.2/0004-unvendor-dependencies.patch"
   "4.0.0":
-    - patch_file: "patches/0001-objutil-cxx-std.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-lodepng-no-export-symbols.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0003-clamp-include-algorithm.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/4.0.0/0001-objutil-cxx-std.patch"
+    - patch_file: "patches/4.0.0/0002-lodepng-no-export-symbols.patch"
+    - patch_file: "patches/4.0.0/0003-clamp-include-algorithm.patch"
+    - patch_file: "patches/4.0.0/0004-unvendor-dependencies.patch"

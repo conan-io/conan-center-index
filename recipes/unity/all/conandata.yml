@@ -1,0 +1,7 @@
+sources:
+  "2.6.0":
+    url: "https://github.com/ThrowTheSwitch/Unity/archive/refs/tags/v2.6.0.tar.gz"
+    sha256: "aa4c9fb1ae5fc5242f914c65f3557e817e40cb37f04a31e5ff76d1ab89dbf674"
+  "2.5.2":
+    url: "https://github.com/ThrowTheSwitch/Unity/archive/refs/tags/v2.5.2.tar.gz"
+    sha256: "3786de6c8f389be3894feae4f7d8680a02e70ed4dbcce36109c8f8646da2671a"

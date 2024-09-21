@@ -1,10 +1,11 @@
-from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, get, copy
-from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.50.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
+
+required_conan_version = ">=1.53.0"
 
 
 class LibBigWigConan(ConanFile):
@@ -14,6 +15,7 @@ class LibBigWigConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/dpryan79/libBigWig"
     license = "MIT"
+    package_type = "library"
     settings = "arch", "build_type", "compiler", "os"
 
     options = {
@@ -26,32 +28,28 @@ class LibBigWigConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_curl": False,
+        "with_curl": True,
         "with_zlibng": False
     }
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_curl:
-            self.requires("libcurl/7.85.0")
+            # transitive_headers=True is required due to includes in bigWigIO.h
+            # https://github.com/dpryan79/libBigWig/blob/master/bigWigIO.h#L5
+            self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True)
         if self.options.with_zlibng:
-            self.requires("zlib-ng/2.0.6")
+            self.requires("zlib-ng/2.1.6")
         else:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.info.settings.os == "Windows":
@@ -62,13 +60,9 @@ class LibBigWigConan(ConanFile):
             if not zlib_ng.options.zlib_compat:
                 raise ConanInvalidConfiguration(f"{self.ref} requires the dependency option zlib-ng:zlib_compat=True")
 
-        if self.options.with_curl:
-            libcurl = self.dependencies["libcurl"]
-            if libcurl.options.with_imap or libcurl.options.with_pop3 or libcurl.options.with_smtp:
-                raise ConanInvalidConfiguration(f"{self.ref} requires libcurl using the follow options: -o libcurl:with_imap=False -o libcurl:with_pop3=False -o libcurl:with_smtp=False")
-
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+            destination=self.source_folder, strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -91,10 +85,11 @@ class LibBigWigConan(ConanFile):
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["BigWig"]
-        self.cpp_info.system_libs = ["m"]
         self.cpp_info.set_property("cmake_file_name", "BigWig")
         self.cpp_info.set_property("cmake_target_name", "BigWig::BigWig")
+        self.cpp_info.libs = ["BigWig"]
+        self.cpp_info.system_libs = ["m"]
+
 
         if not self.options.with_curl:
             self.cpp_info.defines = ["NOCURL"]

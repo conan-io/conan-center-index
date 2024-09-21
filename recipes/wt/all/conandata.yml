@@ -1,4 +1,10 @@
 sources:
+  "4.10.1":
+    url: "https://github.com/emweb/wt/archive/4.10.1.tar.gz"
+    sha256: "f6d6114416a628604793197cd077066a9d4d98799bbb288b97de42f66705bde5"
+  "4.10.0":
+    url: "https://github.com/emweb/wt/archive/4.10.0.tar.gz"
+    sha256: "7090023d4fc4b6594bf4cb11072d9d3d775269327aece9a8993c7bbe46decb9d"
   "4.9.1":
     url: "https://github.com/emweb/wt/archive/4.9.1.tar.gz"
     sha256: "253c61779623ed125bdd604a7b7fe48e64bd991548d17180f040bfa88ccafd98"
@@ -14,19 +20,15 @@ sources:
   "4.6.0":
     url: "https://github.com/emweb/wt/archive/4.6.0.tar.gz"
     sha256: "7f709e132d32c4925e6db0a590c7ccc5613344e8b9052676ef891a25ccb550e6"
-  "4.5.1":
-    url: "https://github.com/emweb/wt/archive/4.5.1.tar.gz"
-    sha256: "c2820646095af5618fc235705c0108797e3898225fb1826f2c6185c405c21a17"
-  "4.5.0":
-    url: "https://github.com/emweb/wt/archive/4.5.0.tar.gz"
-    sha256: "119b1eae83285a153b9c901d3f4f25775c7a460d30b1e48242d7d2d649d61deb"
-  "4.4.0":
-    url: "https://github.com/emweb/wt/archive/4.4.0.tar.gz"
-    sha256: "2eabefea915ecc4deb36f9f67ab30dd3b1f6c73893d76c9d9fa39ac25f4f3690"
-  "4.3.1":
-    url: "https://github.com/emweb/wt/archive/4.3.1.tar.gz"
-    sha256: "6c0130f36c829ed67119679770c2f62d7768a62eaa281bb10070c4cf1b145139"
 patches:
+  "4.10.1":
+    - patch_file: "patches/4.8.0-0001-use-cci-package.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "4.10.0":
+    - patch_file: "patches/4.8.0-0001-use-cci-package.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
   "4.9.1":
     - patch_file: "patches/4.8.0-0001-use-cci-package.patch"
       patch_description: "use cci package"
@@ -47,28 +49,3 @@ patches:
     - patch_file: "patches/4.6.2-0001-use-cci-package.patch"
       patch_description: "use cci package"
       patch_type: "conan"
-  "4.5.1":
-    - patch_file: "patches/4.3.1-0001-use-cci-package.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-  "4.5.0":
-    - patch_file: "patches/4.3.1-0001-use-cci-package.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-    - patch_file: "patches/4.3.1-0002-gcc_11.patch"
-      patch_description: "include limits header"
-      patch_type: "portability"
-  "4.4.0":
-    - patch_file: "patches/4.3.1-0001-use-cci-package.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-    - patch_file: "patches/4.3.1-0002-gcc_11.patch"
-      patch_description: "include limits header"
-      patch_type: "portability"
-  "4.3.1":
-    - patch_file: "patches/4.3.1-0001-use-cci-package.patch"
-      patch_description: "use cci package"
-      patch_type: "conan"
-    - patch_file: "patches/4.3.1-0002-gcc_11.patch"
-      patch_description: "include limits header"
-      patch_type: "portability"

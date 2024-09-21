@@ -4,7 +4,8 @@ from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.50.0"
+
 
 class MikeLankampFpmConan(ConanFile):
     name = "mikelankamp-fpm"
@@ -13,6 +14,7 @@ class MikeLankampFpmConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/MikeLankamp/fpm"
     topics = ("fixed-point", "math", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 

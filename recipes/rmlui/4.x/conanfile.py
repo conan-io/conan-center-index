@@ -1,18 +1,23 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import get, replace_in_file, copy, export_conandata_patches, apply_conandata_patches
 import os
 
+
+required_conan_version = ">=1.53.0"
 
 class RmluiConan(ConanFile):
     name = "rmlui"
     description = "RmlUi - The HTML/CSS User Interface Library Evolved"
-    homepage = "https://github.com/mikke89/RmlUi"
-    url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/mikke89/RmlUi"
     topics = ("css", "gui", "html", "lua", "rmlui")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "enable_rtti_and_exceptions": [True, False],
         "font_interface": ["freetype", None],
         "fPIC": [True, False],
         "matrix_mode": ["column_major", "row_major"],
@@ -21,7 +26,6 @@ class RmluiConan(ConanFile):
         "with_thirdparty_containers": [True, False]
     }
     default_options = {
-        "enable_rtti_and_exceptions": True,
         "font_interface": "freetype",
         "fPIC": True,
         "matrix_mode": "column_major",
@@ -29,9 +33,6 @@ class RmluiConan(ConanFile):
         "with_lua_bindings": False,
         "with_thirdparty_containers": True
     }
-    build_requires = ["cmake/3.23.2"]
-    exports_sources = ["CMakeLists.txt"]
-    generators = ["cmake", "cmake_find_package"]
 
     @property
     def _minimum_compilers_version(self):
@@ -49,18 +50,21 @@ class RmluiConan(ConanFile):
     def _minimum_cpp_standard(self):
         return 14
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
-        
+            check_min_cppstd(self, self._minimum_cpp_standard)
+
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
             lv2 = [int(v) for v in v2.split(".")]
@@ -70,12 +74,10 @@ class RmluiConan(ConanFile):
         min_version = self._minimum_compilers_version.get(
             str(self.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
+            self.output.warning(f"{self.ref} recipe lacks information about the {self.settings.compiler} compiler support.")
         else:
             if lazy_lt_semver(str(self.settings.compiler.version), min_version):
-                raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+                raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard} support. The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
     def requirements(self):
         if self.options.font_interface == "freetype":
@@ -85,78 +87,54 @@ class RmluiConan(ConanFile):
             self.requires("lua/5.3.5")
 
         if self.options.with_thirdparty_containers:
-            self.requires("robin-hood-hashing/3.11.3")
+            self.requires("robin-hood-hashing/3.11.3", transitive_headers=True)
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version],
+                  destination=self.source_folder, strip_root=True)
 
-    def _configure_cmake(self):
-        if not hasattr(self, "_cmake"):
-            self._cmake = CMake(self)
-            self._cmake.definitions["BUILD_LUA_BINDINGS"] = self.options.with_lua_bindings
-            self._cmake.definitions["BUILD_SAMPLES"] = False
-            self._cmake.definitions["CUSTOM_CONFIGURATION"] = True
-            self._cmake.definitions["CUSTOM_INCLUDE_DIRS"] = ";".join(self.deps_cpp_info["robin-hood-hashing"].include_paths)
-            self._cmake.definitions["DISABLE_RTTI_AND_EXCEPTIONS"] = not self.options.enable_rtti_and_exceptions
-            self._cmake.definitions["ENABLE_PRECOMPILED_HEADERS"] = True
-            self._cmake.definitions["ENABLE_TRACY_PROFILING"] = False
-            self._cmake.definitions["MATRIX_ROW_MAJOR"] = self.options.matrix_mode == "row_major"
-            self._cmake.definitions["NO_FONT_INTERFACE_DEFAULT"] = self.options.font_interface is None
-            self._cmake.definitions["NO_THIRDPARTY_CONTAINERS"] = not self.options.with_thirdparty_containers
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_LUA_BINDINGS"] = self.options.with_lua_bindings
+        tc.cache_variables["BUILD_SAMPLES"] = False
+        tc.cache_variables["DISABLE_RTTI_AND_EXCEPTIONS"] = False
+        tc.cache_variables["ENABLE_PRECOMPILED_HEADERS"] = True
+        tc.cache_variables["ENABLE_TRACY_PROFILING"] = False
+        tc.cache_variables["MATRIX_ROW_MAJOR"] = self.options.matrix_mode == "row_major"
+        tc.cache_variables["NO_FONT_INTERFACE_DEFAULT"] = not self.options.font_interface
+        tc.cache_variables["NO_THIRDPARTY_CONTAINERS"] = not self.options.with_thirdparty_containers
+        tc.generate()
 
-            self._cmake.configure()
-
-        return self._cmake
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        # The *.cmake files that conan generates using cmake_find_package for CMake's find_package to consume use
-        # different variable naming than described in CMake's documentation, thus the need for most of the replacements.
-        # References:
-        #  * https://cmake.org/cmake/help/latest/module/FindFreetype.html
-        #  * https://cmake.org/cmake/help/latest/module/FindLua.html
-        replace_mapping = {
-            "FREETYPE_FOUND": "Freetype_FOUND",
-            "FREETYPE_INCLUDE_DIRS": "Freetype_INCLUDE_DIRS",
-            "FREETYPE_LINK_DIRS": "Freetype_LINK_DIRS",
-            "FREETYPE_LIBRARY": "Freetype_LIBRARIES",
-            "FREETYPE_LIBRARIES": "Freetype_LIBRARIES",
-            "LUA_FOUND": "lua_FOUND",
-            "LUA_INCLUDE_DIR": "lua_INCLUDE_DIR",
-            "LUA_LIBRARIES": "lua_LIBRARIES",
-            # disables the built-in generation of package configuration files
-            "if(PkgHelpers_AVAILABLE)": "if(FALSE)"
-        }
+        apply_conandata_patches(self)
 
-        cmakelists_path = os.path.join(
-            self._source_subfolder, "CMakeLists.txt")
-        for key, value in replace_mapping.items():
-            tools.replace_in_file(cmakelists_path, key, value, strict=False)
-
+        # If we are using robin_hood hashing provided by conan, we need to change its include path
         if self.options.with_thirdparty_containers:
-            config_path = os.path.join(self._source_subfolder,
+            config_path = os.path.join(self.source_folder,
                                        "Include", "RmlUi", "Config", "Config.h")
-            tools.replace_in_file(
-                config_path, "\"../Core/Containers/robin_hood.h\"", "<robin_hood.h>")
+            replace_in_file(
+                self, config_path, "\"../Core/Containers/robin_hood.h\"", "<robin_hood.h>")
 
     def build(self):
         self._patch_sources()
-        self._configure_cmake().build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        self._configure_cmake().install()
-        self.copy("*LICENSE.txt", dst="licenses", src=self._source_subfolder, excludes=("Samples/*", "Tests/*"))
+        copy(self, pattern="*LICENSE.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder, excludes=("Samples/*", "Tests/*"))
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
         if self.options.matrix_mode == "row_major":
             self.cpp_info.defines.append("RMLUI_MATRIX_ROW_MAJOR")
-
-        if not self.options.enable_rtti_and_exceptions:
-            self.cpp_info.defines.append("RMLUI_USE_CUSTOM_RTTI")
 
         if not self.options.shared:
             self.cpp_info.defines.append("RMLUI_STATIC_LIB")

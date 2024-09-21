@@ -1,10 +1,13 @@
 sources:
+  "4.2.16-2":
+    url:
+      - "https://hdf-wordpress-1.s3.amazonaws.com/wp-content/uploads/manual/HDF4/HDF4.2.16-2/src/hdf-4.2.16-2.tar.bz2"
+      - "https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.16-2/src/hdf-4.2.16-2.tar.bz2"
+    sha256: "c5c3234b5012258aef2e4432f649b31c21b26015afba1857ad83640c3f2b692c"
   "4.2.15":
     url: "https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.15/src/hdf-4.2.15.tar.gz"
     sha256: "dbeeef525af7c2d01539906c28953f0fdab7dba603d1bc1ec4a5af60d002c459"
 patches:
   "4.2.15":
     - patch_file: "patches/fix-export-macro.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/fix-missing-unistd-include.patch"
-      base_path: "source_subfolder"

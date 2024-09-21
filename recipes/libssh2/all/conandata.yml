@@ -1,4 +1,7 @@
 sources:
+  "1.11.0":
+    sha256: a488a22625296342ddae862de1d59633e6d446eff8417398e06674a49be3d7c2
+    url: https://github.com/libssh2/libssh2/releases/download/libssh2-1.11.0/libssh2-1.11.0.tar.xz
   "1.10.0":
     sha256: 2d64e90f3ded394b91d3a2e774ca203a4179f69aebee03003e5a6fa621e41d51
     url: https://github.com/libssh2/libssh2/releases/download/libssh2-1.10.0/libssh2-1.10.0.tar.gz
@@ -11,16 +14,3 @@ sources:
   "1.8.0":
     sha256: 39f34e2f6835f4b992cafe8625073a88e5a28ba78f83e8099610a7b3af4676d4
     url: https://github.com/libssh2/libssh2/releases/download/libssh2-1.8.0/libssh2-1.8.0.tar.gz
-patches:
-  "1.10.0":
-    - patch_file: "patches/0001-threads.patch"
-      base_path: "source_subfolder"
-  "1.9.0":
-    - patch_file: "patches/0001-threads.patch"
-      base_path: "source_subfolder"
-  "1.8.2":
-    - patch_file: "patches/0001-threads.patch"
-      base_path: "source_subfolder"
-  "1.8.0":
-    - patch_file: "patches/0001-threads.patch"
-      base_path: "source_subfolder"

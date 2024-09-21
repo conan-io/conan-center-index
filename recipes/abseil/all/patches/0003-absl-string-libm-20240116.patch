@@ -1,0 +1,15 @@
+--- a/absl/strings/CMakeLists.txt
++++ b/absl/strings/CMakeLists.txt
+@@ -32,9 +32,12 @@
+   PUBLIC
+ )
+ 
++find_library(LIBM m)
+ absl_cc_library(
+   NAME
+     strings
++  LINKOPTS
++    $<$<BOOL:${LIBM}>:-lm>
+   HDRS
+     "ascii.h"
+     "charconv.h"

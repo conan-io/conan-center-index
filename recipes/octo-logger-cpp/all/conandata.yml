@@ -1,7 +1,28 @@
 sources:
-  "1.1.0":
-    sha256: 69057ab2f0ba0754dc6dce1f27c6f1fd9ad1e97c828779a801273bb3e9123e4e
-    url: https://github.com/ofiriluz/octo-logger-cpp/archive/refs/tags/v1.1.0.tar.gz
+  "2.0.0":
+    url: "https://github.com/ofiriluz/octo-logger-cpp/archive/v2.0.0.tar.gz"
+    sha256: "2edad6d1cba27019f1f26e562d9d8ff8395fc9ada1e8fb0c226c603ec5e0ed15"
+  "1.12.0":
+    url: "https://github.com/ofiriluz/octo-logger-cpp/archive/v1.12.0.tar.gz"
+    sha256: "b4140d31910af128e1d97ae44a564bbad7f7ca889410bbc885691c5e215c0d61"
+  "1.11.0":
+    url: "https://github.com/ofiriluz/octo-logger-cpp/archive/v1.11.0.tar.gz"
+    sha256: "73c35ca2a2e0c4be2cd85c5ba1f4061bbc22637fe79570107f1123eff30936db"
+  "1.9.0":
+    url: "https://github.com/ofiriluz/octo-logger-cpp/archive/v1.9.0.tar.gz"
+    sha256: "95187b6e9ae5d405b53ecb12ff7cbde847a9824a340ca88922eecd712ce9a138"
+  "1.6.1":
+    url: "https://github.com/ofiriluz/octo-logger-cpp/archive/v1.6.1.tar.gz"
+    sha256: "02c1d5303d8c129cb2527a92d49677229230a5feaec002791f96d47de3bccb5a"
+  "1.5.0":
+    url: "https://github.com/ofiriluz/octo-logger-cpp/archive/v1.5.0.tar.gz"
+    sha256: "e62e4a54700f7c235111fd2b75c51d96f0b4deaf2c24ce7bc9ef1751ce31ea20"
+  "1.4.0":
+    url: "https://github.com/ofiriluz/octo-logger-cpp/archive/v1.4.0.tar.gz"
+    sha256: "6aacbab0e57917a935e0f9741e52a57ecac21785ba49aaafec5775030208a153"
   "1.2.0":
-    sha256: 54381d6dbc80c6be6d8b9e087a4b55fae6ff5d07c3c2399bc7e1c94252260bf2
-    url: https://github.com/ofiriluz/octo-logger-cpp/archive/refs/tags/v1.2.0.tar.gz
+    url: "https://github.com/ofiriluz/octo-logger-cpp/archive/refs/tags/v1.2.0.tar.gz"
+    sha256: "54381d6dbc80c6be6d8b9e087a4b55fae6ff5d07c3c2399bc7e1c94252260bf2"
+  "1.1.0":
+    url: "https://github.com/ofiriluz/octo-logger-cpp/archive/refs/tags/v1.1.0.tar.gz"
+    sha256: "69057ab2f0ba0754dc6dce1f27c6f1fd9ad1e97c828779a801273bb3e9123e4e"

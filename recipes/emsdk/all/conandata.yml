@@ -1,4 +1,25 @@
 sources:
+  "3.1.50":
+    url: "https://github.com/emscripten-core/emsdk/archive/3.1.50.tar.gz"
+    sha256: "7491a881eb5ee15fe81bbabcfff1fd571e45ccdb24a81890af429f9970cbd1f3"
+  "3.1.49":
+    url: "https://github.com/emscripten-core/emsdk/archive/3.1.49.tar.gz"
+    sha256: "c99d98da9241c7e72784bc764a3e60a65d8f27202d45f3cd422b2ac7245380d9"
+  "3.1.48":
+    url: "https://github.com/emscripten-core/emsdk/archive/3.1.48.tar.gz"
+    sha256: "94b965ba8f2ff0949ff67c6943bf5638a1b8850e4491a25413cdaff5b18da42b"
+  "3.1.47":
+    url: "https://github.com/emscripten-core/emsdk/archive/3.1.47.tar.gz"
+    sha256: "a882560a83cbacec67867e7ce6b00420d557e71c501b523d2ed956ded021f9b4"
+  "3.1.46":
+    url: "https://github.com/emscripten-core/emsdk/archive/3.1.46.tar.gz"
+    sha256: "5dd94e557b720800a60387ec078bf3b3a527cbd916ad74a696fe399f1544474f"
+  "3.1.45":
+    url: "https://github.com/emscripten-core/emsdk/archive/3.1.45.tar.gz"
+    sha256: "8b5b3433eb732dcc7643a2707a12fd5cbe793a5dadbbae9a60c24a737a78fe33"
+  "3.1.44":
+    url: "https://github.com/emscripten-core/emsdk/archive/3.1.44.tar.gz"
+    sha256: "cb8cded78f6953283429d724556e89211e51ac4d871fcf38e0b32405ee248e91"
   "3.1.31":
     url: "https://github.com/emscripten-core/emsdk/archive/3.1.31.tar.gz"
     sha256: "1d38b7375e12e85197165a4c51d76d90e1d9db8c2c593b64cfaec4338af54750"

@@ -1,0 +1,7 @@
+sources:
+  "1.3.1":
+    url: "https://github.com/svgpp/svgpp/archive/refs/tags/v1.3.1.tar.gz"
+    sha256: "be8a89df72d01cf062cc9815dd64c9576b4d20910d6d7aee7f0ea26484dc5e76"
+  "cci.20221030":
+    url: "https://github.com/svgpp/svgpp/archive/1583a7b209038bfd0d98c6ce7d4c93986f7b235e.tar.gz"
+    sha256: "95f4145c43aada913e7b24e37d20d0eef5f170a7c70e00ffcb318a3910b43ca6"

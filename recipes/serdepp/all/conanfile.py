@@ -1,21 +1,26 @@
 import os
 
-from conans.errors import ConanInvalidConfiguration
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.43.0"
+required_conan_version = ">=1.52.0"
 
 
 class SerdeppConan(ConanFile):
     name = "serdepp"
     description = "c++ serialize and deserialize adaptor library like rust serde.rs"
     license = "MIT"
-    topics = ("yaml", "toml", "serialization", "json", "reflection")
-    homepage = "https://github.com/injae/serdepp"
     url = "https://github.com/conan-io/conan-center-index"
-    settings = "arch", "build_type", "compiler", "os"
+    homepage = "https://github.com/injae/serdepp"
+    topics = ("yaml", "toml", "serialization", "json", "reflection", "header-only")
+
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
-        # keeping the option in case upstream support dynamic linking
         "with_nlohmann_json": [True, False],
         "with_rapidjson": [True, False],
         "with_fmt": [True, False],
@@ -32,16 +37,8 @@ class SerdeppConan(ConanFile):
     no_copy_source = True
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder,
-                  strip_root=True)
-
-    def package_id(self):
-        self.info.header_only()
+    def _min_cppstd(self):
+        return 17
 
     @property
     def _compilers_minimum_version(self):
@@ -52,48 +49,68 @@ class SerdeppConan(ConanFile):
             "apple-clang": "10",
         }
 
-    def validate(self):
-        compiler = self.settings.compiler
-        if compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+    def export_sources(self):
+        export_conandata_patches(self)
 
-        if not minimum_version:
-            self.output.warn(f"{self.name} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif tools.Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.name} requires a compiler that supports at least C++17")
-
-    def package(self):
-        s = lambda x: os.path.join(self._source_subfolder, x)
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        include = os.path.join('include', 'serdepp')
-        self.copy('*.hpp', dst=include, src=s(include))
-        attribute = os.path.join(include, 'attribute')
-        self.copy('*.hpp', dst=attribute, src=s(attribute))
-        adaptor = os.path.join(include, 'adaptor')
-        self.copy('reflection.hpp', dst=adaptor, src=s(adaptor))
-        self.copy('sstream.hpp', dst=adaptor, src=s(adaptor))
-        if self.options.with_toml11:
-            self.copy('toml11.hpp', dst=adaptor, src=s(adaptor))
-        if self.options.with_yamlcpp:
-            self.copy('yaml-cpp.hpp', dst=adaptor, src=s(adaptor))
-        if self.options.with_rapidjson:
-            self.copy('rapidjson.hpp', dst=adaptor, src=s(adaptor))
-        if self.options.with_fmt:
-            self.copy('fmt.hpp', dst=adaptor, src=s(adaptor))
-        if self.options.with_nlohmann_json:
-            self.copy('nlohmann_json.hpp', dst=adaptor, src=s(adaptor))
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nameof/0.10.1")
-        self.requires("magic_enum/0.7.3")
+        self.requires("nameof/0.10.3")
+        self.requires("magic_enum/0.9.5")
         if self.options.with_toml11:
-            self.requires("toml11/3.7.0")
+            self.requires("toml11/3.8.1")
         if self.options.with_yamlcpp:
-            self.requires("yaml-cpp/0.7.0")
+            self.requires("yaml-cpp/0.8.0")
         if self.options.with_rapidjson:
             self.requires("rapidjson/1.1.0")
         if self.options.with_fmt:
-            self.requires("fmt/8.1.1")
+            self.requires("fmt/10.2.1")
         if self.options.with_nlohmann_json:
-            self.requires("nlohmann_json/3.10.5")
+            self.requires("nlohmann_json/3.11.3")
+
+    def package_id(self):
+        self.info.clear()
+
+    def validate(self):
+        compiler = self.settings.compiler
+        if compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+
+        if not minimum_version:
+            self.output.warning(f"{self.name} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports C++{self._min_cppstd}.")
+        elif Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.name} requires a compiler that supports at least C++{self._min_cppstd}")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def build(self):
+        apply_conandata_patches(self)
+
+    def package(self):
+        s = lambda x: os.path.join(self.source_folder, x)
+        p = lambda x: os.path.join(self.package_folder, x)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        include = os.path.join("include", "serdepp")
+        copy(self, "*.hpp", dst=p(include), src=s(include))
+        attribute = os.path.join(include, "attribute")
+        copy(self, "*.hpp", dst=p(attribute), src=s(attribute))
+        adaptor = os.path.join(include, "adaptor")
+        copy(self, "reflection.hpp", dst=p(adaptor), src=s(adaptor))
+        copy(self, "sstream.hpp", dst=p(adaptor), src=s(adaptor))
+        if self.options.with_toml11:
+            copy(self, "toml11.hpp", dst=p(adaptor), src=s(adaptor))
+        if self.options.with_yamlcpp:
+            copy(self, "yaml-cpp.hpp", dst=p(adaptor), src=s(adaptor))
+        if self.options.with_rapidjson:
+            copy(self, "rapidjson.hpp", dst=p(adaptor), src=s(adaptor))
+        if self.options.with_fmt:
+            copy(self, "fmt.hpp", dst=p(adaptor), src=s(adaptor))
+        if self.options.with_nlohmann_json:
+            copy(self, "nlohmann_json.hpp", dst=p(adaptor), src=s(adaptor))
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

@@ -1,3 +1,6 @@
+import os
+import textwrap
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
@@ -15,8 +18,7 @@ from conan.tools.files import (
 )
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc, msvc_runtime_flag
 from conan.tools.scm import Version
-import os
-import textwrap
+
 
 required_conan_version = ">=1.53.0"
 
@@ -47,11 +49,18 @@ class FastDDSConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
-        return {
-            "gcc": "5",
-            "clang": "3.9",
-            "apple-clang": "8",
-        }
+        if Version(self.version) < "2.11.0":
+            return {
+                "gcc": "8",
+                "clang": "12",
+                "apple-clang": "12",
+            }
+        else:
+            return {
+                "gcc": "9",
+                "clang": "15",
+                "apple-clang": "15",
+            }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -61,6 +70,7 @@ class FastDDSConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        self.options["fast-cdr"].shared = self.options.shared
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
@@ -68,15 +78,19 @@ class FastDDSConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("tinyxml2/9.0.0")
-        self.requires("asio/1.21.0")
-        self.requires("fast-cdr/1.0.26", transitive_headers=True, transitive_libs=True)
+        self.requires("tinyxml2/10.0.0")
+        self.requires("asio/1.29.0")  # This is now a package_type = header
+        # Fast-DDS < 2.12 uses Fast-CDR 1.x
+        if Version(self.version) < "2.12.0":
+            self.requires("fast-cdr/1.1.0", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("fast-cdr/2.1.0", transitive_headers=True, transitive_libs=True)
         self.requires("foonathan-memory/0.7.3")
-        self.requires("boost/1.75.0")  # boost/1.76 is required by version 2.3.2, boost/1.75.0 required for 2.3.3 by Windows
         if self.options.with_ssl:
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
+        # fast-dds requires C++11
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, "192")
@@ -86,10 +100,15 @@ class FastDDSConan(ConanFile):
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
                 )
+
         if self.options.shared and is_msvc(self) and "MT" in msvc_runtime_flag(self):
             # This combination leads to an fast-dds error when linking
             # linking dynamic '*.dll' and static MT runtime
-            raise ConanInvalidConfiguration("Mixing a dll {} library with a static runtime is a bad idea".format(self.name))
+            raise ConanInvalidConfiguration("Mixing a dll {} library with a static runtime is not supported".format(self.name))
+
+    def build_requirements(self):
+        if Version(self.version) >= "2.7.0":
+            self.tool_requires("cmake/[>=3.16.3 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -163,7 +182,6 @@ class FastDDSConan(ConanFile):
             "asio::asio",
             "tinyxml2::tinyxml2",
             "foonathan-memory::foonathan-memory",
-            "boost::boost",
         ]
         if self.settings.os in ["Linux", "FreeBSD", "Neutrino"]:
             self.cpp_info.components["fastrtps"].system_libs.append("pthread")

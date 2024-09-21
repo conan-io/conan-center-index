@@ -1,0 +1,10 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -117,7 +117,6 @@ set_target_properties(shp
+   PROPERTIES 
+   SOVERSION ${shp_SOVERSION}
+   VERSION ${shp_VERSION}
+-  INSTALL_NAME_DIR "${CMAKE_INSTALL_LIBDIR}"
+   )
+ 
+ if(USE_RPATH)

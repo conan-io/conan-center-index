@@ -1,20 +1,26 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
-from conans.errors import ConanInvalidConfiguration
-import functools
-from itertools import product
 import os
+from itertools import product
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.53.0"
 
 
 class OpenFstConan(ConanFile):
     name = "openfst"
     description = "A library for constructing, combining, optimizing and searching weighted finite-state-transducers (FSTs)."
-    topics = ("asr", "fst", "wfst", "openfst")
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.openfst.org/twiki/bin/view/FST/WebHome"
-    license = "Apache-2.0"
+    topics = ("asr", "fst", "wfst", "openfst")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -50,12 +56,11 @@ class OpenFstConan(ConanFile):
     }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -63,12 +68,14 @@ class OpenFstConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(
-                "OpenFst is only supported on linux")
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            raise ConanInvalidConfiguration("OpenFst is only supported on linux")
 
         compilers = {
             "gcc": "8",
@@ -76,33 +83,36 @@ class OpenFstConan(ConanFile):
         }
 
         if self.settings.compiler.cppstd:
-            tools.check_min_cppstd(self, 17)
+            check_min_cppstd(self, 17)
         minimum_compiler = compilers.get(str(self.settings.compiler))
         if minimum_compiler:
-            if tools.Version(self.settings.compiler.version) < minimum_compiler:
-                raise ConanInvalidConfiguration(f"{self.name} requires c++17, which your compiler does not support.")
+            if Version(self.settings.compiler.version) < minimum_compiler:
+                raise ConanInvalidConfiguration(
+                    f"{self.name} requires c++17, which your compiler does not support."
+                )
         else:
-            self.output.warn(f"{self.name} requires c++17, but this compiler is unknown to this recipe. Assuming your compiler supports c++17.")
+            self.output.warning(
+                f"{self.name} requires c++17, but this compiler is unknown to this recipe."
+                f" Assuming your compiler supports c++17."
+            )
 
         # Check stdlib ABI compatibility
         if self.settings.compiler == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
-            raise ConanInvalidConfiguration('Using %s with GCC requires "compiler.libcxx=libstdc++11"' % self.name)
+            raise ConanInvalidConfiguration(
+                f'Using {self.name} with GCC requires "compiler.libcxx=libstdc++11"'
+            )
         elif self.settings.compiler == "clang" and self.settings.compiler.libcxx not in ["libstdc++11", "libc++"]:
-            raise ConanInvalidConfiguration('Using %s with Clang requires either "compiler.libcxx=libstdc++11"'
-                                            ' or "compiler.libcxx=libc++"' % self.name)
+            raise ConanInvalidConfiguration(
+                f'Using {self.name} with Clang requires either "compiler.libcxx=libstdc++11" or "compiler.libcxx=libc++"'
+            )
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_autotools(self):
-        autotools = AutoToolsBuildEnvironment(self)
+    def generate(self):
+        tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
-        args = [
-            "--with-pic={}".format(yes_no(self.options.get_safe("fPIC", True))),
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
+        tc.configure_args += [
             "--enable-bin={}".format(yes_no(self.options.enable_bin)),
             "--enable-compact-fsts={}".format(yes_no(self.options.enable_compact_fsts)),
             "--enable-compress={}".format(yes_no(self.options.enable_compress)),
@@ -115,47 +125,51 @@ class OpenFstConan(ConanFile):
             "--enable-ngram-fsts={}".format(yes_no(self.options.enable_ngram_fsts)),
             "--enable-pdt={}".format(yes_no(self.options.enable_pdt)),
             "--enable-special={}".format(yes_no(self.options.enable_special)),
-            "LIBS=-lpthread",
         ]
-        autotools.configure(args=args, configure_dir=self._source_subfolder)
-        return autotools
-
-    def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        tc.extra_cflags.append("-pthread")
+        tc.extra_cxxflags.append("-pthread")
+        tc.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
+        apply_conandata_patches(self)
 
     def build(self):
         self._patch_sources()
-        autotools = self._configure_autotools()
+        autotools = Autotools(self)
+        autotools.configure()
         autotools.make()
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        autotools = self._configure_autotools()
+        copy(self, "COPYING",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+
+        autotools = Autotools(self)
         autotools.install()
 
         lib_dir = os.path.join(self.package_folder, "lib")
         lib_subdir = os.path.join(self.package_folder, "lib", "fst")
         if os.path.exists(lib_subdir):
             for fn in os.listdir(lib_subdir):
-                tools.rename(os.path.join(lib_subdir, fn), os.path.join(lib_dir, "lib{}".format(fn)))
-            tools.rmdir(lib_subdir)
+                rename(self,
+                       os.path.join(lib_subdir, fn),
+                       os.path.join(lib_dir, f"lib{fn}"))
+            rmdir(self, lib_subdir)
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.remove_files_by_mask(lib_dir, "*.la")
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.la", lib_dir, recursive=True)
 
     @property
     def _get_const_fsts_libs(self):
-        return ["const{}-fst".format(n) for n in [8, 16, 64]]
+        return [f"const{n}-fst" for n in [8, 16, 64]]
 
     @property
     def _get_compact_fsts_libs(self):
-        return ["compact{}_{}-fst".format(n, fst)
-                for n, fst in product([8, 16, 64], ["acceptor", "string", "unweighted_acceptor", "unweighted", "weighted_string"])]
+        return [f"compact{n}_{fst}-fst"
+                for n, fst in product(
+                    [8, 16, 64],
+                    ["acceptor", "string", "unweighted_acceptor", "unweighted", "weighted_string"]
+                )]
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenFst")
@@ -196,8 +210,9 @@ class OpenFstConan(ConanFile):
             if self.options.enable_pdt or self.options.enable_grm:
                 self.cpp_info.libs.append("fstpdtscript")
 
-            bindir = os.path.join(self.package_folder, "bin")
-            self.output.info("Appending PATH environment var: {}".format(bindir))
-            self.env_info.PATH.append(bindir)
-
         self.cpp_info.system_libs = ["pthread", "dl", "m"]
+
+        # TODO: Legacy, to be removed on Conan 2.0
+        bindir = os.path.join(self.package_folder, "bin")
+        self.output.info(f"Appending PATH environment var: {bindir}")
+        self.env_info.PATH.append(bindir)

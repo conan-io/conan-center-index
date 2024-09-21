@@ -14,5 +14,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
-            glb_path = os.path.join(self.source_folder, os.pardir, "test_package", "box01.glb")
-            self.run(f"{bin_path} {glb_path}", run_environment=True)
+            self.run(bin_path, run_environment=True)

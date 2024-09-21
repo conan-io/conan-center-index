@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 import os
@@ -25,17 +25,41 @@ class BenchmarkConan(ConanFile):
         "fPIC": [True, False],
         "enable_lto": [True, False],
         "enable_exceptions": [True, False],
+        "enable_libpfm": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_lto": False,
         "enable_exceptions": True,
+        "enable_libpfm": False,
     }
+
+    @property
+    def _min_cppstd(self):
+        if Version(self.version) >= "1.8.5":
+            return 14
+        if is_msvc(self):
+            return 14
+        return 11
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "14": {
+                "apple-clang": "10",
+                "clang": "7",
+                "gcc": "7",
+                "msvc": "191",
+                "Visual Studio": "15",
+            }
+        }.get(self._min_cppstd, {})
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os != "Linux" or Version(self.version) < "1.5.4":
+            del self.options.enable_libpfm
 
     def configure(self):
         if self.options.shared:
@@ -45,24 +69,25 @@ class BenchmarkConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
+
         check_min_vs(self, "190")
         if Version(self.version) < "1.7.0" and is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support msvc shared builds")
 
-    def _cmake_new_enough(self, required_version):
-        try:
-            import re
-            from io import StringIO
-            output = StringIO()
-            self.run("cmake --version", output)
-            m = re.search(r'cmake version (\d+\.\d+\.\d+)', output.getvalue())
-            return Version(m.group(1)) >= required_version
-        except:
-            return False
+    def requirements(self):
+        if self.options.get_safe("enable_libpfm"):
+            self.requires("libpfm4/4.13.0")
 
     def build_requirements(self):
-        if Version(self.version) >= "1.7.1" and not self._cmake_new_enough("3.16.3"):
-            self.tool_requires("cmake/3.25.3")
+        if Version(self.version) >= "1.7.1":
+            self.tool_requires("cmake/[>=3.16.3 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -73,6 +98,9 @@ class BenchmarkConan(ConanFile):
         tc.variables["BENCHMARK_ENABLE_GTEST_TESTS"] = "OFF"
         tc.variables["BENCHMARK_ENABLE_LTO"] = self.options.enable_lto
         tc.variables["BENCHMARK_ENABLE_EXCEPTIONS"] = self.options.enable_exceptions
+        tc.variables["BENCHMARK_ENABLE_LIBPFM"] = self.options.get_safe("enable_libpfm", False)
+        if not self.settings.compiler.cppstd:
+            tc.cache_variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         if Version(self.version) >= "1.6.1":
             tc.variables["BENCHMARK_ENABLE_WERROR"] = False
             tc.variables["BENCHMARK_FORCE_WERROR"] = False
@@ -85,8 +113,17 @@ class BenchmarkConan(ConanFile):
         else:
             tc.variables["BENCHMARK_USE_LIBCXX"] = False
         tc.generate()
+    
+    def _patch_sources(self):
+        if Version(self.version) > "1.7.0":
+            replace_in_file(self,
+                os.path.join(self.source_folder, "CMakeLists.txt"),
+                "set(CMAKE_CXX_STANDARD",
+                "#"
+            )
 
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -113,6 +150,8 @@ class BenchmarkConan(ConanFile):
             self.cpp_info.components["_benchmark"].system_libs.append("shlwapi")
         elif self.settings.os == "SunOS":
             self.cpp_info.components["_benchmark"].system_libs.append("kstat")
+        if self.options.get_safe("enable_libpfm"):
+            self.cpp_info.components["_benchmark"].requires.append("libpfm4::libpfm4")
 
         self.cpp_info.components["benchmark_main"].set_property("cmake_target_name", "benchmark::benchmark_main")
         self.cpp_info.components["benchmark_main"].libs = ["benchmark_main"]

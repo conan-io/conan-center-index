@@ -37,8 +37,8 @@ class CMakeConan(ConanFile):
             self.options.with_openssl = False
 
     def requirements(self):
-        if self.options.with_openssl:
-            self.requires("openssl/1.1.1t")
+        if self.options.get_safe("with_openssl", default=False):
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate_build(self):
         if self.settings.os == "Windows" and self.options.bootstrap:
@@ -97,6 +97,7 @@ class CMakeConan(ConanFile):
                     openssl = self.dependencies["openssl"]
                     bootstrap_cmake_options.append("-DCMAKE_USE_OPENSSL=ON")
                     bootstrap_cmake_options.append(f'-DOPENSSL_USE_STATIC_LIBS={"FALSE" if openssl.options.shared else "TRUE"}')
+                    bootstrap_cmake_options.append(f'-DOPENSSL_ROOT_DIR={openssl.package_path}')
                 else:
                     bootstrap_cmake_options.append("-DCMAKE_USE_OPENSSL=OFF")
             save(self, "bootstrap_args", json.dumps({"bootstrap_cmake_options": ' '.join(arg for arg in bootstrap_cmake_options)}))

@@ -1,13 +1,25 @@
 sources:
-  "5.75.0":
-    url: "https://download.kde.org/stable/frameworks/5.75/extra-cmake-modules-5.75.0.zip"
-    sha256: "dc937fd2018eb8285c1b07d4b5de104c60959404c4979883f6bdb0a4d40cf98e"
-  "5.80.0":
-    url: "https://download.kde.org/stable/frameworks/5.80/extra-cmake-modules-5.80.0.tar.xz"
-    sha256: "2370fd80f685533d0b96efa6fa443ceea68e0ceba4e8a9d7c151d297b1c96f64"
-  "5.84.0":
-    url: "https://download.kde.org/stable/frameworks/5.84/extra-cmake-modules-5.84.0.tar.xz"
-    sha256: "bb085ef2e177c182ff46988516b6b31849d1497beb2ff5301165ad2ba12a1c41"
+  "6.2.0":
+    url: "https://download.kde.org/stable/frameworks/6.2/extra-cmake-modules-6.2.0.tar.xz"
+    sha256: "6374bfa0dded8be265c702acd5de11eecd2851c625b93e1c87d8d0f5f1a8ebe1"
+  "5.113.0":
+    url: "https://download.kde.org/stable/frameworks/5.113/extra-cmake-modules-5.113.0.tar.xz"
+    sha256: "265e5440eebeca07351a469e617a4bf35748927bd907b00ace9c018392bb3bc4"
+  "5.111.0":
+    url: "https://download.kde.org/stable/frameworks/5.111/extra-cmake-modules-5.111.0.tar.xz"
+    sha256: "555d3c1dfa6727b4e64a35d3f01724c9fcd6209c2a41f2b2297c39ed7aabea9a"
+  "5.108.0":
+    url: "https://download.kde.org/stable/frameworks/5.108/extra-cmake-modules-5.108.0.tar.xz"
+    sha256: "ff14abd21abd34c2d8c00ee7a1ccd173b9a57ed1824e5c01090897ffffed447a"
   "5.93.0":
     url: "https://download.kde.org/stable/frameworks/5.93/extra-cmake-modules-5.93.0.tar.xz"
     sha256: "093dea7b11647bc5f74e6971d47ef15b5c410cba2b4620acae00f008d5480b21"
+  "5.84.0":
+    url: "https://download.kde.org/stable/frameworks/5.84/extra-cmake-modules-5.84.0.tar.xz"
+    sha256: "bb085ef2e177c182ff46988516b6b31849d1497beb2ff5301165ad2ba12a1c41"
+  "5.80.0":
+    url: "https://download.kde.org/stable/frameworks/5.80/extra-cmake-modules-5.80.0.tar.xz"
+    sha256: "2370fd80f685533d0b96efa6fa443ceea68e0ceba4e8a9d7c151d297b1c96f64"
+  "5.75.0":
+    url: "https://download.kde.org/stable/frameworks/5.75/extra-cmake-modules-5.75.0.zip"
+    sha256: "dc937fd2018eb8285c1b07d4b5de104c60959404c4979883f6bdb0a4d40cf98e"

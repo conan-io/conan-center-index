@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import copy, get, apply_conandata_patches, replace_in_file, rmdir, save
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, save
 from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
@@ -14,10 +14,11 @@ required_conan_version = ">=1.53"
 class SQLiteCppConan(ConanFile):
     name = "sqlitecpp"
     description = "SQLiteCpp is a smart and easy to use C++ sqlite3 wrapper"
-    topics = ("sqlite", "sqlite3", "data-base")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/SRombauts/SQLiteCpp"
-    license = "MIT"
+    topics = ("sqlite", "sqlite3", "data-base")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -31,8 +32,7 @@ class SQLiteCppConan(ConanFile):
     }
 
     def export_sources(self):
-        for p in self.conan_data.get("patches", {}).get(self.version, []):
-            copy(self, p["patch_file"], self.recipe_folder, self.export_sources_folder)
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -43,7 +43,7 @@ class SQLiteCppConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        self.requires("sqlite3/3.40.0")
+        self.requires("sqlite3/3.45.0")
 
     def validate(self):
         if Version(self.version) >= "3.0.0" and self.info.settings.compiler.get_safe("cppstd"):

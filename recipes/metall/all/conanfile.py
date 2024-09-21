@@ -5,6 +5,7 @@ from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
+import platform
 
 required_conan_version = ">=1.50.0"
 
@@ -16,6 +17,7 @@ class MetallConan(ConanFile):
     description = "Meta allocator for persistent memory"
     license = "MIT", "Apache-2.0"
     topics = "cpp", "allocator", "memory-allocator", "persistent-memory", "ecp", "exascale-computing"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -26,11 +28,19 @@ class MetallConan(ConanFile):
             "clang": "9",
         }
 
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
     def requirements(self):
-        self.requires("boost/1.79.0")
+        self.requires("boost/1.81.0")
 
     def package_id(self):
         self.info.clear()
+
+    @property
+    def _is_glibc_older_than_2_27(self):
+        libver = platform.libc_ver()
+        return self.settings.os == 'Linux' and libver[0] == 'glibc' and Version(libver[1]) < "2.27"
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -38,7 +48,7 @@ class MetallConan(ConanFile):
 
         if self.settings.os not in ["Linux", "Macos"]:
             raise ConanInvalidConfiguration(
-                "Metall requires some POSIX functionalities like mmap.")
+                f"{self.ref} requires some POSIX functionalities like mmap.")
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -52,12 +62,13 @@ class MetallConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "{} {} requires C++17, which your compiler does not support.".format(self.name, self.version))
 
-    def layout(self):
-        basic_layout(self, src_folder="src")
+    def validate_build(self):
+        if Version(self.version) >= "0.28" and self._is_glibc_older_than_2_27:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires copy_file_range() which is available since glibc 2.27.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -75,9 +86,7 @@ class MetallConan(ConanFile):
         self.cpp_info.names["cmake_find_package_multi"] = "Metall"
 
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")

@@ -1,12 +1,30 @@
 sources:
+  "1.8.6":
+    url: "https://github.com/alembic/alembic/archive/refs/tags/1.8.6.tar.gz"
+    sha256: "c572ebdea3a5f0ce13774dd1fceb5b5815265cd1b29d142cf8c144b03c131c8c"
+  "1.8.5":
+    url: "https://github.com/alembic/alembic/archive/refs/tags/1.8.5.tar.gz"
+    sha256: "180a12f08d391cd89f021f279dbe3b5423b1db751a9898540c8059a45825c2e9"
   "1.8.3":
-    url: "https://github.com/alembic/alembic/archive/1.8.3.tar.gz"
+    url: "https://github.com/alembic/alembic/archive/refs/tags/1.8.3.tar.gz"
     sha256: "b0bc74833bff118a869e81e6acb810a58797e77ef63143954b2f8e817c7f65cb"
   "1.8.2":
     url: "https://github.com/alembic/alembic/archive/refs/tags/1.8.2.tar.gz"
     sha256: "3f1c466ee1600578689b32b1f2587066d3259704ec7ed1fcf80c324d01274f48"
 patches:
+  "1.8.6":
+    - patch_file: "patches/1.8.5-0001-fix-cmake.patch"
+      patch_description: "CMake: fix install layout, don't link directly to zlib if hdf5, relocatable shared lib for macOS"
+      patch_type: "conan"
+  "1.8.5":
+    - patch_file: "patches/1.8.5-0001-fix-cmake.patch"
+      patch_description: "CMake: fix install layout, don't link directly to zlib if hdf5, relocatable shared lib for macOS"
+      patch_type: "conan"
   "1.8.3":
     - patch_file: "patches/1.8.2-0001-fix-cmake.patch"
+      patch_description: "CMake: fix install layout, don't link directly to zlib if hdf5, relocatable shared lib for macOS"
+      patch_type: "conan"
   "1.8.2":
     - patch_file: "patches/1.8.2-0001-fix-cmake.patch"
+      patch_description: "CMake: fix install layout, don't link directly to zlib if hdf5, relocatable shared lib for macOS"
+      patch_type: "conan"

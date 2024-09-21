@@ -8,6 +8,7 @@ class TestPackageConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["CPUINFO_VERSION"] = self.deps_cpp_info["cpuinfo"].version.split('.')[1]
         cmake.configure()
         cmake.build()
 

@@ -1,39 +1,53 @@
-from conans import ConanFile, tools
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get, load, save
+from conan.tools.layout import basic_layout
+
+required_conan_version = ">=1.52.0"
 
 
 class YasConan(ConanFile):
     name = "yas"
     description = "Yet Another Serialization"
-    topics = ("yas", "serialization", "header-only")
+    license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/niXman/yas"
-    license = "BSL-1.0"
+    topics = ("serialization", "header-only")
+
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def _min_cppstd(self):
+        return 11
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
+
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _extract_license(self):
-        header = tools.load(os.path.join(
-            self.source_folder, self._source_subfolder,
-            "include", "yas", "binary_oarchive.hpp"))
-        license_contents = header[:header.find("#")] \
-            .replace("//", "").replace("\n ", "\n").lstrip()
-        tools.save("LICENSE", license_contents)
+        header = load(self, os.path.join(self.source_folder, "include", "yas", "binary_oarchive.hpp"))
+        license_contents = header[: header.find("#")].replace("//", "").replace("\n ", "\n").lstrip()
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package(self):
         self._extract_license()
-        self.copy("LICENSE", dst="licenses")
-        self.copy("*", src=os.path.join(self._source_subfolder, "include"),
-                  dst="include")
+        copy(self, "*",
+             dst=os.path.join(self.package_folder, "include"),
+             src=os.path.join(self.source_folder, "include"))
 
-    def package_id(self):
-        self.info.header_only()
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

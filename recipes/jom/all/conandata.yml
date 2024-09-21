@@ -1,4 +1,15 @@
 sources:
+  "1.1.4":
+    x86_64:
+      url: "http://download.qt.io/official_releases/jom/jom_1_1_4.zip"
+      sha256: "d533c1ef49214229681e90196ed2094691e8c4a0a0bef0b2c901debcb562682b"
+    license:
+      url: "https://code.qt.io/cgit/qt-labs/jom.git/plain/LICENSE.GPL?h=v1.1.3"
+      sha256: "d3d9052b838761dbe00067168ed9ebc437734d53ebf71dea1c8e9f7532a5333b"
   "1.1.3":
-    sha256: "128fdd846fe24f8594eed37d1d8929a0ea78df563537c0c1b1861a635013fff8"
-    url: "http://download.qt.io/official_releases/jom/jom_1_1_3.zip"
+    x86_64:
+      url: "http://download.qt.io/official_releases/jom/jom_1_1_3.zip"
+      sha256: "128fdd846fe24f8594eed37d1d8929a0ea78df563537c0c1b1861a635013fff8"
+    license:
+      url: "https://code.qt.io/cgit/qt-labs/jom.git/plain/LICENSE.GPL?h=v1.1.3"
+      sha256: "d3d9052b838761dbe00067168ed9ebc437734d53ebf71dea1c8e9f7532a5333b"

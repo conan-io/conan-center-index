@@ -141,5 +141,6 @@ void demorgan()
 
 int main() {
     simple_example();
-    demorgan();
+    // Z3 v4.11.2: Trigger a page fault when compiled with and Clang in release mode
+    // demorgan();
 }

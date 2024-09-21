@@ -5,8 +5,10 @@ from conan.tools.files import copy, get, rmdir, rename, chdir, rm
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.errors import ConanInvalidConfiguration
 
+required_conan_version = ">=1.60.0 <2 || >=2.0.6"
 
 class LibniceConan(ConanFile):
     name = "libnice"
@@ -59,16 +61,16 @@ class LibniceConan(ConanFile):
                 "-o glib/*:shared=True with static runtime is not supported")
 
     def requirements(self):
-        self.requires("glib/2.75.2")
+        self.requires("glib/2.78.1", transitive_headers=True, transitive_libs=True)
         if self.options.crypto_library == "openssl":
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.with_gstreamer:
-            self.requires("gstreamer/1.19.2")
+            self.requires("gstreamer/1.22.3")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.0.0")
-        self.tool_requires("pkgconf/1.9.3")
-        self.tool_requires("glib/2.75.2")  # for glib-mkenums
+        self.tool_requires("meson/1.2.3")
+        self.tool_requires("pkgconf/2.0.3")
+        self.tool_requires("glib/<host_version>")  # for glib-mkenums
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
 
@@ -107,6 +109,7 @@ class LibniceConan(ConanFile):
             if not self.options.shared:
                 with chdir(self, os.path.join(self.package_folder, "lib")):
                     rename(self, "libnice.a", "nice.lib")
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["nice"]

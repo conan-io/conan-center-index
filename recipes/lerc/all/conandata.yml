@@ -1,4 +1,10 @@
 sources:
+  "4.0.4":
+    url: "https://github.com/Esri/lerc/archive/js_v4.0.4.tar.gz"
+    sha256: "1dc090218387ab8ca615eefd844207be64454e37868b396f3e965ed0dcf83947"
+  "4.0.1":
+    url: "https://github.com/Esri/lerc/archive/js_v4.0.1.tar.gz"
+    sha256: "d771f45b90dd033187d5fad2b99159d0a98d46878d88d3236147c3df297dd544"
   "4.0.0":
     url: "https://github.com/Esri/lerc/archive/refs/tags/v4.0.0.tar.gz"
     sha256: "91431c2b16d0e3de6cbaea188603359f87caed08259a645fd5a3805784ee30a0"
@@ -9,6 +15,18 @@ sources:
     url: "https://github.com/Esri/lerc/archive/v2.1.tar.gz"
     sha256: "7c48de40cd5f09319de4b39c417ff4eec4ad4b6aa5d6144f6ffa9b10d18ec94e"
 patches:
+  "4.0.4":
+    - patch_file: "patches/4.0.0-include-algorithm.patch"
+      patch_description: "include algorithm header for std::min/max"
+      patch_type: "portability"
+    - patch_file: "patches/4.0.4-add-missing-climits-include.patch"
+      patch_description: "add missing #include <climits>"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/Esri/lerc/commit/1fc73694263f53cf029c8cac2e632170880f56d4"
+  "4.0.1":
+    - patch_file: "patches/4.0.0-include-algorithm.patch"
+      patch_description: "include algorithm header for std::min/max"
+      patch_type: "portability"
   "4.0.0":
     - patch_file: "patches/4.0.0-include-algorithm.patch"
       patch_description: "include algorithm header for std::min/max"

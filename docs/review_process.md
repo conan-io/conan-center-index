@@ -82,9 +82,8 @@ At least 2 approving reviews are required, and at least one of them has to be fr
 So, it might be 1 official + 1 community, or 2 official, but it couldn't be just 2 community reviews.
 Approvals are only counted if they are associated with the latest commit in the PR, while "Change requested" ones (from the Conan team) will persist even if there are new commits. Don't hesitate to dismiss old reviews if the issues have already been addressed.
 
-> **Note** Pull requests labelled as [`Bump version`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+version%22)
-> or [`Bump dependencies`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+dependencies%22+) are merged by
-> the bot without requiring any approval.
+Pull requests labelled as [`Bump version`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+version%22)
+or [`Bump dependencies`](https://github.com/conan-io/conan-center-index/pulls?q=is%3Aopen+is%3Apr+label%3A%22Bump+dependencies%22+) require **just 1 approving review from an official reviewer**. Community reviewers are not required but are still welcome.
 
 ### Reviews from others
 
@@ -101,7 +100,7 @@ The bot runs Automatic Merges every 20 minutes. Currently, it can only merge a s
 PR is selected for the merge only if:
 
 - Author is already [approved](https://github.com/conan-io/conan-center-index/issues/4).
-- Author has signed the [CLA](CONTRIBUTOR_LICENSE_AGREEMENT.md).
+- Author has signed the [CLA](https://cla-assistant.io/conan-io/conan-center-index).
 - PR is not a Draft.
 - PR has a green status (successful build).
 - PR doesn't have merge conflicts with `master` branch.

@@ -1,4 +1,7 @@
 sources:
+  "0.41.0":
+    url: "https://github.com/gsl-lite/gsl-lite/archive/v0.41.0.tar.gz"
+    sha256: "4682d8a60260321b92555760be3b9caab60e2a71f95eddbdfb91e557ee93302a"
   "0.40.0":
     url: "https://github.com/gsl-lite/gsl-lite/archive/v0.40.0.tar.gz"
     sha256: "65af4ec8a1050dac4f1ca4622881bb02a9c3978a9baec289fb56e25412d6cac7"
@@ -14,9 +17,3 @@ sources:
   "0.37.0":
     url: "https://github.com/gsl-lite/gsl-lite/archive/0.37.0.zip"
     sha256: "980c8e91dd25bfaac7bfbd7151f04027fa68ff0bf652baa11de137242641e399"
-  "0.36.0":
-    url: "https://github.com/martinmoene/gsl-lite/archive/v0.36.0.zip"
-    sha256: "ab1bb560611dcf9cef2265b8e40e59689bb4af1fd64914aa4a8eff945dd75057"
-  "0.34.0":
-    url: "https://github.com/martinmoene/gsl-lite/archive/v0.34.0.zip"
-    sha256: "44255fd8aab1780773a5a2a16703c9c5a95f8c944d95caa7c468b229c0fcd1ff"

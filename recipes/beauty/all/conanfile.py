@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -12,34 +13,36 @@ required_conan_version = ">=1.53.0"
 
 class BeautyConan(ConanFile):
     name = "beauty"
-    homepage = "https://github.com/dfleury2/beauty"
     description = "HTTP Server above Boost.Beast"
-    topics = ("http", "server", "boost.beast")
-    url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
-
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/dfleury2/beauty"
+    topics = ("http", "server", "boost.beast")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_openssl": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_openssl": True,
     }
 
     @property
     def _min_cppstd(self):
-        return "20"
+        return "17"
 
     @property
     def _compilers_minimum_version(self):
         return {
             "gcc": "8",
-            "clang": "11",
+            "clang": "7",
             "Visual Studio": "16",
             "msvc": "192",
+            "apple-clang": "10"
         }
 
     def export_sources(self):
@@ -57,8 +60,16 @@ class BeautyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.79.0"),
-        self.requires("openssl/1.1.1s")
+        # beauty public headers include some boost headers.
+        # For example beauty/application.hpp includes boost/asio.hpp
+        if Version(self.version) >= "1.0.4":
+            # https://github.com/dfleury2/beauty/issues/30
+            self.requires("boost/1.85.0", transitive_headers=True)
+        else:
+            self.requires("boost/1.84.0", transitive_headers=True)
+        if self.options.with_openssl:
+            # dependency of asio in boost, exposed in boost/asio/ssl/detail/openssl_types.hpp
+            self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -71,19 +82,25 @@ class BeautyConan(ConanFile):
             )
 
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libc++":
-            raise ConanInvalidConfiguration("Only libc++ is supported for clang")
+            raise ConanInvalidConfiguration(f"{self.ref} clang compiler requires -s compiler.libcxx=libc++")
 
         if self.settings.compiler == "apple-clang" and self.options.shared:
-            raise ConanInvalidConfiguration("shared is not supported on apple-clang")
+            raise ConanInvalidConfiguration(f"The option {self.ref}:shared=True is not supported on Apple Clang. Use static instead.")
 
         if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration("shared is not supported on Visual Studio")
+            raise ConanInvalidConfiguration(f"{self.ref} shared=True is not supported with {self.settings.compiler}")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.21 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
         tc = CMakeToolchain(self)
+        tc.variables["CONAN"] = False
+        tc.variables["BEAUTY_ENABLE_OPENSSL"] = self.options.with_openssl
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -104,6 +121,12 @@ class BeautyConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "beauty")
         self.cpp_info.set_property("cmake_target_name", "beauty::beauty")
         self.cpp_info.libs = ["beauty"]
-        self.cpp_info.requires = ["boost::headers", "openssl::openssl"]
+        self.cpp_info.requires = ["boost::headers"]
+        if self.options.with_openssl:
+            self.cpp_info.requires.append("openssl::ssl")
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["m"]
+            self.cpp_info.system_libs = ["m", "pthread"]
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["crypt32"]
+        if self.options.with_openssl:
+            self.cpp_info.defines = ["BEAUTY_ENABLE_OPENSSL"]

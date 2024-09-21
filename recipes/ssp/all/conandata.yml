@@ -1,0 +1,13 @@
+sources:
+  "1.8.0":
+    url: "https://github.com/red0124/ssp/archive/refs/tags/v1.8.0.tar.gz"
+    sha256: "a4416746023c8a60f6808200193dd207f1044b6e37e6c5bc0462e85452307d1d"
+  "1.7.2":
+    url: "https://github.com/red0124/ssp/archive/refs/tags/v1.7.2.tar.gz"
+    sha256: "700e05d304fe10f05331d0a963757257632dddc1f9442b826a85efa545c64772"
+  "1.6.2":
+    url: "https://github.com/red0124/ssp/archive/refs/tags/v1.6.2.tar.gz"
+    sha256: "6fa5ae1cd458eae3c1931e8cbcbd8d97956eda37db1388358456ca0743b48b7c"
+  "1.6.1":
+    url: "https://github.com/red0124/ssp/archive/refs/tags/v1.6.1.tar.gz"
+    sha256: "4cdf75959b0a5fabd0b3e6ec1bad41d7c3f298d5b7f822d6e12b7e4d7dfcdd34"

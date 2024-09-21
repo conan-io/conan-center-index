@@ -1,13 +1,8 @@
-cmake_minimum_required(VERSION 3.1)
-project(PackageTest CXX)
+cmake_minimum_required(VERSION 3.15)
+project(PackageTest LANGUAGES CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+find_package(immer REQUIRED CONFIG)
 
-find_package(immer CONFIG REQUIRED)
-
-add_executable(example example.cpp)
-
-target_link_libraries(example immer::immer)
-
-target_compile_features(example PUBLIC cxx_std_14)
+add_executable(test_package test_package.cpp)
+target_link_libraries(test_package PRIVATE immer::immer)
+target_compile_features(test_package PRIVATE cxx_std_14)

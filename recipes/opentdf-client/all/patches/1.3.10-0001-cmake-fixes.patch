@@ -1,0 +1,51 @@
+diff --git a/src/lib/CMakeLists.txt b/src/lib/CMakeLists.txt
+index d7e1dc1..aeb3b2c 100644
+--- a/src/lib/CMakeLists.txt
++++ b/src/lib/CMakeLists.txt
+@@ -99,7 +99,9 @@ set(TDF_COMBINED_LIB_FULL_PATH ${TDF_LIB_DIR}/${TDF_COMBINED_LIB_FILENAME})
+ message(STATUS "Combined full path: ${TDF_COMBINED_LIB_FULL_PATH}")
+ 
+ #TODO: Also need to handle iOS and Android(arm64).
+-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
++if(TRUE)
++    message(STATUS "Skipping generation of combined static library")
++elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+ 
+     FOREACH (LDIR ${CONAN_LIB_DIRS})
+         set(V_COMBINED_LIB_DIRS ${V_COMBINED_LIB_DIRS} -L${LDIR})
+@@ -155,8 +157,6 @@ elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+         lib -out:${TDF_LIB_DIR}/${TDF_COMBINED_LIB_FILENAME} ${TDF_LIB_DIR}/${TDF_STATIC_LIB_FILENAME} ${V_COMBINED_LIB_DIRS} ${V_COMBINED_LIB_NAMES}
+       )
+     )
+-else()
+-    message(STATUS "${CMAKE_SYSTEM_NAME} - unknown system FIXME........")
+ endif()
+ 
+ # generate the shared library from the library sources
+@@ -187,16 +187,19 @@ install(DIRECTORY DESTINATION ${TDF_LIB_INSTALL_LOCATION})
+ # move the headers(to include) and tdf(to lib) directory under tdf-lib-cpp
+ install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+     DESTINATION ${TDF_LIB_INSTALL_LOCATION}/include)
+-        
+-install(FILES ${TDF_STATIC_LIB_FULL_PATH}
+-    DESTINATION ${TDF_LIB_INSTALL_LOCATION}/lib)
+ 
+-install(FILES ${TDF_COMBINED_LIB_FULL_PATH}
+-    DESTINATION ${TDF_LIB_INSTALL_LOCATION}/lib)
++if(NOT BUILD_SHARED_LIBS)
++  install(FILES $<TARGET_FILE:opentdfstatic>
++      DESTINATION ${TDF_LIB_INSTALL_LOCATION}/lib)
++endif()
++
++# Skip combined static library for Conan Center Index package
++# install(FILES ${TDF_COMBINED_LIB_FULL_PATH}
++#     DESTINATION ${TDF_LIB_INSTALL_LOCATION}/lib)
+ 
+ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+   message(STATUS "Skipping shared lib on windows")
+-else()
+-  install(FILES ${TDF_SHARED_LIB_FULL_PATH}
++elseif(BUILD_SHARED_LIBS)
++  install(FILES $<TARGET_FILE:opentdfshared>
+     DESTINATION ${TDF_LIB_INSTALL_LOCATION}/lib)
+ endif()

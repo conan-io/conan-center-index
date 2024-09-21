@@ -1,0 +1,12 @@
+diff --git a/cmake/ftxui_install.cmake b/cmake/ftxui_install.cmake
+index d6de491..c5c4f66 100644
+--- a/cmake/ftxui_install.cmake
++++ b/cmake/ftxui_install.cmake
+@@ -11,6 +11,7 @@ include(CMakePackageConfigHelpers)
+ install(
+   TARGETS screen dom component
+   EXPORT ftxui-targets
++  RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR}
+   LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   )

@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 import os
@@ -53,9 +53,12 @@ class HiredisConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ENABLE_SSL"] = self.options.with_ssl
-        tc.variables["DISABLE_TESTS"] = True
-        tc.variables["ENABLE_EXAMPLES"] = False
+        # Since 1.2.0, BUILD_SHARED_LIBS has been defined by option()
+        if Version(self.version) >= "1.2.0":
+            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["ENABLE_SSL"] = self.options.with_ssl
+        tc.cache_variables["DISABLE_TESTS"] = True
+        tc.cache_variables["ENABLE_EXAMPLES"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -74,13 +77,14 @@ class HiredisConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "build"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "hiredis")
 
         suffix = ""
         if Version(self.version) >= "1.1.0":
-            if is_msvc(self) and not self.options.shared:
+            if is_msvc(self) and not self.options.shared and Version(self.version) < "1.2.0":
                 suffix += "_static"
             if self.settings.build_type == "Debug":
                 suffix += "d"

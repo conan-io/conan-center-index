@@ -1,0 +1,39 @@
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -135,26 +135,12 @@ elseif(UNIX)
+   endforeach()
+ endif()
+ 
+-if(BUILD_SHARED_LIBS)
+   set_target_properties (libJSBSim PROPERTIES
+                                    SOVERSION ${LIBRARY_SOVERSION}
+-                                   FRAMEWORK ON)
++                                   )
+   install(TARGETS libJSBSim LIBRARY DESTINATION lib
+-                            NAMELINK_SKIP
+-                            COMPONENT runtime
+-                            # For Mac
+-                            FRAMEWORK DESTINATION "/Library/Frameworks")
+-  install(TARGETS libJSBSim LIBRARY DESTINATION lib
+-                            NAMELINK_ONLY
+-                            COMPONENT devel
+-                            # For Mac
+-                            FRAMEWORK DESTINATION "/Library/Frameworks")
+-else()
+-  install(TARGETS libJSBSim ARCHIVE DESTINATION lib
+-                            COMPONENT devel
+-                            # For Mac
+-                            FRAMEWORK DESTINATION "/Library/Frameworks")
+-endif()
++                            ARCHIVE DESTINATION lib
++                            RUNTIME DESTINATION bin)
+ 
+ ################################################################################
+ # Build and install command line executable                                    #
+--- a/utils/aeromatic++/CMakeLists.txt
++++ b/utils/aeromatic++/CMakeLists.txt
+@@ -47,4 +47,3 @@ ADD_EXECUTABLE( aeromatic aeromatic.cpp )
+ TARGET_LINK_LIBRARIES( aeromatic ${LIBAEROMATIC3} ${EXTRA_LIBS})
+ 
+ INSTALL(TARGETS aeromatic RUNTIME DESTINATION bin COMPONENT runtime)
+-INSTALL(TARGETS ${LIBAEROMATIC3} ARCHIVE DESTINATION lib COMPONENT devel)

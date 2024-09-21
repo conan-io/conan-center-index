@@ -9,11 +9,11 @@ required_conan_version = ">=1.50.0"
 
 class ExpectedLiteConan(ConanFile):
     name = "expected-lite"
+    description = "expected lite - Expected objects in C++11 and later in a single-file header-only library"
+    license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/martinmoene/expected-lite"
-    description = "expected lite - Expected objects in C++11 and later in a single-file header-only library"
-    topics = ("cpp11", "cpp14", "cpp17", "expected", "expected-implementations")
-    license = "BSL-1.0"
+    topics = ("cpp11", "cpp14", "cpp17", "expected", "expected-implementations", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
@@ -52,3 +52,4 @@ class ExpectedLiteConan(ConanFile):
         self.cpp_info.components["expectedlite"].names["cmake_find_package"] = "expected-lite"
         self.cpp_info.components["expectedlite"].names["cmake_find_package_multi"] = "expected-lite"
         self.cpp_info.components["expectedlite"].set_property("cmake_target_name", "nonstd::expected-lite")
+        self.cpp_info.components["expectedlite"].libdirs = []

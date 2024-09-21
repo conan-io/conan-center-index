@@ -3,7 +3,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.layout import basic_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, get, download, export_conandata_patches, apply_conandata_patches, rm, copy
+from conan.tools.files import chdir, get, export_conandata_patches, apply_conandata_patches, rm, copy, load, save
 from conan.tools.gnu import AutotoolsToolchain, Autotools, AutotoolsDeps
 import os
 
@@ -17,7 +17,7 @@ class NasRecipe(ConanFile):
     topics = ("audio", "sound")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.radscan.com/nas.html"
-    license = "Unlicense"
+    license = "DocumentRef-wave.h:LicenseRef-MIT-advertising"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -61,8 +61,6 @@ class NasRecipe(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0],  strip_root=True)
-        # This library does not come with a License file by itself, package it from an external source
-        download(self, filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     @property
     def _user_info_build(self):
@@ -107,8 +105,16 @@ class NasRecipe(ConanFile):
             # j1 avoids some errors while trying to run this target
             autotools.make(target="World", args=["-j1"] + self._imake_make_args)
 
+    def _extract_license(self):
+        header = "Copyright 1995"
+        footer = "Translation:  You can do whatever you want with this software!"
+        nas_audio = load(self, os.path.join(self.source_folder, "README"))
+        begin = nas_audio.find(header)
+        end = nas_audio.find(footer, begin)
+        return nas_audio[begin:end]
+
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), self._extract_license())
 
         tmp_install = os.path.join(self.build_folder, "prefix")
         self.output.warning(tmp_install)

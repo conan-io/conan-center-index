@@ -1,0 +1,16 @@
+sources:
+  "1.0.1":
+    url: "https://github.com/bytedance/sonic-cpp/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "c78fb90c56ba235e8867888c0b1af0e96d7b0b86829381b3cca94f61f83d41e5"
+  "1.0.0":
+    url: "https://github.com/bytedance/sonic-cpp/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "78af626fa070a2702fe9586d90617292b421d97d7ab1fe27a02cc20434467a80"
+patches:
+  "1.0.1":
+    - patch_file: "patches/1.0.0-0001-use-cci.patch"
+      patch_description: "use cci recipes"
+      patch_type: "conan"
+  "1.0.0":
+    - patch_file: "patches/1.0.0-0001-use-cci.patch"
+      patch_description: "use cci recipes"
+      patch_type: "conan"

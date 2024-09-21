@@ -1,18 +1,28 @@
 import os
-import functools
-from conans import ConanFile, Meson, tools
-from conans.errors import ConanInvalidConfiguration
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import cross_building
+from conan.tools.files import copy, get, rmdir, rm
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
+
 
 class LibSixelConan(ConanFile):
     name = "libsixel"
-    description = "A SIXEL encoder/decoder implementation derived from kmiya's sixel (https://github.com/saitoha/sixel)."
-    topics = ("sixel")
+    description = ("A SIXEL encoder/decoder implementation derived from kmiya's sixel"
+                   " (https://github.com/saitoha/sixel).")
     license = "MIT"
-    homepage = "https://github.com/libsixel/libsixel"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/libsixel/libsixel"
+    topics = "sixel"
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,75 +42,80 @@ class LibSixelConan(ConanFile):
         "with_jpeg": True,
         "with_png": True,
     }
-    generators = "cmake", "pkg_config"
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
 
     def config_options(self):
-        if self.settings.os == 'Windows':
+        if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
-    def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
-            raise ConanInvalidConfiguration("Cross-building not implemented")
-        if is_msvc(self):
-            raise ConanInvalidConfiguration("{}/{} does not support Visual Studio".format(self.name, self.version))
-
-    def build_requirements(self):
-        self.build_requires("meson/0.62.2")
-        self.build_requires("pkgconf/1.7.4")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_curl:
-            self.requires("libcurl/7.83.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.with_gd:
-            self.requires("libgd/2.3.2")
+            self.requires("libgd/2.3.3")
         if self.options.with_gdk_pixbuf2:
-            self.requires("gdk-pixbuf/2.42.6")
+            self.requires("gdk-pixbuf/2.42.10")
         if self.options.with_jpeg:
-            self.requires("libjpeg/9d")
+            self.requires("libjpeg/9e")
         if self.options.with_png:
-            self.requires("libpng/1.6.37")
+            self.requires("libpng/1.6.40")
+
+    def validate(self):
+        if hasattr(self, "settings_build") and cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building not implemented")
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio")
+
+    def build_requirements(self):
+        self.tool_requires("meson/1.2.3")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/2.0.3")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @functools.lru_cache(1)
-    def _configure_meson(self):
-        meson = Meson(self)
-        defs = {
+    def generate(self):
+        tc = MesonToolchain(self)
+        tc.project_options = {
             "libcurl": "enabled" if self.options.with_curl else "disabled",
             "gd": "enabled" if self.options.with_gd else "disabled",
             "gdk-pixbuf2": "enabled" if self.options.with_gdk_pixbuf2 else "disabled",
             "img2sixel": "disabled",
             "sixel2png": "disabled",
             "python2": "disabled",
+            "libdir": "lib",
         }
-        meson.configure(
-            defs=defs,
-            source_folder=self._source_subfolder,
-        )
-        return meson
+        tc.generate()
+        tc = PkgConfigDeps(self)
+        tc.generate()
 
     def build(self):
-        meson = self._configure_meson()
+        meson = Meson(self)
+        meson.configure()
         meson.build()
 
     def package(self):
-        self.copy("LICENSE*", dst="licenses", src=self._source_subfolder)
-        meson = self._configure_meson()
+        copy(self, "LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        meson = Meson(self)
         meson.install()
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fix_apple_shared_install_name(self)
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.options.shared:
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.lib", os.path.join(self.package_folder, "lib"))
+        else:
+            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
+            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["sixel"]

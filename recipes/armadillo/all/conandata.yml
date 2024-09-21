@@ -8,6 +8,12 @@ sources:
   "11.4.3":
     url: "https://sourceforge.net/projects/arma/files/armadillo-11.4.3.tar.xz"
     sha256: "87603263664988af41da2ca4f36205e36ea47a9281fa6cfd463115f3797a1da2"
+  "12.2.0":
+    url: "https://sourceforge.net/projects/arma/files/armadillo-12.2.0.tar.xz"
+    sha256: "b0dce042297e865add3351dad77f78c2c7638d6632f58357b015e50edcbd2186"
+  "12.6.4":
+    url: "https://sourceforge.net/projects/arma/files/armadillo-12.6.4.tar.xz"
+    sha256: "eb7f243ffc32f18324bc7fa978d0358637e7357ca7836bec55b4eb56e9749380"
 
 patches:
   "10.7.0":
@@ -20,5 +26,13 @@ patches:
       patch_type: "conan"
   "11.4.3":
     - patch_file: "patches/0002-Guard-dependency-discovery-11.4.x.patch"
+      patch_description: "Add find_package statements to inject conan dependencies"
+      patch_type: "conan"
+  "12.2.0":
+    - patch_file: "patches/0003-Guard-dependency-discovery-12.2.x.patch"
+      patch_description: "Add find_package statements to inject conan dependencies"
+      patch_type: "conan"
+  "12.6.4":
+    - patch_file: "patches/0004-Guard-dependency-discovery-12.6.x.patch"
       patch_description: "Add find_package statements to inject conan dependencies"
       patch_type: "conan"

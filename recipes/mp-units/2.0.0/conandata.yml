@@ -1,0 +1,10 @@
+sources:
+  "2.1.1":
+    url: https://github.com/mpusz/units/archive/v2.1.1.tar.gz
+    sha256: 881070fd9a15a8954a4e38d991e398dc9638907bbc13961a530519596c9783f9
+  "2.1.0":
+    url: https://github.com/mpusz/units/archive/v2.1.0.tar.gz
+    sha256: a42057492f5a8e80442cf13602b97bb48b9c3a408bc91bdb60d86aadc84c95cc
+  "2.0.0":
+    url: https://github.com/mpusz/units/archive/v2.0.0.tar.gz
+    sha256: c04cda9fdaeca3ae42886552658e8bde3b608a24a4a921a621a5db41ec416e0e

@@ -16,7 +16,8 @@ class Rangev3Conan(ConanFile):
     license = "BSL-1.0"
     homepage = "https://github.com/ericniebler/range-v3"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "Experimental range library for C++11/14/17"
+    package_type = "header-library"
+    description = "Range library for C++14/17/20, basis for C++20's std::ranges"
     topics = ("range", "range-library", "proposal", "iterator", "header-only")
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
@@ -36,9 +37,9 @@ class Rangev3Conan(ConanFile):
             return "17"
         else:
             return "14"
-    
+
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -67,6 +68,8 @@ class Rangev3Conan(ConanFile):
             self.package_folder, "licenses"), src=self.source_folder)
 
     def package_info(self):
+        self.cpp_info.libdirs = []
+        self.cpp_info.bindirs = []
         self.cpp_info.components["range-v3-meta"].names["cmake_find_package"] = "meta"
         self.cpp_info.components["range-v3-meta"].names["cmake_find_package_multi"] = "meta"
         if is_msvc(self):

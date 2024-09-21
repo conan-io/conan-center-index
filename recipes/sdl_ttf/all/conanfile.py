@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc
@@ -50,10 +51,11 @@ class SdlttfConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("freetype/2.12.1")
-        self.requires("sdl/2.26.1")
+        self.requires("freetype/2.13.2")
+        # https://github.com/conan-io/conan-center-index/pull/18366#issuecomment-1625464996
+        self.requires("sdl/2.28.3", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_harfbuzz"):
-            self.requires("harfbuzz/6.0.0")
+            self.requires("harfbuzz/8.3.0")
 
     def validate(self):
         if Version(self.version).major != Version(self.dependencies["sdl"].ref.version).major:
@@ -65,6 +67,9 @@ class SdlttfConan(ConanFile):
         else:
             if is_msvc(self) and self.options.shared:
                 raise ConanInvalidConfiguration(f"{self.ref} shared is not supported with Visual Studio")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -121,6 +126,10 @@ class SdlttfConan(ConanFile):
         self.cpp_info.components["_sdl2_ttf"].requires = ["freetype::freetype", "sdl::libsdl2"]
         if self.options.get_safe("with_harfbuzz"):
             self.cpp_info.components["_sdl2_ttf"].requires.append("harfbuzz::harfbuzz")
+        if Version(self.version) <= "2.0.18" and is_apple_os(self) and self.options.shared:
+            self.cpp_info.components["_sdl2_ttf"].frameworks = [
+                "AppKit", "CoreGraphics", "CoreFoundation", "CoreServices"
+        ]
 
         # TODO: to remove in conan v2
         self.cpp_info.names["cmake_find_package"] = "SDL2_ttf"

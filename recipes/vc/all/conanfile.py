@@ -4,17 +4,17 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.50.0"
 
 
 class VcConan(ConanFile):
     name = "vc"
     description = "SIMD Vector Classes for C++."
     license = "BSD-3-Clause"
-    topics = ("vc", "simd", "vectorization", "parallel", "sse", "avx", "neon")
+    topics = ("simd", "vectorization", "parallel", "sse", "avx", "neon")
     homepage = "https://github.com/VcDevel/Vc"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
@@ -31,12 +31,11 @@ class VcConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

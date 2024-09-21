@@ -1,10 +1,17 @@
-cmake_minimum_required(VERSION 3.4)
-project(cmake_wrapper LANGUAGES C)
+cmake_minimum_required(VERSION 3.15)
+project(METIS C)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup(KEEP_RPATHS)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-set(GKLIB_PATH "${CMAKE_CURRENT_LIST_DIR}/source_subfolder/GKlib" CACHE PATH "")
+include(gkbuild.cmake)
 
-add_subdirectory(source_subfolder)
+find_package(gklib REQUIRED)
+
+file(GLOB metis_sources libmetis/*.c)
+add_library(metis ${metis_sources})
+target_include_directories(metis PRIVATE libmetis include)
+target_link_libraries(metis PRIVATE gklib::gklib)
+
+include(GNUInstallDirs)
+install(TARGETS metis)
+install(DIRECTORY include/ DESTINATION include)

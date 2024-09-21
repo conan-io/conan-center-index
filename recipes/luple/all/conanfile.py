@@ -10,13 +10,14 @@ required_conan_version = ">=1.50.0"
 
 class LupleConan(ConanFile):
     name = "luple"
-    license = "Unlicense"
+    license = "Public-domain"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/alexpolt/luple"
     description = "Home to luple, nuple, C++ String Interning, Struct Reader and C++ Type Loophole"
     topics = ("loophole", "luple", "nuple", "struct", "intern")
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+    package_type = "header-library"
 
     @property
     def _min_cppstd(self):
@@ -57,13 +58,13 @@ class LupleConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0],
             destination=self.source_folder, strip_root=True)
-        download(self, filename="LICENSE", **self.conan_data["sources"][self.version][1])
 
     def build(self):
         pass
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        # This package doesn't have a license file, it is public domain declared in the Readme
+        copy(self, "README.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*.h", src=self.source_folder, dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):

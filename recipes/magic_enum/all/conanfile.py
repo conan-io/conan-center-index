@@ -1,8 +1,8 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
-from conan.tools.layout import basic_layout
+from conan.tools.files import copy, get, mkdir, rmdir
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 import os
 
@@ -15,11 +15,12 @@ class MagicEnumConan(ConanFile):
         "Header-only C++17 library provides static reflection for enums, work "
         "with any enum type without any macro or boilerplate code."
     )
-    topics = ("cplusplus", "enum-to-string", "string-to-enum", "serialization",
-              "reflection", "header-only", "compile-time")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Neargye/magic_enum"
-    license = "MIT"
+    topics = ("cplusplus", "enum-to-string", "string-to-enum", "serialization",
+              "reflection", "header-only", "compile-time")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -32,12 +33,13 @@ class MagicEnumConan(ConanFile):
         return {
             "gcc": "9",
             "Visual Studio": "15",
+            "msvc": "191",
             "clang": "5",
             "apple-clang": "10",
         }
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -52,20 +54,30 @@ class MagicEnumConan(ConanFile):
             )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
 
     def build(self):
-        pass
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        copy(self, "*", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        cmake = CMake(self)
+        cmake.install()
+        if Version(self.version) >= "0.9.4" and Version(self.version) <= "0.9.6":
+            mkdir(self, os.path.join(self.package_folder, "include/magic_enum"))
+            copy(self, "*", src=os.path.join(self.package_folder, "include"), dst=os.path.join(self.package_folder, "include/magic_enum"))
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "magic_enum")
         self.cpp_info.set_property("cmake_target_name", "magic_enum::magic_enum")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []

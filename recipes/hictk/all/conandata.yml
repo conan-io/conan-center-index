@@ -1,0 +1,22 @@
+sources:
+  "0.0.12":
+    url: "https://github.com/paulsengroup/hictk/archive/refs/tags/v0.0.12.tar.gz"
+    sha256: "03e8f7c0076ea6209fdfee1580658e871895f6a59b895407c4a25512b9558fb7"
+  "0.0.10":
+    url: "https://github.com/paulsengroup/hictk/archive/refs/tags/v0.0.10.tar.gz"
+    sha256: "0b2d60af73578b292317e5ab513f24965176f9852ceda29e8d02007a434588c3"
+  "0.0.9":
+    url: "https://github.com/paulsengroup/hictk/archive/refs/tags/v0.0.9.tar.gz"
+    sha256: "c64cb07a057863baa199b9d344b27b8f15a1db458390ccf7b5cac0627308d8c8"
+  "0.0.8":
+    url: "https://github.com/paulsengroup/hictk/archive/refs/tags/v0.0.8.tar.gz"
+    sha256: "4bdadf49cb053731ea31f50312c9e4fcbcdcbaf94c39715f7b325641629bed4b"
+  "0.0.3":
+    url: "https://github.com/paulsengroup/hictk/archive/refs/tags/v0.0.3.tar.gz"
+    sha256: "f49657b9ef80ef9fa07f125a0b6f056923235c9ea77e19cee312b004384ea39e"
+  "0.0.2":
+    url: "https://github.com/paulsengroup/hictk/archive/refs/tags/v0.0.2.tar.gz"
+    sha256: "7716711ecb33247d8f79f6768ebbdcf55e51e9b6f962245747b33d0967431427"
+  "0.0.1":
+    url: "https://github.com/paulsengroup/hictk/archive/refs/tags/v0.0.1.tar.gz"
+    sha256: "460985413c3b2e80121f7697c6c824a91955a38051de770d7eb946ddafa88460"

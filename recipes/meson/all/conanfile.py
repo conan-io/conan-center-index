@@ -11,12 +11,12 @@ required_conan_version = ">=1.52.0"
 
 class MesonConan(ConanFile):
     name = "meson"
-    package_type = "application"
-    description = "Meson is a project to create the best possible next-generation build system"
-    topics = ("meson", "mesonbuild", "build-system")
+    description = "a project to create the best possible next-generation build system"
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mesonbuild/meson"
-    license = "Apache-2.0"
+    topics = ("mesonbuild", "build-system")
+    package_type = "application"
     no_copy_source = True
 
     def layout(self):
@@ -24,17 +24,15 @@ class MesonConan(ConanFile):
 
     def requirements(self):
         if self.conf.get("tools.meson.mesontoolchain:backend", default="ninja", check_type=str) == "ninja":
-            self.requires("ninja/1.11.1")
+            # Meson requires >=1.8.2 as of 1.5
+            # https://github.com/mesonbuild/meson/blob/b6b634ad33e5ca9ad4a9d6139dba4244847cc0e8/mesonbuild/backend/ninjabackend.py#L625
+            self.requires("ninja/[>=1.10.2 <2]")
 
     def package_id(self):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
-
-    def build(self):
-        pass
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -44,11 +42,13 @@ class MesonConan(ConanFile):
         # create wrapper scripts
         save(self, os.path.join(self.package_folder, "bin", "meson.cmd"), textwrap.dedent("""\
             @echo off
+            set PYTHONDONTWRITEBYTECODE=1
             CALL python %~dp0/meson.py %*
         """))
         save(self, os.path.join(self.package_folder, "bin", "meson"), textwrap.dedent("""\
             #!/usr/bin/env bash
             meson_dir=$(dirname "$0")
+            export PYTHONDONTWRITEBYTECODE=1
             exec "$meson_dir/meson.py" "$@"
         """))
 

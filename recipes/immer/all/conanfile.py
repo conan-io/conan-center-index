@@ -1,39 +1,31 @@
-from conans import ConanFile, tools, errors
+import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.52.0"
+
 
 class ImmerConan(ConanFile):
     name = "immer"
+    description = "Postmodern immutable and persistent data structures for C++ - value semantics at scale"
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/arximboldi/immer"
-    description = "Postmodern immutable and persistent data structures for C++---value semantics at scale"
-    topics = ("header", "header-only", "persistent", "modern", "immutable",
-              "data structures", "functional", "value semantics", "postmodern",
-              "rrb-tree")
+    topics = ("header", "header-only", "persistent", "modern", "immutable", "data structures",
+              "functional", "value semantics", "postmodern", "rrb-tree")
+
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-    settings =  "compiler"
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 14
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  strip_root=True,
-                  destination=self._source_subfolder)
-
-    def package(self):
-        include_folder = self._source_subfolder
-        self.copy(pattern="*.hpp", dst="include", src=include_folder)
-        self.copy(pattern="LICENSE", dst="licenses", src=include_folder)
-
-    def package_id(self):
-        self.info.header_only()
 
     @property
     def _minimum_compilers_version(self):
@@ -44,17 +36,36 @@ class ImmerConan(ConanFile):
             "gcc": "6",
             "intel": "17",
             "sun-cc": "5.15",
-            "Visual Studio": "15"
+            "Visual Studio": "15",
         }
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    def package_id(self):
+        self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
+            self.output.warning(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
         else:
-            if tools.Version(self.settings.compiler.version) < min_version:
-                raise errors.ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                    self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
+            if Version(self.settings.compiler.version) < min_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.name} requires C++{self._min_cppstd} support. The current compiler"
+                    f" {self.settings.compiler} {self.settings.compiler.version} does not support it."
+                )
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def package(self):
+        include_folder = self.source_folder
+        copy(self, pattern="*.hpp", dst=os.path.join(self.package_folder, "include"), src=include_folder)
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=include_folder)
+
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

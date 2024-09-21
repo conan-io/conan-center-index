@@ -33,12 +33,12 @@ class Tixi3Conan(ConanFile):
         deps.generate()
 
     def requirements(self):
-        self.requires("libxml2/2.9.14")
-        self.requires("libxslt/1.1.34")
-        self.requires("libcurl/7.84.0")
+        self.requires("libxml2/[>=2.12.5 <3]")
+        self.requires("libxslt/1.1.39")
+        self.requires("libcurl/[>=7.78.0 <9]")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -46,20 +46,10 @@ class Tixi3Conan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-
+            self.options.rm_safe("fPIC")
         # tixi is a c library
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def export_sources(self):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):

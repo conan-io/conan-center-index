@@ -1,0 +1,18 @@
+versions:
+  # Newer versions at the top
+  "2.1.0":
+    folder: v2
+  "2.0.2":
+    folder: v2
+  "2.0.1":
+    folder: v2
+  "2.0.0":
+    folder: v2
+  "1.2.2":
+    folder: v1
+  "1.2.1":
+    folder: v1
+  "1.1":
+    folder: v1
+  "1.0":
+    folder: v1

@@ -7,16 +7,16 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.54.0"
 
 
 class Catch2Conan(ConanFile):
     name = "catch2"
     description = "A modern, C++-native, header-only, framework for unit-tests, TDD and BDD"
-    topics = ("catch2", "unit-test", "tdd", "bdd")
     license = "BSL-1.0"
-    homepage = "https://github.com/catchorg/Catch2"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/catchorg/Catch2"
+    topics = ("catch2", "unit-test", "tdd", "bdd")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -25,6 +25,7 @@ class Catch2Conan(ConanFile):
         "with_prefix": [True, False],
         "default_reporter": [None, "ANY"],
         "console_width": [None, "ANY"],
+        "no_posix_signals": [True, False],
     }
     default_options = {
         "shared": False,
@@ -32,7 +33,11 @@ class Catch2Conan(ConanFile):
         "with_prefix": False,
         "default_reporter": None,
         "console_width": "80",
+        "no_posix_signals": False,
     }
+    # disallow cppstd compatibility, as it affects the ABI in this library
+    # see https://github.com/conan-io/conan-center-index/issues/19008
+    extension_properties = {"compatibility_cppstd": False}
 
     @property
     def _min_cppstd(self):
@@ -102,6 +107,7 @@ class Catch2Conan(ConanFile):
         tc.variables["CATCH_CONFIG_CONSOLE_WIDTH"] = self.options.console_width
         if self.options.default_reporter:
             tc.variables["CATCH_CONFIG_DEFAULT_REPORTER"] = self._default_reporter_str
+        tc.variables["CATCH_CONFIG_NO_POSIX_SIGNALS"] = self.options.no_posix_signals
         tc.generate()
 
     def build(self):

@@ -1,28 +1,43 @@
-from conans import ConanFile, tools
 import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.tools.files import copy, get, replace_in_file
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.52.0"
+
 
 class DtlConan(ConanFile):
     name = "dtl"
     description = "diff template library written by C++"
-    topics = ("diff", "library", "algorithm")
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/cubicdaiya/dtl"
+    topics = ("diff", "library", "algorithm", "header-only")
+
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        if Version(self.version) < "1.21":
+            # See https://github.com/cubicdaiya/dtl/pull/18
+            replace_in_file(self, os.path.join(self.source_folder, "dtl", "Diff.hpp"), "void enableTrivial () const {", "void enableTrivial () {")
 
     def package(self):
-        self.copy(os.path.join("dtl", "*.hpp"), dst="include", src=self._source_subfolder)
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
+        copy(self, "COPYING",
+             dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, os.path.join("dtl", "*.hpp"),
+             dst=os.path.join(self.package_folder, "include"), src=self.source_folder)
 
+    def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []

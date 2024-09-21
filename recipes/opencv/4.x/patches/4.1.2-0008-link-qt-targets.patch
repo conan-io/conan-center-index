@@ -1,0 +1,29 @@
+--- a/contrib/modules/cvv/CMakeLists.txt
++++ b/contrib/modules/cvv/CMakeLists.txt
+@@ -14,7 +14,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
+ foreach(dt5_dep Core Gui Widgets)
+   add_definitions(${Qt5${dt5_dep}_DEFINITIONS})
+   include_directories(${Qt5${dt5_dep}_INCLUDE_DIRS})
+-  list(APPEND CVV_LIBRARIES ${Qt5${dt5_dep}_LIBRARIES})
++  list(APPEND CVV_LIBRARIES Qt5::${dt5_dep})
+ endforeach()
+ 
+ ocv_glob_module_sources()
+--- a/modules/highgui/CMakeLists.txt
++++ b/modules/highgui/CMakeLists.txt
+@@ -58,13 +58,13 @@ if(HAVE_QT5)
+   foreach(dt5_dep Core Gui Widgets Test Concurrent)
+     add_definitions(${Qt5${dt5_dep}_DEFINITIONS})
+     include_directories(${Qt5${dt5_dep}_INCLUDE_DIRS})
+-    list(APPEND HIGHGUI_LIBRARIES ${Qt5${dt5_dep}_LIBRARIES})
++    list(APPEND HIGHGUI_LIBRARIES Qt5::${dt5_dep})
+   endforeach()
+ 
+   if(HAVE_QT_OPENGL)
+     add_definitions(${Qt5OpenGL_DEFINITIONS})
+     include_directories(${Qt5OpenGL_INCLUDE_DIRS})
+-    list(APPEND HIGHGUI_LIBRARIES ${Qt5OpenGL_LIBRARIES})
++    list(APPEND HIGHGUI_LIBRARIES Qt5::OpenGL)
+   endif()
+ 
+ elseif(HAVE_QT)

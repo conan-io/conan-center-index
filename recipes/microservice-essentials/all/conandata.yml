@@ -1,0 +1,4 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/seboste/microservice-essentials/archive/refs/tags/0.1.0.tar.gz"
+    sha256: "9739f7052ee9de96c4b206e0d345d6de5594dcf2bd6f8d3364d44788e83fbe58"

@@ -75,7 +75,7 @@ class LibVertoConan(ConanFile):
 
     def requirements(self):
         if self.options.with_glib:
-            self.requires("glib/2.76.0")
+            self.requires("glib/2.78.1")
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
         if self.options.with_libev:
@@ -109,7 +109,7 @@ class LibVertoConan(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/2.0.3")
         self.tool_requires("libtool/2.4.7")
         if self._settings_build.os == "Windows":
             self.win_bash = True

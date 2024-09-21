@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -103,15 +104,20 @@ class YamlCppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "yaml-cpp")
-        self.cpp_info.set_property("cmake_target_name", "yaml-cpp")
+        self.cpp_info.set_property("cmake_target_name", "yaml-cpp::yaml-cpp")
+        self.cpp_info.set_property("cmake_target_aliases", ["yaml-cpp"]) # CMake imported target before 0.8.0
         self.cpp_info.set_property("pkg_config_name", "yaml-cpp")
         self.cpp_info.libs = collect_libs(self)
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.append("m")
         if is_msvc(self):
             self.cpp_info.defines.append("_NOEXCEPT=noexcept")
-            if self.options.shared:
+        if Version(self.version) < "0.8.0":
+            if self.settings.os == "Windows" and self.options.shared:
                 self.cpp_info.defines.append("YAML_CPP_DLL")
+        else:
+            if not self.options.shared:
+                self.cpp_info.defines.append("YAML_CPP_STATIC_DEFINE")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]

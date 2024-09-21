@@ -1,0 +1,30 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e3eb444..f033794 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -59,11 +59,22 @@ target_include_directories(EASTL PUBLIC include)
+ #-------------------------------------------------------------------------------------------
+ # Dependencies
+ #-------------------------------------------------------------------------------------------
+-if (NOT TARGET EABase)
+-    add_subdirectory(test/packages/EABase)
++find_package(EABase REQUIRED CONFIG)
++target_link_libraries(EASTL EABase::EABase)
++ 
++if(BUILD_SHARED_LIBS)
++  target_compile_definitions(EASTL PUBLIC EASTL_DLL)
++  if(MSVC OR CYGWIN)
++    target_compile_definitions(EASTL PRIVATE "EASTL_API=__declspec(dllexport)")
++  endif()
+ endif()
+ 
+-target_link_libraries(EASTL EABase)
++include(GNUInstallDirs)
++install(TARGETS EASTL
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
++install(DIRECTORY ${CMAKE_INSTALL_INCLUDEDIR}/EASTL DESTINATION include)
+ 
+ #-------------------------------------------------------------------------------------------
+ # Installation

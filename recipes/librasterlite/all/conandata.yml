@@ -5,6 +5,4 @@ sources:
 patches:
   "1.1g":
     - patch_file: "patches/0001-fix-autotools.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/0002-nmake-honor-flags.patch"
-      base_path: "source_subfolder"
