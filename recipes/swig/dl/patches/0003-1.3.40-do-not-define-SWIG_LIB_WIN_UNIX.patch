@@ -1,0 +1,13 @@
+diff --git a/configure.in b/configure.in
+index 4edc8e1ae..f5b664fca 100644
+--- a/configure.in
++++ b/configure.in
+@@ -2153,7 +2153,7 @@ case $host in
+         *-*-cygwin*) SWIG_LIB_WIN_UNIX=`cygpath --mixed "$SWIG_LIB"`;;
+         *) SWIG_LIB_WIN_UNIX="";;
+ esac
+-AC_DEFINE_UNQUOTED(SWIG_LIB_WIN_UNIX, ["$SWIG_LIB_WIN_UNIX"], [Directory for SWIG system-independent libraries (Unix install on native Windows)])
++AC_DEFINE_UNQUOTED(SWIG_LIB_WIN_UNIX, [""], [Directory for SWIG system-independent libraries (Unix install on native Windows)])
+ 
+ AC_CONFIG_FILES([			        \
+     Makefile				        \

@@ -1,0 +1,47 @@
+diff --git a/Source/Modules/main.cxx b/Source/Modules/main.cxx
+index c824db6f9..007eef1ac 100644
+--- a/Source/Modules/main.cxx
++++ b/Source/Modules/main.cxx
+@@ -805,9 +805,29 @@ void SWIG_getoptions(int argc, char *argv[]) {
+   }
+ }
+ 
++#if defined(HAVE_UNISTD_H) && !defined(_WIN32) && !defined(_AIX) && !defined(__sun__)
++#include <libgen.h>
++#include <unistd.h>
++#include <dlfcn.h>
+ 
++static char *get_exe_path(void) {
++  Dl_info info;
++  if (dladdr("main", &info)) {
++    char buffer[PATH_MAX];
++    char* res = NULL;
+ 
++    res = realpath(info.dli_fname, buffer);
++    if (!res) {
++      return Swig_copy_string(SWIG_LIB);
++    }
+ 
++    strcpy(buffer, dirname(buffer));
++    strcat(buffer, "/swiglib");
++    return Swig_copy_string(buffer);
++  }
++  return Swig_copy_string(SWIG_LIB);
++}
++#endif
+ 
+ int SWIG_main(int argc, char *argv[], Language *l) {
+   char *c;
+@@ -869,9 +889,11 @@ int SWIG_main(int argc, char *argv[], Language *l) {
+     char *p;
+     if (!(GetModuleFileName(0, buf, MAX_PATH) == 0 || (p = strrchr(buf, '\\')) == 0)) {
+       *(p + 1) = '\0';
+-      SwigLibWin = NewStringf("%sLib", buf);	// Native windows installation path
++      SwigLibWin = NewStringf("%sswiglib", buf);	// Native windows installation path
+     }
+     SwigLib = Swig_copy_string(SWIG_LIB_WIN_UNIX);	// Unix installation path using a drive letter (for msys/mingw)
++#elif defined(HAVE_UNISTD_H) && !defined(_WIN32) && !defined(_AIX) && !defined(__sun__)
++    SwigLib = get_exe_path();
+ #else
+     SwigLib = Swig_copy_string(SWIG_LIB);
+ #endif
