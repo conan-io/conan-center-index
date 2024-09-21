@@ -246,18 +246,14 @@ class JoltPhysicsConan(ConanFile):
         self.cpp_info.libs = ["Jolt"]
 
         # if both options are false
-        if (not self.options.profiler_in_debug_and_release and not self.options.profiler_in_distribution) {
+        if (not self.options.profiler_in_debug_and_release and not self.options.profiler_in_distribution):
             # but you want custom behavior
-            if (self.options.profiler) {
+            if (self.options.profiler):
                 self.cpp_info.defines.append("JPH_PROFILE_ENABLED")
-            }
-        }
 
-        if (not self.options.debug_renderer_in_debug_and_release and not self.options.debug_renderer_in_distribution) {
-            if (self.options.debug_renderer) {
+        if (not self.options.debug_renderer_in_debug_and_release and not self.options.debug_renderer_in_distribution):
+            if (self.options.debug_renderer):
                 self.cpp_info.defines.append("JPH_DEBUG_RENDERER")
-            }
-        }
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
