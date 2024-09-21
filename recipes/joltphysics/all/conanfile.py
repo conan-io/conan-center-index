@@ -25,6 +25,7 @@ class JoltPhysicsConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
+        "shared": [True, False],
 
         "use_asserts": [True, False],
         "double_precision": [True, False],
@@ -68,10 +69,10 @@ class JoltPhysicsConan(ConanFile):
         "use_std_vector": [True, False],
         "enable_object_stream": [True, False],
         "enable_install": [True, False],
-        "profile": [True, False],
+        # "profile": [True, False],
     }
     default_options = {
-        "build_shared_libs": False,
+        "shared": False,
         "fPIC": True,
 
         "use_asserts": False,
