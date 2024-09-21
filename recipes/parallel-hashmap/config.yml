@@ -1,9 +1,7 @@
 versions:
-<<<<<<< HEAD
   "1.4.0":
-=======
+    folder: all
   "1.3.12":
->>>>>>> c2c5964ace4be2a0905a5503554c7a2642e71e0d
     folder: all
   "1.3.11":
     folder: all
