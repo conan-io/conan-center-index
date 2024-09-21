@@ -1,0 +1,20 @@
+diff --git a/Jolt/Jolt.cmake b/Jolt/Jolt.cmake
+index 78a4149a..0bc7a80b 100644
+--- a/Jolt/Jolt.cmake
++++ b/Jolt/Jolt.cmake
+@@ -13,6 +13,7 @@ set(JOLT_PHYSICS_SRC_FILES
+ 	${JOLT_PHYSICS_ROOT}/AABBTree/AABBTreeToBuffer.h
+ 	${JOLT_PHYSICS_ROOT}/AABBTree/NodeCodec/NodeCodecQuadTreeHalfFloat.h
+ 	${JOLT_PHYSICS_ROOT}/AABBTree/TriangleCodec/TriangleCodecIndexed8BitPackSOA4Flags.h
++	${JOLT_PHYSICS_ROOT}/ConfigurationString.h
+ 	${JOLT_PHYSICS_ROOT}/Core/ARMNeon.h
+ 	${JOLT_PHYSICS_ROOT}/Core/Array.h
+ 	${JOLT_PHYSICS_ROOT}/Core/Atomics.h
+@@ -365,6 +366,7 @@ set(JOLT_PHYSICS_SRC_FILES
+ 	${JOLT_PHYSICS_ROOT}/Physics/SoftBody/SoftBodyShape.h
+ 	${JOLT_PHYSICS_ROOT}/Physics/SoftBody/SoftBodySharedSettings.cpp
+ 	${JOLT_PHYSICS_ROOT}/Physics/SoftBody/SoftBodySharedSettings.h
++	${JOLT_PHYSICS_ROOT}/Physics/SoftBody/SoftBodyUpdateContext.h
+ 	${JOLT_PHYSICS_ROOT}/Physics/SoftBody/SoftBodyVertex.h
+ 	${JOLT_PHYSICS_ROOT}/Physics/StateRecorder.h
+ 	${JOLT_PHYSICS_ROOT}/Physics/StateRecorderImpl.cpp

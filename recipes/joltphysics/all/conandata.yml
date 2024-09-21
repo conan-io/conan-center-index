@@ -12,10 +12,10 @@ sources:
     url: "https://github.com/jrouwe/JoltPhysics/archive/refs/tags/v2.0.1.tar.gz"
     sha256: "96ae2e8691c4802e56bf2587da30f2cc86b8abe82a78bc2398065bd87dd718af"
 patches:
-  # "5.1.0":
-  #   - patch_file: "patches/5.1.0-0001-fix-cmake.patch"
-  #     patch_description: "Fix CMakeLists: no warnings as errors, allow shared, add install target, and add profile & debug_renderer options"
-  #     patch_type: "conan"
+  "5.1.0":
+    - patch_file: "patches/5.1.0-0001-fix-cmake.patch"
+      patch_description: "Fixes missing files ConfigurationString.h and SoftBodyUpdateContext.h when running cmake --install. See: https://github.com/jrouwe/JoltPhysics/commit/304c71912de0944c499d30e8324f3490c86076df"
+      patch_type: "conan"
   "3.0.1":
     - patch_file: "patches/3.0.1-0001-fix-cmake.patch"
       patch_description: "Fix CMakeLists: no warnings as errors, allow shared, add install target, and add profile & debug_renderer options"
