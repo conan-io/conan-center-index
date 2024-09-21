@@ -1,0 +1,5 @@
+[tool_requires]
+# This profile is used for building CMake from binaries. Apply it to everything *but* the consumer
+# conanfile, where it will mess up the version testing.
+# Doc: https://docs.conan.io/1/devtools/build_requires.html#declaring-tool-requirements
+&!:bootstrap_cmake/[>=3.19.0]
