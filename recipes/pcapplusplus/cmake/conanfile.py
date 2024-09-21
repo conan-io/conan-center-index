@@ -44,8 +44,6 @@ class PcapplusplusConan(ConanFile):
         if self.settings.compiler == "gcc" and compiler_version < "5.1":
             raise ConanInvalidConfiguration("PcapPlusPlus requires GCC >= 5.1")
 
-        if self.settings
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
