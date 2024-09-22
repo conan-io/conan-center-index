@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 import os
@@ -156,6 +157,10 @@ class OpenblasConan(ConanFile):
             # ld: unknown option: --allow-multiple-definition on apple-clang
             raise ConanInvalidConfiguration(f'"{self.name}/*:build_relapack=True" option is only supported for GCC and Clang')
 
+    def build_requirements(self):
+        if self.options.use_openmp:
+            self.tool_requires("cmake/[>=3.16 <4]")
+
     def validate_build(self):
         # If we're cross-compiling, and the user didn't provide the target, and
         # we couldn't infer the target from settings.arch, fail
@@ -169,6 +174,8 @@ class OpenblasConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
+
         tc = CMakeToolchain(self)
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
