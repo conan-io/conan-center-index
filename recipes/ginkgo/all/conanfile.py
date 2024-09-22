@@ -122,6 +122,7 @@ class GinkgoConan(ConanFile):
                     "191": "15",
                     "192": "16",
                     "193": "17",
+                    "194": "17",
                 }[compiler_version]
         else:
             visual_version = compiler_version
@@ -281,7 +282,7 @@ class GinkgoConan(ConanFile):
             self.cpp_info.components["ginkgo_hip"].requires += ["ginkgo_device"]
             self.cpp_info.components["ginkgo_cuda"].requires += ["ginkgo_device"]
             self.cpp_info.components["ginkgo_dpcpp"].requires += ["ginkgo_device"]
-        
+
         if has_config_library:
             self.cpp_info.components["ginkgo_core"].requires += ["ginkgo_config"]
 
