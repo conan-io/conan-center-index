@@ -9,6 +9,19 @@ from astroid.builder import extract_node
 from astroid.inference_tip import inference_tip
 from astroid.manager import AstroidManager
 
+
+def _settings_transform():
+    module = AstroidBuilder(AstroidManager()).string_build(
+        textwrap.dedent("""
+            class Settings(object):
+                os = None
+                arch = None
+                compiler = None
+                build_type = None
+            """)
+    )
+    return module['Settings']
+
 def _user_info_build_transform():
     module = AstroidBuilder(AstroidManager()).string_build(
         textwrap.dedent("""
@@ -48,6 +61,8 @@ def transform_conanfile(node):
         "info": info_class,
         "python_requires": [str_class, python_requires_class],
         "recipe_folder": str_class,
+        "settings_build": [_settings_transform()],
+        "settings_target": [_settings_transform()],
         "conf": dict_class,
     }
     
@@ -61,7 +76,7 @@ astroid.MANAGER.register_transform(
 
 
 def _looks_like_settings(node: astroid.Attribute) -> bool:
-    return node.attrname in ["settings", "settings_build", "settings_target"]
+    return node.attrname == "settings"
 
 def infer_settings(node, context):
     return astroid.MANAGER.ast_from_module_name(
