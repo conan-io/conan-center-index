@@ -10,3 +10,6 @@ patches:
     - patch_file: "patches/0002-disable-cpp11.patch"
       patch_description: "disable specifying C++11"
       patch_type: "conan"
+    - patch_file: "patches/0003-replace-project-declaration.patch"
+      patch_description: "switch positions between project() and cmake_minimum_required()"
+      patch_type: "conan"
