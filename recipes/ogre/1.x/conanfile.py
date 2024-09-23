@@ -437,10 +437,11 @@ class OgreConanFile(ConanFile):
                         '#include "stbi/', '#include "')
         # Unvendor imgui in Overlay
         # https://github.com/OGRECave/ogre/blob/v14.2.6/Components/Overlay/CMakeLists.txt#L21-L43
-        replace_in_file(self, os.path.join(self.source_folder, "Components", "Overlay", "CMakeLists.txt"),
-                        "if(OGRE_BUILD_COMPONENT_OVERLAY_IMGUI)", "if(0)")
-        replace_in_file(self, os.path.join(self.source_folder, "Components", "Overlay", "CMakeLists.txt"),
-                        "list(REMOVE_ITEM SOURCE_FILES", "# list(REMOVE_ITEM SOURCE_FILES")
+        if self.options.get_safe("build_component_overlay_imgui"):
+            replace_in_file(self, os.path.join(self.source_folder, "Components", "Overlay", "CMakeLists.txt"),
+                            "if(OGRE_BUILD_COMPONENT_OVERLAY_IMGUI)", "if(0)")
+            replace_in_file(self, os.path.join(self.source_folder, "Components", "Overlay", "CMakeLists.txt"),
+                            "list(REMOVE_ITEM SOURCE_FILES", "# list(REMOVE_ITEM SOURCE_FILES")
 
     def build(self):
         self._patch_sources()
