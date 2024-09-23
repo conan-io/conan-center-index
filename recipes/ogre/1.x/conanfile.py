@@ -391,6 +391,7 @@ class OgreConanFile(ConanFile):
         tc.variables["OGRE_CONFIG_ENABLE_GL_STATE_CACHE_SUPPORT"] = self.options.get_safe("config_enable_gl_state_cache_support", False)
         tc.variables["OGRE_CONFIG_FILESYSTEM_UNICODE"] = self.options.get_safe("config_filesystem_unicode", False)
         tc.variables["OGRE_CONFIG_STATIC_LINK_CRT"] = is_msvc_static_runtime(self)
+        tc.variables["OGRE_ENABLE_PRECOMPILED_HEADERS"] = False  # Fails for GCC in C3I with 'ADD_CUSTOM_COMMAND called with OUTPUT containing a ">"'
         tc.variables["OGRE_INSTALL_SAMPLES"] = False
         tc.variables["OGRE_INSTALL_TOOLS"] = self.options.get_safe("build_tools", False)
         tc.variables["OGRE_INSTALL_DOCS"] = False
