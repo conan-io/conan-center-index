@@ -94,7 +94,11 @@ if(IMGUI_IMPL_METAL)
     enable_language(OBJCXX)
     add_library(imgui-metal backends/imgui_impl_metal.mm)
     set_source_files_properties(backends/imgui_impl_metal.mm PROPERTIES COMPILE_FLAGS -fobjc-weak)
-    target_link_libraries(imgui-metal PRIVATE "-framework Metal" "-framework Cocoa" "-framework QuartzCore")
+    target_link_libraries(imgui-metal PRIVATE
+        "-framework Foundation"
+        "-framework Metal"
+        "-framework QuartzCore"
+    )
     install(FILES backends/imgui_impl_metal.h DESTINATION include)
     list(APPEND IMGUI_COMPONENTS imgui-metal)
 endif()
@@ -119,7 +123,13 @@ endif()
 if(IMGUI_IMPL_OSX)
     enable_language(OBJCXX)
     add_library(imgui-osx backends/imgui_impl_osx.mm)
-    target_link_libraries(imgui-osx INTERFACE "-framework Cocoa" "-framework AppKit")
+    target_link_libraries(imgui-osx PRIVATE
+        "-framework AppKit"
+        "-framework Carbon"
+        "-framework Cocoa"
+        "-framework Foundation"
+        "-framework GameController"
+    )
     install(FILES backends/imgui_impl_osx.h DESTINATION include)
     list(APPEND IMGUI_COMPONENTS imgui-osx)
 endif()
