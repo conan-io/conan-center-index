@@ -54,7 +54,7 @@ class OneTBBConan(ConanFile):
     @property
     def _tbbbind_supported(self):
         if is_apple_os(self):
-            return return self.settings.os == "Macos" and Version(self.version) >= "2021.11.0"
+            return self.settings.os == "Macos" and Version(self.version) >= "2021.11.0"
         return True
 
     @property
