@@ -69,7 +69,7 @@ class ImguiConan(ConanFile):
         "backend_dx11": False,
         "backend_dx12": False,
         "backend_glfw": True,
-        "backend_glut": True,
+        "backend_glut": False,
         "backend_metal": True,
         "backend_opengl2": True,
         "backend_opengl3": True,
