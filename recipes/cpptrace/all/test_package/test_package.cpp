@@ -9,9 +9,9 @@
 int main() {
     cpptrace::generate_trace().print();
     
-    #ifdef CTRACE
+#ifdef CTRACE
     ctrace_stacktrace c_trace = ctrace_generate_trace(0, SIZE_MAX);
-    #endif
+#endif
 
     return EXIT_SUCCESS;
 }
