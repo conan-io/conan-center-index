@@ -196,7 +196,7 @@ class OgreConanFile(ConanFile):
 
     @property
     def _build_opengl(self):
-        # https://github.com/OGRECave/ogre/blob/v14.2.6/RenderSystems/CMakeLists.txt#L32-L34
+        # https://github.com/OGRECave/ogre/blob/v14.3.0/RenderSystems/CMakeLists.txt#L32-L34
         return (self.options.get_safe("build_rendersystem_gl") or
                 self.options.get_safe("build_rendersystem_gles2") or
                 self.options.get_safe("build_rendersystem_gl3plus"))
@@ -290,7 +290,7 @@ class OgreConanFile(ConanFile):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
 
-        # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/ConfigureBuild.cmake#L21-L25
+        # https://github.com/OGRECave/ogre/blob/v14.3.0/CMake/ConfigureBuild.cmake#L21-L25
         if self.options.shared and is_apple_os(self) and self.settings.os != "Macos":
             raise ConanInvalidConfiguration(f"OGRE shared library is not available on {self.settings.os}")
 
@@ -315,7 +315,7 @@ class OgreConanFile(ConanFile):
 
     @property
     def _plugins_dir(self):
-        # Match https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/InstallResources.cmake#L33-L43
+        # Match https://github.com/OGRECave/ogre/blob/v14.3.0/CMake/InstallResources.cmake#L33-L43
         return "lib" if self.settings.os == "Windows" else os.path.join("lib", "OGRE")
 
     @property
@@ -335,7 +335,7 @@ class OgreConanFile(ConanFile):
         venv.generate()
 
         tc = CMakeToolchain(self)
-        # https://github.com/OGRECave/ogre/blob/v14.2.6/CMakeLists.txt#L281-L420
+        # https://github.com/OGRECave/ogre/blob/v14.3.0/CMakeLists.txt#L281-L420
         tc.variables["OGRE_STATIC"] = not self.options.shared
         tc.variables["OGRE_RESOURCEMANAGER_STRICT"] = 2 if self.options.resourcemanager_strict == "STRICT" else 1
         tc.variables["OGRE_BUILD_RENDERSYSTEM_D3D9"] = self.options.get_safe("build_rendersystem_d3d9", False)
@@ -403,10 +403,10 @@ class OgreConanFile(ConanFile):
         tc.variables["OGRE_LIB_DIRECTORY"] = "lib"
         tc.variables["OGRE_BIN_DIRECTORY"] = "bin"
         tc.variables["OGRE_INSTALL_VSPROPS"] = False
-        # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/ConfigureBuild.cmake#L63-L69
+        # https://github.com/OGRECave/ogre/blob/v14.3.0/CMake/ConfigureBuild.cmake#L63-L69
         tc.variables["OGRE_ASSERT_MODE"] = self.options.assert_mode
         tc.variables["OGRE_BUILD_DEPENDENCIES"] = False
-        # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/InstallResources.cmake
+        # https://github.com/OGRECave/ogre/blob/v14.3.0/CMake/InstallResources.cmake
         tc.variables["OGRE_PLUGINS_PATH"] = self._to_cmake_path(self._plugins_dir)
         tc.variables["OGRE_MEDIA_PATH"] = self._to_cmake_path(self._media_dir)
         tc.variables["OGRE_CFG_INSTALL_PATH"] = self._to_cmake_path(self._config_dir)
@@ -439,7 +439,7 @@ class OgreConanFile(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "PlugIns", "STBICodec", "src", "OgreSTBICodec.cpp"),
                         '#include "stbi/', '#include "')
         # Unvendor imgui in Overlay
-        # https://github.com/OGRECave/ogre/blob/v14.2.6/Components/Overlay/CMakeLists.txt#L21-L43
+        # https://github.com/OGRECave/ogre/blob/v14.3.0/Components/Overlay/CMakeLists.txt#L21-L43
         if self.options.get_safe("build_component_overlay_imgui"):
             replace_in_file(self, os.path.join(self.source_folder, "Components", "Overlay", "CMakeLists.txt"),
                             "if(OGRE_BUILD_COMPONENT_OVERLAY_IMGUI)", "if(0)")
@@ -457,7 +457,7 @@ class OgreConanFile(ConanFile):
         return ["DirectX", "DirectX11", "Softimage", "GLSLOptimizer", "HLSL2GLSL"]
 
     def _create_cmake_module_variables(self, module_file):
-        # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/Templates/OGREConfig.cmake.in
+        # https://github.com/OGRECave/ogre/blob/v14.3.0/CMake/Templates/OGREConfig.cmake.in
         content = textwrap.dedent(f"""\
             set(OGRE_STATIC {'OFF' if self.options.shared else 'ON'})
             get_filename_component(OGRE_PREFIX_DIR "${{CMAKE_CURRENT_LIST_DIR}}/../../../" ABSOLUTE)
@@ -521,7 +521,7 @@ class OgreConanFile(ConanFile):
             return ".so"
 
     def _core_libname(self, lib):
-        # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/ConfigureBuild.cmake#L140-L145
+        # https://github.com/OGRECave/ogre/blob/v14.3.0/CMake/ConfigureBuild.cmake#L140-L145
         if not self.options.shared:
             lib += "Static"
         if self.settings.os == "Windows" and self.settings.build_type == "Debug":
@@ -641,13 +641,13 @@ class OgreConanFile(ConanFile):
 
         if self.options.get_safe("build_rendersystem_d3d9"):
             _add_plugin_component("RenderSystem_Direct3D9")
-            # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/Packages/FindDirectX.cmake#L58-L60
+            # https://github.com/OGRECave/ogre/blob/v14.3.0/CMake/Packages/FindDirectX.cmake#L58-L60
             self.cpp_info.components["RenderSystem_Direct3D9"].system_libs += ["d3d9", "d3dx9", "dxguid"]
         if self.options.get_safe("build_rendersystem_d3d11"):
             _add_plugin_component("RenderSystem_Direct3D11")
             if self.settings.compiler == "gcc":
                 self.cpp_info.components["RenderSystem_Direct3D11"].system_libs += ["psapi", "d3dcompiler"]
-            # https://github.com/OGRECave/ogre/blob/v14.2.6/CMake/Packages/FindDirectX11.cmake#L95-L100
+            # https://github.com/OGRECave/ogre/blob/v14.3.0/CMake/Packages/FindDirectX11.cmake#L95-L100
             self.cpp_info.components["RenderSystem_Direct3D11"].system_libs += ["dxerr", "dxguid", "dxgi", "d3dcompiler", "d3d11", "d3dx11"]
         if self.options.get_safe("build_rendersystem_gl"):
             _add_plugin_component("RenderSystem_GL", requires=opengl_reqs)
