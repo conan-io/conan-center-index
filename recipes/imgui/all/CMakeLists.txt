@@ -20,11 +20,11 @@ set_target_properties(imgui PROPERTIES
 )
 target_include_directories(imgui PUBLIC ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 
-set(IMGUI_EXPORT_HEADERS imgui_export_headers.h)
+set(IMGUI_EXPORT_HEADER imgui_export.h)
 include(GenerateExportHeader)
 generate_export_header(imgui
     EXPORT_MACRO_NAME IMGUI_API
-    EXPORT_FILE_NAME ${IMGUI_EXPORT_HEADERS}
+    EXPORT_FILE_NAME ${IMGUI_EXPORT_HEADER}
 )
 
 if(IMGUI_IMPL_ALLEGRO5)
@@ -200,7 +200,7 @@ file(GLOB IMGUI_HEADERS *.h)
 install(FILES
         misc/cpp/imgui_stdlib.h
         ${IMGUI_HEADERS}
-        ${PROJECT_BINARY_DIR}/${IMGUI_EXPORT_HEADERS}
+        ${PROJECT_BINARY_DIR}/${IMGUI_EXPORT_HEADER}
     DESTINATION include
 )
 

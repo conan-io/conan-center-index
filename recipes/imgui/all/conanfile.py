@@ -229,10 +229,10 @@ class ImguiConan(ConanFile):
         imconfig_path.write_text(content, "utf8")
 
     def _patch_sources(self):
-        # Ensure we take into account export_headers
+        # Ensure the generated imgui_export.h is always included
         replace_in_file(self, os.path.join(self.source_folder, "imgui.h"),
-                        "#ifdef IMGUI_USER_CONFIG",
-                        '#include "imgui_export_headers.h"\n\n#ifdef IMGUI_USER_CONFIG')
+                        '#include "imconfig.h"',
+                        '#include "imconfig.h"\n\n#include "imgui_export.h"')
 
     def build(self):
         self._configure_header()
