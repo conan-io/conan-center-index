@@ -1,0 +1,14 @@
+Fixes
+error: incompatible function pointer types assigning to 'xmlStructuredErrorFunc' (aka 'void (*)(void *, const struct _xmlError *)') from 'void (void *, xmlErrorPtr)' (aka 'void (void *, struct _xmlError *)') [-Wincompatible-function-pointer-types]
+  866 |     handler.serror = rsvg_xml_noerror;
+--- a/rsvg-css.c
++++ b/rsvg-css.c
+@@ -839,7 +839,7 @@
+ }
+ 
+ static void
+-rsvg_xml_noerror (void *data, xmlErrorPtr error)
++rsvg_xml_noerror (void *data, const struct _xmlError *error)
+ {
+ }
+ 
