@@ -1,7 +1,9 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -49,6 +51,8 @@ class CurlppConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+        elif self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
+            raise ConanInvalidConfiguration("${self.ref} requires C++11. Please set 'compiler.cppstd=11'.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
