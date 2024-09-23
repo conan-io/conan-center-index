@@ -62,9 +62,8 @@ class ReflectCppConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        if not self.options.shared:
-            self.requires("ctre/3.9.0", transitive_headers=True)
-            self.requires("yyjson/0.8.0", transitive_headers=True)
+        self.requires("ctre/3.9.0", transitive_headers=True)
+        self.requires("yyjson/0.8.0", transitive_headers=True)
         if self.options.with_cbor:
             self.requires("tinycbor/0.6.0", transitive_headers=True)
         if self.options.with_flatbuffers:
@@ -108,7 +107,7 @@ class ReflectCppConan(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
         tc.cache_variables["REFLECTCPP_BUILD_SHARED"] = self.options.shared
-        tc.cache_variables["REFLECTCPP_USE_BUNDLED_DEPENDENCIES"] = self.options.shared
+        tc.cache_variables["REFLECTCPP_USE_BUNDLED_DEPENDENCIES"] = False
         tc.cache_variables["REFLECTCPP_USE_VCPKG"] = False
         tc.cache_variables["REFLECTCPP_CBOR"] = self.options.with_cbor
         tc.cache_variables["REFLECTCPP_FLEXBUFFERS"] = self.options.with_flatbuffers
