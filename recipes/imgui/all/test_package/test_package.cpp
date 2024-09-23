@@ -28,17 +28,11 @@
 #ifdef IMGUI_IMPL_GLUT
     #include <imgui_impl_glut.h>
 #endif
-#ifdef IMGUI_IMPL_METAL
-    #include <imgui_impl_metal.h>
-#endif
 #ifdef IMGUI_IMPL_OPENGL2
     #include <imgui_impl_opengl2.h>
 #endif
 #ifdef IMGUI_IMPL_OPENGL3
     #include <imgui_impl_opengl3.h>
-#endif
-#ifdef IMGUI_IMPL_OSX
-    #include <imgui_impl_osx.h>
 #endif
 #ifdef IMGUI_IMPL_SDL2
     #include <imgui_impl_sdl2.h>
@@ -86,17 +80,11 @@ void test_backends() {
 #ifdef IMGUI_IMPL_GLUT
     ImGui_ImplGLUT_Shutdown();
 #endif
-#ifdef IMGUI_IMPL_METAL
-    ImGui_ImplMetal_Shutdown();
-#endif
 #ifdef IMGUI_IMPL_OPENGL2
     ImGui_ImplOpenGL2_Shutdown();
 #endif
 #ifdef IMGUI_IMPL_OPENGL3
     ImGui_ImplOpenGL3_Shutdown();
-#endif
-#ifdef IMGUI_IMPL_OSX
-    ImGui_ImplOSX_Shutdown();
 #endif
 #ifdef IMGUI_IMPL_SDL2
     ImGui_ImplSDL2_Shutdown();
