@@ -13,10 +13,10 @@ required_conan_version = ">=1.53.0"
 class ZlibNgConan(ConanFile):
     name = "zlib-ng"
     description = "zlib data compression library for the next generation systems"
-    topics = ("zlib", "compression")
     license ="Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zlib-ng/zlib-ng/"
+    topics = ("zlib", "compression")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {

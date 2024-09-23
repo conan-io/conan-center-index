@@ -13,9 +13,9 @@ class GeosConan(ConanFile):
     name = "geos"
     description = "GEOS is a C++ library for performing operations on two-dimensional vector geometries."
     license = "LGPL-2.1"
-    topics = ("osgeo", "geometry", "topology", "geospatial")
-    homepage = "https://libgeos.org/"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://libgeos.org/"
+    topics = ("osgeo", "geometry", "topology", "geospatial")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
