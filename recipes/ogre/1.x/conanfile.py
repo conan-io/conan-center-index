@@ -299,6 +299,7 @@ class OgreConanFile(ConanFile):
             self.requires("egl/system")
 
         # TODO: Qt support in OgreBites
+        # TODO: add support for DirectX, DirectX11, Softimage, GLSLOptimizer, HLSL2GLSL
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -472,10 +473,6 @@ class OgreConanFile(ConanFile):
         cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
 
-    @property
-    def _ogre_cmake_packages(self):
-        return ["DirectX", "DirectX11", "Softimage", "GLSLOptimizer", "HLSL2GLSL"]
-
     def _create_cmake_module_variables(self, module_file):
         # https://github.com/OGRECave/ogre/blob/v14.3.0/CMake/Templates/OGREConfig.cmake.in
         content = textwrap.dedent(f"""\
@@ -495,15 +492,6 @@ class OgreConanFile(ConanFile):
         #  - OGRE_${COMPONENT}_FOUND
         #  - OGRE_${COMPONENT}_LIBRARIES
 
-        # A hacky dependency resolution for packages that are not available from Conan
-        for pkg in self._ogre_cmake_packages:
-            content += textwrap.dedent(f"""\
-                find_package({pkg} MODULE QUIET)
-                if({pkg}_FOUND OR {pkg.upper()}_FOUND)
-                    target_link_libraries(OgreMain INTERFACE ${{{pkg}}}_LIBRARIES}} ${{{pkg.upper()}}}_LIBRARIES}})
-                    target_include_directories(OgreMain INTERFACE ${{{pkg}}}_INCLUDE_DIRS}} ${{{pkg.upper()}}}_INCLUDE_DIRS}})
-                endif()
-            """)
         save(self, module_file, content)
 
     def package(self):
@@ -514,14 +502,6 @@ class OgreConanFile(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "OGRE", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake", "OGRE"))
         self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_file_rel_path))
-        # Include modules for packages that are not available from Conan
-        for pkg in self._ogre_cmake_packages:
-            copy(self, f"Find{pkg}.cmake",
-                 src=os.path.join(self.source_folder, "CMake", "Packages"),
-                 dst=os.path.join(self.package_folder, self._module_file_rel_dir))
-            copy(self, "FindPkgMacros.cmake",
-                 src=os.path.join(self.source_folder, "CMake", "Utils"),
-                 dst=os.path.join(self.package_folder, self._module_file_rel_dir))
 
     @property
     def _module_file_rel_dir(self):
