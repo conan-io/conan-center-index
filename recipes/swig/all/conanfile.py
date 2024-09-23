@@ -62,10 +62,17 @@ class SwigConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
             if is_msvc(self):
                 self.tool_requires("cccl/1.3")
-        if is_msvc(self):
-            self.tool_requires("winflexbison/2.5.25")
+        if Version(self.version) >= "4.2":
+            if is_msvc(self):
+                # bison 3.8.2 is not ready for msvc
+                self.tool_requires("bison/3.7.6")
+            else:
+                self.tool_requires("bison/3.8.2")
         else:
-            self.tool_requires("bison/3.8.2")
+            if is_msvc(self):
+                self.tool_requires("winflexbison/2.5.25")
+            else:
+                self.tool_requires("bison/3.8.2")
         self.tool_requires("automake/1.16.5")
 
     def source(self):

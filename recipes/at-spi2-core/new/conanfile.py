@@ -1,6 +1,6 @@
 from conan import ConanFile
-from conan.errors import ConanException, ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
@@ -32,7 +32,7 @@ class AtSpi2CoreConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_x11": False,
+        "with_x11": True,
     }
 
     def export_sources(self):
@@ -41,6 +41,8 @@ class AtSpi2CoreConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            del self.options.with_x11
 
     def configure(self):
         if self.options.shared:
@@ -56,22 +58,20 @@ class AtSpi2CoreConan(ConanFile):
 
     def requirements(self):
         self.requires("glib/2.78.3")
-        if self.options.with_x11:
-            self.requires("xorg/system")
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("dbus/1.15.8")
+        if self.options.get_safe("with_x11"):
+            self.requires("xorg/system")
 
     def validate(self):
-        if self.options.shared and not  self.dependencies["glib"].options.shared:
+        if self.options.shared and not self.dependencies["glib"].options.shared:
             raise ConanInvalidConfiguration(
                 "Linking a shared library against static glib can cause unexpected behaviour."
             )
-        if Version(self.version) < "2.49.1":
-            if self.settings.os == "Windows":
-                raise ConanInvalidConfiguration("Windows is not supported before version 2.49.1")
-        if Version(self.version) < "2.50.0":
-            if self.settings.os == "Macos":
-                raise ConanInvalidConfiguration("macos is not supported before version 2.50.0")
+        if Version(self.version) < "2.49.1" and self.settings.os == "Windows":
+            raise ConanInvalidConfiguration("Windows is not supported before version 2.49.1")
+        if Version(self.version) < "2.50.0" and is_apple_os(self):
+            raise ConanInvalidConfiguration("macOS is not supported before version 2.50.0")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -86,10 +86,10 @@ class AtSpi2CoreConan(ConanFile):
         tc = MesonToolchain(self)
         if Version(self.version) >= "2.47.1":
             tc.project_options["introspection"] = "disabled"
-            tc.project_options["x11"] = "enabled" if self.options.with_x11 else "disabled"
+            tc.project_options["x11"] = "enabled" if self.options.get_safe("with_x11") else "disabled"
         else:
             tc.project_options["introspection"] = "no"
-            tc.project_options["x11"] = "yes" if self.options.with_x11 else "no"
+            tc.project_options["x11"] = "yes" if self.options.get_safe("with_x11") else "no"
         if self.settings.os != "Linux":
             tc.project_options["atk_only"] = "true"
             
@@ -124,24 +124,25 @@ class AtSpi2CoreConan(ConanFile):
         fix_apple_shared_install_name(self)
         fix_msvc_libname(self)
 
-
     def package_info(self):
-        if self.settings.os == "Linux":
-            self.cpp_info.components["atspi"].libs = ['atspi']
-            self.cpp_info.components["atspi"].includedirs = ["include/at-spi-2.0"]
-            self.cpp_info.components["atspi"].requires = ["dbus::dbus", "glib::glib"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["atspi"].set_property("pkg_config_name", "atspi-2")
+            self.cpp_info.components["atspi"].libs = ["atspi"]
+            self.cpp_info.components["atspi"].includedirs = ["include/at-spi-2.0"]
+            self.cpp_info.components["atspi"].requires = ["dbus::dbus", "glib::glib-2.0", "glib::gobject-2.0"]
+            if self.options.with_x11:
+                self.cpp_info.components["atspi"].requires.extend(["xorg::x11", "xorg::xtst", "xorg::xi"])
 
+        self.cpp_info.components["atk"].set_property("pkg_config_name", "atk")
         self.cpp_info.components["atk"].libs = ["atk-1.0"]
-        self.cpp_info.components["atk"].includedirs = ['include/atk-1.0']
-        self.cpp_info.components["atk"].requires = ["glib::glib"]
-        self.cpp_info.components["atk"].set_property("pkg_config_name", 'atk')
+        self.cpp_info.components["atk"].includedirs = ["include/atk-1.0"]
+        self.cpp_info.components["atk"].requires = ["glib::glib-2.0", "glib::gobject-2.0"]
 
-        if self.settings.os == "Linux":
-            self.cpp_info.components["atk-bridge"].libs = ['atk-bridge-2.0']
-            self.cpp_info.components["atk-bridge"].includedirs = [os.path.join('include', 'at-spi2-atk', '2.0')]
-            self.cpp_info.components["atk-bridge"].requires = ["dbus::dbus", "atk", "glib::glib", "atspi"]
-            self.cpp_info.components["atk-bridge"].set_property("pkg_config_name", 'atk-bridge-2.0')
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["atk-bridge"].set_property("pkg_config_name", "atk-bridge-2.0")
+            self.cpp_info.components["atk-bridge"].libs = ["atk-bridge-2.0"]
+            self.cpp_info.components["atk-bridge"].includedirs = [os.path.join("include", "at-spi2-atk", "2.0")]
+            self.cpp_info.components["atk-bridge"].requires = ["atspi", "atk", "glib::gmodule-2.0"]
 
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
