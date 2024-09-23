@@ -148,6 +148,7 @@ class ImguiConan(ConanFile):
         # elif self.options.get_safe("backend_sdlrenderer3"):
         #     self.requires("sdl/3.x")
         if self.options.get_safe("backend_vulkan"):
+            self.requires("vulkan-headers/1.3.290.0", transitive_headers=True)
             self.requires("vulkan-loader/1.3.290.0")
         if self.options.get_safe("backend_glfw") and self.settings.os != "Emscripten":
             self.requires("glfw/3.4")
@@ -292,7 +293,7 @@ class ImguiConan(ConanFile):
         _add_binding("sdl2", requires=["sdl::sdl"])
         _add_binding("sdlrenderer2", requires=["sdl::sdl"])
         # _add_binding("sdlrenderer3", requires=["sdl::sdl"])
-        _add_binding("vulkan", requires=["vulkan-loader::vulkan-loader"])
+        _add_binding("vulkan", requires=["vulkan-headers::vulkan-headers", "vulkan-loader::vulkan-loader"])
         _add_binding("win32", system_libs=["dwmapi", "xinput"])
         # _add_binding("wgpu", requires=["dawn::dawn"])
 
