@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.15)
 project(imgui LANGUAGES CXX)
 
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 11)
+endif()
+
 add_library(imgui
     imgui.cpp
     imgui_demo.cpp
@@ -15,7 +19,6 @@ set_target_properties(imgui PROPERTIES
     VISIBILITY_INLINES_HIDDEN ON
 )
 target_include_directories(imgui PUBLIC ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
-target_compile_features(imgui PRIVATE cxx_std_11)
 
 set(IMGUI_EXPORT_HEADERS imgui_export_headers.h)
 include(GenerateExportHeader)
@@ -174,7 +177,6 @@ endif()
 
 if(IMGUI_IMPL_TOOLS)
     add_executable(binary_to_compressed_c misc/fonts/binary_to_compressed_c.cpp)
-    target_compile_features(binary_to_compressed_c PRIVATE cxx_std_11)
     install(TARGETS binary_to_compressed_c DESTINATION bin)
 endif()
 
