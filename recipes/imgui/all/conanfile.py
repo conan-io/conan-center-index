@@ -51,6 +51,7 @@ class ImguiConan(ConanFile):
         # See https://github.com/ocornut/imgui/blob/master/imconfig.h for details
         "enable_freetype": [True, False],
         "enable_freetype_lunasvg": [True, False],
+        "enable_metal_cpp": [True, False],
         "enable_osx_clipboard": [True, False],
         "enable_demo_windows": [True, False],
         "enable_debug_tools": [True, False],
@@ -81,6 +82,7 @@ class ImguiConan(ConanFile):
         # Other options
         "enable_freetype": False,
         "enable_freetype_lunasvg": False,
+        "enable_metal_cpp": False,
         "enable_osx_clipboard": True,
         "enable_demo_windows": True,
         "enable_debug_tools": True,
@@ -106,10 +108,13 @@ class ImguiConan(ConanFile):
         if not is_apple_os(self):
             del self.options.backend_metal
             del self.options.backend_osx
+            del self.options.enable_metal_cpp
             del self.options.enable_osx_clipboard
         if Version(self.version) < "1.89.6":
             del self.options.backend_sdl2
             del self.options.backend_sdlrenderer2
+        if Version(self.version) < "1.87":
+            self.options.rm_safe("enable_metal_cpp")
 
     def configure(self):
         if self.options.shared:
@@ -217,6 +222,10 @@ class ImguiConan(ConanFile):
                 content, n = re.subn(rf"// *#define +{define}\b", f"#define {define}", content)
                 if n != 1:
                     raise ConanException(f"Failed to set {define} in imconfig.h")
+        # Not listed in imconfig.h, but supported by the OSX and Metal backends
+        if self.options.get_safe("enable_metal_cpp"):
+            content += "\n#define IMGUI_IMPL_METAL_CPP\n"
+            content += "#define IMGUI_IMPL_METAL_CPP_EXTENSIONS\n"
         imconfig_path.write_text(content, "utf8")
 
     def _patch_sources(self):
