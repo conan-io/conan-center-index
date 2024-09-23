@@ -95,7 +95,7 @@ class OgreConanFile(ConanFile):
         "build_component_volume": True,
         "build_component_property": True,
         "build_component_overlay": True,
-        "build_component_overlay_imgui": True,
+        "build_component_overlay_imgui": False,
         "build_component_bites": True,
         "build_component_bullet": True,
         "bites_static_plugins": False,
