@@ -300,7 +300,7 @@ class AwsSdkCppConan(ConanFile):
             "fPIC": [True, False],
             "min_size": [True, False],
         },
-        **{ x: [True, False] for x in _sdks},
+        **{x: [True, False] for x in _sdks},
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
@@ -340,22 +340,24 @@ class AwsSdkCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # These versions come from prefetch_crt_dependency.sh,
+        # dont bump them independently, check the file
         if self.version == "1.11.352":
             self.requires("aws-crt-cpp/0.26.9", transitive_headers=True)
             self.requires("aws-c-auth/0.7.16")
             self.requires("aws-c-cal/0.6.14")
             self.requires("aws-c-common/0.9.15")
-            # self.requires("aws-c-compression/0.2.18")
+            self.requires("aws-c-compression/0.2.18")  # No mention of this in the code
             self.requires("aws-c-event-stream/0.4.2")
             self.requires("aws-c-http/0.8.1")
             self.requires("aws-c-io/0.14.7")
             self.requires("aws-c-mqtt/0.10.3")
             if self.options.get_safe("s3-crt"):
                 self.requires("aws-c-s3/0.5.5")
-            # self.requires("aws-c-sdkutils/0.1.15")
+            self.requires("aws-c-sdkutils/0.1.15")  # No mention of this in the code
             self.requires("aws-checksums/0.1.18")
             # missing aws-lc
-            # self.requires("s2n/1.4.16")
+            self.requires("s2n/1.4.16")  # No mention of this in the code
         if self.version == "1.9.234":
             self.requires("aws-c-common/0.6.11")
             self.requires("aws-c-event-stream/0.2.7")
@@ -371,7 +373,7 @@ class AwsSdkCppConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
             # Used transitively in core/http/curl/CurlHandleContainer.h public header
             self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True)
-        if self.settings.os =="Linux":
+        if self.settings.os == "Linux":
             # Pulseaudio -> libcap, libalsa only support linux, don't use pulseaudio on other platforms
             if self.options.get_safe("text-to-speech"):
                 # Used transitively in text-to-speech/PulseAudioPCMOutputDriver.h public header
@@ -387,25 +389,26 @@ class AwsSdkCppConan(ConanFile):
         if self._settings_build.os == "Windows" and self.settings.os == "Android":
             raise ConanInvalidConfiguration("Cross-building from Windows to Android is not supported")
 
-    def validate(self):
         if (self.options.shared
-            and self.settings.compiler == "gcc"
-            and Version(self.settings.compiler.version) < "6.0"):
+                and self.settings.compiler == "gcc"
+                and Version(self.settings.compiler.version) < "6.0"):
             raise ConanInvalidConfiguration(
                 "Doesn't support gcc5 / shared. "
                 "See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744"
             )
+
+    def validate(self):
         if is_msvc(self) and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Static runtime is not working for more recent releases")
         if (is_msvc(self) and self.options.shared and self.settings.build_type == "Debug"
                 and not self.dependencies["aws-c-common"].options.shared):
             raise ConanInvalidConfiguration(f"{self.ref} with shared and Debug build is not supported with aws-c-common static")
 
-    def package_id(self):
-        for hl_comp in self._internal_requirements.keys():
-            if getattr(self.info.options, hl_comp):
-                for internal_requirement in self._internal_requirements[hl_comp]:
-                    setattr(self.info.options, internal_requirement, True)
+        for main_module in self._internal_requirements:
+            if self.options.get_safe(main_module):
+                for internal_requirement in self._internal_requirements[main_module]:
+                    if not self.options.get_safe(internal_requirement):
+                        raise ConanInvalidConfiguration(f"-o={self.ref}:{main_module}=True requires -o={self.ref}:{internal_requirement}=True")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -488,7 +491,7 @@ class AwsSdkCppConan(ConanFile):
 
         # avoid getting error from hook
         rename(self, os.path.join(self.package_folder, self._res_folder, "toolchains", "cmakeProjectConfig.cmake"),
-                     os.path.join(self.package_folder, self._res_folder, "toolchains", "cmakeProjectConf.cmake"))
+               os.path.join(self.package_folder, self._res_folder, "toolchains", "cmakeProjectConf.cmake"))
         replace_in_file(
             self, os.path.join(self.package_folder, self._res_folder, "cmake", "utilities.cmake"),
             "cmakeProjectConfig.cmake", "cmakeProjectConf.cmake",
@@ -526,6 +529,9 @@ class AwsSdkCppConan(ConanFile):
             "aws-c-http::aws-c-http",
             "aws-c-io::aws-c-io",
             "aws-crt-cpp::aws-crt-cpp",
+            "aws-c-compression::aws-c-compression",
+            "aws-c-sdkutils::aws-c-sdkutils",
+            "s2n::s2n"
         ]
 
         if Version(self.version) >= "1.11.352":
@@ -536,11 +542,6 @@ class AwsSdkCppConan(ConanFile):
 
         # other components
         enabled_sdks = [sdk for sdk in self._sdks if self.options.get_safe(sdk)]
-        for hl_comp in self._internal_requirements.keys():
-            if getattr(self.options, hl_comp):
-                for internal_requirement in self._internal_requirements[hl_comp]:
-                    if internal_requirement not in enabled_sdks:
-                        enabled_sdks.append(internal_requirement)
 
         for sdk in enabled_sdks:
             # TODO: there is no way to properly emulate COMPONENTS names for
@@ -556,7 +557,7 @@ class AwsSdkCppConan(ConanFile):
             # TODO: to remove in conan v2 once cmake_find_package_* generators removed
             self.cpp_info.components[sdk].names["cmake_find_package"] = "aws-sdk-cpp-" + sdk
             self.cpp_info.components[sdk].names["cmake_find_package_multi"] = "aws-sdk-cpp-" + sdk
-            component_alias = f"aws-sdk-cpp-{sdk}_alias" # to emulate COMPONENTS names for find_package()
+            component_alias = f"aws-sdk-cpp-{sdk}_alias"  # to emulate COMPONENTS names for find_package()
             self.cpp_info.components[component_alias].names["cmake_find_package"] = sdk
             self.cpp_info.components[component_alias].names["cmake_find_package_multi"] = sdk
             self.cpp_info.components[component_alias].requires = [sdk]
