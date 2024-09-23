@@ -5,20 +5,9 @@
 import textwrap
 import astroid
 from astroid.builder import AstroidBuilder
+from astroid.builder import extract_node
+from astroid.inference_tip import inference_tip
 from astroid.manager import AstroidManager
-
-
-def _settings_transform():
-    module = AstroidBuilder(AstroidManager()).string_build(
-        textwrap.dedent("""
-            class Settings(object):
-                os = None
-                arch = None
-                compiler = None
-                build_type = None
-            """)
-    )
-    return module['Settings']
 
 def _user_info_build_transform():
     module = AstroidBuilder(AstroidManager()).string_build(
@@ -41,28 +30,24 @@ def transform_conanfile(node):
     info_class = astroid.MANAGER.ast_from_module_name("conans.model.info").lookup(
         "ConanInfo")
     build_requires_class = astroid.MANAGER.ast_from_module_name(
-        "conans.client.graph.graph_manager").lookup("_RecipeBuildRequires")
-    file_copier_class = astroid.MANAGER.ast_from_module_name(
-        "conans.client.file_copier").lookup("FileCopier")
-    file_importer_class = astroid.MANAGER.ast_from_module_name(
-        "conans.client.importer").lookup("_FileImporter")
+        "conans.model.requires").lookup("BuildRequirements")
+    tool_requires_class = astroid.MANAGER.ast_from_module_name(
+        "conans.model.requires").lookup("ToolRequirements")
+    test_requires_class = astroid.MANAGER.ast_from_module_name(
+        "conans.model.requires").lookup("TestRequirements")
     python_requires_class = astroid.MANAGER.ast_from_module_name(
         "conans.client.graph.python_requires").lookup("PyRequires")
 
     dynamic_fields = {
         "conan_data": str_class,
         "build_requires": build_requires_class,
-        "test_requires" : build_requires_class,
-        "tool_requires": build_requires_class,
+        "test_requires" : test_requires_class,
+        "tool_requires": tool_requires_class,
         "info_build": info_class,
         "user_info_build": [_user_info_build_transform()],
         "info": info_class,
-        "copy": file_copier_class,
-        "copy_deps": file_importer_class,
         "python_requires": [str_class, python_requires_class],
         "recipe_folder": str_class,
-        "settings_build": [_settings_transform()],
-        "settings_target": [_settings_transform()],
         "conf": dict_class,
     }
     
@@ -73,3 +58,17 @@ def transform_conanfile(node):
 astroid.MANAGER.register_transform(
     astroid.ClassDef, transform_conanfile,
     lambda node: node.qname() == "conans.model.conan_file.ConanFile")
+
+
+def _looks_like_settings(node: astroid.Attribute) -> bool:
+    return node.attrname in ["settings", "settings_build", "settings_target"]
+
+def infer_settings(node, context):
+    return astroid.MANAGER.ast_from_module_name(
+        "conans.model.settings").lookup("Settings")[1][0].instantiate_class().infer(context=context)
+
+astroid.MANAGER.register_transform(
+    astroid.Attribute,
+    inference_tip(infer_settings),
+    _looks_like_settings,
+)
