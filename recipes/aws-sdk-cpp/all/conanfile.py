@@ -357,7 +357,7 @@ class AwsSdkCppConan(ConanFile):
             self.requires("aws-c-sdkutils/0.1.15")  # No mention of this in the code
             self.requires("aws-checksums/0.1.18")
             # missing aws-lc
-            self.requires("s2n/1.4.16")  # No mention of this in the code
+            self.requires("s2n/1.4.11")  # No mention of this in the code
         if self.version == "1.9.234":
             self.requires("aws-c-common/0.6.11")
             self.requires("aws-c-event-stream/0.2.7")
