@@ -204,6 +204,9 @@ class OgreConanFile(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not (self.settings.os == "Android" or is_apple_os(self) and self.settings.os != "Macos"):
+            # GLES is generally not useful and not guaranteed to be available in non-embedded contexts
+            self.options.build_rendersystem_gles2 = False
         if self.settings.os != "Windows":
             self.options.rm_safe("build_rendersystem_d3d9")
             self.options.rm_safe("build_rendersystem_d3d11")
