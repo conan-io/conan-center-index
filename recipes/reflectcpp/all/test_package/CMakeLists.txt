@@ -5,4 +5,5 @@ find_package(reflectcpp REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} reflectcpp::reflectcpp)
+target_link_libraries(${PROJECT_NAME} yyjson::yyjson)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
