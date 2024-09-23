@@ -75,6 +75,8 @@ class OgreConanFile(ConanFile):
         "config_enable_gl_state_cache_support": [True, False],
         "config_filesystem_unicode": [True, False],
         "assert_mode": [0, 1, 2],
+        "glsupport_use_egl": [True, False],
+        "use_wayland": [True, False],
         "with_openmp": [True, False],
     }
     default_options = {
@@ -128,6 +130,8 @@ class OgreConanFile(ConanFile):
         "config_enable_gl_state_cache_support": False,
         "config_filesystem_unicode": True,
         "assert_mode": 1,
+        "glsupport_use_egl": True,
+        "use_wayland": False,
         "with_openmp": True,
     }
     options_description = {
@@ -188,6 +192,8 @@ class OgreConanFile(ConanFile):
             "1 - Standard asserts in debug builds, exceptions in release builds.\n"
             "2 - Exceptions in debug builds, exceptions in release builds."
         ),
+        "glsupport_use_egl": "Use EGL for GL Context Creation instead of GLX/WGL",
+        "use_wayland": "Use Wayland window manager",
         "with_openmp": "Enable OpenMP support in RenderSystem_Tiny",
     }
 
@@ -204,6 +210,7 @@ class OgreConanFile(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            self.options.glsupport_use_egl = False
         if not (self.settings.os == "Android" or is_apple_os(self) and self.settings.os != "Macos"):
             # GLES is generally not useful and not guaranteed to be available in non-embedded contexts
             self.options.build_rendersystem_gles2 = False
@@ -224,6 +231,8 @@ class OgreConanFile(ConanFile):
             self.options.rm_safe("build_tools")
         if not is_msvc(self):
             self.options.rm_safe("config_filesystem_unicode")
+        if not self.settings.os in ["Linux", "FreeBSD"]:
+            self.options.rm_safe("use_wayland")
 
     def configure(self):
         if self.options.shared:
@@ -260,7 +269,10 @@ class OgreConanFile(ConanFile):
             self.requires("glad/0.1.36", transitive_headers=True, transitive_libs=True)
             self.requires("khrplatform/cci.20200529", transitive_headers=True)
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("xorg/system")
+            if self.options.use_wayland:
+                self.requires("wayland/1.22.0")
+            else:
+                self.requires("xorg/system")
         if self.options.build_component_bullet:
             self.requires("bullet3/3.25")
         if self.options.build_component_overlay:
@@ -283,6 +295,8 @@ class OgreConanFile(ConanFile):
         if self.options.build_rendersystem_vulkan:
             self.requires("vulkan-headers/1.3.268.0")
             self.requires("volk/1.3.268.0", transitive_headers=True, transitive_libs=True)
+        if self.options.glsupport_use_egl:
+            self.requires("egl/system")
 
         # TODO: Qt support in OgreBites
 
@@ -301,6 +315,9 @@ class OgreConanFile(ConanFile):
 
         _missing_dep_warning("config_enable_quad_buffer_stereo", "NVAPI")
         _missing_dep_warning("build_xsiexporter", "Softimage")
+
+        if self.options.get_safe("use_wayland") and not self.options.glsupport_use_egl:
+            raise ConanInvalidConfiguration("-o use_wayland=True requires -o glsupport_use_egl=True")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
@@ -412,6 +429,9 @@ class OgreConanFile(ConanFile):
         tc.variables["OGRE_CFG_INSTALL_PATH"] = self._to_cmake_path(self._config_dir)
         if self.options.get_safe("build_component_overlay_imgui"):
             tc.variables["CONAN_IMGUI_SRC"] = os.path.join(self.dependencies["imgui"].package_folder, "res")
+        # https://github.com/OGRECave/ogre/blob/v14.3.0/RenderSystems/GLSupport/CMakeLists.txt#L15-L16
+        tc.variables["OGRE_GLSUPPORT_USE_EGL"] = self.options.get_safe("glsupport_use_egl", False)
+        tc.variables["OGRE_USE_WAYLAND"] = self.options.get_safe("use_wayland", False)
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -585,7 +605,19 @@ class OgreConanFile(ConanFile):
             requires=["pugixml::pugixml", "zlib::zlib", "zziplib::zziplib"],
         )
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["OgreMain"].requires.append("xorg::xorg")
+            if self.options.use_wayland:
+                self.cpp_info.components["OgreMain"].requires.extend([
+                    "wayland::wayland-client",
+                    "wayland::wayland-egl",
+                ])
+            else:
+                self.cpp_info.components["OgreMain"].requires.extend([
+                    "xorg::x11",
+                    "xorg::xaw7",
+                    "xorg::xext",
+                    "xorg::xrandr",
+                    "xorg::xt",
+                ])
 
         if self.options.get_safe("build_component_bites"):
             _add_core_component("Bites", requires=["Overlay", "sdl::sdl"])
@@ -609,6 +641,8 @@ class OgreConanFile(ConanFile):
             _add_core_component("Volume")
 
         opengl_reqs = ["opengl::opengl", "glad::glad", "khrplatform::khrplatform"]
+        if self.options.glsupport_use_egl:
+            opengl_reqs.append("egl::egl")
         if self._build_opengl:
             if not self.options.shared:
                 _add_core_component("GLSupport", requires=opengl_reqs)
