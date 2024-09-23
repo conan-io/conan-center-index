@@ -32,6 +32,7 @@ class LibPcapConan(ConanFile):
         "enable_libnl": [True, False],
         "enable_libusb": [True, False],
         "enable_rdma": [True, False],
+        "with_snf": [True, False],
     }
     default_options = {
         "shared": False,
@@ -40,6 +41,7 @@ class LibPcapConan(ConanFile):
         "enable_libnl": False,
         "enable_libusb": False,
         "enable_rdma": False,
+        "with_snf": False,
     }
 
     @property
@@ -115,6 +117,7 @@ class LibPcapConan(ConanFile):
                 VirtualRunEnv(self).generate(scope="build")
 
             tc = AutotoolsToolchain(self)
+            yes_no = lambda v: "yes" if v else "no"
             tc.configure_args.extend([
                 "--disable-universal",  # don't build universal binaries on macOS
                 "--enable-usb" if self.options.get_safe("enable_libusb") else "--disable-usb",
@@ -122,6 +125,7 @@ class LibPcapConan(ConanFile):
                 "--enable-rdma" if self.options.get_safe("enable_rdma") else "--disable-rdma",
                 "--with-libnl" if self.options.get_safe("enable_libnl") else "--without-libnl",
                 "--disable-bluetooth",
+                f"--with-snf={yes_no(self.options.get_safe('with_snf'))}",
             ])
             if Version(self.version) < "1.10":
                 tc.configure_args.append("--disable-packet-ring")
@@ -189,3 +193,5 @@ class LibPcapConan(ConanFile):
             self.cpp_info.requires.append("rdma-core::libibverbs")
         if self.options.get_safe("enable_dbus"):
             self.cpp_info.requires.append("dbus::dbus")
+        if self.options.get_safe("with_snf"):
+            self.cpp_info.system_libs.append("snf")

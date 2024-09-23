@@ -38,6 +38,7 @@ class LibarchiveConan(ConanFile):
         "with_zstd": [True, False],
         "with_mbedtls": [True, False],
         "with_xattr": [True, False],
+        "with_pcre2": [True, False],
     }
     default_options = {
         "shared": False,
@@ -59,6 +60,7 @@ class LibarchiveConan(ConanFile):
         "with_zstd": False,
         "with_mbedtls": False,
         "with_xattr": False,
+        "with_pcre2": False,
     }
 
     def export_sources(self):
@@ -67,8 +69,8 @@ class LibarchiveConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "3.4.2":
-            del self.options.with_mbedtls
+        if Version(self.version) < "3.7.3":
+            del self.options.with_pcre2
 
     def configure(self):
         if self.options.shared:
@@ -85,13 +87,13 @@ class LibarchiveConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.12.3")
+            self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_expat:
-            self.requires("expat/2.5.0")
+            self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_iconv:
             self.requires("libiconv/1.17")
         if self.options.with_pcreposix:
-            self.requires("pcre2/10.42")
+            self.requires("pcre/8.45")
         if self.options.with_nettle:
             self.requires("nettle/3.9.1")
         if self.options.with_openssl:
@@ -103,11 +105,13 @@ class LibarchiveConan(ConanFile):
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5 <1.6]")
         if self.options.get_safe("with_mbedtls"):
-            self.requires("mbedtls/3.5.1")
+            self.requires("mbedtls/3.6.1")
+        if self.options.get_safe("with_pcre2"):
+            self.requires("pcre2/10.43")
 
     def validate(self):
         if self.settings.os != "Windows" and self.options.with_cng:
@@ -152,8 +156,9 @@ class LibarchiveConan(ConanFile):
         tc.variables["ENABLE_UNZIP"] = False
         # too strict check
         tc.variables["ENABLE_WERROR"] = False
-        if Version(self.version) >= "3.4.2":
-            tc.variables["ENABLE_MBEDTLS"] = self.options.with_mbedtls
+        tc.variables["ENABLE_MBEDTLS"] = self.options.with_mbedtls
+        if Version(self.version) >= "3.7.3":
+            tc.variables["ENABLE_PCRE2POSIX"] = self.options.with_pcre2
         tc.variables["ENABLE_XATTR"] = self.options.with_xattr
         # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
         if is_msvc(self):

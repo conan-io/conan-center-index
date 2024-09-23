@@ -1,4 +1,10 @@
 sources:
+  "3.13.0":
+    url: "https://github.com/libgeos/geos/releases/download/3.13.0/geos-3.13.0.tar.bz2"
+    sha256: "47ec83ff334d672b9e4426695f15da6e6368244214971fabf386ff8ef6df39e4"
+  "3.12.2":
+    url: "https://github.com/libgeos/geos/releases/download/3.12.2/geos-3.12.2.tar.bz2"
+    sha256: "34c7770bf0090ee88488af98767d08e779f124fa33437e0aabec8abd4609fec6"
   "3.12.0":
     url: "https://github.com/libgeos/geos/releases/download/3.12.0/geos-3.12.0.tar.bz2"
     sha256: "d96db96011259178a35555a0f6d6e75a739e52a495a6b2aa5efb3d75390fbc39"
@@ -17,9 +23,3 @@ sources:
   "3.10.2":
     url: "https://download.osgeo.org/geos/geos-3.10.2.tar.bz2"
     sha256: "50bbc599ac386b4c2b3962dcc411f0040a61f204aaef4eba7225ecdd0cf45715"
-patches:
-  "3.12.0":
-    - patch_file: "patches/3.12.0-0001-fix-cmake.patch"
-      patch_description: "Fix CMake on Windows with Visual Studio"
-      patch_type: "official"
-      patch_source: "https://github.com/libgeos/geos/pull/945"

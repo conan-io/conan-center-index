@@ -105,7 +105,7 @@ class PackageConan(ConanFile):
         self.tool_requires("libtool/x.y.z")
         # only if upstream configure.ac relies on PKG_CHECK_MODULES macro
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/x.y.z")
+            self.tool_requires("pkgconf/[>=1.2.3 <2]")
         # required to suppport windows as a build machine
         if self._settings_build.os == "Windows":
             self.win_bash = True
@@ -132,7 +132,7 @@ class PackageConan(ConanFile):
         # --enable/disable-shared is automatically managed when 'shared' option is declared
         tc = AutotoolsToolchain(self)
         # autotools usually uses 'yes' and 'no' to enable/disable options
-        yes_no = lambda v: "yes" if v else "no"
+        def yes_no(v): return "yes" if v else "no"
         tc.configure_args.extend([
             f"--with-foobar={yes_no(self.options.with_foobar)}",
             "--enable-tools=no",

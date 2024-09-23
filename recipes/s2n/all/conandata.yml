@@ -1,4 +1,19 @@
 sources:
+  "1.5.2":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.5.2.tar.gz"
+    sha256: "896d9f8f8e9bd2fdcb9a21b18aede4f7afc65bde279afabc60abf97fa5069dd1"
+  "1.5.1":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.5.1.tar.gz"
+    sha256: "d79710d6ef089097a3b84fc1e5cec2f08d1ec46e93b1d400df59fcfc859e15a3"
+  "1.5.0":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.5.0.tar.gz"
+    sha256: "5e86d97d8f24653ef3dff3abe6165169f0ba59cdf52b5264987125bba070174d"
+  "1.4.16":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.4.16.tar.gz"
+    sha256: "84fdbaa894c722bf13cac87b8579f494c1c2d66de642e5e6104638fddea76ad9"
+  "1.4.13":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.4.13.tar.gz"
+    sha256: "8b0b36697963d6752e5a1b49e28e393605990d348edf1aef6f39c33164d45edb"
   "1.4.1":
     url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.4.1.tar.gz"
     sha256: "d8c1d8e1142441412434feacb4947ce6430a244dcd8f58921af79b29bd901731"

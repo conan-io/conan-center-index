@@ -58,8 +58,8 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 
 ## Linux
 
-- Python: 3.7.13
-- CMake: 3.15.7, 3.18.2 (same version expected after all use [new docker images](https://github.com/conan-io/conan-docker-tools/tree/master/modern))
+- Python: 3.7.17
+- CMake: 3.15.7, 3.18.6 (same version expected after all use [new docker images](https://github.com/conan-io/conan-docker-tools/tree/master/modern))
 - Compilers:
   - GCC versions: 5, 7, 9, 11
   - Clang versions: 13

@@ -1,0 +1,7 @@
+sources:
+  "1.5.2":
+    url: "https://github.com/jll63/yomm2/archive/refs/tags/v1.5.2.tar.gz"
+    sha256: "12f3f735b4870606199b889a242ebfed84cf0cd392b04a1c32db11291de684be"
+  "1.5.1":
+    url: "https://github.com/jll63/yomm2/archive/refs/tags/v1.5.1.tar.gz"
+    sha256: "323abba27a356555cc3ead3e3e950746ab43f90d97ad21950f2ba3afaf565ecc"

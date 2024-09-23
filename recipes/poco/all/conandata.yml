@@ -1,7 +1,7 @@
 sources:
   "1.13.3":
     url: "https://github.com/pocoproject/poco/archive/poco-1.13.3-release.tar.gz"
-    sha256: "0f0012944924052ebbe90d74cd684f5bc5264be805010a177c5b8df1ce313e43"
+    sha256: "9f074d230daf30f550c5bde5528037bdab6aa83b2a06c81a25e89dd3bcb7e419"
   "1.13.2":
     url: "https://github.com/pocoproject/poco/archive/poco-1.13.2-release.tar.gz"
     sha256: "c01221870aa9bccedf1de39890279699207848fe61a0cfb6aeec7c5942c4627f"
