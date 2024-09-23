@@ -51,8 +51,11 @@ class CurlppConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        elif self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
-            raise ConanInvalidConfiguration("${self.ref} requires C++11. Please set 'compiler.cppstd=11'.")
+        else:
+            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
+                raise ConanInvalidConfiguration("${self.ref} requires C++11. Please set 'compiler.cppstd=11'.")
+            if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14":
+                raise ConanInvalidConfiguration("${self.ref} requires C++11. Please set 'compiler.cppstd=11'.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
