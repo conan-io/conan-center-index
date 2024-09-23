@@ -14,8 +14,7 @@ to configure plugins, warnings and errors which should be enabled or disabled.
 
   * [Understanding the different linters](#understanding-the-different-linters)
   * [Running the linters locally](#running-the-linters-locally)
-  * [Pylint configuration files](#pylint-configuration-files)
-  <!-- endToc -->
+  * [Pylint configuration files](#pylint-configuration-files)<!-- endToc -->
 
 ## Understanding the different linters
 
