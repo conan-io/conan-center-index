@@ -284,6 +284,7 @@ requirements:
   - zlib
   - zstd
   locale:
+  - iconv
   - icu
   python:
   - python
