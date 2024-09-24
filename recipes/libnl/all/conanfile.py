@@ -79,22 +79,22 @@ class LibNlConan(ConanFile):
 
         self.cpp_info.components["nl-genl"].libs = ["nl-genl-3"]
         self.cpp_info.components["nl-genl"].requires = ["nl"]
-        self.cpp_info.components["nl-genl"].set_property("pkg_config_name", "libnl-genl-3.0.pc")
+        self.cpp_info.components["nl-genl"].set_property("pkg_config_name", "libnl-genl-3.0")
 
         self.cpp_info.components["nl-nf"].libs = ["nl-nf-3"]
         self.cpp_info.components["nl-nf"].requires = ["nl-route"]
-        self.cpp_info.components["nl-nf"].set_property("pkg_config_name", "libnl-nf-3.0.pc")
+        self.cpp_info.components["nl-nf"].set_property("pkg_config_name", "libnl-nf-3.0")
 
         self.cpp_info.components["nl-cli"].libs = ["nl-cli-3"]
         self.cpp_info.components["nl-cli"].requires = ["nl-nf", "nl-genl"]
         self.cpp_info.components["nl-cli"].system_libs = ["dl"]
-        self.cpp_info.components["nl-cli"].set_property("pkg_config_name", "libnl-cli-3.0.pc")
+        self.cpp_info.components["nl-cli"].set_property("pkg_config_name", "libnl-cli-3.0")
 
         self.cpp_info.components["nl-idiag"].libs = ["nl-idiag-3"]
         self.cpp_info.components["nl-idiag"].requires = ["nl"]
-        self.cpp_info.components["nl-idiag"].set_property("pkg_config_name", "libnl-idiag-3.0.pc")
+        self.cpp_info.components["nl-idiag"].set_property("pkg_config_name", "libnl-idiag-3.0")
 
         if Version(self.version) >= "3.3.0":
             self.cpp_info.components["nl-xfrm"].libs = ["nl-xfrm-3"]
-            self.cpp_info.components["nl-idiag"].requires = ["nl"]
-            self.cpp_info.components["nl-idiag"].set_property("pkg_config_name", "libnl-xfrm-3.0.pc")
+            self.cpp_info.components["nl-xfrm"].requires = ["nl"]
+            self.cpp_info.components["nl-xfrm"].set_property("pkg_config_name", "libnl-xfrm-3.0")
