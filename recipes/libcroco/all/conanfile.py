@@ -71,6 +71,9 @@ class LibcrocoConan(ConanFile):
         # ./configure fails in C3I otherwise with:
         # error: -Bsymbolic requested but not supported by ld
         tc.configure_args.append("--disable-Bsymbolic")
+        if is_msvc(self):
+            tc.extra_cflags.append("-FS")
+            tc.extra_cxxflags.append("-FS")
         tc.generate()
 
         deps = PkgConfigDeps(self)
