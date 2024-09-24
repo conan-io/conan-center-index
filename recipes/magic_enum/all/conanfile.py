@@ -1,10 +1,11 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get, mkdir, rmdir
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get
+from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
-import os
 
 required_conan_version = ">=1.50.0"
 
@@ -39,7 +40,7 @@ class MagicEnumConan(ConanFile):
         }
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
@@ -56,28 +57,20 @@ class MagicEnumConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.generate()
-
-    def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
-
     def package(self):
-        cmake = CMake(self)
-        cmake.install()
-        if Version(self.version) >= "0.9.4" and Version(self.version) <= "0.9.6":
-            mkdir(self, os.path.join(self.package_folder, "include/magic_enum"))
-            copy(self, "*", src=os.path.join(self.package_folder, "include"), dst=os.path.join(self.package_folder, "include/magic_enum"))
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        if Version(self.version) >= "0.9.4":
+            copy(self, "*",
+                 os.path.join(self.source_folder, "include"),
+                 os.path.join(self.package_folder, "include"))
+        else:
+            copy(self, "*",
+                 os.path.join(self.source_folder, "include"),
+                 os.path.join(self.package_folder, "include", "magic_enum"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "magic_enum")
         self.cpp_info.set_property("cmake_target_name", "magic_enum::magic_enum")
+        self.cpp_info.includedirs.append(os.path.join("include", "magic_enum"))
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
