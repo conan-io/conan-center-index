@@ -16,6 +16,8 @@ class OpenJDK(ConanFile):
     license = "GPL-2.0-only WITH Classpath-exception-2.0", "GPL-2.0-only WITH OpenJDK-assembly-exception-1.0"
     topics = ("java", "jdk", "openjdk")
     settings = "os", "arch", "compiler", "build_type"
+    upload_policy = "skip"
+    build_policy = "missing"
 
     def package_id(self):
         del self.info.settings.compiler
@@ -23,7 +25,7 @@ class OpenJDK(ConanFile):
 
     def configure(self):
         self.settings.rm_safe("os.version")
-        
+
     def validate(self):
         if Version(self.version) < "19.0.2" and self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Unsupported Architecture.  This package currently only supports x86_64.")

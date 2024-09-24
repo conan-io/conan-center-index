@@ -77,7 +77,7 @@ class GrpcConan(ConanFile):
 
     def export(self):
         copy(self, f"target_info/grpc_{self.version}.yml", src=self.recipe_folder, dst=self.export_folder)
-    
+
     def export_sources(self):
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
         copy(self, f"cmake/{self._grpc_plugin_template}", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
@@ -101,12 +101,14 @@ class GrpcConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # abseil is public. See https://github.com/conan-io/conan-center-index/pull/17284#issuecomment-1526082638
+        # abseil requires:
+        # transitive_headers=True because grpc headers include abseil headers
+        # transitive_libs=True because generated code (grpc_cpp_plugin) require symbols from abseil
         if Version(self.version) >= "1.62.0":
             self.requires("protobuf/5.27.0", transitive_headers=True)
-            self.requires("abseil/[>=20240116.1 <20240117.0]", transitive_headers=True)
+            self.requires("abseil/[>=20240116.1 <20240117.0]", transitive_headers=True, transitive_libs=True)
         else:
-            self.requires("abseil/[>=20230125.3 <=20230802.1]", transitive_headers=True)
+            self.requires("abseil/[>=20230125.3 <=20230802.1]", transitive_headers=True, transitive_libs=True)
             self.requires("protobuf/3.21.12", transitive_headers=True)
         self.requires("c-ares/[>=1.19.1 <2]")
         self.requires("openssl/[>=1.1 <4]")
@@ -195,6 +197,9 @@ class GrpcConan(ConanFile):
 
         if self._supports_libsystemd:
             tc.cache_variables["gRPC_USE_SYSTEMD"] = self.options.with_libsystemd
+        
+        if Version(self.version) >= "1.62.0":
+            tc.cache_variables["gRPC_DOWNLOAD_ARCHIVES"] = False
 
         tc.generate()
 
@@ -225,7 +230,7 @@ class GrpcConan(ConanFile):
                             'COMMAND ${CMAKE_COMMAND} -E env "LD_LIBRARY_PATH=$<JOIN:${CMAKE_LIBRARY_PATH},:>:$ENV{LD_LIBRARY_PATH}" ${_gRPC_PROTOBUF_PROTOC_EXECUTABLE}')
         if self.settings.os == "Macos" and Version(self.version) >= "1.64":
             # See https://github.com/grpc/grpc/issues/36654#issuecomment-2228569158
-            replace_in_file(self, cmakelists, "target_compile_features(upb_textformat_lib PUBLIC cxx_std_14)", 
+            replace_in_file(self, cmakelists, "target_compile_features(upb_textformat_lib PUBLIC cxx_std_14)",
             """target_compile_features(upb_textformat_lib PUBLIC cxx_std_14)
             target_link_options(upb_textformat_lib PRIVATE -Wl,-undefined,dynamic_lookup)
             target_link_options(upb_json_lib PRIVATE -Wl,-undefined,dynamic_lookup)
