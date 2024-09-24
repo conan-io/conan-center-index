@@ -552,6 +552,13 @@ class AwsSdkCppConan(ConanFile):
         if self._settings_build.os == "Windows" and self.settings.os == "Android":
             raise ConanInvalidConfiguration("Cross-building from Windows to Android is not supported")
 
+    def validate(self):
+        if is_msvc(self) and is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration("Static runtime is not working for more recent releases")
+        if (is_msvc(self) and self.options.shared
+                and not self.dependencies["aws-c-common"].options.shared):
+            raise ConanInvalidConfiguration(f"{self.ref} with shared is not supported with aws-c-common static")
+
         if (self.options.shared
                 and self.settings.compiler == "gcc"
                 and Version(self.settings.compiler.version) < "6.0"):
@@ -559,13 +566,6 @@ class AwsSdkCppConan(ConanFile):
                 "Doesn't support gcc5 / shared. "
                 "See https://github.com/conan-io/conan-center-index/pull/4401#issuecomment-802631744"
             )
-
-    def validate(self):
-        if is_msvc(self) and is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration("Static runtime is not working for more recent releases")
-        if (is_msvc(self) and self.options.shared
-                and not self.dependencies["aws-c-common"].options.shared):
-            raise ConanInvalidConfiguration(f"{self.ref} with shared is not supported with aws-c-common static")
 
         # If the user has explicitly set a main module dependency to False,
         # error out if the main module itself is not also disabled
