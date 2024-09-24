@@ -58,8 +58,11 @@ class CppServerPackage(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # Used in asio/asio.h public header
         self.requires("asio/1.27.0", transitive_headers=True, transitive_libs=True)
+        # Used in transitive asio/ssl.hpp header from asio
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
+        # threads/thread.h used in asio/service.h public header
         self.requires("cppcommon/1.0.3.0", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
