@@ -36,6 +36,10 @@ class JsonStructConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
+        
+        compiler_version = self._min_compiler_versions.get(str(self.settings.compiler))
+        if compiler_version and (Version(self.settings.compiler.version) < compiler_version):
+            raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd} with {self.settings.compiler} {compiler_version} or newer")
 
     def layout(self):
         basic_layout(self, src_folder="src")
