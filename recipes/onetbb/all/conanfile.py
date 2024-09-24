@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -52,7 +53,9 @@ class OneTBBConan(ConanFile):
 
     @property
     def _tbbbind_supported(self):
-        return self.settings.os != "Macos" or Version(self.version) >= "2021.11.0"
+        if is_apple_os(self):
+            return self.settings.os == "Macos" and Version(self.version) >= "2021.11.0"
+        return True
 
     @property
     def _tbbbind_build(self):
