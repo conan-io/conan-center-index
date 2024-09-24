@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir
@@ -50,6 +51,10 @@ class LibcrocoConan(ConanFile):
         # Both are used in several public headers
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         self.requires("libxml2/[>=2.12.5 <3]", transitive_headers=True, transitive_libs=True)
+
+    def validate(self):
+        if is_msvc(self) and self.options.shared:
+            raise ConanInvalidConfiguration("Shared builds are not supported with MSVC")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
