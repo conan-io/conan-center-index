@@ -110,7 +110,7 @@ class ImguiConan(ConanFile):
             del self.options.backend_osx
             del self.options.enable_metal_cpp
             del self.options.enable_osx_clipboard
-        if Version(self.version) < "1.89.8":
+        if Version(self.version) < "1.90":
             del self.options.enable_freetype_lunasvg
         if Version(self.version) < "1.89.6":
             del self.options.backend_sdl2
