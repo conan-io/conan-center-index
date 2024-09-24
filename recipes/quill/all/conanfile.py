@@ -60,7 +60,6 @@ class QuillConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-
     def _patch_sources(self):
         # remove bundled fmt
         rmdir(self, os.path.join(self.source_folder, "quill", "quill", "include", "quill", "bundled", "fmt"))
