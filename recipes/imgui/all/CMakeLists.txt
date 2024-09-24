@@ -26,6 +26,8 @@ generate_export_header(imgui
     EXPORT_MACRO_NAME IMGUI_API
     EXPORT_FILE_NAME ${IMGUI_EXPORT_HEADER}
 )
+# Enable __declspec(dllexport) in backend libs as well
+add_compile_definitions(imgui_EXPORTS)
 
 if(IMGUI_IMPL_ALLEGRO5)
     find_package(Allegro CONFIG REQUIRED)
