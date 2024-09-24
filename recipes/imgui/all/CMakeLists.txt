@@ -13,13 +13,13 @@ add_library(imgui
     imgui_widgets.cpp
     misc/cpp/imgui_stdlib.cpp
 )
+target_include_directories(imgui PUBLIC ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
+
 set_target_properties(imgui PROPERTIES
     CXX_VISIBILITY_PRESET hidden
     OBJCXX_VISIBILITY_PRESET hidden
     VISIBILITY_INLINES_HIDDEN ON
 )
-target_include_directories(imgui PUBLIC ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
-
 set(IMGUI_EXPORT_HEADER imgui_export.h)
 include(GenerateExportHeader)
 generate_export_header(imgui
@@ -28,6 +28,21 @@ generate_export_header(imgui
 )
 # Enable __declspec(dllexport) in backend libs as well
 add_compile_definitions(imgui_EXPORTS)
+
+if(IMGUI_FREETYPE)
+    find_package(freetype CONFIG REQUIRED)
+    target_sources(imgui PRIVATE misc/freetype/imgui_freetype.cpp)
+    target_link_libraries(imgui PRIVATE freetype)
+    install(FILES misc/freetype/imgui_freetype.h DESTINATION include)
+    if(IMGUI_FREETYPE_LUNASVG)
+        find_package(lunasvg CONFIG REQUIRED)
+        target_link_libraries(imgui PRIVATE lunasvg::lunasvg)
+    endif()
+endif()
+
+if(IMGUI_ENABLE_OSX_DEFAULT_CLIPBOARD_FUNCTIONS)
+    target_link_libraries(imgui PRIVATE "-framework ApplicationServices")
+endif()
 
 if(IMGUI_IMPL_ALLEGRO5)
     find_package(Allegro CONFIG REQUIRED)
@@ -167,24 +182,9 @@ if(IMGUI_IMPL_WIN32)
     list(APPEND IMGUI_COMPONENTS imgui-win32)
 endif()
 
-if(IMGUI_FREETYPE)
-    find_package(freetype CONFIG REQUIRED)
-    target_sources(imgui PRIVATE misc/freetype/imgui_freetype.cpp)
-    target_link_libraries(imgui PRIVATE freetype)
-    install(FILES misc/freetype/imgui_freetype.h DESTINATION include)
-    if(IMGUI_FREETYPE_LUNASVG)
-        find_package(lunasvg CONFIG REQUIRED)
-        target_link_libraries(imgui PRIVATE lunasvg::lunasvg)
-    endif()
-endif()
-
 foreach(component ${IMGUI_COMPONENTS})
     target_link_libraries(${component} PUBLIC imgui)
 endforeach()
-
-if(IMGUI_ENABLE_OSX_DEFAULT_CLIPBOARD_FUNCTIONS)
-    target_link_libraries(imgui PRIVATE "-framework ApplicationServices")
-endif()
 
 if(IMGUI_IMPL_TOOLS)
     add_executable(binary_to_compressed_c misc/fonts/binary_to_compressed_c.cpp)
