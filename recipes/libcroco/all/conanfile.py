@@ -68,6 +68,9 @@ class LibcrocoConan(ConanFile):
         VirtualBuildEnv(self).generate()
 
         tc = AutotoolsToolchain(self)
+        # ./configure fails in C3I otherwise with:
+        # error: -Bsymbolic requested but not supported by ld
+        tc.configure_args.append("--disable-Bsymbolic")
         tc.generate()
 
         deps = PkgConfigDeps(self)
