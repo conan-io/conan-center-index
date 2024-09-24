@@ -278,8 +278,8 @@ class OgreConanFile(ConanFile):
         if self.options.build_component_overlay:
             self.requires("freetype/2.13.2")
             if self.options.build_component_overlay_imgui:
-                # Used in Overlay/OgreImGuiOverlay.h public heder
-                self.requires("imgui/1.91.0", transitive_headers=True, transitive_libs=True)
+                # Used in Overlay/OgreImGuiOverlay.h public header
+                self.requires("imgui/1.91.2", transitive_headers=True, transitive_libs=True)
         if self.options.build_plugin_assimp:
             self.requires("assimp/5.4.2")
         if self.options.build_plugin_exrcodec:
