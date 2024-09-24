@@ -117,9 +117,6 @@ class SdbusCppConan(ConanFile):
 
         deps = PkgConfigDeps(self)
         deps.generate()
-        # workaround for https://gitlab.kitware.com/cmake/cmake/-/issues/18150
-        copy(self, "*.pc", self.generators_folder,
-             os.path.join(self.generators_folder, "lib", "pkgconfig"))
 
         if self.options.with_code_gen:
             deps = CMakeDeps(self)
