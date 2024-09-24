@@ -478,12 +478,12 @@ class AwsSdkCppConan(ConanFile):
 
         # If the user does not specify a value for a specific sdk:
         # - Set it to True if it's a dependency of a main module that is set to True
-
         for module, dependencies in self._internal_requirements.items():
             if self.options.get_safe(module):
                 for dependency in dependencies:
                     # Don't listen to the linter, get_safe should be compared like this to None
-                    if self.options.get_safe(dependency) == None:
+                    # TODO: Remove str comparison when Conan 1 is disabled
+                    if str(self.options.get_safe(dependency)) == "None":
                         setattr(self.options, dependency, True)
 
         # - Otherwise set it to False
@@ -569,9 +569,9 @@ class AwsSdkCppConan(ConanFile):
 
         # If the user has explicitly set a main module dependency to False,
         # error out if the main module itself is not also disabled
-        for main_module in self._internal_requirements:
+        for main_module, dependencies in self._internal_requirements.items():
             if self.options.get_safe(main_module):
-                for internal_requirement in self._internal_requirements[main_module]:
+                for internal_requirement in dependencies:
                     if not self.options.get_safe(internal_requirement):
                         raise ConanInvalidConfiguration(f"-o={self.ref}:{main_module}=True requires -o={self.ref}:{internal_requirement}=True")
 
