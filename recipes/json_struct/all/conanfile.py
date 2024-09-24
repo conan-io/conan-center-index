@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 import os
@@ -32,9 +33,15 @@ class JsonStructConan(ConanFile):
             "Visual Studio": "15",
         }
 
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
+    
+    def package_id(self):
+        self.info.clear()
 
     # Copy all files to the package folder
     def package(self):
