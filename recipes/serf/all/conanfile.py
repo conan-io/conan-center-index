@@ -172,7 +172,7 @@ class SerfConan(ConanFile):
         else:
             ext_to_remove = self._static_ext if self.options.shared else self._shared_ext
             for fn in os.listdir(os.path.join(self.package_folder, "lib")):
-                if any(re.finditer("\\.{}(\.?|$)".format(ext_to_remove), fn)):
+                if any(re.finditer(rf"\.{ext_to_remove}(\.?|$)", fn)):
                     os.unlink(os.path.join(self.package_folder, "lib", fn))
             fix_apple_shared_install_name(self)
 
