@@ -6,10 +6,12 @@
 // This comes from the following Boost example:
 // https://github.com/boostorg/process/blob/boost-1.86.0/example/v2/intro.cpp
 
-#include <boost/process/v2.hpp>
-
+// clang-format: off
 #include <boost/asio/read.hpp>
 #include <boost/asio/readable_pipe.hpp>
+// clang-format: on
+
+#include <boost/process/v2.hpp>
 #include <boost/system/error_code.hpp>
 
 #include <string>
