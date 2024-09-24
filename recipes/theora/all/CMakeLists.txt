@@ -96,9 +96,7 @@ else()
 endif()
 
 
-if (MSVC AND BUILD_SHARED_LIBS)
-   set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif ()
+set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 add_library(theora ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC} ${LIBTHEORA_DEC})
 add_library(theoraenc ${LIBTHEORA_COMMON} ${LIBTHEORA_ENC})
