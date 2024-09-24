@@ -14,7 +14,7 @@ class ConfuJson(ConanFile):
     name = "confu_json"
     homepage = "https://github.com/werto87/confu_json"
     description = "uses boost::fusion to help with serialization; json <-> user defined type"
-    topics = ("json parse", "serialization", "user defined type")
+    topics = ("json", "serialization", "user-defined-type")
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "header-library"
@@ -85,3 +85,4 @@ class ConfuJson(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.requires = ["boost::headers", "magic_enum::magic_enum"]
