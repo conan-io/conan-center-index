@@ -24,7 +24,10 @@ class RaylibConan(ConanFile):
         "opengl_version": [None, "4.3", "3.3", "2.1", "1.1", "ES-2.0"],
 
         "customize_build": [True, False],  
-        "module_raudio": [True, False],  
+        "module_raudio": [True, False],
+        "camera_system": [True, False],
+        "gestures_system": [True, False],
+        "rprand_generator": [True, False],
         "events_waiting": [True, False],  
         "custom_frame_control": [True, False]
     }
@@ -33,9 +36,12 @@ class RaylibConan(ConanFile):
         "fPIC": True,
         "opengl_version": None,
 
-        "customize_build": False,  
-        "module_raudio": True,  
-        "events_waiting": False,  
+        "customize_build": False, 
+        "module_raudio": True, 
+        "camera_system": False,
+        "gestures_system": False,
+        "rprand_generator": False,
+        "events_waiting": False, 
         "custom_frame_control": False
     }
 
@@ -94,10 +100,10 @@ class RaylibConan(ConanFile):
             tc.variables["SUPPORT_EVENTS_WAITING"] = self.options.get_safe("events_waiting")  
             tc.variables["SUPPORT_CUSTOM_FRAME_CONTROL"] = self.options.get_safe("custom_frame_control")
 
-        # this makes it include the headers rcamera.h, rgesture.h and rprand.h
-        tc.variables["SUPPORT_CAMERA_SYSTEM"]    = "ON"
-        tc.variables["SUPPORT_GESTURES_SYSTEM"]  = "ON"
-        tc.variables["SUPPORT_RPRAND_GENERATOR"] = "ON"
+            # this makes it include the headers rcamera.h, rgesture.h and rprand.h
+            tc.variables["SUPPORT_CAMERA_SYSTEM"]    = self.options.get_safe("camera_system")
+            tc.variables["SUPPORT_GESTURES_SYSTEM"]  = self.options.get_safe("gestures_system")
+            tc.variables["SUPPORT_RPRAND_GENERATOR"] = self.options.get_safe("rprand_generator")
 
         # Due to a specific logic of cmakedeps_macros.cmake used by CMakeDeps to try to locate shared libs on Windows
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0054"] = "NEW"
@@ -125,6 +131,11 @@ class RaylibConan(ConanFile):
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"raylib": "raylib::raylib"}
         )
+
+        
+        copy(self, pattern="rcamera.h", dst=os.path.join(self.package_folder, "res"), src=os.path.join(self.source_folder, "src"))
+        copy(self, pattern="rgestures.h", dst=os.path.join(self.package_folder, "res"), src=os.path.join(self.source_folder, "src"))
+        copy(self, pattern="rprand.h", dst=os.path.join(self.package_folder, "res", "external"), src=os.path.join(self.source_folder, "src", "external"))
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
