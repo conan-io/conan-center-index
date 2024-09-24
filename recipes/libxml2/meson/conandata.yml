@@ -1,0 +1,4 @@
+sources:
+  "2.13.3":
+    url: "https://download.gnome.org/sources/libxml2/2.13/libxml2-2.13.3.tar.xz"
+    sha256: "0805d7c180cf09caad71666c7a458a74f041561a532902454da5047d83948138"
