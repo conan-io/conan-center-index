@@ -48,12 +48,12 @@ class FclConan(ConanFile):
 
     def requirements(self):
         # Used in fcl/common/types.h public header
-        self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
+        self.requires("eigen/3.4.0", transitive_headers=True)
         # Used in fcl/narrowphase/detail/convexity_based_algorithm/support.h
         self.requires("libccd/2.1", transitive_headers=True, transitive_libs=True)
         if self.options.with_octomap:
             # Used in fcl/geometry/octree/octree.h
-            self.requires("octomap/1.9.7", transitive_headers=True, transitive_libs=True)
+            self.requires("octomap/1.9.7", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
