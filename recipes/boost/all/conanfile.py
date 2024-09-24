@@ -47,6 +47,7 @@ CONFIGURE_OPTIONS = (
     "math",
     "mpi",
     "nowide",
+    "process",
     "program_options",
     "python",
     "random",
