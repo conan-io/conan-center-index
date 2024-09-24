@@ -4,6 +4,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -16,6 +17,7 @@ class LibNlConan(ConanFile):
     homepage = "https://github.com/thom311/libnl"
     topics = ("netlink")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "fPIC": [True, False],
         "shared": [True, False],
@@ -92,6 +94,7 @@ class LibNlConan(ConanFile):
         self.cpp_info.components["nl-idiag"].requires = ["nl"]
         self.cpp_info.components["nl-idiag"].set_property("pkg_config_name", "libnl-idiag-3.0.pc")
 
-        self.cpp_info.components["nl-xfrm"].libs = ["nl-xfrm-3"]
-        self.cpp_info.components["nl-idiag"].requires = ["nl"]
-        self.cpp_info.components["nl-idiag"].set_property("pkg_config_name", "libnl-xfrm-3.0.pc")
+        if Version(self.version) >= "3.3.0":
+            self.cpp_info.components["nl-xfrm"].libs = ["nl-xfrm-3"]
+            self.cpp_info.components["nl-idiag"].requires = ["nl"]
+            self.cpp_info.components["nl-idiag"].set_property("pkg_config_name", "libnl-xfrm-3.0.pc")
