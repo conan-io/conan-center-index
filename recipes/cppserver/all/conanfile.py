@@ -63,7 +63,7 @@ class CppServerPackage(ConanFile):
         # Used in transitive asio/ssl.hpp header from asio
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
         # threads/thread.h used in asio/service.h public header
-        self.requires("cppcommon/1.0.3.0", transitive_headers=True, transitive_libs=True)
+        self.requires("cppcommon/1.0.4.0", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
