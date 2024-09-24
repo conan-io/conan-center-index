@@ -4,8 +4,8 @@ from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import chdir, copy, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.files import chdir, copy, get, rm, rmdir, rename
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
@@ -137,8 +137,19 @@ class LibPcapConan(ConanFile):
             tc.generate()
 
             AutotoolsDeps(self).generate()
+            pkg_config_deps = PkgConfigDeps(self)
+            # FIXME: https://github.com/conan-io/conan/issues/17048
+            pkg_config_deps.set_property("libnl::nl-genl", "pkg_config_name", "libnl-genl-3.0")
+            pkg_config_deps.generate()
+
+    def _patch_sources(self):
+        # TODO: Remove this after having https://github.com/conan-io/conan/issues/17048 fixed
+        if os.path.exists(os.path.join(self.generators_folder, "libnl-nl-genl.pc")):
+            rename(self, os.path.join(self.generators_folder, "libnl-nl-genl.pc"),
+                    os.path.join(self.generators_folder, "libnl-genl-3.0.pc"))
 
     def build(self):
+        self._patch_sources()
         if self.settings.os == "Windows":
             cmake = CMake(self)
             cmake.configure()
