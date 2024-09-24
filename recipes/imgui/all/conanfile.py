@@ -165,7 +165,7 @@ class ImguiConan(ConanFile):
         if self.options.enable_freetype:
             self.requires("freetype/2.13.2")
             if self.options.enable_freetype_lunasvg:
-                self.requires("lunasvg/2.4.0")
+                self.requires("lunasvg/2.4.1")
 
     def validate(self):
         if self.settings.compiler.cppstd:
