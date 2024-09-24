@@ -77,12 +77,12 @@ class FclConan(ConanFile):
         tc.cache_variables["FCL_COVERALLS_UPLOAD"] = False
         tc.cache_variables["FCL_WITH_OCTOMAP"] = self.options.with_octomap
         if self.options.with_octomap:
-            octomap_version_str = self.dependencies["octomap"].ref.version
+            octomap_version_str = str(self.dependencies["octomap"].ref.version)
             tc.cache_variables["OCTOMAP_VERSION"] = octomap_version_str
             octomap_version = Version(octomap_version_str)
-            tc.cache_variables["OCTOMAP_MAJOR_VERSION"] = octomap_version.major
-            tc.cache_variables["OCTOMAP_MINOR_VERSION"] = octomap_version.minor
-            tc.cache_variables["OCTOMAP_PATCH_VERSION"] = octomap_version.patch
+            tc.cache_variables["OCTOMAP_MAJOR_VERSION"] = str(octomap_version.major)
+            tc.cache_variables["OCTOMAP_MINOR_VERSION"] = str(octomap_version.minor)
+            tc.cache_variables["OCTOMAP_PATCH_VERSION"] = str(octomap_version.patch)
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["FCL_NO_DEFAULT_RPATH"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
