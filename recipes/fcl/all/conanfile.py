@@ -66,25 +66,25 @@ class FclConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["FCL_ENABLE_PROFILING"] = False
-        tc.variables["FCL_TREAT_WARNINGS_AS_ERRORS"] = False
-        tc.variables["FCL_HIDE_ALL_SYMBOLS"] = False
-        tc.variables["FCL_STATIC_LIBRARY"] = not self.options.shared
-        tc.variables["FCL_USE_X64_SSE"] = False # Let consumer decide to add relevant compile options, fcl doesn't have simd intrinsics
-        tc.variables["FCL_USE_HOST_NATIVE_ARCH"] = False
-        tc.variables["FCL_USE_SSE"] = False
-        tc.variables["FCL_COVERALLS"] = False
-        tc.variables["FCL_COVERALLS_UPLOAD"] = False
-        tc.variables["FCL_WITH_OCTOMAP"] = self.options.with_octomap
+        tc.cache_variables["FCL_ENABLE_PROFILING"] = False
+        tc.cache_variables["FCL_TREAT_WARNINGS_AS_ERRORS"] = False
+        tc.cache_variables["FCL_HIDE_ALL_SYMBOLS"] = False
+        tc.cache_variables["FCL_STATIC_LIBRARY"] = not self.options.shared
+        tc.cache_variables["FCL_USE_X64_SSE"] = False # Let consumer decide to add relevant compile options, fcl doesn't have simd intrinsics
+        tc.cache_variables["FCL_USE_HOST_NATIVE_ARCH"] = False
+        tc.cache_variables["FCL_USE_SSE"] = False
+        tc.cache_variables["FCL_COVERALLS"] = False
+        tc.cache_variables["FCL_COVERALLS_UPLOAD"] = False
+        tc.cache_variables["FCL_WITH_OCTOMAP"] = self.options.with_octomap
         if self.options.with_octomap:
             octomap_version_str = self.dependencies["octomap"].ref.version
-            tc.variables["OCTOMAP_VERSION"] = octomap_version_str
+            tc.cache_variables["OCTOMAP_VERSION"] = octomap_version_str
             octomap_version = Version(octomap_version_str)
-            tc.variables["OCTOMAP_MAJOR_VERSION"] = octomap_version.major
-            tc.variables["OCTOMAP_MINOR_VERSION"] = octomap_version.minor
-            tc.variables["OCTOMAP_PATCH_VERSION"] = octomap_version.patch
-        tc.variables["BUILD_TESTING"] = False
-        tc.variables["FCL_NO_DEFAULT_RPATH"] = False
+            tc.cache_variables["OCTOMAP_MAJOR_VERSION"] = octomap_version.major
+            tc.cache_variables["OCTOMAP_MINOR_VERSION"] = octomap_version.minor
+            tc.cache_variables["OCTOMAP_PATCH_VERSION"] = octomap_version.patch
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["FCL_NO_DEFAULT_RPATH"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
