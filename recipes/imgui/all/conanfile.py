@@ -80,7 +80,7 @@ class ImguiConan(ConanFile):
         "backend_vulkan": True,
         "backend_win32": True,
         # Other options
-        "enable_freetype": False,
+        "enable_freetype": True,
         "enable_freetype_lunasvg": False,
         "enable_metal_cpp": False,
         "enable_osx_clipboard": True,
@@ -270,12 +270,10 @@ class ImguiConan(ConanFile):
         elif is_apple_os(self):
             if self.options.enable_osx_clipboard:
                 self.cpp_info.components["core"].frameworks.append("ApplicationServices")
-
         if self.options.enable_freetype:
-            self.cpp_info.components["freetype"].libs = ["imgui-freetype"]
-            self.cpp_info.components["freetype"].requires.append("freetype::freetype")
+            self.cpp_info.components["core"].requires.append("freetype::freetype")
             if self.options.enable_freetype_lunasvg:
-                self.cpp_info.components["freetype"].requires.append("lunasvg::lunasvg")
+                self.cpp_info.components["core"].requires.append("lunasvg::lunasvg")
 
         def _add_binding(name, requires=None, system_libs=None, frameworks=None):
             if self.options.get_safe(f"backend_{name}"):
