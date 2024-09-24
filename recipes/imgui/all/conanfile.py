@@ -110,6 +110,8 @@ class ImguiConan(ConanFile):
             del self.options.backend_osx
             del self.options.enable_metal_cpp
             del self.options.enable_osx_clipboard
+        if Version(self.version) < "1.89.8":
+            del self.options.enable_freetype_lunasvg
         if Version(self.version) < "1.89.6":
             del self.options.backend_sdl2
             del self.options.backend_sdlrenderer2
@@ -139,7 +141,7 @@ class ImguiConan(ConanFile):
             self.options.rm_safe("backend_win32")
             self.options.rm_safe("backend_wgpu")
         if not self.options.enable_freetype:
-            del self.options.enable_freetype_lunasvg
+            self.options.rm_safe("enable_freetype_lunasvg")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -164,7 +166,7 @@ class ImguiConan(ConanFile):
         #     self.requires("dawn/cci.20240726")
         if self.options.enable_freetype:
             self.requires("freetype/2.13.2")
-            if self.options.enable_freetype_lunasvg:
+            if self.options.get_safe("enable_freetype_lunasvg"):
                 self.requires("lunasvg/2.4.1")
 
     def validate(self):
@@ -272,7 +274,7 @@ class ImguiConan(ConanFile):
                 self.cpp_info.components["core"].frameworks.append("ApplicationServices")
         if self.options.enable_freetype:
             self.cpp_info.components["core"].requires.append("freetype::freetype")
-            if self.options.enable_freetype_lunasvg:
+            if self.options.get_safe("enable_freetype_lunasvg"):
                 self.cpp_info.components["core"].requires.append("lunasvg::lunasvg")
 
         def _add_binding(name, requires=None, system_libs=None, frameworks=None):
