@@ -47,10 +47,13 @@ class FclConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("eigen/3.4.0")
-        self.requires("libccd/2.1")
+        # Used in fcl/common/types.h public header
+        self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
+        # Used in fcl/narrowphase/detail/convexity_based_algorithm/support.h
+        self.requires("libccd/2.1", transitive_headers=True, transitive_libs=True)
         if self.options.with_octomap:
-            self.requires("octomap/1.9.7")
+            # Used in fcl/geometry/octree/octree.h
+            self.requires("octomap/1.9.7", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -82,6 +85,7 @@ class FclConan(ConanFile):
             tc.variables["OCTOMAP_PATCH_VERSION"] = octomap_version.patch
         tc.variables["BUILD_TESTING"] = False
         tc.variables["FCL_NO_DEFAULT_RPATH"] = False
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         cd = CMakeDeps(self)
