@@ -484,14 +484,12 @@ class OgreConanFile(ConanFile):
             set(OGRE_PLUGIN_DIR "${{OGRE_PREFIX_DIR}}/{self._to_cmake_path(self._plugins_dir)}")
             set(OGRE_CONFIG_DIR "${{OGRE_PREFIX_DIR}}/{self._to_cmake_path(self._config_dir)}")
         """)
-
         # TODO:
         #  - OGRE_LIBRARIES
         #  - OGRE_PLUGINS
         #  - OGRE_COMPONENTS
         #  - OGRE_${COMPONENT}_FOUND
         #  - OGRE_${COMPONENT}_LIBRARIES
-
         save(self, module_file, content)
 
     def package(self):
@@ -552,27 +550,31 @@ class OgreConanFile(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components[comp].system_libs.append("pthread")
 
-        def _add_core_component(comp, *, requires=None):
+        def _add_core_component(comp, *, requires=None, extra_includedirs=None):
+            if extra_includedirs is None:
+                extra_includedirs = [os.path.join(self._include_dir, comp)]
             _add_component(
                 comp,
                 libs=[self._core_libname(f"Ogre{comp}")],
                 libdirs=["lib"],
-                extra_includedirs=[os.path.join(self._include_dir, comp)],
+                extra_includedirs=extra_includedirs,
                 requires=requires,
             )
 
-        def _add_plugin_component(comp, *, requires=None):
-            if comp.startswith("RenderSystem_"):
-                includedir = os.path.join(self._include_dir, "RenderSystems", comp.replace("RenderSystem_", ""))
-            elif comp.startswith("Codec_"):
-                includedir = os.path.join(self._include_dir, "Plugins", f"{comp.replace('Codec_', '')}Codec")
-            else:
-                includedir = os.path.join(self._include_dir, "Plugins", comp.replace("Plugin_", ""))
+        def _add_plugin_component(comp, *, requires=None, extra_includedirs=None):
+            if extra_includedirs is None:
+                if comp.startswith("RenderSystem_"):
+                    includedir = os.path.join(self._include_dir, "RenderSystems", comp.replace("RenderSystem_", ""))
+                elif comp.startswith("Codec_"):
+                    includedir = os.path.join(self._include_dir, "Plugins", f"{comp.replace('Codec_', '')}Codec")
+                else:
+                    includedir = os.path.join(self._include_dir, "Plugins", comp.replace("Plugin_", ""))
+                extra_includedirs = [includedir]
             _add_component(
                 comp,
                 libs=[self._plugin_libname(comp)],
                 libdirs=[self._plugins_dir],
-                extra_includedirs=[includedir],
+                extra_includedirs=extra_includedirs,
                 requires=requires,
             )
             if self.options.get_safe("bites_static_plugins", not self.options.shared):
@@ -625,12 +627,16 @@ class OgreConanFile(ConanFile):
             opengl_reqs.append("egl::egl")
         if self._build_opengl:
             if not self.options.shared:
-                _add_core_component("GLSupport", requires=opengl_reqs)
+                _add_core_component("GLSupport", requires=opengl_reqs, extra_includedirs=[])
             else:
                 self.cpp_info.components["OgreMain"].requires.extend(opengl_reqs)
 
         if self.options.build_plugin_assimp:
-            _add_plugin_component("Codec_Assimp", requires=["assimp::assimp"])
+            _add_plugin_component(
+                "Codec_Assimp",
+                requires=["assimp::assimp"],
+                extra_includedirs=[os.path.join(self._include_dir, "Plugins", "Assimp")],
+            )
         if self.options.build_plugin_bsp:
             _add_plugin_component("Plugin_BSPSceneManager")
         if self.options.build_plugin_dot_scene:
@@ -640,9 +646,11 @@ class OgreConanFile(ConanFile):
         if self.options.build_plugin_freeimage:
             _add_plugin_component("Codec_FreeImage", requires=["freeimage::freeimage"])
         if self.options.build_plugin_glslang:
-            _add_plugin_component("Plugin_GLSLangProgramManager", requires=[
-                "glslang::glslang", "spirv-tools::spirv-tools-core", "spirv-tools::spirv-tools-opt"
-            ])
+            _add_plugin_component(
+                "Plugin_GLSLangProgramManager",
+                requires=["glslang::glslang", "spirv-tools::spirv-tools-core", "spirv-tools::spirv-tools-opt"],
+                extra_includedirs=[os.path.join(self._include_dir, "Plugins", "GLSLang")]
+            )
         if self.options.build_plugin_octree:
             _add_plugin_component("Plugin_OctreeSceneManager")
         if self.options.build_plugin_pcz:
