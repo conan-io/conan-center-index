@@ -294,7 +294,8 @@ class SfmlConan(ConanFile):
             elif self.settings.os == "FreeBSD":
                 self.cpp_info.components["window"].system_libs.append("usbhid")
             elif self.settings.os == "Macos":
-                self.cpp_info.components["window"].frameworks = ["Foundation", "AppKit", "IOKit", "Carbon"]
+                # CoreServices is pulled from Carbon, even if it does not show up in the upstream CMakeLists.txt
+                self.cpp_info.components["window"].frameworks = ["Foundation", "AppKit", "IOKit", "Carbon", "CoreServices"]
             elif self.settings.os == "iOS":
                 self.cpp_info.components["window"].frameworks = ["Foundation", "UIKit", "CoreGraphics", "QuartzCore", "CoreMotion"]
             elif self.settings.os == "Android":
