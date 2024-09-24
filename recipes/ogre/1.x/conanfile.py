@@ -439,6 +439,15 @@ class OgreConanFile(ConanFile):
         deps.set_property("openexr", "cmake_file_name", "OpenEXR")
         deps.set_property("freeimage", "cmake_file_name", "FreeImage")
         deps.set_property("freetype", "cmake_file_name", "Freetype")
+        # Ogre uses glslang libraries without a namespace prefix
+        deps.set_property("glslang::glslang", "cmake_target_name", "glslang::glslang")
+        deps.set_property("glslang::genericcodegen", "cmake_target_name", "GenericCodeGen")
+        deps.set_property("glslang::hlsl", "cmake_target_name", "HLSL")
+        deps.set_property("glslang::machineindependent", "cmake_target_name", "MachineIndependent")
+        deps.set_property("glslang::oglcompiler", "cmake_target_name", "OGLCompiler")
+        deps.set_property("glslang::osdependent", "cmake_target_name", "OSDependent")
+        deps.set_property("glslang::spirv", "cmake_target_name", "SPIRV")
+        deps.set_property("glslang::spvremapper", "cmake_target_name", "SPVRemapper")
         deps.generate()
 
         deps = PkgConfigDeps(self)
