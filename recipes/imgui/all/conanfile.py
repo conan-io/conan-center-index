@@ -81,7 +81,7 @@ class ImguiConan(ConanFile):
         "backend_win32": True,
         # Other options
         "enable_freetype": True,
-        "enable_freetype_lunasvg": False,
+        "enable_freetype_lunasvg": True,
         "enable_metal_cpp": True,
         "enable_osx_clipboard": True,
         "enable_demo_windows": True,
