@@ -65,8 +65,8 @@ class ImguiConan(ConanFile):
         # Backends
         "build_backends": True,
         "backend_android": True,
-        "backend_dx9": False,
-        "backend_dx10": False,
+        "backend_dx9": True,
+        "backend_dx10": True,
         "backend_dx11": False,
         "backend_dx12": False,
         "backend_glfw": True,
@@ -82,7 +82,7 @@ class ImguiConan(ConanFile):
         # Other options
         "enable_freetype": True,
         "enable_freetype_lunasvg": False,
-        "enable_metal_cpp": False,
+        "enable_metal_cpp": True,
         "enable_osx_clipboard": True,
         "enable_demo_windows": True,
         "enable_debug_tools": True,
