@@ -14,9 +14,32 @@ sources:
   "2.1.0":
     url: "https://github.com/qchateau/packio/archive/refs/tags/2.1.0.tar.gz"
     sha256: "d13be083cd5a133b02fdd1da0d89fb75988c16109ccdcd631d53f9ca2457ad42"
-  "2.0.1":
-    url: "https://github.com/qchateau/packio/archive/refs/tags/2.0.1.tar.gz"
-    sha256: "081d378be922262c39218e115eabdf77f257e4773928011dff95795b8146b520"
-  "1.3.0":
-    url: "https://github.com/qchateau/packio/archive/refs/tags/1.3.0.tar.gz"
-    sha256: "adb723ef14b4a3ec41e9a7c17c48c8ee58712604b678b24f44e6a8aa471f18e5"
+patches:
+  "2.4.1":
+    - patch_file: "patches/0001-fix-boost-json-namespace.patch"
+      patch_description: "Replace BOOST_JSON_NS_BEGIN for Boost 1.82+ compatibility"
+      patch_type: "backport"
+      patch_source: "https://github.com/qchateau/packio/commit/6ed35ba444dc22a5bc4c3c84989f7b8357a28e5b"
+  "2.3.0":
+    - patch_file: "patches/0001-fix-boost-json-namespace.patch"
+      patch_description: "Replace BOOST_JSON_NS_BEGIN for Boost 1.82+ compatibility"
+      patch_type: "backport"
+      patch_source: "https://github.com/qchateau/packio/commit/6ed35ba444dc22a5bc4c3c84989f7b8357a28e5b"
+  "2.2.0":
+    - patch_file: "patches/0001-fix-boost-json-namespace.patch"
+      patch_description: "Replace BOOST_JSON_NS_BEGIN for Boost 1.82+ compatibility"
+      patch_type: "backport"
+      patch_source: "https://github.com/qchateau/packio/commit/6ed35ba444dc22a5bc4c3c84989f7b8357a28e5b"
+    - patch_file: "patches/0002-fix-boost-json-value-regression.patch"
+      patch_description: "Fix std::hash<boost::json::value>"
+      patch_type: "backport"
+      patch_source: "https://github.com/qchateau/packio/commit/d1e0b30378ccafc96da039cf5fc9ffa754e4c2fe"
+  "2.1.0":
+    - patch_file: "patches/0001-fix-boost-json-namespace.patch"
+      patch_description: "Fix std::hash<boost::json::value>"
+      patch_type: "backport"
+      patch_source: "https://github.com/qchateau/packio/commit/d1e0b30378ccafc96da039cf5fc9ffa754e4c2fe"
+    - patch_file: "patches/0002-fix-boost-json-value-regression.patch"
+      patch_description: "Fix std::hash<boost::json::value>"
+      patch_type: "backport"
+      patch_source: "https://github.com/qchateau/packio/commit/d1e0b30378ccafc96da039cf5fc9ffa754e4c2fe"

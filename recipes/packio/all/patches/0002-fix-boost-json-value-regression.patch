@@ -1,0 +1,30 @@
+From d1e0b30378ccafc96da039cf5fc9ffa754e4c2fe Mon Sep 17 00:00:00 2001
+From: Quentin Chateau <quentin.chateau@gmail.com>
+Date: Fri, 16 Dec 2022 20:58:08 +0100
+Subject: [PATCH] packio: fix std::hash<boost::json::value>
+
+---
+ include/packio/json_rpc/hash.h | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/include/packio/json_rpc/hash.h b/include/packio/json_rpc/hash.h
+index 9f6e3dd..b4c8977 100644
+--- a/include/packio/json_rpc/hash.h
++++ b/include/packio/json_rpc/hash.h
+@@ -6,6 +6,9 @@
+ #define PACKIO_JSON_RPC_HASH_H
+ 
+ #include <boost/json.hpp>
++#include <boost/version.hpp>
++
++#if BOOST_VERSION < 107700
+ 
+ namespace packio {
+ namespace json_rpc {
+@@ -72,4 +75,6 @@ struct hash<boost::json::value> {
+ 
+ } // std
+ 
++#endif // BOOST_VERSION < 107700
++
+ #endif // PACKIO_JSON_RPC_HASH_H
