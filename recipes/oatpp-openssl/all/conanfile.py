@@ -18,6 +18,7 @@ class OatppOpenSSLConan(ConanFile):
     description = "Oat++ OpenSSL library"
     topics = ("oat++", "oatpp", "openssl")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -34,17 +35,16 @@ class OatppOpenSSLConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"oatpp/{self.version}")
-        self.requires("openssl/[>=1.1 <4]")
+        # Used in oatpp-openssl/oatpp-openssl/Config.hpp public header
+        self.requires(f"oatpp/{self.version}", transitive_headers=True, transitive_libs=True)
+        # Used SSL* and SSL_CTX* used in public headers
+        self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
@@ -57,8 +57,7 @@ class OatppOpenSSLConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires GCC >=5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -76,7 +75,7 @@ class OatppOpenSSLConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
@@ -84,25 +83,18 @@ class OatppOpenSSLConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "oatpp-openssl")
         self.cpp_info.set_property("cmake_target_name", "oatpp::oatpp-openssl")
-        # TODO: back to global scope in conan v2 once legacy generators removed
-        self.cpp_info.components["_oatpp-openssl"].includedirs = [
-            os.path.join("include", f"oatpp-{self.version}", "oatpp-openssl")
-        ]
-        self.cpp_info.components["_oatpp-openssl"].libdirs = [os.path.join("lib", f"oatpp-{self.version}")]
+        self.cpp_info.includedirs = [os.path.join("include", f"oatpp-{self.version}", "oatpp-openssl")]
+        self.cpp_info.libdirs = [os.path.join("lib", f"oatpp-{self.version}")]
         if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.components["_oatpp-openssl"].bindirs = [os.path.join("bin", f"oatpp-{self.version}")]
+            self.cpp_info.bindirs = [os.path.join("bin", f"oatpp-{self.version}")]
         else:
-            self.cpp_info.components["_oatpp-openssl"].bindirs = []
-        self.cpp_info.components["_oatpp-openssl"].libs = ["oatpp-openssl"]
+            self.cpp_info.bindirs = []
+        self.cpp_info.libs = ["oatpp-openssl"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["_oatpp-openssl"].system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread"]
 
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.filenames["cmake_find_package"] = "oatpp-openssl"
         self.cpp_info.filenames["cmake_find_package_multi"] = "oatpp-openssl"
         self.cpp_info.names["cmake_find_package"] = "oatpp"
         self.cpp_info.names["cmake_find_package_multi"] = "oatpp"
-        self.cpp_info.components["_oatpp-openssl"].names["cmake_find_package"] = "oatpp-openssl"
-        self.cpp_info.components["_oatpp-openssl"].names["cmake_find_package_multi"] = "oatpp-openssl"
-        self.cpp_info.components["_oatpp-openssl"].set_property("cmake_target_name", "oatpp::oatpp-openssl")
-        self.cpp_info.components["_oatpp-openssl"].requires = ["oatpp::oatpp", "openssl::openssl"]
