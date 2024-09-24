@@ -142,6 +142,10 @@ class ImguiConan(ConanFile):
             self.options.rm_safe("backend_wgpu")
         if not self.options.enable_freetype:
             self.options.rm_safe("enable_freetype_lunasvg")
+        if not self.options.get_safe("backend_osx"):
+            self.options.rm_safe("enable_osx_clipboard")
+        if not self.options.get_safe("backend_osx") and not self.options.get_safe("backend_metal"):
+            self.options.rm_safe("enable_metal_cpp")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -168,6 +172,8 @@ class ImguiConan(ConanFile):
             self.requires("freetype/2.13.2")
             if self.options.get_safe("enable_freetype_lunasvg"):
                 self.requires("lunasvg/2.4.1")
+        if self.options.get_safe("enable_metal_cpp"):
+            self.requires("metal-cpp/14.2", transitive_headers=bool(self.options.get_safe("backend_metal")))
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -200,6 +206,8 @@ class ImguiConan(ConanFile):
         tc.cache_variables["IMGUI_FREETYPE"] = self.options.enable_freetype
         tc.cache_variables["IMGUI_FREETYPE_LUNASVG"] = self.options.get_safe("enable_freetype_lunasvg", False)
         tc.cache_variables["IMGUI_BUILD_PROGRAMS"] = self.options.build_programs
+        tc.cache_variables["IMGUI_IMPL_METAL_CPP"] = self.options.get_safe("enable_metal_cpp", False)
+        tc.cache_variables["IMGUI_IMPL_METAL_CPP_EXTENSIONS"] = self.options.get_safe("enable_metal_cpp", False)
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -285,6 +293,9 @@ class ImguiConan(ConanFile):
                 self.cpp_info.components[name].system_libs = system_libs or []
                 self.cpp_info.components[name].frameworks = frameworks or []
 
+        def _metal_cpp():
+            return ["metal-cpp::metal-cpp"] if self.options.get_safe("enable_metal_cpp") else []
+
         # _add_binding("allegro5", requires=[
         #     "allegro::allegro",
         #     "allegro::allegro_ttf",
@@ -298,10 +309,10 @@ class ImguiConan(ConanFile):
         _add_binding("dx12", system_libs=["d3d12"])
         _add_binding("glfw", requires=["glfw::glfw"] if self.settings.os != "Emscripten" else [])
         _add_binding("glut", requires=["freeglut::freeglut"] if self.settings.os != "Emscripten" else [])
-        _add_binding("metal", frameworks=["Foundation", "Metal", "QuartzCore"])
+        _add_binding("metal", frameworks=["Foundation", "Metal", "QuartzCore"], requires=_metal_cpp())
         _add_binding("opengl2", requires=["opengl::opengl"])
         _add_binding("opengl3", requires=["opengl::opengl"])
-        _add_binding("osx", frameworks=["AppKit", "Carbon", "Cocoa", "Foundation", "GameController"])
+        _add_binding("osx", frameworks=["AppKit", "Carbon", "Cocoa", "Foundation", "GameController"], requires=_metal_cpp())
         _add_binding("sdl2", requires=["sdl::sdl"])
         _add_binding("sdlrenderer2", requires=["sdl::sdl"])
         # _add_binding("sdlrenderer3", requires=["sdl::sdl"])

@@ -117,6 +117,10 @@ if(IMGUI_IMPL_METAL)
         "-framework QuartzCore"
     )
     install(FILES backends/imgui_impl_metal.h DESTINATION include)
+    if(IMGUI_IMPL_METAL_CPP)
+        find_package(metal-cpp CONFIG REQUIRED)
+        target_link_libraries(imgui-metal PRIVATE metal-cpp::metal-cpp)
+    endif()
     list(APPEND IMGUI_COMPONENTS imgui-metal)
 endif()
 
@@ -148,6 +152,10 @@ if(IMGUI_IMPL_OSX)
         "-framework GameController"
     )
     install(FILES backends/imgui_impl_osx.h DESTINATION include)
+    if(IMGUI_IMPL_METAL_CPP_EXTENSIONS)
+        find_package(metal-cpp CONFIG REQUIRED)
+        target_link_libraries(imgui-osx PRIVATE metal-cpp::metal-cpp)
+    endif()
     list(APPEND IMGUI_COMPONENTS imgui-osx)
 endif()
 
