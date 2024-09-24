@@ -84,8 +84,8 @@ class ImguiConan(ConanFile):
         "enable_freetype_lunasvg": False,
         "enable_metal_cpp": True,
         "enable_osx_clipboard": True,
-        "enable_demo_windows": False,
-        "enable_debug_tools": False,
+        "enable_demo_windows": True,
+        "enable_debug_tools": True,
         "use_bgra_packed_color": False,
         "use_wchar32": False,
         "build_programs": False,
@@ -223,7 +223,10 @@ class ImguiConan(ConanFile):
         defines["IMGUI_USE_BGRA_PACKED_COLOR"] = self.options.use_bgra_packed_color
         defines["IMGUI_USE_WCHAR32"] = self.options.use_wchar32
         defines["IMGUI_DISABLE_DEMO_WINDOWS"] = not self.options.enable_demo_windows
-        defines["IMGUI_DISABLE_DEBUG_TOOLS"] = not self.options.enable_debug_tools
+        if Version(self.version) >= "1.88":
+            defines["IMGUI_DISABLE_DEBUG_TOOLS"] = not self.options.enable_debug_tools
+        else:
+            defines["IMGUI_DISABLE_METRICS_WINDOW"] = not self.options.enable_debug_tools
 
         imconfig_path = Path(self.source_folder, "imconfig.h")
         content = imconfig_path.read_text("utf8")
