@@ -50,7 +50,7 @@ class FclConan(ConanFile):
         # Used in fcl/common/types.h public header
         self.requires("eigen/3.4.0", transitive_headers=True)
         # Used in fcl/narrowphase/detail/convexity_based_algorithm/support.h
-        self.requires("libccd/2.1", transitive_headers=True, transitive_libs=True)
+        self.requires("libccd/2.1", transitive_headers=True)
         if self.options.with_octomap:
             # Used in fcl/geometry/octree/octree.h
             self.requires("octomap/1.9.7", transitive_headers=True)
