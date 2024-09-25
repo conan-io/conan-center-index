@@ -78,7 +78,9 @@ class SdbusCppConan(ConanFile):
         elif self._with_sdbus == "basu":
             self.requires("basu/0.2.1")
         if self.options.with_code_gen:
-            self.requires("expat/[>=2.6.2 <3]")
+            # Trick: always force transitive_libs=False, in order to not propagate expat lib
+            # transitively even when sdbus-cpp is static, since expat is a dependency of the executable, not the lib
+            self.requires("expat/[>=2.6.2 <3]", transitive_libs=False)
 
     def validate(self):
         if self.settings.os not in self._supported_os:
