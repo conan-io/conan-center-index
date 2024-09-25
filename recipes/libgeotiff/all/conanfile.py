@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -69,7 +70,8 @@ class LibgeotiffConan(ConanFile):
         tc.cache_variables["WITH_TOWGS84"] = self.options.with_towgs84
         tc.generate()
         deps = CMakeDeps(self)
-        deps.set_property("proj", "cmake_file_name", "PROJ")
+        if Version(self.version) >= "1.7.1":
+            deps.set_property("proj", "cmake_file_name", "PROJ")
         deps.generate()
 
     def build(self):
@@ -131,6 +133,9 @@ class LibgeotiffConan(ConanFile):
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_file])
         self.cpp_info.set_property("cmake_file_name", "geotiff")
         self.cpp_info.set_property("cmake_target_name", "geotiff_library")
+
+        if Version(self.version) >= "1.7.3":
+            self.cpp_info.set_property("pkg_config_name", "libgeotiff")
 
         self.cpp_info.names["cmake_find_package"] = "GeoTIFF"
         self.cpp_info.names["cmake_find_package_multi"] = "geotiff"
