@@ -704,9 +704,11 @@ class AwsSdkCppConan(ConanFile):
             "aws-c-io::aws-c-io",
             "aws-c-mqtt::aws-c-mqtt",
             "aws-checksums::aws-checksums",
-            "zlib::zlib",
-            "s2n::s2n"
+            "zlib::zlib"
         ]
+
+        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
+            self.cpp_info.components["core"].requires.append("s2n::s2n")
 
         if Version(self.version) >= "1.11.352":
             self.cpp_info.components["core"].requires.extend([
