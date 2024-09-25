@@ -65,7 +65,7 @@ class SimfilRecipe(ConanFile):
         self.requires("fmt/10.0.0", transitive_headers=True)
         self.requires("bitsery/5.2.3", transitive_headers=True)
         if self.options.with_json:
-            self.requires("nlohmann_json/3.11.2")
+            self.requires("nlohmann_json/3.11.2", transitive_headers=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -102,3 +102,5 @@ class SimfilRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["simfil"]
+        if self.options.with_json:
+            self.cpp_info.defines = ["SIMFIL_WITH_MODEL_JSON=1"]

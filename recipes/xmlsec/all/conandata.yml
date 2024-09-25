@@ -1,4 +1,7 @@
 sources:
+  "1.3.4":
+    url: "https://github.com/lsh123/xmlsec/releases/download/1.3.4/xmlsec1-1.3.4.tar.gz"
+    sha256: "45ad9078d41ae76844ad2f8651600ffeec0fdd128ead988a8d69e907c57aee75"
   "1.3.3":
     url: "https://github.com/lsh123/xmlsec/releases/download/1.3.3/xmlsec1-1.3.3.tar.gz"
     sha256: "ab5b9a9ffd6960f46f7466d9d91f174ec37e8c31989237ba6b9eacdd816464f2"

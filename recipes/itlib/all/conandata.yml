@@ -1,4 +1,13 @@
 sources:
+  "1.11.3":
+    url: "https://github.com/iboB/itlib/archive/v1.11.3.tar.gz"
+    sha256: "38999b3c4c2425ac3700529457fb2683d6fa5853752747c3afb97b2e688255b8"
+  "1.11.2":
+    url: "https://github.com/iboB/itlib/archive/v1.11.2.tar.gz"
+    sha256: "bbf734f6084af77a1e886e54e4efadab491ada242f5858afa561353db6a0a03f"
+  "1.11.1":
+    url: "https://github.com/iboB/itlib/archive/v1.11.1.tar.gz"
+    sha256: "2c60e02660ea63dfb7a39237e29b30a066670cef228d22e8d0908e1fff2fa7f1"
   "1.10.3":
     url: "https://github.com/iboB/itlib/archive/v1.10.3.tar.gz"
     sha256: "e533c44354d48b2251ca57f1502778033b38170d9d6aba6bb2bbad90f2bf9d27"
