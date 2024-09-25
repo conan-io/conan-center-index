@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, rmdir, copy, apply_conandata_patches, export_conandata_patches, rm
@@ -11,7 +11,7 @@ required_conan_version = ">=1.52.0"
 class InnoextractConan(ConanFile):
     name = "innoextract"
     description = "Extract contents of Inno Setup installers"
-    license = "LicenseRef-LICENSE"
+    license = "Zlib"
     topics = ("inno-setup", "decompression")
     homepage = "https://constexpr.org/innoextract"
     url = "https://github.com/conan-io/conan-center-index"
@@ -28,6 +28,14 @@ class InnoextractConan(ConanFile):
         self.requires("boost/1.85.0")
         self.requires("xz_utils/[>=5.4.5 <6]")
         self.requires("libiconv/1.17")
+
+    def validate(self):
+        # TODO: Remove guard after dropping Conan 1.x support
+        if conan_version > "2":
+            # This was not backported to Conan 1.x
+            from conan.tools.build import check_max_cppstd
+            # Uses auto_ptr
+            check_max_cppstd(self, "14")
 
     def package_id(self):
         del self.info.settings.compiler
