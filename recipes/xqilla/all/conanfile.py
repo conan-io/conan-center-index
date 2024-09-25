@@ -23,6 +23,7 @@ class XqillaConan(ConanFile):
     homepage = "http://xqilla.sourceforge.net/HomePage"
     license = "Apache-2.0"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -56,7 +57,7 @@ class XqillaConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("xerces-c/3.2.3")
+        self.requires("xerces-c/3.2.5", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
@@ -73,8 +74,7 @@ class XqillaConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -87,6 +87,8 @@ class XqillaConan(ConanFile):
         tc.configure_args.append(f"--with-xerces={unix_path(self, self.dependencies['xerces-c'].package_folder)}")
         if not valid_min_cppstd(self, self._min_cppstd):
             tc.extra_cxxflags.append(f"-std=c++{self._min_cppstd}")
+        # warning: ISO C++17 does not allow 'register' storage class specifier
+        tc.extra_defines.append("register=")
         tc.generate()
 
         deps = AutotoolsDeps(self)
@@ -123,8 +125,7 @@ class XqillaConan(ConanFile):
         save(self, os.path.join(self.package_folder, "licenses", "LICENSE.yajl"), self._extract_yajl_license())
 
         autotools = Autotools(self)
-        # TODO: replace by autotools.install() once https://github.com/conan-io/conan/issues/12153 fixed
-        autotools.install(args=[f"DESTDIR={unix_path(self, self.package_folder)}"])
+        autotools.install()
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         fix_apple_shared_install_name(self)
 
