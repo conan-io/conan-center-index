@@ -14,7 +14,7 @@ class SoleConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/r-lyeh-archived/sole"
     topics = ("uuid", "header-only")
-    package_type = "header-only"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     def export_sources(self):
