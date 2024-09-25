@@ -90,6 +90,8 @@ class TileDBConan(ConanFile):
             self.options.rm_safe("fPIC")
         if self.options.serialization:
             self.options["libcurl"].with_zstd = True
+        if self.options.azure:
+            self.options["azure-sdk-for-cpp"]["azure-storage-blobs"] = True
         if self.options.s3:
             self.options["aws-sdk-cpp"].s3 = True
             self.options["aws-sdk-cpp"]["identity-management"] = True
@@ -102,16 +104,16 @@ class TileDBConan(ConanFile):
         # TileDB has no transitive header deps
         self.requires("bzip2/1.0.8")
         self.requires("libxml2/[>=2.12.5 <3]")
-        self.requires("lz4/1.10.0")
+        self.requires("lz4/1.9.4")
         self.requires("spdlog/1.14.1")
-        self.requires("xz_utils/5.4.4")
+        self.requires("xz_utils/[>=5.4.5 <6]")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zstd/[^1.5]")
         if self.settings.os != "Windows":
             self.requires("openssl/[>=1.1 <4]")
         self.requires("libmagic/5.45")
         if self.options.azure:
-            self.requires("azure-storage-cpp/7.5.0")
+            self.requires("azure-sdk-for-cpp/1.11.3")
         if self.options.gcs:
             self.requires("google-cloud-cpp/2.28.0")
         if self.options.serialization:
@@ -184,7 +186,7 @@ class TileDBConan(ConanFile):
         deps = CMakeDeps(self)
         conan_to_cmake_name = {
             "aws-sdk-cpp": "AWSSDK",
-            "azure-storage-cpp": "azure-storage-blobs-cpp",
+            "azure-sdk-for-cpp": "azure-storage-blobs-cpp",
             "bzip2": "BZip2",
             "capnproto": "CapnProto",
             "clipp": "clipp",
@@ -203,18 +205,18 @@ class TileDBConan(ConanFile):
             deps.set_property(conan_name, "cmake_file_name", cmake_name)
 
         renamed_targets = {
-            "azure-storage-cpp":         "Azure::azure-storage-blobs",
-            "bzip2":                     "BZip2::BZip2",
-            "clipp":                     "clipp::clipp",
+            "azure-sdk-for-cpp::azure-storage-blobs": "Azure::azure-storage-blobs",
+            "bzip2": "BZip2::BZip2",
+            "clipp": "clipp::clipp",
             "google-cloud-cpp::storage": "google-cloud-cpp::storage",
-            "libmagic":                  "unofficial::libmagic::libmagic",
-            "libwebp::webp":             "WebP::webp",
-            "libwebp::webpdecoder":      "WebP::webpdecoder",
-            "libwebp::webpdemux":        "WebP::webpdemux",
-            "libwebp::webpmux":          "WebP::libwebpmux",
-            "lz4":                       "LZ4::LZ4",
-            "zlib":                      "ZLIB::ZLIB",
-            "zstd":                      "Zstd::Zstd",
+            "libmagic": "unofficial::libmagic::libmagic",
+            "libwebp::webp": "WebP::webp",
+            "libwebp::webpdecoder": "WebP::webpdecoder",
+            "libwebp::webpdemux": "WebP::webpdemux",
+            "libwebp::webpmux": "WebP::libwebpmux",
+            "lz4": "LZ4::LZ4",
+            "zlib": "ZLIB::ZLIB",
+            "zstd": "Zstd::Zstd",
         }
         for component, new_target_name in renamed_targets.items():
             deps.set_property(component, "cmake_target_name", new_target_name)
