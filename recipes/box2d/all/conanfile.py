@@ -3,6 +3,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rm, rmdir, copy
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -107,7 +108,9 @@ class Box2dConan(ConanFile):
         self.cpp_info.names["cmake_find_package"] = "box2d"
         self.cpp_info.names["cmake_find_package_multi"] = "box2d"
         self.cpp_info.libs = ["box2d"]
-        if Version(self.version) >= "2.4.1" and self.options.shared:
+        if Version(self.version) >= "3.0.0" and is_msvc(self) and self.options.shared:
+            self.cpp_info.defines.append("BOX2D_DLL")
+        elif Version(self.version) >= "2.4.1" and self.options.shared:
             self.cpp_info.defines.append("B2_SHARED")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
