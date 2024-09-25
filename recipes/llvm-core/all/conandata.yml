@@ -1,14 +1,14 @@
 sources:
-  "18.1.7":
+  "19.1.0":
     "llvm":
-      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.7/llvm-18.1.7.src.tar.xz
-      sha256: 17ba3d57c3db185722c36e736a189b2110e8cb842cc9e53dcc74e938bdadb97e
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.0/llvm-19.1.0.src.tar.xz
+      sha256: a8b141cbfa13f50d84ce545899bd311aaa60d59dfbf7f3a0cf84f25badc1544d
     "cmake":
-      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.7/cmake-18.1.7.src.tar.xz
-      sha256: f0b67599f51cddcdbe604c35b6de97f2d0a447e18b9c30df300c82bf1ee25bd7
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.0/cmake-19.1.0.src.tar.xz
+      sha256: dc78b6a9ac8a097ca6ac0f23c06821d65e6ea3bf666026f529994c1d01056ae7
     "third-party":
-      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.7/third-party-18.1.7.src.tar.xz
-      sha256: 8d8192598b251b44cf900109dc83dd9cde33bb465d7930a8cdadf5586d632320
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.0/third-party-19.1.0.src.tar.xz
+      sha256: f521e6cdb6598d777c6120d086aee3993f182ab38bc59ce4a59c48fae4839b8c
   "13.0.0":
     url: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/llvm-13.0.0.src.tar.xz
     sha256: 408d11708643ea826f519ff79761fcdfc12d641a2510229eec459e72f8163020
@@ -20,7 +20,7 @@ sources:
     sha256: ce8508e318a01a63d4e8b3090ab2ded3c598a50258cc49e2625b9120d4c03ea5
 
 patches:
-  "18.1.7":
+  "19.1.0":
     - patch_file: patches/18x/0000-cmake-dependencies.patch
       patch_description: fix references to third party libs to match conan variables and targets
       patch_type: conan
