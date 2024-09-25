@@ -164,5 +164,9 @@ class SdbusCppConan(ConanFile):
             self.cpp_info.components["sdbus-c++"].requires.append(
                 "basu::basu")
         if self.options.with_code_gen:
+            # Not a dependency of the lib, only of executable, but there is no way to modelize this
+            # with conan
+            self.cpp_info.components["sdbus-c++"].requires.append("expat::expat")
+        if self.options.with_code_gen:
             bin_path = os.path.join(self.package_folder, "bin")
             self.env_info.PATH.append(bin_path)
