@@ -17,7 +17,7 @@ AZURE_SDK_MODULES = (
 class AzureSDKForCppConan(ConanFile):
     name = "azure-sdk-for-cpp"
     description = "Microsoft Azure Storage Client Library for C++"
-    license = "Apache-2.0"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Azure/azure-sdk-for-cpp"
     topics = ("azure", "cpp", "cross-platform", "microsoft", "cloud")
