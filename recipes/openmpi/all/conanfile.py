@@ -62,6 +62,7 @@ class OpenMPIConan(ConanFile):
         # transitive_headers=True is not needed for any dependencies.
         self.requires("hwloc/2.10.0")
         self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("libevent/2.1.12")
         if self.settings.os == "Linux":
             self.requires("libnl/3.8.0")
         if self.options.get_safe("with_verbs"):
@@ -92,6 +93,7 @@ class OpenMPIConan(ConanFile):
             f"--enable-mpi-cxx={yes_no(self.options.enable_cxx)}",
             f"--enable-cxx-exceptions={yes_no(self.options.get_safe('enable_cxx_exceptions'))}",
             f"--with-hwloc={root('hwloc')}",
+            f"--with-libevent={root('libevent')}",
             f"--with-libnl={root('libnl') if not is_apple_os(self) else 'no'}",
             f"--with-verbs={root('rdma-core') if self.options.get_safe('with_verbs') else 'no'}",
             f"--with-zlib={root('zlib')}",
@@ -180,6 +182,7 @@ class OpenMPIConan(ConanFile):
 
         requires = [
             "hwloc::hwloc",
+            "libevent::libevent",
             "zlib::zlib",
         ]
         if self.settings.os == "Linux":
