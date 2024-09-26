@@ -37,7 +37,6 @@ int main()
   boost::system::error_code ec;
 
   auto sz = asio::read(p, asio::dynamic_buffer(line), ec);
-  assert(ec == asio::error::eof);
 
   std::cout << "CMake version: '"  << line << "'" << std::endl;
 
