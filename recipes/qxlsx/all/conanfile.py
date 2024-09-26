@@ -91,5 +91,7 @@ class QXlsxConan(ConanFile):
         self.cpp_info.requires = ["qt::qtCore", "qt::qtGui"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = cmake_name
-        self.cpp_info.names["cmake_find_package_multi"] = cmake_name
+        self.cpp_info.filenames["cmake_find_package"] = cmake_name
+        self.cpp_info.filenames["cmake_find_package_multi"] = cmake_name
+        self.cpp_info.names["cmake_find_package"] = "QXlsx"
+        self.cpp_info.names["cmake_find_package"] = "QXlsx"
