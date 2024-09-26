@@ -3,6 +3,9 @@ project(test_package LANGUAGES CXX)
 
 find_package(AzureSDK CONFIG REQUIRED)
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 add_executable(test_azure-core test_azure-core.cc)
 target_link_libraries(test_azure-core PRIVATE Azure::azure-core)
 
