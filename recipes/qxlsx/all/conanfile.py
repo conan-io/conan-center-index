@@ -45,7 +45,7 @@ class QXlsxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/5.15.9")
+        self.requires("qt/[~5.15]")
 
     def build_requirements(self):
         if Version(self.version) >= "1.4.4":
