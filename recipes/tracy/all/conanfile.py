@@ -123,12 +123,6 @@ class TracyConan(ConanFile):
             deps.generate()
 
     def build(self):
-        if self.version == "0.11.1":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                """target_include_directories(TracyClient INTERFACE ${unwind_INCLUDE_DIRS})""",
-                """target_include_directories(TracyClient PRIVATE ${unwind_INCLUDE_DIRS})"""
-            )
-
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
