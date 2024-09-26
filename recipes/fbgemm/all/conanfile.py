@@ -6,6 +6,7 @@ from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, export_conandata_patches, get, apply_conandata_patches, rmdir, replace_in_file
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -105,6 +106,12 @@ class FbgemmConan(ConanFile):
         if not valid_min_cppstd(self, self._min_cppstd):
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.variables["CMAKE_C_STANDARD"] = 99
+        if is_msvc(self) and self.settings.build_type in ["Debug", "RelWithDebInfo"]:
+            # Avoid "fatal error C1128: number of sections exceeded object file format limit: compile with /bigobj"
+            tc.blocks["cmake_flags_init"].template += (
+                'string(APPEND CMAKE_CXX_FLAGS_INIT " /bigobj")\n'
+                'string(APPEND CMAKE_C_FLAGS_INIT " /bigobj")\n'
+            )
         tc.generate()
 
         deps = CMakeDeps(self)
