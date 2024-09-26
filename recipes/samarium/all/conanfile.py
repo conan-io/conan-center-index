@@ -50,6 +50,10 @@ class SamariumConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        # samarium relies on stb_image_write.h being instantiated in SFML with STB_IMAGE_WRITE_IMPLEMENTATION,
+        # but it is not build with --whole-archive, so some symbols expected by samarium are not found.
+        # Adding STB_IMAGE_WRITE_IMPLEMENTATION in samarium would lead to issues on apple-clang and MSVC due to multiple definitions.
+        self.options["sfml"].shared = False
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -69,6 +73,9 @@ class SamariumConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+
+        if self.dependencies["sfml"].options.shared:
+            raise ConanInvalidConfiguration("SFML dependency must be built as a static library")
 
     def source(self):
         get(self, **self.conan_data["sources"][str(self.version)], strip_root=True)
