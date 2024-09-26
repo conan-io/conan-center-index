@@ -51,10 +51,10 @@ class AzureSDKForCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("openssl/[>=1.1 <4]")
         if self.settings.os in ["Windows", "WindowsStore"]:
             self.requires("wil/1.0.240803.1")
         else:
-            self.requires("openssl/[>=1.1 <4]")
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.build_transport_curl:
             self.requires("libcurl/[>=7.78 <9]")
@@ -146,7 +146,7 @@ class AzureSDKForCppConan(ConanFile):
         if self.settings.os in ["Windows", "WindowsStore"]:
             identity.requires.append("wil::wil")
 
-        _add_component("azure-security-attestation")
+        _add_component("azure-security-attestation", requires=["openssl::crypto"])
         _add_component("azure-security-keyvault-administration")
         _add_component("azure-security-keyvault-certificates")
         _add_component("azure-security-keyvault-keys")
