@@ -105,7 +105,7 @@ class Krb5Conan(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         self.build_requires("automake/1.16.5")
         self.build_requires("bison/3.8.2")
 
@@ -129,37 +129,37 @@ class Krb5Conan(ConanFile):
         self.cpp_info.components["mit-krb5"].libs = ["krb5", "k5crypto", "com_err"]
         if self.options.get_safe('with_tls') == "openssl":
             self.cpp_info.components["mit-krb5"].requires = ["openssl::crypto"]
-        self.cpp_info.components["mit-krb5"].names["pkg_config"] = "mit-krb5"
+        self.cpp_info.components["mit-krb5"].set_property("pkg_config_name", "mit-krb5")
         if self.settings.os == "Linux":
             self.cpp_info.components["mit-krb5"].system_libs = ["resolv"]
 
         self.cpp_info.components["libkrb5"].libs = []
         self.cpp_info.components["libkrb5"].requires = ["mit-krb5"]
-        self.cpp_info.components["libkrb5"].names["pkg_config"] = "krb5"
+        self.cpp_info.components["libkrb5"].set_property("pkg_config_name", "krb5")
 
         self.cpp_info.components["mit-krb5-gssapi"].libs = ["gssapi_krb5"]
         self.cpp_info.components["mit-krb5-gssapi"].requires = ["mit-krb5"]
-        self.cpp_info.components["mit-krb5-gssapi"].names["pkg_config"] = "mit-krb5-gssapi"
+        self.cpp_info.components["mit-krb5-gssapi"].set_property("pkg_config_name", "mit-krb5-gssapi")
 
         self.cpp_info.components["krb5-gssapi"].libs = []
         self.cpp_info.components["krb5-gssapi"].requires = ["mit-krb5-gssapi"]
-        self.cpp_info.components["krb5-gssapi"].names["pkg_config"] = "krb5-gssapi"
+        self.cpp_info.components["krb5-gssapi"].set_property("pkg_config_name", "krb5-gssapi")
 
         self.cpp_info.components["gssrpc"].libs = ["gssrpc"]
         self.cpp_info.components["gssrpc"].requires = ["mit-krb5-gssapi"]
-        self.cpp_info.components["gssrpc"].names["pkg_config"] = "gssrpc"
+        self.cpp_info.components["gssrpc"].set_property("pkg_config_name", "gssrpc")
 
         self.cpp_info.components["kadm-client"].libs = ["kadm5clnt_mit"]
         self.cpp_info.components["kadm-client"].requires = ["mit-krb5-gssapi", "gssrpc"]
-        self.cpp_info.components["kadm-client"].names["pkg_config"] = "kadm-client"
+        self.cpp_info.components["kadm-client"].set_property("pkg_config_name", "kadm-client")
 
         self.cpp_info.components["kdb"].libs = ["kdb5"]
         self.cpp_info.components["kdb"].requires = ["mit-krb5-gssapi", "mit-krb5", "gssrpc"]
-        self.cpp_info.components["kdb"].names["pkg_config"] = "kdb-client"
+        self.cpp_info.components["kdb"].set_property("pkg_config_name", "kdb-client")
 
         self.cpp_info.components["kadm-server"].libs = ["kadm5srv_mit"]
         self.cpp_info.components["kadm-server"].requires = ["kdb", "mit-krb5-gssapi"]
-        self.cpp_info.components["kadm-server"].names["pkg_config"] = "kadm-server"
+        self.cpp_info.components["kadm-server"].set_property("pkg_config_name", "kadm-server")
 
         self.cpp_info.components["krad"].libs = ["krad"]
         self.cpp_info.components["krad"].requires = ["libkrb5", "libverto::libverto"]
