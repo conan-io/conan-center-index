@@ -5,3 +5,14 @@ sources:
   "2.1.27":
     url: "https://github.com/cyrusimap/cyrus-sasl/releases/download/cyrus-sasl-2.1.27/cyrus-sasl-2.1.27.tar.gz"
     sha256: "26866b1549b00ffd020f188a43c258017fa1c382b3ddadd8201536f72efb05d5"
+patches:
+  "2.1.28":
+    - patch_file: "patches/0001-2.1.28-fix-time.h-check.patch"
+      patch_description: "Add a missing check for time.h availability"
+      patch_type: "backport"
+      patch_source: "https://github.com/cyrusimap/cyrus-sasl/commit/266f0acf7f5e029afbb3e263437039e50cd6c262"
+  "2.1.27":
+    - patch_file: "patches/0001-2.1.27-fix-time.h-check.patch"
+      patch_description: "Add a missing check for time.h availability"
+      patch_type: "backport"
+      patch_source: "https://github.com/cyrusimap/cyrus-sasl/commit/266f0acf7f5e029afbb3e263437039e50cd6c262"
