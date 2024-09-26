@@ -50,7 +50,6 @@ tasks:
       - llvm
     parallel_strategy: unlimited
   cci:
-    conan_v2_run_export: false
     write_comments: true
     detailed_status_checks: false
     update_labels: true
