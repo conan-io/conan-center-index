@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, save
@@ -36,6 +37,7 @@ class PackageConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.options["brotli"].shared = False
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -46,6 +48,8 @@ class PackageConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
+        if self.dependencies["brotli"].options.shared:
+            raise ConanInvalidConfiguration("brotli must be built as a static library")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -90,9 +94,7 @@ class PackageConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.components["brunslidec-c"].libs = ["brunslidec-c"]
-        self.cpp_info.components["brunslidec-c"].requires = ["brotli::brotlidec"]
         self.cpp_info.components["brunslienc-c"].libs = ["brunslienc-c"]
-        self.cpp_info.components["brunslienc-c"].requires = ["brotli::brotlienc"]
         if not self.options.shared:
             self.cpp_info.components["brunslidec-c"].libs += ["brunslicommon-static", "brunslidec-static"]
             self.cpp_info.components["brunslienc-c"].libs += ["brunslicommon-static", "brunslienc-static"]
