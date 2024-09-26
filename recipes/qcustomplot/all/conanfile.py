@@ -16,6 +16,7 @@ class QCustomPlotConan(ConanFile):
     topics = ("chart", "data-visualization", "graph", "plot", "qt")
     homepage = "https://www.qcustomplot.com"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -45,9 +46,11 @@ class QCustomPlotConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= "2.0.0":
-            self.requires("qt/[>=6.x <7]")
+            # INFO: Public header qcustomplot.h includes QObject
+            self.requires("qt/[>=6.5 <7]", transitive_headers=True)
         else:
-            self.requires("qt/[~5.15]")
+            # INFO: Public header qcustomplot.h includes QObject
+            self.requires("qt/[~5.15]", transitive_headers=True)
         if self.options.with_opengl and self.settings.os == "Windows":
             self.requires("opengl/system")
 
