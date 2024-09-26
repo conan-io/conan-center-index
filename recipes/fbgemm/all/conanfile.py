@@ -57,8 +57,6 @@ class FbgemmConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # TODO: remove, just for testing
-        self.options["asmjit"].shared=False
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -74,6 +72,12 @@ class FbgemmConan(ConanFile):
         # https://github.com/pytorch/FBGEMM/issues/2074
         if str(self.settings.arch).startswith("arm"):
             raise ConanInvalidConfiguration("FBGEMM does not yet support ARM architectures")
+
+        if self.settings.compiler == "clang":
+            # test_package fails with libfbgemm.so: undefined reference to __gnu_f2h_ieee
+            # Might be fixed in v1.0:
+            # https://github.com/pytorch/FBGEMM/commit/273d964b5aa8b9b3ea75c0146a85ef4b2aa7dfad#diff-dd5678511c7f6486912de08742713b8c05e3718f28f92522d72d6b2995d4790f
+            raise ConanInvalidConfiguration("Clang is currently not supported. Contributions are welcome.")
 
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
