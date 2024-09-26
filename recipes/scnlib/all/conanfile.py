@@ -83,7 +83,7 @@ class ScnlibConan(ConanFile):
 
     def requirements(self):
         self.requires("fast_float/6.1.0")
-        if Version(self.version) >= "2.0":
+        if "2.0" <= Version(self.version) < "3.0":
             self.requires("simdutf/4.0.5")
         if self.options.get_safe("regex_backend") in ["boost", "boost_icu"]:
             self.requires("boost/1.83.0")
@@ -184,8 +184,9 @@ class ScnlibConan(ConanFile):
             self.cpp_info.components["_scnlib"].defines = ["SCN_HEADER_ONLY=0"]
             self.cpp_info.components["_scnlib"].libs = ["scn"]
         self.cpp_info.components["_scnlib"].requires.append("fast_float::fast_float")
-        if Version(self.version) >= "2.0":
+        if "2.0" <= Version(self.version) < "3.0":
             self.cpp_info.components["_scnlib"].requires.append("simdutf::simdutf")
+        if Version(self.version) >= "2.0":
             if self.options.get_safe("regex_backend") in ["boost", "boost_icu"]:
                 self.cpp_info.components["_scnlib"].requires.append("boost::regex")
             elif self.options.get_safe("regex_backend") == "re2":

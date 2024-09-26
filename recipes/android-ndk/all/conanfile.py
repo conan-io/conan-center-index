@@ -300,12 +300,13 @@ class AndroidNDKConan(ConanFile):
         self.conf_info.update("tools.build:compiler_executables", compiler_executables)
         self.buildenv_info.define_path("CC", compiler_executables["c"])
         self.buildenv_info.define_path("CXX", compiler_executables["cpp"])
+        self.buildenv_info.define_path("AS", compiler_executables["c"])
+        self.buildenv_info.define_path("LD", compiler_executables["cpp"])
 
         # Versions greater than 23 had the naming convention
         # changed to no longer include the triplet.
         bare = self._ndk_version_major >= 23
         self.buildenv_info.define_path("AR", self._define_tool_var("AR", "ar", bare))
-        self.buildenv_info.define_path("AS", self._define_tool_var("AS", "as", bare))
         self.buildenv_info.define_path("RANLIB", self._define_tool_var("RANLIB", "ranlib", bare))
         self.buildenv_info.define_path("STRIP", self._define_tool_var("STRIP", "strip", bare))
         self.buildenv_info.define_path("ADDR2LINE", self._define_tool_var("ADDR2LINE", "addr2line", bare))
@@ -316,12 +317,6 @@ class AndroidNDKConan(ConanFile):
         # there doesn't seem to be an 'elfedit' included anymore.
         if self._ndk_version_major < 23:
             self.buildenv_info.define_path("ELFEDIT", self._define_tool_var("ELFEDIT", "elfedit", bare))
-
-        # The `ld` tool changed naming conventions earlier than others
-        if self._ndk_version_major >= 22:
-            self.buildenv_info.define_path("LD", self._define_tool_var_naked("LD", "ld"))
-        else:
-            self.buildenv_info.define_path("LD", self._define_tool_var("LD", "ld"))
 
         self.buildenv_info.define("ANDROID_PLATFORM", f"android-{self.settings_target.os.api_level}")
         self.buildenv_info.define("ANDROID_TOOLCHAIN", "clang")

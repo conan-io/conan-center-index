@@ -65,8 +65,7 @@ class JasperConan(ConanFile):
         VirtualBuildEnv(self).generate()
 
         tc = CMakeToolchain(self)
-        if Version(self.version) >= "4.0.0":
-            tc.variables["JAS_ENABLE_PIC"] = self.options.get_safe("fPIC", True)
+        tc.variables["JAS_ENABLE_PIC"] = self.options.get_safe("fPIC", True)
         tc.variables["JAS_ENABLE_DOC"] = False
         tc.variables["JAS_ENABLE_LATEX"] = False
         tc.variables["JAS_ENABLE_PROGRAMS"] = False
@@ -74,8 +73,7 @@ class JasperConan(ConanFile):
         tc.variables["JAS_LIBJPEG_REQUIRED"] = "REQUIRED"
         tc.variables["JAS_ENABLE_LIBJPEG"] = bool(self.options.with_libjpeg)
         tc.variables["JAS_HAVE_JPEGLIB_H"] = True
-        if Version(self.version) >= "3.0.0":
-            tc.variables["JAS_ENABLE_LIBHEIF"] = False
+        tc.variables["JAS_ENABLE_LIBHEIF"] = False
         tc.variables["JAS_ENABLE_OPENGL"] = False
         if cross_building(self):
             tc.cache_variables["JAS_CROSSCOMPILING"] = True

@@ -1,4 +1,6 @@
 versions:
+  "4.4.0":
+    folder: all
   "4.3.1":
     folder: all
   "4.3.0":
@@ -10,8 +12,4 @@ versions:
   "4.0.0":
     folder: all
   "3.490":
-    folder: all
-  "3.480":
-    folder: all
-  "3.470":
     folder: all
