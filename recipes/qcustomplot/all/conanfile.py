@@ -47,10 +47,12 @@ class QCustomPlotConan(ConanFile):
     def requirements(self):
         if Version(self.version) >= "2.0.0":
             # INFO: Public header qcustomplot.h includes QObject
-            self.requires("qt/[>=6.5 <7]", transitive_headers=True)
+            # INFO: transitive libs: undefined reference to 'QMainWindow::Event'
+            self.requires("qt/[>=6.5 <7]", transitive_headers=True, transitive_libs=True)
         else:
             # INFO: Public header qcustomplot.h includes QObject
-            self.requires("qt/[~5.15]", transitive_headers=True)
+            # INFO: transitive libs: undefined reference to 'QMainWindow::Event'
+            self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
         if self.options.with_opengl and self.settings.os == "Windows":
             self.requires("opengl/system")
 
