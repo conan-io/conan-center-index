@@ -23,6 +23,7 @@ required_for_references:
 - andreasbuhr-cppcoro
 - android-ndk
 - angelscript
+- ann
 - annoy
 - antlr4
 - antlr4-cppruntime
@@ -275,6 +276,7 @@ required_for_references:
 - csvmonkey
 - ctml
 - ctpg
+- ctrack
 - ctre
 - cub
 - cubicinterpolation
@@ -589,6 +591,7 @@ required_for_references:
 - influxdb-cpp
 - influxdb-cxx
 - inih
+- inipp
 - inja
 - intel-ipsec-mb
 - intel-neon2sse
@@ -698,6 +701,7 @@ required_for_references:
 - libcurl
 - libcvd
 - libdaemon
+- libdatrie
 - libdb
 - libdc1394
 - libde265
@@ -894,6 +898,7 @@ required_for_references:
 - linmath.h
 - linux-headers-generic
 - linux-syscall-support
+- liquid-dsp
 - litehtml
 - lksctp-tools
 - llama-cpp
@@ -929,6 +934,7 @@ required_for_references:
 - mailio
 - make
 - makefile-project-workspace-creator
+- manif
 - mapbox-geometry
 - mapbox-variant
 - mapbox-wagyu
@@ -955,6 +961,7 @@ required_for_references:
 - mdns
 - mdnsresponder
 - mdspan
+- melon
 - mesa-glu
 - meshoptimizer
 - meson
@@ -1014,6 +1021,7 @@ required_for_references:
 - msix
 - msys2
 - mtdev
+- mtfmt
 - mujs
 - muparser
 - muparserx
@@ -1202,6 +1210,7 @@ required_for_references:
 - plusaes
 - plutovg
 - pngpp
+- pocketfft
 - poco
 - podofo
 - poly2tri
@@ -1398,6 +1407,7 @@ required_for_references:
 - spirv-cross
 - spirv-headers
 - spirv-tools
+- splunk-opentelemetry-cpp
 - spscqueue
 - spy
 - sqlcipher
@@ -1412,6 +1422,7 @@ required_for_references:
 - ssht
 - ssp
 - st_tree
+- statistic
 - statslib
 - status-code
 - status-value-lite
