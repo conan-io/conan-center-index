@@ -45,8 +45,9 @@ class QXlsxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # INFP: QXlsx/xlsxdocument.h includes QtGlobal
-        self.requires("qt/[~5.15]", transitive_headers=True)
+        # INFO: QXlsx/xlsxdocument.h includes QtGlobal
+        # INFO: transitive libs: undefined reference to symbol '_ZN10QArrayData10deallocateEPS_mm@@Qt_5'
+        self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         if Version(self.version) >= "1.4.4":
