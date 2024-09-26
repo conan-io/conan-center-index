@@ -51,7 +51,7 @@ class SamariumConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         # samarium relies on stb_image_write.h being instantiated in SFML with STB_IMAGE_WRITE_IMPLEMENTATION,
-        # but it is not build with --whole-archive, so some symbols expected by samarium are not found.
+        # but it is not built with --whole-archive, so some symbols expected by samarium are not found.
         # Adding STB_IMAGE_WRITE_IMPLEMENTATION in samarium would lead to issues on apple-clang and MSVC due to multiple definitions.
         self.options["sfml"].shared = False
 
