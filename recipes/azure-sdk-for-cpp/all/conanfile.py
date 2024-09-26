@@ -34,6 +34,8 @@ class AzureSDKForCppConan(ConanFile):
         "build_transport_winhttp": False,
     }
 
+    short_paths = True
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
