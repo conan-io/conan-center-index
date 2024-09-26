@@ -83,12 +83,13 @@ class QXlsxConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", f"QXlsxQt{self._qt_version}")
+        cmake_name = f"QXlsxQt{self._qt_version}" if Version(self.version) >= "1.4.5" else "QXlsx"
+        self.cpp_info.set_property("cmake_file_name", cmake_name)
         self.cpp_info.set_property("cmake_target_name", "QXlsx::QXlsx")
-        self.cpp_info.libs = [f"QXlsxQt{self._qt_version}"]
+        self.cpp_info.libs = [cmake_name]
         self.cpp_info.includedirs = ["include", os.path.join("include", "QXlsx")]
         self.cpp_info.requires = ["qt::qtCore", "qt::qtGui"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = f"QXlsxQt{self._qt_version}"
-        self.cpp_info.names["cmake_find_package_multi"] = f"QXlsxQt{self._qt_version}"
+        self.cpp_info.names["cmake_find_package"] = cmake_name
+        self.cpp_info.names["cmake_find_package_multi"] = cmake_name
