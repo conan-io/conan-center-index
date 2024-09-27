@@ -102,11 +102,13 @@ class UlfiusConan(ConanFile):
         deps.set_property("libmicrohttpd", "cmake_file_name", "MHD")
         deps.set_property("libmicrohttpd", "cmake_target_name", "MHD::MHD")
 
-        if not self.dependencies["orcania"].options.shared:
-            deps.set_property("orcania", "cmake_target_name", "Orcania::Orcania-static")
+        # Orcania generates -static targets for static libraries, but Ulfius does not check for them,
+        # unconditionally set the target name to Orcania::Orcania
+        deps.set_property("orcania", "cmake_target_name", "Orcania::Orcania")
 
-        if self.options.with_yder and not self.dependencies["yder"].options.shared:
-            deps.set_property("yder", "cmake_target_name", "Yder::Yder-static")
+        # Same for Yder
+        if self.options.with_yder:
+            deps.set_property("yder", "cmake_target_name", "Yder::Yder")
 
         if self.options.with_jansson:
             deps.set_property("jansson", "cmake_file_name", "Jansson")
