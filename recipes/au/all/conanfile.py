@@ -75,8 +75,6 @@ class PackageConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = ["package_lib"]
-
         self.cpp_info.set_property("cmake_file_name", "Au")
         self.cpp_info.set_property("cmake_target_name", "Au::au")
 
