@@ -2037,6 +2037,11 @@ class BoostConan(ConanFile):
 
             if not self.options.get_safe("without_process") and self.settings.os == "Windows":
                 self.cpp_info.components["process"].system_libs.extend(["ntdll", "shell32", "Advapi32", "user32"])
+                if self._shared:
+                    self.cpp_info.components["process"].defines.append("BOOST_PROCESS_DYN_LINK")
+                else:
+                    self.cpp_info.components["process"].defines.append("BOOST_PROCESS_STATIC_LINK")
+
 
             if is_msvc(self) or self._is_clang_cl:
                 # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974
