@@ -59,11 +59,14 @@ class SamariumConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-         self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
-         self.requires("sfml/2.6.1", transitive_headers=True, transitive_libs=True)
-         self.requires("range-v3/cci.20240905", transitive_headers=True)
-         self.requires("stb/cci.20230920")
-         self.requires("tl-expected/20190710", transitive_headers=True)
+        # Undefined symbols for architecture arm64: "void fmt::v10::detail::vformat_to..." when using sm::print
+        self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
+        # Undefined symbols for architecture arm64: "sf::Keyboard::isKeyPressed(sf::Keyboard::Key)"
+        # when using inlined is_key_pressed function
+        self.requires("sfml/2.6.1", transitive_headers=True, transitive_libs=True)
+        self.requires("range-v3/cci.20240905", transitive_headers=True)
+        self.requires("stb/cci.20230920")
+        self.requires("tl-expected/20190710", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
