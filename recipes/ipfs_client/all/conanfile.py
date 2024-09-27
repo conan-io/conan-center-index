@@ -66,7 +66,7 @@ class IpfsChromium(ConanFile):
         env.generate()
         tc = CMakeToolchain(self)
         tc.cache_variables["INSIDE_CONAN"] = True
-        cppstd = self.settings.get_safe("compiler.cppstd").replace("gnu", "")
+        cppstd = self.settings.get_safe("compiler.cppstd", self._min_cppstd).replace("gnu", "")
         if cppstd:
             tc.cache_variables["CXX_VERSION"] = cppstd
         tc.generate()
