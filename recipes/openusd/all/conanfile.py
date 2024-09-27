@@ -49,17 +49,17 @@ class OpenUSDConan(ConanFile):
         "build_imaging": True,
         "build_usd_imaging": True,
         "build_usdview": True,
-        "build_openimageio_plugin": False,
-        "build_opencolorio_plugin": False,
-        "build_embree_plugin": False,
-        "enable_materialx_support": False,
+        "build_openimageio_plugin": True,
+        "build_opencolorio_plugin": True,
+        "build_embree_plugin": True,
+        "enable_materialx_support": True,
         "enable_vulkan_support": False,
         "enable_gl_support": False,
         "enable_ptex_support": True,
-        "enable_openvdb_support": False,
-        "build_alembic_plugin": False,
+        "enable_openvdb_support": True,
+        "build_alembic_plugin": True,
         "enable_hdf5_support": True,
-        "build_draco_plugin": False,
+        "build_draco_plugin": True,
         "enable_osl_support": False,
         "build_animx_tests": False,
         "enable_python_support": False
@@ -161,6 +161,8 @@ class OpenUSDConan(ConanFile):
             self.requires("imath/3.1.9")
 
     def validate(self):
+        if not self.options.shared:
+            raise ConanInvalidConfiguration("static not yet supported")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -176,7 +178,6 @@ class OpenUSDConan(ConanFile):
             raise ConanInvalidConfiguration("openshadinglanguage recipe doesn't yet exists in conan center index")
         if self.options.enable_python_support:
             raise ConanInvalidConfiguration("python doesn't yet supported")
-
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
