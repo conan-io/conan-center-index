@@ -35,7 +35,6 @@ class OpenUSDConan(ConanFile):
         "build_gpu_support": [True, False],
         "enable_ptex_support": [True, False],
         "enable_openvdb_support": [True, False],
-        "build_renderman_plugin": [True, False],
         "build_alembic_plugin": [True, False],
         "enable_hdf5_support": [True, False],
         "build_draco_plugin": [True, False],
@@ -52,13 +51,12 @@ class OpenUSDConan(ConanFile):
         "build_usdview": True,
         "build_openimageio_plugin": False,
         "build_opencolorio_plugin": False,
-        "build_embree_plugin": True,
-        "enable_materialx_support": True,
+        "build_embree_plugin": False,
+        "enable_materialx_support": False,
         "enable_vulkan_support": False,
         "enable_gl_support": False,
         "enable_ptex_support": True,
         "enable_openvdb_support": False,
-        "build_renderman_plugin": False,
         "build_alembic_plugin": False,
         "enable_hdf5_support": True,
         "build_draco_plugin": False,
@@ -112,9 +110,6 @@ class OpenUSDConan(ConanFile):
                 self.options.build_embree_plugin = False
             elif not self.options.build_gpu_support:
                 self.options.build_embree_plugin = False
-        if self.options.build_renderman_plugin:
-            if not self.options.build_imaging:
-                self.options.build_renderman_plugin = False
 
     def configure(self):
         if self.options.shared:
@@ -147,9 +142,6 @@ class OpenUSDConan(ConanFile):
                 self.requires("openvdb/11.0.0")
             if self.options.build_embree_plugin and self.options.build_gpu_support:
                 self.requires("embree3/3.13.5")
-        # if self.options.build_renderman_plugin:
-            # TODO: add a recipe for renderman
-            # self.requires("renderman/x.y.z")
         if self.options.build_alembic_plugin:
             self.requires("alembic/1.8.6")
             if self.options.enable_hdf5_support:
@@ -182,8 +174,6 @@ class OpenUSDConan(ConanFile):
             raise ConanInvalidConfiguration("animx recipe doesn't yet exists in conan center index")
         if self.options.enable_osl_support:
             raise ConanInvalidConfiguration("openshadinglanguage recipe doesn't yet exists in conan center index")
-        if self.options.build_renderman_plugin:
-            raise ConanInvalidConfiguration("renderman recipe doesn't yet exists in conan center index")
         if self.options.enable_python_support:
             raise ConanInvalidConfiguration("python doesn't yet supported")
 
@@ -235,7 +225,8 @@ class OpenUSDConan(ConanFile):
                 if self.options.build_usdview:
                     tc.variables["PXR_BUILD_USDVIEW"] = True
 
-        tc.variables["PXR_BUILD_PRMAN_PLUGIN"] = self.options.build_renderman_plugin
+        # Renderman is a proprietary software, see build_renderman_plugin 
+        tc.variables["PXR_BUILD_PRMAN_PLUGIN"] = False
 
         if self.options.build_alembic_plugin:
             tc.variables["PXR_BUILD_ALEMBIC_PLUGIN"] = True
