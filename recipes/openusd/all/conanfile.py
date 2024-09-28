@@ -124,7 +124,7 @@ class OpenUSDConan(ConanFile):
             # self.requires("boost/1.86.0", transitive_headers=True)
             self.requires("boost/1.86.0")
         # openusd doesn't support yet recent release of onetbb, see https://github.com/PixarAnimationStudios/OpenUSD/issues/1471
-        self.requires("onetbb/2021.12.0", transitive_headers=True)
+        self.requires("onetbb/2021.10.0", transitive_headers=True)
 
         if self.options.build_imaging:
             if self.options.build_openimageio_plugin and self.options.build_gpu_support:
