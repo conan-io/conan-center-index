@@ -121,8 +121,7 @@ class OpenUSDConan(ConanFile):
 
     def requirements(self):
         if self.options.enable_python_support:
-            # self.requires("boost/1.86.0", transitive_headers=True)
-            self.requires("boost/1.86.0")
+            self.requires("boost/1.84.0")
         # openusd doesn't support yet recent release of onetbb, see https://github.com/PixarAnimationStudios/OpenUSD/issues/1471
         self.requires("onetbb/2021.10.0", transitive_headers=True)
 
@@ -138,7 +137,7 @@ class OpenUSDConan(ConanFile):
                 self.requires("opengl/system")
             if self._enable_ptex:
                 self.requires("ptex/2.4.2")
-            if self.options.enable_openvdb_support:
+            if self.options.enable_openvdb_support and self.options.build_gpu_support:
                 self.requires("openvdb/11.0.0")
             if self.options.build_embree_plugin and self.options.build_gpu_support:
                 self.requires("embree3/3.13.5")
@@ -197,8 +196,6 @@ class OpenUSDConan(ConanFile):
 
         tc.variables["TBB_tbb_LIBRARY"] = "TBB::tbb"
 
-        tc.variables["OPENVDB_LIBRARY"] = "OpenVDB::openvdb"
-
         tc.variables["PXR_ENABLE_MATERIALX_SUPPORT"] = self.options.enable_materialx_support
 
         tc.variables["PXR_BUILD_IMAGING"] = self.options.build_imaging
@@ -212,7 +209,9 @@ class OpenUSDConan(ConanFile):
                 tc.variables["PTEX_LIBRARY"] = self.dependencies['ptex'].cpp_info.libdirs[0]
                 tc.variables["PTEX_INCLUDE_DIR"] = self.dependencies['ptex'].cpp_info.includedirs[0]
 
-            tc.variables["PXR_ENABLE_OPENVDB_SUPPORT"] = self.options.enable_openvdb_support
+            tc.variables["PXR_ENABLE_OPENVDB_SUPPORT"] = self.options.enable_openvdb_support and self.options.enable_gl_support
+            tc.variables["OPENVDB_LIBRARY"] = "OpenVDB::openvdb"
+
             tc.variables["PXR_BUILD_OPENIMAGEIO_PLUGIN"] = self.options.build_openimageio_plugin and self.options.build_gpu_support
             tc.variables["PXR_BUILD_COLORIO_PLUGIN"] = self.options.build_opencolorio_plugin and self.options.enable_gl_support and self.options.build_gpu_support
 
@@ -285,9 +284,6 @@ class OpenUSDConan(ConanFile):
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
             self.cpp_info.system_libs.append("dl")
-
-        # For plugins
-        self.cpp_info.libdirs.append("plugin/usd/")
 
         # base
         self.cpp_info.components["usd_arch"].libs = ["usd_arch"]
@@ -401,6 +397,11 @@ class OpenUSDConan(ConanFile):
                     self.cpp_info.components["usd_hioOpenVDB"].requires.append("imath::imath")
 
             # plugins
+
+            self.cpp_info.components["hioAvif"].libdirs = ["plugin/usd/"]
+            self.cpp_info.components["hioAvif"].libs = ["hioAvif"]
+            self.cpp_info.components["hioAvif"].requires = ["usd_ar", "usd_arch", "usd_gf", "usd_hio", "usd_tf"]
+
             if self.options.build_openimageio_plugin and self.options.build_gpu_support:
                 self.cpp_info.components["usd_hioOiio"].libs = ["usd_hioOiio"]
                 self.cpp_info.components["usd_hioOiio"].requires = ["usd_ar", "usd_arch", "usd_gf", "usd_hio", "usd_tf", "openimageio::openimageio"]
@@ -504,18 +505,22 @@ class OpenUSDConan(ConanFile):
         self.cpp_info.components["usd_usdVol"].requires = ["usd_tf", "usd_usd", "usd_usdGeom"]
 
         if self.options.build_draco_plugin:
+            self.cpp_info.components["usdDraco"].libdirs = ["plugin/usd/"]
             self.cpp_info.components["usdDraco"].libs = ["usdDraco"]
             self.cpp_info.components["usdDraco"].requires = ["usd_tf", "usd_gf", "usd_sdf", "usd_usd", "usd_usdGeom", "draco::draco"]
 
         if self.options.build_alembic_plugin:
+            self.cpp_info.components["usdAbc"].libdirs = ["plugin/usd/"]
             self.cpp_info.components["usdAbc"].libs = ["usdAbc"]
-            self.cpp_info.components["usdAbc"].requires = ["usd_tf", "usd_work", "usd_sdf", "usd_usd", "usd_usdGeom", "alembic::alembic"]
+            self.cpp_info.components["usdAbc"].requires = ["usd_tf", "usd_work", "usd_sdf", "usd_usd", "usd_usdGeom", "alembic::alembic", "imath::imath"]
             if self.options.enable_hdf5_support:
                 self.cpp_info.components["usdAbc"].requires.append("hdf5::hdf5")
 
         if self.options.build_usd_imaging and not self.options.build_imaging:
+            self.cpp_info.components["usd_usdShaders"].libdirs = ["plugin/usd/"]
             self.cpp_info.components["usd_usdShaders"].libs = ["usdShaders"]
             self.cpp_info.components["usd_usdShaders"].requires = ["usd_ar", "usd_ndr", "usd_sdr", "usd_usdShade"]
 
+            self.cpp_info.components["usd_sdrGlslfx"].libdirs = ["plugin/usd/"]
             self.cpp_info.components["usd_sdrGlslfx"].libs = ["sdrGlslfx"]
             self.cpp_info.components["usd_sdrGlslfx"].requires = ["usd_ar", "usd_ndr", "usd_sdr", "usd_hio"]
