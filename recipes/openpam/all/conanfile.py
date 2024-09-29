@@ -65,3 +65,4 @@ class PackageConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["pam"]
+        self.cpp_info.system_libs = ["dl"]
