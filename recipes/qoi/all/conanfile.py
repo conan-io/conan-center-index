@@ -7,7 +7,7 @@ import os
 required_conan_version = ">=1.52.0"
 
 
-class PackageConan(ConanFile):
+class QoiConan(ConanFile):
     name = "qoi"
     description = "The “Quite OK Image Format” for fast, lossless image compression"
     license = "MIT"
