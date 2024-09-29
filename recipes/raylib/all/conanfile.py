@@ -132,10 +132,10 @@ class RaylibConan(ConanFile):
             {"raylib": "raylib::raylib"}
         )
 
-        
-        copy(self, pattern="rcamera.h", dst=os.path.join(self.package_folder, "res"), src=os.path.join(self.source_folder, "src"))
-        copy(self, pattern="rgestures.h", dst=os.path.join(self.package_folder, "res"), src=os.path.join(self.source_folder, "src"))
-        copy(self, pattern="rprand.h", dst=os.path.join(self.package_folder, "res", "external"), src=os.path.join(self.source_folder, "src", "external"))
+        res_path = os.path.join(self.package_folder, "res", "include")
+        copy(self, pattern="rcamera.h", dst=res_path, src=os.path.join(self.source_folder, "src"))
+        copy(self, pattern="rgestures.h", dst=res_path, src=os.path.join(self.source_folder, "src"))
+        copy(self, pattern="rprand.h", dst=os.path.join(res_path, "external"), src=os.path.join(self.source_folder, "src", "external"))
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
@@ -166,6 +166,10 @@ class RaylibConan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("winmm")
+        
+        # Some useful files are not packaged by default
+        res_includes = os.path.join(self.package_folder, "res", "include")
+        self.cpp_info.resdirs = [res_includes]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
