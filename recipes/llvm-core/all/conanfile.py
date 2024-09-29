@@ -20,7 +20,7 @@ from conan.tools.scm import Version
 
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PosixPath
 import re
 import textwrap
 
@@ -93,6 +93,7 @@ class LLVMCoreConan(ConanFile):
         "with_zlib": [True, False],
         "with_xml2": [True, False],
         "with_z3": [True, False],
+        "with_zstd": [True, False],
     }
     default_options = {
         "shared": False,
@@ -114,6 +115,7 @@ class LLVMCoreConan(ConanFile):
         "with_xml2": True,
         "with_z3": True,
         "with_zlib": True,
+        "with_zstd": True,
     }
 
     @property
@@ -137,6 +139,8 @@ class LLVMCoreConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.with_libedit  # not supported on windows
+        if Version(self.version) < 18:
+            del self.options.zstd
 
     def configure(self):
         if self.options.shared:
@@ -156,6 +160,8 @@ class LLVMCoreConan(ConanFile):
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_z3:
             self.requires("z3/4.13.0")
+        if self.options.get_safe("with_zstd"):
+            self.requires("zstd/1.5.6")
 
     def build_requirements(self):
         self.tool_requires("ninja/[>=1.10.2 <2]")
@@ -267,6 +273,7 @@ class LLVMCoreConan(ConanFile):
             "LLVM_ENABLE_FFI": self.options.with_ffi,
             "LLVM_ENABLE_ZLIB": "FORCE_ON" if self.options.with_zlib else False,
             "LLVM_ENABLE_LIBXML2": "FORCE_ON" if self.options.with_xml2 else False,
+            "LLVM_ENABLE_ZSTD": "FORCE_ON" if self.options.get_safe("with_zstd") else False,
             "LLVM_ENABLE_TERMINFO": self.options.with_terminfo
         }
         if self.options.targets != "all":
@@ -303,10 +310,11 @@ class LLVMCoreConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
+        graphviz_args = [f"--graphviz={PosixPath(self.build_folder) / "llvm-core.dot"}"]
         if Version(self.version) < 18:
-            cmake.configure()
+            cmake.configure(cli_args=graphviz_args)
         else:
-            cmake.configure(build_script_folder="llvm-main")
+            cmake.configure(build_script_folder="llvm-main", cli_args=graphviz_args)
         cmake.build()
 
     @property
