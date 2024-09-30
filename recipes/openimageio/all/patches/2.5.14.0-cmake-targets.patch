@@ -1,0 +1,521 @@
+diff --git CMakeLists.txt CMakeLists.txt
+index 3ff009229..d38941db0 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -154,7 +154,7 @@ endif ()
+ add_definitions (-DOIIO_INTERNAL=1)
+ 
+ list (APPEND CMAKE_MODULE_PATH
+-      "${PROJECT_SOURCE_DIR}/src/cmake/modules"
++      #"${PROJECT_SOURCE_DIR}/src/cmake/modules"
+       "${PROJECT_SOURCE_DIR}/src/cmake")
+ 
+ include (GNUInstallDirs)
+@@ -233,7 +233,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
+     add_subdirectory (src/iinfo)
+     add_subdirectory (src/maketx)
+     add_subdirectory (src/oiiotool)
+-    add_subdirectory (src/testtex)
++    #add_subdirectory (src/testtex)
+     add_subdirectory (src/iv)
+ endif ()
+ 
+diff --git src/cmake/externalpackages.cmake src/cmake/externalpackages.cmake
+index fe581e723..ab2fbb7f5 100644
+--- src/cmake/externalpackages.cmake
++++ src/cmake/externalpackages.cmake
+@@ -48,14 +48,14 @@ if (NOT DEFINED Boost_USE_STATIC_LIBS)
+     set (Boost_USE_STATIC_LIBS "${LINKSTATIC}")
+ endif ()
+ 
+-if (MSVC)
+-    # Not linking Boost as static libraries: either an explicit setting or LINKSTATIC is FALSE:
+-    if (NOT Boost_USE_STATIC_LIBS)
+-        add_definitions (-DBOOST_ALL_DYN_LINK=1)
+-    endif ()
+-endif ()
+-
+-set (Boost_COMPONENTS thread)
++#if (MSVC)
++#    # Not linking Boost as static libraries: either an explicit setting or LINKSTATIC is FALSE:
++#    if (NOT Boost_USE_STATIC_LIBS)
++#        add_definitions (-DBOOST_ALL_DYN_LINK=1)
++#    endif ()
++#endif ()
++
++set (Boost_COMPONENTS filesystem system thread container)
+ if (NOT USE_STD_FILESYSTEM)
+     list (APPEND Boost_COMPONENTS filesystem)
+ endif ()
+@@ -111,9 +111,9 @@ checked_find_package (OpenEXR REQUIRED
+ # building against Imath/OpenEXR 3.x when there is still a system-level
+ # install version of 2.x.
+ include_directories(BEFORE ${IMATH_INCLUDES} ${OPENEXR_INCLUDES})
+-if (MSVC AND NOT LINKSTATIC)
+-    add_definitions (-DOPENEXR_DLL) # Is this needed for new versions?
+-endif ()
++#if (MSVC AND NOT LINKSTATIC)
++#    add_definitions (-DOPENEXR_DLL) # Is this needed for new versions?
++#endif ()
+ if (OpenEXR_VERSION VERSION_GREATER_EQUAL 3.0)
+     set (OIIO_USING_IMATH 3)
+ else ()
+@@ -140,11 +140,15 @@ set (OPENIMAGEIO_CONFIG_DO_NOT_FIND_IMATH OFF CACHE BOOL
+      "Exclude find_dependency(Imath) from the exported OpenImageIOConfig.cmake")
+ 
+ # JPEG -- prefer JPEG-Turbo to regular libjpeg
+-checked_find_package (libjpeg-turbo
+-                      VERSION_MIN 2.1
+-                      DEFINITIONS -DUSE_JPEG_TURBO=1)
+-if (NOT TARGET libjpeg-turbo::jpeg) # Try to find the non-turbo version
++if (USE_JPEGTURBO)
++    checked_find_package (libjpeg-turbo REQUIRED
++                          DEFINITIONS -DUSE_JPEG_TURBO=1
++                          PRINT libjpeg-turbo_INCLUDES libjpeg-turbo_LIBRARIES)
++    add_library(JPEG::JPEG ALIAS libjpeg-turbo::libjpeg-turbo)
++elseif (USE_JPEG) # Try to find the non-turbo version
+     checked_find_package (JPEG REQUIRED)
++else ()
++    message(FATAL_ERROR "JPEG library was not found!")
+ endif ()
+ 
+ # Pugixml setup.  Normally we just use the version bundled with oiio, but
+@@ -160,7 +164,7 @@ else ()
+ endif()
+ 
+ # From pythonutils.cmake
+-find_python()
++#find_python()
+ if (USE_PYTHON)
+     checked_find_package (pybind11 REQUIRED VERSION_MIN 2.4.2)
+ endif ()
+@@ -170,111 +174,107 @@ endif ()
+ # Dependencies for optional formats and features. If these are not found,
+ # we will continue building, but the related functionality will be disabled.
+ 
+-checked_find_package (PNG)
++if (USE_LIBPNG)
++    checked_find_package (PNG REQUIRED)
++endif()
+ 
+-checked_find_package (BZip2)   # Used by ffmpeg and freetype
+-if (NOT BZIP2_FOUND)
+-    set (BZIP2_LIBRARIES "")  # TODO: why does it break without this?
+-endif ()
++if (USE_FREETYPE)
++    checked_find_package (Freetype REQUIRED
++                          DEFINITIONS  -DUSE_FREETYPE=1 )
++endif()
+ 
+-checked_find_package (Freetype
+-                   DEFINITIONS  -DUSE_FREETYPE=1 )
+-
+-checked_find_package (OpenColorIO
+-                      DEFINITIONS  -DUSE_OCIO=1 -DUSE_OPENCOLORIO=1
+-                      # PREFER_CONFIG
+-                      )
+-if (OpenColorIO_FOUND)
+-    option (OIIO_DISABLE_BUILTIN_OCIO_CONFIGS
+-           "For deveoper debugging/testing ONLY! Disable OCIO 2.2 builtin configs." OFF)
+-    if (OIIO_DISABLE_BUILTIN_OCIO_CONFIGS OR "$ENV{OIIO_DISABLE_BUILTIN_OCIO_CONFIGS}")
+-        add_compile_definitions(OIIO_DISABLE_BUILTIN_OCIO_CONFIGS)
+-    endif ()
+-else ()
+-    set (OpenColorIO_FOUND 0)
++if (USE_OPENCOLORIO)
++    checked_find_package (OpenColorIO REQUIRED
++                          DEFINITIONS  -DUSE_OCIO=1 -DUSE_OPENCOLORIO=1
++                          # PREFER_CONFIG
++                          )
+ endif ()
+ 
+-checked_find_package (OpenCV 3.0
+-                   DEFINITIONS  -DUSE_OPENCV=1)
++if (USE_OPENCV)
++    checked_find_package (OpenCV REQUIRED  3.0
++                          DEFINITIONS  -DUSE_OPENCV=1)
++endif()
+ 
+ # Intel TBB
+-set (TBB_USE_DEBUG_BUILD OFF)
+-checked_find_package (TBB 2017
+-                      SETVARIABLES OIIO_TBB
+-                      PREFER_CONFIG)
++if (USE_TBB)# Intel TBB
++    set (TBB_USE_DEBUG_BUILD OFF)
++    checked_find_package (TBB 2017 REQUIRED
++                          SETVARIABLES OIIO_TBB
++                          PREFER_CONFIG)
++endif()
+ 
+ # DCMTK is used to read DICOM images
+-checked_find_package (DCMTK VERSION_MIN 3.6.1
+-                      PREFER_CONFIG)
++if (USE_DCMTK)
++    checked_find_package (DCMTK REQUIRED VERSION_MIN 3.6.1)  # For DICOM images
++endif()
+ 
+-checked_find_package (FFmpeg VERSION_MIN 3.0)
+-checked_find_package (GIF
+-                      VERSION_MIN 4
+-                      RECOMMEND_MIN 5.0
+-                      RECOMMEND_MIN_REASON "for stability and thread safety")
++if (USE_FFMPEG)
++    checked_find_package (ffmpeg REQUIRED VERSION_MIN 3.0)
++endif()
++if (USE_GIF)
++    checked_find_package (GIF REQUIRED
++                          VERSION_MIN 4
++                          RECOMMEND_MIN 5.0
++                          RECOMMEND_MIN_REASON "for stability and thread safety")
++endif()
+ 
+ # For HEIF/HEIC/AVIF formats
+-checked_find_package (Libheif VERSION_MIN 1.3
+-                      RECOMMEND_MIN 1.16
+-                      RECOMMEND_MIN_REASON "for orientation support")
+-if (APPLE AND LIBHEIF_VERSION VERSION_GREATER_EQUAL 1.10 AND LIBHEIF_VERSION VERSION_LESS 1.11)
+-    message (WARNING "Libheif 1.10 on Apple is known to be broken, disabling libheif support")
+-    set (Libheif_FOUND 0)
+-endif ()
++if (USE_LIBHEIF)
++    checked_find_package (libheif REQUIRED VERSION_MIN 1.3
++                          RECOMMEND_MIN 1.7
++                          RECOMMEND_MIN_REASON "for AVIF support")
++endif()
+ 
+-checked_find_package (LibRaw
+-                      VERSION_MIN 0.18
+-                      PRINT LibRaw_r_LIBRARIES)
+-if (LibRaw_FOUND AND LibRaw_VERSION VERSION_LESS 0.20 AND CMAKE_CXX_STANDARD VERSION_GREATER_EQUAL 17)
+-    message (STATUS "${ColorYellow}WARNING When building for C++17, LibRaw should be 0.20 or higher (found ${LibRaw_VERSION}). You may get errors, depending on the compiler.${ColorReset}")
+-    # Currently, we issue the above warning and let them take their chances.
+-    # If we wish to disable the LibRaw<0.20/C++17 combination that may fail,
+-    # just uncomment the following two lines.
+-    # set (LibRaw_FOUND 0)
+-    # set (LIBRAW_FOUND 0)
+-endif ()
++if (USE_LIBRAW)
++    checked_find_package (LibRaw REQUIRED
++                          RECOMMEND_MIN 0.18
++                          RECOMMEND_MIN_REASON "for ACES support and better camera metadata"
++                          PRINT LibRaw_r_LIBRARIES)
++endif()
+ 
+-checked_find_package (OpenJPEG VERSION_MIN 2.0
+-                      RECOMMEND_MIN 2.2
+-                      RECOMMEND_MIN_REASON "for multithreading support")
+-# Note: Recent OpenJPEG versions have exported cmake configs, but we don't
+-# find them reliable at all, so we stick to our FindOpenJPEG.cmake module.
+-
+-checked_find_package (OpenVDB
+-                      VERSION_MIN 5.0
+-                      DEPS         TBB
+-                      DEFINITIONS  -DUSE_OPENVDB=1)
+-if (OpenVDB_FOUND AND OpenVDB_VERSION VERSION_GREATER_EQUAL 10.1 AND CMAKE_CXX_STANDARD VERSION_LESS 17)
+-    message (WARNING "${ColorYellow}OpenVDB >= 10.1 (we found ${OpenVDB_VERSION}) can only be used when we build with C++17 or higher. Disabling OpenVDB support.${ColorReset}")
+-    set (OpenVDB_FOUND 0)
+-    add_compile_definitions(DISABLE_OPENVDB=1)
+-endif ()
++if (USE_OPENJPEG)
++    checked_find_package (OpenJPEG REQUIRED
++                          VERSION_MIN 2.0
++                          RECOMMEND_MIN 2.2
++                          RECOMMEND_MIN_REASON "for multithreading support")
++    # Note: Recent OpenJPEG versions have exported cmake configs, but we don't
++    # find them reliable at all, so we stick to our FindOpenJPEG.cmake module.
++endif()
+ 
+-checked_find_package (Ptex PREFER_CONFIG)
+-if (NOT Ptex_FOUND OR NOT Ptex_VERSION)
+-    # Fallback for inadequate Ptex exported configs. This will eventually
+-    # disappear when we can 100% trust Ptex's exports.
+-    unset (Ptex_FOUND)
+-    checked_find_package (Ptex)
+-endif ()
++if (USE_OPENVDB)
++    checked_find_package (OpenVDB REQUIRED
++                          VERSION_MIN 5.0
++                          DEPS         TBB
++                          DEFINITIONS  -DUSE_OPENVDB=1)
++    # Upstream contains a version check to ensure that CXX 17 or newer is used with
++    # OpenVDB >= 10.1. This is ensured by the conanfile for openvdb
++endif()
+ 
+-checked_find_package (WebP)
+-# Note: When WebP 1.1 (released late 2019) is our minimum, we can use their
+-# exported configs and remove our FindWebP.cmake module.
++if (USE_PTEX)
++    checked_find_package (ptex REQUIRED PREFER_CONFIG)
++endif()
++ 
++if (USE_LIBWEBP)
++    checked_find_package (WebP REQUIRED)
++endif()
+ 
+ option (USE_R3DSDK "Enable R3DSDK (RED camera) support" OFF)
+-checked_find_package (R3DSDK NO_RECORD_NOTFOUND)  # RED camera
++if (USE_R3DSDK)
++    checked_find_package (R3DSDK REQUIRED)  # RED camera
++endif ()
+ 
+ set (NUKE_VERSION "7.0" CACHE STRING "Nuke version to target")
+-checked_find_package (Nuke NO_RECORD_NOTFOUND)
++if (USE_NUKE)
++    checked_find_package (Nuke REQUIRED)
++endif ()
+ 
+ 
+ # Qt -- used for iv
+ option (USE_QT "Use Qt if found" ON)
+-if (USE_QT)
+-    checked_find_package (OpenGL)   # used for iv
++if (USE_OPENGL)
++    checked_find_package (OpenGL REQUIRED)   # used for iv
+ endif ()
+-if (USE_QT AND OPENGL_FOUND)
++if (USE_QT AND USE_OPENGL)
+     checked_find_package (Qt6 COMPONENTS Core Gui Widgets OpenGLWidgets)
+     if (NOT Qt6_FOUND)
+         checked_find_package (Qt5 COMPONENTS Core Gui Widgets OpenGL)
+@@ -298,13 +298,13 @@ macro (find_or_download_robin_map)
+     # for an installed version. Still prefer a copy that seems to be
+     # locally installed in this tree.
+     if (NOT BUILD_ROBINMAP_FORCE)
+-        find_package (Robinmap QUIET)
++    find_package (tsl-robin-map REQUIRED)
+     endif ()
+     # If an external copy wasn't found and we requested that missing
+     # packages be built, or we we are forcing a local copy to be built, then
+     # download and build it.
+     # Download the headers from github
+-    if ((BUILD_MISSING_ROBINMAP AND NOT ROBINMAP_FOUND) OR BUILD_ROBINMAP_FORCE)
++    if ((BUILD_MISSING_ROBINMAP AND NOT tsl-robin-map_FOUND) OR BUILD_ROBINMAP_FORCE)
+         message (STATUS "Downloading local Tessil/robin-map")
+         set (ROBINMAP_INSTALL_DIR "${PROJECT_SOURCE_DIR}/ext/robin-map")
+         set (ROBINMAP_GIT_REPOSITORY "https://github.com/Tessil/robin-map")
+@@ -322,7 +322,7 @@ macro (find_or_download_robin_map)
+         endif ()
+         set (ROBINMAP_INCLUDE_DIR "${ROBINMAP_INSTALL_DIR}/include")
+     endif ()
+-    checked_find_package (Robinmap REQUIRED)
++    checked_find_package (tsl-robin-map REQUIRED)
+ endmacro()
+ 
+ find_or_download_robin_map ()
+@@ -341,7 +341,7 @@ macro (find_or_download_fmt)
+     # for an installed version. Still prefer a copy that seems to be
+     # locally installed in this tree.
+     if (NOT BUILD_FMT_FORCE)
+-        find_package (fmt QUIET)
++        find_package (fmt REQUIRED)
+     endif ()
+     # If an external copy wasn't found and we requested that missing
+     # packages be built, or we we are forcing a local copy to be built, then
+@@ -376,7 +376,7 @@ macro (find_or_download_fmt)
+         set (fmt_VERSION "${FMT_VERSION_MAJOR}.${FMT_VERSION_MINOR}.${FMT_VERSION_PATCH}")
+         list (APPEND CFP_ALL_BUILD_DEPS_FOUND "${pkgname} ${${pkgname}_VERSION}")
+     else ()
+-        get_target_property(FMT_INCLUDE_DIR fmt::fmt-header-only INTERFACE_INCLUDE_DIRECTORIES)
++        get_target_property(FMT_INCLUDE_DIR fmt::fmt INTERFACE_INCLUDE_DIRECTORIES)
+         set (OIIO_USING_FMT_LOCAL FALSE)
+         checked_find_package (fmt REQUIRED
+                               VERSION_MIN 7.0)
+diff --git src/ffmpeg.imageio/CMakeLists.txt src/ffmpeg.imageio/CMakeLists.txt
+index 8e47a8443..900d23101 100644
+--- src/ffmpeg.imageio/CMakeLists.txt
++++ src/ffmpeg.imageio/CMakeLists.txt
+@@ -2,7 +2,7 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # https://github.com/AcademySoftwareFoundation/OpenImageIO
+ 
+-if (FFmpeg_FOUND)
++if (USE_FFMPEG)
+     if (LINKSTATIC)
+         set (_static_suffixes .lib .a)
+         set (_static_libraries_found 0)
+@@ -26,11 +26,9 @@ if (FFmpeg_FOUND)
+     endif()
+ 
+     add_oiio_plugin (ffmpeginput.cpp
+-                     INCLUDE_DIRS ${FFMPEG_INCLUDES}
+-                     LINK_LIBRARIES ${FFMPEG_LIBRARIES}
+-                                    ${BZIP2_LIBRARIES}
++                     LINK_LIBRARIES ffmpeg::avcodec ffmpeg::avformat ffmpeg::swscale
+                      DEFINITIONS "-DUSE_FFMPEG"
+-                                 "-DOIIO_FFMPEG_VERSION=\"${FFMPEG_VERSION}\"")
++                                 "-DOIIO_FFMPEG_VERSION=\"${ffmpeg_VERSION}\"")
+ else()
+     message (STATUS "FFmpeg not found: ffmpeg plugin will not be built")
+ endif()
+diff --git src/heif.imageio/CMakeLists.txt src/heif.imageio/CMakeLists.txt
+index 5b6c30a85..e5bc55ef1 100644
+--- src/heif.imageio/CMakeLists.txt
++++ src/heif.imageio/CMakeLists.txt
+@@ -2,32 +2,31 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # https://github.com/AcademySoftwareFoundation/OpenImageIO
+ 
+-if (Libheif_FOUND)
+-    if (LINKSTATIC)
+-        set (_static_suffixes .lib .a)    
+-        set (_static_libraries_found 0)
++if (USE_LIBHEIF)
++    # if (LINKSTATIC)
++    #     set (_static_suffixes .lib .a)    
++    #     set (_static_libraries_found 0)
+ 
+-        foreach (_libeheif_library IN LISTS LIBHEIF_LIBRARIES)
+-            get_filename_component (_ext ${_libeheif_library} LAST_EXT)
+-            list (FIND _static_suffixes ${_ext} _index)
+-            if (${_index} GREATER -1)
+-                MATH (EXPR _static_libraries_found "${static_libraries_found}+1")
+-            endif()
+-        endforeach()
++    #     foreach (_libeheif_library IN LISTS LIBHEIF_LIBRARIES)
++    #         get_filename_component (_ext ${_libeheif_library} LAST_EXT)
++    #         list (FIND _static_suffixes ${_ext} _index)
++    #         if (${_index} GREATER -1)
++    #             MATH (EXPR _static_libraries_found "${static_libraries_found}+1")
++    #         endif()
++    #     endforeach()
+ 
+-        if (${_static_libraries_found} GREATER 0)
+-            message (STATUS "${ColorYellow}")
+-            message (STATUS "You are linking OpenImageIO against a static version of libheif, which is LGPL")
+-            message (STATUS "licensed. If you intend to redistribute this build of OpenImageIO, we recommend")
+-            message (STATUS "that you review the libheif license terms, or you may wish to switch to using a")
+-            message (STATUS "dynamically-linked libheif.")
+-            message ("${ColorReset}")
+-        endif()
+-    endif()
++    #     if (${_static_libraries_found} GREATER 0)
++    #         message (STATUS "${ColorYellow}")
++    #         message (STATUS "You are linking OpenImageIO against a static version of libheif, which is LGPL")
++    #         message (STATUS "licensed. If you intend to redistribute this build of OpenImageIO, we recommend")
++    #         message (STATUS "that you review the libheif license terms, or you may wish to switch to using a")
++    #         message (STATUS "dynamically-linked libheif.")
++    #         message ("${ColorReset}")
++    #     endif()
++    # endif()
+ 
+     add_oiio_plugin (heifinput.cpp heifoutput.cpp
+-                     INCLUDE_DIRS ${LIBHEIF_INCLUDES}
+-                     LINK_LIBRARIES ${LIBHEIF_LIBRARIES}
++                     LINK_LIBRARIES libheif::heif
+                      DEFINITIONS "-DUSE_HEIF=1")
+ else ()
+     message (WARNING "heif plugin will not be built")
+diff --git src/include/CMakeLists.txt src/include/CMakeLists.txt
+index 18b7632a3..c558c4780 100644
+--- src/include/CMakeLists.txt
++++ src/include/CMakeLists.txt
+@@ -64,7 +64,8 @@ install (FILES ${detail_headers}
+          DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/detail
+          COMPONENT developer)
+ 
+-if (INTERNALIZE_FMT OR OIIO_USING_FMT_LOCAL)
++if (0)   # Don't try to copy fmt libraries to target install folder
++    set(FMT_INCLUDES "${fmt_INCLUDE_DIR}")
+     set (fmt_headers_base_names)
+     foreach (header_name core.h format-inl.h format.h ostream.h printf.h
+              std.h base.h chrono.h)
+diff --git src/jpeg2000.imageio/CMakeLists.txt src/jpeg2000.imageio/CMakeLists.txt
+index 560e8d486..24348fe66 100644
+--- src/jpeg2000.imageio/CMakeLists.txt
++++ src/jpeg2000.imageio/CMakeLists.txt
+@@ -2,10 +2,9 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # https://github.com/AcademySoftwareFoundation/OpenImageIO
+ 
+-if (OPENJPEG_FOUND)
++if (USE_OPENJPEG)
+     add_oiio_plugin (jpeg2000input.cpp jpeg2000output.cpp
+-                     INCLUDE_DIRS ${OPENJPEG_INCLUDES}
+-                     LINK_LIBRARIES ${OPENJPEG_LIBRARIES}
++                     LINK_LIBRARIES openjp2
+                      DEFINITIONS "-DUSE_OPENJPEG")
+ else()
+     message (WARNING "Jpeg-2000 plugin will not be built")
+diff --git src/libOpenImageIO/CMakeLists.txt src/libOpenImageIO/CMakeLists.txt
+index aeb7b7f93..9a32e4cf2 100644
+--- src/libOpenImageIO/CMakeLists.txt
++++ src/libOpenImageIO/CMakeLists.txt
+@@ -154,19 +154,27 @@ target_link_libraries (OpenImageIO
+             ${OPENIMAGEIO_IMATH_TARGETS}
+         PRIVATE
+             ${OPENIMAGEIO_OPENEXR_TARGETS}
+-            ${OpenCV_LIBRARIES}
+             ${format_plugin_libs} # Add all the target link libraries from the plugins
+             $<TARGET_NAME_IF_EXISTS:OpenColorIO::OpenColorIO>
+             $<TARGET_NAME_IF_EXISTS:OpenColorIO::OpenColorIOHeaders>
+             $<TARGET_NAME_IF_EXISTS:pugixml::pugixml>
+             $<TARGET_NAME_IF_EXISTS:TBB::tbb>
+-            $<TARGET_NAME_IF_EXISTS:Freetype::Freetype>
+             ${BZIP2_LIBRARIES}
+             ZLIB::ZLIB
+-            $<TARGET_NAME_IF_EXISTS:Boost::thread>
++            tsl::robin_map
++            Boost::filesystem Boost::thread Boost::system Boost::container
+             ${CMAKE_DL_LIBS}
+         )
+ 
++if (USE_OPENCV)
++    target_link_libraries (OpenImageIO PRIVATE opencv::opencv_core
++                                               opencv::opencv_imgproc
++                                               opencv::opencv_videoio)
++endif ()
++if (USE_FREETYPE)
++    target_link_libraries (OpenImageIO PRIVATE Freetype::Freetype)
++endif()
++
+ if (WIN32)
+     target_link_libraries (OpenImageIO PRIVATE psapi)
+ endif()
+diff --git src/libutil/CMakeLists.txt src/libutil/CMakeLists.txt
+index f873b3eed..cf5d4e74c 100644
+--- src/libutil/CMakeLists.txt
++++ src/libutil/CMakeLists.txt
+@@ -20,20 +20,13 @@ target_link_libraries (OpenImageIO_Util
+             ${GCC_ATOMIC_LIBRARIES}
+             ${OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY}
+             ${OPENIMAGEIO_IMATH_TARGETS}
++            fmt::fmt
+         PRIVATE
+-            $<TARGET_NAME_IF_EXISTS:Boost::filesystem>
+-            $<TARGET_NAME_IF_EXISTS:Boost::thread>
++            Boost::filesystem Boost::thread Boost::system
+             $<TARGET_NAME_IF_EXISTS:TBB::tbb>
+             ${CMAKE_DL_LIBS}
+         )
+ 
+-if (INTERNALIZE_FMT OR OIIO_USING_FMT_LOCAL)
+-    add_dependencies(OpenImageIO_Util fmt_internal_target)
+-else ()
+-    target_link_libraries (OpenImageIO_Util
+-                           PUBLIC fmt::fmt-header-only)
+-endif ()
+-
+ if (WIN32)
+     add_definitions(-DWIN32_LEAN_AND_MEAN -DNOMINMAX -DNOGDI -DVC_EXTRALEAN)
+     target_link_libraries (OpenImageIO_Util PRIVATE psapi)
+diff --git src/ptex.imageio/CMakeLists.txt src/ptex.imageio/CMakeLists.txt
+index 16634fedb..82060ac29 100644
+--- src/ptex.imageio/CMakeLists.txt
++++ src/ptex.imageio/CMakeLists.txt
+@@ -2,12 +2,9 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # https://github.com/AcademySoftwareFoundation/OpenImageIO
+ 
+-if (Ptex_FOUND)
+-    set(ptex_target Ptex::Ptex_dynamic)
+-    if (TARGET Ptex::Ptex_static AND (NOT TARGET Ptex::Ptex_dynamic OR LINKSTATIC))
+-        set(ptex_target Ptex::Ptex_static)
+-    endif()
++if (USE_PTEX)
+     add_oiio_plugin (ptexinput.cpp
+-                     LINK_LIBRARIES ${ptex_target} ZLIB::ZLIB
++                     LINK_LIBRARIES ${ptex_LIBRARIES} ZLIB::ZLIB
++                     INCLUDE_DIRS ${ptex_INCLUDE_DIRS}
+                      DEFINITIONS "-DUSE_PTEX")
+ endif ()
