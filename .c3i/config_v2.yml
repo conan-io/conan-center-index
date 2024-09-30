@@ -3,7 +3,7 @@
 id: 'conan-io/conan-center-index'
 
 conan:
-  version: 2.5.0
+  version: 2.7.1
   backup_sources:
     upload_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
     download_url: "https://c3i.jfrog.io/artifactory/conan-center-backup-sources/"
@@ -45,7 +45,6 @@ tasks:
       - gstreamer
     parallel_strategy: unlimited
   cci:
-    conan_v2_run_export: false
     detailed_status_checks: true
     write_comments: false
     update_labels: false

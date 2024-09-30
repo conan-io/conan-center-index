@@ -52,6 +52,8 @@ class LibsndfileConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -64,7 +66,7 @@ class LibsndfileConan(ConanFile):
             self.requires("vorbis/1.3.7")
             self.requires("flac/1.4.2")
             self.requires("opus/1.4")
-        if self.options.get_safe("with_mpeg", False):
+        if self.options.get_safe("with_mpeg"):
             self.requires("mpg123/1.31.2")
             self.requires("libmp3lame/3.100")
 
