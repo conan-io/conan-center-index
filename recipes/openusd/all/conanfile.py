@@ -177,6 +177,7 @@ class OpenUSDConan(ConanFile):
             raise ConanInvalidConfiguration("openshadinglanguage recipe doesn't yet exists in conan center index")
         if self.options.enable_python_support:
             raise ConanInvalidConfiguration("python doesn't yet supported")
+        # TODO: add a requirement on materialx to be shared
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -397,11 +398,6 @@ class OpenUSDConan(ConanFile):
                     self.cpp_info.components["usd_hioOpenVDB"].requires.append("imath::imath")
 
             # plugins
-
-            self.cpp_info.components["hioAvif"].libdirs = ["plugin/usd/"]
-            self.cpp_info.components["hioAvif"].libs = ["hioAvif"]
-            self.cpp_info.components["hioAvif"].requires = ["usd_ar", "usd_arch", "usd_gf", "usd_hio", "usd_tf"]
-
             if self.options.build_openimageio_plugin and self.options.build_gpu_support:
                 self.cpp_info.components["usd_hioOiio"].libs = ["usd_hioOiio"]
                 self.cpp_info.components["usd_hioOiio"].requires = ["usd_ar", "usd_arch", "usd_gf", "usd_hio", "usd_tf", "openimageio::openimageio"]
@@ -503,24 +499,3 @@ class OpenUSDConan(ConanFile):
 
         self.cpp_info.components["usd_usdVol"].libs = ["usd_usdVol"]
         self.cpp_info.components["usd_usdVol"].requires = ["usd_tf", "usd_usd", "usd_usdGeom"]
-
-        if self.options.build_draco_plugin:
-            self.cpp_info.components["usdDraco"].libdirs = ["plugin/usd/"]
-            self.cpp_info.components["usdDraco"].libs = ["usdDraco"]
-            self.cpp_info.components["usdDraco"].requires = ["usd_tf", "usd_gf", "usd_sdf", "usd_usd", "usd_usdGeom", "draco::draco"]
-
-        if self.options.build_alembic_plugin:
-            self.cpp_info.components["usdAbc"].libdirs = ["plugin/usd/"]
-            self.cpp_info.components["usdAbc"].libs = ["usdAbc"]
-            self.cpp_info.components["usdAbc"].requires = ["usd_tf", "usd_work", "usd_sdf", "usd_usd", "usd_usdGeom", "alembic::alembic", "imath::imath"]
-            if self.options.enable_hdf5_support:
-                self.cpp_info.components["usdAbc"].requires.append("hdf5::hdf5")
-
-        if self.options.build_usd_imaging and not self.options.build_imaging:
-            self.cpp_info.components["usd_usdShaders"].libdirs = ["plugin/usd/"]
-            self.cpp_info.components["usd_usdShaders"].libs = ["usdShaders"]
-            self.cpp_info.components["usd_usdShaders"].requires = ["usd_ar", "usd_ndr", "usd_sdr", "usd_usdShade"]
-
-            self.cpp_info.components["usd_sdrGlslfx"].libdirs = ["plugin/usd/"]
-            self.cpp_info.components["usd_sdrGlslfx"].libs = ["sdrGlslfx"]
-            self.cpp_info.components["usd_sdrGlslfx"].requires = ["usd_ar", "usd_ndr", "usd_sdr", "usd_hio"]
