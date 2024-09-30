@@ -55,12 +55,17 @@ LLVM_TARGETS = {
 
 def components_from_dotfile(dotfile):
     def node_labels(dot):
+        label_replacements = {
+            "LibXml2::LibXml2": "libxml2::libxml2",
+            "ZLIB::ZLIB": "zlib::zlib",
+            "zstd::libzstd_static": "zstd::zstdlib",
+        }
         for row in dot:
             match_label = re.match(r'''^\s*"(node[0-9]+)"\s*\[\s*label\s*=\s*"(.+)".*''', row)
             if match_label:
                 node = match_label.group(1)
                 label = match_label.group(2)
-                yield node, label
+                yield node, label_replacements.get(label, label)
 
     def node_dependencies(dot):
         labels = {k: v for k, v in node_labels(dot)}
@@ -70,14 +75,21 @@ def components_from_dotfile(dotfile):
                 node_label = labels[match_dep.group(1)]
                 if node_label.startswith("LLVM"):
                     yield node_label, labels[match_dep.group(2)]
+        # some components don't have dependencies
+        for label in labels.values():
+            if label.startswith("LLVM"):
+                yield label, None
 
     components = {}
     dotfile_rows = dotfile.split("\n")
     for node, dependency in node_dependencies(dotfile_rows):
+        key = "system_libs" if dependency in ["rt", "m", "dl", "pthread"] else "requires"
         if not node in components:
-            components[node] = [dependency]
-        else:
-            components[node].append(dependency)
+            components[node] = { "system_libs": [], "requires": [] }
+            if dependency is not None:
+                components[node][key] = [dependency]
+        elif dependency is not None:
+            components[node][key].append(dependency)
 
     return components
 
@@ -336,10 +348,14 @@ class LLVMCoreConan(ConanFile):
         tc = CMakeDeps(self)
         tc.generate()
 
+    @property
+    def _graphviz_file(self):
+        return PosixPath(self.build_folder) / "llvm-core.dot"
+
     def build(self):
         apply_conandata_patches(self)
         cmake = CMake(self)
-        graphviz_args = [f"--graphviz={PosixPath(self.build_folder) / "llvm-core.dot"}"]
+        graphviz_args = [f"--graphviz={self._graphviz_file}"]
         graphviz_options = textwrap.dedent("""
             set(GRAPHVIZ_EXECUTABLES OFF)
             set(GRAPHVIZ_MODULE_LIBS OFF)
@@ -387,6 +403,7 @@ class LLVMCoreConan(ConanFile):
             set(LLVM_AVAILABLE_LIBS "{';'.join(build_info['components'].keys())}")
             set(LLVM_BUILD_TYPE "{self.settings.build_type}")
             set(LLVM_CMAKE_DIR "${{CMAKE_CURRENT_LIST_DIR}}")
+            list(APPEND CMAKE_MODULE_DIR ${{CMAKE_CURRENT_LIST_DIR}})
             set(LLVM_ALL_TARGETS "{self._all_targets}")
             set(LLVM_TARGETS_TO_BUILD "{self._targets_to_build}")
             set(LLVM_TARGETS_WITH_JIT "{';'.join(targets_with_jit)}")
@@ -447,9 +464,7 @@ class LLVMCoreConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "LLVM")
         self.cpp_info.set_property("cmake_build_modules",
                                    [self._build_module_file_rel_path,
-                                    self._cmake_module_path / "LLVM-ConfigInternal.cmake",
-                                    self._cmake_module_path / "LLVMDistributionSupport.cmake",
-                                    self._cmake_module_path / "AddLLVM.cmake"]
+                                    (self._cmake_module_path / "LLVM-ConfigInternal.cmake").as_posix()]
                                    )
         self.cpp_info.builddirs.append(self._cmake_module_path)
 
