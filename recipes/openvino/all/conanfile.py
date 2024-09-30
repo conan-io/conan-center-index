@@ -205,7 +205,11 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_INTEL_CPU"] = self.options.enable_cpu
         if self._gpu_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GPU"] = self.options.enable_gpu
-            toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = self.options.shared or not self.options.enable_cpu
+            toolchain.cache_variables["ENABLE_ONEDNN_FOR_GPU"] = (
+                Version(self.version) >= "2024.4.0" and self.options.enable_gpu
+                or not self.options.enable_cpu
+                or self.options.shared
+            )
         if self._gna_option_available:
             toolchain.cache_variables["ENABLE_INTEL_GNA"] = False
         if self._npu_option_available:
@@ -275,7 +279,8 @@ class OpenvinoConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support Debug build type on Conan Center CI")
 
     def validate(self):
-        if self.options.get_safe("enable_gpu") and not self.options.shared and self.options.enable_cpu:
+        if (self.options.get_safe("enable_gpu") and self.options.enable_cpu
+                and Version(self.version) < "2024.4.0" and not self.options.shared):
             # GPU and CPU plugins cannot be simultaneously built statically, because they use different oneDNN versions
             self.output.warning(f"{self.name} recipe builds GPU plugin without oneDNN (dGPU) support during static build, "
                                 "because CPU plugin compiled with different oneDNN version may cause ODR violation. "
@@ -329,7 +334,7 @@ class OpenvinoConan(ConanFile):
             if self.options.get_safe("enable_gpu"):
                 openvino_runtime.libs.extend(["openvino_intel_gpu_plugin", "openvino_intel_gpu_graph",
                                               "openvino_intel_gpu_runtime", "openvino_intel_gpu_kernels"])
-                if not self.options.enable_cpu:
+                if not self.options.enable_cpu or Version(self.version) >= "2024.4.0":
                     openvino_runtime.libs.append("openvino_onednn_gpu")
             # SW plugins
             if self.options.enable_auto:

@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -90,7 +89,8 @@ class LunaSVGConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        if Version(self.version) < "2.4.1":
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
 
         tc = CMakeDeps(self)
@@ -111,3 +111,5 @@ class LunaSVGConan(ConanFile):
         self.cpp_info.libs = ["lunasvg"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
+        if Version(self.version) >= "2.4.1" and not self.options.shared:
+            self.cpp_info.defines = ["LUNASVG_BUILD_STATIC"]

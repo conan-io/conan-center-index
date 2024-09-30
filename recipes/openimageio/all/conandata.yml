@@ -20,6 +20,9 @@ sources:
   "2.5.14.0":
     url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.5.14.0.tar.gz"
     sha256: "0e74372c658f083820872311d126867f10d59b526a856672746de7b2c772034d"
+  "2.5.15.0":
+    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.5.15.0.tar.gz"
+    sha256: "7779ef2c3d03c5ed95e13ff292de85c3f8cee301cd46baad0d2dc83c93bfe85c"
 patches:
   "2.4.7.1":
     - patch_file: "patches/2.4.7.1-cmake-targets.patch"
@@ -49,6 +52,10 @@ patches:
       patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
       patch_type: "conan"
   "2.5.14.0":
+    - patch_file: "patches/2.5.14.0-cmake-targets.patch"
+      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
+      patch_type: "conan"
+  "2.5.15.0":
     - patch_file: "patches/2.5.14.0-cmake-targets.patch"
       patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
       patch_type: "conan"
