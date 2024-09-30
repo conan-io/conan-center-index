@@ -261,9 +261,7 @@ class LibpqConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.components["_common"].libs.extend([
                 self._libname("pgfeutils"),
-                self._libname("pgcommon"),
                 self._libname("pgcommon_shlib"),
-                self._libname("pgport"),
                 self._libname("pgport_shlib"),
             ])
         if self.settings.os in ["Linux", "FreeBSD"]:
