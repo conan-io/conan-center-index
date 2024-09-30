@@ -20,3 +20,10 @@ sources:
   "1.13.1":
     url: "https://github.com/onnx/onnx/archive/refs/tags/v1.13.1.tar.gz"
     sha256: "090d3e10ec662a98a2a72f1bf053f793efc645824f0d4b779e0ce47468a0890e"
+
+
+patches:
+  "1.16.2":
+    - patch_file: "1.16.2-0001-undef-optional.patch"
+      patch_description: "#undef OPTIONAL macro from windows.h, mingw header in onnx/onnx-data_pb.h"
+      patch_type: "portability"
