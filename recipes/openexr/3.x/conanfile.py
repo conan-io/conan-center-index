@@ -29,6 +29,8 @@ class OpenEXRConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if Version(self.version) >= "3.3":
+            return 17
         return 11
 
     @property
