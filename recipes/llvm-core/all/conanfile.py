@@ -8,6 +8,7 @@ from conan.tools.files import (
     collect_libs,
     get,
     rmdir,
+    load,
     save,
     copy,
     export_conandata_patches,
@@ -51,6 +52,34 @@ LLVM_TARGETS = {
     "X86",
     "XCore"
 }
+
+def components_from_dotfile(dotfile):
+    def node_labels(dot):
+        for row in dot:
+            match_label = re.match(r'''^\s*"(node[0-9]+)"\s*\[\s*label\s*=\s*"(.+)".*''', row)
+            if match_label:
+                node = match_label.group(1)
+                label = match_label.group(2)
+                yield node, label
+
+    def node_dependencies(dot):
+        labels = {k: v for k, v in node_labels(dot)}
+        for row in dot:
+            match_dep = re.match(r'''^\s*"(node[0-9]+)"\s*->\s*"(node[0-9]+)".*''', row)
+            if match_dep:
+                node_label = labels[match_dep.group(1)]
+                if node_label.startswith("LLVM"):
+                    yield node_label, labels[match_dep.group(2)]
+
+    components = {}
+    dotfile_rows = dotfile.split("\n")
+    for node, dependency in node_dependencies(dotfile_rows):
+        if not node in components:
+            components[node] = [dependency]
+        else:
+            components[node].append(dependency)
+
+    return components
 
 
 class LLVMCoreConan(ConanFile):
@@ -274,7 +303,7 @@ class LLVMCoreConan(ConanFile):
             "LLVM_ENABLE_ZLIB": "FORCE_ON" if self.options.with_zlib else False,
             "LLVM_ENABLE_LIBXML2": "FORCE_ON" if self.options.with_xml2 else False,
             "LLVM_ENABLE_ZSTD": "FORCE_ON" if self.options.get_safe("with_zstd") else False,
-            "LLVM_ENABLE_TERMINFO": self.options.with_terminfo
+            "LLVM_ENABLE_TERMINFO": self.options.with_terminfo,
         }
         if self.options.targets != "all":
             cmake_variables["LLVM_TARGETS_TO_BUILD"] = self.options.targets
@@ -311,6 +340,13 @@ class LLVMCoreConan(ConanFile):
         apply_conandata_patches(self)
         cmake = CMake(self)
         graphviz_args = [f"--graphviz={PosixPath(self.build_folder) / "llvm-core.dot"}"]
+        graphviz_options = textwrap.dedent("""
+            set(GRAPHVIZ_EXECUTABLES OFF)
+            set(GRAPHVIZ_MODULE_LIBS OFF)
+            set(GRAPHVIZ_OBJECT_LIBS OFF)
+            set(GRAPHVIZ_IGNORE_TARGETS "CONAN_LIB.*")
+        """)
+        save(self, Path(self.build_folder) / "CMakeGraphVizOptions.cmake", graphviz_options)
         if Version(self.version) < 18:
             cmake.configure(cli_args=graphviz_args)
         else:
@@ -321,70 +357,9 @@ class LLVMCoreConan(ConanFile):
     def _package_folder_path(self):
         return Path(self.package_folder)
 
-    def _update_component_dependencies(self, components):
-        def _sanitized_components(deps_list):
-            match_genex = re.compile(r"""\\\$<LINK_ONLY:(.+)>""")
-            replacements = {
-                "LibXml2::LibXml2": "libxml2::libxml2",
-                "ZLIB::ZLIB": "zlib::zlib"
-            }
-            for dep in deps_list.split(";"):
-                match = match_genex.search(dep)
-                if match:
-                    yield match.group(1)
-                else:
-                    replacement = replacements.get(dep)
-                    if replacement:
-                        yield replacement
-                    elif dep.startswith("-l"):
-                        yield dep[2:]
-                    else:
-                        yield dep
-
-        def _parse_deps(deps_list):
-            data = {
-                "requires": [],
-                "system_libs": []
-            }
-            windows_system_libs = [
-                "ole32",
-                "delayimp",
-                "shell32",
-                "advapi32",
-                "-delayload:shell32.dll",
-                "uuid",
-                "psapi",
-                "-delayload:ole32.dll"
-            ]
-            for component in _sanitized_components(deps_list):
-                if component in windows_system_libs:
-                    continue
-                if component in ["rt", "m", "dl", "pthread"]:
-                    data["system_libs"].append(component)
-                else:
-                    data["requires"].append(component)
-            return data
-
-        # Can't use tools.files.load due to CRLF endings on Windows causing issues with Regular Expressions
-        cmake_exports = (self._package_folder_path / "lib" / "cmake" / "llvm" / "LLVMExports.cmake").read_text("utf-8")
-        match_dependencies = re.compile(
-            r'''^set_target_properties\((\w+).*\n?\s*INTERFACE_LINK_LIBRARIES\s+"(\S+)"''', re.MULTILINE)
-
-        for llvm_lib, dependencies in match_dependencies.findall(cmake_exports):
-            if llvm_lib in components:
-                components[llvm_lib].update(_parse_deps(dependencies))
-
     def _llvm_build_info(self):
         cmake_config = (self._package_folder_path / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake").read_text("utf-8")
-
-        match_cmake_var = re.compile(r"""^set\(LLVM_AVAILABLE_LIBS (?P<components>.*)\)$""", re.MULTILINE)
-        match = match_cmake_var.search(cmake_config)
-        if match is None:
-            self.output.warning("Could not find components in LLVMConfig.cmake")
-            return None
-
-        components = {component: {} for component in match.groupdict()["components"].split(";")}
-        self._update_component_dependencies(components)
+        components = components_from_dotfile(load(self, Path(self.build_folder) / "llvm-core.dot"))
 
         return {
             "components": components,
