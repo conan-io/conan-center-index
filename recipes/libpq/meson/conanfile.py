@@ -146,10 +146,19 @@ class LibpqConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/[~1.5]")
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
+        if self._settings_build.os == "Windows":
+            self.tool_requires("winflexbison/2.5.24")
+        else:
+            self.tool_requires("flex/2.6.4")
+            self.tool_requires("bison/3.8.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
