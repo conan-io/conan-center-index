@@ -181,7 +181,10 @@ class LLVMCoreConan(ConanFile):
             del self.options.fPIC
             del self.options.with_libedit  # not supported on windows
         if Version(self.version) < 18:
-            del self.options.zstd
+            del self.options.with_zstd
+        if Version(self.version) >= 19:
+            # removed in https://github.com/llvm/llvm-project/commit/852aaf54071ad072335dcac57f544d4da34c875a
+            del self.options.with_terminfo
 
     def configure(self):
         if self.options.shared:
@@ -248,7 +251,7 @@ class LLVMCoreConan(ConanFile):
     def source(self):
         sources = self.conan_data["sources"][self.version]
         if Version(self.version) < 18:
-            get(**sources, strip_root=True)
+            get(self, **sources, strip_root=True)
         else:
             get(self, **sources["llvm"], destination='llvm-main', strip_root=True)
             get(self, **sources["cmake"], destination='cmake', strip_root=True)
@@ -284,6 +287,7 @@ class LLVMCoreConan(ConanFile):
         tc = CMakeToolchain(self, generator="Ninja")
         # https://releases.llvm.org/12.0.0/docs/CMake.html
         # https://releases.llvm.org/13.0.0/docs/CMake.html
+        # https://releases.llvm.org/19.1.0/docs/CMake.html
         cmake_variables = {
             # Enables LLVM to find conan libraries during try_compile
             "CMAKE_TRY_COMPILE_CONFIGURATION": str(self.settings.build_type),
@@ -314,9 +318,12 @@ class LLVMCoreConan(ConanFile):
             "LLVM_ENABLE_FFI": self.options.with_ffi,
             "LLVM_ENABLE_ZLIB": "FORCE_ON" if self.options.with_zlib else False,
             "LLVM_ENABLE_LIBXML2": "FORCE_ON" if self.options.with_xml2 else False,
-            "LLVM_ENABLE_ZSTD": "FORCE_ON" if self.options.get_safe("with_zstd") else False,
-            "LLVM_ENABLE_TERMINFO": self.options.with_terminfo,
         }
+        if Version(self.version) < 19:
+            cmake_variables["LLVM_ENABLE_TERMINFO"] = self.options.get_safe("with_terminfo")
+        else:
+            cmake_variables["LLVM_ENABLE_ZSTD"] = "FORCE_ON" if self.options.get_safe("with_zstd") else False,
+
         if self.options.targets != "all":
             cmake_variables["LLVM_TARGETS_TO_BUILD"] = self.options.targets
 
@@ -327,10 +334,9 @@ class LLVMCoreConan(ConanFile):
             cmake_variables[f"LLVM_USE_CRT_{build_type}"] = msvc_runtime_flag(self)
 
         if not self.options.shared:
-            cmake_variables.update({
-                "DISABLE_LLVM_LINK_LLVM_DYLIB": True,
-                "LLVM_ENABLE_PIC": self.options.get_safe("fPIC", default=True)
-            })
+            cmake_variables["LLVM_ENABLE_PIC"] = self.options.get_safe("fPIC", default=True)
+            if Version(self.version) < 19:
+                cmake_variables["DISABLE_LLVM_LINK_LLVM_DYLIB"] = True
 
         if self.options.use_sanitizer == "None":
             cmake_variables["LLVM_USE_SANITIZER"] = ""
