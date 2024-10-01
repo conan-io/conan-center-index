@@ -93,6 +93,7 @@ class QwtConan(ConanFile):
         VirtualRunEnv(self).generate(scope="build")
 
         tc = CMakeToolchain(self)
+        tc.variables["QWT_QT_VERSION_MAJOR"] = Version(self.dependencies["qt"].ref.version).major
         tc.variables["QWT_DLL"] = self.options.shared
         tc.variables["QWT_STATIC"] = not self.options.shared
         tc.variables["QWT_PLOT"] = self.options.plot
