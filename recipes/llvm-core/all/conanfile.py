@@ -209,6 +209,7 @@ class LLVMCoreConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("ninja/[>=1.10.2 <2]")
+        self.tool_requires("cmake/[>=3.20 <4]") # required by LLVM 19
 
     def validate(self):
         if self.settings.compiler.cppstd:
