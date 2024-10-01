@@ -47,7 +47,7 @@ class AwsCdiSdkConan(ConanFile):
 
     def requirements(self):
         self.requires("aws-libfabric/1.9.1amzncdi1.0")
-        self.requires("aws-sdk-cpp/1.9.234")
+        self.requires("aws-sdk-cpp/1.11.352")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Windows"]:
