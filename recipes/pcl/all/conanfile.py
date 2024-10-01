@@ -450,45 +450,45 @@ class PclConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["PCL_SHARED_LIBS"] = self.options.shared
-        tc.variables["WITH_LIBUSB"] = self._is_enabled("libusb")
-        tc.variables["WITH_OPENGL"] = self._is_enabled("opengl")
-        tc.variables["WITH_OPENMP"] = self._is_enabled("openmp")
-        tc.variables["WITH_PCAP"] = self._is_enabled("pcap")
-        tc.variables["WITH_PNG"] = self._is_enabled("png")
-        tc.variables["WITH_QHULL"] = self._is_enabled("qhull")
+        tc.cache_variables["PCL_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["WITH_LIBUSB"] = self._is_enabled("libusb")
+        tc.cache_variables["WITH_OPENGL"] = self._is_enabled("opengl")
+        tc.cache_variables["WITH_OPENMP"] = self._is_enabled("openmp")
+        tc.cache_variables["WITH_PCAP"] = self._is_enabled("pcap")
+        tc.cache_variables["WITH_PNG"] = self._is_enabled("png")
+        tc.cache_variables["WITH_QHULL"] = self._is_enabled("qhull")
         if self._is_enabled("qhull"):
             # Upstream FindQhull.cmake defines HAVE_QHULL which changes content of pcl_config.h
             # Since we use CMakeDeps instead of this file, we have to manually inject HAVE_QHULL
-            tc.variables["HAVE_QHULL"] = True
-        tc.variables["WITH_QT"] = self._is_enabled("qt")
-        tc.variables["WITH_VTK"] = self._is_enabled("vtk")
-        tc.variables["WITH_CUDA"] = self._is_enabled("cuda")
-        tc.variables["BUILD_CUDA"] = self._is_enabled("cuda")
-        tc.variables["BUILD_GPU"] = self._is_enabled("cuda")
-        tc.variables["WITH_SYSTEM_ZLIB"] = True
-        tc.variables["PCL_ONLY_CORE_POINT_TYPES"] = self.options.precompile_only_core_point_types
+            tc.cache_variables["HAVE_QHULL"] = True
+        tc.cache_variables["WITH_QT"] = self._is_enabled("qt")
+        tc.cache_variables["WITH_VTK"] = self._is_enabled("vtk")
+        tc.cache_variables["WITH_CUDA"] = self._is_enabled("cuda")
+        tc.cache_variables["BUILD_CUDA"] = self._is_enabled("cuda")
+        tc.cache_variables["BUILD_GPU"] = self._is_enabled("cuda")
+        tc.cache_variables["WITH_SYSTEM_ZLIB"] = True
+        tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = self.options.precompile_only_core_point_types
         # The default False setting breaks OpenGL detection in CMake
-        tc.variables["PCL_ALLOW_BOTH_SHARED_AND_STATIC_DEPENDENCIES"] = True
-        tc.variables["OpenGL_GL_PREFERENCE"] = "GLVND"
+        tc.cache_variables["PCL_ALLOW_BOTH_SHARED_AND_STATIC_DEPENDENCIES"] = True
+        tc.cache_variables["OpenGL_GL_PREFERENCE"] = "GLVND"
 
         if not self.options.add_build_type_postfix:
-            tc.variables["CMAKE_DEBUG_POSTFIX"] = ""
-            tc.variables["CMAKE_RELEASE_POSTFIX"] = ""
-            tc.variables["CMAKE_RELWITHDEBINFO_POSTFIX"] = ""
-            tc.variables["CMAKE_MINSIZEREL_POSTFIX"] = ""
+            tc.cache_variables["CMAKE_DEBUG_POSTFIX"] = ""
+            tc.cache_variables["CMAKE_RELEASE_POSTFIX"] = ""
+            tc.cache_variables["CMAKE_RELWITHDEBINFO_POSTFIX"] = ""
+            tc.cache_variables["CMAKE_MINSIZEREL_POSTFIX"] = ""
 
-        tc.variables["BUILD_tools"] = self.options.tools
-        tc.variables["BUILD_apps"] = self.options.apps
-        tc.variables["BUILD_examples"] = False
+        tc.cache_variables["BUILD_tools"] = self.options.tools
+        tc.cache_variables["BUILD_apps"] = self.options.apps
+        tc.cache_variables["BUILD_examples"] = False
         enabled = sorted(self._enabled_components())
         disabled = sorted(self._disabled_components())
         self.output.info("Enabled components: " + ", ".join(enabled))
         self.output.info("Disabled components: " + ", ".join(disabled))
         for comp in enabled:
-            tc.variables[f"BUILD_{comp}"] = True
+            tc.cache_variables[f"BUILD_{comp}"] = True
         for comp in disabled:
-            tc.variables[f"BUILD_{comp}"] = False
+            tc.cache_variables[f"BUILD_{comp}"] = False
 
         tc.cache_variables["PCL_ENABLE_SSE"] = self.options.get_safe("use_sse", False)
 
