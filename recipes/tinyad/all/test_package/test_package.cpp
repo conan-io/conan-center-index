@@ -1,5 +1,6 @@
 #include <TinyAD/Scalar.hh>
 #include <Eigen/Dense>
+#include <iostream>
 
 int main(void) {
     // Choose autodiff scalar type for 3 variables
@@ -13,6 +14,8 @@ int main(void) {
     ADouble angle = acos(x.dot(y) / (x.norm() * y.norm()));
     Eigen::Vector3d g = angle.grad;
     Eigen::Matrix3d H = angle.Hess;
+
+    std::cout << "TinyAD test package successful \n";
 
     return 0;
 }
