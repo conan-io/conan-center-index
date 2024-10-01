@@ -1,5 +1,6 @@
 import glob
 import os
+from pathlib import Path
 
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
@@ -26,6 +27,9 @@ class LibpqConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "build_psql": [True, False],
+        "build_server": [True, False],
+        "build_tools": [True, False],
         "disable_rpath": [True, False],
         "with_bonjour": [True, False],
         "with_gssapi": [True, False],
@@ -47,6 +51,9 @@ class LibpqConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "build_psql": False,
+        "build_server": False,
+        "build_tools": False,
         "disable_rpath": False,
         # libpq dependencies
         "with_gssapi": False,
@@ -61,15 +68,18 @@ class LibpqConan(ConanFile):
         "with_selinux": False,
         "with_uuid": False,
         # psql executable dependencies
-        "with_readline": False,
+        "with_readline": "editline",
         # postgres server executable dependencies
-        "with_bonjour": False,
-        "with_icu": False,
-        "with_lz4": False,
-        "with_pam": False,
-        "with_systemd": False,
+        "with_bonjour": True,
+        "with_icu": True,
+        "with_lz4": True,
+        "with_pam": True,
+        "with_systemd": True,
     }
     options_description = {
+        "build_psql": "Build the psql command line tool",
+        "build_server": "Build the PostgreSQL server executable",
+        "build_tools": "Build all other tools",
         "with_bonjour": "Bonjour support",
         "with_gssapi": "GSSAPI support",
         "with_icu": "ICU support",
@@ -108,6 +118,14 @@ class LibpqConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        if not self.options.build_psql:
+            self.options.rm_safe("with_readline")
+        if not self.options.build_server:
+            self.options.rm_safe("with_bonjour")
+            self.options.rm_safe("with_icu")
+            self.options.rm_safe("with_lz4")
+            self.options.rm_safe("with_pam")
+            self.options.rm_safe("with_systemd")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -115,7 +133,7 @@ class LibpqConan(ConanFile):
     def requirements(self):
         if self.options.with_gssapi:
             self.requires("krb5/1.21.2")
-        if self.options.with_icu:
+        if self.options.get_safe("with_icu"):
             self.requires("icu/75.1")
         if self.options.with_ldap:
             self.requires("openldap/2.6.7")
@@ -123,7 +141,7 @@ class LibpqConan(ConanFile):
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_libxslt:
             self.requires("libxslt/1.1.42")
-        if self.options.with_lz4:
+        if self.options.get_safe("with_lz4"):
             self.requires("lz4/1.9.4")
         if self.options.with_nls:
             self.requires("libgettext/0.22")
@@ -131,9 +149,9 @@ class LibpqConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_pam"):
             self.requires("linux-pam/1.6.1")
-        if self.options.with_readline == "readline":
+        if self.options.get_safe("with_readline") == "readline":
             self.requires("readline/8.2")
-        elif self.options.with_readline == "editline":
+        elif self.options.get_safe("with_readline") == "editline":
             self.requires("editline/3.1")
         if self.options.get_safe("with_selinux"):
             self.requires("libselinux/3.6")
@@ -177,19 +195,19 @@ class LibpqConan(ConanFile):
         tc.project_options["docs"] = "disabled"
         tc.project_options["dtrace"] = "disabled"
         tc.project_options["gssapi"] = feature(self.options.with_gssapi)
-        tc.project_options["icu"] = feature(self.options.with_icu)
+        tc.project_options["icu"] = feature(self.options.get_safe("with_icu"))
         tc.project_options["ldap"] = feature(self.options.with_ldap)
         tc.project_options["libxml"] = feature(self.options.with_libxml)
         tc.project_options["libxslt"] = feature(self.options.with_libxslt)
         tc.project_options["llvm"] = "disabled"
-        tc.project_options["lz4"] = feature(self.options.with_lz4)
+        tc.project_options["lz4"] = feature(self.options.get_safe("with_lz4"))
         tc.project_options["nls"] = feature(self.options.with_nls)
         tc.project_options["pam"] = feature(self.options.get_safe("with_pam"))
         tc.project_options["plperl"] = "disabled"
         tc.project_options["plpython"] = "disabled"
         tc.project_options["pltcl"] = "disabled"
-        tc.project_options["readline"] = feature(self.options.with_readline)
-        tc.project_options["libedit_preferred"] = true_false(self.options.with_readline == "editline")
+        tc.project_options["readline"] = feature(self.options.get_safe("with_readline"))
+        tc.project_options["libedit_preferred"] = true_false(self.options.get_safe("with_readline") == "editline")
         tc.project_options["selinux"] = feature(self.options.get_safe("with_selinux"))
         tc.project_options["ssl"] = "openssl" if self.options.with_openssl else "none"
         tc.project_options["systemd"] = feature(self.options.get_safe("with_systemd"))
@@ -220,6 +238,23 @@ class LibpqConan(ConanFile):
             rm(self, "*.dll.a", lib_folder)
             rm(self, "*.so*", lib_folder)
             rm(self, "*.dylib", lib_folder)
+        if self.settings.os == "Windows":
+            # Produced by building postgres.exe and only on Windows.
+            # Does not have a corresponding .pc file.
+            rm(self, "postgres.lib", lib_folder)
+
+    def _remove_executables(self):
+        # There's no way to disable building of the executables as of v17.0,
+        # so simply remove them from the package instead to keep the size down.
+        for path in Path(self.package_folder, "bin").iterdir():
+            if path.name.endswith(".dll"):
+                continue
+            if path.stem == "postgres" and not self.options.build_server:
+                path.unlink()
+            elif path.stem == "psql" and not self.options.build_psql:
+                path.unlink()
+            elif not self.options.build_tools:
+                path.unlink()
 
     def package(self):
         copy(self, "COPYRIGHT", self.source_folder, os.path.join(self.package_folder, "licenses"))
@@ -232,6 +267,7 @@ class LibpqConan(ConanFile):
              os.path.join(self.build_folder, "src", "backend", "catalog"),
              os.path.join(self.package_folder, "include", "catalog"))
         self._remove_unused_libraries_from_package()
+        self._remove_executables()
         fix_apple_shared_install_name(self)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share", "doc"))
@@ -306,17 +342,17 @@ class LibpqConan(ConanFile):
             tool_requires.append("libgettext::libgettext")
         if self.options.with_gssapi:
             tool_requires.append("krb5::krb5-gssapi")
-        if self.options.with_icu:
+        if self.options.get_safe("with_icu"):
             tool_requires.extend(["icu::icu-uc", "icu::icu-i18n"])
         if self.options.with_ldap:
             tool_requires.append("openldap::openldap")
-        if self.options.with_lz4:
+        if self.options.get_safe("with_lz4"):
             tool_requires.append("lz4::lz4")
         if self.options.get_safe("with_pam"):
             tool_requires.append("linux-pam::pam")
-        if self.options.with_readline == "readline":
+        if self.options.get_safe("with_readline") == "readline":
             tool_requires.append("readline::readline")
-        elif self.options.with_readline == "editline":
+        elif self.options.get_safe("with_readline") == "editline":
             tool_requires.append("editline::editline")
         if self.options.get_safe("with_systemd"):
             tool_requires.append("libsystemd::libsystemd")
