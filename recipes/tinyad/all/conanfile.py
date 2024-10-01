@@ -1,6 +1,9 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -18,6 +21,27 @@ class TinyADConan(ConanFile):
 
     def requirements(self):
         self.requires("eigen/3.4.0")
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "12.0",
+            "Visual Studio": "15",
+            "msvc": "191",
+        }
+
+    def validate(self):
+        required_min_cppstd = "17"
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, required_min_cppstd)
+
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{required_min_cppstd}, which your compiler does not support."
+            )
 
     def package_id(self):
         self.info.clear()
