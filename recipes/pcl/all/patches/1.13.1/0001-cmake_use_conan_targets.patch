@@ -12,6 +12,9 @@
 -  string(APPEND CMAKE_CXX_FLAGS " ${OpenMP_CXX_FLAGS}")
 +  link_libraries(OpenMP::OpenMP_CXX)
 +
+ 
+   # We could use OpenMP_CXX_VERSION starting from CMake 3.9, but this value is only available on first run of CMake (see https://gitlab.kitware.com/cmake/cmake/issues/19150),
+   # so we use always OpenMP_CXX_SPEC_DATE, which is available since CMake 3.7.
 @@ -319,11 +319,11 @@
  find_package(Threads REQUIRED)
  
