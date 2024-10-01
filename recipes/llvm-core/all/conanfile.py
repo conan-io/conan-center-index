@@ -363,11 +363,19 @@ class LLVMCoreConan(ConanFile):
         apply_conandata_patches(self)
         cmake = CMake(self)
         graphviz_args = [f"--graphviz={self._graphviz_file}"]
-        graphviz_options = textwrap.dedent("""
+
+        # components not exported or not of interest
+        exclude_patterns = [
+            "LLVMTableGenGlobalISel.*",
+            "CONAN_LIB.*",
+            "LLVMExegesis.*",
+            "LLVMCFIVerify.*"
+        ]
+        graphviz_options = textwrap.dedent(f"""
             set(GRAPHVIZ_EXECUTABLES OFF)
             set(GRAPHVIZ_MODULE_LIBS OFF)
             set(GRAPHVIZ_OBJECT_LIBS OFF)
-            set(GRAPHVIZ_IGNORE_TARGETS "CONAN_LIB.*")
+            set(GRAPHVIZ_IGNORE_TARGETS "{';'.join(exclude_patterns)}")
         """)
         save(self, Path(self.build_folder) / "CMakeGraphVizOptions.cmake", graphviz_options)
         if Version(self.version) < 18:
