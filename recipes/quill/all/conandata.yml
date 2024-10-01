@@ -1,4 +1,7 @@
 sources:
+  "7.2.2":
+    url: "https://github.com/odygrd/quill/releases/download/v7.2.2/quill-7.2.2.zip"
+    sha256: "3b908f498e1a04b5bf2098108461ff2fab9c3350fccae62c96e54c0f868c00be"
   "7.2.1":
     url: "https://github.com/odygrd/quill/releases/download/v7.2.1/quill-7.2.1.zip"
     sha256: "5ca27bbb8866489a9c2fb1da628d9ddfed423cbba1dd1d07c793d7a8237cfaab"
