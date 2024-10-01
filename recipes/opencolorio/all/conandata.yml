@@ -1,7 +1,7 @@
 sources:
   "2.4.0":
     url: "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v2.4.0.tar.gz"
-    sha256: "00fc49578abf8435eb041088af44c8c4bcaafbe04021d53d341adcd488aec711"
+    sha256: "0ff3966b9214da0941b2b1cbdab3975a00a51fc6f3417fa860f98f5358f2c282"
   "2.3.2":
     url: "https://github.com/AcademySoftwareFoundation/OpenColorIO/archive/v2.3.2.tar.gz"
     sha256: "6bbf4e7fa4ea2f743a238cb22aff44890425771a2f57f62cece1574e46ceec2f"
