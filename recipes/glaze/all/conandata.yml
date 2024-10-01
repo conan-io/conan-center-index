@@ -1,7 +1,7 @@
 sources:
-  "3.6.0":
-    url: "https://github.com/stephenberry/glaze/archive/v3.6.0.tar.gz"
-    sha256: "d394fed35440bd1cb1a2aec059b967acc43fc04764ecb0915ba24b9f5a9ca0a3"
+  "3.6.1":
+    url: "https://github.com/stephenberry/glaze/archive/v3.6.1.tar.gz"
+    sha256: "70324ad952adee32d6bbf95a0983f0c1623ce61bd237aa28c8337af2d8bb9ed5"
   # keep 3.4.3 for breaking change: API(naming) change
   "3.4.3":
     url: "https://github.com/stephenberry/glaze/archive/v3.4.3.tar.gz"
