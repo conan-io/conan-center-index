@@ -30,7 +30,7 @@ class LibjpegConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
+    
     @property
     def _is_clang_cl(self):
         return self.settings.os == "Windows" and self.settings.compiler == "clang"
@@ -69,7 +69,7 @@ class LibjpegConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        if is_msvc(self):
+        if is_msvc(self) or self._is_clang_cl:
             tc = MSBuildToolchain(self)
             tc.cflags.append("-DLIBJPEG_BUILDING")
             if not self.options.shared:
@@ -84,7 +84,7 @@ class LibjpegConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        if is_msvc(self):
+        if is_msvc(self) or self._is_clang_cl:
             with chdir(self, self.source_folder):
                 self.run("nmake /f makefile.vs setupcopy-v16")
 
