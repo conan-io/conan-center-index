@@ -105,6 +105,9 @@ class LibheifConan(ConanFile):
         tc.variables["WITH_OpenJPEG_DECODER"] = self.options.get_safe("with_openjpeg", False)
         tc.variables["WITH_OpenJPEG_ENCODER"] = self.options.get_safe("with_openjpeg", False)
         tc.variables["WITH_OPENJPH_ENCODER"] = self.options.get_safe("with_openjph", False)
+        # Disable finding possible Doxygen in system, so no docs are built
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
+
         tc.generate()
         deps = CMakeDeps(self)
         if Version(self.version) >= "1.18.0":
