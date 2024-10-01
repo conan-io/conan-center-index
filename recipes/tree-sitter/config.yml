@@ -11,5 +11,6 @@ versions:
     folder: all
   "0.21.0":
     folder: all
+  # keep 0.20.8 for tree-sitter-c
   "0.20.8":
     folder: all
