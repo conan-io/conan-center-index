@@ -57,20 +57,20 @@ class SAILConan(ConanFile):
     def requirements(self):
         if self.options.with_highest_priority_codecs:
             self.requires("giflib/5.2.2")
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/9f")
             self.requires("libpng/[>=1.6 <2]")
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/4.7.0")
         if self.options.with_high_priority_codecs:
             if Version(self.version) >= "0.9.1":
                 self.requires("nanosvg/cci.20231025")
         if self.options.with_medium_priority_codecs:
-            self.requires("libavif/1.0.4")
-            self.requires("jasper/4.2.0")
+            self.requires("libavif/1.1.1")
+            self.requires("jasper/4.2.4")
             # TODO Re-enable JPEG XL after merging either of the following:
             #   - https://github.com/conan-io/conan-center-index/pull/13898
             #   - https://github.com/conan-io/conan-center-index/pull/18812
-            # self.requires("libjxl/0.10.2")
-            self.requires("libwebp/1.3.2")
+            # self.requires("libjxl/0.10.3")
+            self.requires("libwebp/1.4.0")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
