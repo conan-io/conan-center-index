@@ -48,7 +48,7 @@ class ZuluOpenJDK(ConanFile):
 
     def build(self):
         get(self, **self.conan_data["sources"][self.version][str(self._settings_host.os)]
-            [str(self._settings_host.arch)], strip_root=True)
+            [str(self._settings_host.arch)], strip_root=True, keep_permissions=True)
 
     def package(self):
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "bin"),
