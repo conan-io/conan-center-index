@@ -85,7 +85,6 @@ class FclConan(ConanFile):
             tc.cache_variables["OCTOMAP_PATCH_VERSION"] = str(octomap_version.patch)
         tc.cache_variables["BUILD_TESTING"] = False
         tc.cache_variables["FCL_NO_DEFAULT_RPATH"] = False
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         cd = CMakeDeps(self)
