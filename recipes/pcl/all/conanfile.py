@@ -223,7 +223,7 @@ class PclConan(ConanFile):
             "metslib": [],
             "opencv": ["opencv::opencv"],
             "opengl": ["opengl::opengl", "freeglut::freeglut", "glew::glew", "glu::glu" if is_apple_os(self) or self.settings.os == "Windows" else "mesa-glu::mesa-glu"],
-            "openmp": ["llvm-openmp::llvm-openmp"],
+            "openmp": ["llvm-openmp::llvm-openmp"] if self.settings.compiler in ["clang", "apple-clang"] else [],
             "openni": [],
             "openni2": [],
             "pcap": ["libpcap::libpcap"],
@@ -402,7 +402,8 @@ class PclConan(ConanFile):
         if self._is_enabled("zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
         if self._is_enabled("openmp"):
-            self.requires("llvm-openmp/18.1.8", transitive_headers=True, transitive_libs=True)
+            if self.settings.compiler in ["clang", "apple-clang"]:
+                self.requires("llvm-openmp/17.0.6", transitive_headers=True, transitive_libs=True)
         # TODO:
         # self.requires("vtk/9.x.x", transitive_headers=True)
         # self.requires("openni/x.x.x", transitive_headers=True)
@@ -591,6 +592,17 @@ class PclConan(ConanFile):
                 common.system_libs.append("pthread")
         if self.settings.os == "Windows":
             common.system_libs.append("ws2_32")
+
+        if self.options.with_openmp:
+            openmp_flags = []
+            if is_msvc(self):
+                openmp_flags = ["-openmp"]
+            elif self.settings.compiler == "gcc":
+                openmp_flags = ["-fopenmp"]
+            elif self.settings.compiler == "intel-cc":
+                openmp_flags = ["/Qopenmp"] if self.settings.os == "Windows" else ["-Qopenmp"]
+            self.cpp_info.cflags += openmp_flags
+            self.cpp_info.cxxflags += openmp_flags
 
         # TODO: Legacy, to be removed on Conan 2.0
         self.cpp_info.names["cmake_find_package"] = "PCL"
