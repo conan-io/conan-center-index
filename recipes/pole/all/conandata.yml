@@ -9,5 +9,5 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/0.5.4/0001-code.patch"
       patch_description: "Add conan support with a cmake"
-      patch_type: "code"
+      patch_type: "portability"
       
