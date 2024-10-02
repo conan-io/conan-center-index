@@ -1,13 +1,14 @@
+import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 
 class poleRecipe(ConanFile):
     name = "pole"
     package_type = "library"
 
     # Optional metadata
-    license = "LicenseRef-pole/LICENSE"
+    license = "BSD-3-Clause"
     author = "Luc Crepin  (luc.crepin@free.fr)"
     url = "https://github.com/otofoto/Pole"
     description = "POLE is a portable C++ library to access structured storage."
@@ -47,6 +48,7 @@ class poleRecipe(ConanFile):
         cmake.build()
 
     def package(self):
+        copy(self, "pole/LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"),keep_path=False)
         cmake = CMake(self)
         cmake.install()
 
