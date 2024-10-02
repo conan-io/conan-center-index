@@ -43,7 +43,7 @@ class GoogleCloudCppConan(ConanFile):
     def _minimum_compiler_versions(self):
         return {
             "gcc": "5.4",
-            "clang": "3.8",
+            "clang": "3.8" if Version(self.version) < "1.30.0" else "6",
         }
 
     def config_options(self):
@@ -109,7 +109,7 @@ class GoogleCloudCppConan(ConanFile):
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE_LOGGING"] = True
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE_GENERATOR"] = False
 
-        # tc.variables["CMAKE_FIND_DEBUG_MODE"] = True
+        tc.variables["CMAKE_FIND_DEBUG_MODE"] = True
 
         if is_msvc(self):
             tc.preprocessor_definitions["_SILENCE_CXX20_REL_OPS_DEPRECATION_WARNING"] = 1
