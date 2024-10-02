@@ -1,4 +1,13 @@
 sources:
+  "2.5.3":
+    url: "https://github.com/edenhill/librdkafka/archive/v2.5.3.tar.gz"
+    sha256: "eaa1213fdddf9c43e28834d9a832d9dd732377d35121e42f875966305f52b8ff"
+  "2.5.0":
+    url: "https://github.com/edenhill/librdkafka/archive/v2.5.0.tar.gz"
+    sha256: "3dc62de731fd516dfb1032861d9a580d4d0b5b0856beb0f185d06df8e6c26259"
+  "2.4.0":
+    url: "https://github.com/edenhill/librdkafka/archive/v2.4.0.tar.gz"
+    sha256: "d645e47d961db47f1ead29652606a502bdd2a880c85c1e060e94eea040f1a19a"
   "2.3.0":
     url: "https://github.com/edenhill/librdkafka/archive/v2.3.0.tar.gz"
     sha256: "2d49c35c77eeb3d42fa61c43757fcbb6a206daa560247154e60642bcdcc14d12"
@@ -12,6 +21,31 @@ sources:
     url: "https://github.com/edenhill/librdkafka/archive/v1.9.2.tar.gz"
     sha256: "3fba157a9f80a0889c982acdd44608be8a46142270a389008b22d921be1198ad"
 patches:
+  "2.5.3":
+    - patch_file: patches/0001-Change-library-names-1-9-1.patch
+      patch_description: "find_package conan packages"
+      patch_type: "conan"
+    - patch_file: patches/0002-Change-library-targets-and-result-variables-2-5-0.patch
+      patch_description: "refer conan package names"
+      patch_type: "conan"
+  "2.5.0":
+    - patch_file: patches/0001-Change-library-names-1-9-1.patch
+      patch_description: "find_package conan packages"
+      patch_type: "conan"
+    - patch_file: patches/0002-Change-library-targets-and-result-variables-2-5-0.patch
+      patch_description: "refer conan package names"
+      patch_type: "conan"
+    - patch_file: patches/0003-add-forward-declaration-2-5-0.patch
+      patch_description: "add forward declarations to fix compilation without ssl"
+      patch_type: "official"
+      patch_source: "https://github.com/confluentinc/librdkafka/pull/4794/"
+  "2.4.0":
+    - patch_file: patches/0001-Change-library-names-1-9-1.patch
+      patch_description: "find_package conan packages"
+      patch_type: "conan"
+    - patch_file: patches/0002-Change-library-targets-and-result-variables-2-3-0.patch
+      patch_description: "refer conan package names"
+      patch_type: "conan"
   "2.3.0":
     - patch_file: patches/0001-Change-library-names-1-9-1.patch
       patch_description: "find_package conan packages"
