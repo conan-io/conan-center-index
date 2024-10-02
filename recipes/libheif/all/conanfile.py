@@ -27,6 +27,7 @@ class LibheifConan(ConanFile):
         "with_dav1d": [True, False],
         "with_jpeg": [True, False],
         "with_openjpeg": [True, False],
+        "with_openjph": [True, False],
     }
     default_options = {
         "shared": False,
@@ -37,6 +38,7 @@ class LibheifConan(ConanFile):
         "with_dav1d": False,
         "with_jpeg": False,
         "with_openjpeg": False,
+        "with_openjph": False,
     }
 
     def export_sources(self):
@@ -48,6 +50,8 @@ class LibheifConan(ConanFile):
         if Version(self.version) < "1.17.0":
             del self.options.with_jpeg
             del self.options.with_openjpeg
+        if Version(self.version) < "1.18.0":
+            del self.options.with_openjph
 
     def configure(self):
         if self.options.shared:
@@ -69,6 +73,8 @@ class LibheifConan(ConanFile):
             self.requires("libjpeg/9f")
         if self.options.get_safe("with_openjpeg"):
             self.requires("openjpeg/2.5.2")
+        if self.options.get_safe("with_openjph"):
+            self.requires("openjph/0.16.0", transitive_headers=False)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -98,10 +104,15 @@ class LibheifConan(ConanFile):
         tc.variables["WITH_JPEG_ENCODER"] = self.options.get_safe("with_jpeg", False)
         tc.variables["WITH_OpenJPEG_DECODER"] = self.options.get_safe("with_openjpeg", False)
         tc.variables["WITH_OpenJPEG_ENCODER"] = self.options.get_safe("with_openjpeg", False)
+        tc.variables["WITH_OPENJPH_ENCODER"] = self.options.get_safe("with_openjph", False)
+        # Disable finding possible Doxygen in system, so no docs are built
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
+
         tc.generate()
         deps = CMakeDeps(self)
         if Version(self.version) >= "1.18.0":
             deps.set_property("libde265", "cmake_file_name", "LIBDE265")
+            deps.set_property("openjph", "cmake_file_name", "OPENJPH")
         deps.generate()
         if Version(self.version) >= "1.18.0":
             venv = VirtualBuildEnv(self)
@@ -153,3 +164,5 @@ class LibheifConan(ConanFile):
             self.cpp_info.components["heif"].requires.append("libjpeg::libjpeg")
         if self.options.get_safe("with_openjpeg"):
             self.cpp_info.components["heif"].requires.append("openjpeg::openjpeg")
+        if self.options.get_safe("with_openjph"):
+            self.cpp_info.components["heif"].requires.append("openjph::openjph")
