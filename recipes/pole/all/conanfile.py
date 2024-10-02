@@ -9,10 +9,11 @@ class poleRecipe(ConanFile):
 
     # Optional metadata
     license = "BSD-3-Clause"
-    author = "Luc Crepin  (luc.crepin@free.fr)"
     url = "https://github.com/otofoto/Pole"
     description = "POLE is a portable C++ library to access structured storage."
-    topics = ("Compound file", "OLE")
+    topics = ("compound file", "ole")
+    # Conan V1 compat
+    homepage = "https://github.com/otofoto/Pole"
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
