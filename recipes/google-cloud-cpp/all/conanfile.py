@@ -35,6 +35,17 @@ class GoogleCloudCppConan(ConanFile):
 
     short_paths = True
 
+    @property
+    def _min_cppstd(self):
+        return 11
+
+    @property
+    def _minimum_compiler_versions(self):
+        return {
+            "gcc": "5.4",
+            "clang": "3.8",
+        }
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -47,14 +58,20 @@ class GoogleCloudCppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("abseil/20230125.3")
+        self.requires("abseil/[>=20230125.3 <=20230802.1]", transitive_headers=True)
         self.requires("crc32c/1.1.2")
         self.requires("grpc/1.54.3")
         self.requires("libcurl/[>=7.78.0 <9]")
         self.requires("nlohmann_json/3.11.3")
         self.requires("openssl/[>=1.1 <4]")
         self.requires("protobuf/3.21.12")
-        # TODO: Add googleapis once it is available in CCI (now it is embedded)
+        # TODO: googleapis is hard to unvendorize, as it creates google-cloud-cpp:: targets
+        #  and it's not trivial to replace them with the googleapis:: targets,
+        #  there's not clean 1:1 mapping between them either way
+        # self.requires("googleapis/cci.20220531")
+
+    def build_requirements(self):
+        self.tool_requires("protobuf/<host_version>")
 
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
@@ -68,13 +85,9 @@ class GoogleCloudCppConan(ConanFile):
 
         check_min_vs(self, "192")
 
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5.4":
-            raise ConanInvalidConfiguration("Building requires GCC >= 5.4")
-
-        if self.settings.compiler == "clang":
-            min_clang_version = "3.8" if Version(self.version) < "1.30.0" else "6.0"
-            if Version(self.settings.compiler.version) < min_clang_version:
-                raise ConanInvalidConfiguration(f"Clang version must be at least {min_clang_version}")
+        minimum_version = self._minimum_compiler_versions.get(str(self.settings.compiler))
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.name} requires {self.settings.compiler} >= {minimum_version}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -93,7 +106,10 @@ class GoogleCloudCppConan(ConanFile):
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE_PUBSUB"] = True
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE_IAM"] = True
         tc.variables["GOOGLE_CLOUD_CPP_ENABLE_LOGGING"] = True
-        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_GENERATOR"] = True
+        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_GENERATOR"] = False
+
+        # tc.variables["CMAKE_FIND_DEBUG_MODE"] = True
+
         if is_msvc(self):
             tc.preprocessor_definitions["_SILENCE_CXX20_REL_OPS_DEPRECATION_WARNING"] = 1
             tc.preprocessor_definitions["_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING"] = 1
