@@ -225,23 +225,28 @@ class LibpqConan(ConanFile):
         meson.configure()
         meson.build()
 
+    def _fix_static_library_names(self):
+        # Meson outputs static libraries with a .a extension on Windows,
+        # which is not compatible with Conan and CMake.
+        # The .lib files are empty import libs and need to be removed.
+        if self.settings.os == "Windows" and not self.options.shared:
+            lib_folder = Path(self.package_folder, "lib")
+            for import_lib in lib_folder.glob("*.lib"):
+                import_lib.unlink()
+            for static_lib in lib_folder.glob("*.a"):
+                static_lib.rename(static_lib.with_suffix(".lib"))
+
     def _remove_unused_libraries_from_package(self):
+        # Meson always builds both static and shared libraries.
+        # Remove the incorrect ones from the package.
         bin_folder = os.path.join(self.package_folder, "bin")
         lib_folder = os.path.join(self.package_folder, "lib")
-        rm(self, "*.dll", lib_folder)
         if self.options.shared:
-            for lib in glob.glob(os.path.join(lib_folder, "*.a")):
-                if not (self.settings.os == "Windows" and os.path.basename(lib) == "libpq.dll.a"):
-                    os.remove(lib)
+            rm(self, "*.a", lib_folder)
         else:
             rm(self, "*.dll", bin_folder)
-            rm(self, "*.dll.a", lib_folder)
             rm(self, "*.so*", lib_folder)
             rm(self, "*.dylib", lib_folder)
-        if self.settings.os == "Windows":
-            # Produced by building postgres.exe and only on Windows.
-            # Does not have a corresponding .pc file.
-            rm(self, "postgres.lib", lib_folder)
 
     def _remove_executables(self):
         # There's no way to disable building of the executables as of v17.0,
@@ -266,9 +271,10 @@ class LibpqConan(ConanFile):
         copy(self, "*.h",
              os.path.join(self.build_folder, "src", "backend", "catalog"),
              os.path.join(self.package_folder, "include", "catalog"))
+        fix_apple_shared_install_name(self)
+        self._fix_static_library_names()
         self._remove_unused_libraries_from_package()
         self._remove_executables()
-        fix_apple_shared_install_name(self)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share", "doc"))
         os.rename(os.path.join(self.package_folder, "share"),
