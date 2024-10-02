@@ -71,7 +71,7 @@ class OpenEXRConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         
-        minimum_version = self._minimum_compiler_version(str(self.settings.compiler))
+        minimum_version = self._minimum_compiler_version[str(self.settings.compiler)]
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires {self.settings.compiler} >= {minimum_version}")
 
