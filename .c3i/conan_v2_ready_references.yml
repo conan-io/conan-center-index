@@ -62,6 +62,7 @@ required_for_references:
 - asyncpp
 - atomic_queue
 - audiofile
+- audiowaveform
 - autoconf
 - autoconf-archive
 - automake
@@ -904,6 +905,7 @@ required_for_references:
 - llama-cpp
 - llhttp
 - llnl-units
+- llvm-core
 - llvm-openmp
 - lmdb
 - lodepng
@@ -1140,6 +1142,7 @@ required_for_references:
 - openvino
 - openvr
 - openxlsx
+- optimlib
 - optional-lite
 - opus
 - opusfile
