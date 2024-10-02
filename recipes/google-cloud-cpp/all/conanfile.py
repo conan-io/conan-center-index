@@ -71,6 +71,7 @@ class GoogleCloudCppConan(ConanFile):
         # self.requires("googleapis/cci.20220531")
 
     def build_requirements(self):
+        self.tool_requires("grpc/<host_version>")
         self.tool_requires("protobuf/<host_version>")
 
     def validate(self):
