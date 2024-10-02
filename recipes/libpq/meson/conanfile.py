@@ -275,6 +275,7 @@ class LibpqConan(ConanFile):
         self._fix_static_library_names()
         self._remove_unused_libraries_from_package()
         self._remove_executables()
+        rm(self, "*.pdb", self.package_folder, recursive=True)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share", "doc"))
         os.rename(os.path.join(self.package_folder, "share"),
