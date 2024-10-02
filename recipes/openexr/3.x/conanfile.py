@@ -33,12 +33,12 @@ class OpenEXRConan(ConanFile):
         if Version(self.version) >= "3.3":
             return 17
         return 11
-    
+
     @property
     def _minimum_compiler_version(self):
         return {
             "17": {
-                "gcc": "7"
+                "gcc": "9"
             }
         }.get(str(self._min_cppstd), {})
 
@@ -70,7 +70,7 @@ class OpenEXRConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        
+
         minimum_version = self._minimum_compiler_version.get(str(self.settings.compiler))
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires {self.settings.compiler} >= {minimum_version}")
