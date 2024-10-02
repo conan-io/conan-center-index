@@ -1,7 +1,7 @@
 import os
 import textwrap
 
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import copy, get, save
@@ -40,6 +40,8 @@ class NumpyConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
     
     def validate(self):
+        if conan_version.major == 1:
+            raise ConanInvalidConfiguration("Conan v1 is not supported")
         # https://github.com/numpy/numpy/blob/v1.26.4/meson.build#L28
         if self.settings.compiler == "gcc" and self.settings.compiler.version < Version("8.4"):
             raise ConanInvalidConfiguration(f"{self.ref} requires GCC 8.4+")
