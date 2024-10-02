@@ -40,7 +40,7 @@ class OpenEXRConan(ConanFile):
             "17": {
                 "gcc": "7"
             }
-        }.get(self._min_cppstd, {})
+        }.get(str(self._min_cppstd), {})
 
     @property
     def _with_libdeflate(self):
