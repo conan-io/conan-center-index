@@ -1,7 +1,7 @@
 sources:
-  "1.19.0":
-    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.19.0.tar.gz"
-    sha256: "dd945b2fb8c2e7df7243e9d96c0293f45350058f0f713f66c519834a49a6c99d"
+  "1.19.2":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.19.2.tar.gz"
+    sha256: "870ee3772d265d1c7b0799ac7280071f8ecd55b11ee3f11868a3e79c7f4cab0f"
   "1.18.1":
     url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.18.1.tar.gz"
     sha256: "480ff5d2450ff18d02db48908c9c0c6a602993942cb47866b8effe32d0469a2c"
@@ -18,7 +18,7 @@ sources:
     url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.14.1.tar.gz"
     sha256: "f998352b131bb89fa7dd1f1d87ddbafe647dfaddd11929b6b5168b3f4ef857de"
 patches:
-  "1.19.0":
+  "1.19.2":
     - patch_file: "patches/1.17.3-0002-missing-include.patch"
       patch_description: "add missing '<optional>' include when abseil is built without c++17 support"
       patch_type: "portability"
@@ -79,11 +79,11 @@ patches:
       patch_description: "Ensures the forward compatibility with the newest versions of re2 library."
       patch_type: "portability"
       patch_source: "https://github.com/microsoft/onnxruntime/commit/126e7bf15fa4af8621814b82a3f7bd0d786f0239.patch"
-      
+
 # ONNX versions are based on the minor version used at
 # https://github.com/microsoft/onnxruntime/tree/main/cmake/external
 onnx_version_map:
-  "1.19.0": "1.16.2"
+  "1.19.2": "1.16.2"
   "1.18.1": "1.16.2"
   "1.17.3": "1.15.0"
   "1.16.3": "1.14.1"
