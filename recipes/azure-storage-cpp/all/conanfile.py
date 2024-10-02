@@ -31,6 +31,10 @@ class AzureStorageCppConan(ConanFile):
         "fPIC": True,
     }
 
+    # Use azure-sdk-for-cpp::azure-storage-blobs-cpp instead
+    # https://github.com/Azure/azure-sdk-for-cpp/blob/main/sdk/storage/MigrationGuide.md
+    deprecated = "azure-sdk-for-cpp"
+
     @property
     def _minimum_cpp_standard(self):
         return 11
