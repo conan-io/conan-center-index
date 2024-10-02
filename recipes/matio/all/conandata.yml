@@ -8,6 +8,9 @@ sources:
   "1.5.26":
     url: "https://downloads.sourceforge.net/project/matio/matio/1.5.26/matio-1.5.26.tar.gz"
     sha256: "8b47c29f58e468dba7a5555371c6a72ad4c6aa8b15f459b2b0b65a303c063933"
+  "1.5.27":
+    url: "https://downloads.sourceforge.net/project/matio/matio/1.5.27/matio-1.5.27.tar.gz"
+    sha256: "0a6aa00b18c4512b63a8d27906b079c8c6ed41d4b2844f7a4ae598e18d22d3b3"
 patches:
   "1.5.23":
     - patch_file: "patches/require-cmake-3.10.patch"
@@ -18,3 +21,6 @@ patches:
   "1.5.26":
     - patch_file: "patches/require-cmake-3.10.patch"
     - patch_file: "patches/cmake-install-bundle.patch"
+  "1.5.27":
+    - patch_file: "patches/require-cmake-3.10.patch"
+    - patch_file: "patches/cmake-install-bundle-1.5.27.patch"

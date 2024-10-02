@@ -1,10 +1,9 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -68,15 +67,6 @@ class SystemcConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration(
                 "Building SystemC as a shared library on Windows is currently not supported"
-            )
-
-        if (
-            conan_version.major == 1
-            and self.settings.compiler == "gcc"
-            and Version(self.settings.compiler.version) <= "5"
-        ):
-            raise ConanInvalidConfiguration(
-                f"GCC {self.settings.compiler.version} is not supported by SystemC on Conan v1"
             )
 
     def source(self):
