@@ -1,18 +1,17 @@
 from conan import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get
-
 
 class poleRecipe(ConanFile):
     name = "pole"
     package_type = "library"
 
     # Optional metadata
-    license = "<Put the package license here>"
-    author = "<Put your name here> <And your email here>"
-    url = "<Package recipe repository url here, for issues about the package>"
-    description = "<Description of pole package here>"
-    topics = ("<Put some tag here>", "<here>", "<and here>")
+    license = "LicenseRef-pole/LICENSE"
+    author = "Luc Crepin  (luc.crepin@free.fr)"
+    url = "https://github.com/otofoto/Pole"
+    description = "POLE is a portable C++ library to access structured storage."
+    topics = ("Compound file", "OLE")
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
@@ -37,10 +36,8 @@ class poleRecipe(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def generate(self):
-        deps = CMakeDeps(self)
-        deps.generate()
-        tc = CMakeToolchain(self)
+    def generate(self):        
+        tc = CMakeToolchain(self)       
         tc.generate()
 
     def build(self):

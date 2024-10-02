@@ -1,15 +1,16 @@
-#include <pole/pole.h>
+#include <pole.h>
 
 using namespace POLE;
 
-int main() {
+int main() 
+{
     Storage aStorage("test.ole");
 	if( aStorage.open(true,true))
 	{
 		Stream sStream(&aStorage,"/test_stream", true);
-		constexpr char[] acPoleStr = "POLE library trial";
-		sStream.write(acPoleStr, sizeof(acPoleStr));
+		constexpr char acPoleStr[] = "POLE library trial";
+		sStream.write((unsigned char*)acPoleStr, sizeof(acPoleStr));
 		sStream.flush();
 	}
-	sStorage.close();
+	aStorage.close();
 }
