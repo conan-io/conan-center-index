@@ -5,6 +5,7 @@ import textwrap
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, mkdir, replace_in_file, rm, rmdir, save, unzip
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
@@ -86,6 +87,10 @@ class CPythonConan(ConanFile):
             del self.options.with_curses
             del self.options.with_gdbm
             del self.options.with_nis
+        if is_apple_os(self) and cross_building(self):
+            # FIXME: The corresponding recipes currently don't support cross building
+            self.options.with_tkinter = False
+            self.options.with_curses = False
 
         self.settings.compiler.rm_safe("libcxx")
         self.settings.compiler.rm_safe("cppstd")
