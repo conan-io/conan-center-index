@@ -2,9 +2,10 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches, copy, export_conandata_patches, get,
-    replace_in_file, rm, rmdir
+    replace_in_file, rm, rmdir, collect_libs
 )
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
@@ -35,6 +36,35 @@ class GeographiclibConan(ConanFile):
         "tools": True,
     }
 
+    @property
+    def _min_cppstd(self):
+        if Version(self.version) >= "2.4":
+            return 14
+        if Version(self.version) >= "1.51":
+            return 11
+        return None
+
+    @property
+    def _compilers_minimum_version(self):
+        if self._min_cppstd == 11:
+            # Minimum compiler version having C++11 math functions
+            return {
+                "apple-clang": "3.3",
+                "gcc": "4.9",
+                "clang": "6",
+                "Visual Studio": "14", # guess
+                "msvc": "190",
+            }
+        elif self._min_cppstd == 14:
+            return {
+                "gcc": "7",
+                "clang": "6",
+                "Visual Studio": "16",
+                "msvc": "192",
+                "apple-clang": "14",
+            }
+        return {}
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -49,35 +79,27 @@ class GeographiclibConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    @property
-    def _compilers_minimum_version(self):
-        # Minimum compiler version having C++11 math functions
-        return {
-            "apple-clang": "3.3",
-            "gcc": "4.9",
-            "clang": "6",
-            "Visual Studio": "14", # guess
-            "msvc": "190",
-        }
-
     def validate(self):
-        if Version(self.version) >= "1.51":
-            if self.settings.compiler.get_safe("cppstd"):
-                check_min_cppstd(self, 11)
+        if self.settings.compiler.get_safe("cppstd") and self._min_cppstd:
+            check_min_cppstd(self, self._min_cppstd)
 
-            def loose_lt_semver(v1, v2):
-                return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))
+        def loose_lt_semver(v1, v2):
+            return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))
 
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++11 math functions, which your compiler does not support."
-                )
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and loose_lt_semver(str(self.settings.compiler.version), minimum_version):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
         if self.options.precision not in ["float", "double"]:
             # FIXME: add support for extended, quadruple and variable precisions
             # (may require external libs: boost multiprecision for quadruple, mpfr for variable)
             raise ConanInvalidConfiguration("extended, quadruple and variable precisions not yet supported in this recipe")
+
+    def build_requirements(self):
+        if Version(self.version) >= "2.4":
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -97,6 +119,8 @@ class GeographiclibConan(ConanFile):
         tc.variables["GEOGRAPHICLIB_LIB_TYPE"] = "SHARED" if self.options.shared else "STATIC"
         tc.variables["GEOGRAPHICLIB_PRECISION"] = self._cmake_option_precision
         tc.generate()
+
+        VirtualBuildEnv(self).generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -138,9 +162,11 @@ class GeographiclibConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "geographiclib")
         self.cpp_info.set_property("cmake_target_name", "GeographicLib::GeographicLib")
         self.cpp_info.set_property("pkg_config_name", "geographiclib")
-        suffix = "_d" if self.settings.build_type == "Debug" and is_msvc(self) else ""
-        suffix += "-i" if is_msvc(self) and self.options.shared else ""
-        self.cpp_info.libs = [f"GeographicLib{suffix}"] if Version(self.version) >= "2" else [f"Geographic{suffix}"]
+        # Geographic library name is GeographicLib since version 2.x (was Geographic before)
+        # It uses a debug postfix _d on Windows or when using multi-configuration generators (like Ninja Multi-Config)
+        # It's hard to track when using multi-configuration generators, so collect_libs is used
+        # Plus, it adds -i postfix on Windows when using shared libraries
+        self.cpp_info.libs = collect_libs(self)
         self.cpp_info.defines.append("GEOGRAPHICLIB_SHARED_LIB={}".format("1" if self.options.shared else "0"))
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
