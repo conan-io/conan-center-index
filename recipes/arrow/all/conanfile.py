@@ -231,18 +231,18 @@ class ArrowConan(ConanFile):
         # From https://github.com/conan-io/conan-center-index/pull/23163#issuecomment-2039808851
         if self.options.gandiva:
             if not self.options.with_re2:
-                raise ConanException("'with_re2' option should be True when'gandiva=True'")
+                raise ConanException("'with_re2' option should be True when 'gandiva=True'")
             if not self.options.with_boost:
-                raise ConanException("'with_boost' option should be True when'gandiva=True'")
+                raise ConanException("'with_boost' option should be True when 'gandiva=True'")
             if not self.options.with_utf8proc:
-                raise ConanException("'with_utf8proc' option should be True when'gandiva=True'")
+                raise ConanException("'with_utf8proc' option should be True when 'gandiva=True'")
         if self.options.with_thrift and not self.options.with_boost:
-            raise ConanException("'with_boost' option should be True when'thrift=True'")
+            raise ConanException("'with_boost' option should be True when 'thrift=True'")
         if self.options.parquet:
             if not self.options.with_thrift:
-                raise ConanException("'with_thrift' option should be True when'parquet=True'")
+                raise ConanException("'with_thrift' option should be True when 'parquet=True'")
         if self.options.with_flight_rpc and not self.options.with_protobuf:
-            raise ConanException("'with_protobuf' option should be True when'with_flight_rpc=True'")
+            raise ConanException("'with_protobuf' option should be True when 'with_flight_rpc=True'")
 
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
