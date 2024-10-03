@@ -11,7 +11,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-        self.requires("cpython/3.12.2", run=True)
+        self.requires("cpython/3.12.7", run=True)
 
     def build_requirements(self):
         # Required for find_package(Python)
