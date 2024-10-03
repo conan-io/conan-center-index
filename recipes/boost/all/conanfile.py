@@ -2039,7 +2039,7 @@ class BoostConan(ConanFile):
                 if self.settings.os == "Windows":
                     self.cpp_info.components["process"].system_libs.extend(["ntdll", "shell32", "Advapi32", "user32"])
                 if self._shared:
-                    self.cpp_info.components["process"].defines.append("BOOST_PROCESS_SOURCE")
+                    self.cpp_info.components["process"].defines.append("BOOST_PROCESS_DYN_LINK")
 
 
             if is_msvc(self) or self._is_clang_cl:
