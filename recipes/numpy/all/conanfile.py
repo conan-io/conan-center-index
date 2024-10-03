@@ -38,7 +38,7 @@ class NumpyConan(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-    
+
     def validate(self):
         if conan_version.major == 1:
             raise ConanInvalidConfiguration("Conan v1 is not supported")
@@ -50,14 +50,14 @@ class NumpyConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openblas/0.3.26")
-        self.requires("cpython/3.12.2", transitive_headers=True, transitive_libs=True)
+        self.requires("openblas/0.3.27")
+        self.requires("cpython/3.12.7", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         self.tool_requires("cpython/<host_version>")
-        self.tool_requires("ninja/1.11.1")
+        self.tool_requires("ninja/[>=1.10.2 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
