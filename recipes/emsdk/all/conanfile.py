@@ -1,4 +1,5 @@
 from conan import ConanFile, conan_version
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import Environment
 from conan.tools.files import chdir, copy, get, replace_in_file
@@ -6,6 +7,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import json
 import os
+import platform
 
 required_conan_version = ">=1.52.0"
 
@@ -35,6 +37,16 @@ class EmSDKConan(ConanFile):
             self.requires("nodejs/20.16.0")
         # self.requires("python")  # FIXME: Not available as Conan package
         # self.requires("wasm")  # FIXME: Not available as Conan package
+
+    @property
+    def _is_glibc_older_than_2_28(self):
+        libver = platform.libc_ver()
+        return self.settings.os == 'Linux' and libver[0] == 'glibc' and Version(libver[1]) < "2.28"
+
+    def validate_build(self):
+        if Version(self.version) >= "3.1.64" and self._is_glibc_older_than_2_28:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires glibc 2.28 for nodejs/20.16.0")
 
     def package_id(self):
         del self.info.settings.compiler
