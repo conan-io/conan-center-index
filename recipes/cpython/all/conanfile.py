@@ -107,7 +107,7 @@ class CPythonConan(ConanFile):
             # Static CPython on Windows is only loosely supported, see https://github.com/python/cpython/issues/110234
             # 3.10 fails during the test, 3.11 fails during the build (missing symbol that seems to be DLL specific: PyWin_DLLhModule)
             # Disabling static MSVC builds (>=3.10) due to "AttributeError: module 'sys' has no attribute 'winver'"
-            self.package_type = "static-library"
+            self.package_type = "shared-library"
             del self.options.shared
 
     def layout(self):
