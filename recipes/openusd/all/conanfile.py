@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, load, get, rm, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -117,13 +117,15 @@ class OpenUSDConan(ConanFile):
         # Set same options as in https://github.com/PixarAnimationStudios/OpenUSD/blob/release/build_scripts/build_usd.py#L1397
         # self.options["opensubdiv/*"].with_tbb = True
         self.options["opensubdiv/*"].with_opengl = self.options.enable_gl_support and not is_apple_os(self)
+        # FIXME: provokes a missing binary error on conan center
+        self.options["opensubdiv/*"].with_metal = is_apple_os(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.enable_python_support:
-            self.requires("boost/1.84.0")
+            self.requires("boost/1.86.0")
         # openusd doesn't support yet recent release of onetbb, see https://github.com/PixarAnimationStudios/OpenUSD/issues/1471
         self.requires("onetbb/2021.10.0", transitive_headers=True)
 
@@ -171,7 +173,8 @@ class OpenUSDConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        if is_apple_os(self) and not self.dependencies["opensubdiv"].options["with_metal"]:
+        # if is_apple_os(self) and not self.dependencies["opensubdiv"].options["with_metal"]:
+        if is_apple_os(self):
             raise ConanInvalidConfiguration(f'{self.ref} needs -o="opensubdiv/*:with_metal=True"')
         if self.options.build_animx_tests:
             raise ConanInvalidConfiguration("animx recipe doesn't yet exists in conan center index")
@@ -193,8 +196,11 @@ class OpenUSDConan(ConanFile):
         tc.variables["PXR_ENABLE_PYTHON_SUPPORT"] = self.options.enable_python_support
         tc.variables["PXR_BUILD_USD_TOOLS"] = self.options.build_usd_tools
 
-        tc.variables["OPENSUBDIV_LIBRARIES"] = self.dependencies['opensubdiv'].cpp_info.libdirs[0]
-        tc.variables["OPENSUBDIV_INCLUDE_DIR"] = self.dependencies['opensubdiv'].cpp_info.includedirs[0]
+        tc.variables["OPENSUBDIV_LIBRARIES"] = self.dependencies['opensubdiv'].cpp_info.libdirs[0].replace("\\", "/")
+        # Provokes cmake parsing error
+        # See https://c3i.jfrog.io/c3i/misc/logs/pr/24506/75-windows-visual_studio/openusd/24.08//a47d3be1b4a4ee7c129fc15ba3f28e471624adfb-build.txt
+        # See https://github.com/conan-io/conan/issues/10539 
+        tc.variables["OPENSUBDIV_INCLUDE_DIR"] = self.dependencies['opensubdiv'].cpp_info.includedirs[0].replace("\\", "/")
         # tc.variables["OPENSUBDIV_OSDCPU_LIBRARY"] = "OpenSubdiv::osdcpu"
 
         tc.variables["TBB_tbb_LIBRARY"] = "TBB::tbb"
@@ -210,7 +216,7 @@ class OpenUSDConan(ConanFile):
             if self._enable_ptex:
                 tc.variables["PXR_ENABLE_PTEX_SUPPORT"] = True
                 tc.variables["PTEX_LIBRARY"] = self.dependencies['ptex'].cpp_info.libdirs[0]
-                tc.variables["PTEX_INCLUDE_DIR"] = self.dependencies['ptex'].cpp_info.includedirs[0]
+                tc.variables["PTEX_INCLUDE_DIR"] = self.dependencies['ptex'].cpp_info.includedirs[0].replace("\\", "/")
 
             tc.variables["PXR_ENABLE_OPENVDB_SUPPORT"] = self.options.enable_openvdb_support and self.options.enable_gl_support
             tc.variables["OPENVDB_LIBRARY"] = "OpenVDB::openvdb"
@@ -221,7 +227,7 @@ class OpenUSDConan(ConanFile):
             if self.options.build_embree_plugin and self.options.build_gpu_support:
                 tc.variables["PXR_BUILD_EMBREE_PLUGIN"] = self.options.build_embree_plugin
                 tc.variables["EMBREE_LIBRARY"] = self.dependencies['embree3'].cpp_info.libdirs[0]
-                tc.variables["EMBREE_INCLUDE_DIR"] = self.dependencies['embree3'].cpp_info.includedirs[0]
+                tc.variables["EMBREE_INCLUDE_DIR"] = self.dependencies['embree3'].cpp_info.includedirs[0].replace("\\", "/")
 
             if self.options.build_usd_imaging:
                 tc.variables["PXR_BUILD_USD_IMAGING"] = True
@@ -235,15 +241,15 @@ class OpenUSDConan(ConanFile):
             tc.variables["PXR_BUILD_ALEMBIC_PLUGIN"] = True
             tc.variables["ALEMBIC_FOUND"] = True
             tc.variables["ALEMBIC_LIBRARIES"] = "Alembic::Alembic"
-            tc.variables["ALEMBIC_LIBRARY_DIR"] = self.dependencies['alembic'].cpp_info.libdirs[0]
-            tc.variables["ALEMBIC_INCLUDE_DIR"] = self.dependencies['alembic'].cpp_info.includedirs[0]
+            tc.variables["ALEMBIC_LIBRARY_DIR"] = self.dependencies['alembic'].cpp_info.libdirs[0].replace("\\", "/")
+            tc.variables["ALEMBIC_INCLUDE_DIR"] = self.dependencies['alembic'].cpp_info.includedirs[0].replace("\\", "/")
 
         tc.variables["PXR_ENABLE_HDF5_SUPPORT"] = self.options.build_alembic_plugin and self.options.enable_hdf5_support
 
         if self.options.build_draco_plugin:
             tc.variables["PXR_BUILD_DRACO_PLUGIN"] = True
             tc.variables["DRACO_LIBRARY"] = "draco::draco"
-            tc.variables["DRACO_INCLUDES"] = self.dependencies['draco'].cpp_info.includedirs[0]
+            tc.variables["DRACO_INCLUDES"] = self.dependencies['draco'].cpp_info.includedirs[0].replace("\\", "/")
 
         tc.variables["PXR_ENABLE_OSL_SUPPORT"] = self.options.enable_osl_support
         tc.variables["PXR_BUILD_ANIMX_TESTS"] = self.options.build_animx_tests
@@ -251,6 +257,12 @@ class OpenUSDConan(ConanFile):
         tc.variables["MaterialX_DIR"] = self.options.build_animx_tests
 
         tc.generate()
+
+        self.output.info("Content of conan_toolchain.cmake")
+        self.output.info(str(self.build_folder))
+        conan_toolchain = load(self, os.path.join(self.build_folder, "generators", "conan_toolchain.cmake"))
+        self.output.info(str(conan_toolchain))
+        self.output.info("End of conan_toolchain.cmake")
 
         tc = CMakeDeps(self)
         if self.options.enable_materialx_support:
