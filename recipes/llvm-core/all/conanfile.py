@@ -61,12 +61,23 @@ def components_from_dotfile(dotfile):
             "zstd::libzstd_static": "zstd::zstdlib",
             "-lpthread": "pthread"
         }
+        windows_system_libs = [
+            "ole32",
+            "delayimp",
+            "shell32",
+            "advapi32",
+            "-delayload:shell32.dll",
+            "uuid",
+            "psapi",
+            "-delayload:ole32.dll"
+        ]
         for row in dot:
             match_label = re.match(r'''^\s*"(node[0-9]+)"\s*\[\s*label\s*=\s*"(.+)".*''', row)
             if match_label:
                 node = match_label.group(1)
                 label = match_label.group(2)
-                yield node, label_replacements.get(label, label)
+                if label not in windows_system_libs:
+                    yield node, label_replacements.get(label, label)
 
     def node_dependencies(dot):
         labels = {k: v for k, v in node_labels(dot)}
@@ -336,9 +347,10 @@ class LLVMCoreConan(ConanFile):
             cmake_variables[f"LLVM_USE_CRT_{build_type}"] = msvc_runtime_flag(self)
 
         if not self.options.shared:
-            cmake_variables["LLVM_ENABLE_PIC"] = self.options.get_safe("fPIC", default=True)
-            if Version(self.version) < 19:
-                cmake_variables["DISABLE_LLVM_LINK_LLVM_DYLIB"] = True
+            cmake_variables.update({
+                "DISABLE_LLVM_LINK_LLVM_DYLIB": True,
+                "LLVM_ENABLE_PIC": self.options.get_safe("fPIC", default=True)
+            })
 
         if self.options.use_sanitizer == "None":
             cmake_variables["LLVM_USE_SANITIZER"] = ""
