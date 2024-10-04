@@ -589,6 +589,13 @@ class BoostConan(ConanFile):
                 elif not self._has_cppstd_14_supported:
                     disable_graph()
 
+            # TODO: Revisit on Boost 1.87.0
+            # It's not possible to disable process only when having shared parsed already.
+            # https://github.com/boostorg/process/issues/408
+            # https://github.com/boostorg/process/pull/409
+            if Version(self.version) == "1.86.0" and is_msvc(self):
+                setattr(self.options, "without_process", True)
+
     @property
     def _configure_options(self):
         return self._dependencies["configure_options"]
@@ -757,6 +764,10 @@ class BoostConan(ConanFile):
         if not self.options.get_safe("without_cobalt", True) and not self._has_coroutine_supported:
             raise ConanInvalidConfiguration("Boost.Cobalt requires a C++20 capable compiler. "
                                             "Please, set compiler.cppstd and use a newer compiler version, or disable from building.")
+
+        # TODO: Revisit on Boost 1.87.0. Remove in case Process is fixed.
+        if Version(self.version) == "1.86.0" and is_msvc(self) and self.options.get_safe("shared") and self.options.get_safe("without_process", None) == False:
+            raise ConanInvalidConfiguration(f"{self.ref} Boost.Process will fail to be consumed as shared library on MSVC. See https://github.com/boostorg/process/issues/408.")
 
     def _with_dependency(self, dependency):
         """
