@@ -2,7 +2,8 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, rmdir
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -24,7 +25,10 @@ class TreeSitterConan(ConanFile):
         "fPIC": True,
         "shared": False,
     }
-    exports_sources = "CMakeLists.txt"
+
+    def export_sources(self):
+        if Version(self.version) < "0.24.1":
+            copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,13 +48,17 @@ class TreeSitterConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["TREE_SITTER_SRC_DIR"] = self.source_folder.replace("\\", "/")
-        tc.variables["TREE_SITTER_VERSION"] = str(self.version)
+        if Version(self.version) < "0.24.1":
+            tc.variables["TREE_SITTER_SRC_DIR"] = self.source_folder.replace("\\", "/")
+            tc.variables["TREE_SITTER_VERSION"] = str(self.version)
         tc.generate()
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        if Version(self.version) < "0.24.1":
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
+        else:
+            cmake.configure(build_script_folder=os.path.join(self.source_folder, "lib"))
         cmake.build()
 
     def package(self):
@@ -62,6 +70,8 @@ class TreeSitterConan(ConanFile):
         )
         cmake = CMake(self)
         cmake.install()
+
+        rmdir(self, os.path.join(self.package_folder, "share", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = ["tree-sitter"]
