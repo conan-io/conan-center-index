@@ -114,7 +114,9 @@ class OpenUSDConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.options["opensubdiv/*"].with_opengl = self.options.enable_gl_support
+        # Set same options as in https://github.com/PixarAnimationStudios/OpenUSD/blob/release/build_scripts/build_usd.py#L1397
+        # self.options["opensubdiv/*"].with_tbb = True
+        self.options["opensubdiv/*"].with_opengl = self.options.enable_gl_support and not is_apple_os(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -193,6 +195,7 @@ class OpenUSDConan(ConanFile):
 
         tc.variables["OPENSUBDIV_LIBRARIES"] = self.dependencies['opensubdiv'].cpp_info.libdirs[0]
         tc.variables["OPENSUBDIV_INCLUDE_DIR"] = self.dependencies['opensubdiv'].cpp_info.includedirs[0]
+        # tc.variables["OPENSUBDIV_OSDCPU_LIBRARY"] = "OpenSubdiv::osdcpu"
 
         tc.variables["TBB_tbb_LIBRARY"] = "TBB::tbb"
 
