@@ -51,10 +51,10 @@ class SimdConan(ConanFile):
             raise ConanInvalidConfiguration("Windows only supports x86/x64 architectures.")
         if is_msvc(self) and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("ARM64 building with MSVC is not supported.")
-        if Version(self.version) >= "6.1.139" and \
+        if Version(self.version) >= "6.1.142" and \
             self.settings.arch in ["x86", "x86_64"] and \
-            self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
-            raise ConanInvalidConfiguration("${self.ref} requires GCC >= 7")
+            self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9":
+            raise ConanInvalidConfiguration("${self.ref} requires GCC >= 9")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
