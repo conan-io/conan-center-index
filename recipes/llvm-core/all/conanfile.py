@@ -21,7 +21,7 @@ from conan.tools.scm import Version
 
 import json
 import os
-from pathlib import Path, PosixPath
+from pathlib import Path, PurePosixPath
 import re
 import textwrap
 
@@ -59,6 +59,7 @@ def components_from_dotfile(dotfile):
             "LibXml2::LibXml2": "libxml2::libxml2",
             "ZLIB::ZLIB": "zlib::zlib",
             "zstd::libzstd_static": "zstd::zstdlib",
+            "-lpthread": "pthread"
         }
         for row in dot:
             match_label = re.match(r'''^\s*"(node[0-9]+)"\s*\[\s*label\s*=\s*"(.+)".*''', row)
@@ -357,7 +358,7 @@ class LLVMCoreConan(ConanFile):
 
     @property
     def _graphviz_file(self):
-        return PosixPath(self.build_folder) / "llvm-core.dot"
+        return PurePosixPath(self.build_folder) / "llvm-core.dot"
 
     def build(self):
         apply_conandata_patches(self)
@@ -390,7 +391,7 @@ class LLVMCoreConan(ConanFile):
 
     def _llvm_build_info(self):
         cmake_config = (self._package_folder_path / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake").read_text("utf-8")
-        components = components_from_dotfile(load(self, Path(self.build_folder) / "llvm-core.dot"))
+        components = components_from_dotfile(load(self, self._graphviz_file))
 
         return {
             "components": components,
@@ -490,12 +491,8 @@ class LLVMCoreConan(ConanFile):
             for component_name, data in components.items():
                 self.cpp_info.components[component_name].set_property("cmake_target_name", component_name)
                 self.cpp_info.components[component_name].libs = [component_name]
-                requires = data.get("requires")
-                if requires is not None:
-                    self.cpp_info.components[component_name].requires += requires
-                system_libs = data.get("system_libs")
-                if system_libs is not None:
-                    self.cpp_info.components[component_name].system_libs += system_libs
+                self.cpp_info.components[component_name].requires = data["requries"]
+                self.cpp_info.components[component_name].system_libs = data["system_libs"]
         else:
             self.cpp_info.set_property("cmake_target_name", "LLVM")
             self.cpp_info.libs = collect_libs(self)
