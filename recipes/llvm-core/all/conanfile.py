@@ -224,7 +224,7 @@ class LLVMCoreConan(ConanFile):
         if self.options.shared:
             if self.settings.os == "Windows":
                 raise ConanInvalidConfiguration("Shared builds are currently not supported on Windows")
-            if is_apple_os(self):
+            if is_apple_os(self) and "libiconv" in self.dependencies:
                 # FIXME iconv contains duplicate symbols in the libiconv and libcharset libraries (both of which are
                 #  provided by libiconv). This may be an issue with how conan packages libiconv
                 iconv_dep = self.dependencies.get("libiconv")
@@ -491,7 +491,7 @@ class LLVMCoreConan(ConanFile):
             for component_name, data in components.items():
                 self.cpp_info.components[component_name].set_property("cmake_target_name", component_name)
                 self.cpp_info.components[component_name].libs = [component_name]
-                self.cpp_info.components[component_name].requires = data["requries"]
+                self.cpp_info.components[component_name].requires = data["requires"]
                 self.cpp_info.components[component_name].system_libs = data["system_libs"]
         else:
             self.cpp_info.set_property("cmake_target_name", "LLVM")
