@@ -35,9 +35,9 @@ class TreeSitterConan(ConanFile):
             del self.options.fPIC
             if Version(self.version) >= "0.24.1":
                 self.package_type = "static-library"
-                
+
     def configure(self):
-        if self.settings.os == "Windows":
+        if Version(self.version) >= "0.24.1" and self.settings.os == "Windows":
             self.options.rm_safe("shared")
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
