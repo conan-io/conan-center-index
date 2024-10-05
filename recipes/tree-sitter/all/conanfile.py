@@ -35,9 +35,10 @@ class TreeSitterConan(ConanFile):
             del self.options.fPIC
             if Version(self.version) >= "0.24.1":
                 self.package_type = "static-library"
-
+                del self.options.shared
+                
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
