@@ -390,7 +390,7 @@ class LLVMCoreConan(ConanFile):
             set(GRAPHVIZ_OBJECT_LIBS OFF)
             set(GRAPHVIZ_IGNORE_TARGETS "{';'.join(exclude_patterns)}")
         """)
-        save(self, Path(self.build_folder) / "CMakeGraphVizOptions.cmake", graphviz_options)
+        save(self, PurePosixPath(self.build_folder) / "CMakeGraphVizOptions.cmake", graphviz_options)
         if Version(self.version) < 18:
             cmake.configure(cli_args=graphviz_args)
         else:
@@ -399,10 +399,17 @@ class LLVMCoreConan(ConanFile):
 
     @property
     def _package_folder_path(self):
-        return Path(self.package_folder)
+        return PurePosixPath(self.package_folder)
+
+    @property
+    def _llvm_source_folder_path(self):
+        if (Version(self.version) < 18):
+            return PurePosixPath(self.source_folder)
+
+        return PurePosixPath(self.source_folder) / "llvm-main"
 
     def _llvm_build_info(self):
-        cmake_config = (self._package_folder_path / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake").read_text("utf-8")
+        cmake_config = Path(self._package_folder_path / "lib" / "cmake" / "llvm" / "LLVMConfig.cmake").read_text("utf-8")
         components = components_from_dotfile(load(self, self._graphviz_file))
 
         return {
@@ -412,7 +419,7 @@ class LLVMCoreConan(ConanFile):
 
     @property
     def _cmake_module_path(self):
-        return Path("lib") / "cmake" / "llvm"
+        return PurePosixPath("lib") / "cmake" / "llvm"
 
     @property
     def _build_info_file(self):
@@ -462,37 +469,36 @@ class LLVMCoreConan(ConanFile):
             return json.load(fp)
 
     def package(self):
-        copy(self, "LICENSE.TXT", self.source_folder, (self._package_folder_path / "licenses").as_posix())
+        copy(self, "LICENSE.TXT", self._llvm_source_folder_path, self._package_folder_path / "licenses")
         cmake = CMake(self)
         cmake.install()
 
         build_info = self._write_build_info()
 
         cmake_folder = self._package_folder_path / "lib" / "cmake" / "llvm"
-        cmake_folder_posix = cmake_folder.as_posix()
-        rm(self, "LLVMConfig.cmake", cmake_folder_posix)
-        rm(self, "LLVMExports*", cmake_folder_posix)
-        rm(self, "Find*", cmake_folder_posix)
-        rm(self, "*.pdb", (self._package_folder_path / "lib").as_posix())
-        rm(self, "*.pdb", (self._package_folder_path / "bin").as_posix())
+        rm(self, "LLVMConfig.cmake", cmake_folder)
+        rm(self, "LLVMExports*", cmake_folder)
+        rm(self, "Find*", cmake_folder)
+        rm(self, "*.pdb", self._package_folder_path / "lib")
+        rm(self, "*.pdb", self._package_folder_path / "bin")
         # need to rename this as Conan will flag it, but it's not actually a Config file and is needed by
         # downstream packages
-        rename(self, (cmake_folder / "LLVM-Config.cmake").as_posix(), (cmake_folder / "LLVM-ConfigInternal.cmake").as_posix())
-        replace_in_file(self, (cmake_folder / "AddLLVM.cmake").as_posix(), "LLVM-Config", "LLVM-ConfigInternal")
-        rmdir(self, (self._package_folder_path / "share").as_posix())
+        rename(self, cmake_folder / "LLVM-Config.cmake", cmake_folder / "LLVM-ConfigInternal.cmake")
+        replace_in_file(self, cmake_folder / "AddLLVM.cmake", "LLVM-Config", "LLVM-ConfigInternal")
+        rmdir(self, self._package_folder_path / "share")
         if self.options.shared:
-            rm(self, "*.a", (self._package_folder_path / "lib").as_posix())
+            rm(self, "*.a", self._package_folder_path / "lib")
 
         self._create_cmake_build_module(
             build_info,
-            (self._package_folder_path / self._build_module_file_rel_path).as_posix()
+            self._package_folder_path / self._build_module_file_rel_path
         )
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "LLVM")
         self.cpp_info.set_property("cmake_build_modules",
                                    [self._build_module_file_rel_path,
-                                    (self._cmake_module_path / "LLVM-ConfigInternal.cmake").as_posix()]
+                                    self._cmake_module_path / "LLVM-ConfigInternal.cmake"]
                                    )
         self.cpp_info.builddirs.append(self._cmake_module_path)
 
