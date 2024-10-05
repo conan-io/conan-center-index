@@ -100,7 +100,7 @@ class Hdf5Conan(ConanFile):
             raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
         if self.options.with_zlib and self.options.get_safe("with_zlibng"):
             raise ConanInvalidConfiguration("with_zlib and with_zlibng cannot be enabled at the same time")
-        if self.option.get_safe("with_zlibng") and Version(self.version) < "1.14.5":
+        if self.options.get_safe("with_zlibng") and Version(self.version) < "1.14.5":
             raise ConanInvalidConfiguration("with_zlibng=True is incompatible with versions prior to v1.14.5")
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
