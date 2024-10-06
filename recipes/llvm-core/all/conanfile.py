@@ -61,6 +61,14 @@ def components_from_dotfile(dotfile):
             "zstd::libzstd_static": "zstd::zstdlib",
             "-lpthread": "pthread"
         }
+        for row in dot:
+            match_label = re.match(r'''^\s*"(node[0-9]+)"\s*\[\s*label\s*=\s*"(.+)".*''', row)
+            if match_label:
+                node = match_label.group(1)
+                label = match_label.group(2)
+                yield node, label_replacements.get(label, label)
+
+    def node_dependencies(dot):
         windows_system_libs = [
             "ole32",
             "delayimp",
@@ -71,21 +79,12 @@ def components_from_dotfile(dotfile):
             "psapi",
             "-delayload:ole32.dll"
         ]
-        for row in dot:
-            match_label = re.match(r'''^\s*"(node[0-9]+)"\s*\[\s*label\s*=\s*"(.+)".*''', row)
-            if match_label:
-                node = match_label.group(1)
-                label = match_label.group(2)
-                if label not in windows_system_libs:
-                    yield node, label_replacements.get(label, label)
-
-    def node_dependencies(dot):
         labels = {k: v for k, v in node_labels(dot)}
         for row in dot:
             match_dep = re.match(r'''^\s*"(node[0-9]+)"\s*->\s*"(node[0-9]+)".*''', row)
             if match_dep:
                 node_label = labels[match_dep.group(1)]
-                if node_label.startswith("LLVM"):
+                if node_label.startswith("LLVM") and node_label not in windows_system_libs:
                     yield node_label, labels[match_dep.group(2)]
         # some components don't have dependencies
         for label in labels.values():
