@@ -55,6 +55,8 @@ class TreeSitterConan(ConanFile):
         if Version(self.version) < "0.24.1":
             tc.variables["TREE_SITTER_SRC_DIR"] = self.source_folder.replace("\\", "/")
             tc.variables["TREE_SITTER_VERSION"] = str(self.version)
+        else:
+            tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.get_safe("shared", False)
         tc.generate()
 
     def build(self):
