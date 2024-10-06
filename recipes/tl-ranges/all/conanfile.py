@@ -27,7 +27,7 @@ class TLRangesConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "11",
-            "clang": "12",
+            "clang": "15",
             "apple-clang": "13",
             "Visual Studio": "16",
             "msvc": "192",
