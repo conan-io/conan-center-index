@@ -116,9 +116,10 @@ class OpenUSDConan(ConanFile):
             self.options.rm_safe("fPIC")
         # Set same options as in https://github.com/PixarAnimationStudios/OpenUSD/blob/release/build_scripts/build_usd.py#L1397
         # self.options["opensubdiv/*"].with_tbb = True
-        self.options["opensubdiv/*"].with_opengl = self.options.enable_gl_support and not is_apple_os(self)
-        # FIXME: provokes a missing binary error on conan center
-        self.options["opensubdiv/*"].with_metal = is_apple_os(self)
+        if self.options.enable_gl_support:
+            self.options["opensubdiv/*"].with_opengl = self.options.enable_gl_support
+            # FIXME: provokes a missing binary error on conan center
+            self.options["opensubdiv/*"].with_metal = is_apple_os(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -134,7 +135,8 @@ class OpenUSDConan(ConanFile):
                 self.requires("openimageio/2.5.14.0")
             if not self.options.build_openimageio_plugin and self.options.build_opencolorio_plugin and self.options.build_gpu_support and self.options.enable_gl_support:
                 self.requires("opencolorio/2.3.2")
-            self.requires("opensubdiv/3.6.0")
+            if self.options.enable_gl_support:
+                self.requires("opensubdiv/3.6.0")
             if self.options.enable_vulkan_support:
                 self.requires("vulkan-headers/1.3.290.0")
             if self.options.enable_gl_support:
@@ -174,7 +176,7 @@ class OpenUSDConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
         # if is_apple_os(self) and not self.dependencies["opensubdiv"].options["with_metal"]:
-        if is_apple_os(self):
+        if self.options.enable_gl_support and is_apple_os(self):
             raise ConanInvalidConfiguration(f'{self.ref} needs -o="opensubdiv/*:with_metal=True"')
         if self.options.build_animx_tests:
             raise ConanInvalidConfiguration("animx recipe doesn't yet exists in conan center index")
@@ -196,12 +198,14 @@ class OpenUSDConan(ConanFile):
         tc.variables["PXR_ENABLE_PYTHON_SUPPORT"] = self.options.enable_python_support
         tc.variables["PXR_BUILD_USD_TOOLS"] = self.options.build_usd_tools
 
-        tc.variables["OPENSUBDIV_LIBRARIES"] = self.dependencies['opensubdiv'].cpp_info.libdirs[0].replace("\\", "/")
-        # Provokes cmake parsing error
-        # See https://c3i.jfrog.io/c3i/misc/logs/pr/24506/75-windows-visual_studio/openusd/24.08//a47d3be1b4a4ee7c129fc15ba3f28e471624adfb-build.txt
-        # See https://github.com/conan-io/conan/issues/10539 
-        tc.variables["OPENSUBDIV_INCLUDE_DIR"] = self.dependencies['opensubdiv'].cpp_info.includedirs[0].replace("\\", "/")
-        # tc.variables["OPENSUBDIV_OSDCPU_LIBRARY"] = "OpenSubdiv::osdcpu"
+        if self.options.enable_gl_support:
+            # tc.variables["OPENSUBDIV_ROOT_DIR"] = self.dependencies['opensubdiv'].cpp_info.
+            tc.variables["OPENSUBDIV_LIBRARIES"] = self.dependencies['opensubdiv'].cpp_info.libdirs[0].replace("\\", "/")
+            # Provokes cmake parsing error
+            # See https://c3i.jfrog.io/c3i/misc/logs/pr/24506/75-windows-visual_studio/openusd/24.08//a47d3be1b4a4ee7c129fc15ba3f28e471624adfb-build.txt
+            # See https://github.com/conan-io/conan/issues/10539 
+            tc.variables["OPENSUBDIV_INCLUDE_DIR"] = self.dependencies['opensubdiv'].cpp_info.includedirs[0].replace("\\", "/")
+            # tc.variables["OPENSUBDIV_OSDCPU_LIBRARY"] = "OpenSubdiv::osdcpu"
 
         tc.variables["TBB_tbb_LIBRARY"] = "TBB::tbb"
 
