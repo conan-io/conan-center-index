@@ -84,7 +84,8 @@ def components_from_dotfile(dotfile):
             match_dep = re.match(r'''^\s*"(node[0-9]+)"\s*->\s*"(node[0-9]+)".*''', row)
             if match_dep:
                 node_label = labels[match_dep.group(1)]
-                if node_label.startswith("LLVM") and node_label not in windows_system_libs:
+                dependency = labels[match_dep.group(2)]
+                if node_label.startswith("LLVM") and dependency not in windows_system_libs:
                     yield node_label, labels[match_dep.group(2)]
         # some components don't have dependencies
         for label in labels.values():
@@ -299,7 +300,7 @@ class LLVMCoreConan(ConanFile):
         tc = CMakeToolchain(self, generator="Ninja")
         # https://releases.llvm.org/12.0.0/docs/CMake.html
         # https://releases.llvm.org/13.0.0/docs/CMake.html
-        # https://releases.llvm.org/19.1.0/docs/CMake.html
+        # https://releases.llvm.org/19.1.1/docs/CMake.html
         cmake_variables = {
             # Enables LLVM to find conan libraries during try_compile
             "CMAKE_TRY_COMPILE_CONFIGURATION": str(self.settings.build_type),
