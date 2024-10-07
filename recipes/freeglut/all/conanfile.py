@@ -203,7 +203,13 @@ class freeglutConan(ConanFile):
         else:
             self.cpp_info.components["freeglut_"].requires.append("opengl::opengl")
         if self._with_x11:
-            self.cpp_info.components["freeglut_"].requires.append("xorg::xorg")
+            # https://github.com/freeglut/freeglut/blob/v3.4.0/CMakeLists.txt#L261-L278
+            self.cpp_info.components["freeglut_"].requires.extend([
+                "xorg::x11",
+                "xorg::xrandr",
+                "xorg::xxf86vm",
+                "xorg::xinput",
+            ])
         if self.options.get_safe("with_wayland"):
             self.cpp_info.components["freeglut_"].requires.extend(["wayland::wayland-client", "wayland::wayland-cursor", "wayland::wayland-egl", "xkbcommon::xkbcommon"])
         if is_apple_os(self) or self.settings.os == "Windows":
