@@ -694,6 +694,10 @@ class VtkConan(ConanFile):
             tc.variables["NetCDF_HAS_PARALLEL"] = ""
         if self.options.with_libproj:
             tc.variables["LibPROJ_MAJOR_VERSION"] = Version(self.dependencies["proj"].ref.version).major
+
+        # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
+        # Needed for try_compile() calls with MPI::MPI_CXX to work.
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
 
         deps = CMakeDeps(self)
