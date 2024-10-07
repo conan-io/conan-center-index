@@ -142,6 +142,7 @@ class freeglutConan(ConanFile):
         tc.variables["INSTALL_PDB"] = False
         tc.variables["FREEGLUT_REPLACE_GLUT"] = self.options.replace_glut
         tc.preprocessor_definitions["FREEGLUT_LIB_PRAGMAS"] = "0"
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         cmake_deps = CMakeDeps(self)
         cmake_deps.generate()
