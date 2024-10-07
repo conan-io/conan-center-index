@@ -66,7 +66,7 @@ class CPythonConan(ConanFile):
 
     @property
     def _supports_modules(self):
-        return not is_msvc(self) or self.options.get_safe("shared")
+        return not is_msvc(self) or self.options.get_safe("shared", default=True)
 
     @property
     def _version_suffix(self):
@@ -159,7 +159,7 @@ class CPythonConan(ConanFile):
         del self.info.options.env_vars
 
     def validate(self):
-        if self.options.get_safe("shared"):
+        if self.options.get_safe("shared", default=True):
             if is_msvc_static_runtime(self):
                 raise ConanInvalidConfiguration(
                     "cpython does not support MT(d) runtime when building a shared cpython library"
@@ -443,7 +443,7 @@ class CPythonConan(ConanFile):
                             "$(RUNSHARED) CC='$(CC) $(CONFIGURE_CFLAGS) $(CONFIGURE_CPPFLAGS)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)'")
 
         # Enable static MSVC cpython
-        if not self.options.get_safe("shared"):
+        if not self.options.get_safe("shared", default=True):
             replace_in_file(self, os.path.join(self.source_folder, "PCbuild", "pythoncore.vcxproj"),
                 "<PreprocessorDefinitions>",
                 "<PreprocessorDefinitions>Py_NO_BUILD_SHARED;")
@@ -480,7 +480,7 @@ class CPythonConan(ConanFile):
 
     @property
     def _solution_projects(self):
-        if self.options.get_safe("shared"):
+        if self.options.get_safe("shared", default=True):
             solution_path = os.path.join(self.source_folder, "PCbuild", "pcbuild.sln")
             projects = set(m.group(1) for m in re.finditer('"([^"]+)\\.vcxproj"', open(solution_path).read()))
 
@@ -660,7 +660,7 @@ class CPythonConan(ConanFile):
         prefix = "" if self.settings.os == "Windows" else "lib"
         if self.settings.os == "Windows":
             extension = "lib"
-        elif not self.options.get_safe("shared"):
+        elif not self.options.get_safe("shared", default=True):
             extension = "a"
         elif is_apple_os(self):
             extension = "dylib"
@@ -724,7 +724,7 @@ class CPythonConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
-            if self.options.get_safe("shared"):
+            if self.options.get_safe("shared", default=True):
                 self._msvc_package_layout()
             else:
                 self._msvc_package_copy()
@@ -822,7 +822,7 @@ class CPythonConan(ConanFile):
                 os.path.join("include", f"python{self._version_suffix}{self._abi_suffix}")
             )
             libdir = "lib"
-        if self.options.get_safe("shared"):
+        if self.options.get_safe("shared", default=True):
             self.cpp_info.components["python"].defines.append("Py_ENABLE_SHARED")
         else:
             self.cpp_info.components["python"].defines.append("Py_NO_ENABLE_SHARED")
