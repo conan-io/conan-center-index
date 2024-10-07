@@ -129,6 +129,9 @@ class ThorvgConan(ConanFile):
         if self.settings.os == "Linux":
             if self.options.with_engines in ["gl", "gl_beta"]:
                 self.requires("opengl/system")
+        if self.options.with_threads and Version(self.version) >= "0.15.0":
+            if self.options.get_safe("with_openmp") and self.settings.compiler in ["clang", "apple-clang"]:
+                self.requires("llvm-openmp/17.0.4", transitive_headers=True, transitive_libs=True)
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.0")
@@ -200,3 +203,15 @@ class ThorvgConan(ConanFile):
             self.cpp_info.defines = ["TVG_STATIC"]
         else:
             self.cpp_info.defines = ["TVG_EXPORT", "TVG_BUILD"]
+
+        if self.options.with_threads and Version(self.version) >= "0.15.0":
+            openmp_flags = []
+            if is_msvc(self):
+                openmp_flags = ["-openmp"]
+            elif self.settings.compiler == "gcc":
+                openmp_flags = ["-fopenmp"]
+            elif self.settings.compiler in ["clang", "apple-clang"]:
+                openmp_flags = ["-Xpreprocessor", "-fopenmp"]
+            self.cpp_info.cxxflags.extend(openmp_flags)
+            self.cpp_info.exelinkflags.extend(openmp_flags)
+            self.cpp_info.sharedlinkflags.extend(openmp_flags)
