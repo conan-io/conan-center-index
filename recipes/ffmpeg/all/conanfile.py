@@ -61,6 +61,7 @@ class FFMpegConan(ConanFile):
         "with_ssl": [False, "openssl", "securetransport"],
         "with_libalsa": [True, False],
         "with_pulse": [True, False],
+        "with_sndio": [True, False],
         "with_vaapi": [True, False],
         "with_vdpau": [True, False],
         "with_vulkan": [True, False],
@@ -145,6 +146,7 @@ class FFMpegConan(ConanFile):
         "with_ssl": "openssl",
         "with_libalsa": True,
         "with_pulse": True,
+        "with_sndio": False,
         "with_vaapi": True,
         "with_vdpau": True,
         "with_vulkan": False,
@@ -229,6 +231,7 @@ class FFMpegConan(ConanFile):
             "with_libalsa": ["avdevice"],
             "with_xcb": ["avdevice"],
             "with_pulse": ["avdevice"],
+            "with_sndio": ["avdevice"],
             "with_sdl": ["with_programs"],
             "with_libsvtav1": ["avcodec"],
             "with_libaom": ["avcodec"],
@@ -515,6 +518,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("openssl", self.options.with_ssl == "openssl"),
             opt_enable_disable("alsa", self.options.get_safe("with_libalsa")),
             opt_enable_disable("libpulse", self.options.get_safe("with_pulse")),
+            opt_enable_disable("sndio", self.options.get_safe("with_sndio")),
             opt_enable_disable("vaapi", self.options.get_safe("with_vaapi")),
             opt_enable_disable("libdrm", self.options.get_safe("with_libdrm")),
             opt_enable_disable("vdpau", self.options.get_safe("with_vdpau")),
@@ -853,6 +857,8 @@ class FFMpegConan(ConanFile):
                 avdevice.requires.extend(["xorg::x11", "xorg::xext", "xorg::xv"])
             if self.options.get_safe("with_pulse"):
                 avdevice.requires.append("pulseaudio::pulseaudio")
+            if self.options.get_safe("with_sndio"):
+                avdevice.requires.append("libsndio::libsndio")
             if self.options.get_safe("with_appkit"):
                 avdevice.frameworks.append("AppKit")
             if self.options.get_safe("with_avfoundation"):
