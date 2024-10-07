@@ -476,6 +476,7 @@ class FFMpegConan(ConanFile):
         tc = self._create_toolchain()
 
         args = [
+            "--disable-autodetect",
             "--pkg-config-flags=--static",
             "--disable-doc",
             opt_enable_disable("cross-compile", cross_building(self)),
