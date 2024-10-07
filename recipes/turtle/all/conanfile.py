@@ -26,7 +26,7 @@ class TurtleConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "apple-clang": "10",
+            "apple-clang": "13", # for std::remove_cv_t
             "clang": "7",
             "gcc": "7",
             "msvc": "191",
