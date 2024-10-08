@@ -1,7 +1,7 @@
 sources:
   "3.13.0":
-    url: "https://github.com/python/cpython/archive/refs/tags/v3.13.0rc3.tar.gz" # TODO this is RC3
-    sha256: "96a5170a2ba2991c1546934c7110b0ed45464a8304b7743b58b60ad327795e7a"
+    url: "https://www.python.org/ftp/python/3.13.0/Python-3.13.0.tgz"
+    sha256: "12445c7b3db3126c41190bfdc1c8239c39c719404e844babbd015a1bc3fafcd4"
   "3.12.7":
     url: "https://www.python.org/ftp/python/3.12.7/Python-3.12.7.tgz"
     sha256: "73ac8fe780227bf371add8373c3079f42a0dc62deff8d612cd15a618082ab623"
