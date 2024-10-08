@@ -153,7 +153,7 @@ class VtkConan(ConanFile):
         "with_libproj": False,  # FIXME: missing binaries
         "with_libxml2": True,
         "with_metaio": True,
-        "with_mpi": False,  # TODO: #18980 Should enable, since disabling this disables all parallel modules
+        "with_mpi": False,  # Disabled due to openmpi/*:enable_cxx being False by default
         "with_mysql": False,  # FIXME: missing binaries
         "with_netcdf": False,  # FIXME: missing binaries
         "with_nlohmannjson": True,
@@ -343,7 +343,7 @@ class VtkConan(ConanFile):
             self.requires("libxml2/[>=2.12.5 <3]", transitive_headers=True, transitive_libs=True)
         if self.options.with_mpi:
             # Used in public vtk_mpi.h
-            self.requires("openmpi/4.1.6", transitive_headers=True, transitive_libs=True)
+            self.requires("openmpi/4.1.6", transitive_headers=True, transitive_libs=True, options={"enable_cxx": True})
         if self.options.with_mysql == "libmysqlclient":
             self.requires("libmysqlclient/8.1.0")
         elif self.options.with_mysql == "mariadb-connector-c":
@@ -451,6 +451,8 @@ class VtkConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires kissfft/*:datatype=double")
         if self.options.with_qt and not self.dependencies["qt"].options.widgets:
             raise ConanInvalidConfiguration(f"{self.ref} requires qt/*:widgets=True")
+        if self.options.with_mpi and not self.dependencies["openmpi"].options.enable_cxx:
+            raise ConanInvalidConfiguration(f"{self.ref} requires openmpi/*:enable_cxx=True")
 
         # Just to check for conflicts
         self._compute_module_values()
