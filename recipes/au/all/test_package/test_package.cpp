@@ -7,9 +7,9 @@
 using namespace au;
 
 int main(void) {
-    constexpr auto lenght = meters(100.0);
+    constexpr auto length = meters(100.0);
 
-    std::cout << lenght << " == " << lenght.in(kilo(meters)) <<" km" << std::endl;
+    std::cout << length << " == " << length.in(kilo(meters)) <<" km" << std::endl;
 
     return EXIT_SUCCESS;
 }
