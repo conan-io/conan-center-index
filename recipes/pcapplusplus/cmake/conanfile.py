@@ -74,9 +74,10 @@ class PcapplusplusConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "set(CMAKE_CXX_STANDARD 11)",
                         "")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "set(CMAKE_POSITION_INDEPENDENT_CODE ON)",
-                        "")
+        if Version(self.verison) => "24.09":
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "set(CMAKE_POSITION_INDEPENDENT_CODE ON)",
+                            "")
 
     def build(self):
         self._patch_sources()
