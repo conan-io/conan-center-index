@@ -134,7 +134,7 @@ class HidapiConan(ConanFile):
             self.cpp_info.set_property("cmake_target_aliases", ["hidapi::hidapi"])
             self.cpp_info.libs = ["hidapi"]
             self.cpp_info.includedirs.append(os.path.join("include", "hidapi"))
-            self.cpp_info.frameworks.extend(["IOKit", "CoreFoundation"])
+            self.cpp_info.frameworks.extend(["IOKit", "CoreFoundation", "AppKit"])
         else:
             self.cpp_info.set_property("cmake_target_name", "hidapi::winapi")
             self.cpp_info.set_property("cmake_target_aliases", ["hidapi::hidapi"])
