@@ -44,6 +44,10 @@ class PcapplusplusConan(ConanFile):
             self.requires("npcap/1.70")
         else:
             self.requires("libpcap/1.10.1")
+    
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def validate(self):
         if self.settings.compiler.cppstd:
