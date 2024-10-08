@@ -413,6 +413,7 @@ required_for_references:
 - fastnoise2
 - fastpfor
 - fastprng
+- fcl
 - fernandovelcic-hexdump
 - fff
 - ffmpeg
@@ -1124,6 +1125,7 @@ required_for_references:
 - openimageio
 - openjdk
 - openjpeg
+- openjph
 - openldap
 - openmesh
 - openmpi
@@ -1256,6 +1258,7 @@ required_for_references:
 - qcbor
 - qdbm
 - qhull
+- qoi
 - qpdf
 - qpoases
 - qr-code-generator
@@ -1272,6 +1275,7 @@ required_for_references:
 - quill
 - quirc
 - qwt
+- qxlsx
 - qxmpp
 - r8brain-free-src
 - rabbitmq-c
@@ -1283,6 +1287,7 @@ required_for_references:
 - rapidcheck
 - rapidcsv
 - rapidfuzz
+- rapidhash
 - rapidjson
 - rapidxml
 - rapidyaml
@@ -1494,6 +1499,7 @@ required_for_references:
 - tiny-dnn
 - tiny-regex-c
 - tiny-utf8
+- tinyad
 - tinyalsa
 - tinycbor
 - tinycolormap
