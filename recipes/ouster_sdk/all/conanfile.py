@@ -98,8 +98,6 @@ class OusterSdkConan(ConanFile):
         if self.options.build_viz:
             self.requires("glad/0.1.36")
             self.requires("glfw/3.4")
-            if self.settings.os != "Windows":
-                self.requires("xorg/system")
 
     def validate(self):
         if conan_version.major < 2 and self.settings.os == "Windows":
@@ -212,8 +210,6 @@ class OusterSdkConan(ConanFile):
                 "glad::glad",
                 "glfw::glfw",
             ]
-            if self.settings.os != "Windows":
-                self.cpp_info.components["ouster_viz"].requires.append("xorg::xorg")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "OusterSDK"
