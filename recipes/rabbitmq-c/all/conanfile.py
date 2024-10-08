@@ -67,6 +67,9 @@ class RabbitmqcConan(ConanFile):
         tc.variables["ENABLE_SSL_SUPPORT"] = self.options.ssl
         tc.variables["BUILD_API_DOCS"] = False
         tc.variables["RUN_SYSTEM_TESTS"] = False
+        # Required for https://github.com/alanxz/rabbitmq-c/blob/v0.14.0/CMakeLists.txt#L132-L133
+        # Otherwise fails with "CheckSymbolExists.c:(.text+0x1f): undefined reference to `ENGINE_new'"
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
 
         if self.options.ssl:
