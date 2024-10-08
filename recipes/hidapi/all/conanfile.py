@@ -115,7 +115,7 @@ class HidapiConan(ConanFile):
                 self.cpp_info.components["libusb"].set_property("pkg_config_name", "hidapi-libusb")
                 self.cpp_info.components["libusb"].set_property("cmake_target_name", "hidapi::libusb")
                 if not self.options.build_hidapi_hidraw:
-                    self.cpp_info.components["libusb"].set_property("cmake_target_alias", ["hidapi::hidapi"])
+                    self.cpp_info.components["libusb"].set_property("cmake_target_aliases", ["hidapi::hidapi"])
                 self.cpp_info.components["libusb"].libs = ["hidapi-libusb"]
                 self.cpp_info.components["libusb"].includedirs.append(os.path.join("include", "hidapi"))
                 self.cpp_info.components["libusb"].requires = ["libusb::libusb", "libiconv::libiconv"]
@@ -123,7 +123,7 @@ class HidapiConan(ConanFile):
             if self.options.build_hidapi_hidraw:
                 self.cpp_info.components["hidraw"].set_property("pkg_config_name", "hidapi-hidraw")
                 self.cpp_info.components["hidraw"].set_property("cmake_target_name", "hidapi::hidraw")
-                self.cpp_info.components["hidraw"].set_property("cmake_target_alias", ["hidapi::hidapi"])
+                self.cpp_info.components["hidraw"].set_property("cmake_target_aliases", ["hidapi::hidapi"])
                 self.cpp_info.components["hidraw"].libs = ["hidapi-hidraw"]
                 self.cpp_info.components["hidraw"].includedirs.append(os.path.join("include", "hidapi"))
                 if self.settings.os == "Linux":
@@ -131,12 +131,12 @@ class HidapiConan(ConanFile):
                 self.cpp_info.components["hidraw"].system_libs = ["pthread", "dl"]
         elif is_apple_os(self):
             self.cpp_info.set_property("cmake_target_name", "hidapi::darwin")
-            self.cpp_info.set_property("cmake_target_alias", ["hidapi::hidapi"])
+            self.cpp_info.set_property("cmake_target_aliases", ["hidapi::hidapi"])
             self.cpp_info.libs = ["hidapi"]
             self.cpp_info.includedirs.append(os.path.join("include", "hidapi"))
             self.cpp_info.frameworks.extend(["IOKit", "CoreFoundation"])
         else:
             self.cpp_info.set_property("cmake_target_name", "hidapi::winapi")
-            self.cpp_info.set_property("cmake_target_alias", ["hidapi::hidapi"])
+            self.cpp_info.set_property("cmake_target_aliases", ["hidapi::hidapi"])
             self.cpp_info.libs = ["hidapi"]
             self.cpp_info.includedirs.append(os.path.join("include", "hidapi"))
