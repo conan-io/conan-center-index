@@ -15,7 +15,7 @@ class OusterSdkConan(ConanFile):
     description = "Ouster SDK - tools for working with Ouster Lidars"
     license = "BSD 3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/ouster-lidar/ouster_example"
+    homepage = "https://github.com/ouster-lidar/ouster-sdk"
     topics = ("ouster", "lidar", "driver", "hardware", "point cloud", "3d", "robotics", "automotive")
 
     package_type = "library"
