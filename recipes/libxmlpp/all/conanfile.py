@@ -36,7 +36,7 @@ class LibXMLPlusPlus(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "17" if Version(self.version) < "5.4.0" else "11"
+        return "17" if Version(self.version) >= "5.4.0" else "11"
 
     @property
     def _compilers_minimum_version(self):
