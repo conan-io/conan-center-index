@@ -8,11 +8,11 @@ from conan.tools.files import (
     rm,
     rmdir, export_conandata_patches, replace_in_file,
 )
-import os
-
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc_static_runtime
 from conans.model.version import Version
 
+import os
 required_conan_version = ">=1.54.0"
 
 
@@ -81,7 +81,7 @@ class SymengineConan(ConanFile):
         tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_BENCHMARKS"] = False
         tc.variables["INTEGER_CLASS"] = self.options.integer_class
-        tc.variables["MSVC_USE_MT"] = False
+        tc.variables["MSVC_USE_MT"] = is_msvc_static_runtime(self)
         if self._needs_fast_float:
             tc.variables["WITH_SYSTEM_FASTFLOAT"] = True
 
@@ -92,13 +92,16 @@ class SymengineConan(ConanFile):
         deps = CMakeDeps(self)
         if self.options.integer_class == "gmp":
             deps.set_property("gmp", "cmake_file_name", "GMP")
+            # If we ever add support for gmpxx, we should set this property
+            # if self.dependencies["gmp"].options.enable_cxx:
+            #     deps.set_property("gmp::gmpxx", "cmake_target_name", "gmpxx")
         if self._needs_fast_float:
             deps.set_property("fast_float", "cmake_file_name", "FASTFLOAT")
         deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # Disable forced C++11
+        # Disable hardcoded C++11
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         'set(CMAKE_CXX_FLAGS "${CXX11_OPTIONS} ${CMAKE_CXX_FLAGS}")',
                         '')
@@ -106,6 +109,10 @@ class SymengineConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         'set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${common}")',
                         '')
+        # cmake_target_name not working?
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(LIBS ${LIBS} ${GMP_TARGETS})",
+                        "set(LIBS ${LIBS} gmp::gmp)")
 
     def build(self):
         self._patch_sources()
