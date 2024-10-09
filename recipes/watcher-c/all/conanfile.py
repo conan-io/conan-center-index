@@ -3,11 +3,12 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches, rename
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 from conan.tools.apple import is_apple_os
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -93,6 +94,9 @@ class WatcherCConan(ConanFile):
         meson.install()
 
         fix_apple_shared_install_name(self)
+
+        if is_msvc(self) and not self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", "libwatcher-c.a"), os.path.join(self.package_folder, "lib", "libwatcher-c.lib"))
 
     def package_info(self):
         self.cpp_info.libs = ["watcher-c"]
