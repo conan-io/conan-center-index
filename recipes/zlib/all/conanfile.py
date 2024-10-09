@@ -12,7 +12,7 @@ class ZlibConan(ConanFile):
     package_type = "library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://zlib.net"
-    license = "Zlib"
+    license = "foobar-donotmerge"
     description = ("A Massively Spiffy Yet Delicately Unobtrusive Compression Library "
                    "(Also Free, Not to Mention Unencumbered by Patents)")
     topics = ("zlib", "compression")
