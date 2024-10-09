@@ -1,14 +1,17 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools.files import (
     apply_conandata_patches,
     collect_libs,
     copy,
     get,
     rm,
-    rmdir,
+    rmdir, export_conandata_patches, replace_in_file,
 )
 import os
+
+from conan.tools.layout import basic_layout
+from conans.model.version import Version
 
 required_conan_version = ">=1.54.0"
 
@@ -20,8 +23,8 @@ class SymengineConan(ConanFile):
     topics = ("symbolic", "algebra")
     homepage = "https://symengine.org/"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
     settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -34,19 +37,15 @@ class SymengineConan(ConanFile):
     }
     short_paths = True
 
-    def requirements(self):
-        if self.options.integer_class == "boostmp":
-            self.requires("boost/1.83.0")
-        else:
-            self.requires("gmp/6.3.0", transitive_headers=True, transitive_libs=True)
+    @property
+    def _min_cppstd(self):
+        return 11
 
-    def source(self):
-        get(
-            self,
-            **self.conan_data["sources"][self.version],
-            strip_root=True,
-            destination=self.source_folder,
-        )
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -56,16 +55,60 @@ class SymengineConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    @property
+    def _needs_fast_float(self):
+        return Version(self.version) >= "0.13.0"
+
+    def requirements(self):
+        if self.options.integer_class == "boostmp":
+            # symengine/mp_class.h:12
+            self.requires("boost/1.83.0", transitive_headers=True)
+        else:
+            self.requires("gmp/6.3.0", transitive_headers=True, transitive_libs=True)
+        if self._needs_fast_float:
+            self.requires("fast_float/6.1.5")
+
+    def source(self):
+        get(
+            self,
+            **self.conan_data["sources"][self.version],
+            strip_root=True,
+            destination=self.source_folder,
+        )
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTS"] = False
         tc.variables["BUILD_BENCHMARKS"] = False
         tc.variables["INTEGER_CLASS"] = self.options.integer_class
         tc.variables["MSVC_USE_MT"] = False
+        if self._needs_fast_float:
+            tc.variables["WITH_SYSTEM_FASTFLOAT"] = True
+
+        if not self.settings.compiler.cppstd:
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+
         tc.generate()
+        deps = CMakeDeps(self)
+        if self.options.integer_class == "gmp":
+            deps.set_property("gmp", "cmake_file_name", "GMP")
+        if self._needs_fast_float:
+            deps.set_property("fast_float", "cmake_file_name", "FASTFLOAT")
+        deps.generate()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        # Disable forced C++11
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'set(CMAKE_CXX_FLAGS "${CXX11_OPTIONS} ${CMAKE_CXX_FLAGS}")',
+                        '')
+        # Let Conan choose fPIC
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        'set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${common}")',
+                        '')
 
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
