@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
@@ -91,3 +91,9 @@ class WatcherCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["watcher-c"]
+        if not self.options.shared:
+            libcxx = stdcpp_library(self)
+            if libcxx:
+                self.cpp_info.system_libs.append(libcxx)
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.extend(["m", "pthread"])
