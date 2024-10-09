@@ -7,6 +7,7 @@ from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
+from conan.tools.apple import is_apple_os
 import os
 
 required_conan_version = ">=1.53.0"
@@ -97,3 +98,5 @@ class WatcherCConan(ConanFile):
                 self.cpp_info.system_libs.append(libcxx)
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread"])
+        if is_apple_os(self):
+            self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
