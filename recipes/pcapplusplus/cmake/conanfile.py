@@ -69,6 +69,8 @@ class PcapplusplusConan(ConanFile):
         tc.variables["PCAPPP_BUILD_TESTS"] = False
         tc.variables["PCAPPP_BUILD_EXAMPLES"] = False
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
+        if not self.settings.compiler.cppstd:
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
 
     def layout(self):
