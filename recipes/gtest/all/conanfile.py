@@ -109,6 +109,12 @@ class GTestConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def build_requirements(self):
+        if Version(self.version) >= "1.14.0":
+            self.tool_requires("cmake/[>=3.13]")
+        else:
+            self.tool_requires("cmake/[>=3.5]")
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_GMOCK"] = bool(self.options.build_gmock)
