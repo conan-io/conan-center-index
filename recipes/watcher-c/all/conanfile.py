@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
@@ -44,6 +44,9 @@ class WatcherCConan(ConanFile):
             "msvc": "192",
         }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -79,6 +82,7 @@ class WatcherCConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
         meson.build()
