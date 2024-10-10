@@ -1,4 +1,10 @@
 sources:
+  "1.4.1":
+    url: "https://github.com/laurencelundblade/QCBOR/archive/refs/tags/v1.4.1.tar.gz"
+    sha256: "c7ef031b60b23bf8ede47c66c9713982bba2608668b144280a65665bfcc94470"
+  "1.3":
+    url: "https://github.com/laurencelundblade/QCBOR/archive/refs/tags/v1.3.tar.gz"
+    sha256: "5acd3f3e7b19aad074813736a8776e71859d57c4dec9bfb85cd1dc6c219c8033"
   "1.2":
     url: "https://github.com/laurencelundblade/QCBOR/archive/refs/tags/v1.2.tar.gz"
     sha256: "0f706ad90ada600bd1ddbdf8dc6f2f5910e11de355bb4454b9b4123f0e4ff525"
@@ -9,6 +15,14 @@ sources:
     url: "https://github.com/laurencelundblade/QCBOR/archive/refs/tags/v1.0.tar.gz"
     sha256: "961a46eb5a599cc040bfce4f4fade4427e046f1748f37ba4ebbc097fb9cdf1d3"
 patches:
+  "1.4.1":
+    - patch_file: "patches/1.4.1-0001-fix-cmake.patch"
+      patch_description: "disable fix fPIC and add installation"
+      patch_type: "conan"
+  "1.3":
+    - patch_file: "patches/1.2-0001-fix-cmake.patch"
+      patch_description: "disable fix fPIC and add installation"
+      patch_type: "conan"
   "1.2":
     - patch_file: "patches/1.2-0001-fix-cmake.patch"
       patch_description: "disable fix fPIC and add installation"

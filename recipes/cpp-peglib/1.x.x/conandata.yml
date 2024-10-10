@@ -1,4 +1,13 @@
 sources:
+  "1.9.0":
+    url: "https://github.com/yhirose/cpp-peglib/archive/v1.9.0.tar.gz"
+    sha256: "6f4f0956ea2f44fd1c5882f8adc5782451ba9d227c467d214196390ddedb024c"
+  "1.8.8":
+    url: "https://github.com/yhirose/cpp-peglib/archive/v1.8.8.tar.gz"
+    sha256: "3019d8084a146562fe2fd4c71e3226ac6e3994e8cee21cab27b3cd5a86bcef34"
+  "1.8.7":
+    url: "https://github.com/yhirose/cpp-peglib/archive/v1.8.7.tar.gz"
+    sha256: "400696cc7e721b23aeac28a1ae12ceec235e2671888993da2ce012f6acdf83d4"
   "1.8.6":
     url: "https://github.com/yhirose/cpp-peglib/archive/v1.8.6.tar.gz"
     sha256: "b2ebdc135a66074a386d377b761b38e050088fba6482575ca3028d0e184ecd91"

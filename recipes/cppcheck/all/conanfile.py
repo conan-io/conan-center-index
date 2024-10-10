@@ -66,8 +66,8 @@ class CppcheckConan(ConanFile):
         self.cpp_info.libdirs = []
 
         bin_folder = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Append {bin_folder} to environment variable PATH")
         self.env_info.PATH.append(bin_folder)
+
         cppcheck_htmlreport = os.path.join(bin_folder, "cppcheck-htmlreport")
         self.env_info.CPPCHECK_HTMLREPORT = cppcheck_htmlreport
         self.runenv_info.define_path("CPPCHECK_HTMLREPORT", cppcheck_htmlreport)

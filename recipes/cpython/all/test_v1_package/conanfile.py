@@ -14,6 +14,12 @@ class TestPackageConan(ConanFile):
         return re.match(r"^([0-9.]+)", self.deps_cpp_info["cpython"].version).group(1)
 
     @property
+    def _test_setuptools(self):
+        # TODO Should we still try to test this?
+        # https://github.com/python/cpython/pull/101039
+        return not tools.cross_building(self, skip_x64_x86=True) and self._supports_modules and self._py_version < tools.Version("3.12")
+
+    @property
     def _cmake_try_FindPythonX(self):
         if self.settings.compiler == "Visual Studio" and self.settings.build_type == "Debug":
             return False
@@ -63,34 +69,33 @@ class TestPackageConan(ConanFile):
             cmake.configure()
         cmake.build()
 
-        if not tools.cross_building(self, skip_x64_x86=True):
-            if self._supports_modules:
-                with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                    env = {
-                        "DISTUTILS_USE_SDK": "1",
-                        "MSSdk": "1"
-                    }
-                    env.update(**AutoToolsBuildEnvironment(self).vars)
-                    with tools.environment_append(env):
-                        setup_args = [
-                            os.path.join(self.source_folder, "..", "test_package", "setup.py"),
-                            "build",
-                            "--build-base", self.build_folder,
-                            "--build-platlib", os.path.join(self.build_folder, "lib_setuptools"),
-                            # Bandaid fix: setuptools places temporary files in a subdirectory of the build folder where the
-                            # entirety of the absolute path up to this folder is appended (with seemingly no way to stop this),
-                            # essentially doubling the path length. This may run into Windows max path lengths, so we give ourselves
-                            # a little bit of wiggle room by making this directory name as short as possible. One of the directory
-                            # names goes from (for example) "temp.win-amd64-3.10-pydebug" to "t", saving us roughly 25 characters.
-                            "--build-temp", "t",
-                        ]
-                        if self.settings.build_type == "Debug":
-                            setup_args.append("--debug")
-                        self.run("{} {}".format(self.deps_user_info["cpython"].python, " ".join("\"{}\"".format(a) for a in setup_args)), run_environment=True)
+        if self._test_setuptools:
+            with tools.vcvars(self.settings) if self.settings.compiler == "Visual Studio" else tools.no_op():
+                env = {
+                    "DISTUTILS_USE_SDK": "1",
+                    "MSSdk": "1"
+                }
+                env.update(**AutoToolsBuildEnvironment(self).vars)
+                with tools.environment_append(env):
+                    setup_args = [
+                        os.path.join(self.source_folder, "..", "test_package", "setup.py"),
+                        "build",
+                        "--build-base", self.build_folder,
+                        "--build-platlib", os.path.join(self.build_folder, "lib_setuptools"),
+                        # Bandaid fix: setuptools places temporary files in a subdirectory of the build folder where the
+                        # entirety of the absolute path up to this folder is appended (with seemingly no way to stop this),
+                        # essentially doubling the path length. This may run into Windows max path lengths, so we give ourselves
+                        # a little bit of wiggle room by making this directory name as short as possible. One of the directory
+                        # names goes from (for example) "temp.win-amd64-3.10-pydebug" to "t", saving us roughly 25 characters.
+                        "--build-temp", "t",
+                    ]
+                    if self.settings.build_type == "Debug":
+                        setup_args.append("--debug")
+                    self.run("{} {}".format(self.deps_user_info["cpython"].python, " ".join("\"{}\"".format(a) for a in setup_args)), run_environment=True)
 
     def _test_module(self, module, should_work):
         try:
-            self.run("{} {}/../test_package/test_package.py -b {} -t {} ".format(
+            self.run("{} \"{}/../test_package/test_package.py\" -b \"{}\" -t {} ".format(
                 self.deps_user_info["cpython"].python, self.source_folder, self.build_folder, module), run_environment=True)
             works = True
         except ConanException as e:
@@ -143,10 +148,11 @@ class TestPackageConan(ConanFile):
                     with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib")]}):
                         self.output.info("Testing module (spam) using cmake built module")
                         self._test_module("spam", True)
-
-                    with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib_setuptools")]}):
-                        self.output.info("Testing module (spam) using setup.py built module")
-                        self._test_module("spam", True)
+                    
+                    if self._test_setuptools:
+                        with tools.environment_append({"PYTHONPATH": [os.path.join(self.build_folder, "lib_setuptools")]}):
+                            self.output.info("Testing module (spam) using setup.py built module")
+                            self._test_module("spam", True)
 
             # MSVC builds need PYTHONHOME set. Linux and Mac don't require it to be set if tested after building,
             # but if the package is relocated then it needs to be set.
