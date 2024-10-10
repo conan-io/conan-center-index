@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, CMakeToolchain,CMakeDeps, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "VirtualRunEnv"
+    generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def layout(self):
@@ -22,8 +22,6 @@ class TestPackageConan(ConanFile):
         tc.variables["SFML_WITH_NETWORK"] = self.dependencies["sfml"].options.network
         tc.variables["SFML_WITH_AUDIO"] = self.dependencies["sfml"].options.audio
         tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def build(self):
         cmake = CMake(self)
