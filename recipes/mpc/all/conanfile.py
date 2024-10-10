@@ -79,6 +79,11 @@ class MpcConan(ConanFile):
         tc = AutotoolsToolchain(self)
         tc.configure_args.append(f'--with-gmp={unix_path(self, self.dependencies["gmp"].package_folder)}')
         tc.configure_args.append(f'--with-mpfr={unix_path(self, self.dependencies["mpfr"].package_folder)}')
+        # Unset LIBS which contains -lgmp, -lmpfr, etc. because mpc's configure
+        # script will incorporate it in its command-line when checking whether
+        # the compiler works and will in turn fail with:
+        #  ./conftest: error while loading shared libraries: libmpfr.so.6: cannot open shared object file: No such file or directory
+        tc.environment.unset('LIBS')
         tc.generate()
 
         tc = AutotoolsDeps(self)
