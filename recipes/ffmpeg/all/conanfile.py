@@ -61,6 +61,7 @@ class FFMpegConan(ConanFile):
         "with_ssl": [False, "openssl", "securetransport"],
         "with_libalsa": [True, False],
         "with_pulse": [True, False],
+        "with_sndio": [True, False],
         "with_vaapi": [True, False],
         "with_vdpau": [True, False],
         "with_vulkan": [True, False],
@@ -145,6 +146,7 @@ class FFMpegConan(ConanFile):
         "with_ssl": "openssl",
         "with_libalsa": True,
         "with_pulse": True,
+        "with_sndio": False,
         "with_vaapi": True,
         "with_vdpau": True,
         "with_vulkan": False,
@@ -229,6 +231,7 @@ class FFMpegConan(ConanFile):
             "with_libalsa": ["avdevice"],
             "with_xcb": ["avdevice"],
             "with_pulse": ["avdevice"],
+            "with_sndio": ["avdevice"],
             "with_sdl": ["with_programs"],
             "with_libsvtav1": ["avcodec"],
             "with_libaom": ["avcodec"],
@@ -324,10 +327,12 @@ class FFMpegConan(ConanFile):
             self.requires("xorg/system")
         if self.options.get_safe("with_pulse"):
             self.requires("pulseaudio/14.2")
+        if self.options.get_safe("with_sndio"):
+            self.requires("libsndio/1.9.0")
         if self.options.get_safe("with_vaapi"):
             self.requires("vaapi/system")
         if self.options.get_safe("with_vdpau"):
-            self.requires("vdpau/system")
+            self.requires("libvdpau/1.5")
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.243.0")
         if self.options.get_safe("with_libsvtav1"):
@@ -374,7 +379,7 @@ class FFMpegConan(ConanFile):
             else:
                 self.tool_requires("yasm/1.3.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -475,6 +480,7 @@ class FFMpegConan(ConanFile):
         tc = self._create_toolchain()
 
         args = [
+            "--disable-autodetect",
             "--pkg-config-flags=--static",
             "--disable-doc",
             opt_enable_disable("cross-compile", cross_building(self)),
@@ -513,6 +519,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("openssl", self.options.with_ssl == "openssl"),
             opt_enable_disable("alsa", self.options.get_safe("with_libalsa")),
             opt_enable_disable("libpulse", self.options.get_safe("with_pulse")),
+            opt_enable_disable("sndio", self.options.get_safe("with_sndio")),
             opt_enable_disable("vaapi", self.options.get_safe("with_vaapi")),
             opt_enable_disable("libdrm", self.options.get_safe("with_libdrm")),
             opt_enable_disable("vdpau", self.options.get_safe("with_vdpau")),
@@ -850,6 +857,8 @@ class FFMpegConan(ConanFile):
                 avdevice.requires.extend(["xorg::x11", "xorg::xext", "xorg::xv"])
             if self.options.get_safe("with_pulse"):
                 avdevice.requires.append("pulseaudio::pulseaudio")
+            if self.options.get_safe("with_sndio"):
+                avdevice.requires.append("libsndio::libsndio")
             if self.options.get_safe("with_appkit"):
                 avdevice.frameworks.append("AppKit")
             if self.options.get_safe("with_avfoundation"):
@@ -927,7 +936,7 @@ class FFMpegConan(ConanFile):
             avutil.requires.append("xorg::x11")
 
         if self.options.get_safe("with_vdpau"):
-            avutil.requires.append("vdpau::vdpau")
+            avutil.requires.append("libvdpau::libvdpau")
 
         if self.options.with_ssl == "openssl":
             avutil.requires.append("openssl::ssl")
