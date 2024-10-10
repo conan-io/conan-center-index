@@ -5,6 +5,7 @@ import textwrap
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, mkdir, replace_in_file, rm, rmdir, save, unzip
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
@@ -65,7 +66,7 @@ class CPythonConan(ConanFile):
 
     @property
     def _supports_modules(self):
-        return not is_msvc(self) or self.options.shared
+        return not is_msvc(self) or self.options.get_safe("shared", default=True)
 
     @property
     def _version_suffix(self):
@@ -86,6 +87,10 @@ class CPythonConan(ConanFile):
             del self.options.with_curses
             del self.options.with_gdbm
             del self.options.with_nis
+        if is_apple_os(self) and cross_building(self):
+            # FIXME: The corresponding recipes currently don't support cross building
+            self.options.with_tkinter = False
+            self.options.with_curses = False
 
         self.settings.compiler.rm_safe("libcxx")
         self.settings.compiler.rm_safe("cppstd")
@@ -98,6 +103,12 @@ class CPythonConan(ConanFile):
             self.options.rm_safe("with_sqlite3")
             self.options.rm_safe("with_tkinter")
             self.options.rm_safe("with_lzma")
+        if is_msvc and Version(self.version) >= "3.10":
+            # Static CPython on Windows is only loosely supported, see https://github.com/python/cpython/issues/110234
+            # 3.10 fails during the test, 3.11 fails during the build (missing symbol that seems to be DLL specific: PyWin_DLLhModule)
+            # Disabling static MSVC builds (>=3.10) due to "AttributeError: module 'sys' has no attribute 'winver'"
+            self.package_type = "shared-library"
+            del self.options.shared
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -148,7 +159,7 @@ class CPythonConan(ConanFile):
         del self.info.options.env_vars
 
     def validate(self):
-        if self.options.shared:
+        if self.options.get_safe("shared", default=True):
             if is_msvc_static_runtime(self):
                 raise ConanInvalidConfiguration(
                     "cpython does not support MT(d) runtime when building a shared cpython library"
@@ -170,10 +181,6 @@ class CPythonConan(ConanFile):
                 )
             if str(self.settings.arch) not in self._msvc_archs:
                 raise ConanInvalidConfiguration("Visual Studio does not support this architecture")
-            if not self.options.shared and Version(self.version) >= "3.10":
-                # Static CPython on Windows is only loosely supported, see https://github.com/python/cpython/issues/110234
-                # 3.10 fails during the test, 3.11 fails during the build (missing symbol that seems to be DLL specific: PyWin_DLLhModule)
-                raise ConanInvalidConfiguration("Static msvc build disabled (>=3.10) due to \"AttributeError: module 'sys' has no attribute 'winver'\"")
 
         if self.options.get_safe("with_curses", False) and not self.dependencies["ncurses"].options.with_widec:
             raise ConanInvalidConfiguration("cpython requires ncurses with wide character support")
@@ -436,7 +443,7 @@ class CPythonConan(ConanFile):
                             "$(RUNSHARED) CC='$(CC) $(CONFIGURE_CFLAGS) $(CONFIGURE_CPPFLAGS)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)'")
 
         # Enable static MSVC cpython
-        if not self.options.shared:
+        if not self.options.get_safe("shared", default=True):
             replace_in_file(self, os.path.join(self.source_folder, "PCbuild", "pythoncore.vcxproj"),
                 "<PreprocessorDefinitions>",
                 "<PreprocessorDefinitions>Py_NO_BUILD_SHARED;")
@@ -473,7 +480,7 @@ class CPythonConan(ConanFile):
 
     @property
     def _solution_projects(self):
-        if self.options.shared:
+        if self.options.get_safe("shared", default=True):
             solution_path = os.path.join(self.source_folder, "PCbuild", "pcbuild.sln")
             projects = set(m.group(1) for m in re.finditer('"([^"]+)\\.vcxproj"', open(solution_path).read()))
 
@@ -653,7 +660,7 @@ class CPythonConan(ConanFile):
         prefix = "" if self.settings.os == "Windows" else "lib"
         if self.settings.os == "Windows":
             extension = "lib"
-        elif not self.options.shared:
+        elif not self.options.get_safe("shared", default=True):
             extension = "a"
         elif is_apple_os(self):
             extension = "dylib"
@@ -717,7 +724,7 @@ class CPythonConan(ConanFile):
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
-            if self.options.shared:
+            if self.options.get_safe("shared", default=True):
                 self._msvc_package_layout()
             else:
                 self._msvc_package_copy()
@@ -815,7 +822,7 @@ class CPythonConan(ConanFile):
                 os.path.join("include", f"python{self._version_suffix}{self._abi_suffix}")
             )
             libdir = "lib"
-        if self.options.shared:
+        if self.options.get_safe("shared", default=True):
             self.cpp_info.components["python"].defines.append("Py_ENABLE_SHARED")
         else:
             self.cpp_info.components["python"].defines.append("Py_NO_ENABLE_SHARED")
