@@ -1,0 +1,111 @@
+From: Andreas Tille <tille@debian.org>
+Date: Wed, 25 May 2016 16:01:55 +0200
+Subject: add clapack files
+
+Adding two files that are part of clapack source
+The clapack archive that can be downloaded at
+  http://netlib.org/clapack/
+contains a copy of f2c.  This copy is basically identical but it includes
+two files which are missing in the source which was the base for the libf2c2
+package.  Since the functions inside these files are used inside the test suite
+of clapack the files were added here to avoid code duplication.
+
+Add missing files also to makefile.u to get them built
+---
+ i_ceiling.c  | 36 ++++++++++++++++++++++++++++++++++++
+ i_len_trim.c | 22 ++++++++++++++++++++++
+ makefile.u   |  2 ++
+ 3 files changed, 60 insertions(+)
+ create mode 100644 i_ceiling.c
+ create mode 100644 i_len_trim.c
+
+diff --git a/i_ceiling.c b/i_ceiling.c
+new file mode 100644
+index 0000000..f708a8b
+--- /dev/null
++++ b/i_ceiling.c
+@@ -0,0 +1,36 @@
++#include "f2c.h"
++
++#ifdef KR_headers
++integer i_sceiling(x) real *x;
++#else
++#ifdef __cplusplus
++extern "C" {
++#endif
++integer i_sceiling(real *x)
++#endif
++{
++#define CEIL(x) ((int)(x) + ((x) > 0 && (x) != (int)(x)))
++
++    return (integer) CEIL(*x);
++}
++#ifdef __cplusplus
++}
++#endif
++
++
++#ifdef KR_headers
++integer i_dceiling(x) doublereal *x;
++#else
++#ifdef __cplusplus
++extern "C" {
++#endif
++integer i_dceiling(doublereal *x)
++#endif
++{
++#define CEIL(x) ((int)(x) + ((x) > 0 && (x) != (int)(x)))
++
++    return (integer) CEIL(*x);
++}
++#ifdef __cplusplus
++}
++#endif
+diff --git a/i_len_trim.c b/i_len_trim.c
+new file mode 100644
+index 0000000..c7b7680
+--- /dev/null
++++ b/i_len_trim.c
+@@ -0,0 +1,22 @@
++#include "f2c.h"
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#ifdef KR_headers
++integer i_len_trim(s, n) char *s; ftnlen n;
++#else
++integer i_len_trim(char *s, ftnlen n)
++#endif
++{
++  int i;
++
++  for(i=n-1;i>=0;i--)
++    if(s[i] != ' ')
++      return i + 1;
++
++  return(0);
++}
++#ifdef __cplusplus
++}
++#endif
+diff --git a/makefile.u b/makefile.u
+index 0784eec..f78ff4b 100644
+--- a/makefile.u
++++ b/makefile.u
+@@ -43,6 +43,7 @@
+ 	d_nint.o d_prod.o d_sign.o d_sin.o d_sinh.o\
+ 	d_sqrt.o d_tan.o d_tanh.o
+ INT =	i_abs.o i_dim.o i_dnnt.o i_indx.o i_len.o i_mod.o i_nint.o i_sign.o\
++	i_ceiling.o i_len_trim.o\
+ 	lbitbits.o lbitshft.o
+ HALF =	h_abs.o h_dim.o h_dnnt.o h_indx.o h_len.o h_mod.o h_nint.o h_sign.o
+ CMP =	l_ge.o l_gt.o l_le.o l_lt.o hl_ge.o hl_gt.o hl_le.o hl_lt.o
+@@ -205,6 +206,7 @@
+ 	getarg_.c getenv_.c h_abs.c h_dim.c h_dnnt.c h_indx.c h_len.c \
+ 	h_mod.c h_nint.c h_sign.c hl_ge.c hl_gt.c hl_le.c hl_lt.c \
+ 	i77vers.c i_abs.c i_dim.c i_dnnt.c i_indx.c i_len.c i_mod.c \
++	i_ceiling.c i_len_trim.c \
+ 	i_nint.c i_sign.c iargc_.c iio.c ilnw.c inquire.c l_ge.c l_gt.c \
+ 	l_le.c l_lt.c lbitbits.c lbitshft.c libf2c.lbc libf2c.sy lio.h \
+ 	lread.c lwrite.c main.c makefile.sy makefile.u makefile.vc \
