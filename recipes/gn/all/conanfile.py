@@ -8,8 +8,6 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, XCRun
 from conan.tools.build import check_min_cppstd
-from conan.tools.build.flags import architecture_flag
-from conan.tools.apple import to_apple_arch
 from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import chdir, copy, get, load, save, replace_in_file
 from conan.tools.layout import basic_layout
@@ -110,17 +108,15 @@ class GnConan(ConanFile):
         env = Environment()
         env.define("CXX", self._cxx)
 
-        arch_flags = ""
-        if is_apple_os(self):
+        if is_apple_os(self) and self.settings.arch:
+            arch_flags = ""
             if "armv8" in self.settings.arch:
                 arch_flags += "-arch arm64 "
             if "x86_64" in self.settings.arch:
                 arch_flags += "-arch x86_64 "
-        else:
-            arch_flags = architecture_flag(self.settings)
 
-        env.append("CFLAGS", arch_flags)
-        env.append("LDFLAGS", arch_flags)
+            env.append("CFLAGS", arch_flags)
+            env.append("LDFLAGS", arch_flags)
 
         env.vars(self).save_script("conanbuild_gn")
 
