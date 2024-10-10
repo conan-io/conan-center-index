@@ -1,0 +1,25 @@
+cmake_minimum_required(VERSION 3.15)
+project(tpl LANGUAGES C)
+
+add_library(tpl src/tpl.c)
+set_target_properties(tpl PROPERTIES
+    VERSION 0.0.0
+    SOVERSION 0
+)
+
+if(WIN32)
+    target_sources(tpl PRIVATE src/win/mmap.c)
+    install(FILES src/win/mman.h DESTINATION include/win)
+    if(BUILD_SHARED_LIBS)
+        target_compile_definitions(tpl PRIVATE TPL_EXPORTS)
+    else()
+        target_compile_definitions(tpl PUBLIC TPL_NOLIB)
+    endif()
+endif()
+
+install(TARGETS tpl
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+)
+install(FILES src/tpl.h DESTINATION include)
