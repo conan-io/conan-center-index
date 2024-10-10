@@ -10,7 +10,7 @@ from conan.tools.files import (
 )
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc_static_runtime
-from conans.model.version import Version
+from conan.tools.scm import Version
 
 import os
 required_conan_version = ">=1.54.0"
