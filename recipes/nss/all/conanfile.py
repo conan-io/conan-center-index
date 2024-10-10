@@ -54,11 +54,9 @@ class NSSConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
         if self.settings.os == "Windows":
             self.tool_requires("mozilla-build/4.0.2")
-            if is_msvc(self):
-                self.tool_requires("vswhere/3.1.7")
         if cross_building(self):
             self.tool_requires("sqlite3/<host_version>")
-        self.tool_requires("cpython/3.12.2")
+        self.tool_requires("cpython/3.12.7")
         self.tool_requires("ninja/[>=1.10.2 <2]")
 
     def source(self):
