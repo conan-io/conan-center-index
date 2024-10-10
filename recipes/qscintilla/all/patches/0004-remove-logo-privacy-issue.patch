@@ -1,0 +1,49 @@
+From: SVN-Git Migration <python-modules-team@lists.alioth.debian.org>
+Date: Thu, 8 Oct 2015 13:39:18 -0700
+Subject: remove-logo-privacy-issue.diff
+
+Remove use of http://www.scintilla.org/SciBreak.jpg when the SCintilla docs
+are accessed to resolve privacy-breach-logo lintian error.  Not forwarded, not
+needed.
+
+Patch-Name: remove-logo-privacy-issue.diff
+---
+ doc/Scintilla/index.html | 12 ++----------
+ 1 file changed, 2 insertions(+), 10 deletions(-)
+
+diff --git a/doc/Scintilla/index.html b/doc/Scintilla/index.html
+index 208b1ce..2831ab5 100644
+--- a/doc/Scintilla/index.html
++++ b/doc/Scintilla/index.html
+@@ -64,13 +64,6 @@
+         </td>
+       </tr>
+     </table>
+-    <table bgcolor="#000000" width="100%" cellspacing="0" cellpadding="0" border="0">
+-      <tr>
+-        <td width="100%" style="background: url(https://www.scintilla.org/SciBreak.jpg) no-repeat;height:150px;">
+-          &nbsp;
+-        </td>
+-      </tr>
+-    </table>
+     <ul id="versionlist">
+       <li>Version 3.7.5 adds a Reverse Selected Lines command.
+       MSVC 2013 is no longer supported.</li>
+@@ -177,15 +170,14 @@ hosted on
+ <!--
+ if (IsRemote()) {
+     document.write('<a href="https://sourceforge.net/projects/scintilla/">');
+-    document.write('<img src="https://sflogo.sourceforge.net/sflogo.php?group_id=2439&amp;type=8" width="80" height="15" alt="Get Scintilla at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a> ');
+ } else {
+     document.write('<a href="https://sourceforge.net/projects/scintilla/">SourceForge<\/a>');
+ }
+ //-->
+ </script>
+ <noscript>
+-<a href="https://sourceforge.net/projects/scintilla/">
+-<img src="https://sflogo.sourceforge.net/sflogo.php?group_id=2439&amp;type=8" width="80" height="15" alt="Get Scintilla at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a>
++<a href="http://sourceforge.net/projects/scintilla">
++Get Scintilla at SourceForge.net. Fast, secure and Free Open Source software downloads</a>
+ </noscript>
+   </body>
+ </html>
