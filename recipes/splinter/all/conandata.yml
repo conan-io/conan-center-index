@@ -1,0 +1,13 @@
+sources:
+  "3.0":
+    url: "https://github.com/bgrimstad/splinter/archive/refs/tags/v3.0.tar.gz"
+    sha256: "3d6a719c9c618977b7a70296e7ae5ef37a928789e30554f673a6487c1f0b4fd7"
+patches:
+  "3.0":
+    - patch_file: "patches/3.0-001-cmake-fixes.patch"
+      patch_description: "Improve Conan compatibility in CMakeLists.txt"
+      patch_type: "conan"
+    - patch_file: "patches/3.0-002-fix-eigen-error.patch"
+      patch_description: "Fix an Eigen compilation error"
+      patch_type: "portability"
+      patch_source: "https://github.com/bgrimstad/splinter/issues/116"
