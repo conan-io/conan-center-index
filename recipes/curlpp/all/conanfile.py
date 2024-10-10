@@ -4,6 +4,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
 from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.53.0"
@@ -83,7 +84,7 @@ class CurlppConan(ConanFile):
         rm(self, "curlpp-config", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = ["curlpp"]
+        self.cpp_info.libs = ["libcurlpp" if is_msvc(self) and not self.options.shared else "curlpp"]
 
         self.cpp_info.set_property("cmake_file_name", "curlpp")
         self.cpp_info.set_property("cmake_target_name", "curlpp::curlpp")
