@@ -93,7 +93,7 @@ class NSSConan(ConanFile):
 
     def _pip_install(self, packages):
         site_packages_dir = self._site_packages_dir.replace("\\", "/")
-        self.run(f"python -m pip install {' '.join(packages)} --no-cache-dir --target={site_packages_dir}",)
+        self.run(f"python -m pip install {' '.join(packages)} --no-cache-dir --target={site_packages_dir} --index-url https://pypi.org/simple",)
 
     def _patch_sources(self):
         def _format_library_paths(library_paths):
@@ -133,9 +133,9 @@ class NSSConan(ConanFile):
                         "'nspr_libs%': ['libnspr4.lib', 'libplc4.lib', 'libplds4.lib'],",
                         "'nspr_libs%': ['nspr4.lib', 'plc4.lib', 'plds4.lib'],")
 
-        # Do not hide shlibsign errors in subprocess.check_call()
+        # Don't let shlibsign.py set LD_LIBRARY_PATH to the incorrect value.
         replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "shlibsign.py"),
-                        ", stdout=dev_null, stderr=dev_null", "")
+                        "env['LD_LIBRARY_PATH']", "pass # env['LD_LIBRARY_PATH']")
 
     @property
     def _build_args(self):
