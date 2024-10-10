@@ -1,0 +1,26 @@
+--- Makefile
++++ Makefile
+@@ -54,9 +54,9 @@
+ 	$(XNLIB)  \
+ 	$(OPENNI) \
+ 	$(DEPTH_UTILS) \
+-	$(ALL_DRIVERS) \
+-	$(ALL_WRAPPERS) \
+-	$(ALL_TOOLS)
++	$(ALL_DRIVERS)
++
++
+ 
+ # list all samples
+ CORE_SAMPLES = \
+@@ -90,8 +90,8 @@
+ 
+ # list all projects that are build
+ ALL_BUILD_PROJS = \
+-	$(ALL_CORE_PROJS) \
+-	$(ALL_SAMPLES)
++	$(ALL_CORE_PROJS)
++
+ 
+ ALL_PROJS = \
+ 	$(ALL_BUILD_PROJS)
