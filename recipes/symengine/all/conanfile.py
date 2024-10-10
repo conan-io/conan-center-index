@@ -62,7 +62,7 @@ class SymengineConan(ConanFile):
     def requirements(self):
         if self.options.integer_class == "boostmp":
             # symengine/mp_class.h:12
-            self.requires("boost/1.83.0", transitive_headers=True)
+            self.requires("boost/1.86.0", transitive_headers=True)
         else:
             self.requires("gmp/6.3.0", transitive_headers=True, transitive_libs=True)
         if self._needs_fast_float:
