@@ -1,0 +1,15 @@
+--- a/src/build-system/cmake/CMake.NCBIptb.install.cmake
++++ b/src/build-system/cmake/CMake.NCBIptb.install.cmake
+@@ -312,11 +312,7 @@ function(NCBI_internal_install_root _variable _access)
+ 
+     if(NCBI_PTBCFG_PACKAGING)
+         if (WIN32 OR XCODE)
+-            if(DEFINED CONAN_SETTINGS_BUILD_TYPE)
+-                install( DIRECTORY ${NCBI_CFGINC_ROOT}/${CONAN_SETTINGS_BUILD_TYPE}/ DESTINATION ${NCBI_DIRNAME_INCLUDE})
+-            else()
+-                install( DIRECTORY ${NCBI_CFGINC_ROOT}/Release/ DESTINATION ${NCBI_DIRNAME_INCLUDE})
+-            endif()
++            install( DIRECTORY ${NCBI_CFGINC_ROOT}/$<CONFIG>/ DESTINATION ${NCBI_DIRNAME_INCLUDE})
+         else()
+             install( DIRECTORY ${NCBI_CFGINC_ROOT}/ DESTINATION ${NCBI_DIRNAME_INCLUDE})
+         endif()
