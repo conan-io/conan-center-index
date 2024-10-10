@@ -317,13 +317,21 @@ class CPythonConan(ConanFile):
         replace_in_file(self, self._msvc_project_path("_ssl"), '<Import Project="openssl.props" />', "")
 
         # For mpdecimal, we need to remove all headers and all c files *except* the main module file, _decimal.c
-        self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\.*\.h.*', "")
-        self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\libmpdec\\.*\.c.*', "")
+        if Version(self.version) < "3.13":
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\.*\.h.*', "")
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\libmpdec\\.*\.c.*', "")
+            # Remove extra include directory
+            replace_in_file(self, self._msvc_project_path("_decimal"), r"..\Modules\_decimal\libmpdec;", "")
+        else:
+            # https://github.com/python/cpython/commit/849e0716d378d6f9f724d1b3c386f6613d52a49d
+            # changed _decimal.vcxproj enough that we need different patching code.
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\.\.\\Modules\\_decimal\\windows\\.*\.h.*', "")
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\$\(mpdecimalDir\)\\libmpdec\\.*\.h.*', "")
+            self._regex_replace_in_file(self._msvc_project_path("_decimal"), r'.*Include=\"\$\(mpdecimalDir\)\\libmpdec\\.*\.c.*', "")
+            replace_in_file(self, self._msvc_project_path("_decimal"), r"..\Modules\_decimal\windows;$(mpdecimalDir)\libmpdec;", "")
         # There is also an assembly file with a complicated build step as part of the mpdecimal build
         replace_in_file(self, self._msvc_project_path("_decimal"), "<CustomBuild", "<!--<CustomBuild")
         replace_in_file(self, self._msvc_project_path("_decimal"), "</CustomBuild>", "</CustomBuild>-->")
-        # Remove extra include directory
-        replace_in_file(self, self._msvc_project_path("_decimal"), r"..\Modules\_decimal\libmpdec;", "")
 
         # Don't include vendored sqlite3
         replace_in_file(self, self._msvc_project_path("_sqlite3"),
