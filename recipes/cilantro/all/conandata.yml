@@ -1,0 +1,9 @@
+sources:
+  "cci.20230816":
+    url: "https://github.com/kzampog/cilantro/archive/57ad1a397b73b6f4bbf9604fd75f8fe4363206a7.zip"
+    sha256: "6b54eefbe1121c10706d23895b9d46038c686b9888450880b78781cfc4a05b68"
+patches:
+  "cci.20230816":
+    - patch_file: "patches/0001-Fix-includes-after-unvendoring.patch"
+      patch_description: "Fix includes after unvendoring"
+      patch_type: "conan"
