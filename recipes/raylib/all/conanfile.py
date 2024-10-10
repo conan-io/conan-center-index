@@ -22,11 +22,27 @@ class RaylibConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "opengl_version": [None, "4.3", "3.3", "2.1", "1.1", "ES-2.0"],
+
+        "customize_build": [True, False],  
+        "module_raudio": [True, False],
+        "camera_system": [True, False],
+        "gestures_system": [True, False],
+        "rprand_generator": [True, False],
+        "events_waiting": [True, False],  
+        "custom_frame_control": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "opengl_version": None,
+
+        "customize_build": False, 
+        "module_raudio": True, 
+        "camera_system": False,
+        "gestures_system": False,
+        "rprand_generator": False,
+        "events_waiting": False, 
+        "custom_frame_control": False
     }
 
     def export_sources(self):
@@ -43,6 +59,11 @@ class RaylibConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+
+        if not self.options.customize_build:
+            del self.options.module_raudio
+            del self.options.events_waiting
+            del self.options.custom_frame_control
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -72,14 +93,28 @@ class RaylibConan(ConanFile):
             tc.variables["USE_EXTERNAL_GLFW"] = "ON"
             tc.variables["OPENGL_VERSION"] = "OFF" if not self.options.opengl_version else self.options.opengl_version
         tc.variables["WITH_PIC"] = self.options.get_safe("fPIC", True)
+
+        tc.variables["CUSTOMIZE_BUILD"] = self.options.customize_build  
+        if self.options.customize_build:  
+            tc.variables["SUPPORT_MODULE_RAUDIO"] = self.options.get_safe("module_raudio")  
+            tc.variables["SUPPORT_EVENTS_WAITING"] = self.options.get_safe("events_waiting")  
+            tc.variables["SUPPORT_CUSTOM_FRAME_CONTROL"] = self.options.get_safe("custom_frame_control")
+
+            # this makes it include the headers rcamera.h, rgesture.h and rprand.h
+            tc.variables["SUPPORT_CAMERA_SYSTEM"]    = self.options.get_safe("camera_system")
+            tc.variables["SUPPORT_GESTURES_SYSTEM"]  = self.options.get_safe("gestures_system")
+            tc.variables["SUPPORT_RPRAND_GENERATOR"] = self.options.get_safe("rprand_generator")
+
         # Due to a specific logic of cmakedeps_macros.cmake used by CMakeDeps to try to locate shared libs on Windows
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0054"] = "NEW"
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -96,6 +131,11 @@ class RaylibConan(ConanFile):
             os.path.join(self.package_folder, self._module_file_rel_path),
             {"raylib": "raylib::raylib"}
         )
+
+        res_path = os.path.join(self.package_folder, "res", "include")
+        copy(self, pattern="rcamera.h", dst=res_path, src=os.path.join(self.source_folder, "src"))
+        copy(self, pattern="rgestures.h", dst=res_path, src=os.path.join(self.source_folder, "src"))
+        copy(self, pattern="rprand.h", dst=os.path.join(res_path, "external"), src=os.path.join(self.source_folder, "src", "external"))
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
         content = ""
@@ -126,6 +166,10 @@ class RaylibConan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread"])
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("winmm")
+        
+        # Some useful files are not packaged by default
+        res_includes = os.path.join(self.package_folder, "res", "include")
+        self.cpp_info.resdirs = [res_includes]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
