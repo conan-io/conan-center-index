@@ -56,7 +56,8 @@ class NSSConan(ConanFile):
             self.tool_requires("mozilla-build/4.0.2")
         if cross_building(self):
             self.tool_requires("sqlite3/<host_version>")
-        self.tool_requires("cpython/3.12.7")
+        # shared=True is required for MSVC
+        self.tool_requires("cpython/3.12.7", options={"shared": True})
         self.tool_requires("ninja/[>=1.10.2 <2]")
 
     def source(self):
@@ -79,6 +80,11 @@ class NSSConan(ConanFile):
         env.prepend_path("PATH", os.path.join(self._site_packages_dir, "bin"))
         # For 'shlibsign -v -i <dist_dir>/lib/libfreebl3.so' etc to work during build
         env.prepend_path("LD_LIBRARY_PATH", os.path.join(self._dist_dir, "lib"))
+        if is_msvc(self):
+            # Needed to locate vswhere.exe.
+            # https://github.com/Microsoft/vswhere/wiki/Installing
+            # "Starting with Visual Studio 15.2 (26418.1 Preview) vswhere.exe is installed in [the below path]"
+            env.append_path("PATH", r"C:\Program Files (x86)\Microsoft Visual Studio\Installer")
         env.vars(self, scope="build").save_script("conan_paths")
 
     @property
