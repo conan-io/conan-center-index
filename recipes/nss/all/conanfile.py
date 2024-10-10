@@ -56,8 +56,7 @@ class NSSConan(ConanFile):
             self.tool_requires("mozilla-build/4.0.2")
         if cross_building(self):
             self.tool_requires("sqlite3/<host_version>")
-        # shared=True is required for MSVC
-        self.tool_requires("cpython/3.12.7", options={"shared": True})
+        self.tool_requires("cpython/3.12.2")
         self.tool_requires("ninja/[>=1.10.2 <2]")
 
     def source(self):
