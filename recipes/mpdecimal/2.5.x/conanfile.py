@@ -63,7 +63,8 @@ class MpdecimalConan(ConanFile):
                     "A shared libmpdec++ is not possible on Windows (due to non-exportable thread local storage)")
 
     def build_requirements(self):
-        if is_msvc(self):
+        # Use MSYS2 only for MSVC
+        if not is_msvc(self):
             self.tool_requires("automake/1.16.5")
         else:
             # required to support windows as a build machine
