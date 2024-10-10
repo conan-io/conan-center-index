@@ -1,0 +1,8 @@
+sources:
+  "3.1.7":
+    exe:
+      url: "https://github.com/microsoft/vswhere/releases/download/3.1.7/vswhere.exe"
+      sha256: "c54f3b7c9164ea9a0db8641e81ecdda80c2664ef5a47c4191406f848cc07c662"
+    license:
+      url: "https://raw.githubusercontent.com/microsoft/vswhere/3.1.7/LICENSE.txt"
+      sha256: "a1e41a01dd80dbe3f8ad5edebfd746e64ccff9c2aae3d8f47922746cf83204ef"
