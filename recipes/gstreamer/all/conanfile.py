@@ -7,6 +7,7 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.scm import Version
 
 import glob
 import os
@@ -63,13 +64,13 @@ class GStreamerConan(ConanFile):
             raise ConanInvalidConfiguration("shared GStreamer cannot link to static GLib")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.0")
+        self.tool_requires("meson/[>=1.2.3 <2]")
         # There used to be an issue with glib being shared by default but its dependencies being static
         # No longer the case, but see: https://github.com/conan-io/conan-center-index/pull/13400#issuecomment-1551565573 for context
         if not self._is_legacy_one_profile:
             self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
         if self._settings_build.os == 'Windows':
@@ -151,7 +152,7 @@ class GStreamerConan(ConanFile):
         self.cpp_info.components["gstreamer-1.0"].libs = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
         if self.settings.os == "Linux":
-            self.cpp_info.components["gstreamer-1.0"].system_libs = ["m"]
+            self.cpp_info.components["gstreamer-1.0"].system_libs = ["m", "dl", "nsl"]
         self.cpp_info.components["gstreamer-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
         self.cpp_info.components["gstreamer-base-1.0"].set_property("pkg_config_name", "gstreamer-base-1.0")
@@ -173,6 +174,8 @@ class GStreamerConan(ConanFile):
         self.cpp_info.components["gstreamer-net-1.0"].set_property("pkg_config_name", "gstreamer-net-1.0")
         self.cpp_info.components["gstreamer-net-1.0"].names["pkg_config"] = "gstreamer-net-1.0"
         self.cpp_info.components["gstreamer-net-1.0"].requires = ["gstreamer-1.0", "glib::gio-2.0"]
+        if Version(self.version) >= "1.21.1" and self.settings.os != "Windows":
+            self.cpp_info.components["gstreamer-net-1.0"].requires.append("glib::gio-unix-2.0")
         self.cpp_info.components["gstreamer-net-1.0"].libs = ["gstnet-1.0"]
         self.cpp_info.components["gstreamer-net-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
         self.cpp_info.components["gstreamer-net-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
@@ -186,7 +189,7 @@ class GStreamerConan(ConanFile):
             self.cpp_info.components["gstreamer-check-1.0"].system_libs = ["rt", "m"]
         self.cpp_info.components["gstreamer-check-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
-        # gstcoreelements and gstcoretracers are plugins which should be loaded dynamicaly, and not linked to directly
+        # gstcoreelements and gstcoretracers are plugins which should be loaded dynamically, and not linked to directly
         if not self.options.shared:
             self.cpp_info.components["gstcoreelements"].set_property("pkg_config_name", "gstcoreelements")
             self.cpp_info.components["gstcoreelements"].names["pkg_config"] = "gstcoreelements"
