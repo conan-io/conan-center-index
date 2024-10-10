@@ -22,6 +22,7 @@ class OpenGrmConan(ConanFile):
     homepage = "https://www.opengrm.org/twiki/bin/view/GRM/Thrax"
     license = "Apache-2.0"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -54,7 +55,8 @@ class OpenGrmConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openfst/1.8.2")
+        # Used in thrax/grm-manager.h public header
+        self.requires("openfst/1.8.2", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.os != "Linux":
@@ -88,8 +90,8 @@ class OpenGrmConan(ConanFile):
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
             f"--enable-bin={yes_no(self.options.enable_bin)}",
-            "LIBS=-lpthread",
         ])
+        tc.ldflags.append("-lpthread")
         tc.make_args.append("-j1")
         tc.generate()
 
