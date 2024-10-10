@@ -1,0 +1,4 @@
+sources:
+  "1.1.4":
+    url: "https://sourceforge.net/projects/log4cpp/files/log4cpp-1.1.x%20%28new%29/log4cpp-1.1/log4cpp-1.1.4.tar.gz"
+    sha256: "696113659e426540625274a8b251052cc04306d8ee5c42a0c7639f39ca90c9d6"
