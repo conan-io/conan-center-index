@@ -1,0 +1,128 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3aa3bb2..90d71e3 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,8 +1,7 @@
+-cmake_minimum_required(VERSION 2.8)
++cmake_minimum_required(VERSION 3.15)
+ project(gici)
+ 
+-# Set build flags. 
+-set(CMAKE_CXX_FLAGS "-std=c++11" )
++# Set build flags.
+ set(CMAKE_CXX_FLAGS "-fpermissive")
+ if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+   if (IS_ARM)
+@@ -56,12 +55,12 @@
+                     ${DIR_fusion})
+ 
+ # library
+-add_library(${PROJECT_NAME} SHARED ${DIR_ALL})
++add_library(${PROJECT_NAME} ${DIR_ALL})
+ target_link_libraries(${PROJECT_NAME} 
+                       rtklib
+                       vikit_common
+                       svo
+-                      glog
++                      glog::glog
+                       ${OpenCV_LIBS})
+ target_include_directories(${PROJECT_NAME}
+     PUBLIC ${PROJECT_SOURCE_DIR}/include
+
+diff --git a/ros_wrapper/src/gici/CMakeLists.txt b/ros_wrapper/src/gici/CMakeLists.txt
+index 2dd2200..7ea3481 100755
+--- a/ros_wrapper/src/gici/CMakeLists.txt
++++ b/ros_wrapper/src/gici/CMakeLists.txt
+@@ -1,7 +1,6 @@
+-cmake_minimum_required(VERSION 2.8)
++cmake_minimum_required(VERSION 3.15)
+ project(gici_ros)
+ 
+-set(CMAKE_CXX_FLAGS "-std=c++11" )
+ set(CMAKE_CXX_FLAGS "-fpermissive")
+ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall -O3 -ansi -pedantic")
+ set(CMAKE_C_FLAGS "-Wno-unused-but-set-variable")
+diff --git a/third_party/fast/CMakeLists.txt b/third_party/fast/CMakeLists.txt
+index 7caa58d..7c3579a 100755
+--- a/third_party/fast/CMakeLists.txt
++++ b/third_party/fast/CMakeLists.txt
+@@ -15,7 +15,7 @@ SET(BUILD_TEST TRUE)
+ #######################################
+ SET(PROJECT_NAME fast)
+ PROJECT(${PROJECT_NAME})
+-CMAKE_MINIMUM_REQUIRED (VERSION 2.8.3)
++CMAKE_MINIMUM_REQUIRED (VERSION 3.15)
+ SET(CMAKE_VERBOSE_MAKEFILE ON)
+ 
+ # Build type and flags
+@@ -44,7 +44,7 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+ 
+ # Add library
+ INCLUDE_DIRECTORIES(include src)
+-ADD_LIBRARY(${PROJECT_NAME} SHARED ${SOURCES})
++ADD_LIBRARY(${PROJECT_NAME} ${SOURCES})
+ # Link include directory
+ target_include_directories(${PROJECT_NAME}
+     PUBLIC ${PROJECT_SOURCE_DIR}/include
+diff --git a/third_party/rpg_svo/CMakeLists.txt b/third_party/rpg_svo/CMakeLists.txt
+index d9ab61c..066d722 100755
+--- a/third_party/rpg_svo/CMakeLists.txt
++++ b/third_party/rpg_svo/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ SET(PROJECT_NAME svo)
+ PROJECT(${PROJECT_NAME})
+-CMAKE_MINIMUM_REQUIRED (VERSION 2.8.3)
++CMAKE_MINIMUM_REQUIRED (VERSION 3.15)
+ # SET(CMAKE_BUILD_TYPE Release) # Release, RelWithDebInfo
+ 
+ # Add plain cmake packages 
+@@ -36,7 +36,7 @@ set(SOURCEFILES ${COMMON_DIR} ${DIRECT_DIR} ${SVO_DIR}
+   ${VIO_COMMON})
+ 
+ # Create vikit library
+-ADD_LIBRARY(${PROJECT_NAME} SHARED ${SOURCEFILES})
++ADD_LIBRARY(${PROJECT_NAME} ${SOURCEFILES})
+ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
+                       vikit_common
+-                      glog
++                      glog::glog
+diff --git a/third_party/rpg_vikit/vikit_common/CMakeLists.txt b/third_party/rpg_vikit/vikit_common/CMakeLists.txt
+index 3401ab4..889d80a 100755
+--- a/third_party/rpg_vikit/vikit_common/CMakeLists.txt
++++ b/third_party/rpg_vikit/vikit_common/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ SET(PROJECT_NAME vikit_common)
+ PROJECT(${PROJECT_NAME})
+-CMAKE_MINIMUM_REQUIRED (VERSION 2.8.3)
++CMAKE_MINIMUM_REQUIRED (VERSION 3.15)
+ # SET(CMAKE_BUILD_TYPE Release) # Release, RelWithDebInfo
+ SET(CMAKE_VERBOSE_MAKEFILE OFF)
+ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/CMakeModules/")
+@@ -40,7 +40,7 @@ aux_source_directory(src/vikit_solver SOLVER_DIR)
+ set(SOURCEFILES ${CAMERAS_DIR} ${COMMON_DIR} ${SOLVER_DIR})
+ 
+ # Create vikit library
+-ADD_LIBRARY(${PROJECT_NAME} SHARED ${SOURCEFILES})
++ADD_LIBRARY(${PROJECT_NAME} ${SOURCEFILES})
+ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
+   ${OpenCV_LIBS}
+   yaml-cpp
+diff --git a/third_party/rtklib/CMakeLists.txt b/third_party/rtklib/CMakeLists.txt
+index 5d7dee0..2c6bcda 100755
+--- a/third_party/rtklib/CMakeLists.txt
++++ b/third_party/rtklib/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.8)
++cmake_minimum_required(VERSION 3.15)
+ project(rtklib)
+ 
+ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -Wall -O3 -ansi -pedantic")
+@@ -15,7 +15,7 @@ aux_source_directory(src DIR_SRCS_RTKLIB)
+ aux_source_directory(src/rcv DIR_SRCS_RTKLIB_RCV)
+ list(APPEND DIR_SRCS ${DIR_SRCS_RTKLIB} ${DIR_SRCS_RTKLIB_RCV})
+ 
+-add_library(${PROJECT_NAME} SHARED ${DIR_SRCS})
++add_library(${PROJECT_NAME} ${DIR_SRCS})
+ target_link_libraries(${PROJECT_NAME} pthread)
+ target_include_directories(${PROJECT_NAME}
+     PUBLIC ${PROJECT_SOURCE_DIR}/include
