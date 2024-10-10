@@ -113,7 +113,6 @@ class OnnxConan(ConanFile):
         # https://cmake.org/cmake/help/v3.28/module/FindPythonInterp.html
         # https://github.com/onnx/onnx/blob/1014f41f17ecc778d63e760a994579d96ba471ff/CMakeLists.txt#L119C1-L119C50
         tc.variables["PYTHON_EXECUTABLE"] = sys.executable.replace("\\", "/")
-        tc.variables["ONNX_BUILD_BENCHMARKS"] = False
         tc.variables["ONNX_USE_PROTOBUF_SHARED_LIBS"] = self.dependencies.host["protobuf"].options.shared
         tc.variables["BUILD_ONNX_PYTHON"] = False
         tc.variables["ONNX_GEN_PB_TYPE_STUBS"] = False
