@@ -111,6 +111,10 @@ class GlogConan(ConanFile):
             tc.variables["WITH_UNWIND"] = self.options.get_safe("with_unwind", default=False)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["WITH_GTEST"] = False
+        # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
+        # Needed for https://github.com/google/glog/blob/v0.7.1/CMakeLists.txt#L81
+        # and https://github.com/google/glog/blob/v0.7.1/CMakeLists.txt#L90
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
 
         tc = CMakeDeps(self)
@@ -123,10 +127,6 @@ class GlogConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                                   "set_target_properties (glog PROPERTIES POSITION_INDEPENDENT_CODE ON)",
                                   "")
-        # INFO: avoid "CONAN_LIB::gflags_gflags_nothreads_RELEASE" but the target was not found.
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-        "determine_gflags_namespace",
-        "# determine_gflags_namespace")
 
     def build(self):
         self._patch_sources()
