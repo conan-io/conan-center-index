@@ -324,6 +324,12 @@ class GtsamConan(ConanFile):
         # Unvendor Spectra
         rmdir(self, os.path.join(self.source_folder, "gtsam", "3rdparty", "Spectra"))
 
+        # Remove an unused header from the list of precompiled headers,
+        # which fails with a compilation error for C++20 on MSVC.
+        # https://github.com/borglab/gtsam/pull/1870
+        replace_in_file(self, os.path.join(self.source_folder, "gtsam", "precompiled_header.h"),
+                        "#include <gtsam/base/chartTesting.h>", "")
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
