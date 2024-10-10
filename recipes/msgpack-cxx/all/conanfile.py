@@ -87,8 +87,7 @@ class MsgpackCXXConan(ConanFile):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
-        # https://github.com/msgpack/msgpack-c/tree/cpp_master#usage
-        self.cpp_info.set_property("cmake_file_name", "msgpack")
+        self.cpp_info.set_property("cmake_file_name", "msgpack-cxx")
 
         if Version(self.version) >= "6.0.0":
             self.cpp_info.set_property("cmake_target_name", "msgpack-cxx")
@@ -108,7 +107,7 @@ class MsgpackCXXConan(ConanFile):
             self.cpp_info.requires.append("boost::headers")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "msgpack"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "msgpack"
+        self.cpp_info.filenames["cmake_find_package"] = "msgpack-cxx"
+        self.cpp_info.filenames["cmake_find_package_multi"] = "msgpack-cxx"
         self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
