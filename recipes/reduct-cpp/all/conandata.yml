@@ -1,0 +1,18 @@
+sources:
+  "1.12.0":
+    url: "https://github.com/reductstore/reduct-cpp/archive/refs/tags/v1.12.0.tar.gz"
+    sha256: "8d1a4f56931413b4cd3c226bbd6310f5a21207a1311b494810d2747b771ac893"
+patches:
+  "1.12.0":
+    - patch_file: "patches/1.12.0-0001-use-cci.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"
+    - patch_file: "patches/1.12.0-0002-disable-fpic.patch"
+      patch_description: "disable hardcoded fPIC"
+      patch_type: "conan"
+    - patch_file: "patches/1.12.0-0003-remove-fmt-headeronly.patch"
+      patch_description: "remove FMT_HEADER_ONLY definition"
+      patch_type: "conan"
+    - patch_file: "patches/1.12.0-0004-include-compare.patch"
+      patch_description: "include compare header for spaceship operator"
+      patch_type: "portability"

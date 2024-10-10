@@ -1,0 +1,60 @@
+diff --git a/src/reduct/bucket.h b/src/reduct/bucket.h
+index af312b7..9060e48 100644
+--- a/src/reduct/bucket.h
++++ b/src/reduct/bucket.h
+@@ -10,6 +10,7 @@
+ #include <string>
+ #include <utility>
+ #include <vector>
++#include <compare>
+ 
+ #include "reduct/error.h"
+ #include "reduct/http_options.h"
+diff --git a/src/reduct/client.h b/src/reduct/client.h
+index fa59965..62a57d8 100644
+--- a/src/reduct/client.h
++++ b/src/reduct/client.h
+@@ -9,6 +9,7 @@
+ #include <ostream>
+ #include <string>
+ #include <vector>
++#include <compare>
+ 
+ #include "diagnostics.h"
+ #include "reduct/bucket.h"
+diff --git a/src/reduct/diagnostics.h b/src/reduct/diagnostics.h
+index 315f9b4..9adec24 100644
+--- a/src/reduct/diagnostics.h
++++ b/src/reduct/diagnostics.h
+@@ -5,6 +5,7 @@
+ 
+ #include <map>
+ #include <string>
++#include <compare>
+ 
+ namespace reduct {
+ 
+diff --git a/src/reduct/error.h b/src/reduct/error.h
+index 7c21b16..d8e2383 100644
+--- a/src/reduct/error.h
++++ b/src/reduct/error.h
+@@ -6,6 +6,7 @@
+ #include <ostream>
+ #include <string>
+ #include <variant>
++#include <compare>
+ 
+ namespace reduct {
+ 
+diff --git a/src/reduct/http_options.h b/src/reduct/http_options.h
+index a44fc06..b31eaaa 100644
+--- a/src/reduct/http_options.h
++++ b/src/reduct/http_options.h
+@@ -4,6 +4,7 @@
+ #define REDUCTCPP_HTTP_OPTIONS_H
+ 
+ #include <string>
++#include <compare>
+ 
+ namespace reduct {
+ /**
