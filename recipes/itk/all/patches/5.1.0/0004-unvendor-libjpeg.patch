@@ -1,0 +1,19 @@
+--- a/Modules/IO/JPEG/src/CMakeLists.txt
++++ b/Modules/IO/JPEG/src/CMakeLists.txt
+@@ -4,3 +4,4 @@
+   )
+ 
+ itk_module_add_library(ITKIOJPEG ${ITKIOJPEG_SRCS})
++target_link_libraries(ITKIOJPEG PRIVATE JPEG::JPEG)
+
+--- a/Modules/IO/JPEG/src/itkJPEGImageIO.cxx
++++ b/Modules/IO/JPEG/src/itkJPEGImageIO.cxx
+@@ -19,7 +19,7 @@
+ #include "itkJPEGImageIO.h"
+ #include "itksys/SystemTools.hxx"
+ 
+-#include "itk_jpeg.h"
++#include "jpeglib.h"
+ #include <csetjmp>
+ 
+ // create an error handler for jpeg that
