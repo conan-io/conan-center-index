@@ -112,6 +112,7 @@ class GtsamConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -136,6 +137,8 @@ class GtsamConan(ConanFile):
     def requirements(self):
         self.requires("boost/1.84.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
+        if Version(self.version) >= "4.1":
+            self.requires("spectra/1.0.1")
         if self.options.with_TBB:
             if Version(self.version) >= "4.1":
                 self.requires("onetbb/2021.10.0", transitive_headers=True, transitive_libs=True)
@@ -201,6 +204,8 @@ class GtsamConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) >= "4.1":
+            tc.variables["CMAKE_PROJECT_GTSAM_INCLUDE"] = "conan_deps.cmake"
         # https://github.com/borglab/gtsam/blob/4.2.0/cmake/HandleGeneralOptions.cmake
         tc.variables["GTSAM_BUILD_UNSTABLE"] = self.options.build_unstable
         tc.variables["GTSAM_UNSTABLE_BUILD_PYTHON"] = False
@@ -316,6 +321,8 @@ class GtsamConan(ConanFile):
                             "list(APPEND GTSAM_ADDITIONAL_LIBRARIES tbb tbbmalloc)",
                             "list(APPEND GTSAM_ADDITIONAL_LIBRARIES TBB::tbb TBB::tbbmalloc)")
 
+        # Unvendor Spectra
+        rmdir(self, os.path.join(self.source_folder, "gtsam", "3rdparty", "Spectra"))
 
     def build(self):
         self._patch_sources()
@@ -367,6 +374,8 @@ class GtsamConan(ConanFile):
         gtsam.libs = ["gtsam"]
         gtsam.requires = [f"boost::{component}" for component in self._required_boost_components]
         gtsam.requires.append("eigen::eigen")
+        if Version(self.version) >= "4.1":
+            gtsam.requires.append("spectra::spectra")
         if self.options.with_TBB:
             gtsam.requires.append("onetbb::onetbb")
         if self.options.default_allocator == "tcmalloc":

@@ -19,6 +19,10 @@ patches:
     - patch_file: "patches/4.2.0-0002-eigen3-version.patch"
       patch_description: "Get Eigen3 version info from Conan"
       patch_type: "conan"
+    - patch_file: "patches/4.2.0-0003-update-spectra.patch"
+      patch_description: "Update Spectra to v1.0 for C++20 support"
+      patch_type: "portability"
+      patch_source: "https://github.com/borglab/gtsam/pull/1871"
   "4.1.1":
     - patch_file: "patches/4.1.1-0001-cmake-boost.patch"
       patch_description: "Use boost targets"
@@ -35,6 +39,10 @@ patches:
     - patch_file: "patches/4.1.1-0005-eigen3-version.patch"
       patch_description: "Get Eigen3 version info from Conan"
       patch_type: "conan"
+    - patch_file: "patches/4.1.1-0006-update-spectra.patch"
+      patch_description: "Update Spectra to v1.0 for C++20 support"
+      patch_type: "portability"
+      patch_source: "https://github.com/borglab/gtsam/pull/1871"
   "4.0.3":
     - patch_file: "patches/4.0.3-0001-cmake-boost.patch"
       patch_description: "Use boost targets"
