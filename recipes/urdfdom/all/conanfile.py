@@ -46,28 +46,23 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("urdfdom_headers/1.1.1", transitive_headers=True)
+        self.requires("console_bridge/1.0.2")
         if Version(self.version) >= "4.0":
-            self.requires("tinyxml2/10.0.0", transitive_headers=True, transitive_libs=True)
+            self.requires("tinyxml2/10.0.0")
         else:
             self.requires("tinyxml/2.6.2", transitive_headers=True, transitive_libs=True)
-        self.requires("console_bridge/1.0.2")
 
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
 
     def source(self):
-        # urdfdom packages its headers separately as urdfdom_headers.
-        # There is no obvious benefit of doing the same for the Conan package,
-        # so we simply merge the headers into the main source tree.
-        sources = self.conan_data["sources"][self.version]
-        get(self, **sources["urdfdom_headers"], strip_root=True,
-            destination=os.path.join(self.source_folder, "urdf_parser"))
-        get(self, **sources["urdfdom"], strip_root=True, destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["APPEND_PROJECT_NAME_TO_INCLUDEDIR"] = False
+        tc.variables["APPEND_PROJECT_NAME_TO_INCLUDEDIR"] = True
         tc.variables["BUILD_TESTING"] = False
         tc.variables["BUILD_APPS"] = False
         if not self.options.shared:
@@ -93,10 +88,6 @@ class PackageConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        # Copy urdfdom_headers
-        copy(self, "*",
-             src=os.path.join(self.source_folder, "urdf_parser", "include"),
-             dst=os.path.join(self.package_folder, "include"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "urdfdom"))
         rmdir(self, os.path.join(self.package_folder, "CMake"))
@@ -104,12 +95,32 @@ class PackageConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.libs = [
-            "urdfdom_model",
-            "urdfdom_model_state",
-            "urdfdom_sensor",
-            "urdfdom_world",
-        ]
+        self.cpp_info.set_property("cmake_file_name", "urdfdom")
+        self.cpp_info.set_property("cmake_target_name", "urdfdom::urdf_parser")
+        self.cpp_info.set_property("pkg_config_name", "urdfdom")
+        # For backwards compatibility with the previously incorrectly exported target name
+        self.cpp_info.set_property("cmake_target_aliases", ["urdfdom::urdfdom"])
+
+        def _add_component(lib, requires=None):
+            component = self.cpp_info.components[lib]
+            component.set_property("cmake_target_name", f"urdfdom::{lib}")
+            component.includedirs.append(os.path.join("include", "urdfdom"))
+            component.libs.append(lib)
+            component.requires += [
+                "urdfdom_headers::urdfdom_headers",
+                "console_bridge::console_bridge",
+            ]
+            if Version(self.version) >= "4.0":
+                component.requires.append("tinyxml2::tinyxml2")
+            else:
+                component.requires.append("tinyxml::tinyxml")
+            if requires:
+                component.requires.extend(requires)
+
+        _add_component("urdfdom_model")
+        _add_component("urdfdom_model_state")
+        _add_component("urdfdom_sensor", requires=["urdfdom_model"])
+        _add_component("urdfdom_world")
 
         if not self.options.shared:
             self.cpp_info.defines.append("URDFDOM_STATIC=1")
