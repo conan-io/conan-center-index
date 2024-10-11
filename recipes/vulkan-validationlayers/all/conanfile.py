@@ -232,3 +232,16 @@ class VulkanValidationLayersConan(ConanFile):
 
         if self.settings.os == "Android":
             self.cpp_info.system_libs.extend(["android", "log"])
+
+        self.cpp_info.requires.append("spirv-headers::spirv-headers")
+        self.cpp_info.requires.append("spirv-tools::spirv-tools")
+        self.cpp_info.requires.append("vulkan-headers::vulkan-headers")
+        if Version(self.version) >= "1.3.268.0":
+            self.cpp_info.requires.append("vulkan-utility-libraries::vulkan-utility-libraries")
+        self.cpp_info.requires.append("robin-hood-hashing::robin-hood-hashing")
+        if self.options.get_safe("with_wsi_xlib"):
+            self.cpp_info.requires.append("xorg::x11")
+        if self.options.get_safe("with_wsi_xcb"):
+            self.cpp_info.requires.append("xoeg::xcb")
+        if self.options.get_safe("with_wsi_wayland"):
+            self.cpp_info.requires.append("wayland::wayland-client")
