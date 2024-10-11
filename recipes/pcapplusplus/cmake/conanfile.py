@@ -50,6 +50,9 @@ class PcapplusplusConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def validate(self):
+        if Version(self.version) == "24.09" and self.options.shared and self.settings.os == "Windows":
+            # https://github.com/seladb/PcapPlusPlus/issues/1396
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Windows shared builds for now")
         if self.settings.compiler.cppstd:
             # popen()/pclose() usage
             check_min_cppstd(self, self._min_cppstd, gnu_extensions=not is_msvc(self))
