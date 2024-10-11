@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
-from conan.tools.scm import Version
 
 import os
 
@@ -44,9 +43,9 @@ class HazelcastCppClient(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.79.0", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/1.83.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1t")
+            self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -58,8 +57,6 @@ class HazelcastCppClient(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["WITH_OPENSSL"] = self.options.with_openssl
-        if Version(self.version) <= "4.0.0":
-            tc.variables["BUILD_STATIC_LIB"] = not self.options.shared
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -84,6 +81,6 @@ class HazelcastCppClient(ConanFile):
         self.cpp_info.libs = ["hazelcast-cpp-client"]
         self.cpp_info.defines = ["BOOST_THREAD_VERSION=5"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["pthread", "m"])
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")

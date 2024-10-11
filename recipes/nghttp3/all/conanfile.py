@@ -1,11 +1,9 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, rmdir, copy
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 import os
 
 
@@ -14,11 +12,11 @@ required_conan_version = ">=1.53.0"
 
 class Nghttp3Conan(ConanFile):
     name = "nghttp3"
-    description = "HTTP/2 C Library and tools"
-    topics = ("http", "http3")
+    description = "HTTP/3 library written in C"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://nghttp2.org/nghttp3/"
-    license = "MIT"
+    topics = ("http", "http3", "quic", "qpack")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -30,8 +28,8 @@ class Nghttp3Conan(ConanFile):
         "fPIC": True,
     }
 
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.20 <4]")
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -44,6 +42,9 @@ class Nghttp3Conan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.20 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -55,11 +56,13 @@ class Nghttp3Conan(ConanFile):
         if is_apple_os(self):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
             tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
+        tc.variables["BUILD_TESTING"] = False
         tc.generate()
         tc = VirtualBuildEnv(self)
         tc.generate(scope="build")
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -70,6 +73,7 @@ class Nghttp3Conan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["nghttp3"]

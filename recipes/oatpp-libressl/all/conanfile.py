@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=1.54"
 
 
 class OatppLibresslConan(ConanFile):
@@ -18,6 +18,7 @@ class OatppLibresslConan(ConanFile):
     description = "oat++ libressl library"
     topics = ("oat++", "oatpp", "libressl")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -34,21 +35,24 @@ class OatppLibresslConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"oatpp/{self.version}")
-        self.requires("libressl/3.5.3")
+        # There's a 1 to 1 match between versions of oatpp and oatpp-libressl
+        # oatpp-libressl/oatpp-libressl/Config.hpp:28 and 30 contain includes to these libraries
+        self.requires(f"oatpp/{self.version}", transitive_headers=True)
+        self.requires("libressl/3.5.3", transitive_headers=True)
+
+    @property
+    def _min_cppstd(self):
+        return 11
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
 
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared library with msvc")
@@ -64,8 +68,6 @@ class OatppLibresslConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["OATPP_BUILD_TESTS"] = False
         tc.variables["OATPP_MODULES_LOCATION"] = "INSTALLED"
-        # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -84,6 +86,10 @@ class OatppLibresslConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "oatpp-libressl")
         self.cpp_info.set_property("cmake_target_name", "oatpp::oatpp-libressl")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")
+
         # TODO: back to global scope in conan v2 once legacy generators removed
         self.cpp_info.components["_oatpp-libressl"].includedirs = [
             os.path.join("include", f"oatpp-{self.version}", "oatpp-libressl")

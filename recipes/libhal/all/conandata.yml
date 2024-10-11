@@ -1,4 +1,10 @@
 sources:
-  "0.0.0":
-    url: "https://github.com/libhal/libhal/archive/refs/tags/0.0.0.tar.gz"
-    sha256: "f49d6cee9adfe9d98212ba77aa955c88994693185d4870b86a6e12bad4eb9915"
+  "2.2.0":
+    url: "https://github.com/libhal/libhal/archive/refs/tags/2.2.0.tar.gz"
+    sha256: "4a005cb45bd75662ca7d966a1a55f3570d2a0db01432e17eb1e9889ae7c90ee4"
+  "2.0.2":
+    url: "https://github.com/libhal/libhal/archive/refs/tags/2.0.2.tar.gz"
+    sha256: "bb69fffbff58ac9a91f71636422d81a4426fe70c3b47ca9b07c87fb074c989dc"
+  "2.0.1":
+    url: "https://github.com/libhal/libhal/archive/refs/tags/2.0.1.tar.gz"
+    sha256: "ba05f9d2172f7afbf816ab18f2dcd7c8cc4452df2b268a832e995a0321c1d2f9"

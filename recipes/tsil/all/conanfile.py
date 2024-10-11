@@ -5,7 +5,7 @@ from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=1.53.0"
 
 
 class TsilConan(ConanFile):
@@ -16,6 +16,7 @@ class TsilConan(ConanFile):
     description = "Two-loop Self-energy Integral Library"
     topics = ("high-energy", "physics", "hep", "two-loop", "integrals")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -40,18 +41,9 @@ class TsilConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
-        try:
-            del self.settings.compiler.libcxx
-        except Exception:
-            pass
-        try:
-            del self.settings.compiler.cppstd
-        except Exception:
-            pass
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -88,5 +80,4 @@ class TsilConan(ConanFile):
 
         # TODO: to remove in conan v2
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment variable: {bin_path}")
         self.env_info.PATH.append(bin_path)

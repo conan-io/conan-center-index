@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
 
@@ -20,12 +21,14 @@ class BackwardCppConan(ConanFile):
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "header_only": [True, False],
         "shared": [True, False],
         "fPIC": [True, False],
         "stack_walking": ["unwind", "libunwind", "backtrace"],
         "stack_details": ["dw", "bfd", "dwarf", "backtrace_symbol"],
     }
     default_options = {
+        "header_only": False,
         "shared": False,
         "fPIC": True,
         "stack_walking": "unwind",
@@ -34,7 +37,7 @@ class BackwardCppConan(ConanFile):
 
     @property
     def _supported_os(self):
-        supported_os = ["Linux", "Macos", "Android"]
+        supported_os = ["Linux", "FreeBSD", "Android", "Macos"]
         if Version(self.version) >= "1.5":
             supported_os.append("Windows")
         return supported_os
@@ -57,23 +60,33 @@ class BackwardCppConan(ConanFile):
             self.options.stack_details = "backtrace_symbol"
 
     def configure(self):
-        if self.options.shared:
+        if self.options.header_only:
+            self.options.rm_safe("fPIC")
+            self.options.rm_safe("shared")
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self, src_folder="src")
+        if self.options.header_only:
+            basic_layout(self, src_folder="src")
+        else:
+            cmake_layout(self, src_folder="src")
+
+    def package_id(self):
+        if self.info.options.header_only:
+            self.info.clear()
 
     def requirements(self):
-        if self.settings.os in ["Linux", "Android"]:
+        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             if self._has_stack_walking("libunwind"):
-                self.requires("libunwind/1.6.2", transitive_headers=True)
+                self.requires("libunwind/1.7.2", transitive_headers=True)
             if self._has_stack_details("dwarf"):
                 self.requires("libdwarf/20191104", transitive_headers=True, transitive_libs=True)
                 self.requires("libelf/0.8.13")
             if self._has_stack_details("dw"):
-                self.requires("elfutils/0.186", transitive_headers=True, transitive_libs=True)
+                self.requires("elfutils/0.190", transitive_headers=True)
             if self._has_stack_details("bfd"):
-                self.requires("binutils/2.38", transitive_headers=True, transitive_libs=True)
+                self.requires("binutils/2.41", transitive_headers=True)
 
     def validate(self):
         if self.settings.os not in self._supported_os:
@@ -95,6 +108,8 @@ class BackwardCppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        if self.options.header_only:
+            return
         tc = CMakeToolchain(self)
         tc.variables["STACK_WALKING_UNWIND"] = self._has_stack_walking("unwind")
         tc.variables["STACK_WALKING_LIBUNWIND"] = self._has_stack_walking("libunwind")
@@ -113,15 +128,22 @@ class BackwardCppConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
+        if self.options.header_only:
+            return
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
         copy(self, "LICENSE*", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        cmake = CMake(self)
-        cmake.install()
-        rmdir(self, os.path.join(self.package_folder, "lib", "backward"))
+        if self.options.header_only:
+            copy(self, pattern="*.hpp",
+                 src=self.source_folder,
+                 dst=os.path.join(self.package_folder, "include"))
+        else:
+            cmake = CMake(self)
+            cmake.install()
+            rmdir(self, os.path.join(self.package_folder, "lib", "backward"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Backward")
@@ -137,8 +159,12 @@ class BackwardCppConan(ConanFile):
         self.cpp_info.defines.append(f"BACKWARD_HAS_DWARF={int(self._has_stack_details('dwarf'))}")
         self.cpp_info.defines.append(f"BACKWARD_HAS_PDB_SYMBOL={int(self.settings.os == 'Windows')}")
 
-        self.cpp_info.libs = ["backward"]
-        if self.settings.os == "Linux":
+        if self.options.header_only:
+            self.cpp_info.libdirs = []
+            self.cpp_info.bindirs = []
+        else:
+            self.cpp_info.libs = ["backward"]
+        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             self.cpp_info.system_libs.extend(["dl", "m"])
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["psapi", "dbghelp"])

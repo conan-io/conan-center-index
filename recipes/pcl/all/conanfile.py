@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm
@@ -90,6 +91,7 @@ class PclConan(ConanFile):
         "precompile_only_core_point_types": [True, False],
         # Whether to append a ''/d/rd/s postfix to executables on Windows depending on the build type
         "add_build_type_postfix": [True, False],
+        "use_sse": [True, False],
     }
     default_options = {
         "shared": False,
@@ -150,6 +152,7 @@ class PclConan(ConanFile):
         # Enabled to avoid excessive memory usage during compilation in CCI
         "precompile_only_core_point_types": True,
         "add_build_type_postfix": False,
+        "use_sse": True,
     }
 
     short_paths = True
@@ -212,7 +215,7 @@ class PclConan(ConanFile):
             "libusb": ["libusb::libusb"],
             "metslib": [],
             "opencv": ["opencv::opencv"],
-            "opengl": ["opengl::opengl", "freeglut::freeglut", "glew::glew", "glu::glu"],
+            "opengl": ["opengl::opengl", "freeglut::freeglut", "glew::glew", "glu::glu" if is_apple_os(self) or self.settings.os == "Windows" else "mesa-glu::mesa-glu"],
             "openni": [],
             "openni2": [],
             "pcap": ["libpcap::libpcap"],
@@ -332,6 +335,8 @@ class PclConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.use_sse
 
     def configure(self):
         if self.options.shared:
@@ -361,16 +366,16 @@ class PclConan(ConanFile):
         return is_available and is_used
 
     def requirements(self):
-        self.requires("boost/1.82.0", transitive_headers=True)
+        self.requires("boost/1.83.0", transitive_headers=True)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self._is_enabled("flann"):
             self.requires("flann/1.9.2", transitive_headers=True)
         if self._is_enabled("png"):
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self._is_enabled("qhull"):
             self.requires("qhull/8.0.1", transitive_headers=True)
         if self._is_enabled("qt"):
-            self.requires("qt/6.5.1")
+            self.requires("qt/6.6.1")
         if self._is_enabled("libusb"):
             self.requires("libusb/1.0.26", transitive_headers=True)
         if self._is_enabled("pcap"):
@@ -380,9 +385,12 @@ class PclConan(ConanFile):
             self.requires("opengl/system", transitive_headers=True)
             self.requires("freeglut/3.4.0", transitive_headers=True)
             self.requires("glew/2.2.0", transitive_headers=True)
-            self.requires("glu/system", transitive_headers=True)
+            if is_apple_os(self) or self.settings.os == "Windows":
+                self.requires("glu/system", transitive_headers=True)
+            else:
+                self.requires("mesa-glu/9.0.3", transitive_headers=True)
         if self._is_enabled("opencv"):
-            self.requires("opencv/4.5.5", transitive_headers=True)
+            self.requires("opencv/4.8.1", transitive_headers=True)
         if self._is_enabled("zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
         # TODO:
@@ -440,6 +448,10 @@ class PclConan(ConanFile):
         tc.cache_variables["WITH_PCAP"] = self._is_enabled("pcap")
         tc.cache_variables["WITH_PNG"] = self._is_enabled("png")
         tc.cache_variables["WITH_QHULL"] = self._is_enabled("qhull")
+        if self._is_enabled("qhull"):
+            # Upstream FindQhull.cmake defines HAVE_QHULL which changes content of pcl_config.h
+            # Since we use CMakeDeps instead of this file, we have to manually inject HAVE_QHULL
+            tc.cache_variables["HAVE_QHULL"] = True
         tc.cache_variables["WITH_QT"] = self._is_enabled("qt")
         tc.cache_variables["WITH_VTK"] = self._is_enabled("vtk")
         tc.cache_variables["WITH_CUDA"] = self._is_enabled("cuda")
@@ -468,6 +480,8 @@ class PclConan(ConanFile):
             tc.cache_variables[f"BUILD_{comp}"] = True
         for comp in disabled:
             tc.cache_variables[f"BUILD_{comp}"] = False
+
+        tc.cache_variables["PCL_ENABLE_SSE"] = self.options.get_safe("use_sse", False)
 
         tc.generate()
 
@@ -539,7 +553,6 @@ class PclConan(ConanFile):
                     component.requires.append(opt_dep)
             for dep in self._external_deps.get(name, []) + self._external_optional_deps.get(name, []):
                 component.requires += self._ext_dep_to_conan_target(dep)
-            self.output.info(f"Component {name} requires: {component.requires}")
 
         if self.options.apps:
             component = self.cpp_info.components["apps"]

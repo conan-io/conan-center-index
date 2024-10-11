@@ -9,12 +9,7 @@ sources:
 patches:
   "8.2.0":
     - patch_file: "patches/fix-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/rename-output-library.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/link-to-cryptopp.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/remove-cryptopp-sources-from-cmake.patch"
-      base_path: "source_subfolder"
     - patch_file: "patches/use-cryptopp-include-from-conan.patch"
-      base_path: "source_subfolder"

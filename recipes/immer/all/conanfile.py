@@ -24,7 +24,7 @@ class ImmerConan(ConanFile):
     no_copy_source = True
 
     @property
-    def _minimum_cpp_standard(self):
+    def _min_cppstd(self):
         return 14
 
     @property
@@ -47,14 +47,14 @@ class ImmerConan(ConanFile):
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
+            check_min_cppstd(self, self._min_cppstd)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
             self.output.warning(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
         else:
             if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration(
-                    f"{self.name} requires C++{self._minimum_cpp_standard} support. The current compiler"
+                    f"{self.name} requires C++{self._min_cppstd} support. The current compiler"
                     f" {self.settings.compiler} {self.settings.compiler.version} does not support it."
                 )
 

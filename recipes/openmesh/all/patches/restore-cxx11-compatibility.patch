@@ -1,0 +1,17 @@
+Partial revert of https://gitlab.vci.rwth-aachen.de:9000/OpenMesh/OpenMesh/-/commit/998eec1390dcabbb502dc1ac1bc17cd09a16e343
+for compatibility with C++11.
+
+https://web.archive.org/web/20151001014443/http://en.cppreference.com/w/cpp/container/vector/emplace_back
+"The specialization std::vector<bool> did not have emplace_back() member until C++14."
+
+--- src/OpenMesh/Core/Utils/Property.hh
++++ src/OpenMesh/Core/Utils/Property.hh
+@@ -250,7 +250,7 @@
+   virtual void reserve(size_t _n) override { data_.reserve(_n);    }
+   virtual void resize(size_t _n) override  { data_.resize(_n);     }
+   virtual void clear() override  { data_.clear(); vector_type().swap(data_);    }
+-  virtual void push_back() override        { data_.emplace_back(); }
++  virtual void push_back() override        { data_.push_back(bool()); }
+   virtual void swap(size_t _i0, size_t _i1) override
+   { bool t(data_[_i0]); data_[_i0]=data_[_i1]; data_[_i1]=t; }
+   virtual void copy(size_t _i0, size_t _i1) override

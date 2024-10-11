@@ -34,6 +34,12 @@ class SCIPConan(ConanFile):
         "with_tpi": False,
         "with_sym": "bliss",
     }
+    soplex_version_belonging_to_me = {
+        "9.0.1": "7.0.1",
+        "8.1.0": "6.0.4",
+        "8.0.4": "6.0.4",
+        "8.0.3": "6.0.3"
+    }
 
     @property
     def _min_cppstd(self):
@@ -66,6 +72,9 @@ class SCIPConan(ConanFile):
             raise ConanInvalidConfiguration("Bliss does not support libc++.")
         if self.dependencies["soplex"].options.with_gmp and not self.options.with_gmp:
             raise ConanInvalidConfiguration("The options 'with_gmp' should be aligned with 'soplex:with_gmp' too.")
+        if Version(self.version) >= "9.0.1" and is_msvc(self) and self.settings.build_type == "Debug":
+            # lpi_spx2.cpp : error C1128: number of sections exceeded object file format limit: compile with /bigobj
+            raise ConanInvalidConfiguration(f"{self.ref} can not be build in Debug with MSVC.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -76,11 +85,11 @@ class SCIPConan(ConanFile):
 
     def requirements(self):
         if self.options.with_gmp:
-            self.requires("gmp/6.2.1")
+            self.requires("gmp/6.3.0")
         if self.options.with_sym == "bliss":
             self.requires("bliss/0.77")
-        self.requires("soplex/6.0.3")
-        self.requires("zlib/1.2.13")
+        self.requires(f"soplex/{self.soplex_version_belonging_to_me[self.version]}")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def configure(self):
         self.options["soplex"].with_gmp = self.options.with_gmp
@@ -115,6 +124,7 @@ class SCIPConan(ConanFile):
         tc.variables["PAPILO"] = False  # LGPL
         tc.variables["ZIMPL"] = False  # LPGL
         tc.variables["IPOPT"] = False  # no such coin package on conan center yet
+        tc.variables["BUILD_TESTING"] = False  # do not build documentation and examples
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("sopex", "cmake_file_name", "SOPEX")

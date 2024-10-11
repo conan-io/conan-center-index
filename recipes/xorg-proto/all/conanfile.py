@@ -34,7 +34,7 @@ class XorgProtoConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("automake/1.16.5")
         self.tool_requires("xorg-macros/1.19.3")
-        self.tool_requires("pkgconf/1.9.3")
+        self.tool_requires("pkgconf/2.0.3")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -45,10 +45,7 @@ class XorgProtoConan(ConanFile):
             self.requires("xorg-macros/1.19.3")
 
     def package_id(self):
-        # self.info.clear() would be fine too, but keep the os to add c3i test coverage for Windows.
-        del self.info.settings.arch
-        del self.info.settings.build_type
-        del self.info.settings.compiler
+        self.info.clear()
 
     def export_sources(self):
         export_conandata_patches(self)

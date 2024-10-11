@@ -59,7 +59,7 @@ class NettleConan(ConanFile):
 
     def requirements(self):
         if self.options.public_key:
-            self.requires("gmp/6.2.1")
+            self.requires("gmp/6.3.0")
 
     def validate(self):
         if is_msvc(self):
@@ -113,12 +113,15 @@ class NettleConan(ConanFile):
         self._patch_sources()
         autotools = Autotools(self)
         autotools.autoreconf()
+        autotools.configure()
         # srcdir in unix path causes some troubles in asm files on Windows
         if self._settings_build.os == "Windows":
-            replace_in_file(self, os.path.join(self.build_folder, "config.m4"),
-                                  unix_path(self, os.path.join(self.build_folder, self.source_folder)),
-                                  os.path.join(self.build_folder, self.source_folder).replace("\\", "/"))
-        autotools.configure()
+            replace_in_file(
+                self,
+                os.path.join(self.build_folder, "config.m4"),
+                unix_path(self, self.source_folder),
+                self.source_folder.replace("\\", "/"),
+            )
         autotools.make()
 
     def package(self):

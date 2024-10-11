@@ -3,10 +3,11 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.54.0"
 
@@ -114,10 +115,11 @@ class DCMTKConan(ConanFile):
         del self.info.options.external_dictionary
 
     def validate(self):
-        if hasattr(self, "settings_build") and cross_building(self) and \
-           self.settings.os == "Macos" and self.settings.arch == "armv8":
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, 11)
+        if hasattr(self, "settings_build") and cross_building(self) and self.settings.os == "Macos":
             # FIXME: Probable issue with flags, build includes header 'mmintrin.h'
-            raise ConanInvalidConfiguration("Cross building to Macos M1 is not supported (yet)")
+            raise ConanInvalidConfiguration("Cross building on Macos is not supported (yet)")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -144,7 +146,9 @@ class DCMTKConan(ConanFile):
         tc.variables["DCMTK_WITH_DOXYGEN"] = False
         tc.variables["DCMTK_WIDE_CHAR_FILE_IO_FUNCTIONS"] = self.options.wide_io
         tc.variables["DCMTK_WIDE_CHAR_MAIN_FUNCTION"] = self.options.wide_io
-        tc.variables["DCMTK_ENABLE_STL"] = self.options.enable_stl
+        # Upstream CMakeLists really expects ON value and no other value (like TRUE) in its internal logic
+        # to enable STL features (see DCMTK_TEST_ENABLE_STL_FEATURE() function in CMake/GenerateDCMTKConfigure.cmake)
+        tc.variables["DCMTK_ENABLE_STL"] = "ON" if self.options.enable_stl else "OFF"
         tc.variables["DCMTK_ENABLE_CXX11"] = True
         tc.variables["DCMTK_ENABLE_MANPAGE"] = False
         tc.cache_variables["DCMTK_DEFAULT_DICT"] = self.options.default_dict
@@ -159,32 +163,34 @@ class DCMTKConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _collect_cmake_required(self, dependency):
-        dep = self.dependencies.host[dependency]
+    def _collect_cmake_required(self, host_dependency):
+        """
+        Collect all compile & link flags of a host dependency so that they can be used in:
+          - CMAKE_REQUIRED_FLAGS
+          - CMAKE_REQUIRED_INCLUDES
+          - CMAKE_REQUIRED_DEFINITIONS
+          - CMAKE_REQUIRED_LINK_OPTIONS
+          - CMAKE_REQUIRED_LIBRARIES
+        These variables are listened by CMake functions like check_symbol_exists() etc
+        """
+        # Aggregate cpp_info of dependency and all its depencencies (direct and transitive)
+        dep = self.dependencies.host[host_dependency]
         dep_cpp_info = dep.cpp_info.aggregated_components()
+        for _, trans_dep in dep.dependencies.items():
+            if trans_dep.context == "host":
+                dep_cpp_info.merge(trans_dep.cpp_info.aggregated_components())
+
         dep_includes = [p.replace("\\", "/") for p in dep_cpp_info.includedirs]
-        dep_defs = [d for d in dep_cpp_info.defines]
         libdirs_flag = "/LIBPATH:" if is_msvc(self) else "-L"
         dep_libdirs = ["{}{}".format(libdirs_flag, p.replace("\\", "/")) for p in dep_cpp_info.libdirs]
-        dep_libs = [l for l in dep_cpp_info.libs]
-        dep_system_libs = [s for s in dep_cpp_info.system_libs]
         dep_frameworks = [f"-framework {f}" for f in dep_cpp_info.frameworks]
-        for _, trans_dependency in dep.dependencies.items():
-            if trans_dependency.context != "host":
-                continue
-            trans_dep_cpp_info = trans_dependency.cpp_info.aggregated_components()
-            dep_includes.extend([p.replace("\\", "/") for p in trans_dep_cpp_info.includedirs])
-            dep_defs.extend([d for d in trans_dep_cpp_info.defines])
-            dep_libdirs.extend(["{}{}".format(libdirs_flag, p.replace("\\", "/")) for p in trans_dep_cpp_info.libdirs])
-            dep_libs.extend([l for l in trans_dep_cpp_info.libs])
-            dep_system_libs.extend([s for s in trans_dep_cpp_info.system_libs])
-            dep_frameworks.extend([f"-framework {f}" for f in trans_dep_cpp_info.frameworks])
 
         return {
+            "flags": ";".join(dep_cpp_info.cflags + dep_cpp_info.cxxflags),
             "includes": ";".join(dep_includes),
-            "definitions": ";".join(dep_defs),
-            "link_options": ";".join(dep_libdirs + dep_frameworks),
-            "libraries": ";".join(dep_libs + dep_system_libs),
+            "definitions": ";".join(dep_cpp_info.defines),
+            "link_options": ";".join(dep_libdirs + dep_cpp_info.exelinkflags + dep_frameworks),
+            "libraries": ";".join(dep_cpp_info.libs + dep_cpp_info.system_libs),
         }
 
     def _patch_sources(self):
@@ -199,6 +205,7 @@ class DCMTKConan(ConanFile):
                 os.path.join(self.source_folder, "CMake", "dcmtkPrepare.cmake"),
                 "set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${OPENSSL_LIBS} ${THREAD_LIBS})",
                 textwrap.dedent(f"""\
+                    list(APPEND CMAKE_REQUIRED_FLAGS "{cmake_required['flags']}")
                     list(APPEND CMAKE_REQUIRED_INCLUDES "{cmake_required['includes']}")
                     list(APPEND CMAKE_REQUIRED_DEFINITIONS "{cmake_required['definitions']}")
                     list(APPEND CMAKE_REQUIRED_LINK_OPTIONS "{cmake_required['link_options']}")
@@ -213,6 +220,7 @@ class DCMTKConan(ConanFile):
                 os.path.join(self.source_folder, "CMake", "3rdparty.cmake"),
                 "set(CMAKE_REQUIRED_LIBRARIES ${LIBICONV_LIBS})",
                 textwrap.dedent(f"""\
+                    list(APPEND CMAKE_REQUIRED_FLAGS "{cmake_required['flags']}")
                     list(APPEND CMAKE_REQUIRED_DEFINITIONS "{cmake_required['definitions']}")
                     list(APPEND CMAKE_REQUIRED_LINK_OPTIONS "{cmake_required['link_options']}")
                     list(APPEND CMAKE_REQUIRED_LIBRARIES "{cmake_required['libraries']}")
@@ -281,7 +289,7 @@ class DCMTKConan(ConanFile):
         def xml2():
             return ["libxml2::libxml2"] if self.options.with_libxml2 else []
 
-        return {
+        components = {
             "ofstd"   : charset_conversion(),
             "oflog"   : ["ofstd"],
             "dcmdata" : ["ofstd", "oflog"] + zlib(),
@@ -308,7 +316,15 @@ class DCMTKConan(ConanFile):
             "dcmseg"  : ["dcmfg", "dcmiod", "dcmdata", "ofstd", "oflog"],
             "dcmtract": ["dcmiod", "dcmdata", "ofstd", "oflog"],
             "dcmpmap" : ["dcmfg", "dcmiod", "dcmdata", "ofstd", "oflog"],
+            "dcmect"  : ["dcmfg", "dcmiod", "dcmdata", "ofstd", "oflog"],
         }
+        if Version(self.version) >= "3.6.8":
+            components["dcmxml"] = ["dcmdata", "ofstd", "oflog"] + zlib() + xml2()
+            components["oficonv"] = []
+            components["dcmpstat"] += ["dcmiod"]
+            components["i2d"] += ["dcmxml"]
+            components["ofstd"] += ["oficonv"]
+        return components
 
     @property
     def _dcm_datadictionary_path(self):
@@ -320,7 +336,7 @@ class DCMTKConan(ConanFile):
 
         for target_lib, requires in self._dcmtk_components.items():
             self.cpp_info.components[target_lib].set_property("cmake_target_name", f"DCMTK::{target_lib}")
-            # Before 3.6.7, targets were not namespaced, therefore they are also exposed for conveniency
+            # Before 3.6.7, targets were not namespaced, therefore they are also exposed for convenience
             self.cpp_info.components[target_lib].set_property("cmake_target_aliases", [target_lib])
 
             self.cpp_info.components[target_lib].libs = [target_lib]
@@ -331,14 +347,24 @@ class DCMTKConan(ConanFile):
             self.cpp_info.components[target_lib].build_modules["cmake_find_package"] = [self._module_file_rel_path]
             self.cpp_info.components[target_lib].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
 
+            if is_msvc(self):
+                # Required for the __cplusplus check at
+                # https://github.com/DCMTK/dcmtk/blob/DCMTK-3.6.8/config/include/dcmtk/config/osconfig.h.in#L1489
+                self.cpp_info.components[target_lib].cxxflags.append("/Zc:__cplusplus")
+
+        system_libs = []
         if self.settings.os == "Windows":
-            self.cpp_info.components["ofstd"].system_libs.extend([
-                "iphlpapi", "ws2_32", "netapi32", "wsock32"
-            ])
+            system_libs = ["iphlpapi", "ws2_32", "netapi32", "wsock32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["ofstd"].system_libs.append("m")
+            system_libs = ["m", "nsl"]
             if self.options.with_multithreading:
-                self.cpp_info.components["ofstd"].system_libs.append("pthread")
+                system_libs.append("pthread")
+            if Version(self.version) >= "3.6.8":
+                system_libs.append("rt")
+        if Version(self.version) >= "3.6.8":
+            self.cpp_info.components["oficonv"].system_libs = system_libs
+        else:
+            self.cpp_info.components["ofstd"].system_libs = system_libs
 
         if self.options.default_dict == "external":
             dcmdictpath = os.path.join(self._dcm_datadictionary_path, "dcmtk", "dicom.dic")

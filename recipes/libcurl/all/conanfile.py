@@ -30,7 +30,7 @@ class LibcurlConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_ssl": [False, "openssl", "wolfssl", "schannel", "darwinssl"],
+        "with_ssl": [False, "openssl", "wolfssl", "schannel", "darwinssl", "mbedtls"],
         "with_file": [True, False],
         "with_ftp": [True, False],
         "with_http": [True, False],
@@ -49,7 +49,6 @@ class LibcurlConan(ConanFile):
         "with_libidn": [True, False],
         "with_librtmp": [True, False],
         "with_libgsasl": [True, False],
-        "with_libmetalink": [True, False],
         "with_libpsl": [True, False],
         "with_largemaxwritesize": [True, False],
         "with_nghttp2": [True, False],
@@ -65,6 +64,7 @@ class LibcurlConan(ConanFile):
         "with_cookies": [True, False],
         "with_ipv6": [True, False],
         "with_docs": [True, False],
+        "with_misc_docs": [True, False],
         "with_verbose_debug": [True, False],
         "with_symbol_hiding": [True, False],
         "with_unix_sockets": [True, False],
@@ -95,7 +95,6 @@ class LibcurlConan(ConanFile):
         "with_libidn": False,
         "with_librtmp": False,
         "with_libgsasl": False,
-        "with_libmetalink": False,
         "with_libpsl": False,
         "with_largemaxwritesize": False,
         "with_nghttp2": False,
@@ -111,6 +110,7 @@ class LibcurlConan(ConanFile):
         "with_cookies": True,
         "with_ipv6": True,
         "with_docs": False,
+        "with_misc_docs": False,
         "with_verbose_debug": True,
         "with_symbol_hiding": False,
         "with_unix_sockets": True,
@@ -136,15 +136,6 @@ class LibcurlConan(ConanFile):
     def _is_using_cmake_build(self):
         return is_msvc(self) or self._is_win_x_android
 
-    @property
-    def _has_metalink_option(self):
-        # Support for metalink was removed in version 7.78.0 https://github.com/curl/curl/pull/7176
-        return Version(self.version) < "7.78.0" and not self._is_using_cmake_build
-
-    @property
-    def _has_with_libpsl_option(self):
-        return not (self._is_using_cmake_build and Version(self.version) < "7.84.0")
-
     def export_sources(self):
         copy(self, "lib_Makefile_add.am", self.recipe_folder, self.export_sources_folder)
         export_conandata_patches(self)
@@ -152,17 +143,11 @@ class LibcurlConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._has_metalink_option:
-            del self.options.with_libmetalink
-        if not self._has_with_libpsl_option:
-            del self.options.with_libpsl
         if self._is_using_cmake_build:
             del self.options.with_libgsasl
 
-        # Before 7.86.0, enabling unix sockets configure option would fail on windows
-        # It was fixed with this PR: https://github.com/curl/curl/pull/9688
-        if self._is_mingw and Version(self.version) < "7.86.0":
-            del self.options.with_unix_sockets
+        if Version(self.version) < "8.7.0":
+            del self.options.with_misc_docs
 
         # Default options
         self.options.with_ssl = "darwinssl" if is_apple_os(self) else "openssl"
@@ -183,9 +168,11 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/5.6.3")
+            self.requires("wolfssl/5.6.6")
+        elif self.options.with_ssl == "mbedtls":
+            self.requires("mbedtls/3.5.0")
         if self.options.with_nghttp2:
-            self.requires("libnghttp2/1.56.0")
+            self.requires("libnghttp2/1.59.0")
         if self.options.with_libssh2:
             self.requires("libssh2/1.11.0")
         if self.options.with_zlib:
@@ -195,7 +182,7 @@ class LibcurlConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.with_c_ares:
-            self.requires("c-ares/1.19.1")
+            self.requires("c-ares/[>=1.27 <2]")
         if self.options.get_safe("with_libpsl"):
             self.requires("libpsl/0.21.1")
 
@@ -208,6 +195,8 @@ class LibcurlConan(ConanFile):
             openssl = self.dependencies["openssl"]
             if self.options.with_ntlm and openssl.options.no_des:
                 raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
+        if self.options.with_ssl == "wolfssl" and not self.dependencies["wolfssl"].options.with_curl:
+            raise ConanInvalidConfiguration("option with_ssl=wolfssl requires wolfssl:with_curl=True")
 
     def build_requirements(self):
         if self._is_using_cmake_build:
@@ -216,7 +205,7 @@ class LibcurlConan(ConanFile):
         else:
             self.tool_requires("libtool/2.4.7")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.0.2")
+                self.tool_requires("pkgconf/2.1.0")
             if self.settings.os in [ "tvOS", "watchOS" ]:
                 self.tool_requires("gnu-config/cci.20210814")
             if self._settings_build.os == "Windows":
@@ -226,8 +215,8 @@ class LibcurlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or "https://curl.se/ca/cacert-2023-01-10.pem"
-        cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or "fb1ecd641d0a02c01bc9036d513cb658bbda62a75e246bedbc01764560a639f0"
+        cert_url = self.conf.get("user.libcurl.cert:url", check_type=str) or "https://curl.se/ca/cacert-2023-08-22.pem"
+        cert_sha256 = self.conf.get("user.libcurl.cert:sha256", check_type=str) or "23c2469e2a568362a62eecf1b49ed90a15621e6fa30e29947ded3436422de9b9"
         download(self, cert_url, "cacert.pem", verify=True, sha256=cert_sha256)
 
     def generate(self):
@@ -292,7 +281,10 @@ class LibcurlConan(ConanFile):
         # - link errors if mingw shared or iOS/tvOS/watchOS
         # - it makes recipe consistent with CMake build where we don't build curl tool
         top_makefile = os.path.join(self.source_folder, "Makefile.am")
-        replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
+        if Version(self.version) < "8.8.0":
+            replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
+        else:
+            replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", "SUBDIRS = lib")
         replace_in_file(self, top_makefile, "include src/Makefile.inc", "")
 
         # zlib naming is not always very consistent
@@ -303,7 +295,7 @@ class LibcurlConan(ConanFile):
                                   "AC_CHECK_LIB(z,",
                                   f"AC_CHECK_LIB({zlib_name},")
             replace_in_file(self, configure_ac,
-                                  "-lz ",
+                                  "-lz",
                                   f"-l{zlib_name} ")
 
         if self._is_mingw and self.options.shared:
@@ -330,8 +322,9 @@ class LibcurlConan(ConanFile):
             return
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # TODO: check this patch, it's suspicious
-        replace_in_file(self, cmakelists,
-                              "include(CurlSymbolHiding)", "")
+        if Version(self.version) < "8.4.0":
+            replace_in_file(self, cmakelists,
+                                "include(CurlSymbolHiding)", "")
 
         # brotli
         if Version(self.version) < "8.2.0":
@@ -346,48 +339,67 @@ class LibcurlConan(ConanFile):
         # Use upstream FindZstd.cmake because check_symbol_exists() is called
         # afterwards and it would fail with zstd_LIBRARIES generated by CMakeDeps
         replace_in_file(self, cmakelists, "find_package(Zstd REQUIRED)", "find_package(Zstd REQUIRED MODULE)")
-        replace_in_file(self, os.path.join(self.source_folder, "CMake", "FindZstd.cmake"), "if(UNIX)", "if(0)")
+        if Version(self.version) < "8.10.0":
+            replace_in_file(self, os.path.join(self.source_folder, "CMake", "FindZstd.cmake"), "if(UNIX)", "if(0)")
 
         # c-ares
-        replace_in_file(self, cmakelists, "find_package(CARES REQUIRED)", "find_package(c-ares REQUIRED CONFIG)")
-        replace_in_file(self, cmakelists, "${CARES_LIBRARY}", "c-ares::cares")
+        if Version(self.version) < "8.10.0":
+            replace_in_file(self, cmakelists, "find_package(CARES REQUIRED)", "find_package(c-ares REQUIRED CONFIG)")
+            replace_in_file(self, cmakelists, "${CARES_LIBRARY}", "c-ares::cares")
+        else:
+            replace_in_file(self, cmakelists, "find_package(Cares REQUIRED)", "find_package(c-ares REQUIRED CONFIG)")
+            replace_in_file(self, cmakelists, "${CARES_LIBRARIES}", "c-ares::cares")
 
         # libpsl
-        if self._has_with_libpsl_option:
+        if Version(self.version) < "8.10.0":
             replace_in_file(self, cmakelists, "find_package(LibPSL)", "find_package(libpsl REQUIRED CONFIG)")
-            replace_in_file(self, cmakelists, "if(LIBPSL_FOUND)", "if(libpsl_FOUND)")
             replace_in_file(self, cmakelists, "${LIBPSL_LIBRARY}", "libpsl::libpsl")
             replace_in_file(self, cmakelists, "${LIBPSL_INCLUDE_DIR}", "${libpsl_INCLUDE_DIRS}")
+        else:
+            replace_in_file(self, cmakelists, "${LIBPSL_LIBRARIES}", "libpsl::libpsl")
+            replace_in_file(self, cmakelists, "${LIBPSL_INCLUDE_DIRS}", "${libpsl_INCLUDE_DIRS}")
+        replace_in_file(self, cmakelists, "if(LIBPSL_FOUND)", "if(libpsl_FOUND)")
 
         # libssh2
-        replace_in_file(self, cmakelists, "find_package(LibSSH2)", "find_package(Libssh2 REQUIRED CONFIG)")
+        if Version(self.version) < "8.10.0":
+            replace_in_file(self, cmakelists, "find_package(LibSSH2)", "find_package(Libssh2 REQUIRED CONFIG)")
+            replace_in_file(self, cmakelists, "${LIBSSH2_LIBRARY}", "Libssh2::libssh2")
+            replace_in_file(self, cmakelists, "${LIBSSH2_INCLUDE_DIR}", "${Libssh2_INCLUDE_DIRS}")
+        else:
+            replace_in_file(self, cmakelists, "${LIBSSH2_LIBRARIES}", "Libssh2::libssh2")
+            replace_in_file(self, cmakelists, "${LIBSSH2_INCLUDE_DIRS}", "${Libssh2_INCLUDE_DIRS}")
         replace_in_file(self, cmakelists, "if(LIBSSH2_FOUND)", "if(Libssh2_FOUND)")
-        replace_in_file(self, cmakelists, "${LIBSSH2_LIBRARY}", "Libssh2::libssh2")
-        replace_in_file(self, cmakelists, "${LIBSSH2_INCLUDE_DIR}", "${Libssh2_INCLUDE_DIRS}")
 
         # libnghttp2
-        replace_in_file(self, cmakelists, "find_package(NGHTTP2 REQUIRED)", "find_package(libnghttp2 REQUIRED CONFIG)")
+        if Version(self.version) < "8.10.0":
+            replace_in_file(self, cmakelists, "find_package(NGHTTP2 REQUIRED)", "find_package(libnghttp2 REQUIRED CONFIG)")
+        else:
+            replace_in_file(self, cmakelists, "find_package(NGHTTP2)", "find_package(libnghttp2 REQUIRED CONFIG)")
         replace_in_file(self, cmakelists, "${NGHTTP2_INCLUDE_DIRS}", "${libnghttp2_INCLUDE_DIRS}")
         replace_in_file(self, cmakelists, "${NGHTTP2_LIBRARIES}", "libnghttp2::nghttp2")
 
         # wolfssl
         replace_in_file(self, cmakelists, "find_package(WolfSSL REQUIRED)", "find_package(wolfssl REQUIRED CONFIG)")
-        replace_in_file(self, cmakelists, "${WolfSSL_LIBRARIES}", "${wolfssl_LIBRARIES}")
-        replace_in_file(self, cmakelists, "${WolfSSL_INCLUDE_DIRS}", "${wolfssl_INCLUDE_DIRS}")
+        if Version(self.version) < "8.10.0":
+            replace_in_file(self, cmakelists, "${WolfSSL_LIBRARIES}", "${wolfssl_LIBRARIES}")
+            replace_in_file(self, cmakelists, "${WolfSSL_INCLUDE_DIRS}", "${wolfssl_INCLUDE_DIRS}")
+        else:
+            replace_in_file(self, cmakelists, "${WOLFSSL_LIBRARIES}", "${wolfssl_LIBRARIES}")
+            replace_in_file(self, cmakelists, "${WOLFSSL_INCLUDE_DIRS}", "${wolfssl_INCLUDE_DIRS}")
 
         # INTERFACE_LIBRARY (generated by the cmake_find_package generator) targets doesn't have the LOCATION property.
         # So skipp the LOCATION check in the CMakeLists.txt
-        if Version(self.version) >= "7.80.0":
-            replace_in_file(self,
-                cmakelists,
-                'get_target_property(_lib "${_libname}" LOCATION)',
-                """get_target_property(_type "${_libname}" TYPE)
+        replace_in_file(
+            self,
+            cmakelists,
+            'get_target_property(_lib "${_libname}" LOCATION)',
+            """get_target_property(_type "${_libname}" TYPE)
     if(${_type} STREQUAL "INTERFACE_LIBRARY")
       # Reading the INTERFACE_LIBRARY property on non-imported target will error out.
       continue()
     endif()
     get_target_property(_lib "${_libname}" LOCATION)""",
-            )
+        )
 
     def _yes_no(self, value):
         return "yes" if value else "no"
@@ -435,21 +447,26 @@ class LibcurlConan(ConanFile):
         ])
 
         # Since 7.77.0, disabling TLS must be explicitly requested otherwise it fails
-        if Version(self.version) >= "7.77.0" and not self.options.with_ssl:
+        if not self.options.with_ssl:
             tc.configure_args.append("--without-ssl")
 
-        openssl_option = "ssl" if Version(self.version) < "7.77.0" else "openssl"
         if self.options.with_ssl == "openssl":
             path = unix_path(self, self.dependencies["openssl"].package_folder)
-            tc.configure_args.append(f"--with-{openssl_option}={path}")
+            tc.configure_args.append(f"--with-openssl={path}")
         else:
-            tc.configure_args.append(f"--without-{openssl_option}")
+            tc.configure_args.append("--without-openssl")
 
         if self.options.with_ssl == "wolfssl":
             path = unix_path(self, self.dependencies["wolfssl"].package_folder)
             tc.configure_args.append(f"--with-wolfssl={path}")
         else:
             tc.configure_args.append("--without-wolfssl")
+
+        if self.options.with_ssl == "mbedtls":
+            path = unix_path(self, self.dependencies["mbedtls"].package_folder)
+            tc.configure_args.append(f"--with-mbedtls={path}")
+        else:
+            tc.configure_args.append("--without-mbedtls")
 
         if self.options.with_libssh2:
             path = unix_path(self, self.dependencies["libssh2"].package_folder)
@@ -469,9 +486,6 @@ class LibcurlConan(ConanFile):
         else:
             tc.configure_args.append("--without-zlib")
 
-        if self._has_metalink_option:
-            tc.configure_args.append(f"--with-libmetalink={self._yes_no(self.options.with_libmetalink)}")
-
         if not self.options.with_proxy:
             tc.configure_args.append("--disable-proxy")
 
@@ -483,10 +497,7 @@ class LibcurlConan(ConanFile):
 
         # ntlm will default to enabled if any SSL options are enabled
         if not self.options.with_ntlm:
-            if Version(self.version) <= "7.77.0":
-                tc.configure_args.append("--disable-crypto-auth")
-            else:
-                tc.configure_args.append("--disable-ntlm")
+            tc.configure_args.append("--disable-ntlm")
 
         if not self.options.with_ntlm_wb:
             tc.configure_args.append("--disable-ntlm-wb")
@@ -502,6 +513,12 @@ class LibcurlConan(ConanFile):
             tc.configure_args.append(f"--with-ca-path={str(self.options.with_ca_path)}")
 
         tc.configure_args.append(f"--with-ca-fallback={self._yes_no(self.options.with_ca_fallback)}")
+
+        if "with_misc_docs" in self.options:
+            if self.options.with_misc_docs:
+                tc.configure_args.append("--enable-docs")
+            else:
+                tc.configure_args.append("--disable-docs")
 
         # Cross building flags
         if cross_building(self):
@@ -527,7 +544,6 @@ class LibcurlConan(ConanFile):
 
         if self.settings.os != "Windows":
             tc.fpic = self.options.get_safe("fPIC", True)
-
 
         if cross_building(self) and is_apple_os(self):
             tc.extra_defines.extend(['HAVE_SOCKET', 'HAVE_FCNTL_O_NONBLOCK'])
@@ -572,28 +588,16 @@ class LibcurlConan(ConanFile):
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["CURL_STATICLIB"] = not self.options.shared
         tc.variables["CMAKE_DEBUG_POSTFIX"] = ""
-        if Version(self.version) >= "7.81.0":
-            tc.variables["CURL_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
-        else:
-            tc.variables["CMAKE_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
-        if Version(self.version) >= "7.81.0":
-            tc.variables["CURL_USE_OPENSSL"] = self.options.with_ssl == "openssl"
-        else:
-            tc.variables["CMAKE_USE_OPENSSL"] = self.options.with_ssl == "openssl"
-        if Version(self.version) >= "7.81.0":
-            tc.variables["CURL_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
-        else:
-            tc.variables["CMAKE_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
+        tc.variables["CURL_USE_SCHANNEL"] = self.options.with_ssl == "schannel"
+        tc.variables["CURL_USE_OPENSSL"] = self.options.with_ssl == "openssl"
+        tc.variables["CURL_USE_WOLFSSL"] = self.options.with_ssl == "wolfssl"
+        tc.variables["CURL_USE_MBEDTLS"] = self.options.with_ssl == "mbedtls"
         tc.variables["USE_NGHTTP2"] = self.options.with_nghttp2
         tc.variables["CURL_ZLIB"] = self.options.with_zlib
         tc.variables["CURL_BROTLI"] = self.options.with_brotli
         tc.variables["CURL_ZSTD"] = self.options.with_zstd
-        if self._has_with_libpsl_option:
-            tc.variables["CURL_USE_LIBPSL"] = self.options.with_libpsl
-        if Version(self.version) >= "7.81.0":
-            tc.variables["CURL_USE_LIBSSH2"] = self.options.with_libssh2
-        else:
-            tc.variables["CMAKE_USE_LIBSSH2"] = self.options.with_libssh2
+        tc.variables["CURL_USE_LIBPSL"] = self.options.with_libpsl
+        tc.variables["CURL_USE_LIBSSH2"] = self.options.with_libssh2
         tc.variables["ENABLE_ARES"] = self.options.with_c_ares
         if not self.options.with_c_ares:
             tc.variables["ENABLE_THREADED_RESOLVER"] = self.options.with_threaded_resolver
@@ -606,10 +610,7 @@ class LibcurlConan(ConanFile):
 
         # Also disables NTLM_WB if set to false
         if not self.options.with_ntlm:
-            if Version(self.version) <= "7.77.0":
-                tc.variables["CURL_DISABLE_CRYPTO_AUTH"] = True
-            else:
-                tc.variables["CURL_DISABLE_NTLM"] = True
+            tc.variables["CURL_DISABLE_NTLM"] = True
         tc.variables["NTLM_WB_ENABLED"] = self.options.with_ntlm_wb
 
         if self.options.with_ca_bundle:
@@ -623,6 +624,13 @@ class LibcurlConan(ConanFile):
             tc.cache_variables["CURL_CA_PATH"] = "none"
 
         tc.cache_variables["CURL_CA_FALLBACK"] = self.options.with_ca_fallback
+
+        # TODO: remove this when https://github.com/conan-io/conan/issues/12180 will be fixed.
+        if  Version(self.version) >= "8.3.0":
+            tc.variables["HAVE_SSL_SET0_WBIO"] = False
+        if  Version(self.version) >= "8.4.0":
+            tc.variables["HAVE_OPENSSL_SRP"] = True
+            tc.variables["HAVE_SSL_CTX_SET_QUIC_METHOD"] = True
 
         tc.generate()
 
@@ -676,10 +684,9 @@ class LibcurlConan(ConanFile):
             if self.options.with_ssl == "schannel":
                 self.cpp_info.components["curl"].system_libs.append("crypt32")
         elif is_apple_os(self):
-            if Version(self.version) >= "7.78.0" or self.options.with_ssl == "darwinssl":
-                self.cpp_info.components["curl"].frameworks.append("CoreFoundation")
-            if Version(self.version) >= "7.77.0":
-                self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
+            self.cpp_info.components["curl"].frameworks.append("CoreFoundation")
+            self.cpp_info.components["curl"].frameworks.append("CoreServices")
+            self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
             if self.options.with_ldap:
                 self.cpp_info.components["curl"].system_libs.append("ldap")
             if self.options.with_ssl == "darwinssl":
@@ -698,6 +705,8 @@ class LibcurlConan(ConanFile):
             self.cpp_info.components["curl"].requires.append("openssl::openssl")
         if self.options.with_ssl == "wolfssl":
             self.cpp_info.components["curl"].requires.append("wolfssl::wolfssl")
+        if self.options.with_ssl == "mbedtls":
+            self.cpp_info.components["curl"].requires.append("mbedtls::mbedtls")
         if self.options.with_nghttp2:
             self.cpp_info.components["curl"].requires.append("libnghttp2::libnghttp2")
         if self.options.with_libssh2:

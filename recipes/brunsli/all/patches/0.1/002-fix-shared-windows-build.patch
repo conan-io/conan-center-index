@@ -1,0 +1,43 @@
+Linked static libraries do not export symbols on Windows,
+so build the shared libraries from scratch instead.
+--- brunsli.cmake
++++ brunsli.cmake
+@@ -74,13 +74,21 @@
+ 
+ if(NOT BRUNSLI_EMSCRIPTEN)
+ add_library(brunslidec-c SHARED
++  ${BRUNSLI_COMMON_SOURCES}
++  ${BRUNSLI_COMMON_HEADERS}
++  ${BRUNSLI_DEC_SOURCES}
++  ${BRUNSLI_DEC_HEADERS}
+   c/dec/decode.cc
+ )
+-target_link_libraries(brunslidec-c PRIVATE brunslidec-static)
++target_link_libraries(brunslidec-c PRIVATE brotlidec-static)
+ add_library(brunslienc-c SHARED
++  ${BRUNSLI_COMMON_SOURCES}
++  ${BRUNSLI_COMMON_HEADERS}
++  ${BRUNSLI_ENC_SOURCES}
++  ${BRUNSLI_ENC_HEADERS}
+   c/enc/encode.cc
+ )
+-target_link_libraries(brunslienc-c PRIVATE brunslienc-static)
++target_link_libraries(brunslienc-c PRIVATE brotlienc-static)
+ list(APPEND BRUNSLI_LIBRARIES brunslidec-c brunslienc-c)
+ endif()  # BRUNSLI_EMSCRIPTEN
+ 
+@@ -95,14 +103,6 @@
+ endforeach()
+ 
+ if(NOT BRUNSLI_EMSCRIPTEN)
+-add_executable(cbrunsli c/tools/cbrunsli.cc)
+-target_link_libraries(cbrunsli PRIVATE
+-  brunslienc-static
+-)
+-add_executable(dbrunsli c/tools/dbrunsli.cc)
+-target_link_libraries(dbrunsli PRIVATE
+-  brunslidec-static
+-)
+ else()  # BRUNSLI_EMSCRIPTEN
+ set(WASM_MODULES brunslicodec-wasm brunslidec-wasm brunslienc-wasm)
+ foreach(module IN LISTS WASM_MODULES)

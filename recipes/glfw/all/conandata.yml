@@ -1,4 +1,7 @@
 sources:
+  "3.4":
+    url: "https://github.com/glfw/glfw/releases/download/3.4/glfw-3.4.zip"
+    sha256: "b5ec004b2712fd08e8861dc271428f048775200a2df719ccf575143ba749a3e9"
   "3.3.8":
     url: "https://github.com/glfw/glfw/releases/download/3.3.8/glfw-3.3.8.zip"
     sha256: "4d025083cc4a3dd1f91ab9b9ba4f5807193823e565a5bcf4be202669d9911ea6"
@@ -21,6 +24,36 @@ sources:
     url: "https://github.com/glfw/glfw/releases/download/3.3.2/glfw-3.3.2.zip"
     sha256: "08a33a512f29d7dbf78eab39bd7858576adcc95228c9efe8e4bc5f0f3261efc7"
 patches:
+  "3.3.8":
+    - patch_file: "patches/3.3.5-0001-Wayland-Remove-extra-cmake-modules-dependency.patch"
+      patch_description: "Remove dependency on extra-cmake-modules to fix generation of Wayland Protocols"
+      patch_type: "official"
+      patch_source: "https://github.com/glfw/glfw/commit/2747e47393cbca2d09db56223e735bd94b21e2eb"
+  "3.3.7":
+    - patch_file: "patches/3.3.5-0001-Wayland-Remove-extra-cmake-modules-dependency.patch"
+      patch_description: "Remove dependency on extra-cmake-modules to fix generation of Wayland Protocols"
+      patch_type: "official"
+      patch_source: "https://github.com/glfw/glfw/commit/2747e47393cbca2d09db56223e735bd94b21e2eb"
+  "3.3.6":
+    - patch_file: "patches/3.3.5-0001-Wayland-Remove-extra-cmake-modules-dependency.patch"
+      patch_description: "Remove dependency on extra-cmake-modules to fix generation of Wayland Protocols"
+      patch_type: "official"
+      patch_source: "https://github.com/glfw/glfw/commit/2747e47393cbca2d09db56223e735bd94b21e2eb"
+  "3.3.5":
+    - patch_file: "patches/3.3.5-0001-Wayland-Remove-extra-cmake-modules-dependency.patch"
+      patch_description: "Remove dependency on extra-cmake-modules to fix generation of Wayland Protocols"
+      patch_type: "official"
+      patch_source: "https://github.com/glfw/glfw/commit/2747e47393cbca2d09db56223e735bd94b21e2eb"
+  "3.3.4":
+    - patch_file: "patches/3.3.3-0001-Wayland-Remove-extra-cmake-modules-dependency.patch"
+      patch_description: "Remove dependency on extra-cmake-modules to fix generation of Wayland Protocols"
+      patch_type: "official"
+      patch_source: "https://github.com/glfw/glfw/commit/2747e47393cbca2d09db56223e735bd94b21e2eb"
+  "3.3.3":
+    - patch_file: "patches/3.3.3-0001-Wayland-Remove-extra-cmake-modules-dependency.patch"
+      patch_description: "Remove dependency on extra-cmake-modules to fix generation of Wayland Protocols"
+      patch_type: "official"
+      patch_source: "https://github.com/glfw/glfw/commit/2747e47393cbca2d09db56223e735bd94b21e2eb"
   "3.3.2":
     - patch_file: "patches/3.3.2-0001-fix-objc-cmake3.19+.patch"
       patch_description: "Fix ObjC handling while using recent CMake versions"
@@ -30,3 +63,7 @@ patches:
       patch_description: "Relocatable shared lib on macOS"
       patch_type: "portability"
       patch_source: "https://github.com/glfw/glfw/commit/5a15d8a7842fbc4b5260eac2335a6691bca9be4b"
+    - patch_file: "patches/3.3.2-0003-Wayland-Remove-extra-cmake-modules-dependency.patch"
+      patch_description: "Remove dependency on extra-cmake-modules to fix generation of Wayland Protocols"
+      patch_type: "official"
+      patch_source: "https://github.com/glfw/glfw/commit/2747e47393cbca2d09db56223e735bd94b21e2eb"

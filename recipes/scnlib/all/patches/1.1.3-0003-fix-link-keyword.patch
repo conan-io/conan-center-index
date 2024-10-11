@@ -1,0 +1,22 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index fe6647b..6f34c67 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -112,7 +112,7 @@ function(generate_library_target target_name)
+         target_include_directories(${target_name} PRIVATE
+                 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/deps/fast_float/single_include>)
+     else ()
+-        target_link_libraries(${target_name} INTERFACE
++        target_link_libraries(${target_name} PRIVATE
+                 FastFloat::fast_float)
+     endif ()
+ endfunction()
+@@ -129,7 +129,7 @@ function(generate_header_only_target target_name)
+         target_include_directories(${target_name} INTERFACE
+                 $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/deps/fast_float/single_include>)
+     else ()
+-        target_link_libraries(${target_name} INTERFACE
++        target_link_libraries(${target_name} PRIVATE
+                 FastFloat::fast_float)
+     endif ()
+ endfunction()

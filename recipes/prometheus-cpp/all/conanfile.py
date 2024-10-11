@@ -4,7 +4,6 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc, check_min_vs
 
 import os
 
@@ -17,7 +16,7 @@ class PrometheusCppConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jupp0r/prometheus-cpp"
     topics = ("metrics", "prometheus", "networking")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -36,15 +35,19 @@ class PrometheusCppConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11 if Version(self.version) < "1.1.0" else 14
+        return "14" if Version(self.version) == "1.1.0" else "11"
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "7",
-            "clang": "7",
-            "apple-clang": "10",
-        }
+            "14": {
+                "gcc": "7",
+                "clang": "7",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -66,25 +69,21 @@ class PrometheusCppConan(ConanFile):
         if self.options.with_pull:
             self.requires("civetweb/1.16")
         if self.options.with_push:
-            self.requires("libcurl/8.0.1")
+            self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.get_safe("with_compression"):
             self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
-        if Version(self.version) < "1.1.0":
-            return
-        check_min_vs(self, 191)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)

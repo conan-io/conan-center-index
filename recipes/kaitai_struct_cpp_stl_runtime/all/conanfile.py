@@ -45,6 +45,7 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
             tc.variables["STRING_ENCODING_TYPE"] = "ICONV"
         else:
             tc.variables["STRING_ENCODING_TYPE"] = "NONE"
+        tc.variables["BUILD_TESTS"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -63,3 +64,5 @@ class KaitaiStructCppStlRuntimeConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["kaitai_struct_cpp_stl_runtime"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs.append("m")

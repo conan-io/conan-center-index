@@ -153,7 +153,10 @@ class Mpg123Conan(ConanFile):
             ])
             if is_apple_os(self):
                 # Needed for fix_apple_shared_install_name invocation in package method
-                tc.extra_cflags = ["-headerpad_max_install_names"]
+                tc.extra_cflags += ["-headerpad_max_install_names"]
+            # The finite-math-only optimization has no effect and will cause linking errors
+            # when linked against glibc >= 2.31
+            tc.extra_cflags += ["-fno-finite-math-only"]
             tc.generate()
             tc = AutotoolsDeps(self)
             tc.generate()

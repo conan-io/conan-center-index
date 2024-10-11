@@ -11,9 +11,9 @@ required_conan_version = ">=1.54.0"
 class LibZipConan(ConanFile):
     name = "libzip"
     description = "A C library for reading, creating, and modifying zip archives"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nih-at/libzip"
-    license = "BSD-3-Clause"
     topics = ("zip", "zip-archives", "zip-editing")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -68,7 +68,7 @@ class LibZipConan(ConanFile):
             self.requires("bzip2/1.0.8")
 
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.2")
+            self.requires("xz_utils/5.4.5")
 
         if self.options.get_safe("with_zstd"):
             self.requires("zstd/1.5.5")
@@ -76,7 +76,7 @@ class LibZipConan(ConanFile):
         if self.options.crypto == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         elif self.options.crypto == "mbedtls":
-            self.requires("mbedtls/3.2.1")
+            self.requires("mbedtls/3.5.0")
 
     def validate(self):
         if self.options.crypto == "win32" and self.settings.os != "Windows":

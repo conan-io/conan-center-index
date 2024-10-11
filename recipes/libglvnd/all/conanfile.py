@@ -1,21 +1,24 @@
 from conan import ConanFile
-from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.files import get, rmdir, save
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import get, rmdir, save
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
+from conan.tools.meson import Meson, MesonToolchain
 import os
 import textwrap
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=1.64.0 <2 || >=2.2.0"
 
 class LibGlvndConan(ConanFile):
     name = "libglvnd"
     description = "The GL Vendor-Neutral Dispatch library"
-    license = "LicenseRef-LICENSE"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.freedesktop.org/glvnd/libglvnd"
-    topics = ("gl", "vendor-neutral", "dispatch")
+    topics = ("dispatch", "egl", "gl", "gles", "glx", "glvnd", "opengl", "vendor-neutral")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "shared-library"
     options = {
         "asm": [True, False],
         "x11": [True, False],
@@ -41,21 +44,9 @@ class LibGlvndConan(ConanFile):
         "entrypoint_patching": True,
     }
 
-    generators = "PkgConfigDeps"
-
-    # don't use self.settings_build
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    # don't use self.user_info_build
-    @property
-    def _user_info_build(self):
-        return getattr(self, "user_info_build", self.deps_user_info)
-
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def requirements(self):
         if self.options.x11:
@@ -65,20 +56,25 @@ class LibGlvndConan(ConanFile):
 
     def validate(self):
         if self.settings.os not in ['Linux', 'FreeBSD']:
-            raise ConanInvalidConfiguration("libglvnd is only compatible with Linux and FreeBSD")
+            raise ConanInvalidConfiguration(f"{self.name} is only compatible with Linux and FreeBSD")
 
     def build_requirements(self):
-        self.build_requires("meson/0.63.2")
-        self.build_requires("pkgconf/1.9.3")
+        self.tool_requires("meson/1.4.0")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/2.1.0")
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
                   strip_root=True)
 
     def generate(self):
+        virtual_build_env = VirtualBuildEnv(self)
+        virtual_build_env.generate()
+        pkg_config_deps = PkgConfigDeps(self)
+        pkg_config_deps.generate()
         tc = MesonToolchain(self)
         tc.project_options["asm"] = "enabled" if self.options.asm else "disabled"
         tc.project_options["x11"] = "enabled" if self.options.x11 else "disabled"
@@ -91,6 +87,10 @@ class LibGlvndConan(ConanFile):
         tc.project_options["headers"] = self.options.headers
         tc.project_options["entrypoint-patching"] = "enabled" if self.options.entrypoint_patching else "disabled"
         tc.project_options["libdir"] = "lib"
+        # Configure the data directory so that it defaults to the correct location for ICD discovery on the local system.
+        tc.project_options["datadir"] = os.path.join("usr", "share") if self.settings.os == "Linux" else os.path.join("usr", "local", "share")
+        if self.settings.os == "FreeBSD":
+            tc.project_options["sysconfdir"] = os.path.join("usr", "local", "etc")
         tc.generate()
 
     def build(self):
@@ -141,7 +141,9 @@ class LibGlvndConan(ConanFile):
         if self.options.egl:
             self.cpp_info.components['egl'].libs = ["EGL"]
             self.cpp_info.components['egl'].system_libs.extend(["pthread", "dl", "m"])
-            self.cpp_info.components['egl'].requires.extend(["xorg::x11", "gldispatch"])
+            self.cpp_info.components['egl'].requires.append("gldispatch")
+            if self.options.x11:
+                self.cpp_info.components['egl'].requires.append("xorg::x11")
             self.cpp_info.components['egl'].set_property("pkg_config_name", "egl")
 
         if self.options.glx:

@@ -13,10 +13,10 @@ required_conan_version = ">=1.53.0"
 
 class JsonSchemaValidatorConan(ConanFile):
     name = "json-schema-validator"
+    description = "JSON schema validator for JSON for Modern C++"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/pboettch/json-schema-validator"
-    description = "JSON schema validator for JSON for Modern C++ "
     topics = ("modern-json", "schema-validation", "json")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -37,7 +37,6 @@ class JsonSchemaValidatorConan(ConanFile):
         "fPIC": True,
         "json_diagnostics": False,
     }
-
     short_paths = True
 
     @property
@@ -69,12 +68,16 @@ class JsonSchemaValidatorConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nlohmann_json/3.11.2", transitive_headers=True)
+        # to support latest compilers, we have to downgrade nlohmann_json.
+        # https://github.com/pboettch/json-schema-validator/pull/276
+        if Version(self.version) < "2.3.0":
+            self.requires("nlohmann_json/3.10.5", transitive_headers=True)
+        else:
+            self.requires("nlohmann_json/3.11.3", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
@@ -92,6 +95,9 @@ class JsonSchemaValidatorConan(ConanFile):
         else:
             tc.variables["JSON_VALIDATOR_BUILD_TESTS"] = False
             tc.variables["JSON_VALIDATOR_BUILD_EXAMPLES"] = False
+            tc.variables["JSON_VALIDATOR_INSTALL"] = True
+            tc.variables["JSON_VALIDATOR_SHARED_LIBS"] = self.options.shared
+            tc.variables["CMAKE_INSTALL_RUNTIMEDIR"] = "bin"
         if self.options.json_diagnostics:
             tc.preprocessor_definitions["JSON_DIAGNOSTICS"] = '1'
         if Version(self.version) < "2.1.0":
@@ -147,6 +153,8 @@ class JsonSchemaValidatorConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+        elif self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.defines.append("JSON_SCHEMA_VALIDATOR_EXPORTS=1")
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "nlohmann_json_schema_validator"

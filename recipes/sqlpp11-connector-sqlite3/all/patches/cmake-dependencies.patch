@@ -10,19 +10,21 @@
                             $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
                             $<INSTALL_INTERFACE:include>)
  
-@@ -58,14 +55,13 @@ endif()
+@@ -58,14 +55,16 @@ endif()
  
  if (SQLCIPHER)
      target_compile_definitions(sqlpp11-connector-sqlite3 PUBLIC SQLPP_USE_SQLCIPHER)
--    target_link_libraries(sqlpp11-connector-sqlite3 SQLCipher::SQLCipher)
+     target_link_libraries(sqlpp11-connector-sqlite3 SQLCipher::SQLCipher)
      if (SQLPP_DYNAMIC_LOADING)
          target_compile_definitions(sqlpp11-connector-sqlite3-dynamic PUBLIC SQLPP_USE_SQLCIPHER)
          target_include_directories(sqlpp11-connector-sqlite3-dynamic PUBLIC ${SQLCIPHER_INCLUDE_DIRS})
      endif()
  else()
 -    target_link_libraries(sqlpp11-connector-sqlite3 ${SQLITE3_LIBRARIES})
++    target_link_libraries(sqlpp11-connector-sqlite3 SQLite::SQLite3)
  endif()
-+target_link_libraries(sqlpp11-connector-sqlite3 ${CONAN_LIBS})
++find_package(Sqlpp11 REQUIRED)
++target_link_libraries(sqlpp11-connector-sqlite3 sqlpp11::sqlpp11)
  
  install(TARGETS sqlpp11-connector-sqlite3
          ARCHIVE DESTINATION lib

@@ -28,18 +28,31 @@ class So5extraConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
+        if self.version >= Version("1.6.0"):
+            # Since v1.6.0 requirements to compilers were updated:
+            return {
+                "gcc": "10",
+                "clang": "11",
+                "apple-clang": "13",
+                "Visual Studio": "17",
+                "msvc": "192"
+            }
         return {
             "gcc": "7",
             "clang": "6",
             "apple-clang": "10",
             "Visual Studio": "15",
+            "msvc": "191"
         }
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("sobjectizer/5.8.0")
+        if self.version >= Version("1.6.0"):
+            self.requires("sobjectizer/5.8.1")
+        else:
+            self.requires("sobjectizer/5.7.4")
 
     def package_id(self):
         self.info.clear()

@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7cc5bda..12a5e71 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -27,7 +27,6 @@ else()
+ 
+     if (BEAUTY_ENABLE_OPENSSL)
+         find_package(OpenSSL REQUIRED)
+-        add_library(openssl::openssl ALIAS OpenSSL::SSL)
+     endif()
+ endif()
+ 

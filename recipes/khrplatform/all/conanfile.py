@@ -13,6 +13,7 @@ class KhrplatformConan(ConanFile):
     homepage = "https://www.khronos.org/registry/EGL/"
     description = "Khronos EGL platform interfaces"
     topics = ("opengl", "gl", "egl", "khr", "khronos")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 

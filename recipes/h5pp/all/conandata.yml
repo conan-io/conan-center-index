@@ -1,4 +1,13 @@
 sources:
+  "1.11.2":
+    url: "https://github.com/DavidAce/h5pp/archive/v1.11.2.tar.gz"
+    sha256: "5638bf699a92049910c80a7af3d6c8495f02253dd32ee0000bc35a29a9e61e9c"
+  "1.11.1":
+    url: "https://github.com/DavidAce/h5pp/archive/v1.11.1.tar.gz"
+    sha256: "659d566dcb011e7a0f14f9fec9d6e6c783559eec3fd051de1e5cf44d95fd752b"
+  "1.11.0.1":
+    url: "https://github.com/DavidAce/h5pp/archive/v1.11.0.1.tar.gz"
+    sha256: "73b08273c36220fad2836897138f4e0adbe347ea7d1cc7c22f9783a29b24f967"
   "1.11.0":
     url: "https://github.com/DavidAce/h5pp/archive/v1.11.0.tar.gz"
     sha256: "1c4171275eb50a26ed9da8055397f03a726896c4c49ad0380b16dcb13574ecff"

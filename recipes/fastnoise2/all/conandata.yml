@@ -1,0 +1,4 @@
+sources:
+  "0.10.0-alpha":
+    url: "https://github.com/Auburn/FastNoise2/archive/v0.10.0-alpha.tar.gz"
+    sha256: "8e1331425d6372e65e73775e13fedd367ae5999ec5616036b99df33434e3b527"

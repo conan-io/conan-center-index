@@ -1,9 +1,10 @@
+import glob
 import os
 import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import can_run, check_min_cppstd, valid_min_cppstd
+from conan.tools.build import cross_building, check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
@@ -16,7 +17,7 @@ class Hdf5Conan(ConanFile):
     description = "HDF5 is a data model, library, and file format for storing and managing data."
     license = "BSD-3-Clause"
     topics = "hdf", "data"
-    homepage = "https://portal.hdfgroup.org/display/HDF5/HDF5"
+    homepage = "https://www.hdfgroup.org/solutions/hdf5/"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -84,9 +85,6 @@ class Hdf5Conan(ConanFile):
             self.requires("openmpi/4.1.0")
 
     def validate(self):
-        if not can_run(self):
-            # While building it runs some executables like H5detect
-            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
         if self.options.parallel and not self.options.enable_unsupported:
             if self.options.enable_cxx:
                 raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive, forcefully allow with enable_unsupported=True")
@@ -99,6 +97,11 @@ class Hdf5Conan(ConanFile):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
+    def validate_build(self):
+        if cross_building(self) and Version(self.version) < "1.14.4.3":
+            # While building it runs some executables like H5detect
+            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
+
     def build_requirements(self):
         if Version(self.version) >= "1.14.0":
             self.tool_requires("cmake/[>=3.18 <4]")
@@ -107,7 +110,7 @@ class Hdf5Conan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _inject_stdlib_flag(self, tc):
-        if self.settings.os == "Linux" and self.settings.compiler == "clang":
+        if self.settings.os in ["Linux", "FreeBSD"] and self.settings.compiler == "clang":
             cpp_stdlib = f" -stdlib={self.settings.compiler.libcxx}".rstrip("1")  # strip 11 from stdlibc++11
             tc.variables["CMAKE_CXX_FLAGS"] = tc.variables.get("CMAKE_CXX_FLAGS", "") + cpp_stdlib
         return tc
@@ -235,7 +238,9 @@ class Hdf5Conan(ConanFile):
 
         # remove extra libs... building 1.8.21 as shared also outputs static libs on Linux.
         if self.options.shared:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+            for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
+                if not lib.endswith(".dll.a"):
+                    os.remove(lib)
 
         # Mimic the official CMake FindHDF5 targets. HDF5::HDF5 refers to the global target as per conan,
         # but component targets have a lower case namespace prefix. hdf5::hdf5 refers to the C library only
@@ -281,10 +286,12 @@ class Hdf5Conan(ConanFile):
         components = self._components()
         add_component("hdf5_c", **components["hdf5_c"])
         self.cpp_info.components["hdf5_c"].includedirs.append(os.path.join("include", "hdf5"))
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["hdf5_c"].system_libs.extend(["dl", "m"])
             if self.options.get_safe("threadsafe"):
                 self.cpp_info.components["hdf5_c"].system_libs.append("pthread")
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["hdf5_c"].system_libs.append("Shlwapi")
 
         if self.options.shared:
             self.cpp_info.components["hdf5_c"].defines.append("H5_BUILT_AS_DYNAMIC_LIB")
