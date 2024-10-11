@@ -1,4 +1,6 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools.files import (
     apply_conandata_patches,
@@ -40,6 +42,12 @@ class SymengineConan(ConanFile):
     @property
     def _min_cppstd(self):
         return 11
+    
+    @property
+    def _minimium_compilers_version(self):
+        return {
+            "gcc": "7"
+        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -54,6 +62,14 @@ class SymengineConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+    
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        
+        minimum_version = self._minimium_compilers_version.get(str(self.settings.compiler))
+        if minimum_version and Version(self.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires {self.setting.compiler} >= {minimum_version}")
 
     @property
     def _needs_fast_float(self):
@@ -140,6 +156,8 @@ class SymengineConan(ConanFile):
             self.cpp_info.libs.append("teuchos")
         if self.settings.os == "Linux":
             self.cpp_info.system_libs.append("m")
+
+        self.cpp_info.set_property("cmake_target_name", "symengine")
+        # TODO: Remove when Conan 1 support is dropped
         self.cpp_info.names["cmake_find_package"] = "symengine"
-        # FIXME: symengine exports a non-namespaced `symengine` target.
         self.cpp_info.names["cmake_find_package_multi"] = "symengine"
