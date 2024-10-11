@@ -38,7 +38,7 @@ class Open62541ppConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "gcc": "7",
+            "gcc": "9",
             "clang": "13",
             "apple-clang": "14",
             "msvc": "192",
