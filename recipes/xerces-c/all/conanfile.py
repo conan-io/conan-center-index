@@ -120,6 +120,10 @@ class XercesCConan(ConanFile):
         tc = CMakeToolchain(self)
         # Because upstream overrides BUILD_SHARED_LIBS as a CACHE variable
         tc.cache_variables["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
+
+        # Prevent linking against unused found library
+        tc.cache_variables["NSL_LIBRARY"] = "NSL_LIBRARY-NOTFOUND"
+        
         # https://xerces.apache.org/xerces-c/build-3.html
         tc.variables["network"] =  self.options.network
         if self.options.network:
@@ -172,7 +176,7 @@ class XercesCConan(ConanFile):
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread", "nsl"])
+            self.cpp_info.system_libs.extend(["pthread"])
 
         if Version(conan_version).major < 2:
             self.cpp_info.names["cmake_find_package"] = "XercesC"
