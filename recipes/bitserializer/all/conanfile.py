@@ -134,8 +134,11 @@ class BitserializerConan(ConanFile):
         if Version(self.version) >= "0.50":
             # Remove 'ryml' subdirectory from #include
             replace_in_file(
-                self, os.path.join(self.source_folder, "include", "bitserializer", "rapidyaml_archive.h"),
-                "#include <ryml/", "#include <",
+                self, 
+                os.path.join(self.source_folder, "include", "bitserializer", "rapidyaml_archive.h"),
+                "#include <ryml/", 
+                "#include <",
+                strict=False
             )
 
     def build(self):
