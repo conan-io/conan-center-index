@@ -78,9 +78,7 @@ class MiniscriptConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) >= "1.6.2":
-            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        else:
+        if Version(self.version) < "1.6.2":
             tc.variables["MINISCRIPT_SRC_DIR"] = self.source_folder.replace("\\", "/")
         tc.generate()
 
