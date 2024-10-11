@@ -81,6 +81,8 @@ class WatcherCConan(ConanFile):
 
     def generate(self):
         tc = MesonToolchain(self)
+        if "shared" not in self.options:
+            tc.project_options["default_library"] = "static"
         tc.generate()
         tc = VirtualBuildEnv(self)
         tc.generate()
