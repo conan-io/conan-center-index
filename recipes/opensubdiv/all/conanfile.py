@@ -144,6 +144,7 @@ class OpenSubdivConan(ConanFile):
         tc.variables["NO_TESTS"] = True
         tc.variables["NO_GLTESTS"] = True
         tc.variables["NO_MACOS_FRAMEWORK"] = True
+        tc.variables["NO_GLFW"] = True
         tc.generate()
 
         tc = CMakeDeps(self)
