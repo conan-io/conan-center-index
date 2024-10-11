@@ -10,4 +10,3 @@ patches:
     - patch_file: "patches/0002-add-const-for-cpp17.patch"
       patch_description: "Fix a regression in C++17"
       patch_type: "portability"
-      patch_source: "https://github.com/microsoft/vcpkg/blob/d07689ef165f033de5c0710e4f67c193a85373e1/ports/xqilla/fix-compare.patch"
