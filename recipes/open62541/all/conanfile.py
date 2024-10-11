@@ -327,6 +327,7 @@ class Open62541Conan(ConanFile):
                     tc.variables["UA_ENABLE_ENCRYPTION_OPENSSL"] = True
 
         tc.variables["UA_ENABLE_JSON_ENCODING"] = self.options.json_support
+        tc.variables["UA_ENABLE_PUBSUB_INFORMATIONMODEL"] = self.options.pub_sub != False
         tc.variables["UA_ENABLE_PUBSUB"] = self.options.pub_sub != False
         tc.variables["UA_ENABLE_PUBSUB_ENCRYPTION"] = self.options.pub_sub_encryption != False
 
@@ -431,12 +432,13 @@ class Open62541Conan(ConanFile):
         else:
             self.cpp_info.includedirs.append(
                 os.path.join("include", "open62541", "plugin"))
-            if self.settings.os == "Windows":
-                self.cpp_info.includedirs.append(
-                    os.path.join("include", "open62541", "win32"))
-            else:
-                self.cpp_info.includedirs.append(
-                    os.path.join("include", "open62541", "posix"))
+            if Version(self.version) < "1.4.0":
+                if self.settings.os == "Windows":
+                    self.cpp_info.includedirs.append(
+                        os.path.join("include", "open62541", "win32"))
+                else:
+                    self.cpp_info.includedirs.append(
+                        os.path.join("include", "open62541", "posix"))
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
@@ -451,4 +453,4 @@ class Open62541Conan(ConanFile):
             self._module_file_rel_path]
         self.cpp_info.set_property("cmake_build_modules", [
                                    self._module_file_rel_path])
-        
+
