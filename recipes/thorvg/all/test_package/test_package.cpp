@@ -4,7 +4,7 @@ int main() {
     const int WIDTH = 800;
     const int HEIGHT = 600;
 
-    tvg::Initializer::init(tvg::CanvasEngine::Sw, 0);
+    tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
 
     static uint32_t buffer[WIDTH * HEIGHT];  // canvas target buffer
 
