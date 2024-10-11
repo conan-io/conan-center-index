@@ -130,7 +130,7 @@ class ThorvgConan(ConanFile):
             if self.options.with_engines in ["gl", "gl_beta"]:
                 self.requires("opengl/system")
         if self.options.with_threads and Version(self.version) >= "0.15.0" and self.settings.compiler in ["clang", "apple-clang"]:
-            self.requires("llvm-openmp/17.0.4", transitive_headers=True, transitive_libs=True)
+            self.requires("llvm-openmp/17.0.4")
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.0")
