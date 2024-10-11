@@ -69,7 +69,7 @@ class SymengineConan(ConanFile):
         
         minimum_version = self._minimium_compilers_version.get(str(self.settings.compiler))
         if minimum_version and Version(self.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires {self.setting.compiler} >= {minimum_version}")
+            raise ConanInvalidConfiguration(f"{self.ref} requires {self.settings.compiler} >= {minimum_version}")
 
     @property
     def _needs_fast_float(self):
