@@ -39,10 +39,10 @@ class Open62541ppConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "7",
-            "clang": "7",
-            "apple-clang": "10",
-            "msvc": "191",
-            "Visual Studio": "15",
+            "clang": "13",
+            "apple-clang": "14",
+            "msvc": "192",
+            "Visual Studio": "16",
         }
 
     def config_options(self):
