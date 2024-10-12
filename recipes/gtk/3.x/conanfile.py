@@ -4,6 +4,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.build import can_run
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
@@ -168,7 +169,8 @@ class GtkConan(ConanFile):
     def generate(self):
         VirtualBuildEnv(self).generate()
         # Required for glib-compile-resources
-        VirtualRunEnv(self).generate(scope="build")
+        if can_run(self):
+            VirtualRunEnv(self).generate(scope="build")
 
         true_false = lambda opt: "true" if opt else "false"
         tc = MesonToolchain(self)
