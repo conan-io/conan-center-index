@@ -5,12 +5,12 @@ import textwrap
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, can_run
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, mkdir, replace_in_file, rm, rmdir, save, unzip
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import MSBuildDeps, MSBuildToolchain, MSBuild, is_msvc, is_msvc_static_runtime, msvc_runtime_flag, msvs_toolset
+from conan.tools.microsoft import MSBuildDeps, MSBuildToolchain, MSBuild, is_msvc, is_msvc_static_runtime, msvc_runtime_flag, msvs_toolset, unix_path
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.58.0"
@@ -116,6 +116,8 @@ class CPythonConan(ConanFile):
     def build_requirements(self):
         if Version(self.version) >= "3.11" and not is_msvc(self) and not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.1.0")
+        if not can_run(self) and not is_msvc(self):
+            self.build_requires(f"cpython/{self.version}")
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
@@ -237,6 +239,16 @@ class CPythonConan(ConanFile):
             ]
         if not is_apple_os(self):
             tc.extra_ldflags.append('-Wl,--as-needed')
+
+        if not can_run(self):
+            build_python = unix_path(self, os.path.join(self.dependencies.build["cpython"].package_folder, "bin", "python"))
+            tc.configure_args.append(f"--with-build-python={build_python}")
+        # The following are required only when cross-building, but set for all cases for consistency
+        tc.configure_args.append("--enable-ipv6")  # enabled by default, but skip the check
+        dev_ptmx_exists = os.path.exists("/dev/ptmx")
+        dev_ptc_exists = os.path.exists("/dev/ptc")
+        tc.configure_args.append(f"ac_cv_file__dev_ptmx={yes_no(dev_ptmx_exists)}")
+        tc.configure_args.append(f"ac_cv_file__dev_ptc={yes_no(dev_ptc_exists)}")
 
         tc.generate()
 

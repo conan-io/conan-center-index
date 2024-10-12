@@ -66,6 +66,7 @@ class TestPackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_MODULE"] = self._supports_modules
+        tc.cache_variables["CAN_RUN"] = can_run(self)
         tc.generate()
 
         deps = CMakeDeps(self)
