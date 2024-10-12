@@ -165,7 +165,7 @@ class HarfbuzzConan(ConanFile):
             "gdi": is_enabled(self.options.get_safe("with_gdi")),
             "coretext": is_enabled(self.options.get_safe("with_coretext")),
             "directwrite": is_enabled(self.options.get_safe("with_directwrite")),
-            "gobject": is_enabled(can_run(self) and self.options.with_glib),
+            "gobject": is_enabled(self.options.with_glib),
             "introspection": is_enabled(self.options.get_safe("with_introspection")),
             "tests": "disabled",
             "docs": "disabled",
