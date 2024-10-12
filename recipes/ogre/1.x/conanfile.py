@@ -260,7 +260,7 @@ class OgreConanFile(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zziplib/0.13.72")
         if self.options.get_safe("build_component_bites") or self.options.get_safe("build_rendersystem_tiny"):
-            self.requires("sdl/2.30.7")
+            self.requires("sdl/2.30.8")
         if self.options.get_safe("build_rendersystem_tiny") and self.options.with_openmp:
             self.requires("openmp/system")
         if self._build_opengl:
@@ -276,10 +276,10 @@ class OgreConanFile(ConanFile):
         if self.options.build_component_bullet:
             self.requires("bullet3/3.25")
         if self.options.build_component_overlay:
-            self.requires("freetype/2.13.2")
+            self.requires("freetype/2.13.3")
             if self.options.build_component_overlay_imgui:
                 # Used in Overlay/OgreImGuiOverlay.h public header
-                self.requires("imgui/1.91.2", transitive_headers=True, transitive_libs=True)
+                self.requires("imgui/1.91.3", transitive_headers=True, transitive_libs=True)
         if self.options.build_plugin_assimp:
             self.requires("assimp/5.4.2")
         if self.options.build_plugin_exrcodec:
