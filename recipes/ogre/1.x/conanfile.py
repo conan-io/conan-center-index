@@ -83,7 +83,7 @@ class OgreConanFile(ConanFile):
         "shared": False,
         "fPIC": True,
         "resourcemanager_strict": "STRICT",
-        "build_rendersystem_d3d9": True,
+        "build_rendersystem_d3d9": False,
         "build_rendersystem_d3d11": True,
         "build_rendersystem_gl3plus": True,
         "build_rendersystem_gl": True,
@@ -475,6 +475,14 @@ class OgreConanFile(ConanFile):
                             "if(OGRE_BUILD_COMPONENT_OVERLAY_IMGUI)", "if(0)")
             replace_in_file(self, os.path.join(self.source_folder, "Components", "Overlay", "CMakeLists.txt"),
                             "list(REMOVE_ITEM SOURCE_FILES", "# list(REMOVE_ITEM SOURCE_FILES")
+        # Require DirectX if enabled
+        if self.options.get_safe("build_rendersystem_d3d9"):
+            replace_in_file(self, os.path.join(self.source_folder, "CMake", "Dependencies.cmake"),
+                            "find_package(DirectX)", "find_package(DirectX REQUIRED)")
+        if self.options.get_safe("build_rendersystem_d3d11"):
+            replace_in_file(self, os.path.join(self.source_folder, "CMake", "Dependencies.cmake"),
+                            "find_package(DirectX11)", "find_package(DirectX11 REQUIRED)")
+
 
     def build(self):
         self._patch_sources()
