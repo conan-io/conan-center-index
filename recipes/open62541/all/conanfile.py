@@ -12,9 +12,6 @@ required_conan_version = ">=1.53.0"
 
 class Open62541Conan(ConanFile):
     name = "open62541"
-    license = ("MPL-2.0", "CC0-1.0")
-    homepage = "https://open62541.org/"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "open62541 is an open source and free implementation of OPC UA " \
                   "(OPC Unified Architecture) written in the common subset of the " \
                   "C99 and C++98 languages. The library is usable with all major " \
@@ -23,6 +20,9 @@ class Open62541Conan(ConanFile):
                   "into existing applications. open62541 library is platform independent. " \
                   "All platform-specific functionality is implemented via exchangeable " \
                   "plugins. Plugin implementations are provided for the major operating systems."
+    license = ("MPL-2.0", "CC0-1.0")
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://open62541.org/"
     topics = (
         "opc ua", "sdk", "server/client", "c", "iec-62541",
         "industrial automation", "tsn", "time sensitive networks", "publish-subscirbe", "pubsub"
@@ -235,11 +235,9 @@ class Open62541Conan(ConanFile):
                     "When web_socket is enabled, libwebsockets:with_ssl must have the value of open62541:encryption")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-        submodule_filename = os.path.join(
-            self.recipe_folder, 'submoduledata.yml')
+        submodule_filename = os.path.join(self.recipe_folder, 'submoduledata.yml')
         with open(submodule_filename, 'r') as submodule_stream:
             submodules_data = yaml.safe_load(submodule_stream)
             for path, submodule in submodules_data["submodules"][self.version].items():
@@ -453,4 +451,3 @@ class Open62541Conan(ConanFile):
             self._module_file_rel_path]
         self.cpp_info.set_property("cmake_build_modules", [
                                    self._module_file_rel_path])
-
