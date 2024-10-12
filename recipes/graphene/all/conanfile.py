@@ -164,7 +164,6 @@ class GrapheneConan(ConanFile):
         elif simd["neon"]:
             # https://salsa.debian.org/gnome-team/graphene/-/blob/1.10.0/meson.build?ref_type=tags#L339-343
             if not is_msvc(self):
-                self.cpp_info.components["graphene-1.0"].cflags = ["-mfpu=neon"]
                 if self.settings.os == "Android":
                     self.cpp_info.components["graphene-1.0"].cflags.append("-mfloat-abi=softfp")
 
