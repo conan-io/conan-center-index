@@ -1,20 +1,28 @@
 --- a/cmake/arch.cmake
 +++ b/cmake/arch.cmake
-@@ -35,9 +35,14 @@ if (USE_OPENMP)
+@@ -35,9 +35,22 @@ if (USE_OPENMP)
    # USE_SIMPLE_THREADED_LEVEL3 = 1
    # NO_AFFINITY = 1
    find_package(OpenMP REQUIRED)
 -  if (OpenMP_FOUND)
 -    set(CCOMMON_OPT "${CCOMMON_OPT} ${OpenMP_C_FLAGS} -DUSE_OPENMP")
 -    set(FCOMMON_OPT "${FCOMMON_OPT} ${OpenMP_Fortran_FLAGS}")
-+  if(OpenMP_FOUND)  # TODO: use OpenMP_C_FOUND when llvm-openmp has been fixed
++  if(OpenMP_C_FOUND)
 +    set(CCOMMON_OPT "${CCOMMON_OPT} -DUSE_OPENMP")
 +    link_libraries($<$<LINK_LANGUAGE:C>:OpenMP::OpenMP_C>)
-+    include_directories(${OpenMP_C_INCLUDE_DIRS})
++    if(OpenMP_C_INCLUDE_DIRS)
++        include_directories("${OpenMP_C_INCLUDE_DIRS}")
++    endif()
++  else()
++    message(FATAL_ERROR "OpenMP C component not found")
 +  endif()
 +  if(OpenMP_Fortran_FOUND)
 +    link_libraries($<$<LINK_LANGUAGE:Fortran>:OpenMP::OpenMP_Fortran>)
-+    include_directories(${OpenMP_Fortran_INCLUDE_DIRS})
++    if(OpenMP_Fortran_INCLUDE_DIRS)
++        include_directories("${OpenMP_Fortran_INCLUDE_DIRS}")
++    endif()
++  elseif(NOT NOFORTRAN)
++    message(FATAL_ERROR "OpenMP Fortran component not found")
    endif()
  endif ()
  
