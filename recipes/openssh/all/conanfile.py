@@ -7,6 +7,7 @@ from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, replace_in_file, rmdir, export_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import unix_path
 
 required_conan_version = ">=1.54.0"
 
@@ -111,6 +112,12 @@ class PackageConan(ConanFile):
 
         if self.options.with_sandbox != 'auto':
             tc.configure_args.append("--with-sandbox={}".format(self.options.with_sandbox or "no"))
+
+        # For cross-compilation support
+        buildenv_vars = VirtualBuildEnv(self).vars()
+        compiler_executables = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+        strip = compiler_executables.get("strip", buildenv_vars.get("STRIP", "strip"))
+        tc.make_args.append(f"STRIP_OPT=-s --strip-program={unix_path(self, strip)}")
 
         tc.generate()
 
