@@ -149,7 +149,7 @@ class TestPackageConan(ConanFile):
                 env = Environment()
                 env.define("TERM", "ansi")
                 with env.vars(self).apply():
-                   self._test_module("curses", self._cpython_option("with_curses"))
+                    self._test_module("curses", self._cpython_option("with_curses"))
                 self._test_module("expat", True)
                 self._test_module("sqlite3", self._cpython_option("with_sqlite3"))
                 self._test_module("decimal", True)
