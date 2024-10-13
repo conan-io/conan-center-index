@@ -1,9 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars, is_msvc_static_runtime
@@ -54,10 +52,6 @@ class PremakeConan(ConanFile):
         if self.version != "5.0.0-alpha15" and self.settings.os == "Linux":
             self.requires("util-linux-libuuid/2.39.2")
         # Lua sources are required during the build and cannot be unvendored
-
-    def validate(self):
-        if self.version == "5.0.0-alpha15" and cross_building(self):
-            raise ConanInvalidConfiguration("Cross-building is not supported for Premake 5.0.0-alpha15")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
