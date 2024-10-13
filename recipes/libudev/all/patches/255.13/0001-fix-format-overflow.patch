@@ -1,0 +1,26 @@
+Fixes
+
+../src/src/shared/condition.c: In function ‘condition_dump_list’:
+../src/src/shared/condition.c:1269:33: error: ‘%s’ directive argument is null [-Werror=format-overflow=]
+ 1269 |                 "%s\t%s: %s%s%s %s\n",
+      |                                 ^~
+
+--- a/src/shared/condition.c
++++ b/src/shared/condition.c
+@@ -1266,6 +1266,7 @@
+ 
+         prefix = strempty(prefix);
+ 
++        const char* result = condition_result_to_string(c->result);
+         fprintf(f,
+                 "%s\t%s: %s%s%s %s\n",
+                 prefix,
+@@ -1273,7 +1274,7 @@
+                 c->trigger ? "|" : "",
+                 c->negate ? "!" : "",
+                 c->parameter,
+-                condition_result_to_string(c->result));
++                result ? result : "");
+ }
+ 
+ void condition_dump_list(Condition *first, FILE *f, const char *prefix, condition_to_string_t to_string) {
