@@ -6,6 +6,9 @@ patches:
   "cci.20240726":
     - patch_file: "patches/0001-unvendor-third-party.patch"
 spirv-tools-sources:
+  "1.3.290.0":
+    url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/vulkan-sdk-1.3.290.0.tar.gz"
+    sha256: "8f8b487e20e062c3abfbc86c4541faf767588d167b395ec94f2a7f996ef40efe"
   "1.3.268.0":
     url: "https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/vulkan-sdk-1.3.268.0.tar.gz"
     sha256: "4c19fdcffb5fe8ef8dc93d7a65ae78b64edc7a5688893ee381c57f70be77deaf"
