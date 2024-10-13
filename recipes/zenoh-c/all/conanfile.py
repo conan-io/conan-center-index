@@ -5,7 +5,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, Environment
-from conan.tools.files import get, copy, replace_in_file, save, rmdir, rm, rename, mkdir
+from conan.tools.files import get, copy, replace_in_file, save
+from conan.tools.gnu import GnuToolchain
+
+required_conan_version = ">=2.3.0"
 
 
 class ZenohCConan(ConanFile):
@@ -81,13 +84,17 @@ class ZenohCConan(ConanFile):
         tc.variables["ZENOHC_INSTALL_STATIC_LIBRARY"] = not self.options.shared
         tc.variables["ZENOHC_BUILD_WITH_LOGGER_AUTOINIT"] = self.options.logger_autoinit
         tc.variables["ZENOHC_BUILD_WITH_SHARED_MEMORY"] = self.options.shared_memory
-        tc.variables["ZENOHC_CARGO_FLAGS"] = self.options.extra_cargo_flags
+        tc.variables["ZENOHC_CARGO_FLAGS"] = str(self.options.extra_cargo_flags)
         tc.generate()
 
-        # Don't add the Cargo dependencies to a global Cargo cache
         env = Environment()
+        # Ensure the correct linker is used, especially when cross-compiling
+        target_upper = self.conf.get("user.rust:target", check_type=str).upper().replace("-", "_")
+        cc = GnuToolchain(self).extra_env.vars(self)["CC"]
+        env.define_path(f"CARGO_TARGET_{target_upper}_LINKER", cc)
+        # Don't add the Cargo dependencies to a global Cargo cache
         env.define_path("CARGO_HOME", os.path.join(self.build_folder, "cargo"))
-        env.vars(self).save_script("cargo_home_env")
+        env.vars(self).save_script("cargo_paths")
 
     def _patch_sources(self):
         # Cargo channels are only applicable when Rust has been installed via rustup
@@ -111,20 +118,16 @@ class ZenohCConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        cmake = CMake(self)
-        cmake.install()
-        if not self.options.shared:
-            rm(self, "*.so", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dylib", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
+        # Skip cmake.install() since it does not work correctly when cross-compiling.
+        copy(self, "*.h", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
+        build_type = "debug" if self.settings.build_type == "Debug" else "release"
+        dist_dir = os.path.join(self.build_folder, build_type)
+        copy(self, "*.h", os.path.join(dist_dir, "include"), os.path.join(self.package_folder, "include"))
+        lib_pattern = "*.dll.lib" if self.options.shared else "*.lib"
+        for pattern in ["*.a", "*.so*", "*.dylib*", lib_pattern]:
+            copy(self, pattern, dist_dir, os.path.join(self.package_folder, "lib"), keep_path=False)
         if self.settings.os == "Windows" and self.options.shared:
-            rename(self, os.path.join(self.package_folder, "lib", f"{self._lib_name}.dll.lib"),
-                   os.path.join(self.package_folder, "lib", f"{self._lib_name}.lib"))
-            mkdir(self, os.path.join(self.package_folder, "bin"))
-            rename(self, os.path.join(self.package_folder, "lib", f"{self._lib_name}.dll"),
-                   os.path.join(self.package_folder, "bin", f"{self._lib_name}.dll"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            copy(self, "*.dll", dist_dir, os.path.join(self.package_folder, "bin"), keep_path=False)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "zenohc")
