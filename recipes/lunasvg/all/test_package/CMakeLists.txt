@@ -12,3 +12,7 @@ elseif (lunasvg_VERSION VERSION_LESS_EQUAL "2.3.8")
 else()
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
 endif()
+
+if (lunasvg_VERSION VERSION_LESS "3.0.0")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE LUNASVG_BEFORE_3_0_0)
+endif()
