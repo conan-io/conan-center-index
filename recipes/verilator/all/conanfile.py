@@ -50,9 +50,6 @@ class VerilatorConan(ConanFile):
         del self.info.settings.compiler
 
     def validate(self):
-        if hasattr(self, "settings_build") and cross_building(self):
-            raise ConanInvalidConfiguration("Cross building is not yet supported. Contributions are welcome")
-
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration("GCC < version 7 is not supported")
 
