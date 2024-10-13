@@ -659,6 +659,10 @@ class VtkConan(ConanFile):
         tc.variables["VTK_WRAP_JAVA"] = False
         tc.variables["VTK_WRAP_PYTHON"] = False
 
+        # Skip a try_run() check when cross-compiling
+        tc.variables["VTK_REQUIRE_LARGE_FILE_SUPPORT"] = True
+        tc.variables["XDMF_REQUIRE_LARGE_FILE_SUPPORT"] = True
+
         # TODO
         # VTK_ENABLE_VISRTX
         # VTK_USE_OPENGL_DELAYED_LOAD
