@@ -1,5 +1,6 @@
 import os
 import textwrap
+from pathlib import Path
 
 import yaml
 from conan import ConanFile, conan_version
@@ -37,10 +38,6 @@ class YojimboConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-    def configure(self):
-        if self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration("Only 64-bit x86 architecture is supported")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -151,6 +148,12 @@ class YojimboConan(ConanFile):
                 msbuild = MSBuild(self)
                 msbuild.build("Yojimbo.sln")
             else:
+                # Remove incorrect arch flags
+                for make_file in Path(self.source_folder).rglob("*.make"):
+                    if self.settings.arch not in ["x86", "x86_64"]:
+                        replace_in_file(self, make_file, "-msse2", "", strict=False)
+                    if self.settings.arch != "x86_64":
+                        replace_in_file(self, make_file, "-m64", "", strict=False)
                 config = "debug" if self.settings.build_type == "Debug" else "release"
                 config += "_x64"
                 autotools = Autotools(self)
