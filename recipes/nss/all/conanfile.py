@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, can_run
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.files import chdir, copy, get, rm, replace_in_file
 from conan.tools.layout import basic_layout
@@ -54,10 +54,12 @@ class NSSConan(ConanFile):
                 self.tool_requires("msys2/cci.latest")
         if self.settings.os == "Windows":
             self.tool_requires("mozilla-build/4.0.2")
-        if cross_building(self):
-            self.tool_requires("sqlite3/<host_version>")
         self.tool_requires("cpython/3.12.2")
         self.tool_requires("ninja/[>=1.10.2 <2]")
+        if not can_run(self):
+            # Needed for shlibsign executable
+            self.tool_requires(f"nss/{self.version}")
+            self.tool_requires("sqlite3/3.45.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -71,19 +73,35 @@ class NSSConan(ConanFile):
         vc.generate()
 
         env = Environment()
+
+        compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+        buildenv_vars = VirtualBuildEnv(self).vars()
+        cc = compilers_from_conf.get("c", buildenv_vars.get("CC"))
+        if cc:
+            env.define("CC", unix_path(self, cc))
+        strip = compilers_from_conf.get("strip", buildenv_vars.get("STRIP"))
+        if strip:
+            env.define("STRIP", unix_path(self, strip))
+        cxx = compilers_from_conf.get("cpp", buildenv_vars.get("CXX"))
+        if cc:
+            env.define("CXX", unix_path(self, cxx))
+
         # Add temporary site-packages to PYTHONPATH for gyp-next
         env.prepend_path("PYTHONPATH", self._site_packages_dir)
         if self.settings.os == "Windows":
             # An additional forward-slash path is needed for MSYS2 bash
             env.prepend_path("PYTHONPATH", self._site_packages_dir.replace("\\", "/"))
         env.prepend_path("PATH", os.path.join(self._site_packages_dir, "bin"))
+
         # For 'shlibsign -v -i <dist_dir>/lib/libfreebl3.so' etc to work during build
         env.prepend_path("LD_LIBRARY_PATH", os.path.join(self._dist_dir, "lib"))
+
         if is_msvc(self):
             # Needed to locate vswhere.exe.
             # https://github.com/Microsoft/vswhere/wiki/Installing
             # "Starting with Visual Studio 15.2 (26418.1 Preview) vswhere.exe is installed in [the below path]"
             env.append_path("PATH", r"C:\Program Files (x86)\Microsoft Visual Studio\Installer")
+
         env.vars(self, scope="build").save_script("conan_paths")
 
     @property
@@ -141,6 +159,10 @@ class NSSConan(ConanFile):
         # Don't let shlibsign.py set LD_LIBRARY_PATH to the incorrect value.
         replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "shlibsign.py"),
                         "env['LD_LIBRARY_PATH']", "pass # env['LD_LIBRARY_PATH']")
+        if not can_run(self):
+            shlibsign = os.path.join(self.dependencies.build["nss"].package_folder, "bin", "shlibsign").replace("\\", "/")
+            replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "shlibsign.py"),
+                            "os.path.join(bin_path, 'shlibsign')", f"'{shlibsign}'")
 
     @property
     def _build_args(self):
