@@ -33,6 +33,8 @@ class LunaSVGConan(ConanFile):
             return "14"
         if Version(self.version) <= "2.3.8":
             return "17"
+        if Version(self.version) >= "3.0.0":
+            return "17"
         return "11"
 
     @property
@@ -71,8 +73,10 @@ class LunaSVGConan(ConanFile):
     def requirements(self):
         if Version(self.version) < "2.3.5":
             self.requires("plutovg/cci.20220103")
-        else:
+        elif Version(self.version) < "3.0.0":
             self.requires("plutovg/cci.20221030")
+        else:
+            self.requires("plutovg/0.0.7")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
