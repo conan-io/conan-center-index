@@ -92,6 +92,8 @@ class CoinCglConan(ConanFile):
             "--without-osixpr",
             "--without-osivol",
             "--without-sample",
+            "--disable-dependency-linking",
+            "F77=unavailable",
         ])
         if is_msvc(self):
             tc.extra_cxxflags.append("-EHsc")
