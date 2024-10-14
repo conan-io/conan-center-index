@@ -20,20 +20,10 @@ class LibUdevConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.freedesktop.org/software/systemd/man/udev.html"
     license = "GPL-2.0-or-later AND LGPL-2.1-or-later"
-    package_type = "library"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {
-        "shared": [True, False],
-        "fPIC": [True, False],
-    }
-    default_options = {
-        "shared": False,
-        "fPIC": True,
-    }
 
     def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
@@ -90,13 +80,7 @@ class LibUdevConan(ConanFile):
         tc.project_options["lz4"] = "false"
         tc.project_options["xz"] = "false"
         tc.project_options["zstd"] = "false"
-
-        if self.options.shared:
-            tc.project_options["static-libudev"] = "false"
-        elif self.options.fPIC:
-            tc.project_options["static-libudev"] = "pic"
-        else:
-            tc.project_options["static-libudev"] = "no-pic"
+        tc.project_options["static-libudev"] = "false"
 
         # options unrelated to libsystemd
         unrelated = [
@@ -130,20 +114,16 @@ class LibUdevConan(ConanFile):
         apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
-        meson.build(target="udev:shared_library" if self.options.shared else "udev:static_library")
+        meson.build(target="udev:shared_library")
 
     def package(self):
         copy(self, "LICENSE.GPL2", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(self, "LICENSE.LGPL2.1", self.source_folder, os.path.join(self.package_folder, "licenses"))
         copy(self, "libudev.h", os.path.join(self.source_folder, "src", "libudev"), os.path.join(self.package_folder, "include"))
-        if self.options.shared:
-            copy(self, "libudev.so*", self.build_folder, os.path.join(self.package_folder, "lib"))
-        else:
-            copy(self, "libudev.a", self.build_folder, os.path.join(self.package_folder, "lib"))
+        copy(self, "libudev.so*", self.build_folder, os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libudev")
         self.cpp_info.set_property("component_version", str(Version(self.version).major))
         self.cpp_info.libs = ["udev"]
         self.cpp_info.system_libs = ["rt", "pthread"]
-
