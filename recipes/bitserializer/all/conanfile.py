@@ -38,8 +38,6 @@ class BitserializerConan(ConanFile):
         "with_msgpack": False,
     }
 
-    no_copy_source = True
-
     @property
     def _min_cppstd(self):
         return "17"
@@ -138,7 +136,6 @@ class BitserializerConan(ConanFile):
                 os.path.join(self.source_folder, "include", "bitserializer", "rapidyaml_archive.h"),
                 "#include <ryml/", 
                 "#include <",
-                strict=False
             )
 
     def build(self):
