@@ -50,6 +50,8 @@ class LiefConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if Version(self.version) >= "0.15.1":
+            return "17"
         return "14" if self.options.with_frozen else "11"
 
     @property
@@ -61,6 +63,13 @@ class LiefConan(ConanFile):
                 "apple-clang": "10",
                 "Visual Studio": "15",
                 "msvc": "191",
+            },
+            "17": {
+                "gcc": "8",
+                "clang": "7",
+                "apple-clang": "12",
+                "Visual Studio": "16",
+                "msvc": "192",
             },
         }.get(self._min_cppstd, {})
 
@@ -83,7 +92,10 @@ class LiefConan(ConanFile):
         if Version(self.version) < "0.12.2":
             self.requires("rang/3.2")
         else:
-            self.requires("utfcpp/3.2.3")
+            if Version(self.version) >= "0.15.1":
+                self.requires("utfcpp/4.0.5")
+            else:
+                self.requires("utfcpp/3.2.3")
             # lief doesn't supprot spdlog/1.11.0 with fmt/9.x yet.
             self.requires("spdlog/1.10.0")
             self.requires("boost/1.81.0", transitive_headers=True)
@@ -92,6 +104,8 @@ class LiefConan(ConanFile):
             self.requires("nlohmann_json/3.11.2")
         if self.options.with_frozen:
             self.requires("frozen/1.1.1")
+        if Version(self.version) >= "0.15.1":
+            self.requires("tl-expected/1.1.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -141,6 +155,8 @@ class LiefConan(ConanFile):
             tc.variables["LIEF_INSTALL"] = True
             tc.variables["LIEF_EXTERNAL_SPAN_DIR"] = self.dependencies["tcb-span"].cpp_info.includedirs[0].replace("\\", "/")
             tc.variables["LIEF_EXTERNAL_LEAF_DIR"] = self.dependencies["boost"].cpp_info.includedirs[0].replace("\\", "/")
+        if Version(self.version) >= "0.15.1":
+            tc.cache_variables["LIEF_OPT_EXTERNAL_EXPECTED"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
