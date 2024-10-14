@@ -101,7 +101,7 @@ class BlisConan(ConanFile):
 
         tc = AutotoolsToolchain(self)
         # BLIS uses a custom configure script, which does not support all the standard options
-        remove = ["--bindir", "--sbindir", "--oldincludedir"]
+        remove = ["--bindir", "--sbindir", "--oldincludedir", "--build", "--host"]
         tc.configure_args = [arg for arg in tc.configure_args if arg.split("=")[0] not in remove]
         tc.configure_args.append("--sharedir=${prefix}/res")
         tc.configure_args.append("--enable-cblas")
