@@ -171,4 +171,4 @@ class CprConan(ConanFile):
         if Version(self.version) >= "1.11.0" and \
             ((self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9") or \
             (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") in ["libstdc++", "libstdc++11"])):
-            self.cpp_info.components["h5pp_flags"].system_libs = ["stdc++fs"]
+            self.cpp_info.system_libs = ["stdc++fs"]
