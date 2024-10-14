@@ -96,6 +96,7 @@ class LunaSVGConan(ConanFile):
         if Version(self.version) < "2.4.1":
             tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
+        tc.variables["LUNASVG_BUILD_EXAMPLES"] = False
 
         tc = CMakeDeps(self)
         tc.generate()
