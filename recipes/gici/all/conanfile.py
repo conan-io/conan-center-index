@@ -69,7 +69,7 @@ class GiciConan(ConanFile):
         # gici/utility/option.h
         self.requires("yaml-cpp/0.8.0", transitive_headers=True, transitive_libs=True)
         # gici/utility/option.h
-        self.requires("glog/0.7.0", transitive_headers=True, transitive_libs=True)
+        self.requires("glog/0.6.0", transitive_headers=True, transitive_libs=True)
         # gici/imu/imu_error.h
         self.requires("ceres-solver/2.1.0", transitive_headers=True, transitive_libs=True)  # 2.2.0 is not compatible
 
