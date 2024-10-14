@@ -66,6 +66,7 @@ class ZoeConan(ConanFile):
         tc.variables["ZOE_BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["ZOE_USE_STATIC_CRT"] = is_msvc_static_runtime(self)
         tc.variables["ZOE_BUILD_TESTS"] = False
+        tc.variables["LUNASVG_BUILD_EXAMPLES"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         deps = CMakeDeps(self)
