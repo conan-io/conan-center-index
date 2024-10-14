@@ -1,0 +1,51 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 908d4c7..5deb0c7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -75,9 +75,12 @@ endif()
+ 
+ # Dependencies
+ # ============
+-set(THIRD_PARTY_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/third-party/")
+ include(LIEFDependencies)
+-
++set(LIEF_FROZEN_ENABLED 0)
++if (LIEF_SUPPORT_CXX14 AND NOT LIEF_DISABLE_FROZEN)
++  message(STATUS "Enable Frozen (C++14 support)")
++  set(LIEF_FROZEN_ENABLED 1)
++endif()
+ # iOS specific config
+ # ===================
+ if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+@@ -306,8 +309,7 @@ endif()
+ # Flags definition
+ # ----------------
+ set_target_properties(LIB_LIEF
+-  PROPERTIES POSITION_INDEPENDENT_CODE ON
+-             CXX_STANDARD              17
++  PROPERTIES CXX_STANDARD              17
+              CXX_STANDARD_REQUIRED     ON
+              VISIBILITY_INLINES_HIDDEN ON
+              CXX_VISIBILITY_PRESET     hidden
+@@ -490,7 +492,7 @@ if(LIEF_INSTALL)
+     EXPORT LIEFExport
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-    RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT libraries
+     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ 
+   install(
+diff --git a/src/logging.cpp b/src/logging.cpp
+index 8459150..9e0c9fd 100644
+--- a/src/logging.cpp
++++ b/src/logging.cpp
+@@ -20,7 +20,7 @@
+ #include "logging.hpp"
+ 
+ #include "spdlog/spdlog.h"
+-#include "spdlog/fmt/bundled/args.h"
++#include "fmt/args.h"
+ #include "spdlog/sinks/stdout_color_sinks.h"
+ #include "spdlog/sinks/basic_file_sink.h"
+ #include "spdlog/sinks/android_sink.h"
