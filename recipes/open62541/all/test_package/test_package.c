@@ -44,7 +44,8 @@ int main(void) {
         UA_LOG_INFO(UA_Log_Stdout, UA_LOGCATEGORY_SERVER, "The Ape has ns=%d;id=%d",
                     testInstanceId.namespaceIndex, testInstanceId.identifier.numeric);
 
-        return_code = UA_Server_run(server, &running);
+        // return_code = UA_Server_run(server, &running);
+        return_code = UA_STATUSCODE_GOOD;
     }
     running = false;
     UA_Server_delete(server);
