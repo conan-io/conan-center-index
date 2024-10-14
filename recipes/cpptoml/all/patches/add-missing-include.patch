@@ -1,0 +1,10 @@
+--- a/include/cpptoml.h
++++ b/include/cpptoml.h
+@@ -14,6 +14,7 @@
+ #include <cstring>
+ #include <fstream>
+ #include <iomanip>
++#include <limits>
+ #include <map>
+ #include <memory>
+ #include <sstream>
