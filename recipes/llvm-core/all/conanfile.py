@@ -77,7 +77,8 @@ def components_from_dotfile(dotfile):
             "-delayload:shell32.dll",
             "uuid",
             "psapi",
-            "-delayload:ole32.dll"
+            "-delayload:ole32.dll",
+            "diaguids.lib",
         ]
         labels = {k: v for k, v in node_labels(dot)}
         for row in dot:
@@ -85,7 +86,7 @@ def components_from_dotfile(dotfile):
             if match_dep:
                 node_label = labels[match_dep.group(1)]
                 dependency = labels[match_dep.group(2)]
-                if node_label.startswith("LLVM") and dependency not in windows_system_libs:
+                if node_label.startswith("LLVM") and PurePosixPath(dependency).parts[-1] not in windows_system_libs:
                     yield node_label, labels[match_dep.group(2)]
         # some components don't have dependencies
         for label in labels.values():
