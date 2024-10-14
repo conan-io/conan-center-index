@@ -1,14 +1,14 @@
+import os
 import shutil
 
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
-import os
 
 required_conan_version = ">=1.57.0"
 
@@ -179,6 +179,12 @@ class CoinUtilsConan(ConanFile):
         autotools = Autotools(self)
         autotools.autoreconf()
         autotools.configure()
+        # Manually specify OpenBLAS name mangling since F77 is not available to autodetect it.
+        save(self, os.path.join(self.build_folder, "CoinUtils/src/config.h"),
+             ("\n"
+              "#define F77_FUNC(name,NAME) name ## _\n"
+              "#define F77_FUNC_(name,NAME) name ## _\n"),
+             append=True)
         autotools.make()
 
     def package(self):
