@@ -100,6 +100,8 @@ class CoinClpConan(ConanFile):
             # These are only used for sample datasets
             "--without-netlib",
             "--without-sample",
+            "--disable-dependency-linking",
+            "F77=unavailable",
         ])
 
         # TODO: add option
