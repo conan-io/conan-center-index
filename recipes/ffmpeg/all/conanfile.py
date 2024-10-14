@@ -328,7 +328,7 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_pulse"):
             self.requires("pulseaudio/14.2")
         if self.options.get_safe("with_vaapi"):
-            self.requires("vaapi/system")
+            self.requires("libva/2.21.0")
         if self.options.get_safe("with_vdpau"):
             self.requires("libvdpau/1.5")
         if self.options.get_safe("with_vulkan"):
@@ -931,7 +931,7 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_libdrm"):
             avutil.requires.append("libdrm::libdrm_libdrm")
         if self.options.get_safe("with_vaapi"):
-            avutil.requires.append("vaapi::vaapi")
+            avutil.requires.append("libva::libva")
         if self.options.get_safe("with_xcb"):
             avutil.requires.append("xorg::x11")
 
