@@ -104,6 +104,8 @@ class CoinUtilsConan(ConanFile):
             # These are only used for sample datasets
             "--without-netlib",
             "--without-sample",
+            "--disable-dependency-linking",
+            "F77=unavailable",
         ])
         if self.settings.os in ["Linux", "FreeBSD"]:
             # enables compilation of thread aware CoinUtils
