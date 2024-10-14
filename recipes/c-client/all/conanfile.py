@@ -44,6 +44,7 @@ class CclientConan(ConanFile):
     def requirements(self):
         if not is_msvc(self):
             self.requires("openssl/[>=1.1 <4]")
+            self.requires("libxcrypt/4.4.36")
 
     def validate(self):
         if self.settings.os == "Windows" and not is_msvc(self):
@@ -60,12 +61,21 @@ class CclientConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    @property
+    def _cc(self):
+        tc_vars = AutotoolsToolchain(self).vars()
+        if "CC" in tc_vars:
+            return tc_vars["CC"]
+        compiler = str(self.settings.compiler)
+        return compiler if compiler in ["gcc", "clang"] else "cc"
+
     def generate(self):
         if is_msvc(self):
             tc = NMakeToolchain(self)
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
+            tc.make_args.append(f"CC={self._cc}")
             tc.generate()
             deps = AutotoolsDeps(self)
             deps.generate()
@@ -134,5 +144,4 @@ class CclientConan(ConanFile):
             self.cpp_info.defines = ["_DEFAULT_SOURCE"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["winmm", "ws2_32", "secur32", "crypt32"]
-        elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["crypt"]
+
