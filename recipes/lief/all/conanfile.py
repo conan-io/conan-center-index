@@ -122,6 +122,10 @@ class LiefConan(ConanFile):
         if self.settings.compiler.get_safe("libcxx") == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} does not support libstdc++")
 
+    def build_requirements(self):
+        if Version(self.version) >= "0.15.1":
+            self.tool_requires("cmake/[>=3.24 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
