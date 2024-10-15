@@ -2,9 +2,10 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, copy, get
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.files import chdir, copy, get, save
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps, GnuToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc
 
@@ -41,12 +42,7 @@ class NativefiledialogConan(ConanFile):
 
     def requirements(self):
         if self.settings.os in ["Linux", "FreeBSD"]:
-            # Using system GTK since the Conan version is not v2 compatible
-            self.requires("gtk/system")
-
-    def validate(self):
-        if self.settings.arch not in ["x86", "x86_64"]:
-            raise ConanInvalidConfiguration(f"{self.settings.arch} architecture is not supported")
+            self.requires("gtk/3.24.43")
 
     def build_requirements(self):
         self.tool_requires("premake/5.0.0-alpha15")
@@ -78,6 +74,18 @@ class NativefiledialogConan(ConanFile):
     def _build_subdir(self):
         return os.path.join(self.source_folder, "build", "subdir")
 
+    @property
+    def _arch(self):
+        return {
+            "x86": "x86",
+            "x86_64": "x86_64",
+            "armv5": "ARM",
+            "armv7": "ARM",
+            "armv8": "ARM64",
+            "mips": "MIPS",
+            "mips64": "MIPS64",
+        }[str(self.settings.arch)]
+
     def generate(self):
         venv = VirtualBuildEnv(self)
         venv.generate()
@@ -88,8 +96,15 @@ class NativefiledialogConan(ConanFile):
         else:
             tc = AutotoolsToolchain(self)
             tc.generate()
-            tc = AutotoolsDeps(self)
+            tc = PkgConfigDeps(self)
             tc.generate()
+
+        system = [f'architecture ("{self._arch}")']
+        if cross_building(self):
+            gnu_vars = GnuToolchain(self).extra_env.vars(self)
+            prefix = gnu_vars["STRIP"].replace("-strip", "-")
+            system.append(f'gccprefix ("{prefix}")')
+        save(self, os.path.join(self.generators_folder, "system.lua"), "\n".join(system))
 
         copy(self, "premake5.lua", os.path.join(self.source_folder, "build"), self._build_subdir)
 
@@ -102,7 +117,8 @@ class NativefiledialogConan(ConanFile):
                 generator = f"vs{ide_year}"
             else:
                 generator = "gmake2"
-            self.run(f"premake5 {generator}")
+            sys = os.path.join(self.generators_folder, "system.lua")
+            self.run(f"premake5 {generator} --systemscript={sys}")
 
             if is_msvc(self):
                 msbuild = MSBuild(self)
@@ -111,7 +127,7 @@ class NativefiledialogConan(ConanFile):
                 config = "debug" if self.settings.build_type == "Debug" else "release"
                 config += "_x86" if self.settings.arch == "x86" else "_x64"
                 autotools = Autotools(self)
-                autotools.make(args=[f"config={config}"])
+                autotools.make(args=[f"config={config}", "-j1"], target="nfd")
 
     @property
     def _lib_name(self):
@@ -128,6 +144,5 @@ class NativefiledialogConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = [self._lib_name]
-        # FIXME: uncomment once non-system GTK is available
-        # if self.settings.os in ["Linux", "FreeBSD"]:
-        #     self.cpp_info.requires = ["gtk::gtk+-3.0"]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.requires = ["gtk::gtk+-3.0"]
