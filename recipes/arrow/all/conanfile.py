@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -264,6 +264,11 @@ class ArrowConan(ConanFile):
             if self.dependencies["jemalloc"].options.enable_cxx:
                 raise ConanInvalidConfiguration("jemmalloc.enable_cxx of a static jemalloc must be disabled")
 
+        if self.options.with_thrift and not self.options.with_zlib:
+            raise ConanInvalidConfiguration("arrow:with_thrift requires arrow:with_zlib")
+
+        if self.options.with_parquet and not self.options.with_thrift:
+            raise ConanInvalidConfiguration("arrow:with_parquet requires arrow:with_thrift")
 
     def build_requirements(self):
         if Version(self.version) >= "13.0.0":
@@ -355,6 +360,7 @@ class ArrowConan(ConanFile):
         tc.variables["ARROW_WITH_THRIFT"] = bool(self.options.with_thrift)
         tc.variables["Thrift_SOURCE"] = "SYSTEM"
         if self.options.with_thrift:
+            tc.variables["ARROW_THRIFT"] = True
             tc.variables["THRIFT_VERSION"] = bool(self.dependencies["thrift"].ref.version) # a recent thrift does not require boost
             tc.variables["ARROW_THRIFT_USE_SHARED"] = bool(self.dependencies["thrift"].options.shared)
         tc.variables["ARROW_USE_OPENSSL"] = self.options.with_openssl
