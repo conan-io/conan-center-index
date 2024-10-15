@@ -4,7 +4,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, GnuToolchain
 from conan.tools.layout import basic_layout
 import os
 
@@ -62,10 +62,8 @@ class LibTarConan(ConanFile):
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
-        tc = AutotoolsToolchain(self)
-        tc.configure_args.extend([
-            "--with-zlib" if self.options.with_zlib else "--without-zlib",
-        ])
+        tc = GnuToolchain(self)
+        tc.configure_args["--with-zlib"] = "yes" if self.options.with_zlib else "no"
         tc.generate()
         deps = AutotoolsDeps(self)
         deps.generate()
@@ -78,6 +76,10 @@ class LibTarConan(ConanFile):
                 "AC_CHECK_LIB([z], [gzread])",
                 "AC_CHECK_LIB([{}], [gzread])".format(self.dependencies["zlib"].cpp_info.aggregated_components().libs[0]),
             )
+        if cross_building(self):
+            replace_in_file(self, os.path.join(self.source_folder, "libtar", "Makefile.in"),
+                            "INSTALL_PROGRAM	= @INSTALL_PROGRAM@ -s",
+                            "INSTALL_PROGRAM	= @INSTALL_PROGRAM@ -s --strip-program=${STRIP}")
 
     def build(self):
         self._patch_sources()
