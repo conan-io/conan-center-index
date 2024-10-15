@@ -651,6 +651,7 @@ required_for_references:
 - kissfft
 - kitten
 - kmod
+- kplot
 - krb5
 - ktx
 - kuba-zip
