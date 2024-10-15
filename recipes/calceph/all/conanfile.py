@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import chdir, copy, get, replace_in_file, rm, rmdir
@@ -15,7 +14,7 @@ class CalcephConan(ConanFile):
     name = "calceph"
     description = "C Library designed to access the binary planetary ephemeris " \
                   "files, such INPOPxx, JPL DExxx and SPICE ephemeris files."
-    license = ["CECILL-C", "CECILL-B", "CECILL-2.1"]
+    license = ("CECILL-C", "CECILL-B", "CECILL-2.1")
     topics = ("ephemeris", "astronomy", "space", "planet")
     homepage = "https://www.imcce.fr/inpop/calceph"
     url = "https://github.com/conan-io/conan-center-index"
