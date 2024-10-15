@@ -79,7 +79,7 @@ class LibsndioConan(ConanFile):
         tc.configure_args.append("--datadir=${prefix}/res")
 
         # Bundled `configure` script does not support these options, so remove
-        exclusions = ["--enable-shared", "--disable-shared", "--disable-static", "--enable-static", "--sbindir", "--oldincludedir"]
+        exclusions = ["--enable-shared", "--disable-shared", "--disable-static", "--enable-static", "--sbindir", "--oldincludedir", "--host", "--build"]
         tc.configure_args = [arg for arg in tc.configure_args if not any(exclusion in arg for exclusion in exclusions)]
 
         # Add alsa support
