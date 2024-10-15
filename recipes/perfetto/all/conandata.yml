@@ -1,7 +1,7 @@
 sources:
-  "48.0":
-    url: "https://github.com/google/perfetto/archive/refs/tags/v48.0.tar.gz"
-    sha256: "1274fc866c50f273958ba3c5fffe493f67a4aec0eb4c471ddb99e36f26fd1af0"
+  "48.1":
+    url: "https://github.com/google/perfetto/archive/refs/tags/v48.1.tar.gz"
+    sha256: "8d1c6bf44f1bdb098ab70cd60da3ce6b6e731e4eb21dd52b2527cbdcf85d984d"
   "47.0":
     url: "https://github.com/google/perfetto/archive/refs/tags/v47.0.tar.gz"
     sha256: "9bbd38a0f074038bde6ccbcf5f2ff32587eb60faec254932268ecb6f17f18186"
