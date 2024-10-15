@@ -17,12 +17,14 @@ class LibmeshbConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_gmf_asio": [True, False]
+        "with_gmf_asio": [True, False],
+        "enable_fortran": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_gmf_asio": False
+        "with_gmf_asio": False,
+        "enable_fortran": False,
     }
 
     def config_options(self):
@@ -50,6 +52,8 @@ class LibmeshbConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["WITH_GMF_AIO"] = self.options.get_safe("with_gmf_asio", False)
+        if not self.options.enable_fortran:
+            tc.variables["CMAKE_Fortran_COMPILER"] = ""
         tc.generate()
 
     def _patch_sources(self):
