@@ -4,10 +4,10 @@ import shutil
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building
+from conan.tools.build import can_run
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, save, replace_in_file, chdir, rmdir, rm, rename, copy
-from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.gnu import Autotools, PkgConfigDeps, GnuToolchain
 from conan.tools.layout import basic_layout
 
 
@@ -84,8 +84,6 @@ class NetpbmConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration("Windows is not supported. Contributions are welcome!")
-        if cross_building(self):
-            raise ConanInvalidConfiguration("Cross-building is not supported")
 
     def build_requirements(self):
         self.tool_requires("make/4.4.1")
@@ -117,29 +115,28 @@ class NetpbmConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
 
-        tc = AutotoolsToolchain(self)
-        config = []
+        tc = GnuToolchain(self)
         lib_type, suffix = self._libtype_and_suffix
-        config.append(f"NETPBMLIBTYPE={lib_type}")
-        config.append(f"NETPBMLIBSUFFIX={suffix}")
-        config.append(f"STATICLIB_TOO={'N' if self.options.shared else 'Y'}")
-        config.append(f"WANT_SSE={'Y' if self.settings.arch in ['x86', 'x86_64'] else 'N'}")
-        config.append("DEFAULT_TARGET=nonmerge")
-        config.append("LDRELOC=ld --reloc")
+        tc.make_args["NETPBMLIBTYPE"] = lib_type
+        tc.make_args["NETPBMLIBSUFFIX"] = suffix
+        tc.make_args["STATICLIB_TOO"] = "N" if self.options.shared else "Y"
+        tc.make_args["WANT_SSE"] = "Y" if self.settings.arch in ["x86", "x86_64"] else "N"
+        tc.make_args["DEFAULT_TARGET"] = "nonmerge"
+        tc.make_args["LDRELOC"] = "ld --reloc"
 
         if is_apple_os(self):
-            config.append("LDSHLIB=-shared -dynamiclib -install_name @rpath/libnetpbm.dylib")
+            tc.make_args["LDSHLIB"] = "-shared -dynamiclib -install_name @rpath/libnetpbm.dylib"
 
         def _configure_dependency(name, pkg, lib):
             cpp_info = self.dependencies[pkg].cpp_info.aggregated_components()
             # The file does not need to exist. The build script simply strips 'lib*.a' from the paths.
             lib_path = os.path.join(cpp_info.libdir, f"lib{lib}.a")
-            config.append(f"{name}LIB={lib_path}")
-            config.append(f"{name}HDR_DIR={cpp_info.includedir}")
+            tc.make_args[f"{name}LIB"] = lib_path
+            tc.make_args[f"{name}HDR_DIR"] = cpp_info.includedir
 
         def _use_pkgconfig(name):
-            config.append(f"{name}LIB=USE_PKGCONFIG.a")
-            config.append(f"{name}HDR_DIR=USE_PKGCONFIG.a")
+            tc.make_args[f"{name}LIB"] = "USE_PKGCONFIG.a"
+            tc.make_args[f"{name}HDR_DIR"] = "USE_PKGCONFIG.a"
 
         if self.options.tools:
             _configure_dependency("TIFF", "libtiff", "tiff")
@@ -161,9 +158,8 @@ class NetpbmConan(ConanFile):
         if is_apple_os(self):
             # For vasprintf
             cflags.append("-D_DARWIN_C_SOURCE")
-        config.append(f"CFLAGS={' '.join(cflags)}")
-
-        tc.make_args.extend(config)
+        tc.make_args[f"CFLAGS"] = " ".join(cflags)
+        tc.make_args["CC"] = tc.extra_env.vars(self)["CC"]
         tc.generate()
 
         deps = PkgConfigDeps(self)
@@ -186,6 +182,10 @@ class NetpbmConan(ConanFile):
         with chdir(self, self.source_folder):
             shutil.copy("config.mk.in", "config.mk")
             autotools = Autotools(self)
+            if not can_run(self):
+                # Build buildtools using any native C compiler
+                with chdir(self, os.path.join(self.source_folder, "buildtools")):
+                    autotools.make(args=["CC=cc"])
             autotools.make()
 
     def package(self):
