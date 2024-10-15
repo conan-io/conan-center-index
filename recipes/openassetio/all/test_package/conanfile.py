@@ -10,11 +10,9 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
-        self.requires("cpython/3.10.0")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25 <4]")
-        self.tool_requires("cpython/<host_version>")
 
     def layout(self):
         cmake_layout(self)
@@ -23,7 +21,7 @@ class TestPackageConan(ConanFile):
         tc = CMakeToolchain(self)
 
         tc.variables["OPENASSETIOTEST_GLIBCXX_USE_CXX11_ABI"] = self.settings.get_safe("compiler.libcxx") == "libstdc++11"
-        tc.variables["OPENASSETIOTEST_ENABLE_PYTHON"] = self.dependencies["openassetio"].options.with_python
+        tc.variables["OPENASSETIOTEST_ENABLE_PYTHON"] = False
 
         tc.generate()
         tc = CMakeDeps(self)
