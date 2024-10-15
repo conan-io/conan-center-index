@@ -15,6 +15,7 @@ from conan.tools.files import (
     rename,
     replace_in_file
 )
+from conan.tools.gnu import GnuToolchain
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.scm import Version
 
@@ -183,14 +184,6 @@ class LLVMCoreConan(ConanFile):
         if self.options.exceptions and not self.options.rtti:
             raise ConanInvalidConfiguration("Cannot enable exceptions without rtti support")
 
-        if cross_building(self):
-            # FIXME support cross compilation
-            #  For Cross Building, LLVM builds a "native" toolchain in a subdirectory of the main build directory.
-            #  This subdirectory would need to have the conan cmake configuration files for the build platform
-            #  installed into it for a cross build to be successful.
-            #  see also https://llvm.org/docs/HowToCrossCompileLLVM.html
-            raise ConanInvalidConfiguration("Cross compilation is not supported. Contributions are welcome!")
-
     def validate_build(self):
         if os.getenv("CONAN_CENTER_BUILD_SERVICE") and self.settings.build_type == "Debug":
             if self.settings.os == "Linux":
@@ -287,6 +280,18 @@ class LLVMCoreConan(ConanFile):
             # Workaround for: https://github.com/conan-io/conan/issues/13560
             libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
             tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
+
+        if cross_building(self):
+            tc.variables["LLVM_HOST_TRIPLE"] = GnuToolchain(self).triplets_info["host"]["triplet"]
+            # The native build utilities don't need any external dependencies.
+            tc.variables["CROSS_TOOLCHAIN_FLAGS_NATIVE"] = ";".join([
+                "-DLLVM_ENABLE_LIBEDIT=FALSE",
+                "-DLLVM_ENABLE_Z3_SOLVER=FALSE",
+                "-DLLVM_ENABLE_FFI=FALSE",
+                "-DLLVM_ENABLE_ZLIB=FALSE",
+                "-DLLVM_ENABLE_LIBXML2=FALSE",
+                "-DLLVM_ENABLE_TERMINFO=FALSE",
+            ])
 
         tc.cache_variables.update(cmake_variables)
         tc.generate()
