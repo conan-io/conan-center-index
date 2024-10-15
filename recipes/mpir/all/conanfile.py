@@ -62,10 +62,6 @@ class MpirConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def validate(self):
-        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross-building doesn't work (yet)")
-
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
         self.tool_requires("yasm/1.3.0")
