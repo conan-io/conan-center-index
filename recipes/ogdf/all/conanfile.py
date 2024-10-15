@@ -68,6 +68,8 @@ class OGDFConan(ConanFile):
                                     ("src", "GraphIO_graphml.cpp"),
                                     ("src", "GraphIO_gexf.cpp")]:
             replace_in_file(self, join(self.source_folder, dir_name, "ogdf", "fileformats", file_name), "ogdf/lib/pugixml/pugixml.h", "pugixml.hpp")
+        # -march=native is not portable
+        replace_in_file(self, join(self.source_folder, "cmake", "compiler-specifics.cmake"), "-march=native", "")
 
     def build(self):
         self._patch_sources()
