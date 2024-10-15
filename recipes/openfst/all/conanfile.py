@@ -3,8 +3,8 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import check_min_cppstd, cross_building
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
+from conan.tools.build import cross_building, check_min_cppstd, can_run
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 
@@ -108,6 +108,16 @@ class OpenFstConan(ConanFile):
         tc.extra_cflags.append("-pthread")
         tc.extra_cxxflags.append("-pthread")
         tc.generate()
+
+    def _patch_sources(self):
+        if not can_run(self):
+            # Skip a "Float equality is good" try_run check.
+            replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                            'if test "$cross_compiling" = yes',
+                            'if false')
+            replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                            'if ac_fn_cxx_try_run "$LINENO"',
+                            'if true')
 
     def build(self):
         autotools = Autotools(self)
