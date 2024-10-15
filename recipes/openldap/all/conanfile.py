@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rm, rmdir, replace_in_file
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, GnuToolchain
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.layout import basic_layout
 
@@ -63,24 +63,22 @@ class OpenldapConan(ConanFile):
         def yes_no(v):
             return "yes" if v else "no"
 
-        tc = AutotoolsToolchain(self)
-        tc.configure_args += [
-            "--with-cyrus_sasl={}".format(yes_no(self.options.with_cyrus_sasl)),
-            "--without-fetch",
-            "--with-tls=openssl",
-            "--enable-auditlog",
-            "--libexecdir=${prefix}/bin",
-            f"systemdsystemunitdir={os.path.join(self.package_folder, 'res')}",
-        ]
+        tc = GnuToolchain(self)
+        tc.configure_args["--with-cyrus_sasl"] = yes_no(self.options.with_cyrus_sasl)
+        tc.configure_args["--with-fetch"] = "no"
+        tc.configure_args["--with-tls"] = "openssl"
+        tc.configure_args["--enable-auditlog"] = "yes"
+        tc.configure_args["--libexecdir"] = "${prefix}/bin"
+        tc.configure_args["systemdsystemunitdir"] = os.path.join(self.package_folder, 'res')
         if cross_building(self):
             # When cross-building, yielding_select should be explicit:
             # https://git.openldap.org/openldap/openldap/-/blob/OPENLDAP_REL_ENG_2_5/configure.ac#L1636
-            tc.configure_args.append("--with-yielding_select=yes")
+            tc.configure_args["--with-yielding_select"] = "yes"
             # Workaround: https://bugs.openldap.org/show_bug.cgi?id=9228
-            tc.configure_args.append("ac_cv_func_memcmp_working=yes")
+            tc.configure_args["ac_cv_func_memcmp_working"] = "yes"
         if is_apple_os(self):
             # macOS Ventura does not have soelim, but mandoc_soelim
-            tc.make_args.append("SOELIM=soelim" if shutil.which("soelim") else "SOELIM=mandoc_soelim")
+            tc.make_args["SOELIM"] = "soelim" if shutil.which("soelim") else "mandoc_soelim"
         tc.generate()
         tc = AutotoolsDeps(self)
         tc.generate()
