@@ -1,7 +1,7 @@
 sources:
-  "9.6.1":
-    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.6.1.tar.gz"
-    sha256: "98cf497c1d6d0a927142d2002a0b6b4816a0998c74fda9ae7b1bdaf6b784e895"
+  "9.7.2":
+    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.7.2.tar.gz"
+    sha256: "13e9c41d290199ee0185590d4fa9d327422aaf75765b3193945303c3c314e07d"
   "9.5.2":
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.5.2.tar.gz"
     sha256: "B20780586D3DF4A3C5BCBDE341A2C1946B03D18237960BDA5BC5E9538F42AF40"
@@ -30,10 +30,6 @@ sources:
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v6.20.3.tar.gz"
     sha256: "c6502c7aae641b7e20fafa6c2b92273d935d2b7b2707135ebd9a67b092169dca"
 patches:
-  "9.6.1":
-    - patch_file: "patches/9.6.1-0001-support-clang.patch"
-      patch_description: "Fix build with gcc 13 by including cstdint"
-      patch_type: "portability"
   "6.29.5":
     - patch_file: "patches/6.29.5-0001-add-include-cstdint-for-gcc-13.patch"
       patch_description: "Fix build with gcc 13 by including cstdint"
