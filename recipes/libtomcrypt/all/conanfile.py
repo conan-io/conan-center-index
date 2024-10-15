@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, chdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, GnuToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, NMakeDeps
 
@@ -76,17 +76,20 @@ class LibTomCryptConan(ConanFile):
             venv = VirtualRunEnv(self)
             venv.generate(scope="build")
 
-        tc = AutotoolsToolchain(self)
+        tc = GnuToolchain(self)
         if self.settings.os == "Windows" and not is_msvc(self):
             tc.ldflags.append("-lcrypt32")
-        if self.settings.os == "Windows":
-            makefile = "makefile.mingw"
-        else:
-            if self.options.shared:
-                makefile = "makefile.shared"
-            else:
-                makefile = "makefile.unix"
-        tc.make_args += ["-f", makefile]
+        cflags = tc.cflags + ["-DUSE_LTM", "-DLTM_DESC"] + [f"-D{d}" for d in tc.defines]
+        ldflags = list(tc.ldflags)
+        deps = AutotoolsDeps(self)
+        dep_vars = deps.environment.vars(self)
+        cflags.append(dep_vars.get("CFLAGS", ""))
+        cflags.append(dep_vars.get("CPPFLAGS", ""))
+        ldflags.append(dep_vars.get("LDFLAGS", ""))
+        tc.make_args["CFLAGS"] = " ".join(cflags)
+        tc.make_args["LDFLAGS"] = " ".join(ldflags)
+        tc.make_args["CC"] = tc.extra_env.vars(self)["CC"]
+        tc.make_args["STRIP"] = tc.extra_env.vars(self).get("STRIP", "strip")
         tc.generate()
 
         if is_msvc(self):
@@ -113,7 +116,14 @@ class LibTomCryptConan(ConanFile):
                     else:
                         target = "libtomcrypt.a"
                 autotools = Autotools(self)
-                autotools.make(target=target)
+                if self.settings.os == "Windows":
+                    makefile = "makefile.mingw"
+                else:
+                    if self.options.shared:
+                        makefile = "makefile.shared"
+                    else:
+                        makefile = "makefile.unix"
+                autotools.make(target=target, args=[f"-f {makefile}"])
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
