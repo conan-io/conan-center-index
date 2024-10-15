@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.build import can_run
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -76,6 +77,10 @@ class LibopingConan(ConanFile):
             "--without-ncurses",
             "--without-perl-bindings",
         ]
+        if not can_run(self):
+            # Add a guess for a try_run check.
+            # All modern compilers return non-NULL for malloc(0).
+            tc.configure_args.append("ac_cv_func_malloc_0_nonnull=yes")
         tc.generate()
 
     def build(self):
