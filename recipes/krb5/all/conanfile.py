@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, can_run
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches, chdir
@@ -59,8 +59,7 @@ class Krb5Conan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} building with static OpenSSL generates linking errors. Please use '-o openssl/*:shared=True'")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -88,6 +87,13 @@ class Krb5Conan(ConanFile):
             "--enable-dns-for-realm",
             f"--with-keyutils={self.package_folder}",
             f"--with-tcl={(self.dependencies['tcl'].package_folder if self.options.get_safe('with_tcl') else 'no')}",
+            ])
+        if not can_run(self):
+            # Use values from Linux GCC as a guess for try_compile checks.
+            tc.configure_args.extend([
+                "krb5_cv_attr_constructor_destructor=yes,yes",
+                "ac_cv_func_regcomp=yes",
+                "ac_cv_printf_positional=yes",
             ])
         tc.generate()
 
