@@ -84,6 +84,8 @@ class MariadbConnectorcConan(ConanFile):
         else:
             tc.variables["WITH_MYSQLCOMPAT"] = False
             tc.variables["WITH_ICONV"] = self.options.with_iconv
+            if not self.options.get_safe("with_krb5"):
+                tc.variables["KRB5_CONFIG"] = ""
         tc.variables["WITH_UNIT_TESTS"] = False
         tc.variables["WITH_DYNCOL"] = self.options.dyncol
         tc.variables["WITH_EXTERNAL_ZLIB"] = True
