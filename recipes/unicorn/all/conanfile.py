@@ -80,9 +80,8 @@ class UnicornConan(ConanFile):
                 f"Invalid arch(s) in supported_archs option: {unsupported_archs}\n"
                 f"Valid supported architectures are: {self._all_supported_archs}"
             )
-        if "arm" in self.settings.arch:
-            # FIXME: will/should be fixed with unicorn 2 (https://github.com/unicorn-engine/unicorn/issues/1379)
-            raise ConanInvalidConfiguration("arm builds of unicorn are currently unsupported")
+        if "arm" in self.settings.arch and Version(self.version) < "2.0":
+            raise ConanInvalidConfiguration(f"{self.version} does not support ARM architectures")
 
     def build_requirements(self):
         if self._needs_jwasm:
