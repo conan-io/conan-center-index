@@ -14,8 +14,6 @@ on:
 
 jobs:
   stale:
-    if: github.repository == 'conan-io/conan-center-index'
-
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
