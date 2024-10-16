@@ -148,6 +148,7 @@ class SundialsConan(ConanFile):
         VirtualBuildEnv(self).generate()
 
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_Fortran_COMPILER"] = ""
         tc.variables["EXAMPLES_ENABLE_C"] = False
         tc.variables["EXAMPLES_ENABLE_CXX"] = False
         tc.variables["EXAMPLES_INSTALL"] = False
@@ -175,6 +176,7 @@ class SundialsConan(ConanFile):
         tc.variables["ENABLE_HIP"] = False
         tc.variables["ENABLE_SYCL"] = False
         tc.variables["ENABLE_LAPACK"] = self.options.get_safe("with_lapack", False)
+        tc.variables["LAPACK_WORKS"] = True
         tc.variables["ENABLE_GINKGO"] = self.options.get_safe("with_ginkgo", False)
         tc.variables["SUNDIALS_GINKGO_BACKENDS"] = ";".join(self._ginkgo_backends)
         tc.variables["GINKGO_WORKS"] = True
