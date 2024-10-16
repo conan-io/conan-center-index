@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain, CMakeDeps
-from conan.tools.files import copy, get, save
+from conan.tools.files import copy, get, save, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.47.0"
@@ -97,6 +97,10 @@ class SamariumConan(ConanFile):
     def _patch_sources(self):
         # Force-disable all tests
         save(self, os.path.join(self.source_folder, "test", "CMakeLists.txt"), "")
+        # Disable SSE4.1 for non-x86 architectures
+        if self.settings.arch not in ["x86", "x86_64"]:
+            replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"),
+                            "-msse4.1;-mpclmul;", "")
 
     def build(self):
         self._patch_sources()
