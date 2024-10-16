@@ -63,14 +63,14 @@ class DpdkConan(ConanFile):
         self.requires("libnuma/2.0.19", options={"shared": True})
         self.requires("libelf/0.8.13")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("linux-headers-generic/5.15.128", transitive_headers=True)
+        # self.requires("linux-headers-generic/6.5.9", transitive_headers=True)
         if self.options.with_jansson:
             # rte_metrics_telemetry.h
             self.requires("jansson/2.14", transitive_headers=True, transitive_libs=True)
         if self.options.with_libarchive:
             self.requires("libarchive/3.7.6")
         if self.options.with_libbpf:
-            self.requires("libbpf/1.3.0")
+            self.requires("libbpf/1.4.6")
         if self.options.with_libbsd:
             self.requires("libbsd/0.10.0")
         if self.options.with_libibverbs:
