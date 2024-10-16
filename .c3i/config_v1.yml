@@ -54,6 +54,8 @@ tasks:
     detailed_status_checks: false
     update_labels: true
     build_bump_deps_pr: false
+    user_feedback:
+      description: "> [!WARNING]\n> Conan Center will stop receiving updates for Conan 1.x packages soon - please see [announcement](https://github.com/conan-io/conan-center-index/discussions/25461)."
     description_bump_deps_pr: ":vertical_traffic_light: Thank for your Bump dependencies PR. The build service will be triggered soon by a Conan team member."
     wait_for_multibranch:  # CCI jobs should wait for other multibranch job for that same PR
       job_name: "prod-v2/cci"  # e.g. "cci-v2/cci" -> this means waiting for cci-v2/cci/PR-<number>
