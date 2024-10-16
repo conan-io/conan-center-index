@@ -10,6 +10,7 @@ on:
   schedule:
   - cron: '34 6 * * *'
   workflow_dispatch:
+  push:
 
 jobs:
   stale:
