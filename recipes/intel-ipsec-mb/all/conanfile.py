@@ -54,6 +54,9 @@ class PackageConan(ConanFile):
     def validate(self):
         if self.settings.os not in ("FreeBSD", "Linux", "Windows"):
             raise ConanInvalidConfiguration(f"{self.ref} does not support the O.S. {self.settings.os}.")
+        if self.settings.arch not in ["x86", "x86_64"]:
+            # Relies on x86 SIMD intrinsics.
+            raise ConanInvalidConfiguration(f"{self.ref} does not support the architecture {self.settings.arch}.")
 
     def build_requirements(self):
         self.tool_requires("nasm/2.15.05")
