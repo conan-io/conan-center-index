@@ -1,3 +1,25 @@
+--- a/src/osgEarthDrivers/lerc/CMakeLists.txt
++++ b/src/osgEarthDrivers/lerc/CMakeLists.txt
+@@ -1,15 +1,6 @@
+-include_directories(BEFORE ../../third_party/lerc/include )
+-
+ add_osgearth_plugin(
+     TARGET osgdb_lerc
+     SOURCES
+-        ReaderWriterLERC.cpp
+-        ../../third_party/lerc/src/LercLib/BitMask.cpp
+-        ../../third_party/lerc/src/LercLib/BitStuffer2.cpp
+-        ../../third_party/lerc/src/LercLib/Huffman.cpp
+-        ../../third_party/lerc/src/LercLib/Lerc.cpp
+-        ../../third_party/lerc/src/LercLib/Lerc_c_api_impl.cpp
+-        ../../third_party/lerc/src/LercLib/Lerc2.cpp
+-        ../../third_party/lerc/src/LercLib/RLE.cpp
+-        ../../third_party/lerc/src/LercLib/Lerc1Decode/BitStuffer.cpp
+-        ../../third_party/lerc/src/LercLib/Lerc1Decode/CntZImage.cpp )
+\ No newline at end of file
++        ReaderWriterLERC.cpp)
++find_package(lerc REQUIRED CONFIG)
++target_link_libraries(osgdb_lerc PRIVATE lerc::lerc)
 --- src/osgEarthDrivers/lerc/ReaderWriterLERC.cpp
 +++ src/osgEarthDrivers/lerc/ReaderWriterLERC.cpp
 @@ -66,7 +66,7 @@

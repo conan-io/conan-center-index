@@ -1,16 +1,13 @@
 sources:
-  "3.6":
-    url: "https://github.com/gwaldron/osgearth/archive/refs/tags/osgearth-3.6.tar.gz"
-    sha256: "98fbd88c233cd8f5f507a56f19b49e6893ba28f551a1f8f94f5f94c28b747357"
+  "3.7":
+    url: "https://github.com/gwaldron/osgearth/archive/refs/tags/osgearth-3.7.tar.gz"
+    sha256: "d13d0f749759f8f012eb1fb7cd29ae30b73fc4463b817c8c31f0ac408cfadd16"
 patches:
-  "3.6":
-    - patch_file: "patches/0001-Fix-tingltf-rapidjson-includes.patch"
-      patch_description: "Fix rapidjson includes in vendored tingltf"
-      patch_type: "portability"
-    - patch_file: "patches/0002-Unvendor-dependencies.patch"
-      patch_description: "Unvendor dependencies"
-      patch_type: "portability"
+  "3.7":
+    - patch_file: "patches/0001-unvendor-rapidjson.patch"
+      patch_description: "Unvendor rapidjson"
+      patch_type: "conan"
+    - patch_file: "patches/0002-unvendor-lerc.patch"
+      patch_description: "Unvendor lerc and update library calls for v4 compatibility"
+      patch_type: "conan"
     - patch_file: "patches/3.5-mingw.patch"
-    - patch_file: "patches/3.5-lerc-api-upgrades.patch"
-      patch_description: "Upgrade lerc library calls for v4 compatibility"
-      patch_type: "portability"
