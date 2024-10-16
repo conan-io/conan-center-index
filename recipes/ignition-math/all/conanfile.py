@@ -57,13 +57,6 @@ class IgnitionMathConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if min_version and Version(self.settings.compiler.version) < min_version:
-            raise ConanInvalidConfiguration(
-                f"{self.name} requires c++17 support. "
-                f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -72,17 +65,22 @@ class IgnitionMathConan(ConanFile):
         self.requires("ignition-cmake/2.17.1", visible=False)
         self.requires("eigen/3.4.0", transitive_headers=True)
         if self.options.enable_swig:
-            self.requires("swig/4.1.1")
+            self.requires("swig/4.2.1")
 
     def validate(self):
-        if cross_building(self) and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("sorry, M1 cross builds are not currently supported, giving up!")
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._minimum_cpp_standard)
+        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
+        if min_version and Version(self.settings.compiler.version) < min_version:
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires c++17 support. "
+                f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it.")
 
     def build_requirements(self):
-        self.tool_requires("ignition-cmake/<host_version>")
+        self.tool_requires("ignition-cmake/2.17.1")
         self.tool_requires("doxygen/1.9.4")
         if self.options.enable_swig:
-            self.tool_requires("swig/<host_version>")
+            self.tool_requires("swig/4.2.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
