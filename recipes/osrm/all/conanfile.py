@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -129,6 +130,14 @@ class OsrmConan(ConanFile):
         tc.cache_variables["ENABLE_ASSERTIONS"] = self.options.get_safe("enable_assertions", False)
         tc.cache_variables["ENABLE_LTO"] = self.options.enable_lto
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
+        if self.settings.compiler in ["gcc", "clang", "apple-clang"]:
+            # TODO: should probably be fixed instead
+            # include/sol/stack_field.hpp:116:61: error: array subscript ‘const char [30][0]’ is partly outside array bounds of ‘const char [18]’ [-Werror=array-bounds=]
+            tc.extra_cxxflags.append("-Wno-array-bounds")
+            # Disable -Werror=deprecated-declarations due to std::is_pod in C++20
+            tc.extra_cxxflags.append("-Wno-deprecated-declarations")
+            # include/updater/csv_file_parser.hpp:108:45: error: top-level comma expression in array subscript is deprecated [-Werror=comma-subscript]
+            tc.extra_cxxflags.append("-Wno-comma-subscript")
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -152,6 +161,17 @@ class OsrmConan(ConanFile):
                 rmdir(self, subdir)
                 save(self, subdir.joinpath("CMakeLists.txt"), "")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), " $<TARGET_OBJECTS:MICROTAR>", "")
+
+        # Add missing includes.
+        # TODO: submit upstream
+        path = Path(self.source_folder, "include", "util", "coordinate.hpp")
+        path.write_text("#include <cstdint>\n" + path.read_text())
+        path = Path(self.source_folder, "src", "util", "opening_hours.cpp")
+        path.write_text("#include <cstdint>\n" + path.read_text())
+        path = Path(self.source_folder, "include", "util", "query_heap.hpp")
+        path.write_text("#include <cstdint>\n" + path.read_text())
+        path = Path(self.source_folder, "include", "extractor", "suffix_table.hpp")
+        path.write_text("#include <vector>\n" + path.read_text())
 
     def build(self):
         self._patch_source()
