@@ -1,0 +1,76 @@
+From a41c5d5386e682752c1e60dc370d4b673d77e2ef Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fr=C3=A9d=C3=A9ric=20Nadeau?= <fred.nadeau@gmail.com>
+Date: Thu, 2 May 2024 19:38:39 -0400
+Subject: [PATCH] Add support for conan
+
+---
+ .../gst-plugins-base/ext/gl/meson.build       |  4 ++++
+ .../gst-libs/gst/gl/meson.build               | 23 +++++++++++++++----
+ 2 files changed, 22 insertions(+), 5 deletions(-)
+
+diff --git a/subprojects/gst-plugins-base/ext/gl/meson.build b/subprojects/gst-plugins-base/ext/gl/meson.build
+index ad514014e9..e8589550a7 100644
+--- a/subprojects/gst-plugins-base/ext/gl/meson.build
++++ b/subprojects/gst-plugins-base/ext/gl/meson.build
+@@ -138,6 +138,10 @@ if gl_nvmm
+   optional_deps += [nvbuf_utils_dep]
+ endif
+ 
++if glext_dep.found()
++  optional_deps += glext_dep
++endif
++
+ gstopengl = library('gstopengl',
+   opengl_sources,
+   c_args : gst_plugins_base_args + extra_c_args,
+diff --git a/subprojects/gst-plugins-base/gst-libs/gst/gl/meson.build b/subprojects/gst-plugins-base/gst-libs/gst/gl/meson.build
+index b97ec0c049..361bedaab9 100644
+--- a/subprojects/gst-plugins-base/gst-libs/gst/gl/meson.build
++++ b/subprojects/gst-plugins-base/gst-libs/gst/gl/meson.build
+@@ -402,6 +402,10 @@ if need_api_opengl != 'no'
+ # include <GL/glext.h>
+ #endif
+ '''
++    glext_dep = dependency('glext', method: 'pkg-config', required : false)
++    if glext_dep.found()
++      gl_lib_deps += glext_dep
++    endif
+   endif
+ endif
+ 
+@@ -764,11 +768,16 @@ if host_system == 'windows' and need_win_win32 != 'no'
+     have_wgl = false
+     have_egl_win32 = false
+     if need_platform_wgl != 'no'
+-      wglext_h = cc.has_header('GL/wglext.h',
+-                               prefix : '''#include <windows.h>
+-                                           #include <GL/gl.h>''',
+-                               include_directories : compat_includes)
+-      have_wgl = wglext_h and gl_dep.found()
++      wglext_dep = dependency('wglext', method: 'pkg-config', required : false)
++      if not wglext_dep.found()
++        wglext_h = cc.has_header('GL/wglext.h',
++                                prefix : '''#include <windows.h>
++                                            #include <GL/gl.h>''',
++                                include_directories : compat_includes)
++        have_wgl = wglext_h and gl_dep.found()
++      else
++        have_wgl = wglext_dep.found()
++      endif
+     endif
+ 
+     have_egl_win32 = enabled_gl_platforms.contains('egl') and gles2_dep.found()
+@@ -789,6 +798,10 @@ if host_system == 'windows' and need_win_win32 != 'no'
+       ]
+       enabled_gl_platforms += 'wgl'
+       glconf.set('GST_GL_HAVE_PLATFORM_WGL', 1)
++      if wglext_dep.found()
++        gl_platform_deps += wglext_dep
++        gl_winsys_deps += wglext_dep
++      endif
+     endif
+   endif
+ endif
+-- 
+2.40.0.windows.1
+
