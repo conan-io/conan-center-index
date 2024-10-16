@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 
@@ -169,8 +169,11 @@ class Imlib2Conan(ConanFile):
         ])
         tc.generate()
 
-        tc = PkgConfigDeps(self)
-        tc.generate()
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
         if is_msvc(self):
             env = Environment()
