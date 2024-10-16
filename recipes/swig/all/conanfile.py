@@ -1,4 +1,6 @@
 import os
+import re
+from pathlib import Path
 
 from conan import ConanFile
 from conan.tools.apple import is_apple_os, to_apple_arch
@@ -150,6 +152,14 @@ class SwigConan(ConanFile):
         # https://github.com/swig/swig/blob/v4.0.2/configure.ac#L65-L86
         replace_in_file(self, os.path.join(self.source_folder, "configure.ac"),
                         'AS_IF([test "x$with_pcre" != xno],', 'AS_IF([false],')
+        configure_ac = Path(self.source_folder, "configure.ac")
+        # The project configure.ac looks for TclConfig.sh very stubbornly
+        # and provides no config variables to disable it.
+        # Configuration fails if Tcl is not present on the system.
+        content = configure_ac.read_text()
+        content, n = re.subn(r'# Look for Tcl.+AC_SUBST\(TCLINCLUDE\)', r'AC_SUBST(TCLINCLUDE)', content, flags=re.DOTALL | re.MULTILINE)
+        assert n == 1, "Failed to disable TCL autodetection in configure.ac"
+        configure_ac.write_text(content)
 
     def build(self):
         self._patch_sources()
