@@ -64,24 +64,19 @@ class IgnitionUtilsConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("ignition-cmake/2.10.0", visible=False)
+        self.requires("ignition-cmake/2.17.1", visible=False)
         if self.options.ign_utils_vendor_cli11:
-            self.requires("cli11/2.3.2")
+            self.requires("cli11/2.4.2")
 
     def validate(self):
-        if is_apple_os(self) and self.settings.arch == "armv8":
-            raise ConanInvalidConfiguration("sorry, M1 builds are not currently supported, give up!")
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warning(f"{self.name} recipe lacks information about the {self.settings.compiler} compiler support.")
-        else:
-            if Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.name} requires c++17 support. "
-                    f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it."
-                )
+        if min_version and Version(self.settings.compiler.version) < min_version:
+            raise ConanInvalidConfiguration(
+                f"{self.name} requires c++17 support. "
+                f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it."
+            )
 
     def requirements(self):
         self.requires("doxygen/[>=1.8 <2]")
@@ -89,7 +84,7 @@ class IgnitionUtilsConan(ConanFile):
             self.requires("cli11/2.1.2")
 
     def build_requirements(self):
-        self.tool_requires("ignition-cmake/<host_version>")
+        self.tool_requires("ignition-cmake/2.17.1")
         self.tool_requires("doxygen/1.9.4")
         if self._settings_build.os == "Windows":
             # For sed
