@@ -6,14 +6,14 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0.9"
 
 
 class RecklessConan(ConanFile):
     name = "reckless"
     description = "Reckless is an extremely low-latency, high-throughput logging library."
     license = "MIT"
-    topics = ("logging")
+    topics = ("logging",)
     homepage = "https://github.com/mattiasflodin/reckless"
     url = "https://github.com/conan-io/conan-center-index"
 
@@ -26,39 +26,31 @@ class RecklessConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
         if self.info.settings.os not in ["Windows", "Linux"]:
             raise ConanInvalidConfiguration(f"{self.ref} only supports Windows and Linux")
         if self.info.settings.os == "Windows" and not is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.ref} only supports Visual Studio on Windows")
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported by Visual Studio")
+        # Atomic operations support in reckless requires either libstdc++ or MSVC on an x86 architecture.
         if self.info.settings.compiler == "clang" and self.info.settings.compiler.get_safe("libcxx") == "libc++":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support clang with libc++")
+        if self.settings.arch not in ["x86", "x86_64"]:
+            raise ConanInvalidConfiguration(f"{self.ref} only supports x86 and x86_64")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -66,7 +58,6 @@ class RecklessConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
