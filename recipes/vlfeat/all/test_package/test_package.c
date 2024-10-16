@@ -6,7 +6,7 @@
 int main() {
     VL_PRINT("Hello World! This is VLFeat.\n");
 
-    VlSiftFilt *sift = vl_sift_new(256, 256, -1, 3, 0);
+    VlSiftFilt *sift = vl_sift_new(16, 16, 1, 3, 0);
 
     if (!sift) {
         printf("Failed to initialize SIFT descriptor.\n");
