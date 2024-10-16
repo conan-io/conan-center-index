@@ -23,6 +23,7 @@ class LibsystemdConan(ConanFile):
     topics = ("systemd", "service", "manager")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+    provides = "libudev"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -40,6 +41,16 @@ class LibsystemdConan(ConanFile):
         "with_zstd": True,
     }
 
+    def _compilers_minimum_version(self, version):
+        # Version 249 documented the minimum version of Clang.
+        # This same version is when __VA_OPT__ started being used, which was introduced in GCC 8.
+        if Version(version) >= "249":
+            return {
+                "clang": "10",
+                "gcc": "8",
+            }
+        return {}
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -52,16 +63,10 @@ class LibsystemdConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",  # gcc 5 is failing
-            "clang": "10"
-        }
-
     def requirements(self):
         self.requires("libcap/2.69")
         self.requires("libmount/2.39.2")
+        self.requires("linux-headers-generic/6.5.9")
         self.requires("libxcrypt/4.4.36")
         if self.options.with_selinux:
             self.requires("libselinux/3.6")
@@ -75,8 +80,8 @@ class LibsystemdConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("Only Linux supported")
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if Version(self.version) >= "255.0" and minimum_version and Version(self.settings.compiler.version) < minimum_version:
+        minimum_version = self._compilers_minimum_version(self.version).get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires {str(self.settings.compiler)} >= {minimum_version}."
             )
@@ -97,11 +102,21 @@ class LibsystemdConan(ConanFile):
         move_folder_contents(self, os.path.join(self.source_folder, f"systemd-stable-{self.version}"), self.source_folder)
 
     @property
-    def _so_version(self):
+    def _libsystemd_so_version(self):
         meson_build = os.path.join(self.source_folder, "meson.build")
         with open(meson_build, "r", encoding="utf-8") as build_file:
             for line in build_file:
                 match = re.match(r"^libsystemd_version = '(.*)'$", line)
+                if match:
+                    return match.group(1)
+        return ""
+
+    @property
+    def _libudev_so_version(self):
+        meson_build = os.path.join(self.source_folder, "meson.build")
+        with open(meson_build, "r", encoding="utf-8") as build_file:
+            for line in build_file:
+                match = re.match(r"^libudev_version = '(.*)'$", line)
                 if match:
                     return match.group(1)
         return ""
@@ -111,6 +126,8 @@ class LibsystemdConan(ConanFile):
         env.generate()
 
         tc = MesonToolchain(self)
+        tc.c_args.append("-Wno-error=nonnull")
+        tc.project_options["werror"] = False
         tc.project_options["selinux"] = ("true" if self.options.with_selinux
                                          else "false")
         tc.project_options["lz4"] = ("true" if self.options.with_lz4
@@ -121,10 +138,13 @@ class LibsystemdConan(ConanFile):
 
         if self.options.shared:
             tc.project_options["static-libsystemd"] = "false"
+            tc.project_options["static-libudev"] = "false"
         elif self.options.fPIC:
             tc.project_options["static-libsystemd"] = "pic"
+            tc.project_options["static-libudev"] = "pic"
         else:
             tc.project_options["static-libsystemd"] = "no-pic"
+            tc.project_options["static-libudev"] = "no-pic"
 
         # options unrelated to libsystemd
         unrelated = [
@@ -186,32 +206,68 @@ class LibsystemdConan(ConanFile):
 
         meson = Meson(self)
         meson.configure()
-        target = ("systemd:shared_library" if self.options.shared
+        systemd_target = ("systemd:shared_library" if self.options.shared
                   else "systemd:static_library")
-        meson.build(target=f"version.h {target}")
+        udev_target = ("udev:shared_library" if self.options.shared
+                  else "udev:static_library")
+        meson.build(target=f"version.h {systemd_target} {udev_target}")
 
     def package(self):
         copy(self, "LICENSE.LGPL2.1", self.source_folder,
              os.path.join(self.package_folder, "licenses"))
         copy(self, "*.h", os.path.join(self.source_folder, "src", "systemd"),
              os.path.join(self.package_folder, "include", "systemd"))
+        copy(self, "libudev.h", os.path.join(self.source_folder, "src", "libudev"),
+             os.path.join(self.package_folder, "include"))
+
+        libudev_directory = self.build_folder
+        if Version(self.version) < "248":
+            libudev_directory = os.path.join(self.build_folder, "src", "udev")
 
         if self.options.shared:
             copy(self, "libsystemd.so", self.build_folder,
                  os.path.join(self.package_folder, "lib"))
-            copy(self, "libsystemd.so.{}".format(self._so_version.split('.')),
+            copy(self, f"libsystemd.so.{self._libsystemd_so_version.split('.')}",
                  self.build_folder, os.path.join(self.package_folder, "lib"))
-            copy(self, "libsystemd.so.{}".format(self._so_version),
+            copy(self, f"libsystemd.so.{self._libsystemd_so_version}",
                  self.build_folder, os.path.join(self.package_folder, "lib"))
+            copy(self, "libudev.so", libudev_directory, os.path.join(self.package_folder, "lib"))
+            copy(self, f"libudev.so.{self._libudev_so_version.split('.')}",
+                 libudev_directory, os.path.join(self.package_folder, "lib"))
+            copy(self, f"libudev.so.{self._libudev_so_version}",
+                 libudev_directory, os.path.join(self.package_folder, "lib"))
         else:
             copy(self, "libsystemd.a", self.build_folder,
                  os.path.join(self.package_folder, "lib"))
+            copy(self, "libudev.a", libudev_directory,
+                 os.path.join(self.package_folder, "lib"))
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "libsystemd")
-        self.cpp_info.set_property("component_version", str(Version(self.version).major))
-        self.cpp_info.libs = ["systemd"]
-        self.cpp_info.system_libs = ["rt", "pthread", "dl"]
+        self.cpp_info.set_property("system_package_version", str(Version(self.version).major))
+        self.cpp_info.components["libsystemd"].libs = ["systemd"]
+        self.cpp_info.components["libsystemd"].requires = ["libcap::cap", "libmount::libmount", "linux-headers-generic::linux-headers-generic"]
+        if Version(self.version) >= "251.18":
+            self.cpp_info.components["libsystemd"].requires.append("libxcrypt::libxcrypt")
+        if self.options.with_selinux:
+            self.cpp_info.components["libsystemd"].requires.append("libselinux::selinux")
+        if self.options.with_lz4:
+            self.cpp_info.components["libsystemd"].requires.append("lz4::lz4")
+        if self.options.with_xz:
+            self.cpp_info.components["libsystemd"].requires.append("xz_utils::xz_utils")
+        if self.options.with_zstd:
+            self.cpp_info.components["libsystemd"].requires.append("zstd::zstdlib")
+        self.cpp_info.components["libsystemd"].set_property("pkg_config_name", "libsystemd")
+        self.cpp_info.components["libsystemd"].set_property("component_version", str(Version(self.version).major))
+        self.cpp_info.components["libsystemd"].system_libs = ["rt", "pthread", "dl"]
 
         # TODO: to remove in conan v2
-        self.cpp_info.version = str(Version(self.version).major)
+        self.cpp_info.components["libsystemd"].version = str(Version(self.version).major)
+
+        self.cpp_info.components["libudev"].libs = ["udev"]
+        self.cpp_info.components["libudev"].requires = ["libcap::cap", "linux-headers-generic::linux-headers-generic"]
+        self.cpp_info.components["libudev"].set_property("pkg_config_name", "libudev")
+        self.cpp_info.components["libudev"].set_property("component_version", str(Version(self.version).major))
+        self.cpp_info.components["libudev"].system_libs = ["rt", "pthread"]
+
+        # TODO: to remove in conan v2
+        self.cpp_info.components["libudev"].version = str(Version(self.version).major)
