@@ -38,6 +38,7 @@ class OsgearthConan(ConanFile):
         "with_draco": [True, False],
         "with_duktape": [True, False],
         "with_geos": [True, False],
+        "with_imgui": [True, False],
         "with_protobuf": [True, False],
         "with_rocksdb": [True, False],
         "with_spdlog": [True, False],
@@ -65,6 +66,7 @@ class OsgearthConan(ConanFile):
         "with_draco": True,
         "with_duktape": True,
         "with_geos": True,
+        "with_imgui": True,
         "with_protobuf": True,
         "with_rocksdb": True,
         "with_spdlog": True,
@@ -129,7 +131,6 @@ class OsgearthConan(ConanFile):
         self.requires("libzip/1.10.1")
         self.requires("opengl/system")
         self.requires("openscenegraph/3.6.5", transitive_headers=True, transitive_libs=True)
-        self.requires("portable-file-dialogs/cci.20221111")
         self.requires("rapidjson/cci.20230929")
 
         # Cannot unvendor tinygltf because of modifications to it:
@@ -140,6 +141,7 @@ class OsgearthConan(ConanFile):
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blend2d:
+            # v0.10+ is not compatible as of v3.7
             self.requires("blend2d/0.9")
         if self.options.with_blosc:
             self.requires("c-blosc/1.21.5")
@@ -150,11 +152,16 @@ class OsgearthConan(ConanFile):
         if self.options.with_geos:
             # https://github.com/gwaldron/osgearth/blob/osgearth-3.6/src/osgEarth/GEOS#L32
             self.requires("geos/3.12.0", transitive_headers=True, transitive_libs=True)
+        if self.options.with_imgui:
+            self.requires("glew/2.2.0")
+            # TODO: unvendor
+            # self.requires("imgui/1.90.2")
+            # self.requires("portable-file-dialogs/cci.20221111")
         if self.options.with_protobuf:
             # Used transitively by the generated headers
             self.requires("protobuf/5.27.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_rocksdb:
-            self.requires("rocksdb/9.2.1")
+            self.requires("rocksdb/9.5.2")
         if self.options.with_spdlog:
             self.requires("spdlog/1.14.1")
         if self.options.with_sqlite3:
@@ -178,6 +185,8 @@ class OsgearthConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.20 <4]")
+        if self.options.with_protobuf:
+            self.tool_requires("protobuf/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -190,10 +199,12 @@ class OsgearthConan(ConanFile):
         tc.variables["OSGEARTH_BUILD_EXAMPLES"] = True
         tc.variables["OSGEARTH_INSTALL_PDBS"] = False
         tc.variables["OSGEARTH_SONAMES"] = True
+        tc.variables["OSGEARTH_ENABLE_FASTDXT"] = self.settings.arch in ["x86", "x86_64"]  # Requires SSE support
         tc.variables["OSGEARTH_ENABLE_PROFILING"] = self.options.enable_profiling
         tc.variables["OSGEARTH_ENABLE_WININET_FOR_HTTP"] = self.options.get_safe("enable_wininet_for_http", False)
         tc.variables["OSGEARTH_BUILD_TOOLS"] = self.options.build_tools
         tc.variables["OSGEARTH_BUILD_CESIUM_NODEKIT"] = False
+        tc.variables["OSGEARTH_BUILD_IMGUI_NODEKIT"] = self.options.with_imgui
         tc.variables["OSGEARTH_BUILD_TRITON_NODEKIT"] = False
         tc.variables["OSGEARTH_BUILD_SILVERLINING_NODEKIT"] = False
         tc.variables["OSGEARTH_ENABLE_GEOCODER"] = self.options.enable_geocoder
@@ -208,7 +219,7 @@ class OsgearthConan(ConanFile):
 
         deps = CMakeDeps(self)
         # Use the same name for shared and static targets
-        deps.set_property("rocksdb", "cmake_target_name", "RocksDB::rocksdb")
+        deps.set_property("rocksdb", "cmake_target_aliases", ["RocksDB::rocksdb", "RocksDB::rocksdb-shared"])
         deps.generate()
 
         VirtualBuildEnv(self).generate()
@@ -227,12 +238,13 @@ class OsgearthConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         if self.options.install_shaders:
-            rename(self, os.path.join(self.package_folder, "resources"), os.path.join(self.package_folder, "res"))
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            rename(self, os.path.join(self.package_folder, "lib64"), os.path.join(self.package_folder, "lib"))
-        # rmdir(self, os.path.join(self.package_folder, "cmake"))
+            os.rename(os.path.join(self.package_folder, "share"),
+                      os.path.join(self.package_folder, "res"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "osgEarth")
+        self.cpp_info.set_property("cmake_target_name", "osgEarth::osgEarth")
+
         if self.settings.build_type == "Debug":
             postfix = "d"
         elif self.settings.build_type == "RelWithDebInfo":

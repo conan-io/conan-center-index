@@ -1,12 +1,20 @@
-From 42cf1e3f0f4db27a33540b4d0bea4bedfc2f7e03 Mon Sep 17 00:00:00 2001
-From: Martin Valgur <martin.valgur@gmail.com>
-Date: Tue, 9 Jul 2024 11:23:40 +0300
-Subject: [PATCH 1/2] Fix tingltf rapidjson includes
-
----
- src/third_party/tinygltf/tiny_gltf.h | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
-
+diff --git a/src/osgEarthDrivers/gltf/CMakeLists.txt b/src/osgEarthDrivers/gltf/CMakeLists.txt
+--- a/src/osgEarthDrivers/gltf/CMakeLists.txt
++++ b/src/osgEarthDrivers/gltf/CMakeLists.txt
+@@ -14,9 +14,10 @@
+     HEADERS ${TARGET_H}
+     SOURCES ${TARGET_SRC} )
+     
+-include_directories(
+-    ${OSGEARTH_EMBEDDED_THIRD_PARTY_DIR}/tinygltf 
+-    ${OSGEARTH_EMBEDDED_THIRD_PARTY_DIR}/rapidjson/include/rapidjson )
++include_directories(${OSGEARTH_EMBEDDED_THIRD_PARTY_DIR}/tinygltf)
++
++find_package(RapidJSON REQUIRED CONFIG)
++target_link_libraries(osgdb_gltf PRIVATE rapidjson)
+ 
+ if (draco_FOUND)
+     #include_directories(${draco_INCLUDE_DIRS})
 diff --git a/src/third_party/tinygltf/tiny_gltf.h b/src/third_party/tinygltf/tiny_gltf.h
 index 9bf35a594..37aba341f 100644
 --- a/src/third_party/tinygltf/tiny_gltf.h
@@ -31,6 +39,3 @@ index 9bf35a594..37aba341f 100644
  #endif
  #endif
  
--- 
-2.43.0
-
