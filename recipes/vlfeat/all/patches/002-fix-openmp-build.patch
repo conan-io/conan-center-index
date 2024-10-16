@@ -1,6 +1,8 @@
+Fixes a "vl/kmeans.c:685:34: error: ‘vl_infinity_d’ not specified in enclosing ‘parallel’" error when building with OpenMP.
+
 --- a/vl/kmeans.c
 +++ b/vl/kmeans.c
-@@ -669,7 +669,7 @@ VL_XCAT(_vl_kmeans_quantize_, SFX)
+@@ -670,7 +670,7 @@
  
  #ifdef _OPENMP
  #pragma omp parallel default(none) \
