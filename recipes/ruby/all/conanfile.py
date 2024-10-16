@@ -51,10 +51,6 @@ class RubyConan(ConanFile):
     short_paths = True
 
     @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    @property
     def _windows_system_libs(self):
         return ["user32", "advapi32", "shell32", "ws2_32", "iphlpapi", "imagehlp", "shlwapi", "bcrypt"]
 
@@ -104,6 +100,7 @@ class RubyConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         VirtualBuildEnv(self).generate()
@@ -147,11 +144,10 @@ class RubyConan(ConanFile):
         td.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         autotools = Autotools(self)
         build_script_folder = self.source_folder
         if is_msvc(self):
-            self.conf["tools.gnu:make_program"] = "nmake"
+            self.conf.define("tools.gnu:make_program", "nmake")
             build_script_folder = os.path.join(self.source_folder, "win32")
             if "TMP" in os.environ:  # workaround for TMP in CCI containing both forward and back slashes
                 os.environ["TMP"] = os.environ["TMP"].replace("/", "\\")
@@ -215,9 +211,3 @@ class RubyConan(ConanFile):
             self.cpp_info.requires.append("libffi::libffi")
         if self.options.get_safe("with_readline"):
             self.cpp_info.requires.append("readline::readline")
-
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "Ruby"
-        self.cpp_info.names["cmake_find_package_multi"] = "Ruby"
-        binpath = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(binpath)

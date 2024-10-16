@@ -9,7 +9,7 @@ from conan.tools.cmake import CMake, cmake_layout
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeToolchain", "CMakeDeps"
 
     def requirements(self):
         self.requires(self.tested_reference_str, run=True, libs=True)
@@ -51,5 +51,5 @@ class TestPackageConan(ConanFile):
             self._test_ruby_executable()
 
             # test library
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "bin", "test_package")
+            bin_path = os.path.join(self.cpp.build.bindir, "bin", "test_package")
             self.run(bin_path, env="conanrun")
