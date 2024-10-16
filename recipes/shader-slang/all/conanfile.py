@@ -3,10 +3,10 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, mkdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, mkdir, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -96,6 +96,8 @@ class ShaderSlangConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25 <4]")
+        if not can_run(self):
+            self.tool_requires(f"shader-slang/{self.version}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -128,11 +130,17 @@ class ShaderSlangConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
+        if getattr(self, "settings_target") is not None:
+            # Build and install native build tools for cross-compilation
+            cmake.build(target="generators")
+            cmake.build(target="slang-bootstrap")
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        if getattr(self, "settings_target") is not None:
+            cmake.install(component="generators")
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
@@ -175,4 +183,5 @@ class ShaderSlangConan(ConanFile):
             if self.options.with_cuda:
                 self.cpp_info.components["gfx"].system_libs.append("cuda")
 
-        self.cpp_info.components["_tools"].requires = ["imgui::imgui"]
+        if self.options.enable_gfx:
+            self.cpp_info.components["_tools"].requires = ["imgui::imgui"]
