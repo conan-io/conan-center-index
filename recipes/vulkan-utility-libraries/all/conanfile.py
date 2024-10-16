@@ -153,24 +153,32 @@ class VulkanUtilityLibrariesConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "VulkanUtilityLibraries")
 
         # Vulkan::UtilityHeaders
-        self.cpp_info.components["VulkanUtilityHeaders"].set_property("cmake_target_name", "Vulkan::UtilityHeaders")
-        self.cpp_info.components["VulkanUtilityHeaders"].requires = ["vulkan-headers::vulkanheaders"]
-        self.cpp_info.components["VulkanUtilityHeaders"].libdirs = []
-        self.cpp_info.components["VulkanUtilityHeaders"].bindirs = []
+        self.cpp_info.components["UtilityHeaders"].set_property("cmake_target_name", "Vulkan::UtilityHeaders")
+        self.cpp_info.components["UtilityHeaders"].requires = ["vulkan-headers::vulkanheaders"]
+        self.cpp_info.components["UtilityHeaders"].libdirs = []
+        self.cpp_info.components["UtilityHeaders"].bindirs = []
 
         # Vulkan::LayerSettings
-        self.cpp_info.components["VulkanLayerSettings"].set_property("cmake_target_name", "Vulkan::LayerSettings")
-        self.cpp_info.components["VulkanLayerSettings"].requires = ["vulkan-headers::vulkanheaders", "VulkanUtilityHeaders"]
-        self.cpp_info.components["VulkanLayerSettings"].libs = ["VulkanLayerSettings"]
-        self.cpp_info.components["VulkanLayerSettings"].bindirs = []
+        self.cpp_info.components["LayerSettings"].set_property("cmake_target_name", "Vulkan::LayerSettings")
+        self.cpp_info.components["LayerSettings"].requires = ["vulkan-headers::vulkanheaders", "UtilityHeaders"]
+        self.cpp_info.components["LayerSettings"].libs = ["VulkanLayerSettings"]
+        self.cpp_info.components["LayerSettings"].bindirs = []
 
         # Vulkan::CompilerConfiguration
         if Version(self.version) >= "1.3.265":
-            self.cpp_info.components["VulkanCompilerConfiguration"].set_property("cmake_target_name", "Vulkan::CompilerConfiguration")
-            self.cpp_info.components["VulkanCompilerConfiguration"].requires = ["vulkan-headers::vulkanheaders"]
-            self.cpp_info.components["VulkanCompilerConfiguration"].cxxflags = self._exported_cxxflags
-            self.cpp_info.components["VulkanCompilerConfiguration"].defines = self._exported_defines
-            self.cpp_info.components["VulkanCompilerConfiguration"].includedirs = []
-            self.cpp_info.components["VulkanCompilerConfiguration"].libdirs = []
-            self.cpp_info.components["VulkanCompilerConfiguration"].bindirs = []
-            self.cpp_info.components["VulkanLayerSettings"].requires.append("VulkanCompilerConfiguration")
+            self.cpp_info.components["CompilerConfiguration"].set_property("cmake_target_name", "Vulkan::CompilerConfiguration")
+            self.cpp_info.components["CompilerConfiguration"].requires = ["vulkan-headers::vulkanheaders"]
+            self.cpp_info.components["CompilerConfiguration"].cxxflags = self._exported_cxxflags
+            self.cpp_info.components["CompilerConfiguration"].defines = self._exported_defines
+            self.cpp_info.components["CompilerConfiguration"].includedirs = []
+            self.cpp_info.components["CompilerConfiguration"].libdirs = []
+            self.cpp_info.components["CompilerConfiguration"].bindirs = []
+            self.cpp_info.components["LayerSettings"].requires.append("CompilerConfiguration")
+
+        # Vulkan::SafeStruct
+        if Version(self.version) >= "1.3.282":
+            self.cpp_info.components["SafeStruct"].set_property("cmake_target_name", "Vulkan::SafeStruct")
+            self.cpp_info.components["SafeStruct"].requires = ["vulkan-headers::vulkanheaders", "UtilityHeaders", "CompilerConfiguration"]
+            self.cpp_info.components["SafeStruct"].libs = ["VulkanSafeStruct"]
+            self.cpp_info.components["SafeStruct"].bindirs = []
+            self.cpp_info.components["LayerSettings"].requires.append("SafeStruct")
