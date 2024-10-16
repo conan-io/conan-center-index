@@ -102,9 +102,12 @@ class SuiteSparseGraphBlasConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["graphblas"]
         self.cpp_info.set_property("cmake_file_name", "GraphBLAS")
-        self.cpp_info.set_property("cmake_target_name", "SuiteSparse::GraphBLAS")
+        self.cpp_info.set_property("cmake_target_name", "GraphBLAS::GraphBLAS")
+        aliases = ["SuiteSparse::GraphBLAS"]
         if not self.options.shared:
-            self.cpp_info.set_property("cmake_target_aliases", ["SuiteSparse::GraphBLAS_static"])
+            aliases.append("GraphBLAS::GraphBLAS_static")
+            aliases.append("SuiteSparse::GraphBLAS_static")
+        self.cpp_info.set_property("cmake_target_aliases", aliases)
         self.cpp_info.set_property("pkg_config_name", "GraphBLAS")
 
         self.cpp_info.includedirs.append(os.path.join("include", "suitesparse"))
