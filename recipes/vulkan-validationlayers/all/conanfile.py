@@ -1,4 +1,4 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
@@ -74,11 +74,8 @@ class VulkanValidationLayersConan(ConanFile):
         return self.version
 
     def requirements(self):
-        # TODO: set private=True, once the issue is resolved https://github.com/conan-io/conan/issues/9390
-        private = dict(private=not hasattr(self, "settings_build")) if conan_version.major == 1 else dict(visible=False)
-
         self.requires(f"spirv-headers/{self._vulkan_sdk_version}")
-        self.requires(f"spirv-tools/{self._vulkan_sdk_version}", **private)
+        self.requires(f"spirv-tools/{self._vulkan_sdk_version}", visible=False)
         self.requires(f"vulkan-headers/{self._vulkan_sdk_version}", transitive_headers=True)
         if Version(self.version) >= "1.3.268.0":
             self.requires(f"vulkan-utility-libraries/{self._vulkan_sdk_version}")
@@ -234,7 +231,6 @@ class VulkanValidationLayersConan(ConanFile):
             self.cpp_info.system_libs.extend(["android", "log"])
 
         self.cpp_info.requires.append("spirv-headers::spirv-headers")
-        self.cpp_info.requires.append("spirv-tools::spirv-tools")
         self.cpp_info.requires.append("vulkan-headers::vulkan-headers")
         if Version(self.version) >= "1.3.268.0":
             self.cpp_info.requires.append("vulkan-utility-libraries::vulkan-utility-libraries")
