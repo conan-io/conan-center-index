@@ -23,16 +23,20 @@ class CgalConan(ConanFile):
     short_paths = True
 
     @property
+    def _requires_cpp17(self):
+        return Version(self.version) >= "6.0"
+
+    @property
     def _min_cppstd(self):
-        return "17" if Version(self.version) >= "6.0" else "14"
+        return "17" if self._requires_cpp17 else "14"
 
     @property
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "5",
-            "clang": "5",
+            "gcc": "7" if self._requires_cpp17 else "5",
+            "clang": "7" if self._requires_cpp17 else "5",
             "apple-clang": "5.1",
         }
 
