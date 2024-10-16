@@ -238,6 +238,6 @@ class VulkanValidationLayersConan(ConanFile):
         if self.options.get_safe("with_wsi_xlib"):
             self.cpp_info.requires.append("xorg::x11")
         if self.options.get_safe("with_wsi_xcb"):
-            self.cpp_info.requires.append("xoeg::xcb")
+            self.cpp_info.requires.append("xorg::xcb")
         if self.options.get_safe("with_wsi_wayland"):
             self.cpp_info.requires.append("wayland::wayland-client")
