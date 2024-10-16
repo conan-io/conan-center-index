@@ -1,0 +1,34 @@
+From 4f28a90cce17e37bfd93ffc647f8ce6d5578d07c Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Wed, 19 Jun 2024 14:11:41 +0200
+Subject: [PATCH] Expat
+
+---
+ Config.cmake/fmixml.cmake | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/Config.cmake/fmixml.cmake b/Config.cmake/fmixml.cmake
+index ddd3c1f..e59135c 100644
+--- a/Config.cmake/fmixml.cmake
++++ b/Config.cmake/fmixml.cmake
+@@ -137,6 +137,7 @@ set(FMIXMLSOURCE
+ 	src/FMI2/fmi2_xml_variable.c
+ )
+ 
++if(FALSE)
+ include(ExternalProject)
+ 
+ # The *_POSTFIX variables are set because it makes it easier to determine the name of
+@@ -214,6 +215,9 @@ endif()
+ set(EXPAT_INCLUDE_DIRS ${CMAKE_BINARY_DIR}/ExpatEx/install/include)
+ 
+ include_directories("${EXPAT_INCLUDE_DIRS}" "${FMILIB_THIRDPARTYLIBS}/FMI/" "${FMIXMLGENDIR}/FMI1" "${FMIXMLGENDIR}/FMI2")
++endif()
++find_package(expat REQUIRED)
++include_directories("${FMILIB_THIRDPARTYLIBS}/FMI/" "${FMIXMLGENDIR}/FMI1" "${FMIXMLGENDIR}/FMI2")
+ 
+ PREFIXLIST(FMIXMLSOURCE  ${FMIXMLDIR}/)
+ PREFIXLIST(FMIXMLHEADERS ${FMIXMLDIR}/)
+-- 
+2.39.2
+
