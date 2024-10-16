@@ -269,6 +269,8 @@ class PopplerConan(ConanFile):
         # Ignore package versions in find_soft_mandatory_package()
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "find_package(${_package_name} ${_package_version})", "find_package(${_package_name})")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "FREETYPE ${FREETYPE_VERSION} REQUIRED", "FREETYPE REQUIRED")
 
     def build(self):
         self._patch_sources()
