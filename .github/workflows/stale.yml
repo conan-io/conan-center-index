@@ -9,6 +9,7 @@ name: Mark stale pull requests
 on:
   schedule:
   - cron: '34 6 * * *'
+  workflow_dispatch:
 
 jobs:
   stale:
@@ -21,7 +22,7 @@ jobs:
 
 
     steps:
-    - uses: actions/stale@v9
+    - uses: ericLemanissier/stale@patch-2
       with:
         # Do not make issues as stale
         days-before-issue-stale: -1
