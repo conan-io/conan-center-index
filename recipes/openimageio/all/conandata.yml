@@ -14,6 +14,10 @@ sources:
   "2.5.16.0":
     url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v2.5.16.0.tar.gz"
     sha256: "e5438e28d34a5b0a09428ed77ec310edd47c141db1b259364859110847e161e7"
+  # Replace before creating MR
+  "3.0.0.0":
+    url: "https://github.com/AcademySoftwareFoundation/OpenImageIO/archive/refs/tags/v3.0.0.0-beta1.tar.gz"
+    sha256: "344790867caf7d27d7c72578bb28bd35d85835b717a6ca1eb8875a82fee4dcbf"
 patches:
   "2.4.7.1":
     - patch_file: "patches/2.4.7.1-cmake-targets.patch"
