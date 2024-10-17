@@ -1,9 +1,11 @@
 import os
+import subprocess
+import sys
 import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building, check_min_cppstd
+from conan.tools.build import can_run, cross_building, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -97,13 +99,13 @@ class DCMTKConan(ConanFile):
         elif self.options.charset_conversion == "icu":
             self.requires("icu/73.2")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.11.4")
+            self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_openssl:
             self.requires("openssl/[>=1 <4]")
         if self.options.with_libpng:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_libtiff:
             self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_tcpwrappers"):
@@ -114,18 +116,31 @@ class DCMTKConan(ConanFile):
         del self.info.options.builtin_dictionary
         del self.info.options.external_dictionary
 
+    def _can_run(self):
+        result = can_run(self)
+        if not result and self.settings.os == "Macos" and self.settings.arch == "x86_64" and sys.platform == "darwin":
+            # check rosetta is installed & working
+            command = ["arch", "-arch",  "x86_64", "uname", "-m"]
+            result = subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+        return result
+
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
-        if hasattr(self, "settings_build") and cross_building(self) and self.settings.os == "Macos":
+        if hasattr(self, "settings_build") and cross_building(self) and self.settings.os == "Macos" and self.settings.arch == "armv8":
             # FIXME: Probable issue with flags, build includes header 'mmintrin.h'
-            raise ConanInvalidConfiguration("Cross building on Macos is not supported (yet)")
+            raise ConanInvalidConfiguration("Cross building to Macos M1 is not supported (yet)")
+        if hasattr(self, "settings_build") and cross_building(self) and \
+           self.settings.os == "Macos" and self.settings.arch == "x86_64" and not self._can_run():
+            raise ConanInvalidConfiguration("Cross building to macOS x86_64 is only supported from macOS arm64 using rosetta")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if cross_building(self) and self._can_run():
+            tc.variables["CMAKE_CROSSCOMPILING_EMULATOR"] = ""
         # DICOM Data Dictionaries are required
         tc.variables["CMAKE_INSTALL_DATADIR"] = self._dcm_datadictionary_path.replace("\\", "/")
         tc.cache_variables["DCMTK_USE_FIND_PACKAGE"] = True
@@ -195,7 +210,12 @@ class DCMTKConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "CMake", "dcmtkTryRun.cmake"),
+            "if(CMAKE_CROSSCOMPILING)",
+            "if(CMAKE_CROSSCOMPILING AND NOT DEFINED CMAKE_CROSSCOMPILING_EMULATOR)",
+        )
         # Workaround for CMakeDeps bug with check_* like functions.
         # See https://github.com/conan-io/conan/issues/12012 & https://github.com/conan-io/conan/issues/12180
         if self.options.with_openssl:
