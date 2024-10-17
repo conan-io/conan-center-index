@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 
+if(POLICY CMP0142)
+  cmake_policy(SET CMP0142 NEW)
+endif()
+
 project(test_package LANGUAGES C) # if the project is pure C
 # project(test_package LANGUAGES CXX) # if the project uses C++
 
