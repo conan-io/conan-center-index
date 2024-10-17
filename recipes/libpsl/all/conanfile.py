@@ -5,6 +5,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -23,11 +24,13 @@ class LibPslConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_idna": [False, "icu", "libidn", "libidn2"],
+        "enable_builtin": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_idna": "icu",
+        "enable_builtin": True,
     }
 
     def export_sources(self):
@@ -36,6 +39,8 @@ class LibPslConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "0.21.5":
+            self.options.rm_safe("enable_builtin")
 
     def configure(self):
         if self.options.shared:
@@ -57,7 +62,7 @@ class LibPslConan(ConanFile):
             self.requires("libunistring/0.9.10")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/1.4.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
 
@@ -76,7 +81,11 @@ class LibPslConan(ConanFile):
         env.generate()
         tc = MesonToolchain(self)
         tc.project_options["runtime"] = self._idna_option
-        tc.project_options["builtin"] = self._idna_option
+        if Version(self.version) >= "0.21.5":
+            tc.project_options["builtin"] = self.options.enable_builtin
+            tc.project_options["tests"] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
+        else:
+            tc.project_options["builtin"] = self._idna_option
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
