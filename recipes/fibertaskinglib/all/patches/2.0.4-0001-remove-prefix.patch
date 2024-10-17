@@ -1,0 +1,13 @@
+diff --git a/source/CMakeLists.txt b/source/CMakeLists.txt
+index 992e1b8..5e885e3 100644
+--- a/source/CMakeLists.txt
++++ b/source/CMakeLists.txt
+@@ -91,7 +91,7 @@ target_include_directories(ftl PUBLIC ../include)
+ target_link_libraries(ftl boost_context ${CMAKE_THREAD_LIBS_INIT})
+ 
+ # Remove the prefix
+-set_target_properties(ftl PROPERTIES PREFIX "")
++# set_target_properties(ftl PROPERTIES PREFIX "")
+ 
+ # Set the c++ std
+ if (FTL_CPP_17)
