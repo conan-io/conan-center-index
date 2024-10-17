@@ -1,13 +1,13 @@
+import os
+import shutil
+
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, msvc_runtime_flag
-import os
 
 required_conan_version = ">=1.57.0"
 
@@ -24,10 +24,12 @@ class CoinOsiConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_glpk": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_glpk": True,
     }
 
     @property
@@ -49,19 +51,20 @@ class CoinOsiConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("coin-utils/2.11.9")
-
-    def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("coin-osi does not support shared builds on Windows")
-        # FIXME: This issue likely comes from very old autotools versions used to produce configure.
-        if hasattr(self, "settings_build") and cross_building(self) and self.options.shared:
-            raise ConanInvalidConfiguration("coin-osi shared not supported yet when cross-building")
+        self.requires("coin-utils/2.11.11")
+        self.requires("openblas/0.3.26")
+        if self.options.with_glpk:
+            self.requires("glpk/4.48")
+        # TODO: add support for: Cplex, Mosek, Xpress, Gurobi
+        # https://github.com/coin-or/Osi/blob/stable/0.108/Osi/configure.ac#L65-L77
+        # soplex support requires v4.0, which is not available on CCI and is distributed under ZIB Academic License
+        # https://github.com/coin-or-tools/ThirdParty-SoPlex/blob/master/INSTALL.SoPlex
 
     def build_requirements(self):
+        self.tool_requires("coin-buildtools/0.8.11")
         self.tool_requires("gnu-config/cci.20210814")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -74,10 +77,28 @@ class CoinOsiConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
 
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
+        def _add_pkg_config_alias(src_name, dst_name):
+            shutil.copy(os.path.join(self.generators_folder, f"{src_name}.pc"),
+                        os.path.join(self.generators_folder, f"{dst_name}.pc"))
+
+        _add_pkg_config_alias("openblas", "coinblas")
+        _add_pkg_config_alias("openblas", "coinlapack")
+        if self.options.with_glpk:
+            _add_pkg_config_alias("glpk", "coinglpk")
+
         tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
-            "--without-blas",
-            "--without-lapack",
+            # the coin*.pc pkg-config files are only used when set to BUILD
+            "--with-blas=BUILD",
+            "--with-lapack=BUILD",
+            "--with-glpk=BUILD" if self.options.with_glpk else "--without-glpk",
+            "--with-soplex=no",
+            # These are only used for sample datasets
+            "--without-netlib",
+            "--without-sample",
         ])
         if is_msvc(self):
             tc.extra_cxxflags.append("-EHsc")
@@ -98,18 +119,19 @@ class CoinOsiConan(ConanFile):
             env.define("PKG_CONFIG_PATH", self.generators_folder)
         tc.generate(env)
 
-        deps = PkgConfigDeps(self)
-        deps.generate()
-
     def build(self):
         apply_conandata_patches(self)
+        copy(self, "*", os.path.join(self.dependencies.build["coin-buildtools"].package_folder, "res"),
+             os.path.join(self.source_folder, "BuildTools"))
+        copy(self, "*", os.path.join(self.dependencies.build["coin-buildtools"].package_folder, "res"),
+             os.path.join(self.source_folder, "Osi", "BuildTools"))
         for gnu_config in [
             self.conf.get("user.gnu-config:config_guess", check_type=str),
             self.conf.get("user.gnu-config:config_sub", check_type=str),
         ]:
-            if gnu_config:
-                copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+            copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
         autotools = Autotools(self)
+        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
@@ -130,8 +152,13 @@ class CoinOsiConan(ConanFile):
         self.cpp_info.components["libosi"].set_property("pkg_config_name", "osi")
         self.cpp_info.components["libosi"].libs = ["Osi"]
         self.cpp_info.components["libosi"].includedirs = [os.path.join("include", "coin")]
-        self.cpp_info.components["libosi"].requires = ["coin-utils::coin-utils"]
+        self.cpp_info.components["libosi"].requires = ["coin-utils::coin-utils", "openblas::openblas"]
 
         self.cpp_info.components["osi-unittests"].set_property("pkg_config_name", "osi-unittests")
         self.cpp_info.components["osi-unittests"].libs = ["OsiCommonTests"]
         self.cpp_info.components["osi-unittests"].requires = ["libosi"]
+
+        if self.options.with_glpk:
+            self.cpp_info.components["osi-glpk"].set_property("pkg_config_name", "osi-glpk")
+            self.cpp_info.components["osi-glpk"].libs = ["OsiGlpk"]
+            self.cpp_info.components["osi-glpk"].requires = ["libosi", "glpk::glpk"]
