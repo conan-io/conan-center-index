@@ -1,0 +1,70 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -31,7 +31,7 @@
+ #
+ #  Please report all bugs and problems to <gl2ps@geuz.org>.
+ 
+-cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
++cmake_minimum_required(VERSION 3.15)
+ 
+ # do not warn about non-definition of WIN32 on Cygwin
+ set(CMAKE_LEGACY_CYGWIN_WIN32 0)
+@@ -91,7 +91,7 @@
+   add_definitions(-DHAVE_NO_VSNPRINTF)
+ endif()
+ 
+-find_package(OpenGL)
++find_package(OpenGL REQUIRED)
+ if(OPENGL_FOUND)
+   list(APPEND EXTERNAL_INCLUDES ${OPENGL_INCLUDE_DIR})
+   list(APPEND EXTERNAL_LIBRARIES ${OPENGL_LIBRARIES})
+@@ -139,26 +139,22 @@
+ endif()
+ 
+ if(OPENGL_FOUND)
+-  add_library(lib STATIC gl2ps.c gl2ps.h)
+-  set_target_properties(lib PROPERTIES OUTPUT_NAME gl2ps)
+-
+-  add_library(shared SHARED gl2ps.c gl2ps.h)
+-  target_link_libraries(shared ${EXTERNAL_LIBRARIES})
+-  set_target_properties(shared PROPERTIES OUTPUT_NAME gl2ps
++  add_library(gl2ps gl2ps.c gl2ps.h)
++
++  target_link_libraries(gl2ps ${EXTERNAL_LIBRARIES})
++  set_target_properties(gl2ps PROPERTIES
+     VERSION ${GL2PS_MAJOR_VERSION}.${GL2PS_MINOR_VERSION}.${GL2PS_PATCH_VERSION}
+     SOVERSION ${GL2PS_MAJOR_VERSION})
+   if(WIN32 OR CYGWIN)
+-    set_target_properties(shared PROPERTIES
++    set_target_properties(gl2ps PROPERTIES
+         COMPILE_FLAGS "-DGL2PSDLL -DGL2PSDLL_EXPORTS")
+   endif()
+-  install(TARGETS lib shared RUNTIME DESTINATION bin
+-                             LIBRARY DESTINATION lib${LIB_SUFFIX}
+-                             ARCHIVE DESTINATION lib${LIB_SUFFIX})
+-endif()
+-
+-if(WIN32)
+-  set(GL2PS_DOC .)
+-else()
++  install(TARGETS gl2ps RUNTIME DESTINATION bin
++                        LIBRARY DESTINATION lib
++                        ARCHIVE DESTINATION lib)
++endif()
++
++if(NOT DEFINED GL2PS_DOC)
+   set(GL2PS_DOC share/doc/gl2ps)
+ endif()
+ 
+@@ -171,9 +167,9 @@
+ 
+ if(GLUT_FOUND)
+   add_executable(gl2psTest WIN32 gl2psTest.c)
+-  target_link_libraries(gl2psTest lib ${EXTERNAL_LIBRARIES})
++  target_link_libraries(gl2psTest gl2ps ${EXTERNAL_LIBRARIES})
+   add_executable(gl2psTestSimple WIN32 gl2psTestSimple.c)
+-  target_link_libraries(gl2psTestSimple lib ${EXTERNAL_LIBRARIES})
++  target_link_libraries(gl2psTestSimple gl2ps ${EXTERNAL_LIBRARIES})
+ endif()
+ 
+ find_package(LATEX)
