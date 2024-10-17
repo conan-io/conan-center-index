@@ -4,22 +4,16 @@ import os, sys
 
 class CopperSpiceConan(ConanFile):
     name = 'CopperSpice'
-    settings = {
-        'os': ['Windows'],
-        'compiler': {'Visual Studio': {'version': ['16']}},
-        'arch': ['x86_64', 'x86'],
-        'build_type': ['Debug', 'Release']
-    }
-    generators = 'cmake_paths'
-    version = '1.7.1'
-    license = 'LGPL-2.1-only'
+    url = 'https://github.com/conan-io/conan-center-index'
+    homepage = 'https://www.copperspice.com/'
     description = '''
     CopperSpice is a set of individual libraries which can be used to develop cross platform software applications in C++.
     It is a totally open source project released under the LGPL V2.1 license and was initially derived from the Qt framework.
     '''
-    url = 'http://balmer.intern.colvistec.de/repos/_51' # conan-copperspice repo
-    homepage = 'https://www.copperspice.com/'
-    exports_sources = ['patches/*']
+    topics = ("framework", "ui")
+    license = 'LGPL-2.1-only'
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         'with_gui': [True, False],
         'with_multimedia': [True, False],
@@ -35,7 +29,6 @@ class CopperSpiceConan(ConanFile):
         'with_xml': [True, False],
         'with_xmlpatterns': [True, False],
     }
-
     default_options = {
         'with_gui': True,
         'with_multimedia': False,
@@ -52,10 +45,24 @@ class CopperSpiceConan(ConanFile):
         'with_xmlpatterns': False,
     }
 
+    generators = 'cmake_paths'
+    exports_sources = ['patches/*']
+
+
     def source(self):
         git = tools.Git(folder='copperspice')
         tag = 'cs-{}'.format(self.version)
         git.clone('https://github.com/copperspice/copperspice', branch=tag, shallow=True)
+
+    def requirements(self):
+        self.requires("cs_libguarded/[>=1.1.0 <2]")
+        self.requires("zlib/[>=1.3 <2]")
+        if self.options.with_mysql_plugin:
+            self.options.requires("libmysqlclient/[>=8]")
+        if self.options.with_psql_plugin:
+            self.options.requires("libpq/[>=9]")
+        if self.options.with_sql:
+            self.options.requires("sqlite3/[>=3 <4]")
 
     def _configure_cmake(self):
         cmake = CMake(self)
