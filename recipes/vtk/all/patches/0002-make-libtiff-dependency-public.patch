@@ -1,0 +1,35 @@
+From d28d2d2ddd53be0f02ef351570bb2e309594055f Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Fri, 2 Aug 2024 19:32:42 +0300
+Subject: [PATCH] make libtiff dependency public
+
+A workaround for libjbig.so not being found when libtiff is used transitively internally.
+Does not have any effect to external consumers in Conan.
+
+---
+ IO/Image/vtk.module | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/IO/Image/vtk.module b/IO/Image/vtk.module
+index b5b3d1b1e9..e5ff3f1c0d 100644
+--- a/IO/Image/vtk.module
++++ b/IO/Image/vtk.module
+@@ -15,6 +15,7 @@ DEPENDS
+   VTK::CommonCore
+   VTK::CommonExecutionModel
+   VTK::ImagingCore
++  VTK::tiff
+ PRIVATE_DEPENDS
+   VTK::CommonDataModel
+   VTK::CommonMath
+@@ -26,7 +27,6 @@ PRIVATE_DEPENDS
+   VTK::metaio
+   VTK::png
+   VTK::pugixml
+-  VTK::tiff
+   VTK::vtksys
+   VTK::zlib
+ TEST_DEPENDS
+-- 
+2.43.0
+
