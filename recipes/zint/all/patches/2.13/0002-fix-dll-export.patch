@@ -1,0 +1,18 @@
+--- backend_qt/qzint.h
++++ backend_qt/qzint.h
+@@ -48,3 +48,14 @@
+-class QZint : public QObject
++#ifdef _WIN32
++# ifdef QZINT_BUILD_DLL
++#  define QZINT_EXTERN __declspec(dllexport)
++# elif defined(QZINT_DLL)
++#  define QZINT_EXTERN __declspec(dllimport)
++# else
++#  define QZINT_EXTERN
++# endif
++#else
++# define QZINT_EXTERN
++#endif
++class QZINT_EXTERN QZint : public QObject
+ {
+     Q_OBJECT
