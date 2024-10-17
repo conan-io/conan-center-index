@@ -80,7 +80,7 @@ class ColmapConan(ConanFile):
         self.requires("freeimage/3.18.0")
         self.requires("glog/0.6.0", transitive_headers=True, transitive_libs=True)
         self.requires("metis/5.2.1")
-        self.requires("sqlite3/3.45.3", transitive_headers=True, transitive_libs=True)
+        self.requires("sqlite3/[>=3.45.0 <4]", transitive_headers=True, transitive_libs=True)
         self.requires("lz4/1.9.4")
         if self.options.openmp:
             self.requires("openmp/system", transitive_headers=True, transitive_libs=True)
