@@ -1,4 +1,8 @@
 sources:
+  # Add only versions that have a corresponding vulkan-headers version available
+  "1.3.268":
+    url: "https://github.com/charles-lunarg/vk-bootstrap/archive/refs/tags/v1.3.268.tar.gz"
+    sha256: "028300b0dac2dfaf193ca95d2ecd46a450f6da31095a09334c4c3b76c561714c"
   "0.7":
     url: "https://github.com/charles-lunarg/vk-bootstrap/archive/refs/tags/v0.7.tar.gz"
     sha256: "7b2c30a4c46514cc5b20d2bebab25c495df39574b9e117c760d1cfe19f71d9aa"
