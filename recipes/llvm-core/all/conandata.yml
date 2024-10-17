@@ -1,4 +1,14 @@
 sources:
+  "19.1.1":
+    "llvm":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.1/llvm-19.1.1.src.tar.xz
+      sha256: 15a7c77f9c39444d9dd6756b75b9a70129dcbd1e340724a6e45b3b488f55bc4b
+    "cmake":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.1/cmake-19.1.1.src.tar.xz
+      sha256: 92a016ecfe46ad7c18db6425a018c2c6ee126b9d0e5513d6fad989fee6648ffa
+    "third-party":
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.1/third-party-19.1.1.src.tar.xz
+      sha256: 39dec41a0a4d39af6428a58ddbd5c3e5c3ae4f6175e3655480909559cba86cb7
   "13.0.0":
     url: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/llvm-13.0.0.src.tar.xz
     sha256: 408d11708643ea826f519ff79761fcdfc12d641a2510229eec459e72f8163020
@@ -10,6 +20,11 @@ sources:
     sha256: ce8508e318a01a63d4e8b3090ab2ded3c598a50258cc49e2625b9120d4c03ea5
 
 patches:
+  "19.1.1":
+    - patch_file: patches/19x/0000-cmake-dependencies.patch
+      patch_description: fix references to third party libs to match conan variables and targets
+      patch_type: conan
+      base_path: llvm-main
   "13.0.0":
     - patch_file: patches/13x/0000-cmake-dependencies.patch
       patch_description: fix references to third party libs to match conan variables and targets
