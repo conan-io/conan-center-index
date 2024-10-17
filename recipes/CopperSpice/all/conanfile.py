@@ -64,6 +64,10 @@ class CopperSpiceConan(ConanFile):
         if self.options.with_sql:
             self.options.requires("sqlite3/[>=3 <4]")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.21.1 <4]")
+        self.tool_requires("ninja/[>=1.12 <2]")
+
     def _configure_cmake(self):
         cmake = CMake(self)
         cmake.definitions['WITH_GUI'] = self.options.with_gui
