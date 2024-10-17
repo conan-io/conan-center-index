@@ -165,7 +165,7 @@ class OsgearthConan(ConanFile):
         if self.options.with_spdlog:
             self.requires("spdlog/1.14.1")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.45.3", force=True)  # FIXME: fix gdal versions
+            self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.with_tinyxml:
             self.requires("tinyxml/2.6.2")
         if self.options.with_webp:
