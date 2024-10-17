@@ -1,4 +1,7 @@
 sources:
+  "9.7.2":
+    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.7.2.tar.gz"
+    sha256: "13e9c41d290199ee0185590d4fa9d327422aaf75765b3193945303c3c314e07d"
   "9.5.2":
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.5.2.tar.gz"
     sha256: "B20780586D3DF4A3C5BCBDE341A2C1946B03D18237960BDA5BC5E9538F42AF40"
