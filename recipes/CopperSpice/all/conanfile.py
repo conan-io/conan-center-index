@@ -1,5 +1,7 @@
 from conans import ConanFile, CMake, tools
 from conans.errors import ConanException
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 import os, sys
 
 class CopperSpiceConan(ConanFile):
@@ -45,14 +47,11 @@ class CopperSpiceConan(ConanFile):
         'with_xmlpatterns': False,
     }
 
-    generators = 'cmake_paths'
-    exports_sources = ['patches/*']
-
+    def layout(self):
+        cmake_layout(self, src_folder="copperspice")
 
     def source(self):
-        git = tools.Git(folder='copperspice')
-        tag = 'cs-{}'.format(self.version)
-        git.clone('https://github.com/copperspice/copperspice', branch=tag, shallow=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def requirements(self):
         self.requires("cs_libguarded/[>=1.1.0 <2]")
@@ -68,32 +67,35 @@ class CopperSpiceConan(ConanFile):
         self.tool_requires("cmake/[>=3.21.1 <4]")
         self.tool_requires("ninja/[>=1.12 <2]")
 
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions['WITH_GUI'] = self.options.with_gui
-        cmake.definitions['WITH_MULTIMEDIA'] = self.options.with_multimedia
-        cmake.definitions['WITH_MYSQL_PLUGIN'] = self.options.with_mysql_plugin
-        cmake.definitions['WITH_NETWORK'] = self.options.with_network
-        cmake.definitions['WITH_ODBC_PLUGIN'] = self.options.with_odbc_plugin
-        cmake.definitions['WITH_OPENGL'] = self.options.with_opengl
-        cmake.definitions['WITH_PSQL_PLUGIN'] = self.options.with_psql_plugin
-        cmake.definitions['WITH_SCRIPT'] = self.options.with_script
-        cmake.definitions['WITH_SQL'] = self.options.with_sql
-        cmake.definitions['WITH_SVG'] = self.options.with_svg
-        cmake.definitions['WITH_VULKAN'] = self.options.with_vulkan
-        cmake.definitions['WITH_WEBKIT'] = self.options.with_webkit
-        cmake.definitions['WITH_XMLPATTERNS'] = self.options.with_xmlpatterns
-        cmake.configure(source_dir='copperspice')
-        return cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc = CMakeToolchain(self, generator="Ninja")
+        tc.variables["WITH_GUI"] = self.options.with_gui
+        tc.variables['WITH_MULTIMEDIA'] = self.options.with_multimedia
+        tc.variables['WITH_MYSQL_PLUGIN'] = self.options.with_mysql_plugin
+        tc.variables['WITH_NETWORK'] = self.options.with_network
+        tc.variables['WITH_ODBC_PLUGIN'] = self.options.with_odbc_plugin
+        tc.variables['WITH_OPENGL'] = self.options.with_opengl
+        tc.variables['WITH_PSQL_PLUGIN'] = self.options.with_psql_plugin
+        tc.variables['WITH_SCRIPT'] = self.options.with_script
+        tc.variables['WITH_SQL'] = self.options.with_sql
+        tc.variables['WITH_SVG'] = self.options.with_svg
+        tc.variables['WITH_VULKAN'] = self.options.with_vulkan
+        tc.variables['WITH_WEBKIT'] = self.options.with_webkit
+        tc.variables['WITH_XMLPATTERNS'] = self.options.with_xmlpatterns
+        tc.generate()
 
     def build(self):
-        tools.patch(base_path='copperspice', patch_file='patches/noifc.patch')
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, "*", src=os.path.join(self.source_folder, "license"), dst=os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
+#        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # src_dir = os.getcwd()
         # build_type = str(self.settings.arch) + '-' + str(self.settings.build_type).lower()
@@ -101,3 +103,9 @@ class CopperSpiceConan(ConanFile):
         # self.copy('**', dst=os.path.join('bin'), src=os.path.join(src_dir, build_type, 'bin'))
         # self.copy('**', dst=os.path.join('lib'), src=os.path.join(src_dir, build_type, 'lib'))
         # self.copy('**', dst=os.path.join('CopperSpice', 'cmake'), src=os.path.join(src_dir, build_type, 'cmake', 'CopperSpice'))
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "CopperSpice")
+        self.cpp_info.set_property("pkg_config_name", "copperspice")
+
+        self.cpp_info.names["cmake_find_package"] = "CopperSpice"
