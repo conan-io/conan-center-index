@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -31,6 +32,10 @@ class LibId3TagConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
@@ -62,6 +67,10 @@ class LibId3TagConan(ConanFile):
     def build_requirements(self):
         if not is_msvc(self):
             self.tool_requires("gnu-config/cci.20210814")
+            if self._settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -112,6 +121,7 @@ class LibId3TagConan(ConanFile):
                 autotools = Autotools(self)
                 autotools.install()
             rm(self, "*.la", self.package_folder, recursive=True)
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
         if is_msvc(self):
