@@ -130,7 +130,7 @@ class ShaderSlangConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        if getattr(self, "settings_target") is not None:
+        if self.settings_target is not None:
             # Build and install native build tools for cross-compilation
             cmake.build(target="generators")
             cmake.build(target="slang-bootstrap")
@@ -139,7 +139,7 @@ class ShaderSlangConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        if getattr(self, "settings_target") is not None:
+        if self.settings_target is not None:
             cmake.install(component="generators")
         rmdir(self, os.path.join(self.package_folder, "share"))
 
