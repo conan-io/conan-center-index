@@ -1,0 +1,11 @@
+--- a/setup.py
++++ b/setup.py
+@@ -2446,7 +2446,7 @@
+             ))
+ 
+     def detect_nis(self):
+-        if MS_WINDOWS or CYGWIN or HOST_PLATFORM == 'qnx6':
++        if True:
+             self.missing.append('nis')
+             return
+ 
