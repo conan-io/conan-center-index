@@ -4,7 +4,6 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file
 from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
 
 
@@ -55,7 +54,7 @@ class PcapplusplusConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support Windows shared builds for now")
         if self.settings.compiler.cppstd:
             # popen()/pclose() usage
-            check_min_cppstd(self, self._min_cppstd, gnu_extensions=not is_msvc(self))
+            check_min_cppstd(self, self._min_cppstd)
         if self.settings.os not in ("FreeBSD", "Linux", "Macos", "Windows"):
             raise ConanInvalidConfiguration(f"{self.settings.os} is not supported")
 
