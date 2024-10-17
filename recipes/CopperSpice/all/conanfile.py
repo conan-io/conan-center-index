@@ -55,6 +55,7 @@ class CopperSpiceConan(ConanFile):
 
     def requirements(self):
         self.requires("cs_libguarded/[>=1.1.0 <2]")
+        self.requires("libjpeg/9f")
         self.requires("zlib/[>=1.3 <2]")
         if self.options.with_mysql_plugin:
             self.options.requires("libmysqlclient/[>=8]")
