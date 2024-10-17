@@ -26,10 +26,12 @@ class CryptoPPConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "use_openmp": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "use_openmp": False,
     }
 
     def export_sources(self):
@@ -97,6 +99,7 @@ class CryptoPPConan(ConanFile):
             tc.cache_variables["CRYPTOPP_USE_INTERMEDIATE_OBJECTS_TARGET"] = False
             if self.settings.os == "Android":
                 tc.cache_variables["CRYPTOPP_NATIVE_ARCH"] = True
+            tc.cache_variables["CRYPTOPP_USE_OPENMP"] = self.options.use_openmp
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Git"] = True
         tc.generate()
 
