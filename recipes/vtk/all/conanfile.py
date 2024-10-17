@@ -388,7 +388,7 @@ class VtkConan(ConanFile):
             # Used in public vtkSDL2OpenGLRenderWindow.h
             self.requires("sdl/2.30.5", transitive_headers=True, transitive_libs=True)
         if self.options.with_sqlite:
-            self.requires("sqlite3/3.44.2")
+            self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.with_theora:
             self.requires("theora/1.1.1")
         if self.options.with_tiff:
