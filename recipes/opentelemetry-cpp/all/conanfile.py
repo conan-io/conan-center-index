@@ -1,7 +1,7 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rmdir, replace_in_file, save
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, default_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
@@ -70,6 +70,22 @@ class OpenTelemetryCppConan(ConanFile):
         if self.options.with_abseil and Version(self.dependencies["abseil"].ref.version) >= "20230125":
             return 14
         return 11
+
+    @property
+    def _default_cppstd(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            return str(self.settings.compiler.cppstd).replace("gnu", "")
+        else:
+            if self.settings.compiler == "apple-clang":
+                # default cppstd for every apple-clang version is still gnu98
+                return self._min_cppstd
+            return default_cppstd(self).replace("gnu", "")
+
+    @property
+    def _default_stl_version(self):
+        if self.options.with_stl and Version(self.version) >= "1.12":
+            return f"CXX{self._default_cppstd}"
+        return self.options.with_stl
 
     @property
     def _compilers_minimum_version(self):
@@ -144,7 +160,7 @@ class OpenTelemetryCppConan(ConanFile):
         return ["locale"] if self.options.get_safe("with_jaeger") else []
 
     def validate(self):
-        if self.settings.compiler.cppstd:
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -208,7 +224,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["BUILD_BENCHMARK"] = False
         tc.cache_variables["WITH_EXAMPLES"] = False
         tc.cache_variables["WITH_NO_DEPRECATED_CODE"] = self.options.with_no_deprecated_code
-        tc.cache_variables["WITH_STL"] = self.options.with_stl
+        tc.cache_variables["WITH_STL"] = self._default_stl_version
         tc.cache_variables["WITH_GSL"] = self.options.with_gsl
         tc.cache_variables["WITH_ABSEIL"] = self.options.with_abseil
         if Version(self.version) < "1.10":
@@ -227,8 +243,8 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_ASYNC_EXPORT_PREVIEW"] = self.options.with_async_export_preview
         tc.cache_variables["WITH_METRICS_EXEMPLAR_PREVIEW"] = self.options.with_metrics_exemplar_preview
         tc.cache_variables["OPENTELEMETRY_INSTALL"] = True
-        if not self.settings.compiler.cppstd:
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        if not self.settings.compiler.get_safe("cppstd"):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._default_cppstd
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -369,7 +385,10 @@ class OpenTelemetryCppConan(ConanFile):
             self.cpp_info.components["opentelemetry_common"].system_libs.extend(["pthread"])
 
         if self.options.with_stl:
-            self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_CPP_STDLIB")
+            if Version(self.version) < "1.12":
+                self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_CPP_STDLIB")
+            else:
+                self.cpp_info.components["opentelemetry_common"].defines.append(f"OPENTELEMETRY_STL_VERSION=20{self._default_cppstd}")
 
         if self.options.with_gsl:
             self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_GSL")
@@ -468,4 +487,3 @@ class OpenTelemetryCppConan(ConanFile):
             self.cpp_info.components["opentelemetry_exporter_etw"].requires.append(
                 "nlohmann_json::nlohmann_json",
             )
-
