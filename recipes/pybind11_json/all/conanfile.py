@@ -41,6 +41,10 @@ class Pybind11JsonConan(ConanFile):
              src=os.path.join(self.source_folder, "include"))
 
     def package_info(self):
+        # By default pybind11::pybind11_all_do_not_use target is used, which is obviously wrong.
+        # Maybe instead pybind11::pybind11 lighter pybind11::headers would be better?
+        self.cpp_info.requires = ["pybind11::pybind11", "nlohmann_json::nlohmann_json"]
+
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
