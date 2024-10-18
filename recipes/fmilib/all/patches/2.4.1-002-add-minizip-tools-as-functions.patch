@@ -1,0 +1,50 @@
+From 150530fed42e0193f0ccac73971bdce2d277b368 Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Thu, 7 Dec 2023 15:42:49 +0100
+Subject: [PATCH 1/6] add minizip tools as functions
+
+---
+ src/ZIP/include/miniunz.h |  11 +
+ src/ZIP/include/minizip.h |  12 +
+ 2 files changed, 23 insertions(+)
+ create mode 100644 src/ZIP/include/miniunz.h
+ create mode 100644 src/ZIP/include/minizip.h
+
+diff --git a/src/ZIP/include/miniunz.h b/src/ZIP/include/miniunz.h
+new file mode 100644
+index 0000000..d958b3d
+--- /dev/null
++++ b/src/ZIP/include/miniunz.h
+@@ -0,0 +1,11 @@
++#ifndef MINIUNZ_H
++#define MINIUNZ_H
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++  int miniunz(int argc , char *argv[]); /* Renamed the main function */
++#ifdef __cplusplus
++}
++#endif
++#endif /* End of header file MINIUNZ_H */
+diff --git a/src/ZIP/include/minizip.h b/src/ZIP/include/minizip.h
+new file mode 100644
+index 0000000..767dbde
+--- /dev/null
++++ b/src/ZIP/include/minizip.h
+@@ -0,0 +1,12 @@
++#ifndef MINIZIP_H
++#define MINIZIP_H
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++  int minizip(int argc , char *argv[]); /* Renamed the main function */
++
++#ifdef __cplusplus
++}
++#endif
++#endif /* End of header file MINIZIP_H */
+-- 
+2.30.2
+
