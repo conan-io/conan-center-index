@@ -3,11 +3,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir
+from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.scm import Version
 import os
-import textwrap
 
 required_conan_version = ">=1.53.0"
 
@@ -108,11 +107,6 @@ class OpenblasConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        # When no Fortran compiler is available, OpenBLAS builds LAPACK from an f2c-converted copy of LAPACK unless the NO_LAPACK option is specified.
-        # This is not available before v0.3.21.
-        if Version(self.version) < "0.3.21":
-            self.options.build_lapack = False
-            self.options.build_relapack = False
 
     def configure(self):
         if self.options.shared:
@@ -164,14 +158,10 @@ class OpenblasConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
 
         tc.variables["NOFORTRAN"] = not self.options.build_lapack
-        # This checks explicit user-specified fortran compiler
         if self.options.build_lapack and not self._fortran_compiler:
-            if Version(self.version) < "0.3.21":
-                self.output.warning("Building with LAPACK support requires a Fortran compiler.")
-            else:
-                tc.variables["C_LAPACK"] = True
-                tc.variables["NOFORTRAN"] = True
-                self.output.info("Building LAPACK without a Fortran compiler")
+            tc.variables["C_LAPACK"] = True
+            tc.variables["NOFORTRAN"] = True
+            self.output.info("Building LAPACK without a Fortran compiler")
 
         tc.variables["BUILD_WITHOUT_LAPACK"] = not self.options.build_lapack
         tc.variables["BUILD_RELAPACK"] = self.options.build_relapack
@@ -197,44 +187,7 @@ class OpenblasConan(ConanFile):
 
         tc.generate()
 
-    def _patch_sources(self):
-        if Version(self.version) <= "0.3.15":
-            replace_in_file(self, os.path.join(self.source_folder, "cmake", "utils.cmake"),
-                "set(obj_defines ${defines_in})", textwrap.dedent("""\
-                 set(obj_defines ${defines_in})
-
-                 list(FIND obj_defines "RC" def_idx)
-                 if (${def_idx} GREATER -1)
-                   list(REMOVE_ITEM obj_defines "RC")
-                   list(APPEND obj_defines "RC=RC")
-                 endif ()
-                 list(FIND obj_defines "CR" def_idx)
-                 if (${def_idx} GREATER -1)
-                   list(REMOVE_ITEM obj_defines "CR")
-                   list(APPEND obj_defines "CR=CR")
-                 endif ()"""))
-        if Version(self.version) < "0.3.21":
-            f_check_cmake = os.path.join(self.source_folder, "cmake", "f_check.cmake")
-            if Version(self.version) >= "0.3.12":
-                replace_in_file(self, f_check_cmake,
-                                'message(STATUS "No Fortran compiler found, can build only BLAS but not LAPACK")',
-                                'message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")')
-            else:
-                replace_in_file(self, f_check_cmake,
-                    "enable_language(Fortran)",
-                    textwrap.dedent("""\
-                        include(CheckLanguage)
-                        check_language(Fortran)
-                        if(CMAKE_Fortran_COMPILER)
-                          enable_language(Fortran)
-                        else()
-                          message(FATAL_ERROR "No Fortran compiler found. Cannot build with LAPACK.")
-                          set (NOFORTRAN 1)
-                          set (NO_LAPACK 1)
-                        endif()"""))
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
