@@ -1,0 +1,30 @@
+diff --git a/src/reduct/bucket.cc b/src/reduct/bucket.cc
+index 7d10b6d..aa59976 100644
+--- a/src/reduct/bucket.cc
++++ b/src/reduct/bucket.cc
+@@ -1,8 +1,8 @@
+ // Copyright 2022-2024 Alexey Timin
+ 
+ #include "reduct/bucket.h"
+-#define FMT_HEADER_ONLY 1
+-#include <fmt/core.h>
++// #define FMT_HEADER_ONLY 1
++#include <fmt/format.h>
+ #include <fmt/ranges.h>
+ #if CONAN
+ #include <moodycamel/concurrentqueue.h>
+diff --git a/src/reduct/error.cc b/src/reduct/error.cc
+index 2a5dbb4..d28cced 100644
+--- a/src/reduct/error.cc
++++ b/src/reduct/error.cc
+@@ -1,8 +1,8 @@
+ // Copyright 2022 Alexey Timin
+ 
+ #include "reduct/error.h"
+-#define FMT_HEADER_ONLY 1
+-#include <fmt/core.h>
++// #define FMT_HEADER_ONLY 1
++#include <fmt/format.h>
+ 
+ namespace reduct {
+ 
