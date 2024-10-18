@@ -1,0 +1,25 @@
+diff --git a/src/ELF/DynamicEntryArray.cpp b/src/ELF/DynamicEntryArray.cpp
+index c6fa713..4e1bec3 100644
+--- a/src/ELF/DynamicEntryArray.cpp
++++ b/src/ELF/DynamicEntryArray.cpp
+@@ -18,6 +18,8 @@
+ 
+ #include "logging.hpp"
+ 
++#include <algorithm>
++
+ namespace LIEF {
+ namespace ELF {
+ 
+diff --git a/src/ELF/DynamicEntryRunPath.cpp b/src/ELF/DynamicEntryRunPath.cpp
+index e083840..e8282e0 100644
+--- a/src/ELF/DynamicEntryRunPath.cpp
++++ b/src/ELF/DynamicEntryRunPath.cpp
+@@ -19,6 +19,7 @@
+ 
+ #include <numeric>
+ #include <sstream>
++#include <algorithm>
+ 
+ namespace LIEF {
+ namespace ELF {
