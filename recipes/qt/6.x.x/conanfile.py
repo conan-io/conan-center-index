@@ -661,13 +661,13 @@ class QtConan(ConanFile):
         current_cpp_std = self.settings.get_safe("compiler.cppstd", default_cppstd(self))
         current_cpp_std = str(current_cpp_std).replace("gnu", "")
         cpp_std_map = {
-            11: "FEATURE_cxx11",
-            14: "FEATURE_cxx14",
-            17: "FEATURE_cxx17",
-            20: "FEATURE_cxx20"
+            11: "QT_FEATURE_cxx11",
+            14: "QT_FEATURE_cxx14",
+            17: "QT_FEATURE_cxx17",
+            20: "QT_FEATURE_cxx20"
         }
         if Version(self.version) >= "6.5.0":
-            cpp_std_map[23] = "FEATURE_cxx2b"
+            cpp_std_map[23] = "QT_FEATURE_cxx2b"
 
         for std, feature in cpp_std_map.items():
             tc.variables[feature] = "ON" if int(current_cpp_std) >= std else "OFF"
