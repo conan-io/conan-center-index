@@ -1,0 +1,19 @@
+sources:
+  "0.5.0":
+    stella_vslam:
+      url: "https://github.com/stella-cv/stella_vslam/archive/refs/tags/0.5.0.tar.gz"
+      sha256: "0382df7663d738b2b73f12c193f499faacf68ed497c8e828f1bf880b1ed1ea71"
+    iridescence_viewer:
+      url: "https://github.com/stella-cv/iridescence_viewer/archive/c451852585f7df147eb8c7c1f29a24e5557d4251.zip"
+      sha256: "b4906781cf1ac2b9a1c98672c63761c07b6acbf027e2af0ef41808279a61e663"
+    pangolin_viewer:
+      url: "https://github.com/stella-cv/pangolin_viewer/archive/1e0233534055ea3c184dbf6f8b254a0c6c25cee4.zip"
+      sha256: "eea013614ef82cfa3df019501908e986a8aca6fe923cda5ca3012c78324a536f"
+    socket_viewer:
+      url: "https://github.com/stella-cv/socket_viewer/archive/e1e14eec215f5022c84185781ba8d81de22a6f40.zip"
+      sha256: "0325d1ab801e65f4e10791f9aa81d5ad5d9ce0f10246b03f7074f159199c7f09"
+patches:
+  "0.5.0":
+    - patch_file: "patches/001-cmake-conan.patch"
+      patch_description: "Add support for Conan dependencies, unvendor dependencies"
+      patch_type: "conan"
