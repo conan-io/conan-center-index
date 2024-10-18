@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
@@ -22,25 +23,30 @@ class NetcdfConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "netcdf4": [True, False],
-        "with_hdf5": [True, False],
+        "byterange": [True, False],
         "cdf5": [True, False],
         "dap": [True, False],
-        "byterange": [True, False],
+        "netcdf4": [True, False],
+        "with_hdf4": [True, False],
+        "with_hdf5": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "netcdf4": True,
-        "with_hdf5": True,
+        "byterange": False,
         "cdf5": True,
         "dap": True,
-        "byterange": False,
+        "netcdf4": True,
+        "with_hdf4": False,
+        "with_hdf5": True,
     }
+
+    def _with_hdf5_base(self, options):
+        return options.with_hdf5 or options.with_hdf4 or options.netcdf4
 
     @property
     def _with_hdf5(self):
-        return self.options.with_hdf5 or self.options.netcdf4
+        return self._with_hdf5_base(self.options)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -54,6 +60,9 @@ class NetcdfConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+
+    def package_id(self):
+        self.info.options.with_hdf5 = self._with_hdf5_base(self.info.options)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -69,6 +78,11 @@ class NetcdfConan(ConanFile):
                 self.requires("hdf5/1.12.0")
             else:
                 self.requires("hdf5/1.14.1")
+            if Version(self.version) >= "4.9.0":
+                self.requires("zlib/[>=1.2.11 <2]")
+
+        if self.options.with_hdf4:
+            self.requires("hdf4/4.2.16-2")
 
         if self.options.dap or self.options.byterange:
             self.requires("libcurl/[>=7.78.0 <9]")
@@ -90,6 +104,11 @@ class NetcdfConan(ConanFile):
         tc.variables["ENABLE_BYTERANGE"] = self.options.byterange
         tc.variables["USE_HDF5"] = self.options.with_hdf5
         tc.variables["NC_FIND_SHARED_LIBS"] = self.options.with_hdf5 and self.dependencies["hdf5"].options.shared
+
+        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
+        # The compilation check incorrectly fails on MSVC otherwise:
+        # error C2168: 'memmove': too few actual parameters for intrinsic function
+        tc.variables["HAVE_MEMMOVE"] = True
         tc.generate()
 
         tc = CMakeDeps(self)
@@ -125,6 +144,10 @@ class NetcdfConan(ConanFile):
         self.cpp_info.components["libnetcdf"].libs = ["netcdf"]
         if self._with_hdf5:
             self.cpp_info.components["libnetcdf"].requires.append("hdf5::hdf5")
+            if Version(self.version) >= "4.9.0":
+                self.cpp_info.components["libnetcdf"].requires.append("zlib::zlib")
+        if self.options.with_hdf4:
+            self.cpp_info.components["libnetcdf"].requires.append("hdf4::hdf4")
         if self.options.dap or self.options.byterange:
             self.cpp_info.components["libnetcdf"].requires.append("libcurl::libcurl")
         if self.settings.os in ["Linux", "FreeBSD"]:
