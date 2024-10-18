@@ -3,7 +3,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd, cross_building, can_run
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir, save, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc_static_runtime
@@ -149,9 +149,8 @@ class PdalConan(ConanFile):
         tc.variables["WITH_TESTS"] = False
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_PostgreSQL"] = True
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Libexecinfo"] = True
-        if cross_building(self) and can_run(self):
-            # Workaround for dimbuilder not being found when cross-compiling on macOS
-            tc.variables["DIMBUILDER_EXECUTABLE"] = os.path.join(self.build_folder, "src", "bin", "dimbuilder")
+        if cross_building(self):
+            tc.variables["DIMBUILDER_EXECUTABLE"] = os.path.join(self.build_folder, "bin", "dimbuilder")
         tc.generate()
 
         # For the namespace injection in _patch_sources() below
@@ -217,6 +216,19 @@ class PdalConan(ConanFile):
 
     def build(self):
         self._patch_sources()
+
+        if cross_building(self):
+            # Build the dimbuilder executable using the default native compiler instead
+            src_dir = os.path.join(self.source_folder, "dimbuilder")
+            build_dir = os.path.join(self.build_folder, "src", "dimbuilder")
+            nlohmann_inc_dir = os.path.join(self.dependencies["nlohmann_json"].package_folder, "include")
+            utfcpp_inc_dir = os.path.join(self.dependencies["utfcpp"].package_folder, "include")
+            replace_in_file(self, os.path.join(src_dir, "DimBuilder.hpp"), "NL::", "nlohmann::")
+            replace_in_file(self, os.path.join(src_dir, "DimBuilder.cpp"), "NL::", "nlohmann::")
+            self.run(f"cmake -S {src_dir} -B {build_dir} -DNLOHMANN_INCLUDE_DIR={nlohmann_inc_dir} -DUTFCPP_INCLUDE_DIR={utfcpp_inc_dir}")
+            self.run(f"cmake --build {build_dir}")
+            copy(self, "dimbuilder*", src=build_dir, dst=os.path.join(self.build_folder, "bin"))
+
         cmake = CMake(self)
         cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
