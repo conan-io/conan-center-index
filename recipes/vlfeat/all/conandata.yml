@@ -4,6 +4,9 @@ sources:
     sha256: "221d7fb5103f004cc90201307fd1acb080c0caf5c2c26435ba1d5307c07e8cce"
 patches:
   "0.9.21":
+    - patch_file: "patches/001-remove-unnecesary-memcpy-versioning.patch"
+      patch_description: "Remove an unnecessary use of versioned memcpy"
+      patch_type: "portability"
     - patch_file: "patches/002-fix-openmp-build.patch"
       patch_description: "Fix OpenMP build on GCC 9 and newer"
       patch_type: "portability"
