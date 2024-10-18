@@ -104,6 +104,8 @@ class CoinCbcConan(ConanFile):
             "--without-netlib",
             "--without-sample",
             "--without-miplib3",
+            "--disable-dependency-linking",
+            "F77=unavailable",
         ]
         if is_msvc(self):
             tc.extra_cxxflags.append("-EHsc")
