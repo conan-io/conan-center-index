@@ -32,9 +32,9 @@ class OpenImageIOConan(ConanFile):
         "with_freetype": [True, False],
         "with_giflib": [True, False],
         "with_hdf5": [True, False],
-        "with_jxl": [True, False],
         "with_libheif": [True, False],
         "with_libjpeg": ["libjpeg", "libjpeg-turbo"],
+        "with_libjxl": [True, False],
         "with_libpng": [True, False],
         "with_libwebp": [True, False],
         "with_opencolorio": [True, False],
@@ -53,9 +53,9 @@ class OpenImageIOConan(ConanFile):
         "with_freetype": True,
         "with_giflib": True,
         "with_hdf5": True,
-        "with_jxl": True,
-        "with_libjpeg": "libjpeg",
         "with_libheif": True,
+        "with_libjpeg": "libjpeg",
+        "with_libjxl": False,  # TODO: Currently produces link failues
         "with_libpng": True,
         "with_libwebp": True,
         "with_opencolorio": True,
@@ -78,7 +78,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if Version(self.version) < "3.0.0.0":
-            self.options.with_jxl = False  #rm_safe("with_jxl")
+            self.options.with_libjxl = False  #rm_safe("with_libjxl")
 
     def requirements(self):
         # Required libraries
@@ -101,7 +101,7 @@ class OpenImageIOConan(ConanFile):
             self.requires("fmt/9.1.0", transitive_headers=True)
 
         # Optional libraries
-        if self.options.with_jxl:
+        if self.options.with_libjxl:
             self.requires("libjxl/0.10.3")
         if self.options.with_libpng:
             self.requires("libpng/1.6.42")
@@ -134,6 +134,10 @@ class OpenImageIOConan(ConanFile):
             self.requires("ptex/2.4.2")
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.2")
+
+        # TODO: Temporary, to be removed
+        # Works with build=missing now, awaiting https://github.com/conan-io/conan-center-index/pull/25660
+        self.requires('lcms/2.16', override=True)
 
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
@@ -183,9 +187,9 @@ class OpenImageIOConan(ConanFile):
         tc.variables["USE_JPEG"] = True
         # OIIO CMake files are patched to check USE_* flags to require or not use dependencies
         tc.variables["USE_JPEGTURBO"] = (self.options.with_libjpeg == "libjpeg-turbo")
-        if Version(self.version) >= '3.0.0.0':
-            tc.variables["USE_JXS"] = self.options.with_jxl
         tc.variables["USE_LIBHEIF"] = self.options.with_libheif
+        if Version(self.version) >= '3.0.0.0':
+            tc.variables["USE_LIBJXL"] = self.options.with_libjxl
         tc.variables["USE_LIBPNG"] = self.options.with_libpng
         tc.variables["USE_LIBRAW"] = self.options.with_raw
         tc.variables["USE_LIBWEBP"] = self.options.with_libwebp
@@ -285,7 +289,7 @@ class OpenImageIOConan(ConanFile):
                 "boost::regex",
             ]
 
-        if self.options.with_jxl:
+        if self.options.with_libjxl:
             open_image_io.requires.append("libjxl::libjxl")
         if self.options.with_libjpeg == "libjpeg":
             open_image_io.requires.append("libjpeg::libjpeg")
