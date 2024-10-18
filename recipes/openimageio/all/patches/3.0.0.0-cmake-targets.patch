@@ -335,46 +335,6 @@ index 25606a139..5f520249a 100644
                       DEFINITIONS "USE_HEIF=1")
  else ()
      message (WARNING "heif plugin will not be built")
-diff --git src/iconvert/CMakeLists.txt src/iconvert/CMakeLists.txt
-index 735b88def..8f5bb3b54 100644
---- src/iconvert/CMakeLists.txt
-+++ src/iconvert/CMakeLists.txt
-@@ -2,4 +2,4 @@
- # SPDX-License-Identifier: Apache-2.0
- # https://github.com/AcademySoftwareFoundation/OpenImageIO
- 
--fancy_add_executable (LINK_LIBRARIES OpenImageIO)
-+fancy_add_executable (LINK_LIBRARIES OpenImageIO fmt::fmt)
-diff --git src/idiff/CMakeLists.txt src/idiff/CMakeLists.txt
-index 735b88def..8f5bb3b54 100644
---- src/idiff/CMakeLists.txt
-+++ src/idiff/CMakeLists.txt
-@@ -2,4 +2,4 @@
- # SPDX-License-Identifier: Apache-2.0
- # https://github.com/AcademySoftwareFoundation/OpenImageIO
- 
--fancy_add_executable (LINK_LIBRARIES OpenImageIO)
-+fancy_add_executable (LINK_LIBRARIES OpenImageIO fmt::fmt)
-diff --git src/igrep/CMakeLists.txt src/igrep/CMakeLists.txt
-index 735b88def..8f5bb3b54 100644
---- src/igrep/CMakeLists.txt
-+++ src/igrep/CMakeLists.txt
-@@ -2,4 +2,4 @@
- # SPDX-License-Identifier: Apache-2.0
- # https://github.com/AcademySoftwareFoundation/OpenImageIO
- 
--fancy_add_executable (LINK_LIBRARIES OpenImageIO)
-+fancy_add_executable (LINK_LIBRARIES OpenImageIO fmt::fmt)
-diff --git src/iinfo/CMakeLists.txt src/iinfo/CMakeLists.txt
-index 735b88def..8f5bb3b54 100644
---- src/iinfo/CMakeLists.txt
-+++ src/iinfo/CMakeLists.txt
-@@ -2,4 +2,4 @@
- # SPDX-License-Identifier: Apache-2.0
- # https://github.com/AcademySoftwareFoundation/OpenImageIO
- 
--fancy_add_executable (LINK_LIBRARIES OpenImageIO)
-+fancy_add_executable (LINK_LIBRARIES OpenImageIO fmt::fmt)
 diff --git src/include/CMakeLists.txt src/include/CMakeLists.txt
 index 3ab45a570..9b6511b78 100644
 --- src/include/CMakeLists.txt
@@ -485,15 +445,14 @@ index 941c1bbc9..3126fd267 100644
          target_compile_definitions(${targetname} PRIVATE
                                     WIN32_LEAN_AND_MEAN NOMINMAX
 diff --git src/oiiotool/CMakeLists.txt src/oiiotool/CMakeLists.txt
-index 87b6a3e78..acd0cb985 100644
+index 87b6a3e78..279b84b10 100644
 --- src/oiiotool/CMakeLists.txt
 +++ src/oiiotool/CMakeLists.txt
-@@ -9,4 +9,6 @@ fancy_add_executable (SYSTEM_INCLUDE_DIRS
+@@ -9,4 +9,5 @@ fancy_add_executable (SYSTEM_INCLUDE_DIRS
                          OpenImageIO
                          $<TARGET_NAME_IF_EXISTS:OpenEXR::OpenEXR>
                          ${OpenCV_LIBRARIES}
 +                        tsl::robin_map
-+                        fmt::fmt
                       )
 diff --git src/ptex.imageio/CMakeLists.txt src/ptex.imageio/CMakeLists.txt
 index 73e3ad843..da45e8c5f 100644
