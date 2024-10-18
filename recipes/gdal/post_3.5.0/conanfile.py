@@ -87,6 +87,7 @@ class GdalConan(ConanFile):
         "with_xml2": [True, False],
         "with_zlib": ["deprecated", True, False], # always enabled
         "with_zstd": [True, False],
+        "rename_shapelib_symbols": [True, False],
     }
     default_options = {
         "shared": False,
@@ -153,6 +154,7 @@ class GdalConan(ConanFile):
         "with_xml2": False,
         "with_zlib": "deprecated",
         "with_zstd": False,
+        "rename_shapelib_symbols": True,
     }
 
     def export_sources(self):
@@ -174,6 +176,9 @@ class GdalConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
+        if not self.options.with_shapelib:
+            del self.options.rename_shapelib_symbols
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -323,7 +328,7 @@ class GdalConan(ConanFile):
             raise ConanInvalidConfiguration("Enable either pcre or pcre2, not both")
 
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
-            raise ConanInvalidConfiguration("gdql requires sqlite3:enable_column_metadata=True")
+            raise ConanInvalidConfiguration("gdal requires sqlite3:enable_column_metadata=True")
 
         if self.dependencies["libtiff"].options.jpeg != self.options.with_jpeg:
             msg = "libtiff:jpeg and gdal:with_jpeg must be set to the same value, either libjpeg or libjpeg-turbo."
@@ -333,7 +338,7 @@ class GdalConan(ConanFile):
             # So we print the error message manually.
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
-
+        
         if self.options.with_poppler and self.dependencies["poppler"].options.with_libjpeg != self.options.with_jpeg:
             msg = "poppler:with_libjpeg and gdal:with_jpeg must be set to the same value, either libjpeg or libjpeg-turbo."
             self.output.error(msg)
@@ -460,6 +465,9 @@ class GdalConan(ConanFile):
             tc.variables["SQLite3_HAS_MUTEX_ALLOC"] = True
             tc.preprocessor_definitions["SQLite3_HAS_COLUMN_METADATA"] = 1 if self.dependencies["sqlite3"].options.enable_column_metadata else 0
             tc.preprocessor_definitions["SQLite3_HAS_RTREE"] = 1 if self.dependencies["sqlite3"].options.enable_rtree else 0
+
+        if self.options.with_shapelib:
+            tc.variables["RENAME_INTERNAL_SHAPELIB_SYMBOLS"] = self.options.rename_shapelib_symbols
         # https://github.com/OSGeo/gdal/blob/v3.8.0/cmake/helpers/CheckDependentLibraries.cmake#L419-L450
         tc.variables["HAVE_JPEGTURBO_DUAL_MODE_8_12"] = (
                 self.options.with_jpeg == "libjpeg-turbo" and
