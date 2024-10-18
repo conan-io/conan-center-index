@@ -210,7 +210,7 @@ class QtConan(ConanFile):
 
     def _debug_output(self, message):
         if Version(conan_version) >= "2":
-            self.output.debug(message)
+            self.output.info(message)
 
     def configure(self):
         # if self.settings.os != "Linux":
@@ -773,22 +773,22 @@ class QtConan(ConanFile):
             if package in [d.ref.name for d in self.dependencies.direct_host.values()]:
                 p = self.dependencies[package]
                 if package == "freetype":
-                    args.append("\"%s_INCDIR=%s\"" % (var, p.cpp_info.aggregated_components().includedirs[-1]))
-                args.append("\"%s_LIBS=%s\"" % (var, " ".join(self._gather_libs(p))))
+                    args.append(f'"{var}_INCDIR={p.cpp_info.aggregated_components().includedirs[-1]}"')
+                args.append(f'"{var}_LIBS={" ".join(self._gather_libs(p))}"')
 
         for dependency in self.dependencies.direct_host.values():
             args += [f"-I \"{s}\"" for s in dependency.cpp_info.aggregated_components().includedirs]
             args += [f"-D {s}" for s in dependency.cpp_info.aggregated_components().defines]
 
         libdirs = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
-        args.append("QMAKE_LIBDIR+=\"%s\"" % " ".join(libdirs))
+        args.append(f'QMAKE_LIBDIR+="{" ".join(libdirs)}"')
         if not is_msvc(self):
-            args.append("QMAKE_RPATHLINKDIR+=\"%s\"" % ":".join(libdirs))
+            args.append(f'QMAKE_RPATHLINKDIR+="{":".join(libdirs)}"')
 
         if "libmysqlclient" in [d.ref.name for d in self.dependencies.direct_host.values()]:
-            args.append("-mysql_config \"%s\"" % os.path.join(self.dependencies["libmysqlclient"].package_folder, "bin", "mysql_config"))
+            args.append(f'-mysql_config "{os.path.join(self.dependencies["libmysqlclient"].package_folder, "bin", "mysql_config")}"')
         if "libpq" in [d.ref.name for d in self.dependencies.direct_host.values()]:
-            args.append("-psql_config \"%s\"" % os.path.join(self.dependencies["libpq"].package_folder, "bin", "pg_config"))
+            args.append(f'-psql_config "{os.path.join(self.dependencies["libpq"].package_folder, "bin", "pg_config")}"')
         if self.settings.os == "Macos":
             args += ["-no-framework"]
             if self.settings.arch == "armv8":
@@ -862,7 +862,7 @@ class QtConan(ConanFile):
         if self.settings.compiler == "apple-clang" and self.options.qtmultimedia:
             # XCode 14.3 finally removes std::unary_function, so compilation fails
             # when using newer SDKs when using C++17 or higher.
-            # This macro re-enables them. Should be safe to pass this macro even 
+            # This macro re-enables them. Should be safe to pass this macro even
             # in earlier versions, as it would have no effect.
             args += ['QMAKE_CXXFLAGS+="-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION=1"']
 
@@ -976,9 +976,12 @@ Prefix = ..""")
         filecontents += 'set(CMAKE_AUTOMOC_MACRO_NAMES "Q_OBJECT" "Q_GADGET" "Q_GADGET_EXPORT" "Q_NAMESPACE" "Q_NAMESPACE_EXPORT")\n'
         save(self, os.path.join(self.package_folder, self._cmake_core_extras_file), filecontents)
 
-        def _create_private_module(module, dependencies=[]):
-            if "Core" not in dependencies:
+        def _create_private_module(module, dependencies=None):
+            if not dependencies:
+                dependencies = ["Core"]
+            elif "Core" not in dependencies:
                 dependencies.append("Core")
+
             dependencies_string = ';'.join(f'Qt5::{dependency}' for dependency in dependencies)
             contents = textwrap.dedent("""\
             if(NOT TARGET Qt5::{0}Private)
@@ -1047,7 +1050,10 @@ Prefix = ..""")
                 reqs.append(corrected_req)
             return reqs
 
-        def _create_module(module, requires=[], has_include_dir=True):
+        def _create_module(module, requires=None, has_include_dir=True):
+            if not requires:
+                requires = []
+
             componentname = f"qt{module}"
             assert componentname not in self.cpp_info.components, f"Module {module} already present in self.cpp_info.components"
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt5::{module}")
@@ -1079,8 +1085,7 @@ Prefix = ..""")
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt5::{pluginname}")
             self.cpp_info.components[componentname].names["cmake_find_package"] = pluginname
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
-            if not self.options.shared:
-                self.cpp_info.components[componentname].libs = [libname + libsuffix]
+            self.cpp_info.components[componentname].libs = [libname + libsuffix]
             self.cpp_info.components[componentname].libdirs = [os.path.join("plugins", plugintype)]
             self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
@@ -1149,6 +1154,7 @@ Prefix = ..""")
                 gui_reqs.append("md4c::md4c")
             _create_module("Gui", gui_reqs)
             _add_build_module("qtGui", self._cmake_qt5_private_file("Gui"))
+            _create_plugin("QOffscreenIntegrationPlugin", "qoffscreen", "platforms", ["Core", "Gui"])
 
             event_dispatcher_reqs = ["Core", "Gui"]
             if self.options.with_glib:
@@ -1243,6 +1249,7 @@ Prefix = ..""")
                 if self.options.get_safe("with_x11", False):
                     _create_module("XcbQpa", xcb_qpa_reqs, has_include_dir=False)
                     _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpa"])
+                    _create_plugin("QXcbGlxIntegrationPlugin", "qxcb-glx-integration", "xcbglintegrations", ["Core", "Gui"])
 
         if self.options.with_sqlite3:
             _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
@@ -1316,6 +1323,16 @@ Prefix = ..""")
         if self.options.qtwayland and self.options.gui:
             _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
             _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
+            _create_plugin("QWaylandIntegrationPlugin", "qwayland-generic", "platforms", ["Gui"])
+            _create_plugin("QWaylandEglPlatformIntegrationPlugin", "qwayland-egl", "platforms", ["Gui"])
+            _create_plugin("QWaylandXCompositeGlxPlatformIntegrationPlugin", "qwayland-xcomposite-glx", "platforms", ["Gui"])
+            _create_plugin("QWaylandWlShellIntegrationPlugin", "wl-shell", "wayland-shell-integration", ["WaylandClient"])
+            _create_plugin("QWaylandFullScreenShellV1IntegrationPlugin", "fullscreen-shell-v1", "wayland-shell-integration", ["WaylandClient"])
+            _create_plugin("QWaylandXdgShellIntegrationPlugin", "xdg-shell", "wayland-shell-integration", ["WaylandClient"])
+            _create_plugin("QWaylandIviShellIntegrationPlugin", "ivi-shell", "wayland-shell-integration", ["WaylandClient"])
+            _create_plugin("QWaylandEglClientBufferPlugin", "qt-plugin-wayland-egl", "wayland-graphics-integration-client", ["WaylandClient"])
+            _create_plugin("QWaylandXCompositeGlxClientBufferPlugin", "xcomposite-glx", "wayland-graphics-integration-client", ["WaylandClient"])
+            _create_plugin("QWaylandBradientDecorationPlugin", "bradient", "wayland-decoration-client", ["WaylandClient"])
 
         if self.options.qtlocation:
             _create_module("Positioning")
