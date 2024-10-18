@@ -1,14 +1,11 @@
 sources:
-  "10.2":
-    "Windows":
-      "x86_64":
-        url: "https://downloads.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/ray_linn/GCC-10.X-with-ada/GCC-10.2.0-crt-8.0.0-with-ada-20201019.7z"
-        sha256: "5c3fc254494bc24eb201870f4b781d401cf7279bd03ea1aba6f2ffae771ded44"
-    "Linux":
-      "x86_64":
-        url: "https://gfortran.meteodat.ch/download/x86_64/releases/gcc-10.2.0.tar.xz"
-        sha256: "5cfaf152db442bb967963ca62d4590980cb2664c5902c1a9578fc8a9c6efe40f"
-    "Macos":
-      "x86_64":
-        url: "https://downloads.sourceforge.net/project/hpc/hpc/g95/gfortran-10.2-bin.tar.gz"
-        sha256: "2de46f571eefc2b544db4ed6c958c78a5e3e78c4b4b5daab38aabc1b08dd5666"
+  "13.2.0":
+    sources:
+      url:
+        - "https://mirrors.dotsrc.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz"
+        - "https://ftpmirror.gnu.org/gnu/gcc/gcc-13.2.0/gcc-13.2.0.tar.xz"
+        - "https://gcc.gnu.org/ftp/gcc/releases/gcc-13.2.0/gcc-13.2.0.tar.xz"
+      sha256: "e275e76442a6067341a27f04c5c6b83d8613144004c0413528863dc6b5c743da"
+    homebrew-patches:
+      url: "https://raw.githubusercontent.com/Homebrew/formula-patches/3c5cbc8e9cf444a1967786af48e430588e1eb481/gcc/gcc-13.2.0.diff"
+      sha256: "2df7ef067871a30b2531a2013b3db661ec9e61037341977bfc451e30bf2c1035"
