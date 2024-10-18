@@ -1,4 +1,4 @@
-#include "cqasm.hpp"
+#include "libqasm/cqasm.hpp"
 
 #include <iostream>
 
