@@ -129,8 +129,6 @@ class ThorvgConan(ConanFile):
         if self.settings.os == "Linux":
             if self.options.with_engines in ["gl", "gl_beta"]:
                 self.requires("opengl/system")
-        if self.options.with_threads and Version(self.version) >= "0.15.0" and self.settings.compiler in ["clang", "apple-clang"]:
-            self.requires("llvm-openmp/17.0.4")
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.0")
@@ -175,6 +173,16 @@ class ThorvgConan(ConanFile):
         if is_msvc(self) and self.options.shared:
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"), ", 'strip=true'", "")
 
+        # TODO: As OpenMP is tagged as "required: false", let's disable it for now to avoid extra flags and requirements injections.
+        if Version(self.version) >= "0.15.1":
+            # Notice that the use of disabler() is not working here. If it's used, there is no targets to build.
+            replace_in_file(self, os.path.join(self.source_folder, "src", "renderer", "sw_engine", "meson.build"),
+                            "omp_dep = dependency('openmp', required: false)",
+                            "omp_dep = []")
+            replace_in_file(self, os.path.join(self.source_folder, "src", "renderer", "sw_engine", "meson.build"),
+                            "omp_dep.found()",
+                            "false")
+
     def build(self):
         self._patch_sources()
         meson = Meson(self)
@@ -202,13 +210,3 @@ class ThorvgConan(ConanFile):
             self.cpp_info.defines = ["TVG_STATIC"]
         else:
             self.cpp_info.defines = ["TVG_EXPORT", "TVG_BUILD"]
-
-        if self.options.with_threads and Version(self.version) >= "0.15.0":
-            openmp_flags = []
-            if is_msvc(self):
-                openmp_flags = ["-openmp"]
-            elif self.settings.compiler == "gcc":
-                openmp_flags = ["-fopenmp"]
-            elif self.settings.compiler in ["clang", "apple-clang"]:
-                openmp_flags = ["-Xpreprocessor", "-fopenmp"]
-            self.cpp_info.exelinkflags.extend(openmp_flags)
