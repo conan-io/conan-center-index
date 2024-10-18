@@ -190,6 +190,11 @@ class OpenblasConan(ConanFile):
             tc.cache_variables["TARGET"] = self.options.target
 
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+
+        # Fix a fatal compiler warning on GCC 14
+        # https://github.com/OpenMathLib/OpenBLAS/pull/4894
+        tc.extra_cflags.append("-Wno-error=incompatible-pointer-types")
+
         tc.generate()
 
     def _patch_sources(self):
