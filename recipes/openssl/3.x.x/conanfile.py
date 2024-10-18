@@ -89,12 +89,14 @@ class OpenSSLConan(ConanFile):
         "no_zlib": [True, False],
         "openssldir": [None, "ANY"],
         "tls_security_level": [None, 0, 1, 2, 3, 4, 5],
+        "rand_seed": ["none", "getrandom", "devrandom", "os", "egd", "rdcpu"],
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
     default_options["no_md2"] = True
     default_options["openssldir"] = None
     default_options["tls_security_level"] = None
+    default_options["rand_seed"] = "os"
 
     @property
     def _is_clang_cl(self):
@@ -362,6 +364,7 @@ class OpenSSLConan(ConanFile):
             "--libdir=lib",
             f"--openssldir=\"{openssldir}\"",
             "no-threads" if self.options.no_threads else "threads",
+            f"--with-rand-seed={self.options.rand_seed}",
             f"PERL={self._perl}",
             "no-unit-test",
             "no-tests",
@@ -410,7 +413,7 @@ class OpenSSLConan(ConanFile):
             ])
 
         for option_name in self.default_options.keys():
-            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "tls_security_level", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2"):
+            if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "tls_security_level", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2", "rand_seed"):
                 self.output.info(f"Activated option: {option_name}")
                 args.append(option_name.replace("_", "-"))
         return args
