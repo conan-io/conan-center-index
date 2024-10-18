@@ -1,5 +1,7 @@
 #include "raylib.h"
 
+#include "raylib_stuff/rcamera.h"
+
 #include <stdio.h>
 
 int main(void) {
@@ -8,5 +10,9 @@ int main(void) {
   if (CheckCollisionSpheres(center, r, center, r)) {
     printf("unit sphere collides with itself!\n");
   }
+  Camera3D cam;
+  cam.fovy = 0;
+  printf("%f\n", cam.fovy);
+
   return 0;
 }
