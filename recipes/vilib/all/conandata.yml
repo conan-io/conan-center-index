@@ -1,0 +1,9 @@
+sources:
+  "cci.20210625":
+    url: "https://github.com/uzh-rpg/vilib/archive/7a12fe1db78ca755876469979394076f10fe577c.zip"
+    sha256: "431e19fdb85ed99b5508b7409699ea30ea121578e660116351a57d71474bf01a"
+patches:
+  "cci.20210625":
+    - patch_file: "patches/001-fix-opencv-linked-libs.patch"
+      patch_type: "bugfix"
+      patch_description: "Add missing required OpenCV linked libraries"
