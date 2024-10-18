@@ -1,4 +1,7 @@
 sources:
+  "1.12.0":
+    url: "https://github.com/apache/avro/archive/release-1.12.0.tar.gz"
+    sha256: "51832f9c2e81fa95addb74be627dac27b4883ec2c8627ec8471d99cfea787555"
   "1.11.3":
     url: "https://github.com/apache/avro/archive/release-1.11.3.tar.gz"
     sha256: "da377ac1cf8b91458bf702cbcfb214eecb5c399b267f0ca9c0aade6cabaf126e"
@@ -15,6 +18,25 @@ sources:
     url: "https://github.com/apache/avro/archive/release-1.10.1.tar.gz"
     sha256: "8fd1f850ce37e60835e6d8335c0027a959aaa316773da8a9660f7d33a66ac142"
 patches:
+  "1.12.0":
+    - patch_file: "patches/0001-add-iterator-include-1-12-0.patch"
+      patch_description: "include iterator"
+      patch_type: "portability"
+    - patch_file: "patches/0002-disable-tests-1-12-0.patch"
+      patch_description: "disable tests"
+      patch_type: "conan"
+    - patch_file: "patches/0003-allow-static-boost-linkage-1-12-0.patch"
+      patch_description: "remove boost linkage definitions"
+      patch_type: "conan"
+    - patch_file: "patches/0004-fix-windows-shared-installation-1-12-0.patch"
+      patch_description: "fix runtime installation path"
+      patch_type: "portability"
+    - patch_file: "patches/0006-disable-warn-as-error-1-12-0.patch"
+      patch_description: "disable warn as error for boost c++14 breaking change"
+      patch_type: "portability"
+    - patch_file: "patches/0007-use-cci-fmt-1-12-0.patch"
+      patch_description: "use cci fmt"
+      patch_type: "conan"
   "1.11.3":
     - patch_file: "patches/0001-add-iterator-include-1-11-0.patch"
       patch_description: "include iterator"
