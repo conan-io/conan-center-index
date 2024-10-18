@@ -1,0 +1,12 @@
+--- include/guik/screen_capture.hpp
++++ include/guik/screen_capture.hpp
+@@ -6,6 +6,9 @@
+ #include <atomic>
+ #include <thread>
+ #include <iostream>
++#include <string>
++#include <utility>
++#include <vector>
+ #include <Eigen/Core>
+ #include <guik/concurrent_queue.hpp>
+ 
