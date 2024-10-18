@@ -1,0 +1,4 @@
+sources:
+  "0.9.3":
+    url: "https://github.com/thedmd/imgui-node-editor/archive/refs/tags/v0.9.3.tar.gz"
+    sha256: "efe3e35dea4e769fca8477c4ec26c1c8566c81c58a9bb6ab430cc2890d3276ca"
