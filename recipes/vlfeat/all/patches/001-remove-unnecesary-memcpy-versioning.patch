@@ -1,0 +1,17 @@
+Unnecessary and breaks cross-compilation.
+
+E.g. memcpy@GLIBC_2.2.5 is not available in /usr/aarch64-linux-gnu/lib/libc.so.6 when cross-compiling.
+
+--- vl/host.h
++++ vl/host.h
+@@ -658,10 +658,5 @@
+ #endif
+ }
+ 
+-/* Linux: limit glibc to old versions for compatibility */
+-#if defined(VL_COMPILER_GNUC) & defined(VL_OS_LINUX) & ! defined(__DOXYGEN__)
+-__asm__(".symver memcpy,memcpy@GLIBC_2.2.5");
+-#endif
+-
+ /* VL_HOST_H */
+ #endif
