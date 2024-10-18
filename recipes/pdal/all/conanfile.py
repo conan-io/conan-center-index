@@ -1,5 +1,4 @@
 import os
-import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -245,23 +244,6 @@ class PdalConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rm(self, "pdal-config*", os.path.join(self.package_folder, "bin"), recursive=True)
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_target_file),
-            {"pdalcpp": "PDAL::PDAL"},
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
     @property
     def _module_target_file(self):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
@@ -277,10 +259,3 @@ class PdalConan(ConanFile):
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9.0":
             self.cpp_info.system_libs.append("stdc++fs")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "PDAL"
-        self.cpp_info.names["cmake_find_package_multi"] = "PDAL"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_target_file]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_target_file]
-        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
