@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 
 required_conan_version = ">=1.53.0"
@@ -174,6 +174,9 @@ class PackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["FORTRAN_REQUIRED"] = False
+        tc.variables["CMAKE_Fortran_COMPILER"] = ""
+
         # Static builds are disabled due to requiring WITH_DL=False,
         # which fails with a compilation error as of v3.6.4.
         tc.variables["ENABLE_SHARED"] = True
@@ -297,6 +300,8 @@ class PackageConan(ConanFile):
         if self.options.with_bonmin:
             content = content.replace("foreach(PKG ALPAQA ", "foreach(PKG COINCGL COINOSI COINUTILS ALPAQA ")
         cmakelists.write_text(content, encoding="utf-8")
+        # The project incorrectly tries to enable Fortran support despite FORTRAN_REQUIRED=OFF
+        replace_in_file(self, cmakelists, "enable_language(Fortran", "# enable_language(Fortran")
 
     def build(self):
         self._patch_sources()
