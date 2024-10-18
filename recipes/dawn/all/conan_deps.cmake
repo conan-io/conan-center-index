@@ -1,0 +1,6 @@
+find_package(absl REQUIRED CONFIG)
+find_package(glslang REQUIRED CONFIG)
+find_package(glfw3 REQUIRED CONFIG)
+find_package(SPIRV-Headers REQUIRED CONFIG)
+find_package(Vulkan-Headers REQUIRED CONFIG)
+find_package(VulkanUtilityHeaders REQUIRED CONFIG)
