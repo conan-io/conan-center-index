@@ -5,12 +5,12 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir, save, replace_in_file
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.gnu import Autotools, AutotoolsDeps, GnuToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.3.0"
 
 
 class OpenMPIConan(ConanFile):
@@ -115,67 +115,61 @@ class OpenMPIConan(ConanFile):
         def yes_no(v):
             return "yes" if v else "no"
 
-        tc = AutotoolsToolchain(self)
-        tc.configure_args += [
-            "--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic",
-            f"--enable-mpi-fortran={self.options.fortran}",
-            f"--with-hwloc={root('hwloc')}",
-            f"--with-libevent={root('libevent')}",
-            f"--with-libnl={root('libnl') if not is_apple_os(self) else 'no'}",
-            f"--with-ofi={root('libfabric') if self.options.get_safe('with_libfabric') else 'no'}",
-            f"--with-zlib={root('zlib')}",
-            "--with-pmix=internal",
-            "--disable-wrapper-rpath",
-            "--disable-wrapper-runpath",
-            "--exec-prefix=/",
-            "--datarootdir=${prefix}/res",
-            # Disable other external libraries explicitly
-            "--with-alps=no",  # ALPS
-            "--with-cuda=no",  # CUDA
-            "--with-gpfs=no",  # Gpfs
-            "--with-hcoll=no",  # hcoll
-            "--with-ime=no",  # IME
-            "--with-lsf=no",  # LSF
-            "--with-lustre=no",  # Lustre
-            "--with-memkind=no",  # memkind
-            "--with-portals4=no",  # Portals4
-            "--with-psm2=no",  # PSM2
-            "--with-pvfs2=no",  # Pvfs2
-            "--with-treematch=no",  # TreeMatch
-            "--with-ucx=no",  # UCX
-            "--with-valgrind=no",  # Valgrind
-        ]
+        tc = GnuToolchain(self)
+        tc.configure_args["--with-pic"] = self.options.get_safe("fPIC", True)
+        tc.configure_args["--enable-mpi-fortran"] = self.options.fortran
+        tc.configure_args["--with-hwloc"] = root("hwloc")
+        tc.configure_args["--with-libevent"] = root("libevent")
+        tc.configure_args["--with-libnl"] = root("libnl") if not is_apple_os(self) else "no"
+        tc.configure_args["--with-ofi"] = root("libfabric") if self.options.get_safe("with_libfabric") else "no"
+        tc.configure_args["--with-zlib"] = root("zlib")
+        tc.configure_args["--with-pmix"] = "internal"
+        tc.configure_args["--enable-wrapper-rpath"] = "no"
+        tc.configure_args["--enable-wrapper-runpath"] = "no"
+        tc.configure_args["--exec-prefix"] = "/"
+        tc.configure_args["--datarootdir"] = "${prefix}/res"
+        # Disable other external libraries explicitly
+        tc.configure_args["--with-alps"] = "no"  # ALPS
+        tc.configure_args["--with-cuda"] = "no"  # CUDA
+        tc.configure_args["--with-gpfs"] = "no"  # Gpfs
+        tc.configure_args["--with-hcoll"] = "no"  # hcoll
+        tc.configure_args["--with-ime"] = "no"  # IME
+        tc.configure_args["--with-lsf"] = "no"  # LSF
+        tc.configure_args["--with-lustre"] = "no"  # Lustre
+        tc.configure_args["--with-memkind"] = "no"  # memkind
+        tc.configure_args["--with-portals4"] = "no"  # Portals4
+        tc.configure_args["--with-psm2"] = "no"  # PSM2
+        tc.configure_args["--with-pvfs2"] = "no"  # Pvfs2
+        tc.configure_args["--with-treematch"] = "no"  # TreeMatch
+        tc.configure_args["--with-ucx"] = "no"  # UCX
+        tc.configure_args["--with-valgrind"] = "no"  # Valgrind
         if Version(self.version) >= "5.0":
-            tc.configure_args += [
-                f"--with-curl={root('libcurl') if self.options.with_curl else 'no'}",
-                f"--with-jansson={root('jansson') if self.options.with_jansson else 'no'}",
-                "--with-prrte=internal",  # PMIx runtime
-                "--disable-sphinx",  # only used for docs
-                "--with-argobots=no",  # argobots
-                "--with-cxi=no",  # CXI
-                "--with-libev=no",  # not compatible with libevent, which cannot be disabled as of v5.0.5
-                "--with-munge=no",  # munge
-                "--with-qthreads=no",  # QThreads
-                "--with-rocm=no",  # ROCm
-            ]
+            tc.configure_args["--with-curl"] = root("libcurl") if self.options.with_curl else "no"
+            tc.configure_args["--with-jansson"] = root("jansson") if self.options.with_jansson else "no"
+            tc.configure_args["--with-prrte"] = "internal"  # PMIx runtime
+            tc.configure_args["--enable-sphinx"] = "no"  # only used for docs
+            tc.configure_args["--with-argobots"] = "no"  # argobots
+            tc.configure_args["--with-cxi"] = "no"  # CXI
+            tc.configure_args["--with-libev"] = "no"  # not compatible with libevent, which cannot be disabled as of v5.0.5
+            tc.configure_args["--with-munge"] = "no"  # munge
+            tc.configure_args["--with-qthreads"] = "no"  # QThreads
+            tc.configure_args["--with-rocm"] = "no"  # ROCm
         else:
-            tc.configure_args += [
-                f"--enable-mpi-cxx={yes_no(self.options.enable_cxx)}",
-                f"--enable-cxx-exceptions={yes_no(self.options.get_safe('enable_cxx_exceptions'))}",
-                f"--with-verbs={root('rdma-core') if self.options.get_safe('with_verbs') else 'no'}",
-                "--with-fca=no",  # FCA
-                "--with-mxm=no",  # Mellanox MXM
-                "--with-pmi=no",  # PMI
-                "--with-psm=no",  # PSM
-                "--with-xpmem=no",  # XPMEM
-                "--with-x=no",  # X11
-            ]
+            tc.configure_args["--enable-mpi-cxx"] = yes_no(self.options.enable_cxx)
+            tc.configure_args["--enable-cxx-exceptions"] = yes_no(self.options.get_safe("enable_cxx_exceptions"))
+            tc.configure_args["--with-verbs"] = root("rdma-core") if self.options.get_safe("with_verbs") else "no"
+            tc.configure_args["--with-fca"] = "no"  # FCA
+            tc.configure_args["--with-mxm"] = "no"  # Mellanox MXM
+            tc.configure_args["--with-pmi"] = "no"  # PMI
+            tc.configure_args["--with-psm"] = "no"  # PSM
+            tc.configure_args["--with-xpmem"] = "no"  # XPMEM
+            tc.configure_args["--with-x"] = "no"  # X11
         if is_apple_os(self):
             if self.settings.arch == "armv8":
-                tc.configure_args.append("--host=aarch64-apple-darwin")
+                tc.configure_args["--host"] = "aarch64-apple-darwin"
                 tc.extra_ldflags.append("-arch arm64")
             # macOS has no libnl
-            tc.configure_args.append("--enable-mca-no-build=reachable-netlink")
+            tc.configure_args["--enable-mca-no-build"] = "reachable-netlink"
         # libtool's libltdl is not really needed, OpenMPI provides its own equivalent.
         # Not adding it as it fails to be detected by ./configure in some cases.
         # https://github.com/open-mpi/ompi/blob/v4.1.6/opal/mca/dl/dl.h#L20-L25
