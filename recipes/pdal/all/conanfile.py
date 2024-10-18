@@ -213,21 +213,28 @@ class PdalConan(ConanFile):
                             "#include <arbiter/arbiter.hpp>",
                             "#include <arbiter/arbiter.hpp>\n#include <nlohmann/json.hpp>")
 
+    def _build_dimbuilder(self):
+        # Build the dimbuilder build utility using a native compiler.
+        src_dir = os.path.join(self.source_folder, "dimbuilder")
+        build_dir = os.path.join(self.build_folder, "src", "dimbuilder")
+        cmake_vars = {}
+        native_executables = self.conf_build.get("tools.build:compiler_executables", default={}, check_type=dict)
+        if "cpp" in native_executables:
+            cmake_vars["CMAKE_CXX_COMPILER"] = native_executables["cpp"]
+        cmake_vars["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        cmake_vars["CMAKE_BUILD_TYPE"] = "Release"
+        cmake_vars["NLOHMANN_INCLUDE_DIR"] = os.path.join(self.dependencies["nlohmann_json"].package_folder, "include").replace("\\", "/")
+        cmake_vars["UTFCPP_INCLUDE_DIR"] = os.path.join(self.dependencies["utfcpp"].package_folder, "include").replace("\\", "/")
+        cmake_vars["CMAKE_RUNTIME_OUTPUT_DIRECTORY"] = os.path.join(self.build_folder, "bin").replace("\\", "/")
+        replace_in_file(self, os.path.join(src_dir, "DimBuilder.hpp"), "NL::", "nlohmann::")
+        replace_in_file(self, os.path.join(src_dir, "DimBuilder.cpp"), "NL::", "nlohmann::")
+        self.run(f"cmake -S {src_dir} -B {build_dir}" + "".join(f" -D{k}={v}" for k, v in cmake_vars.items()))
+        self.run(f"cmake --build {build_dir}")
+
     def build(self):
         self._patch_sources()
-
         if cross_building(self):
-            # Build the dimbuilder executable using the default native compiler instead
-            src_dir = os.path.join(self.source_folder, "dimbuilder")
-            build_dir = os.path.join(self.build_folder, "src", "dimbuilder")
-            nlohmann_inc_dir = os.path.join(self.dependencies["nlohmann_json"].package_folder, "include")
-            utfcpp_inc_dir = os.path.join(self.dependencies["utfcpp"].package_folder, "include")
-            replace_in_file(self, os.path.join(src_dir, "DimBuilder.hpp"), "NL::", "nlohmann::")
-            replace_in_file(self, os.path.join(src_dir, "DimBuilder.cpp"), "NL::", "nlohmann::")
-            self.run(f"cmake -S {src_dir} -B {build_dir} -DNLOHMANN_INCLUDE_DIR={nlohmann_inc_dir} -DUTFCPP_INCLUDE_DIR={utfcpp_inc_dir}")
-            self.run(f"cmake --build {build_dir}")
-            copy(self, "dimbuilder*", src=build_dir, dst=os.path.join(self.build_folder, "bin"))
-
+            self._build_dimbuilder()
         cmake = CMake(self)
         cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
