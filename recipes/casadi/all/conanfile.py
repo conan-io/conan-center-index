@@ -146,6 +146,8 @@ class PackageConan(ConanFile):
             self.requires("coin-utils/2.11.11")
         if self.options.with_spral:
             self.requires("metis/5.2.1")
+        if self.options.with_csparse:
+            self.requires("suitesparse-cxsparse/4.4.1")
 
         # FIXME: SUNDIALS v5+ available from CCI is not compatible
         # CasADi vendors v2.6.1
@@ -231,7 +233,6 @@ class PackageConan(ConanFile):
         tc.variables["WITH_BUILD_ALPAQA"] = self.options.with_alpaqa
         tc.variables["WITH_BUILD_BLASFEO"] = self.options.with_blasfeo
         tc.variables["WITH_BUILD_BONMIN"] = self.options.with_bonmin
-        tc.variables["WITH_BUILD_CSPARSE"] = self.options.with_csparse
         tc.variables["WITH_BUILD_DSDP"] = self.options.with_dsdp
         tc.variables["WITH_BUILD_FATROP"] = self.options.with_fatrop
         tc.variables["WITH_BUILD_HIGHS"] = self.options.with_highs
@@ -285,6 +286,8 @@ class PackageConan(ConanFile):
         deps.set_property("metis", "cmake_target_name", "metis::metis")
         deps.set_property("osqp", "cmake_file_name", "OSQP")
         deps.set_property("osqp", "cmake_target_name", "osqp::osqp")
+        deps.set_property("suitesparse-cxsparse", "cmake_file_name", "CSPARSE")
+        deps.set_property("suitesparse-cxsparse", "cmake_target_name", "cxsparse")
         deps.set_property("tinyxml2", "cmake_file_name", "TINYXML")
         deps.set_property("tinyxml2", "cmake_target_name", "tinyxml2::tinyxml2")
         deps.generate()
