@@ -165,6 +165,14 @@ if(ENABLE_FTS5 OR ENABLE_MATH_FUNCTIONS)
     endif()
 endif()
 
+# The upstream source files're encoded in UTF-8,
+# but some non-ASCII characters may be not be decoded
+# in the user's current code page (e.g. CP936).
+# Thus we need to instruct the MSVC to use UTF-8.
+if(MSVC)
+    add_compile_options("/utf-8")
+endif()
+
 include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
