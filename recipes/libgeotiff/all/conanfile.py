@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -12,18 +13,24 @@ class LibgeotiffConan(ConanFile):
     description = "Libgeotiff is an open source library normally hosted on top " \
                   "of libtiff for reading, and writing GeoTIFF information tags."
     license = ["MIT", "BSD-3-Clause"]
-    topics = ("geotiff", "tiff")
-    homepage = "https://github.com/OSGeo/libgeotiff"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/OSGeo/libgeotiff"
+    topics = ("geotiff", "tiff")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_zlib": [True, False],
+        "with_jpeg": [True, False],
+        "with_towgs84": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_zlib": False,
+        "with_jpeg": False,
+        "with_towgs84": True,
     }
 
     def export_sources(self):
@@ -43,19 +50,28 @@ class LibgeotiffConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        self.requires("proj/9.3.1")
         # libgeotiff/include/xtiffio.h includes libtiff/include/tiffio.h
         self.requires("libtiff/4.6.0", transitive_headers=True, transitive_libs=True)
-        self.requires("proj/9.3.1")
+        if self.options.with_zlib:
+            self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.with_jpeg:
+            self.requires("libjpeg/9e")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["WITH_UTILITIES"] = False
-        tc.variables["WITH_TOWGS84"] = True
+        tc.cache_variables["WITH_UTILITIES"] = False
+        tc.cache_variables["WITH_TIFF"] = True
+        tc.cache_variables["WITH_ZLIB"] = self.options.with_zlib
+        tc.cache_variables["WITH_JPEG"] = self.options.with_jpeg
+        tc.cache_variables["WITH_TOWGS84"] = self.options.with_towgs84
         tc.generate()
         deps = CMakeDeps(self)
+        if Version(self.version) >= "1.7.1":
+            deps.set_property("proj", "cmake_file_name", "PROJ")
         deps.generate()
 
     def build(self):
@@ -71,6 +87,7 @@ class LibgeotiffConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "cmake"))
         rmdir(self, os.path.join(self.package_folder, "doc"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         self._create_cmake_module_variables(
             os.path.join(self.package_folder, self._module_vars_file)
         )
@@ -116,6 +133,9 @@ class LibgeotiffConan(ConanFile):
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_file])
         self.cpp_info.set_property("cmake_file_name", "geotiff")
         self.cpp_info.set_property("cmake_target_name", "geotiff_library")
+
+        if Version(self.version) >= "1.7.3":
+            self.cpp_info.set_property("pkg_config_name", "libgeotiff")
 
         self.cpp_info.names["cmake_find_package"] = "GeoTIFF"
         self.cpp_info.names["cmake_find_package_multi"] = "geotiff"
