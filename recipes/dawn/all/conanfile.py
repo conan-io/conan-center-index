@@ -2,10 +2,9 @@ import os
 from pathlib import Path
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches, save
 
 required_conan_version = ">=1.53.0"
 
@@ -25,26 +24,25 @@ class DawnConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("abseil/20240116.2")
-        self.requires("spirv-headers/1.3.268.0", transitive_headers=True)
-        self.requires("spirv-tools/1.3.268.0")
-        self.requires("glslang/1.3.268.0")
+        self.requires("spirv-headers/1.3.290.0", transitive_headers=True)
+        self.requires("glslang/1.3.290.0")
         self.requires("glfw/3.4")
-        self.requires("vulkan-headers/1.3.268.0")
-        self.requires("vulkan-utility-libraries/1.3.268.0")
+        self.requires("vulkan-headers/1.3.290.0")
+        self.requires("vulkan-utility-libraries/1.3.290.0")
         self.requires("opengl-registry/20240721")
+        # Remove SPIRV-Tools from the dependency graph
+        self.requires("spirv-tools/1.3.290.0", headers=False, libs=False, visible=False)
 
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
-
-        if self.dependencies["spirv-tools"].options.shared:
-            raise ConanInvalidConfiguration("spirv-tools must be built as a static library (-o spirv-tools/*:shared=False)")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -54,6 +52,8 @@ class DawnConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_PROJECT_Dawn_INCLUDE"] = "conan_deps.cmake"
+        tc.variables["DAWN_BUILD_MONOLITHIC_LIBRARY"] = True  # TODO: the default behavior, but might want to expose as an option
         tc.variables["DAWN_ENABLE_INSTALL"] = True
         tc.variables["DAWN_BUILD_SAMPLES"] = False
         tc.variables["TINT_ENABLE_INSTALL"] = False
@@ -70,11 +70,11 @@ class DawnConan(ConanFile):
         deps.set_property("glfw", "cmake_target_name", "glfw")
         deps.set_property("vulkan-headers", "cmake_file_name", "Vulkan-Headers")
         deps.set_property("vulkan-headers", "cmake_target_name", "Vulkan-Headers")
-        deps.set_property("vulkan-utility-libraries::VulkanUtilityHeaders", "cmake_target_name", "VulkanUtilityHeaders")
-        # Hide the spirv-tools components transitively exposed by glslang to avoid conflicts with the vendored version
-        for component in ["core", "diff", "link", "lint", "opt", "reduce"]:
-            deps.set_property(f"spirv-tools::spirv-tools-{component}", "cmake_target_name", f"SPIRV-Tools-{component}_private")
+        deps.set_property("vulkan-utility-libraries", "cmake_file_name", "VulkanUtilityHeaders")
+        deps.set_property("vulkan-utility-libraries::UtilityHeaders", "cmake_target_name", "VulkanUtilityHeaders")
         deps.generate()
+        # Avoid conflicts with SPIRV-Tools target names
+        save(self, "SPIRV-ToolsConfig.cmake", "set(SPIRV-Tools_FOUND TRUE)")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -82,6 +82,7 @@ class DawnConan(ConanFile):
         for path in Path(self.source_folder, "third_party").iterdir():
             if path.is_dir() and path.name != "spirv-tools":
                 rmdir(self, path)
+        save(self, os.path.join(self.source_folder, "third_party", "vulkan-utility-libraries", "src", "CMakeLists.txt"), "")
 
     def build(self):
         self._patch_sources()
