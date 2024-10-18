@@ -13,3 +13,11 @@ if((DEFINED MSVC_VERSION AND MSVC_VERSION GREATER 1900) OR Drogon_VERSION VERSIO
 else()
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
 endif()
+
+if(NOT DEFINED DROGON_EXECUTABLE)
+    message(FATAL_ERROR "DROGON_EXECUTABLE variable not defined")
+elseif(NOT COMMAND drogon_create_views)
+    message(FATAL_ERROR "drogon_create_views() from DrogonUtilities.cmake not found")
+elseif(NOT COMMAND ParseAndAddDrogonTests)
+    message(FATAL_ERROR "ParseAndAddDrogonTests() from ParseAndAddDrogonTests.cmake not found")
+endif()
