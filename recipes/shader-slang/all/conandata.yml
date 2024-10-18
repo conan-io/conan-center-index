@@ -1,0 +1,9 @@
+sources:
+  "2024.11.1":
+    url: "https://github.com/shader-slang/slang/archive/refs/tags/v2024.11.1.tar.gz"
+    sha256: "e25bdf63e4cace79ba388e4411eed73495f2046ef53125e42ec5fa36599995a8"
+patches:
+  "2024.11.1":
+    - patch_file: "patches/0001-update-unvendored-includes.patch"
+    - patch_file: "patches/0002-cmake-fixes.patch"
+    - patch_file: "patches/0003-fix-glslang-regression.patch"
