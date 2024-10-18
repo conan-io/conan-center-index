@@ -27,42 +27,44 @@ class OpenImageIOConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_libjpeg": ["libjpeg", "libjpeg-turbo"],
-        "with_libpng": [True, False],
-        "with_freetype": [True, False],
-        "with_hdf5": [True, False],
-        "with_opencolorio": [True, False],
-        "with_opencv": [True, False],
-        "with_tbb": [True, False],
         "with_dicom": [True, False],
         "with_ffmpeg": [True, False],
+        "with_freetype": [True, False],
         "with_giflib": [True, False],
+        "with_hdf5": [True, False],
+        "with_jxl": [True, False],
         "with_libheif": [True, False],
-        "with_raw": [True, False],
+        "with_libjpeg": ["libjpeg", "libjpeg-turbo"],
+        "with_libpng": [True, False],
+        "with_libwebp": [True, False],
+        "with_opencolorio": [True, False],
+        "with_opencv": [True, False],
         "with_openjpeg": [True, False],
         "with_openvdb": [True, False],
         "with_ptex": [True, False],
-        "with_libwebp": [True, False],
+        "with_raw": [True, False],
+        "with_tbb": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_libjpeg": "libjpeg",
-        "with_libpng": True,
-        "with_freetype": True,
-        "with_hdf5": True,
-        "with_opencolorio": True,
-        "with_opencv": False,
-        "with_tbb": False,
         "with_dicom": False,  # Heavy dependency, disabled by default
         "with_ffmpeg": True,
+        "with_freetype": True,
         "with_giflib": True,
+        "with_hdf5": True,
+        "with_jxl": True,
+        "with_libjpeg": "libjpeg",
         "with_libheif": True,
-        "with_raw": False,  # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
+        "with_libpng": True,
+        "with_libwebp": True,
+        "with_opencolorio": True,
         "with_openjpeg": True,
         "with_openvdb": False,  # FIXME: broken on M1
+        "with_opencv": False,
         "with_ptex": True,
-        "with_libwebp": True,
+        "with_raw": False,  # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
+        "with_tbb": False,
     }
 
     def export_sources(self):
@@ -75,6 +77,8 @@ class OpenImageIOConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if Version(self.version) < "3.0.0.0":
+            self.options.with_jxl = False  #rm_safe("with_jxl")
 
     def requirements(self):
         # Required libraries
@@ -97,6 +101,8 @@ class OpenImageIOConan(ConanFile):
             self.requires("fmt/9.1.0", transitive_headers=True)
 
         # Optional libraries
+        if self.options.with_jxl:
+            self.requires("libjxl/0.10.3")
         if self.options.with_libpng:
             self.requires("libpng/1.6.42")
         if self.options.with_freetype:
@@ -128,7 +134,6 @@ class OpenImageIOConan(ConanFile):
             self.requires("ptex/2.4.2")
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.2")
-        # Todo add JXL for OpenImageIO 3.0.0.0
 
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
@@ -178,6 +183,8 @@ class OpenImageIOConan(ConanFile):
         tc.variables["USE_JPEG"] = True
         # OIIO CMake files are patched to check USE_* flags to require or not use dependencies
         tc.variables["USE_JPEGTURBO"] = (self.options.with_libjpeg == "libjpeg-turbo")
+        if Version(self.version) >= '3.0.0.0':
+            tc.variables["USE_JXS"] = self.options.with_jxl
         tc.variables["USE_LIBHEIF"] = self.options.with_libheif
         tc.variables["USE_LIBPNG"] = self.options.with_libpng
         tc.variables["USE_LIBRAW"] = self.options.with_raw
@@ -193,7 +200,6 @@ class OpenImageIOConan(ConanFile):
         tc.variables["USE_TBB"] = self.options.with_tbb
 
         # Unsupported options
-        tc.variables["USE_JXL"] = False  # Todo, is available as a package
         tc.variables["USE_NUKE"] = False
         tc.variables["USE_R3DSDK"] = False
 
@@ -265,7 +271,6 @@ class OpenImageIOConan(ConanFile):
             "openexr::openexr",
         ]
 
-
         if Version(self.version) < "3.0.0.0":
             open_image_io_util.requires += [
                 "boost::filesystem",
@@ -280,6 +285,8 @@ class OpenImageIOConan(ConanFile):
                 "boost::regex",
             ]
 
+        if self.options.with_jxl:
+            open_image_io.requires.append("libjxl::libjxl")
         if self.options.with_libjpeg == "libjpeg":
             open_image_io.requires.append("libjpeg::libjpeg")
         elif self.options.with_libjpeg == "libjpeg-turbo":
