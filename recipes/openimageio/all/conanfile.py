@@ -79,7 +79,8 @@ class OpenImageIOConan(ConanFile):
     def requirements(self):
         # Required libraries
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("boost/1.84.0")
+        if Version(self.version) < "3.0.0.0":
+            self.requires("boost/1.84.0")
         self.requires("libtiff/4.6.0")
         self.requires("imath/3.1.9", transitive_headers=True)
         self.requires("openexr/3.2.3")
@@ -127,12 +128,17 @@ class OpenImageIOConan(ConanFile):
             self.requires("ptex/2.4.2")
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.2")
+        # Todo add JXL for OpenImageIO 3.0.0.0
+
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 14)
+            if Version(self.version) >= "3.0.0.0":
+                check_min_cppstd(self, 17)
+            else:
+                check_min_cppstd(self, 14)
         if is_msvc(self) and is_msvc_static_runtime(self) and self.options.shared:
             raise ConanInvalidConfiguration(
                 "Building shared library with static runtime is not supported!"
@@ -156,40 +162,40 @@ class OpenImageIOConan(ConanFile):
         tc.variables["INSTALL_FONTS"] = False
         tc.variables["INSTALL_CMAKE_HELPER"] = False
         tc.variables["EMBEDPLUGINS"] = True
-        tc.variables["USE_PYTHON"] = False
         tc.variables["USE_EXTERNAL_PUGIXML"] = True
         tc.variables["BUILD_MISSING_FMT"] = False
 
         # Conan is normally not used for testing, so fixing this option to not build the tests
         tc.variables["BUILD_TESTING"] = False
 
-        # OIIO CMake files are patched to check USE_* flags to require or not use dependencies
-        tc.variables["USE_JPEGTURBO"] = (
-            self.options.with_libjpeg == "libjpeg-turbo"
-        )
-        tc.variables[
-            "USE_JPEG"
-        ] = True  # Needed for jpeg.imageio plugin, libjpeg/libjpeg-turbo selection still works
-        tc.variables["USE_HDF5"] = self.options.with_hdf5
-        tc.variables["USE_OPENCOLORIO"] = self.options.with_opencolorio
-        tc.variables["USE_OPENCV"] = self.options.with_opencv
-        tc.variables["USE_TBB"] = self.options.with_tbb
         tc.variables["USE_DCMTK"] = self.options.with_dicom
         tc.variables["USE_FFMPEG"] = self.options.with_ffmpeg
         tc.variables["USE_FIELD3D"] = False
+        tc.variables["USE_FREETYPE"] = self.options.with_freetype
         tc.variables["USE_GIF"] = self.options.with_giflib
+        tc.variables["USE_HDF5"] = self.options.with_hdf5
+        # Needed for jpeg.imageio plugin, libjpeg/libjpeg-turbo selection still works
+        tc.variables["USE_JPEG"] = True
+        # OIIO CMake files are patched to check USE_* flags to require or not use dependencies
+        tc.variables["USE_JPEGTURBO"] = (self.options.with_libjpeg == "libjpeg-turbo")
         tc.variables["USE_LIBHEIF"] = self.options.with_libheif
+        tc.variables["USE_LIBPNG"] = self.options.with_libpng
         tc.variables["USE_LIBRAW"] = self.options.with_raw
+        tc.variables["USE_LIBWEBP"] = self.options.with_libwebp
+        tc.variables["USE_OPENCOLORIO"] = self.options.with_opencolorio
+        tc.variables["USE_OPENCV"] = self.options.with_opencv
+        tc.variables["USE_OPENGL"] = False
+        tc.variables["USE_OPENJPEG"] = self.options.with_openjpeg
         tc.variables["USE_OPENVDB"] = self.options.with_openvdb
         tc.variables["USE_PTEX"] = self.options.with_ptex
-        tc.variables["USE_R3DSDK"] = False
-        tc.variables["USE_NUKE"] = False
-        tc.variables["USE_OPENGL"] = False
+        tc.variables["USE_PYTHON"] = False
         tc.variables["USE_QT"] = False
-        tc.variables["USE_LIBPNG"] = self.options.with_libpng
-        tc.variables["USE_FREETYPE"] = self.options.with_freetype
-        tc.variables["USE_LIBWEBP"] = self.options.with_libwebp
-        tc.variables["USE_OPENJPEG"] = self.options.with_openjpeg
+        tc.variables["USE_TBB"] = self.options.with_tbb
+
+        # Unsupported options
+        tc.variables["USE_JXL"] = False  # Todo, is available as a package
+        tc.variables["USE_NUKE"] = False
+        tc.variables["USE_R3DSDK"] = False
 
         tc.generate()
         cd = CMakeDeps(self)
@@ -234,10 +240,6 @@ class OpenImageIOConan(ConanFile):
         open_image_io_util = self._add_component("OpenImageIO_Util")
         open_image_io_util.libs = ["OpenImageIO_Util"]
         open_image_io_util.requires = [
-            "boost::filesystem",
-            "boost::thread",
-            "boost::system",
-            "boost::regex",
             "imath::imath",
             "openexr::openexr",
         ]
@@ -254,10 +256,6 @@ class OpenImageIOConan(ConanFile):
         open_image_io.requires = [
             "openimageio_openimageio_util",
             "zlib::zlib",
-            "boost::thread",
-            "boost::system",
-            "boost::container",
-            "boost::regex",
             "libtiff::libtiff",
             "pugixml::pugixml",
             "tsl-robin-map::tsl-robin-map",
@@ -266,6 +264,21 @@ class OpenImageIOConan(ConanFile):
             "imath::imath",
             "openexr::openexr",
         ]
+
+
+        if Version(self.version) < "3.0.0.0":
+            open_image_io_util.requires += [
+                "boost::filesystem",
+                "boost::thread",
+                "boost::system",
+                "boost::regex",
+            ]
+            open_image_io.requires += [
+                "boost::thread",
+                "boost::system",
+                "boost::container",
+                "boost::regex",
+            ]
 
         if self.options.with_libjpeg == "libjpeg":
             open_image_io.requires.append("libjpeg::libjpeg")
