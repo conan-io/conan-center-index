@@ -25,8 +25,8 @@ class CopperSpiceConan(ConanFile):
         'with_script': [True, False],
         'with_sql': [True, False],
         'with_svg': [True, False],
+        'with_vulkan': [True, False],
         'with_webkit': [True, False],
-        'with_xml': [True, False],
         'with_xmlpatterns': [True, False],
     }
     default_options = {
@@ -40,8 +40,8 @@ class CopperSpiceConan(ConanFile):
         'with_script': False,
         'with_sql': False,
         'with_svg': False,
+        'with_vulkan': False,
         'with_webkit': False,
-        'with_xml': True,
         'with_xmlpatterns': False,
     }
 
@@ -76,8 +76,8 @@ class CopperSpiceConan(ConanFile):
         cmake.definitions['WITH_SCRIPT'] = self.options.with_script
         cmake.definitions['WITH_SQL'] = self.options.with_sql
         cmake.definitions['WITH_SVG'] = self.options.with_svg
+        cmake.definitions['WITH_VULKAN'] = self.options.with_vulkan
         cmake.definitions['WITH_WEBKIT'] = self.options.with_webkit
-        cmake.definitions['WITH_XML'] = self.options.with_xml
         cmake.definitions['WITH_XMLPATTERNS'] = self.options.with_xmlpatterns
         cmake.configure(source_dir='copperspice')
         return cmake
