@@ -1,0 +1,41 @@
+--- a/Modules/IO/TIFF/src/CMakeLists.txt
++++ b/Modules/IO/TIFF/src/CMakeLists.txt
+@@ -5,3 +5,5 @@
+   )
+ 
+ itk_module_add_library(ITKIOTIFF ${ITKIOTIFF_SRCS})
++target_link_libraries(ITKIOTIFF PRIVATE TIFF::TIFF)
++target_compile_definitions(ITKIOTIFF PRIVATE ITK_TIFF_HAS_TIFFFieldReadCount)
+--- a/Modules/IO/LSM/src/itkLSMImageIO.cxx
++++ b/Modules/IO/LSM/src/itkLSMImageIO.cxx
+@@ -29,7 +29,7 @@
+ #include "itkByteSwapper.h"
+ 
+ #include "itk_kwiml.h"
+-#include "itk_tiff.h"
++#include "tiffio.h"
+ 
+ /* Structure with LSM-specific data ( only in the first image directory). */
+ #define TIF_CZ_LSMINFO 34412 /* 0x866c, Type: TIF_BYTE, Length: 512 */
+--- a/Modules/IO/TIFF/src/itkTIFFImageIO.cxx
++++ b/Modules/IO/TIFF/src/itkTIFFImageIO.cxx
+@@ -21,7 +21,7 @@
+ #include "itksys/SystemTools.hxx"
+ #include "itkMetaDataObject.h"
+ 
+-#include "itk_tiff.h"
++#include "tiffio.h"
+ 
+ namespace itk
+ {
+--- a/Modules/IO/TIFF/src/itkTIFFReaderInternal.h
++++ b/Modules/IO/TIFF/src/itkTIFFReaderInternal.h
+@@ -20,7 +20,7 @@
+ 
+ #include "ITKIOTIFFExport.h"
+ #include "itkIntTypes.h"
+-#include "itk_tiff.h"
++#include "tiffio.h"
+ 
+ 
+ namespace itk
