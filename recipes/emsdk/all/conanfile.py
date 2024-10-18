@@ -1,4 +1,5 @@
 from conan import ConanFile, conan_version
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import Environment
 from conan.tools.files import chdir, copy, get, replace_in_file
@@ -6,6 +7,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import json
 import os
+import platform
 
 required_conan_version = ">=1.52.0"
 
@@ -13,12 +15,12 @@ required_conan_version = ">=1.52.0"
 class EmSDKConan(ConanFile):
     name = "emsdk"
     description = "Emscripten SDK. Emscripten is an Open Source LLVM to JavaScript compiler"
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kripken/emscripten"
-    topics = ("emsdk", "emscripten", "sdk")
-    license = "MIT"
+    topics = ("emscripten", "sdk")
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-
     short_paths = True
 
     @property
@@ -29,17 +31,29 @@ class EmSDKConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nodejs/16.3.0")
+        if Version(self.version) < "3.1.68":
+            self.requires("nodejs/16.3.0")
+        else:
+            self.requires("nodejs/20.16.0")
         # self.requires("python")  # FIXME: Not available as Conan package
         # self.requires("wasm")  # FIXME: Not available as Conan package
+
+    @property
+    def _is_glibc_older_than_2_28(self):
+        libver = platform.libc_ver()
+        return self.settings.os == 'Linux' and libver[0] == 'glibc' and Version(libver[1]) < "2.28"
+
+    def validate_build(self):
+        if Version(self.version) >= "3.1.68" and self._is_glibc_older_than_2_28:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires glibc 2.28 for nodejs/20.16.0")
 
     def package_id(self):
         del self.info.settings.compiler
         del self.info.settings.build_type
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
     def _relative_paths(self):
