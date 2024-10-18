@@ -4,6 +4,7 @@ from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.gnu import PkgConfigDeps
 import os
 import textwrap
 
@@ -24,11 +25,13 @@ class SQLiteCppConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "stack_protection": [True, False],
+        "with_sqlcipher": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "stack_protection": True,
+        "with_sqlcipher": False,
     }
 
     def export_sources(self):
@@ -37,20 +40,31 @@ class SQLiteCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "3.3.1":
+            del self.options.with_sqlcipher
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if self.options.get_safe("with_sqlcipher"):
+            self.options["sqlcipher"].enable_column_metadata = True
 
     def requirements(self):
-        self.requires("sqlite3/3.45.0")
+        if self.options.get_safe("with_sqlcipher"):
+            self.requires("sqlcipher/4.5.6")
+        else:
+            self.requires("sqlite3/3.45.0")
 
     def validate(self):
         if Version(self.version) >= "3.0.0" and self.info.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 11)
         if self.info.settings.os == "Windows" and self.info.options.shared:
             raise ConanInvalidConfiguration("SQLiteCpp can not be built as shared lib on Windows")
-
+        if self.options.get_safe("with_sqlcipher")and Version(self.version) < "3.3.1":
+            raise ConanInvalidConfiguration("Using SQLCipher with this recipe is only available from version 3.3.1")
+        if self.options.get_safe("with_sqlcipher") and not self.dependencies["sqlcipher"].options.enable_column_metadata:
+            raise ConanInvalidConfiguration(f"{self.ref} option with_sqlcipher=True requires 'sqlcipher/*:enable_column_metadata=True'")
+    
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -78,10 +92,15 @@ class SQLiteCppConan(ConanFile):
         tc.variables["SQLITECPP_BUILD_EXAMPLES"] = False
         tc.variables["SQLITECPP_BUILD_TESTS"] = False
         tc.variables["SQLITECPP_USE_STACK_PROTECTION"] = self.options.stack_protection
+        tc.variables["SQLITE_HAS_CODEC"] = self.options.get_safe("with_sqlcipher", False)
         tc.generate()
 
         tc = CMakeDeps(self)
         tc.generate()
+
+        if self.options.get_safe("with_sqlcipher"):
+            pc = PkgConfigDeps(self)
+            pc.generate()
 
     def build(self):
         self._patch_sources()
