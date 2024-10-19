@@ -142,6 +142,11 @@ class OpenImageIOConan(ConanFile):
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
 
+    def build_requirements(self):
+        # A minimum cmake version is now required that is reasonably new
+        if Version(self.version) >= "3.0.0.0":
+            self.build_requires("cmake/[>=3.18.2]")
+
     def validate(self):
         if self.settings.compiler.cppstd:
             if Version(self.version) >= "3.0.0.0":
