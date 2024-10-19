@@ -96,7 +96,15 @@ class LeptonicaConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_PROG"] = False
         tc.variables["SW_BUILD"] = False
-        if Version(self.version) >= "1.83.0":
+        if Version(self.version) >= "1.85.0":
+            tc.variables["ENABLE_ZLIB"] = self.options.with_zlib
+            tc.variables["ENABLE_PNG"] = self.options.with_png
+            tc.variables["ENABLE_GIF"] = self.options.with_gif
+            tc.variables["ENABLE_JPEG"] = self.options.with_jpeg
+            tc.variables["ENABLE_TIFF"] = self.options.with_tiff
+            tc.variables["ENABLE_WEBP"] = self.options.with_webp
+            tc.variables["ENABLE_OPENJPEG"] = self.options.with_openjpeg
+        elif Version(self.version) >= "1.83.0":
             tc.variables["LIBWEBP_SUPPORT"] = self.options.with_webp
             tc.variables["OPENJPEG_SUPPORT"] = self.options.with_openjpeg
         tc.generate()
