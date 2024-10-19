@@ -137,7 +137,7 @@ class OpenImageIOConan(ConanFile):
 
         # TODO: Temporary, to be removed
         # Works with build=missing now, awaiting https://github.com/conan-io/conan-center-index/pull/25660
-        self.requires('lcms/2.16', override=True)
+        #self.requires('lcms/2.16', override=True)
 
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
