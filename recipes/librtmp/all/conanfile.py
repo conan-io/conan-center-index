@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
 
 required_conan_version = ">=1.53.0"
 
@@ -56,8 +56,24 @@ class LibrtmpConan(ConanFile):
         tc.variables["RTMP_SOVERSION"] = 1
         tc.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+
+        # When _DEBUG macro is defined, there is some extra logging logic with strong expectations
+        # in source code calling librtmp, something orthogonal to debugger.
+        # _DEBUG macro is not a standard macro in most compilers, but it's automatically
+        # defined by msvc in Debug mode, something librtmp didn't expect I guess.
+        # So we replace this generic name by RTMP_DEBUGINFO
+        for src_file in ("handshake.h", "log.c", "log.h", "rtmp.c"):
+            replace_in_file(
+                self,
+                os.path.join(self.source_folder, "librtmp", src_file),
+                "#ifdef _DEBUG",
+                "#ifdef RTMP_DEBUGINFO",
+        )
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
