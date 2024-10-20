@@ -2,3 +2,8 @@ sources:
   "2.6":
     url: "https://github.com/mirror/rtmpdump/archive/6f6bb1353fc84f4cc37138baa99f586750028a01.tar.gz"
     sha256: "5d68d69710be21e86e766753d2bd25cb2ad1c853b0bc80ebe6b49a6cc507bfc0"
+patches:
+  "2.6":
+    - patch_file: "patches/2.6-0001-msvc-snprintf-vsnprintf.patch"
+      patch_description: "Don't redefine snprintf and vsnprintf for recent msvc versions"
+      patch_type: "portability"
