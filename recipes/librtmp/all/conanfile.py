@@ -71,4 +71,4 @@ class LibrtmpConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "librtmp")
         self.cpp_info.libs = ["rtmp"]
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("ws2_32")
+            self.cpp_info.system_libs.extend(["winmm", "ws2_32"])

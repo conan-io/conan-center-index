@@ -16,7 +16,14 @@ add_library(rtmp
     ${RTMP_LIB_SRC_DIR}/rtmp.c
 )
 target_include_directories(rtmp PRIVATE ${RTMP_LIB_SRC_DIR})
-target_link_libraries(rtmp PRIVATE ZLIB::ZLIB OpenSSL::Crypto OpenSSL::SSL $<$<BOOL:${WIN32}>:ws2_32>)
+target_link_libraries(rtmp
+    PRIVATE
+        ZLIB::ZLIB
+        OpenSSL::Crypto
+        OpenSSL::SSL
+        $<$<BOOL:${WIN32}>:ws2_32>
+        $<$<BOOL:${WIN32}>:winmm>
+)
 set_target_properties(rtmp PROPERTIES
     VERSION ${RTMP_VERSION}
     SOVERSION ${RTMP_SOVERSION}
