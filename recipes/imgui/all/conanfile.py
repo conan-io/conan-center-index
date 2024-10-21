@@ -26,6 +26,7 @@ class ImguiConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "docking": [True, False],
         # Backends
         # See https://github.com/ocornut/imgui/blob/master/docs/BACKENDS.md
         "build_backends": [True, False],
@@ -62,6 +63,7 @@ class ImguiConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "docking": False,
         # Backends
         "build_backends": True,
         "backend_android": True,
@@ -97,6 +99,9 @@ class ImguiConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.version.endswith("-docking"):
+            # Support the old -docking versions for backwards compatibility
+            self.options.docking = True
         if self.settings.os != "Android":
             del self.options.backend_android
         if self.settings.os != "Windows":
@@ -152,7 +157,7 @@ class ImguiConan(ConanFile):
 
     def requirements(self):
         # if self.options.get_safe("backend_allegro5"):
-        #     self.requi`res("allegro5/0")
+        #     self.requires("allegro5/0")
         if self.options.get_safe("backend_opengl2") or self.options.get_safe("backend_opengl3"):
             self.requires("opengl/system")
         if self.options.get_safe("backend_glut") and self.settings.os != "Emscripten":
@@ -178,9 +183,14 @@ class ImguiConan(ConanFile):
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
+        if Version(self.version) < "1.89" and self.options.docking:
+            raise ConanException("Docking support requires version 1.89 or newer.")
+        if self.version.endswith("-docking"):
+            self.output.warning("The -docking versions of imgui are deprecated. Use -o imgui/*:docking=True instead.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Handled in build() instead to support self.options.docking.
+        pass
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -212,6 +222,11 @@ class ImguiConan(ConanFile):
 
         deps = CMakeDeps(self)
         deps.generate()
+
+    def _source(self):
+        version = self.version.replace("-docking", "")
+        kind = "docking" if self.options.docking else "regular"
+        get(self, **self.conan_data["sources"][version][kind], destination=self.source_folder, strip_root=True)
 
     def _configure_header(self):
         defines = {}
@@ -248,6 +263,7 @@ class ImguiConan(ConanFile):
                         '#include "imconfig.h"\n\n#include "imgui_export.h"')
 
     def build(self):
+        self._source()
         self._configure_header()
         self._patch_sources()
         cmake = CMake(self)
@@ -323,7 +339,7 @@ class ImguiConan(ConanFile):
         _add_binding("win32", system_libs=["dwmapi", "xinput"])
         # _add_binding("wgpu", requires=["dawn::dawn"])
 
-        self.conf_info.define("user.imgui:with_docking", "-docking" in self.version)
+        self.conf_info.define("user.imgui:with_docking", bool(self.options.docking))
 
         if self.options.build_programs:
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
