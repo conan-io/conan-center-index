@@ -54,9 +54,9 @@ class MinioCppConan(ConanFile):
         self.requires("curlpp/0.8.1.cci.20240530", transitive_headers=True)
         self.requires("inih/58")
         self.requires("nlohmann_json/3.11.3", transitive_headers=True)
-        self.requires("openssl/3.3.2")
+        self.requires("openssl/[>=1.1 <4]")
         self.requires("pugixml/1.14")
-        self.requires("zlib/1.3.1")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
