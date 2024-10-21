@@ -58,16 +58,10 @@ class ArucoConan(ConanFile):
         tc.variables["USE_OWN_EIGEN3"] = False
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("eigen", "cmake_additional_variables_prefixes", ["Eigen3"])
         deps.generate()
 
-    def _patch_sources(self):
-        # Don't scare the users reading the compilation output
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "printInfo.cmake"),
-                        'message( STATUS "EIGEN3_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR}")',
-                        'message( STATUS "EIGEN3_INCLUDE_DIR=${Eigen3_INCLUDE_DIRS}")')
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
