@@ -65,7 +65,7 @@ class LiefConan(ConanFile):
                 "msvc": "191",
             },
             "17": {
-                "gcc": "8",
+                "gcc": "8" if Version(self.version) < "0.15.1" else "10",
                 "clang": "7",
                 "apple-clang": "12",
                 "Visual Studio": "16",
