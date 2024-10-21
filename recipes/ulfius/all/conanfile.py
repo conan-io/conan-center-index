@@ -40,15 +40,12 @@ class UlfiusConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.enable_websockets = False
+            # INSTALL.md says that websockets are not supported on Windows
+            del self.options.enable_websockets
             del self.options.fPIC
 
     def validate(self):
-        # INSTALL.md says that websockets are not supported on Windows
-        if self.settings.os == "Windows" and self.options.enable_websockets:
-            raise ConanInvalidConfiguration(f"{self.ref} does not support -o=&:with_websockets=True on Windows")
-
-        if self.options.enable_websockets and not self.options.with_gnutls:
+        if self.options.get_safe("enable_websockets") and not self.options.with_gnutls:
             raise ConanInvalidConfiguration(f"{self.ref} requires -o=&:with_gnutls=True when -o=&:enable_websockets=True")
 
     def configure(self):
@@ -69,7 +66,7 @@ class UlfiusConan(ConanFile):
         if self.options.with_gnutls:
             # Used in public ulfius.h:43
             self.requires("gnutls/3.8.2", transitive_headers=True)
-        if self.options.enable_websockets:
+        if self.options.get_safe("enable_websockets"):
             self.requires("zlib/[>=1.2.11 <2]")
 
     def source(self):
@@ -88,7 +85,7 @@ class UlfiusConan(ConanFile):
         tc.variables["BUILD_STATIC"] = not self.options.shared
         tc.variables["DOWNLOAD_DEPENDENCIES"] = False
         tc.variables["WITH_GNUTLS"] = self.options.with_gnutls
-        tc.variables["WITH_WEBSOCKET"] = self.options.enable_websockets
+        tc.variables["WITH_WEBSOCKET"] = self.options.get_safe("enable_websockets")
         tc.variables["WITH_CURL"] = self.options.with_libcurl
         tc.variables["WITH_JANSSON"] = self.options.with_jansson
 
