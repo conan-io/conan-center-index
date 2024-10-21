@@ -115,7 +115,10 @@ class GrpcConan(ConanFile):
         self.requires("re2/20230301")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_libsystemd"):
-            self.requires("libsystemd/255")
+            if Version(self.version) >= "1.67.0":
+                self.requires("libsystemd/255.10")
+            else:
+                self.requires("libsystemd/255")
 
     def package_id(self):
         del self.info.options.secure
@@ -197,7 +200,7 @@ class GrpcConan(ConanFile):
 
         if self._supports_libsystemd:
             tc.cache_variables["gRPC_USE_SYSTEMD"] = self.options.with_libsystemd
-        
+
         if Version(self.version) >= "1.62.0":
             tc.cache_variables["gRPC_DOWNLOAD_ARCHIVES"] = False
 
