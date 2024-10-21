@@ -79,6 +79,8 @@ def components_from_dotfile(dotfile):
             "psapi",
             "-delayload:ole32.dll",
             "diaguids.lib",
+            "ntdll",
+            "ws2_32"
         ]
         labels = {k: v for k, v in node_labels(dot)}
         for row in dot:
@@ -113,6 +115,7 @@ class LLVMCoreConan(ConanFile):
         "A toolkit for the construction of highly optimized compilers,"
         "optimizers, and runtime environments."
     )
+    package_type = "library"
     license = "Apache-2.0 WITH LLVM-exception"
     topics = ("llvm", "compiler")
     homepage = "https://llvm.org"
@@ -334,7 +337,7 @@ class LLVMCoreConan(ConanFile):
         if Version(self.version) < 19:
             cmake_variables["LLVM_ENABLE_TERMINFO"] = self.options.get_safe("with_terminfo")
         else:
-            cmake_variables["LLVM_ENABLE_ZSTD"] = "FORCE_ON" if self.options.get_safe("with_zstd") else False,
+            cmake_variables["LLVM_ENABLE_ZSTD"] = "FORCE_ON" if self.options.get_safe("with_zstd") else False
 
         if self.options.targets != "all":
             cmake_variables["LLVM_TARGETS_TO_BUILD"] = self.options.targets
