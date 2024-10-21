@@ -17,8 +17,8 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        # Care about comparing prerelease versions, simpler to check for major for now
-        tc.variables["THORVG_VERSION_LESS_1"] = self.dependencies[self.tested_reference_str].ref.version.major < 1
+        # Care about comparing prerelease versions for now
+        tc.variables["THORVG_VERSION_LESS_1"] = self.dependencies[self.tested_reference_str].ref.version < "1-a"
         tc.generate()
 
     def build(self):
