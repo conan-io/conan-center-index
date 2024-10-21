@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get, rmdir
+from conan.tools.files import collect_libs, copy, get, rmdir, replace_in_file
 import os
 
 required_conan_version = ">=1.53.0"
@@ -37,8 +37,11 @@ class ArucoConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # Header used in public markerdetector.h
+        # cv::FileStorage::FileStorage used by aruco::CameraParameters::saveToFile
         self.requires("opencv/4.9.0", transitive_headers=True, transitive_libs=True)
-        self.requires("eigen/3.4.0", transitive_headers=True)
+        # Header used in levmarq.h
+        self.requires("eigen/3.4.0", transitive_headers=False)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -57,7 +60,14 @@ class ArucoConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
+    def _patch_sources(self):
+        # Don't scare the users reading the compilation output
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "printInfo.cmake"),
+                        'message( STATUS "EIGEN3_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR}")',
+                        'message( STATUS "EIGEN3_INCLUDE_DIR=${Eigen3_INCLUDE_DIRS}")')
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
