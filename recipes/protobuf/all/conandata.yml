@@ -2,6 +2,9 @@ sources:
   "5.28.3":
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v5.28.3.tar.gz"
     sha256: "7fce939b9b7181bd0bd157360e0cc88a8cabf01ac4efe4662494f56dd955d4c1"
+  "5.28.2":
+    url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v5.28.2.tar.gz"
+    sha256: "31c6cc07431af43dcc056a2fbfe1aaa09e53d95f77685db79f054d490145ed97"
   "5.27.0":
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v5.27.0.tar.gz"
     sha256: "1611a03e550c27c526bde1da544c94f7aa65c10687bbc8e570537dfa94069e1a"
@@ -28,6 +31,45 @@ patches:
 absl_deps:
   # reference: https://github.com/protocolbuffers/protobuf/blob/main/cmake/abseil-cpp.cmake
   "5.28.3":
+      - absl_absl_check
+    - absl_absl_log
+    - absl_algorithm
+    - absl_base
+    - absl_bind_front
+    - absl_bits
+    - absl_btree
+    - absl_cleanup
+    - absl_cord
+    - absl_core_headers
+    - absl_debugging
+    - absl_die_if_null
+    - absl_dynamic_annotations
+    - absl_flags
+    - absl_flat_hash_map
+    - absl_flat_hash_set
+    - absl_function_ref
+    - absl_hash
+    - absl_if_constexpr
+    - absl_layout
+    - absl_log_initialize
+    - absl_log_globals
+    - absl_log_severity
+    - absl_memory
+    - absl_node_hash_map
+    - absl_node_hash_set
+    - absl_optional
+    - absl_random_distributions
+    - absl_random_random
+    - absl_span
+    - absl_status
+    - absl_statusor
+    - absl_strings
+    - absl_synchronization
+    - absl_time
+    - absl_type_traits
+    - absl_utility
+    - absl_variant
+  "5.28.2":
     - absl_absl_check
     - absl_absl_log
     - absl_algorithm
