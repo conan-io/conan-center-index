@@ -36,20 +36,12 @@ Prefix = {path}""")
         cmake.configure()
         cmake.build()
 
-    def _get_packageoption_value(self, optionname):
-        result = None
-        for (name, value) in self.options.values.as_list():
-            if name == f"qt:{optionname}":
-                result = value
-                break
-        return result
-
     def test(self):
         if can_run(self):
             copy(self, "qt.conf", src=self.generators_folder, dst=os.path.join(self.cpp.build.bindirs[0]))
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
-            if self._get_packageoption_value("qtdeclarative"):
+            if self.dependencies[self.tested_reference_str].options.get_safe("qtdeclarative"):
                 self.run(os.path.join(self.cpp.build.bindirs[0], "CheckQMLModules"), env="conanrun")
             # Related to https://github.com/conan-io/conan-center-index/issues/20574
             if self.settings.os == "Macos":
