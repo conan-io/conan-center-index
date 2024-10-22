@@ -69,18 +69,8 @@ def components_from_dotfile(dotfile):
                 yield node, label_replacements.get(label, label)
 
     def node_dependencies(dot):
-        windows_system_libs = [
-            "ole32",
-            "delayimp",
-            "shell32",
-            "advapi32",
-            "-delayload:shell32.dll",
-            "uuid",
-            "psapi",
-            "-delayload:ole32.dll",
-            "diaguids.lib",
-            "ntdll",
-            "ws2_32"
+        ignore_deps = [
+            "diaguids.lib" # https://github.com/llvm/llvm-project/issues/86250
         ]
         labels = {k: v for k, v in node_labels(dot)}
         for row in dot:
@@ -88,17 +78,33 @@ def components_from_dotfile(dotfile):
             if match_dep:
                 node_label = labels[match_dep.group(1)]
                 dependency = labels[match_dep.group(2)]
-                if node_label.startswith("LLVM") and PurePosixPath(dependency).parts[-1] not in windows_system_libs:
+                if node_label.startswith("LLVM") and PurePosixPath(dependency).parts[-1] not in ignore_deps:
                     yield node_label, labels[match_dep.group(2)]
         # some components don't have dependencies
         for label in labels.values():
             if label.startswith("LLVM"):
                 yield label, None
 
+    system_libs = {
+        "ole32",
+        "delayimp",
+        "shell32",
+        "advapi32",
+        "-delayload:shell32.dll",
+        "uuid",
+        "psapi",
+        "-delayload:ole32.dll",
+        "ntdll",
+        "ws2_32",
+        "rt",
+        "m",
+        "dl",
+        "pthread"
+    }
     components = {}
     dotfile_rows = dotfile.split("\n")
     for node, dependency in node_dependencies(dotfile_rows):
-        key = "system_libs" if dependency in ["rt", "m", "dl", "pthread"] else "requires"
+        key = "system_libs" if dependency in system_libs else "requires"
         if not node in components:
             components[node] = { "system_libs": [], "requires": [] }
             if dependency is not None:
