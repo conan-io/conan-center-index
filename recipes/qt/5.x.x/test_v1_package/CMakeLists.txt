@@ -12,7 +12,7 @@ conan_set_libcxx()
 conan_output_dirs_setup()
 
 find_package(Qt5 COMPONENTS Core Network Sql Concurrent Xml REQUIRED CONFIG)
-find_package(Qt5 COMPONENTS Qml)
+find_package(Qt5 OPTIONAL_COMPONENTS Qml)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
