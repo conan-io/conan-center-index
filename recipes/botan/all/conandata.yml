@@ -17,6 +17,9 @@ sources:
   "2.19.4":
     url: "https://github.com/randombit/botan/archive/2.19.4.tar.gz"
     sha256: "5754a6b5ddc3c74b0cb8671531feea69d03a4f3b5bdafa5f75e4c73a1242e5b1"
+  "2.19.5":
+    url: "https://github.com/randombit/botan/archive/2.19.5.tar.gz"
+    sha256: "8d4a3826787f9febbdc225172ad2d39d7d3960346c5721fe46cb27d480d7e1de"
   "3.0.0":
     url: "https://github.com/randombit/botan/archive/3.0.0.tar.gz"
     sha256: "8bafe2e965fa9ccf92ef5741165d735c9fbbe6376c373bbf5702495ad2dfb814"
