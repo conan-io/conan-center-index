@@ -91,7 +91,7 @@ class Libssh2Conan(ConanFile):
                 self.requires("mbedtls/2.28.4")
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.20.6")
+        self.tool_requires("cmake/[>=3.20 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
