@@ -1,4 +1,4 @@
-grpc_version: 1.65.0
+grpc_version: 1.67.0
 grpc_targets:
     - name: "address_sorting"
       lib: "address_sorting"
@@ -183,3 +183,5 @@ grpc_plugins:
       executable: "grpc_python_plugin"
     - target: "gRPC::grpc_ruby_plugin"
       executable: "grpc_ruby_plugin"
+    - target: "gRPC::grpc_otel_plugin"
+      executable: "grpc_otel_plugin"
