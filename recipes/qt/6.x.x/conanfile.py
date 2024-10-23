@@ -1510,6 +1510,11 @@ class QtConan(ConanFile):
                 self.cpp_info.components["qtCore"].system_libs.append("ws2_32")
                 self.cpp_info.components["qtCore"].system_libs.append("mpr")
                 self.cpp_info.components["qtCore"].system_libs.append("userenv")
+                # https://github.com/qt/qtbase/blob/v6.5.0/src/plugins/tls/schannel/CMakeLists.txt#L28-L31
+                self.cpp_info.components["qtCore"].system_libs.append("crypt32")
+                self.cpp_info.components["qtCore"].system_libs.append("secur32")
+                self.cpp_info.components["qtCore"].system_libs.append("bcrypt")
+                self.cpp_info.components["qtCore"].system_libs.append("ncrypt")
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/network/CMakeLists.txt#L196-L200
                 self.cpp_info.components["qtNetwork"].system_libs.append("advapi32")
                 self.cpp_info.components["qtNetwork"].system_libs.append("dnsapi")
