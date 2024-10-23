@@ -1,9 +1,9 @@
 sources:
-  "0.12.1":
-    url: "https://github.com/e-dant/watcher/archive/release/0.12.1.tar.gz"
-    sha256: "aab03c11d729b998f16a97fd6f9c6e0579466f4f0d208650117159818a11cf20"
+  "0.13.0":
+    url: "https://github.com/e-dant/watcher/archive/release/0.13.0.tar.gz"
+    sha256: "fafc2291d89cd38e26d956e16c162581f10efe77fbc717e4d03d2d9cad5e2030"
 patches:
-  "0.12.1":
-    - patch_file: "patches/0.12.1-0001-disable-test.patch"
+  "0.13.0":
+    - patch_file: "patches/0.13.0-0001-disable-test.patch"
       patch_description: "disable test and python binding"
       patch_type: "conan"
