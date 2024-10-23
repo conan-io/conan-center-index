@@ -126,7 +126,7 @@ Prefix = {}""".format(self.dependencies["qt"].package_folder.replace('\\', '/'))
         self.output.info("Testing CMake_find_package_multi")
         shutil.copy(os.path.join(self.generators_folder, "qt.conf"), "bin")
         self.run(os.path.join("bin", "test_package"), run_environment=True)
-        if self.dependencies[self.tested_reference_str].options.get_safe("qtdeclarative"):
+        if getattr(self.options['qt'], 'qtdeclarative'):
             self.run(os.path.join("bin", "CheckQMLModules"), run_environment=True)
 
     def test(self):
