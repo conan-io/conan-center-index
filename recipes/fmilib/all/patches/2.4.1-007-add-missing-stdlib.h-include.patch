@@ -1,0 +1,23 @@
+From af5133fa4eba5c9eb8338bb4284383183d1ef3cd Mon Sep 17 00:00:00 2001
+From: Joakim Haugen <joakim.haugen@sintef.no>
+Date: Thu, 7 Dec 2023 15:46:39 +0100
+Subject: [PATCH 6/6] add missing stdlib.h include
+
+---
+ Test/jm_locale_test.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Test/jm_locale_test.c b/Test/jm_locale_test.c
+index 5970c65..40f711d 100644
+--- a/Test/jm_locale_test.c
++++ b/Test/jm_locale_test.c
+@@ -1,5 +1,6 @@
+ #include <stdio.h>
+ #include <stdarg.h>
++#include <stdlib.h>
+ #include <math.h>
+ #include <locale.h>
+ 
+-- 
+2.30.2
+
