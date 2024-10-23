@@ -19,6 +19,10 @@ patches:
     - patch_file: "patches/1.3.0-0001-find-apr.patch"
       patch_description: "use cci's package name"
       patch_type: "conan"
+    - patch_file: "patches/1.3.0-0002-fix-gcc5.patch"
+      patch_description: "Prevent compilation error when using std::experimental::optional"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/apache/logging-log4cxx/pull/419"
   "1.2.0":
     - patch_file: "patches/1.2.0-0001-find-apr.patch"
       patch_description: "use cci's package name"
