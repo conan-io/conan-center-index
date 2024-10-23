@@ -47,13 +47,15 @@ class MSYS2Conan(ConanFile):
         "exclude_files": ["ANY"],
         "packages": ["ANY"],
         "additional_packages": [None, "ANY"],
-        "no_kill": [True, False]
+        "no_kill": [True, False],
+        "gpg_dirmngr_honor_http_proxy": [True, False],
     }
     default_options = {
         "exclude_files": "*/link.exe",
         "packages": "base-devel,binutils,gcc",
         "additional_packages": None,
         "no_kill": False,
+        "gpg_dirmngr_honor_http_proxy": False,
     }
 
     short_paths = True
@@ -77,6 +79,12 @@ class MSYS2Conan(ConanFile):
     def _update_pacman(self):
         with chdir(self, os.path.join(self._msys_dir, "usr", "bin")):
             try:
+                if self.options.gpg_dirmngr_honor_http_proxy:
+                    # the following bash lines  must not run with login shells as otherwise the key refresh would be triggered prematurely
+                    self.run('bash -c "PATH=/bin:/usr/bin pacman-key --init"') # creates and initializes /etc/pacman.d/gnupg/
+                    self.run('bash -c "PATH=/bin:/usr/bin echo honor-http-proxy > /etc/pacman.d/gnupg/dirmngr.conf"')
+                    self.run('bash -c "PATH=/bin:/usr/bin pacman-key --populate"')
+
                 self._kill_pacman()
 
                 # https://www.msys2.org/docs/ci/
