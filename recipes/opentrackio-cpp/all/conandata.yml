@@ -1,5 +1,4 @@
 sources:
-  # Newer versions at the top
   "1.0.0":
     url:
     - "https://github.com/mosys/opentrackio-cpp/archive/refs/tags/v1.0.0.tar.gz"
