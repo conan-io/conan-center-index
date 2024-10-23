@@ -1,7 +1,7 @@
 sources:
   "3.1.69":
-    url: "https://github.com/emscripten-core/emsdk/archive/3.1.60.tar.gz"
-    sha256: "a6387de363af5685e30920648a6b8122c2fe8c224c0ab6fe39808db6f1bcac2e"
+    url: "https://github.com/emscripten-core/emsdk/archive/3.1.69.tar.gz"
+    sha256: "7fbf610accce016f8b05196c254cc92162c07571979fbd0b6e5a4c50fded157c"
   "3.1.50":
     url: "https://github.com/emscripten-core/emsdk/archive/3.1.50.tar.gz"
     sha256: "7491a881eb5ee15fe81bbabcfff1fd571e45ccdb24a81890af429f9970cbd1f3"
