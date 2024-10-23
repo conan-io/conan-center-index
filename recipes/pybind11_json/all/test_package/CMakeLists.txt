@@ -8,3 +8,4 @@ find_package(pybind11_json REQUIRED CONFIG)
 add_executable(test_package test_package.cpp)
  # FIXME: target should be pybind11_json, replace once Conan v1 has been dropped
 target_link_libraries(test_package PUBLIC pybind11_json::pybind11_json)
+target_link_libraries(test_package PUBLIC pybind11::embed)
