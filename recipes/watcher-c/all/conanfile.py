@@ -105,7 +105,7 @@ class WatcherCConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["watcher-c"]
-        if not self.options.shared:
+        if not self.options.get_safe("shared", False):
             libcxx = stdcpp_library(self)
             if libcxx:
                 self.cpp_info.system_libs.append(libcxx)
