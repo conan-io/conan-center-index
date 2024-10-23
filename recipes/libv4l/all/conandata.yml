@@ -1,0 +1,4 @@
+sources:
+  "1.28.1":
+    url: "https://linuxtv.org/downloads/v4l-utils/v4l-utils-1.28.1.tar.xz"
+    sha256: "0fa075ce59b6618847af6ea191b6155565ccaa44de0504581ddfed795a328a82"
