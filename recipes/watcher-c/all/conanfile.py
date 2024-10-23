@@ -100,7 +100,7 @@ class WatcherCConan(ConanFile):
 
         fix_apple_shared_install_name(self)
 
-        if is_msvc(self) and not self.options.shared:
+        if is_msvc(self):
             rename(self, os.path.join(self.package_folder, "lib", "libwatcher-c.a"), os.path.join(self.package_folder, "lib", "watcher-c.lib"))
 
     def package_info(self):
