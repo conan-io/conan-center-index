@@ -21,7 +21,7 @@ class ThorvgConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/thorvg/thorvg"
-    topics = ("svg", "animation", "tvg")
+    topics = ("svg", "lottie", "animation", "graphics", "rendering")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {

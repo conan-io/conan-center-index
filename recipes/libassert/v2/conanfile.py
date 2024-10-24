@@ -16,9 +16,8 @@ class LibassertConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jeremy-rifkin/libassert"
-    package_type = "library"
-
     topics = ("assert", "library", "assertions", "stacktrace", "diagnostics", "defensive programming", "testing")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -52,7 +51,10 @@ class LibassertConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("cpptrace/0.7.1", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) >= "2.1.2":
+            self.requires("cpptrace/0.7.2", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("cpptrace/0.7.1", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -129,7 +131,7 @@ class LibassertConan(ConanFile):
         self.cpp_info.components["assert"].libs = ["assert"]
         if not self.options.shared:
             self.cpp_info.components["assert"].defines.append("LIBASSERT_STATIC_DEFINE")
-        
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
         self.cpp_info.requires = ["cpptrace::cpptrace"]
