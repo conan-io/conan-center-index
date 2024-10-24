@@ -4,7 +4,11 @@ int main() {
     const int WIDTH = 800;
     const int HEIGHT = 600;
 
+#ifdef THORVG_VERSION_LESS_1
     tvg::Initializer::init(tvg::CanvasEngine::Sw, 0);
+#else
+    tvg::Initializer::init(0, tvg::CanvasEngine::Sw);
+#endif
 
     static uint32_t buffer[WIDTH * HEIGHT];  // canvas target buffer
 
