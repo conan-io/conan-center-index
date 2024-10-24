@@ -113,7 +113,10 @@ class libqConan(ConanFile):
 
     def package_info(self):
         if self.options.shared:
-            self.cpp_info.libs = ["libq"]
+            if self.settings.os in ["Macos"]:
+                self.cpp_info.libs = ["libq.dylib"]
+            else:
+                self.cpp_info.libs = ["libq.so"]
         else:
             self.cpp_info.libs = ["libq.a"]
 
