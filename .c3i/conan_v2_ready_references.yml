@@ -61,6 +61,7 @@ required_for_references:
 - asyncplusplus
 - asyncpp
 - atomic_queue
+- au
 - audiofile
 - audiowaveform
 - autoconf
@@ -285,6 +286,7 @@ required_for_references:
 - cuda-kat
 - cuda-samples
 - cunit
+- curlpp
 - cute_headers
 - cutlass
 - cvplot
