@@ -1,0 +1,4 @@
+sources:
+  "0.9.0":
+    url: "https://github.com/crossdb-org/crossdb/archive/refs/tags/0.9.0.tar.gz"
+    sha256: "04defc43f0b5102cc6a341ba9e328302416982c04cc4c59bc16aef19cc1b020c"
