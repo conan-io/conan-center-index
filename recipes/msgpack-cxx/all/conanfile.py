@@ -24,8 +24,8 @@ class MsgpackCXXConan(ConanFile):
     }
     no_copy_source = True
 
-    def configure_options(self):
-        # No boost was added since 4.1.0
+    def config_options(self):
+        # Boost was not optional until 4.1.0
         if Version(self.version) < "4.1.0":
             del self.options.use_boost
 
@@ -33,6 +33,7 @@ class MsgpackCXXConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
+        # Boost was not optional until 4.1.0
         if self.options.get_safe("use_boost", True):
             self.requires("boost/1.83.0")
 
