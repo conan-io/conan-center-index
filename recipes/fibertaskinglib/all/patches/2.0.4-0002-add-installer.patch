@@ -1,0 +1,37 @@
+diff --git a/source/CMakeLists.txt b/source/CMakeLists.txt
+index 5e885e3..a41e5c1 100644
+--- a/source/CMakeLists.txt
++++ b/source/CMakeLists.txt
+@@ -103,3 +103,13 @@ endif()
+ 
+ # Set the warnings
+ AddCompilerFlags(ftl)
++
++include(GNUInstallDirs)
++
++install(
++    TARGETS ftl
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
++install(DIRECTORY "../include/ftl" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+diff --git a/third_party/boost_context/CMakeLists.txt b/third_party/boost_context/CMakeLists.txt
+index 84a9c72..16f9a7b 100644
+--- a/third_party/boost_context/CMakeLists.txt
++++ b/third_party/boost_context/CMakeLists.txt
+@@ -107,3 +107,14 @@ endif()
+ 
+ add_library(boost_context STATIC ${BOOST_CONTEXT_SRC})
+ target_include_directories(boost_context INTERFACE include)
++
++include(GNUInstallDirs)
++
++install(
++    TARGETS boost_context
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++)
++install(DIRECTORY "include/boost_context" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
++
