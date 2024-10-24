@@ -16,9 +16,10 @@ int main(void) {
         "slate": "A101_A_4",
         "status": "Optical Good"
       }
-    })"
+    })";
     
     opentrackio::OpenTrackIOSample sample{};
-    sample.initialise(example);
+    bool sample_success = sample.initialise(std::string_view{example});
+    std::cout << "Sample init successful: " << (sample_success ? "True" : "False") << std::endl;
     return EXIT_SUCCESS;
 }

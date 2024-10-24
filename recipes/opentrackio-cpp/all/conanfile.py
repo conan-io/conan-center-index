@@ -79,9 +79,6 @@ class PackageConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        # remove bundled xxhash
-        rm(self, "whateer.*", os.path.join(self.source_folder, "lib"))
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "...", "")
 
     def build(self):
         cmake = CMake(self)
@@ -93,15 +90,9 @@ class PackageConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = ["opentrackio-cpp"]
-        self.cpp_info.set_property("cmake_file_name", "package")
-        self.cpp_info.set_property("cmake_target_name", "package::package")
