@@ -14,4 +14,4 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            ret_code = self.run("msdf-atlas-gen -help", env="conanrun")
+            self.run("msdf-atlas-gen -help", env="conanrun")
