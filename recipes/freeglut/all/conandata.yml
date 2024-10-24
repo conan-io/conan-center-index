@@ -1,4 +1,7 @@
 sources:
+  "3.6.0":
+    url: "https://github.com/FreeGLUTProject/freeglut/archive/v3.6.0.tar.gz"
+    sha256: "16de4f51dc1efd663a1a58ba5552e54f8783b77478289c95dca474a4d39ddd02"
   "3.4.0":
     url: "https://github.com/FreeGLUTProject/freeglut/archive/v3.4.0.tar.gz"
     sha256: "3c0bcb915d9b180a97edaebd011b7a1de54583a838644dcd42bb0ea0c6f3eaec"
