@@ -2,13 +2,14 @@ import os
 import re
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.env import Environment, VirtualBuildEnv
+from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, mkdir, rm, rmdir, save
-from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path, msvs_toolset
+from conan.tools.microsoft import is_msvc, msvs_toolset, msvc_runtime_flag
 from conan.tools.scm import Version
+from conan.tools.scons import SConsDeps
 
 required_conan_version = ">=1.53.0"
 
@@ -54,8 +55,14 @@ class SerfConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("openssl/[>=1.1 <4]")
 
+    def validate(self):
+        if self.settings.build_type == "Debug" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == 11:
+            # https://github.com/conan-io/conan-center-index/pull/22003#issuecomment-1984297329
+            # Fails with 'error adding symbols: File format not recognized'
+            raise ConanInvalidConfiguration("Debug build is not supported for GCC 11")
+
     def build_requirements(self):
-        self.tool_requires("scons/4.3.0")
+        self.tool_requires("scons/4.6.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -70,63 +77,65 @@ class SerfConan(ConanFile):
             return "cl"
         return str(self.settings.compiler)
 
-    def _lib_path_arg(self, path):
-        argname = "LIBPATH:" if is_msvc(self) else "L"
-        return "-{}'{}'".format(argname, unix_path(self, path))
-
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
 
-        autotools = AutotoolsToolchain(self)
-        args = ["-Y", self.source_folder]
-        libdirs = sum([dep.cpp_info.libdirs for dep in self.dependencies.values()], [])
-        sharedlinkflags = sum([dep.cpp_info.sharedlinkflags for dep in self.dependencies.values()], [])
-        includedirs = sum([dep.cpp_info.includedirs for dep in self.dependencies.values()], [])
-        cflags = sum([dep.cpp_info.cflags for dep in self.dependencies.values()], [])
-        cflags += autotools.cflags
-        libs = sum([dep.cpp_info.libs for dep in self.dependencies.values()], [])
-        if self.options.get_safe("fPIC"):
-            cflags.append("-fPIC")
-        kwargs = {
-            "APR": unix_path(self, self.dependencies["apr"].package_folder),
-            "APU": unix_path(self, self.dependencies["apr-util"].package_folder),
-            "OPENSSL": unix_path(self, self.dependencies["openssl"].package_folder),
-            "PREFIX": unix_path(self, self.package_folder),
-            "LIBDIR": unix_path(self, os.path.join(self.package_folder, "lib")),
-            "ZLIB": unix_path(self, self.dependencies["zlib"].package_folder),
-            "DEBUG": self.settings.build_type == "Debug",
-            "APR_STATIC": not self.dependencies["apr"].options.shared,
-            "CFLAGS": " ".join(cflags),
-            "LINKFLAGS": " ".join(sharedlinkflags + [self._lib_path_arg(l) for l in libdirs]),
-            "CPPFLAGS": " ".join([f"-D{d}" for d in autotools.defines] + [f"-I'{unix_path(self, inc)}'" for inc in includedirs]),
-            "CC": self._cc,
-            "SOURCE_LAYOUT": "False",
-        }
+        tc = SConsDeps(self)
+        tc.generate()
 
+        kwargs = {}
+        kwargs["CC"] = self._cc
+        kwargs["PREFIX"] = self.package_folder.replace("\\", "/")
+        kwargs["LIBDIR"] = os.path.join(self.package_folder, "lib").replace("\\", "/")
+        kwargs["DEBUG"] = self.settings.build_type == "Debug"
+        kwargs["SOURCE_LAYOUT"] = False
+        kwargs["APR_STATIC"] = not self.dependencies["apr"].options.shared
+        kwargs["APR"] = self.dependencies["apr"].package_folder.replace("\\", "/")
+        kwargs["APU"] = self.dependencies["apr-util"].package_folder.replace("\\", "/")
+        kwargs["OPENSSL"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
+        kwargs["ZLIB"] = self.dependencies["zlib"].package_folder.replace("\\", "/")
         if is_msvc(self):
             kwargs["TARGET_ARCH"] = str(self.settings.arch)
             kwargs["MSVC_VERSION"] = "{:.1f}".format(float(msvs_toolset(self).lstrip("v")) / 10)
-            kwargs["ZLIB_LIBNAME"] = f"{self.dependencies['zlib'].cpp_info.libs[0]}"
-            env = Environment()
-            env.define("OPENSSL_LIBS", os.pathsep.join(f"{lib}.lib" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs))
-            env.vars(self).save_script("conanbuild_msvc")
-        else:
-            kwargs["LIBS"] = " ".join(libs)
-
-        escape_str = lambda x: f'"{x}"'
-        scons_args = " ".join([escape_str(s) for s in args] + [f"{k}={escape_str(v)}" for k, v in kwargs.items()])
-        save(self, os.path.join(self.source_folder, "scons_args"), scons_args)
+        scons_args = " ".join(f'{k}="{v}"' for k, v in kwargs.items())
+        save(self, os.path.join(self.generators_folder, "scons_args"), scons_args)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
         pc_in = os.path.join(self.source_folder, "build", "serf.pc.in")
         save(self, pc_in, load(self, pc_in))
 
+        sconstruct = os.path.join(self.source_folder, "SConstruct")
+        if is_msvc(self):
+            content = load(self, sconstruct)
+            content = content.replace("allowed_values=('14.0', '12.0',", "allowed_values=('14.3', '14.2', '14.1', '14.0', '12.0',")
+            content = content.replace("zlib.lib", self.dependencies['zlib'].cpp_info.libs[0])
+            content = content.replace("['libeay32.lib', 'ssleay32.lib']",
+                                      str([f"{lib}.lib" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs]))
+            content = content.replace("['$OPENSSL/include/openssl']",
+                                      "['$OPENSSL/include', '$OPENSSL/include/openssl']")
+            content = content.replace("['$APR/include/apr-1', '$APU/include/apr-1']",
+                                      "['$APR/include', '$APU/include']")
+            content = content.replace("['shell32.lib', 'xml.lib']",
+                                      "['shell32.lib']")
+            runtime_flag = f", '/{msvc_runtime_flag(self)}'"
+            content = content.replace(", '/MDd'", runtime_flag)
+            content = content.replace(", '/MD'", runtime_flag)
+            save(self, sconstruct, content)
+
+        # Inject SConsDeps
+        conandeps = os.path.join(self.generators_folder, "SConscript_conandeps").replace("\\", "/")
+        save(self, sconstruct,
+             f"\ninfo = SConscript('{conandeps}')\n"
+             "env.MergeFlags(info['conandeps'])\n",
+             append=True)
+
     def build(self):
         self._patch_sources()
+        args = load(self, os.path.join(self.generators_folder, "scons_args"))
         with chdir(self, self.source_folder):
-            self.run("scons {}".format(load(self, "scons_args")))
+            self.run(f'scons -Y "{self.source_folder}" {args}')
 
     @property
     def _static_ext(self):
@@ -163,7 +172,7 @@ class SerfConan(ConanFile):
         else:
             ext_to_remove = self._static_ext if self.options.shared else self._shared_ext
             for fn in os.listdir(os.path.join(self.package_folder, "lib")):
-                if any(re.finditer("\\.{}(\.?|$)".format(ext_to_remove), fn)):
+                if any(re.finditer(rf"\.{ext_to_remove}(\.?|$)", fn)):
                     os.unlink(os.path.join(self.package_folder, "lib", fn))
             fix_apple_shared_install_name(self)
 
