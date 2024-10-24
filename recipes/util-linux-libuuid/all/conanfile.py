@@ -28,7 +28,7 @@ class UtilLinuxLibuuidConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_python_bindings": False,
+        "with_python_bindings": True,
     }
 
     @property
