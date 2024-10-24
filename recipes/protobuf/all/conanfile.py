@@ -15,10 +15,10 @@ required_conan_version = ">=1.53"
 class ProtobufConan(ConanFile):
     name = "protobuf"
     description = "Protocol Buffers - Google's data interchange format"
-    topics = ("protocol-buffers", "protocol-compiler", "serialization", "rpc", "protocol-compiler")
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/protocolbuffers/protobuf"
-    license = "BSD-3-Clause"
+    topics = ("protocol-buffers", "protocol-compiler", "serialization", "rpc", "protocol-compiler")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -49,7 +49,7 @@ class ProtobufConan(ConanFile):
     @property
     def _is_clang_x86(self):
         return self.settings.compiler == "clang" and self.settings.arch == "x86"
-    
+
     @property
     def _protobuf_release(self):
         current_ver = Version(self.version)
@@ -78,7 +78,7 @@ class ProtobufConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
         if self._protobuf_release >= "22.0":
-            self.requires("abseil/20240116.2", transitive_headers=True)
+            self.requires("abseil/[>=20230802.1 <=20240722.0]", transitive_headers=True)
 
     @property
     def _compilers_minimum_version(self):
@@ -93,7 +93,7 @@ class ProtobufConan(ConanFile):
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
-        
+
         if is_msvc(self) and self._protobuf_release >= "22" and self.options.shared and \
             not self.dependencies["abseil"].options.shared:
             raise ConanInvalidConfiguration("When building protobuf as a shared library on Windows, "
@@ -109,7 +109,7 @@ class ProtobufConan(ConanFile):
                     raise ConanInvalidConfiguration(
                         f"{self.ref} requires C++14, which your compiler does not support.",
                     )
-        
+
         check_min_vs(self, "190")
 
         if self.settings.compiler == "clang":
@@ -259,7 +259,7 @@ class ProtobufConan(ConanFile):
         self.cpp_info.components["libprotobuf"].libs = [lib_prefix + "protobuf" + lib_suffix]
         if self.options.with_zlib:
             self.cpp_info.components["libprotobuf"].requires = ["zlib::zlib"]
-        if self._protobuf_release >= "22.0":     
+        if self._protobuf_release >= "22.0":
             self.cpp_info.components["libprotobuf"].requires.extend(absl_deps)
             if not self.options.shared:
                 self.cpp_info.components["libprotobuf"].requires.extend(["utf8_validity"])
