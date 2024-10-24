@@ -46,11 +46,12 @@ class OpenTelemetryCppConan(ConanFile):
         "shared": False,
 
         "with_no_deprecated_code": False,
+        # Enabling this causes stack overflow in the test_package
         "with_stl": False,
         "with_gsl": False,
         "with_abseil": True,
         "with_otlp": "deprecated",
-        "with_otlp_grpc": True,
+        "with_otlp_grpc": False,
         "with_otlp_http": True,
         "with_zipkin": True,
         "with_prometheus": False,
@@ -218,6 +219,20 @@ class OpenTelemetryCppConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    @property
+    def _stl_value(self):
+        # From 1.12.0 onwards, the STL can have various values
+        if Version(self.version) < "1.12.1":
+            return self.options.with_stl
+        if self.options.with_stl:
+            if self.settings.compiler.cppstd:
+                return "CXX" + str(self.settings.compiler.cppstd).replace("gnu", "")
+            else:
+                # ON for autodetection in upstream CML
+                return True
+        else:
+            return False
+
     def generate(self):
         VirtualBuildEnv(self).generate(scope="build")
         VirtualRunEnv(self).generate(scope="build")
@@ -227,7 +242,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["BUILD_BENCHMARK"] = False
         tc.cache_variables["WITH_EXAMPLES"] = False
         tc.cache_variables["WITH_NO_DEPRECATED_CODE"] = self.options.with_no_deprecated_code
-        tc.cache_variables["WITH_STL"] = self.options.with_stl
+        tc.cache_variables["WITH_STL"] = self._stl_value
         tc.cache_variables["WITH_GSL"] = self.options.with_gsl
         tc.cache_variables["WITH_ABSEIL"] = self.options.with_abseil
         if Version(self.version) < "1.10":
@@ -393,7 +408,7 @@ class OpenTelemetryCppConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["opentelemetry_common"].system_libs.extend(["pthread"])
 
-        if self.options.with_stl:
+        if self._stl_value:
             self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_CPP_STDLIB")
 
         if self.options.with_gsl:
