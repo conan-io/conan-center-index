@@ -71,11 +71,11 @@ class Openmvgconan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/3.0.2")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
-        self.requires("libpng/1.6.40")
-        self.requires("libtiff/4.5.1")
+        self.requires("libpng/[>=1.6 <2]")
+        self.requires("libtiff/4.6.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
