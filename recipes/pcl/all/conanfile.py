@@ -75,6 +75,7 @@ class PclConan(ConanFile):
         "with_png": [True, False],
         "with_qhull": [True, False],
         "with_qt": [True, False],
+        "with_rssdk2": [True, False],
         "with_vtk": [True, False],
         # TODO:
         # "with_davidsdk": [True, False],
@@ -85,7 +86,6 @@ class PclConan(ConanFile):
         # "with_openni": [True, False],
         # "with_openni2": [True, False],
         # "with_rssdk": [True, False],
-        # "with_rssdk2": [True, False],
         # "with_qvtk": [True, False],
         # Precompile for a minimal set of point types only instead of all (e.g., pcl::PointXYZ instead of PCL_XYZ_POINT_TYPES)
         "precompile_only_core_point_types": [True, False],
@@ -148,6 +148,7 @@ class PclConan(ConanFile):
         "with_png": True,
         "with_qhull": True,
         "with_qt": True,
+        "with_rssdk2": True,
         "with_vtk": False,
         # Enabled to avoid excessive memory usage during compilation in CCI
         "precompile_only_core_point_types": True,
@@ -224,7 +225,7 @@ class PclConan(ConanFile):
             "qt": ["qt::qt"],
             "qvtk": [],
             "rssdk": [],
-            "rssdk2": [],
+            "rssdk2": ["librealsense::librealsense"],
             "vtk": [],
             "zlib": ["zlib::zlib"],
         }[dep]
@@ -393,6 +394,8 @@ class PclConan(ConanFile):
             self.requires("opencv/4.8.1", transitive_headers=True)
         if self._is_enabled("zlib"):
             self.requires("zlib/[>=1.2.11 <2]")
+        if self._is_enabled("rssdk2"):
+            self.requires("librealsense/2.53.1", transitive_headers=True)
         # TODO:
         # self.requires("vtk/9.x.x", transitive_headers=True)
         # self.requires("openni/x.x.x", transitive_headers=True)
