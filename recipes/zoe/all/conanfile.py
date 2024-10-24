@@ -55,6 +55,9 @@ class ZoeConan(ConanFile):
         if self.info.settings.compiler == "apple-clang" and Version(self.info.settings.compiler.version) < "12.0":
             raise ConanInvalidConfiguration(f"{self.ref} can not build on apple-clang < 12.0.")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -81,7 +84,10 @@ class ZoeConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        libname = "zoe" if self.options.shared else "zoe-static"
+        if Version(self.version) >= "3.2":
+            libname = "libZoe"
+        else:
+            libname = "zoe" if self.options.shared else "zoe-static"
         libpostfix = "-d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = [f"{libname}{libpostfix}"]
 
