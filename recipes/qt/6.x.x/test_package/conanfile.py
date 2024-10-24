@@ -41,6 +41,8 @@ Prefix = {path}""")
             copy(self, "qt.conf", src=self.generators_folder, dst=os.path.join(self.cpp.build.bindirs[0]))
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
+            if self.dependencies[self.tested_reference_str].options.get_safe("qtdeclarative"):
+                self.run(os.path.join(self.cpp.build.bindirs[0], "CheckQMLModules"), env="conanrun")
             # Related to https://github.com/conan-io/conan-center-index/issues/20574
             if self.settings.os == "Macos":
                 bin_macos_path = os.path.join(self.cpp.build.bindirs[0], "test_macos_bundle.app", "Contents", "MacOS", "test_macos_bundle")
