@@ -1,4 +1,4 @@
-grpc_version: 1.65.0
+grpc_version: 1.67.0
 grpc_targets:
     - name: "address_sorting"
       lib: "address_sorting"
@@ -56,8 +56,8 @@ grpc_targets:
     - name: "grpc_unsecure"
       lib: "grpc_unsecure"
       requires:
-        - utf8_range_lib
-        - upb_message_lib
+        - upb_mini_descriptor_lib
+        - upb_wire_lib
         - zlib::zlib
         - abseil::absl_algorithm_container
         - abseil::absl_config
@@ -81,11 +81,21 @@ grpc_targets:
       frameworks: ['CoreFoundation']
     - name: "upb_base_lib"
       lib: "upb_base_lib"
-    - name: "upb_json_lib"
-      lib: "upb_json_lib"
+    - name: "upb_mini_descriptor_lib"
+      lib: "upb_mini_descriptor_lib"
+      requires:
+        - upb_base_lib
+        - upb_mem_lib
+    - name: "upb_wire_lib"
+      lib: "upb_wire_lib"
       requires:
         - utf8_range_lib
         - upb_message_lib
+    - name: "upb_json_lib"
+      lib: "upb_json_lib"
+      requires:
+        - upb_mini_descriptor_lib
+        - upb_wire_lib
     - name: "upb_mem_lib"
       lib: "upb_mem_lib"
     - name: "upb_message_lib"
@@ -96,8 +106,8 @@ grpc_targets:
     - name: "upb_textformat_lib"
       lib: "upb_textformat_lib"
       requires:
-        - utf8_range_lib
-        - upb_message_lib
+        - upb_mini_descriptor_lib
+        - upb_wire_lib
     - name: "utf8_range_lib"
       lib: "utf8_range_lib"
     - name: "grpc++"
@@ -129,7 +139,8 @@ grpc_targets:
     - name: "grpc_authorization_provider"
       lib: "grpc_authorization_provider"
       requires:
-        - utf8_range_lib
+        - upb_mini_descriptor_lib
+        - upb_wire_lib
         - upb_message_lib
         - re2::re2
         - zlib::zlib
