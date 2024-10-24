@@ -1,4 +1,6 @@
 sources:
+  "latest":
+    url: "https://www.partow.net/downloads/exprtk.zip"
   "0.0.2":
     url: "https://github.com/ArashPartow/exprtk/archive/0.0.2.tar.gz"
     sha256: "7e8de4a0bfc9855c1316d8b8bc422061aef9a307c2f42d2e66298980463195c1"
