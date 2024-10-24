@@ -1,0 +1,7 @@
+sources:
+  # As per the official README, the release tarballs don't include the generated codes.
+  # > We don't commit the generated parser files to the main branch. Instead, you can find them on the gh-pages branch.
+  # We have to obtain the corresponding snapshot of the github-pages branch.
+  "0.3.5":
+    url: "https://github.com/DerekStride/tree-sitter-sql/archive/c67ecbd37d8d12f22e4cc7138afd14bc20253e10.tar.gz"
+    sha256: "d8cd967ca4daa376614995fe8a439a957a303c7ca5b9858ca15ad243e6b176d3"
