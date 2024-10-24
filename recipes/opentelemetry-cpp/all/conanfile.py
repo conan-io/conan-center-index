@@ -106,24 +106,33 @@ class OpenTelemetryCppConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def _supports_new_proto_grpc_abseil(self):
+        """Old versions do not support the new proto grpc abseil combo
+        (Usage of old imports etc)
+        This is technically only for protobuf, but we take care to
+        keep abseil range in line, and grpc dependencies in sync so no
+        conflicts arise if using any of the 3 elsewhere
+        """
+        return Version(self.version) >= "1.12.0"
+
     def requirements(self):
         if self.options.with_gsl:
             self.requires("ms-gsl/4.0.0")
 
         if self.options.with_abseil:
-            if Version(self.version) >= "1.12.0":
+            if self._supports_new_proto_grpc_abseil():
                 self.requires("abseil/[>=20240116.1 <20240117.0]", transitive_headers=True)
             else:
                 self.requires("abseil/[>=20230125.3 <=20230802.1]", transitive_headers=True)
 
         if self.options.with_otlp_grpc or self.options.with_otlp_http:
-            if Version(self.version) >= "1.12.0":
+            if self._supports_new_proto_grpc_abseil():
                 self.requires("protobuf/5.27.0", transitive_headers=True, transitive_libs=True)
             else:
                 self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
 
         if self.options.with_otlp_grpc:
-            if Version(self.version) >= "1.12.0":
+            if self._supports_new_proto_grpc_abseil():
                 self.requires("grpc/1.65.0", transitive_headers=True, transitive_libs=True)
             else:
                 self.requires("grpc/1.54.3", transitive_headers=True, transitive_libs=True)
