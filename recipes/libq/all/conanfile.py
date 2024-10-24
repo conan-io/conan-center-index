@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm, rmdir, replace_in_file
+from conan.tools.files import collect_libs, copy, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -112,14 +112,7 @@ class libqConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        if self.options.shared:
-            if self.settings.os in ["Macos"]:
-                self.cpp_info.libs = ["libq.dylib"]
-            else:
-                self.cpp_info.libs = ["libq.so"]
-        else:
-            self.cpp_info.libs = ["libq.a"]
-
+        self.cpp_info.libs = collect_libs(self)
         self.cpp_info.set_property("cmake_file_name", "libq")
         self.cpp_info.set_property("cmake_target_name", "libq::libq")
 
