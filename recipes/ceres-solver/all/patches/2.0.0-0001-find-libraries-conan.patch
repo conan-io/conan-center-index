@@ -1,5 +1,54 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -261,7 +261,7 @@
+ endif (EIGEN3_FOUND)
+ 
+ if (LAPACK)
+-  find_package(LAPACK QUIET)
++  find_package(LAPACK REQUIRED)
+   if (LAPACK_FOUND)
+     message("-- Found LAPACK library: ${LAPACK_LIBRARIES}")
+   else (LAPACK_FOUND)
+@@ -279,7 +279,7 @@
+   # built with SuiteSparse support.
+ 
+   # Check for SuiteSparse and dependencies.
+-  find_package(SuiteSparse)
+-  if (SUITESPARSE_FOUND)
++  find_package(SuiteSparse REQUIRED)
++  if (1)
+     # On Ubuntu the system install of SuiteSparse (v3.4.0) up to at least
+     # Ubuntu 13.10 cannot be used to link shared libraries.
+@@ -316,7 +316,7 @@
+ # CXSparse.
+ if (CXSPARSE)
+   # Don't search with REQUIRED as we can continue without CXSparse.
+-  find_package(CXSparse)
+-  if (CXSPARSE_FOUND)
++  find_package(CXSparse REQUIRED)
++  if (1)
+     # By default, if CXSparse and all dependencies are found, Ceres is
+     # built with CXSparse support.
+@@ -340,7 +340,7 @@
+ endif (CXSPARSE)
+ 
+ if (ACCELERATESPARSE)
+-  find_package(AccelerateSparse)
++  find_package(AccelerateSparse REQUIRED)
+   if (AccelerateSparse_FOUND)
+     message("-- Found Apple's Accelerate framework with sparse solvers, "
+       "building with Accelerate sparse support.")
+@@ -389,7 +389,7 @@
+ # GFlags.
+ if (GFLAGS)
+   # Don't search with REQUIRED as we can continue without gflags.
+-  find_package(gflags 2.2.0)
++  find_package(gflags 2.2.0 REQUIRED)
+   if (gflags_FOUND)
+     if (TARGET gflags)
+       message("-- Found Google Flags (gflags) version ${gflags_VERSION}: ${gflags_DIR}")
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
 @@ -239,14 +239,14 @@ message("-- Building with C++${CMAKE_CXX_STANDARD}")
  # Eigen.
  # Eigen delivers Eigen3Config.cmake since v3.3.3
@@ -19,7 +68,7 @@
    endif()
  
    if (EIGENSPARSE)
-@@ -258,7 +258,7 @@ if (EIGEN3_FOUND)
+@@ -258,6 +258,6 @@ if (EIGEN3_FOUND)
      message("   which can still use the EIGEN_SPARSE_QR algorithm.")
      add_definitions(-DEIGEN_MPL2_ONLY)
    endif (EIGENSPARSE)
@@ -27,7 +76,6 @@
 +endif ()
  
  if (LAPACK)
-   find_package(LAPACK QUIET)
 @@ -427,13 +427,14 @@ else (MINIGLOG)
    unset(MINIGLOG_MAX_LOG_LEVEL CACHE)
    # Don't search with REQUIRED so that configuration continues if not found and
