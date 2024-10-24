@@ -90,6 +90,7 @@ class OpenTelemetryCppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
+            del self.options.with_etw
         if Version(self.version) >= "1.10":
             del self.options.with_jaeger
         if Version(self.version) >= "1.11":
@@ -110,7 +111,7 @@ class OpenTelemetryCppConan(ConanFile):
             self.requires("ms-gsl/4.0.0")
 
         if self.options.with_abseil:
-            self.requires("abseil/20230802.1", transitive_headers=True)
+            self.requires("abseil/[>=20230125.3 <=20230802.1]", transitive_headers=True)
 
         if self.options.with_otlp_grpc or self.options.with_otlp_http:
             self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
@@ -121,7 +122,7 @@ class OpenTelemetryCppConan(ConanFile):
         if (self.options.with_zipkin or
            self.options.with_elasticsearch or
            self.options.with_otlp_http or
-           self.options.with_etw
+           self.options.get_safe("with_etw")
         ):
             self.requires("nlohmann_json/3.11.3")
             self.requires("openssl/[>=1.1 <4]")
@@ -175,7 +176,7 @@ class OpenTelemetryCppConan(ConanFile):
 
     def build_requirements(self):
         if self.options.with_otlp_grpc or self.options.with_otlp_http:
-            self.tool_requires("opentelemetry-proto/1.2.0")
+            self.tool_requires("opentelemetry-proto/1.3.0")
             self.tool_requires("protobuf/<host_version>")
 
         if self.options.with_otlp_grpc:
@@ -215,13 +216,17 @@ class OpenTelemetryCppConan(ConanFile):
             tc.cache_variables["WITH_OTLP"] = self.options.with_otlp_grpc or self.options.with_otlp_http
         tc.cache_variables["WITH_OTLP_GRPC"] = self.options.with_otlp_grpc
         tc.cache_variables["WITH_OTLP_HTTP"] = self.options.with_otlp_http
+        if self.options.with_otlp_grpc or self.options.with_otlp_http:
+            tc.cache_variables["OTELCPP_PROTO_PATH"] = self.dependencies.build["opentelemetry-proto"].conf_info.get("user.opentelemetry-proto:proto_root").replace("\\", "/")
         tc.cache_variables["WITH_ZIPKIN"] = self.options.with_zipkin
         tc.cache_variables["WITH_PROMETHEUS"] = self.options.with_prometheus
         tc.cache_variables["WITH_ELASTICSEARCH"] = self.options.with_elasticsearch
         tc.cache_variables["WITH_ZPAGES"] = self.options.with_zpages
         tc.cache_variables["WITH_JAEGER"] = self.options.get_safe("with_jaeger", False)
         tc.cache_variables["WITH_NO_GETENV"] = self.options.with_no_getenv
-        tc.cache_variables["WITH_ETW"] = self.options.with_etw
+        if self.options.get_safe("with_etw"):
+            # CMakeLists checks for definition, not value
+            tc.cache_variables["WITH_ETW"] = True
         if Version(self.version) < "1.11":
             tc.cache_variables["WITH_LOGS_PREVIEW"] = self.options.with_logs_preview
         tc.cache_variables["WITH_ASYNC_EXPORT_PREVIEW"] = self.options.with_async_export_preview
@@ -331,7 +336,7 @@ class OpenTelemetryCppConan(ConanFile):
                 "opentelemetry_logs",
                 "opentelemetry_exporter_ostream_logs",
             ])
-        if self.settings.os == "Windows" and self.options.with_etw:
+        if self.options.get_safe("with_etw"):
             libraries.append("opentelemetry_exporter_etw")
         return libraries
 
@@ -468,7 +473,13 @@ class OpenTelemetryCppConan(ConanFile):
                 "boost::locale"
             )
 
-        if self.settings.os == "Windows" and self.options.with_etw:
+        if self.options.with_prometheus:
+            self.cpp_info.components["opentelemetry_exporter_prometheus"].requires.extend([
+                "prometheus-cpp::prometheus-cpp",
+                "opentelemetry_trace",
+            ])
+
+        if self.options.get_safe("with_etw"):
             self.cpp_info.components["opentelemetry_exporter_etw"].libs = []
             self.cpp_info.components["opentelemetry_exporter_etw"].requires.append(
                 "nlohmann_json::nlohmann_json",
