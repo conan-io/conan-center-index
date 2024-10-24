@@ -3,6 +3,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, save
 from conan.tools.microsoft import is_msvc, check_min_vs
+from conan.tools.scm import Version
 import os
 import textwrap
 
@@ -91,7 +92,7 @@ class AsyncplusplusConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
         
-        if is_msvc(self) and check_min_vs(self, 191):
+        if Version(self.version) >= "1.2" and is_msvc(self) and check_min_vs(self, 191):
             self.cpp_info.cxxflags.extend(["/Zc:__cplusplus"])
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
