@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout, CMakeDeps, CMakeToolchain
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.gnu import PkgConfig, PkgConfigDeps
 
 
@@ -21,7 +21,7 @@ class TestPackageConan(ConanFile):
     def build_requirements(self):
         self.tool_requires(self.tested_reference_str)
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/2.2.0")
 
     def layout(self):
         cmake_layout(self)
@@ -38,6 +38,10 @@ class TestPackageConan(ConanFile):
         pkg_config_deps.generate()
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
+        if self._has_build_profile:
+            env = Environment()
+            env.append_path("PKG_CONFIG_PATH", self.generators_folder)
+            env.vars(self).save_script("conanbuild_cmake")
 
     def build(self):
         cmake = CMake(self)
