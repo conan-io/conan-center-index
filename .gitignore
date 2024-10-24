@@ -8,7 +8,6 @@ conanbuildinfo.txt
 conaninfo.txt
 graph_info.json
 build/
-conan_home/
 .conanrunner/
 .conanrc
 
