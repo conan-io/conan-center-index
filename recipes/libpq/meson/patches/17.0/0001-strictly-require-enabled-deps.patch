@@ -1,0 +1,97 @@
+From 1ccc7518baa3530bdff0fbcc11393fc3b167ed3e Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Sun, 29 Sep 2024 21:23:15 +0300
+Subject: [PATCH] Strictly require enabled dependencies
+
+---
+ meson.build | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 4c2769dee0..608763ddf2 100644
+--- a/meson.build
++++ b/meson.build
+@@ -614,7 +614,7 @@ gssapiopt = get_option('gssapi')
+ krb_srvtab = ''
+ have_gssapi = false
+ if not gssapiopt.disabled()
+-  gssapi = dependency('krb5-gssapi', required: false)
++  gssapi = dependency('krb5-gssapi', required: true)
+   have_gssapi = gssapi.found()
+ 
+   if have_gssapi
+@@ -713,7 +713,7 @@ else
+   # including itself. See https://github.com/mesonbuild/meson/issues/10002
+   # Luckily we only need pkg-config support, so the workaround isn't
+   # complicated.
+-  ldap = dependency('ldap', method: 'pkg-config', required: false)
++  ldap = dependency('ldap', method: 'pkg-config', required: true)
+   ldap_r = ldap
+ 
+   # Before 2.5 openldap didn't have a pkg-config file, and it might not be
+@@ -816,7 +816,7 @@ endif
+ 
+ icuopt = get_option('icu')
+ if not icuopt.disabled()
+-  icu = dependency('icu-uc', required: false)
++  icu = dependency('icu-uc', required: true)
+   if icu.found()
+     icu_i18n = dependency('icu-i18n', required: true)
+   endif
+@@ -850,7 +850,7 @@ endif
+ 
+ libxmlopt = get_option('libxml')
+ if not libxmlopt.disabled()
+-  libxml = dependency('libxml-2.0', required: false, version: '>= 2.6.23')
++  libxml = dependency('libxml-2.0', required: true, version: '>= 2.6.23')
+   # Unfortunately the dependency is named differently with cmake
+   if not libxml.found() # combine with above once meson 0.60.0 is required
+     libxml = dependency('LibXml2', required: libxmlopt, version: '>= 2.6.23',
+@@ -872,7 +872,7 @@ endif
+ 
+ libxsltopt = get_option('libxslt')
+ if not libxsltopt.disabled()
+-  libxslt = dependency('libxslt', required: false)
++  libxslt = dependency('libxslt', required: true)
+   # Unfortunately the dependency is named differently with cmake
+   if not libxslt.found() # combine with above once meson 0.60.0 is required
+     libxslt = dependency('LibXslt', required: libxsltopt, method: 'cmake')
+@@ -893,7 +893,7 @@ endif
+ 
+ lz4opt = get_option('lz4')
+ if not lz4opt.disabled()
+-  lz4 = dependency('liblz4', required: false)
++  lz4 = dependency('liblz4', required: true)
+   # Unfortunately the dependency is named differently with cmake
+   if not lz4.found() # combine with above once meson 0.60.0 is required
+     lz4 = dependency('lz4', required: lz4opt,
+@@ -948,7 +948,7 @@ endif
+ 
+ pamopt = get_option('pam')
+ if not pamopt.disabled()
+-  pam = dependency('pam', required: false)
++  pam = dependency('pam', required: true)
+ 
+   if not pam.found()
+     pam = cc.find_library('pam', required: pamopt, dirs: test_lib_d)
+@@ -1326,7 +1326,7 @@ if sslopt in ['auto', 'openssl']
+   # the library names that we know about.
+ 
+   # via pkg-config et al
+-  ssl = dependency('openssl', required: false)
++  ssl = dependency('openssl', required: true)
+   # only meson >= 0.57 supports declare_dependency() in cc.has_function(), so
+   # we pass cc.find_library() results if necessary
+   ssl_int = []
+@@ -1532,7 +1532,7 @@ endif
+ 
+ zstdopt = get_option('zstd')
+ if not zstdopt.disabled()
+-  zstd = dependency('libzstd', required: false, version: '>=1.4.0')
++  zstd = dependency('libzstd', required: true, version: '>=1.4.0')
+   # Unfortunately the dependency is named differently with cmake
+   if not zstd.found() # combine with above once meson 0.60.0 is required
+     zstd = dependency('zstd', required: zstdopt, version: '>=1.4.0',
+-- 
+2.43.0
+
