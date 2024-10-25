@@ -37,7 +37,7 @@ class libqConan(ConanFile):
         return {
             "apple-clang": "10",
             "clang": "7",
-            "gcc": "8",
+            "gcc": "7",
             "msvc": "191",
             "Visual Studio": "15",
         }
@@ -112,7 +112,11 @@ class libqConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
+        if self.options.shared:
+            self.cpp_info.libs = collect_libs(self)
+        else:
+            self.cpp_info.libs = ["libq.a"]
+
         self.cpp_info.set_property("cmake_file_name", "libq")
         self.cpp_info.set_property("cmake_target_name", "libq::libq")
 
