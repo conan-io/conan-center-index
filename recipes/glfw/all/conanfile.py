@@ -66,7 +66,6 @@ class GlfwConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("opengl/system")
         if self.options.vulkan_static:
             self.requires("vulkan-loader/1.3.268.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -215,7 +214,6 @@ class GlfwConan(ConanFile):
                 "CoreServices", "Foundation", "IOKit",
             ])
 
-        self.cpp_info.requires = ["opengl::opengl"]
         if self.options.vulkan_static:
             self.cpp_info.requires.append("vulkan-loader::vulkan-loader")
         if self.settings.os in ["Linux", "FreeBSD"]:

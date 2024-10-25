@@ -13,6 +13,7 @@ class TestPackageConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
+        self.requires("opengl/system")
         self.requires(self.tested_reference_str)
 
     def build(self):
