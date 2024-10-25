@@ -41,8 +41,6 @@ class DevilConan(ConanFile):
         "with_squish": True
     }
 
-    # no exports_sources attribute, but export_sources(self) method instead
-    # this allows finer grain exportation of patches per version
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -69,7 +67,6 @@ class DevilConan(ConanFile):
         if self.options.with_squish:
             self.requires("libsquish/1.15")
 
-    # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         pass
 
@@ -128,20 +125,24 @@ class DevilConan(ConanFile):
 
         self.cpp_info.components["IL"].libs = ["IL"]
         self.cpp_info.components["IL"].set_property("cmake_target_name", "DevIL::IL")
-        self.cpp_info.components["IL"].requires = [
-            "libpng::libpng",
-            "libjpeg::libjpeg",
-            "libtiff::libtiff",
-            "jasper::jasper",
-            "libsquish::libsquish"
-        ]
+        il_requires = []
+        if self.options.with_png:
+            il_requires.append("libpng::libpng")
+        if self.options.with_jpeg:
+            il_requires.append("libjpeg::libjpeg")
+        if self.options.with_tiff:
+            il_requires.append("libtiff::libtiff")
+        if self.options.with_jasper:
+            il_requires.append("jasper::jasper")
+        if self.options.with_squish:
+            il_requires.append("libsquish::libsquish")
+        self.cpp_info.components["IL"].requires = il_requires
+
         self.cpp_info.components["ILU"].libs = ["ILU"]
         self.cpp_info.components["ILU"].set_property("cmake_target_name", "DevIL::ILU")
+        if self.options.with_tiff:
+            self.cpp_info.components["ILU"].requires = [
+                "libtiff::libtiff"
+            ]
         self.cpp_info.components["ILUT"].libs = ["ILUT"]
         self.cpp_info.components["ILUT"].set_property("cmake_target_name", "DevIL::ILUT")
-
-        # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("dl")
