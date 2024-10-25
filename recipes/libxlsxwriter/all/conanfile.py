@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
 
@@ -81,8 +82,12 @@ class LibxlsxwriterConan(ConanFile):
         if is_msvc(self):
             tc.variables["USE_STATIC_MSVC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
+        if Version(self.version) >= "1.1.9":
+            pkgcfg = PkgConfigDeps(self)
+            pkgcfg.generate()
+        else:
+            deps = CMakeDeps(self)
+            deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
