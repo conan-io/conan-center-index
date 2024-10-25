@@ -353,7 +353,7 @@ class OpenvinoConan(ConanFile):
                 openvino_runtime.libs.extend([l("openvino_intel_gpu_plugin"), l("openvino_intel_gpu_graph"),
                                               l("openvino_intel_gpu_runtime"), l("openvino_intel_gpu_kernels")])
                 if not self.options.enable_cpu or Version(self.version) >= "2024.4.0":
-                    openvino_runtime.libs.append(l("openvino_onednn_gpu"))
+                    openvino_runtime.libs.append("openvino_onednn_gpu")
             # SW plugins
             if self.options.enable_auto:
                 openvino_runtime.libs.append(l("openvino_auto_plugin"))
