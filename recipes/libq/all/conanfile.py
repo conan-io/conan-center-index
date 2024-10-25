@@ -37,7 +37,7 @@ class libqConan(ConanFile):
         return {
             "apple-clang": "10",
             "clang": "7",
-            "gcc": "7",
+            "gcc": "8",
             "msvc": "191",
             "Visual Studio": "15",
         }
