@@ -2,9 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -14,7 +12,7 @@ class PackageConan(ConanFile):
     name = "opentrackio-cpp"
     description = "A Cpp helper library for usage with the OpenTrackIO protocol."
     license = "MIT"
-    url = "https://github.com/mosys/opentrackio-cpp"
+    url = "https://github.com/conan-io/conan-center-index"
     topics = ("OpenTrackIO", "SMPTE")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -42,7 +40,6 @@ class PackageConan(ConanFile):
         }
 
     def export_sources(self):
-        export_conandata_patches(self)
         self.exports_sources = "CMakeLists.txt", "src/*", "include/*", "external/*", "cmake/*"
 
     def config_options(self):
@@ -76,9 +73,6 @@ class PackageConan(ConanFile):
         deps.generate()
         tc = CMakeToolchain(self)
         tc.generate()
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
 
     def build(self):
         cmake = CMake(self)
