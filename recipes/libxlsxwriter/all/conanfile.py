@@ -5,6 +5,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
+from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=1.53.0"
@@ -65,6 +66,10 @@ class LibxlsxwriterConan(ConanFile):
         if Version(self.version) < "1.0.6" and self.info.options.md5 == "openssl":
             raise ConanInvalidConfiguration(f"{self.name}:md5=openssl is not suppported in {self.ref}")
 
+    def build_requirements(self):
+        if Version(self.version) >= "1.1.9" and not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -85,6 +90,8 @@ class LibxlsxwriterConan(ConanFile):
         if Version(self.version) >= "1.1.9":
             pkgcfg = PkgConfigDeps(self)
             pkgcfg.generate()
+            venv = VirtualBuildEnv(self)
+            venv.generate()
         else:
             deps = CMakeDeps(self)
             deps.generate()
