@@ -82,6 +82,8 @@ class LibpngConan(ConanFile):
         if not self._has_vsx_support:
             del self.options.vsx
 
+    def syntax_error(self):
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
