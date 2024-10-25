@@ -12,3 +12,6 @@ patches:
     - patch_file: "patches/1.8.0-jpeg_fix.patch"
       patch_description: "Make devil build with newer versions of libjpeg"
       patch_type: "conan"
+    - patch_file: "patches/1.8.0-remove_register_keyword.patch"
+      patch_description: "Remove invalid register keyword"
+      patch_type: "conan"
