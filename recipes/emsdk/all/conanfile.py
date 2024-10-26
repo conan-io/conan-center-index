@@ -30,14 +30,6 @@ class EmSDKConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def requirements(self):
-        if Version(self.version) < "3.1.68":
-            self.requires("nodejs/16.3.0")
-        else:
-            self.requires("nodejs/20.16.0")
-        # self.requires("python")  # FIXME: Not available as Conan package
-        # self.requires("wasm")  # FIXME: Not available as Conan package
-
     @property
     def _is_glibc_older_than_2_28(self):
         libver = platform.libc_ver()
@@ -47,6 +39,14 @@ class EmSDKConan(ConanFile):
         if Version(self.version) >= "3.1.68" and self._is_glibc_older_than_2_28:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires glibc 2.28 for nodejs/20.16.0")
+
+    def build_requirements(self):
+        if Version(self.version) < "3.1.68":
+            self.tool_requires("nodejs/16.3.0")
+        else:
+            self.tool_requires("nodejs/20.16.0")
+        # self.requires("python")  # FIXME: Not available as Conan package
+        # self.requires("wasm")  # FIXME: Not available as Conan package
 
     def package_id(self):
         del self.info.settings.compiler
@@ -139,7 +139,7 @@ class EmSDKConan(ConanFile):
                               "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)",
                               "set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)")
         if not cross_building(self):
-            self.run("embuilder build MINIMAL", env=["conanemsdk", "conanrun"]) # force cache population
+            self.run("embuilder build MINIMAL", env=["conanemsdk", "conanrun", "conanbuild"]) # force cache population
             # the line below forces emscripten to accept the cache as-is, even after re-location
             # https://github.com/emscripten-core/emscripten/issues/15053#issuecomment-920950710
             os.remove(os.path.join(self._em_cache, "sanity.txt"))
