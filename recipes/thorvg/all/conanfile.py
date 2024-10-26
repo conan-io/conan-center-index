@@ -21,7 +21,7 @@ class ThorvgConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/thorvg/thorvg"
-    topics = ("svg", "animation", "tvg")
+    topics = ("svg", "lottie", "animation", "graphics", "rendering")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -172,6 +172,16 @@ class ThorvgConan(ConanFile):
         # Workaround to avoid: Stripping target 'src\\thorvg-0.dll'.
         if is_msvc(self) and self.options.shared:
             replace_in_file(self, os.path.join(self.source_folder, "meson.build"), ", 'strip=true'", "")
+
+        # TODO: As OpenMP is tagged as "required: false", let's disable it for now to avoid extra flags and requirements injections.
+        if Version(self.version) >= "0.15.1" and self.options.with_threads:
+            # Notice that the use of disabler() is not working here. If it's used, there is no targets to build.
+            replace_in_file(self, os.path.join(self.source_folder, "src", "renderer", "sw_engine", "meson.build"),
+                            "omp_dep = dependency('openmp', required: false)",
+                            "omp_dep = []")
+            replace_in_file(self, os.path.join(self.source_folder, "src", "renderer", "sw_engine", "meson.build"),
+                            "omp_dep.found()",
+                            "false")
 
     def build(self):
         self._patch_sources()
