@@ -61,6 +61,8 @@ class GlfwConan(ConanFile):
 
         if self.options.get_safe("with_wayland"):
             self.options["xkbcommon"].with_wayland = True
+            self.options["wayland"].shared = True
+            self.options["xkbcommon"].shared = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -76,8 +78,14 @@ class GlfwConan(ConanFile):
             self.requires("xkbcommon/1.6.0")
 
     def validate(self):
-        if self.options.get_safe("with_wayland") and not self.dependencies["xkbcommon"].options.with_wayland:
-            raise ConanInvalidConfiguration(f"{self.ref} requires the with_wayland option in xkbcommon to be enabled when the with_wayland option is enabled")
+        if self.options.get_safe("with_wayland"):
+            xkbcommon_options = self.dependencies["xkbcommon"].options
+            if not xkbcommon_options.with_wayland:
+                raise ConanInvalidConfiguration(f"{self.ref} requires the with_wayland option in xkbcommon to be enabled when the with_wayland option is enabled")
+            if not xkbcommon_options.shared:
+                raise ConanInvalidConfiguration(f"{self.ref} always loads xkbcommon dependencies dynamically and does not support static linkage")
+            if not self.dependencies["wayland"].options.shared:
+                raise ConanInvalidConfiguration(f"{self.ref} always loads wayland dependencies dynamically and does not support static linkage")
 
     def build_requirements(self):
         if self.options.get_safe("with_wayland"):
