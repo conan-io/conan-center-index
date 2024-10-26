@@ -71,19 +71,19 @@ class TestPackageConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-        try:
-            # CMakeToolchain might generate VCVars, but we need it
-            # unconditionally for the setuptools build.
-            VCVars(self).generate()
-        except ConanException:
-            pass
-
         # The build also needs access to the run environment to run the python executable
         VirtualRunEnv(self).generate(scope="run")
         VirtualRunEnv(self).generate(scope="build")
 
         if self._test_setuptools:
-            # Just for the distutils build
+            try:
+                # CMakeToolchain might generate VCVars, but we need it
+                # unconditionally for the setuptools build.
+                VCVars(self).generate()
+            except ConanException:
+                pass
+    
+            # Just for the setuptools build
             AutotoolsDeps(self).generate(scope="build")
 
     def build(self):
