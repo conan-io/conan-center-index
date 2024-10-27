@@ -440,6 +440,8 @@ class Open62541Conan(ConanFile):
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
+            if Version(self.version) >= "1.4.6":
+                self.cpp_info.system_libs.append("iphlpapi")
         elif self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["pthread", "m", "rt"])
 
