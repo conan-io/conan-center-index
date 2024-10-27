@@ -12,10 +12,17 @@ class CLI11Conan(ConanFile):
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/CLIUtils/CLI11"
-    topics = "cli-parser", "cpp11", "no-dependencies", "cli", "header-only"
-    package_type = "header-library"
+    topics = "cli-parser", "cpp11", "no-dependencies", "cli"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+
+    options = {
+        "header_only": [True, False]
+    }
+    default_options = {
+        "header_only": False
+    }
 
     @property
     def _min_cppstd(self):
@@ -25,7 +32,8 @@ class CLI11Conan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.clear()
+        if self.info.options.header_only:
+            del self.info.options.header_only
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -36,6 +44,7 @@ class CLI11Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CLI11_PRECOMPILED"] = not self.options.header_only
         tc.variables["CLI11_BUILD_EXAMPLES"] = False
         tc.variables["CLI11_BUILD_TESTS"] = False
         tc.variables["CLI11_BUILD_DOCS"] = False
@@ -56,8 +65,12 @@ class CLI11Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.bindirs = []
-        self.cpp_info.libdirs = []
+        if self.options.header_only:
+            self.cpp_info.bindirs = []
+            self.cpp_info.libdirs = []
+        else:
+            self.cpp_info.libs = ["CLI11"]
+            self.cpp_info.defines = ["CLI11_COMPILE"]
 
         self.cpp_info.set_property("cmake_file_name", "CLI11")
         self.cpp_info.set_property("cmake_target_name", "CLI11::CLI11")
