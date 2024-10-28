@@ -1,5 +1,5 @@
---- a/src-IL/src/il_jp2.cpp
-+++ b/src-IL/src/il_jp2.cpp
+--- a/DevIL/src-IL/src/il_jp2.cpp
++++ b/DevIL/src-IL/src/il_jp2.cpp
 @@ -314,13 +314,13 @@ ILboolean iLoadJp2Internal(jas_stream_t	*Stream, ILimage *Image)
  
  

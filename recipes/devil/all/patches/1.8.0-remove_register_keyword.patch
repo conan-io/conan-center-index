@@ -1,5 +1,5 @@
---- a/src-IL/src/il_manip.cpp
-+++ b/src-IL/src/il_manip.cpp
+--- a/DevIL/src-IL/src/il_manip.cpp
++++ b/DevIL/src-IL/src/il_manip.cpp
 @@ -37,9 +37,9 @@ ILushort ILAPIENTRY ilFloatToHalf(ILuint i) {
  	// of float and half (127 versus 15).
  	//

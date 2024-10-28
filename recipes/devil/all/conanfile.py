@@ -55,7 +55,7 @@ class DevilConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def layout(self):
-        cmake_layout(self, src_folder=os.path.join("src", "DevIL"))
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.with_png:
@@ -72,7 +72,7 @@ class DevilConan(ConanFile):
             self.requires("lcms/2.16")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination="..")
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -89,18 +89,18 @@ class DevilConan(ConanFile):
     def _patch_sources(self):
         apply_conandata_patches(self)
         # Let Conan handle the shared/static build
-        replace_in_file(self, os.path.join(self.source_folder, "src-ILU", "CMakeLists.txt"),
+        replace_in_file(self, os.path.join(self.source_folder, "DevIL", "src-ILU", "CMakeLists.txt"),
                         "add_library(ILU SHARED ",
                         "add_library(ILU ")
 
-        replace_in_file(self, os.path.join(self.source_folder, "src-ILUT", "CMakeLists.txt"),
+        replace_in_file(self, os.path.join(self.source_folder, "DevIL", "src-ILUT", "CMakeLists.txt"),
                         "add_library(ILUT SHARED ",
                         "add_library(ILUT ")
 
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=os.path.join(self.source_folder, "DevIL"))
         cmake.build()
 
     def package(self):

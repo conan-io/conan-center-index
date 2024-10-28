@@ -1,5 +1,5 @@
---- a/src-IL/src/il_jpeg.cpp
-+++ b/src-IL/src/il_jpeg.cpp
+--- a/DevIL/src-IL/src/il_jpeg.cpp
++++ b/DevIL/src-IL/src/il_jpeg.cpp
 @@ -245,7 +245,7 @@ fill_input_buffer (j_decompress_ptr cinfo)
  		src->buffer[0] = (JOCTET) 0xFF;
  		src->buffer[1] = (JOCTET) JPEG_EOI;
