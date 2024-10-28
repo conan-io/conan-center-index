@@ -59,6 +59,7 @@ class GeoLite2PPConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

@@ -5,7 +5,8 @@ index dfb24d7..9f6ecb5 100644
 @@ -11,15 +11,15 @@ ELSE ()
  ENDIF ()
  
- ADD_DEFINITIONS ( "-std=gnu++11" )
+-ADD_DEFINITIONS ( "-std=gnu++11" )
++#ADD_DEFINITIONS ( "-std=gnu++11" )
 -ADD_DEFINITIONS ( "-fPIC" )
 +#ADD_DEFINITIONS ( "-fPIC" )
  ADD_DEFINITIONS ( "-Wall" )
