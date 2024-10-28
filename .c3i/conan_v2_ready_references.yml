@@ -49,6 +49,7 @@ required_for_references:
 - arrow
 - arsenalgear
 - artery-font-format
+- aruco
 - asio
 - asio-grpc
 - asmjit
@@ -1295,6 +1296,7 @@ required_for_references:
 - rapidxml
 - rapidyaml
 - raylib
+- rc_ptr
 - rdma-core
 - re2
 - re2c
@@ -1524,6 +1526,7 @@ required_for_references:
 - tl-expected
 - tl-function-ref
 - tl-optional
+- tl-ranges
 - tllist
 - tlx
 - tmx
