@@ -96,4 +96,4 @@ class PackageConan(ConanFile):
         suffix = ""
         if self.settings.build_type == "Debug":
             suffix = "d"
-        self.cpp_info.libs = [f"opentrackio-cpp{suffix}"]g
+        self.cpp_info.libs = [f"opentrackio-cpp{suffix}"]
