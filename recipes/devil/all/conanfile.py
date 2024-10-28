@@ -84,10 +84,6 @@ class DevilConan(ConanFile):
         tc.variables["IL_NO_LCMS"] = not self.options.with_lcms
         tc.variables["IL_USE_DXTC_SQUISH"] = self.options.with_squish
 
-        if not self.options.shared:
-            tc.variables["IL_STATIC_LIB"] = True
-        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
-
         tc.generate()
 
     def _patch_sources(self):
