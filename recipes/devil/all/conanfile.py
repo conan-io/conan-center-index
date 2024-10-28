@@ -29,7 +29,8 @@ class DevilConan(ConanFile):
         "with_jpeg": [True, False],
         "with_tiff": [True, False],
         "with_jasper": [True, False],
-        "with_squish": [True, False]
+        "with_squish": [True, False],
+        "with_lcms": [True, False]
     }
     default_options = {
         "shared": False,
@@ -38,7 +39,8 @@ class DevilConan(ConanFile):
         "with_jpeg": True,
         "with_tiff": True,
         "with_jasper": True,
-        "with_squish": True
+        "with_squish": True,
+        "with_lcms": True
     }
 
     def export_sources(self):
@@ -57,7 +59,7 @@ class DevilConan(ConanFile):
 
     def requirements(self):
         if self.options.with_png:
-            self.requires("libpng/1.6.44")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_jpeg:
             self.requires("libjpeg/9e")
         if self.options.with_tiff:
@@ -66,9 +68,8 @@ class DevilConan(ConanFile):
             self.requires("jasper/4.2.4")
         if self.options.with_squish:
             self.requires("libsquish/1.15")
-
-    def build_requirements(self):
-        pass
+        if self.options.with_lcms:
+            self.requires("lcms/2.16")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, destination="..")
@@ -77,29 +78,28 @@ class DevilConan(ConanFile):
         tc = CMakeToolchain(self)
 
         tc.variables["IL_NO_PNG"] = not self.options.with_png
-        if self.options.with_png:
-            tc.variables["IL_PNG_LIB"] = self.dependencies["libpng"].cpp_info.libdirs
-
         tc.variables["IL_NO_JPG"] = not self.options.with_jpeg
-        if self.options.with_jpeg:
-            tc.variables["IL_JPEG_LIB"] = self.dependencies["libjpeg"].cpp_info.libdirs
-
         tc.variables["IL_NO_TIF"] = not self.options.with_tiff
-        if self.options.with_tiff:
-            tc.variables["IL_TIFF_LIB"] = self.dependencies["libtiff"].cpp_info.libdirs
-
         tc.variables["IL_NO_JP2"] = not self.options.with_jasper
-        if self.options.with_jasper:
-            tc.variables["IL_JASPER_LIB"] = self.dependencies["jasper"].cpp_info.libdirs
-
+        tc.variables["IL_NO_LCMS"] = not self.options.with_lcms
         tc.variables["IL_USE_DXTC_SQUISH"] = self.options.with_squish
-        if self.options.with_squish:
-            tc.variables["IL_SQUISH_LIB"] = self.dependencies["libsquish"].cpp_info.libdirs
+
+        if not self.options.shared:
+            tc.variables["IL_STATIC_LIB"] = True
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
 
         tc.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        # Let Conan handle the shared/static build
+        replace_in_file(self, os.path.join(self.source_folder, "src-ILU", "CMakeLists.txt"),
+                        "add_library(ILU SHARED ",
+                        "add_library(ILU ")
+
+        replace_in_file(self, os.path.join(self.source_folder, "src-ILUT", "CMakeLists.txt"),
+                        "add_library(ILUT SHARED ",
+                        "add_library(ILUT ")
 
     def build(self):
         self._patch_sources()
@@ -136,6 +136,8 @@ class DevilConan(ConanFile):
             il_requires.append("jasper::jasper")
         if self.options.with_squish:
             il_requires.append("libsquish::libsquish")
+        if self.options.with_lcms:
+            il_requires.append("lcms::lcms")
         self.cpp_info.components["IL"].requires = il_requires
 
         self.cpp_info.components["ILU"].libs = ["ILU"]
@@ -146,3 +148,8 @@ class DevilConan(ConanFile):
             ]
         self.cpp_info.components["ILUT"].libs = ["ILUT"]
         self.cpp_info.components["ILUT"].set_property("cmake_target_name", "DevIL::ILUT")
+
+        if not self.options.shared:
+            self.cpp_info.components["IL"].defines = ["IL_STATIC_LIB"]
+            self.cpp_info.components["ILU"].defines = ["IL_STATIC_LIB"]
+            self.cpp_info.components["ILUT"].defines = ["IL_STATIC_LIB"]
