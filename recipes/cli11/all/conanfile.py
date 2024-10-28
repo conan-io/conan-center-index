@@ -14,9 +14,7 @@ class CLI11Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/CLIUtils/CLI11"
     topics = "cli-parser", "cpp11", "no-dependencies", "cli"
-    # Correct value not autodetected by Conan as this is always a static-library
-    # config_options/configure set the proper value in this case
-    package_type = "library"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -38,20 +36,16 @@ class CLI11Conan(ConanFile):
     def config_options(self):
         if not self._supports_compilation:
             del self.options.header_only
-            self.package_type = "header-library"
     
     def configure(self):
-        if self._supports_compilation:
-            if self.options.header_only:
-                self.package_type = "header-library"
-            else:
-                self.package_type = "static-library"
+        if self._supports_compilation and not self.options.header_only:
+            self.package_type = "static-library"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def package_id(self):
-        if self.info.options.get_safe("header_only", True):
+        if not self._supports_compilation or self.info.options.header_only:
             self.info.clear()
 
     def validate(self):
