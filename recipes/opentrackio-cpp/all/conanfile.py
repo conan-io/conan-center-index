@@ -43,9 +43,12 @@ class PackageConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            # Nothing is exported from the library, so we can't use it as a shared library
+            del self.options.shared
+            self.package_type = "static-library"
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
     def layout(self):
