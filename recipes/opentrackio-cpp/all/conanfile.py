@@ -89,7 +89,11 @@ class PackageConan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["opentrackio-cpp"]
+        suffix = ""
+        if self.settings.build_type == "Debug":
+            suffix = "d"
+        self.cpp_info.libs = [f"opentrackio-cpp{suffix}"]g
