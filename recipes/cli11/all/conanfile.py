@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.files import get, copy, rmdir
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -13,7 +14,9 @@ class CLI11Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/CLIUtils/CLI11"
     topics = "cli-parser", "cpp11", "no-dependencies", "cli"
-    package_type = "static-library"
+    # Correct value not autodetected by Conan as this is always a static-library
+    # config_options/configure set the proper value in this case
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -27,13 +30,29 @@ class CLI11Conan(ConanFile):
     @property
     def _min_cppstd(self):
         return "11"
+    
+    @property
+    def _supports_compilation(self):
+        return Version(self.version) >= 2.3
+    
+    def config_options(self):
+        if not self._supports_compilation:
+            del self.options.header_only
+            self.package_type = "header-library"
+    
+    def configure(self):
+        if self._supports_compilation:
+            if self.options.header_only:
+                self.package_type = "header-library"
+            else:
+                self.package_type = "static-library"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def package_id(self):
-        if self.info.options.header_only:
-            del self.info.options.header_only
+        if self.info.options.get_safe("header_only", True):
+            self.info.clear()
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -44,7 +63,8 @@ class CLI11Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CLI11_PRECOMPILED"] = not self.options.header_only
+        if self._supports_compilation:
+            tc.variables["CLI11_PRECOMPILED"] = not self.options.header_only
         tc.variables["CLI11_BUILD_EXAMPLES"] = False
         tc.variables["CLI11_BUILD_TESTS"] = False
         tc.variables["CLI11_BUILD_DOCS"] = False
@@ -65,7 +85,7 @@ class CLI11Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        if self.options.header_only:
+        if self.options.get_safe("header_only"):
             self.cpp_info.bindirs = []
             self.cpp_info.libdirs = []
         else:
