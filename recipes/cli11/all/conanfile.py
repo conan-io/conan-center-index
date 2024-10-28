@@ -31,7 +31,7 @@ class CLI11Conan(ConanFile):
     
     @property
     def _supports_compilation(self):
-        return Version(self.version) >= 2.3
+        return Version(self.version) >= "2.3"
     
     def config_options(self):
         if not self._supports_compilation:
