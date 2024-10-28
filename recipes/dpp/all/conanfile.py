@@ -56,8 +56,8 @@ class DPPConan(ConanFile):
             git = Git(self)
             git.clone(url="https://github.com/brainboxdotcc/DPP.git", target=".")
             git.checkout(commit="conan-the-librarian")
-            zip_name = "DPP.zip"
         else:
+            zip_name = "DPP.zip"
             download(self, f"https://github.com/brainboxdotcc/DPP/archive/refs/tags/v{self.version}.zip", zip_name)
             unzip(self, zip_name, '.', False, None, True)
             os.unlink(zip_name)
