@@ -325,7 +325,7 @@ class OpenvinoConan(ConanFile):
         openvino_runtime.set_property("cmake_target_name", "openvino::runtime")
         openvino_runtime.requires = ["pugixml::pugixml"]
         if self.options.threading == "tbb":
-            openvino_runtime.append("onetbb::libtbb")
+            openvino_runtime.requires.append("onetbb::libtbb")
         openvino_runtime.libs = [l("openvino")]
         if self._preprocessing_available:
             openvino_runtime.requires.append("ade::ade")
