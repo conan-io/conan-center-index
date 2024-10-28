@@ -33,15 +33,12 @@ class PackageConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "apple-clang": "10",
-            "clang": "10",
-            "gcc": "10",
+            "apple-clang": "15",
+            "clang": "14",
+            "gcc": "13",
             "msvc": "193",
             "Visual Studio": "20",
         }
-
-    def export_sources(self):
-        self.exports_sources = "CMakeLists.txt", "src/*", "include/*", "external/*", "cmake/*"
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -56,6 +53,11 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.3", transitive_headers=True)
+
+    def build_requirements(self):
+        # Min required is 3.15 in the file, but 3.20 in the README.
+        # Be conservative and require the higher version
+        self.build_requires("cmake/[>=3.20 <4]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
