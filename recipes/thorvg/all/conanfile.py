@@ -33,8 +33,7 @@ class ThorvgConan(ConanFile):
         "with_bindings": [False, 'capi', 'wasm_beta'],
         "with_tools": [False, 'svg2tvg', 'svg2png', 'lottie2gif', 'all'],
         "with_threads": [True, False],
-        "with_vector": [True, False],  # removed in thorvg 0.13.1. Renamed to simd
-        "with_simd": [True, False],  # legacy with_vector
+        "with_simd": [True, False],
         "with_examples": [True, False],
         "with_extra": [False, 'lottie_expressions'],
     }
@@ -47,7 +46,6 @@ class ThorvgConan(ConanFile):
         "with_bindings": 'capi',
         "with_tools": False,
         "with_threads": True,
-        "with_vector": False,
         "with_simd": False,
         "with_examples": False,
         "with_extra": 'lottie_expressions',
@@ -58,7 +56,6 @@ class ThorvgConan(ConanFile):
         "with_loaders": "Enable File Loaders in thorvg",
         "with_savers": "Enable File Savers in thorvg",
         "with_threads": "Enable the multi-threading task scheduler in thorvg",
-        "with_vector": "Enable CPU Vectorization(SIMD) in thorvg (renamed in 0.13.1 to 'simd')",
         "with_simd": "Enable CPU Vectorization(SIMD) in thorvg",
         "with_bindings": "Enable API bindings",
         "with_tools": "Enable building thorvg tools",
@@ -84,13 +81,6 @@ class ThorvgConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        # Renamed to simd in higher versions
-        if Version(self.version) > "0.13.0":
-            del self.options.with_vector
-        else:
-            del self.options.with_simd
-        if Version(self.version)  < "0.13.3":
-            del self.options.with_extra
 
     def configure(self):
         if self.options.shared:
@@ -155,13 +145,9 @@ class ThorvgConan(ConanFile):
         # Workaround to avoid: error D8016: '/O1' and '/RTC1' command-line options are incompatible
         if is_msvc(self) and is_debug:
             tc.project_options["optimization"] = "plain"
-        # vector option renamed to simd
-        if Version(self.version) > "0.13.0":
-            tc.project_options["simd"] = bool(self.options.with_simd)
-        else:
-            tc.project_options["vector"] = bool(self.options.with_vector)
-        if self.options.get_safe("with_extra") is not None:
-            tc.project_options["extra"] = str(self.options.with_extra) if self.options.with_extra else ''
+        tc.project_options["simd"] = bool(self.options.with_simd)
+        if self.options.with_extra:
+            tc.project_options["extra"] = str(self.options.with_extra)
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
