@@ -20,7 +20,7 @@ class OpenApiGeneratorConan(ConanFile):
         pass
 
     def requirements(self):
-        self.requires("openjdk/19.0.2")
+        self.requires("openjdk/21.0.1")
 
     def package_id(self):
         del self.info.settings.arch

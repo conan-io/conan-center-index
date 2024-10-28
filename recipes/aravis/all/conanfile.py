@@ -33,7 +33,6 @@ class AravisConan(ConanFile):
         "gst_plugin": [True, False],
         "tools": [True, False],
         "introspection": [True, False],
-        "gv_n_buffers": ["ANY"],
     }
     default_options = {
         "shared": False,
@@ -43,7 +42,6 @@ class AravisConan(ConanFile):
         "gst_plugin": False,
         "tools": True,
         "introspection": False,
-        "gv_n_buffers": 16,
     }
 
     def export_sources(self):
@@ -54,9 +52,6 @@ class AravisConan(ConanFile):
             del self.options.fPIC
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.packet_socket
-        if Version(self.version) < "8.25":
-            del self.options.gv_n_buffers
-
 
     def configure(self):
         if self.options.shared:
@@ -66,22 +61,13 @@ class AravisConan(ConanFile):
         if self.options.shared:
             self.options["glib"].shared = True
 
-        if self.options.get_safe("gv_n_buffers"):
-            try:
-                gv_n_buffers_val = int(str(self.options.gv_n_buffers))
-                if not (1 <= gv_n_buffers_val ):
-                    raise ConanInvalidConfiguration(
-                        f"gv_n_buffers_val must be greater than 1 Provided: {gv_n_buffers_val}")
-            except ValueError as e:
-                raise ConanInvalidConfiguration("gv_n_buffers_val must be an integer.") from e
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         # glib-object.h and gio/gio.h are used in several public headers
-        self.requires("glib/2.78.0", transitive_headers=True)
-        self.requires("libxml2/2.11.4")
+        self.requires("glib/2.78.3", transitive_headers=True)
+        self.requires("libxml2/[>=2.12.5 <3]")
         self.requires("zlib/[>=1.2.11 <2]")
 
         if self.options.usb:
@@ -103,10 +89,10 @@ class AravisConan(ConanFile):
 
     def build_requirements(self):
         #windows build: meson/1.2.1 works, meson/1.2.2 breaks for some reason!
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/1.4.0")
         self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if self.options.introspection:
             self.tool_requires("gobject-introspection/1.72.0")
 
@@ -128,10 +114,6 @@ class AravisConan(ConanFile):
         tc.project_options["viewer"] = "disabled"
         tc.project_options["tests"] = False
         tc.project_options["documentation"] = "disabled"
-
-        if  self.options.get_safe("gv_n_buffers"):
-            tc.project_options["gv-n-buffers"] = int(str(self.options.gv_n_buffers))
-
         tc.project_options["fast-heartbeat"] = False
         if self.settings.get_safe("compiler.runtime"):
             tc.project_options["b_vscrt"] = msvc_runtime_flag(self).lower()

@@ -1,4 +1,10 @@
 sources:
+  "0.7.1":
+    url: "https://github.com/biojppm/rapidyaml/releases/download/v0.7.1/rapidyaml-0.7.1-src.tgz"
+    sha256: "9f7c0df2117c09ea409afef38f27605f79f4455dd73b6b9d6afaed099a627c8a"
+  "0.7.0":
+    url: "https://github.com/biojppm/rapidyaml/releases/download/v0.7.0/rapidyaml-0.7.0-src.tgz"
+    sha256: "ef9f89b68de711c561720f1e70d1594e953356a07d297d36b8ccd3ded0589715"
   "0.5.0":
     url: "https://github.com/biojppm/rapidyaml/releases/download/v0.5.0/rapidyaml-0.5.0-src.tgz"
     sha256: "6493557778791a3a2375510ce6c0ecd70163fc8ce4f8ed683acc36e3e55ee881"
@@ -12,6 +18,14 @@ sources:
     url: "https://github.com/biojppm/rapidyaml/releases/download/v0.3.0/rapidyaml-0.3.0-src.tgz"
     sha256: "38854b8359eaf42cc27352f4b7321f509f6775445a3e2746cc8cd1e468a52aa9"
 patches:
+  "0.7.1":
+    - patch_file: "patches/0.7.1-001-remove-internal-c4core.patch"
+      patch_description: "disable using internal c4core"
+      patch_type: "conan"
+  "0.7.0":
+    - patch_file: "patches/0.7.0-001-remove-internal-c4core.patch"
+      patch_description: "disable using internal c4core"
+      patch_type: "conan"
   "0.5.0":
     - patch_file: "patches/0.5.0-001-remove-internal-c4core.patch"
       patch_description: "disable using internal c4core"
