@@ -34,7 +34,7 @@ class DPPConan(ConanFile):
         self.requires("opus/1.4")
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
 
     def build_requirements(self):
