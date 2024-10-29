@@ -90,13 +90,33 @@ class ZziplibConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
+    def _version_suffix(self):
+        version_suffix = f"-{Version(self.version).major}"
+
+        if self.settings.build_type != "Release":
+            return ""
+
+        if self.settings.os == "Windows":
+            return ""
+
+        if Version(self.version) >= "0.13.78":
+            return version_suffix
+
+        if Version(self.version) >= "0.13.72":
+            if self.options.shared and is_apple_os(self):
+                return ""
+            else:
+                return version_suffix
+
+        if not self.options.shared or is_apple_os(self):
+            return version_suffix
+
+        return ""
+
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "zziplib-all-do-not-use")
 
-        suffix = ""
-        if self.settings.build_type == "Release" and self.settings.os != "Windows" and \
-            not("0.13.72" <= Version(self.version) < "0.13.78" and self.options.shared and is_apple_os(self)):
-            suffix += f"-{Version(self.version).major}"
+        suffix = self._version_suffix()
 
         # libzzip
         self.cpp_info.components["zzip"].set_property("pkg_config_name", "zziplib")
