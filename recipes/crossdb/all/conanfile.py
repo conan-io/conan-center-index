@@ -26,7 +26,7 @@ class CrossDBConan(ConanFile):
 
     def validate(self):
         if is_msvc(self):
-            raise ConanInvalidConfiguration("${self.ref} does not support MSVC")
+            raise ConanInvalidConfiguration(f"${self.ref} does not support MSVC")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
