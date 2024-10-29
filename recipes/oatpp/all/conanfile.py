@@ -35,8 +35,8 @@ class OatppConan(ConanFile):
     @property
     def _version(self):
         version = str(self.version)
-        if version.endswith("_latest"):
-            version = version[:-len("_latest")]
+        if version.endswith(".latest"):
+            version = version[:-len(".latest")]
         return version
 
     def config_options(self):
