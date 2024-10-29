@@ -5,7 +5,7 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.scm import Git
 from conan.tools.files import download, unzip
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=1.65"
 
 class DPPConan(ConanFile):
     name = "dpp"
