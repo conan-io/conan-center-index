@@ -49,6 +49,7 @@ required_for_references:
 - arrow
 - arsenalgear
 - artery-font-format
+- aruco
 - asio
 - asio-grpc
 - asmjit
@@ -61,7 +62,9 @@ required_for_references:
 - asyncplusplus
 - asyncpp
 - atomic_queue
+- au
 - audiofile
+- audiowaveform
 - autoconf
 - autoconf-archive
 - automake
@@ -284,6 +287,7 @@ required_for_references:
 - cuda-kat
 - cuda-samples
 - cunit
+- curlpp
 - cute_headers
 - cutlass
 - cvplot
@@ -412,6 +416,7 @@ required_for_references:
 - fastnoise2
 - fastpfor
 - fastprng
+- fcl
 - fernandovelcic-hexdump
 - fff
 - ffmpeg
@@ -649,6 +654,7 @@ required_for_references:
 - kissfft
 - kitten
 - kmod
+- kplot
 - krb5
 - ktx
 - kuba-zip
@@ -904,6 +910,7 @@ required_for_references:
 - llama-cpp
 - llhttp
 - llnl-units
+- llvm-core
 - llvm-openmp
 - lmdb
 - lodepng
@@ -1122,6 +1129,7 @@ required_for_references:
 - openimageio
 - openjdk
 - openjpeg
+- openjph
 - openldap
 - openmesh
 - openmpi
@@ -1140,6 +1148,7 @@ required_for_references:
 - openvino
 - openvr
 - openxlsx
+- optimlib
 - optional-lite
 - opus
 - opusfile
@@ -1253,6 +1262,7 @@ required_for_references:
 - qcbor
 - qdbm
 - qhull
+- qoi
 - qpdf
 - qpoases
 - qr-code-generator
@@ -1269,6 +1279,7 @@ required_for_references:
 - quill
 - quirc
 - qwt
+- qxlsx
 - qxmpp
 - r8brain-free-src
 - rabbitmq-c
@@ -1280,10 +1291,12 @@ required_for_references:
 - rapidcheck
 - rapidcsv
 - rapidfuzz
+- rapidhash
 - rapidjson
 - rapidxml
 - rapidyaml
 - raylib
+- rc_ptr
 - rdma-core
 - re2
 - re2c
@@ -1491,6 +1504,7 @@ required_for_references:
 - tiny-dnn
 - tiny-regex-c
 - tiny-utf8
+- tinyad
 - tinyalsa
 - tinycbor
 - tinycolormap
@@ -1512,6 +1526,7 @@ required_for_references:
 - tl-expected
 - tl-function-ref
 - tl-optional
+- tl-ranges
 - tllist
 - tlx
 - tmx
