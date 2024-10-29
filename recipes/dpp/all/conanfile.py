@@ -5,7 +5,7 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.scm import Git
 from conan.tools.files import download, unzip
 
-required_conan_version = ">=1.65"
+required_conan_version = ">=2.0"
 
 class DPPConan(ConanFile):
     name = "dpp"
@@ -15,8 +15,8 @@ class DPPConan(ConanFile):
     description = "D++ is a lightweight and efficient library for Discord"
     topics = ("discord")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": True, "fPIC": True}
+    options = {"shared": [True, False]}
+    default_options = {"shared": True}
 
     @property
     def _min_cppstd(self):
@@ -31,14 +31,6 @@ class DPPConan(ConanFile):
         self.requires("openssl/3.1.2")
         self.requires("zlib/1.3")
         self.requires("opus/1.4")
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self)
