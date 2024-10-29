@@ -47,6 +47,9 @@ class DPPConan(ConanFile):
         git = Git(self, self.recipe_folder)
         git.coordinates_to_conandata()
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
+
     def source(self):
         # This environment variable should only be set by D++ library developers to ensure that conan builds succeed
         # without having to wait for release. It will check out the development branch where conanfile.py is being
