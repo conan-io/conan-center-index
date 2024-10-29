@@ -33,9 +33,9 @@ class EfswConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # for plain C projects only
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
+    def validate(self):
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, 11)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -47,7 +47,7 @@ class EfswConan(ConanFile):
         tc = CMakeToolchain(self)
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-
+        tc.variables["BUILD_TEST_APP"] = False
         tc.generate()
 
     def build(self):
