@@ -94,9 +94,9 @@ class ZziplibConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "zziplib-all-do-not-use")
 
         suffix = ""
-        if self.settings.build_type == "Release" and \
-            self.settings.os != "Windows":
-                suffix += f"-{Version(self.version).major}"
+        if self.settings.build_type == "Release" and self.settings.os != "Windows" and \
+            not("0.13.72" <= Version(self.version) < "0.13.78" and self.options.shared and is_apple_os(self)):
+            suffix += f"-{Version(self.version).major}"
 
         # libzzip
         self.cpp_info.components["zzip"].set_property("pkg_config_name", "zziplib")
@@ -105,18 +105,12 @@ class ZziplibConan(ConanFile):
         # libzzipmmapped
         if self.options.zzipmapped:
             self.cpp_info.components["zzipmmapped"].set_property("pkg_config_name", "zzipmmapped")
-            if Version(self.version) >= "0.13.72" and self.options.shared and is_apple_os(self):
-                self.cpp_info.components["zzipmmapped"].libs = [f"zzipmmapped"]
-            else:
-                self.cpp_info.components["zzipmmapped"].libs = [f"zzipmmapped{suffix}"]
+            self.cpp_info.components["zzipmmapped"].libs = [f"zzipmmapped{suffix}"]
             self.cpp_info.components["zzipmmapped"].requires = ["zlib::zlib"]
         # libzzipfseeko
         if self.options.zzipfseeko:
             self.cpp_info.components["zzipfseeko"].set_property("pkg_config_name", "zzipfseeko")
-            if Version(self.version) >= "0.13.72" and self.options.shared and is_apple_os(self):
-                self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko"]
-            else:
-                self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko{suffix}"]
+            self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko{suffix}"]
             self.cpp_info.components["zzipfseeko"].requires = ["zlib::zlib"]
         # libzzipwrap
         if self.options.zzipwrap:
