@@ -29,8 +29,8 @@ class DPPConan(ConanFile):
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2")
-        self.requires("openssl/3.1.2")
-        self.requires("zlib/1.3")
+        self.requires("openssl/[>=1.1 <4]")
+        self.requires("zlib/[>=1.2.11 <2]")
         self.requires("opus/1.4")
 
     def layout(self):
