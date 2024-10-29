@@ -5,13 +5,14 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.scm import Git
 from conan.tools.files import download, unzip
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=1.65"
 
 class DPPConan(ConanFile):
     name = "dpp"
     version = "10.0.34"
     license = "Apache-2.0"
-    url = "https://github.com/brainboxdotcc/DPP"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/brainboxdotcc/DPP"
     description = "D++ is a lightweight and efficient library for Discord"
     topics = ("discord")
     settings = "os", "compiler", "build_type", "arch"
