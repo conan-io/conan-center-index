@@ -12,10 +12,10 @@ required_conan_version = ">=1.53.0"
 class LibarchiveConan(ConanFile):
     name = "libarchive"
     description = "Multi-format archive and compression library"
-    topics = "archive", "compression", "tar", "data-compressor", "file-compression"
+    license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://libarchive.org"
-    license = "BSD-2-Clause"
+    topics = ("archive", "compression", "tar", "data-compressor", "file-compression")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -87,13 +87,13 @@ class LibarchiveConan(ConanFile):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.12.5")
+            self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_expat:
             self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_iconv:
             self.requires("libiconv/1.17")
         if self.options.with_pcreposix:
-            self.requires("pcre2/10.42")
+            self.requires("pcre/8.45")
         if self.options.with_nettle:
             self.requires("nettle/3.9.1")
         if self.options.with_openssl:
@@ -105,11 +105,11 @@ class LibarchiveConan(ConanFile):
         if self.options.with_lzo:
             self.requires("lzo/2.10")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5 <1.6]")
         if self.options.get_safe("with_mbedtls"):
-            self.requires("mbedtls/3.5.1")
+            self.requires("mbedtls/3.6.1")
         if self.options.get_safe("with_pcre2"):
             self.requires("pcre2/10.43")
 

@@ -1,16 +1,18 @@
 from conan import ConanFile
 from conan.tools.build import stdcpp_library
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, chdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.files import copy, get, rmdir, rm, rename, replace_in_file
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import check_min_vs, is_msvc, unix_path, msvc_runtime_flag
+from conan.tools.microsoft import is_msvc
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.scm import Version
+from conan.tools.meson import Meson, MesonToolchain
+from conan.errors import ConanInvalidConfiguration
 
 import os
 
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=1.54.0"
 
 
 class OpenH264Conan(ConanFile):
@@ -32,15 +34,12 @@ class OpenH264Conan(ConanFile):
     }
 
     @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    @property
     def _is_clang_cl(self):
         return self.settings.os == 'Windows' and self.settings.compiler == 'clang'
 
-    def export_sources(self):
-        export_conandata_patches(self)
+    @property
+    def _preserve_dll_name(self):
+        return (is_msvc(self) or self._is_clang_cl) and Version(self.version) <= "2.4.1" and self.options.shared
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,137 +53,80 @@ class OpenH264Conan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self.settings.arch in ("x86", "x86_64"):
-            self.tool_requires("nasm/2.15.05")
-        if self._settings_build.os == "Windows":
-            self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
-                self.tool_requires("msys2/cci.latest")
-        if is_msvc(self):
-            self.tool_requires("automake/1.16.5")
+        self.tool_requires("meson/1.4.1")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/2.2.0")
+        if self.settings.arch in ["x86", "x86_64"]:
+            self.tool_requires("nasm/2.16.01")
+
+    def validate(self):
+        if Version(self.version) <= "2.1.1" and self.settings.os in ["Android", "Macos"]:
+            # INFO: ../src/meson.build:86:2: ERROR: Problem encountered: FIXME: Unhandled system android
+            # INFO: ../src/meson.build:86:2: ERROR: Problem encountered: FIXME: Unhandled system darwin
+            raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.os}. Try a newer version.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
-    def _patch_sources(self):
-        if is_msvc(self):
-            replace_in_file(self, os.path.join(self.source_folder, "build", "platform-msvc.mk"),
-                            "CFLAGS_OPT += -MT",
-                            f"CFLAGS_OPT += -{msvc_runtime_flag(self)}")
-            replace_in_file(self, os.path.join(self.source_folder, "build", "platform-msvc.mk"),
-                            "CFLAGS_DEBUG += -MTd -Gm",
-                            f"CFLAGS_DEBUG += -{msvc_runtime_flag(self)} -Gm")
-        if self.settings.os == "Android":
-            replace_in_file(self, os.path.join(self.source_folder, "codec", "build", "android", "dec", "jni", "Application.mk"),
-                            "APP_STL := stlport_shared",
-                            f"APP_STL := {self.settings.compiler.libcxx}")
-            replace_in_file(self, os.path.join(self.source_folder, "codec", "build", "android", "dec", "jni", "Application.mk"),
-                            "APP_PLATFORM := android-12",
-                            f"APP_PLATFORM := {self._android_target}")
-
-    @property
-    def _library_filename(self):
-        prefix = "" if (is_msvc(self) or self._is_clang_cl) else "lib"
-        if self.options.shared:
-            if is_apple_os(self):
-                suffix = ".dylib"
-            elif self.settings.os == "Windows":
-                suffix = ".dll"
-            else:
-                suffix = ".so"
-        else:
-            if is_msvc(self) or self._is_clang_cl:
-                suffix = ".lib"
-            else:
-                suffix = ".a"
-        return prefix + "openh264" + suffix
-
-    @property
-    def _make_arch(self):
-        return {
-            "armv7": "arm",
-            "armv8": "arm64",
-            "x86": "i386",
-        }.get(str(self.settings.arch), str(self.settings.arch))
-
-    @property
-    def _android_target(self):
-        return f"android-{self.settings.os.api_level}"
-
-    @property
-    def _make_args(self):
-        prefix = unix_path(self, os.path.abspath(self.package_folder))
-        args = [
-            f"ARCH={self._make_arch}",
-            f"PREFIX={prefix}"
-        ]
-
-        if is_msvc(self) or self._is_clang_cl:
-            args.append("OS=msvc")
-        else:
-            if self.settings.os == "Windows":
-                args.append("OS=mingw_nt")
-            if self.settings.os == "Android":
-                libcxx = str(self.settings.compiler.libcxx)
-                stl_lib = f'$(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/$(APP_ABI)/lib{"c++_static.a" if libcxx == "c++_static" else "c++_shared.so"}' \
-                          + "$(NDKROOT)/sources/cxx-stl/llvm-libc++/libs/$(APP_ABI)/libc++abi.a"
-                ndk_home = self.conf.get("tools.android:ndk_path")
-                args.extend([
-                    f"NDKLEVEL={self.settings.os.api_level}",
-                    f"STL_LIB={stl_lib}",
-                    "OS=android",
-                    f"NDKROOT={ndk_home}",  # not NDK_ROOT here
-                    f"TARGET={self._android_target}",
-                    "CCASFLAGS=$(CFLAGS) -fno-integrated-as",
-                ])
-
-        return args
-
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        tc = AutotoolsToolchain(self)
-        tc.make_args.extend(self._make_args)
-
-        if is_msvc(self):
-            tc.extra_cxxflags.append("-nologo")
-            if check_min_vs(self, "180", raise_invalid=False):
-                # https://github.com/conan-io/conan/issues/6514
-                tc.extra_cxxflags.append("-FS")
-        # not needed during and after 2.3.1
-        elif self.settings.compiler in ("apple-clang",):
-            if self.settings.arch in ("armv8",):
-                tc.extra_ldflags.append("-arch arm64")
+        tc = MesonToolchain(self)
+        tc.project_options["tests"] = "disabled"
         tc.generate()
 
+    def _patch_sources(self):
+        if self._preserve_dll_name:
+            # INFO: When generating with Meson, the library name is openh264-7.dll. This change preserves the old name openh264.dll
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "soversion: major_version,", "soversion: '',")
+
     def build(self):
-        apply_conandata_patches(self)
         self._patch_sources()
-        autotools = Autotools(self)
-        with chdir(self, self.source_folder):
-            autotools.make(target=self._library_filename)
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(
-            self.package_folder, "licenses"), src=self.source_folder)
-        autotools = Autotools(self)
-        with chdir(self, self.source_folder):
-            autotools.make(
-                target=f'install-{"shared" if self.options.shared else "static-lib"}')
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        meson = Meson(self)
+        meson.install()
 
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        # INFO: Version 2.1.1 installs both static and shared libraries using same target name
+        if Version(self.version) <= "2.1.1":
+            if self.options.shared:
+                rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+            else:
+                rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
+                rm(self, "*.dylib*", os.path.join(self.package_folder, "lib"))
+                rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
+                rm(self, "openh264.lib", os.path.join(self.package_folder, "lib"))
+
+        if is_msvc(self) or self._is_clang_cl:
+            rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+            if self._preserve_dll_name:
+                # INFO: Preserve same old library name as when building with Make on Windows but using Meson
+                rename(self, os.path.join(self.package_folder, "lib", "openh264.lib"),
+                    os.path.join(self.package_folder, "lib", "openh264_dll.lib"))
+            else:
+                rename(self, os.path.join(self.package_folder, "lib", "libopenh264.a"),
+                    os.path.join(self.package_folder, "lib", "openh264.lib"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "openh264")
-        suffix = "_dll" if (
-            is_msvc(self) or self._is_clang_cl) and self.options.shared else ""
+        suffix = "_dll" if self._preserve_dll_name else ""
         self.cpp_info.libs = [f"openh264{suffix}"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.extend(["m", "pthread"])
         if self.settings.os == "Android":
             self.cpp_info.system_libs.append("m")
-        libcxx = stdcpp_library(self)
-        if libcxx:
-            self.cpp_info.system_libs.append(libcxx)
+        if not self.options.shared:
+            libcxx = stdcpp_library(self)
+            if libcxx:
+                if self.settings.os == "Android" and libcxx == "c++_static":
+                    # INFO: When builing for Android, need to link against c++abi too. Otherwise will get linkage errors:
+                    # ld.lld: error: undefined symbol: operator new(unsigned long)
+                    # >>> referenced by welsEncoderExt.cpp
+                    self.cpp_info.system_libs.append("c++abi")
+                self.cpp_info.system_libs.append(libcxx)
