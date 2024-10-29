@@ -16,8 +16,6 @@ class DPPConan(ConanFile):
     description = "D++ is a lightweight and efficient library for Discord"
     topics = ("discord")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = {"shared": True}
 
     @property
     def _min_cppstd(self):
@@ -41,10 +39,6 @@ class DPPConan(ConanFile):
         self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
-        #zip_name = "DPP.zip"
-        #download(self, f"https://github.com/brainboxdotcc/DPP/archive/refs/tags/v{self.version}.zip", zip_name)
-        #unzip(self, zip_name, '.', False, None, True)
-        #os.unlink(zip_name)
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
   
     def generate(self):
@@ -71,8 +65,6 @@ class DPPConan(ConanFile):
         self.cpp_info.libs = ["dpp"]
         self.cpp_info.includedirs = ["include/dpp-10.0"]
         self.cpp_info.libdirs = ["lib/dpp-10.0"]
-    def package_info(self):
-        self.cpp_info.libs = ["package_lib"]
         self.cpp_info.set_property("cmake_file_name", "dpp")
         self.cpp_info.set_property("cmake_target_name", "dpp::dpp")
 
