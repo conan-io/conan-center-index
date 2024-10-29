@@ -75,3 +75,6 @@ class EfswConan(ConanFile):
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
+        
+        if self.settings.os == "Macos":
+            self.cpp_info.frameworks = ["Cocoa"]
