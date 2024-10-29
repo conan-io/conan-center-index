@@ -62,8 +62,6 @@ class DPPConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["dpp"]
-        self.cpp_info.includedirs = ["include/dpp-10.0"]
-        self.cpp_info.libdirs = ["lib/dpp-10.0"]
         self.cpp_info.set_property("cmake_file_name", "dpp")
         self.cpp_info.set_property("cmake_target_name", "dpp::dpp")
 
