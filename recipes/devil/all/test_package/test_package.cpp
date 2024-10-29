@@ -6,7 +6,7 @@
 
 int main() {
     ilInit();
-    iluGetImageInfo(nullptr);
+    iluGetImageInfo(0);
 
     ilShutDown();
 
