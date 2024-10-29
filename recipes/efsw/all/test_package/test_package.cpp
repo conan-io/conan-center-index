@@ -6,7 +6,7 @@ int main(void) {
     
     efsw::FileWatcher* fileWatcher = new efsw::FileWatcher();
 
-    std::cout << "works" << std::endl;
+    std::cout << "Follows symlinks?: " << fileWatcher->followSymlinks() << std::endl;
 
     delete fileWatcher;
 
