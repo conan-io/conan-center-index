@@ -33,12 +33,11 @@ class CLI11Conan(ConanFile):
     def _supports_compilation(self):
         return Version(self.version) >= "2.3"
     
-    def config_options(self):
-        if not self._supports_compilation:
-            del self.options.header_only
-    
     def configure(self):
-        if self._supports_compilation and not self.options.header_only:
+        if not self._supports_compilation:
+            # TODO: Back to config_options after Conan 1 freeze
+            del self.options.header_only
+        elif not self.options.header_only:
             self.package_type = "static-library"
 
     def layout(self):
