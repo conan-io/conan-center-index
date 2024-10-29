@@ -9,7 +9,6 @@ required_conan_version = ">=1.65"
 
 class DPPConan(ConanFile):
     name = "dpp"
-    version = "10.0.34"
     license = "Apache-2.0"
     package_type = "shared-library"
     url = "https://github.com/conan-io/conan-center-index"
@@ -45,20 +44,12 @@ class DPPConan(ConanFile):
         self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
-        # This environment variable should only be set by D++ library developers to ensure that conan builds succeed
-        # without having to wait for release. It will check out the development branch where conanfile.py is being
-        # developed and tested. If you are NOT sure what this does, DO NOT SET IT. You won't get the D++ release
-        # you expect!
-        if 'DPP_CONAN_TESTING' in os.environ:
-            git = Git(self)
-            git.clone(url="https://github.com/brainboxdotcc/DPP.git", target=".")
-            git.checkout(commit="conan-the-librarian")
-        else:
-            zip_name = "DPP.zip"
-            download(self, f"https://github.com/brainboxdotcc/DPP/archive/refs/tags/v{self.version}.zip", zip_name)
-            unzip(self, zip_name, '.', False, None, True)
-            os.unlink(zip_name)
-
+        #zip_name = "DPP.zip"
+        #download(self, f"https://github.com/brainboxdotcc/DPP/archive/refs/tags/v{self.version}.zip", zip_name)
+        #unzip(self, zip_name, '.', False, None, True)
+        #os.unlink(zip_name)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+  
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
@@ -82,3 +73,8 @@ class DPPConan(ConanFile):
         self.cpp_info.libs = ["dpp"]
         self.cpp_info.includedirs = ["include/dpp-10.0"]
         self.cpp_info.libdirs = ["lib/dpp-10.0"]
+    def package_info(self):
+        self.cpp_info.libs = ["package_lib"]
+        self.cpp_info.set_property("cmake_file_name", "dpp")
+        self.cpp_info.set_property("cmake_target_name", "dpp::dpp")
+
