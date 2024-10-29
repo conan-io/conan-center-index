@@ -43,11 +43,14 @@ class PackageConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+
+    def configure(self):
+        # TODO: This goes back to config_options after Conan 1 freeze
+        if self.settings.os == "Windows":
             # Nothing is exported from the library, so we can't use it as a shared library
             del self.options.shared
             self.package_type = "static-library"
 
-    def configure(self):
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
 
