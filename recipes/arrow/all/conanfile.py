@@ -267,8 +267,8 @@ class ArrowConan(ConanFile):
         if self.options.with_thrift and not self.options.with_zlib:
             raise ConanInvalidConfiguration("arrow:with_thrift requires arrow:with_zlib")
 
-        if self.options.with_parquet and not self.options.with_thrift:
-            raise ConanInvalidConfiguration("arrow:with_parquet requires arrow:with_thrift")
+        if self.options.parquet and not self.options.with_thrift:
+            raise ConanInvalidConfiguration("arrow:parquet requires arrow:with_thrift")
 
     def build_requirements(self):
         if Version(self.version) >= "13.0.0":
