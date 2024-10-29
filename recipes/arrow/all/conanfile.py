@@ -112,7 +112,7 @@ class ArrowConan(ConanFile):
         "with_utf8proc": False,
         "with_lz4": False,
         "with_snappy": False,
-        "with_zlib": False,
+        "with_zlib": True,
         "with_zstd": False,
     }
     short_paths = True
