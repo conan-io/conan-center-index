@@ -36,9 +36,6 @@ class DPPConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
-    def export(self):
-        git = Git(self, self.recipe_folder)
-        git.coordinates_to_conandata()
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
