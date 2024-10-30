@@ -61,6 +61,8 @@ class DPPConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
+        tc.cache_variables["DPP_NO_VCPKG"] = True
+        tc.cache_variables["DPP_USE_EXTERNAL_JSON"] = True
         tc.cache_variables["CONAN_EXPORTED"] = True
         tc.cache_variables["BUILD_VOICE_SUPPORT"] = True
         tc.cache_variables["DPP_BUILD_TEST"] = False
