@@ -7,8 +7,8 @@ import os
 required_conan_version = ">=1.53.0"
 
 
-class DerekstrideTreeSitterSqlConan(ConanFile):
-    name = "derekstride-tree-sitter-sql"
+class TreeSitterSqlConan(ConanFile):
+    name = "tree-sitter-sql"
     description = "SQL grammar for tree-sitter"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
