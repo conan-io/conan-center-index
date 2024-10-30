@@ -2,8 +2,7 @@
 #include <cstdlib>  // EXIT_SUCCESS
 #include "efsw/efsw.hpp"
 
-int main(void) {
-    
+int main() {
     efsw::FileWatcher* fileWatcher = new efsw::FileWatcher();
 
     std::cout << "Follows symlinks?: " << fileWatcher->followSymlinks() << std::endl;

@@ -34,6 +34,7 @@ class EfswConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, 11)
@@ -61,7 +62,6 @@ class EfswConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
@@ -72,7 +72,6 @@ class EfswConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["efsw"]
 
-        # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]
         
