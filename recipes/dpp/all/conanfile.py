@@ -90,3 +90,6 @@ class DPPConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.includedirs = ["include/dpp-10.0"]
             self.cpp_info.libdirs = ["lib/dpp-10.0"]
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.system_libs = ["pthread"]
+        self.cpp_info.defines = ["DPP_USE_EXTERNAL_JSON"]
