@@ -10,6 +10,7 @@ graph_info.json
 build/
 .conanrunner/
 .conanrc
+src/
 
 # CMake
 CMakeUserPresets.json
