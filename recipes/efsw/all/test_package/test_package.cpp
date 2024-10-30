@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdlib>  // EXIT_SUCCESS
 #include "efsw/efsw.hpp"
 
 int main(void) {
