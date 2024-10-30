@@ -97,7 +97,7 @@ class ZziplibConan(ConanFile):
             return ""
 
         if self.settings.os == "Windows":
-            return ""
+            return version_suffix
 
         if Version(self.version) >= "0.13.72":
             return version_suffix
