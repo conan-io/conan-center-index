@@ -22,7 +22,7 @@ class CLI11Conan(ConanFile):
         "header_only": [True, False]
     }
     default_options = {
-        "header_only": False
+        "header_only": True
     }
 
     @property
