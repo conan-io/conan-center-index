@@ -82,6 +82,7 @@ class CLI11Conan(ConanFile):
         self.cpp_info.libdirs = []
 
         if self._supports_compilation and not self.options.get_safe("header_only"):
+            self.cpp_info.libdirs = ["lib"]
             self.cpp_info.libs = ["CLI11"]
             self.cpp_info.defines = ["CLI11_COMPILE"]
 
