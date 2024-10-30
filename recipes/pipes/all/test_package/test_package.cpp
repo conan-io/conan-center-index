@@ -1,8 +1,11 @@
 // Workaround for pipes not finding size_t
 #include <cstddef>
 #include <cstdlib>
-#include <optional>
 #include <vector>
+// FIXME: https://github.com/joboccara/pipes/pull/73
+#if __cplusplus >= 201703L
+#include <optional>
+#endif
 
 #include <pipes/pipes.hpp>
 
