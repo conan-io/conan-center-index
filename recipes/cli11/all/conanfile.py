@@ -28,11 +28,11 @@ class CLI11Conan(ConanFile):
     @property
     def _min_cppstd(self):
         return "11"
-    
+
     @property
     def _supports_compilation(self):
         return Version(self.version) >= "2.3"
-    
+
     def configure(self):
         if not self._supports_compilation:
             # TODO: Back to config_options after Conan 1 freeze
@@ -78,10 +78,10 @@ class CLI11Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        if self.options.get_safe("header_only"):
-            self.cpp_info.bindirs = []
-            self.cpp_info.libdirs = []
-        else:
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
+        if self._supports_compilation and not self.options.get_safe("header_only"):
             self.cpp_info.libs = ["CLI11"]
             self.cpp_info.defines = ["CLI11_COMPILE"]
 
