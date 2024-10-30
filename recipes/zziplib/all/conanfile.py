@@ -99,14 +99,8 @@ class ZziplibConan(ConanFile):
         if self.settings.os == "Windows":
             return ""
 
-        if Version(self.version) >= "0.13.78":
-            return version_suffix
-
         if Version(self.version) >= "0.13.72":
-            if self.options.shared and is_apple_os(self):
-                return ""
-            else:
-                return version_suffix
+            return version_suffix
 
         if not self.options.shared or is_apple_os(self):
             return version_suffix
