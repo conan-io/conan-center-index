@@ -1,5 +1,5 @@
 diff --git a/cpp/src/arrow/ipc/CMakeLists.txt b/cpp/src/arrow/ipc/CMakeLists.txt
-index 495018e..f6cee6f 100644
+index 495018ec0..f6cee6fde 100644
 --- a/cpp/src/arrow/ipc/CMakeLists.txt
 +++ b/cpp/src/arrow/ipc/CMakeLists.txt
 @@ -61,8 +61,12 @@ endif()
