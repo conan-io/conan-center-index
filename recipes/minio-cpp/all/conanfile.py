@@ -74,6 +74,11 @@ class MinioCppConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("curlpp", "cmake_file_name", "unofficial-curlpp")
+        deps.set_property("curlpp", "cmake_target_name", "unofficial::curlpp::curlpp")
+        deps.set_property("inih", "cmake_file_name", "unofficial-inih")
+        deps.set_property("inih", "cmake_target_name", "unofficial::inih::inireader")
+        deps.set_property("pugixml", "cmake_target_name", "pugixml")
         deps.generate()
 
     def build(self):
