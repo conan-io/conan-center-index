@@ -159,9 +159,9 @@ class RaylibConan(ConanFile):
         # INFO: Custom modules are enabled by default but need to copy the headers manually
         include_path = os.path.join(self.package_folder, "include")
         if self.options.get_safe("camera_system", True):
-            copy(self, pattern="rcamera.h", dst=include_path, src=os.path.join(self.source_folder, "src"))
+            copy(self, pattern="*camera.h", dst=include_path, src=os.path.join(self.source_folder, "src"))
         if self.options.get_safe("gestures_system", True):
-            copy(self, pattern="rgestures.h", dst=include_path, src=os.path.join(self.source_folder, "src"))
+            copy(self, pattern="*gestures.h", dst=include_path, src=os.path.join(self.source_folder, "src"))
         if self._support_rpand_generator and self.options.get_safe("rprand_generator", True):
             copy(self, pattern="rprand.h", dst=include_path, src=os.path.join(self.source_folder, "src", "external"))
 
