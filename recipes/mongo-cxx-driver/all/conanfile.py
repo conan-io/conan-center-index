@@ -48,7 +48,7 @@ class MongoCxxConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("mongo-c-driver/1.27.1")
+        self.requires("mongo-c-driver/1.28.0")
         if self.options.polyfill == "boost":
             self.requires("boost/1.82.0", transitive_headers=True)
 

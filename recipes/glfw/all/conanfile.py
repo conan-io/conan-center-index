@@ -215,6 +215,29 @@ class GlfwConan(ConanFile):
                 "CoreServices", "Foundation", "IOKit",
             ])
 
+        self.cpp_info.requires = ["opengl::opengl"]
+        if self.options.vulkan_static:
+            self.cpp_info.requires.append("vulkan-loader::vulkan-loader")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            if self.options.get_safe("with_x11", True):
+                # https://github.com/glfw/glfw/blob/3.4/src/CMakeLists.txt#L181-L218
+                # https://github.com/glfw/glfw/blob/3.3.2/CMakeLists.txt#L196-L233
+                self.cpp_info.requires.extend([
+                    "xorg::x11", # Also includes Xkb and Xshape
+                    "xorg::xrandr",
+                    "xorg::xinerama",
+                    "xorg::xcursor",
+                    "xorg::xi",
+                ])
+        if self.options.get_safe("with_wayland"):
+            # https://github.com/glfw/glfw/blob/3.4/src/CMakeLists.txt#L163-L167
+            self.cpp_info.requires.extend([
+                "wayland::wayland-client",
+                "wayland::wayland-cursor",
+                "wayland::wayland-egl",
+                "xkbcommon::xkbcommon"
+            ])
+
         # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
         self.cpp_info.filenames["cmake_find_package"] = "glfw3"
         self.cpp_info.filenames["cmake_find_package_multi"] = "glfw3"

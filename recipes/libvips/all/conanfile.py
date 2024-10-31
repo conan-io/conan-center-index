@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -121,6 +121,9 @@ class LibvipsConan(ConanFile):
         if not self.options.cpp:
             self.settings.rm_safe("compiler.cppstd")
             self.settings.rm_safe("compiler.libcxx")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -299,6 +302,8 @@ class LibvipsConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
+        
         # Disable tests
         meson_build = os.path.join(self.source_folder, "meson.build")
         replace_in_file(self, meson_build, "subdir('test')", "")
