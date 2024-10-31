@@ -39,16 +39,18 @@ class AwsCIO(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # These versions come from aws-sdl-cpp prefetch_crt_dependency.sh file,
+        # dont bump them independently, check the file and update all the dependencies at once
         if self.version == "0.14.7":
             self.requires("aws-c-common/0.9.15", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-cal/0.6.14")
             if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-                self.requires("s2n/1.4.1")
+                self.requires("s2n/1.4.16")  # 1.4.11 not available, using next available version
         if self.version == "0.10.9":
             self.requires("aws-c-common/0.6.11", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-cal/0.5.12")
             if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-                self.requires("s2n/1.3.55")
+                self.requires("s2n/1.3.15")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
