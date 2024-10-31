@@ -45,6 +45,7 @@ class CrossDBConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         self.cpp_info.libs = ["crossdb"]
