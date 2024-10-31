@@ -70,7 +70,7 @@ class GladConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def validate(self):
-        if (self.options.gles1_version != "None" or self.options.gles2_version != None) and self.options.egl_version == "None":
+        if (self.options.gles1_version != "None" or self.options.gles2_version != "None") and self.options.egl_version == "None":
             raise ConanInvalidConfiguration(f"{self.ref} Generating an OpenGLES spec requires a valid version of EGL")
 
     def layout(self):
