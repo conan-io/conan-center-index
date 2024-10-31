@@ -57,9 +57,6 @@ class RaylibConan(ConanFile):
     def _support_frame_control(self):
         return Version(self.version) >= "4.6"
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -137,8 +134,6 @@ class RaylibConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
-
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
