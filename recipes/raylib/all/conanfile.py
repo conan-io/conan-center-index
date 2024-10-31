@@ -50,7 +50,7 @@ class RaylibConan(ConanFile):
         return Version(self.version) >= "4.2.0"
 
     @property
-    def _support_rpand_generator(self):
+    def _support_rprand_generator(self):
         return Version(self.version) >= "5.0"
 
     @property
@@ -67,7 +67,7 @@ class RaylibConan(ConanFile):
             del self.options.opengl_version
         if not self._support_custom_modules:
             del self.options.module_raudio
-        if not self._support_rpand_generator:
+        if not self._support_rprand_generator:
             del self.options.rprand_generator
         if not self._support_frame_control:
             del self.options.custom_frame_control
@@ -126,7 +126,7 @@ class RaylibConan(ConanFile):
             # this makes it include the headers rcamera.h, rgesture.h and rprand.h
             tc.variables["SUPPORT_CAMERA_SYSTEM"]    = self.options.camera_system
             tc.variables["SUPPORT_GESTURES_SYSTEM"]  = self.options.gestures_system
-            if self._support_rpand_generator:
+            if self._support_rprand_generator:
                 tc.variables["SUPPORT_RPRAND_GENERATOR"] = self.options.rprand_generator
 
         # Due to a specific logic of cmakedeps_macros.cmake used by CMakeDeps to try to locate shared libs on Windows
@@ -162,7 +162,7 @@ class RaylibConan(ConanFile):
             copy(self, pattern="*camera.h", dst=include_path, src=os.path.join(self.source_folder, "src"))
         if self.options.get_safe("gestures_system", True):
             copy(self, pattern="*gestures.h", dst=include_path, src=os.path.join(self.source_folder, "src"))
-        if self._support_rpand_generator and self.options.get_safe("rprand_generator", True):
+        if self._support_rprand_generator and self.options.get_safe("rprand_generator", True):
             copy(self, pattern="rprand.h", dst=include_path, src=os.path.join(self.source_folder, "src", "external"))
 
     def _create_cmake_module_alias_targets(self, module_file, targets):
