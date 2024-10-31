@@ -45,7 +45,7 @@ class hello_conanRecipe(ConanFile):
         cmake.install()
 
         # save a dummy .la file to trigger hook warning
-        la_file = Path(self.package_folder) / "lib" / "hello-conan.la"
+        la_file = Path(self.package_folder) / "lib" / "hello-conan-foobar.la"
         save(self, la_file.as_posix(), "foobar")
 
     def package_info(self):
