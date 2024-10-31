@@ -1,9 +1,8 @@
-#include <tree_sitter/api.h>
-#include <tree_sitter_sql/api.h>
-
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+
+#include "tree_sitter/api.h"
+#include "tree-sitter-sql.h"
 
 int main() {
     TSParser *parser = ts_parser_new();
