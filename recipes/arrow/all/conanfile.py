@@ -523,6 +523,9 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow_flight"].set_property("cmake_target_name", f"ArrowFlight::arrow_flight_{cmake_suffix}")
             self.cpp_info.components["libarrow_flight"].libs = [f"arrow_flight{suffix}"]
             self.cpp_info.components["libarrow_flight"].requires = ["libarrow"]
+            # https://github.com/apache/arrow/pull/43137#pullrequestreview-2267476893
+            if Version(self.version) >= "18.0.0" and self.options.with_openssl:
+                self.cpp_info.components["libarrow_flight"].requires.append("openssl::openssl")
 
         if self.options.get_safe("with_flight_sql"):
             self.cpp_info.components["libarrow_flight_sql"].set_property("pkg_config_name", "flight_sql")
