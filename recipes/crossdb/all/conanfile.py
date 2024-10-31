@@ -33,7 +33,6 @@ class CrossDBConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["CMAKE_MACOSX_RPATH"] = True
         tc.generate()
 
     def build(self):
