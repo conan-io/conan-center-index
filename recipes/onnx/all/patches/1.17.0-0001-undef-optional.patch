@@ -1,0 +1,7 @@
+--- a/onnx/onnx-data_pb.h
++++ b/onnx/onnx-data_pb.h
+@@ -5,3 +5,3 @@
+ #pragma once
+-
++#undef OPTIONAL 
+ // clang-format off
