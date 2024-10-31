@@ -9,7 +9,7 @@ required_conan_version = ">=1.53.0"
 
 class CrossDBConan(ConanFile):
     name = "crossdb"
-    description = "Ultra High-performance Lightweight Embedded and Server OLTP RDBMS✨"
+    description = "Ultra High-performance Lightweight Embedded and Server OLTP RDBMS"
     license = "MPL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/crossdb-org/crossdb"
