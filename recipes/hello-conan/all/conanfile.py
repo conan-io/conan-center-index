@@ -1,5 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
+from conan.tools.files import save
+
+from pathlib import Path
 
 required_conan_version = ">=2.8.0"
 
@@ -40,6 +43,10 @@ class hello_conanRecipe(ConanFile):
     def package(self):
         cmake = CMake(self)
         cmake.install()
+
+        # save a dummy .la file to trigger hook warning
+        la_file = Path(self.package_folder) / "lib" / "hello-conan.la"
+        save(self, la_file.as_posix(), "foobar")
 
     def package_info(self):
         self.cpp_info.libs = ["hello-conan"]
