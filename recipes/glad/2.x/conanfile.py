@@ -121,8 +121,11 @@ class GladConan(ConanFile):
             "glsc2": self.options.glsc2_version,
             "egl": self.options.egl_version,
             "glx": self.options.glx_version,
-            "wgl": self.options.wgl_version
         }
+
+        wgl_version = self.options.get_safe("wgl_version")
+        if wgl_version:
+            spec_api["wgl"] = wgl_version
 
         return ";".join(api(spec_api))
 
