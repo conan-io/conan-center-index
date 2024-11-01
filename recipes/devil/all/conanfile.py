@@ -114,7 +114,10 @@ class DevilConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "DevIL")
         self.cpp_info.set_property("cmake_target_name", "DevIL::DevIL")
 
-        self.cpp_info.components["IL"].libs = ["IL"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["IL"].libs = ["DevIL"]
+        else:
+            self.cpp_info.components["IL"].libs = ["IL"]
         self.cpp_info.components["IL"].set_property("cmake_target_name", "DevIL::IL")
         il_requires = []
         if self.options.with_png:
