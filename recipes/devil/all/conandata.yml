@@ -18,3 +18,6 @@ patches:
     - patch_file: "patches/1.8.0-avoid-methoddef-dllimport-error.patch"
       patch_description: "remove uses of METHODDEF from libjpeg as they are unneeded and cause errors in MSVC"
       patch_type: "conan"
+    - patch_file: "patches/1.8.0-install-ilut-config-h.patch"
+      patch_description: "ensure ilut_config.h is installed"
+      patch_type: "conan"
