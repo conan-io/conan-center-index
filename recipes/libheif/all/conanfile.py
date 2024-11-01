@@ -28,6 +28,7 @@ class LibheifConan(ConanFile):
         "with_jpeg": [True, False],
         "with_openjpeg": [True, False],
         "with_openjph": [True, False],
+        "with_openh264": [True, False],
     }
     default_options = {
         "shared": False,
@@ -39,6 +40,7 @@ class LibheifConan(ConanFile):
         "with_jpeg": False,
         "with_openjpeg": False,
         "with_openjph": False,
+        "with_openh264": False,
     }
 
     def export_sources(self):
@@ -52,6 +54,8 @@ class LibheifConan(ConanFile):
             del self.options.with_openjpeg
         if Version(self.version) < "1.18.0":
             del self.options.with_openjph
+        if Version(self.version) < "1.19.0":
+            del self.options.with_openh264
 
     def configure(self):
         if self.options.shared:
@@ -75,6 +79,8 @@ class LibheifConan(ConanFile):
             self.requires("openjpeg/2.5.2")
         if self.options.get_safe("with_openjph"):
             self.requires("openjph/0.16.0", transitive_headers=False)
+        if self.options.get_safe("with_openh264"):
+            self.requires("openh264/2.4.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -105,14 +111,17 @@ class LibheifConan(ConanFile):
         tc.variables["WITH_OpenJPEG_DECODER"] = self.options.get_safe("with_openjpeg", False)
         tc.variables["WITH_OpenJPEG_ENCODER"] = self.options.get_safe("with_openjpeg", False)
         tc.variables["WITH_OPENJPH_ENCODER"] = self.options.get_safe("with_openjph", False)
+        tc.variables["WITH_OPENH264_DECODER"] = self.options.get_safe("with_openh264", False)
         # Disable finding possible Doxygen in system, so no docs are built
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
-
+        tc.cache_variables["CMAKE_COMPILE_WARNING_AS_ERROR"] = False
         tc.generate()
         deps = CMakeDeps(self)
         if Version(self.version) >= "1.18.0":
             deps.set_property("libde265", "cmake_file_name", "LIBDE265")
             deps.set_property("openjph", "cmake_file_name", "OPENJPH")
+        if Version(self.version) >= "1.19.0":
+            deps.set_property("openh264", "cmake_file_name", "OpenH264")
         deps.generate()
         if Version(self.version) >= "1.18.0":
             venv = VirtualBuildEnv(self)
@@ -166,3 +175,5 @@ class LibheifConan(ConanFile):
             self.cpp_info.components["heif"].requires.append("openjpeg::openjpeg")
         if self.options.get_safe("with_openjph"):
             self.cpp_info.components["heif"].requires.append("openjph::openjph")
+        if self.options.get_safe("with_openh264"):
+            self.cpp_info.components["heif"].requires.append("openh264::openh264")
