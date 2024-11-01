@@ -1,10 +1,10 @@
 import os
 import sys
-from pathlib import PurePosixPath
+from pathlib import Path
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import collect_libs, copy, get
 from conan.errors import ConanInvalidConfiguration
 
 class GladConan(ConanFile):
@@ -101,7 +101,7 @@ class GladConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
-        cmake.configure(build_script_folder=PurePosixPath(self.source_folder).parent)
+        cmake.configure(build_script_folder=Path(self.source_folder).parent)
         cmake.build()
 
     def _get_api(self):
