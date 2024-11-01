@@ -141,7 +141,7 @@ class bgfxConan(ConanFile):
                 self.output.warning(f"{self.ref} does no checking for the current compiler. Assuming it works, please consider adding it.")
 
     def build_requirements(self):
-        self.tool_requires("genie/1170")
+        self.tool_requires("genie/1181")
         if not is_msvc(self) and self._settings_build.os == "Windows":
             if self.settings.os == "Windows": # building for windows mingw
                 if "MINGW" not in os.environ:
