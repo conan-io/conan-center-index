@@ -23,6 +23,7 @@ required_for_references:
 - andreasbuhr-cppcoro
 - android-ndk
 - angelscript
+- ann
 - annoy
 - antlr4
 - antlr4-cppruntime
@@ -43,10 +44,12 @@ required_for_references:
 - args-parser
 - argtable2
 - argtable3
+- argz
 - armadillo
 - arrow
 - arsenalgear
 - artery-font-format
+- aruco
 - asio
 - asio-grpc
 - asmjit
@@ -58,7 +61,10 @@ required_for_references:
 - asyncly
 - asyncplusplus
 - asyncpp
+- atomic_queue
+- au
 - audiofile
+- audiowaveform
 - autoconf
 - autoconf-archive
 - automake
@@ -81,6 +87,8 @@ required_for_references:
 - aws-lambda-cpp
 - aws-libfabric
 - aws-sdk-cpp
+- azure-sdk-for-cpp
+- azure-storage-cpp
 - b2
 - b64
 - backport-cpp
@@ -90,6 +98,7 @@ required_for_references:
 - bandit
 - base64
 - basu
+- battery-embed
 - bazel
 - bdwgc
 - bear
@@ -177,6 +186,7 @@ required_for_references:
 - chipmunk2d
 - choc
 - chunkio
+- cigi-ccl
 - cimg
 - circularbuffer
 - cista
@@ -207,6 +217,7 @@ required_for_references:
 - coin-osi
 - coin-utils
 - commata
+- compute_library
 - concurrencpp
 - concurrentqueue
 - console_bridge
@@ -268,6 +279,7 @@ required_for_references:
 - csvmonkey
 - ctml
 - ctpg
+- ctrack
 - ctre
 - cub
 - cubicinterpolation
@@ -275,7 +287,9 @@ required_for_references:
 - cuda-kat
 - cuda-samples
 - cunit
+- curlpp
 - cute_headers
+- cutlass
 - cvplot
 - cwalk
 - cxxgraph
@@ -402,6 +416,7 @@ required_for_references:
 - fastnoise2
 - fastpfor
 - fastprng
+- fcl
 - fernandovelcic-hexdump
 - fff
 - ffmpeg
@@ -409,6 +424,7 @@ required_for_references:
 - fftw
 - fire-hpp
 - fixed-containers
+- fixed_math
 - flac
 - flann
 - flatbuffers
@@ -424,6 +440,7 @@ required_for_references:
 - fmi3
 - fmt
 - fmtlog
+- folly
 - fontconfig
 - foonathan-lexy
 - foonathan-memory
@@ -451,6 +468,7 @@ required_for_references:
 - fusepp
 - fxdiv
 - g3log
+- gaia-ecs
 - gainput
 - gamenetworkingsockets
 - gamma
@@ -466,6 +484,7 @@ required_for_references:
 - geographiclib
 - geos
 - geotrans
+- getdns
 - getopt-for-visual-studio
 - gettext
 - gf-complete
@@ -496,6 +515,7 @@ required_for_references:
 - gnu-config
 - gnulib
 - gnutls
+- gobject-introspection
 - godot-cpp
 - godot_headers
 - googleapis
@@ -576,6 +596,7 @@ required_for_references:
 - influxdb-cpp
 - influxdb-cxx
 - inih
+- inipp
 - inja
 - intel-ipsec-mb
 - intel-neon2sse
@@ -583,6 +604,7 @@ required_for_references:
 - inversify-cpp
 - iowow
 - ipaddress
+- iphreeqc
 - iqa
 - irrxml
 - isa-l
@@ -632,6 +654,7 @@ required_for_references:
 - kissfft
 - kitten
 - kmod
+- kplot
 - krb5
 - ktx
 - kuba-zip
@@ -651,6 +674,7 @@ required_for_references:
 - lest
 - leveldb
 - lexbor
+- libaec
 - libaesgm
 - libaio
 - libalsa
@@ -683,6 +707,7 @@ required_for_references:
 - libcurl
 - libcvd
 - libdaemon
+- libdatrie
 - libdb
 - libdc1394
 - libde265
@@ -706,6 +731,7 @@ required_for_references:
 - libevdev
 - libevent
 - libexif
+- libfabric
 - libfdk_aac
 - libffi
 - libfork
@@ -739,8 +765,10 @@ required_for_references:
 - libipt
 - libjpeg
 - libjpeg-turbo
+- libjxl
 - libkml
 - libliftoff
+- liblqr
 - liblsl
 - libltc
 - liblzf
@@ -751,6 +779,7 @@ required_for_references:
 - libmd
 - libmediainfo
 - libmemcached
+- libmeshb
 - libmetalink
 - libmicrohttpd
 - libmikmod
@@ -780,7 +809,9 @@ required_for_references:
 - libpcap
 - libpciaccess
 - libpfm4
+- libphonenumber
 - libpng
+- libpointmatcher
 - libpq
 - libpqxx
 - libproperties
@@ -809,6 +840,7 @@ required_for_references:
 - libslz
 - libsmacker
 - libsndfile
+- libsndio
 - libsodium
 - libsolace
 - libspatialindex
@@ -872,10 +904,13 @@ required_for_references:
 - linmath.h
 - linux-headers-generic
 - linux-syscall-support
+- liquid-dsp
 - litehtml
 - lksctp-tools
 - llama-cpp
 - llhttp
+- llnl-units
+- llvm-core
 - llvm-openmp
 - lmdb
 - lodepng
@@ -906,6 +941,7 @@ required_for_references:
 - mailio
 - make
 - makefile-project-workspace-creator
+- manif
 - mapbox-geometry
 - mapbox-variant
 - mapbox-wagyu
@@ -932,6 +968,7 @@ required_for_references:
 - mdns
 - mdnsresponder
 - mdspan
+- melon
 - mesa-glu
 - meshoptimizer
 - meson
@@ -948,6 +985,7 @@ required_for_references:
 - mimalloc
 - mingw-builds
 - mingw-w64
+- minhook
 - mini
 - miniaudio
 - minicoro
@@ -959,6 +997,7 @@ required_for_references:
 - miniz
 - minizip
 - minizip-ng
+- minmea
 - mio
 - mlpack
 - mm_file
@@ -989,6 +1028,7 @@ required_for_references:
 - msix
 - msys2
 - mtdev
+- mtfmt
 - mujs
 - muparser
 - muparserx
@@ -1006,6 +1046,7 @@ required_for_references:
 - nasm
 - ncurses
 - neargye-semver
+- net-snmp
 - netcdf
 - nettle
 - newmat
@@ -1088,11 +1129,14 @@ required_for_references:
 - openimageio
 - openjdk
 - openjpeg
+- openjph
 - openldap
 - openmesh
+- openmpi
 - openmvg
 - openpam
 - openscenegraph
+- openslide
 - openssh
 - openssl
 - opensubdiv
@@ -1104,6 +1148,7 @@ required_for_references:
 - openvino
 - openvr
 - openxlsx
+- optimlib
 - optional-lite
 - opus
 - opusfile
@@ -1174,6 +1219,7 @@ required_for_references:
 - plusaes
 - plutovg
 - pngpp
+- pocketfft
 - poco
 - podofo
 - poly2tri
@@ -1184,6 +1230,7 @@ required_for_references:
 - poppler-data
 - popt
 - portable-file-dialogs
+- poselib
 - poshlib
 - pprint
 - pranav-csv2
@@ -1215,6 +1262,7 @@ required_for_references:
 - qcbor
 - qdbm
 - qhull
+- qoi
 - qpdf
 - qpoases
 - qr-code-generator
@@ -1231,6 +1279,7 @@ required_for_references:
 - quill
 - quirc
 - qwt
+- qxlsx
 - qxmpp
 - r8brain-free-src
 - rabbitmq-c
@@ -1242,10 +1291,12 @@ required_for_references:
 - rapidcheck
 - rapidcsv
 - rapidfuzz
+- rapidhash
 - rapidjson
 - rapidxml
 - rapidyaml
 - raylib
+- rc_ptr
 - rdma-core
 - re2
 - re2c
@@ -1254,6 +1305,7 @@ required_for_references:
 - readerwriterqueue
 - readline
 - readosm
+- rebound
 - recastnavigation
 - reckless
 - rectanglebinpack
@@ -1309,6 +1361,7 @@ required_for_references:
 - sdf
 - sdl
 - sdl_image
+- sdl_mixer
 - sdl_net
 - sdl_ttf
 - seadex-essentials
@@ -1339,6 +1392,7 @@ required_for_references:
 - simfil
 - simple-websocket-server
 - simple-yaml
+- simple_enum
 - sioclient
 - sjson-cpp
 - skyr-url
@@ -1366,6 +1420,7 @@ required_for_references:
 - spirv-cross
 - spirv-headers
 - spirv-tools
+- splunk-opentelemetry-cpp
 - spscqueue
 - spy
 - sqlcipher
@@ -1380,6 +1435,7 @@ required_for_references:
 - ssht
 - ssp
 - st_tree
+- statistic
 - statslib
 - status-code
 - status-value-lite
@@ -1404,6 +1460,7 @@ required_for_references:
 - svector
 - svgpp
 - svgwrite
+- swig
 - symengine
 - systemc
 - systemc-cci
@@ -1447,6 +1504,7 @@ required_for_references:
 - tiny-dnn
 - tiny-regex-c
 - tiny-utf8
+- tinyad
 - tinyalsa
 - tinycbor
 - tinycolormap
@@ -1468,6 +1526,7 @@ required_for_references:
 - tl-expected
 - tl-function-ref
 - tl-optional
+- tl-ranges
 - tllist
 - tlx
 - tmx
@@ -1585,6 +1644,7 @@ required_for_references:
 - wslay
 - wt
 - wtl
+- wxwidgets
 - wyhash
 - xapian-core
 - xbyak
