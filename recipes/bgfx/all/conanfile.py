@@ -21,6 +21,7 @@ class bgfxConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Cross-platform, graphics API agnostic, \"Bring Your Own Engine/Framework\" style rendering library."
     topics = ("rendering", "graphics", "gamedev")
+    package_type = "library"
     settings = "os", "compiler", "arch", "build_type"
     options = {"fPIC": [True, False], "shared": [True, False], "rtti": [True, False], "tools": [True, False], "profiler": [True, False]}
     default_options = {"fPIC": True, "shared": False, "rtti": True, "tools": False, "profiler": False}
