@@ -15,3 +15,6 @@ patches:
     - patch_file: "patches/1.8.0-remove_register_keyword.patch"
       patch_description: "Remove invalid register keyword"
       patch_type: "conan"
+    - patch_file: "patches/1.8.0-avoid-methoddef-dllimport-error.patch"
+      patch_description: "remove uses of METHODDEF from libjpeg as they are unneeded and cause errors in MSVC"
+      patch_type: "conan"
