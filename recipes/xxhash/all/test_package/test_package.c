@@ -1,15 +1,10 @@
-#include "xxhash.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-
+#include "test_package.h"
 
 int main()
 {
-    size_t const bufferSize = 10;
-    void* const buffer = malloc(bufferSize);
-    XXH64_hash_t hash = XXH64(buffer, bufferSize, 0);
-    printf("%llu", hash);
-    free(buffer);
-    return 0;
+    compute_hash();
+
+    // Using the library in both translation units ensures correct linkage with
+    // header-only builds.
+    compute_hash_in_another_tu();
 }

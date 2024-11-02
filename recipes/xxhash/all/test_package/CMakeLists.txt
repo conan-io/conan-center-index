@@ -3,5 +3,5 @@ project(test_package LANGUAGES C)
 
 find_package(xxHash REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} test_package.c)
+add_executable(${PROJECT_NAME} test_package.c test_package_tu.c)
 target_link_libraries(${PROJECT_NAME} PRIVATE xxHash::xxhash)
