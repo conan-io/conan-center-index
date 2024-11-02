@@ -11,10 +11,11 @@ required_conan_version = ">=1.50.0"
 class CppfrontConan(ConanFile):
     name = "cppfront"
     description = "Cppfront is a experimental compiler from a potential C++ 'syntax 2' (Cpp2) to today's 'syntax 1' (Cpp1)"
-    topics = ("cpp2", "compiler")
+    license = "CC-BY-NC-ND-4.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/hsutter/cppfront"
-    license = "CC-BY-NC-ND-4.0"
+    topics = ("cpp2", "compiler")
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
 
     @property
