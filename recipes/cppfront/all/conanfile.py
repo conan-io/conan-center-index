@@ -26,8 +26,9 @@ class CppfrontConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "gcc": "11",
-            "Visual Studio": "16.9",
-            "msvc": "192.9",
+            # cppfront requires constexpr source_location
+            "Visual Studio": "17",
+            "msvc": "193",
             "clang": "12",
             # cppfront requires <ranges> which is available on apple-clang 14.3 or later..
             "apple-clang": "14.3",
