@@ -415,7 +415,15 @@ class SDLConan(ConanFile):
                 "AVFoundation", "Foundation", "QuartzCore",
             ]
             if self.settings.os == "Macos":
-                self.cpp_info.components["libsdl2"].frameworks.extend(["Cocoa", "Carbon", "IOKit", "ForceFeedback"])
+                self.cpp_info.components["libsdl2"].frameworks.extend([
+                    "Cocoa",
+                    "Carbon",
+                    "IOKit",
+                    "ForceFeedback",
+                    "CoreFoundation",
+                    "CoreServices",
+                    "AppKit"
+                ])
                 self.cpp_info.components["libsdl2"].frameworks.append("GameController")
             elif self.settings.os in ["iOS", "tvOS", "watchOS"]:
                 self.cpp_info.components["libsdl2"].frameworks.extend([
