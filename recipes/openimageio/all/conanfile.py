@@ -55,7 +55,7 @@ class OpenImageIOConan(ConanFile):
         "with_hdf5": True,
         "with_libheif": True,
         "with_libjpeg": "libjpeg",
-        "with_libjxl": False,  # TODO: Currently produces link failues
+        "with_libjxl": True,  # TODO: Currently produces link failues
         "with_libpng": True,
         "with_libwebp": True,
         "with_opencolorio": True,
@@ -134,10 +134,6 @@ class OpenImageIOConan(ConanFile):
             self.requires("ptex/2.4.2")
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.2")
-
-        # TODO: Temporary, to be removed
-        # Works with build=missing now, awaiting https://github.com/conan-io/conan-center-index/pull/25660
-        #self.requires('lcms/2.16', override=True)
 
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
@@ -283,19 +279,19 @@ class OpenImageIOConan(ConanFile):
         if Version(self.version) < "3.0.0.0":
             open_image_io_util.requires += [
                 "boost::filesystem",
-                "boost::thread",
-                "boost::system",
                 "boost::regex",
+                "boost::system",
+                "boost::thread",
             ]
             open_image_io.requires += [
-                "boost::thread",
-                "boost::system",
                 "boost::container",
                 "boost::regex",
+                "boost::system",
+                "boost::thread",
             ]
 
         if self.options.with_libjxl:
-            open_image_io.requires.append("libjxl::libjxl")
+            open_image_io.requires += ["libjxl::libjxl", "libjxl::jxl_cms"]
         if self.options.with_libjpeg == "libjpeg":
             open_image_io.requires.append("libjpeg::libjpeg")
         elif self.options.with_libjpeg == "libjpeg-turbo":

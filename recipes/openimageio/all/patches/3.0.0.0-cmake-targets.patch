@@ -1,5 +1,5 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index 322465767..c88ffdb08 100644
+index 7bdb0a4dc..7eec1dee0 100644
 --- CMakeLists.txt
 +++ CMakeLists.txt
 @@ -42,7 +42,7 @@ endif ()
@@ -21,7 +21,7 @@ index 322465767..c88ffdb08 100644
  endif ()
  
 diff --git src/cmake/externalpackages.cmake src/cmake/externalpackages.cmake
-index 612d95a60..b09e8ec87 100644
+index f8670a83f..1efd81609 100644
 --- src/cmake/externalpackages.cmake
 +++ src/cmake/externalpackages.cmake
 @@ -73,16 +73,15 @@ set (OPENIMAGEIO_CONFIG_DO_NOT_FIND_IMATH OFF CACHE BOOL
@@ -73,27 +73,18 @@ index 612d95a60..b09e8ec87 100644
  if (USE_PYTHON)
      checked_find_package (pybind11 REQUIRED VERSION_MIN 2.7)
  endif ()
-@@ -119,85 +120,117 @@ endif ()
+@@ -119,72 +120,104 @@ endif ()
  # Dependencies for optional formats and features. If these are not found,
  # we will continue building, but the related functionality will be disabled.
  
 -checked_find_package (PNG VERSION_MIN 1.6.0)
 -
--checked_find_package (BZip2)   # Used by ffmpeg and freetype
--if (NOT BZIP2_FOUND)
--    set (BZIP2_LIBRARIES "")  # TODO: why does it break without this?
--endif ()
-+if (USE_PNG)
-+    checked_find_package (PNG REQUIRED VERSION_MIN 1.6.0)
-+endif()
- 
 -checked_find_package (Freetype
 -                      VERSION_MIN 2.10.0
 -                      DEFINITIONS USE_FREETYPE=1 )
-+# checked_find_package (BZip2)   # Used by ffmpeg and freetype
-+# if (NOT BZIP2_FOUND)
-+#     set (BZIP2_LIBRARIES "")  # TODO: why does it break without this?
-+# endif ()
++if (USE_PNG)
++    checked_find_package (PNG REQUIRED VERSION_MIN 1.6.0)
++endif()
  
 -checked_find_package (OpenColorIO REQUIRED
 -                      VERSION_MIN 2.2
@@ -235,6 +226,9 @@ index 612d95a60..b09e8ec87 100644
 +    checked_find_package (Nuke NO_RECORD_NOTFOUND)
 +endif()
  
+ if (FFmpeg_FOUND OR FREETYPE_FOUND)
+     checked_find_package (BZip2)   # Used by ffmpeg and freetype
+@@ -196,10 +229,10 @@ endif()
  
  # Qt -- used for iv
  option (USE_QT "Use Qt if found" ON)
@@ -248,7 +242,7 @@ index 612d95a60..b09e8ec87 100644
      checked_find_package (Qt6 COMPONENTS Core Gui Widgets OpenGLWidgets)
      if (NOT Qt6_FOUND)
          checked_find_package (Qt5 COMPONENTS Core Gui Widgets OpenGL)
-@@ -210,10 +243,7 @@ endif ()
+@@ -212,10 +245,7 @@ endif ()
  
  
  # Tessil/robin-map
@@ -260,8 +254,8 @@ index 612d95a60..b09e8ec87 100644
  
  # fmtlib
  option (OIIO_INTERNALIZE_FMT "Copy fmt headers into <install>/include/OpenImageIO/detail/fmt" ON)
-@@ -222,7 +252,7 @@ checked_find_package (fmt REQUIRED
-                       VERSION_MAX 11.99
+@@ -223,7 +253,7 @@ checked_find_package (fmt REQUIRED
+                       VERSION_MIN 7.0
                        BUILD_LOCAL missing
                       )
 -get_target_property(FMT_INCLUDE_DIR fmt::fmt-header-only INTERFACE_INCLUDE_DIRECTORIES)
@@ -335,6 +329,46 @@ index 25606a139..5f520249a 100644
                       DEFINITIONS "USE_HEIF=1")
  else ()
      message (WARNING "heif plugin will not be built")
+diff --git src/iconvert/CMakeLists.txt src/iconvert/CMakeLists.txt
+index 735b88def..8f5bb3b54 100644
+--- src/iconvert/CMakeLists.txt
++++ src/iconvert/CMakeLists.txt
+@@ -2,4 +2,4 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # https://github.com/AcademySoftwareFoundation/OpenImageIO
+ 
+-fancy_add_executable (LINK_LIBRARIES OpenImageIO)
++fancy_add_executable (LINK_LIBRARIES OpenImageIO fmt::fmt)
+diff --git src/idiff/CMakeLists.txt src/idiff/CMakeLists.txt
+index 735b88def..8f5bb3b54 100644
+--- src/idiff/CMakeLists.txt
++++ src/idiff/CMakeLists.txt
+@@ -2,4 +2,4 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # https://github.com/AcademySoftwareFoundation/OpenImageIO
+ 
+-fancy_add_executable (LINK_LIBRARIES OpenImageIO)
++fancy_add_executable (LINK_LIBRARIES OpenImageIO fmt::fmt)
+diff --git src/igrep/CMakeLists.txt src/igrep/CMakeLists.txt
+index 735b88def..8f5bb3b54 100644
+--- src/igrep/CMakeLists.txt
++++ src/igrep/CMakeLists.txt
+@@ -2,4 +2,4 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # https://github.com/AcademySoftwareFoundation/OpenImageIO
+ 
+-fancy_add_executable (LINK_LIBRARIES OpenImageIO)
++fancy_add_executable (LINK_LIBRARIES OpenImageIO fmt::fmt)
+diff --git src/iinfo/CMakeLists.txt src/iinfo/CMakeLists.txt
+index 735b88def..8f5bb3b54 100644
+--- src/iinfo/CMakeLists.txt
++++ src/iinfo/CMakeLists.txt
+@@ -2,4 +2,4 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # https://github.com/AcademySoftwareFoundation/OpenImageIO
+ 
+-fancy_add_executable (LINK_LIBRARIES OpenImageIO)
++fancy_add_executable (LINK_LIBRARIES OpenImageIO fmt::fmt)
 diff --git src/include/CMakeLists.txt src/include/CMakeLists.txt
 index 3ab45a570..9b6511b78 100644
 --- src/include/CMakeLists.txt
@@ -366,7 +400,7 @@ index 2bce60968..4492f7550 100644
  else()
      message (WARNING "Jpeg-2000 plugin will not be built")
 diff --git src/jpegxl.imageio/CMakeLists.txt src/jpegxl.imageio/CMakeLists.txt
-index 70d28318a..e0e29d4c7 100644
+index 70d28318a..aec47621f 100644
 --- src/jpegxl.imageio/CMakeLists.txt
 +++ src/jpegxl.imageio/CMakeLists.txt
 @@ -2,10 +2,9 @@
@@ -378,7 +412,7 @@ index 70d28318a..e0e29d4c7 100644
      add_oiio_plugin (jxlinput.cpp jxloutput.cpp
 -                     INCLUDE_DIRS ${JXL_INCLUDE_DIRS}
 -                     LINK_LIBRARIES ${JXL_LIBRARIES}
-+                     LINK_LIBRARIES libjxl::libjxl
++                     LINK_LIBRARIES libjxl::libjxl libjxl::jxl_cms
                       DEFINITIONS "USE_JXL")
  else()
      message (WARNING "JPEG XL plugin will not be built")
@@ -445,14 +479,15 @@ index 941c1bbc9..3126fd267 100644
          target_compile_definitions(${targetname} PRIVATE
                                     WIN32_LEAN_AND_MEAN NOMINMAX
 diff --git src/oiiotool/CMakeLists.txt src/oiiotool/CMakeLists.txt
-index 87b6a3e78..279b84b10 100644
+index 87b6a3e78..acd0cb985 100644
 --- src/oiiotool/CMakeLists.txt
 +++ src/oiiotool/CMakeLists.txt
-@@ -9,4 +9,5 @@ fancy_add_executable (SYSTEM_INCLUDE_DIRS
+@@ -9,4 +9,6 @@ fancy_add_executable (SYSTEM_INCLUDE_DIRS
                          OpenImageIO
                          $<TARGET_NAME_IF_EXISTS:OpenEXR::OpenEXR>
                          ${OpenCV_LIBRARIES}
 +                        tsl::robin_map
++                        fmt::fmt
                       )
 diff --git src/ptex.imageio/CMakeLists.txt src/ptex.imageio/CMakeLists.txt
 index 73e3ad843..da45e8c5f 100644
