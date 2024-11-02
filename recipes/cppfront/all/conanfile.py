@@ -28,7 +28,7 @@ class CppfrontConan(ConanFile):
             "Visual Studio": "16.9",
             "msvc": "192.9",
             "clang": "12",
-            "apple-clang": "13",
+            "apple-clang": "14.3",
         }
 
     def export_sources(self):
