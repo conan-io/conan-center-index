@@ -23,5 +23,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
-            test_matrix = os.path.join(self.source_folder, "t1.mtx")
-            self.run(f"{bin_path} < {test_matrix}", env="conanrun")
+            self.run(bin_path, env="conanrun")
