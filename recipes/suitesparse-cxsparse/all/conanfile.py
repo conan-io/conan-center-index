@@ -51,6 +51,16 @@ class SuiteSparseCxsparseConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    @property
+    def _complex_supported(self):
+        if is_msvc(self):
+            # ANSI C complex data type is not supported by MSVC
+            return False
+        if self.settings.os == "Android":
+            # creal, cimag and other complex-valued math functions are only available since API level 23
+            return int(self.settings.os.api_level.value) >= 23
+        return True
+
     def generate(self):
         venv = VirtualBuildEnv(self)
         venv.generate()
@@ -62,6 +72,7 @@ class SuiteSparseCxsparseConan(ConanFile):
         tc.variables["SUITESPARSE_USE_CUDA"] = False
         tc.variables["SUITESPARSE_DEMOS"] = False
         tc.variables["SUITESPARSE_USE_FORTRAN"] = False  # Fortran sources are translated to C instead
+        tc.variables["CXSPARSE_USE_COMPLEX"] = self._complex_supported
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -95,6 +106,5 @@ class SuiteSparseCxsparseConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
-        if is_msvc(self):
-            # complex data type is not available on MSVC
+        if not self._complex_supported:
             self.cpp_info.defines.append("NCOMPLEX")
