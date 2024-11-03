@@ -94,7 +94,7 @@ class VtkmConan(ConanFile):
 
     def requirements(self):
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.1")
+            self.requires("hdf5/1.14.5")
         if self.options.with_mpi:
             self.requires("openmpi/4.1.6")
         if self.options.with_openmp:
