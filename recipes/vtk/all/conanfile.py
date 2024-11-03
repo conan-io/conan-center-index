@@ -325,7 +325,7 @@ class VtkConan(ConanFile):
             # Used in public vtk_glew.h
             self.requires("glew/2.2.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.1")
+            self.requires("hdf5/1.14.5")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
