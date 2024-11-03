@@ -22,18 +22,20 @@ class SuiteSparseCholmodConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "gpl": [True, False],
         "cuda": [True, False],
+        "build_matrixops": [True, False],
+        "build_modify": [True, False],
+        "build_partition": [True, False],
+        "build_supernodal": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "gpl": True,
         "cuda": False,
-    }
-    options_description = {
-        "gpl": "Enable GPL-licensed modules: MatrixOps, Modify, Supernodal and CUDA",
-        "cuda": "Enable CUDA acceleration",
+        "build_matrixops": True,
+        "build_modify": True,
+        "build_partition": True,
+        "build_supernodal": True,
     }
 
     def export_sources(self):
@@ -43,14 +45,16 @@ class SuiteSparseCholmodConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    @property
+    def _license_is_gpl(self):
+        return self.options.cuda or self.options.build_matrixops or self.options.build_modify or self.options.build_supernodal
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-
-    def package_id(self):
-        if not self.info.options.gpl:
+        if not self._license_is_gpl:
             self.license = "LGPL-2.1-or-later AND Apache-2.0"
 
     def layout(self):
@@ -70,6 +74,8 @@ class SuiteSparseCholmodConan(ConanFile):
     def validate(self):
         if self.options.cuda and not self.options.gpl:
             raise ConanInvalidConfiguration("CUDA acceleration requires GPL-licensed modules. Set suitesparse-cholmod/*:gpl=True.")
+        if self.options.build_supernodal and not self.dependencies["openblas"].options.build_lapack:
+            raise ConanInvalidConfiguration("-o openblas/*:build_lapack=True is required when build_supernodal=True")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22 <4]")
@@ -84,7 +90,11 @@ class SuiteSparseCholmodConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
-        tc.variables["CHOLMOD_GPL"] = self.options.gpl
+        tc.variables["CHOLMOD_GPL"] = self._license_is_gpl
+        tc.variables["CHOLMOD_MATRIXOPS"] = self.options.build_matrixops
+        tc.variables["CHOLMOD_MODIFY"] = self.options.build_modify
+        tc.variables["CHOLMOD_PARTITION"] = self.options.build_partition
+        tc.variables["CHOLMOD_SUPERNODAL"] = self.options.build_supernodal
         tc.variables["SUITESPARSE_USE_OPENMP"] = True
         tc.variables["SUITESPARSE_USE_CUDA"] = self.options.cuda
         tc.variables["SUITESPARSE_DEMOS"] = False
@@ -131,7 +141,7 @@ class SuiteSparseCholmodConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
-        if not self.options.gpl:
+        if not self._license_is_gpl:
             self.cpp_info.defines.append("NGPL")
         if self.options.cuda:
             self.cpp_info.defines.append("CHOLMOD_HAS_CUDA")
