@@ -175,7 +175,7 @@ class GtkConan(ConanFile):
                 raise ConanInvalidConfiguration("MSVC build requires shared gdk-pixbuf")
             if not self.dependencies["cairo"].options.shared:
                 raise ConanInvalidConfiguration("MSVC build requires shared cairo")
-        if self.settings.os not in ["Linux", "FreeBSD"]:
+        if self.settings.os in ["Linux", "FreeBSD"]:
             if not self.options.with_x11 and not self.options.with_wayland:
                 # Fails with 'Problem encountered: No backends enabled' otherwise
                 raise ConanInvalidConfiguration("At least one of 'with_x11' or 'with_wayland' options must be enabled")
