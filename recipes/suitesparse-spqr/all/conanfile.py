@@ -39,6 +39,7 @@ class SuiteSparseSpqrConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        self.options["openblas"].build_lapack = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -51,6 +52,8 @@ class SuiteSparseSpqrConan(ConanFile):
     def validate(self):
         if self.options.cuda and not self.dependencies["suitesparse-cholmod"].options.cuda:
             raise ConanInvalidConfiguration("suitesparse-spqr/*:cuda=True option requires suitesparse-cholmod/*:cuda=True")
+        if not self.dependencies["openblas"].options.build_lapack:
+            raise ConanInvalidConfiguration("-o openblas/*:build_lapack=True is required")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22 <4]")
