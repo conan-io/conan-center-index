@@ -69,7 +69,7 @@ class PrometheusCppConan(ConanFile):
         if self.options.with_pull:
             self.requires("civetweb/1.16")
         if self.options.with_push:
-            self.requires("libcurl/[>=7.78.0 <9]")
+            self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True)
         if self.options.get_safe("with_compression"):
             self.requires("zlib/[>=1.2.11 <2]")
 
