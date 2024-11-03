@@ -171,6 +171,10 @@ class OpenblasConan(ConanFile):
         if self.options.get_safe("build_relapack") and self.settings.compiler not in ["gcc", "clang"]:
             # ld: unknown option: --allow-multiple-definition on apple-clang
             raise ConanInvalidConfiguration(f'"{self.name}/*:build_relapack=True" option is only supported for GCC and Clang')
+        if self.settings.os == "Android" and self.options.build_lapack:
+            if int(self.settings.os.api_level.value) < 23:
+                # All basic complex math functions are only available since API level 23.
+                raise ConanInvalidConfiguration("build_lapack=True requires Android API level 23 or higher for complex math support")
 
     def build_requirements(self):
         if self.options.use_openmp:
