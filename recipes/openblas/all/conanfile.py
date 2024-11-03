@@ -4,7 +4,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches, save
 from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 import os
 
@@ -235,6 +235,13 @@ class OpenblasConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
+        # Disable test subdirs.
+        # ctest also otherwise fails to compile on Android API 22 and earlier due to incomplete complex support.
+        save(self, os.path.join(self.source_folder, "cpp_thread_test", "CMakeLists.txt"), "")
+        save(self, os.path.join(self.source_folder, "ctest", "CMakeLists.txt"), "")
+        save(self, os.path.join(self.source_folder, "test", "CMakeLists.txt"), "")
+        save(self, os.path.join(self.source_folder, "utest", "CMakeLists.txt"), "")
+        save(self, os.path.join(self.source_folder, "lapack-netlib", "TESTING", "CMakeLists.txt"), "")
 
     def build(self):
         self._patch_sources()
