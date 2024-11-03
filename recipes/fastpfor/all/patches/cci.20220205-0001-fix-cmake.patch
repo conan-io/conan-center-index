@@ -13,15 +13,6 @@ index 5520747..dfccbc1 100644
  else ()
      message(FATAL_ERROR "Please, use GCC, Clang, or the Intel compiler!")
  endif()
-@@ -108,7 +112,7 @@ MESSAGE( STATUS "CMAKE_C_FLAGS_RELEASE: " ${CMAKE_C_FLAGS_RELEASE} )
- 
- # library target
- include_directories(headers)
--add_library(FastPFOR STATIC
-+add_library(FastPFOR
-     src/bitpacking.cpp
-     src/bitpackingaligned.cpp
-     src/bitpackingunaligned.cpp
 @@ -117,9 +121,8 @@ add_library(FastPFOR STATIC
      src/simdbitpacking.cpp
      src/varintdecode.c
