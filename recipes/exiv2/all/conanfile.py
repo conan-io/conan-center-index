@@ -17,9 +17,9 @@ class Exiv2Conan(ConanFile):
     description = "Exiv2 is a C++ library and a command-line utility " \
                   "to read, write, delete and modify Exif, IPTC, XMP and ICC image metadata."
     license = "GPL-2.0"
-    topics = ("image", "exif", "xmp")
-    homepage = "https://www.exiv2.org"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.exiv2.org"
+    topics = ("image", "exif", "xmp")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
