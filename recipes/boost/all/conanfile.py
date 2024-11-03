@@ -19,6 +19,7 @@ import re
 import shlex
 import shutil
 import sys
+from pathlib import Path
 import yaml
 
 required_conan_version = ">=1.53.0"
@@ -844,16 +845,14 @@ class BoostConan(ConanFile):
             self.tool_requires("b2/[>=5.2 <6]")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
 
     def generate(self):
         if not self.options.header_only:
-            env = VirtualBuildEnv(self)
-            env.generate()
-            vc = VCVars(self)
-            vc.generate()
+            VirtualBuildEnv(self).generate()
+            VCVars(self).generate()
+            self._create_user_config_jam()
 
     ##################### BUILDING METHODS ###########################
 
@@ -1066,8 +1065,8 @@ class BoostConan(ConanFile):
         return self.options.namespace != "boost"
 
     @property
-    def _boost_build_dir(self):
-        return os.path.join(self.source_folder, "tools", "build")
+    def _user_config_path(self):
+        return os.path.join(self.generators_folder, "user-config.jam")
 
     def _build_bcp(self):
         folder = os.path.join(self.source_folder, "tools", "bcp")
@@ -1084,13 +1083,13 @@ class BoostConan(ConanFile):
             alias = "--namespace-alias" if self.options.namespace_alias else ""
             boostdir = f"--boost={self.source_folder}"
             libraries = {"build", "boost-build.jam", "boostcpp.jam", "boost_install", "headers"}
-            for d in os.listdir(os.path.join(self.source_folder, "boost")):
-                if os.path.isdir(os.path.join(self.source_folder, "boost", d)):
-                    libraries.add(d)
-            for d in os.listdir(os.path.join(self.source_folder, "libs")):
-                if os.path.isdir(os.path.join(self.source_folder, "libs", d)):
-                    libraries.add(d)
-            libraries = " ".join(libraries)
+            for d in Path(self.source_folder, "boost").iterdir():
+                if d.is_dir():
+                    libraries.add(d.name)
+            for d in Path(self.source_folder, "libs").iterdir():
+                if d.is_dir():
+                    libraries.add(d.name)
+            libraries = " ".join(sorted(libraries))
             command = f"{self._bcp_exe} {namespace} {alias} {boostdir} {libraries} {self._bcp_dir}"
             self.output.warning(command)
             self.run(command)
@@ -1149,22 +1148,18 @@ class BoostConan(ConanFile):
             self._build_bcp()
             self._run_bcp()
 
-        self._create_user_config_jam(self._boost_build_dir)
-
         # JOIN ALL FLAGS
         b2_flags = " ".join(self._build_flags)
         full_command = f"{self._b2_exe} {b2_flags}"
         # -d2 is to print more debug info and avoid travis timing out without output
         sources = os.path.join(self.source_folder, self._bcp_dir) if self._use_bcp else self.source_folder
         full_command += f' --debug-configuration --build-dir="{self.build_folder}"'
-        self.output.warning(full_command)
 
         # If sending a user-specified toolset to B2, setting the vcvars
         # interferes with the compiler selection.
-        with chdir(self, sources):
-            # To show the libraries *1
-            # self.run("%s --show-libraries" % b2_exe)
-            self.run(full_command)
+        # To show the libraries *1
+        # self.run("%s --show-libraries" % b2_exe)
+        self.run(full_command, cwd=sources)
 
     @property
     def _b2_os(self):
@@ -1273,7 +1268,7 @@ class BoostConan(ConanFile):
             flags.append(f"abi={self._b2_abi}")
 
         flags.append(f"--layout={self.options.layout}")
-        flags.append(f"--user-config={os.path.join(self._boost_build_dir, 'user-config.jam')}")
+        flags.append(f"--user-config={self._user_config_path}")
         flags.append(f"-sNO_ZLIB={'0' if self._with_zlib else '1'}")
         flags.append(f"-sNO_BZIP2={'0' if self._with_bzip2 else '1'}")
         flags.append(f"-sNO_LZMA={'0' if self._with_lzma else '1'}")
@@ -1514,8 +1509,8 @@ class BoostConan(ConanFile):
             return shutil.which(f"clang++-{compiler_version}") or shutil.which(f"clang++-{major}") or shutil.which("clang++") or ""
         return ""
 
-    def _create_user_config_jam(self, folder):
-        self.output.warning("Patching user-config.jam")
+    def _create_user_config_jam(self):
+        self.output.info("Generating user-config.jam")
 
         def create_library_config(deps_name, name):
             aggregated_cpp_info = self.dependencies[deps_name].cpp_info.aggregated_components()
@@ -1523,9 +1518,9 @@ class BoostConan(ConanFile):
                 return ""
 
             includedir = aggregated_cpp_info.includedirs[0].replace("\\", "/")
-            includedir = f"\"{includedir}\""
+            includedir = f'"{includedir}"'
             libdir = aggregated_cpp_info.libdirs[0].replace("\\", "/")
-            libdir = f"\"{libdir}\""
+            libdir = f'"{libdir}"'
             lib = aggregated_cpp_info.libs[0]
             version = self.dependencies[deps_name].ref.version
             return f"\nusing {name} : {version} : " \
@@ -1557,7 +1552,7 @@ class BoostConan(ConanFile):
 
         cxx_fwd_slahes = self._cxx.replace("\\", "/")
         if cxx_fwd_slahes:
-            contents += f" \"{cxx_fwd_slahes}\""
+            contents += f' "{cxx_fwd_slahes}"'
 
         if is_apple_os(self):
             if self.settings.compiler == "apple-clang":
@@ -1607,9 +1602,8 @@ class BoostConan(ConanFile):
 
         contents += " ;"
 
-        self.output.warning(contents)
-        filename = f"{folder}/user-config.jam"
-        save(self, filename, contents)
+        self.output.info(contents)
+        save(self, self._user_config_path, contents)
 
     @property
     def _toolset_version(self):
