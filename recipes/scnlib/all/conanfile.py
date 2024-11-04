@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
+from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
@@ -35,23 +35,15 @@ class ScnlibConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        if Version(self.version) < "2.0.0":
-            return "11"
-        else:
-            # scn/2.0.0 has complation error on MSVC c++17
-            # we have to use versions which support c++20
-            # https://github.com/eliaskosunen/scnlib/issues/97
-            # https://github.com/conan-io/conan-center-index/pull/22455#issuecomment-1924444193
-            return "20" if is_msvc(self) else "17"
-
-    def export_sources(self):
-        export_conandata_patches(self)
+        # scn/2.0.0 has complation error on MSVC c++17
+        # we have to use versions which support c++20
+        # https://github.com/eliaskosunen/scnlib/issues/97
+        # https://github.com/conan-io/conan-center-index/pull/22455#issuecomment-1924444193
+        return "20" if is_msvc(self) else "17"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "2.0":
-            del self.options.regex_backend
 
     def configure(self):
         if self.options.get_safe("header_only") or self.options.shared:
@@ -109,24 +101,21 @@ class ScnlibConan(ConanFile):
         tc.variables["SCN_DOCS"] = False
         tc.variables["SCN_INSTALL"] = True
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        if Version(self.version) < "2.0":
-            tc.variables["SCN_USE_BUNDLED_FAST_FLOAT"] = False
-        else:
-            tc.variables["SCN_USE_EXTERNAL_SIMDUTF"] = True
-            tc.variables["SCN_USE_EXTERNAL_FAST_FLOAT"] = True
-            tc.variables["SCN_BENCHMARKS_BUILDTIME"] = False
-            tc.variables["SCN_BENCHMARKS_BINARYSIZE"] = False
-            tc.variables["SCN_DISABLE_REGEX"] = self.options.regex_backend is None
-            if self.options.regex_backend is not None:
-                tc.variables["SCN_REGEX_BACKEND"] = self.options.regex_backend
-                tc.variables["SCN_USE_EXTERNAL_REGEX_BACKEND"] = True
+
+        tc.variables["SCN_USE_EXTERNAL_SIMDUTF"] = True
+        tc.variables["SCN_USE_EXTERNAL_FAST_FLOAT"] = True
+        tc.variables["SCN_BENCHMARKS_BUILDTIME"] = False
+        tc.variables["SCN_BENCHMARKS_BINARYSIZE"] = False
+        tc.variables["SCN_DISABLE_REGEX"] = self.options.regex_backend is None
+        if self.options.regex_backend is not None:
+            tc.variables["SCN_REGEX_BACKEND"] = self.options.regex_backend
+            tc.variables["SCN_USE_EXTERNAL_REGEX_BACKEND"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         if not self.options.get_safe("header_only"):
             cmake = CMake(self)
             cmake.configure()
@@ -166,11 +155,6 @@ class ScnlibConan(ConanFile):
         self.cpp_info.components["_scnlib"].requires.append("fast_float::fast_float")
         if "2.0" <= Version(self.version) < "3.0":
             self.cpp_info.components["_scnlib"].requires.append("simdutf::simdutf")
-        if Version(self.version) >= "2.0":
-            if self.options.get_safe("regex_backend") in ["boost", "boost_icu"]:
-                self.cpp_info.components["_scnlib"].requires.append("boost::regex")
-            elif self.options.get_safe("regex_backend") == "re2":
-                self.cpp_info.components["_scnlib"].requires.append("re2::re2")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_scnlib"].system_libs.append("m")
