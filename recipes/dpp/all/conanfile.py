@@ -67,7 +67,9 @@ class DPPConan(ConanFile):
         tc.cache_variables["BUILD_VOICE_SUPPORT"] = True
         tc.cache_variables["DPP_BUILD_TEST"] = False
         tc.cache_variables["BUILD_SHARED_LIBS"] = True
-        tc.cache_variables["AVX_TYPE"] = "AVX0"
+        if Version(self.version) <= "10.0.34":
+            # Workaround for Neon not compiling in old versions
+            tc.cache_variables["AVX_TYPE"] = "AVX0"
         tc.generate()
 
     def build(self):
