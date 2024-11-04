@@ -69,7 +69,9 @@ class LiefConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("mbedtls/3.2.1")
+        # TODO: Check if we actually need transitive_headers
+        # LIEF.lib(x509.obj) external symbol mbedtls_snprintf referenced in function lief_mbedtls_x509_dn_gets
+        self.requires("mbedtls/3.2.1", transitive_headers=True, transitive_libs=True)
         if Version(self.version) < "0.12.2":
             self.requires("rang/3.2")
         else:
