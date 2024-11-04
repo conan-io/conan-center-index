@@ -28,7 +28,7 @@ class hello_conanRecipe(ConanFile):
 
     def layout(self):
         cmake_layout(self)
-    
+
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
@@ -50,4 +50,3 @@ class hello_conanRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["hello-conan"]
-
