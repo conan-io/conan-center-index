@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy, load, save
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -11,9 +12,9 @@ class ExprTkConan(ConanFile):
     name = "exprtk"
     description = "C++ Mathematical Expression Parsing And Evaluation Library ExprTk"
     license = "MIT"
-    topics = ("math", "mathematics", "parser", "lexer", "numerical", "header-only")
-    homepage = "https://www.partow.net/programming/exprtk/index.html"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.partow.net/programming/exprtk/index.html"
+    topics = ("math", "mathematics", "parser", "lexer", "numerical", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
@@ -44,7 +45,10 @@ class ExprTkConan(ConanFile):
         save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package(self):
-        self._extract_license()
+        if Version(self.version) < "0.0.3":
+            self._extract_license()
+        else:
+            copy(self, "license.txt", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         copy(self, "exprtk.hpp", dst=os.path.join(self.package_folder, "include"), src=self.source_folder)
 
     def package_info(self):
