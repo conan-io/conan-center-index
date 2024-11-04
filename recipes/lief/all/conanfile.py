@@ -8,7 +8,7 @@ from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2.0"
 
 class LiefConan(ConanFile):
     name = "lief"
@@ -54,25 +54,6 @@ class LiefConan(ConanFile):
             return "17"
         return "14" if self.options.with_frozen else "11"
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "14": {
-                "gcc": "6",
-                "clang": "5",
-                "apple-clang": "10",
-                "Visual Studio": "15",
-                "msvc": "191",
-            },
-            "17": {
-                "gcc": "8" if Version(self.version) < "0.15.1" else "10",
-                "clang": "7",
-                "apple-clang": "12",
-                "Visual Studio": "16",
-                "msvc": "192",
-            },
-        }.get(self._min_cppstd, {})
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -110,11 +91,6 @@ class LiefConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
 
         if self.options.shared and is_msvc(self) and not check_min_vs(self, "191", raise_invalid=False):
             raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio < 15 with shared:True")
@@ -177,6 +153,7 @@ class LiefConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
