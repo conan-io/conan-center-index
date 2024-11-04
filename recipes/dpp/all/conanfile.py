@@ -1,6 +1,5 @@
 import os
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir
@@ -23,7 +22,7 @@ class DPPConan(ConanFile):
         return 17
 
     def validate(self):
-        check_min_cppstd(self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2", transitive_libs=True, transitive_headers=True)
