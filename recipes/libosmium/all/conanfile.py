@@ -8,6 +8,7 @@ from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=1.53.0"
 
+
 class LibosmiumConan(ConanFile):
     name = "libosmium"
     description = "A fast and flexible C++ library for working with OpenStreetMap data"
@@ -71,8 +72,7 @@ class LibosmiumConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -128,9 +128,3 @@ class LibosmiumConan(ConanFile):
         if self.options.lz4:
             _add_component("lz4", ["lz4::lz4"])
             self.cpp_info.components["io"].defines.append("OSMIUM_WITH_LZ4")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "Osmium"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Osmium"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_rel_path]
