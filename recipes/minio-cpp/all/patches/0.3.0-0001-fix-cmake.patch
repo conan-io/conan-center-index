@@ -1,0 +1,43 @@
+--- minio-cpp-0.3.0/CMakeLists.txt	2024-08-21 18:38:23.000000000 +0200
++++ CMakeLists.txt	2024-11-04 15:49:53.990367855 +0100
+@@ -57,17 +57,17 @@
+ # ------------
+ 
+ find_package(OpenSSL REQUIRED)
+-find_package(unofficial-curlpp CONFIG REQUIRED)
+-find_package(unofficial-inih CONFIG REQUIRED)
++find_package(curlpp CONFIG REQUIRED)
++find_package(inih CONFIG REQUIRED)
+ find_package(nlohmann_json CONFIG REQUIRED)
+ find_package(pugixml CONFIG REQUIRED)
+ find_package(ZLIB REQUIRED)
+ 
+ list(APPEND MINIO_CPP_LIBS
+-  unofficial::curlpp::curlpp
+-  unofficial::inih::inireader
++  curlpp::curlpp
++  inih::inireader
+   nlohmann_json::nlohmann_json
+-  pugixml
++  pugixml::pugixml
+   OpenSSL::SSL OpenSSL::Crypto
+   ZLIB::ZLIB
+ )
+@@ -115,16 +115,14 @@
+   include/miniocpp/utils.h
+ )
+ 
+-add_library(miniocpp STATIC ${MINIO_CPP_SOURCES} ${MINIO_CPP_HEADERS})
++add_library(miniocpp ${MINIO_CPP_SOURCES} ${MINIO_CPP_HEADERS})
+ target_compile_options(miniocpp PRIVATE ${MINIO_CPP_CFLAGS})
+-target_compile_features(miniocpp PUBLIC cxx_std_${MINIO_CPP_STD})
+ target_include_directories(miniocpp PUBLIC
+   $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+ )
+ target_link_libraries(miniocpp PUBLIC ${MINIO_CPP_LIBS})
+ set_target_properties(miniocpp PROPERTIES VERSION "${MINIO_CPP_VERSION_STRING}")
+-set_target_properties(miniocpp PROPERTIES POSITION_INDEPENDENT_CODE ON)
+ 
+ # Add a cmake alias - this is how users should use minio-cpp in their cmake projects.
+ add_library(miniocpp::miniocpp ALIAS miniocpp)
