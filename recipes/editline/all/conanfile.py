@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 import os
@@ -83,6 +83,10 @@ class EditlineConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         fix_apple_shared_install_name(self)
+
+        # Create symlink history.h as consumers may expect to find some functions therein instead of editline.h
+        with chdir(self, os.path.join(self.package_folder, "include", "editline")):
+            os.symlink("readline.h", "history.h")
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libedit")
