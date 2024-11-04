@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class EfswConan(ConanFile):
@@ -26,18 +26,10 @@ class EfswConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -50,9 +42,15 @@ class EfswConan(ConanFile):
         if is_msvc(self):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.variables["BUILD_TEST_APP"] = False
+        tc.variables["BUILD_STATIC_LIBS"] = False
         tc.generate()
 
+    def _patch_sources(self):
+        # INFO: Honor fPIC option. The upstream sets fPIC to ON always
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
+
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -65,7 +63,6 @@ class EfswConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
@@ -74,6 +71,5 @@ class EfswConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]
-        
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["Cocoa", "CoreFoundation", "CoreServices"]
