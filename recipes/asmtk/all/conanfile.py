@@ -44,10 +44,10 @@ class AsmjitConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["ASMTK_EMBED"] = False
-        tc.variables["ASMTK_STATIC"] = not self.options.shared
-        tc.variables["ASMTK_TEST"] = False
-        tc.variables["ASMJIT_EXTERNAL"] = True
+        tc.cache_variables["ASMTK_EMBED"] = False
+        tc.cache_variables["ASMTK_STATIC"] = not self.options.shared
+        tc.cache_variables["ASMTK_TEST"] = False
+        tc.cache_variables["ASMJIT_EXTERNAL"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
