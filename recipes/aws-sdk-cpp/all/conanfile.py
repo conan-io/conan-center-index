@@ -681,14 +681,6 @@ class AwsSdkCppConan(ConanFile):
                 self.cpp_info.components[sdk].requires.extend(self._internal_requirements[sdk])
             self.cpp_info.components[sdk].libs = ["aws-cpp-sdk-" + sdk]
 
-            # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-            self.cpp_info.components[sdk].names["cmake_find_package"] = "aws-sdk-cpp-" + sdk
-            self.cpp_info.components[sdk].names["cmake_find_package_multi"] = "aws-sdk-cpp-" + sdk
-            component_alias = f"aws-sdk-cpp-{sdk}_alias"  # to emulate COMPONENTS names for find_package()
-            self.cpp_info.components[component_alias].names["cmake_find_package"] = sdk
-            self.cpp_info.components[component_alias].names["cmake_find_package_multi"] = sdk
-            self.cpp_info.components[component_alias].requires = [sdk]
-
         # specific system_libs, frameworks and requires of components
         if self.settings.os == "Windows":
             self.cpp_info.components["core"].system_libs.extend([
@@ -721,13 +713,3 @@ class AwsSdkCppConan(ConanFile):
         self.cpp_info.components["plugin_scripts"].builddirs.extend([
             os.path.join(self._res_folder, "cmake"),
             os.path.join(self._res_folder, "toolchains")])
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "AWSSDK"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "AWSSDK"
-        self.cpp_info.names["cmake_find_package"] = "AWS"
-        self.cpp_info.names["cmake_find_package_multi"] = "AWS"
-        self.cpp_info.components["core"].names["cmake_find_package"] = "aws-sdk-cpp-core"
-        self.cpp_info.components["core"].names["cmake_find_package_multi"] = "aws-sdk-cpp-core"
-        self.cpp_info.components["plugin_scripts"].build_modules["cmake_find_package"] = [sdk_plugin_conf]
-        self.cpp_info.components["plugin_scripts"].build_modules["cmake_find_package_multi"] = [sdk_plugin_conf]
