@@ -13,6 +13,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        self.requires("asmjit/[*]") # whichever version was already resolved
 
     def build(self):
         cmake = CMake(self)
