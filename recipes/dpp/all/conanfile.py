@@ -6,40 +6,24 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.54"
+required_conan_version = ">=2"
 
 class DPPConan(ConanFile):
     name = "dpp"
     license = "Apache-2.0"
-    package_type = "shared-library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/brainboxdotcc/DPP"
     description = "D++ is a lightweight and efficient library for Discord"
     topics = ("discord")
+    package_type = "shared-library"
     settings = "os", "compiler", "build_type", "arch"
 
     @property
     def _min_cppstd(self):
         return 17
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "14",
-            "clang": "10",
-            "gcc": "8",
-            "msvc": "191",
-            "Visual Studio": "16",
-        }
-
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self._min_cppstd)
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2", transitive_libs=True, transitive_headers=True)
