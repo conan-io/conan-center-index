@@ -11,11 +11,11 @@ required_conan_version = ">=1.53.0"
 
 class DateConan(ConanFile):
     name = "date"
-    description = "A date and time library based on the C++11/14/17 <chrono> header"
-    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/HowardHinnant/date"
+    description = "A date and time library based on the C++11/14/17 <chrono> header"
     topics = ("datetime", "timezone", "calendar", "time", "iana-database")
+    license = "MIT"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
