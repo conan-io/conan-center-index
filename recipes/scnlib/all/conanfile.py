@@ -60,7 +60,7 @@ class ScnlibConan(ConanFile):
 
     def requirements(self):
         self.requires("fast_float/6.1.0")
-        if "2.0" <= Version(self.version) < "3.0":
+        if Version(self.version) < "3.0":
             self.requires("simdutf/4.0.5")
         if self.options.get_safe("regex_backend") in ["boost", "boost_icu"]:
             self.requires("boost/1.83.0")
@@ -79,9 +79,10 @@ class ScnlibConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} with regex_backend=Boost_icu option requires boost::i18n_backend_icu to be enabled."
             )
-        if Version(self.version) >= "2.0.0" and self.options.header_only:
+        # TODO: This should probably be a del self.options.header_only in config_options once the CI supports it
+        if self.options.header_only:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support header only mode.")
-        if Version(self.version) >= "2.0.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "11":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "11":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc 11.x due to std::regex_constants::multiline is not defined.")
 
     def build_requirements(self):
@@ -126,13 +127,10 @@ class ScnlibConan(ConanFile):
         if self.options.get_safe("header_only"):
             copy(self, "*", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
             src_folder = os.path.join(self.source_folder, "src")
-            if Version(self.version) >= "1.0":
-                copy(self, "reader_*.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "reader"))
-                copy(self, "vscan.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "scan"))
-                copy(self, "locale.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "detail"))
-                copy(self, "file.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "detail"))
-            else:
-                copy(self, "*.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "detail"))
+            copy(self, "reader_*.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "reader"))
+            copy(self, "vscan.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "scan"))
+            copy(self, "locale.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "detail"))
+            copy(self, "file.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "detail"))
         else:
             cmake = CMake(self)
             cmake.install()
@@ -153,7 +151,7 @@ class ScnlibConan(ConanFile):
             self.cpp_info.components["_scnlib"].defines = ["SCN_HEADER_ONLY=0"]
             self.cpp_info.components["_scnlib"].libs = ["scn"]
         self.cpp_info.components["_scnlib"].requires.append("fast_float::fast_float")
-        if "2.0" <= Version(self.version) < "3.0":
+        if Version(self.version) < "3.0":
             self.cpp_info.components["_scnlib"].requires.append("simdutf::simdutf")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
