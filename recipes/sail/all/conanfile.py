@@ -15,6 +15,7 @@ class SAILConan(ConanFile):
     topics = ( "image", "encoding", "decoding", "graphics" )
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
