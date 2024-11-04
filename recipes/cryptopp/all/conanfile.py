@@ -1,5 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import (
     apply_conandata_patches, collect_libs, copy, export_conandata_patches, get,
@@ -48,6 +50,11 @@ class CryptoPPConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate_build(self):
+        if is_apple_os(self) and cross_building(self) and Version(self.version) <= "8.6.0":
+            # See https://github.com/abdes/cryptopp-cmake/pull/38
+            raise ConanInvalidConfiguration("cryptopp 8.6.0 and lower do not support cross-building on Apple platforms")
+    
     def validate(self):
         if self.options.shared and Version(self.version) >= "8.7.0":
             raise ConanInvalidConfiguration("cryptopp 8.7.0 and higher do not support shared builds")
