@@ -19,5 +19,5 @@ class TestPackageConan(ConanFile):
         self.run("cppfront {}".format(os.path.join(self.build_folder, "pure2-hello.cpp2")), env="conanrun")
 
     def test(self):
-        self.run("cppfront -h")
+        self.run("cppfront -h", env="conanrun")
         assert os.path.isfile(os.path.join(self.build_folder, "pure2-hello.cpp"))
