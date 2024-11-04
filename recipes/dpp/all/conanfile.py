@@ -1,45 +1,24 @@
 import os
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.54"
+required_conan_version = ">=2"
 
 class DPPConan(ConanFile):
     name = "dpp"
     license = "Apache-2.0"
-    package_type = "shared-library"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/brainboxdotcc/DPP"
     description = "D++ is a lightweight and efficient library for Discord"
     topics = ("discord")
+    package_type = "shared-library"
     settings = "os", "compiler", "build_type", "arch"
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "14",
-            "clang": "10",
-            "gcc": "8",
-            "msvc": "191",
-            "Visual Studio": "16",
-        }
-
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, "17")
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2", transitive_libs=True, transitive_headers=True)
@@ -67,7 +46,14 @@ class DPPConan(ConanFile):
         tc.cache_variables["BUILD_VOICE_SUPPORT"] = True
         tc.cache_variables["DPP_BUILD_TEST"] = False
         tc.cache_variables["BUILD_SHARED_LIBS"] = True
-        tc.cache_variables["AVX_TYPE"] = "AVX0"
+        if Version(self.version) <= "10.0.34":
+            # Workaround for Neon not compiling in old versions
+            tc.cache_variables["AVX_TYPE"] = "AVX0"
+        if self.settings.os == "Macos" and cross_building(self) and self.settings.arch == "x86_64":
+            tc.cache_variables["AVX1_EXITCODE"] = "0"
+            tc.cache_variables["AVX2_EXITCODE"] = "0"
+            tc.cache_variables["AVX512_EXITCODE"] = "-1"
+            tc.cache_variables["AVX1024_EXITCODE"] = "-1"
         tc.generate()
 
     def build(self):
