@@ -55,7 +55,7 @@ class LaunchDarklyConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/[>=1.81.0 <2]", override=True)
+        self.requires("boost/[>=1.81.0 <2]", force=True, transitive_headers=True)
         self.requires("certify/cci.20201114")
         self.requires("openssl/[>=3.2.1 <4]", transitive_headers=True)
         self.requires("tl-expected/1.1.0", transitive_headers=True)
@@ -110,6 +110,19 @@ class LaunchDarklyConan(ConanFile):
         self.cpp_info.libs = ["launchdarkly-cpp-client"]
         self.cpp_info.set_property("cmake_file_name", "launchdarkly")
         self.cpp_info.set_property("cmake_target_name", "launchdarkly::client")
+
+        self.cpp_info.requires = [
+            "certify::certify",
+            "openssl::openssl",
+            "tl-expected::tl-expected",
+            "boost::container",
+            "boost::coroutine",
+            "boost::date_time",
+            "boost::headers",
+            "boost::json",
+            "boost::thread",
+            "boost::url"
+        ]
 
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD"]:
