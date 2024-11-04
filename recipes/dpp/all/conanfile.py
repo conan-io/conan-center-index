@@ -17,12 +17,8 @@ class DPPConan(ConanFile):
     package_type = "shared-library"
     settings = "os", "compiler", "build_type", "arch"
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
     def validate(self):
-        check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, "17")
 
     def requirements(self):
         self.requires("nlohmann_json/3.11.2", transitive_libs=True, transitive_headers=True)
