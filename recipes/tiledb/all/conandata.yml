@@ -1,0 +1,4 @@
+sources:
+  "2.26.1":
+    url: "https://github.com/TileDB-Inc/TileDB/archive/refs/tags/2.26.1.tar.gz"
+    sha256: "f90461850c6f87f63fe77788d7932fd53a4d1de7e2ba7263f5e8f2fd1df23e38"

@@ -1,0 +1,5 @@
+sources:
+  "10.0.34":
+    url:
+    - "https://github.com/brainboxdotcc/DPP/archive/refs/tags/v10.0.34.zip"
+    sha256: "944dcaa19638ff88feceae2f543662675eb8aceb59458ad369edc28819e05054"
