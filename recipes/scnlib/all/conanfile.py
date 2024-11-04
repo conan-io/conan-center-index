@@ -9,7 +9,7 @@ from conan.errors import ConanInvalidConfiguration
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 class ScnlibConan(ConanFile):
     name = "scnlib"
@@ -43,21 +43,6 @@ class ScnlibConan(ConanFile):
             # https://github.com/eliaskosunen/scnlib/issues/97
             # https://github.com/conan-io/conan-center-index/pull/22455#issuecomment-1924444193
             return "20" if is_msvc(self) else "17"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "17": {
-                "gcc": "8",
-                "clang": "7",
-                # scn/2.0.0 requires std::regex_constants::multiline
-                "apple-clang": "14",
-            },
-            "20": {
-                "Visual Studio": "17",
-                "msvc": "193",
-            }
-        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -95,13 +80,8 @@ class ScnlibConan(ConanFile):
             self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, self._min_cppstd)
+
         if self.options.get_safe("regex_backend") == "boost_icu" and \
             not self.dependencies["boost"].options.get_safe("i18n_backend_icu"):
             raise ConanInvalidConfiguration(
