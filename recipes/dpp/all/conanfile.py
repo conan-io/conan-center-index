@@ -49,6 +49,11 @@ class DPPConan(ConanFile):
         if Version(self.version) <= "10.0.34":
             # Workaround for Neon not compiling in old versions
             tc.cache_variables["AVX_TYPE"] = "AVX0"
+        if self.settings.os == "Macos" and cross_building(self) and self.settings.arch == "x86_64":
+            tc.cache_variables["AVX1_EXITCODE"] = "0"
+            tc.cache_variables["AVX2_EXITCODE"] = "0"
+            tc.cache_variables["AVX512_EXITCODE"] = "-1"
+            tc.cache_variables["AVX1024_EXITCODE"] = "-1"
         tc.generate()
 
     def build(self):
