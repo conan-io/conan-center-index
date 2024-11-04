@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rename, rmdir
+from conan.tools.files import copy, get, rename, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -9,6 +9,7 @@ required_conan_version = ">=1.53.0"
 
 class SAILConan(ConanFile):
     name = "sail"
+    package_type = "library"
     description = "The missing small and fast image decoding library for humans (not for machines)"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sail.software"
@@ -42,9 +43,6 @@ class SAILConan(ConanFile):
         "with_low_priority_codecs": "Enable codecs: ICO, PCX, PNM, PSD, QOI, TGA",
         "with_lowest_priority_codecs": "Enable codecs: WAL, XBM",
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -111,8 +109,6 @@ class SAILConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
-
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
