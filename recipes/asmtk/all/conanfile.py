@@ -4,12 +4,11 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 class AsmjitConan(ConanFile):
     name = "asmtk"
-    description = "AsmTK is a sister project of AsmJit library, " \
-        "which provides concepts that are useful mostly in AOT code-generation."
+    description = "AsmTK provides concepts that are useful mostly in AOT code-generation."
     license = "Zlib"
     topics = ("asmjit", "compiler", "assembler", "jit", "asmtk")
     url = "https://github.com/conan-io/conan-center-index"
@@ -24,41 +23,24 @@ class AsmjitConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    implements = ["auto_shared_fpic"]
 
     def requirements(self):
+        # INFO: asmtk/globals.h: #include <asmjit/core.h>
+        # INFO asmtk consumes asmjit directly
         self.requires("asmjit/cci.20240531", transitive_headers=True, transitive_libs=True)
 
     def export_sources(self):
         export_conandata_patches(self)
 
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-        }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -71,8 +53,8 @@ class AsmjitConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
