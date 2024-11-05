@@ -59,7 +59,7 @@ class PackageConan(ConanFile):
         # Using patches is always the last resource to fix issues. If possible, try to fix the issue in the upstream project.
         apply_conandata_patches(self)
 
-    # Suppress warning message about missing build() method
+    # Suppress warning message about missing build() method when running Conan
     def build(self):
         pass
 

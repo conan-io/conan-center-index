@@ -5,7 +5,7 @@
 
 int main(void) {
     printf("Create a minimal usage for the target project here.\n");
-    printf("Avoid big examples, bigger than 100 lines\n");
+    printf("Avoid big examples, or code bigger than 15 lines\n");
     printf("Avoid networking connections.\n");
     printf("Avoid background apps or servers.\n");
     printf("The propose is testing the generated artifacts only.\n");
