@@ -10,7 +10,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class ImguiConan(ConanFile):
@@ -181,8 +181,7 @@ class ImguiConan(ConanFile):
             self.requires("metal-cpp/14.2", transitive_headers=bool(self.options.get_safe("backend_metal")))
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
         if Version(self.version) < "1.89" and self.options.docking:
             raise ConanException("Docking support requires version 1.89 or newer.")
         if self.version.endswith("-docking"):
@@ -340,6 +339,3 @@ class ImguiConan(ConanFile):
         # _add_binding("wgpu", requires=["dawn::dawn"])
 
         self.conf_info.define("user.imgui:with_docking", bool(self.options.docking))
-
-        if self.options.build_programs:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
