@@ -26,10 +26,12 @@ class FollyConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_libaio": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_libaio": True,
     }
 
     @property
@@ -53,6 +55,8 @@ class FollyConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os != "Linux":
+            del self.options.with_libaio
 
     def configure(self):
         if self.options.shared:
@@ -88,6 +92,10 @@ class FollyConan(ConanFile):
             self.requires("liburing/2.6")
         # INFO: Folly does not support fmt 11 on MSVC: https://github.com/facebook/folly/issues/2250
         self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
+        if self.options.get_safe("with_libaio"):
+            self.requires("libaio/0.3.113")
+        if Version(self.version) >= "2024.11.04":
+            self.requires("fast_float/6.1.5")
 
     def build_requirements(self):
         # INFO: Required due ZIP_LISTS CMake feature in conan_deps.cmake
@@ -197,6 +205,11 @@ class FollyConan(ConanFile):
         deps.set_property("xz_utils", "cmake_file_name", "LibLZMA")
         deps.set_property("zlib", "cmake_file_name", "ZLIB")
         deps.set_property("zstd", "cmake_file_name", "Zstd")
+        if self.options.get_safe("with_libaio"):
+            deps.set_property("libaio", "cmake_file_name", "LibAIO")
+            deps.set_property("libaio", "cmake_additional_variables_prefixes", ["LIBAIO"])
+        if Version(self.version) >= "2024.11.04":
+            deps.set_property("FastFloat", "cmake_additional_variables_prefixes", ["FASTFLOAT"])
         deps.generate()
 
     def _patch_sources(self):
@@ -266,6 +279,11 @@ class FollyConan(ConanFile):
 
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version.value) >= "11.0":
             self.cpp_info.components["libfolly"].system_libs.append("c++abi")
+
+        if self.options.get_safe("with_libaio"):
+            self.cpp_info.components["libfolly"].requires.append("libaio::libaio")
+        if Version(self.version) >= "2024.11.04":
+            self.cpp_info.components["libfolly"].requires.append("fast_float::fast_float")
 
         self.cpp_info.components["follybenchmark"].set_property("cmake_target_name", "Folly::follybenchmark")
         self.cpp_info.components["follybenchmark"].set_property("pkg_config_name", "libfollybenchmark")
