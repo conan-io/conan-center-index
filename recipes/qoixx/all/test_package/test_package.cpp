@@ -21,4 +21,5 @@ int main(void) {
 
     const auto encoded = qoixx::qoi::encode<std::vector<std::uint8_t>>(original, desc);
     const auto [decoded, decoded_desc] = qoixx::qoi::decode<std::vector<std::uint8_t>>(encoded);
+    return 0;
 }
