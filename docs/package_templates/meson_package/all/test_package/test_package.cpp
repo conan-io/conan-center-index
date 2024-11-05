@@ -6,7 +6,7 @@
 int main(void) {
     /*
      * Create a minimal usage for the target project here.
-     * Avoid big examples, bigger than 100 lines.
+     * Avoid code examples, bigger than 15 lines.
      * Avoid networking connections.
      * Avoid background apps or servers.
      * The propose is testing the generated artifacts only.

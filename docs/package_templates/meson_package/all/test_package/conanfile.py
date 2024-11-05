@@ -8,7 +8,6 @@ import os
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     generators = "PkgConfigDeps", "MesonToolchain", "VirtualRunEnv", "VirtualBuildEnv"
-    test_type = "explicit"
 
     def layout(self):
         basic_layout(self)

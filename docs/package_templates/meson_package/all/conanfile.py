@@ -12,7 +12,7 @@ from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 #
 # INFO: Please, remove all comments before pushing your PR!
@@ -42,34 +42,14 @@ class PackageConan(ConanFile):
         "fPIC": True,
         "feature": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    # in case the project requires C++14/17/20/... the minimum compiler version should be listed
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
+    implements = ["auto_shared_fpic"]
 
     # no exports_sources attribute, but export_sources(self) method instead
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        # for plain C projects only
+        # for plain C projects only. Otherwise, remove this method.
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
@@ -78,45 +58,41 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         # Prefer self.requires method instead of requires attribute.
-        # Set transitive_headers=True (which usually also requires transitive_libs=True)
-        # if the dependency is used in any of the packaged header files.
         self.requires("dependency/0.8.1")
         if self.options.with_foobar:
-            # used in foo/baz.hpp:34
-            self.requires("foobar/0.1.0", transitive_headers=True, transitive_libs=True)
-        # A small number of dependencies on CCI are allowed to use version ranges.
+            # INFO: used in foo/baz.hpp:34
+            self.requires("foobar/0.1.0")
+        # Some dependencies on CCI are allowed to use version ranges.
         # See https://github.com/conan-io/conan-center-index/blob/master/docs/adding_packages/dependencies.md#version-ranges
         self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         # validate the minimum cpp standard supported. For C++ projects only
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 14)
         # in case it does not work in another configuration, it should be validated here too
+        # Always comment the reason including the upstream issue.
+        # INFO: Upstream does not support DLL: See <URL>
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     # if another tool than the compiler or Meson is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         # CCI policy assumes that Meson may not be installed on consumers machine
-        self.tool_requires("meson/1.3.1")
+        self.tool_requires("meson/[>=1.2.3 <2]")
         # pkgconf is largely used by Meson, it should be added in build requirement when there are dependencies
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # apply patches listed in conandata.yml
+        # Using patches is always the last resource to fix issues. If possible, try to fix the issue in the upstream project.
+        apply_conandata_patches(self)
 
     def generate(self):
         # Meson feature options must be set to "enabled" or "disabled"
-        feature = lambda option: "enabled" if option else "disabled"
-
-        # default_library and b_staticpic are automatically parsed when self.options.shared and self.options.fpic exist
+        def feature(v): return "enabled" if v else "disabled"
+        # default_library and static and fpic are automatically parsed when self.options.shared and self.options.fpic exist
         # buildtype is automatically parsed for self.settings
         tc = MesonToolchain(self)
         # In case need to pass definitions directly to the compiler
@@ -134,14 +110,7 @@ class PackageConan(ConanFile):
         # In case there are dependencies listed under build_requirements, VirtualBuildEnv should be used
         VirtualBuildEnv(self).generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # remove bundled xxhash
-        rm(self, "whatever.*", os.path.join(self.source_folder, "lib"))
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "...", "")
-
     def build(self):
-        self._patch_sources()  # It can be apply_conandata_patches(self) only in case no more patches are needed
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -161,10 +130,10 @@ class PackageConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
-        self.cpp_info.set_property("pkg_config_name", "package")
         # avoid collect_libs(), prefer explicit library name instead
         self.cpp_info.libs = ["package_lib"]
+        # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
+        self.cpp_info.set_property("pkg_config_name", "package")
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
