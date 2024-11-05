@@ -46,7 +46,7 @@ class hello_conanRecipe(ConanFile):
 
         # save a dummy .la file to trigger hook warning
         la_file = Path(self.package_folder) / "lib" / "hello-conan-foobar.la"
-        save(self, la_file.as_posix(), "foobar__")
+        save(self, la_file.as_posix(), "foobar__!")
 
     def package_info(self):
         self.cpp_info.libs = ["hello-conan"]
