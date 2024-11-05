@@ -283,7 +283,7 @@ class BotanConan(ConanFile):
         return {'Windows': 'windows',
                 'Linux': 'linux',
                 'Macos': 'darwin',
-                'Android': 'linux',
+                'Android': 'android',
                 'baremetal': 'none',
                 'iOS': 'ios'}.get(str(self.settings.os))
 
