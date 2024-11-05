@@ -55,12 +55,13 @@ class PackageConan(ConanFile):
     def source(self):
         # Download source package and extract to source folder
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    # Not mandatory when there is no patch, but will suppress warning message about missing build() method
-    def build(self):
         # The attribute no_copy_source should not be used when applying patches in build
         # Using patches is always the last resource to fix issues. If possible, try to fix the issue in the upstream project.
         apply_conandata_patches(self)
+
+    # Suppress warning message about missing build() method
+    def build(self):
+        pass
 
     # Copy all files to the package folder
     def package(self):

@@ -74,6 +74,8 @@ class PackageConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Using patches is always the last resource to fix issues. If possible, try to fix the issue in the upstream project.
+        apply_conandata_patches(self)
 
     def generate(self):
         # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are set automatically as tc.variables when self.options.shared or self.options.fPIC exist
@@ -95,8 +97,6 @@ class PackageConan(ConanFile):
         VirtualBuildEnv(self).generate()
 
     def build(self):
-        # Using patches is always the last resource to fix issues. If possible, try to fix the issue in the upstream project.
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
