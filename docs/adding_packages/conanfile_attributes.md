@@ -38,50 +38,52 @@ Please see the FAQs for:
 
 ### Version
 
-ConanCenter is geared towards quickly added new release, the build service always pass the version it is currently building to the recipe.
 The `version` attribute MUST NOT be added to any recipe - with exception to "system packages".
 
 #### ConanCenter specific releases format
 
-The notation shown below is used for publishing packages which do not match the original library's official releases. This format which includes the "datestamp" corresponding to the date of a commit: `cci.<YEAR MONTH DAY>`.
+The notation shown below is used for publishing packages which do not match the original library's official releases.
 
-In order to create reproducible builds, we also "commit-lock" to the latest commit on that day. Otherwise, users would get inconsistent results over time when rebuilding the package. An example of this is the [RapidJSON](https://github.com/Tencent/rapidjson) library, where its package reference is `rapidjson/cci.20200410` and its sources are locked the latest commit on that date in [config.yml](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidjson/config.yml#L4). The prefix `cci.` is mandatory to distinguish as a virtual version provided by CCI. If you are interested to know about the origin, please, read [here](https://github.com/conan-io/conan-center-index/pull/1464).
+There are two cases to consider:
+
+* The library has not had any previous releases/tags. In this case, the version should be of the form
+  `0.0.0.cci.<YEAR MONTH DAY>`. For example, `0.0.0.cci.20240402`. When/if a version of the library is ever released.
+  this will allow version ranges to properly identify the release as a newer version.
+* The library has had previous releases/tags. In this case, the version should be of the form
+  `<MAJOR>.<MINOR>.<PATCH>.cci.<YEAR MONTH DAY>`. For example, `1.2.0.cci.20240402`.
+  This will allow version ranges to properly identify the release as a newer version.
+
+In order to create reproducible builds, we also "commit-lock" to the latest commit on that day, so the sources should point
+to the commit hash of that day. Otherwise, users would get inconsistent results over time when rebuilding the package.
 
 ### License Attribute
 
 The license attribute is a mandatory field which provides the legal information that summarizes the contents saved in the package. These follow the
-[SPDX license](https://spdx.org/licenses/) as a standard. This is for consummers, in particular in the enterprise sector, that do rely on SDPX compliant identifiers so that they can flag this as a custom license text.
+[SPDX license](https://spdx.org/licenses/) as a standard. This is for consumers, in particular in the enterprise sector, that do rely on SDPX compliant identifiers so that they can flag this as a custom license text.
 
 * If the library has a license that has a SPDX identifier, use the [short Identifiers](https://spdx.dev/ids/).
 * If the library has a license text that does not match a SPDX identifier, including custom wording disclaiming copyright or dedicating the words to the ["public domain"](https://fairuse.stanford.edu/overview/public-domain/welcome/), use the [SPDX License Expressions](https://spdx.github.io/spdx-spec/v2-draft/SPDX-license-expressions/), this can follow:
   * `LicenseRef-` as a prefix, followed by the name of the library. For example:`LicenseRef-libfoo-public-domain`
+  * If the license is extracted from a specific document, prepend `DocumentRef-<filename>-` to the license name. For example: `DocumentRef-README.md-LicenseRef-libfoo-public-domain`
 * If the library makes no mention of a license and the terms of use - it **shall not be accepted in ConanCenter** , even if the code is publicly available in GitHub or any other platforms.
 
 In case the license changes in a new release, the recipe should update the license attribute accordingly:
 
 ```python
 class LibfooConan(ConanFile):
-    license = ("MIT", "BSD-3-Clause") # keep both old and new licenses, so conan inspect can find it
+    license = "MIT"
 
     def configure (self):
-       # change the license according to the version, so conan graph info can show the correct one
-
        # INFO: Version < 2.0 the license was MIT, but changed to BSD-3-Clause now.
-       self.license = "BSD-3-Clause" if Version(self.version) >= "2.0.0" else "MIT"
+       if Version(self.version) >= "2.0.0":
+          self.license = "BSD-3-Clause"
 ```
 
 ## Order of methods and attributes
 
 Prefer the following order of documented methods in python code (`conanfile.py`, `test_package/conanfile.py`):
 
-For `conan create` the order is listed [here](https://docs.conan.io/1/reference/commands/creator/create.html#methods-execution-order)
-test packages recipes should append the following methods:
-
-* deploy
-* test
-
-the order above resembles the execution order of methods on CI. therefore, for instance, `build` is always executed before `package` method, so `build` should appear before the
-`package` in `conanfile.py`.
+For `conan create` the order is listed [here](https://docs.conan.io/2/reference/commands/create.html#methods-execution-order).
 
 ## Settings
 
@@ -141,7 +143,7 @@ Having the same naming conventions for the options helps consumers. It allows us
 ### Predefined Options and Known Defaults
 
 ConanCenter supports many combinations, these are outline in the [supported configurations](../supported_platforms_and_configurations.md) document for each platform.
-By default recipes should use `shared=False` with `fPIC=True`. If support, `header_only=False` is the default.
+By default recipes should use `shared=False` with `fPIC=True`. If supported, `header_only=False` is the default.
 
 Usage of each option should follow the rules:
 
