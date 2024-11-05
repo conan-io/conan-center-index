@@ -5,7 +5,7 @@ from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=2.0"
 
 
 class PackageConan(ConanFile):
@@ -19,7 +19,7 @@ class PackageConan(ConanFile):
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"  # even for pre-built executables
 
-    # not needed but supress warning message from conan commands
+    # not needed but suppress warning message from conan commands
     def layout(self):
         pass
 
@@ -58,7 +58,3 @@ class PackageConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        bin_folder = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bin_folder)
