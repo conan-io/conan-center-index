@@ -220,7 +220,6 @@ Usually, the following kind of problems are good candidates for backports:
 * Data corruption.
 * Use of outdated or deprecated API or library.
 
-As sources with backports don't act exactly the same as the version officially released, it may be a source of confusion for the consumers who are relying on the buggy behavior (even if it's completely wrong). Therefore, it's required to introduce a new `cci.<YYYYMMDD>` version for such backports, so consumers may choose to use either official version, or modified version with backport(s) included.
 
 #### patch_source
 
@@ -236,9 +235,3 @@ _Recommended_
 
 For the `patch_type: portability` there might be no patch source matching the definition above. Although we encourage contributors to submit all such portability fixes upstream first, it's not always possible (e.g. for projects no longer maintained). In that case, a link to the Conan issue is a valid patch source (if there is no issue, you may [create](https://github.com/conan-io/conan-center-index/issues/new/choose) one).
 For the `patch_type: conan`, it doesn't make sense to submit patch upstream, so there will be no patch source.
-
-#### base_path
-
-_Optional_
-
-Specifies a sub-directory in project's sources to apply patch. This directory is relative to the [source_folder](https://docs.conan.io/1/reference/conanfile/attributes.html?highlight=source_folder#source-folder). Usually, it would be a `source_subfolder`, but could be a lower-level sub-directory (e.g. if it's a patch for a submodule).
