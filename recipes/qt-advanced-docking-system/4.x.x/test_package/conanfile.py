@@ -9,6 +9,9 @@ class qt_advanced_docking_systemTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "CMakeToolchain"
 
+    def configure(self):
+        self.options["qt-advanced-docking-system"].qt_from_conan = True
+
     def requirements(self):
         self.requires(self.tested_reference_str)
 
