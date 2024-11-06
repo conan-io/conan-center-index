@@ -6,6 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir, replace_in_file, collect_libs
 from conan.tools.microsoft import is_msvc, MSBuild, MSBuildToolchain, is_msvc_static_runtime, msvs_toolset
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.59.0"
 
@@ -50,6 +51,10 @@ class SimdConan(ConanFile):
             raise ConanInvalidConfiguration("Windows only supports x86/x64 architectures.")
         if is_msvc(self) and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("ARM64 building with MSVC is not supported.")
+        if Version(self.version) >= "6.1.142" and \
+            self.settings.arch in ["x86", "x86_64"] and \
+            self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9":
+            raise ConanInvalidConfiguration("${self.ref} requires GCC >= 9")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
