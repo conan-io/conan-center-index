@@ -1,4 +1,7 @@
 sources:
+  "6.1.142":
+    url: "https://github.com/ermig1979/Simd/archive/refs/tags/v6.1.142.tar.gz"
+    sha256: "e9b83b91d38d0c1b1e50e1cee51314f036f6f96efc3f035314cb59ff6345c393"
   "6.1.138":
     url: "https://github.com/ermig1979/Simd/archive/refs/tags/v6.1.138.tar.gz"
     sha256: "5090e4879d48851d5d7d9605485f517dea9a27d9431ec2d54a74a6f04cf3ba00"
