@@ -4,7 +4,6 @@ from conan.tools.layout import basic_layout
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "VirtualBuildEnv"
 
     def layout(self):
         basic_layout(self)

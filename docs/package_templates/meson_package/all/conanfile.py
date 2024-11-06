@@ -2,8 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -107,8 +106,6 @@ class PackageConan(ConanFile):
         # In case there are dependencies listed under requirements, PkgConfigDeps should be used
         deps = PkgConfigDeps(self)
         deps.generate()
-        # In case there are dependencies listed under build_requirements, VirtualBuildEnv should be used
-        VirtualBuildEnv(self).generate()
 
     def build(self):
         meson = Meson(self)

@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
@@ -92,9 +91,6 @@ class PackageConan(ConanFile):
         deps.set_property("fontconfig", "cmake_file_name", "Fontconfig")
         deps.set_property("fontconfig", "cmake_target_name", "Fontconfig::Fontconfig")
         deps.generate()
-
-        # In case there are dependencies listed under build_requirements, VirtualBuildEnv should be used
-        VirtualBuildEnv(self).generate()
 
     def build(self):
         cmake = CMake(self)
