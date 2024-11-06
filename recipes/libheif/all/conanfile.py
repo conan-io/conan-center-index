@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
@@ -43,6 +44,22 @@ class LibheifConan(ConanFile):
         "with_openh264": False,
     }
 
+    @property
+    def _min_cppstd(self):
+        return "20" if Version(self.version) >= "1.19.0" else "11"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "20": {
+                "gcc": "6",
+                "clang": "5",
+                "apple-clang": "10",
+                "Visual Studio": "15",
+                "msvc": "191",
+            },
+        }.get(self._min_cppstd, {})
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -83,8 +100,13 @@ class LibheifConan(ConanFile):
             self.requires("openh264/2.4.1")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def build_requirements(self):
         if Version(self.version) >= "1.18.0":
