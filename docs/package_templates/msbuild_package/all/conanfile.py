@@ -68,7 +68,7 @@ class PackageConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         # apply patches listed in conandata.yml
-        # Using patches is always the last resource to fix issues. If possible, try to fix the issue in the upstream project.
+        # Using patches is always the last resort to fix issues. If possible, try to fix the issue in the upstream project.
         apply_conandata_patches(self)
 
     @property
