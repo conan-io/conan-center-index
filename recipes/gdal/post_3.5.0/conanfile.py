@@ -239,7 +239,7 @@ class GdalConan(ConanFile):
         if self.options.get_safe("with_libaec"):
             self.requires("libaec/1.0.6")
         if self.options.with_libarchive:
-            self.requires("libarchive/3.7.4")
+            self.requires("libarchive/3.7.2")
         if self.options.with_libdeflate:
             self.requires("libdeflate/1.19")
         if self.options.with_libiconv:
@@ -290,7 +290,7 @@ class GdalConan(ConanFile):
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.44.2")
         if self.options.with_tiledb:
-            self.requires("tiledb/2.21.0")
+            self.requires("tiledb/2.26.1")
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
         if self.options.with_xerces:
@@ -302,7 +302,7 @@ class GdalConan(ConanFile):
         # Use of external shapelib is not recommended and is currently broken.
         # https://github.com/OSGeo/gdal/issues/5711
         # if self.options.with_shapelib:
-        #     self.requires("shapelib/1.6.0")
+        #     self.requires("shapelib/1.6.1")
 
     def build_requirements(self):
         # https://github.com/conan-io/conan/issues/3482#issuecomment-662284561
