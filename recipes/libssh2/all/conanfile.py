@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, collect_libs
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, collect_libs, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.7"
 
 
 class Libssh2Conan(ConanFile):
@@ -66,6 +66,8 @@ class Libssh2Conan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("mbedtls", "cmake_file_name", "mbedTLS")
+        deps.set_property("mbedtls", "cmake_additional_variables_prefixes", ["MBEDTLS"])
         deps.generate()
 
     def config_options(self):
@@ -96,6 +98,7 @@ class Libssh2Conan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "MBEDTLS_FOUND", "mbedTLS_FOUND")
 
     def build(self):
         cmake = CMake(self)
@@ -123,10 +126,6 @@ class Libssh2Conan(ConanFile):
             self.cpp_info.components["_libssh2"].system_libs.extend(["pthread", "dl"])
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Libssh2"
-        self.cpp_info.names["cmake_find_package_multi"] = "Libssh2"
-        self.cpp_info.components["_libssh2"].names["cmake_find_package"] = "libssh2"
-        self.cpp_info.components["_libssh2"].names["cmake_find_package_multi"] = "libssh2"
         self.cpp_info.components["_libssh2"].set_property("cmake_target_name", "Libssh2::libssh2")
         self.cpp_info.components["_libssh2"].set_property("pkg_config_name", "libssh2")
         if self.options.with_zlib:
