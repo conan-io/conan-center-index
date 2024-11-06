@@ -10,7 +10,7 @@ from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class FollyConan(ConanFile):
@@ -114,8 +114,7 @@ class FollyConan(ConanFile):
         return [f"Boost::{comp}" for comp in self._required_boost_components]
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
@@ -310,26 +309,3 @@ class FollyConan(ConanFile):
             self.cpp_info.components["folly_exception_counter"].set_property("pkg_config_name", "libfolly_exception_counter")
             self.cpp_info.components["folly_exception_counter"].libs = ["folly_exception_counter"]
             self.cpp_info.components["folly_exception_counter"].requires = ["folly_exception_tracer"]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "folly"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "folly"
-        self.cpp_info.names["cmake_find_package"] = "Folly"
-        self.cpp_info.names["cmake_find_package_multi"] = "Folly"
-        self.cpp_info.components["libfolly"].names["cmake_find_package"] = "folly"
-        self.cpp_info.components["libfolly"].names["cmake_find_package_multi"] = "folly"
-
-        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-        self.cpp_info.components["follybenchmark"].names["cmake_find_package"] = "follybenchmark"
-        self.cpp_info.components["follybenchmark"].names["cmake_find_package_multi"] = "follybenchmark"
-        self.cpp_info.components["folly_test_util"].names["cmake_find_package"] = "folly_test_util"
-        self.cpp_info.components["folly_test_util"].names["cmake_find_package_multi"] = "folly_test_util"
-
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-            self.cpp_info.components["folly_exception_tracer_base"].names["cmake_find_package"] = "folly_exception_tracer_base"
-            self.cpp_info.components["folly_exception_tracer_base"].names["cmake_find_package_multi"] = "folly_exception_tracer_base"
-            self.cpp_info.components["folly_exception_tracer"].names["cmake_find_package"] = "folly_exception_tracer"
-            self.cpp_info.components["folly_exception_tracer"].names["cmake_find_package_multi"] = "folly_exception_tracer"
-            self.cpp_info.components["folly_exception_counter"].names["cmake_find_package"] = "folly_exception_counter"
-            self.cpp_info.components["folly_exception_counter"].names["cmake_find_package_multi"] = "folly_exception_counter"
