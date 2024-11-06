@@ -7,7 +7,7 @@ required_conan_version = ">=1.52.0"
 
 class LibPopcntConan(ConanFile):
     name = "libpopcnt"
-    description = "ast C/C++ bit population count library"
+    description = "Fast C/C++ bit population count library"
     license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/kimwalisch/libpopcnt"
