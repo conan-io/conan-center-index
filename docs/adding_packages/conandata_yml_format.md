@@ -30,8 +30,7 @@ next sections with more detail:
         * [portability](#portability)
         * [conan](#conan)
         * [bugfix](#bugfix)
-      * [patch_source](#patch_source)
-      * [base_path](#base_path)<!-- endToc -->
+      * [patch_source](#patch_source)<!-- endToc -->
 
 ## sources
 
