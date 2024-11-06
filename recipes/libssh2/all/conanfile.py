@@ -43,6 +43,11 @@ class Libssh2Conan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    @property
+    def _mbedtls_cmake_package_name(self):
+        pkg_name = "mbedTLS" if Version(self.version) < "1.11.1" else "MbedTLS"
+        return pkg_name
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["ENABLE_ZLIB_COMPRESSION"] = self.options.with_zlib
@@ -66,7 +71,7 @@ class Libssh2Conan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("mbedtls", "cmake_file_name", "mbedTLS")
+        deps.set_property("mbedtls", "cmake_file_name", self._mbedtls_cmake_package_name)
         deps.set_property("mbedtls", "cmake_additional_variables_prefixes", ["MBEDTLS"])
         deps.generate()
 
@@ -98,7 +103,9 @@ class Libssh2Conan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "MBEDTLS_FOUND", "mbedTLS_FOUND")
+
+        cmakelists = os.path.join("src", "CMakeLists.txt") if Version(self.version) <= "1.10" else "CMakeLists.txt"
+        replace_in_file(self, os.path.join(self.source_folder, cmakelists), "MBEDTLS_FOUND", f"{self._mbedtls_cmake_package_name}_FOUND")
 
     def build(self):
         cmake = CMake(self)
