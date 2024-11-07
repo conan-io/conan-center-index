@@ -59,17 +59,17 @@ class ZoeConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
-    
+
     def _apply_patches(self):
         apply_conandata_patches(self)
         # Remove hardcoded CMAKE_CXX_STANDANRD in newer versions
         if Version(self.version) >= "3.2":
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt",
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                             "set (CMAKE_CXX_STANDARD 11)",
                             "")
 
     def build(self):
-        self._apply_patches(self)
+        self._apply_patches()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -81,10 +81,7 @@ class ZoeConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        if Version(self.version) >= "3.2":
-            libname = "libZoe"
-        else:
-            libname = "zoe" if self.options.shared else "zoe-static"
+        libname = "zoe" if self.options.shared else "zoe-static"
         libpostfix = "-d" if self.settings.build_type == "Debug" else ""
         self.cpp_info.libs = [f"{libname}{libpostfix}"]
 
@@ -92,7 +89,7 @@ class ZoeConan(ConanFile):
             self.cpp_info.defines.append("ZOE_EXPORTS")
         else:
             self.cpp_info.defines.append("ZOE_STATIC")
-        
+
         # https://github.com/winsoft666/zoe/blob/master/src/CMakeLists.txt#L88
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32", "crypt32"]
