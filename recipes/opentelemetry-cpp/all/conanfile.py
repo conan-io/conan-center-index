@@ -27,7 +27,6 @@ class OpenTelemetryCppConan(ConanFile):
         "with_stl": [True, False],
         "with_gsl": [True, False],
         "with_abseil": [True, False],
-        "with_otlp": ["deprecated", True, False],
         "with_otlp_grpc": [True, False],
         "with_otlp_http": [True, False],
         "with_zipkin": [True, False],
@@ -50,7 +49,6 @@ class OpenTelemetryCppConan(ConanFile):
         "with_stl": False,
         "with_gsl": False,
         "with_abseil": True,
-        "with_otlp": "deprecated",
         "with_otlp_grpc": False,
         "with_otlp_http": True,
         "with_zipkin": True,
@@ -100,9 +98,6 @@ class OpenTelemetryCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.options.with_otlp != "deprecated":
-            self.output.warning(f"{self.ref}:with_otlp option is deprecated, do not use anymore. "
-                                "Please, consider with_otlp_grpc or with_otlp_http instead.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -172,11 +167,10 @@ class OpenTelemetryCppConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.settings.os != "Linux" and self.options.shared:
+        if Version(self.version) == "1.8.3" and self.settings.os != "Linux" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} supports building shared libraries only on Linux")
 
-        if self.options.with_otlp_grpc:
-            if not self.dependencies["grpc"].options.cpp_plugin:
+        if self.options.with_otlp_grpc and not self.dependencies["grpc"].options.cpp_plugin:
                 raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
 
         boost_required_comp = any(self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
@@ -187,11 +181,6 @@ class OpenTelemetryCppConan(ConanFile):
                 f"{self.ref} requires boost with these components: "
                 f"{', '.join(self._required_boost_components)}"
             )
-
-        if conan_version.major == 1 and self.settings.compiler == "apple-clang" and Version(self.version) >= "1.12.0":
-            # Only fails on apple-clang in this configuration for some reason:
-            # https://github.com/conan-io/conan-center-index/pull/21332#issuecomment-1830766894
-            raise ConanInvalidConfiguration("opentelemetry-cpp >= 1.12.0 does not support Apple Clang on Conan v1")
 
     def build_requirements(self):
         if self.options.with_otlp_grpc or self.options.with_otlp_http:
@@ -211,10 +200,6 @@ class OpenTelemetryCppConan(ConanFile):
             set(OPENTELEMETRY_CPP_LIBRARIES opentelemetry-cpp::opentelemetry-cpp)
         """)
         save(self, module_file, content)
-
-    def package_id(self):
-        # deprecated
-        del self.info.options.with_otlp
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
