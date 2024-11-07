@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=2.1"
 
 
 class OatppOpenSSLConan(ConanFile):
@@ -29,26 +29,19 @@ class OatppOpenSSLConan(ConanFile):
         "fPIC": True,
     }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         # Used in oatpp-openssl/oatpp-openssl/Config.hpp public header
-        self.requires(f"oatpp/{self.version}", transitive_headers=True, transitive_libs=True)
+        self.requires(f"oatpp/{self.version}", transitive_headers=True)
         # Used SSL* and SSL_CTX* used in public headers
         self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared library with msvc")
@@ -61,8 +54,8 @@ class OatppOpenSSLConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["OATPP_BUILD_TESTS"] = False
-        tc.variables["OATPP_MODULES_LOCATION"] = "INSTALLED"
+        tc.cache_variables["OATPP_BUILD_TESTS"] = False
+        tc.cache_variables["OATPP_MODULES_LOCATION"] = "INSTALLED"
         # Honor BUILD_SHARED_LIBS from conan_toolchain (see https://github.com/conan-io/conan/issues/11840)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
@@ -97,12 +90,5 @@ class OatppOpenSSLConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_oatpp-openssl"].system_libs = ["pthread"]
 
-        # TODO: to remove in conan v2 once legacy generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "oatpp-openssl"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "oatpp-openssl"
-        self.cpp_info.names["cmake_find_package"] = "oatpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "oatpp"
-        self.cpp_info.components["_oatpp-openssl"].names["cmake_find_package"] = "oatpp-openssl"
-        self.cpp_info.components["_oatpp-openssl"].names["cmake_find_package_multi"] = "oatpp-openssl"
         self.cpp_info.components["_oatpp-openssl"].set_property("cmake_target_name", "oatpp::oatpp-openssl")
         self.cpp_info.components["_oatpp-openssl"].requires = ["oatpp::oatpp", "openssl::openssl"]
