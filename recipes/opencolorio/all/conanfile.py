@@ -18,6 +18,7 @@ class OpenColorIOConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("colors", "visual", "effects", "animation")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],

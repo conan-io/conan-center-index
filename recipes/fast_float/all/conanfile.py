@@ -50,3 +50,5 @@ class FastFloatConan(ConanFile):
         self.cpp_info.components["fastfloat"].names["cmake_find_package"] = "fast_float"
         self.cpp_info.components["fastfloat"].names["cmake_find_package_multi"] = "fast_float"
         self.cpp_info.components["fastfloat"].set_property("cmake_target_name", "FastFloat::fast_float")
+        self.cpp_info.components["fastfloat"].bindirs = []
+        self.cpp_info.components["fastfloat"].libdirs = []

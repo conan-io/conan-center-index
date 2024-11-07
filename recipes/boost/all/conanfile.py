@@ -468,21 +468,20 @@ class BoostConan(ConanFile):
                 except ConanException:
                     pass
 
-        if Version(self.version) >= "1.76.0":
-            # Starting from 1.76.0, Boost.Math requires a c++11 capable compiler
-            # ==> disable it by default for older compilers or c++ standards
-            if self.settings.compiler.get_safe("cppstd"):
-                if not valid_min_cppstd(self, 11):
-                    disable_math()
-            else:
-                min_compiler_version = self._min_compiler_version_default_cxx11
-                if min_compiler_version is None:
-                    self.output.warning("Assuming the compiler supports c++11 by default")
-                elif not self._has_cppstd_11_supported:
-                    disable_math()
-                # Boost.Math is not built when the compiler is GCC < 5 and uses C++11
-                elif self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
-                    disable_math()
+        # Starting from 1.76.0, Boost.Math requires a c++11 capable compiler
+        # ==> disable it by default for older compilers or c++ standards
+        if self.settings.compiler.get_safe("cppstd"):
+            if not valid_min_cppstd(self, 11):
+                disable_math()
+        else:
+            min_compiler_version = self._min_compiler_version_default_cxx11
+            if min_compiler_version is None:
+                self.output.warning("Assuming the compiler supports c++11 by default")
+            elif not self._has_cppstd_11_supported:
+                disable_math()
+            # Boost.Math is not built when the compiler is GCC < 5 and uses C++11
+            elif self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
+                disable_math()
 
         if Version(self.version) >= "1.79.0":
             # Starting from 1.79.0, Boost.Wave requires a c++11 capable compiler
@@ -673,8 +672,7 @@ class BoostConan(ConanFile):
     @property
     def _cxx11_boost_libraries(self):
         libraries = ["fiber", "json", "nowide", "url"]
-        if Version(self.version) >= "1.76.0":
-            libraries.append("math")
+        libraries.append("math")
         if Version(self.version) >= "1.79.0":
             libraries.append("wave")
         if Version(self.version) >= "1.81.0":
@@ -1181,7 +1179,7 @@ class BoostConan(ConanFile):
 
     @property
     def _b2_address_model(self):
-        if self.settings.arch in ("x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3", "sparcv9"):
+        if self.settings.arch in ("x86_64", "ppc64", "ppc64le", "mips64", "armv8", "armv8.3", "sparcv9", "s390x"):
             return "64"
 
         return "32"
