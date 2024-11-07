@@ -1,4 +1,7 @@
 sources:
+  "1.0.6":
+    url: "https://github.com/qicosmos/iguana/archive/refs/tags/1.0.6.tar.gz"
+    sha256: "cfacf1cce4ebe49b947ec823f93a23c2a7fd220f67f6847e9f449e7c469deb9e"
   "1.0.5":
     url: "https://github.com/qicosmos/iguana/archive/refs/tags/1.0.5.tar.gz"
     sha256: "b7a7385c49574a60f9f6bf887c1addbc08f557a0117bf18cf7eec532ac2536b1"
