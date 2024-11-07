@@ -50,7 +50,7 @@ class PackageConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # Always prefer self.requires method instead of requires attribute.
+        # Always prefer self.requirements() method instead of self.requires attribute.
         self.requires("dependency/0.8.1")
         if self.options.with_foobar:
             # INFO: used in foo/baz.hpp:34
