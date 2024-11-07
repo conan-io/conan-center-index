@@ -14,7 +14,7 @@ required_conan_version = ">=1.53.0"
 
 
 class EmbreeConan(ConanFile):
-    name = "embree4"
+    name = "embree"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("embree", "raytracing", "rendering")
@@ -51,12 +51,12 @@ class EmbreeConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "sse2": True,
-        "sse42": False,
-        "avx": False,
-        "avx2": False,
-        "avx512": False,
-        "neon": False,
-        "neon2x": False,
+        "sse42": True,
+        "avx": True,
+        "avx2": True,
+        "avx512": True,
+        "neon": True,
+        "neon2x": True,
         "geometry_curve": True,
         "geometry_grid": True,
         "geometry_instance": True,
@@ -65,10 +65,10 @@ class EmbreeConan(ConanFile):
         "geometry_triangle": True,
         "geometry_user": True,
         "ray_packets": True,
-        "ray_masking": False,
-        "backface_culling": False,
-        "ignore_invalid_rays": False,
-        "with_tbb": False,
+        "ray_masking": True,
+        "backface_culling": True,
+        "ignore_invalid_rays": True,
+        "with_tbb": True,
     }
 
     @property
@@ -90,14 +90,6 @@ class EmbreeConan(ConanFile):
         return self.settings.arch in ["x86", "x86_64"]
 
     @property
-    def _embree_has_neon_support(self):
-        return Version(self.version) >= "3.13.0"
-
-    @property
-    def _embree_has_neon2x_support(self):
-        return Version(self.version) >= "3.13.4"
-
-    @property
     def _has_neon(self):
         return "arm" in self.settings.arch
 
@@ -109,9 +101,9 @@ class EmbreeConan(ConanFile):
     def _num_isa(self):
         num_isa = 0
         if self._has_neon:
-            if self._embree_has_neon_support and self.options.neon:
+            if self.options.neon:
                 num_isa += 1
-            if self._embree_has_neon2x_support and self.options.neon2x:
+            if self.options.neon2x:
                 num_isa += 1
         for simd_option in ["sse2", "sse42", "avx", "avx2", "avx512"]:
             if self.options.get_safe(simd_option):
@@ -143,11 +135,6 @@ class EmbreeConan(ConanFile):
         if not self._has_neon:
             del self.options.neon
             del self.options.neon2x
-        else:
-            if not self._embree_has_neon_support:
-                del self.options.neon
-            if not self._embree_has_neon2x_support:
-                del self.options.neon2x
 
     def configure(self):
         if self.options.shared:
@@ -158,7 +145,7 @@ class EmbreeConan(ConanFile):
 
     def requirements(self):
         if self.options.with_tbb:
-            self.requires("onetbb/2021.7.0")
+            self.requires("onetbb/2021.12.0")
 
     def validate(self):
         if not (self._has_sse_avx or (self._embree_has_neon_support and self._has_neon)):
@@ -209,10 +196,8 @@ class EmbreeConan(ConanFile):
         tc.variables["EMBREE_ISPC_SUPPORT"] = False
         tc.variables["EMBREE_TASKING_SYSTEM"] = "TBB" if self.options.with_tbb else "INTERNAL"
         tc.variables["EMBREE_MAX_ISA"] = "NONE"
-        if self._embree_has_neon_support:
-            tc.variables["EMBREE_ISA_NEON"] = self.options.get_safe("neon", False)
-        if self._embree_has_neon2x_support:
-            tc.variables["EMBREE_ISA_NEON2X"] = self.options.get_safe("neon2x", False)
+        tc.variables["EMBREE_ISA_NEON"] = self.options.get_safe("neon", False)
+        tc.variables["EMBREE_ISA_NEON2X"] = self.options.get_safe("neon2x", False)
 
         tc.variables["EMBREE_ISA_SSE2"] = self.options.get_safe("sse2", False)
         tc.variables["EMBREE_ISA_SSE42"] = self.options.get_safe("sse42", False)
@@ -251,9 +236,6 @@ class EmbreeConan(ConanFile):
             rm(self, pattern=dll_pattern_to_remove, folder=os.path.join(self.package_folder, "bin"), recursive=True)
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "embree")
-        self.cpp_info.set_property("cmake_target_name", "embree")
-
         def _lib_exists(name):
             return bool(
                 glob.glob(os.path.join(self.package_folder, "lib", f"*{name}.*"))
