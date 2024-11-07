@@ -2,9 +2,10 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, replace_in_file, rm, rmdir, copy
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.env import Environment
 
 import os
@@ -13,17 +14,17 @@ required_conan_version = ">=1.55.0"
 
 # Subsystems, CMakeLists.txt#L234
 _subsystems = [
-    ("audio",),
-    ("video",),
+    ("audio", []),
+    ("video", []),
     ("gpu", ["video"]),
     ("render", ["video"]),
     ("camera", ["video"]),
-    ("joystick",),
+    ("joystick", []),
     ("haptic", ["joystick"]),
-    ("hidapi",),
-    ("power",),
-    ("sensor",),
-    ("dialog",),
+    ("hidapi", []),
+    ("power", []),
+    ("sensor", []),
+    ("dialog", []),
 ]
 
 
@@ -70,7 +71,7 @@ class SDLConan(ConanFile):
             # Let the overridden equality check if the option is None
             if self.options.get_safe(subsystem) == None:
                 # self.options[subsystem] = not dependencies
-                self.options[subsystem] = True
+                setattr(self.options, subsystem, True)
 
     def validate(self):
         # If any of the subsystems is enabled, then the corresponding dependencies must be enabled
@@ -83,11 +84,62 @@ class SDLConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    exports_sources = "src/*"
+
     def source(self):
+        return
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    @property
+    def _is_unix_sys(self):
+        """ True for UNIX but not Macos/Android"""
+        # CMakeLists.txt#L110
+        return self.settings.os in ("Linux", "FreeBSD")
+
+    @property
+    def _needs_libusb(self):
+        # CMakeLists.txt#L134
+        # TODO: Add option for libusb
+        return (self.options.get_safe("hidapi") and
+                (not is_apple_os(self) or self.settings.os == "Macos") and
+                self.settings.os != "Android")
+
+    @property
+    def _supports_opengl(self):
+        # CMakeLists.txt#L297
+        # TODO: Add option for opengl
+        return (self.options.get_safe("video")
+                and self.settings.os not in ("iOS", "tvOS", "watchOS"))
+
+    @property
+    def _supports_libudev(self):
+        # CMakeLists.txt#L351&L1618
+        # TODO: Add option for libudev
+        return self.settings.os in ("Linux", "FreeBSD")
+
+    @property
+    def _supports_pulseaudio(self):
+        # CMakeLists.txt#L372
+        # TODO: Add option for pulseaudio
+        return self._is_unix_sys and self.options.get_safe("audio")
+
+    @property
+    def _supports_dbus(self):
+        # CMakeLists.txt#292
+        # TODO: Add option for dbus
+        return self._is_unix_sys
+
     def requirements(self):
-        pass
+        if self._needs_libusb:
+            self.requires("libusb/1.0.26")
+        if self._supports_opengl:
+            self.requires("opengl/system")
+        if self._supports_libudev:
+            self.requires("libudev/system")
+        if self._supports_dbus:
+            self.requires("dbus/1.15.8")
+        if self._supports_pulseaudio:
+            self.requires("pulseaudio/17.0")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -103,8 +155,27 @@ class SDLConan(ConanFile):
         tc.variables["SDL_TESTS"] = True
         tc.variables["SDL_EXAMPLES"] = True
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("libusb", "cmake_target_name", "LibUSB::LibUSB")
+        deps.generate()
+        pcdeps = PkgConfigDeps(self)
+        pcdeps.generate()
+
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
+
+    def package(self):
+        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
+        self.cpp_info.libs = ["SDL3"]
+        self.cpp_info.set_property("cmake_file_name", "SDL3")
+        self.cpp_info.set_property("cmake_target_name", "SDL3::SDL3")
         # CMakeLists.txt#L120
         if self.settings.os in ("Linux", "FreeBSD", "Macos"):
             self.cpp_info.system_libs.append("pthread")
@@ -112,3 +183,6 @@ class SDLConan(ConanFile):
         # TODO: dl support in Unix/Macos, CMakeLists.txt#L1209
         # TODO: Android support of opengles if video is enabled, CMakeLists.txt#L1349
 
+        # CMakeLists.txt#L327
+        if self.settings.os == "Macos" and self.options.get_safe("video"):
+            self.cpp_info.frameworks.append("Cocoa")

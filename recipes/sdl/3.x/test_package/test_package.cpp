@@ -1,9 +1,8 @@
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <iostream>
 
 int main(int argc, char* args[]) {
-    SDL_version v;
-    SDL_GetVersion(&v);
-    std::cout << "SDL version " << int(v.major) << "." << int(v.minor) << "." << int(v.patch) << std::endl;
+    auto version = SDL_GetVersion();
+    std::cout << "SDL version " << version << std::endl;
     return 0;
 }
