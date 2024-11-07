@@ -46,8 +46,7 @@ class OpenTelemetryCppConan(ConanFile):
         "shared": False,
 
         "with_no_deprecated_code": False,
-        # Enabling this causes stack overflow in the test_package
-        "with_stl": False,
+        "with_stl": True,
         "with_gsl": False,
         "with_abseil": True,
         "with_otlp": "deprecated",
@@ -71,22 +70,6 @@ class OpenTelemetryCppConan(ConanFile):
         if self.options.with_abseil and Version(self.dependencies["abseil"].ref.version) >= "20230125":
             return 14
         return 11
-
-    @property
-    def _default_cppstd(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            return str(self.settings.compiler.cppstd).replace("gnu", "")
-        else:
-            if self.settings.compiler == "apple-clang":
-                # default cppstd for every apple-clang version is still gnu98
-                return self._min_cppstd
-            return default_cppstd(self).replace("gnu", "")
-
-    @property
-    def _default_stl_version(self):
-        if self.options.with_stl and Version(self.version) >= "1.12":
-            return f"CXX{self._default_cppstd}"
-        return self.options.with_stl
 
     @property
     def _compilers_minimum_version(self):
@@ -241,11 +224,7 @@ class OpenTelemetryCppConan(ConanFile):
         if Version(self.version) < "1.12.1":
             return self.options.with_stl
         if self.options.with_stl:
-            if self.settings.compiler.cppstd:
-                return "CXX" + str(self.settings.compiler.cppstd).replace("gnu", "")
-            else:
-                # ON for autodetection in upstream CML
-                return True
+            return "CXX" + str(self.settings.compiler.cppstd).replace("gnu", "")
         else:
             return False
 
@@ -258,7 +237,7 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["BUILD_BENCHMARK"] = False
         tc.cache_variables["WITH_EXAMPLES"] = False
         tc.cache_variables["WITH_NO_DEPRECATED_CODE"] = self.options.with_no_deprecated_code
-        tc.cache_variables["WITH_STL"] = self._default_stl_version
+        tc.cache_variables["WITH_STL"] = self._stl_value
         tc.cache_variables["WITH_GSL"] = self.options.with_gsl
         tc.cache_variables["WITH_ABSEIL"] = self.options.with_abseil
         if Version(self.version) < "1.10":
@@ -281,8 +260,6 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_ASYNC_EXPORT_PREVIEW"] = self.options.with_async_export_preview
         tc.cache_variables["WITH_METRICS_EXEMPLAR_PREVIEW"] = self.options.with_metrics_exemplar_preview
         tc.cache_variables["OPENTELEMETRY_INSTALL"] = True
-        if not self.settings.compiler.get_safe("cppstd"):
-            tc.variables["CMAKE_CXX_STANDARD"] = self._default_cppstd
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -428,7 +405,8 @@ class OpenTelemetryCppConan(ConanFile):
             if Version(self.version) < "1.12":
                 self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_CPP_STDLIB")
             else:
-                self.cpp_info.components["opentelemetry_common"].defines.append(f"OPENTELEMETRY_STL_VERSION=20{self._default_cppstd}")
+                stl = str(self.settings.compiler.cppstd).replace("gnu", "")
+                self.cpp_info.components["opentelemetry_common"].defines.append(f"OPENTELEMETRY_STL_VERSION=20{stl}")
 
         if self.options.with_gsl:
             self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_GSL")
