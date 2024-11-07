@@ -18,7 +18,9 @@ Any maintenance, outage or important event related to the CI will be informed th
 
 > [!IMPORTANT]  
 > The Conan Center remote URL changed for **Conan 2** on November 2024 - the new URL is the default on new installations of Conan since version 2.9.2.
+>
 > New recipe updates are only published to this remote and are only guaranteed to be compatible with recent versions of Conan 2.
+>
 > All previously published recipes and packages known to be compatible with Conan 2 are also served by this remote.
 
 To update an existing Conan 2 installation:
