@@ -66,6 +66,7 @@ class PackageConan(ConanFile):
     # Copy all files to the package folder
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        # Prefer CMake.install() or similar in case the upstream offers an official method to install the headers.
         copy(self, "*.h", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
 
     def package_info(self):
