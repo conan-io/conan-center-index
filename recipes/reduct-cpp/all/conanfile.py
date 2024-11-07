@@ -59,7 +59,8 @@ class ReductCPPConan(ConanFile):
         self.requires("cpp-httplib/0.18.0")
         self.requires("nlohmann_json/3.11.3")
         self.requires("concurrentqueue/1.0.4")
-        self.requires("date/3.0.1")
+        if not self.options.with_std_chrono:
+            self.requires("date/3.0.1")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
