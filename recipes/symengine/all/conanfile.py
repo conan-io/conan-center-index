@@ -3,19 +3,19 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps
 from conan.tools.files import (
-    apply_conandata_patches,
     collect_libs,
     copy,
     get,
     rm,
-    rmdir, export_conandata_patches, replace_in_file,
+    rmdir,
+    replace_in_file,
 )
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 
 import os
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class SymengineConan(ConanFile):
@@ -46,11 +46,9 @@ class SymengineConan(ConanFile):
     @property
     def _minimium_compilers_version(self):
         return {
+            # Can't compile with earlier versions even if C++11 supported
             "gcc": "7"
         }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -64,8 +62,7 @@ class SymengineConan(ConanFile):
             self.options.rm_safe("fPIC")
     
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
         
         minimum_version = self._minimium_compilers_version.get(str(self.settings.compiler))
         if minimum_version and Version(self.version) < minimum_version:
@@ -101,9 +98,6 @@ class SymengineConan(ConanFile):
         if self._needs_fast_float:
             tc.variables["WITH_SYSTEM_FASTFLOAT"] = True
 
-        if not self.settings.compiler.cppstd:
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
-
         tc.generate()
         deps = CMakeDeps(self)
         if self.options.integer_class == "gmp":
@@ -116,7 +110,6 @@ class SymengineConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Disable hardcoded C++11
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         'set(CMAKE_CXX_FLAGS "${CXX11_OPTIONS} ${CMAKE_CXX_FLAGS}")',
@@ -158,6 +151,3 @@ class SymengineConan(ConanFile):
             self.cpp_info.system_libs.append("m")
 
         self.cpp_info.set_property("cmake_target_name", "symengine")
-        # TODO: Remove when Conan 1 support is dropped
-        self.cpp_info.names["cmake_find_package"] = "symengine"
-        self.cpp_info.names["cmake_find_package_multi"] = "symengine"
