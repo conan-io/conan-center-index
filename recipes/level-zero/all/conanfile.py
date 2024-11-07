@@ -1,10 +1,9 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.cmake import is_apple_os
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, apply_conandata_patches, copy, export_conandata_patches, rmdir
+from conan.tools.files import get, apply_conandata_patches, copy, export_conandata_patches, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
 import os
 
 
@@ -20,26 +19,15 @@ class LevelZeroConan(ConanFile):
     # Binary configuration
     settings = "os", "arch", "compiler", "build_type"
 
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "190",
-            "Visual Studio": "15",
-        }
-
     def requirements(self):
         self.requires("spdlog/1.14.1")
 
     def source(self):
         version_data = self.conan_data["sources"][self.version]
         get(self, **version_data, strip_root=True)
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "source", "loader","ze_loader.cpp"),
+                        "#ifdef __linux__", "#if defined(__linux__) || defined(__APPLE__)")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -55,21 +43,15 @@ class LevelZeroConan(ConanFile):
         toolchain.generate()
 
     def validate(self):
-        if self.settings.os == "Macos":
-            raise ConanInvalidConfiguration("This recipe doesn't prepared for macOS.")
-        if self.settings.os == "Windows":
-            if self.settings.get_safe("subsystem") == "uwp":
-                raise ConanInvalidConfiguration(f"{self.ref} does not support UWP on Windows.")
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        if is_apple_os(self):
+            self.output.warning("Level Zero is not known to support Apple platforms")
+        if self.settings.os == "Windows" and self.settings.get_safe("subsystem") == "uwp":
+            raise ConanInvalidConfiguration(f"{self.ref} does not support UWP on Windows.")
+
+        min_cpp_std = "14"
+        check_min_cppstd(self, min_cpp_std)
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -90,4 +72,3 @@ class LevelZeroConan(ConanFile):
             self.cpp_info.components["ze-loader"].set_property("pkg_config_name", "libze_loader")
             self.cpp_info.components["level-zero"].requires = ["ze-loader"]
             self.cpp_info.components["level-zero"].set_property("pkg_config_name", "level-zero")
-
