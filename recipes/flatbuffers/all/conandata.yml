@@ -49,7 +49,7 @@ patches:
     - patch_file: "patches/0005-arm-cxx-compiler-build.patch"
       patch_description: "IAR ARM C++ Compiler build bugfix"
       patch_type: "backport"
-      patch_source: "https://github.com/google/flatbuffers/issues/6036"
+      patch_source: "https://github.com/google/flatbuffers/commit/82fac326c5981a85233b8ae7e0d7ec8fda432963"
   "2.0.6":
     - patch_file: "patches/0004-no-flatc-execution-build-time.patch"
       patch_description: "No flatc execution during build time"
