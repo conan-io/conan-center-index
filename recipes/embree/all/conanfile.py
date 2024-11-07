@@ -33,15 +33,6 @@ class EmbreeConan(ConanFile):
         "avx512": [True, False],
         "neon": [True, False],
         "neon2x": [True, False],
-        "geometry_curve": [True, False],
-        "geometry_grid": [True, False],
-        "geometry_instance": [True, False],
-        "geometry_quad": [True, False],
-        "geometry_subdivision": [True, False],
-        "geometry_triangle": [True, False],
-        "geometry_user": [True, False],
-        "ray_packets": [True, False],
-        "ray_masking": [True, False],
         "backface_culling": [True, False],
         "ignore_invalid_rays": [True, False],
         "with_tbb": [True, False],
@@ -57,15 +48,6 @@ class EmbreeConan(ConanFile):
         "avx512": True,
         "neon": True,
         "neon2x": True,
-        "geometry_curve": True,
-        "geometry_grid": True,
-        "geometry_instance": True,
-        "geometry_quad": True,
-        "geometry_subdivision": True,
-        "geometry_triangle": True,
-        "geometry_user": True,
-        "ray_packets": True,
-        "ray_masking": True,
         "backface_culling": True,
         "ignore_invalid_rays": True,
         "with_tbb": True,
@@ -182,15 +164,6 @@ class EmbreeConan(ConanFile):
         tc.variables["EMBREE_STATIC_LIB"] = not self.options.shared
         tc.variables["BUILD_TESTING"] = False
         tc.variables["EMBREE_TUTORIALS"] = False
-        tc.variables["EMBREE_GEOMETRY_CURVE"] = self.options.geometry_curve
-        tc.variables["EMBREE_GEOMETRY_GRID"] = self.options.geometry_grid
-        tc.variables["EMBREE_GEOMETRY_INSTANCE"] = self.options.geometry_instance
-        tc.variables["EMBREE_GEOMETRY_QUAD"] = self.options.geometry_quad
-        tc.variables["EMBREE_GEOMETRY_SUBDIVISION"] = self.options.geometry_subdivision
-        tc.variables["EMBREE_GEOMETRY_TRIANGLE"] = self.options.geometry_triangle
-        tc.variables["EMBREE_GEOMETRY_USER"] = self.options.geometry_user
-        tc.variables["EMBREE_RAY_PACKETS"] = self.options.ray_packets
-        tc.variables["EMBREE_RAY_MASK"] = self.options.ray_masking
         tc.variables["EMBREE_BACKFACE_CULLING"] = self.options.backface_culling
         tc.variables["EMBREE_IGNORE_INVALID_RAYS"] = self.options.ignore_invalid_rays
         tc.variables["EMBREE_ISPC_SUPPORT"] = False
