@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import is_apple_os
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get, apply_conandata_patches, copy, export_conandata_patches, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
