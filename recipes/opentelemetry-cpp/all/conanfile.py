@@ -167,11 +167,13 @@ class OpenTelemetryCppConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if Version(self.version) == "1.8.3" and self.settings.os != "Linux" and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} supports building shared libraries only on Linux")
+        # Macos can compile for newer versions,
+        # Windows fails in every case
+        if (Version(self.version) == "1.8.3" or self.settings.os == "Windows") and self.settings.os not in ("Linux", "Macos") and self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} does not support building as shared for this configuration")
 
         if self.options.with_otlp_grpc and not self.dependencies["grpc"].options.cpp_plugin:
-                raise ConanInvalidConfiguration(f"{self.ref} requires grpc with cpp_plugin=True")
+                raise ConanInvalidConfiguration(f'{self.ref} requires grpc with -o="grpc/*:cpp_plugin=True"')
 
         boost_required_comp = any(self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
                                        for boost_comp in self._required_boost_components)
