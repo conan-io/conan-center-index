@@ -6,7 +6,7 @@
 
 int main() {
   int i = 0;
-  size_t size = 70000;
+  size_t size = 42;
   uint8_t* data = (uint8_t*) malloc(size);
 
   memset(data, 0xff, size);
