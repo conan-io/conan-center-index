@@ -17,6 +17,7 @@ class ZziplibConan(ConanFile):
     license = "GPL-2.0-or-later"
 
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -57,7 +58,12 @@ class ZziplibConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        # Older versions had BUILD_STATIC_LIBS option, new ones only have BUILD_SHARED_LIBS
+        if Version(self.version) < "0.13.78":
+            tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        else:
+            # Disable sanitizer for newer versions
+            tc.variables["FORTIFY"] = False
         tc.variables["ZZIPCOMPAT"] = self.settings.os != "Windows"
         tc.variables["ZZIPMMAPPED"] = self.options.zzipmapped
         tc.variables["ZZIPFSEEKO"] = self.options.zzipfseeko
@@ -112,7 +118,7 @@ class ZziplibConan(ConanFile):
             if Version(self.version) >= "0.13.72" and self.options.shared and is_apple_os(self):
                 self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko"]
             else:
-                self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko{suffix}"]            
+                self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko{suffix}"]
             self.cpp_info.components["zzipfseeko"].requires = ["zlib::zlib"]
         # libzzipwrap
         if self.options.zzipwrap:
