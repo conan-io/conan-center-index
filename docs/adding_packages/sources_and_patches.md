@@ -31,8 +31,7 @@ Downloaded source code must have a deterministic results where the exact same ar
 [Conandata's `"sha"` fields](conandata_yml_format.md#sha256) for how this is achieved in ConanCenterIndex.
 
 The sources stored under `self.source_folder` should not be modified, except for applying patches.
-Any patch should be applied to the copy of this source code when a source is executed (basically in `source()` method). See [Applying Patches](#applying-patches)
-below for more information.
+Any patch should be applied to the copy of this source code when a source is executed (basically in `source()` method).
 
 ### Sources not accessible
 

@@ -93,9 +93,6 @@ A detailed breakdown of all the fields can be found in [conandata_yml_format.md]
 
 Inside the `conanfile.py` recipe, this data is available in through the [self.conan_data](https://docs.conan.io/2/reference/conanfile/attributes.html#conan-data) attribute.
 
-See the [Export Patches](sources_and_patches.md#exporting-patches) and [Applying Patches](sources_and_patches.md#applying-patches)
-for more use cases and examples.
-
 #### `test_package`
 
 All the packages in this repository need to be tested before they join ConanCenter. A `test_package` folder with its
