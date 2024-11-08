@@ -9,5 +9,7 @@ jobs:
       - name: Run linkspector
         uses: umbrelladocs/action-linkspector@v1.2.4
         with:
-          reporter: github-pr-review
-          fail_on_error: true
+          reporter: local
+          fail_level: warning
+          fail_on_error: false
+          level: warning
