@@ -5,17 +5,22 @@ Any C/C++ project can be made available by contributing a "recipe".
 
 Getting started is easy. Try building an existing package with our [developing recipes](../developing_recipes_locally.md)
 tutorial. To deepen you understanding, start with the [How to provide a good recipe](#how-to-provide-a-good-recipe) section.
-You can follow the two steps (:one: :two:) described below! :tada:
+You can follow the :three: steps (:one: :two: :three:) described below! :tada:
 
 <!-- toc -->
 ## Contents
-
-  * [:one: Creating a package](#two-creating-a-package)
+  * [:one: Request accessFirst time contributors](#one-first-time-contributors)
+  * [:two: Creating a package](#two-creating-a-package)
     * [How to provide a good recipe](#how-to-provide-a-good-recipe)
-  * [:two: Submitting a Package](#three-submitting-a-package)
+  * [:three: Submitting a Package](#three-submitting-a-package)
   * [The Build Service](#the-build-service)<!-- endToc -->
 
-## :one: Creating a package
+## :one: First time contributors
+
+When submitting a pull request for the first time, you will be prompted to sign the [CLA](https://cla-assistant.io/conan-io/conan-center-index) for your
+code contributions. You can view your signed CLA's by going to <https://cla-assistant.io/> and signing in.
+
+## :two: Creating a package
 
 Once you've successfully built an existing recipe following [developing recipes](../developing_recipes_locally.md) tutorial.
 You are set to being adding a new package.
@@ -65,7 +70,7 @@ The documents in this folder are written to explain each folder, file, method, a
 The one place you are certain to find a lot of information is <https://docs.conan.io>, this has the documentation for everything in Conan.
 There are helpful tutorials for cross-build, detailed explication for profiles and settings and much much more!
 
-## :two: Submitting a Package
+## :three: Submitting a Package
 
 To contribute a package, you can submit a [Pull Request](https://github.com/conan-io/conan-center-index/pulls) to this GitHub
 repository <https://github.com/conan-io/conan-center-index>.
