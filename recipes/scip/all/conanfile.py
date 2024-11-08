@@ -75,10 +75,6 @@ class SCIPConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def requirements(self):
         def _mapping_requires(dep, **kwargs):
             required_version = self.conan_data["version_mappings"][self.version][dep]
@@ -92,6 +88,8 @@ class SCIPConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
 
     def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
         if self.options.with_sym == None:
             self.options.with_sym = self.conan_data["version_mappings"][self.version]["default_sym"]
 
