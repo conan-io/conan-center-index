@@ -30,8 +30,8 @@ Where ever possible, downloading source files and compiling is mandated. Downloa
 Downloaded source code must have a deterministic results where the exact same archive is download each time. See
 [Conandata's `"sha"` fields](conandata_yml_format.md#sha256) for how this is achieved in ConanCenterIndex.
 
-The sources stored under `self.source_folder` should not be modified, except for applying patches.
-Any patch should be applied to the copy of this source code when a source is executed (basically in `source()` method).
+The sources stored under `self.source_folder` should not apply patches or modifications in the `source()` method conditional to options or settings.
+Patches should be applied in the `source()` method - taking special care that the patches are platform agnostic. Patches in the `build()` method can be considered where this is not possible, provided that `no_copy_source` is **not** set to `True`.
 
 ### Sources not accessible
 
