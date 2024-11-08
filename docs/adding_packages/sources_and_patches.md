@@ -87,7 +87,7 @@ reading the changelog of the library, the documentation, or any statement by the
 
 Patch files are preferred over programmatic `replace_in_file` statements. This makes it easier to review and prevent
 unwanted side effects when new versions are added. They will be listed in [`conandata.yml`](conandata_yml_format.md)
-file and exported together with the recipe. Patches must always include [patch fields](conandata_yml_format.md#patches-fields).
+file and exported together with the recipe. Patches should include the required [patch fields](conandata_yml_format.md#patches-fields).
 
 Patches must be located in the recipe folder in a `patches/` sub-directory.
 
