@@ -48,7 +48,10 @@ There is an [autotools package template](../package_templates/autotools_package/
 
 ### No Upstream Build Scripts
 
-For cases where a project only offers source files, but not a build script, you can add CMake support, but first, contact the upstream and open a PR offering building support. If it's rejected because the author doesn't want any kind of build script, or the project is abandoned, CCI may or not accept your build script. Take a look at [Bzip2](https://github.com/conan-io/conan-center-index/blob/master/recipes/bzip2/all/CMakeLists.txt) as example.
+For cases where a project only offers source files but does not provide a build script, you can add CMake support.
+However, it is essential to first contact the upstream maintainers and open a pull request (PR) offering building support.
+If your PR is rejected because the author does not want any kind of build script, or if the project is abandoned, Conan Center Index (CCI) will consider accepting your build script based on the effort required to maintain it, as we aim to avoid adding scripts that may require significant ongoing maintenance.
+Take a look at [Bzip2](https://github.com/conan-io/conan-center-index/blob/master/recipes/bzip2/all/CMakeLists.txt) as example.
 
 ### System Packages
 
