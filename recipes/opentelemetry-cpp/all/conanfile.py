@@ -174,7 +174,7 @@ class OpenTelemetryCppConan(ConanFile):
         if self.settings.os != "Linux" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} supports building shared libraries only on Linux")
 
-        if self.settings.os == "Macos" and (self.settings.compiler.version <= "13"):
+        if self.settings.os == "Macos" and (Version(self.settings.compiler.version) <= "13"):
             # TODO: The SDK 11 is the culprit, blanket-remove it for now
             raise ConanInvalidConfiguration(f"{self.ref} does not support Apple Clang 13 or lower")
 
