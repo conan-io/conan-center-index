@@ -1,0 +1,13 @@
+name: Linkspector
+on: [pull_request]
+jobs:
+  check-links:
+    name: runner/linkspector
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run linkspector
+        uses: umbrelladocs/action-linkspector@v1.2.4
+        with:
+          reporter: github-pr-review
+          fail_on_error: true
