@@ -5,7 +5,7 @@ Any C/C++ project can be made available by contributing a "recipe".
 
 Getting started is easy. Try building an existing package with our [developing recipes](../developing_recipes_locally.md)
 tutorial. To deepen you understanding, start with the [How to provide a good recipe](#how-to-provide-a-good-recipe) section.
-You can follow the :three: steps (:one: :two: :three:) described below! :tada:
+You can follow the three steps (:one: :two: :three:) described below! :tada:
 
 <!-- toc -->
 ## Contents
