@@ -39,17 +39,6 @@ class SymengineConan(ConanFile):
     }
     short_paths = True
 
-    @property
-    def _min_cppstd(self):
-        return 11
-    
-    @property
-    def _minimium_compilers_version(self):
-        return {
-            # Can't compile with earlier versions even if C++11 supported
-            "gcc": "7"
-        }
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -62,11 +51,11 @@ class SymengineConan(ConanFile):
             self.options.rm_safe("fPIC")
     
     def validate(self):
-        check_min_cppstd(self, self._min_cppstd)
-        
-        minimum_version = self._minimium_compilers_version.get(str(self.settings.compiler))
-        if minimum_version and Version(self.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires {self.settings.compiler} >= {minimum_version}")
+        min_cppstd = "11"
+        check_min_cppstd(self, min_cppstd)
+
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
+            raise ConanInvalidConfiguration(f"{self.ref} requires GCC >= 7")
 
     @property
     def _needs_fast_float(self):
