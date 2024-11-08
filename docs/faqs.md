@@ -36,6 +36,7 @@ This section gathers the most common questions from the community related to pac
   * [How to package libraries that depend on proprietary closed-source libraries?](#how-to-package-libraries-that-depend-on-proprietary-closed-source-libraries)
   * [How to protect my project from breaking changes in recipes?](#how-to-protect-my-project-from-breaking-changes-in-recipes)
   * [What's the policy on version ranges?](#whats-the-policy-on-version-ranges)
+  * [How to consume a graph of shared libraries?](#how-to-consume-a-graph-of-shared-libraries)
   * [Can we add package which are parts of bigger projects like Boost?](#can-we-add-package-which-are-parts-of-bigger-projects-like-boost)
     * [Can I add my project which I will submit to Boost?](#can-i-add-my-project-which-i-will-submit-to-boost)
   * [Can I add options that do not affect `package_id` or the package contents](#can-i-add-options-that-do-not-affect-package_id-or-the-package-contents)
@@ -356,6 +357,15 @@ Keep reading in the [consuming recipes section](consuming_recipes.md#isolate-you
 
 Version ranges are currently allowed on a handful of dependencies, but not for general use.
 See [Dependencies Version Ranges](adding_packages/dependencies.md#version-ranges) for additional details.
+
+## How to consume a graph of shared libraries?
+
+When the CI builds packages with the option `*/*:shared=True`, this option is applied not only to the package being created but also to its requirements.
+Since the default value for the shared option is typically `False`, you can generally expect that the dependency graph will consist of static libraries,
+except for packages specifically defined with `package_type = "shared-library"`.
+
+To work with a graph that includes only shared libraries, you must explicitly set the `-o */*:shared=True` option in your conan install command.
+This ensures that the necessary shared libraries are included in your build environment.
 
 ## Can we add package which are parts of bigger projects like Boost?
 
