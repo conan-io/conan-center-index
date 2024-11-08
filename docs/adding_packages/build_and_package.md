@@ -6,6 +6,8 @@ Both methods often use build helpers to build binaries and install them into the
 <!-- toc -->
 ## Contents
 
+  * [Build Method](#build-method)
+  * [Package Method](#package-method)
   * [Build System Examples](#build-system-examples)
     * [Header Only](#header-only)
     * [CMake](#cmake)
@@ -13,6 +15,17 @@ Both methods often use build helpers to build binaries and install them into the
     * [No Upstream Build Scripts](#no-upstream-build-scripts)
     * [System Packages](#system-packages)<!-- endToc -->
 
+## Build Method
+
+For the `build()` method, the general scope used to build artifacts. Please, read
+the official reference to [build()](https://docs.conan.io/2/reference/conanfile/methods/build.html) method.and the
+[Build packages: the build() method](https://docs.conan.io/2/tutorial/creating_packages/build_packages.html).
+
+## Package Method
+
+The `package()` method is used to copy the artifacts to the `package_folder`. Please, read the official reference to
+[package()](https://docs.conan.io/2/reference/conanfile/methods/package.html) method and the
+[Package files: the package() method](https://docs.conan.io/2/tutorial/creating_packages/package_method.html).
 
 ## Build System Examples
 
