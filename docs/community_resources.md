@@ -6,8 +6,7 @@ This is a curated list of various bots and helpful tools that aim to making appr
 ## Contents
 
   * [Social Media and More](#social-media-and-more)
-  * [Bots](#bots)
-  * [Tools](#tools)<!-- endToc -->
+  * [Bots](#bots)<!-- endToc -->
 
 ## Social Media and More
 
@@ -22,7 +21,3 @@ If you are looking to stay up to date with the last Conan news, follow us on Twi
 - [System Package Checks](https://github.com/bincrafters/system-packages-checks): Builds automatically all `system` versions of recipes merged on CCI
 and being pull requested on a selection of Linux distributions and FreeBSD
   - The results can be found here: https://bincrafters.github.io/system-packages-checks/
-
-## Tools
-
-- [Bincrafters Conventions](https://github.com/bincrafters/bincrafters-conventions): Automatically updates Conan recipes to the latest conventions and rules
