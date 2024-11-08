@@ -4,14 +4,14 @@ ConanCenterIndex aims to provide the best quality packages of any open source pr
 Any C/C++ project can be made available by contributing a "recipe".
 
 Getting started is easy. Try building an existing package with our [developing recipes](../developing_recipes_locally.md)
-tutorial. To deepen you understanding, start with the [How to provide a good recipe](#how-to-provide-a-good-recipe) section.
+tutorial. To deepen you understanding, start with the [How to write a good recipe](#how-to-provide-a-good-recipe) section.
 You can follow the three steps (:one: :two: :three:) described below! :tada:
 
 <!-- toc -->
 ## Contents
   * [:one: First time contributors](#one-first-time-contributors)
   * [:two: Creating a package](#two-creating-a-package)
-    * [How to provide a good recipe](#how-to-provide-a-good-recipe)
+    * [How to write a good recipe](#how-to-provide-a-good-recipe)
   * [:three: Submitting a Package](#three-submitting-a-package)
   * [The Build Service](#the-build-service)<!-- endToc -->
 
@@ -44,7 +44,7 @@ In ConanCenter, our belief is recipes should always match upstream, in other wor
 * Options should [follow these recommendations](conanfile_attributes.md#options) as well as match the default value used by the upstream project.
 * [Package information](build_and_package.md), libraries, components should match as well. This includes exposing supported build system names.
 
-### How to provide a good recipe
+### How to write a good recipe
 
 Take a look at existing [recipes](https://github.com/conan-io/conan-center-index/tree/master/recipes) available in ConanCenterIndex which can be
 used as good examples, you can use them as the base for your recipe. The GitHub search is very good for matching code snippets, you can see if,
@@ -92,4 +92,4 @@ For a C++ library, the system is currently generating more than 30 binary packag
 > **Note**: This not a testing service, it is a binary building service for **released** packages. Unit tests shouldn't be built nor run in recipes by default, see the [FAQs](../faqs.md#why-conancenter-does-not-build-and-execute-tests-in-recipes) for more. Before submitting a pull request, please ensure that it works locally for some configurations.
 
 - The CI system will report the build logs in the Checks tab, in the pull-request.
-- Linter and Hooks are automatically executed in the Checks too.
+- Linter and Hooks are automatically displayed in the Checks tab as well.
