@@ -1,7 +1,12 @@
-name: Linkspector
-on: [pull_request]
+name: "[linter] Markdown links"
+
+on:
+  pull_request:
+    paths:
+      - '**.md'
+
 jobs:
-  check-links:
+  markdown-link-check-pr:
     name: runner/linkspector
     runs-on: ubuntu-latest
     steps:
