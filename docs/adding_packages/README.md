@@ -9,7 +9,7 @@ You can follow the :three: steps (:one: :two: :three:) described below! :tada:
 
 <!-- toc -->
 ## Contents
-  * [:one: Request accessFirst time contributors](#one-first-time-contributors)
+  * [:one: First time contributors](#one-first-time-contributors)
   * [:two: Creating a package](#two-creating-a-package)
     * [How to provide a good recipe](#how-to-provide-a-good-recipe)
   * [:three: Submitting a Package](#three-submitting-a-package)
