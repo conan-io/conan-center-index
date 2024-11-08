@@ -208,7 +208,7 @@ class FollyConan(ConanFile):
             deps.set_property("libaio", "cmake_file_name", "LibAIO")
             deps.set_property("libaio", "cmake_additional_variables_prefixes", ["LIBAIO"])
         if Version(self.version) >= "2024.11.04":
-            deps.set_property("FastFloat", "cmake_additional_variables_prefixes", ["FASTFLOAT"])
+            deps.set_property("fast_float", "cmake_additional_variables_prefixes", ["FASTFLOAT"])
         deps.generate()
 
     def _patch_sources(self):
