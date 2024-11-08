@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
 from conan.tools.layout import basic_layout
 import os
 
@@ -16,6 +16,9 @@ class RxcppConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def package_id(self):
         self.info.clear()
 
@@ -27,6 +30,7 @@ class RxcppConan(ConanFile):
             destination=self.source_folder, strip_root=True)
 
     def build(self):
+        apply_conandata_patches(self)
         pass
 
     def package(self):
