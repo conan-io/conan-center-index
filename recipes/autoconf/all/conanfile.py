@@ -41,6 +41,7 @@ class AutoconfConan(ConanFile):
         del self.info.settings.arch
         del self.info.settings.compiler
         del self.info.settings.build_type
+        self.info.requires.clear()
 
     def build_requirements(self):
         self.tool_requires("m4/1.4.19")
