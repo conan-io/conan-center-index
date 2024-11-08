@@ -72,6 +72,8 @@ class LibcurlConan(ConanFile):
         "with_ca_bundle": [False, "auto", "ANY"],
         "with_ca_path": [False, "auto", "ANY"],
         "with_ca_fallback": [True, False],
+        "with_form_api": [True, False],
+        "with_websockets": [True, False],
     }
     default_options = {
         "shared": False,
@@ -118,6 +120,8 @@ class LibcurlConan(ConanFile):
         "with_ca_bundle": "auto",
         "with_ca_path": "auto",
         "with_ca_fallback": False,
+        "with_form_api": True,
+        "with_websockets": True,
     }
 
     @property
@@ -146,8 +150,12 @@ class LibcurlConan(ConanFile):
         if self._is_using_cmake_build:
             del self.options.with_libgsasl
 
+        if Version(self.version) < "8.3.0":
+            del self.options.with_form_api
         if Version(self.version) < "8.7.0":
             del self.options.with_misc_docs
+        if Version(self.version) < "8.11.0":
+            del self.options.with_websockets
 
         # Default options
         self.options.with_ssl = "darwinssl" if is_apple_os(self) else "openssl"
@@ -519,6 +527,16 @@ class LibcurlConan(ConanFile):
                 tc.configure_args.append("--enable-docs")
             else:
                 tc.configure_args.append("--disable-docs")
+        if "with_form_api" in self.options:
+            if self.options.with_form_api:
+                tc.configure_args.append("--enable-form-api")
+            else:
+                tc.configure_args.append("--disable-form-api")
+        if "with_websockets" in self.options:
+            if self.options.with_websockets:
+                tc.configure_args.append("--enable-websockets")
+            else:
+                tc.configure_args.append("--disable-websockets")
 
         # Cross building flags
         if cross_building(self):
@@ -607,6 +625,10 @@ class LibcurlConan(ConanFile):
         tc.variables["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
         tc.variables["CURL_DISABLE_CRYPTO_AUTH"] = not self.options.with_crypto_auth
         tc.variables["CURL_DISABLE_VERBOSE_STRINGS"] = not self.options.with_verbose_strings
+        if "with_form_api" in self.options:
+            tc.variables["CURL_DISABLE_FORM_API"] = not self.options.with_form_api
+        if "with_websockets" in self.options:
+            tc.variables["CURL_DISABLE_WEBSOCKETS"] = not self.options.with_websockets
 
         # Also disables NTLM_WB if set to false
         if not self.options.with_ntlm:
