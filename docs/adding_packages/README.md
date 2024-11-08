@@ -87,6 +87,7 @@ and are made available for everyone.
 ## The Build Service
 
 The **build service** associated to this repository will generate binary packages automatically for the most common platforms and compilers.
+See [the Supported Platforms and Configurations page](../supported_platforms_and_configurations.md) for a list of generated configurations.
 For a C++ library, the system is currently generating more than 30 binary packages.
 
 > **Note**: This not a testing service, it is a binary building service for **released** packages. Unit tests shouldn't be built nor run in recipes by default, see the [FAQs](../faqs.md#why-conancenter-does-not-build-and-execute-tests-in-recipes) for more. Before submitting a pull request, please ensure that it works locally for some configurations.
