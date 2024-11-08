@@ -84,10 +84,10 @@ class SDLConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    exports_sources = "src/*"
+    # exports_sources = "src/*"
 
     def source(self):
-        return
+        # return
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
