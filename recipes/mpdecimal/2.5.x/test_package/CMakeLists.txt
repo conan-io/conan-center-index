@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(test_package LANGUAGES CXX C)
+project(test_package LANGUAGES C)
 
 enable_testing()
 
@@ -11,6 +11,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE mpdecimal::libmpdecimal)
 add_test(NAME test_package COMMAND test_package 10 13)
 
 if(TARGET mpdecimal::libmpdecimal++)
+    enable_language(CXX)
     add_executable(${PROJECT_NAME}_cpp test_package.cpp)
     set_propertY(TARGET ${PROJECT_NAME}_cpp PROPERTY CXX_STANDARD 11)
     target_link_libraries(${PROJECT_NAME}_cpp PRIVATE mpdecimal::libmpdecimal++)
