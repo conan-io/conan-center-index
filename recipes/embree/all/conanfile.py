@@ -3,15 +3,14 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, rm, rmdir, save
+from conan.tools.files import copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.microsoft import check_min_vs
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import glob
 import os
-import textwrap
 
 required_conan_version = ">=1.53.0"
-
 
 class EmbreeConan(ConanFile):
     name = "embree"
@@ -33,9 +32,6 @@ class EmbreeConan(ConanFile):
         "avx512": [True, False],
         "neon": [True, False],
         "neon2x": [True, False],
-        "backface_culling": [True, False],
-        "ignore_invalid_rays": [True, False],
-        "with_tbb": [True, False],
     }
 
     default_options = {
@@ -48,9 +44,6 @@ class EmbreeConan(ConanFile):
         "avx512": True,
         "neon": True,
         "neon2x": True,
-        "backface_culling": True,
-        "ignore_invalid_rays": True,
-        "with_tbb": True,
     }
 
     @property
@@ -60,7 +53,7 @@ class EmbreeConan(ConanFile):
     @property
     def _compilers_minimum_version(self):
         return {
-            "apple-clang": "10",
+            "apple-clang": "11",
             "clang": "7",
             "gcc": "7",
             "msvc": "191",
@@ -126,11 +119,10 @@ class EmbreeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_tbb:
-            self.requires("onetbb/2021.12.0")
+        self.requires("onetbb/2021.12.0")
 
     def validate(self):
-        if not (self._has_sse_avx or (self._embree_has_neon_support and self._has_neon)):
+        if not (self._has_sse_avx or self._has_neon):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support {self.settings.arch}")
 
         if self.settings.compiler.cppstd:
@@ -164,10 +156,10 @@ class EmbreeConan(ConanFile):
         tc.variables["EMBREE_STATIC_LIB"] = not self.options.shared
         tc.variables["BUILD_TESTING"] = False
         tc.variables["EMBREE_TUTORIALS"] = False
-        tc.variables["EMBREE_BACKFACE_CULLING"] = self.options.backface_culling
-        tc.variables["EMBREE_IGNORE_INVALID_RAYS"] = self.options.ignore_invalid_rays
+        tc.variables["EMBREE_BACKFACE_CULLING"] = True
+        tc.variables["EMBREE_IGNORE_INVALID_RAYS"] = True
         tc.variables["EMBREE_ISPC_SUPPORT"] = False
-        tc.variables["EMBREE_TASKING_SYSTEM"] = "TBB" if self.options.with_tbb else "INTERNAL"
+        tc.variables["EMBREE_TASKING_SYSTEM"] = "INTERNAL" if is_apple_os(self) else "TBB"
         tc.variables["EMBREE_MAX_ISA"] = "NONE"
         tc.variables["EMBREE_ISA_NEON"] = self.options.get_safe("neon", False)
         tc.variables["EMBREE_ISA_NEON2X"] = self.options.get_safe("neon2x", False)
@@ -176,7 +168,7 @@ class EmbreeConan(ConanFile):
         tc.variables["EMBREE_ISA_SSE42"] = self.options.get_safe("sse42", False)
         tc.variables["EMBREE_ISA_AVX"] = self.options.get_safe("avx", False)
         tc.variables["EMBREE_ISA_AVX2"] = self.options.get_safe("avx2", False)
-        tc.variables["EMBREE_ISA_AVX512"] = self.options.get_safe("avx512", False)
+        tc.variables["EMBREE_ISA_AVX512"] = self.options.get_safe("avx512", False) and not is_msvc(self)
         tc.generate()
 
         deps = CMakeDeps(self)
