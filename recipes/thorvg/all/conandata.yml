@@ -1,4 +1,7 @@
 sources:
+  "0.15.3":
+    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.15.3.tar.gz"
+    sha256: "c3d57167a54f0ecc3ead8bb33340593acc00bcd8477e784287307bc4e2c82b38"
   "0.15.2":
     url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.15.2.tar.gz"
     sha256: "98fcd73567c003a33fad766a7dbb9244c61e9b4721397d42e7fa04fc2e499dce"
