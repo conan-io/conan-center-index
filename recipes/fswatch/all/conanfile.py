@@ -80,4 +80,4 @@ class WatcherConan(ConanFile):
             self.cpp_info.system_libs = ["m", "pthread"]
 
         if is_apple_os(self):
-            self.cpp_info.frameworks.extend(["CoreFoundation"])
+            self.cpp_info.frameworks.extend(["CoreFoundation", "CoreServices"])
