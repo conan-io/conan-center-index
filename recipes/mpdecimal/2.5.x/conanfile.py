@@ -9,6 +9,8 @@ from conan.tools.apple import is_apple_os
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
+import os
+
 required_conan_version = ">=1.55.0"
 
 
@@ -112,16 +114,16 @@ class MpdecimalConan(ConanFile):
 
     @property
     def _dist_folder(self):
-        vcbuild_folder = self.build_path / "vcbuild"
+        vcbuild_folder = os.path.join(self.build_folder, "vcbuild")
         arch_ext = "32" if self.settings.arch == "x86" else "64"
-        return vcbuild_folder / f"dist{arch_ext}"
+        return os.path.join(vcbuild_folder, f"dist{arch_ext}")
 
     def _build_msvc(self):
-        libmpdec_folder = self.source_path / "libmpdec"
-        libmpdecpp_folder = self.source_path / "libmpdec++"
+        libmpdec_folder = os.path.join(self.source_folder, "libmpdec")
+        libmpdecpp_folder = os.path.join(self.source_folder, "libmpdec++")
 
-        copy(self, "Makefile.vc", libmpdec_folder, self.build_path)
-        rename(self, self.build_path / "Makefile.vc", libmpdec_folder / "Makefile")
+        copy(self, "Makefile.vc", libmpdec_folder, self.build_folder)
+        rename(self, os.path.join(self.build_folder, "Makefile.vc"), os.path.join(libmpdec_folder, "Makefile"))
 
         mpdec_target = "libmpdec-{}.{}".format(self.version, "dll" if self.options.shared else "lib")
         mpdecpp_target = "libmpdec++-{}.{}".format(self.version, "dll" if self.options.shared else "lib")
@@ -179,42 +181,40 @@ class MpdecimalConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.configure()
-            # self.output.info(load(self, pathlib.Path("libmpdec", "Makefile")))
             libmpdec, libmpdecpp = self._target_names
-            copy(self, "*", self.source_path / "libmpdec", self.build_path / "libmpdec")
+            copy(self, "*", os.path.join(self.source_folder, "libmpdec"), os.path.join(self.build_folder, "libmpdec"))
             with chdir(self, "libmpdec"):
                 autotools.make(target=libmpdec)
             if self.options.cxx:
-                copy(self, "*", self.source_path / "libmpdec++", self.build_path / "libmpdec++")
+                copy(self, "*", os.path.join(self.source_folder, "libmpdec++"), os.path.join(self.build_folder, "libmpdec++"))
                 with chdir(self, "libmpdec++"):
                     autotools.make(target=libmpdecpp)
 
     def package(self):
-        pkg_dir = self.package_path
-        copy(self, "LICENSE.txt", src=self.source_folder, dst=pkg_dir / "licenses")
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         if is_msvc(self):
             distfolder = self._dist_folder
-            copy(self, "vc*.h", src=self.source_path / "libmpdec", dst=pkg_dir / "include")
-            copy(self, "*.h", src=distfolder, dst=pkg_dir / "include")
+            copy(self, "vc*.h", src=os.path.join(self.source_folder, "libmpdec"), dst=os.path.join(self.package_folder, "include"))
+            copy(self, "*.h", src=distfolder, dst=os.path.join(self.package_folder, "include"))
             if self.options.cxx:
-                copy(self, "*.hh", src=distfolder, dst=pkg_dir / "include")
-            copy(self, "*.lib", src=distfolder, dst=pkg_dir / "lib")
-            copy(self, "*.dll", src=distfolder, dst=pkg_dir / "bin")
+                copy(self, "*.hh", src=distfolder, dst=os.path.join(self.package_folder, "include"))
+            copy(self, "*.lib", src=distfolder, dst=os.path.join(self.package_folder, "lib"))
+            copy(self, "*.dll", src=distfolder, dst=os.path.join(self.package_folder, "bin"))
         else:
-            mpdecdir = self.build_path / "libmpdec"
-            mpdecppdir = self.build_path / "libmpdec++"
-            copy(self, "mpdecimal.h", src=mpdecdir, dst=pkg_dir / "include")
+            mpdecdir = os.path.join(self.build_folder, "libmpdec")
+            mpdecppdir = os.path.join(self.build_folder, "libmpdec++")
+            copy(self, "mpdecimal.h", src=mpdecdir, dst=os.path.join(self.package_folder, "include"))
             if self.options.cxx:
-                copy(self, "decimal.hh", src=mpdecppdir, dst=pkg_dir / "include")
+                copy(self, "decimal.hh", src=mpdecppdir, dst=os.path.join(self.package_folder, "include"))
             builddirs = [mpdecdir]
             if self.options.cxx:
                 builddirs.append(mpdecppdir)
             for builddir in builddirs:
-                copy(self, "*.a", src=builddir, dst=pkg_dir / "lib")
-                copy(self, "*.so", src=builddir, dst=pkg_dir / "lib")
-                copy(self, "*.so.*", src=builddir, dst=pkg_dir / "lib")
-                copy(self, "*.dylib", src=builddir, dst=pkg_dir / "lib")
-                copy(self, "*.dll", src=builddir, dst=pkg_dir / "bin")
+                copy(self, "*.a", src=builddir, dst=os.path.join(self.package_folder, "lib"))
+                copy(self, "*.so", src=builddir, dst=os.path.join(self.package_folder, "lib"))
+                copy(self, "*.so.*", src=builddir, dst=os.path.join(self.package_folder, "lib"))
+                copy(self, "*.dylib", src=builddir, dst=os.path.join(self.package_folder, "lib"))
+                copy(self, "*.dll", src=builddir, dst=os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         lib_pre_suf = ("", "")
