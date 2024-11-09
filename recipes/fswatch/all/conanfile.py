@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake.toolchain.blocks import is_apple_os
 from conan.tools.files import get, copy
 from conan.tools.scm import Version
 
@@ -76,4 +77,7 @@ class WatcherConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "fswatch::fswatch")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["m"]
+            self.cpp_info.system_libs = ["m", "pthread"]
+
+        if is_apple_os(self):
+            self.cpp_info.frameworks.extend(["CoreFoundation"])
