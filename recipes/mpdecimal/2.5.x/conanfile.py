@@ -219,7 +219,10 @@ class MpdecimalConan(ConanFile):
     def package_info(self):
         lib_pre_suf = ("", "")
         if is_msvc(self):
-            lib_pre_suf = ("lib", f"-{self.version}")
+            if self.options.shared:
+                lib_pre_suf = ("lib", f"-{self.version}.dll")
+            else:
+                lib_pre_suf = ("lib", f"-{self.version}")
         elif self.settings.os == "Windows":
             if self.options.shared:
                 lib_pre_suf = ("", ".dll")
