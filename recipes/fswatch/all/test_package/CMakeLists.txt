@@ -5,4 +5,4 @@ find_package(fswatch REQUIRED CONFIG)
 find_package(Threads REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE fswatch::fswatch)
+target_link_libraries(${PROJECT_NAME} PRIVATE fswatch::fswatch Threads::Threads)
