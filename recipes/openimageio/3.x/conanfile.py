@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.0"
 
 
 class OpenImageIOConan(ConanFile):
@@ -37,7 +37,6 @@ class OpenImageIOConan(ConanFile):
         "with_libjxl": [True, False],
         "with_libpng": [True, False],
         "with_libwebp": [True, False],
-        "with_opencolorio": [True, False],
         "with_opencv": [True, False],
         "with_openjpeg": [True, False],
         "with_openvdb": [True, False],
@@ -58,7 +57,6 @@ class OpenImageIOConan(ConanFile):
         "with_libjxl": True,  # TODO: Currently produces link failues
         "with_libpng": True,
         "with_libwebp": True,
-        "with_opencolorio": True,
         "with_openjpeg": True,
         "with_openvdb": False,  # FIXME: broken on M1
         "with_opencv": False,
@@ -77,28 +75,22 @@ class OpenImageIOConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if Version(self.version) < "3.0.0.0":
-            self.options.with_libjxl = False  #rm_safe("with_libjxl")
 
     def requirements(self):
         # Required libraries
         self.requires("zlib/[>=1.2.11 <2]")
-        if Version(self.version) < "3.0.0.0":
-            self.requires("boost/1.84.0")
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/4.7.0")
         self.requires("imath/3.1.9", transitive_headers=True)
         self.requires("openexr/3.2.3")
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/3.0.4")
         self.requires("pugixml/1.14")
         self.requires("libsquish/1.15")
-        self.requires("tsl-robin-map/1.2.1")
-        if Version(self.version) >= "2.4.17.0":
-            self.requires("fmt/10.2.1", transitive_headers=True)
-        else:
-            self.requires("fmt/9.1.0", transitive_headers=True)
+        self.requires("tsl-robin-map/1.3.0")
+        self.requires("fmt/10.2.1", transitive_headers=True)
+        self.requires("opencolorio/2.4.0")
 
         # Optional libraries
         if self.options.with_libjxl:
@@ -108,28 +100,26 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_freetype:
             self.requires("freetype/2.13.2")
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.3")
-        if self.options.with_opencolorio:
-            self.requires("opencolorio/2.3.1")
+            self.requires("hdf5/1.14.5")
         if self.options.with_opencv:
-            self.requires("opencv/4.8.1")
+            self.requires("opencv/4.10.0")
         if self.options.with_tbb:
-            self.requires("onetbb/2021.10.0")
+            self.requires("onetbb/2021.12.0")
         if self.options.with_dicom:
-            self.requires("dcmtk/3.6.7")
+            self.requires("dcmtk/3.6.8")
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/6.1")
+            self.requires("ffmpeg/7.0.1")
         # TODO: Field3D dependency
         if self.options.with_giflib:
-            self.requires("giflib/5.2.1")
+            self.requires("giflib/5.2.2")
         if self.options.with_libheif:
-            self.requires("libheif/1.16.2")
+            self.requires("libheif/1.18.2")
         if self.options.with_raw:
-            self.requires("libraw/0.21.2")
+            self.requires("libraw/0.21.3")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.2")
         if self.options.with_openvdb:
-            self.requires("openvdb/8.0.1")
+            self.requires("openvdb/11.0.0")
         if self.options.with_ptex:
             self.requires("ptex/2.4.2")
         if self.options.with_libwebp:
@@ -138,17 +128,17 @@ class OpenImageIOConan(ConanFile):
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
 
+        # TODO: Temporary, remove before merge
+        self.requires("lcms/2.16", override=True)
+
     def build_requirements(self):
         # A minimum cmake version is now required that is reasonably new
-        if Version(self.version) >= "3.0.0.0":
-            self.build_requires("cmake/[>=3.18.2]")
+        self.build_requires("cmake/[>=3.18.2]")
 
     def validate(self):
         if self.settings.compiler.cppstd:
-            if Version(self.version) >= "3.0.0.0":
-                check_min_cppstd(self, 17)
-            else:
-                check_min_cppstd(self, 14)
+            check_min_cppstd(self, 17)
+
         if is_msvc(self) and is_msvc_static_runtime(self) and self.options.shared:
             raise ConanInvalidConfiguration(
                 "Building shared library with static runtime is not supported!"
@@ -189,12 +179,10 @@ class OpenImageIOConan(ConanFile):
         # OIIO CMake files are patched to check USE_* flags to require or not use dependencies
         tc.variables["USE_JPEGTURBO"] = (self.options.with_libjpeg == "libjpeg-turbo")
         tc.variables["USE_LIBHEIF"] = self.options.with_libheif
-        if Version(self.version) >= '3.0.0.0':
-            tc.variables["USE_LIBJXL"] = self.options.with_libjxl
+        tc.variables["USE_LIBJXL"] = self.options.with_libjxl
         tc.variables["USE_LIBPNG"] = self.options.with_libpng
         tc.variables["USE_LIBRAW"] = self.options.with_raw
         tc.variables["USE_LIBWEBP"] = self.options.with_libwebp
-        tc.variables["USE_OPENCOLORIO"] = self.options.with_opencolorio
         tc.variables["USE_OPENCV"] = self.options.with_opencv
         tc.variables["USE_OPENGL"] = False
         tc.variables["USE_OPENJPEG"] = self.options.with_openjpeg
@@ -274,21 +262,8 @@ class OpenImageIOConan(ConanFile):
             "fmt::fmt",
             "imath::imath",
             "openexr::openexr",
+            "opencolorio::opencolorio",
         ]
-
-        if Version(self.version) < "3.0.0.0":
-            open_image_io_util.requires += [
-                "boost::filesystem",
-                "boost::regex",
-                "boost::system",
-                "boost::thread",
-            ]
-            open_image_io.requires += [
-                "boost::container",
-                "boost::regex",
-                "boost::system",
-                "boost::thread",
-            ]
 
         if self.options.with_libjxl:
             open_image_io.requires += ["libjxl::libjxl", "libjxl::jxl_cms"]
@@ -304,8 +279,6 @@ class OpenImageIOConan(ConanFile):
             open_image_io.requires.append("freetype::freetype")
         if self.options.with_hdf5:
             open_image_io.requires.append("hdf5::hdf5")
-        if self.options.with_opencolorio:
-            open_image_io.requires.append("opencolorio::opencolorio")
         if self.options.with_opencv:
             open_image_io.requires.append("opencv::opencv")
         if self.options.with_dicom:

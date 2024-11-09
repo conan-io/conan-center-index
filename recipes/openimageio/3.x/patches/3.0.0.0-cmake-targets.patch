@@ -102,12 +102,12 @@ index f8670a83f..1efd81609 100644
  
 -checked_find_package (OpenCV 4.0
 -                      DEFINITIONS USE_OPENCV=1)
-+if (USE_OPENCOLORIO)
++#if (USE_OPENCOLORIO)
 +    checked_find_package (OpenColorIO REQUIRED
 +                          VERSION_MIN 2.2
 +                          VERSION_MAX 2.9
 +                         )
-+endif()
++#endif()
 +# if (NOT OPENCOLORIO_INCLUDES)
 +#     get_target_property(OPENCOLORIO_INCLUDES OpenColorIO::OpenColorIO INTERFACE_INCLUDE_DIRECTORIES)
 +# endif ()
