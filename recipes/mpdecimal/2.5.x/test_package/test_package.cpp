@@ -1,4 +1,4 @@
-#include "decimal.hh"
+#include <decimal.hh>
 
 #include <iostream>
 
