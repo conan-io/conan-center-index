@@ -60,6 +60,9 @@ class CPythonConan(ConanFile):
 
         # options that don't change package id
         "env_vars": True,
+
+        # We need to disable mpdecimal `cxx` option on MSVC if it is shared
+        "mpdecimal/*:cxx": False,
     }
     short_paths = True
 
@@ -568,6 +571,8 @@ class CPythonConan(ConanFile):
             for bin_path in self.dependencies["expat"].cpp_info.bindirs:
                 copy(self, "*.dll", src=bin_path, dst=dest_path)
             for bin_path in self.dependencies["zlib"].cpp_info.bindirs:
+                copy(self, "*.dll", src=bin_path, dst=dest_path)
+            for bin_path in self.dependencies["openssl"].cpp_info.bindirs:
                 copy(self, "*.dll", src=bin_path, dst=dest_path)
 
     def _msvc_package_layout(self):
