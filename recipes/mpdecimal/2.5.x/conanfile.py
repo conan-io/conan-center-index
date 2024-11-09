@@ -107,9 +107,10 @@ class MpdecimalConan(ConanFile):
             tc.generate()
 
             deps = AutotoolsDeps(self)
-            if is_apple_os(self) and self.settings.arch == "armv8":
-                deps.environment.append("LDFLAGS", ["-arch arm64"])
-                deps.environment.append("LDXXFLAGS", ["-arch arm64"])
+            if is_apple_os(self):
+                arch = "arm64" if self.settings.arch == "armv8" else "x86_64"
+                deps.environment.append("LDFLAGS", [f"-arch {arch}"])
+                deps.environment.append("LDXXFLAGS", [f"-arch {arch}"])
             deps.generate()
 
     @property
