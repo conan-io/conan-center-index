@@ -4,5 +4,5 @@ project(test_package LANGUAGES CXX)
 find_package(artery-font-format REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} artery-font-format::artery-font-format)
+target_link_libraries(${PROJECT_NAME} PRIVATE artery-font-format::artery-font-format)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)

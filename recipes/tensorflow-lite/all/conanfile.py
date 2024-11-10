@@ -1,10 +1,9 @@
-import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches, replace_in_file
+from conan.tools.files import get, save, copy, export_conandata_patches, apply_conandata_patches
 from conan.tools.scm import Version
 from os.path import join
 import textwrap
@@ -82,14 +81,17 @@ class TensorflowLiteConan(ConanFile):
         self.requires("eigen/3.4.0")
         self.requires("farmhash/cci.20190513")
         self.requires("fft/cci.20061228")
-        self.requires("flatbuffers/23.3.3", transitive_headers=True)
+        if Version(self.version) < "2.15.0":
+            self.requires("flatbuffers/23.3.3", transitive_headers=True)
+        else:
+            self.requires("flatbuffers/23.5.26", transitive_headers=True)
         self.requires("gemmlowp/cci.20210928")
-        self.requires("ruy/cci.20220628")
+        self.requires("ruy/cci.20231129")
         if self.settings.arch in ("x86", "x86_64"):
             self.requires("intel-neon2sse/cci.20210225")
         if self.options.with_xnnpack:
             self.requires("xnnpack/cci.20231026")
-            # https://github.com/tensorflow/tensorflow/blob/359c3cdfc5fabac82b3c70b3b6de2b0a8c16874f/tensorflow/lite/delegates/xnnpack/xnnpack_delegate.cc#L165
+        if Version(self.version) >= "2.12.0" or self.options.with_xnnpack:
             self.requires("pthreadpool/cci.20231129")
         if self.options.with_xnnpack or self.options.get_safe("with_nnapi", False):
             self.requires("fp16/cci.20210320")
@@ -124,6 +126,7 @@ class TensorflowLiteConan(ConanFile):
             "TFLITE_ENABLE_XNNPACK": self.options.with_xnnpack,
             "TFLITE_ENABLE_MMAP": self.options.get_safe("with_mmap", False),
             "FETCHCONTENT_FULLY_DISCONNECTED": True,
+            "SYSTEM_PTHREADPOOL": True,
             "clog_POPULATED": True,
         })
         if self.settings.arch == "armv8":
@@ -159,9 +162,9 @@ class TensorflowLiteConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, join(self.package_folder, "licenses"))
         copy(self, "*.h", join(self.source_folder, "tensorflow", "lite"), join(self.package_folder, "include", "tensorflow", "lite"))
         copy(self, "version.h", join(self.source_folder, "tensorflow", "core", "public"), join(self.package_folder, "include", "tensorflow", "core", "public"))
-        copy(self, "*.a", self.build_folder, join(self.package_folder, "lib"))
-        copy(self, "*.so", self.build_folder, join(self.package_folder, "lib"))
-        copy(self, "*.dylib", self.build_folder, join(self.package_folder, "lib"))
+        copy(self, "*.a", self.build_folder, join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.so", self.build_folder, join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.dylib", self.build_folder, join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*.lib", self.build_folder, join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*.dll", self.build_folder, join(self.package_folder, "bin"), keep_path=False)
         self._create_cmake_module_alias_target(self, join(self.package_folder, self._module_file))
