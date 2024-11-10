@@ -57,7 +57,7 @@ class MpdecimalConan(ConanFile):
         if is_msvc(self) and self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration(
                 f"{self.ref} currently does not supported {self.settings.arch}. Contributions are welcomed")
-        if self.options.cxx:
+        if self.options.cxx and Version(self.version) < "2.5.1":
             if self.options.shared and self.settings.os == "Windows":
                 raise ConanInvalidConfiguration(
                     "A shared libmpdec++ is not possible on Windows (due to non-exportable thread local storage)")
@@ -240,4 +240,4 @@ class MpdecimalConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libmpdecimal++"].system_libs = ["pthread"]
             if self.options.shared and Version(self.version) >= "2.5.1":
-                self.cpp_info.components["libmpdecimal"].defines = ["MPDECIMALXX_DLL"]
+                self.cpp_info.components["libmpdecimal++"].defines = ["MPDECIMALXX_DLL"]
