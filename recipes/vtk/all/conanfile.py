@@ -6,17 +6,16 @@ import re
 from collections import OrderedDict
 from pathlib import Path
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import export_conandata_patches, get, rmdir, rename, replace_in_file, load, save, copy, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.56 <2 || >=2.0.6"
+required_conan_version = ">=2.0.6"
 
 
 class VtkConan(ConanFile):
@@ -94,7 +93,7 @@ class VtkConan(ConanFile):
         "with_pegtl": [True, False],
         "with_png": [True, False],
         "with_postgresql": [True, False],
-        "with_qt": ["5", "6", False],
+        "with_qt": [True, False],
         "with_sdl2": [True, False],
         "with_sqlite": [True, False],
         "with_theora": [True, False],
@@ -214,13 +213,10 @@ class VtkConan(ConanFile):
         return sorted(all_modules)
 
     def init(self):
-        # Skip module options support for Conan v1 because
-        # self.options.update(new_options, new_defaults) is not available
-        if conan_version.major != 1:
-            all_modules = self._modules_from_all_versions
-            new_options = {mod: ["auto", "YES", "WANT", "DONT_WANT", "NO"] for mod in all_modules}
-            new_defaults = {mod: "auto" for mod in all_modules}
-            self.options.update(new_options, new_defaults)
+        all_modules = self._modules_from_all_versions
+        new_options = {mod: ["auto", "YES", "WANT", "DONT_WANT", "NO"] for mod in all_modules}
+        new_defaults = {mod: "auto" for mod in all_modules}
+        self.options.update(new_options, new_defaults)
 
     @property
     @functools.lru_cache()
@@ -259,9 +255,8 @@ class VtkConan(ConanFile):
             del self.options.with_cocoa
         if self.settings.os == "Emscripten":
             self.options.rm_safe("with_dawn")
-        if conan_version.major != 1:
-            for opt in set(self._modules_from_all_versions) - set(self._modules):
-                self.options.rm_safe(opt)
+        for opt in set(self._modules_from_all_versions) - set(self._modules):
+            self.options.rm_safe(opt)
 
     def configure(self):
         if self.options.shared:
@@ -378,12 +373,9 @@ class VtkConan(ConanFile):
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_postgresql:
             self.requires("libpq/15.5")
-        if self.options.with_qt == "5":
+        if self.options.with_qt:
             # Used in public vtkQWidgetWidget.h
-            self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
-        elif self.options.with_qt == "6":
-            # Used in public vtkQWidgetWidget.h
-            self.requires("qt/[>=6.7 <7]", transitive_headers=True, transitive_libs=True)
+            self.requires("qt/[>=5.15 <7]", transitive_headers=True, transitive_libs=True, run=can_run(self))
         if self.options.with_sdl2:
             # Used in public vtkSDL2OpenGLRenderWindow.h
             self.requires("sdl/2.30.5", transitive_headers=True, transitive_libs=True)
@@ -424,13 +416,10 @@ class VtkConan(ConanFile):
         # zSpace | zSpace::zSpace
 
     def tool_requirements(self):
-        if self.options.with_qt:
+        if self.options.with_qt and not can_run(self):
             self.tool_requires("qt/<host_version>")
 
     def validate(self):
-        if conan_version.major == 1:
-            # The automatic component creation fails due to generator differences.
-            raise ConanInvalidConfiguration("Conan v1 is not supported.")
         if is_msvc(self) and not self.options.shared:
             # vtkCommonCore.lib(vtkSMPToolsAPI.obj) : error LNK2019: unresolved external symbol
             # "public: bool __cdecl vtk::detail::smp::vtkSMPToolsImpl<1>::IsParallelScope(void)"
@@ -602,11 +591,6 @@ class VtkConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        if self.options.with_qt:
-            VirtualBuildEnv(self).generate()
-            # Qt's moc command fails to find libpcre2-16.so.0 otherwise
-            VirtualRunEnv(self).generate(scope="build")
-
         tc = CMakeToolchain(self)
 
         # No need for versions on installed names
