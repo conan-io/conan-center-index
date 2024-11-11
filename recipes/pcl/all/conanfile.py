@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm
 from conan.tools.gnu import PkgConfigDeps
@@ -437,8 +437,34 @@ class PclConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        find_modules_to_remove = [
+            "ClangFormat",
+            "DSSDK",
+            "Ensenso",
+            "FLANN",
+            "GLEW",
+            "GTestSource",
+            "OpenMP",
+            "OpenNI",
+            "OpenNI2",
+            "Pcap",
+            "Qhull",
+            "RSSDK",
+            "RSSDK2",
+            "Sphinx",
+            "davidSDK",
+            "libusb",
+        ]
+        if Version(self.version) < "1.14.0":
+            find_modules_to_remove.append("Eigen")
+        for mod in find_modules_to_remove:
+            os.remove(os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake"))
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -501,16 +527,7 @@ class PclConan(ConanFile):
         deps = PkgConfigDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        find_modules_to_remove = ["FLANN", "GLEW", "Pcap", "Qhull", "libusb"]
-        if Version(self.version) < "1.14.0":
-            find_modules_to_remove.append("Eigen")
-        for mod in find_modules_to_remove:
-            os.remove(os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake"))
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
