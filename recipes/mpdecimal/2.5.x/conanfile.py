@@ -3,7 +3,7 @@ from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.files import get, chdir, copy, export_conandata_patches, apply_conandata_patches, rename
 from conan.tools.layout import basic_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.microsoft import VCVars, is_msvc, NMakeDeps, NMakeToolchain
+from conan.tools.microsoft import VCVars, is_msvc, NMakeToolchain
 from conan.tools.apple import is_apple_os
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
@@ -81,9 +81,6 @@ class MpdecimalConan(ConanFile):
         if is_msvc(self):
             vcvars = VCVars(self)
             vcvars.generate()
-
-            deps = NMakeDeps(self)
-            deps.generate()
 
             tc = NMakeToolchain(self)
             if Version(self.version) >= "2.5.1":
