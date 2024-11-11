@@ -66,7 +66,7 @@ class SpdlogConan(ConanFile):
 
     def requirements(self):
         if not self.options.get_safe("use_std_fmt"):
-            fmt_version = self.conf_data["fmt_version_mapping"][self.version]
+            fmt_version = self.conan_data["fmt_version_mapping"][self.version]
             self.requires(f"fmt/{fmt_version}", transitive_headers=True, transitive_libs=True)
 
     def package_id(self):
