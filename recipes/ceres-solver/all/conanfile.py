@@ -150,7 +150,7 @@ class CeresSolverConan(ConanFile):
             if Version(self.version) < "2.2.0":
                 self.requires("suitesparse-cxsparse/4.4.1")
         if self.options.get_safe("use_lapack"):
-            self.requires("openblas/0.3.27")
+            self.requires("openblas/0.3.28")
         if self._require_metis:
             self.requires("metis/5.2.1")
         if self.options.get_safe("use_TBB"):
