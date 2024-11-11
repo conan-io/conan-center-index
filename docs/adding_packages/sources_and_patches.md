@@ -49,7 +49,7 @@ as a system recipe (`<build_require>/system`) and making those binaries availabl
 In this repository we are building a subset of all the versions for a given library. This set of version changes over time as new versions
 are released and old ones stop being used.
 
-We welcome the latest release version for its new features and improvements. However, we recommend exercising caution with fresh releases, as upstream may soon release patches or hotfixes to address any unforeseen issues."
+We welcome the latest release version for its new features and improvements. However, we recommend exercising caution with fresh releases, as upstream may soon release patches or hotfixes to address any unforeseen issues. We usually wait until releases are a few days old to merge them.
 
 From time to time we remove old versions mainly due to technical reasons:
 the more versions we have, the more resources that are needed in the CI and the more time it takes to build each pull-request (also, the
