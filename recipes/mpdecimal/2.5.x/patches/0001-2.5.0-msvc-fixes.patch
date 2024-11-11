@@ -31,3 +31,4 @@
 +OPT = /Ox /GS /EHsc
 +OPT_SHARED = /Ox /GS /EHsc
  !endif
+ 
