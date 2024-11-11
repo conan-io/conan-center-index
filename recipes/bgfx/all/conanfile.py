@@ -12,7 +12,7 @@ from conan.tools.env import VirtualBuildEnv
 from pathlib import Path
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.1"
 
 class bgfxConan(ConanFile):
     name = "bgfx"
@@ -108,7 +108,8 @@ class bgfxConan(ConanFile):
         return {
             "gcc": "8",
             "clang": "11",
-            "apple-clang": "12", #to keep CCI compiling on osx 11.0 or higher, for now
+            "apple-clang": "12", #to keep CCI compiling on osx 11.0 or higher, for now,
+            "msvc": "192"
         }
 
     @property
@@ -126,20 +127,14 @@ class bgfxConan(ConanFile):
         self.requires("opengl/system")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 17)
-        check_min_vs(self, 192)
+        check_min_cppstd(self, 17)
         if self.settings.os == "Macos" and self.settings.get_safe("os.sdk_version") and self.settings.get_safe("os.sdk_version") < "11.0":
             raise ConanInvalidConfiguration(f"{self.ref} requires macos sdk version >= 11")
         if self.settings.os in ["iOS", "tvOS"]  and self.settings.get_safe("os.sdk_version") and self.settings.get_safe("os.sdk_version") < "16.0":
             raise ConanInvalidConfiguration(f"{self.ref} requires iOS/tvOS sdk version >= 16")
-        if not is_msvc(self):
-            try:
-                minimum_required_compiler_version = self._compiler_required[str(self.settings.compiler)]
-                if Version(self.settings.compiler.version) < minimum_required_compiler_version:
-                    raise ConanInvalidConfiguration("This package requires C++17 support. The current compiler does not support it.")
-            except KeyError:
-                self.output.warning(f"{self.ref} does no checking for the current compiler. Assuming it works, please consider adding it.")
+        minimum_required_compiler_version = self._compiler_required[str(self.settings.compiler)]
+        if Version(self.settings.compiler.version) < minimum_required_compiler_version:
+            raise ConanInvalidConfiguration("This package requires C++17 support. The current compiler does not support it.")
 
     def build_requirements(self):
         self.tool_requires("genie/1181")
@@ -376,9 +371,3 @@ class bgfxConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "bgfx")
         self.cpp_info.set_property("cmake_target_name", "bgfx::bgfx")
         self.cpp_info.set_property("pkg_config_name", "bgfx")
-
-        #  TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "bgfx"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "bgfx"
-        self.cpp_info.names["cmake_find_package"] = "bgfx"
-        self.cpp_info.names["cmake_find_package_multi"] = "bgfx"
