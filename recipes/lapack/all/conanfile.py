@@ -56,7 +56,7 @@ class LapackConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("openblas/0.3.26")
+        self.requires("openblas/0.3.28")
         self.requires("gfortran/13.2.0")
 
     def validate(self):
