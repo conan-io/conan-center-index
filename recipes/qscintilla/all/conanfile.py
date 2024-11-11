@@ -3,12 +3,11 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
+required_conan_version = ">=2.0.5"
 
 
 class QScintillaConan(ConanFile):
@@ -29,10 +28,6 @@ class QScintillaConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 11
-
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
@@ -50,22 +45,21 @@ class QScintillaConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/[>=6.7.1 <7]", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/[>=6.7.1 <7]", transitive_headers=True, transitive_libs=True, run=can_run(self))
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 11)
         if not self.dependencies["qt"].options.widgets:
             raise ConanInvalidConfiguration("QScintilla requires -o qt/*:widgets=True")
 
     def build_requirements(self):
-        self.tool_requires("qt/<host_version>")
+        if not can_run(self):
+            self.tool_requires("qt/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
         tc = CMakeToolchain(self)
         tc.cache_variables["QSCINTILLA_BUILD_DESIGNER_PLUGIN"] = self.dependencies["qt"].options.qttools
         tc.generate()
