@@ -27,7 +27,6 @@ class OpenTelemetryCppConan(ConanFile):
         "with_stl": [True, False],
         "with_gsl": [True, False],
         "with_abseil": [True, False],
-        "with_otlp": ["deprecated", True, False],
         "with_otlp_grpc": [True, False],
         "with_otlp_http": [True, False],
         "with_zipkin": [True, False],
@@ -50,7 +49,6 @@ class OpenTelemetryCppConan(ConanFile):
         "with_stl": False,
         "with_gsl": False,
         "with_abseil": True,
-        "with_otlp": "deprecated",
         "with_otlp_grpc": False,
         "with_otlp_http": True,
         "with_zipkin": True,
@@ -100,9 +98,6 @@ class OpenTelemetryCppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.options.with_otlp != "deprecated":
-            self.output.warning(f"{self.ref}:with_otlp option is deprecated, do not use anymore. "
-                                "Please, consider with_otlp_grpc or with_otlp_http instead.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -195,12 +190,7 @@ class OpenTelemetryCppConan(ConanFile):
 
     def build_requirements(self):
         if self.options.with_otlp_grpc or self.options.with_otlp_http:
-            if Version(self.version) >= "1.17.0":
-                self.tool_requires("opentelemetry-proto/1.3.2")
-            elif Version(self.version) >= "1.16.0":
-                self.tool_requires("opentelemetry-proto/1.3.1")
-            else:
-                self.tool_requires("opentelemetry-proto/1.3.0")
+            self.tool_requires("opentelemetry-proto/1.3.2")
             self.tool_requires("protobuf/<host_version>")
 
         if self.options.with_otlp_grpc:
@@ -216,10 +206,6 @@ class OpenTelemetryCppConan(ConanFile):
             set(OPENTELEMETRY_CPP_LIBRARIES opentelemetry-cpp::opentelemetry-cpp)
         """)
         save(self, module_file, content)
-
-    def package_id(self):
-        # deprecated
-        del self.info.options.with_otlp
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
