@@ -11,7 +11,7 @@ required_conan_version = ">=1.53.0"
 
 class PackageConan(ConanFile):
     name = "seq"
-    description = "a collection of original C++14 STL-like containers and related tools"
+    description = "A collection of original C++14 STL-like containers and related tools"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Thermadiag/seq"
@@ -41,8 +41,7 @@ class PackageConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
