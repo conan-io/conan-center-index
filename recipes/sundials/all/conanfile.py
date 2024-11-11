@@ -107,7 +107,7 @@ class SundialsConan(ConanFile):
         if self.options.get_safe("with_klu"):
             self.requires("suitesparse-klu/2.3.4", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_lapack"):
-            self.requires("openblas/0.3.27")
+            self.requires("openblas/0.3.28")
         if self.options.get_safe("with_mpi"):
             self.requires("openmpi/4.1.6", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_openmp"):
