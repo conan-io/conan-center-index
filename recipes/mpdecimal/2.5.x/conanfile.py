@@ -133,13 +133,16 @@ class MpdecimalConan(ConanFile):
         copy(self, "mpdecimal.h", libmpdec_folder, dist_folder)
         if self.options.shared:
             copy(self, f"libmpdec-{self.version}.dll", libmpdec_folder, dist_folder)
-            copy(self, f"libmpdec-{self.version}.dll.exp", libmpdec_folder, dist_folder)
             copy(self, f"libmpdec-{self.version}.dll.lib", libmpdec_folder, dist_folder)
         else:
             copy(self, f"libmpdec-{self.version}.lib", libmpdec_folder, dist_folder)
         if self.options.cxx:
+            if self.options.shared:
+                copy(self, f"libmpdec++-{self.version}.dll", libmpdecpp_folder, dist_folder)
+                copy(self, f"libmpdec++-{self.version}.dll.lib", libmpdecpp_folder, dist_folder)
+            else:
+                copy(self, f"libmpdec++-{self.version}.lib", libmpdecpp_folder, dist_folder)
             copy(self, "decimal.hh", libmpdecpp_folder, dist_folder)
-            copy(self, f"libmpdec++-{self.version}.lib", libmpdecpp_folder, dist_folder)
 
     @property
     def _shared_suffix(self):
