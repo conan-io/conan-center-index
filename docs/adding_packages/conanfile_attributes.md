@@ -160,7 +160,7 @@ Usage of each option should follow the rules:
    configurations for the value `header_only=False` and add one more configuration with `header_only=True`. **Only one package**
    will be generated for `header_only=True`, so it is crucial that the package is actually a _header only_ library, with header files only (no libraries or executables inside).
 
-   Recipes with such option should include the following in their `implements` attribute:
+   Recipes with such options should include the following in their `implements` attribute:
 
    ```python
    implements = ["auto_header_only"]
