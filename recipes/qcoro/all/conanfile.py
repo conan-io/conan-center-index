@@ -3,13 +3,12 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, replace_in_file, rmdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.56.0 <2 || >=2.0.6"
+required_conan_version = ">=2.0.9"
 
 
 class QCoroConan(ConanFile):
@@ -19,7 +18,6 @@ class QCoroConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/danvratil/qcoro"
     topics = ("coroutines", "qt")
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -32,6 +30,7 @@ class QCoroConan(ConanFile):
         "fPIC": True,
         "asan": False,
     }
+    implements = ["auto_shared_fpic"]
 
     @property
     def _compilers_minimum_version(self):
@@ -43,24 +42,14 @@ class QCoroConan(ConanFile):
             "apple-clang": "13",
         }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/[>=6.6.0 <7]", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/[>=5.15 <7]", transitive_headers=True, transitive_libs=True, run=can_run(self))
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 20)
-
+        check_min_cppstd(self, 20)
         # Special check for clang that can only be linked to libc++
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libc++":
             raise ConanInvalidConfiguration(
@@ -77,10 +66,14 @@ class QCoroConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.23 <4]")
-        self.tool_requires("qt/<host_version>")
+        if not can_run(self):
+            self.tool_requires("qt/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ECMQueryQt.cmake"),
+                        "get_target_property(_qtpaths_executable Qt6::qtpaths LOCATION)",
+                        "set(_qtpaths_executable qtpaths)")
 
     @property
     def _with_qml(self):
@@ -100,9 +93,6 @@ class QCoroConan(ConanFile):
         return self.dependencies["qt"].options.get_safe("qtwebsockets", False)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
-        # Required for Qt's moc and qtpaths
-        VirtualRunEnv(self).generate(scope="build")
         tc = CMakeToolchain(self)
         tc.variables["QCORO_BUILD_EXAMPLES"] = False
         tc.variables["QCORO_ENABLE_ASAN"] = self.options.asan
@@ -113,16 +103,10 @@ class QCoroConan(ConanFile):
         tc.variables["QCORO_WITH_QTQUICK"] = self._with_quick
         tc.variables["QCORO_WITH_QTWEBSOCKETS"] = self._with_websockets
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
-
-    def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ECMQueryQt.cmake"),
-                        "get_target_property(_qtpaths_executable Qt6::qtpaths LOCATION)",
-                        "set(_qtpaths_executable qtpaths)")
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -150,9 +134,6 @@ class QCoroConan(ConanFile):
                 component.libs = [f"{name}{module_name}"]
             component.includedirs.append(os.path.join("include", f"qcoro{qt_major}", "qcoro"))
             component.requires = requires or []
-            # TODO: Legacy, to be removed on Conan 2.0
-            component.names["cmake_find_package"] = module_name
-            component.names["cmake_find_package_multi"] = module_name
 
         _add_module("Coro", interface=True)
         _add_module("Core", requires=["coro", "qt::qtCore"])
@@ -172,9 +153,3 @@ class QCoroConan(ConanFile):
         self.cpp_info.builddirs.append(os.path.join("lib", "cmake", f"{name}Coro"))
         macros_cmake_path = os.path.join("lib", "cmake", f"{name}Coro", "QCoroMacros.cmake")
         self.cpp_info.set_property("cmake_build_modules", [macros_cmake_path])
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = name
-        self.cpp_info.names["cmake_find_package_multi"] = name
-        self.cpp_info.components["core"].build_modules["cmake_find_package"].append(macros_cmake_path)
-        self.cpp_info.components["core"].build_modules["cmake_find_package_multi"].append(macros_cmake_path)
