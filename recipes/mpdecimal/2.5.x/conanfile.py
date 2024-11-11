@@ -54,6 +54,7 @@ class MpdecimalConan(ConanFile):
 
     def layout(self):
         basic_layout(self, src_folder="src")
+        self.folders.build = "src"
 
     def validate(self):
         if is_msvc(self) and self.settings.arch not in ("x86", "x86_64"):
@@ -162,13 +163,10 @@ class MpdecimalConan(ConanFile):
         else:
             autotools = Autotools(self)
             autotools.configure()
-            # self.output.info(load(self, pathlib.Path("libmpdec", "Makefile")))
             libmpdec, libmpdecpp = self._target_names
-            copy(self, "*", self.source_path / "libmpdec", self.build_path / "libmpdec")
             with chdir(self, "libmpdec"):
                 autotools.make(target=libmpdec)
             if self.options.cxx:
-                copy(self, "*", self.source_path / "libmpdec++", self.build_path / "libmpdec++")
                 with chdir(self, "libmpdec++"):
                     autotools.make(target=libmpdecpp)
 
