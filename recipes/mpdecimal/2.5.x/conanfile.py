@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
-from conan.tools.files import get, chdir, copy, export_conandata_patches, apply_conandata_patches, rename
+from conan.tools.files import get, chdir, copy, export_conandata_patches, apply_conandata_patches, mkdir, rename
 from conan.tools.layout import basic_layout
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
@@ -8,8 +8,6 @@ from conan.tools.microsoft import VCVars, is_msvc, NMakeDeps, NMakeToolchain
 from conan.tools.apple import is_apple_os
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
-
-import os
 
 required_conan_version = ">=1.55.0"
 
@@ -109,6 +107,9 @@ class MpdecimalConan(ConanFile):
         libmpdec_folder = self.source_path / "libmpdec"
         libmpdecpp_folder = self.source_path / "libmpdec++"
 
+        copy(self, "Makefile.vc", libmpdec_folder, self.build_path)
+        rename(self, self.build_path / "Makefile.vc", libmpdec_folder / "Makefile")
+
         mpdec_target = "libmpdec-{}.{}".format(self.version, "dll" if self.options.shared else "lib")
         mpdecpp_target = "libmpdec++-{}.{}".format(self.version, "dll" if self.options.shared else "lib")
 
@@ -117,9 +118,6 @@ class MpdecimalConan(ConanFile):
             builds.append([libmpdecpp_folder, mpdecpp_target])
 
         for build_dir, target in builds:
-            copy(self, "Makefile.vc", build_dir, self.build_path)
-            rename(self, self.build_path / "Makefile.vc", build_dir / "Makefile")
-
             with chdir(self, build_dir):
                 self.run("""nmake -f Makefile.vc {target} MACHINE={machine} DEBUG={debug} DLL={dll}""".format(
                     target=target,
