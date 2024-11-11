@@ -47,7 +47,7 @@ class SpdlogConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         else:
-            del self.optinos.wchar_support
+            del self.options.wchar_support
             del self.options.wchar_filenames
             del self.options.wchar_console
         if Version(self.version) < "1.10.0":
