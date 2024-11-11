@@ -49,7 +49,7 @@ class CoinClpConan(ConanFile):
         # Symbols are exposed https://github.com/conan-io/conan-center-index/pull/16053#issuecomment-1512637106
         self.requires("coin-utils/2.11.11", transitive_headers=True, transitive_libs=True)
         self.requires("coin-osi/0.108.10", transitive_headers=True)
-        self.requires("openblas/0.3.26")
+        self.requires("openblas/0.3.28")
 
         # TODO:
         # self.requires("metis/5.2.1")
