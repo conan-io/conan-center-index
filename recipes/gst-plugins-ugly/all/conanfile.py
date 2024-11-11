@@ -1,6 +1,6 @@
 from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
 from conans.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 import glob
 import os
 import shutil
@@ -30,10 +30,6 @@ class GStPluginsUglyConan(ConanFile):
     exports_sources = ["patches/*.patch"]
 
     generators = "pkg_config"
-
-    @property
-    def _is_msvc(self):
-        return self.settings.compiler == "Visual Studio"
 
     def validate(self):
         if self.options.shared != self.options["gstreamer"].shared or \
@@ -101,7 +97,7 @@ class GStPluginsUglyConan(ConanFile):
             add_flag("cpp_link_args", value)
 
         meson = Meson(self)
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             add_linker_flag("-lws2_32")
             add_compiler_flag("-%s" % self.settings.compiler.runtime)
             if int(str(self.settings.compiler.version)) < 14:
@@ -123,13 +119,13 @@ class GStPluginsUglyConan(ConanFile):
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
             tools.patch(**patch)
 
-        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
+        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if is_msvc(self) else tools.no_op():
             meson = self._configure_meson()
             meson.build()
 
     def _fix_library_names(self, path):
         # regression in 1.16
-        if self.settings.compiler == "Visual Studio":
+        if is_msvc(self):
             with tools.chdir(path):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
@@ -138,7 +134,7 @@ class GStPluginsUglyConan(ConanFile):
 
     def package(self):
         self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if self._is_msvc else tools.no_op():
+        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if is_msvc(self) else tools.no_op():
             meson = self._configure_meson()
             meson.install()
 
