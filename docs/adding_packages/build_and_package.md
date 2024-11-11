@@ -18,7 +18,7 @@ Both methods often use build helpers to build binaries and install them into the
 ## Build Method
 
 For the `build()` method, the general scope used to build artifacts. Please, read
-the official reference to [build()](https://docs.conan.io/2/reference/conanfile/methods/build.html) method.and the
+the official reference to the [build()](https://docs.conan.io/2/reference/conanfile/methods/build.html) method and the
 [Build packages: the build() method](https://docs.conan.io/2/tutorial/creating_packages/build_packages.html).
 
 ## Package Method
