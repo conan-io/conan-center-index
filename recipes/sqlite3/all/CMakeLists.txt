@@ -169,9 +169,7 @@ endif()
 # but some non-ASCII characters may be not be decoded
 # in the user's current code page (e.g. CP936).
 # Thus we need to instruct the MSVC to use UTF-8.
-if(MSVC)
-    add_compile_options("/utf-8")
-endif()
+target_compile_options(${PROJECT_NAME} PRIVATE "$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 
 include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME}
