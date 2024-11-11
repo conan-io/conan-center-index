@@ -144,7 +144,6 @@ class GStLibAVConan(ConanFile):
             self.output.info(f"Appending GST_PLUGIN_PATH env var : {gst_plugin_path}")
             self.cpp_info.bindirs.append(gst_plugin_path)
             self.runenv_info.prepend_path("GST_PLUGIN_PATH", gst_plugin_path)
-            self.env_info.GST_PLUGIN_PATH.append(gst_plugin_path)
         else:
             self.cpp_info.defines.append("GST_LIBAV_STATIC")
             self.cpp_info.libdirs.append(gst_plugin_path)

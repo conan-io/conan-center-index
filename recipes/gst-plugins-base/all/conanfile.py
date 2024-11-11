@@ -286,8 +286,6 @@ class GStPluginsBaseConan(ConanFile):
 
         if self.options.shared:
             self.runenv_info.define_path("GST_PLUGIN_PATH", gst_plugin_path)
-            # TODO: Legacy, to be removed on Conan 2.0
-            self.env_info.GST_PLUGIN_PATH.append(gst_plugin_path)
 
         def _define_plugin_component(name, requires):
             self.cpp_info.components[name].libs = [name]
@@ -650,6 +648,11 @@ class GStPluginsBaseConan(ConanFile):
             gl_custom_content = "\n".join(f"{key}={value}" for key, value in gl_variables.items())
             self.cpp_info.components["gstreamer-gl-1.0"].set_property("pkg_config_custom_content", gl_custom_content)
 
+            self.cpp_info.components["gstreamer-gl-1.0"].libs = ["gstgl-1.0"]
+            self.cpp_info.components["gstreamer-gl-1.0"].requires = [
+                "gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0",
+                "gstreamer-allocators-1.0", "gstreamer-video-1.0",
+                "glib::gmodule-no-export-2.0", "libglvnd::libglvnd"] # TODO: bcm
             if self.options.get_safe("with_egl"):
                 self.cpp_info.components["gstreamer-gl-1.0"].requires += ["egl::egl"]
             if self.options.get_safe("with_xorg"):
