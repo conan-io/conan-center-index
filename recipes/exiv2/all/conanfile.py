@@ -96,12 +96,11 @@ class Exiv2Conan(ConanFile):
                 "clang": "5",
                 "apple-clang": "10",
             }
-            if not is_msvc(self):
-                minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)
-                if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-                    raise ConanInvalidConfiguration(
-                        f"{self.ref} requires C++{min_cppstd}, which your compiler does not fully support."
-                    )
+            minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{min_cppstd}, which your compiler does not fully support."
+                )
         else:
             # https://github.com/Exiv2/exiv2/tree/v0.27.7#217-building-with-c11-and-other-compilers
             check_max_cppstd(self, 14)
