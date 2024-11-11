@@ -22,22 +22,6 @@
 +MPD_LDFLAGS= /DLL /MANIFEST $(LDFLAGS) $(CONAN_LDFLAGS)
  
  
-@@ -34,13 +34,13 @@
- OBJS = decimal.obj
- 
- 
--$(LIBSTATIC_CXX): Makefile $(OBJS)
-+$(LIBSTATIC_CXX): Makefile.vc $(OBJS)
- 	-@if exist $@ del $(LIBSTATIC_CXX)
- 	lib /out:$(LIBSTATIC_CXX) $(OBJS)
- 
- 
- decimal.obj:\
--Makefile decimal.cc decimal.hh
-+Makefile.vc decimal.cc decimal.hh
- 	$(CXX) "-I." "-I$(SRCDIR)" $(MPD_CXXFLAGS) -c decimal.cc
- 
- 
 --- libmpdec/Makefile.vc
 +++ libmpdec/Makefile.vc
 @@ -36,15 +36,15 @@
