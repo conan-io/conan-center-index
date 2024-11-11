@@ -1,9 +1,8 @@
 import os
 
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
@@ -34,6 +33,7 @@ class QtADS(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    implements = ["auto_shared_fpic"]
 
     @property
     def _qt_major(self):
@@ -46,38 +46,24 @@ class QtADS(ConanFile):
         else:
             return 14
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/[>=6.0 <7]", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/[>=6.0 <7]", transitive_headers=True, transitive_libs=True, run=can_run(self))
         self.requires("libpng/[>=1.6 <2]")
 
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
 
     def build_requirements(self):
-        # Qt uses rcc during the build
-        # FIXME: Qt on CCI is currently only able to use tools from the host profile
-        # self.tool_requires("qt/<host_version>")
-        pass
+        if not can_run(self):
+            self.tool_requires("qt/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-        env = VirtualRunEnv(self)
-        env.generate(scope="build")
         tc = CMakeToolchain(self)
         tc.cache_variables["ADS_VERSION"] = self.version
         tc.variables["BUILD_EXAMPLES"] = "OFF"
