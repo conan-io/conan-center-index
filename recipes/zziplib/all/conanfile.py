@@ -113,7 +113,6 @@ class ZziplibConan(ConanFile):
         self.cpp_info.components["zzip"].set_property("pkg_config_name", "zziplib")
         self.cpp_info.components["zzip"].libs = [f"zzip{suffix}"]
         self.cpp_info.components["zzip"].requires = ["zlib::zlib"]
-        self.cpp_info.components["zzip"].bindirs = []
         # libzzipmmapped
         if self.options.zzipmapped:
             self.cpp_info.components["zzipmmapped"].set_property("pkg_config_name", "zzipmmapped")
@@ -122,7 +121,6 @@ class ZziplibConan(ConanFile):
             else:
                 self.cpp_info.components["zzipmmapped"].libs = [f"zzipmmapped{suffix}"]
             self.cpp_info.components["zzipmmapped"].requires = ["zlib::zlib"]
-            self.cpp_info.components["zzipmmapped"].bindirs = []
         # libzzipfseeko
         if self.options.zzipfseeko:
             self.cpp_info.components["zzipfseeko"].set_property("pkg_config_name", "zzipfseeko")
@@ -131,10 +129,8 @@ class ZziplibConan(ConanFile):
             else:
                 self.cpp_info.components["zzipfseeko"].libs = [f"zzipfseeko{suffix}"]
             self.cpp_info.components["zzipfseeko"].requires = ["zlib::zlib"]
-            self.cpp_info.components["zzipfseeko"].bindirs = []
         # libzzipwrap
         if self.options.zzipwrap:
             self.cpp_info.components["zzipwrap"].set_property("pkg_config_name", "zzipwrap")
             self.cpp_info.components["zzipwrap"].libs = [f"zzipwrap{suffix}"]
             self.cpp_info.components["zzipwrap"].requires = ["zzip", "zlib::zlib"]
-            self.cpp_info.components["zzipwrap"].bindirs = []
