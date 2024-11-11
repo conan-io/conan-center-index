@@ -1,15 +1,11 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file, load, save
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
-
 
 class ColmapConan(ConanFile):
     name = "colmap"
@@ -43,20 +39,6 @@ class ColmapConan(ConanFile):
         "cuda_architectures": "all-major",
     }
 
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
     def export_sources(self):
         copy(self, "colmap-conan-vars.cmake.in", self.recipe_folder, self.export_sources_folder)
 
@@ -87,7 +69,8 @@ class ColmapConan(ConanFile):
         if self.options.cgal:
             self.requires("cgal/5.6.1")
         if self.options.gui:
-            self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
+            # Qt6 is not supported
+            self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True, run=can_run(self))
         if self.options.gui or self.options.cuda:
             self.requires("glew/2.2.0")
             self.requires("opengl/system")
@@ -95,17 +78,13 @@ class ColmapConan(ConanFile):
         # self.requires("vlfeat/0.9.21", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 14)
 
     def build_requirements(self):
         if self.options.cuda:
             self.tool_requires("cmake/[>=3.24 <4]")
+        if self.options.gui and not can_run(self):
+            self.tool_requires("qt/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -142,12 +121,12 @@ class ColmapConan(ConanFile):
         deps.set_property("metis", "cmake_target_name", "metis")
         deps.generate()
 
-        VirtualBuildEnv(self).generate()
-
-        # FIXME: this is a hack for Freeimage and Metis transitive dep shared libs not being found for some reason
-        VirtualRunEnv(self).generate(scope="build")
-
     def _patch_sources(self):
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_CXX_STANDARD 14)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_CUDA_STANDARD 14)", "")
+
         for module in self.source_path.joinpath("cmake").glob("Find*.cmake"):
             if module.name != "FindDependencies.cmake":
                 module.unlink()
