@@ -41,7 +41,7 @@ for consumer, we do impose some limits on Conan features to provide a smoother f
 
 > **Note**: These are very specific to the ConanCenter being the default remote and may not be relevant to your specifc use case.
 
-* [Version ranges](https://docs.conan.io/2/tutorial/versioning/version_ranges.html#range-expressions) are generally not allowed (see below for exemption).
+* [Version ranges](https://docs.conan.io/2/tutorial/versioning/version_ranges.html#range-expressions) are generally not allowed ([see below](https://github.com/conan-io/conan-center-index/blob/master/docs/adding_packages/dependencies.md#version-ranges) for exemptions).
 * Specify explicit [RREV](https://docs.conan.io/2/tutorial/versioning/revisions.html) (recipe revision) of dependencies is not allowed.
 * Only ConanCenter recipes are allowed in `requires`/`requirements()` and `build_requires`/`build_requirements()`.
 * [`python_requires`](https://docs.conan.io/2/reference/extensions/python_requires.html) are not allowed.
