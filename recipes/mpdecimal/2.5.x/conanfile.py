@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
+from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.files import get, chdir, copy, export_conandata_patches, apply_conandata_patches, mkdir, rename
 from conan.tools.layout import basic_layout
 from conan.tools.build import cross_building
@@ -94,14 +94,9 @@ class MpdecimalConan(ConanFile):
 
             tc = AutotoolsToolchain(self)
             tc.configure_args.append("--enable-cxx" if self.options.cxx else "--disable-cxx")
-            tc.generate()
-
-            deps = AutotoolsDeps(self)
-            if is_apple_os(self):
-                arch = "arm64" if self.settings.arch == "armv8" else "x86_64"
-                deps.environment.append("LDFLAGS", [f"-arch {arch}"])
-                deps.environment.append("LDXXFLAGS", [f"-arch {arch}"])
-            deps.generate()
+            tc_env = tc.environment()
+            tc_env.append("LDXXFLAGS", ["$LDFLAGS"])
+            tc.generate(tc_env)
 
     @property
     def _dist_folder(self):
