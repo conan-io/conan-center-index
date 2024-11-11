@@ -166,9 +166,8 @@ class MpdecimalConan(ConanFile):
                     autotools.make(target=libmpdecpp)
 
     def package(self):
-        src_folder = self.source_folder if is_msvc(self) else self.build_folder
-        mpdecdir = os.path.join(src_folder, "libmpdec")
-        mpdecppdir = os.path.join(src_folder, "libmpdec++")
+        mpdecdir = os.path.join(self.source_folder, "libmpdec")
+        mpdecppdir = os.path.join(self.source_folder, "libmpdec++")
 
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "vccompat.h", src=mpdecdir, dst=os.path.join(self.package_folder, "include")) # 2.5.0/MSVC only
