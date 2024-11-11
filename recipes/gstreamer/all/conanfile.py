@@ -1,16 +1,15 @@
+import glob
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rename, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
-
-import glob
-import os
 
 required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
@@ -33,14 +32,6 @@ class GStreamerConan(ConanFile):
         "fPIC": True,
         "with_introspection": False,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    @property
-    def _is_legacy_one_profile(self):
-        return not hasattr(self, "settings_build")
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -67,13 +58,12 @@ class GStreamerConan(ConanFile):
         self.tool_requires("meson/[>=1.2.3 <2]")
         # There used to be an issue with glib being shared by default but its dependencies being static
         # No longer the case, but see: https://github.com/conan-io/conan-center-index/pull/13400#issuecomment-1551565573 for context
-        if not self._is_legacy_one_profile:
-            self.tool_requires("glib/<host_version>")
+        self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
-        if self._settings_build.os == 'Windows':
+        if self.settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("bison/3.8.2")
@@ -83,10 +73,6 @@ class GStreamerConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        virtual_build_env = VirtualBuildEnv(self)
-        virtual_build_env.generate()
-        if self._is_legacy_one_profile:
-            VirtualRunEnv(self).generate(scope="build")
         pkg_config_deps = PkgConfigDeps(self)
         pkg_config_deps.generate()
         tc = MesonToolchain(self)

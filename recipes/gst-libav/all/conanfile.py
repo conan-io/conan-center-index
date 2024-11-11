@@ -11,7 +11,7 @@ from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class GStLibAVConan(ConanFile):
@@ -34,17 +34,12 @@ class GStLibAVConan(ConanFile):
         "fPIC": True,
         "with_introspection": False,
     }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
         self.options["gstreamer"].shared = self.options.shared

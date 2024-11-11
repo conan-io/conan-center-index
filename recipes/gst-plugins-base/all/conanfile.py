@@ -6,7 +6,6 @@ import textwrap
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rm, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -64,14 +63,6 @@ class GStPluginsBaseConan(ConanFile):
         "with_introspection": False,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    @property
-    def _is_legacy_one_profile(self):
-        return not hasattr(self, "settings_build")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -102,7 +93,7 @@ class GStPluginsBaseConan(ConanFile):
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_libalsa"):
-            self.requires("libalsa/1.2.10")
+            self.requires("libalsa/1.2.12")
         if self.options.get_safe("with_xorg"):
             self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
         if self.options.with_gl:
@@ -125,7 +116,7 @@ class GStPluginsBaseConan(ConanFile):
         if self.options.with_ogg:
             self.requires("ogg/1.3.5")
         if self.options.with_opus:
-            self.requires("opus/1.4")
+            self.requires("opus/1.5.2")
         if self.options.with_theora:
             self.requires("theora/1.1.1")
         if self.options.with_vorbis:
@@ -147,18 +138,16 @@ class GStPluginsBaseConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
-        if not self._is_legacy_one_profile:
-            self.tool_requires("glib/2.81.0")
+        self.tool_requires("glib/2.81.0")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
         if self.options.get_safe("with_wayland"):
-            if not self._is_legacy_one_profile:
-                self.tool_requires("wayland/1.22.0")
+            self.tool_requires("wayland/1.22.0")
             self.tool_requires("wayland-protocols/1.36")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.78.1")
@@ -206,10 +195,6 @@ class GStPluginsBaseConan(ConanFile):
             tc.c_link_args.append(value)
             tc.cpp_link_args.append(value)
 
-        VirtualBuildEnv(self).generate()
-        if self._is_legacy_one_profile:
-            VirtualRunEnv(self).generate(scope="build")
-
         tc = MesonToolchain(self)
 
         if is_msvc(self):
@@ -254,22 +239,7 @@ class GStPluginsBaseConan(ConanFile):
 
         deps = PkgConfigDeps(self)
         if self.options.get_safe("with_wayland"):
-            if self._is_legacy_one_profile:
-                # Manually generate pkgconfig file of wayland-protocols since
-                # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
-                wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
-                wp_version = self.dependencies.build["wayland-protocols"].ref.version
-                wp_pkg_content = textwrap.dedent(f"""\
-                    prefix={wp_prefix}
-                    datarootdir=${{prefix}}/res
-                    pkgdatadir=${{datarootdir}}/wayland-protocols
-                    Name: Wayland Protocols
-                    Description: Wayland protocol files
-                    Version: {wp_version}
-                """)
-                save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
-            else:
-                deps.build_context_activated = ["wayland-protocols"]
+            deps.build_context_activated = ["wayland-protocols"]
         deps.generate()
 
     def build(self):
