@@ -20,7 +20,7 @@ or are known by ConanCenter's build service and have special meaning.
 
 ## Attributes
 
-These are a [key feature](https://docs.conan.io/2/reference/conanfile/attributes.html) which allow the Conan client to understand,
+These are a [key feature](https://docs.conan.io/2/reference/conanfile/attributes.html) which allows the Conan client to understand,
 identify, and expose recipes and which project they expose.
 
 In ConanCenter, there are a few conventions that need to be respected to ensure recipes can be discovered there `conan search` command
