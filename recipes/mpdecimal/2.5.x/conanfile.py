@@ -101,8 +101,8 @@ class MpdecimalConan(ConanFile):
             tc.generate(tc_env)
 
     def _build_msvc(self):
-        libmpdec_folder = self.source_path / "libmpdec"
-        libmpdecpp_folder = self.source_path / "libmpdec++"
+        libmpdec_folder = os.path.join(self.source_folder, "libmpdec")
+        libmpdecpp_folder = os.path.join(self.source_folder, "libmpdec++")
 
         mpdec_target = "libmpdec-{}.{}".format(self.version, "dll" if self.options.shared else "lib")
         mpdecpp_target = "libmpdec++-{}.{}".format(self.version, "dll" if self.options.shared else "lib")
@@ -112,8 +112,8 @@ class MpdecimalConan(ConanFile):
             builds.append([libmpdecpp_folder, mpdecpp_target])
 
         for build_dir, target in builds:
-            copy(self, "Makefile.vc", build_dir, self.build_path)
-            rename(self, self.build_path / "Makefile.vc", build_dir / "Makefile")
+            copy(self, "Makefile.vc", build_dir, self.build_folder)
+            rename(self, os.path.join(self.build_folder, "Makefile.vc"), os.path.join(build_dir, "Makefile"))
 
             with chdir(self, build_dir):
                 self.run("""nmake -f Makefile.vc {target} MACHINE={machine} DEBUG={debug} DLL={dll}""".format(
