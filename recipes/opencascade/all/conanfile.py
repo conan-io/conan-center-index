@@ -14,7 +14,7 @@ from conan.tools.files import (
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class OpenCascadeConan(ConanFile):
@@ -123,21 +123,23 @@ class OpenCascadeConan(ConanFile):
             self.requires("onetbb/2021.10.0")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
         if self.settings.compiler == "clang" and self.settings.compiler.version == "6.0" and \
            self.settings.build_type == "Release":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support Clang 6.0 if Release build type")
+        # adm/cmake/occt_defs_flags.cmake#L168
+        if self.settings.compiler == "apple-clang" and self.settings.compiler.libcxx != "libc++":
+            raise ConanInvalidConfiguration(f"{self.ref} requires libc++ with apple-clang")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-
-        # Inject C++ standard from profile since we have removed hardcoded C++ standard from upstream build files
-        if not valid_min_cppstd(self, self._min_cppstd):
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        if Version(self.version) >= "7.8.1":
+            # CMakeLists.txt#L9
+            cpp_standard_flag = str(self.settings.compiler.cppstd).replace("gnu", "").upper()
+            tc.cache_variables["BUILD_CPP_STANDARD"] = cpp_standard_flag
 
         tc.cache_variables["BUILD_LIBRARY_TYPE"] = "Shared" if self.options.shared else "Static"
         tc.cache_variables["INSTALL_TEST_CASES"] = False
@@ -273,6 +275,7 @@ class OpenCascadeConan(ConanFile):
                 replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs \"tk8.6\")", csf_tk_libs)
             else:
                 replace_in_file(self, occt_csf_cmake, "set (CSF_TclTkLibs   \"tk8.6\")", csf_tk_libs)
+
         ## fontconfig
         if self._is_linux:
             deps_targets.append("Fontconfig::Fontconfig")
@@ -412,8 +415,10 @@ class OpenCascadeConan(ConanFile):
 
         # Honor fPIC option, compiler.cppstd and compiler.libcxx
         replace_in_file(self, occt_defs_flags_cmake, "-fPIC", "")
-        replace_in_file(self, occt_defs_flags_cmake, "-std=c++0x", "")
-        replace_in_file(self, occt_defs_flags_cmake, "-std=gnu++0x", "")
+        if Version(self.version) < "7.8.1":
+            # As proper flags in newer versions
+            replace_in_file(self, occt_defs_flags_cmake, "-std=c++0x", "")
+            replace_in_file(self, occt_defs_flags_cmake, "-std=gnu++0x", "")
         replace_in_file(self, occt_defs_flags_cmake, "-stdlib=libc++", "")
         replace_in_file(self, occt_csf_cmake,
                               "set (CSF_ThreadLibs  \"pthread rt stdc++\")",
@@ -464,27 +469,6 @@ class OpenCascadeConan(ConanFile):
         occt_modules = self._get_modules_from_source_code()
         self._create_modules_json_file(occt_modules)
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._cmake_module_file_rel_path),
-            {target: f"opencascade::{target}" for module in occt_modules.values() for target in module},
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _cmake_module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
     def _get_modules_from_source_code(self):
         csf_to_conan_dependencies = {
             # Mandatory dependencies
@@ -492,6 +476,7 @@ class OpenCascadeConan(ConanFile):
             "CSF_TclLibs": {"externals": ["tcl::tcl"]},
             "CSF_fontconfig": {"externals": ["fontconfig::fontconfig"] if self._is_linux else []},
             "CSF_XwLibs": {"externals": ["xorg::xorg"] if self._is_linux else []},
+            "CSF_MMGR": {},
             # Optional dependencies
             "CSF_OpenGlLibs": {"externals": ["opengl::opengl"] if self._link_opengl else []},
             "CSF_TclTkLibs": {"externals": ["tk::tk"] if self._link_tk else []},
@@ -589,22 +574,9 @@ class OpenCascadeConan(ConanFile):
 
                     self.cpp_info.components[conan_component_module_name].requires.append(conan_component_target_name)
 
-                    # TODO: to remove in conan v2 once cmake_find_package* generators removed
-                    self.cpp_info.components[conan_component_target_name].names["cmake_find_package"] = target_lib
-                    self.cpp_info.components[conan_component_target_name].names["cmake_find_package_multi"] = target_lib
-                    self.cpp_info.components[conan_component_target_name].build_modules["cmake_find_package"] = [self._cmake_module_file_rel_path]
-                    self.cpp_info.components[conan_component_target_name].build_modules["cmake_find_package_multi"] = [self._cmake_module_file_rel_path]
-
-                # TODO: to remove in conan v2 once cmake_find_package* generators removed
-                self.cpp_info.components[conan_component_module_name].names["cmake_find_package"] = module
-                self.cpp_info.components[conan_component_module_name].names["cmake_find_package_multi"] = module
-
         occt_modules_json_content = load(self, self._modules_helper_filepath)
         occt_modules = json.loads(occt_modules_json_content)
         _register_components(occt_modules)
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "OpenCASCADE"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCASCADE"
         if self.options.shared:
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
