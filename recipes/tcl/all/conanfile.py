@@ -186,6 +186,8 @@ class TclConan(ConanFile):
             for root, _, list_of_files in os.walk(self.build_folder):
                 if "Makefile" in list_of_files:
                     replace_in_file(self, os.path.join(root, "Makefile"), "-Dstrtod=fixstrtod", "", strict=False)
+            # Potentially used by some of the subpackages - make sure it is built first
+            autotools.make(target="minizip")
             # For some reason this target "binaries" may not be built before others
             # on Windows while it's a dependency of many other targets
             autotools.make(target="binaries")
