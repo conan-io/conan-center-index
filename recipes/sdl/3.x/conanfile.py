@@ -84,10 +84,7 @@ class SDLConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    # exports_sources = "src/*"
-
     def source(self):
-        # return
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     @property
@@ -131,6 +128,7 @@ class SDLConan(ConanFile):
 
     def requirements(self):
         if self._needs_libusb:
+            # TODO: Fix, libusb not being picked up
             self.requires("libusb/1.0.26")
         if self._supports_opengl:
             self.requires("opengl/system")
