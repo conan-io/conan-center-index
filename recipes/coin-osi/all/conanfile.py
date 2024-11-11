@@ -52,7 +52,7 @@ class CoinOsiConan(ConanFile):
 
     def requirements(self):
         self.requires("coin-utils/2.11.11")
-        self.requires("openblas/0.3.26")
+        self.requires("openblas/0.3.28")
         if self.options.with_glpk:
             self.requires("glpk/4.48")
         # TODO: add support for: Cplex, Mosek, Xpress, Gurobi
