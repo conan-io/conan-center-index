@@ -1,4 +1,7 @@
 sources:
+  "1.2.0":
+    url: "https://github.com/zeus-cpp/expected/archive/refs/tags/v1.2.0.tar.gz"
+    sha256: "460da641f212c793f46a5a8f29107c9b9540a17a91f197e2dc396dac0269a2b5"
   "1.1.1":
     url: "https://github.com/zeus-cpp/expected/archive/refs/tags/v1.1.1.tar.gz"
     sha256: "47b411677ffb2fa0d43b308797542509ae2bdb101426cf0d4777e3c162b1d726"
