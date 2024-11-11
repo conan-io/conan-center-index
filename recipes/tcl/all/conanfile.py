@@ -105,13 +105,15 @@ class TclConan(ConanFile):
         unix_config_dir = os.path.join(self.source_folder, "unix")
         # When disabling 64-bit support (in 32-bit), this test must be 0 in order to use "long long" for 64-bit ints
         # (${tcl_type_64bit} can be either "__int64" or "long long")
-        replace_in_file(self, os.path.join(unix_config_dir, "configure"),
-                        "(sizeof(${tcl_type_64bit})==sizeof(long))",
-                        "(sizeof(${tcl_type_64bit})!=sizeof(long))")
+        if Version(self.version) < "9.0.0":
+            replace_in_file(self, os.path.join(unix_config_dir, "configure"),
+                            "(sizeof(${tcl_type_64bit})==sizeof(long))",
+                            "(sizeof(${tcl_type_64bit})!=sizeof(long))")
 
         unix_makefile_in = os.path.join(unix_config_dir, "Makefile.in")
         # Avoid building internal libraries as shared libraries
-        replace_in_file(self, unix_makefile_in, "--enable-shared --enable-threads", "--enable-threads")
+        if Version(self.version) < "9.0.0":
+            replace_in_file(self, unix_makefile_in, "--enable-shared --enable-threads", "--enable-threads")
         # Avoid clearing CFLAGS and LDFLAGS in the makefile
         replace_in_file(self, unix_makefile_in, "\nCFLAGS\t", "\n#CFLAGS\t")
         replace_in_file(self, unix_makefile_in, "\nLDFLAGS\t", "\n#LDFLAGS\t")
