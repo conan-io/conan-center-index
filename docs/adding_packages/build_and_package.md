@@ -23,7 +23,7 @@ the official reference to [build()](https://docs.conan.io/2/reference/conanfile/
 
 ## Package Method
 
-The `package()` method is used to copy the artifacts to the `package_folder`. Please, read the official reference to
+The `package()` method is used to copy the artifacts to the `package_folder`. Please, read the official reference to the
 [package()](https://docs.conan.io/2/reference/conanfile/methods/package.html) method and the
 [Package files: the package() method](https://docs.conan.io/2/tutorial/creating_packages/package_method.html).
 
