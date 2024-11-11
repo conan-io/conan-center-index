@@ -92,16 +92,14 @@ class SpdlogConan(ConanFile):
             raise ConanInvalidConfiguration("Visual Studio build for shared library with MT runtime is not supported")
     
         if self.options.get_safe("use_std_fmt"):
-            check_min_vs(self, self._std_fmt_compilers_minimum_version["msvc"])
-            if not is_msvc(self):
-                compiler_name = str(self.settings.compiler)
-                minimum_version = self._std_fmt_compilers_minimum_version.get(compiler_name, False)
-                if not minimum_version:
-                    self.output.warning(f"{self.name} recipe lacks information about the {compiler_name} compiler support.")
-                elif Version(self.settings.compiler.version) < minimum_version:
-                    raise ConanInvalidConfiguration(
-                        f"{self.ref} using std::fmt requires std::fmt, which your compiler does not support."
-                    )
+            compiler_name = str(self.settings.compiler)
+            minimum_version = self._std_fmt_compilers_minimum_version.get(compiler_name, False)
+            if not minimum_version:
+                self.output.warning(f"{self.name} recipe lacks information about the {compiler_name} compiler support.")
+            elif Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} using std::fmt requires std::fmt, which your compiler does not support."
+                )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -119,10 +117,10 @@ class SpdlogConan(ConanFile):
                 tc.variables["SPDLOG_FMT_EXTERNAL"] = not fmt.options.header_only
                 tc.variables["SPDLOG_FMT_EXTERNAL_HO"] = fmt.options.header_only
             tc.variables["SPDLOG_BUILD_SHARED"] = not self.options.header_only and self.options.shared
-            tc.variables["SPDLOG_WCHAR_SUPPORT"] = self.options.get_safe("wchar_support")
-            tc.variables["SPDLOG_WCHAR_FILENAMES"] = self.options.get_safe("wchar_filenames")
+            tc.variables["SPDLOG_WCHAR_SUPPORT"] = self.options.get_safe("wchar_support", False)
+            tc.variables["SPDLOG_WCHAR_FILENAMES"] = self.options.get_safe("wchar_filenames", False)
             if Version(self.version) >= "1.15.0":
-                tc.variables["SDPLOG_WCHAR_CONSOLE"] = self.options.get_safe("wchar_console")
+                tc.variables["SDPLOG_WCHAR_CONSOLE"] = self.options.get_safe("wchar_console", False)
             tc.variables["SPDLOG_INSTALL"] = True
             tc.variables["SPDLOG_NO_EXCEPTIONS"] = self.options.no_exceptions
             tc.variables["SPDLOG_USE_STD_FORMAT"] = self.options.get_safe("use_std_fmt")
