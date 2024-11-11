@@ -3,7 +3,6 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, cmake_layout
-from conan.tools.files import copy
 
 
 class SdbusCppTestConan(ConanFile):
@@ -11,19 +10,14 @@ class SdbusCppTestConan(ConanFile):
     generators = "CMakeToolchain", "PkgConfigDeps", "VirtualBuildEnv", "VirtualRunEnv"
     test_type = "explicit"
 
+    def layout(self):
+        cmake_layout(self)
+
     def requirements(self):
         self.requires(self.tested_reference_str)
 
     def build_requirements(self):
-        self.tool_requires("pkgconf/2.1.0")
-
-    def layout(self):
-        cmake_layout(self)
-
-    def generate(self):
-        # workaround for https://gitlab.kitware.com/cmake/cmake/-/issues/18150
-        copy(self, "*.pc", self.generators_folder,
-             os.path.join(self.generators_folder, "lib", "pkgconfig"))
+        self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def build(self):
         cmake = CMake(self)

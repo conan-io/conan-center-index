@@ -15,7 +15,7 @@ sources:
     url: "https://github.com/beached/utf_range/archive/v2.2.0.tar.gz"
     sha256: "00f60360736062403c8a7a94dd07c750366958f20d1864578faecf2e09d84265"
 daw_headers_mapping:
-  "2.2.5": "2.106.0"
+  "2.2.5": "2.110.0"
   "2.2.4": "2.101.0"
   "2.2.3": "2.97.0"
   "2.2.2": "2.97.0"

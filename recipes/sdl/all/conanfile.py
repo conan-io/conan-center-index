@@ -15,10 +15,10 @@ required_conan_version = ">=1.55.0"
 class SDLConan(ConanFile):
     name = "sdl"
     description = "Access to audio, keyboard, mouse, joystick, and graphics hardware via OpenGL, Direct3D and Vulkan"
-    topics = ("sdl2", "audio", "keyboard", "graphics", "opengl")
+    license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libsdl.org"
-    license = "Zlib"
+    topics = ("sdl2", "audio", "keyboard", "graphics", "opengl")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -186,8 +186,7 @@ class SDLConan(ConanFile):
             self.build_requires("wayland/1.22.0")  # Provides wayland-scanner
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True,
-            destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
