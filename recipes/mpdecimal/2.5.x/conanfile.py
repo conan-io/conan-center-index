@@ -29,7 +29,7 @@ class MpdecimalConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "cxx": False,
+        "cxx": True,
     }
 
     @property
