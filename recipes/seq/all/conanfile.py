@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 class PackageConan(ConanFile):
     name = "seq"
