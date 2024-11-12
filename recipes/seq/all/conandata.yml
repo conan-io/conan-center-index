@@ -2,3 +2,9 @@ sources:
   "1.1.0":
     url: "https://github.com/Thermadiag/seq/archive/refs/tags/v1.1.0.tar.gz"
     sha256: "806e5f0ed692d662caba3295ef23f8177147853365d97fa2ff9bbc2aa412c840"
+patches:
+  "1.1.0":
+    - patch_file: "patches/1.1.0-0001-support-clang.patch"
+      patch_description: "support clang about is_trivially_copyable"
+      patch_type: "portability"
+      patch_source: "https://github.com/Thermadiag/seq/pull/4"

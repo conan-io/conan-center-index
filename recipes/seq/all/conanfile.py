@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file, rm
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
 from conan.tools.env import VirtualBuildEnv
 import os
 
@@ -23,6 +23,9 @@ class PackageConan(ConanFile):
     default_options = {
         "header_only": False,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.options.header_only:
@@ -52,7 +55,7 @@ class PackageConan(ConanFile):
         venv.generate(scope="build")
 
     def build(self):
-        replace_in_file(self, os.path.join(self.source_folder, "seq", "type_traits.hpp"), "#if defined(__GNUG__) && (__GNUC__ < 5)", "#if !defined(__clang__) && defined(__GNUG__) && (__GNUC__ < 5)")
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
