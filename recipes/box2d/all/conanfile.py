@@ -78,6 +78,7 @@ class Box2dConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["CMAKE_COMPILE_WARNING_AS_ERROR"] = False
         if Version(self.version) < "3.0.0":
             tc.variables["BOX2D_BUILD_TESTBED"] = False
             tc.variables["BOX2D_BUILD_UNIT_TESTS"] = False

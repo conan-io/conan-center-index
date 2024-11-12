@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
+from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.files import get, chdir, copy, export_conandata_patches, apply_conandata_patches, mkdir, rename
 from conan.tools.layout import basic_layout
 from conan.tools.build import cross_building
@@ -102,13 +102,9 @@ class MpdecimalConan(ConanFile):
 
             tc = AutotoolsToolchain(self)
             tc.configure_args.append("--enable-cxx" if self.options.cxx else "--disable-cxx")
-            tc.generate()
-
-            deps = AutotoolsDeps(self)
-            if is_apple_os(self) and self.settings.arch == "armv8":
-                deps.environment.append("LDFLAGS", ["-arch arm64"])
-                deps.environment.append("LDXXFLAGS", ["-arch arm64"])
-            deps.generate()
+            tc_env = tc.environment()
+            tc_env.append("LDXXFLAGS", ["$LDFLAGS"])
+            tc.generate(tc_env)
 
     @property
     def _dist_folder(self):
@@ -219,7 +215,10 @@ class MpdecimalConan(ConanFile):
     def package_info(self):
         lib_pre_suf = ("", "")
         if is_msvc(self):
-            lib_pre_suf = ("lib", f"-{self.version}")
+            if self.options.shared:
+                lib_pre_suf = ("lib", f"-{self.version}.dll")
+            else:
+                lib_pre_suf = ("lib", f"-{self.version}")
         elif self.settings.os == "Windows":
             if self.options.shared:
                 lib_pre_suf = ("", ".dll")
