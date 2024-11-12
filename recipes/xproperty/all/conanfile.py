@@ -24,25 +24,6 @@ class XpropertyConan(ConanFile):
     def _min_cppstd(self):
         return "14" if Version(self.version) <= "0.12.0" else "17"
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "14": {
-                "gcc": "6",
-                "clang": "5",
-                "apple-clang": "10",
-                "Visual Studio": "15",
-                "msvc": "191",
-            },
-            "17": {
-                "gcc": "8",
-                "clang": "7",
-                "apple-clang": "12",
-                "Visual Studio": "16",
-                "msvc": "192",
-            }
-        }.get(self._min_cppstd, {})
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
