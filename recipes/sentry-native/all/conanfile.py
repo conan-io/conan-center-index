@@ -9,7 +9,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2.1"
 
 
 class SentryNativeConan(ConanFile):
@@ -131,8 +131,7 @@ class SentryNativeConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
@@ -302,30 +301,3 @@ class SentryNativeConan(ConanFile):
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)
-
-            # TODO: to remove in conan v2 once cmake_find_package* generators removed
-            self.cpp_info.names["cmake_find_package"] = "crashpad"
-            self.cpp_info.names["cmake_find_package_multi"] = "crashpad"
-            self.cpp_info.components["crashpad_mini_chromium"].names["cmake_find_package"] = "mini_chromium"
-            self.cpp_info.components["crashpad_mini_chromium"].names["cmake_find_package_multi"] = "mini_chromium"
-            self.cpp_info.components["crashpad_compat"].names["cmake_find_package"] = "compat"
-            self.cpp_info.components["crashpad_compat"].names["cmake_find_package_multi"] = "compat"
-            self.cpp_info.components["crashpad_util"].names["cmake_find_package"] = "util"
-            self.cpp_info.components["crashpad_util"].names["cmake_find_package_multi"] = "util"
-            self.cpp_info.components["crashpad_client"].names["cmake_find_package"] = "client"
-            self.cpp_info.components["crashpad_client"].names["cmake_find_package_multi"] = "client"
-            self.cpp_info.components["crashpad_snapshot"].names["cmake_find_package"] = "snapshot"
-            self.cpp_info.components["crashpad_snapshot"].names["cmake_find_package_multi"] = "snapshot"
-            self.cpp_info.components["crashpad_minidump"].names["cmake_find_package"] = "minidump"
-            self.cpp_info.components["crashpad_minidump"].names["cmake_find_package_multi"] = "minidump"
-            if self.settings.os == "Windows":
-                self.cpp_info.components["crashpad_getopt"].names["cmake_find_package"] = "getopt"
-                self.cpp_info.components["crashpad_getopt"].names["cmake_find_package_multi"] = "getopt"
-            self.cpp_info.components["crashpad_handler"].names["cmake_find_package"] = "handler"
-            self.cpp_info.components["crashpad_handler"].names["cmake_find_package_multi"] = "handler"
-            self.cpp_info.components["crashpad_tools"].names["cmake_find_package"] = "tools"
-            self.cpp_info.components["crashpad_tools"].names["cmake_find_package_multi"] = "tools"
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "sentry"
-        self.cpp_info.names["cmake_find_package_multi"] = "sentry"
