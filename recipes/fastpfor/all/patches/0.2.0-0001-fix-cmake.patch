@@ -1,15 +1,15 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 38590f3..40beff4 100644
+index 38590f3..3cd57b6 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -103,6 +103,10 @@ elseif(WIN32)
      if(NOT MSVC12)
           message(STATUS "On Windows, only MSVC version 12 is supported!")
      endif()
-+    set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /arch:AVX")
-+    set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} /arch:AVX")
-+    set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /arch:AVX")
-+    set (CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} /arch:AVX")
++		set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /arch:AVX")
++		set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} /arch:AVX")
++		set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /arch:AVX")
++		set (CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG} /arch:AVX")
  else ()
      message(FATAL_ERROR "Please, use GCC, Clang, or the Intel compiler!")
  endif()
@@ -31,19 +31,27 @@ index 38590f3..40beff4 100644
  find_package(snappy)
  if(NOT ${snappy_FOUND})
      message(STATUS "Snappy was not found. codecssnappy and "
-@@ -158,6 +162,7 @@ else()
+@@ -158,13 +162,15 @@ else()
      message(STATUS "Snappy was found. Building additional targets "
                     "codecssnappy and inmemorybenchmarksnappy.")
      include_directories(${snappy_INCLUDE_DIRS})
-+    if(0)
-     add_executable(codecssnappy src/codecs.cpp)
+-    add_executable(codecssnappy src/codecs.cpp)
++		if(0)
++		add_executable(codecssnappy src/codecs.cpp)
      set_target_properties(codecssnappy PROPERTIES DEFINE_SYMBOL USESNAPPY)
      target_link_libraries(codecssnappy FastPFOR ${snappy_LIBRARIES})
-@@ -165,6 +170,7 @@ else()
+ 
      add_executable(inmemorybenchmarksnappy src/inmemorybenchmark.cpp)
      set_target_properties(inmemorybenchmarksnappy PROPERTIES DEFINE_SYMBOL USESNAPPY)
      target_link_libraries(inmemorybenchmarksnappy FastPFOR ${snappy_LIBRARIES})
-+    endif()
++		endif()
  endif()
  
  option(WITH_TEST "Build with Google Test" ON)
+@@ -256,4 +262,4 @@ if(NOT CMAKE_VERSION VERSION_LESS 3.0.0)
+ endif()
+ configure_file("fastpfor.pc.in" "${CMAKE_CURRENT_BINARY_DIR}/fastpfor.pc" @ONLY)
+ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/fastpfor.pc"
+-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+\ No newline at end of file
++    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
