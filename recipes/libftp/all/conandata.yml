@@ -1,7 +1,7 @@
 sources:
-  "1.2.0":
-    url: "https://github.com/deniskovalchuk/libftp/archive/refs/tags/v1.2.0.tar.gz"
-    sha256: "5d9c1b24e58ebf01f38e1ea4c76fee7ea4d238e3e2782f1d43492b19a202b4d1"
+  "1.3.0":
+    url: "https://github.com/deniskovalchuk/libftp/archive/refs/tags/v1.3.0.tar.gz"
+    sha256: "e4861fccb5c67742db1aa8f1af98ac70888b54212b06a8366d84a040897ca749"
   "1.1.0":
     url: "https://github.com/deniskovalchuk/libftp/archive/refs/tags/v1.1.0.tar.gz"
     sha256: "8d9ff413436b17eef225c4b12539965cdea786d02bb2c688b153992d36f88f48"
