@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.env import VirtualBuildEnv, Environment
+from conan.tools.env import Environment
 from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches, collect_libs, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -48,22 +48,19 @@ class DpdkConan(ConanFile):
         "with_openssl": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return "11"
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.options["libnuma"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libnuma/2.0.16", options={"shared": True})
+        self.requires("libnuma/2.0.19", options={"shared": True})
         self.requires("libelf/0.8.13")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("linux-headers-generic/5.15.128", transitive_headers=True)
@@ -71,7 +68,7 @@ class DpdkConan(ConanFile):
             # rte_metrics_telemetry.h
             self.requires("jansson/2.14", transitive_headers=True, transitive_libs=True)
         if self.options.with_libarchive:
-            self.requires("libarchive/3.7.4")
+            self.requires("libarchive/3.7.6")
         if self.options.with_libbpf:
             self.requires("libbpf/1.3.0")
         if self.options.with_libbsd:
@@ -96,10 +93,7 @@ class DpdkConan(ConanFile):
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("DPDK is only supported on Linux")
-
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
+        check_min_cppstd(self, 11)
         if not self.dependencies["libnuma"].options.shared:
             # dpdk is strict about its exported symbols and fails when it encounters statically linked libnuma symbols
             raise ConanInvalidConfiguration("libnuma must be built with '-o libnuma/*:shared=True'")
@@ -108,10 +102,11 @@ class DpdkConan(ConanFile):
         self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        self.tool_requires("cpython/[~3.12]")
+        self.tool_requires("cpython/3.12.7")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = MesonToolchain(self)
@@ -123,10 +118,7 @@ class DpdkConan(ConanFile):
         tc.extra_cflags.append(f"-I{self.dependencies['linux-headers-generic'].cpp_info.includedir}")
         tc.generate()
 
-        deps = PkgConfigDeps(self)
-        deps.generate()
-
-        VirtualBuildEnv(self).generate()
+        PkgConfigDeps(self).generate()
 
         # To install pyelftools
         env = Environment()
@@ -142,7 +134,6 @@ class DpdkConan(ConanFile):
         self.run(f"python -m pip install {' '.join(packages)} --no-cache-dir --target={self._site_packages_dir}")
 
     def build(self):
-        apply_conandata_patches(self)
         self._pip_install(["pyelftools"])
         meson = Meson(self)
         meson.configure()
@@ -161,4 +152,5 @@ class DpdkConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "libdpdk")
+        # The project builds almost 200 libraries.
         self.cpp_info.libs = collect_libs(self)
