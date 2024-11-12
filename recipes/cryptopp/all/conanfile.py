@@ -189,6 +189,12 @@ class CryptoPPConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.components["libcryptopp"].system_libs = ["bcrypt", "ws2_32"]
 
+        if not self.options.shared and self.options.use_openmp:
+            if self.settings.compiler in ("gcc", "clang"):
+                openmp_flag = ["-fopenmp"]
+                self.cpp_info.components["libcryptopp"].cxxflags = openmp_flag
+                self.cpp_info.components["libcryptopp"].exelinkflags = openmp_flag
+
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["pkg_config"] = "libcryptopp"
         self.cpp_info.components["libcryptopp"].names["cmake_find_package"] = legacy_cmake_target
