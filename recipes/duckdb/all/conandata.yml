@@ -1,4 +1,7 @@
 sources:
+  "1.1.3":
+    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v1.1.2.tar.gz"
+    sha256: "a3319a64c390ed0454c869b2e4fc0af2413cd49f55cd0f1400aaed9069cdbc4c"
   "1.1.2":
     url: "https://github.com/duckdb/duckdb/archive/refs/tags/v1.1.2.tar.gz"
     sha256: "a3319a64c390ed0454c869b2e4fc0af2413cd49f55cd0f1400aaed9069cdbc4c"
@@ -24,6 +27,13 @@ sources:
     url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.9.0.tar.gz"
     sha256: "3dbf3326a831bf0797591572440e81a3d6d668f8e33a25ce04efae19afc3a23d"
 patches:
+  "1.1.3":
+    - patch_file: "patches/1.1.1-0001-fix-cmake.patch"
+      patch_description: "install static of shared library, add installation for odbc extention"
+      patch_type: "portability"
+    - patch_file: "patches/1.1.1-0002-msvc-bicobj.patch"
+      patch_description: "add /bigobj flag"
+      patch_type: "portability"
   "1.1.2":
     - patch_file: "patches/1.1.1-0001-fix-cmake.patch"
       patch_description: "install static of shared library, add installation for odbc extention"

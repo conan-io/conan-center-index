@@ -62,7 +62,7 @@ class LibRawConan(ConanFile):
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.3")
         if self.options.with_lcms:
-            self.requires("lcms/2.14")
+            self.requires("lcms/2.16")
         if self.options.with_jasper:
             self.requires("jasper/4.0.0")
 
