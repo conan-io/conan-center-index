@@ -161,11 +161,6 @@ class Open62541Conan(ConanFile):
             self.settings.rm_safe("compiler.libcxx")
             self.settings.rm_safe("compiler.cppstd")
 
-        # Due to https://github.com/open62541/open62541/issues/4687 we cannot build with 1.2.2 + Windows + shared
-        if Version(self.version) >= "1.2.2" and self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} doesn't properly support shared lib on Windows")
-
         if self.options.subscription == "With Events":
             # Deprecated in 1.2.2
             self.output.warning(
@@ -228,6 +223,11 @@ class Open62541Conan(ConanFile):
         if self.options.pub_sub != False and self.settings.os != "Linux":
             raise ConanInvalidConfiguration(
                 "PubSub over Ethernet is not supported for your OS!")
+
+        # Due to https://github.com/open62541/open62541/issues/4687 we cannot build with 1.2.2 + Windows + shared
+        if Version(self.version) >= "1.2.2" and self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} doesn't properly support shared lib on Windows")
 
         if self.options.web_socket:
             if self.options["libwebsockets"].with_ssl != self.options.encryption:
