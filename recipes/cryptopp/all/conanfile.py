@@ -192,7 +192,7 @@ class CryptoPPConan(ConanFile):
         if not self.options.shared and self.options.use_openmp:
             if self.settings.compiler in ("gcc", "clang"):
                 openmp_flag = ["-fopenmp"]
-                self.cpp_info.components["libcryptopp"].cxxflags = openmp_flag
+                self.cpp_info.components["libcryptopp"].sharedlinkflags = openmp_flag
                 self.cpp_info.components["libcryptopp"].exelinkflags = openmp_flag
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
