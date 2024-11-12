@@ -24,26 +24,12 @@ class EmbreeConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
-        "sse2": [True, False],
-        "sse42": [True, False],
-        "avx": [True, False],
-        "avx2": [True, False],
-        "avx512": [True, False],
-        "neon": [True, False],
-        "neon2x": [True, False],
+        "fPIC": [True, False]
     }
 
     default_options = {
         "shared": False,
-        "fPIC": True,
-        "sse2": True,
-        "sse42": True,
-        "avx": True,
-        "avx2": True,
-        "avx512": True,
-        "neon": True,
-        "neon2x": True,
+        "fPIC": True
     }
 
     @property
@@ -68,48 +54,12 @@ class EmbreeConan(ConanFile):
     def _has_neon(self):
         return "arm" in self.settings.arch
 
-    @property
-    def _has_neon2x(self):
-        return "arm" in self.settings.arch and is_apple_os(self)
-
-    @property
-    def _num_isa(self):
-        num_isa = 0
-        if self._has_neon:
-            if self.options.neon:
-                num_isa += 1
-            if self.options.neon2x:
-                num_isa += 1
-        for simd_option in ["sse2", "sse42", "avx", "avx2", "avx512"]:
-            if self.options.get_safe(simd_option):
-                num_isa += 1
-        return num_isa
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
-        # For Emscripten disable TBB and all ISAs. It will compile only for SSE
-        if self.settings.os == "Emscripten":
-            del self.options.with_tbb
-            del self.options.sse42
-            del self.options.avx
-            del self.options.avx2
-            del self.options.avx512
-            del self.options.neon
-            del self.options.neon2x
-
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._has_sse_avx:
-            del self.options.sse2
-            del self.options.sse42
-            del self.options.avx
-            del self.options.avx2
-            del self.options.avx512
-        if not self._has_neon:
-            del self.options.neon
-            del self.options.neon2x
 
     def configure(self):
         if self.options.shared:
@@ -119,7 +69,8 @@ class EmbreeConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("onetbb/2021.12.0")
+        if self.settings.os != "Emscripten":
+            self.requires("onetbb/2021.12.0")
 
     def validate(self):
         if not (self._has_sse_avx or self._has_neon):
@@ -142,11 +93,8 @@ class EmbreeConan(ConanFile):
         if self.settings.os == "Linux" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
             raise ConanInvalidConfiguration(f"{self.ref} cannot be built with clang libc++, use libstdc++ instead")
 
-        if self.settings.compiler == "apple-clang" and not self.options.shared and compiler_version >= "9.0" and self._num_isa > 1:
+        if self.settings.compiler == "apple-clang" and not self.options.shared and compiler_version >= "9.0":
             raise ConanInvalidConfiguration(f"{self.ref} static with apple-clang >=9 and multiple ISA (simd) is not supported")
-
-        if self._num_isa == 0:
-            raise ConanInvalidConfiguration("At least one ISA (simd) must be enabled")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -159,16 +107,17 @@ class EmbreeConan(ConanFile):
         tc.variables["EMBREE_BACKFACE_CULLING"] = True
         tc.variables["EMBREE_IGNORE_INVALID_RAYS"] = True
         tc.variables["EMBREE_ISPC_SUPPORT"] = False
-        tc.variables["EMBREE_TASKING_SYSTEM"] = "INTERNAL" if is_apple_os(self) else "TBB"
+        tc.variables["EMBREE_TASKING_SYSTEM"] = "INTERNAL" if is_apple_os(self) or self.settings.os == "Emscripten" else "TBB"
         tc.variables["EMBREE_MAX_ISA"] = "NONE"
-        tc.variables["EMBREE_ISA_NEON"] = self.options.get_safe("neon", False)
-        tc.variables["EMBREE_ISA_NEON2X"] = self.options.get_safe("neon2x", False)
-
-        tc.variables["EMBREE_ISA_SSE2"] = self.options.get_safe("sse2", False)
-        tc.variables["EMBREE_ISA_SSE42"] = self.options.get_safe("sse42", False)
-        tc.variables["EMBREE_ISA_AVX"] = self.options.get_safe("avx", False)
-        tc.variables["EMBREE_ISA_AVX2"] = self.options.get_safe("avx2", False)
-        tc.variables["EMBREE_ISA_AVX512"] = self.options.get_safe("avx512", False) and not is_msvc(self)
+        tc.variables["EMBREE_ISA_NEON"] = self._has_neon
+        tc.variables["EMBREE_ISA_NEON2X"] = self._has_neon
+        tc.variables["EMBREE_ISA_SSE2"] = self._has_sse_avx
+        tc.variables["EMBREE_ISA_SSE42"] = self._has_sse_avx
+        # For Emscripten disable TBB and all ISAs. It will compile only for SSE
+        if self.settings.os == "Emscripten":
+            tc.variables["EMBREE_ISA_AVX"] = self._has_sse_avx
+            tc.variables["EMBREE_ISA_AVX2"] = self._has_sse_avx
+            tc.variables["EMBREE_ISA_AVX512"] = self._has_sse_avx and not is_msvc(self)
         tc.generate()
 
         deps = CMakeDeps(self)
