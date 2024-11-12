@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, rm
-from conan.tools.env import VirtualBuildEnv
 import os
 
 required_conan_version = ">=2.1"
@@ -51,8 +50,6 @@ class PackageConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["HEADER_ONLY"] = self.options.header_only
         tc.generate()
-        venv = VirtualBuildEnv(self)
-        venv.generate(scope="build")
 
     def build(self):
         apply_conandata_patches(self)
