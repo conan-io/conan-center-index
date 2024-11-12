@@ -6,8 +6,7 @@ import os
 
 class DpdkTestConan(ConanFile):
     settings = "os", "build_type", "arch", "compiler"
-    generators = "PkgConfigDeps", "MesonToolchain", "VirtualRunEnv", "VirtualBuildEnv"
-    test_type = "explicit"
+    generators = "PkgConfigDeps", "MesonToolchain"
 
     def layout(self):
         basic_layout(self)
