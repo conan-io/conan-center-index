@@ -11,7 +11,6 @@ int main() {
         const date::time_zone* tz = date::current_zone();
     }
     catch (const std::exception & e) {
-        std::cout << "exception caught " << e.what() << std::endl;
     }
 #endif
 
