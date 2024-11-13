@@ -4,8 +4,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple.apple import is_apple_os
-from conan.tools.build import can_run
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
+from conan.tools.env import Environment
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -14,7 +13,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.system.package_manager import Apt
 
-required_conan_version = ">=1.56.0 <2 || >=2.0.6"
+required_conan_version = ">=2.0.6"
 
 
 class GtkConan(ConanFile):
@@ -232,12 +231,13 @@ class GtkConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def generate(self):
-        VirtualBuildEnv(self).generate()
-        # Required for glib-compile-resources
-        if can_run(self):
-            VirtualRunEnv(self).generate(scope="build")
+        if "4.6.2" <= Version(self.version) < "4.9.2":
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                            "dependency(is_msvc_like ? ",
+                            "dependency(false ? ",
+                            strict=not self.no_copy_source)
 
+    def generate(self):
         enabled_disabled = lambda opt: "enabled" if opt else "disabled"
         tc = MesonToolchain(self)
         tc.project_options["wayland-backend"] = "true" if self.options.get_safe("with_wayland") else "false"
@@ -296,12 +296,7 @@ class GtkConan(ConanFile):
         self.run(f"{pkg_config} --variable pc_path pkg-config", output, scope=None)
         return output.getvalue().strip()
 
-    def _patch_sources(self):
-        if "4.6.2" <= Version(self.version) < "4.9.2":
-            replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "dependency(is_msvc_like ? ", "dependency(false ? ", strict=not self.no_copy_source)
-
     def build(self):
-        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -441,8 +436,6 @@ class GtkConan(ConanFile):
         if self.options.with_introspection:
             self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "share", "gir-1.0"))
             self.buildenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
-            self.env_info.GI_GIR_PATH.append(os.path.join(self.package_folder, "res", "share", "gir-1.0"))
-            self.env_info.GI_TYPELIB_PATH.append(os.path.join(self.package_folder, "lib", "girepository-1.0"))
 
         # TODO: add the following info to all generated .pc files:
         # targets=wayland x11

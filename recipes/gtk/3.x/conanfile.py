@@ -4,8 +4,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import can_run
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
+from conan.tools.env import Environment
 from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -13,7 +12,7 @@ from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.microsoft import is_msvc
 from conan.tools.system.package_manager import Apt
 
-required_conan_version = ">=1.56.0 <2 || >=2.0.6"
+required_conan_version = ">=2.0.9"
 
 
 class GtkConan(ConanFile):
@@ -52,13 +51,13 @@ class GtkConan(ConanFile):
         "with_iso_codes": False,
     }
     no_copy_source = True
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
             # Fix duplicate definitions of DllMain
             self.options["gdk-pixbuf"].shared = True
             # Fix segmentation fault
@@ -71,8 +70,6 @@ class GtkConan(ConanFile):
             self.options["pango"].with_freetype = True
 
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
@@ -167,11 +164,6 @@ class GtkConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
-        # Required for glib-compile-resources
-        if can_run(self):
-            VirtualRunEnv(self).generate(scope="build")
-
         true_false = lambda opt: "true" if opt else "false"
         tc = MesonToolchain(self)
         tc.project_options["wayland_backend"] = true_false(self.options.get_safe("with_wayland"))
@@ -370,8 +362,6 @@ class GtkConan(ConanFile):
         if self.options.with_introspection:
             self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "share", "gir-1.0"))
             self.buildenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
-            self.env_info.GI_GIR_PATH.append(os.path.join(self.package_folder, "res", "share", "gir-1.0"))
-            self.env_info.GI_TYPELIB_PATH.append(os.path.join(self.package_folder, "lib", "girepository-1.0"))
 
         # TODO: add the following info to all generated .pc files:
         # targets=wayland x11
