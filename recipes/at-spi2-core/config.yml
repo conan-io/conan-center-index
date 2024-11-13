@@ -1,16 +1,4 @@
 versions:
-  "2.38.0":
-    folder: all
-  "2.39.1":
-    folder: all
-  "2.40.3":
-    folder: all
-  "2.42.0":
-    folder: all
-  "2.44.0":
-    folder: all
-  "2.44.1":
-    folder: all
   "2.46.0":
     folder: new
   "2.47.1":
