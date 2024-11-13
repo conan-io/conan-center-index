@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
 from conan.tools.microsoft import is_msvc_static_runtime
@@ -48,6 +49,8 @@ class DoxygenConan(ConanFile):
         
         if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "191":
             raise ConanInvalidConfiguration("Doxygen requires Visual Studio 2017 or newer")
+        
+        check_min_cppstd(self, "17")
 
     def build_requirements(self):
         if self.settings_build.os == "Windows":
@@ -56,12 +59,16 @@ class DoxygenConan(ConanFile):
             self.tool_requires("flex/2.6.4")
             self.tool_requires("bison/3.8.2")
 
+        self.tool_requires("cmake/[>=3.19 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
 
         #Do not build manpages
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_subdirectory(doc)", "")
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "add_subdirectory(doc)", "")
+        replace_in_file(self, cmakelists, "set(CMAKE_CXX_STANDARD", "##set(CMAKE_CXX_STANDARD")
 
     def generate(self):
         tc = CMakeToolchain(self)
