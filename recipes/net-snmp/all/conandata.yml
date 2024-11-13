@@ -1,14 +1,13 @@
 sources:
-  "5.9.1":
-    sha256: "75b59d67e871aaaa31c8cef89ba7d06972782b97736b7e8c3399f36b50a8816f"
-    url: https://sourceforge.net/projects/net-snmp/files/net-snmp/5.9.1/net-snmp-5.9.1.zip/download
+  "5.9.4":
+    url: "https://sourceforge.net/projects/net-snmp/files/net-snmp/5.9.4/net-snmp-5.9.4.zip/download"
+    sha256: "ceea0c876f23b87731de2073e6a3a683ea610c66a5a67b5cabf4986b7813c22b"
 patches:
-  "5.9.1":
+  "5.9.4":
     - patch_file: patches/0001-fix-openssl-linking-msvc.patch
-      base_path: ""
+      patch_description: "Use Conan OpenSSL when linking on Windows"
+      patch_source: "https://github.com/net-snmp/net-snmp/commit/99332c80b68248cb60023d12297135dc9c6c8abf"
     - patch_file: patches/0002-install-only-libnetsnmp.patch
-      base_path: ""
+      patch_description: "Avoid install extra helper libraries"
     - patch_file: patches/0003-fix-perl-scripts-msvc.patch
-      base_path: ""
-    - patch_file: patches/0004-fix-apple-arm64-build.patch
-      base_path: ""
+      patch_description: "Avoid injecting extra flags when running perl"

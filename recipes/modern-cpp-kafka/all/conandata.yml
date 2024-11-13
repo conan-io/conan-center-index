@@ -1,4 +1,7 @@
 sources:
+  "2024.07.03":
+    url: "https://github.com/morganstanley/modern-cpp-kafka/archive/v2024.07.03.tar.gz"
+    sha256: "06b89b5f2757d2107761d65869b98c3ec71e3c8c7e2cb2ab49277f3272044f02"
   "2023.03.07":
     url: "https://github.com/morganstanley/modern-cpp-kafka/archive/v2023.03.07.tar.gz"
     sha256: "4685527a9768d44ed769ec6e502c3edde0b5cf4d341d8f9b476474955c61bba4"

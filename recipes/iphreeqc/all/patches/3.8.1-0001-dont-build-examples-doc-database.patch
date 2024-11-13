@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -400,7 +400,7 @@ endif()
+ 
+ include (CTest)
+ 
+-if (STANDALONE_BUILD)
++if (0)
+ 
+   add_subdirectory(database)
+   add_subdirectory(doc)

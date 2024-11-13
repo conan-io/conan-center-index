@@ -35,27 +35,37 @@ class GnConan(ConanFile):
         del self.info.settings.compiler
 
     @property
-    def _minimum_compiler_version_supporting_cxx17(self):
-        return {
-            "Visual Studio": 15,
-            "msvc": 191,
-            "gcc": 7,
-            "clang": 4,
-            "apple-clang": 10,
-        }.get(str(self.settings.compiler))
+    def _min_cppstd(self):
+        if self.version == "cci.20210429":
+            return 17
+        else:
+            return 20
+
+    @property
+    def _minimum_compiler_version(self):
+        if self._min_cppstd == 17:
+            return {
+                "Visual Studio": 15,
+                "msvc": 191,
+                "gcc": 7,
+                "clang": 4,
+                "apple-clang": 10,
+            }.get(str(self.settings.compiler))
+        else:
+            return {
+                "gcc": "11",
+                "clang": "12",
+                "apple-clang": "15",
+                "msvc": "192",
+                "Visual Studio": "16",
+            }
 
     def validate_build(self):
         if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 17)
-        else:
-            if self._minimum_compiler_version_supporting_cxx17:
-                if Version(self.settings.compiler.version) < self._minimum_compiler_version_supporting_cxx17:
-                    raise ConanInvalidConfiguration("gn requires a compiler supporting c++17")
-            else:
-                self.output.warning(
-                    "gn recipe does not recognize the compiler. gn requires a compiler supporting c++17."
-                    " Assuming it does."
-                )
+            check_min_cppstd(self, self._min_cppstd)
+        if self._minimum_compiler_version and Version(self.settings.compiler.version) < self._minimum_compiler_version:
+            raise ConanInvalidConfiguration(f"gn requires a compiler supporting C++{self._min_cppstd}")
+
 
     def build_requirements(self):
         # FIXME: add cpython build requirements for `build/gen.py`.

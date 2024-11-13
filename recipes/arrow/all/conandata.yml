@@ -1,4 +1,7 @@
 sources:
+  "17.0.0":
+    url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-17.0.0/apache-arrow-17.0.0.tar.gz?action=download"
+    sha256: "9d280d8042e7cf526f8c28d170d93bfab65e50f94569f6a790982a878d8d898d"
   "16.1.0":
     url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-16.1.0/apache-arrow-16.1.0.tar.gz?action=download"
     sha256: "c9e60c7e87e59383d21b20dc874b17153729ee153264af6d21654b7dff2c60d7"
@@ -45,24 +48,85 @@ sources:
     url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-7.0.0/apache-arrow-7.0.0.tar.gz?action=download"
     sha256: "e8f49b149a15ecef4e40fcfab1b87c113c6b1ee186005c169e5cdf95d31a99de"
 patches:
+  "17.0.0":
+    - patch_file: "patches/16.0.0-0001-fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "16.1.0":
+    - patch_file: "patches/16.0.0-0001-fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "16.0.0":
+    - patch_file: "patches/16.0.0-0001-fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "15.0.0":
+    - patch_file: "patches/11.0.0-0001-fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "14.0.2":
+    - patch_file: "patches/11.0.0-0001-fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "14.0.1":
+    - patch_file: "patches/11.0.0-0001-fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "14.0.0":
+    - patch_file: "patches/11.0.0-0001-fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "13.0.0":
+    - patch_file: "patches/11.0.0-0001-fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "12.0.1":
+    - patch_file: "patches/11.0.0-0001-fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "12.0.0":
+    - patch_file: "patches/11.0.0-0001-fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
+  "11.0.0":
+    - patch_file: "patches/11.0.0-0001-fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
   "8.0.1":
-    - patch_file: "patches/8.0.0-0005-install-utils.patch"
+    - patch_file: "patches/8.0.0-0001-static-analyzers.patch"
+      patch_description: "do not look for static analyzers"
+      patch_type: "conan"
+    - patch_file: "patches/8.0.0-0002-install-utils.patch"
       patch_description: "enable utils installation"
       patch_type: "conan"
-    - patch_file: "patches/8.0.0-0006-fix-cmake.patch"
+    - patch_file: "patches/8.0.0-0003-fix-cmake.patch"
       patch_description: "use cci package"
       patch_type: "conan"
+    - patch_file: "patches/8.0.0-0004-fix-msvc-build.patch"
+      patch_description: "patch Arrow such that it can be built using MSVC"
+      patch_type: "backport"
+      patch_source: "https://github.com/apache/arrow/pull/13108"
   "8.0.0":
-    - patch_file: "patches/8.0.0-0005-install-utils.patch"
+    - patch_file: "patches/8.0.0-0001-static-analyzers.patch"
+      patch_description: "do not look for static analyzers"
+      patch_type: "conan"
+    - patch_file: "patches/8.0.0-0002-install-utils.patch"
       patch_description: "enable utils installation"
       patch_type: "conan"
-    - patch_file: "patches/8.0.0-0006-fix-cmake.patch"
+    - patch_file: "patches/8.0.0-0003-fix-cmake.patch"
       patch_description: "use cci package"
       patch_type: "conan"
+    - patch_file: "patches/8.0.0-0004-fix-msvc-build.patch"
+      patch_description: "patch Arrow such that it can be built using MSVC"
+      patch_type: "backport"
+      patch_source: "https://github.com/apache/arrow/pull/13108"
   "7.0.0":
-    - patch_file: "patches/7.0.0-0006-install-utils.patch"
+    - patch_file: "patches/7.0.0-0001-static-analyzers.patch"
+      patch_description: "do not look for static analyzers"
+      patch_type: "conan"
+    - patch_file: "patches/7.0.0-0002-install-utils.patch"
       patch_description: "enable utils installation"
       patch_type: "conan"
-    - patch_file: "patches/7.0.0-0007-fix-cmake.patch"
+    - patch_file: "patches/7.0.0-0003-fix-cmake.patch"
       patch_description: "use cci package"
       patch_type: "conan"

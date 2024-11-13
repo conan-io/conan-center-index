@@ -1,4 +1,19 @@
 sources:
+  "9.7.4":
+    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.7.4.tar.gz"
+    sha256: "9b810c81731835fda0d4bbdb51d3199d901fa4395733ab63752d297da84c5a47"
+  "9.7.3":
+    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.7.3.tar.gz"
+    sha256: "acfabb989cbfb5b5c4d23214819b059638193ec33dad2d88373c46448d16d38b"
+  "9.7.2":
+    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.7.2.tar.gz"
+    sha256: "13e9c41d290199ee0185590d4fa9d327422aaf75765b3193945303c3c314e07d"
+  "9.5.2":
+    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.5.2.tar.gz"
+    sha256: "B20780586D3DF4A3C5BCBDE341A2C1946B03D18237960BDA5BC5E9538F42AF40"
+  "9.4.0":
+    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.4.0.tar.gz"
+    sha256: "1f829976aa24b8ba432e156f52c9e0f0bd89c46dc0cc5a9a628ea70571c1551c"
   "9.2.1":
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.2.1.tar.gz"
     sha256: "bb20fd9a07624e0dc1849a8e65833e5421960184f9c469d508b58ed8f40a780f"

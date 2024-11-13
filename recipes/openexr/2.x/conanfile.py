@@ -141,6 +141,9 @@ class OpenEXRConan(ConanFile):
         #        waiting an implementation of https://github.com/conan-io/conan/issues/9000
         self.cpp_info.set_property("cmake_file_name", "OpenEXR")
 
+        # Avoid conflict in PkgConfigDeps with OpenEXR.pc file coming from openexr_ilmimf component
+        self.cpp_info.set_property("pkg_config_name", "openexr_conan_full_package")
+
         lib_suffix = ""
         if not self.options.shared or self.settings.os == "Windows":
             openexr_version = Version(self.version)

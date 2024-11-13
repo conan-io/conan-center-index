@@ -1,4 +1,7 @@
 sources:
+  "1.0.1":
+    url: "https://github.com/furfurylic/commata/archive/refs/tags/v1.0.1.tar.gz"
+    sha256: "b6e91ede0ec8b7c69ced1e243eba204717e05fcd9ae26163a54425ca800124ef"
   "1.0.0":
     url: "https://github.com/furfurylic/commata/archive/refs/tags/v1.0.0.tar.gz"
     sha256: "ecf0a88f6a4616d10770522b4ef4838e4100511759eb640270f6b932e4b7df69"

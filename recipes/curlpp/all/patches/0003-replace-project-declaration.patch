@@ -1,0 +1,19 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index bfba06b..7f4c6fd 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,6 +1,3 @@
+-project(curlpp)
+-
+-
+ # In response to CMake 3.0 generating warnings regarding policy CMP0042,
+ # the OSX RPATH settings have been updated per recommendations found
+ # in the CMake Wiki:
+@@ -52,6 +49,7 @@ if(WIN32)
+     endif()
+ endif()
+ 
++project(curlpp)
+ 
+ # Conan.io integration
+ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/conanbuildinfo.cmake)

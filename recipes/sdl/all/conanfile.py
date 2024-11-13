@@ -15,10 +15,10 @@ required_conan_version = ">=1.55.0"
 class SDLConan(ConanFile):
     name = "sdl"
     description = "Access to audio, keyboard, mouse, joystick, and graphics hardware via OpenGL, Direct3D and Vulkan"
-    topics = ("sdl2", "audio", "keyboard", "graphics", "opengl")
+    license = "Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libsdl.org"
-    license = "Zlib"
+    topics = ("sdl2", "audio", "keyboard", "graphics", "opengl")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -186,8 +186,7 @@ class SDLConan(ConanFile):
             self.build_requires("wayland/1.22.0")  # Provides wayland-scanner
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True,
-            destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -217,6 +216,8 @@ class SDLConan(ConanFile):
                 "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
                 'find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED PATHS "${WAYLAND_BIN_DIR}" NO_DEFAULT_PATH)',
             )
+        if Version(self.version) >= "2.30.6" and not self.options.shared:
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "list(APPEND targets SDL2-static)", "set(targets SDL2-static)")
 
     def define_toolchain(self):
         tc = CMakeToolchain(self)
@@ -414,7 +415,15 @@ class SDLConan(ConanFile):
                 "AVFoundation", "Foundation", "QuartzCore",
             ]
             if self.settings.os == "Macos":
-                self.cpp_info.components["libsdl2"].frameworks.extend(["Cocoa", "Carbon", "IOKit", "ForceFeedback"])
+                self.cpp_info.components["libsdl2"].frameworks.extend([
+                    "Cocoa",
+                    "Carbon",
+                    "IOKit",
+                    "ForceFeedback",
+                    "CoreFoundation",
+                    "CoreServices",
+                    "AppKit"
+                ])
                 self.cpp_info.components["libsdl2"].frameworks.append("GameController")
             elif self.settings.os in ["iOS", "tvOS", "watchOS"]:
                 self.cpp_info.components["libsdl2"].frameworks.extend([
