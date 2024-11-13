@@ -36,6 +36,7 @@ class SVTAV1Conan(ConanFile):
         "build_encoder": True,
         "build_decoder": True,
         "minimal_build": False,
+        "with_neon": True,
         "with_arm_crc32": True,
         "with_neon_dotprod": True,
         "with_neon_i8mm": True,
