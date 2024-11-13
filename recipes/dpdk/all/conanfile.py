@@ -70,7 +70,7 @@ class DpdkConan(ConanFile):
         if self.options.with_libarchive:
             self.requires("libarchive/3.7.6")
         if self.options.with_libbpf:
-            self.requires("libbpf/1.4.6")
+            self.requires("libbpf/1.3.0")
         if self.options.with_libbsd:
             self.requires("libbsd/0.10.0")
         if self.options.with_libibverbs:
