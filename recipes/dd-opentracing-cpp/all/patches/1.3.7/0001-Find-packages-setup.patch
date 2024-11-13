@@ -1,0 +1,60 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -35,15 +35,10 @@
+ set(CMAKE_LIBRARY_PATH deps/lib)
+ 
+ # Dependencies
+-find_path(OPENTRACING_INCLUDE_DIR NAMES opentracing/tracer.h)
+-find_library(OPENTRACING_LIB opentracing)
+-find_library(MSGPACK_LIB msgpack)
+-find_package(CURL)
++find_package(OpenTracing REQUIRED CONFIG)
++find_package(msgpack REQUIRED CONFIG)
++find_package(CURL REQUIRED CONFIG)
+ find_package(Threads REQUIRED)
+-
+-# Code Sanitizers
+-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/3rd_party/sanitizers-cmake" ${CMAKE_MODULE_PATH})
+-find_package(Sanitizers)
+ 
+ # Code
+ install(DIRECTORY include/datadog DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+@@ -64,12 +59,12 @@
+ if(BUILD_COVERAGE)
+   set(COVERAGE_LIBRARIES gcov)
+ endif()
+-set(DATADOG_LINK_LIBRARIES ${OPENTRACING_LIB} ${CURL_LIBRARIES} Threads::Threads ${COVERAGE_LIBRARIES})
++set(DATADOG_LINK_LIBRARIES OpenTracing::OpenTracing CURL::libcurl ${msgpack_LIBRARIES} ZLIB::ZLIB Threads::Threads)
++include_directories(${msgpack_INCLUDE_DIRS})
+ 
+ ## Shared lib
+ if(BUILD_SHARED)
+   add_library(dd_opentracing SHARED ${DD_OPENTRACING_SOURCES})
+-  add_sanitizers(dd_opentracing)
+   if(BUILD_COVERAGE)
+     target_link_options(dd_opentracing PRIVATE -fprofile-arcs -ftest-coverage)
+   endif()
+@@ -77,6 +72,7 @@
+   set_target_properties(dd_opentracing PROPERTIES SOVERSION ${SOVERSION})
+   target_compile_definitions(dd_opentracing PUBLIC DD_OPENTRACING_SHARED)
+   install(TARGETS dd_opentracing
++          RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+           LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+           ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ endif()
+@@ -84,13 +80,10 @@
+ ## Static lib
+ if(BUILD_STATIC)
+   add_library(dd_opentracing-static STATIC ${DD_OPENTRACING_SOURCES})
+-  add_sanitizers(dd_opentracing-static)
+   target_link_libraries(dd_opentracing-static ${DATADOG_LINK_LIBRARIES})
+-  set_target_properties(dd_opentracing-static PROPERTIES OUTPUT_NAME dd_opentracing POSITION_INDEPENDENT_CODE ON)
++  set_target_properties(dd_opentracing-static PROPERTIES OUTPUT_NAME dd_opentracing)
+   target_compile_definitions(dd_opentracing-static PUBLIC DD_OPENTRACING_STATIC)
+-  install(TARGETS dd_opentracing-static
+-          LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-          ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
++  install(TARGETS dd_opentracing-static)
+ endif()
+ 
+ ## Object lib

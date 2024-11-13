@@ -1,8 +1,4 @@
-#ifdef MAGIC_ENUM_INCLUDE_WITH_FOLDER
-#  include <magic_enum/magic_enum.hpp>
-#else
-#  include <magic_enum.hpp>
-#endif
+#include <magic_enum.hpp>
 #include <cstdlib>
 #include <string>
 

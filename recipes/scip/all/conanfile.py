@@ -3,7 +3,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import copy, get
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get
 from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
 from os.path import join
@@ -25,19 +25,13 @@ class SCIPConan(ConanFile):
         "fPIC": [True, False],
         "with_gmp": [True, False],
         "with_tpi": [False, "omp", "tny"],
-        "with_sym": [False, "bliss"],
+        "with_sym": [False, "bliss", "snauty"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_gmp": True,
-        "with_tpi": False,
-        "with_sym": "bliss",
-    }
-    soplex_version_belonging_to_me = {
-        "8.1.0": "6.0.4",
-        "8.0.4": "6.0.4",
-        "8.0.3": "6.0.3"
+        "with_tpi": False
     }
 
     @property
@@ -51,6 +45,9 @@ class SCIPConan(ConanFile):
             "clang": "4",
             "apple-clang": "7",
         }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def validate(self):
         if self.settings.compiler.cppstd:
@@ -71,21 +68,30 @@ class SCIPConan(ConanFile):
             raise ConanInvalidConfiguration("Bliss does not support libc++.")
         if self.dependencies["soplex"].options.with_gmp and not self.options.with_gmp:
             raise ConanInvalidConfiguration("The options 'with_gmp' should be aligned with 'soplex:with_gmp' too.")
+        if Version(self.version) >= "9.0.1" and is_msvc(self) and self.settings.build_type == "Debug":
+            # lpi_spx2.cpp : error C1128: number of sections exceeded object file format limit: compile with /bigobj
+            raise ConanInvalidConfiguration(f"{self.ref} can not be build in Debug with MSVC.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def requirements(self):
+        def _mapping_requires(dep, **kwargs):
+            required_version = self.conan_data["version_mappings"][self.version][dep]
+            self.requires(f"{dep}/{required_version}", **kwargs)
+
         if self.options.with_gmp:
             self.requires("gmp/6.3.0")
         if self.options.with_sym == "bliss":
             self.requires("bliss/0.77")
-        self.requires(f"soplex/{self.soplex_version_belonging_to_me[self.version]}")
+        _mapping_requires("soplex")
         self.requires("zlib/[>=1.2.11 <2]")
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        if self.options.with_sym == None:
+            self.options.with_sym = self.conan_data["version_mappings"][self.version]["default_sym"]
 
     def configure(self):
         self.options["soplex"].with_gmp = self.options.with_gmp
@@ -100,6 +106,7 @@ class SCIPConan(ConanFile):
         return ";".join(item.replace("\\", "/") for sublist in arrays for item in sublist)
 
     def generate(self):
+        apply_conandata_patches(self)
         tc = CMakeToolchain(self)
         tc.variables["SHARED"] = self.options.shared
         tc.variables["READLINE"] = False  # required for interactive stuff
@@ -120,6 +127,7 @@ class SCIPConan(ConanFile):
         tc.variables["PAPILO"] = False  # LGPL
         tc.variables["ZIMPL"] = False  # LPGL
         tc.variables["IPOPT"] = False  # no such coin package on conan center yet
+        tc.variables["BUILD_TESTING"] = False  # do not build documentation and examples
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("sopex", "cmake_file_name", "SOPEX")

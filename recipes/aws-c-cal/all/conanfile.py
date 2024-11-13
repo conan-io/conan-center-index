@@ -48,10 +48,10 @@ class AwsCCal(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) <= "0.5.20":
-            self.requires("aws-c-common/0.8.2", transitive_headers=True, transitive_libs=True)
-        else:
-            self.requires("aws-c-common/0.9.6", transitive_headers=True, transitive_libs=True)
+        if self.version == "0.6.14":
+            self.requires("aws-c-common/0.9.15", transitive_headers=True, transitive_libs=True)
+        if self.version == "0.5.12":
+            self.requires("aws-c-common/0.6.11", transitive_headers=True, transitive_libs=True)
         if self._needs_openssl:
             self.requires("openssl/[>=1.1 <4]")
 

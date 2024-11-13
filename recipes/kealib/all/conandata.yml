@@ -1,14 +1,10 @@
 sources:
+  "1.5.2":
+    url: "https://github.com/ubarsc/kealib/archive/refs/tags/kealib-1.5.2.tar.gz"
+    sha256: "f16a51007ab7612aa598de6ee2cac0aa4421040894777c8e57cb4a50ea552ab1"
+  "1.4.15":
+    url: "https://github.com/ubarsc/kealib/archive/kealib-1.4.15.tar.gz"
+    sha256: "fc7bd049663985e9528acd894724f0c730c84a3408d5bff3c0c0f01d7c6cd172"
   "1.4.14":
     url: "https://github.com/ubarsc/kealib/archive/kealib-1.4.14.tar.gz"
     sha256: "b3f73104acebe5304ecce5c19c1560def66fd5c448ce251e9486494baeb141bc"
-  "1.4.13":
-    url: "https://github.com/ubarsc/kealib/archive/kealib-1.4.13.tar.gz"
-    sha256: "2a254eb557a4ec20638a5134ed549a16b7f64977f37de3cf3853a206c8d82199"
-patches:
-  "1.4.14":
-    - patch_file: "patches/fix-cmake-1.4.14.patch"
-      base_path: "source_subfolder"
-  "1.4.13":
-    - patch_file: "patches/fix-export-symbols-and-cmake.patch"
-      base_path: "source_subfolder"

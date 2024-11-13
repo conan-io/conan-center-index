@@ -132,10 +132,8 @@ class BinutilsConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type="str"):
                 self.tool_requires("msys2/cci.latest")
-
-        if self.version >= "2.39":
-            self.tool_requires("bison/3.8.2")
-            self.tool_requires("flex/2.6.4")
+        self.tool_requires("bison/3.8.2")
+        self.tool_requires("flex/2.6.4")
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")

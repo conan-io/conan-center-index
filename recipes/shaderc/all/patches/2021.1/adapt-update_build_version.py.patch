@@ -1,0 +1,25 @@
+diff --git a/utils/update_build_version.py b/utils/update_build_version.py
+--- a/utils/update_build_version.py
++++ b/utils/update_build_version.py
+@@ -128,18 +128,18 @@
+ 
+ 
+ def main():
+-    if len(sys.argv) != 5:
++    if len(sys.argv) < 5:
+         print(('usage: {} <shaderc-dir> <spirv-tools-dir> <glslang-dir> <output-file>'.format(
+             sys.argv[0])))
+         sys.exit(1)
+ 
+-    projects = ['shaderc', 'spirv-tools', 'glslang']
++    projects = ['shaderc']
+     new_content = ''.join([
+         '"{}\\n"\n'.format(get_version_string(p, d))
+         for (p, d) in zip(projects, sys.argv[1:])
+     ])
+ 
+-    output_file = sys.argv[4]
++    output_file = sys.argv[-1]
+     mkdir_p(os.path.dirname(output_file))
+ 
+     if os.path.isfile(output_file):

@@ -4,7 +4,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import can_run, check_min_cppstd, valid_min_cppstd
+from conan.tools.build import cross_building, check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
 from conan.tools.scm import Version
@@ -17,7 +17,7 @@ class Hdf5Conan(ConanFile):
     description = "HDF5 is a data model, library, and file format for storing and managing data."
     license = "BSD-3-Clause"
     topics = "hdf", "data"
-    homepage = "https://portal.hdfgroup.org/display/HDF5/HDF5"
+    homepage = "https://www.hdfgroup.org/solutions/hdf5/"
     url = "https://github.com/conan-io/conan-center-index"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -28,6 +28,7 @@ class Hdf5Conan(ConanFile):
         "hl": [True, False],
         "threadsafe": [True, False],
         "with_zlib": [True, False],
+        "with_zlibng": [True, False],
         "szip_support": [None, "with_libaec", "with_szip"],
         "szip_encoding": [True, False],
         "parallel": [True, False],
@@ -40,6 +41,7 @@ class Hdf5Conan(ConanFile):
         "hl": True,
         "threadsafe": False,
         "with_zlib": True,
+        "with_zlibng": False,
         "szip_support": None,
         "szip_encoding": False,
         "parallel": False,
@@ -77,6 +79,8 @@ class Hdf5Conan(ConanFile):
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.with_zlibng:
+            self.requires("zlib-ng/2.2.2")
         if self.options.szip_support == "with_libaec":
             self.requires("libaec/1.0.6")
         elif self.options.szip_support == "with_szip":
@@ -85,9 +89,6 @@ class Hdf5Conan(ConanFile):
             self.requires("openmpi/4.1.0")
 
     def validate(self):
-        if not can_run(self):
-            # While building it runs some executables like H5detect
-            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
         if self.options.parallel and not self.options.enable_unsupported:
             if self.options.enable_cxx:
                 raise ConanInvalidConfiguration("Parallel and C++ options are mutually exclusive, forcefully allow with enable_unsupported=True")
@@ -97,8 +98,17 @@ class Hdf5Conan(ConanFile):
                 self.options.szip_encoding and \
                 not self.dependencies["szip"].options.enable_encoding:
             raise ConanInvalidConfiguration("encoding must be enabled in szip dependency (szip:enable_encoding=True)")
+        if self.options.with_zlib and self.options.get_safe("with_zlibng"):
+            raise ConanInvalidConfiguration("with_zlib and with_zlibng cannot be enabled at the same time")
+        if self.options.get_safe("with_zlibng") and Version(self.version) < "1.14.5":
+            raise ConanInvalidConfiguration("with_zlibng=True is incompatible with versions prior to v1.14.5")
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+
+    def validate_build(self):
+        if cross_building(self) and Version(self.version) < "1.14.4.3":
+            # While building it runs some executables like H5detect
+            raise ConanInvalidConfiguration("Current recipe doesn't support cross-building (yet)")
 
     def build_requirements(self):
         if Version(self.version) >= "1.14.0":
@@ -148,6 +158,7 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
         tc.variables["HDF5_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
         tc.variables["HDF5_ENABLE_SZIP_ENCODING"] = self.options.get_safe("szip_encoding", False)
+        tc.variables["HDF5_USE_ZLIB_NG"] = self.options.get_safe("with_zlibng", False)
         tc.variables["HDF5_PACKAGE_EXTLIBS"] = False
         tc.variables["HDF5_ENABLE_THREADSAFE"] = self.options.get_safe("threadsafe", False)
         tc.variables["HDF5_ENABLE_DEBUG_APIS"] = False # Option?

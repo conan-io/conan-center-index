@@ -7,5 +7,3 @@ versions:
     folder: all
   "1.0.0":
     folder: all
-  "0.14.1":
-    folder: "0.x.x"

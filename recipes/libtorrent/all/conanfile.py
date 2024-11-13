@@ -187,9 +187,9 @@ class LibtorrentConan(ConanFile):
             self.cpp_info.components["libtorrent-rasterbar"].requires.append("libiconv::libiconv")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["libtorrent-rasterbar"].system_libs = ["dl", "pthread"]
+            self.cpp_info.components["libtorrent-rasterbar"].system_libs = ["dl", "pthread", "m"]
         elif self.settings.os == "Windows":
-            self.cpp_info.components["libtorrent-rasterbar"].system_libs = ["wsock32", "ws2_32", "iphlpapi", "dbghelp"]
+            self.cpp_info.components["libtorrent-rasterbar"].system_libs = ["wsock32", "ws2_32", "iphlpapi", "dbghelp", "mswsock"]
         elif self.settings.os == "Macos":
             self.cpp_info.components["libtorrent-rasterbar"].frameworks = ["CoreFoundation", "SystemConfiguration"]
 

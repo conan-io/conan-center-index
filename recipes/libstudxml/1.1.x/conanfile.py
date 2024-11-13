@@ -38,7 +38,7 @@ class LibStudXmlConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("expat/2.5.0", transitive_headers=True, transitive_libs=True)
+        self.requires("expat/[>=2.6.2 <3]", transitive_headers=True, transitive_libs=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

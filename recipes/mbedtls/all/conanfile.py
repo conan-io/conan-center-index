@@ -15,10 +15,10 @@ class MBedTLSConan(ConanFile):
         "mbed TLS makes it trivially easy for developers to include "
         "cryptographic and SSL/TLS capabilities in their (embedded) products"
     )
-    topics = ("polarssl", "tls", "security")
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tls.mbed.org"
-    license = "Apache-2.0"
+    topics = ("polarssl", "tls", "security")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"

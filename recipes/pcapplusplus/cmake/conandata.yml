@@ -2,3 +2,6 @@ sources:
   "23.09":
     url: "https://github.com/seladb/PcapPlusPlus/archive/v23.09.tar.gz"
     sha256: "608292f7d2a2e1b7af26adf89347597a6131547eea4e513194bc4f584a40fe74"
+  "24.09":
+    url: "https://github.com/seladb/PcapPlusPlus/archive/v24.09.tar.gz"
+    sha256: "b14998ecf5718c2bfb6f709060e53f7ef67639b98bf2222a3cd23d820d70acdc"

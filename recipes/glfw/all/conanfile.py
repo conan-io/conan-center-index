@@ -123,10 +123,8 @@ class GlfwConan(ConanFile):
             else:
                 # Manually generate pkgconfig file of wayland-protocols since
                 # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
-                # We must use legacy conan v1 deps_cpp_info because self.dependencies doesn't
-                # contain build requirements when using 1 profile.
-                wp_prefix = self.deps_cpp_info["wayland-protocols"].rootpath
-                wp_version = self.deps_cpp_info["wayland-protocols"].version
+                wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
+                wp_version = self.dependencies.build["wayland-protocols"].ref.version
                 wp_pkg_content = textwrap.dedent(f"""\
                     prefix={wp_prefix}
                     datarootdir=${{prefix}}/res
@@ -215,6 +213,29 @@ class GlfwConan(ConanFile):
             self.cpp_info.frameworks.extend([
                 "AppKit", "Cocoa", "CoreFoundation", "CoreGraphics",
                 "CoreServices", "Foundation", "IOKit",
+            ])
+
+        self.cpp_info.requires = ["opengl::opengl"]
+        if self.options.vulkan_static:
+            self.cpp_info.requires.append("vulkan-loader::vulkan-loader")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            if self.options.get_safe("with_x11", True):
+                # https://github.com/glfw/glfw/blob/3.4/src/CMakeLists.txt#L181-L218
+                # https://github.com/glfw/glfw/blob/3.3.2/CMakeLists.txt#L196-L233
+                self.cpp_info.requires.extend([
+                    "xorg::x11", # Also includes Xkb and Xshape
+                    "xorg::xrandr",
+                    "xorg::xinerama",
+                    "xorg::xcursor",
+                    "xorg::xi",
+                ])
+        if self.options.get_safe("with_wayland"):
+            # https://github.com/glfw/glfw/blob/3.4/src/CMakeLists.txt#L163-L167
+            self.cpp_info.requires.extend([
+                "wayland::wayland-client",
+                "wayland::wayland-cursor",
+                "wayland::wayland-egl",
+                "xkbcommon::xkbcommon"
             ])
 
         # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
