@@ -58,6 +58,13 @@ class GobjectIntrospectionConan(ConanFile):
         # ffi.h is exposed by public header gobject-introspection-1.0/girffi.h
         self.requires("libffi/3.4.4", transitive_headers=True)
 
+    def validate_build(self):
+        if cross_building(self):
+            # Requires QEMU or similar as an exe_wrapper for Meson to run the built executables during cross-compilation.
+            # Disabling even if 'can_run' is True, since the introspection data generation when using the package still tries to
+            # link against libgirepository-1.0.so of the executable and fails when cross-compiling.
+            raise ConanInvalidConfiguration("Cross-compilation is not supported.")
+
     def validate(self):
         if self.settings.os == "Windows" and self.settings.build_type == "Debug":
             # fatal error LNK1104: cannot open file 'python37_d.lib'
