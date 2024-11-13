@@ -15,9 +15,9 @@ class ProjConan(ConanFile):
     name = "proj"
     description = "Cartographic Projections and Coordinate Transformations Library."
     license = "MIT"
-    topics = "dsp", "proj", "proj4", "projections", "gis", "geospatial"
-    homepage = "https://proj.org"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://proj.org"
+    topics = ("dsp", "proj", "proj4", "projections", "gis", "geospatial")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -180,7 +180,6 @@ class ProjConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-
 
     def package_info(self):
         proj_version = Version(self.version)
