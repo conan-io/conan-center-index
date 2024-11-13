@@ -1,4 +1,13 @@
 sources:
+  "4.6.7":
+    url: "https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.6.7.tar.gz"
+    sha256: "735c65d4685c5156f0876635f3bc1565700d0f648fbb1f384e46d186796c8bae"
+  "4.6.6":
+    url: "https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.6.6.tar.gz"
+    sha256: "8343820313e553052df68c75fe2bf35353da2719106e81eb2a8b026ff96c7d7c"
+  "4.6.4":
+    url: "https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.6.4.tar.gz"
+    sha256: "93b5f1dc88fd67fdebde409e927e828dfbae02efa44936e89728622411c6a047"
   "4.6.3":
     url: "https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.6.3.tar.gz"
     sha256: "3b5d9ba4b49d0380678e8172f27cdb8eda196ea448e7f1cdd79620066d082ab9"
@@ -12,6 +21,18 @@ sources:
     url: "https://github.com/galkahana/PDF-Writer/archive/refs/tags/v4.5.12.tar.gz"
     sha256: "40fcbaa66fc46fcb588ceda119ba8839ff6d2c886191ac5e68ed702475c7336e"
 patches:
+  "4.6.7":
+    - patch_file: "patches/4.6.6-0001-fix-cmake.patch"
+      patch_description: "disable cpack"
+      patch_type: "conan"
+  "4.6.6":
+    - patch_file: "patches/4.6.6-0001-fix-cmake.patch"
+      patch_description: "disable cpack"
+      patch_type: "conan"
+  "4.6.4":
+    - patch_file: "patches/4.6.2-0001-fix-cmake.patch"
+      patch_description: "disable cpack"
+      patch_type: "conan"
   "4.6.3":
     - patch_file: "patches/4.6.2-0001-fix-cmake.patch"
       patch_description: "disable cpack"

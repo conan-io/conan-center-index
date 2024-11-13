@@ -24,22 +24,8 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         path = self.dependencies["qt"].package_folder.replace("\\", "/")
-        folder = os.path.join(path, "bin")
-        bin_folder = "bin" if self.settings.os == "Windows" else "libexec"
         save(self, "qt.conf", f"""[Paths]
-Prefix = {path}
-ArchData = {folder}/archdatadir
-HostData = {folder}/archdatadir
-Data = {folder}/datadir
-Sysconf = {folder}/sysconfdir
-LibraryExecutables = {folder}/archdatadir/{bin_folder}
-HostLibraryExecutables = bin
-Plugins = {folder}/archdatadir/plugins
-Imports = {folder}/archdatadir/imports
-Qml2Imports = {folder}/archdatadir/qml
-Translations = {folder}/datadir/translations
-Documentation = {folder}/datadir/doc
-Examples = {folder}/datadir/examples""")
+Prefix = {path}""")
 
         VirtualRunEnv(self).generate()
         if can_run(self):
@@ -55,3 +41,7 @@ Examples = {folder}/datadir/examples""")
             copy(self, "qt.conf", src=self.generators_folder, dst=os.path.join(self.cpp.build.bindirs[0]))
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
+            # Related to https://github.com/conan-io/conan-center-index/issues/20574
+            if self.settings.os == "Macos":
+                bin_macos_path = os.path.join(self.cpp.build.bindirs[0], "test_macos_bundle.app", "Contents", "MacOS", "test_macos_bundle")
+                self.run(bin_macos_path, env="conanrun")

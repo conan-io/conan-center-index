@@ -1,9 +1,29 @@
 sources:
+  "1.0.4":
+    url: "https://github.com/alicevision/CCTag/archive/refs/tags/v1.0.4.tar.gz"
+    sha256: "f4ced6138419f4ad09d62d4373738c172586c91068faff8bf08c2caa5e76d516"
+  "1.0.3":
+    url: "https://github.com/alicevision/CCTag/archive/refs/tags/v1.0.3.tar.gz"
+    sha256: "25396b03c4aa3c1be241a2a8518a29511cb4fff695caa5126203fbba8e8e444d"
   "1.0.1":
     url: "https://github.com/alicevision/CCTag/archive/refs/tags/v1.0.1.tar.gz"
     sha256: "ae8a819bc978eb13bb1061a204c214da835e56c9b7dc775237ed6b2191011dec"
 patches:
-  "1.0.1":
-    - patch_file: "patches/0001-honor-vc-runtime.patch"
+  "1.0.3":
+    - patch_file: "patches/1.0.3-0001-honor-vc-runtime.patch"
       patch_description: "Honor vc runtime"
       patch_type: "conan"
+    - patch_file: "patches/1.0.3-0002-fix-boost-deprecated-includes.patch"
+      patch_description: "Fix deprecated Boost includes"
+      patch_type: "portability"
+  "1.0.1":
+    - patch_file: "patches/1.0.1-0001-honor-vc-runtime.patch"
+      patch_description: "Honor vc runtime"
+      patch_type: "conan"
+    - patch_file: "patches/1.0.3-0002-fix-boost-deprecated-includes.patch"
+      patch_description: "Fix deprecated Boost includes"
+      patch_type: "portability"
+    - patch_file: "patches/1.0.1-0002-fix-missing-define.patch"
+      patch_description: "Add missing _GNU_SOURCE define"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/alicevision/CCTag/commit/b49d710ab6870a865c20c943a65bd6dca906a184"

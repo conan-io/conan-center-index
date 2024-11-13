@@ -14,13 +14,26 @@ The current Conan Center Index CI status can be found on https://status.conan.io
 Any maintenance, outage or important event related to the CI will be informed there.
 
 
-### Add ConanCenter remote
+### Configure the Conan Center remote
 
-ConanCenter remote is configured by default in any Conan client installation. If, for any reason, you need to add it manually, just execute:
+> [!IMPORTANT]
+> The Conan Center remote URL changed for **Conan 2** on November 2024 - the new URL is the default on new installations of Conan since version 2.9.2.
+>
+> New recipe updates are only published to this remote and are only guaranteed to be compatible with recent versions of Conan 2.
+>
+> All previously published recipes and packages known to be compatible with Conan 2 are also served by this remote.
+
+To update an existing Conan 2 installation:
 
 ```
-conan remote add conancenter https://center.conan.io
+conan remote update conancenter --url https://center2.conan.io
 ```
+
+#### Conan Center legacy remote
+
+The legacy remote at `https://center.conan.io` stopped receiving updates on 4 November 2024 and is frozen and will no longer received updates.
+It is kept in this state to avoid breaking any existing Conan 1.x installations.
+
 
 ### How to consume recipes
 
@@ -28,12 +41,10 @@ Starting to use recipes from this repository is as easy as running
 one simple command after installing Conan:
 
 ```
-conan install name/version@ [-g <generator>]
+conan install --require=name/version [-g <generator>]
 ```
 
-Of course, we really encourage you to use a `conanfile.txt` or `conanfile.py`
-to list all the requirements or your project and install them all together
-(Conan will build a single graph and ensure congruency).
+For further details, please see the [Conan documentation](https://docs.conan.io/2/tutorial/consuming_packages.html).
 
 :warning: It is very important to notice that recipes will evolve over time
 and, while they are fixing some issues, they might introduce new features and
@@ -50,10 +61,8 @@ This is a list of shortcuts to some interesting topics:
 
 * :rocket: If you want to learn how to **contribute new recipes**, please read [docs/adding_packages/](docs/adding_packages/README.md).
 * :speech_balloon: **FAQ**: most common questions are listed in [docs/faqs.md](docs/faqs.md).
-* :warning: The conan-center **hook errors** reported by CCI Bot can be found in the [docs/error_knowledge_base.md](docs/error_knowledge_base.md).
 * :hammer_and_wrench: The internal changes related to infrastructure can be checked in [docs/changelog.md](docs/changelog.md).
 * :world_map: There are various community lead initiatives which are outlined in [docs/community_resources.md](docs/community_resources.md).
-* :magic_wand: To start preparing your recipes for **Conan 2.0**, please check [docs/v2_migration.md](docs/v2_migration.md).
 
 ### Reporting Issues
 
@@ -65,7 +74,7 @@ You can open issues in the [issue tracker](https://github.com/conan-io/conan-cen
     - Specify the name and version (`zlib/1.2.11`) and any relevant details about the fail configuration: Applied profile, building machine...
 
 * :bulb: Request a **new library** to be added:
-    - Use the `[request]` label to search the library in the issue tracker in case the it was already requested.
+    - Use the `[request]` label to search the library in the issue tracker in case it was already requested.
     - If not, use the same `[request]` tag in the title of the issue to help identifying them.
     - Indicate the name and the version of the library you would like to have in the repository. Also links to the project's website,
       source download/repository and in general any relevant information that helps creating a recipe for it.

@@ -1,0 +1,31 @@
+From 5cfa39e5cde6b64ccf3d1335cee4d4744d4ce242 Mon Sep 17 00:00:00 2001
+From: Guillem Jover <guillem@hadrons.org>
+Date: Wed, 23 Nov 2022 23:42:49 +0100
+Subject: [PATCH] =?UTF-8?q?build:=20Use=20=C2=AByes=C2=BB=20instead=20of?=
+ =?UTF-8?q?=20=C2=ABtrue=C2=BB=20for=20AC=5FCHECK=5FFUNCS=20cache=20value?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This autoconf macro sets the ac_cv_func_ cached variable to «yes» not
+«true» so we were checking for an impossible condition.
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 17d113c..842f5d6 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -173,7 +173,7 @@ AC_CHECK_FUNCS([clearenv dirfd fopencookie __fpurge \
+                 getauxval getentropy getexecname getline \
+                 pstat_getproc sysconf \
+ 		strlcpy strlcat strnstr strmode fpurge])
+-AM_CONDITIONAL([HAVE_GETENTROPY], [test "x$ac_cv_func_getentropy" = "xtrue"])
++AM_CONDITIONAL([HAVE_GETENTROPY], [test "x$ac_cv_func_getentropy" = "xyes"])
+ 
+ AC_CONFIG_FILES([
+ 	Makefile
+-- 
+GitLab
+

@@ -1,17 +1,24 @@
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+import os
 
-required_conan_version = ">=1.33.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rm
+from conan.tools.microsoft import is_msvc
+
+required_conan_version = ">=1.53.0"
 
 
 class S2let(ConanFile):
     name = "s2let"
+    description = "Fast wavelets on the sphere"
     license = "GPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/astro-informatics/s2let"
-    description = "Fast wavelets on the sphere"
-    settings = "os", "arch", "compiler", "build_type"
     topics = ("physics", "astrophysics", "radio interferometry")
+
+    package_type = "static-library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
         "with_cfitsio": [True, False],
@@ -20,62 +27,50 @@ class S2let(ConanFile):
         "fPIC": True,
         "with_cfitsio": False,
     }
-    generators = "cmake", "cmake_find_package"
-    exports_sources = ["CMakeLists.txt"]
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
-        del self.settings.compiler.cppstd
-        del self.settings.compiler.libcxx
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("astro-informatics-so3/1.3.4")
+        self.requires("astro-informatics-so3/1.3.6", transitive_headers=True, transitive_libs=True)
         if self.options.with_cfitsio:
-            self.requires("cfitsio/3.490")
+            self.requires("cfitsio/4.3.1")
 
     def validate(self):
-        if self.settings.compiler == "Visual Studio":
-            raise ConanInvalidConfiguration(
-                "S2LET requires C99 support for complex numbers."
-            )
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("S2LET requires C99 support for complex numbers.")
 
     def source(self):
-        tools.get(
-            **self.conan_data["sources"][self.version],
-            strip_root=True,
-            destination=self._source_subfolder
-        )
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    @property
-    def _cmake(self):
-        if not hasattr(self, "_cmake_instance"):
-            self._cmake_instance = CMake(self)
-            self._cmake_instance.definitions["BUILD_TESTING"] = False
-            self._cmake_instance.definitions["cfitsio"] = self.options.with_cfitsio
-            self._cmake_instance.configure(build_folder=self._build_subfolder)
-        return self._cmake_instance
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
+        tc.variables["cfitsio"] = self.options.with_cfitsio
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        self._cmake.build()
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
-        self._cmake.install()
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        rm(self, "*.cmake", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "s2let"
-        self.cpp_info.names["cmake_find_package_multi"] = "s2let"
         self.cpp_info.libs = ["s2let"]
-        if self.settings.os == "Linux":
+        if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]

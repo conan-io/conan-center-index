@@ -5,6 +5,7 @@ from conan.tools.files import get, copy, rmdir, replace_in_file, save, rm
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import export_conandata_patches, apply_conandata_patches
 
 import os
 
@@ -17,6 +18,7 @@ class BehaviorTreeCPPConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/BehaviorTree/BehaviorTree.CPP"
     topics = ("ai", "robotics", "games", "coordination")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -73,6 +75,7 @@ class BehaviorTreeCPPConan(ConanFile):
             }
 
     def export_sources(self):
+        export_conandata_patches(self)
         copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
@@ -215,6 +218,7 @@ class BehaviorTreeCPPConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # Let Conan handle -fPIC
         replace_in_file(self, cmakelists, "set(CMAKE_POSITION_INDEPENDENT_CODE ON)\n", "")
@@ -225,7 +229,9 @@ class BehaviorTreeCPPConan(ConanFile):
         # Unvendor minitrace
         if self._with_minitrace:
             rmdir(self, os.path.join(self.source_folder, "3rdparty", "minitrace"))
-            replace_in_file(self, cmakelists, "3rdparty/minitrace/minitrace.cpp", "")
+            if Version(self.version) < "4.6.2":
+                # INFO: Version 4.6.2 removed minitrace via patch file 001-minitrace.patch
+                replace_in_file(self, cmakelists, "3rdparty/minitrace/minitrace.cpp", "")
             replace_in_file(self, os.path.join(self.source_folder, "src", "loggers", "bt_minitrace_logger.cpp"),
                             "minitrace/minitrace.h", "minitrace.h")
         # Unvendor tinyxml2

@@ -47,7 +47,7 @@ class LibBigWigConan(ConanFile):
             # https://github.com/dpryan79/libBigWig/blob/master/bigWigIO.h#L5
             self.requires("libcurl/[>=7.78.0 <9]", transitive_headers=True)
         if self.options.with_zlibng:
-            self.requires("zlib-ng/2.1.6")
+            self.requires("zlib-ng/2.2.0")
         else:
             self.requires("zlib/[>=1.2.11 <2]")
 

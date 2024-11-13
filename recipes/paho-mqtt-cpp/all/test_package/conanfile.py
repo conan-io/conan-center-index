@@ -16,8 +16,6 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["TEST_SSL_OPTION"] = self.dependencies[self.tested_reference_str].options.ssl
-        tc.variables["PAHO_MQTT_CPP_SHARED"] = self.dependencies[self.tested_reference_str].options.shared
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
