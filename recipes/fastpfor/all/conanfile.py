@@ -1,8 +1,8 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.apple import is_apple_os
 import os
 
 required_conan_version = ">=1.53.0"
@@ -33,12 +33,12 @@ class FastPFORConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def validate(self):
-        if self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration(f"{self.settings.arch} architecture is not supported")
+    def requirements(self):
+        if str(self.settings.arch).startswith("armv8"):
+            self.requires("simde/0.8.0", transitive_headers=True)
 
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "11")
+    def validate(self):
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -46,6 +46,15 @@ class FastPFORConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["WITH_TEST"] = False
+        if str(self.settings.arch).startswith("armv8"):
+            tc.cache_variables["SUPPORT_NEON"] = True
+            tc.preprocessor_definitions["SIMDE_ENABLE_NATIVE_ALIASES"] = 1
+            if is_apple_os(self):
+                tc.variables["CMAKE_OSX_ARCHITECTURES"] = {
+                    "armv8": "arm64",
+                }.get(str(self.settings.arch), str(self.settings.arch))
+        tc.generate()
+        tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
@@ -70,6 +79,9 @@ class FastPFORConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
+        if str(self.settings.arch).startswith("armv8"):
+            self.cpp_info.defines = ["SIMDE_ENABLE_NATIVE_ALIASES"]
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "FastPFOR"

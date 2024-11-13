@@ -1,7 +1,16 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 38590f3..9295930 100644
+index 38590f3..cbe7357 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -62,7 +62,7 @@ if( SUPPORT_SSE42 )
+     MESSAGE( STATUS "SSE 4.2 support detected" )
+ else()
+     if (SUPPORT_NEON)
+-        include("${CMAKE_MODULE_PATH}/simde.cmake")
++        find_package(simde REQUIRED CONFIG)
+         MESSAGE(STATUS "USING SIMDE FOR SIMD OPERATIONS")
+     else ()
+         MESSAGE(STATUS "SIMDE and SSE 4.2 support not detected")
 @@ -90,7 +90,7 @@ elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Intel")
      set (CMAKE_CXX_FLAGS_DEBUG   "-Wall -ggdb   -std=c++11 -DHAVE_CXX0X  -march=native")
      set (CMAKE_C_FLAGS_RELEASE "-Wall -Ofast  -DNDEBUG -std=c99  -march=native")
@@ -11,15 +20,19 @@ index 38590f3..9295930 100644
      if (CXX_COMPILER_VERSION VERSION_LESS 4.2.1)
          message(STATUS  "Clang version must be at least 4.2.1!" )
      endif()
-@@ -98,11 +98,20 @@ elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STR
+@@ -98,11 +98,24 @@ elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STR
      set (CMAKE_CXX_FLAGS_DEBUG   "-Wall -Wcast-align -ggdb  -std=c++11 -DHAVE_CXX0X -march=native")
      set (CMAKE_C_FLAGS_RELEASE "-Wall -Wcast-align -O3 -DNDEBUG -std=c99 -march=native")
      set (CMAKE_C_FLAGS_DEBUG   "-Wall -Wcast-align -ggdb  -std=c99 -march=native")
 +elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
-+    set (CMAKE_CXX_FLAGS_RELEASE "-Wall -Wcast-align -O3 -DNDEBUG -std=c++11 -DHAVE_CXX0X -mtune=native")
-+    set (CMAKE_CXX_FLAGS_DEBUG   "-Wall -Wcast-align -ggdb  -std=c++11 -DHAVE_CXX0X -mtune=native")
-+    set (CMAKE_C_FLAGS_RELEASE "-Wall -Wcast-align -O3 -DNDEBUG -std=c99 -mtune=native")
-+    set (CMAKE_C_FLAGS_DEBUG   "-Wall -Wcast-align -ggdb  -std=c99 -mtune=native")
++    set(TUNE_FLAG "-mtune=native")
++    if(CMAKE_OSX_ARCHITECTURES MATCHES "arm64.*")
++        set(TUNE_FLAG "-mtune=apple-m1")
++    endif()
++    set (CMAKE_CXX_FLAGS_RELEASE "-Wall -Wcast-align -O3 -DNDEBUG -std=c++11 -DHAVE_CXX0X ${TUNE_FLAG}")
++    set (CMAKE_CXX_FLAGS_DEBUG   "-Wall -Wcast-align -ggdb  -std=c++11 -DHAVE_CXX0X ${TUNE_FLAG}")
++    set (CMAKE_C_FLAGS_RELEASE "-Wall -Wcast-align -O3 -DNDEBUG -std=c99 ${TUNE_FLAG}")
++    set (CMAKE_C_FLAGS_DEBUG   "-Wall -Wcast-align -ggdb  -std=c99 ${TUNE_FLAG}")
  elseif(WIN32)
      # TODO add support for later versions?
      if(NOT MSVC12)
@@ -32,7 +45,7 @@ index 38590f3..9295930 100644
  else ()
      message(FATAL_ERROR "Please, use GCC, Clang, or the Intel compiler!")
  endif()
-@@ -129,7 +138,7 @@ add_library(FastPFOR STATIC
+@@ -129,19 +142,19 @@ add_library(FastPFOR STATIC
      src/streamvbyte.c)
  set_target_properties(FastPFOR PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
  
@@ -41,7 +54,25 @@ index 38590f3..9295930 100644
  # other executables
  add_executable(gapstats src/gapstats.cpp)
  add_executable(partitionbylength src/partitionbylength.cpp)
-@@ -149,7 +158,7 @@ if( SUPPORT_SSE42 )
+ add_executable(csv2maropu src/csv2maropu.cpp)
+-
++endif()
+ if (SUPPORT_NEON)
+-    target_link_libraries(FastPFOR PUBLIC simde)
+-    target_link_libraries(gapstats PUBLIC simde)
+-    target_link_libraries(partitionbylength PUBLIC simde)
+-    target_link_libraries(csv2maropu PUBLIC simde)
++    target_link_libraries(FastPFOR PUBLIC simde::simde)
++    # target_link_libraries(gapstats PUBLIC simde::simde)
++    # target_link_libraries(partitionbylength PUBLIC simde::simde)
++    # target_link_libraries(csv2maropu PUBLIC simde::simde)
+ endif()
+-
++if(0)
+ add_executable(entropy src/entropy.cpp)
+ target_link_libraries(entropy FastPFOR)
+ 
+@@ -149,7 +162,7 @@ if( SUPPORT_SSE42 )
      add_executable(benchbitpacking src/benchbitpacking.cpp)
      target_link_libraries(benchbitpacking FastPFOR)
  endif()
@@ -50,7 +81,7 @@ index 38590f3..9295930 100644
  find_package(snappy)
  if(NOT ${snappy_FOUND})
      message(STATUS "Snappy was not found. codecssnappy and "
-@@ -158,6 +167,7 @@ else()
+@@ -158,6 +171,7 @@ else()
      message(STATUS "Snappy was found. Building additional targets "
                     "codecssnappy and inmemorybenchmarksnappy.")
      include_directories(${snappy_INCLUDE_DIRS})
@@ -58,7 +89,7 @@ index 38590f3..9295930 100644
      add_executable(codecssnappy src/codecs.cpp)
      set_target_properties(codecssnappy PROPERTIES DEFINE_SYMBOL USESNAPPY)
      target_link_libraries(codecssnappy FastPFOR ${snappy_LIBRARIES})
-@@ -165,6 +175,7 @@ else()
+@@ -165,6 +179,7 @@ else()
      add_executable(inmemorybenchmarksnappy src/inmemorybenchmark.cpp)
      set_target_properties(inmemorybenchmarksnappy PROPERTIES DEFINE_SYMBOL USESNAPPY)
      target_link_libraries(inmemorybenchmarksnappy FastPFOR ${snappy_LIBRARIES})
