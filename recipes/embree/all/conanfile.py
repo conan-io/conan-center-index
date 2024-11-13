@@ -150,18 +150,15 @@ class EmbreeConan(ConanFile):
             rm(self, pattern=dll_pattern_to_remove, folder=os.path.join(self.package_folder, "bin"), recursive=True)
 
     def package_info(self):
-        def _lib_exists(name):
-            return bool(
-                glob.glob(os.path.join(self.package_folder, "lib", f"*{name}.*"))
-            )
-
         self.cpp_info.libs = ["embree4"]
         if not self.options.shared:
             self.cpp_info.libs.extend(["sys", "math", "simd", "lexers", "tasking"])
-            simd_libs = ["embree_sse42", "embree_avx", "embree_avx2", "embree_avx512"]
-            for lib in simd_libs:
-                if _lib_exists(lib):
-                    self.cpp_info.libs.append(lib)
+            if self._has_sse_avx:
+                self.cpp_info.libs.extend(["embree_sse42", "embree_avx", "embree_avx2"])
+                if not is_msvc(self):
+                    self.cpp_info.libs.append("embree_avx512")
+            if self._has_neon:
+                self.cpp_info.libs.extend(["embree_avx2"])
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
