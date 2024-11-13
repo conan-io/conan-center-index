@@ -334,7 +334,7 @@ class GtkConan(ConanFile):
             "libepoxy::libepoxy",
             "libjpeg::libjpeg",
             "libpng::libpng",
-            "libtiff::libtiff",
+            "libtiff::tiff",
         ]
         if self.settings.os == "Linux" and Version(self.version) >= "4.13.2":
             self.cpp_info.components["gtk4"].requires.append("libdrm::libdrm")
