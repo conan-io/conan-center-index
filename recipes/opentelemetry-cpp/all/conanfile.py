@@ -134,7 +134,7 @@ class OpenTelemetryCppConan(ConanFile):
 
         if self.options.with_otlp_grpc:
             if self._supports_new_proto_grpc_abseil():
-                self.requires("grpc/1.65.0", transitive_headers=True, transitive_libs=True)
+                self.requires("grpc/1.67.1", transitive_headers=True, transitive_libs=True)
             else:
                 self.requires("grpc/1.54.3", transitive_headers=True, transitive_libs=True)
 

@@ -621,7 +621,7 @@ class BoostConan(ConanFile):
             return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
         elif Version(self.version) >= "1.86.0":
             # https://github.com/boostorg/stacktrace/blob/boost-1.86.0/build/Jamfile.v2#L148
-            return not self.options.header_only and not self.options.without_stacktrace and self.settings.arch == "x86_64"
+            return not self.options.header_only and not self.options.without_stacktrace and self._b2_architecture == "x86"
 
     def configure(self):
         if self.options.header_only:
