@@ -1,20 +1,18 @@
 import glob
 import os
 import shutil
-import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import chdir, copy, get, rm, rmdir, save
+from conan.tools.files import chdir, copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, check_min_vs
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
+required_conan_version = ">=2.0.9"
 
 
 class GStPluginsBaseConan(ConanFile):
@@ -63,18 +61,9 @@ class GStPluginsBaseConan(ConanFile):
         "with_xorg": True,
         "with_introspection": False,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    @property
-    def _is_legacy_one_profile(self):
-        return not hasattr(self, "settings_build")
+    implements = ["auto_shared_fpic"]
 
     def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
         if self.settings.os not in ["Linux", "FreeBSD"]:
             self.options.rm_safe("with_libalsa")
             self.options.rm_safe("with_egl")
@@ -82,8 +71,6 @@ class GStPluginsBaseConan(ConanFile):
             self.options.rm_safe("with_xorg")
 
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
         if not self.options.with_gl:
@@ -125,7 +112,7 @@ class GStPluginsBaseConan(ConanFile):
         if self.options.with_ogg:
             self.requires("ogg/1.3.5")
         if self.options.with_opus:
-            self.requires("opus/1.4")
+            self.requires("opus/1.5.2")
         if self.options.with_theora:
             self.requires("theora/1.1.1")
         if self.options.with_vorbis:
@@ -147,8 +134,7 @@ class GStPluginsBaseConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
-        if not self._is_legacy_one_profile:
-            self.tool_requires("glib/<host_version>")
+        self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         if self._settings_build.os == "Windows":
@@ -157,11 +143,10 @@ class GStPluginsBaseConan(ConanFile):
             self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
         if self.options.get_safe("with_wayland"):
-            if not self._is_legacy_one_profile:
-                self.tool_requires("wayland/<host_version>")
+            self.tool_requires("wayland/<host_version>")
             self.tool_requires("wayland-protocols/1.33")
         if self.options.with_introspection:
-            self.tool_requires("gobject-introspection/1.72.0")
+            self.tool_requires("gobject-introspection/1.78.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -205,10 +190,6 @@ class GStPluginsBaseConan(ConanFile):
         def add_linker_flag(value):
             tc.c_link_args.append(value)
             tc.cpp_link_args.append(value)
-
-        VirtualBuildEnv(self).generate()
-        if self._is_legacy_one_profile:
-            VirtualRunEnv(self).generate(scope="build")
 
         tc = MesonToolchain(self)
 
@@ -254,22 +235,7 @@ class GStPluginsBaseConan(ConanFile):
 
         deps = PkgConfigDeps(self)
         if self.options.get_safe("with_wayland"):
-            if self._is_legacy_one_profile:
-                # Manually generate pkgconfig file of wayland-protocols since
-                # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
-                wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
-                wp_version = self.dependencies.build["wayland-protocols"].ref.version
-                wp_pkg_content = textwrap.dedent(f"""\
-                    prefix={wp_prefix}
-                    datarootdir=${{prefix}}/res
-                    pkgdatadir=${{datarootdir}}/wayland-protocols
-                    Name: Wayland Protocols
-                    Description: Wayland protocol files
-                    Version: {wp_version}
-                """)
-                save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
-            else:
-                deps.build_context_activated = ["wayland-protocols"]
+            deps.build_context_activated = ["wayland-protocols"]
         deps.generate()
 
     def build(self):
@@ -316,8 +282,6 @@ class GStPluginsBaseConan(ConanFile):
 
         if self.options.shared:
             self.runenv_info.define_path("GST_PLUGIN_PATH", gst_plugin_path)
-            # TODO: Legacy, to be removed on Conan 2.0
-            self.env_info.GST_PLUGIN_PATH.append(gst_plugin_path)
 
         def _define_plugin_component(name, requires):
             self.cpp_info.components[name].libs = [name]
@@ -680,6 +644,11 @@ class GStPluginsBaseConan(ConanFile):
             gl_custom_content = "\n".join(f"{key}={value}" for key, value in gl_variables.items())
             self.cpp_info.components["gstreamer-gl-1.0"].set_property("pkg_config_custom_content", gl_custom_content)
 
+            self.cpp_info.components["gstreamer-gl-1.0"].libs = ["gstgl-1.0"]
+            self.cpp_info.components["gstreamer-gl-1.0"].requires = [
+                "gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0",
+                "gstreamer-allocators-1.0", "gstreamer-video-1.0",
+                "glib::gmodule-no-export-2.0", "libglvnd::libglvnd"] # TODO: bcm
             if self.options.get_safe("with_egl"):
                 self.cpp_info.components["gstreamer-gl-1.0"].requires += ["egl::egl"]
             if self.options.get_safe("with_xorg"):
