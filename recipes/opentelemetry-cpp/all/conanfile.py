@@ -437,6 +437,8 @@ class OpenTelemetryCppConan(ConanFile):
         if Version(self.version) >= "1.16.0" and is_apple_os(self):
             self.cpp_info.components["opentelemetry_common"].frameworks.extend(["CoreFoundation"])
 
+        if self.options.get_safe("with_otlp_http_compression"):
+            self.cpp_info.components["opentelemetry_common"].defines.append("ENABLE_OTLP_COMPRESSION_PREVIEW")
         if self._stl_value:
             self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_CPP_STDLIB")
 
