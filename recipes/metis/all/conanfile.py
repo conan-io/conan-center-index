@@ -34,7 +34,7 @@ class METISConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_64bit_types": True,
+        "with_64bit_types": False,
         "enable_gkrand": False,
         "enable_gkregex": False,
         "with_openmp": False,
@@ -45,12 +45,7 @@ class METISConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
-        copy(
-            self,
-            "gkbuild.cmake",
-            self.recipe_folder,
-            os.path.join(self.export_sources_folder, "src"),
-        )
+        copy(self, "gkbuild.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -76,11 +71,11 @@ class METISConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["VALGRIND"] = self.options.with_valgrind
-        tc.cache_variables["OPENMP"] = self.options.with_openmp
-        tc.cache_variables["PCRE"] = self.options.with_pcre
-        tc.cache_variables["GKREGEX"] = self.settings.os == "Windows" or self.options.enable_gkregex
-        tc.cache_variables["GKRAND"] = self.options.enable_gkrand
+        tc.variables["VALGRIND"] = self.options.with_valgrind
+        tc.variables["OPENMP"] = self.options.with_openmp
+        tc.variables["PCRE"] = self.options.with_pcre
+        tc.variables["GKREGEX"] = self.settings.os == "Windows" or self.options.enable_gkregex
+        tc.variables["GKRAND"] = self.options.enable_gkrand
         if self.settings.build_type == "Debug":
             tc.preprocessor_definitions["DEBUG"] = ""
         else:
@@ -104,12 +99,7 @@ class METISConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(
-            self,
-            pattern="LICENSE",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
-        )
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rm(self, "*.cmake", self.package_folder, recursive=True)

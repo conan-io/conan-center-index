@@ -1,4 +1,7 @@
 sources:
+  "4.1.0":
+    sha256: "be7abecbc420bb87919eeef729b13ff7c29d5ce547bdae284923296c695415bd"
+    url: "https://github.com/bshoshany/thread-pool/archive/refs/tags/v4.1.0.tar.gz"
   "4.0.1":
     sha256: "34d25503e17e58198613d9306313f8358cfaaa9320f2b7694dc599b90a1858a7"
     url: "https://github.com/bshoshany/thread-pool/archive/refs/tags/v4.0.1.tar.gz"

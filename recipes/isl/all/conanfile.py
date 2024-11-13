@@ -6,6 +6,7 @@ from conan.tools.files import copy, get, rm, rmdir, apply_conandata_patches, exp
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, check_min_vs, unix_path, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.58.0"
@@ -50,7 +51,7 @@ class IslConan(ConanFile):
     def validate(self):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Cannot build shared isl library on Windows (due to libtool refusing to link to static/import libraries)")
-        if is_apple_os(self) and cross_building(self):
+        if Version(self.version) < "0.25" and is_apple_os(self) and cross_building(self):
             raise ConanInvalidConfiguration("Cross-building with Apple Clang is not supported yet")
         if msvc_runtime_flag(self) == "MDd" and not check_min_vs(self, 192, raise_invalid=False):
             # isl fails to link with this version of visual studio and MDd runtime:

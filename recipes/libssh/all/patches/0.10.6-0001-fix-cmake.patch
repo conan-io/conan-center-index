@@ -1,0 +1,110 @@
+diff --git a/ConfigureChecks.cmake b/ConfigureChecks.cmake
+index 9de10225..6f881775 100644
+--- a/ConfigureChecks.cmake
++++ b/ConfigureChecks.cmake
+@@ -101,41 +101,41 @@ if (OPENSSL_FOUND)
+     check_include_file(openssl/ecdsa.h HAVE_OPENSSL_ECDSA_H)
+ 
+     set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+-    set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES})
++    set(CMAKE_REQUIRED_LIBRARIES OpenSSL::Crypto)
+     check_function_exists(EVP_KDF_CTX_new_id HAVE_OPENSSL_EVP_KDF_CTX_NEW_ID)
+ 
+     set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+-    set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES})
++    set(CMAKE_REQUIRED_LIBRARIES OpenSSL::Crypto)
+     check_function_exists(EVP_KDF_CTX_new HAVE_OPENSSL_EVP_KDF_CTX_NEW)
+ 
+     set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+-    set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES})
++    set(CMAKE_REQUIRED_LIBRARIES OpenSSL::Crypto)
+     check_function_exists(FIPS_mode HAVE_OPENSSL_FIPS_MODE)
+ 
+     set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+-    set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES})
++    set(CMAKE_REQUIRED_LIBRARIES OpenSSL::Crypto)
+     check_function_exists(RAND_priv_bytes HAVE_OPENSSL_RAND_PRIV_BYTES)
+ 
+     set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+-    set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES})
++    set(CMAKE_REQUIRED_LIBRARIES OpenSSL::Crypto)
+     check_function_exists(EVP_DigestSign HAVE_OPENSSL_EVP_DIGESTSIGN)
+ 
+     set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+-    set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES})
++    set(CMAKE_REQUIRED_LIBRARIES OpenSSL::Crypto)
+     check_function_exists(EVP_DigestVerify HAVE_OPENSSL_EVP_DIGESTVERIFY)
+ 
+     check_function_exists(OPENSSL_ia32cap_loc HAVE_OPENSSL_IA32CAP_LOC)
+ 
+     set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+-    set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES})
++    set(CMAKE_REQUIRED_LIBRARIES OpenSSL::Crypto)
+     check_symbol_exists(EVP_PKEY_ED25519 "openssl/evp.h" FOUND_OPENSSL_ED25519)
+ 
+     set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+-    set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES})
++    set(CMAKE_REQUIRED_LIBRARIES OpenSSL::Crypto)
+     check_function_exists(EVP_chacha20 HAVE_OPENSSL_EVP_CHACHA20)
+ 
+     set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+-    set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES})
++    set(CMAKE_REQUIRED_LIBRARIES OpenSSL::Crypto)
+     check_symbol_exists(EVP_PKEY_POLY1305 "openssl/evp.h" HAVE_OPENSSL_EVP_POLY1305)
+ 
+     if (HAVE_OPENSSL_EVP_DIGESTSIGN AND HAVE_OPENSSL_EVP_DIGESTVERIFY AND
+@@ -144,7 +144,7 @@ if (OPENSSL_FOUND)
+     endif()
+ 
+     set(CMAKE_REQUIRED_INCLUDES ${OPENSSL_INCLUDE_DIR})
+-    set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_CRYPTO_LIBRARIES})
++    set(CMAKE_REQUIRED_LIBRARIES OpenSSL::Crypto)
+     check_symbol_exists(EVP_PKEY_X25519 "openssl/evp.h" HAVE_OPENSSL_X25519)
+ 
+     unset(CMAKE_REQUIRED_INCLUDES)
+@@ -494,7 +494,7 @@ if (WITH_PKCS11_URI)
+         message(FATAL_ERROR "PKCS #11 is not supported for mbedcrypto")
+         set(WITH_PKCS11_URI 0)
+     endif()
+-    if (HAVE_OPENSSL AND NOT OPENSSL_VERSION VERSION_GREATER_EQUAL "1.1.1")
++    if (HAVE_OPENSSL AND NOT OpenSSL_VERSION VERSION_GREATER_EQUAL "1.1.1")
+         message(FATAL_ERROR "PKCS #11 requires at least OpenSSL 1.1.1")
+         set(WITH_PKCS11_URI 0)
+     endif()
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 807313b5..91f85094 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -17,7 +17,7 @@ if (OPENSSL_CRYPTO_LIBRARIES)
+ 
+   set(LIBSSH_LINK_LIBRARIES
+     ${LIBSSH_LINK_LIBRARIES}
+-    ${OPENSSL_CRYPTO_LIBRARIES}
++    OpenSSL::Crypto
+   )
+ endif (OPENSSL_CRYPTO_LIBRARIES)
+ 
+@@ -46,12 +46,12 @@ endif()
+ if (WITH_ZLIB)
+   set(LIBSSH_PRIVATE_INCLUDE_DIRS
+     ${LIBSSH_PRIVATE_INCLUDE_DIRS}
+-    ${ZLIB_INCLUDE_DIR}
++    ${ZLIB_INCLUDE_DIRS}
+   )
+ 
+   set(LIBSSH_LINK_LIBRARIES
+     ${LIBSSH_LINK_LIBRARIES}
+-    ${ZLIB_LIBRARY}
++    ${ZLIB_LIBRARIES}
+   )
+ endif (WITH_ZLIB)
+ 
+@@ -257,7 +257,7 @@ else (WITH_GCRYPT)
+             chachapoly.c
+         )
+     endif (NOT (HAVE_OPENSSL_EVP_CHACHA20 AND HAVE_OPENSSL_EVP_POLY1305))
+-    if(OPENSSL_VERSION VERSION_LESS "1.1.0")
++    if(OpenSSL_VERSION VERSION_LESS "1.1.0")
+         set(libssh_SRCS ${libssh_SRCS} libcrypto-compat.c)
+     endif()
+ endif (WITH_GCRYPT)

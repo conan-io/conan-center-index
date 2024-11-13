@@ -1,0 +1,25 @@
+From b2896dee6f43733c832c3a60f09f362abe2c5e79 Mon Sep 17 00:00:00 2001
+From: Kevin Greene <kgreenek@gmail.com>
+Date: Fri, 23 Feb 2024 10:22:02 -0800
+Subject: [PATCH] Fix non-const string issue with C++20
+
+---
+ ouster_client/src/curl_client.h | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/ouster_client/src/curl_client.h b/ouster_client/src/curl_client.h
+index ce3fb31d..62bcabc0 100644
+--- a/ouster_client/src/curl_client.h
++++ b/ouster_client/src/curl_client.h
+@@ -89,9 +89,8 @@ class CurlClient : public ouster::util::HttpClient {
+                 // HTTP 5XX means a server error, so we should re-attempt.
+                 // log a warning and sleep before re-attempting
+                 ouster::sensor::logger().warn(
+-                    std::string("Re-attempting CurlClient::execute_get after "
+-                                "failure for url: ") +
+-                        "[{}] with the code: [{}] - and return: {}",
++                    "Re-attempting CurlClient::execute_get after failure for "
++                    "url: [{}] with the code: [{}] - and return: {}",
+                     url, http_code, buffer);
+                 std::this_thread::sleep_for(
+                     std::chrono::milliseconds(retry_delay_ms));

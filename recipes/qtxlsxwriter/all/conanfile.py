@@ -7,7 +7,7 @@ from conan.tools.files import apply_conandata_patches, copy, download, export_co
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.63.0"
 
 
 class QtXlsxWriterConan(ConanFile):
@@ -19,6 +19,7 @@ class QtXlsxWriterConan(ConanFile):
     topics = ("excel", "xlsx")
 
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -44,7 +45,7 @@ class QtXlsxWriterConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/5.15.7")
+        self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if not self.dependencies["qt"].options.gui:
@@ -55,7 +56,7 @@ class QtXlsxWriterConan(ConanFile):
 
     def build_requirements(self):
         if hasattr(self, "settings_build") and cross_building(self):
-            self.tool_requires("qt/5.15.7")
+            self.tool_requires("qt/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["source"],

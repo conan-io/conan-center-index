@@ -1,0 +1,5 @@
+versions:
+  "12.1":
+    folder: all
+  "11.2":
+    folder: all

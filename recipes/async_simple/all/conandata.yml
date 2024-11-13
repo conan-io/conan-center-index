@@ -1,5 +1,16 @@
 sources:
+  "1.3":
+    url: "https://github.com/alibaba/async_simple/archive/refs/tags/v1.3.tar.gz"
+    sha256: "0BA0DC3397882611B538D04B8EE6668B1A04CE046128599205184C598B718743"
+  "1.2":
+    url: "https://github.com/alibaba/async_simple/archive/refs/tags/1.2.tar.gz"
+    sha256: "a59a2674ac2b0a3997b90873b2bf0fbe4d96fdedbe6a2628c16c92a65a3fa39a"
   "1.0.0":
-    url:
-      - "https://github.com/alibaba/async_simple/archive/refs/tags/1.0.tar.gz"
+    url: "https://github.com/alibaba/async_simple/archive/refs/tags/1.0.tar.gz"
     sha256: "b243fb7af5d61b534fe18b662d16498392bbce1deffdc68e58829aa31db7badf"
+patches:
+  "1.0.0":
+    - patch_file: "patches/disable-asan-1.0.patch"
+      patch_description: "Add option for disabling address sanitizer in root CMakeLists"
+      patch_type: "portability"
+      patch_source: "https://github.com/alibaba/async_simple/commit/ccb760356b9d7481ca73f0c58d15928bf8b0aa0b"

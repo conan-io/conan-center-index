@@ -19,6 +19,7 @@ class TestPackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["SPDLOG_HEADER_ONLY"] = self.dependencies["spdlog"].options.header_only
+        tc.variables["SPDLOG_USE_STD_FORMAT"] = self.dependencies["spdlog"].options.get_safe("use_std_fmt", False)
         tc.generate()
 
     def build(self):

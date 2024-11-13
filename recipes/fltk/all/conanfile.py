@@ -4,6 +4,8 @@ from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.microsoft import msvc_runtime_flag
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -35,6 +37,14 @@ class FltkConan(ConanFile):
         "with_gdiplus": True,
         "with_xft": False,
     }
+
+    @property
+    def _is_cl_like(self):
+        return self.settings.compiler.get_safe("runtime") is not None
+
+    @property
+    def _is_cl_like_static_runtime(self):
+        return self._is_cl_like and "MT" in msvc_runtime_flag(self)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -68,7 +78,7 @@ class FltkConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("libjpeg/9e")
-        self.requires("libpng/1.6.40")
+        self.requires("libpng/[>=1.6 <2]")
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_gl:
                 self.requires("opengl/system")
@@ -96,6 +106,9 @@ class FltkConan(ConanFile):
         tc.variables["OPTION_USE_SYSTEM_LIBJPEG"] = True
         tc.variables["OPTION_USE_SYSTEM_ZLIB"] = True
         tc.variables["OPTION_USE_SYSTEM_LIBPNG"] = True
+        if Version(self.version) >= "1.3.9":
+            if self._is_cl_like:
+                tc.variables["FLTK_MSVC_RUNTIME_DLL"] = not self._is_cl_like_static_runtime
 
         tc.generate()
         tc = CMakeDeps(self)

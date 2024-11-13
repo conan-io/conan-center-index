@@ -1,4 +1,7 @@
 sources:
+  "1.54.0":
+    url: "https://download.gnome.org/sources/pango/1.54/pango-1.54.0.tar.xz"
+    sha256: "8a9eed75021ee734d7fc0fdf3a65c3bba51dfefe4ae51a9b414a60c70b2d1ed8"
   "1.51.0":
     url: "https://download.gnome.org/sources/pango/1.51/pango-1.51.0.tar.xz"
     sha256: "74efc109ae6f903bbe6af77eaa2ac6094b8ee245a2e23f132a7a8f0862d1a9f5"

@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rename, rmdir
+from conan.tools.files import copy, get, rename, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -9,6 +9,7 @@ required_conan_version = ">=1.53.0"
 
 class SAILConan(ConanFile):
     name = "sail"
+    package_type = "library"
     description = "The missing small and fast image decoding library for humans (not for machines)"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://sail.software"
@@ -43,9 +44,6 @@ class SAILConan(ConanFile):
         "with_lowest_priority_codecs": "Enable codecs: WAL, XBM",
     }
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
@@ -56,20 +54,17 @@ class SAILConan(ConanFile):
 
     def requirements(self):
         if self.options.with_highest_priority_codecs:
-            self.requires("giflib/5.2.1")
+            self.requires("giflib/5.2.2")
             self.requires("libjpeg/9e")
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
             self.requires("libtiff/4.6.0")
         if self.options.with_high_priority_codecs:
             if Version(self.version) >= "0.9.1":
                 self.requires("nanosvg/cci.20231025")
         if self.options.with_medium_priority_codecs:
-            self.requires("libavif/1.0.3")
-            self.requires("jasper/4.1.1")
-            # TODO Re-enable JPEG XL after merging either of the following:
-            #   - https://github.com/conan-io/conan-center-index/pull/13898
-            #   - https://github.com/conan-io/conan-center-index/pull/18812
-            # self.requires("libjxl/0.6.1")
+            self.requires("libavif/1.0.4")
+            self.requires("jasper/4.2.0")
+            self.requires("libjxl/0.8.2")
             self.requires("libwebp/1.3.2")
 
     def layout(self):
@@ -100,25 +95,19 @@ class SAILConan(ConanFile):
         tc.variables["SAIL_COMBINE_CODECS"] = True
         tc.variables["SAIL_ENABLE_OPENMP"]  = False
         tc.variables["SAIL_ONLY_CODECS"]    = ";".join(only_codecs)
-        # JPEGXL needs porting to Conan2
         # SVG with nanosvg is supported in >= 0.9.1
-        if Version(self.version) >= "0.9.1":
-            tc.variables["SAIL_DISABLE_CODECS"] = "jpegxl"
-        else:
-            tc.variables["SAIL_DISABLE_CODECS"] = "jpegxl;svg"
+        if Version(self.version) < "0.9.1":
+            tc.variables["SAIL_DISABLE_CODECS"] = "svg"
         tc.variables["SAIL_INSTALL_PDB"]    = False
         tc.variables["SAIL_THREAD_SAFE"]    = self.options.thread_safe
         # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
-        if is_msvc(self):
-            tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
-
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -169,7 +158,7 @@ class SAILConan(ConanFile):
         if self.options.with_medium_priority_codecs:
             self.cpp_info.components["sail-codecs"].requires.append("libavif::libavif")
             self.cpp_info.components["sail-codecs"].requires.append("jasper::jasper")
-            # self.cpp_info.components["sail-codecs"].requires.append("libjxl::libjxl")
+            self.cpp_info.components["sail-codecs"].requires.append("libjxl::libjxl")
             self.cpp_info.components["sail-codecs"].requires.append("libwebp::libwebp")
 
         self.cpp_info.components["libsail"].set_property("cmake_target_name", "SAIL::Sail")

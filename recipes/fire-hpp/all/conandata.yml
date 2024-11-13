@@ -1,4 +1,7 @@
 sources:
+  "1.0":
+    url: "https://github.com/kongaskristjan/fire-hpp/archive/v1.0.tar.gz"
+    sha256: "73086d72a785a57bac8833d4f92799e8e769fef1d2ca46399cfbdb82a5c22f84"
   "0.2":
-    sha256: 50ac76005e5d45590355a51e5e1b62aba65c56f2003335acce0370da13d77b28
-    url: https://github.com/kongaskristjan/fire-hpp/archive/v0.2.tar.gz
+    url: "https://github.com/kongaskristjan/fire-hpp/archive/v0.2.tar.gz"
+    sha256: "50ac76005e5d45590355a51e5e1b62aba65c56f2003335acce0370da13d77b28"

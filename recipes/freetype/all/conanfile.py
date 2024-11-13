@@ -40,18 +40,12 @@ class FreetypeConan(ConanFile):
         "subpixel": False,
     }
 
-    @property
-    def _has_with_brotli_option(self):
-        return Version(self.version) >= "2.10.2"
-
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._has_with_brotli_option:
-            del self.options.with_brotli
 
     def configure(self):
         if self.options.shared:
@@ -64,12 +58,12 @@ class FreetypeConan(ConanFile):
 
     def requirements(self):
         if self.options.with_png:
-            self.requires("libpng/1.6.42")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.10 <2]")
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
-        if self.options.get_safe("with_brotli"):
+        if self.options.with_brotli:
             self.requires("brotli/1.1.0")
 
     def source(self):
@@ -90,17 +84,15 @@ class FreetypeConan(ConanFile):
             # TODO: Harfbuzz can be added as an option as soon as it is available.
             tc.variables["FT_REQUIRE_HARFBUZZ"] = False
             tc.variables["FT_DISABLE_HARFBUZZ"] = True
-            if self._has_with_brotli_option:
-                tc.variables["FT_REQUIRE_BROTLI"] = self.options.with_brotli
-                tc.variables["FT_DISABLE_BROTLI"] = not self.options.with_brotli
+            tc.variables["FT_REQUIRE_BROTLI"] = self.options.with_brotli
+            tc.variables["FT_DISABLE_BROTLI"] = not self.options.with_brotli
         else:
             tc.variables["FT_WITH_ZLIB"] = self.options.with_zlib
             tc.variables["FT_WITH_PNG"] = self.options.with_png
             tc.variables["FT_WITH_BZIP2"] = self.options.with_bzip2
             # TODO: Harfbuzz can be added as an option as soon as it is available.
             tc.variables["FT_WITH_HARFBUZZ"] = False
-            if self._has_with_brotli_option:
-                tc.variables["FT_WITH_BROTLI"] = self.options.with_brotli
+            tc.variables["FT_WITH_BROTLI"] = self.options.with_brotli
         # Generate a relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
@@ -109,9 +101,8 @@ class FreetypeConan(ConanFile):
         apply_conandata_patches(self)
         # Do not accidentally enable dependencies we have disabled
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        find_harfbuzz = "find_package(HarfBuzz {})".format("1.3.0" if Version(self.version) < "2.10.2" else "${HARFBUZZ_MIN_VERSION}")
         if_harfbuzz_found = "if ({})".format("HARFBUZZ_FOUND" if Version(self.version) < "2.11.0" else "HarfBuzz_FOUND")
-        replace_in_file(self, cmakelists, find_harfbuzz, "")
+        replace_in_file(self, cmakelists, "find_package(HarfBuzz ${HARFBUZZ_MIN_VERSION})", "")
         replace_in_file(self, cmakelists, if_harfbuzz_found, "if(0)")
         if not self.options.with_png:
             replace_in_file(self, cmakelists, "find_package(PNG)", "")
@@ -122,16 +113,15 @@ class FreetypeConan(ConanFile):
         if not self.options.with_bzip2:
             replace_in_file(self, cmakelists, "find_package(BZip2)", "")
             replace_in_file(self, cmakelists, "if (BZIP2_FOUND)", "if(0)")
-        if self._has_with_brotli_option:
-            # the custom FindBrotliDec of upstream is too fragile
-            replace_in_file(self, cmakelists,
-                                  "find_package(BrotliDec REQUIRED)",
-                                  "find_package(Brotli REQUIRED)\n"
-                                  "set(BROTLIDEC_FOUND 1)\n"
-                                  "set(BROTLIDEC_LIBRARIES \"brotli::brotli\")")
-            if not self.options.with_brotli:
-                replace_in_file(self, cmakelists, "find_package(BrotliDec)", "")
-                replace_in_file(self, cmakelists, "if (BROTLIDEC_FOUND)", "if(0)")
+        # the custom FindBrotliDec of upstream is too fragile
+        replace_in_file(self, cmakelists,
+                              "find_package(BrotliDec REQUIRED)",
+                              "find_package(Brotli REQUIRED)\n"
+                              "set(BROTLIDEC_FOUND 1)\n"
+                              "set(BROTLIDEC_LIBRARIES \"brotli::brotli\")")
+        if not self.options.with_brotli:
+            replace_in_file(self, cmakelists, "find_package(BrotliDec)", "")
+            replace_in_file(self, cmakelists, "if (BROTLIDEC_FOUND)", "if(0)")
 
         config_h = os.path.join(self.source_folder, "include", "freetype", "config", "ftoption.h")
         if self.options.subpixel:
@@ -254,10 +244,10 @@ class FreetypeConan(ConanFile):
 
         libtool_version = load(self, self._libtool_version_txt).strip()
         self.conf_info.define("user.freetype:libtool_version", libtool_version)
-        # FIXME: need to do override the pkg_config version (pkg_config_custom_content does not work)
-        # self.cpp_info.version["pkg_config"] = pkg_config_version
+        self.cpp_info.set_property("system_package_version", libtool_version)
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
+        self.cpp_info.set_property("component_version", libtool_version)
         self.cpp_info.filenames["cmake_find_package"] = "Freetype"
         self.cpp_info.filenames["cmake_find_package_multi"] = "freetype"
         self.cpp_info.names["cmake_find_package"] = "Freetype"

@@ -1,4 +1,10 @@
 sources:
+  "1.1.0":
+    url: "https://github.com/KDAB/KDBindings/archive/refs/tags/v1.1.0.tar.gz"
+    sha256: "0ee07cb3e2ec4f5688b4b2971c42e5a4f4a41c7bf4aa130e6b118bea4b6340ab"
+  "1.0.5":
+    url: "https://github.com/KDAB/KDBindings/archive/refs/tags/v1.0.5.tar.gz"
+    sha256: "4d001419809a719f8c966e9bc73f457180325655deca0a11c07c47ee112447a3"
   "1.0.3":
     url: "https://github.com/KDAB/KDBindings/archive/refs/tags/v1.0.3.tar.gz"
     sha256: "da8de679d12bf123df6a3c63a482a862d4122a2f3d3567c9b3b2fc2c4f574393"

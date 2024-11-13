@@ -1,0 +1,24 @@
+sources:
+  "0.13.0":
+    url: "https://github.com/ouster-lidar/ouster-sdk/archive/refs/tags/release-0.13.0.tar.gz"
+    sha256: "baf65fbf547375fe73fdaee89c6c1246fdf9f0cabe4f4bd16391d3a06d0117a1"
+  "0.12.0":
+    url: "https://github.com/ouster-lidar/ouster-sdk/archive/refs/tags/20240703.tar.gz"
+    sha256: "7edff33451e99fe094aeafc4c10081d77bfe02d2f2ab16da93a44a5e61473af7"
+  "0.11.0":
+    url: "https://github.com/ouster-lidar/ouster-sdk/archive/refs/tags/20240425.tar.gz"
+    sha256: "8141abf4caef8a175a48c35c47bd841b34f8a7d758cb3ad66cf948a7042adbf9"
+  "0.10.0":
+    url: "https://github.com/ouster-lidar/ouster-sdk/archive/refs/tags/20231031.tar.gz"
+    sha256: "c45dfd42ff11e171b605ffd0a98d8094ec88ecbbccb923d396e1e73cba7737f3"
+patches:
+  "0.11.0":
+    - patch_file: "patches/001-579-fix-cpp20-string-error.patch"
+      patch_type: "portability"
+      patch_description: "Fix non-const string issue with C++20"
+      patch_source: "https://github.com/ouster-lidar/ouster-sdk/pull/579"
+  "0.10.0":
+    - patch_file: "patches/001-579-fix-cpp20-string-error.patch"
+      patch_type: "portability"
+      patch_description: "Fix non-const string issue with C++20"
+      patch_source: "https://github.com/ouster-lidar/ouster-sdk/pull/579"

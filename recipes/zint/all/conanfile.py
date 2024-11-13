@@ -49,7 +49,7 @@ class ZintConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libpng:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_qt:
             self.requires("qt/5.15.10")

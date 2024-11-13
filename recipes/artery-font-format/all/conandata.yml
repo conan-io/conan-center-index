@@ -1,4 +1,7 @@
 sources:
+  "1.1":
+    url: "https://github.com/Chlumsky/artery-font-format/archive/v1.1.tar.gz"
+    sha256: "cd8eb58590d85069312b831ce5bc6eba21778ef2fa8ca8ac06e1ecf8eca53a7c"
   "1.0.1":
     url: "https://github.com/Chlumsky/artery-font-format/archive/v1.0.1.tar.gz"
     sha256: "23dc9450d2364c9f1a67fcb0ae8f2bef365fabc5a3f4af55d9a646f8fbcdc537"

@@ -103,7 +103,6 @@ main(void)
         return 1;
     }
 
-    ares_gethostbyname(channel, "google.com", AF_INET, callback, NULL);
     wait_ares(channel);
     ares_destroy(channel);
     ares_library_cleanup();

@@ -1,4 +1,10 @@
 sources:
+  "3.12.0":
+    url: "https://github.com/pciutils/pciutils/archive/v3.12.0.tar.gz"
+    sha256: "3a76ca02581fed03d0470ba822e72ee06e492442a990062f9638dec90018505f"
+  "3.10.0":
+    url: "https://github.com/pciutils/pciutils/archive/v3.10.0.tar.gz"
+    sha256: "e579d87f1afe2196db7db648857023f80adb500e8194c4488c8b47f9a238c1c6"
   "3.7.0":
-    sha256: ea768aa0187ba349391c6c157445ecc2b42e7d671fc1ce8c53ff5ef513f1e2ab
-    url: https://github.com/pciutils/pciutils/archive/v3.7.0.tar.gz
+    url: "https://github.com/pciutils/pciutils/archive/v3.7.0.tar.gz"
+    sha256: "ea768aa0187ba349391c6c157445ecc2b42e7d671fc1ce8c53ff5ef513f1e2ab"

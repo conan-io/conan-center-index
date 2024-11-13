@@ -1,0 +1,4 @@
+sources:
+  "7.80":
+    url: "https://github.com/LoicMarechal/libMeshb/archive/refs/tags/v7.80.tar.gz"
+    sha256: "3026e84fa7c5c14428b1e0d1484038b0cf24921814e9cd0b6e0f13a34b0f1248"

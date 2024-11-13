@@ -223,15 +223,9 @@ class TclConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "TCL")
 
-        libs = []
-        libdirs = []
-        for root, _, _ in os.walk(os.path.join(self.package_folder, "lib"), topdown=False):
-            newlibs = collect_libs(self, root)
-            if newlibs:
-                libs.extend(newlibs)
-                libdirs.append(root)
-        self.cpp_info.libs = libs
-        self.cpp_info.libdirs = libdirs
+        # There are other libs in subfolders, but they are only used
+        # for TCL extensions and should not be linked against.
+        self.cpp_info.libs = collect_libs(self, os.path.join(self.package_folder, "lib"))
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["ws2_32", "netapi32", "userenv"])
