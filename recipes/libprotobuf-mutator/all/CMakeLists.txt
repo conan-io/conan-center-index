@@ -1,13 +1,9 @@
-cmake_minimum_required(VERSION 2.8.11)
-project(cmake_wrapper)
+cmake_minimum_required(VERSION 3.15)
+project(cmake_wrapper CXX)
 
-include(conanbuildinfo.cmake)
-conan_basic_setup()
+find_package(Protobuf REQUIRED)
+find_package(absl CONFIG REQUIRED)
 
-add_subdirectory(source_subfolder)
+add_subdirectory(src)
 
-if(MSVC)
-  # Should be added because of
-  # https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-initonceexecuteonce
-  add_definitions(-D_WIN32_WINNT=0x0600)
-endif()
+target_link_libraries(protobuf-mutator PUBLIC protobuf::libprotobuf absl::strings)

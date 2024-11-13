@@ -1,0 +1,10 @@
+sources:
+  "4.4.1":
+    url: "https://github.com/hannorein/rebound/archive/refs/tags/4.4.1.tar.gz"
+    sha256: "0ae7bdf20750cd0a83c4905a66c3cde211f09ac732ffb4cba9887e68aba5273b"
+patches:
+  "4.4.1":
+    - patch_file: "patches/0001-4.4.1-stdio-legacy-fix.patch"
+      patch_description: "Link to legacy_stdio only when MSVC"
+      patch_type: "backport"
+      patch_source: "https://github.com/hannorein/rebound/pull/777"

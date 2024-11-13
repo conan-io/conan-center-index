@@ -11,13 +11,13 @@ required_conan_version = ">=1.50.0"
 
 class TaoCPPPEGTLConan(ConanFile):
     name = "taocpp-pegtl"
+    description = "Parsing Expression Grammar Template Library"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/taocpp/pegtl"
-    description = "Parsing Expression Grammar Template Library"
     topics = ("peg", "header-only", "cpp",
               "parsing", "cpp17", "cpp11", "grammar")
-    no_copy_source = True
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "boost_filesystem": [True, False],
@@ -25,6 +25,7 @@ class TaoCPPPEGTLConan(ConanFile):
     default_options = {
         "boost_filesystem": False,
     }
+    no_copy_source = True
 
     def requirements(self):
         if self.options.boost_filesystem:
@@ -75,6 +76,9 @@ class TaoCPPPEGTLConan(ConanFile):
         copy(self, "*", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
 
     def package_info(self):
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+
         self.cpp_info.set_property("cmake_file_name", "pegtl")
         self.cpp_info.set_property("cmake_target_name", "taocpp::pegtl")
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed

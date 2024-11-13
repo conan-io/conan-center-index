@@ -44,7 +44,7 @@ class CprConan(ConanFile):
     def _compilers_minimum_version(self):
         return {
             "17": {
-                "gcc": "9",
+                "gcc": "7",
                 "clang": "7",
                 "apple-clang": "10",
                 "Visual Studio": "15",
@@ -167,3 +167,8 @@ class CprConan(ConanFile):
         self.cpp_info.libs = ["cpr"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
+
+        if Version(self.version) >= "1.11.0" and \
+            ((self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "9") or \
+            (self.settings.compiler == "clang" and self.settings.compiler.get_safe("libcxx") in ["libstdc++", "libstdc++11"])):
+            self.cpp_info.system_libs = ["stdc++fs"]

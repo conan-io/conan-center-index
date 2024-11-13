@@ -1,4 +1,7 @@
 sources:
+  "2.0.19":
+    url: "https://github.com/numactl/numactl/releases/download/v2.0.19/numactl-2.0.19.tar.gz"
+    sha256: "f2672a0381cb59196e9c246bf8bcc43d5568bc457700a697f1a1df762b9af884"
   "2.0.16":
     url: "https://github.com/numactl/numactl/releases/download/v2.0.16/numactl-2.0.16.tar.gz"
     sha256: "1b242f893af977a1d31af6ce9d6b8dafdd2d8ec3dc9207f7c2dc0d3446e7c7c8"

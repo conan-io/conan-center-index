@@ -1,4 +1,10 @@
 sources:
+  "1.14.1":
+    url: "https://github.com/webmproject/libvpx/archive/refs/tags/v1.14.1.tar.gz"
+    sha256: "901747254d80a7937c933d03bd7c5d41e8e6c883e0665fadcb172542167c7977"
+  "1.14.0":
+    url: "https://github.com/webmproject/libvpx/archive/refs/tags/v1.14.0.tar.gz"
+    sha256: "5f21d2db27071c8a46f1725928a10227ae45c5cd1cad3727e4aafbe476e321fa"
   "1.13.1":
     url: "https://github.com/webmproject/libvpx/archive/refs/tags/v1.13.1.tar.gz"
     sha256: "00dae80465567272abd077f59355f95ac91d7809a2d3006f9ace2637dd429d14"
@@ -8,9 +14,6 @@ sources:
   "1.10.0":
     url: "https://github.com/webmproject/libvpx/archive/refs/tags/v1.10.0.tar.gz"
     sha256: "85803ccbdbdd7a3b03d930187cb055f1353596969c1f92ebec2db839fa4f834a"
-  "1.9.0":
-    url: "https://github.com/webmproject/libvpx/archive/refs/tags/v1.9.0.tar.gz"
-    sha256: "d279c10e4b9316bf11a570ba16c3d55791e1ad6faa4404c67422eb631782c80a"
 patches:
   "1.11.0":
     - patch_file: "patches/0001-extended-support-1.10.0.patch"
@@ -22,12 +25,3 @@ patches:
       patch_type: "portability"
       patch_description: "Add support for more compilers"
       patch_source: "https://github.com/webmproject/libvpx/commit/cafe7cc1f10cfea74edb2ded7c3df2d69fcf1eee"
-  "1.9.0":
-    - patch_file: "patches/0001-extended-support-1.9.0.patch"
-      patch_type: "portability"
-      patch_description: "Add support for more compilers"
-      patch_source: "https://github.com/webmproject/libvpx/commit/cafe7cc1f10cfea74edb2ded7c3df2d69fcf1eee"
-    - patch_file: "patches/0002-msvc_conan_build.patch"
-      patch_type: "portability"
-      patch_description: "Add support for more compilers"
-      patch_source: "https://github.com/webmproject/libvpx/commit/04086a30664d2a3e89d6a6e4e1c18f1a82c8f958"

@@ -4,6 +4,7 @@ from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.51.1"
@@ -21,21 +22,26 @@ class GlazeConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 20
+        return "20" if Version(self.version) < "3.0.0" else "23"
 
     @property
     def _compilers_minimum_version(self):
-        versions = {
-            "Visual Studio": "17",
-            "msvc": "193",
-            "gcc": "10",
-            # glaze >= 2.1.6 uses std::bit_cast which is supported by clang >= 14
-            "clang": "12" if Version(self.version) < "2.1.6" else "14",
-            "apple-clang": "13.1",
-        }
-        if Version(self.version) >= "1.9.0":
-            versions["gcc"] = "11"
-        return versions
+        return {
+            "20": {
+                "Visual Studio": "17",
+                "msvc": "193",
+                "gcc": "11" if Version(self.version) < "2.6.3" else "12",
+                "clang": "14",
+                "apple-clang": "13.1",
+            },
+            "23": {
+                "Visual Studio": "17",
+                "msvc": "193",
+                "gcc": "12",
+                "clang": "15",
+                "apple-clang": "14",
+            },
+        }.get(self._min_cppstd, {})
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -44,12 +50,6 @@ class GlazeConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if Version(self.version) >= "2.1.4" and \
-            self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "11.3":
-            raise ConanInvalidConfiguration(
-                f"{self.ref} doesn't support 11.0<=gcc<11.3 due to gcc bug. Please use gcc>=11.3 and set compiler.version.(ex. compiler.version=11.3)",
-            )
-
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -73,3 +73,5 @@ class GlazeConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        if is_msvc(self):
+            self.cpp_info.cxxflags.append("/Zc:preprocessor")

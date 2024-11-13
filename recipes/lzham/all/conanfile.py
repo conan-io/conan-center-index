@@ -1,12 +1,14 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import (
     apply_conandata_patches,
     copy,
     export_conandata_patches,
     get,
+    replace_in_file,
     rmdir
 )
 from conan.tools.microsoft import (
@@ -51,6 +53,28 @@ class PackageConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def validate(self):
+        if self.settings.os == "Windows" and self.settings.arch not in ["x86", "x86_64"]:
+            raise ConanInvalidConfiguration("On Windows, only x86 and x86_64 are supported")
+        
+    def _msvc_libs(self, targets=False):
+        arch = "x86" if self.settings.arch == "x86" else "x64"
+        suffix = f"{arch}D" if self.settings.build_type == "Debug" else arch
+        if self.options.shared == True:
+            if targets:
+                 # Note: this causes its dependencies to be built too
+                return ['lzhamdll']
+            
+            files = [f"lzham_{suffix}.dll", f"lzham_{suffix}.lib"]
+        else:
+            libs = ['lzhamcomp', 'lzhamdecomp', 'lzhamlib']
+            if targets:
+                return libs
+            
+            files = [f"{lib}_{suffix}.lib" for lib in libs]
+            
+        return files
+
     def layout(self):
         if is_msvc(self):
             vs_layout(self)
@@ -79,10 +103,21 @@ class PackageConan(ConanFile):
             # Honor BUILD_SHARED_LIBS from conan_toolchain (see
             # https://github.com/conan-io/conan/issues/11840)
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+
+            # Build relocatable shared libraries on Apple OSs
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
             tc.generate()
 
     def build(self):
         apply_conandata_patches(self)
+        for project in ['lzhamcomp', 'lzhamdecomp', 'lzhamdll', 'lzhamlib']:
+            filename = 'lzham' if project == 'lzhamdll' else project
+            vcxproj_file = os.path.join(self.source_folder, project, f"{filename}.vcxproj")
+            # Avoid errors when the toolset on the consumer side is not exactly the same version
+            replace_in_file(self, vcxproj_file, "WholeProgramOptimization>true", "WholeProgramOptimization>false")
+            # Don't override the runtime library set by Conan's MSBuildToolchain
+            replace_in_file(self, vcxproj_file, "<RuntimeLibrary>MultiThreaded</RuntimeLibrary>", "")
+            replace_in_file(self, vcxproj_file, "<RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>", "")
         if is_msvc(self):
             msbuild = MSBuild(self)
             msbuild.build_type = (
@@ -91,7 +126,7 @@ class PackageConan(ConanFile):
             msbuild.platform = (
                 "Win32" if self.settings.arch == "x86" else msbuild.platform
             )
-            msbuild.build(sln="lzham.sln")
+            msbuild.build(sln="lzham.sln", targets=self._msvc_libs(targets=True))
         else:
             cmake = CMake(self)
             cmake.configure()
@@ -106,21 +141,21 @@ class PackageConan(ConanFile):
         )
 
         if is_msvc(self):
-            suffix = "x64D" if self.settings.build_type == "Debug" else "x64"
-            copy(
-                self,
-                pattern=f"lzham_{suffix}.lib",
-                dst=os.path.join(self.package_folder, "lib"),
-                src=os.path.join(self.build_folder, "lib", "x64"),
-                keep_path=False
-            )
-            copy(
-                self,
-                pattern=f"lzham_{suffix}.dll",
-                dst=os.path.join(self.package_folder, "bin"),
-                src=os.path.join(self.build_folder, "bin"),
-                keep_path=False
-            )
+            arch = "x86" if self.settings.arch == "x86" else "x64" 
+            for target in self._msvc_libs():
+                self.output.warning(target)
+                debug_suffix = "D" if self.settings.build_type == "Debug" and not self.options.shared else ""
+                arch_folder = f"{arch}{debug_suffix}"
+                subfolder = "lib" if not target.endswith('dll') else "bin"
+                subfolder_src = os.path.join("lib", arch_folder) if not target.endswith('dll') else "bin"
+                self.output.warning(subfolder_src)
+                copy(
+                    self,
+                    pattern=target,
+                    dst=os.path.join(self.package_folder, subfolder),
+                    src=os.path.join(self.build_folder, subfolder_src),
+                    keep_path=False
+                )
             copy(
                 self,
                 pattern="*.h",
@@ -141,10 +176,8 @@ class PackageConan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "pthread"])
 
         if is_msvc(self):
-            lib_name = "lzham_x64"
-            if self.settings.build_type == "Debug":
-                lib_name += "D"
-            self.cpp_info.libs = [lib_name]
+            libs = list(set([filename[:-4] for filename in self._msvc_libs()]))
+            self.cpp_info.libs = libs
         else:
             self.cpp_info.libs = ["lzhamdll", "lzhamcomp", "lzhamdecomp"]
             self.cpp_info.set_property("cmake_file_name", "lzham")

@@ -1,0 +1,4 @@
+sources:
+  "1.6.3":
+    url: "https://github.com/max0x7ba/atomic_queue/archive/refs/tags/v1.6.3.tar.gz"
+    sha256: "0ad6e0203d90367f6a4e496449dfd9ad65b80168fadafef4eac08820c6bda79c"

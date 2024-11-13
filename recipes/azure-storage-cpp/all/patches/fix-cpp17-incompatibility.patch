@@ -1,0 +1,51 @@
+From b81d6349d3f6c05741978bab9b07372150c85137 Mon Sep 17 00:00:00 2001
+From: Adam Mensel <adam.mensel@gmail.com>
+Date: Mon, 31 Aug 2020 19:44:24 -0600
+Subject: [PATCH 1/2] Use lambdas instead of std::fun_ptr, to get free C++17
+ compatibility.
+
+---
+ Microsoft.WindowsAzure.Storage/src/util.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Microsoft.WindowsAzure.Storage/src/util.cpp b/Microsoft.WindowsAzure.Storage/src/util.cpp
+index cf0a3116..2d0d540c 100644
+--- a/Microsoft.WindowsAzure.Storage/src/util.cpp
++++ b/Microsoft.WindowsAzure.Storage/src/util.cpp
+@@ -334,8 +334,8 @@ namespace azure { namespace storage {  namespace core {
+ 
+     utility::string_t str_trim_starting_trailing_whitespaces(const utility::string_t& str)
+     {
+-        auto non_space_begin = std::find_if(str.begin(), str.end(), std::not1(std::ptr_fun<int, int>(isspace)));
+-        auto non_space_end = std::find_if(str.rbegin(), str.rend(), std::not1(std::ptr_fun<int, int>(isspace))).base();
++        auto non_space_begin = std::find_if(str.begin(), str.end(), [](char c) { return !std::isspace(c); });
++        auto non_space_end = std::find_if(str.rbegin(), str.rend(), [](char c) { return !std::isspace(c); }).base();
+         return utility::string_t(non_space_begin, non_space_end);
+     }
+ 
+
+From b71db982b9f7065494c950c558f7e30b89026a89 Mon Sep 17 00:00:00 2001
+From: Adam Mensel <adam.mensel@gmail.com>
+Date: Mon, 31 Aug 2020 23:02:29 -0600
+Subject: [PATCH 2/2] Keep the exact same logic as before, but still using a
+ lambda instead of std::fun_ptr.
+
+---
+ Microsoft.WindowsAzure.Storage/src/util.cpp | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Microsoft.WindowsAzure.Storage/src/util.cpp b/Microsoft.WindowsAzure.Storage/src/util.cpp
+index 2d0d540c..c2a3d7d4 100644
+--- a/Microsoft.WindowsAzure.Storage/src/util.cpp
++++ b/Microsoft.WindowsAzure.Storage/src/util.cpp
+@@ -334,8 +334,8 @@ namespace azure { namespace storage {  namespace core {
+ 
+     utility::string_t str_trim_starting_trailing_whitespaces(const utility::string_t& str)
+     {
+-        auto non_space_begin = std::find_if(str.begin(), str.end(), [](char c) { return !std::isspace(c); });
+-        auto non_space_end = std::find_if(str.rbegin(), str.rend(), [](char c) { return !std::isspace(c); }).base();
++        auto non_space_begin = std::find_if(str.begin(), str.end(), [](int c) { return !isspace(c); });
++        auto non_space_end = std::find_if(str.rbegin(), str.rend(), [](int c) { return !isspace(c); }).base();
+         return utility::string_t(non_space_begin, non_space_end);
+     }
+ 

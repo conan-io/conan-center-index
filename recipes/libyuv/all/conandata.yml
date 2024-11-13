@@ -1,6 +1,8 @@
 # Versions from LIBYUV_VERSION definition in include/libyuv/version.h
 # Pay attention to package commits incrementing this definition
 sources:
+  "1892":
+    url: "https://chromium.googlesource.com/libyuv/libyuv/+archive/4cd90347e78ff76755df2107009e900374aee9cd.tar.gz"
   "1880":
     url: "https://chromium.googlesource.com/libyuv/libyuv/+archive/fb6341d326846fbbe669ad5173e520f66b339621.tar.gz"
   "1854":
@@ -12,6 +14,13 @@ sources:
   "1768":
     url: "https://chromium.googlesource.com/libyuv/libyuv/+archive/dfaf7534e0e536f7e5ef8ddd7326797bd09b8622.tar.gz"
 patches:
+  "1892":
+    - patch_file: "patches/1892-0001-fix-cmake.patch"
+      patch_description: "Fix CMake to be more robust & predictable"
+      patch_type: "conan"
+    - patch_file: "patches/1892-0001-check-arm-sve.patch"
+      patch_description: "Check if -march=armv9-a+sve2 is supported"
+      patch_type: "conan"
   "1880":
     - patch_file: "patches/1880-0001-fix-cmake.patch"
       patch_description: "Fix CMake to be more robust & predictable"
