@@ -6,7 +6,7 @@ from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.0"
 
 
 class AwsCdiSdkConan(ConanFile):
@@ -58,8 +58,7 @@ class AwsCdiSdkConan(ConanFile):
             raise ConanInvalidConfiguration("Cannot build with static dependencies")
         if not self.dependencies["aws-sdk-cpp"].options.get_safe("monitoring"):
             raise ConanInvalidConfiguration("This package requires the monitoring AWS SDK")
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -108,14 +107,3 @@ class AwsCdiSdkConan(ConanFile):
         libcxx = stdcpp_library(self)
         if libcxx:
             c_sdk.system_libs.append(libcxx)
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        # TODO: Remove the namespace on CMake targets
-        self.cpp_info.names["cmake_find_package"] = "AWS"
-        self.cpp_info.names["cmake_find_package_multi"] = "AWS"
-        self.cpp_info.filenames["cmake_find_package"] = "aws-cdi-sdk"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "aws-cdi-sdk"
-        cpp_sdk.names["cmake_find_package"] = "aws-cpp-sdk-cdi"
-        cpp_sdk.names["cmake_find_package_multi"] = "aws-cpp-sdk-cdi"
-        c_sdk.names["cmake_find_package"] = "aws-cdi-sdk"
-        c_sdk.names["cmake_find_package_multi"] = "aws-cdi-sdk"
