@@ -12,8 +12,8 @@ class TreeSitterCQLConan(ConanFile):
     description = "Tree-sitter parser for Cassandra CQL language"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/tree-sitter/tree-sitter-c"
-    topics = ("parser", "grammar", "tree", "c", "ide")
+    homepage = "https://github.com/shotover/tree-sitter-cql"
+    topics = ("parser", "grammar", "tree", "CQL", "cassandra")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
 
@@ -59,7 +59,7 @@ class TreeSitterCQLConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def _patch_sources(self):
-        if not self.options.shared:
+        if not self.options.get_safe("shared"):
             replace_in_file(
                 self,
                 os.path.join(self.source_folder, "src", "parser.c"),
