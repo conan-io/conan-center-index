@@ -1,0 +1,34 @@
+--- libdjvu/GBitmap.h
++++ libdjvu/GBitmap.h
+@@ -620,7 +620,7 @@
+ inline int
+ GBitmap::read_run(unsigned char *&data)
+ {
+-  register int z=*data++;
++  int z=*data++;
+   return (z>=RUNOVERFLOWVALUE)?
+     ((z&~RUNOVERFLOWVALUE)<<8)|(*data++):z;
+ }
+@@ -628,7 +628,7 @@
+ inline int
+ GBitmap::read_run(const unsigned char *&data)
+ {
+-  register int z=*data++;
++  int z=*data++;
+   return (z>=RUNOVERFLOWVALUE)?
+     ((z&~RUNOVERFLOWVALUE)<<8)|(*data++):z;
+ }
+--- libdjvu/MMX.h
++++ libdjvu/MMX.h
+@@ -172,9 +172,9 @@
+ #define MMXir(op,imm,dst) \
+   __asm { op dst,imm }
+ #define MMXar(op,addr,dst) \
+-  { register __int64 var=*(__int64*)(addr); __asm { op dst,var } }
++  { __int64 var=*(__int64*)(addr); __asm { op dst,var } }
+ #define MMXra(op,src,addr) \
+-  { register __int64 var; __asm { op [var],src };  *(__int64*)addr = var; } 
++  { __int64 var; __asm { op [var],src };  *(__int64*)addr = var; } 
+ // Probably not as efficient as GCC macros
+ #define MMX 1
+ #endif

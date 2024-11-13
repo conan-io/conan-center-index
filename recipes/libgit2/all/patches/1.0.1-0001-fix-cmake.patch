@@ -1,5 +1,19 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 8264158..374a21c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -11,8 +11,8 @@
+ # Install:
+ # > cmake --build . --target install
+ 
+-PROJECT(libgit2 C)
+ CMAKE_MINIMUM_REQUIRED(VERSION 3.5.1)
++PROJECT(libgit2 C)
+ CMAKE_POLICY(SET CMP0015 NEW)
+ IF(POLICY CMP0051)
+ 	CMAKE_POLICY(SET CMP0051 NEW)
 diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index dff1d94..abd9c45 100644
+index dff1d94..25652b7 100644
 --- a/src/CMakeLists.txt
 +++ b/src/CMakeLists.txt
 @@ -158,11 +158,11 @@ ENDIF()
@@ -31,3 +45,15 @@ index dff1d94..abd9c45 100644
  ENDIF()
  IF (LIBSSH2_FOUND)
  	SET(GIT_SSH 1)
+@@ -209,10 +213,7 @@ IF (LIBSSH2_FOUND)
+ 	LIST(APPEND LIBGIT2_LIBS ${LIBSSH2_LIBRARIES})
+ 	LIST(APPEND LIBGIT2_PC_LIBS ${LIBSSH2_LDFLAGS})
+ 
+-	CHECK_LIBRARY_EXISTS("${LIBSSH2_LIBRARIES}" libssh2_userauth_publickey_frommemory "${LIBSSH2_LIBRARY_DIRS}" HAVE_LIBSSH2_MEMORY_CREDENTIALS)
+-	IF (HAVE_LIBSSH2_MEMORY_CREDENTIALS)
+-		SET(GIT_SSH_MEMORY_CREDENTIALS 1)
+-	ENDIF()
++	SET(GIT_SSH_MEMORY_CREDENTIALS 1)
+ ELSE()
+ 	MESSAGE(STATUS "LIBSSH2 not found. Set CMAKE_PREFIX_PATH if it is installed outside of the default search path.")
+ ENDIF()

@@ -21,10 +21,12 @@ class Jinja2cppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_regex": ["std", "boost"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_regex": "boost",
     }
 
     @property
@@ -47,6 +49,8 @@ class Jinja2cppConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "1.3.2":
+            del self.options.with_regex
 
     def configure(self):
         if self.options.shared:
@@ -76,12 +80,20 @@ class Jinja2cppConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        if Version(self.version) >= "1.3.1" and self.dependencies["boost"].options.without_json:
+            raise ConanInvalidConfiguration(f"{self.ref} require Boost::json.")
+
+    def build_requirements(self):
+        if Version(self.version) >= "1.3.1":
+            self.tool_requires("cmake/[>=3.23 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) >= "1.3.2":
+            tc.cache_variables["JINJA2CPP_USE_REGEX"] = self.options.with_regex
         tc.variables["JINJA2CPP_BUILD_TESTS"] = False
         tc.variables["JINJA2CPP_STRICT_WARNINGS"] = False
         tc.variables["JINJA2CPP_BUILD_SHARED"] = self.options.shared
@@ -95,6 +107,7 @@ class Jinja2cppConan(ConanFile):
             tc.variables["JINJA2CPP_MSVC_RUNTIME_TYPE"] = runtime
         tc.generate()
         deps = CMakeDeps(self)
+        deps.set_property("expected-lite", "cmake_target_name", "expected-lite::expected-lite")
         deps.generate()
 
     def _patch_sources(self):

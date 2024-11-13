@@ -11,9 +11,9 @@ required_conan_version = ">=1.54.0"
 class LibZipConan(ConanFile):
     name = "libzip"
     description = "A C library for reading, creating, and modifying zip archives"
+    license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nih-at/libzip"
-    license = "BSD-3-Clause"
     topics = ("zip", "zip-archives", "zip-editing")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"

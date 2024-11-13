@@ -13,10 +13,10 @@ required_conan_version = ">=1.53.0"
 class LibcoroConan(ConanFile):
     name = "libcoro"
     description = "C++20 coroutine library"
-    topics = ("coroutines", "concurrency", "tasks", "executors", "networking")
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/jbaldwin/libcoro"
+    topics = ("coroutines", "concurrency", "tasks", "executors", "networking")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {

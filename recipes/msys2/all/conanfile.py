@@ -156,8 +156,9 @@ class MSYS2Conan(ConanFile):
             os.utime(tmp_name, None)
 
         # Prepend the PKG_CONFIG_PATH environment variable with an eventual PKG_CONFIG_PATH environment variable
+        # Note: this is no longer needed when we exclusively support Conan 2 integrations
         replace_in_file(self, os.path.join(self._msys_dir, "etc", "profile"),
-                              'PKG_CONFIG_PATH="', 'PKG_CONFIG_PATH="$PKG_CONFIG_PATH:')
+                              'PKG_CONFIG_PATH="', 'PKG_CONFIG_PATH="${PKG_CONFIG_PATH:+${PKG_CONFIG_PATH}:}')
 
     def package(self):
         excludes = None

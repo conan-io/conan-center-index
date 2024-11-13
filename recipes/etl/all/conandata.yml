@@ -1,49 +1,28 @@
 sources:
+  "20.39.4":
+    url: "https://github.com/ETLCPP/etl/archive/20.39.4.tar.gz"
+    sha256: "ce1222ed12fb39ae7a6160f8c33da61534d6b4c4d0d36be622910bbd545f5ee7"
+  "20.39.3":
+    url: "https://github.com/ETLCPP/etl/archive/20.39.3.tar.gz"
+    sha256: "1d596bc47d17959ced8b4586e0ae22348c903df6ab00f47ef900d854ef5e30c8"
+  "20.38.17":
+    url: "https://github.com/ETLCPP/etl/archive/20.38.17.tar.gz"
+    sha256: "5b490aca3faad3796a48bf0980e74f2a67953967fad3c051a6d4981051cb0b9a"
+  "20.38.16":
+    url: "https://github.com/ETLCPP/etl/archive/20.38.16.tar.gz"
+    sha256: "6d05e33d6e7eb2c8d4654c77dcd083adc70da29aba808f471ba7c6e2b8fcbf03"
+  "20.38.15":
+    url: "https://github.com/ETLCPP/etl/archive/20.38.15.tar.gz"
+    sha256: "c4f3108b35eb669ce4a6a217264ca133fe52cc8b5bce026a474ec81c0a2c4026"
+  "20.38.14":
+    url: "https://github.com/ETLCPP/etl/archive/20.38.14.tar.gz"
+    sha256: "d286191f0617e1c6c85e1ecb2175e84035918a7bf67d0bb347a8cb6fca3b2db4"
+  "20.38.13":
+    url: "https://github.com/ETLCPP/etl/archive/20.38.13.tar.gz"
+    sha256: "e606083e189a8fe6211c30c8c579b60c29658a531b5cafbb511daab1a2861a69"
+  "20.38.11":
+    url: "https://github.com/ETLCPP/etl/archive/20.38.11.tar.gz"
+    sha256: "c73b6b076ab59e02398a9f90a66198a9f8bf0cfa91af7be2eebefb3bb264ba83"
   "20.38.10":
     url: "https://github.com/ETLCPP/etl/archive/20.38.10.tar.gz"
     sha256: "562f9b5d9e6786350b09d87be9c5f030073e34d7bf0a975de3e91476ddd471a3"
-  "20.38.7":
-    url: "https://github.com/ETLCPP/etl/archive/20.38.7.tar.gz"
-    sha256: "65cfc033bacab452af05a36bd53b8cdc2bdfd1492b2adc5bb51d2f00e451491f"
-  "20.38.6":
-    url: "https://github.com/ETLCPP/etl/archive/20.38.6.tar.gz"
-    sha256: "95515f2229fe75393d18ee95548998a06e65a02acd5eedae5808dd34f8201462"
-  "20.38.4":
-    url: "https://github.com/ETLCPP/etl/archive/20.38.4.tar.gz"
-    sha256: "4074583bacac17e7944030f099d18a4ea3591d5d58b8d8b85c1b7f080a3e9610"
-  "20.38.3":
-    url: "https://github.com/ETLCPP/etl/archive/20.38.3.tar.gz"
-    sha256: "7d2f384dfa9a50c8e066b716524016d2b62e753b0b75fed09a2b7e2c260759d2"
-  "20.38.0":
-    url: "https://github.com/ETLCPP/etl/archive/20.38.0.tar.gz"
-    sha256: "7e29ce81a2a2d5826286502a2ad5bde1f4b591d2c9e0ef7ccc335e75445223cd"
-  "20.37.3":
-    url: "https://github.com/ETLCPP/etl/archive/20.37.3.tar.gz"
-    sha256: "fbdf60c770772cd96d1eb25bdf56e4f45f23bf4029e18ef1f2af1f2056b9ea41"
-  "20.37.2":
-    url: "https://github.com/ETLCPP/etl/archive/20.37.2.tar.gz"
-    sha256: "13bd5d9d1bfbc887e3182895ca0291df0008a1c5770ddd12ef6cd2215c2bc6af"
-  "20.37.1":
-    url: "https://github.com/ETLCPP/etl/archive/20.37.1.tar.gz"
-    sha256: "73c29678e478eca9243c1d0c98e727a2249a7973d1429a847c669bccc65dca88"
-  "20.37.0":
-    url: "https://github.com/ETLCPP/etl/archive/20.37.0.tar.gz"
-    sha256: "94ffb30dc38b9f40566ba7c4ef0c233bca23cfcb4e6c400fcf981729a46413eb"
-  "20.36.0":
-    url: "https://github.com/ETLCPP/etl/archive/20.36.0.tar.gz"
-    sha256: "bcab607d619008c7e3942ecc9cb429e17deb553c81bc5f1fd013fbc1e17f1344"
-  "20.35.14":
-    url: "https://github.com/ETLCPP/etl/archive/20.35.14.tar.gz"
-    sha256: "6af1baf039d38f405f932451615f9bcf227f5767b463f33e17fcbbbc02e4632e"
-  "20.35.11":
-    url: "https://github.com/ETLCPP/etl/archive/20.35.11.tar.gz"
-    sha256: "64a9eed9b9ac8a278349aac8e5888320fda0e090ba24373651767b7a8b8793fc"
-  "20.35.8":
-    url: "https://github.com/ETLCPP/etl/archive/20.35.8.tar.gz"
-    sha256: "7d0a6402b24fc91cf66328b95391a38c52d20f582f42497fb9b0a99d71ab8879"
-  "20.35.7":
-    url: "https://github.com/ETLCPP/etl/archive/20.35.7.tar.gz"
-    sha256: "20127e36c12a33142645dd5ec0a08d12b34ce9b33986847eeaa8c4201e025895"
-  "20.34.0":
-    url: "https://github.com/ETLCPP/etl/archive/20.34.0.tar.gz"
-    sha256: "56e25968f20167a161ee50c3eecda3daa91f696660ba59654c1afd22e502c465"

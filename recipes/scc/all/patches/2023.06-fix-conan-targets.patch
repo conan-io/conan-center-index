@@ -1,0 +1,17 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -24,5 +24,13 @@
+ include(Common)
+ 
+-if(CMAKE_PROJECT_NAME STREQUAL "scc")
++find_package(SystemC REQUIRED CONFIG)
++find_package(systemc-cci REQUIRED CONFIG)
++find_package(fmt REQUIRED CONFIG)
++find_package(spdlog REQUIRED CONFIG)
++find_package(Boost REQUIRED CONFIG)
++find_package(yaml-cpp REQUIRED CONFIG)
++find_package(lz4 REQUIRED CONFIG)
++if(TRUE)
++elseif(CMAKE_PROJECT_NAME STREQUAL "scc")
+     message(STATUS "Building SCC in standalone mode")
+     include(GNUInstallDirs)

@@ -1,0 +1,14 @@
+diff --git a/libshaderc_util/CMakeLists.txt b/libshaderc_util/CMakeLists.txt
+--- a/libshaderc_util/CMakeLists.txt
++++ b/libshaderc_util/CMakeLists.txt
+@@ -87,3 +87,10 @@
+   add_dependencies(shaderc_util_file_finder_test testdata)
+   add_dependencies(shaderc_util_io_shaderc_test testdata)
+ endif()
++
++if(SHADERC_ENABLE_INSTALL AND NOT BUILD_SHARED_LIBS)
++  install(TARGETS shaderc_util
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
++endif()

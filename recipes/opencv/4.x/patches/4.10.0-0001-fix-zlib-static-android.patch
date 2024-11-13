@@ -1,0 +1,17 @@
+--- a/cmake/OpenCVFindLibsGrfmt.cmake
++++ b/cmake/OpenCVFindLibsGrfmt.cmake
+@@ -20,12 +20,12 @@ if(BUILD_ZLIB)
+     ocv_clear_vars(ZLIB_FOUND)
+   else()
+     ocv_clear_internal_cache_vars(ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
+-  if(ANDROID)
++  if(0)
+     set(_zlib_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+     set(CMAKE_FIND_LIBRARY_SUFFIXES .so)
+   endif()
+   find_package(ZLIB "${MIN_VER_ZLIB}")
+-  if(ANDROID)
++  if(0)
+     set(CMAKE_FIND_LIBRARY_SUFFIXES ${_zlib_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
+     unset(_zlib_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES)
+   endif()
