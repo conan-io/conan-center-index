@@ -34,9 +34,15 @@ patches:
     - patch_file: "patches/0004-control-optimizations-5.4.0.patch"
       patch_description: "fix condition for cpu optimizations"
       patch_type: "portability"
+    - patch_file: "patches/0005-disable-install-pdb-5.5.0.patch"
+      patch_description: "disable installing PDB files"
+      patch_type: "portability"
   "5.4.1":
     - patch_file: "patches/0004-control-optimizations-5.4.0.patch"
       patch_description: "fix condition for cpu optimizations"
+      patch_type: "portability"
+    - patch_file: "patches/0005-disable-install-pdb-5.4.1.patch"
+      patch_description: "disable installing PDB files"
       patch_type: "portability"
   "5.4.0":
     - patch_file: "patches/0004-control-optimizations-5.4.0.patch"
