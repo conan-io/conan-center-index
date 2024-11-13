@@ -18,7 +18,7 @@ index 955aea3..ff94eb8 100644
  		add_feature_info(http-parser ON "http-parser support (system)")
  	else()
 diff --git a/cmake/SelectSSH.cmake b/cmake/SelectSSH.cmake
-index 23dfc97..a094cc7 100644
+index 23dfc97..386f184 100644
 --- a/cmake/SelectSSH.cmake
 +++ b/cmake/SelectSSH.cmake
 @@ -1,13 +1,10 @@
@@ -40,3 +40,15 @@ index 23dfc97..a094cc7 100644
  
  	if(NOT LIBSSH2_FOUND)
  		message(FATAL_ERROR "LIBSSH2 not found. Set CMAKE_PREFIX_PATH if it is installed outside of the default search path.")
+@@ -20,10 +17,7 @@ if(LIBSSH2_FOUND)
+ 	list(APPEND LIBGIT2_SYSTEM_LIBS ${LIBSSH2_LIBRARIES})
+ 	list(APPEND LIBGIT2_PC_LIBS ${LIBSSH2_LDFLAGS})
+ 
+-	check_library_exists("${LIBSSH2_LIBRARIES}" libssh2_userauth_publickey_frommemory "${LIBSSH2_LIBRARY_DIRS}" HAVE_LIBSSH2_MEMORY_CREDENTIALS)
+-	if(HAVE_LIBSSH2_MEMORY_CREDENTIALS)
+-		set(GIT_SSH_MEMORY_CREDENTIALS 1)
+-	endif()
++	set(GIT_SSH_MEMORY_CREDENTIALS 1)
+ else()
+ 	message(STATUS "LIBSSH2 not found. Set CMAKE_PREFIX_PATH if it is installed outside of the default search path.")
+ endif()

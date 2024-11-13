@@ -21,12 +21,10 @@ class PahoMqttCppConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "ssl": [True, False, "deprecated"], # TODO: deprecated option, to remove in few months
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "ssl": "deprecated",
     }
 
     @property
@@ -47,25 +45,13 @@ class PahoMqttCppConan(ConanFile):
         suffix = "" if Version(conan_version).major < "2" else "/*"
         self.options[f"paho-mqtt-c{suffix}"].shared = self.options.shared
 
-        # TODO: deprecated option, to remove in few months
-        if self.options.ssl != "deprecated":
-            self.output.warning("ssl option is deprecated, do not use anymore")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if Version(self.version) >= "1.2.0":
-            # Headers are exposed https://github.com/conan-io/conan-center-index/pull/16760#issuecomment-1502420549
-            # Symbols are exposed   "_MQTTProperties_free", referenced from: mqtt::connect_options::~connect_options() in test_package.cpp.o
-            self.requires("paho-mqtt-c/1.3.9", transitive_headers=True, transitive_libs=True)
-        else:
-             # This is the "official tested" version https://github.com/eclipse/paho.mqtt.cpp/releases/tag/v1.1
-            self.requires("paho-mqtt-c/1.3.1", transitive_headers=True, transitive_libs=True)
-
-    def package_id(self):
-        # TODO: deprecated option, to remove in few months
-        del self.info.options.ssl
+        # Headers are exposed https://github.com/conan-io/conan-center-index/pull/16760#issuecomment-1502420549
+        # Symbols are exposed   "_MQTTProperties_free", referenced from: mqtt::connect_options::~connect_options() in test_package.cpp.o
+        self.requires("paho-mqtt-c/1.3.13", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -73,8 +59,6 @@ class PahoMqttCppConan(ConanFile):
 
         if self.dependencies["paho-mqtt-c"].options.shared != self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires paho-mqtt-c to have a matching 'shared' option.")
-        if Version(self.version) < "1.2.0" and Version(self.dependencies["paho-mqtt-c"].ref.version) >= "1.3.2":
-            raise ConanInvalidConfiguration(f"{self.ref} requires paho-mqtt-c =< 1.3.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -88,8 +72,9 @@ class PahoMqttCppConan(ConanFile):
         tc.variables["PAHO_WITH_SSL"] = self.dependencies["paho-mqtt-c"].options.ssl
         tc.generate()
         deps = CMakeDeps(self)
-        deps.set_property("paho-mqtt-c", "cmake_file_name", "PahoMqttC")
-        deps.set_property("paho-mqtt-c", "cmake_target_name", "PahoMqttC::PahoMqttC")
+        if Version(self.version) < "1.4.0":
+            deps.set_property("paho-mqtt-c", "cmake_file_name", "PahoMqttC")
+            deps.set_property("paho-mqtt-c", "cmake_target_name", "PahoMqttC::PahoMqttC")
         deps.generate()
 
     def build(self):

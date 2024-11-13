@@ -1,29 +1,29 @@
 sources:
+  "4.4.0":
+    url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.4.0.tar.gz"
+    sha256: "95900cf95ae760839e7cb9678a7b2fad0858d6ac12234f934bd1cb6bfc246ba9"
   "4.3.1":
     url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.3.1.tar.gz"
-    sha256: "2332b965d327a15c103a7d31d6d1afaf775d00e9785dd25332ae76b9725351e4"
+    sha256: "47a7c8ee05687be1e1d8eeeb94fb88f060fbf3cd8a4df52ccb88d5eb0f5062be"
   "4.3.0":
     url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.3.0.tar.gz"
-    sha256: "734ab0198714fe43eab94a67d6987085bde5573e6babde4d05799a8d04ebb04c"
+    sha256: "fdadc01d09cf9f54253802c5ec87eb10de51ce4130411415ae88c30940621b8b"
   "4.2.0":
     url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.2.0.tar.gz"
-    sha256: "ef9881973ecb9fe55732a4c1bb5ca96e63b624728f6319556939e0fe25f495e8"
+    sha256: "eba53d1b3f6e345632bb09a7b752ec7ced3d63ec5153a848380f3880c5d61889"
   "4.1.0":
     url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.1.0.tar.gz"
-    sha256: "748994dd1c819b88567e3539ea1f0ec2dd39fc0ed2884c033afa3da66efb5f4e"
+    sha256: "b367c695d2831958e7166921c3b356d5dfa51b1ecee505b97416ba39d1b6c17a"
   "4.0.0":
     url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.0.0.tar.gz"
-    sha256: "88735b69bb017ee92823b9e7ee14efeae2e57fb6c00503ed3aa2820e850a7b5e"
+    sha256: "b2a8efba0b9f86d3e1bd619f662a476ec18112b4f27cc441cc680a4e3777425e"
   "3.490":
     url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-3.49.tar.gz"
-    sha256: "8cc4beddd0ff389fb81bde9c181e0e3c419c15ec8a66df201ff4619a93715558"
-  "3.480":
-    url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-3.48.tar.gz"
-    sha256: "fc369363616753fa4dbe9bf28fa7e49cc1b057081229d89b52087d85ef303314"
-  "3.470":
-    url: "https://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-3.47.tar.gz"
-    sha256: "985606e058403c073a68d95be74e9696f0ded9414520784457a1d4cba8cca7e2"
+    sha256: "5b65a20d5c53494ec8f638267fca4a629836b7ac8dd0ef0266834eab270ed4b3"
 patches:
+  "4.4.0":
+    - patch_file: "patches/windows-use-strtok_s.patch"
+    - patch_file: "patches/fix-cmake-4.2.0.patch"
   "4.3.1":
     - patch_file: "patches/windows-use-strtok_s.patch"
     - patch_file: "patches/fix-cmake-4.2.0.patch"
@@ -42,9 +42,3 @@ patches:
   "3.490":
     - patch_file: "patches/windows-use-strtok_s.patch"
     - patch_file: "patches/fix-cmake-3.490.patch"
-  "3.480":
-    - patch_file: "patches/windows-use-strtok_s.patch"
-    - patch_file: "patches/fix-cmake-3.470.patch"
-  "3.470":
-    - patch_file: "patches/windows-use-strtok_s.patch"
-    - patch_file: "patches/fix-cmake-3.470.patch"

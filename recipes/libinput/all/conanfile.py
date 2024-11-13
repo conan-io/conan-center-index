@@ -3,14 +3,14 @@ import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, replace_in_file, rmdir, save
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.files import copy, get, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
 
 
 class LibinputConan(ConanFile):
@@ -91,6 +91,12 @@ class LibinputConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        tc = VirtualBuildEnv(self)
+        tc.generate()
+        if self.options.get_safe("with_wayland") and not self._has_build_profile:
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         tc = MesonToolchain(self)
         tc.project_options["build.pkg_config_path"] = self.generators_folder
         tc.project_options["coverity"] = False
@@ -111,10 +117,8 @@ class LibinputConan(ConanFile):
             else:
                 # Manually generate pkgconfig file of wayland-protocols since
                 # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
-                # We must use legacy conan v1 deps_cpp_info because self.dependencies doesn't
-                # contain build requirements when using 1 profile.
-                wp_prefix = self.deps_cpp_info["wayland-protocols"].rootpath
-                wp_version = self.deps_cpp_info["wayland-protocols"].version
+                wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
+                wp_version = self.dependencies.build["wayland-protocols"].ref.version
                 wp_pkg_content = textwrap.dedent(f"""\
                     prefix={wp_prefix}
                     datarootdir=${{prefix}}/res
@@ -125,8 +129,6 @@ class LibinputConan(ConanFile):
                 """)
                 save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
         pkg_config_deps.generate()
-        tc = VirtualBuildEnv(self)
-        tc.generate()
 
     def build(self):
         meson = Meson(self)

@@ -56,6 +56,7 @@ class Nghttp3Conan(ConanFile):
         if is_apple_os(self):
             # workaround for: install TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE executable
             tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
+        tc.variables["BUILD_TESTING"] = False
         tc.generate()
         tc = VirtualBuildEnv(self)
         tc.generate(scope="build")
@@ -72,6 +73,7 @@ class Nghttp3Conan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["nghttp3"]

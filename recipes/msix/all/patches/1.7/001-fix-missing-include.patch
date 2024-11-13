@@ -1,0 +1,11 @@
+Fixes https://github.com/microsoft/msix-packaging/issues/596
+--- src/inc/Encoding.hpp
++++ src/inc/Encoding.hpp
+@@ -5,6 +5,7 @@
+ #pragma once
+ 
++#include <cstdint>
+ #include <string>
+ 
+ namespace MSIX { namespace Encoding {
+ 

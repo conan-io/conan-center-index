@@ -15,5 +15,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
-            testsrc = os.path.join(self.source_folder, os.pardir, "test_package", "testsrc.mp4")
-            self.run(f"{bin_path} {testsrc}", run_environment=True)
+            self.run(bin_path, run_environment=True)
