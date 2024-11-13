@@ -7,6 +7,7 @@ from conan.tools.build import can_run
 class cliTestConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps"
+    test_type = "explicit"
 
     def requirements(self):
         self.requires(self.tested_reference_str)

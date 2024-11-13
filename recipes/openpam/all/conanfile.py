@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -11,11 +10,11 @@ required_conan_version = ">=1.54.0"
 
 class PackageConan(ConanFile):
     name = "openpam"
-    description = "OpenPAM library"
+    description = "OpenPAM: an open source PAM library that focuses on simplicity, correctness, and cleanliness"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://openpam.org/"
-    topics = ("pam")
+    topics = ("pam", "pluggable-authentication-module", "authentication", "security")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
 
@@ -35,7 +34,6 @@ class PackageConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
@@ -43,14 +41,11 @@ class PackageConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
-
         if self.settings.os not in ["Linux", "FreeBSD", "Neutrino"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, filename=f"openpam-{self.version}.tar.gz")
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
@@ -64,7 +59,7 @@ class PackageConan(ConanFile):
     def package(self):
         autotools = Autotools(self)
         autotools.install()
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"), ignore_case=True)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
 

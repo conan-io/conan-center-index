@@ -1,22 +1,22 @@
 sources:
-  # Newer versions at the top
+  "2.1.2":
+    url: "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.1.2.tar.gz"
+    sha256: "a7220ca354270deca08a7a162b93523c738ba3c8037a4df1a46ababfdc664196"
+  "2.1.1":
+    url: "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.1.1.tar.gz"
+    sha256: "2bdf27523f964f41668d266cfdbd7f5f58988af963d976577195969ed44359d1"
   "2.1.0":
-    url:
-      - "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.1.0.tar.gz"
+    url: "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.1.0.tar.gz"
     sha256: "e42405b49cde017c44c78aacac35c6e03564532838709031e73d10ab71f5363d"
   "2.0.2":
-    url:
-      - "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.0.2.tar.gz"
+    url: "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.0.2.tar.gz"
     sha256: "4a0b52e6523bdde0116231a67583131ea1a84bb574076fad939fc13fc7490443"
   "2.0.1":
-    url:
-      - "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.0.1.tar.gz"
+    url: "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.0.1.tar.gz"
     sha256: "405a44c14c5e40de5b81b01538ba12ef9d7c1f57e2c29f81b929e7e179847d4c"
   "2.0.0":
-    url:
-      - "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.0.0.tar.gz"
+    url: "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.0.0.tar.gz"
     sha256: "d4b2da2179a94637b34d18813a814531a1eceb0ddc6dd6db6098050dd638f4a1"
-
 patches:
   "2.1.0":
     - patch_file: "patches/2.1.0/0001-msvc-ice.patch"

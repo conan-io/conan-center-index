@@ -27,11 +27,13 @@ class OnnxRuntimeConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_xnnpack": [True, False],
+        "with_cuda": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_xnnpack": False,
+        "with_cuda": False,
     }
     short_paths = True
 
@@ -70,6 +72,9 @@ class OnnxRuntimeConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        # onnxruntime forces this to be True
+        # https://github.com/microsoft/onnxruntime/blob/be76e1e1b8e2914e448d12a0cc683c00014c0490/cmake/external/onnxruntime_external_deps.cmake#L542
+        self.options["onnx"].disable_static_registration = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -105,6 +110,8 @@ class OnnxRuntimeConan(ConanFile):
                 self.requires("xnnpack/cci.20230715")
             else:
                 self.requires("xnnpack/cci.20220801")
+        if self.options.with_cuda:
+            self.requires("cutlass/3.5.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -113,6 +120,10 @@ class OnnxRuntimeConan(ConanFile):
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires minimum compiler version {minimum_version}."
+            )
+        if not self.dependencies["onnx"].options.disable_static_registration:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires onnx compiled with `-o onnx:disable_static_registration=True`."
             )
 
     def validate_build(self):
@@ -143,8 +154,10 @@ class OnnxRuntimeConan(ConanFile):
         tc.variables["onnxruntime_USE_FULL_PROTOBUF"] = not self.dependencies["protobuf"].options.lite
         tc.variables["onnxruntime_USE_XNNPACK"] = self.options.with_xnnpack
 
+        tc.variables["onnxruntime_USE_CUDA"] = self.options.with_cuda
         tc.variables["onnxruntime_BUILD_UNIT_TESTS"] = False
         tc.variables["onnxruntime_DISABLE_CONTRIB_OPS"] = False
+        tc.variables["onnxruntime_USE_FLASH_ATTENTION"] = False
         tc.variables["onnxruntime_DISABLE_RTTI"] = False
         tc.variables["onnxruntime_DISABLE_EXCEPTIONS"] = False
 
@@ -157,7 +170,7 @@ class OnnxRuntimeConan(ConanFile):
         if Version(self.version) >= "1.17":
             tc.variables["onnxruntime_ENABLE_CUDA_EP_INTERNAL_TESTS"] = False
             tc.variables["onnxruntime_USE_NEURAL_SPEED"] = False
-            tc.variables["onnxruntime_USE_MEMORY_EFFICIENT_ATTENTION"] = True
+            tc.variables["onnxruntime_USE_MEMORY_EFFICIENT_ATTENTION"] = False
 
         # Disable a warning that gets converted to an error
         tc.preprocessor_definitions["_SILENCE_ALL_CXX23_DEPRECATION_WARNINGS"] = "1"
@@ -180,6 +193,11 @@ class OnnxRuntimeConan(ConanFile):
         if Version(self.version) >= "15.0":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "CMakeLists.txt"),
                             "if (Git_FOUND)", "if (FALSE)")
+        if Version(self.version) >= "1.17":
+            # https://github.com/microsoft/onnxruntime/commit/5bfca1dc576720627f3af8f65e25af408271079b
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "onnxruntime_providers_cuda.cmake"),
+                            'option(onnxruntime_NVCC_THREADS "Number of threads that NVCC can use for compilation." 1)', 
+                            'set(onnxruntime_NVCC_THREADS "1" CACHE STRING "Number of threads that NVCC can use for compilation.")')
 
     def build(self):
         self._patch_sources()
@@ -252,6 +270,8 @@ class OnnxRuntimeConan(ConanFile):
             self.cpp_info.requires.append("wil::wil")
         if self.options.with_xnnpack:
             self.cpp_info.requires.append("xnnpack::xnnpack")
+        if self.options.with_cuda:
+            self.cpp_info.requires.append("cutlass::cutlass")
 
         # https://github.com/microsoft/onnxruntime/blob/v1.16.0/cmake/CMakeLists.txt#L1759-L1763
         self.cpp_info.set_property("cmake_file_name", "onnxruntime")
