@@ -175,7 +175,6 @@ class ThriftConan(ConanFile):
         self.cpp_info.components["libthrift"].set_property("pkg_config_name", "thrift")
         self.cpp_info.components["libthrift"].libs = [f"thrift{libsuffix}"]
         if self.settings.os == "Windows":
-            self.cpp_info.components["libthrift"].defines.append("NOMINMAX")
             if Version(self.version) >= "0.15.0":
                 self.cpp_info.components["libthrift"].system_libs.append("shlwapi")
         elif self.settings.os in ["Linux", "FreeBSD"]:

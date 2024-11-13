@@ -1,0 +1,15 @@
+sources:
+  "1.10.1":
+    url: "https://github.com/bbc/audiowaveform/archive/refs/tags/1.10.1.tar.gz"
+    sha256: "bd283d84dc84fda84f4090fddde9a5bef924c588dd7bf6acaa8f7b946efb42a4"
+patches:
+  "1.10.1":
+    - patch_file: "patches/0001-1.10.1_find_packages.patch"
+      patch_description: "Inject thirdparties from conan"
+      patch_type: "conan"
+    - patch_file: "patches/0002-1.10.1_remove_flags.patch"
+      patch_description: "Remove custom compile flags"
+      patch_type: "conan"
+    - patch_file: "patches/0003-1.10.1_remove_documentation.patch"
+      patch_description: "Remove documenation"
+      patch_type: "conan"

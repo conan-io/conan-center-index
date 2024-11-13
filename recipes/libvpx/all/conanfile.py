@@ -60,6 +60,9 @@ class LibVPXConan(ConanFile):
             self.package_type = "static-library"
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
+        if self.settings.os == "Android":
+            del self.options.shared
+            self.package_type = "static-library"
 
     def layout(self):
         basic_layout(self, src_folder="src")

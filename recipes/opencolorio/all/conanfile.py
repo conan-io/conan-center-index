@@ -18,6 +18,7 @@ class OpenColorIOConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("colors", "visual", "effects", "animation")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -66,7 +67,7 @@ class OpenColorIOConan(ConanFile):
             self.requires("minizip-ng/3.0.9")
 
         # for tools only
-        self.requires("lcms/2.14")
+        self.requires("lcms/2.16")
         # TODO: add GLUT (needed for ociodisplay tool)
 
     def validate(self):

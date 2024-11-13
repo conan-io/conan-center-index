@@ -2,7 +2,7 @@ import os
 import textwrap
 
 from conan import ConanFile, conan_version
-from conan.tools.files import copy, get, rmdir, save
+from conan.tools.files import copy, get, rmdir, save, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
@@ -24,7 +24,9 @@ class MesonConan(ConanFile):
 
     def requirements(self):
         if self.conf.get("tools.meson.mesontoolchain:backend", default="ninja", check_type=str) == "ninja":
-            self.requires("ninja/1.11.1")
+            # Meson requires >=1.8.2 as of 1.5
+            # https://github.com/mesonbuild/meson/blob/b6b634ad33e5ca9ad4a9d6139dba4244847cc0e8/mesonbuild/backend/ninjabackend.py#L625
+            self.requires("ninja/[>=1.10.2 <2]")
 
     def package_id(self):
         self.info.clear()
@@ -49,6 +51,16 @@ class MesonConan(ConanFile):
             export PYTHONDONTWRITEBYTECODE=1
             exec "$meson_dir/meson.py" "$@"
         """))
+
+    def finalize(self):
+        copy(self, "*", src=self.immutable_package_folder, dst=self.package_folder)
+        replace_in_file(self, os.path.join(self.package_folder, "bin", "meson.cmd"),
+                        "set PYTHONDONTWRITEBYTECODE=1",
+                        "")
+
+        replace_in_file(self, os.path.join(self.package_folder, "bin", "meson"),
+                        "export PYTHONDONTWRITEBYTECODE=1",
+                        "")
 
     @staticmethod
     def _chmod_plus_x(filename):

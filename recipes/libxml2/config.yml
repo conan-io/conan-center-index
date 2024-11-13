@@ -1,17 +1,13 @@
 versions:
-  "2.12.7":
+  "2.13.4":
     folder: all
-  "2.12.6":
-    folder: all
-  "2.12.5":
+  "2.12.9":
     folder: all
   "2.12.4":
     folder: all
   "2.12.3":
     folder: all
-  "2.11.8":
-    folder: all
-  "2.11.7":
+  "2.11.9":
     folder: all
   "2.11.6":
     folder: all
