@@ -1,10 +1,10 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, replace_in_file, copy
+from conan.tools.files import get, copy
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class TreeSitterCQLConan(ConanFile):
@@ -16,7 +16,6 @@ class TreeSitterCQLConan(ConanFile):
     topics = ("parser", "grammar", "tree", "CQL", "cassandra")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -25,20 +24,12 @@ class TreeSitterCQLConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=(self.export_sources_folder + "/src"))
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def configure(self):
-        if is_msvc(self):
-            del self.options.shared
-            self.package_type = "static-library"
-        if self.options.get_safe("shared"):
-            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
@@ -50,7 +41,8 @@ class TreeSitterCQLConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["TREE_SITTER_CQL_SRC_DIR"] = self.source_folder.replace("\\", "/")
+        if is_msvc(self):
+            tc.variables.preprocessor_definitions["TREE_SITTER_HIDE_SYMBOLS"] = not self.options.shared
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -58,18 +50,9 @@ class TreeSitterCQLConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _patch_sources(self):
-        if not self.options.get_safe("shared"):
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "src", "parser.c"),
-                "__declspec(dllexport)", ""
-            )
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
-        cmake.configure()
+        cmake.configure(build_script_folder=os.path.join(self.source_folder,  os.pardir))
         cmake.build()
 
     def package(self):
@@ -85,4 +68,3 @@ class TreeSitterCQLConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["tree-sitter-cql"]
         self.cpp_info.set_property("pkg_config_name", "tree-sitter-cql")
-
