@@ -1,4 +1,7 @@
 sources:
+  "2.1.2":
+    url: "https://github.com/log4cplus/log4cplus/releases/download/REL_2_1_2/log4cplus-2.1.2.tar.bz2"
+    sha256: "2450dfbb4ab35dd2c9e64d8c750c514bf7293b81d8f32af7ab124417f70adfad"
   "2.1.1":
     url: "https://github.com/log4cplus/log4cplus/releases/download/REL_2_1_1/log4cplus-2.1.1.tar.bz2"
     sha256: "6597de782775e4e0fba8fdcad938c3709fd839a8084c4b6edfae3cc5046e2688"
@@ -11,11 +14,14 @@ sources:
   "2.0.7":
     url: "https://github.com/log4cplus/log4cplus/releases/download/REL_2_0_7/log4cplus-2.0.7.tar.bz2"
     sha256: "8fadbafee2ba4e558a0f78842613c9fb239c775d83f23340d091084c0e1b12ab"
-  # v1 is required for the openvdb recipe
   "1.2.2":
     url: "https://github.com/log4cplus/log4cplus/releases/download/REL_1_2_2/log4cplus-1.2.2.tar.bz2"
     sha256: "853efd919f9ca76c518c0944e6b0ced1174523a86b6db046ed4f23fe695167bd"
 patches:
+  "2.1.2":
+    - patch_file: "patches/2.1.2-0001-fix-cmake.patch"
+      patch_description: "disable fPIC"
+      patch_type: "conan"
   "2.1.1":
     - patch_file: "patches/2.0.6-0001-fix-cmake.patch"
       patch_description: "disable fPIC, move cmake_minimum_version to front"

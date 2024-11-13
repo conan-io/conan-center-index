@@ -1,0 +1,4 @@
+sources:
+  "3.1":
+    url: "https://github.com/kimwalisch/libpopcnt/archive/refs/tags/v3.1.tar.gz"
+    sha256: "b4ea061f4c2e5385dff0dd032ad5a16c60dc0dd050391283afb463c0d62c19bd"
