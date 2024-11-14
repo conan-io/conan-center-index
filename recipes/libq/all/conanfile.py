@@ -115,6 +115,7 @@ class libqConan(ConanFile):
         if self.options.shared:
             self.cpp_info.libs = collect_libs(self)
         else:
+            self.cpp_info.libs = ["libq.a"]
             self.cpp_info.system_libs = ["libq.a"]
 
         self.cpp_info.set_property("cmake_file_name", "libq")
