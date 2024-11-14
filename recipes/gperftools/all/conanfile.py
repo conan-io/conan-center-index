@@ -59,7 +59,19 @@ class GperftoolsConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return "11" if Version(self.version) < "2.16" else "17"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "17": {
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "12",
+            "Visual Studio": "16",
+            "msvc": "192",
+            },
+        }.get(self._min_cppstd, {})
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -93,6 +105,11 @@ class GperftoolsConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
         if Version(self.version) >= "2.11.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration(f"{self.ref} does not support gcc < 7.")

@@ -1,6 +1,6 @@
 # conandata.yml
 
-[conandata.yml](https://docs.conan.io/1/reference/config_files/conandata.yml.html) is a [YAML](https://yaml.org/)
+[conandata.yml](https://docs.conan.io/2/tutorial/creating_packages/handle_sources_in_packages.html#using-the-conandata-yml-file) is a [YAML](https://yaml.org/)
 file to provide declarative data for the recipe (which is imperative). This is a built-in Conan feature (available since
 1.22.0) without a fixed structure, but ConanCenter has a specific format to ensure quality of recipes.
 
@@ -30,8 +30,7 @@ next sections with more detail:
         * [portability](#portability)
         * [conan](#conan)
         * [bugfix](#bugfix)
-      * [patch_source](#patch_source)
-      * [base_path](#base_path)<!-- endToc -->
+      * [patch_source](#patch_source)<!-- endToc -->
 
 ## sources
 
@@ -114,7 +113,7 @@ sources:
         sha256: "f5d48c4b0d558c5d71e8bf6fcdf135b0943210c1ff91f8191dfc447419a6b12e"
 ```
 
-This approach requires a special code within [build](https://docs.conan.io/1/reference/conanfile/methods.html#build) method to handle.
+This approach requires a special code within [build](https://docs.conan.io/2/reference/conanfile/methods/build.html) method to handle.
 
 ### Sources fields
 
@@ -173,7 +172,7 @@ An example of a full patch description could be: `port to Android: update config
 
 #### patch_type
 
-_Required_
+_Recommended_
 
 The `patch_type` field specifies the type of the patch. In ConanCenterIndex we currently accept only several kind of patches:
 
@@ -220,7 +219,6 @@ Usually, the following kind of problems are good candidates for backports:
 * Data corruption.
 * Use of outdated or deprecated API or library.
 
-As sources with backports don't act exactly the same as the version officially released, it may be a source of confusion for the consumers who are relying on the buggy behavior (even if it's completely wrong). Therefore, it's required to introduce a new `cci.<YYYYMMDD>` version for such backports, so consumers may choose to use either official version, or modified version with backport(s) included.
 
 #### patch_source
 
@@ -236,9 +234,3 @@ _Recommended_
 
 For the `patch_type: portability` there might be no patch source matching the definition above. Although we encourage contributors to submit all such portability fixes upstream first, it's not always possible (e.g. for projects no longer maintained). In that case, a link to the Conan issue is a valid patch source (if there is no issue, you may [create](https://github.com/conan-io/conan-center-index/issues/new/choose) one).
 For the `patch_type: conan`, it doesn't make sense to submit patch upstream, so there will be no patch source.
-
-#### base_path
-
-_Optional_
-
-Specifies a sub-directory in project's sources to apply patch. This directory is relative to the [source_folder](https://docs.conan.io/1/reference/conanfile/attributes.html?highlight=source_folder#source-folder). Usually, it would be a `source_subfolder`, but could be a lower-level sub-directory (e.g. if it's a patch for a submodule).

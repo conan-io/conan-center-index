@@ -1,4 +1,7 @@
 sources:
+  "1.9.0":
+    url: "https://github.com/nanomsg/nng/archive/refs/tags/v1.9.0.tar.gz"
+    sha256: "ff882bda0a854abd184a7c1eb33329e526928ef98e80ef0457dd9a708bb5b0b1"
   "1.8.0":
     url: "https://github.com/nanomsg/nng/archive/refs/tags/v1.8.0.tar.gz"
     sha256: "cfacfdfa35c1618a28bb940e71f774a513dcb91292999696b4346ad8bfb5baff"
