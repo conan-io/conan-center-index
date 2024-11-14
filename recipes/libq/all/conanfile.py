@@ -20,12 +20,10 @@ class libqConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     package_type = "library"
     options = {
-        "shared": [True, False],
-        "fPIC": [True, False]
+        "shared": [True, False]
     }
     default_options = {
-        "shared": False,
-        "fPIC": True
+        "shared": False
     }
 
     @property
@@ -37,22 +35,12 @@ class libqConan(ConanFile):
         return {
             "apple-clang": "10",
             "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
+            "gcc": "7"
         }
 
     @property
     def _build_tests(self):
         return not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -69,8 +57,8 @@ class libqConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        if is_msvc(self) and not self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built as static on Visual Studio and msvc.")
+        if self.settings.os in ["Windows"]:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built on Windows")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -80,8 +68,6 @@ class libqConan(ConanFile):
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["q_BUILD_TESTS"] = self._build_tests
         tc.variables["q_BUILD_APPS"] = False
-        if is_msvc(self):
-            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
 
         tc.generate()
 
