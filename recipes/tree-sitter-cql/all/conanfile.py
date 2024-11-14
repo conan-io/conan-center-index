@@ -30,6 +30,8 @@ class TreeSitterCQLConan(ConanFile):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def configure(self):
+        if self.options.get_safe("shared"):
+            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
