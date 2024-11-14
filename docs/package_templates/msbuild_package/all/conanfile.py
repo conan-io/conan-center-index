@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildDeps, MSBuildToolchain, is_msvc
 import os
@@ -24,13 +24,10 @@ class PackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
-        "fPIC": [True, False],
     }
     default_options = {
         "shared": False,
-        "fPIC": True,
     }
-    implements = ["auto_shared_fpic"]
 
     # no exports_sources attribute, but export_sources(self) method instead
     def export_sources(self):
