@@ -70,8 +70,11 @@ class SDLConan(ConanFile):
             # Don't use is with get_safe, it does not return None, but a _PackageOption with a None value
             # Let the overridden equality check if the option is None
             if self.options.get_safe(subsystem) == None:
-                # self.options[subsystem] = not dependencies
-                setattr(self.options, subsystem, True)
+                default_subsystem_value = True
+                if subsystem == "hidapi" and self.settings.os == "visionOS":
+                    # CMakeLists.txt#L343
+                    default_subsystem_value = False
+                setattr(self.options, subsystem, default_subsystem_value)
 
     def validate(self):
         # If any of the subsystems is enabled, then the corresponding dependencies must be enabled
@@ -128,7 +131,6 @@ class SDLConan(ConanFile):
 
     def requirements(self):
         if self._needs_libusb:
-            # TODO: Fix, libusb not being picked up
             self.requires("libusb/1.0.26")
         if self._supports_opengl:
             self.requires("opengl/system")
@@ -152,9 +154,14 @@ class SDLConan(ConanFile):
         tc.variables["SDL_TEST_LIBRARY"] = True
         tc.variables["SDL_TESTS"] = True
         tc.variables["SDL_EXAMPLES"] = True
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        if self._needs_libusb:
+            tc.variables["SDL_HIDAPI_LIBUSB"] = True
+            tc.variables["SDL_HIDAPI_LIBUSB_SHARED"] = self.dependencies["libusb"].options.get_safe("shared", False)
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("libusb", "cmake_target_name", "LibUSB::LibUSB")
+        deps.set_property("libusb", "cmake_additional_variables_prefixes", ["LibUSB"])
         deps.generate()
         pcdeps = PkgConfigDeps(self)
         pcdeps.generate()
