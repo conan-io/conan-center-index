@@ -32,6 +32,8 @@ class LibFTPConan(ConanFile):
         if is_msvc(self):
             del self.options.shared
             self.package_type = "static-library"
+        if self.options.get_safe("shared"):
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
