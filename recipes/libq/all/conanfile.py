@@ -69,8 +69,8 @@ class libqConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
+        if is_msvc(self) and not self.options.shared:
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as static on Visual Studio and msvc.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -112,12 +112,7 @@ class libqConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        if self.options.shared:
-            self.cpp_info.libs = collect_libs(self)
-        else:
-            self.cpp_info.libs = ["libq"]
-            self.cpp_info.system_libs = ["libq.a"]
-
+        self.cpp_info.libs = collect_libs(self)
         self.cpp_info.set_property("cmake_file_name", "libq")
         self.cpp_info.set_property("cmake_target_name", "libq::libq")
 
