@@ -1,10 +1,9 @@
 from conan import ConanFile
 from conan.tools.gnu import AutotoolsToolchain, Autotools
-from conan.tools.files import get, chdir, copy, export_conandata_patches, apply_conandata_patches, rename
+from conan.tools.files import get, chdir, copy, export_conandata_patches, apply_conandata_patches, rename, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.microsoft import VCVars, is_msvc, NMakeToolchain
-from conan.tools.apple import is_apple_os
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
@@ -100,62 +99,45 @@ class MpdecimalConan(ConanFile):
             tc_env.append("LDXXFLAGS", ["$LDFLAGS"])
             tc.generate(tc_env)
 
+    @property
+    def _target(self):
+        return "SHARED" if self.options.shared else "STATIC"
+
     def _build_msvc(self):
         libmpdec_folder = os.path.join(self.source_folder, "libmpdec")
         libmpdecpp_folder = os.path.join(self.source_folder, "libmpdec++")
 
-        mpdec_target = "libmpdec-{}.{}".format(self.version, "dll" if self.options.shared else "lib")
-        mpdecpp_target = "libmpdec++-{}.{}".format(self.version, "dll" if self.options.shared else "lib")
-
-        builds = [[libmpdec_folder, mpdec_target]]
+        builds = [libmpdec_folder]
         if self.options.cxx:
-            builds.append([libmpdecpp_folder, mpdecpp_target])
+            builds.append(libmpdecpp_folder)
 
-        for build_dir, target in builds:
+        for build_dir in builds:
             copy(self, "Makefile.vc", build_dir, self.build_folder)
             rename(self, os.path.join(self.build_folder, "Makefile.vc"), os.path.join(build_dir, "Makefile"))
 
             with chdir(self, build_dir):
-                self.run("""nmake -f Makefile.vc {target} MACHINE={machine} DEBUG={debug} DLL={dll}""".format(
-                    target=target,
+                self.run("""nmake -f Makefile.vc MACHINE={machine} DEBUG={debug} DLL={dll}""".format(
                     machine={"x86": "ppro", "x86_64": "x64"}[str(self.settings.arch)],
                     # FIXME: else, use ansi32 and ansi64
                     debug="1" if self.settings.build_type == "Debug" else "0",
                     dll="1" if self.options.shared else "0",
                 ))
 
-    @property
-    def _shared_suffix(self):
-        if is_apple_os(self):
-            return ".dylib"
-        return {
-            "Windows": ".dll",
-        }.get(str(self.settings.os), ".so")
-
-    @property
-    def _target_names(self):
-        libsuffix = self._shared_suffix if self.options.shared else ".a"
-        versionsuffix = f".{self.version}" if self.options.shared else ""
-        suffix = (
-            f"{versionsuffix}{libsuffix}"
-            if is_apple_os(self) or self.settings.os == "Windows"
-            else f"{libsuffix}{versionsuffix}"
-        )
-        return f"libmpdec{suffix}", f"libmpdec++{suffix}"
-
     def build(self):
         apply_conandata_patches(self)
+        # Replace the default target with just the target we want
+        for ext in ["vc", "in"]:
+            replace_in_file(self, os.path.join("libmpdec", f"Makefile.{ext}"), "default:",
+                                f"default: $(LIB{self._target}) #")
+            replace_in_file(self, os.path.join("libmpdec++", f"Makefile.{ext}"), "default:",
+                                f"default: $(LIB{self._target}_CXX) #")
+
         if is_msvc(self):
             self._build_msvc()
         else:
             autotools = Autotools(self)
             autotools.configure()
-            libmpdec, libmpdecpp = self._target_names
-            with chdir(self, "libmpdec"):
-                autotools.make(target=libmpdec)
-            if self.options.cxx:
-                with chdir(self, "libmpdec++"):
-                    autotools.make(target=libmpdecpp)
+            autotools.make()
 
     def package(self):
         mpdecdir = os.path.join(self.source_folder, "libmpdec")
