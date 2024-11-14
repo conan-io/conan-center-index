@@ -188,7 +188,7 @@ class OpenCVConan(ConanFile):
         "with_wayland": True,
         # imgcodecs module options
         "with_avif": False,
-        "with_jpeg": "libjpeg",
+        "with_jpeg": "libjpeg-turbo",
         "with_png": True,
         "with_tiff": True,
         "with_jpeg2000": "openjpeg",
