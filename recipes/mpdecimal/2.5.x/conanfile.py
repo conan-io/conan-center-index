@@ -72,8 +72,6 @@ class MpdecimalConan(ConanFile):
 
     def generate(self):
         if is_msvc(self):
-            vcvars = VCVars(self)
-            vcvars.generate()
 
             tc = NMakeToolchain(self)
             if Version(self.version) >= "2.5.1":
@@ -83,9 +81,6 @@ class MpdecimalConan(ConanFile):
                         tc.extra_cxxflags.append("-DLIBMPDECXX_DLL")
             tc.generate()
         else:
-            # inject tool_requires env vars in build scope (not needed if there is no tool_requires)
-            env = VirtualBuildEnv(self)
-            env.generate()
 
             tc = AutotoolsToolchain(self)
             if Version(self.version) >= "2.5.0":
@@ -111,7 +106,7 @@ class MpdecimalConan(ConanFile):
             rename(self, os.path.join(self.build_folder, "Makefile.vc"), os.path.join(build_dir, "Makefile"))
 
             with chdir(self, build_dir):
-                self.run("""nmake -f Makefile.vc MACHINE={machine} DEBUG={debug} DLL={dll}""".format(
+                self.run("nmake -f Makefile.vc MACHINE={machine} DEBUG={debug} DLL={dll}".format(
                     machine={"x86": "ppro", "x86_64": "x64"}[str(self.settings.arch)],
                     # FIXME: else, use ansi32 and ansi64
                     debug="1" if self.settings.build_type == "Debug" else "0",
@@ -148,12 +143,9 @@ class MpdecimalConan(ConanFile):
         if self.options.get_safe("cxx"):
             builddirs.append(mpdecppdir)
         for builddir in builddirs:
-            copy(self, "*.a",     src=builddir, dst=os.path.join(self.package_folder, "lib"))
-            copy(self, "*.so",    src=builddir, dst=os.path.join(self.package_folder, "lib"))
-            copy(self, "*.so.*",  src=builddir, dst=os.path.join(self.package_folder, "lib"))
-            copy(self, "*.dylib", src=builddir, dst=os.path.join(self.package_folder, "lib"))
-            copy(self, "*.lib",   src=builddir, dst=os.path.join(self.package_folder, "lib"))
-            copy(self, "*.dll",   src=builddir, dst=os.path.join(self.package_folder, "bin"))
+            for pattern in ["*.a", "*.so", "*.so.*", "*.dylib", "*.lib"]:
+                copy(self, pattern, src=builddir, dst=os.path.join(self.package_folder, "lib"))
+            copy(self, "*.dll", src=builddir, dst=os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         lib_pre_suf = ("", "")
