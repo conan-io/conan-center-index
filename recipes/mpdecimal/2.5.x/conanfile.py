@@ -32,10 +32,6 @@ class MpdecimalConan(ConanFile):
         "cxx": True,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "setings_build", self.settings)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -60,20 +56,16 @@ class MpdecimalConan(ConanFile):
         if is_msvc(self) and self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration(
                 f"{self.ref} currently does not supported {self.settings.arch}. Contributions are welcomed")
-        if self.options.get_safe("cxx"):
+        if self.options.get_safe("cxx") and Version(self.version) < "2.5.1":
             if self.options.shared and self.settings.os == "Windows":
                 raise ConanInvalidConfiguration(
                     "A shared libmpdec++ is not possible on Windows (due to non-exportable thread local storage)")
 
     def build_requirements(self):
-        if is_msvc(self):
-            self.tool_requires("automake/1.16.5")
-        else:
-            # required to support windows as a build machine
-            if self._settings_build.os == "Windows":
-                self.win_bash = True
-                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-                    self.tool_requires("msys2/cci.latest")
+        if not is_msvc(self) and self.settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -190,4 +182,4 @@ class MpdecimalConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libmpdecimal++"].system_libs = ["pthread"]
             if self.options.shared and Version(self.version) >= "2.5.1":
-                self.cpp_info.components["libmpdecimal"].defines = ["MPDECIMALXX_DLL"]
+                self.cpp_info.components["libmpdecimal++"].defines = ["MPDECIMALXX_DLL"]
