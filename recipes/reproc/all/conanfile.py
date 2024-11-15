@@ -99,4 +99,4 @@ class PackageConan(ConanFile):
             self.cpp_info.components["reproc_cxx"].set_property("pkg_config_name", "reproc++")
             self.cpp_info.components["reproc_cxx"].set_property("cmake_target_name", "reproc++")
             self.cpp_info.components["reproc_cxx"].libs = ["reproc++"]
-            self.cpp_info.components["reproc_cxx"].requires = ["reproc"]
+            self.cpp_info.components["reproc_cxx"].requires = ["reproc_c"]
