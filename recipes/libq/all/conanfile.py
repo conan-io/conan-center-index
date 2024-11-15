@@ -37,11 +37,15 @@ class libqConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def configure(self):
+        if self.settings.os == "Windows":
+            self.package_type = "static-library"
+            del self.options.shared
+        if self.options.get_safe("shared"):
+            self.options.rm_safe("fPIC")
+
     def validate(self):
         check_min_cppstd(self, 11)
-        if self.settings.os == "Windows" and self.options.shared:
-            # It exports no symbols, so it can't be used as a shared library
-            raise ConanInvalidConfiguration("Does not support shared libraries on Windows")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
