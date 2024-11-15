@@ -2,8 +2,7 @@ from conan import ConanFile
 from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.files import get, chdir, copy, export_conandata_patches, apply_conandata_patches, rename, replace_in_file
 from conan.tools.layout import basic_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.microsoft import VCVars, is_msvc, NMakeToolchain
+from conan.tools.microsoft import is_msvc, NMakeToolchain
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
@@ -72,7 +71,6 @@ class MpdecimalConan(ConanFile):
 
     def generate(self):
         if is_msvc(self):
-
             tc = NMakeToolchain(self)
             if Version(self.version) >= "2.5.1":
                 if self.options.shared:
@@ -81,7 +79,6 @@ class MpdecimalConan(ConanFile):
                         tc.extra_cxxflags.append("-DLIBMPDECXX_DLL")
             tc.generate()
         else:
-
             tc = AutotoolsToolchain(self)
             if Version(self.version) >= "2.5.0":
                 tc.configure_args.append("--enable-cxx" if self.options.cxx else "--disable-cxx")
