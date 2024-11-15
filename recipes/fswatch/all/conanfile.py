@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.cmake.toolchain.blocks import is_apple_os
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, replace_in_file
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -36,21 +36,38 @@ class WatcherConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
+        # self.settings.rm_safe("compiler.libcxx")
+        # self.settings.rm_safe("compiler.cppstd")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
         if self.settings.compiler == "gcc":
             if Version(self.settings.compiler.version) < "6":
                 raise ConanInvalidConfiguration("gcc < 6 is unsupported")
 
+    def requirements(self):
+        self.requires("libgettext/0.22")
+
+    def build_requirements(self):
+        self.tool_requires("gettext/0.22.5")
+
+    def _apply_patches(self):
+        # Remove hardcoded CXX standard
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_CXX_STANDARD 11)",
+                        "")
+
+        # Dont compile tests
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "add_subdirectory(test/src)",
+                        "")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._apply_patches()
 
     def generate(self):
         tc = CMakeToolchain(self)
