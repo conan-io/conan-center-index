@@ -10,7 +10,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=1.53.0"
 
 
 class GiflibConan(ConanFile):
@@ -153,3 +153,7 @@ class GiflibConan(ConanFile):
         self.cpp_info.libs = ["gif"]
         if is_msvc(self):
             self.cpp_info.defines.append("USE_GIF_DLL" if self.options.shared else "USE_GIF_LIB")
+
+        # TODO: to remove in conan v2
+        self.cpp_info.names["cmake_find_package"] = "GIF"
+        self.cpp_info.names["cmake_find_package_multi"] = "GIF"
