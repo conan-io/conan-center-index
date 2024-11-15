@@ -25,7 +25,7 @@ index 38590f3..cbe7357 100644
      set (CMAKE_C_FLAGS_RELEASE "-Wall -Wcast-align -O3 -DNDEBUG -std=c99 -march=native")
      set (CMAKE_C_FLAGS_DEBUG   "-Wall -Wcast-align -ggdb  -std=c99 -march=native")
 +elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "AppleClang")
-+    set(TUNE_FLAG "-mtune=native")
++    set(TUNE_FLAG "-mtune=core-avx2")
 +    if(CMAKE_OSX_ARCHITECTURES MATCHES "arm64.*")
 +        set(TUNE_FLAG "-mtune=apple-m1")
 +    endif()
