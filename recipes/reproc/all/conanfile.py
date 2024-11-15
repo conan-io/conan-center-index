@@ -85,18 +85,18 @@ class PackageConan(ConanFile):
         cmake_config_name = "reproc++" if self.options.cxx else "reproc"
         self.cpp_info.set_property("cmake_file_name", cmake_config_name)
 
-        self.cpp_info.components["reproc"].set_property("pkg_config_name", "reproc")
-        self.cpp_info.components["reproc"].set_property("cmake_target_name", "reproc")
-        self.cpp_info.components["reproc"].libs = ["reproc"]
+        self.cpp_info.components["reproc_c"].set_property("pkg_config_name", "reproc")
+        self.cpp_info.components["reproc_c"].set_property("cmake_target_name", "reproc")
+        self.cpp_info.components["reproc_c"].libs = ["reproc"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["reproc"].system_libs.append("rt")
+            self.cpp_info.components["reproc_c"].system_libs.append("rt")
             if self.options.multithreaded:
-                self.cpp_info.components["reproc"].system_libs.append("pthread")
+                self.cpp_info.components["reproc_c"].system_libs.append("pthread")
         elif self.settings.os == "Windows":
-            self.cpp_info.components["reproc"].system_libs.append("Ws2_32")
+            self.cpp_info.components["reproc_c"].system_libs.append("Ws2_32")
 
         if self.options.cxx:
-            self.cpp_info.components["reprocxx"].set_property("pkg_config_name", "reproc++")
-            self.cpp_info.components["reprocxx"].set_property("cmake_target_name", "reproc++")
-            self.cpp_info.components["reprocxx"].libs = ["reproc++"]
-            self.cpp_info.components["reprocxx"].requires = ["reproc"]
+            self.cpp_info.components["reproc_cxx"].set_property("pkg_config_name", "reproc++")
+            self.cpp_info.components["reproc_cxx"].set_property("cmake_target_name", "reproc++")
+            self.cpp_info.components["reproc_cxx"].libs = ["reproc++"]
+            self.cpp_info.components["reproc_cxx"].requires = ["reproc"]
