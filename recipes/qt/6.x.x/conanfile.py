@@ -1543,10 +1543,11 @@ class QtConan(ConanFile):
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/corelib/CMakeLists.txt#L598-L606
                     self.cpp_info.components["qtCore"].frameworks.append("AppKit")
                     self.cpp_info.components["qtCore"].frameworks.append("ApplicationServices")
-                    self.cpp_info.components["qtCore"].frameworks.append("CoreServices")
+                    self.cpp_info.components["qtCore"].frameworks.append("CoreFoundation")
                     self.cpp_info.components["qtCore"].frameworks.append("CoreServices")
                     self.cpp_info.components["qtCore"].frameworks.append("Security")
                     self.cpp_info.components["qtCore"].frameworks.append("DiskArbitration")
+                    self.cpp_info.components["qtCore"].frameworks.append("UniformTypeIdentifiers")
                 else:
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/corelib/CMakeLists.txt#L969-L972
                     self.cpp_info.components["qtCore"].frameworks.append("MobileCoreServices")
