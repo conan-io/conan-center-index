@@ -42,14 +42,10 @@ class QhullConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    @property
-    def _is_v8_1(self):
-        return self.version == "8.1-alpha4" or Version(self.version) >= "8.1"
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self._is_v8_1:
+        if Version(self.version) >= "8.1-alpha4":
             if not self.options.cpp:
                 self.settings.rm_safe("compiler.cppstd")
                 self.settings.rm_safe("compiler.libcxx")
@@ -143,7 +139,7 @@ class QhullConan(ConanFile):
             self.cpp_info.components["libqhullcpp"].names["pkg_config"] = "qhullcpp"
 
     def _qhull_cmake_name(self, reentrant):
-        if not self._is_v8_1 and not reentrant and self.options.shared:
+        if Version(self.version) < "8.1-alpha4" and not reentrant and self.options.shared:
             return "libqhull"
         return self._qhull_pkgconfig_name(reentrant)
 
