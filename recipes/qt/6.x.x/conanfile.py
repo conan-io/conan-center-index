@@ -712,11 +712,13 @@ class QtConan(ConanFile):
             if os.path.isfile(file):
                 os.remove(file)
 
-        # workaround QTBUG-94356
-        replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", "FindWrapSystemZLIB.cmake"), '"-lz"', 'ZLIB::ZLIB')
-        replace_in_file(self, os.path.join(self.source_folder, "qtbase", "configure.cmake"),
-            "set_property(TARGET ZLIB::ZLIB PROPERTY IMPORTED_GLOBAL TRUE)",
-            "")
+        # workaround https://bugreports.qt.io/browse/QTBUG-94356
+        if Version(self.version) < "6.8.0":
+            replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", "FindWrapSystemZLIB.cmake"), '"-lz"', "ZLIB::ZLIB")
+            replace_in_file(self, os.path.join(self.source_folder, "qtbase", "configure.cmake"),
+                "set_property(TARGET ZLIB::ZLIB PROPERTY IMPORTED_GLOBAL TRUE)",
+                "")
+            
         if Version(self.version) <= "6.4.0":
             # use official variable name https://cmake.org/cmake/help/latest/module/FindFontconfig.html
             replace_in_file(self, os.path.join(self.source_folder, "qtbase", "src", "gui", "configure.cmake"), "FONTCONFIG_FOUND", "Fontconfig_FOUND")
@@ -1192,21 +1194,27 @@ class QtConan(ConanFile):
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/gui/CMakeLists.txt#L362-L370
                     self.cpp_info.components["qtGui"].frameworks += ["AppKit", "Carbon"]
                     _create_plugin("QCocoaIntegrationPlugin", "qcocoa", "platforms", ["Core", "Gui"])
-                    # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/cocoa/CMakeLists.txt#L51-L58
-                    self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = [
-                        "AppKit", "Carbon", "CoreServices", "CoreVideo", "IOKit", "IOSurface", "Metal", "QuartzCore"
-                    ]
+                    if not self.options.shared:
+                        # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/cocoa/CMakeLists.txt#L51-L58
+                        self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = [
+                            "AppKit", "Carbon", "CoreServices", "CoreVideo", "IOKit", "IOSurface", "Metal", "QuartzCore"
+                        ]
+                        if Version(self.version) >= "6.8.0":
+                                self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks.append("UniformTypeIdentifiers")
                 elif self.settings.os in ["iOS", "tvOS"]:
                     _create_plugin("QIOSIntegrationPlugin", "qios", "platforms", [])
-                    # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/ios/CMakeLists.txt#L32-L37
-                    self.cpp_info.components["QIOSIntegrationPlugin"].frameworks = [
-                        "AudioToolbox", "Foundation", "Metal", "QuartzCore", "UIKit", "CoreGraphics"
-                    ]
-                    if self.settings.os != "tvOS":
-                        # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/ios/CMakeLists.txt#L66-L68
-                        self.cpp_info.components["QIOSIntegrationPlugin"].frameworks += [
-                            "AssetsLibrary", "UniformTypeIdentifiers", "Photos",
+                    if not self.options.shared:
+                        # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/ios/CMakeLists.txt#L32-L37
+                        self.cpp_info.components["QIOSIntegrationPlugin"].frameworks = [
+                            "AudioToolbox", "Foundation", "Metal", "QuartzCore", "UIKit", "CoreGraphics"
                         ]
+                        if self.settings.os != "tvOS":
+                            # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/ios/CMakeLists.txt#L66-L68
+                            self.cpp_info.components["QIOSIntegrationPlugin"].frameworks += [
+                                "UniformTypeIdentifiers", "Photos",
+                            ]
+                            if Version(self.version) < "6.8.0":
+                                self.cpp_info.components["QIOSIntegrationPlugin"].frameworks.append("AssetsLibrary")
                 elif self.settings.os == "watchOS":
                     _create_plugin("QMinimalIntegrationPlugin", "qminimal", "platforms", [])
             elif self.settings.os == "Emscripten":
