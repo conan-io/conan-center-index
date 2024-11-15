@@ -3,9 +3,9 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.microsoft import check_min_vs
-from conan.tools.microsoft import is_msvc
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import glob
 import os
@@ -54,9 +54,6 @@ class EmbreeConan(ConanFile):
     def _has_neon(self):
         return "arm" in self.settings.arch
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -103,9 +100,10 @@ class EmbreeConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["EMBREE_STATIC_LIB"] = not self.options.shared
         tc.variables["BUILD_TESTING"] = False
+        tc.variables["EMBREE_INSTALL_DEPENDENCIES"] = False
         tc.variables["EMBREE_TUTORIALS"] = False
-        tc.variables["EMBREE_BACKFACE_CULLING"] = True
-        tc.variables["EMBREE_IGNORE_INVALID_RAYS"] = True
+        tc.variables["EMBREE_BACKFACE_CULLING"] = False 
+        tc.variables["EMBREE_IGNORE_INVALID_RAYS"] = False
         tc.variables["EMBREE_ISPC_SUPPORT"] = False
         tc.variables["EMBREE_TASKING_SYSTEM"] = "INTERNAL" if is_apple_os(self) or self.settings.os == "Emscripten" else "TBB"
         tc.variables["EMBREE_MAX_ISA"] = "NONE"
@@ -118,6 +116,8 @@ class EmbreeConan(ConanFile):
             tc.variables["EMBREE_ISA_AVX"] = self._has_sse_avx
             tc.variables["EMBREE_ISA_AVX2"] = self._has_sse_avx
             tc.variables["EMBREE_ISA_AVX512"] = self._has_sse_avx and not is_msvc(self)
+            if is_msvc(self):
+                tc.variables["USE_STATIC_RUNTIME"] = is_msvc_static_runtime(conanfile)
         tc.generate()
 
         deps = CMakeDeps(self)
