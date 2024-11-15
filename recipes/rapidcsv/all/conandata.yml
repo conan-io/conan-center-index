@@ -1,4 +1,10 @@
 sources:
+  "8.84":
+    url: "https://github.com/d99kris/rapidcsv/archive/refs/tags/v8.84.tar.gz"
+    sha256: "213699f46a2a29fc2f45c2f9f66ccbe5383aebe6061445d91ac196e3cf7029c8"
+  "8.83":
+    url: "https://github.com/d99kris/rapidcsv/archive/refs/tags/v8.83.tar.gz"
+    sha256: "9342eeb0ce37e30b778c4c030129d03e99f44a66d4710ac19627187bee774097"
   "8.82":
     url: "https://github.com/d99kris/rapidcsv/archive/refs/tags/v8.82.tar.gz"
     sha256: "4f1f57ca9db0f5447416acbef4e059cbd7cb03f6eb39fec1301732bbedaac927"

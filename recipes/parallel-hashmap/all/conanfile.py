@@ -12,9 +12,9 @@ class ParallelHashmapConan(ConanFile):
     name = "parallel-hashmap"
     description = "A family of header-only, very fast and memory-friendly hashmap and btree containers."
     license = "Apache-2.0"
-    topics = ("parallel", "hashmap", "btree")
-    homepage = "https://github.com/greg7mdp/parallel-hashmap"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/greg7mdp/parallel-hashmap"
+    topics = ("parallel", "hashmap", "btree", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
@@ -31,9 +31,6 @@ class ParallelHashmapConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def build(self):
-        pass
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
