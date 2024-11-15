@@ -48,7 +48,7 @@ class WhisperCppConan(ConanFile):
         "no_fma": False,
         "no_f16c": False,
         "no_accelerate": False,
-        "metal": False,
+        "metal": True,
         "metal_ndebug": False,
         "with_coreml": False,
         "coreml_allow_fallback": False,
@@ -198,7 +198,7 @@ class WhisperCppConan(ConanFile):
         copy(self, "*", os.path.join(self.source_folder, "models"), os.path.join(self.package_folder, "res", "models"))
 
     def package_info(self):
-        self.cpp_info.libs = ["whisper"]
+        self.cpp_info.libs = ["whisper", "ggml"]
         self.cpp_info.resdirs = ["res"]
         self.cpp_info.libdirs = ["lib", "lib/static"]
 
