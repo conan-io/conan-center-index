@@ -74,6 +74,7 @@ version range only when a requirement for a newer version is needed.
 * meson: `[>=1.2.3 <2]`
 * pkgconf: `[>=2.2 <3]`
 * xz_utils: `[>=5.4.5 <6]`
+* sqlite3: `[>=3.45.0 <4]`
 
 Conan maintainers may introduce this for other dependencies over time. Outside of the cases outlined above, version ranges are not allowed in ConanCenter recipes.
 

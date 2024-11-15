@@ -144,7 +144,7 @@ class BotanConan(ConanFile):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.45.1")
+            self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.with_boost:
             self.requires("boost/1.84.0")
 
