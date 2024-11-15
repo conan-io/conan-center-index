@@ -81,7 +81,8 @@ class MailioConan(ConanFile):
         env.generate()
 
         tc = CMakeToolchain(self)
-        tc.variables["MAILIO_BUILD_SHARED_LIBRARY"] = self.options.shared
+        if Version(self.version) < "0.24.0":
+            tc.variables["MAILIO_BUILD_SHARED_LIBRARY"] = self.options.shared
         tc.variables["MAILIO_BUILD_DOCUMENTATION"] = False
         tc.variables["MAILIO_BUILD_EXAMPLES"] = False
         if Version(self.version) >= "0.22.0":
