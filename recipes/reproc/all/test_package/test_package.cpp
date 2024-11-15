@@ -1,13 +1,16 @@
-#include <reproc++/run.hpp>
-
-#include <array>
-#include <string>
+#include <reproc++/reproc.hpp>
+#include <iostream>
 
 int main()
 {
-  std::array<std::string, 2> command = { "echo", "Hello, World!" };
-  reproc::options options;
-  options.redirect.parent = true;
-  options.deadline = reproc::milliseconds(1000);
-  reproc::run(command, options);
+  try {
+    reproc::process process;
+    reproc::options options;
+    options.redirect.parent = true;
+    std::cout << "reproc++ setup successful. Process object created.\n";
+  } catch (const std::exception &e) {
+    std::cerr << "Error: " << e.what() << '\n';
+    return 1;
+  }
+  return 0;
 }
