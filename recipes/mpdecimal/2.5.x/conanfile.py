@@ -42,11 +42,13 @@ class MpdecimalConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) < "2.5.0":
+            del self.options.cxx
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if not self.options.cxx:
+        if not self.options.get_safe("cxx"):
             self.settings.rm_safe("compiler.libcxx")
             self.settings.rm_safe("compiler.cppstd")
 
@@ -58,7 +60,7 @@ class MpdecimalConan(ConanFile):
         if is_msvc(self) and self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration(
                 f"{self.ref} currently does not supported {self.settings.arch}. Contributions are welcomed")
-        if self.options.cxx:
+        if self.options.get_safe("cxx"):
             if self.options.shared and self.settings.os == "Windows":
                 raise ConanInvalidConfiguration(
                     "A shared libmpdec++ is not possible on Windows (due to non-exportable thread local storage)")
@@ -85,7 +87,7 @@ class MpdecimalConan(ConanFile):
             if Version(self.version) >= "2.5.1":
                 if self.options.shared:
                     tc.extra_cflags.append("-DMPDECIMAL_DLL")
-                    if self.options.cxx:
+                    if self.options.get_safe("cxx"):
                         tc.extra_cxxflags.append("-DLIBMPDECXX_DLL")
             tc.generate()
         else:
@@ -94,7 +96,8 @@ class MpdecimalConan(ConanFile):
             env.generate()
 
             tc = AutotoolsToolchain(self)
-            tc.configure_args.append("--enable-cxx" if self.options.cxx else "--disable-cxx")
+            if Version(self.version) >= "2.5.0":
+                tc.configure_args.append("--enable-cxx" if self.options.cxx else "--disable-cxx")
             tc_env = tc.environment()
             tc_env.append("LDXXFLAGS", ["$LDFLAGS"])
             tc.generate(tc_env)
@@ -108,7 +111,7 @@ class MpdecimalConan(ConanFile):
         libmpdecpp_folder = os.path.join(self.source_folder, "libmpdec++")
 
         builds = [libmpdec_folder]
-        if self.options.cxx:
+        if self.options.get_safe("cxx"):
             builds.append(libmpdecpp_folder)
 
         for build_dir in builds:
@@ -129,9 +132,10 @@ class MpdecimalConan(ConanFile):
         for ext in ["vc", "in"]:
             replace_in_file(self, os.path.join("libmpdec", f"Makefile.{ext}"), "default:",
                                 f"default: $(LIB{self._target}) #")
-            replace_in_file(self, os.path.join("libmpdec++", f"Makefile.{ext}"), "default:",
-                                f"default: $(LIB{self._target}_CXX) #")
-
+            if self.options.get_safe("cxx"):
+                replace_in_file(self, os.path.join("libmpdec++", f"Makefile.{ext}"), "default:",
+                                    f"default: $(LIB{self._target}_CXX) #")
+ 
         if is_msvc(self):
             self._build_msvc()
         else:
@@ -146,10 +150,10 @@ class MpdecimalConan(ConanFile):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "vccompat.h", src=mpdecdir, dst=os.path.join(self.package_folder, "include")) # 2.5.0/MSVC only
         copy(self, "mpdecimal.h", src=mpdecdir, dst=os.path.join(self.package_folder, "include"))
-        if self.options.cxx:
+        if self.options.get_safe("cxx"):
             copy(self, "decimal.hh", src=mpdecppdir, dst=os.path.join(self.package_folder, "include"))
         builddirs = [mpdecdir]
-        if self.options.cxx:
+        if self.options.get_safe("cxx"):
             builddirs.append(mpdecppdir)
         for builddir in builddirs:
             copy(self, "*.a",     src=builddir, dst=os.path.join(self.package_folder, "lib"))
@@ -180,7 +184,7 @@ class MpdecimalConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libmpdecimal"].system_libs = ["m"]
 
-        if self.options.cxx:
+        if self.options.get_safe("cxx"):
             self.cpp_info.components["libmpdecimal++"].libs = ["{}mpdec++{}".format(*lib_pre_suf)]
             self.cpp_info.components["libmpdecimal++"].requires = ["libmpdecimal"]
             if self.settings.os in ["Linux", "FreeBSD"]:
