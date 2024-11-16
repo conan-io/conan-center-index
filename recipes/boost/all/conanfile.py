@@ -170,7 +170,6 @@ class BoostConan(ConanFile):
             "gcc": 6,
             "clang": 6,
             "apple-clang": 99,  # still uses C++98 by default. XCode does not reflect apple-clang
-            "Visual Studio": 14,  # guess
             "msvc": 190,  # guess
         }.get(str(self.settings.compiler))
 
@@ -185,7 +184,6 @@ class BoostConan(ConanFile):
             "gcc": 6,
             "clang": 6,
             "apple-clang": 99,  # still uses C++98 by default. XCode does not reflect apple-clang
-            "Visual Studio": 15,  # guess
             "msvc": 191,  # guess
         }.get(str(self.settings.compiler))
 
@@ -195,7 +193,6 @@ class BoostConan(ConanFile):
             "gcc": 99,
             "clang": 99,
             "apple-clang": 99,
-            "Visual Studio": 99,
             "msvc": 999,
         }.get(str(self.settings.compiler))
 
@@ -206,11 +203,11 @@ class BoostConan(ConanFile):
         # https://releases.llvm.org/14.0.0/tools/clang/docs/ReleaseNotes.html#clang-format: before is experimental header
         # https://gcc.gnu.org/gcc-10/changes.html: requires -fcoroutines
         min_compiler_versions = {
-                "apple-clang": "12",
-                "clang": "14",
-                "gcc": "10",
-                "msvc": "192",
-                "Visual Studio": "16",}
+            "apple-clang": "12",
+            "clang": "14",
+            "gcc": "10",
+            "msvc": "192",
+        }
         required_compiler_version = min_compiler_versions.get(str(self.settings.compiler))
         if not required_compiler_version:
             return cppstd_20_supported
@@ -222,7 +219,6 @@ class BoostConan(ConanFile):
         return {
             "gcc": 4.8,
             "clang": 5,
-            "Visual Studio": 14,  # guess
             "msvc": 190,  # guess
         }.get(str(self.settings.compiler))
 
@@ -269,10 +265,6 @@ class BoostConan(ConanFile):
     @property
     def _bcp_dir(self):
         return "custom-boost"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     @property
     def _is_clang_cl(self):
@@ -614,8 +606,7 @@ class BoostConan(ConanFile):
             self.tool_requires("b2/[>=5.2 <6]")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
 
     def generate(self):
@@ -692,7 +683,7 @@ class BoostConan(ConanFile):
         python_version_parts = str(self.info.options.python_version).split('.')
         python_major = int(python_version_parts[0])
         python_minor = int(python_version_parts[1])
-        if(python_major >= 3 and python_minor >= 10):
+        if python_major >= 3 and python_minor >= 10:
             return self._get_python_sc_var(name)
 
         return self._get_python_sc_var(name) or self._get_python_du_var(name)
@@ -1420,7 +1411,6 @@ class BoostConan(ConanFile):
         # Visual Studio  | 17               | Windows     | vc142          | depends on compiler.toolset
         compiler = {
             "apple-clang": "",
-            "Visual Studio": "vc",
             "msvc": "vc",
         }.get(str(self.settings.compiler), str(self.settings.compiler))
         if (self.settings.compiler, self.settings.os) == ("gcc", "Windows"):
@@ -1500,10 +1490,6 @@ class BoostConan(ConanFile):
         self.env_info.BOOST_ROOT = self.package_folder
 
         self.cpp_info.set_property("cmake_file_name", "Boost")
-        self.cpp_info.filenames["cmake_find_package"] = "Boost"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Boost"
-        self.cpp_info.names["cmake_find_package"] = "Boost"
-        self.cpp_info.names["cmake_find_package_multi"] = "Boost"
 
         # - Use 'headers' component for all includes + defines
         # - Use '_libboost' component to attach extra system_libs, ...
@@ -1511,9 +1497,6 @@ class BoostConan(ConanFile):
         self.cpp_info.components["headers"].libs = []
         self.cpp_info.components["headers"].libdirs = []
         self.cpp_info.components["headers"].set_property("cmake_target_name", "Boost::headers")
-        self.cpp_info.components["headers"].names["cmake_find_package"] = "headers"
-        self.cpp_info.components["headers"].names["cmake_find_package_multi"] = "headers"
-        self.cpp_info.components["headers"].names["pkg_config"] = "boost"
 
         if self.options.system_no_deprecated:
             self.cpp_info.components["headers"].defines.append("BOOST_SYSTEM_NO_DEPRECATED")
@@ -1554,8 +1537,6 @@ class BoostConan(ConanFile):
         # Boost::boost is an alias of Boost::headers
         self.cpp_info.components["_boost_cmake"].requires = ["headers"]
         self.cpp_info.components["_boost_cmake"].set_property("cmake_target_name", "Boost::boost")
-        self.cpp_info.components["_boost_cmake"].names["cmake_find_package"] = "boost"
-        self.cpp_info.components["_boost_cmake"].names["cmake_find_package_multi"] = "boost"
         if self.options.header_only:
             self.cpp_info.components["_boost_cmake"].libdirs = []
 
@@ -1564,9 +1545,6 @@ class BoostConan(ConanFile):
 
             self.cpp_info.components["diagnostic_definitions"].libs = []
             self.cpp_info.components["diagnostic_definitions"].set_property("cmake_target_name", "Boost::diagnostic_definitions")
-            self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package"] = "diagnostic_definitions"
-            self.cpp_info.components["diagnostic_definitions"].names["cmake_find_package_multi"] = "diagnostic_definitions"
-            self.cpp_info.components["diagnostic_definitions"].names["pkg_config"] = "boost_diagnostic_definitions"  # FIXME: disable on pkg_config
             # I would assume headers also need the define BOOST_LIB_DIAGNOSTIC, as a header can trigger an autolink,
             # and this definition triggers a print out of the library selected.  See notes below on autolink and headers.
             self.cpp_info.components["headers"].requires.append("diagnostic_definitions")
@@ -1575,9 +1553,6 @@ class BoostConan(ConanFile):
 
             self.cpp_info.components["disable_autolinking"].libs = []
             self.cpp_info.components["disable_autolinking"].set_property("cmake_target_name", "Boost::disable_autolinking")
-            self.cpp_info.components["disable_autolinking"].names["cmake_find_package"] = "disable_autolinking"
-            self.cpp_info.components["disable_autolinking"].names["cmake_find_package_multi"] = "disable_autolinking"
-            self.cpp_info.components["disable_autolinking"].names["pkg_config"] = "boost_disable_autolinking"  # FIXME: disable on pkg_config
 
             # Even headers needs to know the flags for disabling autolinking ...
             # magic_autolink is an option in the recipe, so if a consumer wants this version of boost,
@@ -1613,9 +1588,6 @@ class BoostConan(ConanFile):
 
             self.cpp_info.components["dynamic_linking"].libs = []
             self.cpp_info.components["dynamic_linking"].set_property("cmake_target_name", "Boost::dynamic_linking")
-            self.cpp_info.components["dynamic_linking"].names["cmake_find_package"] = "dynamic_linking"
-            self.cpp_info.components["dynamic_linking"].names["cmake_find_package_multi"] = "dynamic_linking"
-            self.cpp_info.components["dynamic_linking"].names["pkg_config"] = "boost_dynamic_linking"  # FIXME: disable on pkg_config
             # A library that only links to Boost::headers can be linked into another library that links a Boost::library,
             # so for this reasons, the header-only library should know the BOOST_ALL_DYN_LINK definition as it will likely
             # change some important part of the boost code and cause linking errors downstream.
@@ -1740,9 +1712,6 @@ class BoostConan(ConanFile):
 
                 self.cpp_info.components[module].requires = self._dependencies["dependencies"][module] + ["_libboost"]
                 self.cpp_info.components[module].set_property("cmake_target_name", "Boost::" + module)
-                self.cpp_info.components[module].names["cmake_find_package"] = module
-                self.cpp_info.components[module].names["cmake_find_package_multi"] = module
-                self.cpp_info.components[module].names["pkg_config"] = f"boost_{module}"
 
                 # extract list of names of direct host dependencies to check for dependencies
                 # of components that exist in other packages
