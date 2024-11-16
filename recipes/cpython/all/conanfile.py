@@ -60,9 +60,6 @@ class CPythonConan(ConanFile):
 
         # options that don't change package id
         "env_vars": True,
-
-        # We need to disable mpdecimal `cxx` option on MSVC if it is shared
-        "mpdecimal/*:cxx": False,
     }
     short_paths = True
 
