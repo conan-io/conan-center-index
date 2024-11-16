@@ -20,10 +20,12 @@ class FlacConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_programs": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_programs": True,
     }
 
     def export_sources(self):
@@ -55,6 +57,7 @@ class FlacConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_DOCS"] = False
+        tc.variables["BUILD_PROGRAMS"] = self.options.with_programs
         tc.variables["BUILD_TESTING"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
