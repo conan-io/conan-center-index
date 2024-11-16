@@ -4,10 +4,8 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir
-from conan.tools.microsoft import check_min_vs
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
-import glob
 import os
 
 required_conan_version = ">=1.53.0"
@@ -70,9 +68,6 @@ class EmbreeConan(ConanFile):
             self.requires("onetbb/2021.12.0")
 
     def validate(self):
-        if not (self._has_sse_avx or self._has_neon):
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support {self.settings.arch}")
-
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -82,14 +77,8 @@ class EmbreeConan(ConanFile):
             )
 
         compiler_version = Version(self.settings.compiler.version)
-        if self.settings.compiler == "clang" and compiler_version < "4":
-            raise ConanInvalidConfiguration("Clang < 4 is not supported")
 
-        check_min_vs(self, 191)
-
-        if self.settings.os == "Linux" and self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
-            raise ConanInvalidConfiguration(f"{self.ref} cannot be built with clang libc++, use libstdc++ instead")
-
+        # See https://github.com/RenderKit/embree/blob/master/CMakeLists.txt#L538
         if self.settings.compiler == "apple-clang" and not self.options.shared and compiler_version >= "9.0":
             raise ConanInvalidConfiguration(f"{self.ref} static with apple-clang >=9 and multiple ISA (simd) is not supported")
 
