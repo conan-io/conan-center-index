@@ -85,9 +85,9 @@ class KeystoneConan(ConanFile):
     def package(self):
         copy(
             self,
-            "LICENSE*.txt",
+            "COPYING",
             src=self.source_folder,
-            dst=os.path.join(self.package_folder, "licenses"),
+            dst=self.package_folder
         )
         cmake = CMake(self)
         cmake.install()
