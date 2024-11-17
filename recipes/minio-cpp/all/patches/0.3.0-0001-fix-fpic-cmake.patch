@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c2610db..52bbffa 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -124,7 +124,6 @@ target_include_directories(miniocpp PUBLIC
+ )
+ target_link_libraries(miniocpp PUBLIC ${MINIO_CPP_LIBS})
+ set_target_properties(miniocpp PROPERTIES VERSION "${MINIO_CPP_VERSION_STRING}")
+-set_target_properties(miniocpp PROPERTIES POSITION_INDEPENDENT_CODE ON)
+ 
+ # Add a cmake alias - this is how users should use minio-cpp in their cmake projects.
+ add_library(miniocpp::miniocpp ALIAS miniocpp)
