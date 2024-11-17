@@ -97,7 +97,5 @@ class KeystoneConan(ConanFile):
     def package_info(self):
         suffix = "_dll" if is_msvc(self) and self.options.shared else ""
         self.cpp_info.libs = [f"keystone{suffix}"]
-        if not self.options.shared:
-            self.cpp_info.defines.append("KEYSTONE_STATIC")
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["shell32", "ole32", "uuid"]
