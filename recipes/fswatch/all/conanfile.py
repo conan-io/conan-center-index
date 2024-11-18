@@ -1,9 +1,10 @@
 import os
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.apple import is_apple_os
 from conan.errors import ConanInvalidConfiguration
 
 
@@ -37,6 +38,9 @@ class WatcherConan(ConanFile):
         if is_msvc(self):
             # INFO: fswatch requires pthread always and fails CMake when using MSVC
             raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC due pthread requirement.")
+        if is_apple_os(self) and cross_building(self):
+            # INFO: Cmake error: "VERSION_GREATER_EQUAL" "9.0" Unknown arguments specified
+            raise ConanInvalidConfiguration(f"{self.ref} does not support cross-building on {self.settings.os}")
 
     def requirements(self):
         self.requires("libgettext/0.22")
