@@ -14,5 +14,7 @@ int main()
     | rpp::operators::filter(std::not_fn(&::isdigit))
     | rpp::operators::map(&::toupper);
 
+
+
   return 0;
 }
