@@ -1,23 +1,22 @@
 import os
-
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.cmake.toolchain.blocks import is_apple_os
-from conan.tools.files import get, copy, replace_in_file
-from conan.tools.scm import Version
+from conan.tools.files import get, copy, replace_in_file, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.53.0"
+
+required_conan_version = ">=2.0.9"
+
 
 class WatcherConan(ConanFile):
     name = "fswatch"
-    description = "A cross-platform file change monitor with multiple backends: Apple OS X File System Events, *BSD kqueue, Solaris/Illumos File Events Notification, Linux inotify, Microsoft Windows and a stat()-based backend.."
-    license = "GPL-3.0"
+    description = "A cross-platform file change monitor with multiple backends"
+    license = "GPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/emcrisostomo/fswatch"
-    topics = ("watch", "filesystem", "event", "header-only")
-
+    topics = ("watch", "filesystem", "event", "monitor")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -28,25 +27,16 @@ class WatcherConan(ConanFile):
         "shared": False,
         "fPIC": True
     }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        # self.settings.rm_safe("compiler.libcxx")
-        # self.settings.rm_safe("compiler.cppstd")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
         check_min_cppstd(self, 11)
-        if self.settings.compiler == "gcc":
-            if Version(self.settings.compiler.version) < "6":
-                raise ConanInvalidConfiguration("gcc < 6 is unsupported")
+        if is_msvc(self):
+            # INFO: fswatch requires pthread always and fails CMake when using MSVC
+            raise ConanInvalidConfiguration(f"{self.ref} does not support MSVC due pthread requirement.")
 
     def requirements(self):
         self.requires("libgettext/0.22")
@@ -81,9 +71,11 @@ class WatcherConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "COPYING*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["fswatch"]
@@ -92,6 +84,5 @@ class WatcherConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]
-
-        if is_apple_os(self):
-            self.cpp_info.frameworks.extend(["CoreFoundation", "CoreServices"])
+        elif self.settings.os == "Macos":
+            self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
