@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir, replace_in_file
@@ -20,12 +21,10 @@ class FlacConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_programs": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_programs": True,
     }
 
     def export_sources(self):
@@ -57,7 +56,7 @@ class FlacConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_DOCS"] = False
-        tc.variables["BUILD_PROGRAMS"] = self.options.with_programs
+        tc.variables["BUILD_PROGRAMS"] = not is_apple_os_(self) or self.settings.os == "Macos"
         tc.variables["BUILD_TESTING"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
