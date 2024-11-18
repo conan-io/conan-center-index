@@ -44,9 +44,6 @@ class MailioConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16.3 <4]")
-        if Version(self.version) >= "0.24.0" and \
-            (self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14.0"):
-            raise ConanInvalidConfiguration("${self.ref} doesn't support apple-clang < 14.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

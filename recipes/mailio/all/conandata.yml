@@ -19,6 +19,9 @@ patches:
     - patch_file: "patches/0.24.0-adapt-cmakelists.patch"
       patch_description: "fix install path"
       patch_type: "conan"
+    - patch_file: "patches/0.24.0-0002-backport-missing-include.patch"
+      patch_description: "Add missing vector include"
+      patch_type: "backport"
   "0.23.0":
     - patch_file: "patches/0.23.0-adapt-cmakelists.patch"
       patch_description: "fix install path"

@@ -1,0 +1,12 @@
+diff --git a/include/mailio/percent.hpp b/include/mailio/percent.hpp
+index 166ee3b..4bf0d46 100644
+--- a/include/mailio/percent.hpp
++++ b/include/mailio/percent.hpp
+@@ -14,6 +14,7 @@ copy at http://www.freebsd.org/copyright/freebsd-license.html.
+ #pragma once
+ 
+ #include <string>
++#include <vector>
+ #include "codec.hpp"
+ #include "export.hpp"
+ 
