@@ -1,12 +1,13 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
-from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file
+from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.4"
 
 
 class DoxygenConan(ConanFile):
@@ -26,24 +27,8 @@ class DoxygenConan(ConanFile):
     default_options = {
         "enable_parse": True,
         "enable_search": True,
-        "enable_app": False,
+        "enable_app": False
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    @property
-    def _minimum_compiler_version(self):
-        if Version(self.version) <= "1.9.1":
-            return {
-                "gcc": "5",
-            }
-        return {
-            "gcc": "7",  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66297
-            "Visual Studio": "15",
-            "msvc": "191",
-        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -56,28 +41,34 @@ class DoxygenConan(ConanFile):
             self.requires("xapian-core/1.4.19")
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.enable_app or self.options.enable_parse:
-            # INFO: Doxygen uses upper case CMake variables to link/include IConv, so we are using patches for targets.
             self.requires("libiconv/1.17")
 
-    def compatibility(self):
-        return [{"settings": [("build_type", "Release")]}]
-
     def validate(self):
-        minimum_compiler_version = self._minimum_compiler_version.get(str(self.settings.compiler))
-        if minimum_compiler_version and Version(self.settings.compiler.version) < minimum_compiler_version:
-            raise ConanInvalidConfiguration(f"Compiler version too old. At least {minimum_compiler_version} is required.")
-        if Version(self.version) == "1.8.18":
-            check_min_vs(self, "191")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration("Doxygen requires GCC >=5")
+        
+        if self.settings.compiler == "msvc" and Version(self.settings.compiler.version) < "191":
+            raise ConanInvalidConfiguration("Doxygen requires Visual Studio 2017 or newer")
+        
+        check_min_cppstd(self, "17")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.24")
         else:
             self.tool_requires("flex/2.6.4")
             self.tool_requires("bison/3.8.2")
 
+        self.tool_requires("cmake/[>=3.19 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+
+        #Do not build manpages
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "add_subdirectory(doc)", "")
+        replace_in_file(self, cmakelists, "set(CMAKE_CXX_STANDARD", "##set(CMAKE_CXX_STANDARD")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -89,10 +80,10 @@ class DoxygenConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("libiconv", "cmake_additional_variables_prefixes", ["ICONV"])
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -106,8 +97,3 @@ class DoxygenConan(ConanFile):
         self.cpp_info.set_property("cmake_find_mode", "none")
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread", "m"]
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
