@@ -56,7 +56,7 @@ class FlacConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_DOCS"] = False
-        tc.variables["BUILD_PROGRAMS"] = not is_apple_os_(self) or self.settings.os == "Macos"
+        tc.variables["BUILD_PROGRAMS"] = not is_apple_os(self) or self.settings.os == "Macos"
         tc.variables["BUILD_TESTING"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
