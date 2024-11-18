@@ -242,7 +242,7 @@ class OpenTelemetryCppConan(ConanFile):
     @property
     def _stl_value(self):
         # From 1.12.0 onwards, the STL can have various values
-        if Version(self.version) < "1.12.1":
+        if Version(self.version) < "1.12.0":
             return self.options.with_stl
         if self.options.with_stl:
             return "CXX" + str(self.settings.compiler.cppstd).replace("gnu", "")
