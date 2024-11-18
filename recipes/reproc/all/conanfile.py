@@ -48,10 +48,6 @@ class PackageConan(ConanFile):
     def validate(self):
         if self.options.cxx and self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
-        if self.settings.os == "Windows" and self.options.shared:
-            # test_package fails with:
-            # unresolved external symbol "class std::chrono::duration<int,struct std::ratio<1,1000> > const reproc::infinite"
-            raise ConanInvalidConfiguration("Shared libraries are not supported on Windows")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "6":
             # drain.hpp:55:43: error: ‘stream’ is not a class, namespace, or enumeration
             raise ConanInvalidConfiguration("GCC < 6 is not supported")
