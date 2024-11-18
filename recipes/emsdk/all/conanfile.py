@@ -30,15 +30,6 @@ class EmSDKConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    @property
-    def _is_glibc_older_than_2_28(self):
-        libver = platform.libc_ver()
-        return self.settings.os == 'Linux' and libver[0] == 'glibc' and Version(libver[1]) < "2.28"
-
-    def validate_build(self):
-        if Version(self.version) >= "3.1.68" and self._is_glibc_older_than_2_28:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires glibc 2.28 for nodejs/20.16.0")
 
     def build_requirements(self):
         if Version(self.version) < "3.1.68":
