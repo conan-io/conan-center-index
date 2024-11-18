@@ -26,7 +26,7 @@ class PackageConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
+    def configure(self):
         if self.options.header_only:
             self.package_type = "header-library"
 
