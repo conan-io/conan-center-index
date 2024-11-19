@@ -42,9 +42,8 @@ class FastPFORConan(ConanFile):
 
     def _patch_sources(self):
         # Let Conan set the C++ standard
-        if self.settings.compiler.cppstd:
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "set(CMAKE_CXX_STANDARD 11)", "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_CXX_STANDARD 11)", "")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
