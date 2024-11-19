@@ -18,19 +18,19 @@ class KeystoneConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.keystone-engine.org"
     topics = (
-        "reverse-engineering",
-        "disassembler",
         "security",
-        "framework",
         "arm",
-        "arm64",
-        "x86",
-        "sparc",
-        "powerpc",
+        "framework",
         "mips",
         "x86-64",
+        "reverse-engineering",
+        "assembler",
+        "x86",
         "hexagon",
-        "systemz",
+        "arm64",
+        "sparc",
+        "powerpc",
+        "systemz"
     )
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
