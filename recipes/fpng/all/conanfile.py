@@ -2,15 +2,15 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, save, load
 from conan.tools.build import check_min_cppstd
+from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.53.0"
-
+required_conan_version = ">=2.1"
 
 class FpngConan(ConanFile):
     name = "fpng"
     description = "Super fast C++ .PNG writer/reader"
-    license = "Unlicense",
+    license = "Unlicense"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/richgel999/fpng"
     topics = ("png", "writer", "reader")
@@ -28,10 +28,6 @@ class FpngConan(ConanFile):
     }
     exports_sources = ["CMakeLists.txt"]
 
-    @property
-    def _min_cppstd(self):
-        return 11
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -39,13 +35,15 @@ class FpngConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if is_msvc(self):
+            self.package_type = "static-library"
+            del self.options.shared
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

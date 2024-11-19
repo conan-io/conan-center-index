@@ -6,7 +6,6 @@ include(GNUInstallDirs)
 add_library(fpng ${FPNG_SRC_DIR}/src/fpng.cpp)
 set_target_properties(fpng PROPERTIES
     PUBLIC_HEADER ${FPNG_SRC_DIR}/src/fpng.h
-    WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 target_compile_features(fpng PRIVATE cxx_std_11)
 if(FPNG_WITH_SSE)
