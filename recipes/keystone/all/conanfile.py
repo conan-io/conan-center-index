@@ -79,5 +79,6 @@ class KeystoneConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        self.cpp_info.libs = ["keystone"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["shell32", "ole32", "uuid"]
