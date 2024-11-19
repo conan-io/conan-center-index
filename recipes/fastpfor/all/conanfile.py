@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.apple import is_apple_os
@@ -40,8 +40,15 @@ class FastPFORConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 11)
 
+    def _patch_sources(self):
+        # Let Conan set the C++ standard
+        if self.settings.compiler.cppstd:
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "set(CMAKE_CXX_STANDARD 11)", "")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
