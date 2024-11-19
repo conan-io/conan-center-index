@@ -1,4 +1,4 @@
 sources:
   "1.0.6":
-    url: "https://github.com/richgel999/fpng/archive/01296df391d70e68af9d64baa3b7b80d9e38caa6.tar.gz"
-    sha256: "8c07bf75f01a33d797b895afd4ddf5302486a80b1e93ecb1956df00788748444"
+    url: "https://github.com/richgel999/fpng/archive/refs/tags/v1.0.6.tar.gz"
+    sha256: "0f4b60f0b638d47addfbd150bb19bfe2f3343c4ed2d742c02c085456de0ee1dd"
