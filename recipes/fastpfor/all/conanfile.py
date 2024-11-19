@@ -1,8 +1,10 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.apple import is_apple_os
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -34,25 +36,22 @@ class FastPFORConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if str(self.settings.arch).startswith("armv8"):
+        if "arm" in str(self.settings.arch):
             self.requires("simde/0.8.0", transitive_headers=True)
 
     def validate(self):
         check_min_cppstd(self, 11)
-
-    def _patch_sources(self):
-        # Let Conan set the C++ standard
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "set (CMAKE_CXX_STANDARD 11)", "")
+        if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "15.0":
+            raise ConanInvalidConfiguration("${self.ref} doesn't support ${self.settings.compiler} < 15.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["WITH_TEST"] = False
-        if str(self.settings.arch).startswith("armv8"):
+        if "arm" in str(self.settings.arch):
             tc.cache_variables["SUPPORT_NEON"] = True
             tc.preprocessor_definitions["SIMDE_ENABLE_NATIVE_ALIASES"] = 1
             if is_apple_os(self):
@@ -64,7 +63,6 @@ class FastPFORConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
