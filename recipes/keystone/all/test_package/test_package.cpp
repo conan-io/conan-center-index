@@ -4,8 +4,8 @@
 
 int main()
 {
-    int major = 0, minor = 0;
+    unsigned int major = 0, minor = 0;
     ks_version(&major, &minor);
-    printf("keystone version %d.%d\n", major, minor);
+    printf("keystone version %u.%u\n", major, minor);
     return EXIT_SUCCESS;
 }
