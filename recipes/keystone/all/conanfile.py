@@ -63,8 +63,8 @@ class KeystoneConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["build_libs_only"] = True
-        tc.variables["KEYSTONE_BUILD_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        tc.cache_variables["BUILD_LIBS_ONLY"] = True
+        tc.cache_variables["KEYSTONE_BUILD_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
 
     def build(self):
