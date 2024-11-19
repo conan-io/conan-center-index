@@ -1,14 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import (
-    copy,
-    get,
-    rmdir,
-    export_conandata_patches,
-    apply_conandata_patches,
-)
+from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
