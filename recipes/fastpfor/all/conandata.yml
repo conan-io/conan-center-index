@@ -1,7 +1,7 @@
 sources:
   "0.2.0":
     url: "https://github.com/lemire/FastPFor/archive/refs/tags/v0.2.0.tar.gz"
-    sha256: "6722f2cba2edb4c20a49280b1c6b8a999895c4bc1c031584a9b2670c3e54173e"
+    sha256: "d9f0eacf9c3c61866cda23bae35107ca9c5d35fa7b7a96ca9ccc85803d7e753d"
 patches:
   "0.2.0":
     - patch_file: "patches/0.2.0-0001-fix-cmake.patch"
