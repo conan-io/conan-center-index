@@ -4,7 +4,7 @@ from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class KeystoneConan(ConanFile):
