@@ -14,7 +14,7 @@ class KeystoneConan(ConanFile):
         "Keystone assembler framework: Core (Arm, Arm64, Hexagon, "
         "Mips, PowerPC, Sparc, SystemZ & X86) + bindings."
     )
-    license = "GPL-2.0-only"
+    license = ( "GPL-2.0-only", "FOSS-Exception" )
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.keystone-engine.org"
     topics = (
@@ -70,6 +70,12 @@ class KeystoneConan(ConanFile):
         copy(
             self,
             "COPYING",
+            src=self.source_folder,
+            dst=os.path.join(self.package_folder, "licenses"),
+        )
+        copy(
+            self,
+            "EXCEPTIONS-CLIENT",
             src=self.source_folder,
             dst=os.path.join(self.package_folder, "licenses"),
         )
