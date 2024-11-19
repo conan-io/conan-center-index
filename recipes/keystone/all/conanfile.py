@@ -43,12 +43,10 @@ class KeystoneConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "use_default_alloc": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "use_default_alloc": True,
     }
     def config_options(self):
         if self.settings.os == "Windows":
