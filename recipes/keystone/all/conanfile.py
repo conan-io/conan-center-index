@@ -42,13 +42,8 @@ class KeystoneConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    implements = ["auto_shared_fpic"]
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
     def layout(self):
         cmake_layout(self, src_folder="src")
 
