@@ -44,6 +44,7 @@ class G2oConan(ConanFile):
         "with_openmp": [True, False],
         "with_cholmod": [True, False],
         "with_csparse": [True, False],
+        "with_opengl": [True, False],
     }
     default_options = {
         "shared": False,
@@ -70,6 +71,7 @@ class G2oConan(ConanFile):
         "with_openmp": True,
         "with_cholmod": False,
         "with_csparse": False,
+        "with_opengl": True,
     }
 
     @property
@@ -127,9 +129,10 @@ class G2oConan(ConanFile):
         self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
         # Used in stuff/logger.h
         self.requires("spdlog/1.14.1", transitive_headers=True, transitive_libs=True)
-        # Used in stuff/opengl_wrapper.h
-        self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
-        self.requires("freeglut/3.4.0", transitive_headers=True, transitive_libs=True)
+        if self.options.with_opengl:
+            # Used in stuff/opengl_wrapper.h
+            self.requires("opengl/system", transitive_headers=True, transitive_libs=True)        
+            self.requires("freeglut/3.4.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_openmp and self.settings.compiler in ["clang", "apple-clang"]:
             # Used in core/openmp_mutex.h, also '#pragma omp' is used in several core public headers
             self.requires("llvm-openmp/18.1.8", transitive_headers=True, transitive_libs=True)
@@ -168,7 +171,7 @@ class G2oConan(ConanFile):
         tc.variables["G2O_USE_OPENMP"] = self.options.with_openmp
         tc.variables["G2O_USE_CHOLMOD"] = self.options.with_cholmod
         tc.variables["G2O_USE_CSPARSE"] = self.options.with_csparse
-        tc.variables["G2O_USE_OPENGL"] = True
+        tc.variables["G2O_USE_OPENGL"] = self.options.with_opengl
         tc.variables["G2O_USE_LOGGING"] = True
         tc.variables["G2O_BUILD_SLAM2D_TYPES"] = self.options.build_slam2d_types
         tc.variables["G2O_BUILD_SLAM2D_ADDON_TYPES"] = self.options.build_slam2d_addon_types
@@ -230,6 +233,8 @@ class G2oConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "g2o")
 
         def _add_component(name, requires=None):
+            if not self.options.with_opengl and "opengl_helper" in requires:
+                requires.remove("opengl_helper")
             self.cpp_info.components[name].set_property("cmake_target_name", f"g2o::{name}")
             self.cpp_info.components[name].libs = [f"g2o_{name}"]
             self.cpp_info.components[name].requires = requires or []
@@ -238,7 +243,8 @@ class G2oConan(ConanFile):
         self.cpp_info.components["g2o_ceres_ad"].set_property("cmake_target_name", "g2o::g2o_ceres_ad")
         _add_component("stuff", requires=["spdlog::spdlog", "eigen::eigen"])
         _add_component("core", requires=["stuff", "eigen::eigen", "g2o_ceres_ad"])
-        _add_component("opengl_helper", requires=["opengl::opengl", "freeglut::freeglut", "eigen::eigen"])
+        if self.options.with_opengl:
+            _add_component("opengl_helper", requires=["opengl::opengl", "freeglut::freeglut", "eigen::eigen"])
 
         # Solvers
         _add_component("solver_dense", requires=["core"])
