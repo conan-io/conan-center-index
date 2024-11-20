@@ -158,6 +158,9 @@ class WhisperCppConan(ConanFile):
         if self.options.no_f16c:
             tc.variables["WHISPER_NO_F16C"] = True
 
+        # TODO: Implement OpenMP support
+        tc.variables["GGML_OPENMP"] = False
+
         if self.options.get_safe("with_openvino"):
             tc.variables["WHISPER_OPENVINO"] = True
             # TODO: remove with Conan 1.x support
