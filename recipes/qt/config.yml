@@ -7,7 +7,5 @@ versions:
     folder: 6.x.x
   "5.15.16":
     folder: 5.x.x
-  "5.15.15":
-    folder: 5.x.x
   "5.15.14":
     folder: 5.x.x
