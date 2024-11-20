@@ -81,7 +81,7 @@ class WhisperCppConan(ConanFile):
         if is_apple_os(self):
             del self.options.with_blas
             if Version(self.version) < "1.7.0":
-                self.default_options.metal = False
+                self.options.metal = False
         else:
             del self.options.metal
             del self.options.metal_ndebug
