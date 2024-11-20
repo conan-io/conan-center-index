@@ -260,7 +260,7 @@ class SDLMixerConan(ConanFile):
         if self.settings.os == "Windows":
             if self.options.nativemidi:
                 self.cpp_info.system_libs.append("winmm")
-        elif is_apple_os(self):
+        elif is_apple_os(self) and not self.options.shared:
             self.cpp_info.frameworks.extend(["AudioToolbox", "CoreServices", "CoreGraphics", "CoreFoundation"])
             if self.settings.os == "Macos":
                 self.cpp_info.frameworks.extend(["AppKit", "AudioUnit"])
