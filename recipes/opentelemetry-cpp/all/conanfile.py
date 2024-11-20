@@ -71,11 +71,11 @@ class OpenTelemetryCppConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        if self.options.with_abseil and Version(self.dependencies["abseil"].ref.version) >= "20230125":
-            return 14
         if Version(self.version) < "1.12.0" and self.options.with_stl:
             # Old versions require C++17 with STL
             return 17
+        if self.options.with_abseil and Version(self.dependencies["abseil"].ref.version) >= "20230125":
+            return 14
         return 11
 
     @property
