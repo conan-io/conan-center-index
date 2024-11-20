@@ -121,27 +121,6 @@ class SfmlConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {values["target"]: f"SFML::{component}" for component, values in self._sfml_components.items()}
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
     @property
     def _sfml_components(self):
         def gdi32():
@@ -311,13 +290,4 @@ class SfmlConan(ConanFile):
                 self.cpp_info.components[component].frameworks = frameworks
                 self.cpp_info.components[component].exelinkflags = exelinkflags
 
-                # TODO: to remove in conan v2 once cmake_find_package* generators removed
-                self.cpp_info.components[component].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-                self.cpp_info.components[component].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-
         _register_components(self._sfml_components)
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "SFML"
-        self.cpp_info.names["cmake_find_package_multi"] = "SFML"
-        self.cpp_info.names["pkgconfig"] = "sfml-all"
