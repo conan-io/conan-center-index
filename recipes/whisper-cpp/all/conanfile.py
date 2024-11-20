@@ -5,10 +5,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class WhisperCppConan(ConanFile):
@@ -74,10 +74,6 @@ class WhisperCppConan(ConanFile):
         }.get(self._min_cppstd, {})
 
     @property
-    def _is_metal_option_available(self):
-        return is_apple_os(self) and Version(self.version) >= "1.5.2"
-
-    @property
     def _is_openvino_option_available(self):
         return Version(self.version) >= "1.5.2"
 
@@ -85,16 +81,14 @@ class WhisperCppConan(ConanFile):
         if is_apple_os(self):
             del self.options.with_blas
         else:
+            del self.options.metal
+            del self.options.metal_ndebug
             del self.options.no_accelerate
             del self.options.with_coreml
             del self.options.coreml_allow_fallback
 
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-        if not self._is_metal_option_available:
-            del self.options.metal
-            del self.options.metal_ndebug
 
         if not self._is_openvino_option_available:
             del self.options.with_openvino
@@ -175,8 +169,10 @@ class WhisperCppConan(ConanFile):
                 tc.variables["WHISPER_COREML"] = True
                 if self.options.coreml_allow_fallback:
                     tc.variables["WHISPER_COREML_ALLOW_FALLBACK"] = True
-            if self._is_metal_option_available:
-                tc.variables["GGML_METAL" if Version(self.version) >= "1.7.0" else "WHISPER_METAL"] = self.options.metal
+            if Version(self.version) >= "1.7.0":
+                tc.variables["GGML_METAL"] = self.options.metal
+            else:
+                tc.variables["WHISPER_METAL"] = self.options.metal
         else:
             if self.options.with_blas:
                 if Version(self.version) >= "1.4.2":
