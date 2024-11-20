@@ -48,7 +48,7 @@ class OpenTelemetryCppConan(ConanFile):
         "shared": False,
 
         "with_no_deprecated_code": False,
-        "with_stl": True,
+        "with_stl": False,
         "with_gsl": False,
         "with_abseil": True,
         "with_otlp_grpc": False,
@@ -197,9 +197,10 @@ class OpenTelemetryCppConan(ConanFile):
         if self.settings.os != "Linux" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} supports building shared libraries only on Linux")
 
-        if self.settings.os == "Macos" and (Version(self.settings.compiler.version) <= "12"):
+        if self.options.with_stl and self.settings.os == "Macos" and (Version(self.settings.compiler.version) <= "13"):
             # TODO: The SDK 11 is the culprit, blanket-remove it for now
-            raise ConanInvalidConfiguration(f"{self.ref} does not support Apple Clang 12 or lower")
+            # See PR 24230 for logs,
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Apple Clang 13 or lower with -o=&:with_stl=True")
 
         if self.options.with_otlp_grpc:
             if not self.dependencies["grpc"].options.cpp_plugin:
