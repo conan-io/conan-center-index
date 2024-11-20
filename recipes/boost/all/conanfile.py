@@ -588,6 +588,10 @@ class BoostConan(ConanFile):
                 elif not self._has_cppstd_14_supported:
                     disable_graph()
 
+            if self.settings.os == "iOS":
+                # the process library doesn't build (and doesn't even make sense) on iOS
+                self.options.without_process = True
+
             # TODO: Revisit on Boost 1.87.0
             # It's not possible to disable process only when having shared parsed already.
             # https://github.com/boostorg/process/issues/408
@@ -2046,7 +2050,7 @@ class BoostConan(ConanFile):
 
             if not self.options.get_safe("without_process"):
                 if self.settings.os == "Windows":
-                    self.cpp_info.components["process"].system_libs.extend(["ntdll", "shell32", "Advapi32", "user32"])
+                    self.cpp_info.components["process"].system_libs.extend(["ntdll", "shell32", "advapi32", "user32"])
                 if self._shared:
                     self.cpp_info.components["process"].defines.append("BOOST_PROCESS_DYN_LINK")
 
