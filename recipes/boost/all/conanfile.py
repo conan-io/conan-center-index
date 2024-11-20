@@ -97,7 +97,6 @@ class BoostConan(ConanFile):
         "lzma": [True, False],
         "zstd": [True, False],
         "segmented_stacks": [True, False],
-        "debug_level": list(range(0, 14)),
         "pch": [True, False],
         "extra_b2_flags": [None, "ANY"],  # custom b2 flags
         "i18n_backend": ["iconv", "icu", None, "deprecated"],
@@ -136,7 +135,6 @@ class BoostConan(ConanFile):
         "lzma": False,
         "zstd": False,
         "segmented_stacks": False,
-        "debug_level": 0,
         "pch": True,
         "extra_b2_flags": None,
         "i18n_backend": "deprecated",
@@ -415,7 +413,7 @@ class BoostConan(ConanFile):
             # https://github.com/boostorg/math/blob/boost-1.85.0/README.md
             # ==> disable it by default for older compilers or c++ standards
             if not valid_min_cppstd(self, 14):
-                    disable_math()
+                disable_math()
 
         if Version(self.version) >= "1.86.0":
             # Boost 1.86.0 updated more components that require C++14 and C++17
@@ -496,11 +494,6 @@ class BoostConan(ConanFile):
 
         if self.options.without_fiber:
             self.options.rm_safe("numa")
-
-        # Use verbosity from [conf] if specified
-        verbosity = self.conf.get("tools.build:verbosity", default="quiet")
-        if verbosity == "verbose" and int(self.options.debug_level) < 2:
-            self.options.debug_level.value = 2
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -663,7 +656,6 @@ class BoostConan(ConanFile):
         if self.info.options.header_only:
             self.info.clear()
         else:
-            del self.info.options.debug_level
             del self.info.options.filesystem_version
             del self.info.options.pch
             del self.info.options.python_executable  # PATH to the interpreter is not important, only version matters
@@ -677,7 +669,6 @@ class BoostConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
         if not self.options.header_only:
@@ -818,7 +809,7 @@ class BoostConan(ConanFile):
                 if os.path.isfile(python_h):
                     self.output.info(f"found Python.h: {python_h}")
                     return candidate.replace("\\", "/")
-        raise Exception("couldn't locate Python.h - make sure you have installed python development files")
+        raise ConanException("Could not locate Python.h - make sure you have installed python development files.")
 
     @property
     def _python_library_dir(self):
@@ -900,11 +891,18 @@ class BoostConan(ConanFile):
     def _boost_build_dir(self):
         return os.path.join(self.source_folder, "tools", "build")
 
+    @property
+    def _debug_flag(self):
+        verbosity = self.conf.get("tools.build:verbosity", default="quiet", check_type=str)
+        debug_level = {"quiet": 0, "verbose": 2}.get(verbosity)
+        return f"-d{debug_level}"
+
     def _build_bcp(self):
         folder = os.path.join(self.source_folder, "tools", "bcp")
         with chdir(self, folder):
             command = f"{self._b2_exe} -j{build_jobs(self)} --abbreviate-paths toolset={self._toolset}"
-            command += f" -d{self.options.debug_level}"
+            command += " "
+            command += self._debug_flag
             self.output.warning(command)
             self.run(command)
 
@@ -926,12 +924,13 @@ class BoostConan(ConanFile):
             self.output.warning(command)
             self.run(command)
 
-    def build(self):
+    def _patch_sources(self):
+        apply_conandata_patches(self)
         stacktrace_jamfile = os.path.join(self.source_folder, "libs", "stacktrace", "build", "Jamfile.v2")
-        if cross_building(self, skip_x64_x86=True):
+        if not can_run(self):
             # When cross building, do not attempt to run the test-executable (assume they work)
             replace_in_file(self, stacktrace_jamfile, "$(>) > $(<)", "echo \"\" > $(<)", strict=False)
-        if self._with_stacktrace_backtrace and self.settings.os != "Windows" and not cross_building(self):
+        if self._with_stacktrace_backtrace and self.settings.os != "Windows" and can_run(self):
             # When libbacktrace is shared, give extra help to the test-executable
             linker_var = "DYLD_LIBRARY_PATH" if self.settings.os == "Macos" else "LD_LIBRARY_PATH"
             libbacktrace_libdir = self.dependencies["libbacktrace"].cpp_info.aggregated_components().libdirs[0]
@@ -951,7 +950,7 @@ class BoostConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                                   "static __thread", "/* static __thread */")
         replace_in_file(self, os.path.join(self.source_folder, "tools", "build", "src", "tools", "gcc.jam"),
-                              "local generic-os = [ set.difference $(all-os) : aix darwin vxworks solaris osf hpux ] ;",
+                              "local generic-os = [ set.differenExceptionce $(all-os) : aix darwin vxworks solaris osf hpux ] ;",
                               "local generic-os = [ set.difference $(all-os) : aix darwin vxworks solaris osf hpux iphone appletv ] ;",
                               strict=False)
         replace_in_file(self, os.path.join(self.source_folder, "tools", "build", "src", "tools", "gcc.jam"),
@@ -976,6 +975,8 @@ class BoostConan(ConanFile):
 
         self._clean()
 
+    def build(self):
+        self._patch_sources()
         if self._use_bcp:
             self._build_bcp()
             self._run_bcp()
@@ -985,7 +986,6 @@ class BoostConan(ConanFile):
         # JOIN ALL FLAGS
         b2_flags = " ".join(self._build_flags)
         full_command = f"{self._b2_exe} {b2_flags}"
-        # -d2 is to print more debug info and avoid travis timing out without output
         sources = os.path.join(self.source_folder, self._bcp_dir) if self._use_bcp else self.source_folder
         full_command += f' --debug-configuration --build-dir="{self.build_folder}"'
         self.output.warning(full_command)
@@ -1163,7 +1163,7 @@ class BoostConan(ConanFile):
 
         cppstd_version = cppstd_flag(self)
         flags.append(f"cxxstd={cppstd_version.lstrip("gnu")}")
-        if "gnu" in safe_cppstd:
+        if "gnu" in cppstd_version:
             flags.append("cxxstd-dialect=gnu")
 
         # LDFLAGS
@@ -1274,7 +1274,7 @@ class BoostConan(ConanFile):
             f"--prefix={self.package_folder}",
             f"-j{build_jobs(self)}",
             "--abbreviate-paths",
-            f"-d{self.options.debug_level}",
+            self._debug_flag,
         ])
         return flags
 
