@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.gnu import AutotoolsToolchain, AutotoolsDeps, Autotools
+from conan.tools.gnu import AutotoolsToolchain, Autotools
 from conan.tools.files import get, chdir, copy, export_conandata_patches, apply_conandata_patches, mkdir, rename
 from conan.tools.layout import basic_layout
 from conan.tools.build import cross_building
@@ -32,10 +32,6 @@ class MpdecimalConan(ConanFile):
         "cxx": True,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "setings_build", self.settings)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -57,20 +53,16 @@ class MpdecimalConan(ConanFile):
         if is_msvc(self) and self.settings.arch not in ("x86", "x86_64"):
             raise ConanInvalidConfiguration(
                 f"{self.ref} currently does not supported {self.settings.arch}. Contributions are welcomed")
-        if self.options.cxx:
+        if self.options.cxx and Version(self.version) < "2.5.1":
             if self.options.shared and self.settings.os == "Windows":
                 raise ConanInvalidConfiguration(
                     "A shared libmpdec++ is not possible on Windows (due to non-exportable thread local storage)")
 
     def build_requirements(self):
-        if is_msvc(self):
-            self.tool_requires("automake/1.16.5")
-        else:
-            # required to support windows as a build machine
-            if self._settings_build.os == "Windows":
-                self.win_bash = True
-                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-                    self.tool_requires("msys2/cci.latest")
+        if not is_msvc(self) and self.settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -102,13 +94,9 @@ class MpdecimalConan(ConanFile):
 
             tc = AutotoolsToolchain(self)
             tc.configure_args.append("--enable-cxx" if self.options.cxx else "--disable-cxx")
-            tc.generate()
-
-            deps = AutotoolsDeps(self)
-            if is_apple_os(self) and self.settings.arch == "armv8":
-                deps.environment.append("LDFLAGS", ["-arch arm64"])
-                deps.environment.append("LDXXFLAGS", ["-arch arm64"])
-            deps.generate()
+            tc_env = tc.environment()
+            tc_env.append("LDXXFLAGS", ["$LDFLAGS"])
+            tc.generate(tc_env)
 
     @property
     def _dist_folder(self):
@@ -145,13 +133,16 @@ class MpdecimalConan(ConanFile):
         copy(self, "mpdecimal.h", libmpdec_folder, dist_folder)
         if self.options.shared:
             copy(self, f"libmpdec-{self.version}.dll", libmpdec_folder, dist_folder)
-            copy(self, f"libmpdec-{self.version}.dll.exp", libmpdec_folder, dist_folder)
             copy(self, f"libmpdec-{self.version}.dll.lib", libmpdec_folder, dist_folder)
         else:
             copy(self, f"libmpdec-{self.version}.lib", libmpdec_folder, dist_folder)
         if self.options.cxx:
+            if self.options.shared:
+                copy(self, f"libmpdec++-{self.version}.dll", libmpdecpp_folder, dist_folder)
+                copy(self, f"libmpdec++-{self.version}.dll.lib", libmpdecpp_folder, dist_folder)
+            else:
+                copy(self, f"libmpdec++-{self.version}.lib", libmpdecpp_folder, dist_folder)
             copy(self, "decimal.hh", libmpdecpp_folder, dist_folder)
-            copy(self, f"libmpdec++-{self.version}.lib", libmpdecpp_folder, dist_folder)
 
     @property
     def _shared_suffix(self):
@@ -219,7 +210,10 @@ class MpdecimalConan(ConanFile):
     def package_info(self):
         lib_pre_suf = ("", "")
         if is_msvc(self):
-            lib_pre_suf = ("lib", f"-{self.version}")
+            if self.options.shared:
+                lib_pre_suf = ("lib", f"-{self.version}.dll")
+            else:
+                lib_pre_suf = ("lib", f"-{self.version}")
         elif self.settings.os == "Windows":
             if self.options.shared:
                 lib_pre_suf = ("", ".dll")
@@ -240,4 +234,4 @@ class MpdecimalConan(ConanFile):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.components["libmpdecimal++"].system_libs = ["pthread"]
             if self.options.shared and Version(self.version) >= "2.5.1":
-                self.cpp_info.components["libmpdecimal"].defines = ["MPDECIMALXX_DLL"]
+                self.cpp_info.components["libmpdecimal++"].defines = ["MPDECIMALXX_DLL"]
