@@ -389,7 +389,7 @@ class BoostConan(ConanFile):
             # https://github.com/boostorg/process/issues/408
             # https://github.com/boostorg/process/pull/409
             if Version(self.version) == "1.86.0" and is_msvc(self):
-                setattr(self.options, "without_process", True)
+                self._disable_component("process")
 
     @property
     def _configure_options(self):
