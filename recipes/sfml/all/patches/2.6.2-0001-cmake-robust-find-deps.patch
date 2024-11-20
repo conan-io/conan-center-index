@@ -30,7 +30,7 @@ index 8158365..a2e029a 100644
 -                      PRIVATE VORBIS FLAC)
 +                      PRIVATE Vorbis::vorbisenc Vorbis::vorbisfile FLAC::FLAC minimp3::minimp3)
 diff --git a/src/SFML/Graphics/CMakeLists.txt b/src/SFML/Graphics/CMakeLists.txt
-index a939a98..5206fc6 100644
+index a939a98..6f16273 100644
 --- a/src/SFML/Graphics/CMakeLists.txt
 +++ b/src/SFML/Graphics/CMakeLists.txt
 @@ -93,7 +93,8 @@ sfml_add_library(sfml-graphics
@@ -43,3 +43,12 @@ index a939a98..5206fc6 100644
  
  # glad sources
  target_include_directories(sfml-graphics SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/extlibs/headers/glad/include")
+@@ -123,7 +124,7 @@ if((SFML_COMPILER_MSVC AND SFML_MSVC_VERSION GREATER_EQUAL 14) OR (SFML_COMPILER
+     target_link_libraries(sfml-graphics PRIVATE legacy_stdio_definitions.lib)
+ endif()
+ 
+-sfml_find_package(Freetype INCLUDE "FREETYPE_INCLUDE_DIRS" LINK "FREETYPE_LIBRARY")
++find_package(Freetype REQUIRED)
+ target_link_libraries(sfml-graphics PRIVATE Freetype)
+ 
+ # add preprocessor symbols
