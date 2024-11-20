@@ -1,0 +1,39 @@
+--- a/src/Makefile.shlib
++++ b/src/Makefile.shlib
+@@ -384,7 +384,10 @@ else
+ # Win32 case
+ 
+ # See notes in src/backend/parser/Makefile about the following two rules
+-$(stlib): $(shlib)
++$(stlib): $(OBJS) | $(SHLIB_PREREQS)
++	rm -f $@
++	$(LINK.static) $@ $^
++	$(RANLIB) $@
+ 	touch $@
+ 
+ # XXX A backend that loads a module linked with libgcc_s_dw2-1.dll will exit
+@@ -397,12 +400,12 @@ $(stlib): $(shlib)
+ # Else we just use --export-all-symbols.
+ ifeq (,$(SHLIB_EXPORTS))
+ $(shlib): $(OBJS) | $(SHLIB_PREREQS)
+-	$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--export-all-symbols -Wl,--out-implib=$(stlib)
++	$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--export-all-symbols -Wl,--out-implib=lib$(NAME).dll.a
+ else
+ DLL_DEFFILE = lib$(NAME)dll.def
+ 
+ $(shlib): $(OBJS) $(DLL_DEFFILE) | $(SHLIB_PREREQS)
+-	$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(DLL_DEFFILE) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--out-implib=$(stlib)
++	$(CC) $(CFLAGS)  -shared -static-libgcc -o $@  $(OBJS) $(DLL_DEFFILE) $(LDFLAGS) $(LDFLAGS_SL) $(SHLIB_LINK) $(LIBS) -Wl,--out-implib=lib$(NAME).dll.a
+ endif
+ 
+ endif # PORTNAME == cygwin
+@@ -505,6 +508,9 @@ endif # not aix
+ ifneq (,$(findstring $(PORTNAME),win32 cygwin))
+ 	$(INSTALL_SHLIB) $< '$(DESTDIR)$(bindir)/$(shlib)'
+ endif
++ifneq (,$(findstring $(PORTNAME),win32))
++	$(INSTALL_SHLIB) $< '$(DESTDIR)$(libdir)/lib$(NAME).dll.a'
++endif
+ else # no soname
+ 	$(INSTALL_SHLIB) $< '$(DESTDIR)$(pkglibdir)/$(shlib)'
+ endif
