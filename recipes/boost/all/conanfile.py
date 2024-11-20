@@ -270,10 +270,7 @@ class BoostConan(ConanFile):
 
     @property
     def _has_coroutine_supported(self):
-        cppstd = self.settings.compiler.get_safe("cppstd")
-        cppstd_20_supported = True
-        if cppstd:
-            cppstd_20_supported = valid_min_cppstd(self, 20)
+        cppstd_20_supported = valid_min_cppstd(self, 20)
         # https://en.cppreference.com/w/cpp/compiler_support#cpp20
         # https://releases.llvm.org/14.0.0/tools/clang/docs/ReleaseNotes.html#clang-format: before is experimental header
         # https://gcc.gnu.org/gcc-10/changes.html: requires -fcoroutines
