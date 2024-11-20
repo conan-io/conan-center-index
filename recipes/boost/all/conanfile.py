@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, to_apple_arch, XCRun
-from conan.tools.build import build_jobs, cross_building, valid_min_cppstd, supported_cppstd, can_run, cppstd_flag
+from conan.tools.build import build_jobs, cross_building, valid_min_cppstd, can_run, cppstd_flag
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches, chdir, collect_libs, copy, export_conandata_patches,
@@ -148,7 +148,6 @@ class BoostConan(ConanFile):
     default_options.update({f"without_{_name}": False for _name in CONFIGURE_OPTIONS})
     default_options.update({f"without_{_name}": True for _name in ("graph_parallel", "mpi", "python")})
 
-    short_paths = True
     no_copy_source = True
     _cached_dependencies = None
 
@@ -157,40 +156,6 @@ class BoostConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    @property
-    def _min_compiler_version_default_cxx11(self):
-        """ Minimum compiler version having c++ standard >= 11
-        """
-        return {
-            "gcc": 6,
-            "clang": 6,
-            "apple-clang": 99,  # still uses C++98 by default. XCode does not reflect apple-clang
-            "msvc": 190,  # guess
-        }.get(str(self.settings.compiler))
-
-    @property
-    def _min_compiler_version_default_cxx14(self):
-        """ Minimum compiler version having c++ standard >= 14
-        https://gcc.gnu.org/gcc-6/changes.html
-        https://releases.llvm.org/6.0.0/tools/clang/docs/ReleaseNotes.html#id9
-        https://learn.microsoft.com/en-us/cpp/build/reference/std-specify-language-standard-version?view=msvc-150#remarks
-        """
-        return {
-            "gcc": 6,
-            "clang": 6,
-            "apple-clang": 99,  # still uses C++98 by default. XCode does not reflect apple-clang
-            "msvc": 191,  # guess
-        }.get(str(self.settings.compiler))
-
-    @property
-    def _min_compiler_version_default_cxx20(self):
-        return {
-            "gcc": 99,
-            "clang": 99,
-            "apple-clang": 99,
-            "msvc": 999,
-        }.get(str(self.settings.compiler))
 
     @property
     def _has_coroutine_supported(self):
