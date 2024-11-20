@@ -3,6 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
+from conan.tools.apple import fix_apple_shared_install_name
 import os
 
 required_conan_version = ">=1.53.0"
@@ -86,6 +87,7 @@ class CapstoneConan(ConanFile):
         copy(self, "LICENSE*.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        fix_apple_shared_install_name(self)
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
