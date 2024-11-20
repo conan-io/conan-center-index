@@ -48,7 +48,7 @@ class WhisperCppConan(ConanFile):
         "no_fma": False,
         "no_f16c": False,
         "no_accelerate": False,
-        "metal": True,
+        "metal": Version(self.version) >= "1.7.0",
         "metal_ndebug": False,
         "with_coreml": False,
         "coreml_allow_fallback": False,
