@@ -66,10 +66,7 @@ class LibpqConan(ConanFile):
 
     def requirements(self):
         if self.options.with_openssl:
-            if Version(self.version) < "13.5":
-                self.requires("openssl/1.1.1w")
-            else:
-                self.requires("openssl/[>=1.1 <4]")
+            self.requires("openssl/[>=1.1 <4]")
 
     def build_requirements(self):
         if is_msvc(self):
@@ -271,18 +268,16 @@ class LibpqConan(ConanFile):
             if is_msvc(self):
                 self.cpp_info.components["pgport"].libs = ["libpgport"]
                 self.cpp_info.components["pq"].requires.append("pgport")
-                if Version(self.version) >= "12":
-                    self.cpp_info.components["pgcommon"].libs = ["libpgcommon"]
-                    self.cpp_info.components["pq"].requires.append("pgcommon")
+                self.cpp_info.components["pgcommon"].libs = ["libpgcommon"]
+                self.cpp_info.components["pq"].requires.append("pgcommon")
             else:
                 self.cpp_info.components["pgcommon"].libs = ["pgcommon"]
                 self.cpp_info.components["pq"].requires.append("pgcommon")
-                if Version(self.version) >= "12":
-                    self.cpp_info.components["pgcommon"].libs.append("pgcommon_shlib")
-                    self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
-                    if self.settings.os == "Windows":
-                        self.cpp_info.components["pgport"].system_libs = ["ws2_32"]
-                    self.cpp_info.components["pgcommon"].requires.append("pgport")
+                self.cpp_info.components["pgcommon"].libs.append("pgcommon_shlib")
+                self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
+                if self.settings.os == "Windows":
+                    self.cpp_info.components["pgport"].system_libs = ["ws2_32"]
+                self.cpp_info.components["pgcommon"].requires.append("pgport")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["pq"].system_libs = ["pthread"]
