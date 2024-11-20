@@ -35,8 +35,12 @@ class FastPFORConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    @property
+    def _has_simde(self):
+        return "arm" in str(self.settings.arch)
+
     def requirements(self):
-        if "arm" in str(self.settings.arch):
+        if self._has_simde:
             self.requires("simde/0.8.0", transitive_headers=True)
 
     def validate(self):
@@ -51,13 +55,9 @@ class FastPFORConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["WITH_TEST"] = False
-        if "arm" in str(self.settings.arch):
+        if self._has_simde:
             tc.cache_variables["SUPPORT_NEON"] = True
             tc.preprocessor_definitions["SIMDE_ENABLE_NATIVE_ALIASES"] = 1
-            if is_apple_os(self):
-                tc.variables["CMAKE_OSX_ARCHITECTURES"] = {
-                    "armv8": "arm64",
-                }.get(str(self.settings.arch), str(self.settings.arch))
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -84,5 +84,5 @@ class FastPFORConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
-        if str(self.settings.arch).startswith("armv8"):
+        if self._has_simde:
             self.cpp_info.defines = ["SIMDE_ENABLE_NATIVE_ALIASES"]
