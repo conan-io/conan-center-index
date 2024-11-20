@@ -166,8 +166,6 @@ class WhisperCppConan(ConanFile):
         if is_apple_os(self):
             if self.options.no_accelerate:
                 tc.variables["WHISPER_NO_ACCELERATE"] = True
-            if not self.options.get_safe("metal"):
-                tc.variables["WHISPER_METAL"] = False
             if self.options.get_safe("metal_ndebug"):
                 tc.variables["WHISPER_METAL_NDEBUG"] = True
             if self.options.with_coreml:
@@ -175,7 +173,7 @@ class WhisperCppConan(ConanFile):
                 if self.options.coreml_allow_fallback:
                     tc.variables["WHISPER_COREML_ALLOW_FALLBACK"] = True
             if self._is_metal_option_available:
-                tc.variables["WHISPER_METAL"] = self.options.metal
+                tc.variables["GGML_METAL" if Version(self.version) >= "1.7.0" else "WHISPER_METAL"] = self.options.metal
         else:
             if self.options.with_blas:
                 if Version(self.version) >= "1.4.2":
@@ -198,7 +196,9 @@ class WhisperCppConan(ConanFile):
         copy(self, "*", os.path.join(self.source_folder, "models"), os.path.join(self.package_folder, "res", "models"))
 
     def package_info(self):
-        self.cpp_info.libs = ["whisper", "ggml"]
+        self.cpp_info.libs = ["whisper"]
+        if Version(self.version) >= "1.7.0":
+            self.cpp_info.libs.append("ggml")
         self.cpp_info.resdirs = ["res"]
         self.cpp_info.libdirs = ["lib", "lib/static"]
 
