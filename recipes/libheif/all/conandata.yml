@@ -1,7 +1,7 @@
 sources:
-  "1.19.4":
-    url: "https://github.com/strukturag/libheif/releases/download/v1.19.4/libheif-1.19.4.tar.gz"
-    sha256: "44c35b80596561ab531556175309f5f0ab3fcf7a7517dd933940574063f2af85"
+  "1.19.5":
+    url: "https://github.com/strukturag/libheif/releases/download/v1.19.5/libheif-1.19.5.tar.gz"
+    sha256: "d3cf0a76076115a070f9bc87cf5259b333a1f05806500045338798486d0afbaf"
   "1.19.0":
     url: "https://github.com/strukturag/libheif/releases/download/v1.19.0/libheif-1.19.0.tar.gz"
     sha256: "c0323638557994791c7bf939ee9752e8a0f3f5ce4f07328daefa0159e3530eb4"
