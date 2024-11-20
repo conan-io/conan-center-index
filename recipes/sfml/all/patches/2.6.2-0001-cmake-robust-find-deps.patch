@@ -1,13 +1,8 @@
 diff --git a/src/SFML/Audio/CMakeLists.txt b/src/SFML/Audio/CMakeLists.txt
-index 8158365..0159be1 100644
+index 8158365..a2e029a 100644
 --- a/src/SFML/Audio/CMakeLists.txt
 +++ b/src/SFML/Audio/CMakeLists.txt
-@@ -69,12 +69,12 @@ endif()
- 
- # find external libraries
- find_package(OpenAL REQUIRED)
--sfml_find_package(VORBIS INCLUDE "VORBIS_INCLUDE_DIRS" LINK "VORBIS_LIBRARIES")
-+sfml_find_package(Vorbis INCLUDE "VORBIS_INCLUDE_DIRS" LINK "VORBIS_LIBRARIES")
+@@ -73,8 +73,8 @@ sfml_find_package(VORBIS INCLUDE "VORBIS_INCLUDE_DIRS" LINK "VORBIS_LIBRARIES")
  sfml_find_package(FLAC INCLUDE "FLAC_INCLUDE_DIR" LINK "FLAC_LIBRARY")
  
  # avoids warnings in vorbisfile.h
@@ -35,7 +30,7 @@ index 8158365..0159be1 100644
 -                      PRIVATE VORBIS FLAC)
 +                      PRIVATE Vorbis::vorbisenc Vorbis::vorbisfile FLAC::FLAC minimp3::minimp3)
 diff --git a/src/SFML/Graphics/CMakeLists.txt b/src/SFML/Graphics/CMakeLists.txt
-index a939a98..bd6a89b 100644
+index a939a98..5206fc6 100644
 --- a/src/SFML/Graphics/CMakeLists.txt
 +++ b/src/SFML/Graphics/CMakeLists.txt
 @@ -93,7 +93,8 @@ sfml_add_library(sfml-graphics
@@ -48,14 +43,3 @@ index a939a98..bd6a89b 100644
  
  # glad sources
  target_include_directories(sfml-graphics SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/extlibs/headers/glad/include")
-@@ -123,8 +124,8 @@ if((SFML_COMPILER_MSVC AND SFML_MSVC_VERSION GREATER_EQUAL 14) OR (SFML_COMPILER
-     target_link_libraries(sfml-graphics PRIVATE legacy_stdio_definitions.lib)
- endif()
- 
--sfml_find_package(Freetype INCLUDE "FREETYPE_INCLUDE_DIRS" LINK "FREETYPE_LIBRARY")
--target_link_libraries(sfml-graphics PRIVATE Freetype)
-+find_package(freetype REQUIRED)
-+target_link_libraries(sfml-graphics PRIVATE freetype)
- 
- # add preprocessor symbols
- target_compile_definitions(sfml-graphics PRIVATE "STBI_FAILURE_USERMSG")

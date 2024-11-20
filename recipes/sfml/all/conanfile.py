@@ -99,6 +99,12 @@ class SfmlConan(ConanFile):
             tc.variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
         tc.generate()
         deps = CMakeDeps(self)
+        if Version(self.version) >= "2.6.2":
+            if self.options.audio:
+                deps.set_property("vorbis", "cmake_file_name", "VORBIS")
+            if self.options.graphics:
+                deps.set_property("freetype", "cmake_file_name", "Freetype")
+                deps.set_property("freeimage", "cmake_target_name", "Freetype")
         deps.generate()
 
     def build(self):
