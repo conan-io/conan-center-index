@@ -193,18 +193,6 @@ class BoostConan(ConanFile):
         }.get(str(self.settings.compiler))
 
     @property
-    def _has_cppstd_11_supported(self):
-        return valid_min_cppstd(self, 11)
-
-    @property
-    def _has_cppstd_14_supported(self):
-        return valid_min_cppstd(self, 14)
-
-    @property
-    def _has_cppstd_20_supported(self):
-        return valid_min_cppstd(self, 20)
-
-    @property
     def _has_coroutine_supported(self):
         cppstd_20_supported = valid_min_cppstd(self, 20)
         # https://en.cppreference.com/w/cpp/compiler_support#cpp20
@@ -317,9 +305,9 @@ class BoostConan(ConanFile):
 
         # nowide requires a c++11-able compiler + movable std::fstream: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
         # json requires a c++11-able compiler: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
-        if Version(self.version) >= "1.85.0" and not self._has_cppstd_14_supported:
+        if Version(self.version) >= "1.85.0" and not valid_min_cppstd(self, 14):
             self.options.without_math = True
-        if Version(self.version) >= "1.86.0" and not self._has_cppstd_14_supported:
+        if Version(self.version) >= "1.86.0" and not valid_min_cppstd(self, 14):
             self.options.without_graph = True
 
         # iconv is off by default on Windows and Solaris
