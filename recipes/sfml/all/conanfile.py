@@ -104,7 +104,7 @@ class SfmlConan(ConanFile):
                 deps.set_property("vorbis", "cmake_file_name", "VORBIS")
             if self.options.graphics:
                 deps.set_property("freetype", "cmake_file_name", "Freetype")
-                deps.set_property("freeimage", "cmake_target_name", "Freetype")
+                deps.set_property("freetype", "cmake_target_name", "Freetype")
         deps.generate()
 
     def build(self):
