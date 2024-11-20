@@ -103,10 +103,15 @@ class BoostConan(ConanFile):
         "i18n_backend_icu": [True, False],
         "visibility": ["global", "protected", "hidden"],
         "addr2line_location": ["ANY"],
-        "with_stacktrace_backtrace": [True, False],
         "buildid": [None, "ANY"],
         "python_buildid": [None, "ANY"],
         "system_use_utf8": [True, False],
+        "with_stacktrace_backtrace": [True, False],
+        "with_stacktrace_from_exception": [True, False],
+        "with_stacktrace_windbg": [True, False],
+        "with_stacktrace_windbg_cached": [True, False],
+        "with_stacktrace_noop": [True, False],
+        "with_stacktrace_basic": [True, False],
     }
     options.update({f"without_{_name}": [True, False] for _name in CONFIGURE_OPTIONS})
 
@@ -140,10 +145,15 @@ class BoostConan(ConanFile):
         "i18n_backend_icu": False,
         "visibility": "hidden",
         "addr2line_location": "/usr/bin/addr2line",
-        "with_stacktrace_backtrace": True,
         "buildid": None,
         "python_buildid": None,
         "system_use_utf8": False,
+        "with_stacktrace_backtrace": True,
+        "with_stacktrace_from_exception": True,
+        "with_stacktrace_windbg": True,
+        "with_stacktrace_windbg_cached": True,
+        "with_stacktrace_noop": True,
+        "with_stacktrace_basic": True,
     }
     default_options.update({f"without_{_name}": False for _name in CONFIGURE_OPTIONS})
     default_options.update({f"without_{_name}": True for _name in ("graph_parallel", "mpi", "python")})
@@ -394,6 +404,11 @@ class BoostConan(ConanFile):
 
         if self.options.get_safe("without_stacktrace", True):
             self.options.rm_safe("with_stacktrace_backtrace")
+            self.options.rm_safe("with_stacktrace_from_exception")
+            self.options.rm_safe("with_stacktrace_windbg")
+            self.options.rm_safe("with_stacktrace_windbg_cached")
+            self.options.rm_safe("with_stacktrace_noop")
+            self.options.rm_safe("with_stacktrace_basic")
 
         if self.options.without_fiber:
             self.options.rm_safe("numa")
@@ -978,6 +993,8 @@ class BoostConan(ConanFile):
 
     @property
     def _build_flags(self):
+        on_off = lambda value: "on" if value else "off"
+
         flags = self._build_cross_flags
 
         # Stop at the first error. No need to continue building.
@@ -1019,6 +1036,12 @@ class BoostConan(ConanFile):
         else:
             flags.append("boost.locale.iconv=off")
             flags.append("--disable-iconv")
+
+        flags.append(f"boost.stacktrace.from_exception={on_off(self.options.get_safe("with_stacktrace_from_exception"))}")
+        #flags.append(f"boost.stacktrace.windbg={on_off(self.options.get_safe("with_stacktrace_windbg"))}")
+        #flags.append(f"boost.stacktrace.windbg_cached={on_off(self.options.get_safe("with_stacktrace_windbg_cached"))}")
+        #flags.append(f"boost.stacktrace.noop={on_off(self.options.get_safe("with_stacktrace_noop"))}")
+        #flags.append(f"boost.stacktrace.basic={on_off(self.options.get_safe("with_stacktrace_basic"))}")
 
         def add_defines(library):
             for define in self.dependencies[library].cpp_info.aggregated_components().defines:
