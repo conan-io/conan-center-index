@@ -88,6 +88,6 @@ class KeystoneConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["keystone"]
         if is_msvc(self) and self.options.shared:
-            self.cpp_info.bindirs = ["lib", "bin"]
+            self.cpp_info.bindirs = ["lib"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["shell32", "ole32", "uuid"]
