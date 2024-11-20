@@ -62,7 +62,7 @@ class SDLMixerConan(ConanFile):
             del self.options.fPIC
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.tinymidi
-        if not (self.settings.os == "Windows" or is_apple_os(self)):
+        if not (self.settings.os == "Windows" or self.settings.os == "Macos"):
             del self.options.nativemidi
 
     def configure(self):
