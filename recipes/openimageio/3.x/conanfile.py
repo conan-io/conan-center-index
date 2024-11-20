@@ -128,9 +128,6 @@ class OpenImageIOConan(ConanFile):
         # TODO: R3DSDK dependency
         # TODO: Nuke dependency
 
-        # TODO: Temporary, remove before merge
-        self.requires("lcms/2.16", override=True)
-
     def build_requirements(self):
         # A minimum cmake version is now required that is reasonably new
         self.build_requires("cmake/[>=3.18.2]")
