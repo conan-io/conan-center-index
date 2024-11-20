@@ -174,6 +174,3 @@ class WaylandConan(ConanFile):
 
             self.cpp_info.components["wayland-egl-backend"].set_property("pkg_config_name", "wayland-egl-backend")
             self.cpp_info.components["wayland-egl-backend"].set_property("component_version", "3")
-
-            # TODO: to remove in conan v2
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
