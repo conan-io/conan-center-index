@@ -10,3 +10,6 @@ patches:
     - patch_file: "patches/0002-libfru-fix-build-on-MacOS.patch"
       patch_description: "Fixes build on MacOS"
       patch_type: "portability"
+    - patch_file: "patches/0003-let-conan-choose-optimization-flags.patch"
+      patch_description: "Let Conan choose optimization flags"
+      patch_type: "conan"

@@ -5,6 +5,8 @@ from conan.tools.files import get, rmdir, apply_conandata_patches, export_conand
 from conan.tools.microsoft import is_msvc
 import os
 
+required_conan_version = ">=2.1"
+
 class FrugenConan(ConanFile):
     name = "frugen"
     description = "IPMI FRU Information generator / editor tool and library"
@@ -28,7 +30,7 @@ class FrugenConan(ConanFile):
 
     def validate(self):
         if is_msvc(self):
-            raise ConanInvalidConfiguration("Unsupported compiler. This package currently does not support MSVC")
+            raise ConanInvalidConfiguration("MSVC not supported by the library")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -58,6 +60,8 @@ class FrugenConan(ConanFile):
             tc.cache_variables["BINARY_STATIC"] = not self.options.shared
         tc.cache_variables["BINARY_32BIT"] = False
         tc.cache_variables["DEBUG_OUTPUT"] = False
+        # Dont let CMake find doxygen and try to build documentation
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Doxygen"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
