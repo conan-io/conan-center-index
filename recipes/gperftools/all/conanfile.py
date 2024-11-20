@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os, XCRun
-from conan.tools.build import cross_building, check_min_cppstd
+from conan.tools.build import cross_building, check_min_cppstd, stdcpp_library
 from conan.tools.cmake import cmake_layout
 from conan.tools.env import VirtualRunEnv
 from conan.tools.files import get, copy, rm, rmdir, replace_in_file
@@ -59,7 +59,19 @@ class GperftoolsConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 11
+        return "11" if Version(self.version) < "2.16" else "17"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "17": {
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "12",
+            "Visual Studio": "16",
+            "msvc": "192",
+            },
+        }.get(self._min_cppstd, {})
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -93,6 +105,11 @@ class GperftoolsConan(ConanFile):
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
         if Version(self.version) >= "2.11.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration(f"{self.ref} does not support gcc < 7.")
@@ -184,12 +201,7 @@ class GperftoolsConan(ConanFile):
         autotools.make()
 
     def package(self):
-        copy(
-            self,
-            pattern="COPYING",
-            dst=os.path.join(self.package_folder, "licenses"),
-            src=self.source_folder,
-        )
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         autotools = Autotools(self)
         autotools.install()
 
@@ -200,6 +212,9 @@ class GperftoolsConan(ConanFile):
 
     def _add_component(self, lib):
         self.cpp_info.components[lib].libs = [lib]
+        self.cpp_info.components[lib].set_property("pkg_config_name", f"lib{lib}")
+        if stdcpp_library(self):
+            self.cpp_info.components[lib].system_libs.append(stdcpp_library(self))
 
     def package_info(self):
         self._add_component("tcmalloc_minimal")
@@ -217,6 +232,8 @@ class GperftoolsConan(ConanFile):
         for component in self.cpp_info.components.values():
             if self.settings.os in ["Linux", "FreeBSD"]:
                 component.system_libs.extend(["pthread", "m"])
+                component.cflags.append("-pthread")
+                component.cxxflags.append("-pthread")
             if self.options.get_safe("enable_libunwind"):
                 component.requires.append("libunwind::libunwind")
 

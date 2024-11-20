@@ -14,18 +14,18 @@ class ObserverPtrLiteConan(ConanFile):
                     std::experimental::observer_ptr for C++98 and later.")
     topics = ("cpp98", "cpp11", "cpp14", "cpp17")
     license = "BSL-1.0"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-
-    def package_id(self):
-        self.info.clear()
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def package_id(self):
+        self.info.clear()
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -38,9 +38,7 @@ class ObserverPtrLiteConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "observer-ptr-lite")
         self.cpp_info.set_property("cmake_target_name", "nonstd::observer-ptr-lite")
         self.cpp_info.bindirs = []
-        self.cpp_info.frameworkdirs = []
         self.cpp_info.libdirs = []
-        self.cpp_info.resdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "observer-ptr-lite"
@@ -51,6 +49,4 @@ class ObserverPtrLiteConan(ConanFile):
         self.cpp_info.components["observerptrlite"].names["cmake_find_package_multi"] = "observer-ptr-lite"
         self.cpp_info.components["observerptrlite"].set_property("cmake_target_name", "nonstd::observer-ptr-lite")
         self.cpp_info.components["observerptrlite"].bindirs = []
-        self.cpp_info.components["observerptrlite"].frameworkdirs = []
         self.cpp_info.components["observerptrlite"].libdirs = []
-        self.cpp_info.components["observerptrlite"].resdirs = []

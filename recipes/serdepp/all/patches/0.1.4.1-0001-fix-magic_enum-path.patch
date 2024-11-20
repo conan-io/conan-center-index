@@ -1,0 +1,26 @@
+diff --git a/include/serdepp/meta.hpp b/include/serdepp/meta.hpp
+index d0a607a..5e6674f 100644
+--- a/include/serdepp/meta.hpp
++++ b/include/serdepp/meta.hpp
+@@ -11,7 +11,7 @@
+ #include <type_traits>
+ #include <utility>
+ #include <string_view>
+-#include <magic_enum.hpp>
++#include <magic_enum/magic_enum.hpp>
+ #include <memory>
+ 
+ #ifndef __SERDEPP_META_HPP__
+diff --git a/include/serdepp/serializer.hpp b/include/serdepp/serializer.hpp
+index 2e984af..d8b7247 100644
+--- a/include/serdepp/serializer.hpp
++++ b/include/serdepp/serializer.hpp
+@@ -14,7 +14,7 @@
+ #include <variant>
+ #include <string_view>
+ #include <nameof.hpp>
+-#include <magic_enum.hpp>
++#include <magic_enum/magic_enum.hpp>
+ #include <functional>
+ #include <algorithm>
+ #include "serdepp/meta.hpp"

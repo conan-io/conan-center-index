@@ -10,13 +10,13 @@ required_conan_version = ">=1.50.0"
 class StbConan(ConanFile):
     name = "stb"
     description = "single-file public domain libraries for C/C++"
-    topics = ("stb", "single-file")
+    license = ("Unlicense", "MIT")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/nothings/stb"
-    license = ("Unlicense", "MIT")
+    topics = ("stb", "single-file", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-
     options = {
         "with_deprecated": [True, False],
     }
@@ -39,14 +39,17 @@ class StbConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.clear()
+        # Can't call self.info.clear() because options contribute to package id
+        self.info.settings.clear()
+        self.info.requires.clear()
+        try:
+            # conan v2 specific
+            self.info.conf.clear()
+        except AttributeError:
+            pass
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
-
-    def build(self):
-        pass
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))

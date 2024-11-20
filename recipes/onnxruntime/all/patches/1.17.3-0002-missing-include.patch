@@ -1,0 +1,12 @@
+diff --git a/include/onnxruntime/core/graph/graph.h b/include/onnxruntime/core/graph/graph.h
+index 22827d43b2..f9e5fd56d3 100644
+--- a/include/onnxruntime/core/graph/graph.h
++++ b/include/onnxruntime/core/graph/graph.h
+@@ -6,6 +6,7 @@
+ #include <functional>
+ #include <limits>
+ #include <memory>
++#include <optional>
+ #include <string>
+ #include <type_traits>
+ #include <unordered_map>

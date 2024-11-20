@@ -46,13 +46,13 @@ class LogrConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fmt/9.1.0")
+        self.requires("fmt/10.2.0")
         if self.options.backend == "spdlog":
-            self.requires("spdlog/1.11.0")
+            self.requires("spdlog/1.13.0")
         elif self.options.backend == "glog":
             self.requires("glog/0.6.0")
         elif self.options.backend in ["log4cplus", "log4cplus-unicode"]:
-            self.requires("log4cplus/2.0.5")
+            self.requires("log4cplus/2.1.1")
 
     def package_id(self):
         self.info.clear()

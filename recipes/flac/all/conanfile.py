@@ -1,7 +1,8 @@
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir, replace_in_file
 from conan.tools.scm import Version
 import os
 
@@ -55,7 +56,9 @@ class FlacConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_DOCS"] = False
+        tc.variables["BUILD_PROGRAMS"] = not is_apple_os(self) or self.settings.os == "Macos"
         tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
@@ -63,8 +66,13 @@ class FlacConan(ConanFile):
             envbuild = VirtualBuildEnv(self)
             envbuild.generate(scope="build")
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "src", "share", "getopt", "CMakeLists.txt"),
+                        "find_package(Intl)", "")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -100,7 +108,6 @@ class FlacConan(ConanFile):
                 self.cpp_info.components["libflac"].system_libs += ["m"]
 
         bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
         self.env_info.PATH.append(bin_path)
 
         # TODO: to remove in conan v2

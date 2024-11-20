@@ -1,4 +1,7 @@
 sources:
+  "2.4":
+    url: "https://github.com/KjellKod/g3log/archive/2.4.tar.gz"
+    sha256: "a240673f6dda17a8d4d5768b6741534e6863e6c4d786c3678e4fe687eb115902"
   "2.3":
     url: "https://github.com/KjellKod/g3log/archive/2.3.tar.gz"
     sha256: "a27dc3ff0d962cc6e0b4e60890b4904e664b0df16393d27e14c878d7de09b505"
@@ -14,9 +17,6 @@ sources:
   "1.3.3":
     url: "https://github.com/KjellKod/g3log/archive/1.3.3.tar.gz"
     sha256: "d8cae14e1508490145d710f10178b2da9b86ce03fb2428a684fff35576fe5d5c"
-  "1.3.2-86":
-    url: "https://github.com/KjellKod/g3log/archive/4000c5c899c0ae58b8b851f9b66e1a2ac0fe2bff.tar.gz"
-    sha256: "4572b723458fbe2b3bf620e2bd47ecfab2975c16369dc6390ffa27e177b33c88"
   "1.3.2":
     url: "https://github.com/KjellKod/g3log/archive/1.3.2.tar.gz"
     sha256: "0ed1983654fdd8268e051274904128709c3d9df8234acf7916e9015199b0b247"

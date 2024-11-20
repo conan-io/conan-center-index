@@ -13,11 +13,13 @@ class RapidjsonConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://rapidjson.org"
     license = "MIT"
+    package_type = "header-library"
+    package_id_embed_mode = "minor_mode"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     def layout(self):
-        basic_layout(self)
+        basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True,
@@ -33,6 +35,8 @@ class RapidjsonConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "RapidJSON")
         self.cpp_info.set_property("cmake_target_name", "rapidjson")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "RapidJSON"

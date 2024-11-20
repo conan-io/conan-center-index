@@ -1,4 +1,7 @@
 sources:
+  "2.2.7":
+    url: "https://sourceforge.net/projects/libdc1394/files/libdc1394-2/2.2.7/libdc1394-2.2.7.tar.gz"
+    sha256: "537ceb78dd3cef271a183f4a176191d1cecf85f025520e6bd3758b0e19e6609f"
   "2.2.6":
     url: "https://sourceforge.net/projects/libdc1394/files/libdc1394-2/2.2.6/libdc1394-2.2.6.tar.gz"
     sha256: "2b905fc9aa4eec6bdcf6a2ae5f5ba021232739f5be047dec8fe8dd6049c10fed"

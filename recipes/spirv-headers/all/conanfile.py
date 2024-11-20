@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.50.0"
@@ -13,6 +14,7 @@ class SpirvheadersConan(ConanFile):
     license = "MIT-KhronosGroup"
     topics = ("spirv", "spirv-v", "vulkan", "opengl", "opencl", "khronos")
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
     def layout(self):
@@ -22,12 +24,13 @@ class SpirvheadersConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["SPIRV_HEADERS_SKIP_EXAMPLES"] = True
+        if Version(self.version) > "1.3.275.0":
+            tc.variables["SPIRV_HEADERS_ENABLE_TESTS"] = False
         tc.generate()
 
     def build(self):

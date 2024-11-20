@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import check_min_vs, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -31,28 +30,31 @@ class LunaSVGConan(ConanFile):
     @property
     def _min_cppstd(self):
         if Version(self.version) <= "2.3.2":
-            return 14
-        else:
-            return 17
+            return "14"
+        if Version(self.version) <= "2.3.8":
+            return "17"
+        if Version(self.version) >= "3.0.0":
+            return "17"
+        return "11"
 
     @property
     def _compilers_minimum_version(self):
-        if self._min_cppstd == 14:
-            return {
+        return {
+            "14": {
                 "gcc": "5",
                 "clang": "3.5",
                 "apple-clang": "10",
                 "Visual Studio": "15",
                 "msvc": "191",
-            }
-        else:
-            return {
+            },
+            "17": {
                 "gcc": "7.1",
                 "clang": "7",
                 "apple-clang": "12.0",
                 "Visual Studio": "16",
                 "msvc": "192",
-            }
+            },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -71,8 +73,10 @@ class LunaSVGConan(ConanFile):
     def requirements(self):
         if Version(self.version) < "2.3.5":
             self.requires("plutovg/cci.20220103")
-        else:
+        elif Version(self.version) < "3.0.0":
             self.requires("plutovg/cci.20221030")
+        else:
+            self.requires("plutovg/0.0.7")
 
     def validate(self):
         if self.info.settings.compiler.cppstd:
@@ -89,8 +93,10 @@ class LunaSVGConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
+        if Version(self.version) < "2.4.1":
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
+        tc.variables["LUNASVG_BUILD_EXAMPLES"] = False
 
         tc = CMakeDeps(self)
         tc.generate()
@@ -106,7 +112,11 @@ class LunaSVGConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+
     def package_info(self):
         self.cpp_info.libs = ["lunasvg"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
+        if Version(self.version) >= "2.4.1" and not self.options.shared:
+            self.cpp_info.defines = ["LUNASVG_BUILD_STATIC"]
