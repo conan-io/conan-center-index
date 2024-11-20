@@ -1,8 +1,8 @@
+import os
 from conan import ConanFile
 from conan.errors import ConanException
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import chdir
 
 
 class TestPackageConan(ConanFile):
@@ -57,6 +57,8 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not can_run(self):
             return
-        for root, _, file in os.walk(self.cpp.build.bindirs[0]):
+        # for root, _, files in os.walk(self.cpp.build.bindirs[0]):
+        for file in os.listdir(self.cpp.build.bindirs[0]):
             if file.startswith("test_boost_"):
-                self.run(os.path.join(root, file), env="conanrun")
+                bin_path = os.path.join(self.cpp.build.bindirs[0], file)
+                self.run(bin_path, env="conanrun")
