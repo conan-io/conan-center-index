@@ -48,7 +48,7 @@ class WhisperCppConan(ConanFile):
         "no_fma": False,
         "no_f16c": False,
         "no_accelerate": False,
-        "metal": Version(self.version) >= "1.7.0",
+        "metal": True,
         "metal_ndebug": False,
         "with_coreml": False,
         "coreml_allow_fallback": False,
@@ -80,6 +80,8 @@ class WhisperCppConan(ConanFile):
     def config_options(self):
         if is_apple_os(self):
             del self.options.with_blas
+            if Version(self.version) < "1.7.0":
+                self.default_options.metal = False
         else:
             del self.options.metal
             del self.options.metal_ndebug
