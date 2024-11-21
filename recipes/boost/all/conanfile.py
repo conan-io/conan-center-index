@@ -373,6 +373,9 @@ class BoostConan(ConanFile):
             # https://github.com/boostorg/stacktrace/blob/boost-1.85.0/build/Jamfile.v2#L143
             return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
         elif Version(self.version) >= "1.86.0":
+            # https://github.com/boostorg/stacktrace/issues/196
+            if self.settings.os == "Windows" and self.settings.compiler == "gcc":
+                return False
             # https://github.com/boostorg/stacktrace/blob/boost-1.86.0/build/Jamfile.v2#L148
             return not self.options.header_only and not self.options.without_stacktrace
 
