@@ -8,16 +8,15 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 class EmbreeConan(ConanFile):
     name = "embree"
+    description = "Intel's collection of high-performance ray tracing kernels."
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("embree", "raytracing", "rendering")
-    description = "Intel's collection of high-performance ray tracing kernels."
     homepage = "https://embree.github.io/"
-
+    topics = ("embree", "raytracing", "rendering")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -29,20 +28,7 @@ class EmbreeConan(ConanFile):
         "shared": False,
         "fPIC": True
     }
-
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "11",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
+    implements = ["auto_shared_fpic"]
 
     @property
     def _has_sse_avx(self):
@@ -52,14 +38,6 @@ class EmbreeConan(ConanFile):
     def _has_neon(self):
         return "arm" in self.settings.arch
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -68,18 +46,13 @@ class EmbreeConan(ConanFile):
             self.requires("onetbb/2021.12.0")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
-
-        compiler_version = Version(self.settings.compiler.version)
-
+        check_min_cppstd(self, 14)
         # See https://github.com/RenderKit/embree/blob/master/CMakeLists.txt#L538
-        if self.settings.compiler == "apple-clang" and not self.options.shared and compiler_version >= "9.0":
+        if (
+            self.settings.compiler == "apple-clang"
+            and not self.options.shared
+            and Version(self.settings.compiler.version) >= "9.0"
+        ):
             raise ConanInvalidConfiguration(f"{self.ref} static with apple-clang >=9 and multiple ISA (simd) is not supported")
 
     def source(self):
@@ -91,7 +64,7 @@ class EmbreeConan(ConanFile):
         tc.variables["BUILD_TESTING"] = False
         tc.variables["EMBREE_INSTALL_DEPENDENCIES"] = False
         tc.variables["EMBREE_TUTORIALS"] = False
-        tc.variables["EMBREE_BACKFACE_CULLING"] = False 
+        tc.variables["EMBREE_BACKFACE_CULLING"] = False
         tc.variables["EMBREE_IGNORE_INVALID_RAYS"] = False
         tc.variables["EMBREE_ISPC_SUPPORT"] = False
         tc.variables["EMBREE_TASKING_SYSTEM"] = "INTERNAL" if is_apple_os(self) or self.settings.os == "Emscripten" else "TBB"
