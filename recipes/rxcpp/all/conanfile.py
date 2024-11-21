@@ -1,9 +1,11 @@
 from conan import ConanFile
-from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.1"
 
 
 class RxcppConan(ConanFile):
@@ -14,23 +16,25 @@ class RxcppConan(ConanFile):
     homepage = "https://github.com/ReactiveX/RxCpp"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "header-only"
     no_copy_source = True
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def package_id(self):
         self.info.clear()
 
     def layout(self):
         basic_layout(self, src_folder="src")
+    
+    def validate_build(self):
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) >= "14":
+            raise ConanInvalidConfiguration("This package can't be built for gcc >= 14. "
+                                            "You can compile it with a lower version and consume it later with your compiler.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
             destination=self.source_folder, strip_root=True)
 
     def build(self):
-        apply_conandata_patches(self)
         pass
 
     def package(self):
