@@ -269,6 +269,9 @@ class BoostConan(ConanFile):
         # stacktrace_backtrace not supported on Windows
         if self.settings.os == "Windows":
             del self.options.with_stacktrace_backtrace
+        # stacktrace_from_exception is available only for 1.85.0 and later
+        if Version(self.version) < "1.85.0":
+            del self.options.with_stacktrace_from_exception
 
         # nowide requires a c++11-able compiler + movable std::fstream: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
         # json requires a c++11-able compiler: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
@@ -367,10 +370,10 @@ class BoostConan(ConanFile):
     def _stacktrace_from_exception_available(self):
         if Version(self.version) == "1.85.0":
             # https://github.com/boostorg/stacktrace/blob/boost-1.85.0/build/Jamfile.v2#L143
-            return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows" and self.options.with_stacktrace_from_exception
+            return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
         elif Version(self.version) >= "1.86.0":
             # https://github.com/boostorg/stacktrace/blob/boost-1.86.0/build/Jamfile.v2#L148
-            return not self.options.header_only and not self.options.without_stacktrace and self.options.with_stacktrace_from_exception
+            return not self.options.header_only and not self.options.without_stacktrace
 
     def configure(self):
         if self.options.header_only:
@@ -834,7 +837,7 @@ class BoostConan(ConanFile):
         if not can_run(self):
             # When cross building, do not attempt to run the test-executable (assume they work)
             replace_in_file(self, stacktrace_jamfile, "$(>) > $(<)", "echo \"\" > $(<)", strict=False)
-        if self._with_stacktrace_backtrace and self.settings.os != "Windows" and can_run(self):
+        elif self._with_stacktrace_backtrace and self.settings.os != "Windows":
             # When libbacktrace is shared, give extra help to the test-executable
             linker_var = "DYLD_LIBRARY_PATH" if self.settings.os == "Macos" else "LD_LIBRARY_PATH"
             libbacktrace_libdir = self.dependencies["libbacktrace"].cpp_info.aggregated_components().libdirs[0]
@@ -849,14 +852,6 @@ class BoostConan(ConanFile):
                                   "thread_local", "/* thread_local */")
             replace_in_file(self, os.path.join(self.source_folder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                                   "static __thread", "/* static __thread */")
-        replace_in_file(self, os.path.join(self.source_folder, "tools", "build", "src", "tools", "gcc.jam"),
-                              "local generic-os = [ set.differenExceptionce $(all-os) : aix darwin vxworks solaris osf hpux ] ;",
-                              "local generic-os = [ set.difference $(all-os) : aix darwin vxworks solaris osf hpux iphone appletv ] ;",
-                              strict=False)
-        replace_in_file(self, os.path.join(self.source_folder, "tools", "build", "src", "tools", "gcc.jam"),
-                              "local no-threading = android beos haiku sgi darwin vxworks ;",
-                              "local no-threading = android beos haiku sgi darwin vxworks iphone appletv ;",
-                              strict=False)
         replace_in_file(self, os.path.join(self.source_folder, "libs", "fiber", "build", "Jamfile.v2"),
                               "    <conditional>@numa",
                               "    <link>shared:<library>.//boost_fiber : <conditional>@numa",
@@ -1019,9 +1014,9 @@ class BoostConan(ConanFile):
             flags.append("boost.locale.iconv=off")
             flags.append("--disable-iconv")
 
-        if not self.options.without_stacktrace:
+        if self._stacktrace_from_exception_available:
             flags.append("boost.stacktrace.from_exception={}"
-                            .format("on" if self._stacktrace_from_exception_available else "off"))
+                            .format("on" if self.options.with_stacktrace_from_exception else "off"))
 
         def add_defines(library):
             for define in self.dependencies[library].cpp_info.aggregated_components().defines:
@@ -1129,7 +1124,7 @@ class BoostConan(ConanFile):
                 cxx_flags.append("-fembed-bitcode")
         if self._with_stacktrace_backtrace:
             flags.append(f"-sLIBBACKTRACE_PATH={self.dependencies['libbacktrace'].package_folder}")
-        if self._stacktrace_from_exception_available and "x86" not in str(self.settings.arch):
+        if self._stacktrace_from_exception_available and "x86" not in str(self.settings.arch) and self.options.with_stacktrace_from_exception:
             # https://github.com/boostorg/stacktrace/blob/boost-1.85.0/src/from_exception.cpp#L29
             # This feature is guarded by BOOST_STACKTRACE_ALWAYS_STORE_IN_PADDING, but that is only enabled on x86.
             flags.append("define=BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK=1")
@@ -1633,7 +1628,7 @@ class BoostConan(ConanFile):
                         continue
                     if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic") and self.settings.os == "Windows":
                         continue
-                    if name == "boost_stacktrace_from_exception" and not self._stacktrace_from_exception_available:
+                    if name == "boost_stacktrace_from_exception" and self.options.get_safe("with_stacktrace_from_exception") == False:
                         continue
                     if name == "boost_stacktrace_addr2line" and not self._stacktrace_addr2line_available:
                         continue
