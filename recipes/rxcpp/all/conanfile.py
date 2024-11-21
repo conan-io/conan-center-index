@@ -16,7 +16,7 @@ class RxcppConan(ConanFile):
     homepage = "https://github.com/ReactiveX/RxCpp"
     url = "https://github.com/conan-io/conan-center-index"
     settings = "os", "arch", "compiler", "build_type"
-    package_type = "header-only"
+    package_type = "header-library"
     no_copy_source = True
 
     def package_id(self):
