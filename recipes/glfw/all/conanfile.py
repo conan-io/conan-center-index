@@ -68,6 +68,9 @@ class GlfwConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        # libs=False because glfw does not link to opengl, it
+        # loads it via dlopen or equivalent
+        self.requires("opengl/system", libs=False, transitive_headers=True)
         if self.options.vulkan_static:
             self.requires("vulkan-loader/1.3.268.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -221,7 +224,7 @@ class GlfwConan(ConanFile):
                 "AppKit", "Cocoa", "CoreFoundation", "CoreGraphics",
                 "CoreServices", "Foundation", "IOKit",
             ])
-
+        self.cpp_info.requires = ["opengl::opengl"]
         if self.options.vulkan_static:
             self.cpp_info.requires.append("vulkan-loader::vulkan-loader")
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -244,11 +247,4 @@ class GlfwConan(ConanFile):
                 "xkbcommon::xkbcommon"
             ])
 
-        # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
-        self.cpp_info.filenames["cmake_find_package"] = "glfw3"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "glfw3"
-        self.cpp_info.names["cmake_find_package"] = "glfw"
-        self.cpp_info.names["cmake_find_package_multi"] = "glfw"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "glfw3"
+
