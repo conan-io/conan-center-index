@@ -1,4 +1,7 @@
 sources:
+  "2.3.0":
+    url: "https://github.com/vincentlaucsb/csv-parser/archive/refs/tags/2.3.0.tar.gz"
+    sha256: "27b8ac51aa58b9a4debd8ccfb44738c8583a2e874da42f56bbdf3764b75f3af5"
   "2.2.3":
     url: "https://github.com/vincentlaucsb/csv-parser/archive/refs/tags/2.2.3.tar.gz"
     sha256: "e70ea75612fb45f9a9dd83145fb3fbf0b5929a32683de478ad429cdd85f10e4e"

@@ -1,31 +1,15 @@
 versions:
+  "0.650":
+    folder: all
+  "0.645":
+    folder: all
+  "0.640":
+    folder: all
+  "0.635":
+    folder: all
+  "0.630":
+    folder: all
   "0.625":
     folder: all
   "0.620":
-    folder: all
-  "0.615":
-    folder: all
-  "0.610":
-    folder: all
-  "0.607":
-    folder: all
-  "0.603":
-    folder: all
-  "0.598":
-    folder: all
-  "0.593":
-    folder: all
-  "0.589":
-    folder: all
-  "0.582":
-    folder: all
-  "0.577":
-    folder: all
-  "0.572":
-    folder: all
-  "0.568":
-    folder: all
-  "0.563":
-    folder: all
-  "0.558":
     folder: all

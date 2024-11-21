@@ -54,6 +54,9 @@ class GLibConan(ConanFile):
         if is_msvc(self):
             del self.options.with_elf
 
+        if self.settings.os == "Neutrino":
+            del self.options.with_elf
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -72,7 +75,7 @@ class GLibConan(ConanFile):
         if self.options.get_safe("with_mount"):
             self.requires("libmount/2.39")
         if self.options.get_safe("with_selinux"):
-            self.requires("libselinux/3.5")
+            self.requires("libselinux/3.6")
         if self.settings.os != "Linux":
             # for Linux, gettext is provided by libc
             self.requires("libgettext/0.22", transitive_headers=True, transitive_libs=True)
@@ -81,7 +84,7 @@ class GLibConan(ConanFile):
             self.requires("libiconv/1.17")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.2")
+        self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/2.0.3")
 
@@ -97,10 +100,16 @@ class GLibConan(ConanFile):
 
         tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
         tc.project_options["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
-        if self.settings.os == "FreeBSD":
+        if self.settings.os == "FreeBSD" or self.settings.os == "Neutrino":
             tc.project_options["xattr"] = "false"
         tc.project_options["tests"] = "false"
         tc.project_options["libelf"] = "enabled" if self.options.get_safe("with_elf") else "disabled"
+
+        if self.settings.os == "Neutrino":
+            tc.cross_build["host"]["system"] = "qnx"
+            tc.c_link_args.append("-lm")
+            tc.c_link_args.append("-lsocket")
+
         tc.generate()
 
     def _patch_sources(self):
@@ -110,7 +119,7 @@ class GLibConan(ConanFile):
             "subdir('fuzzing')",
             "#subdir('fuzzing')",
         )  # https://gitlab.gnome.org/GNOME/glib/-/issues/2152
-        if self.settings.os != "Linux":
+        if self.settings.os != "Linux" and self.settings.os != "Neutrino":
             # allow to find gettext
             replace_in_file(self,
                 os.path.join(self.source_folder, "meson.build"),
@@ -196,6 +205,15 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gmodule-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
             self.cpp_info.components["gthread-2.0"].system_libs.append("pthread")
             self.cpp_info.components["gio-2.0"].system_libs.append("dl")
+
+        if self.settings.os == "Neutrino":
+            self.cpp_info.components["gmodule-export-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
+            self.cpp_info.components["gmodule-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
+            self.cpp_info.components["glib-2.0"].system_libs.append("m")
+            self.cpp_info.components["glib-2.0"].system_libs.append("socket")
+            self.cpp_info.components["gmodule-no-export-2.0"].system_libs.append("c")
+            self.cpp_info.components["gio-2.0"].system_libs.append("c")
+            self.cpp_info.components["gio-2.0"].system_libs.append("socket")
 
         if self.settings.os == "Windows":
             self.cpp_info.components["glib-2.0"].system_libs += ["ws2_32", "ole32", "shell32", "user32", "advapi32"]
