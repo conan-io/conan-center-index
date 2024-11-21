@@ -58,18 +58,18 @@ class CapstoneConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         if Version(self.version) < "5.0":
-            tc.variables["CAPSTONE_BUILD_STATIC"] = not self.options.shared
-            tc.variables["CAPSTONE_BUILD_SHARED"] = self.options.shared
-        tc.variables["CAPSTONE_BUILD_TESTS"] = False
-        tc.variables["CAPSTONE_BUILD_CSTOOL"] = False
-        tc.variables["CAPSTONE_ARCHITECUTRE_DEFAULT"] = False
+            tc.cache_variables["CAPSTONE_BUILD_STATIC"] = not self.options.shared
+            tc.cache_variables["CAPSTONE_BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["CAPSTONE_BUILD_TESTS"] = False
+        tc.cache_variables["CAPSTONE_BUILD_CSTOOL"] = False
+        tc.cache_variables["CAPSTONE_ARCHITECUTRE_DEFAULT"] = False
         if Version(self.version) < "5.0":
-            tc.variables["CAPSTONE_USE_SYS_DYN_MEM"] = self.options.use_default_alloc
+            tc.cache_variables["CAPSTONE_USE_SYS_DYN_MEM"] = self.options.use_default_alloc
         else:
-            tc.variables["CAPSTONE_USE_DEFAULT_ALLOC"] = self.options.use_default_alloc
+            tc.cache_variables["CAPSTONE_USE_DEFAULT_ALLOC"] = self.options.use_default_alloc
         for a in self._archs:
-            tc.variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
-        tc.variables["CAPSTONE_BUILD_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+            tc.cache_variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
+        tc.cache_variables["CAPSTONE_BUILD_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
 
     def build(self):
