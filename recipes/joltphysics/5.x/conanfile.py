@@ -41,9 +41,6 @@ class JoltPhysicsConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 17)
 
-        if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} shared not supported with Visual Studio")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
