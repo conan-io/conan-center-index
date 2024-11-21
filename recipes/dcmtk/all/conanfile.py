@@ -117,8 +117,8 @@ class DCMTKConan(ConanFile):
 
     def validate_build(self):
         if cross_building(self):
-            if self.settings.os == "Macos" and self.settings.arch != "x86_64" and Version(self.version) < "3.6.7":
-                raise ConanInvalidConfiguration("MacOS crossbuilding is only supported to target x86_64 in versions >= 3.6.7")
+            if self.settings.os == "Macos" and self.settings.arch != "x86_64":
+                raise ConanInvalidConfiguration("MacOS crossbuilding is only supported to target x86_64")
             else:
                 # Note: other cross-building scenarios have not been tested and may also need to be marked as invalid
                 self.output.warning("Crossbuilding has not been tested and may not work")
