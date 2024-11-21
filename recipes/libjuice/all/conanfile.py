@@ -1,9 +1,8 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.apple import fix_apple_shared_install_name
@@ -30,11 +29,11 @@ class libjuiceConan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def validate(self):
         check_min_cppstd(self, 11)
-        if self.settings.os == "Windows":
-            # TODO: fix windows support
-            raise ConanInvalidConfiguration("Package is not supported on Windows yet.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -68,12 +67,19 @@ class libjuiceConan(ConanFile):
             suffix = "d"
         self.cpp_info.libs = ["juice" + suffix]
         self.cpp_info.set_property("cmake_file_name", "LibJuice")
-        self.cpp_info.set_property("cmake_target_name", "LibJuice::LibJuice")
+        if self.options.shared:
+            self.cpp_info.set_property("cmake_target_name", "LibJuice::LibJuice")
+        else:
+            self.cpp_info.set_property("cmake_target_name", "LibJuice::LibJuiceStatic")
+            self.cpp_info.defines.append("JUICE_STATIC")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
             self.cpp_info.system_libs.append("dl")
+
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(["ws2_32", "bcrypt"])
 
         if is_msvc(self):
             self.cpp_info.cxxflags.append("/bigobj")
