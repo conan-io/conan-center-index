@@ -42,6 +42,9 @@ class CapstoneConan(ConanFile):
     options.update({a: [True, False] for a in _archs})
     default_options.update({a: True for a in _archs})
 
+    def _is_universal2(self, info=False):
+        return if Version(self.version) == "5.0.3" and is_apple_os(self)
+
     def export_sources(self):
         export_conandata_patches(self)
 
