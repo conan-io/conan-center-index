@@ -3,7 +3,6 @@
 
 int main(void) {
     juice_config config;
-    juice_agent_t * agent = juice_create(&config);
-    juice_destroy(agent);
+    juice_set_log_level(JUICE_LOG_LEVEL_WARN);
     return EXIT_SUCCESS;
 }
