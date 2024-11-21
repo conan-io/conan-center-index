@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 from conan.tools.apple import fix_apple_shared_install_name
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class CapstoneConan(ConanFile):
@@ -36,6 +36,7 @@ class CapstoneConan(ConanFile):
         "fPIC": True,
         "use_default_alloc": True,
     }
+    implements = ["auto_shared_fpic"]
 
     _archs = ["arm", "m68k", "mips", "ppc", "sparc", "sysz", "xcore", "x86", "tms320c64x", "m680x", "evm"]
     options.update({a: [True, False] for a in _archs})
@@ -44,13 +45,7 @@ class CapstoneConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
