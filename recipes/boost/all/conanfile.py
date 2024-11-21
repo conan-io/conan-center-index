@@ -270,7 +270,8 @@ class BoostConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.with_stacktrace_backtrace
         # stacktrace_from_exception is available only for 1.85.0 and later
-        if Version(self.version) < "1.85.0":
+        # FIXME: https://github.com/boostorg/stacktrace/issues/196
+        if Version(self.version) < "1.85.0" or (self.settings.os == "Windows" and self.settings.compiler == "gcc"):
             del self.options.with_stacktrace_from_exception
 
         # nowide requires a c++11-able compiler + movable std::fstream: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
