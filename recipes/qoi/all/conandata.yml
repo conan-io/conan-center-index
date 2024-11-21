@@ -1,0 +1,5 @@
+sources:
+  # Newer versions at the top
+  "0.0.0.cci.20240906":
+    url: "https://github.com/phoboslab/qoi/archive/019020993ce33bdf56c876004e8b27139a0d011f.zip"
+    sha256: "b4785ed15a5a9d1084cc1ad72829e7bb16b9a7b597ac8aa8160f2788748614f3"

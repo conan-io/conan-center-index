@@ -2,3 +2,6 @@ sources:
   "cci.20220616":
     url: "https://github.com/ned14/status-code/archive/38e1e862386cb38d577664fd681ef829b0e03fba.tar.gz"
     sha256: "faf112df1633a1ee1f58c8b056130154b7c0dbf12e7f006a04dc376500d271c3"
+  "cci.20240614":
+    url: "https://github.com/ned14/status-code/archive/a6689afceb19ed127ec4a828dcf1597102e6c02d.tar.gz"
+    sha256: "f9725675f9d124d2223f9554f11a7f9dcb4893ea2b8a73bd3f7b182f23ba26ca"

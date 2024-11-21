@@ -16,11 +16,15 @@ class OpenJDK(ConanFile):
     license = "GPL-2.0-only WITH Classpath-exception-2.0", "GPL-2.0-only WITH OpenJDK-assembly-exception-1.0"
     topics = ("java", "jdk", "openjdk")
     settings = "os", "arch", "compiler", "build_type"
-    no_copy_source = True
+    upload_policy = "skip"
+    build_policy = "missing"
 
     def package_id(self):
         del self.info.settings.compiler
         del self.info.settings.build_type
+
+    def configure(self):
+        self.settings.rm_safe("os.version")
 
     def validate(self):
         if Version(self.version) < "19.0.2" and self.settings.arch != "x86_64":
@@ -33,42 +37,42 @@ class OpenJDK(ConanFile):
         if self.settings.os in ["Macos", "Linux"]:
             key = f"{self.settings.os}_{self.settings.arch}"
         get(self, **self.conan_data["sources"][self.version][str(key)],
-                  destination=self.source_folder, strip_root=True)
+                  destination=self.build_folder, strip_root=True)
 
     def package(self):
         if self.settings.os == "Macos":
-            source_folder = os.path.join(self.source_folder, f"jdk-{self.version}.jdk", "Contents", "Home")
+            build_folder = os.path.join(self.build_folder, f"jdk-{self.version}.jdk", "Contents", "Home")
         else:
-            source_folder = self.source_folder
-        symlinks.remove_broken_symlinks(self, source_folder)
+            build_folder = self.build_folder
+        symlinks.remove_broken_symlinks(self, build_folder)
         copy(self, pattern="*",
-                src=os.path.join(source_folder, "bin"),
+                src=os.path.join(build_folder, "bin"),
                 dst=os.path.join(self.package_folder, "bin"),
                 excludes=("msvcp140.dll", "vcruntime140.dll", "vcruntime140_1.dll"))
         copy(self, pattern="*",
-                src=os.path.join(source_folder, "include"),
+                src=os.path.join(build_folder, "include"),
                 dst=os.path.join(self.package_folder, "include"))
         copy(self, pattern="*",
-                src=os.path.join(source_folder, "lib"),
+                src=os.path.join(build_folder, "lib"),
                 dst=os.path.join(self.package_folder, "lib"))
         copy(self, pattern="*",
-                src=os.path.join(source_folder, "jmods"),
+                src=os.path.join(build_folder, "jmods"),
                 dst=os.path.join(self.package_folder, "lib", "jmods"))
         copy(self, pattern="*",
-                src=os.path.join(source_folder, "legal"),
+                src=os.path.join(build_folder, "legal"),
                 dst=os.path.join(self.package_folder, "licenses"))
         # conf folder is required for security settings, to avoid
         # java.lang.SecurityException: Can't read cryptographic policy directory: unlimited
         # https://github.com/conan-io/conan-center-index/pull/4491#issuecomment-774555069
         copy(self, pattern="*",
-                src=os.path.join(source_folder, "conf"),
+                src=os.path.join(build_folder, "conf"),
                 dst=os.path.join(self.package_folder, "conf"))
 
     def package_info(self):
         self.output.info(f"Creating JAVA_HOME environment variable with : {self.package_folder}")
 
-        self.runenv_info.append("JAVA_HOME", self.package_folder)
-        self.buildenv_info.append("JAVA_HOME", self.package_folder)
+        self.runenv_info.define_path("JAVA_HOME", self.package_folder)
+        self.buildenv_info.define_path("JAVA_HOME", self.package_folder)
 
         # TODO: remove `env_info` once the recipe is only compatible with Conan >= 2.0
         self.env_info.JAVA_HOME = self.package_folder

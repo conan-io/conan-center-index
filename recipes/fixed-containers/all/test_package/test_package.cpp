@@ -1,10 +1,9 @@
 #include "fixed_containers/fixed_vector.hpp"
-
-using namespace fixed_containers;
+#include "fixed_containers/enum_utils.hpp"
 
 int main(void) {
   constexpr auto v1 = []() {
-    FixedVector<int, 11> v{};
+    fixed_containers::FixedVector<int, 11> v{};
     v.push_back(0);
     v.emplace_back(1);
     v.push_back(2);
