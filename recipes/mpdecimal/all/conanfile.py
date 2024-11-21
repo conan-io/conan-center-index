@@ -196,7 +196,7 @@ class MpdecimalConan(ConanFile):
             mpdecppdir = self.build_path / "libmpdec++"
             copy(self, "mpdecimal.h", src=mpdecdir, dst=pkg_dir / "include")
             if self.options.cxx:
-                copy(self, "decimal.hh", src=mpdecppdir, dst=pkg_dir / "include")
+                copy(self, "decimal.hh", src=self.source_path / "libmpdec++", dst=pkg_dir / "include")
             builddirs = [mpdecdir]
             if self.options.cxx:
                 builddirs.append(mpdecppdir)
