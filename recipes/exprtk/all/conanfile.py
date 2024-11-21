@@ -5,7 +5,7 @@ from conan.tools.files import get, copy, load, save
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class ExprTkConan(ConanFile):
@@ -19,10 +19,6 @@ class ExprTkConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _min_cppstd(self):
-        return 11
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -30,8 +26,7 @@ class ExprTkConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
