@@ -15,10 +15,10 @@ class MBedTLSConan(ConanFile):
         "mbed TLS makes it trivially easy for developers to include "
         "cryptographic and SSL/TLS capabilities in their (embedded) products"
     )
-    topics = ("polarssl", "tls", "security")
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://tls.mbed.org"
-    license = "Apache-2.0"
+    topics = ("polarssl", "tls", "security")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -26,11 +26,13 @@ class MBedTLSConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_zlib": [True, False],
+        "enable_threading": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_zlib": True,
+        "enable_threading": False,
     }
 
     def config_options(self):
@@ -54,8 +56,12 @@ class MBedTLSConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} does not support shared build on Windows")
+        if self.settings.os == "Windows":
+            if self.options.shared:
+                raise ConanInvalidConfiguration(f"{self.ref} does not support shared build on Windows")
+            if self.options.enable_threading:
+                # INFO: Planned: https://github.com/Mbed-TLS/mbedtls/issues/8455
+                raise ConanInvalidConfiguration(f"{self.ref} does not support the option enable_threading on Windows")
 
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             # The command line flags set are not supported on older versions of gcc
@@ -86,6 +92,10 @@ class MBedTLSConan(ConanFile):
                 tc.preprocessor_definitions["MBEDTLS_PLATFORM_SNPRINTF_MACRO"] = "snprintf"
             else:
                 tc.preprocessor_definitions["MBEDTLS_PLATFORM_SNPRINTF_MACRO"] = "MBEDTLS_PLATFORM_STD_SNPRINTF"
+        if self.options.enable_threading:
+            tc.preprocessor_definitions["MBEDTLS_THREADING_C"] = True
+            tc.preprocessor_definitions["MBEDTLS_THREADING_PTHREAD"] = True
+
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -100,6 +110,7 @@ class MBedTLSConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "cmake"))
 
     def package_info(self):
@@ -108,14 +119,28 @@ class MBedTLSConan(ConanFile):
 
         self.cpp_info.components["mbedcrypto"].set_property("cmake_target_name", "MbedTLS::mbedcrypto")
         self.cpp_info.components["mbedcrypto"].libs = ["mbedcrypto"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["mbedcrypto"].system_libs = ["bcrypt"]
+        if Version(self.version) >= "3.6.0":
+            self.cpp_info.components["mbedcrypto"].set_property("pkg_config_name", "mbedcrypto")
+        if self.options.enable_threading:
+            self.cpp_info.components["mbedcrypto"].defines.extend(["MBEDTLS_THREADING_C=1", "MBEDTLS_THREADING_PTHREAD=1"])
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["mbedcrypto"].system_libs.append("pthread")
 
         self.cpp_info.components["mbedx509"].set_property("cmake_target_name", "MbedTLS::mbedx509")
         self.cpp_info.components["mbedx509"].libs = ["mbedx509"]
+        if self.settings.os == "Windows":
+            self.cpp_info.components["mbedx509"].system_libs = ["ws2_32"]
         self.cpp_info.components["mbedx509"].requires = ["mbedcrypto"]
+        if Version(self.version) >= "3.6.0":
+            self.cpp_info.components["mbedx509"].set_property("pkg_config_name", "mbedx509")
 
         self.cpp_info.components["libembedtls"].set_property("cmake_target_name", "MbedTLS::mbedtls")
         self.cpp_info.components["libembedtls"].libs = ["mbedtls"]
         self.cpp_info.components["libembedtls"].requires = ["mbedx509"]
+        if Version(self.version) >= "3.6.0":
+            self.cpp_info.components["libembedtls"].set_property("pkg_config_name", "embedtls")
 
         if self.options.get_safe("with_zlib"):
             for component in self.cpp_info.components:

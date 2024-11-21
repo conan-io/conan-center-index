@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -118,7 +118,10 @@ class LibpngConan(ConanFile):
             tc.variables["PNG_INTEL_SSE"] = self._neon_msa_sse_vsx_mapping[str(self.options.sse)]
         if self._has_vsx_support:
             tc.variables["PNG_POWERPC_VSX"] = self._neon_msa_sse_vsx_mapping[str(self.options.vsx)]
-        if Version(self.version) >= "1.6.38":
+        if Version(self.version) >= "1.6.41":
+            tc.variables["PNG_FRAMEWORK"] = False  # changed from False to True by default in PNG 1.6.41
+            tc.variables["PNG_TOOLS"] = False
+        elif Version(self.version) >= "1.6.38":
             tc.variables["PNG_EXECUTABLES"] = False
 
         tc.cache_variables["CMAKE_MACOSX_BUNDLE"] = False
@@ -146,6 +149,7 @@ class LibpngConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "libpng"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.cmake", os.path.join(self.package_folder, "lib", "cmake", "PNG"))
 
     def package_info(self):
         major_min_version = f"{Version(self.version).major}{Version(self.version).minor}"

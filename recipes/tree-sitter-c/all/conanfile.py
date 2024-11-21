@@ -9,10 +9,10 @@ required_conan_version = ">=1.53.0"
 class TreeSitterCConan(ConanFile):
     name = "tree-sitter-c"
     description = "C grammar for tree-sitter."
-    topics = ("parser", "grammar", "tree", "c", "ide")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/tree-sitter/tree-sitter-c"
-    license = "MIT"
+    topics = ("parser", "grammar", "tree", "c", "ide")
     settings = "os", "arch", "compiler", "build_type"
     package_type = "library"
 
@@ -24,9 +24,6 @@ class TreeSitterCConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-
-    exports_sources = "CMakeLists.txt"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -55,7 +52,7 @@ class TreeSitterCConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def requirements(self):
-        self.requires("tree-sitter/0.20.8", transitive_headers=True, transitive_libs=True)
+        self.requires("tree-sitter/0.24.3", transitive_headers=True, transitive_libs=True)
 
     def _patch_sources(self):
         if not self.options.shared:

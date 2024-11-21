@@ -1,0 +1,22 @@
+From 3af29b660d623e8d7051e5392395c25712037a6a Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Wed, 17 Jan 2024 13:29:49 +0200
+Subject: [PATCH] Fix handling of pthread_setname_np on macOS
+
+---
+ src/utils.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/utils.cpp b/src/utils.cpp
+index eb15b68..72966c2 100644
+--- a/src/utils.cpp
++++ b/src/utils.cpp
+@@ -191,7 +191,7 @@ make_uuid()
+ //---------------------------------------------------------------------------
+ void
+ thread_set_name(const std::string& name) {
+-#ifdef LINUX
++#if LINUX && _GNU_SOURCE
+     constexpr int TASK_COMM_LEN = 16;
+ 
+     char thread_name[TASK_COMM_LEN] = "";

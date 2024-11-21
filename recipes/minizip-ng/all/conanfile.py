@@ -94,7 +94,7 @@ class MinizipNgConan(ConanFile):
 
     def build_requirements(self):
         if self._needs_pkg_config:
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
         if Version(self.version) >= "4.0.0":
             self.tool_requires("cmake/[>=3.19 <4]")
 
@@ -163,7 +163,7 @@ class MinizipNgConan(ConanFile):
 
         # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         prefix = "lib" if is_msvc(self) or self._is_clang_cl else ""
-        suffix = "" if Version(self.version) < "3.0.5" or self.options.mz_compatibility else "-ng"
+        suffix = "" if self.options.mz_compatibility else "-ng"
         self.cpp_info.components["minizip"].libs = [f"{prefix}minizip{suffix}"]
         if self.options.with_lzma:
             self.cpp_info.components["minizip"].defines.append("HAVE_LZMA")
@@ -197,6 +197,8 @@ class MinizipNgConan(ConanFile):
             self.cpp_info.components["minizip"].requires.append("openssl::openssl")
         elif is_apple_os(self):
             self.cpp_info.components["minizip"].frameworks.extend(["CoreFoundation", "Security"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["minizip"].system_libs.append("crypt32")
         if self.settings.os != "Windows" and self.options.with_iconv:
             self.cpp_info.components["minizip"].requires.append("libiconv::libiconv")
 

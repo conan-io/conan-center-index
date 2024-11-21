@@ -1,4 +1,19 @@
 sources:
+  "1.9.0":
+    url: "https://github.com/dice-group/dice-template-library/archive/refs/tags/v1.9.0.tar.gz"
+    sha256: "ca82a61bd445e0eaf69e68fc4a96d037c8b2ea36ff7762042dbb6f47a89f99e9"
+  "1.8.0":
+    url: "https://github.com/dice-group/dice-template-library/archive/refs/tags/v1.8.0.tar.gz"
+    sha256: "cb20717cb596b156b098146d043caa158618e055b8edbeb4d3245cd11e1c8276"
+  "1.6.0":
+    url: "https://github.com/dice-group/dice-template-library/archive/refs/tags/v1.6.0.tar.gz"
+    sha256: "4eb176930beb05dba183d4a48fd9e9716676fe92f0a98a8f527cb8791b0d64fd"
+  "1.5.0":
+    url: "https://github.com/dice-group/dice-template-library/archive/refs/tags/v1.5.0.tar.gz"
+    sha256: "5ab4155097af5674dc9b34d1643db9ea8b30f78d15c1e547c58396ea31068ffd"
+  "1.3.0":
+    url: "https://github.com/dice-group/dice-template-library/archive/refs/tags/v1.3.0.tar.gz"
+    sha256: "2e61e95eeedf31f7041a6694c0789c5d1a5e3f9e4db87546cb83c9189808d4f5"
   "1.2.0":
     url: "https://github.com/dice-group/dice-template-library/archive/refs/tags/v1.2.0.tar.gz"
     sha256: "9b21793e158af3ee81ceec827a1a43a87e309e2f7bf0be8ace0f538a95f4865a"

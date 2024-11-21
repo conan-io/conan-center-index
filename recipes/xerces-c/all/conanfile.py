@@ -26,6 +26,7 @@ class XercesCConan(ConanFile):
         "fPIC": [True, False],
         # https://xerces.apache.org/xerces-c/build-3.html
         "char_type": ["uint16_t", "char16_t", "wchar_t"],
+        "network": [True, False],
         "network_accessor": ["curl", "socket", "cfurl", "winsock"],
         "transcoder": ["gnuiconv", "iconv", "icu", "macosunicodeconverter", "windows"],
         "message_loader": ["inmemory", "icu", "iconv"],
@@ -35,6 +36,7 @@ class XercesCConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "char_type": "uint16_t",
+        "network": True,
         "network_accessor": "socket",
         "transcoder": "gnuiconv",
         "message_loader": "inmemory",
@@ -64,6 +66,8 @@ class XercesCConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        if not self.options.network:
+            self.options.rm_safe("network_accessor")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -71,7 +75,7 @@ class XercesCConan(ConanFile):
     def requirements(self):
         if "icu" in (self.options.transcoder, self.options.message_loader):
             self.requires("icu/74.2")
-        if self.options.network_accessor == "curl":
+        if self.options.get_safe("network_accessor") == "curl":
             self.requires("libcurl/[>=7.78.0 <9]")
 
     def _validate(self, option, value, host_os):
@@ -84,7 +88,7 @@ class XercesCConan(ConanFile):
         :param os: either a single string or a tuple of strings containing the
                    OS(es) that `value` is valid on
         """
-        if self.settings.os not in host_os and getattr(self.options, option) == value:
+        if self.settings.os not in host_os and self.options.get_safe(option) == value:
             raise ConanInvalidConfiguration(f"Option '{option}={value}' is only supported on {host_os}")
 
     def validate(self):
@@ -116,15 +120,27 @@ class XercesCConan(ConanFile):
         tc = CMakeToolchain(self)
         # Because upstream overrides BUILD_SHARED_LIBS as a CACHE variable
         tc.cache_variables["BUILD_SHARED_LIBS"] = "ON" if self.options.shared else "OFF"
+
+        # Prevent linking against unused found library
+        tc.cache_variables["NSL_LIBRARY"] = "NSL_LIBRARY-NOTFOUND"
+        
         # https://xerces.apache.org/xerces-c/build-3.html
-        tc.variables["network-accessor"] = self.options.network_accessor
+        tc.variables["network"] =  self.options.network
+        if self.options.network:
+            tc.variables["network-accessor"] = self.options.network_accessor
         tc.variables["transcoder"] = self.options.transcoder
         tc.variables["message-loader"] = self.options.message_loader
         tc.variables["xmlch-type"] = self.options.char_type
         tc.variables["mutex-manager"] = self.options.mutex_manager
         # avoid picking up system dependency
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = self.options.network_accessor != "curl"
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_CURL"] = self.options.get_safe("network_accessor") != "curl"
         tc.variables["CMAKE_DISABLE_FIND_PACKAGE_ICU"] = "icu" not in (self.options.transcoder, self.options.message_loader)
+
+        # Fix compatibility with Clang on Windows
+        # https://issues.apache.org/jira/browse/XERCESC-2252
+        if self.settings.os == "Windows" and self.settings.compiler == "clang":
+            tc.cache_variables["CMAKE_RC_FLAGS"] = "-C 1252"
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -160,7 +176,7 @@ class XercesCConan(ConanFile):
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreFoundation", "CoreServices"]
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["pthread"])
 
         if Version(conan_version).major < 2:
             self.cpp_info.names["cmake_find_package"] = "XercesC"

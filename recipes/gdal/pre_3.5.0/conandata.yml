@@ -5,9 +5,6 @@ sources:
   "3.4.1":
     url: "https://github.com/OSGeo/gdal/releases/download/v3.4.1/gdal-3.4.1.tar.gz"
     sha256: "e360387bc25ec24940f46afbeada48002d72c74aaf9eccf2a40e8d74e711a2e4"
-  "3.3.3":
-    url: "https://github.com/OSGeo/gdal/releases/download/v3.3.3/gdal-3.3.3.tar.gz"
-    sha256: "28925ea4717b02185ee208bfc121a94fa0bc1dfe9cb862fd3868c2a0394d605a"
 patches:
   "3.4.3":
     - patch_file: "patches/3.4.x/fix-autotools-3.4.3.patch"
@@ -21,9 +18,3 @@ patches:
     - patch_file: "patches/3.4.x/fix-include-jsonc-3.4.1.patch"
     - patch_file: "patches/3.4.x/fix-include-xerces.patch"
     - patch_file: "patches/3.4.x/fix-include-podofo.patch"
-  "3.3.3":
-    - patch_file: "patches/3.3.x/fix-autotools-3.3.3.patch"
-    - patch_file: "patches/3.3.x/fix-nmake.patch"
-    - patch_file: "patches/3.3.x/fix-include-jsonc.patch"
-    - patch_file: "patches/3.3.x/fix-include-xerces.patch"
-    - patch_file: "patches/3.3.x/fix-include-podofo.patch"

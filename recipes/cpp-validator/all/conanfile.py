@@ -64,7 +64,7 @@ class CPPValidatorConan(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.83.0")
-        self.requires("fmt/10.2.0")
+        self.requires("fmt/10.2.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

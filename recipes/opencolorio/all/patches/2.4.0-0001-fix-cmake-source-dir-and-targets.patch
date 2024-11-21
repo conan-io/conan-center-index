@@ -1,0 +1,101 @@
+diff --git CMakeLists.txt CMakeLists.txt
+index 0eaec4be..e711295c 100755
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -511,7 +511,7 @@ install(
+     FILE ${OCIO_TARGETS_EXPORT_NAME}
+ )
+ 
+-if (NOT BUILD_SHARED_LIBS)
++if (0)
+     # Install custom macros used in the find modules.
+     install(FILES
+         ${CMAKE_CURRENT_LIST_DIR}/share/cmake/macros/VersionUtils.cmake
+diff --git share/cmake/modules/FindExtPackages.cmake share/cmake/modules/FindExtPackages.cmake
+index accdecec..945c5edc 100644
+--- share/cmake/modules/FindExtPackages.cmake
++++ share/cmake/modules/FindExtPackages.cmake
+@@ -63,7 +63,7 @@ ocio_handle_dependency(  expat REQUIRED ALLOW_INSTALL
+ # https://github.com/jbeder/yaml-cpp
+ ocio_handle_dependency(  yaml-cpp REQUIRED ALLOW_INSTALL
+                          MIN_VERSION 0.6.3
+-                         RECOMMENDED_VERSION 0.7.0
++                         RECOMMENDED_VERSION 0.8.0
+                          RECOMMENDED_VERSION_REASON "Latest version tested with OCIO")
+ 
+ # pystring
+@@ -110,9 +110,9 @@ ocio_handle_dependency(  ZLIB REQUIRED ALLOW_INSTALL
+ 
+ # minizip-ng
+ # https://github.com/zlib-ng/minizip-ng
+-ocio_handle_dependency(  minizip-ng REQUIRED ALLOW_INSTALL
++ocio_handle_dependency(  minizip REQUIRED ALLOW_INSTALL
+                          MIN_VERSION 3.0.6
+-                         RECOMMENDED_VERSION 3.0.7
++                         RECOMMENDED_VERSION 4.0.1
+                          RECOMMENDED_VERSION_REASON "Latest version tested with OCIO")
+ 
+ ###############################################################################
+@@ -131,7 +131,7 @@ if(OCIO_BUILD_APPS)
+ 
+     # lcms2
+     # https://github.com/mm2/Little-CMS
+-    ocio_handle_dependency(  lcms2 REQUIRED ALLOW_INSTALL
++    ocio_handle_dependency(  lcms REQUIRED ALLOW_INSTALL
+                              MIN_VERSION 2.2
+                              RECOMMENDED_VERSION 2.2
+                              RECOMMENDED_VERSION_REASON "Latest version tested with OCIO")
+diff --git share/cmake/utils/CppVersion.cmake share/cmake/utils/CppVersion.cmake
+index 175d89c2..ac93b87a 100644
+--- share/cmake/utils/CppVersion.cmake
++++ share/cmake/utils/CppVersion.cmake
+@@ -16,7 +16,7 @@ elseif(NOT CMAKE_CXX_STANDARD IN_LIST SUPPORTED_CXX_STANDARDS)
+             "CMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD} is unsupported. Supported standards are: ${SUPPORTED_CXX_STANDARDS_STR}.")
+ endif()
+ 
+-set_property(CACHE CMAKE_CXX_STANDARD PROPERTY STRINGS "${SUPPORTED_CXX_STANDARDS}")
++# set_property(CACHE CMAKE_CXX_STANDARD PROPERTY STRINGS "${SUPPORTED_CXX_STANDARDS}")
+ 
+ include(CheckCXXCompilerFlag)
+ 
+diff --git src/OpenColorIO/CMakeLists.txt src/OpenColorIO/CMakeLists.txt
+index 7d2894da..1e6570b4 100755
+--- src/OpenColorIO/CMakeLists.txt
++++ src/OpenColorIO/CMakeLists.txt
+@@ -315,8 +315,8 @@ target_link_libraries(OpenColorIO
+         "$<BUILD_INTERFACE:utils::from_chars>"
+         "$<BUILD_INTERFACE:utils::strings>"
+         "$<BUILD_INTERFACE:xxHash>"
+-        ${YAML_CPP_LIBRARIES}
+-        MINIZIP::minizip-ng
++        yaml-cpp
++        MINIZIP::minizip
+ )
+ 
+ if(OCIO_USE_SIMD AND OCIO_USE_SSE2NEON AND COMPILER_SUPPORTS_SSE_WITH_SSE2NEON)
+diff --git src/apps/ocioarchive/CMakeLists.txt src/apps/ocioarchive/CMakeLists.txt
+index 599d706f..efe6cd5a 100644
+--- src/apps/ocioarchive/CMakeLists.txt
++++ src/apps/ocioarchive/CMakeLists.txt
+@@ -21,7 +21,7 @@ target_link_libraries(ocioarchive
+     PRIVATE
+         apputils
+         OpenColorIO
+-        MINIZIP::minizip-ng
++        MINIZIP::minizip
+ )
+ 
+ include(StripUtils)
+diff --git src/apps/ociobakelut/CMakeLists.txt src/apps/ociobakelut/CMakeLists.txt
+index 3d6e586b..f7069a1f 100755
+--- src/apps/ociobakelut/CMakeLists.txt
++++ src/apps/ociobakelut/CMakeLists.txt
+@@ -29,7 +29,7 @@ set_target_properties(ociobakelut
+ target_link_libraries(ociobakelut 
+     PRIVATE 
+         apputils
+-        lcms2::lcms2
++        lcms::lcms
+         OpenColorIO
+ )
+ 

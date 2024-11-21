@@ -1,8 +1,13 @@
-#include <fmt/format.h>
-#include "hictk/fmt.hpp"
-#include "hictk/cooler/utils.hpp"
+#include <stdexcept>
+
+#include "hictk/file.hpp"
 
 
 int main(int argc, char** argv) {
-  fmt::print("{}\n", hictk::cooler::utils::is_cooler(argv[0]));
+  try {
+    const hictk::File f(argv[0], 10);  // This is expected to throw
+    return 1;
+  } catch (const std::exception& e) {
+    return 0;
+  }
 }

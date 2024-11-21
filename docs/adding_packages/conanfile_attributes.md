@@ -20,11 +20,11 @@ or are known by ConanCenter's build service and have special meaning.
 
 ## Attributes
 
-These are a [key feature](https://docs.conan.io/1/reference/conanfile/attributes.html) which allow the Conan client to understand,
+These are a [key feature](https://docs.conan.io/2/reference/conanfile/attributes.html) which allows the Conan client to understand,
 identify, and expose recipes and which project they expose.
 
 In ConanCenter, there are a few conventions that need to be respected to ensure recipes can be discovered there `conan search` command
-of through the web UI. Many of which are enforces with the [hooks](../error_knowledge_base.md).
+of through the web UI.
 
 ### Name
 
@@ -38,50 +38,52 @@ Please see the FAQs for:
 
 ### Version
 
-ConanCenter is geared towards quickly added new release, the build service always pass the version it is currently building to the recipe.
 The `version` attribute MUST NOT be added to any recipe - with exception to "system packages".
 
 #### ConanCenter specific releases format
 
-The notation shown below is used for publishing packages which do not match the original library's official releases. This format which includes the "datestamp" corresponding to the date of a commit: `cci.<YEAR MONTH DAY>`.
+The notation shown below is used for publishing packages which do not match the original library's official releases.
 
-In order to create reproducible builds, we also "commit-lock" to the latest commit on that day. Otherwise, users would get inconsistent results over time when rebuilding the package. An example of this is the [RapidJSON](https://github.com/Tencent/rapidjson) library, where its package reference is `rapidjson/cci.20200410` and its sources are locked the latest commit on that date in [config.yml](https://github.com/conan-io/conan-center-index/blob/master/recipes/rapidjson/config.yml#L4). The prefix `cci.` is mandatory to distinguish as a virtual version provided by CCI. If you are interested to know about the origin, please, read [here](https://github.com/conan-io/conan-center-index/pull/1464).
+There are two cases to consider:
+
+* The library has not had any previous releases/tags. In this case, the version should be of the form
+  `0.0.0.cci.<YEAR MONTH DAY>`. For example, `0.0.0.cci.20240402`. When/if a version of the library is ever released.
+  this will allow version ranges to properly identify the release as a newer version.
+* The library has had previous releases/tags. In this case, the version should be of the form
+  `<MAJOR>.<MINOR>.<PATCH>.cci.<YEAR MONTH DAY>`. For example, `1.2.0.cci.20240402`.
+  This will allow version ranges to properly identify the release as a newer version.
+
+In order to create reproducible builds, we also "commit-lock" to the latest commit on that day, so the sources should point
+to the commit hash of that day. Otherwise, users would get inconsistent results over time when rebuilding the package.
 
 ### License Attribute
 
 The license attribute is a mandatory field which provides the legal information that summarizes the contents saved in the package. These follow the
-[SPDX license](https://spdx.org/licenses/) as a standard. This is for consummers, in particular in the enterprise sector, that do rely on SDPX compliant identifiers so that they can flag this as a custom license text.
+[SPDX license](https://spdx.org/licenses/) as a standard. This is for consumers, in particular in the enterprise sector, that do rely on SDPX compliant identifiers so that they can flag this as a custom license text.
 
 * If the library has a license that has a SPDX identifier, use the [short Identifiers](https://spdx.dev/ids/).
 * If the library has a license text that does not match a SPDX identifier, including custom wording disclaiming copyright or dedicating the words to the ["public domain"](https://fairuse.stanford.edu/overview/public-domain/welcome/), use the [SPDX License Expressions](https://spdx.github.io/spdx-spec/v2-draft/SPDX-license-expressions/), this can follow:
   * `LicenseRef-` as a prefix, followed by the name of the library. For example:`LicenseRef-libfoo-public-domain`
+  * If the license is extracted from a specific document, prepend `DocumentRef-<filename>-` to the license name. For example: `DocumentRef-README.md-LicenseRef-libfoo-public-domain`
 * If the library makes no mention of a license and the terms of use - it **shall not be accepted in ConanCenter** , even if the code is publicly available in GitHub or any other platforms.
 
 In case the license changes in a new release, the recipe should update the license attribute accordingly:
 
 ```python
 class LibfooConan(ConanFile):
-    license = ("MIT", "BSD-3-Clause") # keep both old and new licenses, so conan inspect can find it
+    license = "MIT"
 
     def configure (self):
-       # change the license according to the version, so conan graph info can show the correct one
-
        # INFO: Version < 2.0 the license was MIT, but changed to BSD-3-Clause now.
-       self.license = "BSD-3-Clause" if Version(self.version) >= "2.0.0" else "MIT"
+       if Version(self.version) >= "2.0.0":
+          self.license = "BSD-3-Clause"
 ```
 
 ## Order of methods and attributes
 
 Prefer the following order of documented methods in python code (`conanfile.py`, `test_package/conanfile.py`):
 
-For `conan create` the order is listed [here](https://docs.conan.io/1/reference/commands/creator/create.html#methods-execution-order)
-test packages recipes should append the following methods:
-
-* deploy
-* test
-
-the order above resembles the execution order of methods on CI. therefore, for instance, `build` is always executed before `package` method, so `build` should appear before the
-`package` in `conanfile.py`.
+For `conan create` the order is listed [here](https://docs.conan.io/2/reference/commands/create.html#methods-execution-order).
 
 ## Settings
 
@@ -140,61 +142,40 @@ Having the same naming conventions for the options helps consumers. It allows us
 
 ### Predefined Options and Known Defaults
 
-ConanCenter supports many combinations, these are outline in the [supported configurations](../supported_platforms_and_configurations.md) document for each platform.
-By default recipes should use `shared=False` with `fPIC=True`. If support, `header_only=False` is the default.
+By default recipes should use `*/*:shared=False` with `*/*:fPIC=True`. If supported, `&:header_only=False` is the default.
 
 Usage of each option should follow the rules:
 
 * `shared` (with values `True` or `False`). The CI inspects the recipe looking for this option. The **default should be `shared=False`** and will
    generate all the configurations with values `shared=True` and `shared=False`.
 
-   > **Note**: The CI applies `shared=True` only to the package being built, while every other requirement will `shared=False`. To consume everything as a shared library you will set `--build=always` and/or `-o *:shared=True`)
-   > It's important to keep this in mind when trying to consume shared packages from ConanCenter
-   > as their requirements were linked inside the shared library. See [FAQs](../faqs.md#how-to-consume-a-graph-of-shared-libraries) for more information.
-
 * `fPIC` (with values `True` or `False`). The **default should be `fPIC=True`** and will generate all the configurations with values `fPIC=True` and `fPIC=False`.
-  This option does not make sense on all the support configurations so it should be removed.
+  This option does not make sense on all the support configurations, so using `implements` is recommended:
 
    ```python
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-   def configure(self):
-      if self.options.shared:
-         self.options.rm_safe("fPIC")
+   implements = ["auto_shared_fpic"]
    ```
 
 * `header_only` (with values `True` or `False`). The **default should be `header_only=False`**. If the CI detects this option, it will generate all the
    configurations for the value `header_only=False` and add one more configuration with `header_only=True`. **Only one package**
    will be generated for `header_only=True`, so it is crucial that the package is actually a _header only_ library, with header files only (no libraries or executables inside).
 
-   Recipes with such option should include the following in their `package_id` method
+   Recipes with such options should include the following in their `implements` attribute:
 
    ```python
-   def package_id(self):
-      if self.options.header_only:
-         self.info.clear()
+   implements = ["auto_header_only"]
    ```
-
-   ensuring that, when the option is active, the recipe ignores all the settings and only one package ID is generated.
 
 ### Options to Avoid
 
 * `build_testing` should not be added, nor any other related unit test option. Options affect the package ID, therefore, testing should not be part of that.
-   Instead, use Conan config [skip_test](https://docs.conan.io/1/reference/config_files/global_conf.html#tools-configurations) feature:
+   Instead, use Conan config [skip_test](https://docs.conan.io/2/reference/config_files/global_conf.html#user-tools-configurations) feature.
 
-   ```python
-   def generate(self):
-      tc = CMakeToolChain(self)
-      tc.variables['BUILD_TESTING'] = not self.conf.get("tools.build:skip_test", default=true, check_type=bool)
-   ```
-
-   The `skip_test` configuration is supported by [CMake](https://docs.conan.io/1/reference/build_helpers/cmake.html#test) and [Meson](https://docs.conan.io/1/reference/build_helpers/meson.html#test).
+   The `skip_test` configuration is supported by [CMake](https://docs.conan.io/2/reference/tools/cmake/cmake.html) and [Meson](https://docs.conan.io/2/reference/tools/meson/meson.html).
 
  ### Removing from `package_id`
 
- By default, options are included in the calculation for the `package_id` ([docs](https://docs.conan.io/1/reference/conanfile/methods.html#package-id)).
+ By default, options are included in the calculation for the `package_id` ([docs](https://docs.conan.io/2/reference/binary_model/package_id.html)).
  Options which do not impact the generated packages should be deleted, for instance adding a `#define` for a package.
 
  ```python
