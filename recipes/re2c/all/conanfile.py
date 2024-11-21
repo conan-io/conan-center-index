@@ -6,6 +6,7 @@ from conan.tools.files import apply_conandata_patches, chdir, copy, export_conan
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -74,6 +75,16 @@ class Re2CConan(ConanFile):
                         '"$ac_config_links ',
                         '"$ac_config_links" #',
                         strict=False)
+        # re-enable syntax files for 4.0 or later
+        if Version(self.version) >= "4.0":
+            replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                            '"$ac_config_files Makefile" #src',
+                            '"$ac_config_files Makefile src',
+                            strict=False)
+            replace_in_file(self, os.path.join(self.source_folder, "configure"),
+                            '"$ac_config_links" #src',
+                            '"$ac_config_links src',
+                            strict=False)
 
     def build(self):
         self._patch_sources()
@@ -108,8 +119,3 @@ class Re2CConan(ConanFile):
 
         include_dir = os.path.join(self.package_folder, "include")
         self.buildenv_info.define("RE2C_STDLIB_DIR", include_dir)
-
-        # TODO: to remove in conan v2
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bin_path)
-        self.env_info.RE2C_STDLIB_DIR = include_dir
