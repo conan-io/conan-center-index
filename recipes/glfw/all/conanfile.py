@@ -61,12 +61,16 @@ class GlfwConan(ConanFile):
 
         if self.options.get_safe("with_wayland"):
             self.options["xkbcommon"].with_wayland = True
+            self.options["wayland"].shared = True
+            self.options["xkbcommon"].shared = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("opengl/system")
+        # libs=False because glfw does not link to opengl, it
+        # loads it via dlopen or equivalent
+        self.requires("opengl/system", libs=False, transitive_headers=True)
         if self.options.vulkan_static:
             self.requires("vulkan-loader/1.3.268.0")
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -77,8 +81,14 @@ class GlfwConan(ConanFile):
             self.requires("xkbcommon/1.6.0")
 
     def validate(self):
-        if self.options.get_safe("with_wayland") and not self.dependencies["xkbcommon"].options.with_wayland:
-            raise ConanInvalidConfiguration(f"{self.ref} requires the with_wayland option in xkbcommon to be enabled when the with_wayland option is enabled")
+        if self.options.get_safe("with_wayland"):
+            xkbcommon_options = self.dependencies["xkbcommon"].options
+            if not xkbcommon_options.with_wayland:
+                raise ConanInvalidConfiguration(f"{self.ref} requires the with_wayland option in xkbcommon to be enabled when the with_wayland option is enabled")
+            if not xkbcommon_options.shared:
+                raise ConanInvalidConfiguration(f"{self.ref} always loads xkbcommon dependencies dynamically and does not support static linkage")
+            if not self.dependencies["wayland"].options.shared:
+                raise ConanInvalidConfiguration(f"{self.ref} always loads wayland dependencies dynamically and does not support static linkage")
 
     def build_requirements(self):
         if self.options.get_safe("with_wayland"):
@@ -214,7 +224,6 @@ class GlfwConan(ConanFile):
                 "AppKit", "Cocoa", "CoreFoundation", "CoreGraphics",
                 "CoreServices", "Foundation", "IOKit",
             ])
-
         self.cpp_info.requires = ["opengl::opengl"]
         if self.options.vulkan_static:
             self.cpp_info.requires.append("vulkan-loader::vulkan-loader")
@@ -238,11 +247,4 @@ class GlfwConan(ConanFile):
                 "xkbcommon::xkbcommon"
             ])
 
-        # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
-        self.cpp_info.filenames["cmake_find_package"] = "glfw3"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "glfw3"
-        self.cpp_info.names["cmake_find_package"] = "glfw"
-        self.cpp_info.names["cmake_find_package_multi"] = "glfw"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "glfw3"
+
