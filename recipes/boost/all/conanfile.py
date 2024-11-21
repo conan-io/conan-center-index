@@ -108,10 +108,6 @@ class BoostConan(ConanFile):
         "system_use_utf8": [True, False],
         "with_stacktrace_backtrace": [True, False],
         "with_stacktrace_from_exception": [True, False],
-        "with_stacktrace_windbg": [True, False],
-        "with_stacktrace_windbg_cached": [True, False],
-        "with_stacktrace_noop": [True, False],
-        "with_stacktrace_basic": [True, False],
     }
     options.update({f"without_{_name}": [True, False] for _name in CONFIGURE_OPTIONS})
 
@@ -150,10 +146,6 @@ class BoostConan(ConanFile):
         "system_use_utf8": False,
         "with_stacktrace_backtrace": True,
         "with_stacktrace_from_exception": True,
-        "with_stacktrace_windbg": True,
-        "with_stacktrace_windbg_cached": True,
-        "with_stacktrace_noop": True,
-        "with_stacktrace_basic": True,
     }
     default_options.update({f"without_{_name}": False for _name in CONFIGURE_OPTIONS})
     default_options.update({f"without_{_name}": True for _name in ("graph_parallel", "mpi", "python")})
@@ -375,10 +367,10 @@ class BoostConan(ConanFile):
     def _stacktrace_from_exception_available(self):
         if Version(self.version) == "1.85.0":
             # https://github.com/boostorg/stacktrace/blob/boost-1.85.0/build/Jamfile.v2#L143
-            return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows"
+            return not self.options.header_only and not self.options.without_stacktrace and self.settings.os != "Windows" and self.options.with_stacktrace_from_exception
         elif Version(self.version) >= "1.86.0":
             # https://github.com/boostorg/stacktrace/blob/boost-1.86.0/build/Jamfile.v2#L148
-            return not self.options.header_only and not self.options.without_stacktrace and self._b2_architecture == "x86"
+            return not self.options.header_only and not self.options.without_stacktrace and self.options.with_stacktrace_from_exception
 
     def configure(self):
         if self.options.header_only:
@@ -405,10 +397,6 @@ class BoostConan(ConanFile):
         if self.options.get_safe("without_stacktrace", True):
             self.options.rm_safe("with_stacktrace_backtrace")
             self.options.rm_safe("with_stacktrace_from_exception")
-            self.options.rm_safe("with_stacktrace_windbg")
-            self.options.rm_safe("with_stacktrace_windbg_cached")
-            self.options.rm_safe("with_stacktrace_noop")
-            self.options.rm_safe("with_stacktrace_basic")
 
         if self.options.without_fiber:
             self.options.rm_safe("numa")
@@ -852,14 +840,10 @@ class BoostConan(ConanFile):
             libbacktrace_libdir = self.dependencies["libbacktrace"].cpp_info.aggregated_components().libdirs[0]
             patched_run_rule = f"{linker_var}={libbacktrace_libdir} $(>) > $(<)"
             replace_in_file(self, stacktrace_jamfile, "$(>) > $(<)", patched_run_rule, strict=False)
+            # INFO: libstacktrace is consumed as static always by
             if self.dependencies["libbacktrace"].options.shared:
                 replace_in_file(self, stacktrace_jamfile, "<link>static", "<link>shared", strict=False)
 
-        # Older clang releases require a thread_local variable to be initialized by a constant value
-        replace_in_file(self, os.path.join(self.source_folder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
-                              "/* thread_local */", "thread_local", strict=False)
-        replace_in_file(self, os.path.join(self.source_folder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
-                              "/* static __thread */", "static __thread", strict=False)
         if self.settings.compiler == "apple-clang" or (self.settings.compiler == "clang" and Version(self.settings.compiler.version) < 6):
             replace_in_file(self, os.path.join(self.source_folder, "boost", "stacktrace", "detail", "libbacktrace_impls.hpp"),
                                   "thread_local", "/* thread_local */")
@@ -993,8 +977,6 @@ class BoostConan(ConanFile):
 
     @property
     def _build_flags(self):
-        on_off = lambda value: "on" if value else "off"
-
         flags = self._build_cross_flags
 
         # Stop at the first error. No need to continue building.
@@ -1037,11 +1019,9 @@ class BoostConan(ConanFile):
             flags.append("boost.locale.iconv=off")
             flags.append("--disable-iconv")
 
-        flags.append(f"boost.stacktrace.from_exception={on_off(self.options.get_safe("with_stacktrace_from_exception"))}")
-        #flags.append(f"boost.stacktrace.windbg={on_off(self.options.get_safe("with_stacktrace_windbg"))}")
-        #flags.append(f"boost.stacktrace.windbg_cached={on_off(self.options.get_safe("with_stacktrace_windbg_cached"))}")
-        #flags.append(f"boost.stacktrace.noop={on_off(self.options.get_safe("with_stacktrace_noop"))}")
-        #flags.append(f"boost.stacktrace.basic={on_off(self.options.get_safe("with_stacktrace_basic"))}")
+        if not self.options.without_stacktrace:
+            flags.append("boost.stacktrace.from_exception={}"
+                            .format("on" if self._stacktrace_from_exception_available else "off"))
 
         def add_defines(library):
             for define in self.dependencies[library].cpp_info.aggregated_components().defines:
