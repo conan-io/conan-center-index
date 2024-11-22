@@ -13,7 +13,7 @@ required_conan_version = ">=2.1"
 class libdatachannelConan(ConanFile):
     name = "libdatachannel"
     description = "C/C++ WebRTC network library featuring Data Channels, Media Transport, and WebSockets."
-    license = "MPL 2.0"
+    license = "MPL-2.0"
     topics = ("webrtc")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/paullouisageneau/libdatachannel"
