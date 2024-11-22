@@ -2,15 +2,14 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
 import os
 import glob
-import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1.0"
 
 class ArrowConan(ConanFile):
     name = "arrow"
@@ -123,21 +122,6 @@ class ArrowConan(ConanFile):
         # https://github.com/apache/arrow/pull/13991
         return "11" if Version(self.version) < "10.0.0" else "17"
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "11": {
-                "clang": "3.9",
-            },
-            "17": {
-                "gcc": "8",
-                "clang": "7",
-                "apple-clang": "10",
-                "Visual Studio": "15",
-                "msvc": "191",
-            },
-        }.get(self._min_cppstd, {})
-
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
@@ -247,10 +231,13 @@ class ArrowConan(ConanFile):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+        if (
+            Version(self.version) < "10.0.0"
+            and self.settings.compiler == "clang"
+            and Version(self.settings.compiler.version) < "3.9"
+        ):
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                f"{self.ref} requires C++11, which needs at least clang-3.9"
             )
 
         if self.options.get_safe("skyhook", False):
@@ -454,30 +441,9 @@ class ArrowConan(ConanFile):
         if self.options.with_flight_rpc:
             alias_map[f"ArrowFlight::arrow_flight_sql_{cmake_suffix}"] = f"arrow::arrow_flight_sql_{cmake_suffix}"
 
-
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path), alias_map
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent("""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """.format(alias=alias, aliased=aliased))
-        save(self, module_file, content)
-
     @property
     def _module_subfolder(self):
         return os.path.join("lib", "cmake")
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join(self._module_subfolder,
-                            f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         # FIXME: fix CMake targets of components
@@ -534,6 +500,9 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow_flight"].set_property("cmake_target_name", f"ArrowFlight::arrow_flight_{cmake_suffix}")
             self.cpp_info.components["libarrow_flight"].libs = [f"arrow_flight{suffix}"]
             self.cpp_info.components["libarrow_flight"].requires = ["libarrow"]
+            # https://github.com/apache/arrow/pull/43137#pullrequestreview-2267476893
+            if Version(self.version) >= "18.0.0" and self.options.with_openssl:
+                self.cpp_info.components["libarrow_flight"].requires.append("openssl::openssl")
 
         if self.options.get_safe("with_flight_sql"):
             self.cpp_info.components["libarrow_flight_sql"].set_property("pkg_config_name", "flight_sql")
@@ -616,38 +585,3 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["libarrow"].requires.append("grpc::grpc")
         if self.options.with_flight_rpc:
             self.cpp_info.components["libarrow_flight"].requires.append("protobuf::protobuf")
-
-        # TODO: to remove in conan v2
-        self.cpp_info.filenames["cmake_find_package"] = "Arrow"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Arrow"
-        self.cpp_info.components["libarrow"].names["cmake_find_package"] = f"arrow_{cmake_suffix}"
-        self.cpp_info.components["libarrow"].names["cmake_find_package_multi"] = f"arrow_{cmake_suffix}"
-        self.cpp_info.components["libarrow"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["libarrow"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.parquet:
-            self.cpp_info.components["libparquet"].names["cmake_find_package"] = f"parquet_{cmake_suffix}"
-            self.cpp_info.components["libparquet"].names["cmake_find_package_multi"] = f"parquet_{cmake_suffix}"
-            self.cpp_info.components["libparquet"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["libparquet"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.get_safe("substrait"):
-            self.cpp_info.components["libarrow_substrait"].names["cmake_find_package"] = f"arrow_substrait_{cmake_suffix}"
-            self.cpp_info.components["libarrow_substrait"].names["cmake_find_package_multi"] = f"arrow_substrait_{cmake_suffix}"
-            self.cpp_info.components["libarrow_substrait"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["libarrow_substrait"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.gandiva:
-            self.cpp_info.components["libgandiva"].names["cmake_find_package"] = "gandiva"
-            self.cpp_info.components["libgandiva"].names["cmake_find_package_multi"] = "gandiva"
-            self.cpp_info.components["libgandiva"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["libgandiva"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.with_flight_rpc:
-            self.cpp_info.components["libarrow_flight"].names["cmake_find_package"] = "flight_rpc"
-            self.cpp_info.components["libarrow_flight"].names["cmake_find_package_multi"] = "flight_rpc"
-            self.cpp_info.components["libarrow_flight"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["libarrow_flight"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.get_safe("with_flight_sql"):
-            self.cpp_info.components["libarrow_flight_sql"].names["cmake_find_package"] = "flight_sql"
-            self.cpp_info.components["libarrow_flight_sql"].names["cmake_find_package_multi"] = "flight_sql"
-            self.cpp_info.components["libarrow_flight_sql"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["libarrow_flight_sql"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.cli and (self.options.with_cuda or self.options.with_flight_rpc or self.options.parquet):
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
