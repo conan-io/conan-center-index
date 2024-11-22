@@ -42,11 +42,12 @@ class SvtJpegXsConan(ConanFile):
         self.tool_requires("yasm/1.3.0")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
-        if not self.settings.arch in ("x86", "x86_64"):
-            raise ConanInvalidConfiguration("libsvtjpegxs currently only supports x86 with SSE or AVX support")
+        if self.settings.arch not in ["x86", "x86_64"]:
+            # INFO: The upstream mention about only supporting x86, SSE and AVX
+            # https://github.com/OpenVisualCloud/SVT-JPEG-XS/tree/v0.9.0?tab=readme-ov-file#environment-and-requirements
+            raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.arch}. Only x86 and x86_64 are supported.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
