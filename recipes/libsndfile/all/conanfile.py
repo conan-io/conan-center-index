@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -54,6 +55,11 @@ class LibsndfileConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+
+    def validate(self):
+        if self.options.get_safe("with_alsa") != self.dependencies["libsndio"].options.get_safe("with_alsa"):
+            raise ConanInvalidConfiguration(f"{self.ref} with_alsa ({self.options.get_safe('with_alsa')}) option "\
+                f"should be equal to the libsndio with_alsa ({self.dependencies['libsndio'].options.get_safe('with_alsa')}) one")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
