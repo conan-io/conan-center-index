@@ -57,9 +57,8 @@ class LibsndfileConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def validate(self):
-        if self.options.get_safe("with_alsa") != self.dependencies["libsndio"].options.get_safe("with_alsa"):
-            raise ConanInvalidConfiguration(f"{self.ref} with_alsa ({self.options.get_safe('with_alsa')}) option "\
-                f"should be equal to the libsndio with_alsa ({self.dependencies['libsndio'].options.get_safe('with_alsa')}) one")
+        if self.dependencies["libsndio"].options.get_safe("with_alsa") and not self.options.get_safe("with_alsa"):
+            raise ConanInvalidConfiguration(f"{self.ref} 'with_alsa' option should be True when the libsndio 'with_alsa' one is True")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
