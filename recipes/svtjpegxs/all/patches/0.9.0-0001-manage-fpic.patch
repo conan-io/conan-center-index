@@ -1,14 +1,12 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e7cdc8d..4badbaf 100644
+index e7cdc8d..6a88a89 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -88,9 +88,7 @@ else()
+@@ -88,7 +88,6 @@ else()
      set_property(CACHE SANITIZER PROPERTY STRINGS Address Memory Thread Undefined Integer)
  endif()
  
 -set(CMAKE_POSITION_INDEPENDENT_CODE ON)
  set(CMAKE_C_STANDARD 99)
--set(CMAKE_CXX_STANDARD 11)
+ set(CMAKE_CXX_STANDARD 11)
  
- # BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
- # make it prominent in the GUI.
