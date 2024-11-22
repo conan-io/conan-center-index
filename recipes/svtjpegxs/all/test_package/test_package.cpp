@@ -1,8 +1,10 @@
-#include "svt-jpegxs/SvtJpegxs.h"
+#include <cstdlib>
 
-#include <iostream>
+#include "svt-jpegxs/SvtJpegxs.h"
+#include "svt-jpegxs/SvtJpegxsImageBufferTools.h"
 
 int main()
 {
-    std::cout << SVT_JPEGXS_API_VER_MAJOR << "." << SVT_JPEGXS_API_VER_MINOR << "\n";
+    svt_jpeg_xs_frame_pool_free(nullptr);
+    return EXIT_SUCCESS;
 }

@@ -2,8 +2,9 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
+from conan.tools.cmake import cmake_layout, CMakeToolchain, CMake
 from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.microsoft import is_msvc
 
 required_conan_version = ">=2.0.9"
 
@@ -33,11 +34,6 @@ class SvtJpegXsConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
-    def requirements(self):
-        pass
-        # if not self.settings.arch in ("x86", "x86_64"):
-        #     self.tool_requires("simde/0.8.2")
-
     def build_requirements(self):
         self.tool_requires("yasm/1.3.0")
 
@@ -57,8 +53,6 @@ class SvtJpegXsConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_APPS"] = False
         tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -78,3 +72,6 @@ class SvtJpegXsConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m", "pthread"]
+
+        if is_msvc(self) and self.options.shared:
+            self.cpp_info.defines.append("DEF_DLL")
