@@ -435,8 +435,10 @@ class QtConan(ConanFile):
             self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
-            if self.options.get_safe("opengl", "no") != "no":
+            if self.options.get_safe("opengl", "no") == "desktop":
                 self.requires("opengl/system")
+            elif self.options.get_safe("opengl", "no")  == "es2":
+                self.requires("egl/system") 
         if self.settings.os in ["FreeBSD", "Linux"] and ((not self.options.get_safe("with_x11") and self.options.get_safe("opengl", "no") != "no") or self.options.qtwebengine):
             self.requires("egl/system")
         if self.options.get_safe("with_x11") or self.options.qtwayland:
