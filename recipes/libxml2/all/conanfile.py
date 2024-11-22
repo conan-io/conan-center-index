@@ -83,6 +83,8 @@ class Libxml2Conan(ConanFile):
             del self.options.docbook
         if Version(self.version) >= "2.11.0":
             self.options.rm_safe("run-debug")
+        if Version(self.version) >= "2.13.0":
+            self.options.rm_safe("mem-debug")
 
     def configure(self):
         if self.options.shared:
@@ -346,8 +348,8 @@ class Libxml2Conan(ConanFile):
                 set(LIBXML2_INCLUDE_DIR ${{LibXml2_INCLUDE_DIRS}})
                 set(LIBXML2_INCLUDE_DIRS ${{LibXml2_INCLUDE_DIRS}})
             elseif(DEFINED libxml2_INCLUDE_DIRS)
-                set(LIBXML2_LIBRARIES ${{libxml2_INCLUDE_DIRS}})
-                set(LIBXML2_LIBRARY ${{libxml2_INCLUDE_DIRS}})
+                set(LIBXML2_INCLUDE_DIR ${{libxml2_INCLUDE_DIRS}})
+                set(LIBXML2_INCLUDE_DIRS ${{libxml2_INCLUDE_DIRS}})
             endif()
             if(DEFINED LibXml2_LIBRARIES)
                 set(LIBXML2_LIBRARIES ${{LibXml2_LIBRARIES}})
@@ -398,6 +400,10 @@ class Libxml2Conan(ConanFile):
         elif self.settings.os == "Windows":
             if self.options.ftp or self.options.http:
                 self.cpp_info.system_libs.extend(["ws2_32", "wsock32"])
+            if Version(self.version) >= "2.13.4":
+                # https://gitlab.gnome.org/GNOME/libxml2/-/issues/791
+                # https://gitlab.gnome.org/GNOME/libxml2/-/blob/2.13/win32/Makefile.msvc?ref_type=heads#L84
+                self.cpp_info.system_libs.append("bcrypt")
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "LibXml2"

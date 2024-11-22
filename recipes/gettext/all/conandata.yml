@@ -24,6 +24,9 @@ patches:
       patch_description: "apply the __atribute_noreturn__ to print_and_abort"
       patch_source: "https://github.com/coreutils/gnulib/commit/0cc39712803ade7b2d4b89c36b143dad72404063"
       patch_type: "conan"
+    - patch_file: "patches/0.21-include-stdlib_h.patch"
+      patch_description: "include stdlib.h for newer gcc"
+      patch_type: "portability"
   "0.20.1":
     - patch_file: "patches/0.20.1-0001-fix-build-errors-with-MSVC.patch"
     - patch_file: "patches/0.20.1-0003-Reported-by-Gabor-Z.-Papp-gzp-papp.hu.patch"

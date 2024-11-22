@@ -6,6 +6,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.apple import fix_apple_shared_install_name
 
 required_conan_version = ">=1.53.0"
 
@@ -45,12 +46,7 @@ class ShadercConan(ConanFile):
 
     @property
     def _spirv_version(self):
-        return {
-            # TODO: bump me once newer versions are available on CCI
-            # "2023.6": "1.3.261.1",
-            "2023.6": "1.3.239.0",
-            "2021.1": "1.3.224.0",
-        }[str(self.version)]
+        return self.conan_data.get("siprv_mapping")[self.version]
 
     def requirements(self):
         # transitive_headers=True is not required for any of the dependencies
@@ -104,6 +100,7 @@ class ShadercConan(ConanFile):
         copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
+        fix_apple_shared_install_name(self)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):

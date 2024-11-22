@@ -1,0 +1,20 @@
+sources:
+  "1.3":
+    url: "https://github.com/bbc/bmx/releases/download/v1.3/bmx-1.3.tar.gz"
+    sha256: "c20cd34f201510affe62c079c7f9079a10dce3a44d7f61b21f9faff624fdaeab"
+  "1.2":
+    url: "https://github.com/bbc/bmx/archive/refs/tags/v1.2.tar.gz"
+    sha256: "e64d91b2d27478d6b892d72183e1ecf79c99880b079ce04442432f3caed1e259"
+patches:
+  "1.3":
+    - patch_file: "patches/1.3-cmake-fixes.patch"
+      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
+      patch_type: "conan"
+  "1.2":
+    - patch_file: "patches/1.2-cmake-fixes.patch"
+      patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
+      patch_type: "conan"
+    - patch_file: "patches/1.2-fix-cpp20.patch"
+      patch_description: "Fix a compilation problem with C++20"
+      patch_type: "portability"
+      patch_source: "https://github.com/bbc/bmx/pull/69"

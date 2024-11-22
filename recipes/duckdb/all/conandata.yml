@@ -1,4 +1,19 @@
 sources:
+  "1.1.3":
+    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v1.1.2.tar.gz"
+    sha256: "a3319a64c390ed0454c869b2e4fc0af2413cd49f55cd0f1400aaed9069cdbc4c"
+  "1.1.2":
+    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v1.1.2.tar.gz"
+    sha256: "a3319a64c390ed0454c869b2e4fc0af2413cd49f55cd0f1400aaed9069cdbc4c"
+  "1.1.1":
+    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v1.1.1.tar.gz"
+    sha256: "a764cef80287ccfd8555884d8facbe962154e7c747043c0842cd07873b4d6752"
+  "1.1.0":
+    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v1.1.0.tar.gz"
+    sha256: "d9be2c6d3a5ebe2b3d33044fb2cb535bb0bd972a27ae38c4de5e1b4caa4bf68d"
+  "1.0.0":
+    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v1.0.0.tar.gz"
+    sha256: "04e472e646f5cadd0a3f877a143610674b0d2bcf9f4102203ac3c3d02f1c5f26"
   "0.10.2":
     url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.10.2.tar.gz"
     sha256: "662a0ba5c35d678ab6870db8f65ffa1c72e6096ad525a35b41b275139684cea6"
@@ -11,25 +26,42 @@ sources:
   "0.9.0":
     url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.9.0.tar.gz"
     sha256: "3dbf3326a831bf0797591572440e81a3d6d668f8e33a25ce04efae19afc3a23d"
-  "0.8.1":
-    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.8.1.tar.gz"
-    sha256: "a0674f7e320dc7ebcf51990d7fc1c0e7f7b2c335c08f5953702b5285e6c30694"
-  "0.8.0":
-    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.8.0.tar.gz"
-    sha256: "df3b8e0b72bce38914f0fb1cd02235d8b616df9209beb14beb06bfbcaaf2e97f"
-  "0.7.1":
-    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.7.1.tar.gz"
-    sha256: "67f840f861e5ffbe137d65a8543642d016f900b89dd035492d562ad11acf0e1e"
-  "0.6.1":
-    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.6.1.tar.gz"
-    sha256: "ea9bba89ae3e461f3fc9f83911b2f3b6c386c23463bcf7b1ed6bb4cc13e822a4"
-  "0.6.0":
-    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.6.0.tar.gz"
-    sha256: "700b09114f8b99892a9d19ba21ca962ae65d1ea8085622418a2fa50ff915b244"
-  "0.5.1":
-    url: "https://github.com/duckdb/duckdb/archive/refs/tags/v0.5.1.tar.gz"
-    sha256: "3dab7ba0d0f8d024d3c73fd3d4fb8834203c31d7b0ddb1e8539ee266e11b0e9b"
 patches:
+  "1.1.3":
+    - patch_file: "patches/1.1.1-0001-fix-cmake.patch"
+      patch_description: "install static of shared library, add installation for odbc extention"
+      patch_type: "portability"
+    - patch_file: "patches/1.1.1-0002-msvc-bicobj.patch"
+      patch_description: "add /bigobj flag"
+      patch_type: "portability"
+  "1.1.2":
+    - patch_file: "patches/1.1.1-0001-fix-cmake.patch"
+      patch_description: "install static of shared library, add installation for odbc extention"
+      patch_type: "portability"
+    - patch_file: "patches/1.1.1-0002-msvc-bicobj.patch"
+      patch_description: "add /bigobj flag"
+      patch_type: "portability"
+  "1.1.1":
+    - patch_file: "patches/1.1.1-0001-fix-cmake.patch"
+      patch_description: "install static of shared library, add installation for odbc extention"
+      patch_type: "portability"
+    - patch_file: "patches/1.1.1-0002-msvc-bicobj.patch"
+      patch_description: "add /bigobj flag"
+      patch_type: "portability"
+  "1.1.0":
+    - patch_file: "patches/1.1.0-0001-fix-cmake.patch"
+      patch_description: "install static of shared library, add installation for odbc extention"
+      patch_type: "portability"
+    - patch_file: "patches/1.1.0-0002-msvc-bicobj.patch"
+      patch_description: "add /bigobj flag"
+      patch_type: "portability"
+  "1.0.0":
+    - patch_file: "patches/1.0.0-0001-fix-cmake.patch"
+      patch_description: "install static of shared library, add installation for odbc extention"
+      patch_type: "portability"
+    - patch_file: "patches/1.0.0-0002-msvc-bicobj.patch"
+      patch_description: "add /bigobj flag"
+      patch_type: "portability"
   "0.10.2":
     - patch_file: "patches/0.10.2-0001-fix-cmake.patch"
       patch_description: "install static of shared library, add installation for odbc extention"
@@ -50,37 +82,5 @@ patches:
       patch_type: "portability"
   "0.9.0":
     - patch_file: "patches/0.9.0-0001-fix-cmake.patch"
-      patch_description: "install static of shared library, add installation for odbc extention"
-      patch_type: "portability"
-  "0.8.1":
-    - patch_file: "patches/0.8.1-0001-fix-cmake.patch"
-      patch_description: "install static of shared library, add installation for odbc extention"
-      patch_type: "portability"
-  "0.8.0":
-    - patch_file: "patches/0.8.0-0001-fix-cmake.patch"
-      patch_description: "install static of shared library, add installation for odbc extention"
-      patch_type: "portability"
-  "0.7.1":
-    - patch_file: "patches/0.7.0-0001-fix-cmake.patch"
-      patch_description: "install static of shared library, add installation for odbc extention"
-      patch_type: "portability"
-  "0.6.1":
-    - patch_file: "patches/0.6.0-0001-fix-cmake.patch"
-      patch_description: "install static of shared library, add installation for odbc extention"
-      patch_type: "portability"
-    - patch_file: "patches/0.6.0-0002-include-stdlib.patch"
-      patch_description: "include stdlib for abort function"
-      patch_type: "portability"
-      patch_source: "https://github.com/duckdb/duckdb/commit/50b0bd07a6c22d17c4453632fce3b3d3c872663e"
-  "0.6.0":
-    - patch_file: "patches/0.6.0-0001-fix-cmake.patch"
-      patch_description: "install static of shared library, add installation for odbc extention"
-      patch_type: "portability"
-    - patch_file: "patches/0.6.0-0002-include-stdlib.patch"
-      patch_description: "include stdlib for abort function"
-      patch_type: "portability"
-      patch_source: "https://github.com/duckdb/duckdb/commit/50b0bd07a6c22d17c4453632fce3b3d3c872663e"
-  "0.5.1":
-    - patch_file: "patches/0.5.1-0001-fix-cmake.patch"
       patch_description: "install static of shared library, add installation for odbc extention"
       patch_type: "portability"

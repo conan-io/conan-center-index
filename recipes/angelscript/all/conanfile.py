@@ -10,13 +10,13 @@ required_conan_version = ">=1.53.0"
 
 class AngelScriptConan(ConanFile):
     name = "angelscript"
-    license = "Zlib"
-    homepage = "http://www.angelcode.com/angelscript"
-    url = "https://github.com/conan-io/conan-center-index"
     description = (
         "An extremely flexible cross-platform scripting library designed to "
         "allow applications to extend their functionality through external scripts."
     )
+    license = "Zlib"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "http://www.angelcode.com/angelscript"
     topics = ("angelcode", "embedded", "scripting", "language", "compiler", "interpreter")
 
     package_type = "library"
@@ -90,7 +90,7 @@ class AngelScriptConan(ConanFile):
         # TODO: back to global scope in conan v2 once cmake_find_package* generators removed
         self.cpp_info.components["_angelscript"].libs = [f"angelscript{postfix}"]
         if self.settings.os in ("Linux", "FreeBSD", "SunOS"):
-            self.cpp_info.components["_angelscript"].system_libs.append("pthread")
+            self.cpp_info.components["_angelscript"].system_libs.extend(["m", "pthread"])
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.names["cmake_find_package"] = "Angelscript"

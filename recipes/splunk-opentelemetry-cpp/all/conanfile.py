@@ -1,83 +1,115 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
-import glob
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.53.0"
 
 
 class SplunkOpentelemetryConan(ConanFile):
     name = "splunk-opentelemetry-cpp"
+    description = "Splunk's distribution of OpenTelemetry C++"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/signalfx/splunk-otel-cpp"
-    description = "Splunk's distribution of OpenTelemetry C++"
     topics = ("opentelemetry", "observability", "tracing")
-    settings = "os", "compiler", "build_type", "arch"
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
-        "fPIC": [True, False],
         "shared": [True, False],
+        "fPIC": [True, False],
+        "build_jaeger_exporter": [True, False],
     }
     default_options = {
-        "fPIC": True,
         "shared": False,
+        "fPIC": True,
+        "build_jaeger_exporter": True,
     }
-    generators = "cmake", "cmake_find_package_multi"
-    requires = "opentelemetry-cpp/1.0.1"
-    exports_sources = "CMakeLists.txt"
-    short_paths = True
-    _cmake = None
 
-    def validate(self):
-        if self.settings.arch != "x86_64":
-            raise ConanInvalidConfiguration("Architecture not supported")
+    @property
+    def _min_cppstd(self):
+        return 14
 
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "6",
+            "clang": "5",
+            "apple-clang": "10",
+            "Visual Studio": "16",
+            "msvc": "192",
+        }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
-    def _remove_unnecessary_package_files(self):
-        tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
+    def requirements(self):
+        self.requires("opentelemetry-cpp/1.8.3", transitive_headers=True) # v1.12 is not compatible
+        self.requires("grpc/1.54.3")
+        self.requires("nlohmann_json/3.11.3")
+        if self.options.build_jaeger_exporter:
+            self.requires("thrift/0.17.0")
+            self.requires("libcurl/[>=7.78.0 <9]")
+
+    def validate(self):
+        if self.settings.arch != "x86_64":
+            raise ConanInvalidConfiguration(f"{self.settings.arch} architecture not supported")
+        if self.options.build_jaeger_exporter and not self.dependencies["opentelemetry-cpp"].options.get_safe("with_jaeger"):
+            raise ConanInvalidConfiguration("Cannot build Jaeger exporter without with_jaeger=True in opentelemetry-cpp")
+
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def source(self):
-        tools.get(
-            **self.conan_data["sources"][self.version],
-            strip_root=True,
-            destination=self._source_subfolder
-        )
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-
-        self._cmake = CMake(self)
-        defs = {
-          "SPLUNK_CPP_EXAMPLES": False
-        }
-        self._cmake.configure(defs=defs, build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["SPLUNK_CPP_TESTS"] = False
+        tc.variables["SPLUNK_CPP_EXAMPLES"] = False
+        tc.variables["SPLUNK_CPP_WITH_JAEGER_EXPORTER"] = self.options.build_jaeger_exporter
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
-        self._remove_unnecessary_package_files()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "SplunkOpenTelemetry")
+        self.cpp_info.set_property("cmake_target_name", "SplunkOpenTelemetry::SplunkOpenTelemetry")
+        self.cpp_info.libs = ["SplunkOpenTelemetry"]
+
+        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.names["cmake_find_package"] = "SplunkOpenTelemetry"
         self.cpp_info.names["cmake_find_package_multi"] = "SplunkOpenTelemetry"
-        self.cpp_info.libs = ["SplunkOpenTelemetry"]

@@ -12,15 +12,6 @@ index ce2617c..77242fc 100644
  
  Makefile: $(TOP)/Makefile.in
  	./config.status
-@@ -1367,7 +1366,7 @@ fulltestonly:	$(TESTPROGS) fuzztest
- # Fuzz testing
- #
- # WARNING: When the "fuzztest" target is run by the testrunner.tcl script,
--# it does not actually run this code. Instead, it schedules equivalent 
-+# it does not actually run this code. Instead, it schedules equivalent
- # commands. Therefore, if this target is updated, then code in
- # testrunner_data.tcl (search for "trd_fuzztest_data") must also be updated.
- #
 @@ -1579,9 +1578,8 @@ lib_install:	libsqlcipher.la
  	$(INSTALL) -d $(DESTDIR)$(libdir)
  	$(LTINSTALL) libsqlcipher.la $(DESTDIR)$(libdir)
@@ -32,12 +23,3 @@ index ce2617c..77242fc 100644
  	$(INSTALL) -d $(DESTDIR)$(includedir)
  	$(INSTALL) -m 0644 sqlite3.h $(DESTDIR)$(includedir)
  	$(INSTALL) -m 0644 $(TOP)/src/sqlite3ext.h $(DESTDIR)$(includedir)
-@@ -1596,7 +1594,7 @@ tcl_install:	lib_install libtclsqlite3.la pkgIndex.tcl
- 	rm -f $(DESTDIR)$(TCLLIBDIR)/libtclsqlite3.la $(DESTDIR)$(TCLLIBDIR)/libtclsqlite3.a
- 	$(INSTALL) -m 0644 pkgIndex.tcl $(DESTDIR)$(TCLLIBDIR)
- 
--clean:	
-+clean:
- 	rm -f *.lo *.la *.o sqlcipher$(TEXE) libsqlcipher.la
- 	rm -f sqlite3.h opcodes.*
- 	rm -rf .libs .deps

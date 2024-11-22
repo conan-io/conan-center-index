@@ -62,6 +62,13 @@ class PixmanConan(ConanFile):
             "libpng": "disabled",
             "gtk": "disabled"
         })
+
+        # Android armv7 build of Pixman makes use of cpu-features functionality, provided in the NDK
+        if self.settings.os == "Android":
+            android_ndk_home = self.conf.get("tools.android:ndk_path").replace("\\", "/")
+            cpu_features_path = os.path.join(android_ndk_home, "sources", "android", "cpufeatures")
+            tc.project_options.update({'cpu-features-path' : cpu_features_path})
+
         tc.generate()
 
     def _patch_sources(self):

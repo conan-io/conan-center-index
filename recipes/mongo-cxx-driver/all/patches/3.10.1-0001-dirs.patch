@@ -1,0 +1,61 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2a960f7..f809b6c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -315,7 +315,7 @@ unset(dist_generated_depends CACHE)
+ set(BUILD_SOURCE_DIR ${CMAKE_BINARY_DIR})
+ 
+ include(MakeDistFiles)
+-
++if(FALSE)
+ add_custom_target(hugo_dir
+     COMMAND ${CMAKE_COMMAND} -E make_directory hugo
+ )
+@@ -371,7 +371,7 @@ add_custom_target(format-lint
+ add_custom_target(docs
+     DEPENDS hugo doxygen-current
+ )
+-
++endif()
+ set(THIRD_PARTY_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/third_party)
+ set(DATA_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data)
+ 
+@@ -381,13 +381,13 @@ option(ENABLE_MACRO_GUARD_TESTS "Enable targets for macro guard compile tests."
+ if(ENABLE_TESTS)
+     enable_testing()
+ endif()
+-
++set(MONGO_CXX_PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
++set(MONGO_CXX_PROJECT_BIN_DIR ${CMAKE_CURRENT_BINARY_DIR})
+ add_subdirectory(src)
++# add_subdirectory(examples EXCLUDE_FROM_ALL)
+ 
+-add_subdirectory(examples EXCLUDE_FROM_ALL)
+-
+-add_subdirectory(benchmark EXCLUDE_FROM_ALL)
+-
++# add_subdirectory(benchmark EXCLUDE_FROM_ALL)
++if(FALSE)
+ # Implement 'dist' target
+ #
+ # CMake does not implement anything like 'dist' from autotools.
+@@ -525,3 +525,4 @@ endif()
+ if(CMAKE_GENERATOR_TOOLSET)
+     message(STATUS "\tinstance: ${CMAKE_GENERATOR_TOOLSET}")
+ endif()
++endif()
+diff --git a/src/bsoncxx/CMakeLists.txt b/src/bsoncxx/CMakeLists.txt
+index ce53a71..bcd0a61 100644
+--- a/src/bsoncxx/CMakeLists.txt
++++ b/src/bsoncxx/CMakeLists.txt
+@@ -93,8 +93,8 @@ if(TARGET bson_shared OR TARGET bson_static)
+     set(BSONCXX_PKG_DEP "find_dependency(bson-${LIBBSON_REQUIRED_ABI_VERSION} REQUIRED)")
+ else()
+     # Attempt to find libbson by new package name (without lib).
+-    find_package(bson-${LIBBSON_REQUIRED_ABI_VERSION} ${LIBBSON_REQUIRED_VERSION} QUIET)
+-
++    find_package(bson-${LIBBSON_REQUIRED_ABI_VERSION} REQUIRED)
++    set(bson-${LIBBSON_REQUIRED_ABI_VERSION}_FOUND TRUE)
+     if(bson-${LIBBSON_REQUIRED_ABI_VERSION}_FOUND)
+         message(STATUS "found libbson version ${bson-${LIBBSON_REQUIRED_ABI_VERSION}_VERSION}")
+ 

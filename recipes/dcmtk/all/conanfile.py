@@ -152,6 +152,9 @@ class DCMTKConan(ConanFile):
         tc.variables["DCMTK_ENABLE_CXX11"] = True
         tc.variables["DCMTK_ENABLE_MANPAGE"] = False
         tc.cache_variables["DCMTK_DEFAULT_DICT"] = self.options.default_dict
+        if self.options.charset_conversion and Version(self.version) >= "3.6.8":
+            charset_conversion = { "libiconv": "libiconv", "icu": "ICU" }
+            tc.cache_variables["DCMTK_ENABLE_CHARSET_CONVERSION"] = charset_conversion[str(self.options.charset_conversion)]
         tc.variables["DCMTK_USE_DCMDICTPATH"] = self.options.use_dcmdictpath
         if self.settings.os == "Windows":
             tc.variables["DCMTK_OVERWRITE_WIN32_COMPILER_FLAGS"] = False
