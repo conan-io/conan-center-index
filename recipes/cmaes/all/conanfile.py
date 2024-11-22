@@ -28,13 +28,11 @@ class CmaesConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "openmp": [True, False],
         "surrog": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "openmp": True,
         "surrog": True,
     }
 
@@ -44,22 +42,6 @@ class CmaesConan(ConanFile):
     def _min_cppstd(self):
         return 11
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def build_requirements(self):
-        pass
-
-    def requirements(self):
-        self.requires("eigen/3.4.0", transitive_headers=True)
-        if self.options.openmp:
-            self.requires(
-                "llvm-openmp/17.0.6", transitive_headers=True, transitive_libs=True
-            )
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -68,6 +50,19 @@ class CmaesConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
+    def validate(self):
+        check_min_cppstd(self, self._min_cppstd)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+
+    def requirements(self):
+        self.requires("eigen/3.4.0", transitive_headers=True)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -75,14 +70,13 @@ class CmaesConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["LIBCMAES_BUILD_EXAMPLES"] = False
         tc.variables["LIBCMAES_BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["LIBCMAES_USE_OPENMP"] = self.options.openmp
+        tc.variables["LIBCMAES_USE_OPENMP"] = False
         tc.variables["LIBCMAES_ENABLE_SURROG"] = self.options.surrog
         tc.variables["LIBCMAES_BUILD_PYTHON"] = False
         tc.variables["LIBCMAES_BUILD_TESTS"] = False
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -107,7 +101,3 @@ class CmaesConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["cmaes"]
         self.cpp_info.set_property("cmake_target_name", "libcmaes::cmaes")
-
-    def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
