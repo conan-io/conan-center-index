@@ -3,10 +3,9 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 from conan.tools.apple import fix_apple_shared_install_name
 
 required_conan_version = ">=2.1"
@@ -30,7 +29,7 @@ class libdatachannelConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_websocket": True,
-        "with_nice": True
+        "with_nice": False
     }
 
     implements = ["auto_shared_fpic"]
@@ -42,7 +41,7 @@ class libdatachannelConan(ConanFile):
         self.requires("libsrtp/2.6.0")
         self.requires("nlohmann_json/3.11.3")        
         if self.options.with_nice:
-            self.requires("libnice/0.1.21", transitive_headers=True, transitive_libs=True)
+            self.requires("libnice/0.1.21")
         else:
             self.requires("libjuice/1.5.7")
 
@@ -54,6 +53,10 @@ class libdatachannelConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        #apply_conandata_patches(self)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
