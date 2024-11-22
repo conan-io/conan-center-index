@@ -47,9 +47,9 @@ class libdatachannelConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
-        if self.settings.os == "Windows" and self.options.shared:
-            # It exports no symbols, so it can't be used as a shared library
-            raise ConanInvalidConfiguration("Does not support shared libraries on Windows")
+        if self.settings.os == "Windows":
+            # TODO: fix windows support
+            raise ConanInvalidConfiguration("Does not support Windows yet")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
