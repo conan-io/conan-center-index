@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, copy, collect_libs, rmdir, rm, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, copy, collect_libs, rmdir, rm, apply_conandata_patches, export_conandata_patches, replace_in_file
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
@@ -36,6 +36,7 @@ class MariadbConnectorCppRecipe (ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -68,19 +69,21 @@ class MariadbConnectorCppRecipe (ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        replace_in_file(self, os.path.join(self.source_folder, "include", "CMakeLists.txt"), "COMPONENT Development", "COMPONENT Headers")
 
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
 
         tc = CMakeToolchain(self)
-
+        tc.cache_variables["CMAKE_PROJECT_mariadb_connector_cpp_INCLUDE"] = os.path.join(self.source_folder, "conan_cmake_project_include.cmake")
         tc.cache_variables["WITH_UNIT_TESTS"] = False
         tc.cache_variables["INSTALL_BINDIR"] = "bin"
         tc.cache_variables["INSTALL_LIBDIR"] = "lib"
         tc.cache_variables["INSTALL_PLUGINDIR"] = os.path.join("lib", "plugin").replace("\\", "/")
         tc.cache_variables["USE_SYSTEM_INSTALLED_LIB"] = True
         tc.cache_variables["MARIADB_LINK_DYNAMIC"] = True
+        tc.cache_variables["CCLIB"] = "mariadb-connector-c::mariadb-connector-c"
 
         if (self.settings.os == "Windows"):
             tc.cache_variables["CONC_WITH_MSI"] = False
@@ -99,7 +102,11 @@ class MariadbConnectorCppRecipe (ConanFile):
 
     def package(self):
         cmake = CMake(self)
-        cmake.install()
+        cmake.install(component="Headers")
+        if self.options.shared:
+            cmake.install(component="SharedLibraries")
+        else:
+            cmake.install(component="Development")
 
         copy(self, "COPYING", src=os.path.join(self.package_folder, "share", "doc"), dst=os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join (self.package_folder, "share"))
