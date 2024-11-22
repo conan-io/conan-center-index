@@ -46,7 +46,7 @@ class libdatachannelConan(ConanFile):
             self.requires("libjuice/1.5.7")
 
     def validate(self):
-        check_min_cppstd(self, 11)
+        check_min_cppstd(self, 17)
         if self.settings.os == "Windows" and self.options.shared:
             # It exports no symbols, so it can't be used as a shared library
             raise ConanInvalidConfiguration("Does not support shared libraries on Windows")
