@@ -62,8 +62,7 @@ class SvtJpegXsConan(ConanFile):
         cmake.build()
 
     def package(self):
-        for license_file in ("LICENSE.md"):
-            copy(self, license_file, self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.md"), self.source_folder, dst=os.path.join(self.package_folder, "licenses")
         cmake = CMake(self)
         cmake.configure()
         cmake.install()
@@ -71,9 +70,7 @@ class SvtJpegXsConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["SvtJpegxs"]
-
-        self.cpp_info.set_property("pkg_config_name", "libSvtJpegxs")
+        self.cpp_info.set_property("pkg_config_name", "SvtJpegxs")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs = ["m", "pthread"]
