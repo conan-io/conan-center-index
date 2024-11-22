@@ -17,6 +17,7 @@ if (protobuf_LITE)
     target_compile_definitions(${PROJECT_NAME} PRIVATE CONANTEST_PROTOBUF_LITE=1)
 else()
     target_link_libraries(${PROJECT_NAME} PRIVATE protobuf::libprotobuf)
+endif()
 
 if(NOT TARGET protobuf::protoc)
     message(FATAL_ERROR "protoc executable should have been defined as part of find_package(protobuf)")
