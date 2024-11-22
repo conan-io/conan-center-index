@@ -1,15 +1,8 @@
---- a/CMakeLists.txt	2024-07-26 22:49:02.457989012 +0500
-+++ b/CMakeLists.txt	2024-07-26 23:11:54.088870761 +0500
-@@ -19,7 +19,7 @@
- 
- IF(APPLE)
-   # productbuild packaging stuff 
--  CMAKE_MINIMUM_REQUIRED(VERSION 3.23)
-+  CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
- ELSE()
-   CMAKE_MINIMUM_REQUIRED(VERSION 3.1)
- ENDIF()
-@@ -47,6 +47,15 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e16167a..c188915 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -47,6 +47,15 @@ ELSE()
    SET(CMAKE_C_STANDARD 99)
  ENDIF()
  
@@ -25,7 +18,7 @@
  SET(CMAKE_CXX_STANDARD 11)
  SET(CMAKE_CXX_STANDARD_REQUIRED ON)
  
-@@ -62,7 +71,6 @@
+@@ -62,7 +71,6 @@ LIST(REMOVE_ITEM MAODBC_LANGUAGES "RC")
  SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
  
  SET(LIBRARY_NAME "mariadbcpp")
@@ -33,7 +26,7 @@
  
  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/src/Version.h.in
                 ${CMAKE_SOURCE_DIR}/src/Version.h)
-@@ -565,7 +573,7 @@
+@@ -565,7 +573,7 @@ IF(MARIADB_LINK_DYNAMIC)
                                               ShLwApi
                  DOC "Path to ShLwApi.Lib. Usually found in $ENV{programfiles\(x86\)}\\Windows Kits\\10\\Lib")
      ELSE()
@@ -42,7 +35,7 @@
        IF (${CCLIB} STREQUAL "CCLIB-NOTFOUND")
          # It won't be found by linker either unless user does some magic before build, so we actually could stop here with error
          MESSAGE(STATUS "C/C library has not been found")
-@@ -580,6 +588,7 @@
+@@ -580,6 +588,7 @@ IF(MARIADB_LINK_DYNAMIC)
                        /usr/local/include/mariadb
                        /usr/local/include/mysql)
                  #PATH_SUFFIXES mariadb mysql)
@@ -50,36 +43,16 @@
        IF (${CCHEADER} STREQUAL "CCHEADER-NOTFOUND")
          # Again should probably stop
          MESSAGE(STATUS "C/C headers have not been found")
-@@ -606,16 +615,18 @@
+@@ -606,7 +615,7 @@ IF(UNIX)
  ENDIF()
  SET(${LIBRARY_NAME}_OBJECTS $<TARGET_OBJECTS:${LIBRARY_NAME}_obj>)
  
 -IF(WIN32 AND NOT MINGW)
--  ADD_LIBRARY(${LIBRARY_NAME} SHARED ${CMAKE_SOURCE_DIR}/src/maconncpp.rc ${${LIBRARY_NAME}_OBJECTS} ${CMAKE_SOURCE_DIR}/src/maconncpp.def)
--  ADD_LIBRARY(${STATIC_LIBRARY_NAME} STATIC ${${LIBRARY_NAME}_OBJECTS} ${CMAKE_SOURCE_DIR}/src/maconncpp.rc)
--
--  TARGET_COMPILE_DEFINITIONS(${LIBRARY_NAME}_obj PRIVATE "MARIADB_EXPORTED=__declspec(dllexport)")
--
--  TARGET_COMPILE_DEFINITIONS(${LIBRARY_NAME} PRIVATE "MARIADB_EXPORTED=__declspec(dllexport)")
--  TARGET_COMPILE_DEFINITIONS(${LIBRARY_NAME} INTERFACE "MARIADB_EXPORTED=__declspec(dllimport)")
--
--  TARGET_COMPILE_DEFINITIONS(${STATIC_LIBRARY_NAME} PUBLIC MARIADB_STATIC_LINK)
 +IF(False)
-+  if (MARIADB_LIBRARY_TYPE STREQUAL "SHARED")
-+    ADD_LIBRARY(${LIBRARY_NAME} ${MARIADB_LIBRARY_TYPE} ${CMAKE_SOURCE_DIR}/src/maconncpp.rc ${${LIBRARY_NAME}_OBJECTS} ${CMAKE_SOURCE_DIR}/src/maconncpp.def)
-+
-+    TARGET_COMPILE_DEFINITIONS(${LIBRARY_NAME}_obj PRIVATE "MARIADB_EXPORTED=__declspec(dllexport)")
-+
-+    TARGET_COMPILE_DEFINITIONS(${LIBRARY_NAME} PRIVATE "MARIADB_EXPORTED=__declspec(dllexport)")
-+    TARGET_COMPILE_DEFINITIONS(${LIBRARY_NAME} INTERFACE "MARIADB_EXPORTED=__declspec(dllimport)")
-+  else()
-+    ADD_LIBRARY(${LIBRARY_NAME} ${MARIADB_LIBRARY_TYPE} ${${LIBRARY_NAME}_OBJECTS} ${CMAKE_SOURCE_DIR}/src/maconncpp.rc)
-+    TARGET_COMPILE_DEFINITIONS(${LIBRARY_NAME} PUBLIC MARIADB_STATIC_LINK)
-+  endif()
- ELSE()
-   # Xcode doesn't support targets that have only object files,
-   # so let's add an empty file to keep Xcode happy
-@@ -624,36 +635,39 @@
+   ADD_LIBRARY(${LIBRARY_NAME} SHARED ${CMAKE_SOURCE_DIR}/src/maconncpp.rc ${${LIBRARY_NAME}_OBJECTS} ${CMAKE_SOURCE_DIR}/src/maconncpp.def)
+   ADD_LIBRARY(${STATIC_LIBRARY_NAME} STATIC ${${LIBRARY_NAME}_OBJECTS} ${CMAKE_SOURCE_DIR}/src/maconncpp.rc)
+ 
+@@ -624,36 +633,39 @@ ELSE()
      SET(EMPTY_FILE ${CMAKE_BINARY_DIR}/empty.cpp)
    ENDIF()
    #  MESSAGE(STATUS "Version script: ${CMAKE_SOURCE_DIR}/src/maconncpp.def")
@@ -88,32 +61,20 @@
 +  ADD_LIBRARY(${LIBRARY_NAME} ${MARIADB_LIBRARY_TYPE} ${${LIBRARY_NAME}_OBJECTS} ${EMPTY_FILE})
  
    IF(APPLE)
--    SET_TARGET_PROPERTIES(${LIBRARY_NAME} PROPERTIES LINK_FLAGS "-Wl"
--                                     INSTALL_RPATH_USE_LINK_PATH 0
--                                     BUILD_WITH_INSTALL_RPATH 1
--                                     XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES
--                                     XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--timestamp -f"
--                                     INSTALL_RPATH "${MAODBC_INSTALL_RPATH}")
--    SET_TARGET_PROPERTIES(${STATIC_LIBRARY_NAME} PROPERTIES 
--                                     INSTALL_RPATH_USE_LINK_PATH 0
--                                     BUILD_WITH_INSTALL_RPATH 1
--                                     XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES
--                                     XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--timestamp -f"
--                                     INSTALL_RPATH "${MAODBC_INSTALL_RPATH}")
 +    if (MARIADB_LIBRARY_TYPE STREQUAL "SHARED")
-+      SET_TARGET_PROPERTIES(${LIBRARY_NAME} PROPERTIES LINK_FLAGS "-Wl"
-+                                      INSTALL_RPATH_USE_LINK_PATH 0
-+                                      BUILD_WITH_INSTALL_RPATH 1
-+                                      XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES
-+                                      XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--timestamp -f"
-+                                      INSTALL_RPATH "${MAODBC_INSTALL_RPATH}")
+     SET_TARGET_PROPERTIES(${LIBRARY_NAME} PROPERTIES LINK_FLAGS "-Wl"
+                                      INSTALL_RPATH_USE_LINK_PATH 0
+                                      BUILD_WITH_INSTALL_RPATH 1
+                                      XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES
+                                      XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--timestamp -f"
+                                      INSTALL_RPATH "${MAODBC_INSTALL_RPATH}")
 +    else()
-+      SET_TARGET_PROPERTIES(${LIBRARY_NAME} PROPERTIES 
-+                                      INSTALL_RPATH_USE_LINK_PATH 0
-+                                      BUILD_WITH_INSTALL_RPATH 1
-+                                      XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES
-+                                      XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--timestamp -f"
-+                                      INSTALL_RPATH "${MAODBC_INSTALL_RPATH}")
+     SET_TARGET_PROPERTIES(${STATIC_LIBRARY_NAME} PROPERTIES 
+                                      INSTALL_RPATH_USE_LINK_PATH 0
+                                      BUILD_WITH_INSTALL_RPATH 1
+                                      XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME YES
+                                      XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--timestamp -f"
+                                      INSTALL_RPATH "${MAODBC_INSTALL_RPATH}")
 +    endif()
      IF(WITH_SIGNCODE)
        SET_TARGET_PROPERTIES(${LIBRARY_NAME} PROPERTIES XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "Developer ID Application: ${DEVELOPER_ID}")
@@ -137,7 +98,7 @@
  
  # MINGW Specific includes and linking
  IF(MINGW)
-@@ -676,7 +690,6 @@
+@@ -676,7 +688,6 @@ IF(MINGW)
    
    IF(MARIADB_CONNECTORC_LIB)
      TARGET_LINK_DIRECTORIES(${LIBRARY_NAME} PUBLIC ${MARIADB_CONNECTORC_LIB})
@@ -145,7 +106,7 @@
      MESSAGE(STATUS "Found MariaDB Connector/C libraries - ${MARIADB_CONNECTORC_LIB}")
    ELSE()
      MESSAGE(WARNING "Did not find MariaDB Connector/C libraries")
-@@ -685,14 +698,16 @@
+@@ -685,14 +696,16 @@ IF(MINGW)
  ENDIF()
  
  INCLUDE(symlink)
@@ -164,7 +125,7 @@
    IF(WITH_MSI)
      ADD_CUSTOM_COMMAND(TARGET ${LIBRARY_NAME} POST_BUILD
        COMMAND ${CMAKE_COMMAND} ARGS -DDRIVER_LIB_DIR=$<TARGET_FILE_DIR:${LIBRARY_NAME}>
-@@ -709,13 +724,16 @@
+@@ -709,13 +722,16 @@ ELSE()
      #MESSAGE(STATUS "Configuring to generate PKG package")
      #ADD_SUBDIRECTORY(osxinstall)
    ENDIF()
