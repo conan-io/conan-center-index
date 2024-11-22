@@ -1,0 +1,20 @@
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -41,7 +41,7 @@
+ else()
+   message(STATUS "Building in ${CMAKE_BUILD_TYPE} configuration")
+ endif()
+-
++if(0)
+ # ensure the proper linker flags when building the static version on MSVC
+ if(MSVC AND NOT BUILD_SHARED_LIBS)
+   foreach(config "DEBUG" "RELEASE" "MINSIZEREL" "RELWITHDEBINFO")
+@@ -65,7 +65,7 @@
+   endif()
+   list(APPEND CUDA_NVCC_FLAGS   -Xcompiler ${CCTAG_MVSC_LINKER})
+ endif()
+-
++endif()
+ set(CCTAG_CXX_STANDARD 14)
+ set(CMAKE_CXX_STANDARD ${CCTAG_CXX_STANDARD})
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)

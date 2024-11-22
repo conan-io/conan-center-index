@@ -1,4 +1,10 @@
 sources:
+  "3.1.1":
+    url: "https://github.com/rapidfuzz/rapidfuzz-cpp/archive/refs/tags/v3.1.1.tar.gz"
+    sha256: "5a72811a9f5a890c69cb479551c19517426fb793a10780f136eb482c426ec3c8"
+  "3.0.4":
+    url: "https://github.com/rapidfuzz/rapidfuzz-cpp/archive/refs/tags/v3.0.4.tar.gz"
+    sha256: "18d1c41575ceddd6308587da8befc98c85d3b5bc2179d418daffed6d46b8cb0a"
   "3.0.2":
     url: "https://github.com/rapidfuzz/rapidfuzz-cpp/archive/refs/tags/v3.0.2.tar.gz"
     sha256: "4fddce5c0368e78bd604c6b820e6be248d669754715e39b4a8a281bda4c06de1"

@@ -1,6 +1,6 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, check_max_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, rmdir, save, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, check_min_vs
@@ -17,9 +17,9 @@ class Exiv2Conan(ConanFile):
     description = "Exiv2 is a C++ library and a command-line utility " \
                   "to read, write, delete and modify Exif, IPTC, XMP and ICC image metadata."
     license = "GPL-2.0"
-    topics = ("image", "exif", "xmp")
-    homepage = "https://www.exiv2.org"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.exiv2.org"
+    topics = ("image", "exif", "xmp")
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -73,23 +73,22 @@ class Exiv2Conan(ConanFile):
     def requirements(self):
         self.requires("libiconv/1.17")
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_xmp == "bundled":
-            self.requires("expat/2.5.0")
+            self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_curl:
             self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.get_safe("with_brotli"):
             self.requires("brotli/1.1.0")
         if self.options.get_safe("with_inih"):
-            self.requires("inih/57")
+            self.requires("inih/58")
 
     def validate(self):
         if Version(self.version) >= "0.28.0":
             min_cppstd = 17
 
-            if self.settings.compiler.cppstd:
-                check_min_cppstd(self, min_cppstd)
+            check_min_cppstd(self, min_cppstd)
             check_min_vs(self, 191)
 
             compilers_minimum_version = {
@@ -97,16 +96,12 @@ class Exiv2Conan(ConanFile):
                 "clang": "5",
                 "apple-clang": "10",
             }
-            if not is_msvc(self):
-                minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)
-                if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-                    raise ConanInvalidConfiguration(
-                        f"{self.ref} requires C++{min_cppstd}, which your compiler does not fully support."
-                    )
-        elif conan_version.major == 2:
-            # FIXME: linter complains, but function is there
-            # https://docs.conan.io/2.0/reference/tools/build.html?highlight=check_min_cppstd#conan-tools-build-check-max-cppstd
-            check_max_cppstd = getattr(sys.modules['conan.tools.build'], 'check_max_cppstd')
+            minimum_version = compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{min_cppstd}, which your compiler does not fully support."
+                )
+        else:
             # https://github.com/Exiv2/exiv2/tree/v0.27.7#217-building-with-c11-and-other-compilers
             check_max_cppstd(self, 14)
 
@@ -167,30 +162,6 @@ class Exiv2Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        targets = {"exiv2lib": "exiv2::exiv2lib"}
-        if self.options.with_xmp == "bundled":
-            targets.update({"exiv2-xmp": "exiv2::exiv2-xmp"})
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            targets
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "exiv2")
         self.cpp_info.set_property("pkg_config_name", "exiv2")
@@ -223,10 +194,3 @@ class Exiv2Conan(ConanFile):
                 self.cpp_info.components["exiv2lib"].requires.append("exiv2-xmp")
             else:
                 self.cpp_info.components["exiv2lib"].requires.append("expat::expat")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["exiv2lib"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["exiv2lib"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.with_xmp == "bundled" and Version(self.version) < "0.28.0":
-            self.cpp_info.components["exiv2-xmp"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["exiv2-xmp"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]

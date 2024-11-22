@@ -37,6 +37,10 @@ class GTestConan(ConanFile):
         "debug_postfix": "d",
         "disable_pthreads": False,
     }
+    # disallow cppstd compatibility, as it affects the ABI in this library
+    # see https://github.com/conan-io/conan-center-index/issues/23854
+    # Requires Conan >=1.53.0 <2 || >=2.1.0 to work
+    extension_properties = {"compatibility_cppstd": False}
 
     @property
     def _min_cppstd(self):
@@ -158,7 +162,8 @@ class GTestConan(ConanFile):
         self.cpp_info.components["libgtest"].libs = [f"gtest{self._postfix}"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libgtest"].system_libs.append("m")
-            self.cpp_info.components["libgtest"].system_libs.append("pthread")
+            if not self.options.disable_pthreads:
+                self.cpp_info.components["libgtest"].system_libs.append("pthread")
         if self.settings.os == "Neutrino" and self.settings.os.version == "7.1":
             self.cpp_info.components["libgtest"].system_libs.append("regex")
         if self.options.shared:

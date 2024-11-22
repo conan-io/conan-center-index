@@ -5,7 +5,6 @@ include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 find_package(sdf REQUIRED CONFIG)
-find_package(stb REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} ../test_package/test_package.c)
-target_link_libraries(${PROJECT_NAME} PRIVATE sdf::sdf stb::stb)
+target_link_libraries(${PROJECT_NAME} PRIVATE sdf::sdf)
