@@ -50,7 +50,7 @@ class MariadbConnectorCppRecipe (ConanFile):
             self.requires("libcurl/[>=7.78.0 <9]")
 
         # with_iconv doesn't exists on Windows (Why?)
-        self.requires ("mariadb-connector-c/3.3.3", options={
+        self.requires ("mariadb-connector-c/3.3.8", options={
             "dyncol": self.options.dyncol,
             "with_curl": self.options.with_curl,
             "with_ssl": self.options.with_ssl
