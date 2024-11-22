@@ -47,8 +47,11 @@ class NodeEditorConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_DOCS"] = False
         tc.cache_variables["BUILD_EXAMPLES"] = False
-        # INFO: replcate requires could be used to replace the Qt version by 5.x
+        # INFO: replace requires could be used to consume Qt 5.x
         tc.cache_variables["USE_QT6"] = self.dependencies["qt"].ref.version.major == "6"
+        if self.settings.os in ["Macos", "iOS"]:
+            # TODO: Remove after fixing https://github.com/conan-io/conan-center-index/issues/26005
+            tc.extra_sharedlinkflags = ["-framework Metal"]
         tc.generate()
 
     def build(self):
@@ -64,11 +67,10 @@ class NodeEditorConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["QtNodes"]
-        self.cpp_info.requires.extend(["qt::qtCore", "qt::qtGui",
-                                       "qt::qtWidgets", "qt::qtOpenGL"])
+        self.cpp_info.requires = ["qt::qtCore", "qt::qtGui", "qt::qtWidgets", "qt::qtOpenGL"]
         self.cpp_info.set_property("cmake_file_name", "QtNodes")
         self.cpp_info.set_property("cmake_target_name", "QtNodes::QtNodes")
-        if self.options.shared:
-            self.cpp_info.defines = ["NODE_EDITOR_SHARED"]
-        else:
-            self.cpp_info.defines = ["NODE_EDITOR_STATIC"]
+        self.cpp_info.defines = ["NODE_EDITOR_SHARED"] if self.options.shared else ["NODE_EDITOR_STATIC"]
+        if self.settings.os in ["Macos", "iOS"]:
+            # TODO: Remove after fixing https://github.com/conan-io/conan-center-index/issues/26005
+            self.cpp_info.frameworks = ["Metal"]
