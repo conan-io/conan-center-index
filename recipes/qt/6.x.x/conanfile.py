@@ -1157,6 +1157,9 @@ class QtConan(ConanFile):
                     self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = [
                         "AppKit", "Carbon", "CoreServices", "CoreVideo", "IOKit", "IOSurface", "Metal", "QuartzCore"
                     ]
+                if self.settings.os in ["Macos", "iOS"]:
+                    # https://github.com/qt/qtbase/blob/v6.5.3/src/gui/CMakeLists.txt#L963
+                    self.cpp_info.components["qtGui"].frameworks.append("Metal")
                 elif self.settings.os in ["iOS", "tvOS"]:
                     _create_plugin("QIOSIntegrationPlugin", "qios", "platforms", [])
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/ios/CMakeLists.txt#L32-L37
