@@ -97,8 +97,6 @@ class wxWidgetsConan(ConanFile):
     def system_requirements(self):
         apt = package_manager.Apt(self)
         packages = []
-        if self.options.get_safe("secretstore"):
-            packages.append("libsecret-1-dev")
         if self.options.webview:
             if self._gtk_version == "gtk2":
                 packages.extend(["libsoup2.4-dev",
@@ -128,6 +126,7 @@ class wxWidgetsConan(ConanFile):
     # TODO: add support for gtk non system version when it's ready for Conan 2
     def requirements(self):
         if self.settings.os == "Linux":
+            self.requires("libsecret/0.20.5")
             self.requires("xorg/system")
             self.requires("gtk/system")
             if self.options.get_safe("opengl", default=False):
