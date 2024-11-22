@@ -34,7 +34,7 @@ class LibsndfileConan(ConanFile):
         "fPIC": True,
         "programs": True,
         "experimental": False,
-        "with_alsa": False,
+        "with_alsa": True,
         "with_external_libs": True,
         "with_mpeg": True,
     }
@@ -59,9 +59,9 @@ class LibsndfileConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libsndio/1.9.0")
+        self.requires("libsndio/1.9.0",
+            options={"with_alsa": self.options.get_safe("with_alsa")})
         if self.options.get_safe("with_alsa"):
-            self.options["libsndio"].with_alsa = True
             self.requires("libalsa/1.2.10")
         if self.options.with_external_libs:
             self.requires("ogg/1.3.5")
