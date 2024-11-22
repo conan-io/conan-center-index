@@ -1134,12 +1134,10 @@ Prefix = ..""")
                     gui_reqs.append("xkbcommon::xkbcommon")
                 if self.options.get_safe("with_x11", False):
                     gui_reqs.append("xorg::xorg")
-                    if self.options.get_safe("opengl", "no") != "no":
+                    if self.options.get_safe("opengl", "no") == "desktop":
                         gui_reqs.append("opengl::opengl")
-                elif self.options.get_safe("opengl", "no") != "no":
-                    gui_reqs.append("egl::egl")
-            if self.options.get_safe("opengl", "no") != "no" and self.settings.os not in ["FreeBSD", "Linux"]:
-                gui_reqs.append("opengl::opengl")
+                    elif self.options.get_safe("opengl", "no") == "es2":
+                        gui_reqs.append("egl::egl")
             if self.options.get_safe("with_vulkan", False):
                 gui_reqs.append("vulkan-loader::vulkan-loader")
                 if is_apple_os(self):
