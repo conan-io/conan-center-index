@@ -24,11 +24,13 @@ class libdatachannelConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_websocket": [True, False],
+        "with_nice": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_websocket": True,
+        "with_nice": True
     }
 
     implements = ["auto_shared_fpic"]
@@ -38,8 +40,11 @@ class libdatachannelConan(ConanFile):
         self.requires("plog/1.1.10")
         self.requires("usrsctp/0.9.5.0")
         self.requires("libsrtp/2.6.0")
-        self.requires("nlohmann_json/3.11.3")
-        self.requires("libjuice/1.5.7")
+        self.requires("nlohmann_json/3.11.3")        
+        if self.options.with_nice:
+            self.requires("libnice/0.1.21", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("libjuice/1.5.7")
 
     def validate(self):
         check_min_cppstd(self, 11)
@@ -53,13 +58,15 @@ class libdatachannelConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["USE_SYSTEM_SRTP"] = True
-        tc.variables["USE_SYSTEM_JUICE"] = True
+        
         tc.variables["USE_SYSTEM_USRSCTP"] = True
         tc.variables["USE_SYSTEM_PLOG"] = True
         tc.variables["USE_SYSTEM_JSON"] = True
         tc.variables["NO_EXAMPLES"] = True
         tc.variables["NO_TESTS"] = True
         tc.variables["NO_WEBSOCKET"] = not self.options.with_websocket
+        tc.variables["USE_NICE"] = self.options.with_nice
+        tc.variables["USE_SYSTEM_JUICE"] = not self.options.with_nice
         tc.generate()
 
     def build(self):
