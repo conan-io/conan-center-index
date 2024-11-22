@@ -74,4 +74,5 @@ class SvtJpegXsConan(ConanFile):
             self.cpp_info.system_libs = ["m", "pthread"]
 
         if is_msvc(self) and self.options.shared:
+            self.cpp_info.bindirs = ["lib"]
             self.cpp_info.defines.append("DEF_DLL")
