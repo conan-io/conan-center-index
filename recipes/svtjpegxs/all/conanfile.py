@@ -10,7 +10,7 @@ required_conan_version = ">=1.53.0"
 
 
 class SvtJpegXsConan(ConanFile):
-    name = "libsvtjpegxs"
+    name = "svtjpegxs"
     description = "A JPEG XS (ISO/IEC 21122) compatible software encoder/decoder library"
     license = "BSD-2-Clause-Patent"
     url = "https://github.com/conan-io/conan-center-index"
