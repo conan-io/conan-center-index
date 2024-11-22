@@ -3,5 +3,9 @@ project(test_package LANGUAGES C)
 
 find_package(chunkio REQUIRED CONFIG)
 
-add_executable(${PROJECT_NAME} test_package.c)
+if(chunkio_VERSION VERSION_LESS "1.5.0")
+    add_executable(${PROJECT_NAME} test_package.c)
+else()
+    add_executable(${PROJECT_NAME} test_package_1_5_0.c)
+endif()
 target_link_libraries(${PROJECT_NAME} PRIVATE chunkio::chunkio)

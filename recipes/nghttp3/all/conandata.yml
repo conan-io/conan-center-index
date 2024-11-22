@@ -1,4 +1,16 @@
 sources:
+  "1.6.0":
+    url: "https://github.com/ngtcp2/nghttp3/releases/download/v1.6.0/nghttp3-1.6.0.tar.bz2"
+    sha256: "e49806e1008fe823961616dc61dab7df0f20d3e1f43bc76faecf3e10e541a4b8"
+  "1.5.0":
+    url: "https://github.com/ngtcp2/nghttp3/releases/download/v1.5.0/nghttp3-1.5.0.tar.bz2"
+    sha256: "4d89a3b84dbe2c6e0fe1367a2082f23b3c6e3279536e2436aed1a3785f6716c5"
+  "1.4.0":
+    url: "https://github.com/ngtcp2/nghttp3/releases/download/v1.4.0/nghttp3-1.4.0.tar.bz2"
+    sha256: "bf8fbb4242cff0feb10b3e0d02545a8ad9a71d932f877a57a592bfde62a26019"
+  "1.3.0":
+    url: "https://github.com/ngtcp2/nghttp3/releases/download/v1.3.0/nghttp3-1.3.0.tar.bz2"
+    sha256: "1f6bda74a888bfeb110a660a04b2ea25b756e0774d48143e34374af83d25e4a8"
   "1.2.0":
     url: "https://github.com/ngtcp2/nghttp3/releases/download/v1.2.0/nghttp3-1.2.0.tar.bz2"
     sha256: "da1bc26af1fd8756b59883c256153d2f41064294750454ee4c970fe087a70056"

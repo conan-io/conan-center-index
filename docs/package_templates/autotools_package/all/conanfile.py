@@ -2,16 +2,15 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, cross_building
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import Environment, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0.9"
 
 #
 # INFO: Please, remove all comments before pushing your PR!
@@ -22,13 +21,13 @@ class PackageConan(ConanFile):
     name = "package"
     description = "short description"
     # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
-    # In case not listed there, use "LicenseRef-<license-file-name>"
+    # In case not listed there, use "DocumentRef-<license-file-name>:LicenseRef-<package-name>"
     license = ""
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
     # no "conan" and project name in topics. Use topics from the upstream listed on GH
     topics = ("topic1", "topic2", "topic3")
-    # package_type should usually be "library" (if there is shared option)
+    # package_type should usually be "library", "shared-library" or "static-library"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -41,73 +40,53 @@ class PackageConan(ConanFile):
         "fPIC": True,
         "with_foobar": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    # in case the project requires C++14/17/20/... the minimum compiler version should be listed
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    # In case having config_options() or configure() method, the logic should be moved to the specific methods.
+    implements = ["auto_shared_fpic"]
 
     # no exports_sources attribute, but export_sources(self) method instead
-    # this allows finer grain exportation of patches per version
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
+        # Keep this logic only in case configure() is needed e.g pure-c project.
+        # Otherwise remove configure() and auto_shared_fpic will manage it.
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # for plain C projects only
+        # for plain C projects only. Otherwise, remove this method.
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # prefer self.requires method instead of requires attribute
+        # Prefer self.requirements() method instead of self.requires attribute.
         self.requires("dependency/0.8.1")
         if self.options.with_foobar:
+            # INFO: used in foo/baz.hpp:34
             self.requires("foobar/0.1.0")
+        # Some dependencies on CCI are allowed to use version ranges.
+        # See https://github.com/conan-io/conan-center-index/blob/master/docs/adding_packages/dependencies.md#version-ranges
+        self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
         # validate the minimum cpp standard supported. Only for C++ projects
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 14)
+
+        # Always comment the reason including the upstream issue.
+        # INFO: Upstream only support Unix systems. See <URL>
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
-    # if another tool than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
+    # if a tool other than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
         # only if we have to call autoreconf
         self.tool_requires("libtool/x.y.z")
         # only if upstream configure.ac relies on PKG_CHECK_MODULES macro
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/x.y.z")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         # required to suppport windows as a build machine
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -118,21 +97,20 @@ class PackageConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # apply patches listed in conandata.yml
+        # Using patches is always the last resort to fix issues. If possible, try to fix the issue in the upstream project.
+        apply_conandata_patches(self)
 
     def generate(self):
-        # inject tool_requires env vars in build scope (not needed if there is no tool_requires)
-        env = VirtualBuildEnv(self)
-        env.generate()
-        # inject requires env vars in build scope
+        # inject required env vars into the build scope
         # it's required in case of native build when there is AutotoolsDeps & at least one dependency which might be shared, because configure tries to run a test executable
         if not cross_building(self):
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
-        # --fpic is automatically managed when 'fPIC'option is declared
+            VirtualRunEnv(self).generate(scope="build")
+        # --fpic is automatically managed when 'fPIC' option is declared
         # --enable/disable-shared is automatically managed when 'shared' option is declared
         tc = AutotoolsToolchain(self)
         # autotools usually uses 'yes' and 'no' to enable/disable options
-        yes_no = lambda v: "yes" if v else "no"
+        def yes_no(v): return "yes" if v else "no"
         tc.configure_args.extend([
             f"--with-foobar={yes_no(self.options.with_foobar)}",
             "--enable-tools=no",
@@ -143,8 +121,10 @@ class PackageConan(ConanFile):
         tc = PkgConfigDeps(self)
         tc.generate()
         # generate dependencies for autotools
-        tc = AutotoolsDeps(self)
-        tc.generate()
+        # some recipes might require a workaround for MSVC (https://github.com/conan-io/conan/issues/12784):
+        # https://github.com/conan-io/conan-center-index/blob/00ce907b910d0d772f1c73bb699971c141c423c1/recipes/xapian-core/all/conanfile.py#L106-L135
+        deps = AutotoolsDeps(self)
+        deps.generate()
 
         # If Visual Studio is supported
         if is_msvc(self):
@@ -158,7 +138,7 @@ class PackageConan(ConanFile):
             env.define("CC", f"{compile_wrapper} cl -nologo")
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
-            env.define("AR", f"{ar_wrapper} \"lib -nologo\"")
+            env.define("AR", f"{ar_wrapper} lib")
             env.define("NM", "dumpbin -symbols")
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
@@ -166,8 +146,7 @@ class PackageConan(ConanFile):
             env.vars(self).save_script("conanbuild_msvc")
 
     def build(self):
-        # apply patches listed in conandata.yml
-        apply_conandata_patches(self)
+
         autotools = Autotools(self)
         # (optional) run autoreconf to regenerate configure file (libtool should be in tool_requires)
         autotools.autoreconf()
@@ -180,8 +159,9 @@ class PackageConan(ConanFile):
         autotools = Autotools(self)
         autotools.install()
 
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
+        # Some files extensions and folders are not allowed. Please, read the FAQs to get informed.
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        # Consider disabling these at first to verify that the package_info() output matches the info exported by the project.
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
@@ -191,7 +171,7 @@ class PackageConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["package_lib"]
 
-        # if package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
+        # if the package provides a pkgconfig file (package.pc, usually installed in <prefix>/lib/pkgconfig/)
         self.cpp_info.set_property("pkg_config_name", "package")
 
         # If they are needed on Linux, m, pthread and dl are usually needed on FreeBSD too

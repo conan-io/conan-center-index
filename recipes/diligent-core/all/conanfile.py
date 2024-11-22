@@ -3,7 +3,8 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.scm import Version
-from conan.tools.files import rm, get, rmdir, rename, collect_libs, patches, export_conandata_patches, copy, apply_conandata_patches
+from conan.tools.files import rm, get, rmdir, rename, collect_libs, export_conandata_patches, copy, apply_conandata_patches, replace_in_file
+from conan.tools.microsoft import visual
 from conan.tools.apple import is_apple_os
 import os
 
@@ -34,6 +35,7 @@ class DiligentCoreConan(ConanFile):
     def _minimum_compilers_version(self):
         return {
             "Visual Studio": "16",
+            "msvc": "192",
             "gcc": "6",
             "clang": "3.4",
             "apple-clang": "5.1",
@@ -48,29 +50,28 @@ class DiligentCoreConan(ConanFile):
             check_min_cppstd(self, self._minimum_cpp_standard)
         min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
         if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
+            self.output.warning("{} recipe lacks information about the {} compiler support.".format(
                 self.name, self.settings.compiler))
         else:
             if Version(self.settings.compiler.version) < min_version:
                 raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
                     self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
-        if self.settings.compiler == "Visual Studio" and "MT" in self.settings.compiler.runtime:
+        if visual.is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
 
     def export_sources(self):
-        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder, keep_path=False)
+        copy(self, "conan_deps.cmake", src=self.recipe_folder, dst=os.path.join(self.export_sources_folder, "src"), keep_path=False)
         export_conandata_patches(self)
         
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=os.path.join(self.source_folder, "source_subfolder"), strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package_id(self):
-        if self.settings.compiler == "Visual Studio":
-            if "MD" in self.settings.compiler.runtime:
-                self.info.settings.compiler.runtime = "MD/MDd"
-            else:
+        if visual.is_msvc(self.info):
+            if visual.is_msvc_static_runtime(self.info):
                 self.info.settings.compiler.runtime = "MT/MTd"
+            else:
+                self.info.settings.compiler.runtime = "MD/MDd"
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -79,8 +80,7 @@ class DiligentCoreConan(ConanFile):
         tc.variables["DILIGENT_BUILD_TESTS"] = False
         tc.variables["DILIGENT_NO_DXC"] = True
         tc.variables["DILIGENT_NO_GLSLANG"] = not self.options.with_glslang
-        tc.variables["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.options["spirv-cross"].namespace
-        tc.variables["BUILD_SHARED_LIBS"] = False
+        tc.variables["SPIRV_CROSS_NAMESPACE_OVERRIDE"] = self.dependencies["spirv-cross"].options.namespace
         tc.variables["DILIGENT_CLANG_COMPILE_OPTIONS"] = ""
         tc.variables["DILIGENT_MSVC_COMPILE_OPTIONS"] = ""
         tc.variables["ENABLE_RTTI"] = True
@@ -92,34 +92,37 @@ class DiligentCoreConan(ConanFile):
         deps.generate()
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def _patch_sources(self):
-        patches.apply_conandata_patches(self)
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "project(DiligentCore)",
+                        "project(DiligentCore)\n\ninclude(conan_deps.cmake)")
 
     def build_requirements(self):
-        self.tool_requires("cmake/3.24.2")
+        self.tool_requires("cmake/[>=3.24 <4]")
 
     def requirements(self):
         self.requires("opengl/system")
         if self.settings.os == "Linux":
-            self.requires("wayland/1.21.0")
+            self.requires("wayland/1.22.0")
 
         self.requires("spirv-cross/1.3.224.0")
         self.requires("spirv-tools/1.3.224.0")
         if self.options.with_glslang:
             self.requires("glslang/1.3.224.0")
-        self.requires("vulkan-headers/1.3.224.1")
+        self.requires("vulkan-headers/1.3.224.0")
         self.requires("vulkan-validationlayers/1.3.224.1")
-        self.requires("volk/1.3.224.1")
+        self.requires("volk/1.3.224.0")
         self.requires("xxhash/0.8.1")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -144,21 +147,25 @@ class DiligentCoreConan(ConanFile):
             return "PLATFORM_TVOS"
 
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
-        cmake.configure()
+        # By default, Diligent builds static and shared versions of every main library. We select the one we
+        # want based on options.shared in package(). To avoid building every intermediate library as SHARED,
+        # we have to disable BUILD_SHARED_LIBS.
+        # However, BUILD_SHARED_LIBS cannot be disabled normally (in the toolchain in configure()), because
+        # Conan outputs that override after the standard line that enables BUILD_SHARED_LIBS. Since the latter
+        # is a CACHE variable that cannot be overwritten with another set(), we have to specify it on the
+        # command-line, so it takes effect before the toolchain is parsed.
+        cmake.configure(variables={"BUILD_SHARED_LIBS": "OFF"})
         cmake.build()
 
     def package(self):
         cmake = CMake(self)
         cmake.install()
-        rename(self, src=os.path.join(self.package_folder, "include", "source_subfolder"),
-        dst=os.path.join(self.package_folder, "include", "DiligentCore"))
-
         rmdir(self, os.path.join(self.package_folder, "Licenses"))
         rmdir(self, os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "bin"))
-        copy(self, "License.txt", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.package_folder, self.source_folder, "source_subfolder"))
+        copy(self, "License.txt", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.package_folder, self.source_folder))
 
         if self.options.shared:
             copy(self, pattern="*.dylib", dst=os.path.join(self.package_folder, "lib"), src=self.build_folder, keep_path=False)
@@ -184,37 +191,37 @@ class DiligentCoreConan(ConanFile):
         self.cpp_info.libs = collect_libs(self)
         # included as discussed here https://github.com/conan-io/conan-center-index/pull/10732#issuecomment-1123596308
         self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include"))
-        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "DiligentCore", "Common"))
+        self.cpp_info.includedirs.append(os.path.join(self.package_folder, "include", "Common"))
 
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Common", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngine", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineVulkan", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineOpenGL", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsAccessories", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsTools", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "HLSL2GLSLConverterLib", "interface"))
-        archiver_path = os.path.join("include", "DiligentCore", "Graphics", "Archiver", "interface")
+        self.cpp_info.includedirs.append(os.path.join("include"))
+        self.cpp_info.includedirs.append(os.path.join("include", "Common", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "Platforms", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "Graphics", "GraphicsEngine", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "Graphics", "GraphicsEngineVulkan", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "Graphics", "GraphicsEngineOpenGL", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "Graphics", "GraphicsAccessories", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "Graphics", "GraphicsTools", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "Graphics", "HLSL2GLSLConverterLib", "interface"))
+        archiver_path = os.path.join("include", "Graphics", "Archiver", "interface")
         if os.path.isdir(archiver_path):
             self.cpp_info.includedirs.append(archiver_path)
 
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Primitives", "interface"))
-        self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Basic", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "Primitives", "interface"))
+        self.cpp_info.includedirs.append(os.path.join("include", "Platforms", "Basic", "interface"))
         if self.settings.os == "Android":
-            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Android", "interface"))
+            self.cpp_info.includedirs.append(os.path.join("include", "Platforms", "Android", "interface"))
         elif is_apple_os(self):
-            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Apple", "interface"))
+            self.cpp_info.includedirs.append(os.path.join("include", "Platforms", "Apple", "interface"))
         elif self.settings.os == "Emscripten":
-            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Emscripten", "interface"))
+            self.cpp_info.includedirs.append(os.path.join("include", "Platforms", "Emscripten", "interface"))
         elif self.settings.os == "Linux":
-            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Linux", "interface"))
+            self.cpp_info.includedirs.append(os.path.join("include", "Platforms", "Linux", "interface"))
         elif self.settings.os == "Windows":
-            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Platforms", "Win32", "interface"))
-            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineD3D11", "interface"))
-            self.cpp_info.includedirs.append(os.path.join("include", "DiligentCore", "Graphics", "GraphicsEngineD3D12", "interface"))
+            self.cpp_info.includedirs.append(os.path.join("include", "Platforms", "Win32", "interface"))
+            self.cpp_info.includedirs.append(os.path.join("include", "Graphics", "GraphicsEngineD3D11", "interface"))
+            self.cpp_info.includedirs.append(os.path.join("include", "Graphics", "GraphicsEngineD3D12", "interface"))
 
-        self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.options["spirv-cross"].namespace))
+        self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.dependencies["spirv-cross"].options.namespace))
         self.cpp_info.defines.append("{}=1".format(self._diligent_platform()))
 
         if self.settings.os in ["Macos", "Linux"]:
