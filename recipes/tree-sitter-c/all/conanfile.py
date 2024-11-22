@@ -53,6 +53,13 @@ class TreeSitterCConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+
+    def requirements(self):
+        self.requires("tree-sitter/0.24.3", transitive_headers=True, transitive_libs=True)
+
     def _patch_sources(self):
         if Version(self.version) < "0.23.2" and not self.options.shared:
             replace_in_file(
@@ -61,15 +68,8 @@ class TreeSitterCConan(ConanFile):
                 "__declspec(dllexport)", ""
             )
 
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
-        self._patch_sources()
-
-    def requirements(self):
-        self.requires("tree-sitter/0.24.3", transitive_headers=True, transitive_libs=True)
-
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
