@@ -1,4 +1,7 @@
 sources:
+  "0.15.0":
+    url: "https://github.com/alanxz/rabbitmq-c/archive/v0.15.0.tar.gz"
+    sha256: "839b28eae20075ac58f45925fe991d16a3138cbde015db0ee11df1acb1c493df"
   "0.14.0":
     url: "https://github.com/alanxz/rabbitmq-c/archive/v0.14.0.tar.gz"
     sha256: "839b28eae20075ac58f45925fe991d16a3138cbde015db0ee11df1acb1c493df"
