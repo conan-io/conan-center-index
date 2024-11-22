@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 import os
 
@@ -68,6 +68,8 @@ class DevilConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
+        # The CMakeLists will try to call find_package regardless of options
+        # ensure that even if they are picked up by the system, they are not used
         tc.variables["IL_NO_PNG"] = not self.options.with_png
         tc.variables["IL_NO_JPG"] = not self.options.with_jpeg
         tc.variables["IL_NO_TIF"] = not self.options.with_tiff
@@ -76,6 +78,9 @@ class DevilConan(ConanFile):
         tc.variables["IL_USE_DXTC_SQUISH"] = self.options.with_squish
 
         tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
