@@ -41,17 +41,17 @@ class GlewConan(ConanFile):
             del self.options.fPIC
             del self.options.with_egl
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
-
         if self.options.with_glu == None:
             if is_apple_os(self) or self.settings.os == "Windows":
                 self.options.with_glu = "system"
             else:
                 self.options.with_glu = "mesa-glu"
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -63,7 +63,6 @@ class GlewConan(ConanFile):
             self.requires("mesa-glu/9.0.3", transitive_headers=True)
         else:
             self.requires("glu/system", transitive_headers=True)
-
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -92,7 +91,6 @@ class GlewConan(ConanFile):
         glewlib_target_name = "glew" if self.options.shared else "glew_s"
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_module_file_name", "GLEW")
-        self.cpp_info.set_property("cmake_file_name", "glew")
         self.cpp_info.set_property("cmake_target_name", "GLEW::GLEW")
         self.cpp_info.set_property("pkg_config_name", "glew")
         self.cpp_info.components["glewlib"].set_property("cmake_module_target_name", "GLEW::GLEW")
@@ -114,11 +112,3 @@ class GlewConan(ConanFile):
             self.cpp_info.components["glewlib"].requires.append("mesa-glu::mesa-glu")
         else:
             self.cpp_info.components["glewlib"].requires.append("glu::glu")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "GLEW"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "glew"
-        self.cpp_info.names["cmake_find_package"] = "GLEW"
-        self.cpp_info.names["cmake_find_package_multi"] = "GLEW"
-        self.cpp_info.components["glewlib"].names["cmake_find_package"] = "GLEW"
-        self.cpp_info.components["glewlib"].names["cmake_find_package_multi"] = glewlib_target_name
