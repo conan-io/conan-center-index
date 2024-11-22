@@ -36,9 +36,6 @@ class SvtJpegXsConan(ConanFile):
         #     self.tool_requires("simde/0.8.2")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.16 <4]")
-        # if self.settings.arch in ("x86", "x86_64"):
-        #     self.tool_requires("nasm/2.15.05")
         self.tool_requires("yasm/1.3.0")
 
     def validate(self):
@@ -54,6 +51,7 @@ class SvtJpegXsConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["BUILD_APPS"] = False
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
