@@ -3,7 +3,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
 
 required_conan_version = ">=2.0.9"
 
@@ -27,6 +27,9 @@ class SvtJpegXsConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -48,6 +51,7 @@ class SvtJpegXsConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -62,7 +66,7 @@ class SvtJpegXsConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE.md"), self.source_folder, dst=os.path.join(self.package_folder, "licenses")
+        copy(self, "LICENSE.md", self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.configure()
         cmake.install()
