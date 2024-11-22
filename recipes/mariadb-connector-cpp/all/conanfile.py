@@ -69,7 +69,7 @@ class MariadbConnectorCppRecipe (ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        replace_in_file(self, os.path.join(self.source_folder, "include", "CMakeLists.txt"), "COMPONENT Development", "COMPONENT Headers")
+        apply_conandata_patches(self)
 
     def generate(self):
         deps = CMakeDeps(self)
@@ -83,9 +83,8 @@ class MariadbConnectorCppRecipe (ConanFile):
         tc.cache_variables["INSTALL_PLUGINDIR"] = os.path.join("lib", "plugin").replace("\\", "/")
         tc.cache_variables["USE_SYSTEM_INSTALLED_LIB"] = True
         tc.cache_variables["MARIADB_LINK_DYNAMIC"] = True
-        tc.cache_variables["CCLIB"] = "mariadb-connector-c::mariadb-connector-c"
 
-        if (self.settings.os == "Windows"):
+        if self.settings.os == "Windows":
             tc.cache_variables["CONC_WITH_MSI"] = False
             tc.cache_variables["WITH_MSI"] = False
 
@@ -95,7 +94,6 @@ class MariadbConnectorCppRecipe (ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -129,4 +127,11 @@ class MariadbConnectorCppRecipe (ConanFile):
             if self.options.with_ssl == "schannel":
                 self.cpp_info.system_libs.append("secur32")
 
-        self.cpp_info.libs = collect_libs(self)
+        if self.options.shared:
+            self.cpp_info.libs = ["mariadbcpp"]
+            if self.settings.os == "Windows":
+                self.cpp_info.defines.append("MARIADB_EXPORTED=__declspec(dllimport)")
+        else:
+            self.cpp_info.libs = ["mariadbcpp-static"]
+            if self.settings.os == "Windows":
+                self.cpp_info.defines.append("MARIADB_STATIC_LINK")
