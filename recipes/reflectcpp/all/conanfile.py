@@ -103,7 +103,7 @@ class ReflectCppConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
-        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["REFLECTCPP_BUILD_SHARED"] = self.options.shared
         tc.cache_variables["REFLECTCPP_USE_BUNDLED_DEPENDENCIES"] = False
         tc.cache_variables["REFLECTCPP_USE_VCPKG"] = False
         tc.cache_variables["REFLECTCPP_CBOR"] = self.options.with_cbor
