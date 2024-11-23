@@ -120,8 +120,12 @@ class SDLImageConan(ConanFile):
         if Version(self.version) >= "2.6":
             self.tool_requires("cmake/[>=3.16 <4]")
 
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -170,11 +174,7 @@ class SDLImageConan(ConanFile):
         cd = CMakeDeps(self)
         cd.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
         rmdir(self, os.path.join(self.source_folder, "external"))
         cmake = CMake(self)
         if Version(self.version) < "2.6":
