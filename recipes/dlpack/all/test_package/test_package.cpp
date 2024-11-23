@@ -4,7 +4,11 @@
 
 int main()
 {
-#if DLPACK_VERSION < 60
+#ifdef DLPACK_MAJOR_VERSION // Since 1.0
+    int major = DLPACK_MAJOR_VERSION;
+    int minor = DLPACK_MINOR_VERSION;
+    int patch = 0;
+#elif DLPACK_VERSION < 60
     int major = (DLPACK_VERSION >> 6) & 7;
     int minor = (DLPACK_VERSION >> 3) & 7;
     int patch = DLPACK_VERSION & 7;
