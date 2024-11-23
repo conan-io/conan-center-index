@@ -62,9 +62,8 @@ class ReflectCppConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def requirements(self):
-        if not self.options.shared:
-            self.requires("ctre/3.9.0", transitive_headers=True)
-            self.requires("yyjson/0.8.0", transitive_headers=True)
+        self.requires("ctre/3.9.0", transitive_headers=True)
+        self.requires("yyjson/0.8.0", transitive_headers=True)
         if self.options.with_cbor:
             self.requires("tinycbor/0.6.0", transitive_headers=True)
         if self.options.with_flatbuffers:
@@ -84,16 +83,9 @@ class ReflectCppConan(ConanFile):
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(
-            str(self.settings.compiler), False
-        )
-        if (
-            minimum_version
-            and Version(self.settings.compiler.version) < minimum_version
-        ):
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
