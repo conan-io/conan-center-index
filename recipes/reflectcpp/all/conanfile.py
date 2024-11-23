@@ -39,6 +39,7 @@ class ReflectCppConan(ConanFile):
         "with_flatbuffers": [True, False],
         "with_msgpack": [True, False],
         "with_toml": [True, False],
+        "with_ubjson": [True, False],
         "with_xml": [True, False],
         "with_yaml": [True, False],
     }
@@ -49,6 +50,7 @@ class ReflectCppConan(ConanFile):
         "with_flatbuffers": False,
         "with_msgpack": False,
         "with_toml": False,
+        "with_ubjson": False,
         "with_xml": False,
         "with_yaml": False,
     }
@@ -72,6 +74,8 @@ class ReflectCppConan(ConanFile):
             self.requires("msgpack-c/6.0.0", transitive_headers=True)
         if self.options.with_toml:
             self.requires("tomlplusplus/3.4.0", transitive_headers=True)
+        if self.options.with_ubjson:
+            self.requires("jsoncons/0.176.0", transitive_headers=True)
         if self.options.with_xml:
             self.requires("pugixml/1.14", transitive_headers=True)
         if self.options.with_yaml:
