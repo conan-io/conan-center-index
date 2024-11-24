@@ -82,8 +82,8 @@ class MBedTLSConan(ConanFile):
             # relocatable shared libs on macOS
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         if is_msvc(self):
-            tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = bool(self.options.shared)
             if self.options.shared:
+                tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
                 replace_in_file(self, os.path.join(self.source_folder, "library", "constant_time_impl.h"), "extern volatile", "__declspec(dllimport) volatile")
                 replace_in_file(self, os.path.join(self.source_folder, "include", "mbedtls", "x509_crt.h"), "extern const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_suiteb;", "__declspec(dllimport) const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_suiteb;")
                 replace_in_file(self, os.path.join(self.source_folder, "include", "mbedtls", "x509_crt.h"), "extern const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_default;", "__declspec(dllimport) const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_default;")
