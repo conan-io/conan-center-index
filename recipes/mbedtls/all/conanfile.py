@@ -71,8 +71,8 @@ class MBedTLSConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["USE_SHARED_MBEDTLS_LIBRARY"] = self.options.shared
-        tc.cache_variables["USE_STATIC_MBEDTLS_LIBRARY"] = not self.options.shared
+        tc.cache_variables["USE_SHARED_MBEDTLS_LIBRARY"] = bool(self.options.shared)
+        tc.cache_variables["USE_STATIC_MBEDTLS_LIBRARY"] = not bool(self.options.shared)
         if Version(self.version) < "3.0.0":
             tc.cache_variables["ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
         tc.cache_variables["ENABLE_PROGRAMS"] = False
