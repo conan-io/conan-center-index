@@ -83,10 +83,10 @@ class MBedTLSConan(ConanFile):
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         if is_msvc(self):
             tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
-            replace_in_file(self, "library/constant_time_impl.h", "extern volatile", "__declspec(dllimport) volatile")
-            replace_in_file(self, "include/mbedtls/x509_crt.h", "extern const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_suiteb;", "__declspec(dllimport) const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_suiteb;")
-            replace_in_file(self, "include/mbedtls/x509_crt.h", "extern const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_default;", "__declspec(dllimport) const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_default;")
-            replace_in_file(self, "library/psa_util_internal.h", "extern const mbedtls_error_pair_t psa_to_ssl_errors[7];", "__declspec(dllimport) const mbedtls_error_pair_t psa_to_ssl_errors[7];")
+            replace_in_file(self, os.path.join(self.source_folder, "library/constant_time_impl.h"), "extern volatile", "__declspec(dllimport) volatile")
+            replace_in_file(self, os.path.join(self.source_folder, "include/mbedtls/x509_crt.h"), "extern const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_suiteb;", "__declspec(dllimport) const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_suiteb;")
+            replace_in_file(self, os.path.join(self.source_folder, "include/mbedtls/x509_crt.h"), "extern const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_default;", "__declspec(dllimport) const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_default;")
+            replace_in_file(self, os.path.join(self.source_folder, "library/psa_util_internal.h"), "extern const mbedtls_error_pair_t psa_to_ssl_errors[7];", "__declspec(dllimport) const mbedtls_error_pair_t psa_to_ssl_errors[7];")
             if check_min_vs(self, 190, raise_invalid=False):
                 tc.preprocessor_definitions["MBEDTLS_PLATFORM_SNPRINTF_MACRO"] = "snprintf"
             else:
