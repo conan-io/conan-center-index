@@ -14,12 +14,26 @@ sources:
 patches:
   "4.0.0":
     - patch_file: "patches/4.0.0-0001-msvc-fixes.patch"
+      patch_description: "Remove hardcoded MSVC runtime flags"
+      patch_type: "portability"
     - patch_file: "patches/4.0.0-0003-use-MPDECIMAL_DLL.patch"
+      patch_description: "Allow a static lib to use a shared mpdecimal (and vice versa)"
+      patch_type: "portability"
   "2.5.1":
     - patch_file: "patches/2.5.1-0001-msvc-fixes.patch"
+      patch_description: "Remove hardcoded MSVC runtime flags"
+      patch_type: "portability"
     - patch_file: "patches/2.5.1-0003-use-MPDECIMAL_DLL.patch"
+      patch_description: "Allow a static lib to use a shared mpdecimal (and vice versa)"
+      patch_type: "portability"
   "2.5.0":
     - patch_file: "patches/2.5.0-0001-msvc-fixes.patch"
+      patch_description: "Remove hardcoded MSVC runtime flags"
+      patch_type: "portability"
   "2.4.2":
     - patch_file: "patches/2.4.2-0001-msvc-fixes.patch"
+      patch_description: "Remove hardcoded MSVC runtime flags"
+      patch_type: "portability"
     - patch_file: "patches/2.4.2-0002-disable-vcstdint-h-vs2015.patch"
+      patch_description: "Remove some compatibility code in VS2015 onwards"
+      patch_type: "portability"
