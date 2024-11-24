@@ -12,4 +12,4 @@
 +++ libmpdec++/devimal.hh
 @@ -63,1 +63,1 @@
 -  #elif defined(_DLL)
-+  #elif defined(MPDECIMALXX_DLL)
++  #elif defined(MPDECIMAL_DLL)
