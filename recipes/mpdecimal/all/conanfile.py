@@ -155,10 +155,8 @@ class MpdecimalConan(ConanFile):
 
         self.cpp_info.components["libmpdecimal"].libs = ["{}mpdec{}".format(*lib_pre_suf)]
         if self.options.shared and is_msvc(self):
-            if Version(self.version) >= "2.5.1":
-                self.cpp_info.components["libmpdecimal"].defines = ["MPDECIMAL_DLL"]
-            else:
-                self.cpp_info.components["libmpdecimal"].defines = ["USE_DLL"]
+            define = "MPDECIMAL_DLL" if Version(self.version) >= "2.5.1" else "USE_DLL"
+            self.cpp_info.components["libmpdecimal"].defines = [define]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["libmpdecimal"].system_libs = ["m"]
