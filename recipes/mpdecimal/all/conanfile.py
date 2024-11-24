@@ -72,11 +72,8 @@ class MpdecimalConan(ConanFile):
     def generate(self):
         if is_msvc(self):
             tc = NMakeToolchain(self)
-            if Version(self.version) >= "2.5.1":
-                if self.options.shared:
-                    tc.extra_cflags.append("-DMPDECIMAL_DLL")
-                    if self.options.get_safe("cxx"):
-                        tc.extra_cxxflags.append("-DLIBMPDECXX_DLL")
+            if Version(self.version) >= "2.5.1" and self.options.shared:
+                tc.extra_defines.append("MPDECIMAL_DLL")
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
