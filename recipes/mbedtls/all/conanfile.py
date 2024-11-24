@@ -71,6 +71,9 @@ class MBedTLSConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if self.options.shared:
+            tc.preprocessor_definitions["X509_BUILD_SHARED"] = "1"
+            tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.cache_variables["USE_SHARED_MBEDTLS_LIBRARY"] = bool(self.options.shared)
         tc.cache_variables["USE_STATIC_MBEDTLS_LIBRARY"] = not bool(self.options.shared)
         if Version(self.version) < "3.0.0":
@@ -83,7 +86,6 @@ class MBedTLSConan(ConanFile):
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         if is_msvc(self):
             if self.options.shared:
-                tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
                 replace_in_file(self, os.path.join(self.source_folder, "library", "constant_time_impl.h"), "extern volatile", "__declspec(dllimport) volatile")
                 replace_in_file(self, os.path.join(self.source_folder, "include", "mbedtls", "x509_crt.h"), "extern const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_suiteb;", "__declspec(dllimport) const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_suiteb;")
                 replace_in_file(self, os.path.join(self.source_folder, "include", "mbedtls", "x509_crt.h"), "extern const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_default;", "__declspec(dllimport) const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_default;")
