@@ -34,10 +34,18 @@ index d65ac62c4..39d03a43b 100644
              install_targets (${_plugin_NAME})
          endif ()
 diff --git src/cmake/externalpackages.cmake src/cmake/externalpackages.cmake
-index f8670a83f..101bcfa50 100644
+index f8670a83f..7b858f627 100644
 --- src/cmake/externalpackages.cmake
 +++ src/cmake/externalpackages.cmake
-@@ -73,16 +73,15 @@ set (OPENIMAGEIO_CONFIG_DO_NOT_FIND_IMATH OFF CACHE BOOL
+@@ -66,23 +66,22 @@ checked_find_package (OpenEXR REQUIRED
+ # library.
+ include_directories(BEFORE ${IMATH_INCLUDES} ${OPENEXR_INCLUDES})
+ set (OPENIMAGEIO_IMATH_TARGETS Imath::Imath)
+-set (OPENIMAGEIO_OPENEXR_TARGETS OpenEXR::OpenEXR)
++set (OPENIMAGEIO_OPENEXR_TARGETS openexr::openexr)
+ set (OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY "PRIVATE" CACHE STRING
+      "Should we expose Imath library dependency as PUBLIC or PRIVATE")
+ set (OPENIMAGEIO_CONFIG_DO_NOT_FIND_IMATH OFF CACHE BOOL
       "Exclude find_dependency(Imath) from the exported OpenImageIOConfig.cmake")
  
  # JPEG -- prefer JPEG-Turbo to regular libjpeg
@@ -430,18 +438,20 @@ index 70d28318a..aec47621f 100644
  else()
      message (WARNING "JPEG XL plugin will not be built")
 diff --git src/libOpenImageIO/CMakeLists.txt src/libOpenImageIO/CMakeLists.txt
-index 1dd60922c..406c0f8a1 100644
+index 1dd60922c..a6d193bef 100644
 --- src/libOpenImageIO/CMakeLists.txt
 +++ src/libOpenImageIO/CMakeLists.txt
-@@ -153,6 +153,7 @@ target_link_libraries (OpenImageIO
+@@ -153,18 +153,29 @@ target_link_libraries (OpenImageIO
              OpenImageIO_Util
              ${OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY}
              ${OPENIMAGEIO_IMATH_TARGETS}
-+            fmt::fmt
-         PRIVATE
+-        PRIVATE
              ${OPENIMAGEIO_OPENEXR_TARGETS}
++            fmt::fmt
++        PRIVATE
++            #${OPENIMAGEIO_OPENEXR_TARGETS}
              ${format_plugin_libs} # Add all the target link libraries from the plugins
-@@ -160,11 +161,20 @@ target_link_libraries (OpenImageIO
+             OpenColorIO::OpenColorIO
              $<TARGET_NAME_IF_EXISTS:OpenColorIO::OpenColorIOHeaders>
              $<TARGET_NAME_IF_EXISTS:pugixml::pugixml>
              $<TARGET_NAME_IF_EXISTS:TBB::tbb>
@@ -491,6 +501,17 @@ index 941c1bbc9..3126fd267 100644
      if (WIN32)
          target_compile_definitions(${targetname} PRIVATE
                                     WIN32_LEAN_AND_MEAN NOMINMAX
+diff --git src/maketx/CMakeLists.txt src/maketx/CMakeLists.txt
+index 735b88def..ab9732756 100644
+--- src/maketx/CMakeLists.txt
++++ src/maketx/CMakeLists.txt
+@@ -2,4 +2,5 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # https://github.com/AcademySoftwareFoundation/OpenImageIO
+ 
+-fancy_add_executable (LINK_LIBRARIES OpenImageIO)
++fancy_add_executable (LINK_LIBRARIES OpenImageIO
++                                     fmt::fmt)
 diff --git src/oiiotool/CMakeLists.txt src/oiiotool/CMakeLists.txt
 index 87b6a3e78..acd0cb985 100644
 --- src/oiiotool/CMakeLists.txt

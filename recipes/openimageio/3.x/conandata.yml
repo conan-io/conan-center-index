@@ -4,6 +4,6 @@ sources:
     sha256: "fe96d2f39435f1585fe2ede4279a303e2cef3b28df351e8331fed46bbb251f35"
 patches:
   "3.0.0.3":
-    - patch_file: "patches/3.0.0.0-cmake-targets.patch"
+    - patch_file: "patches/3.0.0.3-cmake-targets.patch"
       patch_description: "Ensure project builds correctly with Conan (don't pick up disabled dependencies from the system, fix different spelling of libraries)"
       patch_type: "conan"
