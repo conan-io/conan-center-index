@@ -131,7 +131,8 @@ class MpdecimalConan(ConanFile):
         mpdecdir = os.path.join(self.source_folder, "libmpdec")
         mpdecppdir = os.path.join(self.source_folder, "libmpdec++")
 
-        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses")) # <4.0.0
+        copy(self, "COPYRIGHT.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses")) # >4.0.0
         copy(self, "vc*.h", src=mpdecdir, dst=os.path.join(self.package_folder, "include")) # <=2.5.0/MSVC only
         copy(self, "mpdecimal.h", src=mpdecdir, dst=os.path.join(self.package_folder, "include"))
         if self.options.get_safe("cxx"):
