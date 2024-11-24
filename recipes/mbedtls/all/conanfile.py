@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class MBedTLSConan(ConanFile):
@@ -34,10 +34,9 @@ class MBedTLSConan(ConanFile):
         "with_zlib": True,
         "enable_threading": False,
     }
+    implements = ["auto_shared_fpic"]
 
     def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
         if Version(self.version) >= "3.0.0":
             # ZLIB support has been ditched on version 3.0.0
             del self.options.with_zlib
@@ -57,8 +56,6 @@ class MBedTLSConan(ConanFile):
 
     def validate(self):
         if self.settings.os == "Windows":
-            if self.options.shared:
-                raise ConanInvalidConfiguration(f"{self.ref} does not support shared build on Windows")
             if self.options.enable_threading:
                 # INFO: Planned: https://github.com/Mbed-TLS/mbedtls/issues/8455
                 raise ConanInvalidConfiguration(f"{self.ref} does not support the option enable_threading on Windows")
@@ -74,20 +71,22 @@ class MBedTLSConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.options.shared:
-            tc.preprocessor_definitions["X509_BUILD_SHARED"] = "1"
-            tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        tc.variables["USE_SHARED_MBEDTLS_LIBRARY"] = self.options.shared
-        tc.variables["USE_STATIC_MBEDTLS_LIBRARY"] = not self.options.shared
+        tc.cache_variables["USE_SHARED_MBEDTLS_LIBRARY"] = self.options.shared
+        tc.cache_variables["USE_STATIC_MBEDTLS_LIBRARY"] = not self.options.shared
         if Version(self.version) < "3.0.0":
-            tc.variables["ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
-        tc.variables["ENABLE_PROGRAMS"] = False
-        tc.variables["MBEDTLS_FATAL_WARNINGS"] = False
-        tc.variables["ENABLE_TESTING"] = False
+            tc.cache_variables["ENABLE_ZLIB_SUPPORT"] = self.options.with_zlib
+        tc.cache_variables["ENABLE_PROGRAMS"] = False
+        tc.cache_variables["MBEDTLS_FATAL_WARNINGS"] = False
+        tc.cache_variables["ENABLE_TESTING"] = False
         if Version(self.version) < "3.0.0":
             # relocatable shared libs on macOS
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         if is_msvc(self):
+            tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = self.options.shared
+            replace_in_file(self, "library/constant_time_impl.h", "extern volatile", "__declspec(dllimport) volatile")
+            replace_in_file(self, "extern const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_suiteb;", "__declspec(dllimport) const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_suiteb;")
+            replace_in_file(self, "extern const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_default;", "__declspec(dllimport) const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_default;")
+            replace_in_file(self, "extern const mbedtls_error_pair_t psa_to_ssl_errors[7];", "__declspec(dllimport) const mbedtls_error_pair_t psa_to_ssl_errors[7];")
             if check_min_vs(self, 190, raise_invalid=False):
                 tc.preprocessor_definitions["MBEDTLS_PLATFORM_SNPRINTF_MACRO"] = "snprintf"
             else:
@@ -147,7 +146,7 @@ class MBedTLSConan(ConanFile):
                 self.cpp_info.components[component].requires.append("zlib::zlib")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "MbedTLS"
-        self.cpp_info.names["cmake_find_package_multi"] = "MbedTLS"
+        #self.cpp_info.names["cmake_find_package"] = "MbedTLS"
+        #self.cpp_info.names["cmake_find_package_multi"] = "MbedTLS"
         self.cpp_info.components["libembedtls"].names["cmake_find_package"] = "mbedtls"
         self.cpp_info.components["libembedtls"].names["cmake_find_package_multi"] = "mbedtls"
