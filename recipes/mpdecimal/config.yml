@@ -6,4 +6,4 @@ versions:
   "2.5.0":
     folder: "all"
   "2.4.2":
-    folder: "2.5.x"
+    folder: "all"
