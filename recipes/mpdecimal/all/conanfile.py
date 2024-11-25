@@ -83,10 +83,6 @@ class MpdecimalConan(ConanFile):
             tc_env.append("LDXXFLAGS", ["$LDFLAGS"])
             tc.generate(tc_env)
 
-    @property
-    def _target(self):
-        return "SHARED" if self.options.shared else "STATIC"
-
     def _build_msvc(self):
         libmpdec_folder = os.path.join(self.source_folder, "libmpdec")
         libmpdecpp_folder = os.path.join(self.source_folder, "libmpdec++")
@@ -110,12 +106,13 @@ class MpdecimalConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         # Replace the default target with just the target we want
+        target = "SHARED" if self.options.shared else "STATIC"
         for ext in ["vc", "in"]:
             replace_in_file(self, os.path.join("libmpdec", f"Makefile.{ext}"), "default:",
-                                f"default: $(LIB{self._target}) #")
+                                f"default: $(LIB{target}) #")
             if self.options.get_safe("cxx"):
                 replace_in_file(self, os.path.join("libmpdec++", f"Makefile.{ext}"), "default:",
-                                    f"default: $(LIB{self._target}_CXX) #")
+                                    f"default: $(LIB{target}_CXX) #")
  
         if is_msvc(self):
             self._build_msvc()
