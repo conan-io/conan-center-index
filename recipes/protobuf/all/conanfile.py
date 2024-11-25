@@ -299,6 +299,8 @@ class ProtobufConan(ConanFile):
                 self.cpp_info.components["libprotobuf-lite"].system_libs.append("log")
             if self._protobuf_release >= "22.0":
                 self.cpp_info.components["libprotobuf-lite"].requires.extend(absl_deps)
+                if not self.options.shared:
+                    self.cpp_info.components["libprotobuf-lite"].requires.extend(["utf8_validity"])
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "Protobuf"

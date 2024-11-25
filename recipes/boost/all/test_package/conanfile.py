@@ -41,6 +41,7 @@ class TestPackageConan(ConanFile):
         tc.cache_variables["WITH_LOCALE"] = not self.dependencies["boost"].options.without_locale
         tc.cache_variables["WITH_NOWIDE"] = not self._boost_option("without_nowide", True)
         tc.cache_variables["WITH_JSON"] = not self._boost_option("without_json", True)
+        tc.cache_variables["WITH_PROCESS"] = not self._boost_option("without_process", True)
         tc.cache_variables["WITH_STACKTRACE"] = not self.dependencies["boost"].options.without_stacktrace
         tc.cache_variables["WITH_STACKTRACE_ADDR2LINE"] = self.dependencies["boost"].conf_info.get("user.boost:stacktrace_addr2line_available")
         tc.cache_variables["WITH_STACKTRACE_BACKTRACE"] = self._boost_option("with_stacktrace_backtrace", False)
@@ -59,12 +60,12 @@ class TestPackageConan(ConanFile):
             return
         with chdir(self, self.folders.build_folder):
             # When boost and its dependencies are built as shared libraries,
-            # the test executables need to locate them. Typically the 
+            # the test executables need to locate them. Typically the
             # `conanrun` env should be enough, but this may cause problems on macOS
             # where the CMake installation has dependencies on Apple-provided
-            # system libraries that are incompatible with Conan-provided ones. 
+            # system libraries that are incompatible with Conan-provided ones.
             # When `conanrun` is enabled, DYLD_LIBRARY_PATH will also apply
-            # to ctest itself. Given that CMake already embeds RPATHs by default, 
+            # to ctest itself. Given that CMake already embeds RPATHs by default,
             # we can bypass this by using the `conanbuild` environment on
             # non-Windows platforms, while still retaining the correct behaviour.
             env = "conanrun" if self.settings.os == "Windows" else "conanbuild"
