@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
 from conan.tools.apple import fix_apple_shared_install_name
@@ -24,32 +24,44 @@ class libdatachannelConan(ConanFile):
         "fPIC": [True, False],
         "with_websocket": [True, False],
         "with_nice": [True, False],
+        "with_ssl": ["openssl", "mbedtls", "gnutls"]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_websocket": True,
-        "with_nice": False
+        "with_nice": False,
+        "with_ssl": "openssl"
     }
 
     implements = ["auto_shared_fpic"]
 
     def requirements(self):
-        self.requires("openssl/[>=1.1]")
+        if self.options.with_ssl == "openssl":
+            self.requires("openssl/[>=1.1 <4]")
+        elif self.options.with_ssl == "mbedtls":
+            self.requires("mbedtls/3.6.2")
+        elif self.options.with_ssl == "gnutls":
+            self.requires("gnutls/3.8.7")
+            if self.options.with_websocket:
+                self.requires("nettle/3.9.1")
         self.requires("plog/1.1.10")
         self.requires("usrsctp/0.9.5.0")
         self.requires("libsrtp/2.6.0")
-        self.requires("nlohmann_json/3.11.3")        
+        self.requires("nlohmann_json/3.11.3")
         if self.options.with_nice:
             self.requires("libnice/0.1.21")
         else:
-            self.requires("libjuice/1.5.7")
+            self.requires("libjuice/1.5.7", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         check_min_cppstd(self, 17)
-        if self.settings.os == "Windows":
-            # TODO: fix windows support
-            raise ConanInvalidConfiguration("Does not support Windows yet")
+        if self.options.with_ssl == "mbedtls":
+            # dtlstransport.cpp:414:3: error: use of undeclared identifier 'mbedtls_ssl_conf_dtls_srtp_protection_profiles'
+            raise ConanInvalidConfiguration("Compilation error with mbedtls. Contributions are welcome.")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -60,17 +72,34 @@ class libdatachannelConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["USE_SYSTEM_SRTP"] = True
-        
-        tc.variables["USE_SYSTEM_USRSCTP"] = True
-        tc.variables["USE_SYSTEM_PLOG"] = True
-        tc.variables["USE_SYSTEM_JSON"] = True
-        tc.variables["NO_EXAMPLES"] = True
-        tc.variables["NO_TESTS"] = True
-        tc.variables["NO_WEBSOCKET"] = not self.options.with_websocket
-        tc.variables["USE_NICE"] = self.options.with_nice
-        tc.variables["USE_SYSTEM_JUICE"] = not self.options.with_nice
+        tc.cache_variables["PREFER_SYSTEM_LIB"] = True
+        tc.cache_variables["USE_SYSTEM_SRTP"] = True
+        tc.cache_variables["USE_SYSTEM_USRSCTP"] = True
+        tc.cache_variables["USE_SYSTEM_PLOG"] = True
+        tc.cache_variables["USE_SYSTEM_JSON"] = True
+        tc.cache_variables["NO_EXAMPLES"] = True
+        tc.cache_variables["NO_TESTS"] = True
+        tc.cache_variables["NO_WEBSOCKET"] = not self.options.with_websocket
+        tc.cache_variables["USE_NICE"] = self.options.with_nice
+        tc.cache_variables["USE_SYSTEM_JUICE"] = not self.options.with_nice
+        if self.options.with_ssl == "gnutls":
+            tc.cache_variables["USE_GNUTLS"] = True
+        elif self.options.with_ssl == "mbedtls":
+            tc.cache_variables["USE_MBEDTLS"] = True
         tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("usrsctp", "cmake_target_name", "Usrsctp::Usrsctp")
+        deps.set_property("libsrtp", "cmake_file_name", "libSRTP")
+        deps.set_property("libsrtp", "cmake_target_name", "libSRTP::srtp2")
+        if self.options.with_ssl == "mbedtls":
+            deps.set_property("mbedtls::libembedtls", "cmake_target_name", "MbedTLS::MbedTLS")
+        elif self.options.with_ssl == "gnutls" and self.options.with_websocket:
+            deps.set_property("nettle", "cmake_file_name", "Nettle")
+            deps.set_property("nettle", "cmake_target_name", "Nettle::Nettle")
+        if not self.options.with_nice and not self.options.shared:
+            # Targetname is LibJuice::LibJuiceStatic for static, but upstream makes no distinction
+            deps.set_property("libjuice", "cmake_target_name", "LibJuice::LibJuice")
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -99,9 +128,15 @@ class libdatachannelConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "LibDataChannel::LibDataChannel")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
-            self.cpp_info.system_libs.append("dl")
+            self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
+
+        if not self.options.shared:
+            self.cpp_info.defines.append("RTC_STATIC")
+
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("ws2_32")
+            self.cpp_info.defines.append("WIN32_LEAN_AND_MEAN")
 
         if is_msvc(self):
             self.cpp_info.cxxflags.append("/bigobj")
+            self.cpp_info.defines.extend(["_CRT_SECURE_NO_WARNINGS", "NOMINMAX"])
