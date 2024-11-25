@@ -5,7 +5,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, MSBuild, MSBuildToolchain
+from conan.tools.microsoft import MSBuild, MSBuildToolchain
 import os
 import re
 
@@ -32,8 +32,8 @@ class LibjpegConan(ConanFile):
     }
 
     @property
-    def _is_clang_cl(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "clang"
+    def _is_cl_like(self):
+        return self.settings.compiler.get_safe("runtime") is not None
 
     @property
     def _settings_build(self):
@@ -60,7 +60,7 @@ class LibjpegConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows" and not (is_msvc(self) or self. _is_clang_cl):
+        if self._settings_build.os == "Windows" and not self._is_cl_like:
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -69,7 +69,7 @@ class LibjpegConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        if is_msvc(self):
+        if self._is_cl_like:
             tc = MSBuildToolchain(self)
             tc.cflags.append("-DLIBJPEG_BUILDING")
             if not self.options.shared:
@@ -84,7 +84,7 @@ class LibjpegConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        if is_msvc(self):
+        if self._is_cl_like:
             with chdir(self, self.source_folder):
                 self.run("nmake /f makefile.vs setupcopy-v16")
 
@@ -93,19 +93,22 @@ class LibjpegConan(ConanFile):
                 # shared: "libjpeg.lib" (import), "libjpeg-9.dll" (DLL)
                 jpeg_vcxproj = os.path.join(self.source_folder, "jpeg.vcxproj")
                 target_name = "libjpeg-9" if self.options.shared else "libjpeg"
-                replace_in_file(self, jpeg_vcxproj, """<PropertyGroup Label="UserMacros" />""", 
+                replace_in_file(self, jpeg_vcxproj, """<PropertyGroup Label="UserMacros" />""",
                                 f""" <PropertyGroup Label="UserMacros" /><PropertyGroup Label="TargetName"> <TargetName>{target_name}</TargetName></PropertyGroup>
                                 """)
                 if self.options.shared:
                     replace_in_file(self, jpeg_vcxproj, "</SubSystem>",
                                     "</SubSystem><ImportLibrary>$(OutDir)libjpeg.lib</ImportLibrary>")
-                
+
                 # Support static/shared
                 if self.options.shared:
                     replace_in_file(self, jpeg_vcxproj,
                         "<ConfigurationType>StaticLibrary</ConfigurationType>",
                         "<ConfigurationType>DynamicLibrary</ConfigurationType>"
                     )
+
+                # Don't force LTO
+                replace_in_file(self, jpeg_vcxproj, "<WholeProgramOptimization>true</WholeProgramOptimization>", "")
 
                 # Inject conan-generated .props file
                 # Note: importing it right before Microsoft.Cpp.props also ensures we correctly
@@ -125,7 +128,6 @@ class LibjpegConan(ConanFile):
                     if self.settings.build_type == "Debug":
                         replacements.update({
                             "<Optimization>Full": "<Optimization>Disabled",
-                            "<WholeProgramOptimization>true": "<WholeProgramOptimization>False",
                             "NDEBUG;": "_DEBUG;",
                         })
                     for key, value in replacements.items():
@@ -146,7 +148,7 @@ class LibjpegConan(ConanFile):
 
     def package(self):
         copy(self, "README", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        if is_msvc(self) or self._is_clang_cl:
+        if self._is_cl_like:
             for filename in ["jpeglib.h", "jerror.h", "jconfig.h", "jmorecfg.h"]:
                 copy(self, filename, src=self.source_folder, dst=os.path.join(self.package_folder, "include"), keep_path=False)
 
@@ -181,7 +183,7 @@ class LibjpegConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "JPEG")
         self.cpp_info.set_property("cmake_target_name", "JPEG::JPEG")
         self.cpp_info.set_property("pkg_config_name", "libjpeg")
-        prefix = "lib" if is_msvc(self) or self._is_clang_cl else ""
+        prefix = "lib" if self._is_cl_like else ""
         self.cpp_info.libs = [f"{prefix}jpeg"]
         self.cpp_info.resdirs = ["res"]
         if not self.options.shared:
