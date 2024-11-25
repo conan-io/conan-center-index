@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
+from conan.tools.env import VirtualRunEnv
 from conan.tools.microsoft import is_msvc
 from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
@@ -48,21 +49,24 @@ class QXlsxConan(ConanFile):
         check_min_cppstd(self, 11)
         if not self.dependencies["qt"].options.gui:
             raise ConanInvalidConfiguration(f"{self.ref} requires Qt with gui component. Use '-o qt/*:gui=True'")
-        if Version(self.version) == "1.4.4" and is_msvc(self) and self.options.shared:
-            # FIXME: xlsxworksheet.cpp.obj : error LNK2019: unresolved external symbol " __cdecl QVector<class QXmlStreamAttribute>::begin(
-            raise ConanInvalidConfiguration(f"{self.ref} Conan recipe does not support shared library with MSVC. Use version 1.4.5 or later.")
 
     def build_requirements(self):
-        if Version(self.version) >= "1.4.4":
-            self.tool_requires("cmake/[>=3.16 <4]")
+        self.tool_requires("cmake/[>=3.16 <4]")
+        # INFO: QXlsx use Qt automoc: https://github.com/QtExcel/QXlsx/blob/v1.4.9/QXlsx/CMakeLists.txt#L12
+        self.tool_requires("qt/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        # INFO: In order to find Qt moc application
+        env = VirtualRunEnv(self)
+        env.generate(scope="build")
+
         tc = CMakeToolchain(self)
         tc.cache_variables["QT_VERSION_MAJOR"] = self._qt_version
-        # INFO: QXlsx use cached CMAKE_CXX_STANDARD value
+        # INFO: QXlsx use cached CMAKE_CXX_STANDARD value:
+        # https://github.com/QtExcel/QXlsx/blob/v1.4.9/QXlsx/CMakeLists.txt#L23
         tc.cache_variables["CMAKE_CXX_STANDARD"] = self.settings.get_safe("compiler.cppstd").replace("gnu", "")
         tc.generate()
         tc = CMakeDeps(self)
@@ -81,10 +85,13 @@ class QXlsxConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        cmake_name = f"QXlsxQt{self._qt_version}" if Version(self.version) >= "1.4.5" else "QXlsx"
+        cmake_name = f"QXlsxQt{self._qt_version}"
         self.cpp_info.set_property("cmake_file_name", cmake_name)
         self.cpp_info.set_property("cmake_target_name", "QXlsx::QXlsx")
+        self.cpp_info.set_property("cmake_target_aliases", ["QXlsx"])
         self.cpp_info.libs = [cmake_name]
         includedir = f"QXlsxQt{self._qt_version}" if Version(self.version) >= "1.4.6" else "QXlsx"
         self.cpp_info.includedirs = ["include", os.path.join("include", includedir)]
         self.cpp_info.requires = ["qt::qtCore", "qt::qtGui"]
+        if is_msvc(self) and self.options.shared:
+            self.cpp_info.defines = ["QXlsx_SHAREDLIB"]
