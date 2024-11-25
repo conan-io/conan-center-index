@@ -1,3 +1,5 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a021623..df72705 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -4,8 +4,8 @@
@@ -52,7 +54,7 @@
  endif()
  
  if(UNIT_TEST)
-@@ -211,10 +212,8 @@ endif()
+@@ -211,11 +212,9 @@ endif()
  
  
  # install the conversion tool, .so, .a, and all the header files
@@ -65,3 +67,4 @@
  
  # create the .deb and .rpm packages using cpack
 -INCLUDE ( CM_linux_packages.cmake )
+ 
