@@ -866,14 +866,14 @@ class BoostConan(ConanFile):
                             "! [ $(property-set).get <target-os> ] in windows cygwin darwin aix android &&",
                             strict=False)
 
+    def build(self):
+        self._patch_sources()
+
         if self.options.header_only:
             self.output.info("Header only package, skipping build")
             return
 
         self._clean()
-
-    def build(self):
-        self._patch_sources()
         if self._use_bcp:
             self._build_bcp()
             self._run_bcp()
