@@ -1,6 +1,7 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get, rm, rmdir
@@ -13,7 +14,7 @@ class libdatachannelConan(ConanFile):
     name = "libdatachannel"
     description = "C/C++ WebRTC network library featuring Data Channels, Media Transport, and WebSockets."
     license = "MPL-2.0"
-    topics = ("webrtc")
+    topics = ("webrtc", "rtc", "datachannel", "websocket")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/paullouisageneau/libdatachannel"
     settings = "os", "compiler", "build_type", "arch"
