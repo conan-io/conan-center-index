@@ -103,19 +103,6 @@ class bgfxConan(ConanFile):
                     projs.extend([f"{self._tool_target_prefix}{tool}"])
         return projs
 
-    @property
-    def _compiler_required(self):
-        return {
-            "gcc": "8",
-            "clang": "11",
-            "apple-clang": "12", #to keep CCI compiling on osx 11.0 or higher, for now,
-            "msvc": "192"
-        }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -132,20 +119,15 @@ class bgfxConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires macos sdk version >= 11")
         if self.settings.os in ["iOS", "tvOS"]  and self.settings.get_safe("os.sdk_version") and self.settings.get_safe("os.sdk_version") < "16.0":
             raise ConanInvalidConfiguration(f"{self.ref} requires iOS/tvOS sdk version >= 16")
-        minimum_required_compiler_version = self._compiler_required[str(self.settings.compiler)]
-        if Version(self.settings.compiler.version) < minimum_required_compiler_version:
-            raise ConanInvalidConfiguration("This package requires C++17 support. The current compiler does not support it.")
 
     def build_requirements(self):
         self.tool_requires("genie/1181")
-        if not is_msvc(self) and self._settings_build.os == "Windows":
+        if not is_msvc(self) and self.settings_build.os == "Windows":
             if self.settings.os == "Windows": # building for windows mingw
                 if "MINGW" not in os.environ:
                     self.tool_requires("mingw-builds/13.2.0")
             else: # cross-compiling for something else, probably android; get native make
                 self.tool_requires("make/[>=4.4.1]")
-        if self.settings.os == "Android" and "ANDROID_NDK_ROOT" not in os.environ:
-            self.tool_requires("android-ndk/[>=r26d]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["bgfx"], strip_root=True,
@@ -158,17 +140,11 @@ class bgfxConan(ConanFile):
                     destination=os.path.join(self.source_folder, self._bimg_folder))
 
     def generate(self):
-        vbe = VirtualBuildEnv(self)
-        vbe.generate()
         if is_msvc(self):
             tc = MSBuildToolchain(self)
-            if not self.settings.get_safe("compiler.cppstd"):
-                tc.cppstd = "c++17"
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
-            if not self.settings.get_safe("compiler.cppstd"):
-                tc.cppstd = "-std=c++17"
             tc.generate()
 
     def build(self):
@@ -179,8 +155,7 @@ class bgfxConan(ConanFile):
                             "\"NoRTTI\",", "")
         if is_msvc(self):
             # Conan to Genie translation maps
-            vs_ver_to_genie = {"17": "2022", "16": "2019", "15": "2017",
-                            "194": "2022", "193": "2022", "192": "2019", "191": "2017"}
+            vs_ver_to_genie = {"194": "2022", "193": "2022", "192": "2019", "191": "2017"}
 
             # Use genie directly, then msbuild on specific projects based on requirements
             genie_VS = f"vs{vs_ver_to_genie[str(self.settings.compiler.version)]}"
@@ -367,7 +342,3 @@ class bgfxConan(ConanFile):
                 self.cpp_info.includedirs.extend(["include/compat/ios"])
         elif self.settings.os in ["Android"]:
             self.cpp_info.system_libs.extend(["c", "dl", "m", "android", "log", "c++_shared", "EGL", "GLESv2"])
-
-        self.cpp_info.set_property("cmake_file_name", "bgfx")
-        self.cpp_info.set_property("cmake_target_name", "bgfx::bgfx")
-        self.cpp_info.set_property("pkg_config_name", "bgfx")
