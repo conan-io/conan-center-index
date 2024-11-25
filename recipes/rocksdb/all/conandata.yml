@@ -15,6 +15,22 @@ sources:
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v6.29.5.tar.gz"
     sha256: "ddbf84791f0980c0bbce3902feb93a2c7006f6f53bfd798926143e31d4d756f0"
 patches:
+  "9.7.4":
+    - patch_file: "patches/9.x.x-0001-exclude-thirdparty.patch"
+      patch_description: "Do not include thirdparty.inc"
+      patch_type: "portability"
+  "9.5.2":
+    - patch_file: "patches/9.x.x-0001-exclude-thirdparty.patch"
+      patch_description: "Do not include thirdparty.inc"
+      patch_type: "portability"
+  "9.4.0":
+    - patch_file: "patches/9.x.x-0001-exclude-thirdparty.patch"
+      patch_description: "Do not include thirdparty.inc"
+      patch_type: "portability"
+  "8.8.1":
+    - patch_file: "patches/8.8.1-0001-exclude-thirdparty.patch"
+      patch_description: "Do not include thirdparty.inc"
+      patch_type: "portability"
   "6.29.5":
     - patch_file: "patches/6.29.5-0001-add-include-cstdint-for-gcc-13.patch"
       patch_description: "Fix build with gcc 13 by including cstdint"

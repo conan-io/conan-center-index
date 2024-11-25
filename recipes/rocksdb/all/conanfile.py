@@ -103,8 +103,6 @@ class RocksDBConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) > "6.29.5":
-            tc.variables["ROCKSDB_SKIP_THIRDPARTY"] = True
         tc.variables["FAIL_ON_WARNINGS"] = False
         tc.variables["WITH_TESTS"] = False
         tc.variables["WITH_TOOLS"] = False
