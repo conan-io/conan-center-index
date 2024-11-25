@@ -5,7 +5,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class LibyuvConan(ConanFile):
@@ -57,6 +57,7 @@ class LibyuvConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version])
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -68,10 +69,7 @@ class LibyuvConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-
-        # remove default CMAKE_POSITION_INDEPENDENT_CODE if not requested
-        use_fpic = self.options.get_safe("fPIC") or self.options.get_safe("shared")
-        if Version(self.version) >= "1892" and not use_fpic:
+        if Version(self.version) >= "1892":
             replace_in_file(
                 self,
                 os.path.join(self.source_folder, "CMakeLists.txt"),
@@ -80,7 +78,6 @@ class LibyuvConan(ConanFile):
             )
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -93,6 +90,8 @@ class LibyuvConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = ["yuv"]
         self.cpp_info.requires = []
+        if self.settings.compiler == "msvc":
+            self.cpp_info.defines.append("_CRT_SECURE_NO_WARNINGS")
         if self.options.with_jpeg == "libjpeg":
             self.cpp_info.requires.append("libjpeg::libjpeg")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -101,6 +100,3 @@ class LibyuvConan(ConanFile):
             self.cpp_info.requires.append("mozjpeg::libjpeg")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
