@@ -61,8 +61,11 @@ class LibyuvConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["TEST"] = False
-        tc.variables["LIBYUV_WITH_JPEG"] = bool(self.options.with_jpeg)
+        tc.cache_variables["TEST"] = False
+        tc.cache_variables["LIBYUV_WITH_JPEG"] = bool(self.options.with_jpeg)
+        if self.options.shared:
+            # Force FPIC for shared, Conan does not set it
+            tc.cache_variables["CMAKE_POSITION_INDEPENDENT_CODE"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
