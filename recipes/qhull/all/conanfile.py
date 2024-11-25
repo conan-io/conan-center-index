@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class QhullConan(ConanFile):
@@ -16,10 +16,9 @@ class QhullConan(ConanFile):
                    "furthest-site Delaunay triangulation, and furthest-site "
                    "Voronoi diagram.")
     license = "Qhull"
-    topics = ("geometry", "convex", "triangulation", "intersection")
-    homepage = "http://www.qhull.org"
     url = "https://github.com/conan-io/conan-center-index"
-
+    homepage = "http://www.qhull.org"
+    topics = ("geometry", "convex", "triangulation", "intersection")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -34,13 +33,10 @@ class QhullConan(ConanFile):
         "cpp": False,
         "reentrant": True,
     }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
@@ -71,10 +67,9 @@ class QhullConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_STATIC_LIBS"] = not self.options.shared
-        tc.variables["BUILD_SHARED_LIBS"] = self.options.shared
-        tc.variables["QHULL_ENABLE_TESTING"] = False
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
+        tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        tc.cache_variables["QHULL_ENABLE_TESTING"] = False
         tc.generate()
 
     def build(self):
@@ -120,23 +115,6 @@ class QhullConan(ConanFile):
             self.cpp_info.components["libqhullcpp"].set_property("pkg_config_name", "qhullcpp")
             self.cpp_info.components["libqhullcpp"].libs = [f"qhullcpp{suffix}"]
             self.cpp_info.components["libqhullcpp"].requires = ["libqhull_r"]
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.cpp_info.names["cmake_find_package"] = "Qhull"
-        self.cpp_info.names["cmake_find_package_multi"] = "Qhull"
-        if self.options.reentrant:
-            self.cpp_info.components["libqhull_r"].names["cmake_find_package"] = self._qhull_cmake_name(True)
-            self.cpp_info.components["libqhull_r"].names["cmake_find_package_multi"] = self._qhull_cmake_name(True)
-            self.cpp_info.components["libqhull_r"].names["pkg_config"] = self._qhull_pkgconfig_name(True)
-        else:
-            self.cpp_info.components["libqhull"].names["cmake_find_package"] = self._qhull_cmake_name(False)
-            self.cpp_info.components["libqhull"].names["cmake_find_package_multi"] = self._qhull_cmake_name(False)
-            self.cpp_info.components["libqhull"].names["pkg_config"] = self._qhull_pkgconfig_name(False)
-        if self.options.get_safe("cpp"):
-            self.cpp_info.components["libqhullcpp"].names["cmake_find_package"] = "qhullcpp"
-            self.cpp_info.components["libqhullcpp"].names["cmake_find_package_multi"] = "qhullcpp"
-            self.cpp_info.components["libqhullcpp"].names["pkg_config"] = "qhullcpp"
 
     def _qhull_cmake_name(self, reentrant):
         if Version(self.version) < "8.1-alpha4" and not reentrant and self.options.shared:
