@@ -69,13 +69,6 @@ class LibyuvConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if Version(self.version) >= "1892":
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "CMakeLists.txt"),
-                "SET(CMAKE_POSITION_INDEPENDENT_CODE ON)",
-                "",
-            )
 
     def build(self):
         cmake = CMake(self)
