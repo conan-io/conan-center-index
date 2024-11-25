@@ -48,7 +48,6 @@ class libdatachannelConan(ConanFile):
         self.requires("plog/1.1.10")
         self.requires("usrsctp/0.9.5.0")
         self.requires("libsrtp/2.6.0")
-        self.requires("nlohmann_json/3.11.3")
         if self.options.with_nice:
             self.requires("libnice/0.1.21")
         else:
