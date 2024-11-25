@@ -6,12 +6,11 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class ResiprocateConan(ConanFile):
@@ -24,7 +23,6 @@ class ResiprocateConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/resiprocate/resiprocate/wiki/"
     topics = ("sip", "voip", "communication", "signaling")
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -39,31 +37,7 @@ class ResiprocateConan(ConanFile):
         "with_cares": True,
         "with_ssl": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "6",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -75,19 +49,13 @@ class ResiprocateConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 11)
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
     def build_requirements(self):
-        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -119,11 +87,7 @@ class ResiprocateConan(ConanFile):
         tc = VirtualBuildEnv(self)
         tc.generate(scope="build")
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -146,12 +110,8 @@ class ResiprocateConan(ConanFile):
         if not self.options.with_cares:
             self.cpp_info.libs.append("resipares")
         if is_apple_os(self):
-            self.cpp_info.frameworks.append("CoreFoundation")
-            self.cpp_info.frameworks.append("CoreServices")
-            self.cpp_info.frameworks.append("Security")
+            self.cpp_info.frameworks.extend(["CoreFoundation", "CoreServices", "Security"])
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.append("m")
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.extend(["m", "pthread"])
         elif self.settings.os in ["Windows"]:
-            self.cpp_info.system_libs.append("winmm")
-            self.cpp_info.system_libs.append("ws2_32")
+            self.cpp_info.system_libs.extend(["winmm", "ws2_32"])
