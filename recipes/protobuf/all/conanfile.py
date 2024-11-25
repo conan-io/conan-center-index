@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm
+from conan.tools.files import copy, rename, get, apply_conandata_patches, export_conandata_patches, replace_in_file, rmdir, rm, save
 from conan.tools.microsoft import check_min_vs, msvc_runtime_flag, is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
@@ -146,6 +146,19 @@ class ProtobufConan(ConanFile):
         if is_apple_os(self) and self.options.shared:
             # Workaround against SIP on macOS for consumers while invoking protoc when protobuf lib is shared
             tc.variables["CMAKE_INSTALL_RPATH"] = "@loader_path/../lib"
+
+        if self.settings.os == "Linux":
+            # Use RPATH instead of RUNPATH to help with specific case
+            # in the grpc recipe when grpc_cpp_plugin is run with protoc
+            # in the same build. RPATH ensures that the rpath in the binary
+            # is respected for transitive dependencies too
+            project_include = os.path.join(self.generators_folder, "protobuf_project_include.cmake")
+            save(self, project_include, "add_link_options(-Wl,--disable-new-dtags)")
+            tc.variables["CMAKE_PROJECT_INCLUDE"] = project_include
+            # Note: conan2 only could be:
+            # tc.extra_exelinkflags.append("-Wl,--disable-new-dtags")
+            # tc.extra_sharedlinkflags.append("-Wl,--disable-new-dtags")
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -286,6 +299,8 @@ class ProtobufConan(ConanFile):
                 self.cpp_info.components["libprotobuf-lite"].system_libs.append("log")
             if self._protobuf_release >= "22.0":
                 self.cpp_info.components["libprotobuf-lite"].requires.extend(absl_deps)
+                if not self.options.shared:
+                    self.cpp_info.components["libprotobuf-lite"].requires.extend(["utf8_validity"])
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "Protobuf"
