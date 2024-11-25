@@ -10,7 +10,7 @@ import os
 import shutil
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class GLibConan(ConanFile):
@@ -83,7 +83,7 @@ class GLibConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.2.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
