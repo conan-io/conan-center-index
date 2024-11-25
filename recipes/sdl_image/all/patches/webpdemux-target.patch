@@ -1,0 +1,23 @@
+From 35e3cb865f8394bdc8bb2d2cf6e9f91dfd3c94bd Mon Sep 17 00:00:00 2001
+From: Andrey Filipenkov <decapitator@ukr.net>
+Date: Sat, 23 Nov 2024 00:47:15 +0300
+Subject: [PATCH] fix name case of webpdemux target
+
+(cherry picked from commit 0d418a2a2dc562699854d9c2fc264304ec404e2c)
+---
+ cmake/Findwebp.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cmake/Findwebp.cmake b/cmake/Findwebp.cmake
+index 58891318..e07b377c 100644
+--- a/cmake/Findwebp.cmake
++++ b/cmake/Findwebp.cmake
+@@ -43,7 +43,7 @@ if (webp_FOUND)
+             INTERFACE_LINK_FLAGS "${webp_LINK_FLAGS}"
+         )
+     endif()
+-    if (NOT TARGET WEBP::webpdemux)
++    if (NOT TARGET WebP::webpdemux)
+         add_library(WebP::webpdemux UNKNOWN IMPORTED)
+         set_target_properties(WebP::webpdemux PROPERTIES
+             IMPORTED_LOCATION "${webpdemux_LIBRARY}"
