@@ -55,6 +55,9 @@ class SvtJpegXsConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_APPS"] = False
+        if self.settings.os != "Windows":
+            # INFO: The upstream use OBJECT library for shared library. CMake does not pass -fPIC to OBJECT library
+            tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         tc.generate()
 
     def build(self):
