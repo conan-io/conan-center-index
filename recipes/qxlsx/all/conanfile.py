@@ -1,13 +1,13 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import export_conandata_patches, apply_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
+from conan.tools.build import check_min_cppstd
 from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class QXlsxConan(ConanFile):
@@ -27,6 +27,7 @@ class QXlsxConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    implements = ["auto_shared_fpic"]
 
     @property
     def _qt_version(self):
@@ -35,26 +36,16 @@ class QXlsxConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         # INFO: QXlsx/xlsxdocument.h includes QtGlobal
         # INFO: transitive libs: undefined reference to symbol '_ZN10QArrayData10deallocateEPS_mm@@Qt_5'
-        if Version(self.version) >= "1.4.9":
-            self.requires("qt/[>=6.7 <7]", transitive_headers=True, transitive_libs=True)
-        else:
-            self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/[>=6.7 <7]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
+        check_min_cppstd(self, 11)
         if not self.dependencies["qt"].options.gui:
             raise ConanInvalidConfiguration(f"{self.ref} requires Qt with gui component. Use '-o qt/*:gui=True'")
         if Version(self.version) == "1.4.4" and is_msvc(self) and self.options.shared:
@@ -69,10 +60,10 @@ class QXlsxConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        tc = VirtualBuildEnv(self)
-        tc.generate()
         tc = CMakeToolchain(self)
         tc.cache_variables["QT_VERSION_MAJOR"] = self._qt_version
+        # INFO: QXlsx use cached CMAKE_CXX_STANDARD value
+        tc.cache_variables["CMAKE_CXX_STANDARD"] = self.settings.get_safe("compiler.cppstd").replace("gnu", "")
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -97,9 +88,3 @@ class QXlsxConan(ConanFile):
         includedir = f"QXlsxQt{self._qt_version}" if Version(self.version) >= "1.4.6" else "QXlsx"
         self.cpp_info.includedirs = ["include", os.path.join("include", includedir)]
         self.cpp_info.requires = ["qt::qtCore", "qt::qtGui"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = cmake_name
-        self.cpp_info.filenames["cmake_find_package_multi"] = cmake_name
-        self.cpp_info.names["cmake_find_package"] = "QXlsx"
-        self.cpp_info.names["cmake_find_package"] = "QXlsx"
