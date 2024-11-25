@@ -52,7 +52,7 @@ class SoundTouchConan(ConanFile):
         if Version(self.version) >= "2.3.3":
             check_min_cppstd(self, 17)
 
-        if self.options.integer_samples and self.options.with_dll:
+        if self.settings.os == "Macos" and self.options.integer_samples and self.options.with_dll:
             # Undefined symbols for architecture arm64:
             #   "soundtouch::BPMDetect::inputSamples(float const*, int)", referenced from:
             #       _bpm_putSamples in SoundTouchDLL.cpp.o
