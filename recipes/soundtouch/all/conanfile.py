@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import is_msvc
 from conan.tools.files import get, copy, rm, rmdir, replace_in_file
@@ -50,6 +51,13 @@ class SoundTouchConan(ConanFile):
     def validate(self):
         if Version(self.version) >= "2.3.3":
             check_min_cppstd(self, 17)
+
+        if self.options.integer_samples and self.options.with_dll:
+            # Undefined symbols for architecture arm64:
+            #   "soundtouch::BPMDetect::inputSamples(float const*, int)", referenced from:
+            #       _bpm_putSamples in SoundTouchDLL.cpp.o
+            #       _bpm_putSamples_i16 in SoundTouchDLL.cpp.o
+            raise ConanInvalidConfiguration('The -o="&:integer_samples=True" option is incompatible with -o="&:with_dll=True"')
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
