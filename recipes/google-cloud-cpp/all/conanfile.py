@@ -95,21 +95,21 @@ class GoogleCloudCppConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_TESTING"] = 0
-        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_WERROR"] = False
-        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
-        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_CCACHE"] = False
-        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_BIGTABLE"] = True
-        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_BIGQUERY"] = True
-        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_SPANNER"] = True
-        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_STORAGE"] = True
-        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_FIRESTORE"] = True
-        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_PUBSUB"] = True
-        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_IAM"] = True
-        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_LOGGING"] = True
-        tc.variables["GOOGLE_CLOUD_CPP_ENABLE_GENERATOR"] = False
+        tc.cache_variables["BUILD_TESTING"] = 0
+        tc.cache_variables["GOOGLE_CLOUD_CPP_ENABLE_WERROR"] = False
+        tc.cache_variables["GOOGLE_CLOUD_CPP_ENABLE_MACOS_OPENSSL_CHECK"] = False
+        tc.cache_variables["GOOGLE_CLOUD_CPP_ENABLE_CCACHE"] = False
+        tc.cache_variables["GOOGLE_CLOUD_CPP_ENABLE_BIGTABLE"] = True
+        tc.cache_variables["GOOGLE_CLOUD_CPP_ENABLE_BIGQUERY"] = True
+        tc.cache_variables["GOOGLE_CLOUD_CPP_ENABLE_SPANNER"] = True
+        tc.cache_variables["GOOGLE_CLOUD_CPP_ENABLE_STORAGE"] = True
+        tc.cache_variables["GOOGLE_CLOUD_CPP_ENABLE_FIRESTORE"] = True
+        tc.cache_variables["GOOGLE_CLOUD_CPP_ENABLE_PUBSUB"] = True
+        tc.cache_variables["GOOGLE_CLOUD_CPP_ENABLE_IAM"] = True
+        tc.cache_variables["GOOGLE_CLOUD_CPP_ENABLE_LOGGING"] = True
+        tc.cache_variables["GOOGLE_CLOUD_CPP_ENABLE_GENERATOR"] = False
 
-        tc.variables["CMAKE_FIND_DEBUG_MODE"] = True
+        tc.cache_variables["CMAKE_FIND_DEBUG_MODE"] = True
 
         if is_msvc(self):
             tc.preprocessor_definitions["_SILENCE_CXX20_REL_OPS_DEPRECATION_WARNING"] = 1
