@@ -1,5 +1,5 @@
 versions:
-  "cci.20231127":
+  "1.12.0.cci.20231127":
     folder: cmake
   "1.12.0":
     folder: all
