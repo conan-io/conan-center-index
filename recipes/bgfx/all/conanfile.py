@@ -142,10 +142,9 @@ class bgfxConan(ConanFile):
     def generate(self):
         if is_msvc(self):
             tc = MSBuildToolchain(self)
-            tc.generate()
         else:
             tc = AutotoolsToolchain(self)
-            tc.generate()
+        tc.generate()
 
     def build(self):
         # Patch rtti - cci expects most packages to be built with rtti enabled; mismatches can cause link issues
