@@ -107,6 +107,10 @@ class bgfxConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -197,7 +201,7 @@ class bgfxConan(ConanFile):
 
             # Build project folder and path from given settings
             proj_folder = f"gmake-{gmake_os_to_proj[str(self.settings.os)]}"
-            if self.settings.os == "Windows" or (compiler_str not in ["gcc", "apple-clang"] and self.settings.os != "Android"):
+            if self.settings.os == "Windows" or (compiler_str not in ["apple-clang"] and self.settings.os != "Android"):
                 proj_folder += f"-{compiler_str}" #mingw-gcc or mingw-clang for windows; -clang for linux (where gcc on linux has no extra)
             if os_to_use_arch_config_suffix[str(self.settings.os)]:
                 if (self.settings.os == "Android"):
