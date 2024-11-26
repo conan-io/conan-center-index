@@ -5,11 +5,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rename, rmdir, save
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class DCMTKConan(ConanFile):
@@ -64,6 +64,7 @@ class DCMTKConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "*.h", os.path.join(self.recipe_folder, "crossbuild"), os.path.join(self.export_sources_folder, "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -97,13 +98,13 @@ class DCMTKConan(ConanFile):
         elif self.options.charset_conversion == "icu":
             self.requires("icu/73.2")
         if self.options.with_libxml2:
-            self.requires("libxml2/2.11.4")
+            self.requires("libxml2/[2.12.5 <3]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_openssl:
             self.requires("openssl/[>=1 <4]")
         if self.options.with_libpng:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_libtiff:
             self.requires("libtiff/4.6.0")
         if self.options.get_safe("with_tcpwrappers"):
@@ -114,12 +115,16 @@ class DCMTKConan(ConanFile):
         del self.info.options.builtin_dictionary
         del self.info.options.external_dictionary
 
+    def validate_build(self):
+        if cross_building(self):
+            if self.settings.os == "Macos" and self.settings.arch != "x86_64":
+                raise ConanInvalidConfiguration("MacOS crossbuilding is only supported to target x86_64")
+            else:
+                # Note: other cross-building scenarios have not been tested and may also need to be marked as invalid
+                self.output.warning("Crossbuilding has not been tested and may not work. Please report to Conan Center Index if you find any issues.")
+
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
-        if hasattr(self, "settings_build") and cross_building(self) and self.settings.os == "Macos":
-            # FIXME: Probable issue with flags, build includes header 'mmintrin.h'
-            raise ConanInvalidConfiguration("Cross building on Macos is not supported (yet)")
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -152,12 +157,38 @@ class DCMTKConan(ConanFile):
         tc.variables["DCMTK_ENABLE_CXX11"] = True
         tc.variables["DCMTK_ENABLE_MANPAGE"] = False
         tc.cache_variables["DCMTK_DEFAULT_DICT"] = self.options.default_dict
+        if self.options.charset_conversion and Version(self.version) >= "3.6.8":
+            charset_conversion = { "libiconv": "libiconv", "icu": "ICU" }
+            tc.cache_variables["DCMTK_ENABLE_CHARSET_CONVERSION"] = charset_conversion[str(self.options.charset_conversion)]
         tc.variables["DCMTK_USE_DCMDICTPATH"] = self.options.use_dcmdictpath
         if self.settings.os == "Windows":
             tc.variables["DCMTK_OVERWRITE_WIN32_COMPILER_FLAGS"] = False
         if is_msvc(self):
             tc.variables["DCMTK_ICONV_FLAGS_ANALYZED"] = True
             tc.variables["DCMTK_COMPILE_WIN32_MULTITHREADED_DLL"] = not is_msvc_static_runtime(self)
+
+        if Version(self.version) >= "3.6.7" and cross_building(self):
+            # See https://support.dcmtk.org/redmine/projects/dcmtk/wiki/Cross_Compiling
+            tc.cache_variables["DCMTK_NO_TRY_RUN"] = True
+            if self.options.charset_conversion == "libiconv":
+                tc.cache_variables["DCMTK_ICONV_FLAGS_ANALYZED"] = True
+                tc.cache_variables["DCMTK_FIXED_ICONV_CONVERSION_FLAGS"] = "AbortTranscodingOnIllegalSequence"
+            if self.options.enable_stl:
+                # The recipe has C++11 as the minimum, and these should be available
+                # under that assumption
+                variables = ['HAVE_STL_VECTOR_TEST_RESULT', 'HAVE_STL_ALGORITHM_TEST_RESULT',
+                             'HAVE_STL_LIMITS_TEST_RESULT', 'HAVE_STL_LIST_TEST_RESULT', 'HAVE_STL_MAP_TEST_RESULT',
+                             'HAVE_STL_MEMORY_TEST_RESULT', 'HAVE_STL_STACK_TEST_RESULT',
+                             'HAVE_STL_STRING_TEST_RESULT', 'HAVE_STL_TYPE_TRAITS_TEST_RESULT',
+                             'HAVE_STL_TUPLE_TEST_RESULT', 'HAVE_STL_SYSTEM_ERROR_TEST_RESULT']
+                for var in variables:
+                    tc.cache_variables[var] = True
+            if self.settings.os == "Macos" and self.settings.arch == "x86_64":
+                dst_dir = os.path.join(self.build_folder, "config", "include", "dcmtk", "config")
+                arith_h = "arith_h_Macos_x86_64.h"
+                copy(self, arith_h, self.source_folder, dst_dir)
+                rename(self, os.path.join(dst_dir, arith_h), os.path.join(dst_dir, "arith.h"))
+           
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -343,10 +374,6 @@ class DCMTKConan(ConanFile):
             self.cpp_info.components[target_lib].includedirs.append(os.path.join("include", "dcmtk"))
             self.cpp_info.components[target_lib].requires = requires
 
-            # TODO: to remove in conan v2 once cmake_find_package* generators removed
-            self.cpp_info.components[target_lib].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components[target_lib].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-
             if is_msvc(self):
                 # Required for the __cplusplus check at
                 # https://github.com/DCMTK/dcmtk/blob/DCMTK-3.6.8/config/include/dcmtk/config/osconfig.h.in#L1489
@@ -371,11 +398,3 @@ class DCMTKConan(ConanFile):
             self.runenv_info.define_path("DCMDICTPATH", dcmdictpath)
             if self.options.with_applications:
                 self.buildenv_info.define_path("DCMDICTPATH", dcmdictpath)
-
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "DCMTK"
-        self.cpp_info.names["cmake_find_package_multi"] = "DCMTK"
-        if self.options.default_dict == "external":
-            self.env_info.DCMDICTPATH = dcmdictpath
-        if self.options.with_applications:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

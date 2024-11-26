@@ -4,7 +4,7 @@
 ## Contents
 
   * [Introduction](#introduction)
-    * [Build Images](#build-images)
+    * [Future Steps](#future-steps)
   * [Windows](#windows)
   * [Linux](#linux)
   * [MacOS](#macos)<!-- endToc -->
@@ -13,26 +13,28 @@
 
 The pipeline iterates a fixed list of profiles for every Conan reference,
 it computes the packageID for each profile and discard duplicates. Then it
-builds the packages for the remaining profiles and upload them to
+builds the packages for the remaining profiles and promoted them to
 [JFrog ConanCenter](https://conan.io/center/) once the pull-request is merged.
 
-Because duplicated packageIDs are discarded, the pipeline iterates the
-profiles always in the same order and the profiles selected to build when
-there is a duplicate follow some rules:
-
- * Static linkage (option `shared=False`) is preferred over dynamic linking.
- * On Windows, `MT/MTd` runtime linkage goes before `MD/MDd` linkage.
- * Optimized binaries (`build_type=Release`) are preferred over its _debug_ counterpart.
- * Older compiler versions are considered first.
- * In Linux, GCC is iterated before Clang.
-
 Currently, given the following supported platforms and configurations we
-are generating **136 different binary packages for a C++ library**
-and **88 for a C library**.
+are generating **30 different binary packages for a C++ library**.
 
-### Build Images
 
-For more information see [conan-io/conan-docker-tools](https://github.com/conan-io/conan-docker-tools)
+### Future Steps
+
+With the introduction of our new, more flexible pipeline,
+we will be implementing several enhancements to improve our build capabilities and support
+a wider range of development environments. The following steps will be taken:
+
+- Incorporate additional modern GCC versions for Linux builds:
+  - By adding the latest versions of GCC, we aim to ensure compatibility with the newest C++ standards and features, allowing developers to leverage the latest advancements in the language.
+- Integrate more recent Clang versions for Linux builds:
+  - Clang is known for its fast compilation times and excellent diagnostics. By including more modern versions, we will provide developers with improved performance and better error reporting, enhancing the overall development experience.
+- Include updated Apple-Clang versions for macOS builds:
+  - As macOS continues to evolve, it is crucial to support the latest Apple-Clang versions. This will ensure that our builds are optimized for the latest macOS features and provide a seamless experience for developers working in the Apple ecosystem.
+- Add support for Android builds to the pipeline:
+  - Expanding our pipeline to include Android builds will enable developers to create and test applications for mobile platforms more efficiently.
+    This addition will help streamline the development process and ensure that our tools are versatile and adaptable to various environments.
 
 ## Windows
 
@@ -42,35 +44,28 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
     > WinSDK version is rolled periodically as [discussed previously](https://github.com/conan-io/conan-center-index/issues/4450).
     > Please open an issue in case it needs to be updated.
 - Compilers: Visual Studio:
-  
-  
   - 2019 (19.29.30148)
-  
-- Release (MT/MD) and Debug (MTd, MDd)
-- Architectures: x86_64
-- Build types: Release, Debug
-- Runtimes: MT/MD (Release), MTd/MDd (Debug)
-- Options:
-  - Shared, Static (option `"shared": [True, False]` in the recipe when available)
-  - Header Only (option `"header_only": [True, False]` if available)
 
-> :warning: The profile with the option `shared=True` and runtime `MT/MTd` is not built.
+- Architectures: x86_64
+- Build types: Release
+- Runtime: dynamic (MD)
+- Options:
+  - Shared, Static (option `"*/*:shared": [True, False]` in the recipe when available)
+  - Header Only (option `"&:header_only": [True, False]` is only added with the value True)
 
 ## Linux
 
-- Python: 3.7.13
-- CMake: 3.15.7, 3.18.2 (same version expected after all use [new docker images](https://github.com/conan-io/conan-docker-tools/tree/master/modern))
+- Python: 3.7.17
+- CMake: 3.15.7, 3.18.6 (same version expected after all use [new docker images](https://github.com/conan-io/conan-docker-tools/tree/master/images))
 - Compilers:
-  - GCC versions: 5, 7, 9, 11
-  - Clang versions: 13
+  - GCC versions: 11
 - C++ Standard Library (`libcxx`):
-  - GCC compiler: `libstdc++`, `libstdc++11`
-  - Clang compiler: `libstdc++`, `libc++`
+  - GCC compiler: `libstdc++11`
 - Architectures: x86_64
-- Build types: Release, Debug
+- Build types: Release
 - Options:
-  - Shared, Static (option `"shared": [True, False]` in the recipe when available)
-  - Header Only (option `"header_only": [True, False]` is only added with the value True)
+  - Shared, Static (option `"*/*:shared": [True, False]` in the recipe when available)
+  - Header Only (option `"&:header_only": [True, False]` is only added with the value True)
 
 ## MacOS
 
@@ -81,7 +76,7 @@ For more information see [conan-io/conan-docker-tools](https://github.com/conan-
 - Macos deployment target (`minos`): 11.0
 - C++ Standard Library (`libcxx`): `libc++`
 - Architectures: armv8
-- Build types: Release, Debug
+- Build types: Release
 - Options:
-  - Shared, Static (option ``"shared": [True, False]`` in the recipe when available)
-  - Header Only (option `"header_only": [True, False]` is only added with the value True)
+  - Shared, Static (option `"*/*:shared": [True, False]` in the recipe when available)
+  - Header Only (option `"&:header_only": [True, False]` is only added with the value True)

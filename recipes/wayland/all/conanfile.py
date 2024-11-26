@@ -50,17 +50,17 @@ class WaylandConan(ConanFile):
         if self.options.enable_libraries:
             self.requires("libffi/3.4.4")
         if self.options.enable_dtd_validation:
-            self.requires("libxml2/2.12.3")
-        self.requires("expat/2.6.0")
+            self.requires("libxml2/[>=2.12.5 <3]")
+        self.requires("expat/[>=2.6.2 <3]")
 
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.1")
+        self.tool_requires("meson/[>=1.4.0 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         if not can_run(self):
             self.tool_requires(str(self.ref))
 
@@ -174,6 +174,3 @@ class WaylandConan(ConanFile):
 
             self.cpp_info.components["wayland-egl-backend"].set_property("pkg_config_name", "wayland-egl-backend")
             self.cpp_info.components["wayland-egl-backend"].set_property("component_version", "3")
-
-            # TODO: to remove in conan v2
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

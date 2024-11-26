@@ -1,4 +1,10 @@
 sources:
+  "0.22":
+    url: "https://github.com/zeux/meshoptimizer/archive/refs/tags/v0.22.tar.gz"
+    sha256: "e296cf0685b6421f84bd8a44d0a3cca82a219500f11c793dfbb6087ec86bb1a3"
+  "0.21":
+    url: "https://github.com/zeux/meshoptimizer/archive/refs/tags/v0.21.tar.gz"
+    sha256: "050A5438E4644833FF69F35110FCF4E37038A89C5FDC8AED45D8CD848ECB3A20"
   "0.20":
     url: "https://github.com/zeux/meshoptimizer/archive/refs/tags/v0.20.tar.gz"
     sha256: "CF1077A83958BED3D8DA28A841CA53A6A42D871E49023EDCE64E37002A0F5A48"
