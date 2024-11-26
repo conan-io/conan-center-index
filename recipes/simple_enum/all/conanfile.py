@@ -25,6 +25,9 @@ class SimpleEnumConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def requirements(self):
+        self.requires("glaze/4.0.1")
+
     def package_id(self):
         self.info.clear()
 
@@ -52,3 +55,5 @@ class SimpleEnumConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+
+        self.cpp_info.defines.append("SIMPLE_ENUM_GLZ_3_1_x")
