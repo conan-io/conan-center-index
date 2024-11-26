@@ -49,6 +49,7 @@ class SDLConan(ConanFile):
         "opengles": [True, False],
         "vulkan": [True, False],
         "libunwind": [True, False],
+        "hidapi": [True, False],
     }
     default_options = {
         "shared": False,
@@ -77,6 +78,7 @@ class SDLConan(ConanFile):
         "opengles": True,
         "vulkan": True,
         "libunwind": True,
+        "hidapi": True,
     }
     generators = "CMakeDeps", "PkgConfigDeps", "VirtualBuildEnv"
 
@@ -243,6 +245,7 @@ class SDLConan(ConanFile):
         tc.variables["SDL_OPENGL"] = self.options.opengl
         tc.variables["SDL_OPENGLES"] = self.options.opengles
         tc.variables["SDL_VULKAN"] = self.options.vulkan
+        tc.variables["SDL_HIDAPI"] = self.options.hidapi
         if self.settings.os == "Linux":
             # See https://github.com/bincrafters/community/issues/696
             tc.variables["SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS"] = 1
