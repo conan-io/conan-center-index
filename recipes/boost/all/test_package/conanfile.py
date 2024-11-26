@@ -55,7 +55,7 @@ class TestPackageConan(ConanFile):
     def test(self):
         if not can_run(self):
             return
-        # for root, _, files in os.walk(self.cpp.build.bindirs[0]):
+
         for file in os.listdir(self.cpp.build.bindirs[0]):
             if file.startswith("test_boost_"):
                 bin_path = os.path.join(self.cpp.build.bindirs[0], file)
