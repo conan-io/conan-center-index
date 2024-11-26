@@ -62,6 +62,7 @@ class Libreadstat(ConanFile):
 
     def build(self):
         autotools = Autotools(self)
+        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
