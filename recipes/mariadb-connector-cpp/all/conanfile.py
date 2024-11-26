@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
-from conan.tools.files import get, copy, rmdir, rm, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import get, copy, apply_conandata_patches, export_conandata_patches
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
@@ -17,7 +17,6 @@ class MariadbConnectorCppRecipe (ConanFile):
     homepage = "https://mariadb.com/docs/server/connect/programming-languages/cpp"
     topics = ("mariadb", "mysql", "database")
     package_type = "library"
-    version = "1.1.4"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
