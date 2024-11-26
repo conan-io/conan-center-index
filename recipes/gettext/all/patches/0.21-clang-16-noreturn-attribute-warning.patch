@@ -1,0 +1,78 @@
+diff --git a/gettext-tools/gnulib-lib/obstack.c b/gettext-tools/gnulib-lib/obstack.c
+index a6757b8..7d4439f 100644
+--- a/gettext-tools/gnulib-lib/obstack.c
++++ b/gettext-tools/gnulib-lib/obstack.c
+@@ -326,7 +326,7 @@ int obstack_exit_failure = EXIT_FAILURE;
+ #   include <libio/iolibio.h>
+ #  endif
+ 
+-static _Noreturn void
++static __attribute_noreturn__ void
+ print_and_abort (void)
+ {
+   /* Don't change any of these strings.  Yes, it would be possible to add
+diff --git a/gettext-tools/gnulib-lib/obstack.h b/gettext-tools/gnulib-lib/obstack.h
+index cb59627..e0494a1 100644
+--- a/gettext-tools/gnulib-lib/obstack.h
++++ b/gettext-tools/gnulib-lib/obstack.h
+@@ -153,7 +153,7 @@
+ 
+ /* Not the same as _Noreturn, since it also works with function pointers.  */
+ #ifndef __attribute_noreturn__
+-# if 2 < __GNUC__ + (8 <= __GNUC_MINOR__) || 0x5110 <= __SUNPRO_C
++# if 2 < __GNUC__ + (8 <= __GNUC_MINOR__) || defined __clang__ || 0x5110 <= __SUNPRO_C
+ #  define __attribute_noreturn__ __attribute__ ((__noreturn__))
+ # else
+ #  define __attribute_noreturn__
+diff --git a/gettext-tools/libgettextpo/obstack.c b/gettext-tools/libgettextpo/obstack.c
+index a6757b8..7d4439f 100644
+--- a/gettext-tools/libgettextpo/obstack.c
++++ b/gettext-tools/libgettextpo/obstack.c
+@@ -326,7 +326,7 @@ int obstack_exit_failure = EXIT_FAILURE;
+ #   include <libio/iolibio.h>
+ #  endif
+ 
+-static _Noreturn void
++static __attribute_noreturn__ void
+ print_and_abort (void)
+ {
+   /* Don't change any of these strings.  Yes, it would be possible to add
+diff --git a/gettext-tools/libgettextpo/obstack.h b/gettext-tools/libgettextpo/obstack.h
+index cb59627..e0494a1 100644
+--- a/gettext-tools/libgettextpo/obstack.h
++++ b/gettext-tools/libgettextpo/obstack.h
+@@ -153,7 +153,7 @@
+ 
+ /* Not the same as _Noreturn, since it also works with function pointers.  */
+ #ifndef __attribute_noreturn__
+-# if 2 < __GNUC__ + (8 <= __GNUC_MINOR__) || 0x5110 <= __SUNPRO_C
++# if 2 < __GNUC__ + (8 <= __GNUC_MINOR__) || defined __clang__ || 0x5110 <= __SUNPRO_C
+ #  define __attribute_noreturn__ __attribute__ ((__noreturn__))
+ # else
+ #  define __attribute_noreturn__
+diff --git a/libtextstyle/lib/obstack.c b/libtextstyle/lib/obstack.c
+index a6757b8..7d4439f 100644
+--- a/libtextstyle/lib/obstack.c
++++ b/libtextstyle/lib/obstack.c
+@@ -326,7 +326,7 @@ int obstack_exit_failure = EXIT_FAILURE;
+ #   include <libio/iolibio.h>
+ #  endif
+ 
+-static _Noreturn void
++static __attribute_noreturn__ void
+ print_and_abort (void)
+ {
+   /* Don't change any of these strings.  Yes, it would be possible to add
+diff --git a/libtextstyle/lib/obstack.h b/libtextstyle/lib/obstack.h
+index cb59627..e0494a1 100644
+--- a/libtextstyle/lib/obstack.h
++++ b/libtextstyle/lib/obstack.h
+@@ -153,7 +153,7 @@
+ 
+ /* Not the same as _Noreturn, since it also works with function pointers.  */
+ #ifndef __attribute_noreturn__
+-# if 2 < __GNUC__ + (8 <= __GNUC_MINOR__) || 0x5110 <= __SUNPRO_C
++# if 2 < __GNUC__ + (8 <= __GNUC_MINOR__) || defined __clang__ || 0x5110 <= __SUNPRO_C
+ #  define __attribute_noreturn__ __attribute__ ((__noreturn__))
+ # else
+ #  define __attribute_noreturn__

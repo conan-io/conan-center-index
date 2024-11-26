@@ -1,17 +1,23 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "addressbook.pb.h"
+#if !defined(CONANTEST_PROTOBUF_LITE)
+#include <google/protobuf/timestamp.pb.h>
+#include <google/protobuf/util/time_util.h>
+#else 
+#include <google/protobuf/message_lite.h>
+#endif
 
 int main()
 {
-	std::cout << "Bincrafters\n";
 
-	tutorial::Person p;
-	p.set_id(21);
-	p.set_name("conan-center-index");
-	p.set_email("info@conan.io");
-
-	std::cout << p.SerializeAsString() << "\n";
+#if !defined(CONANTEST_PROTOBUF_LITE)
+	google::protobuf::Timestamp ts;
+	google::protobuf::util::TimeUtil::FromString("1972-01-01T10:00:20.021Z", &ts);
+	const auto nanoseconds = ts.nanos();
+	std::cout << "1972-01-01T10:00:20.021Z in nanoseconds: " << nanoseconds << "\n";
+#else
+	google::protobuf::ShutdownProtobufLibrary();
+#endif
 	return EXIT_SUCCESS;
 }

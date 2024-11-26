@@ -1,4 +1,16 @@
 sources:
+  "2.3.0":
+    url: "https://github.com/vincentlaucsb/csv-parser/archive/refs/tags/2.3.0.tar.gz"
+    sha256: "27b8ac51aa58b9a4debd8ccfb44738c8583a2e874da42f56bbdf3764b75f3af5"
+  "2.2.3":
+    url: "https://github.com/vincentlaucsb/csv-parser/archive/refs/tags/2.2.3.tar.gz"
+    sha256: "e70ea75612fb45f9a9dd83145fb3fbf0b5929a32683de478ad429cdd85f10e4e"
+  "2.2.2":
+    url: "https://github.com/vincentlaucsb/csv-parser/archive/refs/tags/2.2.2.tar.gz"
+    sha256: "8d7720021d19cf03880eb768d82d7f7e0a240b6d564bc6b495fceb4775b8f0c7"
+  "2.2.0":
+    url: "https://github.com/vincentlaucsb/csv-parser/archive/refs/tags/2.2.0.tar.gz"
+    sha256: "027fd894c5e6a59f5afcedd6cc071364611df5f35fcc6fc4a8e193712b2f1e73"
   "2.1.3":
     url: "https://github.com/vincentlaucsb/csv-parser/archive/refs/tags/2.1.3.tar.gz"
-    sha256: 3f6ce9212e66d273de12a9671dcbf7be7da0241334dc690585dd434dce5e5acf
+    sha256: "3f6ce9212e66d273de12a9671dcbf7be7da0241334dc690585dd434dce5e5acf"

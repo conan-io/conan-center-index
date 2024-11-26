@@ -1,0 +1,74 @@
+diff --git a/cmake/helpers/CheckDependentLibraries.cmake b/cmake/helpers/CheckDependentLibraries.cmake
+--- a/cmake/helpers/CheckDependentLibraries.cmake
++++ b/cmake/helpers/CheckDependentLibraries.cmake
+@@ -11,7 +11,7 @@
+ include(CheckFunctionExists)
+ include(CMakeDependentOption)
+ include(FeatureSummary)
+-include(DefineFindPackage2)
++include(ConanFindPackage)
+ include(CheckSymbolExists)
+ 
+ option(
+@@ -109,8 +109,8 @@
+   string(TOUPPER ${name} key)
+   set(_find_dependency "")
+   set(_find_dependency_args "")
+-  find_package2(${name} QUIET OUT_DEPENDENCY _find_dependency)
+-  if (NOT DEFINED ${key}_FOUND)
++  find_package2(${name} QUIET)
++  if (FALSE)
+     set(_find_package_args)
+     if (_GCP_VERSION)
+       list(APPEND _find_package_args ${_GCP_VERSION})
+@@ -345,7 +345,7 @@
+ endif ()
+ 
+ # First check with CMake config files (starting at version 8, due to issues with earlier ones), and then fallback to the FindPROJ module.
+-find_package(PROJ 9 CONFIG QUIET)
++find_package2(PROJ 9 CONFIG REQUIRED)
+ if (NOT PROJ_FOUND)
+   find_package(PROJ 8 CONFIG QUIET)
+ endif()
+@@ -411,8 +411,8 @@
+   NAMES json-c
+   TARGETS json-c::json-c JSONC::JSONC
+ )
+-gdal_internal_library(JSONC REQUIRED)
+-if(TARGET json-c::json-c)
++find_package2(JSONC REQUIRED)
++if(FALSE)
+   get_target_property(include_dirs json-c::json-c INTERFACE_INCLUDE_DIRECTORIES)
+   find_path(GDAL_JSON_INCLUDE_DIR NAMES json.h PATHS ${include_dirs} PATH_SUFFIXES json-c NO_DEFAULT_PATH)
+   list(APPEND include_dirs "${GDAL_JSON_INCLUDE_DIR}")
+@@ -517,9 +517,9 @@
+ endif ()
+ cmake_dependent_option(GDAL_USE_RASTERLITE2 "Set ON to use Rasterlite2" ON HAVE_RASTERLITE2 OFF)
+ 
+-find_package(LibKML COMPONENTS DOM ENGINE)
++find_package2(LibKML COMPONENTS DOM ENGINE)
+ if (GDAL_USE_LIBKML)
+   if (NOT LibKML_FOUND)
+     message(FATAL_ERROR "Configured to use GDAL_USE_LIBKML, but not found")
+   endif ()
+ endif ()
+@@ -540,8 +540,8 @@
+ gdal_check_package(MRSID "MrSID raster SDK" CAN_DISABLE)
+ gdal_check_package(Armadillo "C++ library for linear algebra (used for TPS transformation)" CAN_DISABLE)
+ if (ARMADILLO_FOUND)
+-  # On Conda, the armadillo package has no dependency on lapack, but the later is required for successful linking. So
+-  # try to build & link a test program using Armadillo.
++  # On Conda, the armadillo package has no dependency on lapack, but the later is required for successful linking. So try to build & link a test program using Armadillo.
++  include(CMakePushCheckState)
+   cmake_push_check_state(RESET)
+   set(CMAKE_REQUIRED_INCLUDES "${ARMADILLO_INCLUDE_DIRS}")
+   set(CMAKE_REQUIRED_LIBRARIES "${ARMADILLO_LIBRARIES}")
+@@ -646,7 +646,7 @@
+ gdal_check_package(HEIF "HEIF >= 1.1" CAN_DISABLE)
+ 
+ # OpenJPEG's cmake-CONFIG is broken, so call module explicitly
+-find_package(OpenJPEG MODULE)
++find_package2(OpenJPEG MODULE)
+ if (GDAL_USE_OPENJPEG)
+   if (NOT OPENJPEG_FOUND)
+     message(FATAL_ERROR "Configured to use GDAL_USE_OPENJPEG, but not found")

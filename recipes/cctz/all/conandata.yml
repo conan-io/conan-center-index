@@ -1,8 +1,20 @@
 sources:
+  "2.4":
+    url: "https://github.com/google/cctz/archive/v2.4.tar.gz"
+    sha256: "e1a00957d472044808a24a26f1ba020f36dc26949a69c214562d96b74093adb3"
   "2.3":
     url: "https://github.com/google/cctz/archive/v2.3.tar.gz"
     sha256: "8615b20d4e33e02a271c3b93a3b208e3d7d5d66880f5f6208b03426e448f32db"
 patches:
+  "2.4":
+    - patch_file: "patches/2.4-0001-fix-installation.patch"
+      patch_description: "fix install destination"
+      patch_type: "portability"
   "2.3":
-    - patch_file: "patches/0001-fix-installation.patch"
-    - patch_file: "patches/0002-fix-frameworks-apple.patch"
+    - patch_file: "patches/2.3-0001-fix-installation.patch"
+      patch_description: "fix install destination"
+      patch_type: "portability"
+    - patch_file: "patches/2.3-0002-fix-frameworks-apple.patch"
+      patch_description: "link CoreFoundation on macOS"
+      patch_type: "portability"
+      patch_source: "https://github.com/google/cctz/pull/97"
