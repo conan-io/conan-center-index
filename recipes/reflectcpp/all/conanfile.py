@@ -104,6 +104,8 @@ class ReflectCppConan(ConanFile):
         env = VirtualBuildEnv(self)
         env.generate()
         deps = CMakeDeps(self)
+        if self.options.with_flatbuffers:
+            deps.set_property("flatbuffers", "cmake_target_name", "flatbuffers::flatbuffers")
         deps.generate()
         tc = CMakeToolchain(self)
         tc.cache_variables["REFLECTCPP_BUILD_SHARED"] = self.options.shared
