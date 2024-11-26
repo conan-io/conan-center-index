@@ -9,7 +9,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.60.0 <2 || >=2.0.5"
+required_conan_version = ">=2.0.5"
 
 
 class GlfwConan(ConanFile):
@@ -88,10 +88,11 @@ class GlfwConan(ConanFile):
             if self._has_build_profile:
                 self.tool_requires("wayland/<host_version>")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.1.0")
+                self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -167,7 +168,6 @@ class GlfwConan(ConanFile):
             )
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -231,12 +231,3 @@ class GlfwConan(ConanFile):
                     self.cpp_info.requires.append("xorg::x11")
             if self.options.get_safe("with_wayland"):
                 self.cpp_info.requires.extend(["wayland::wayland", "xkbcommon::xkbcommon"])
-
-        # backward support of cmake_find_package, cmake_find_package_multi & pkg_config generators
-        self.cpp_info.filenames["cmake_find_package"] = "glfw3"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "glfw3"
-        self.cpp_info.names["cmake_find_package"] = "glfw"
-        self.cpp_info.names["cmake_find_package_multi"] = "glfw"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        self.cpp_info.names["pkg_config"] = "glfw3"
