@@ -32,7 +32,6 @@ class DiligentToolsConan(ConanFile):
     generators = "cmake_find_package", "cmake_find_package_multi", "cmake"
     _cmake = None
     short_paths = True
-    implements = ["auto_shared_fpic"]
 
     @property
     def _source_subfolder(self):
@@ -57,6 +56,14 @@ class DiligentToolsConan(ConanFile):
             else:
                 self.info.settings.compiler.runtime = "MT/MTd"
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.options.shared:
+            del self.options.fPIC
+
     def _patch_sources(self):
         patches.apply_conandata_patches(self)
 
@@ -70,7 +77,7 @@ class DiligentToolsConan(ConanFile):
         self.tool_requires("cmake/3.24.2")
 
     def requirements(self):
-        if Version(self.version) == "cci.20211009":
+        if self.version == "cci.20211009":
             self.requires("diligent-core/2.5.1")
             self.requires("imgui/1.87")
         else:
@@ -117,9 +124,9 @@ class DiligentToolsConan(ConanFile):
         self._cmake.definitions["DILIGENT_NO_RENDER_STATE_PACKAGER"] = not self.options.with_render_state_packager
         self._cmake.definitions["ARCHIVER_SUPPORTED"] = not self.options.with_archiver
 
-        if Version(self.version) != "cci.20211009" and \
-        (self.version.startswith("api") and Version(self.version) >= "api.252005") or \
-        (Version(self.version) > "2.5.2"):
+        if self.version != "cci.20211009" and \
+        (self.version.startswith("api") and self.version >= "api.252005") or \
+        (self.version > "2.5.2"):
             self._cmake.definitions["GL_SUPPORTED"] = True
             self._cmake.definitions["GLES_SUPPORTED"] = True
             self._cmake.definitions["VULKAN_SUPPORTED"] = True
