@@ -3,10 +3,10 @@ from conan.tools.files import get, copy
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
-
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 class QuickJSConan(ConanFile):
     name = "quickjs"
@@ -15,6 +15,7 @@ class QuickJSConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://bellard.org/quickjs/"
     topics = ("Javascript", "embeddable", "ES2020", "asynchronous")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -35,7 +36,7 @@ class QuickJSConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.version >= "2023-12-09":
+        if Version(self.version) >= "2023-12-09":
             del self.options.use_bignum
 
     def configure(self):

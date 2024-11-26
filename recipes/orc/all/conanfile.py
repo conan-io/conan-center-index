@@ -1,11 +1,10 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rmdir, replace_in_file, mkdir
+from conan.tools.files import copy, get, rmdir, replace_in_file, mkdir, rename
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
@@ -34,22 +33,8 @@ class OrcRecipe(ConanFile):
     }
 
     @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "8",
-            "clang": "7",
-            "apple-clang": "12",
-        }
-
-    @property
     def _should_patch_thirdparty_toolchain(self):
-        return self.version < "2.0.0"
+        return Version(self.version) < "2.0.0"
 
     def export_sources(self):
         if self._should_patch_thirdparty_toolchain:
@@ -78,12 +63,7 @@ class OrcRecipe(ConanFile):
         self.requires("zstd/[~1.5]")
 
     def validate(self):
-        check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
     def build_requirements(self):
         self.tool_requires("protobuf/<host_version>")
@@ -139,8 +119,8 @@ class OrcRecipe(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.os == "Windows" and self.options.shared:
             mkdir(self, os.path.join(self.package_folder, "bin"))
-            os.rename(os.path.join(self.package_folder, "lib", "orc.dll"),
-                      os.path.join(self.package_folder, "bin", "orc.dll"))
+            rename(self, os.path.join(self.package_folder, "lib", "orc.dll"),
+                   os.path.join(self.package_folder, "bin", "orc.dll"))
 
     def package_info(self):
         self.cpp_info.libs = ["orc"]

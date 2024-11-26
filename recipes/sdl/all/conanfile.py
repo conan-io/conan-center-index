@@ -9,7 +9,7 @@ from conan.tools.env import Environment
 
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2.0.9"
 
 
 class SDLConan(ConanFile):
@@ -352,24 +352,17 @@ class SDLConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "SDL2")
 
-        self.cpp_info.names["cmake_find_package"] = "SDL2"
-        self.cpp_info.names["cmake_find_package_multi"] = "SDL2"
-
         postfix = "d" if self.settings.os != "Android" and self.settings.build_type == "Debug" else ""
 
         # SDL2
         lib_postfix = postfix
-        if self.version >= "2.0.24" and (is_msvc(self) or self._is_clang_cl) and not self.options.shared:
+        if Version(self.version) >= "2.0.24" and (is_msvc(self) or self._is_clang_cl) and not self.options.shared:
             lib_postfix = "-static" + postfix
 
         self.cpp_info.components["libsdl2"].set_property("cmake_target_name", "SDL2::SDL2")
         if not self.options.shared:
             self.cpp_info.components["libsdl2"].set_property("cmake_target_aliases", ["SDL2::SDL2-static"])
         self.cpp_info.components["libsdl2"].set_property("pkg_config_name", "sdl2")
-
-        sdl2_cmake_target = "SDL2" if self.options.shared else "SDL2-static"
-        self.cpp_info.components["libsdl2"].names["cmake_find_package"] = sdl2_cmake_target
-        self.cpp_info.components["libsdl2"].names["cmake_find_package_multi"] = sdl2_cmake_target
 
         self.cpp_info.components["libsdl2"].includedirs.append(os.path.join("include", "SDL2"))
         self.cpp_info.components["libsdl2"].libs = ["SDL2" + lib_postfix]
@@ -447,10 +440,6 @@ class SDLConan(ConanFile):
         # SDL2main
         if self.options.sdl2main:
             self.cpp_info.components["sdl2main"].set_property("cmake_target_name", "SDL2::SDL2main")
-
-            self.cpp_info.components["sdl2main"].names["cmake_find_package"] = "SDL2main"
-            self.cpp_info.components["sdl2main"].names["cmake_find_package_multi"] = "SDL2main"
-
             self.cpp_info.components["sdl2main"].libs = ["SDL2main" + postfix]
             self.cpp_info.components["sdl2main"].requires = ["libsdl2"]
 
