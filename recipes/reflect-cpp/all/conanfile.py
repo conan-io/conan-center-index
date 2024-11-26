@@ -3,6 +3,8 @@ from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 
 import os
 
@@ -29,6 +31,15 @@ class ReflectCppConan(ConanFile):
     )
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "msvc": "193",
+            "gcc": "11",
+            "clang": "13",
+            "apple-clang": "15",
+        }
 
     options = {
         "shared": [True, False],
@@ -79,6 +90,9 @@ class ReflectCppConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 20)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++20 features, which your compiler does not fully support.")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
