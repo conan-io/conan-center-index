@@ -34,8 +34,10 @@ class ReflectCppConan(ConanFile):
 
     @property
     def _compilers_minimum_version(self):
+        # TODO: MSVC 19.38 is required, but ConanCenterIndex CI has update 6 installed.
+        #       Update msvc to 193 when having the CI updated to the latest update.
         return {
-            "msvc": "193",
+            "msvc": "194",
             "gcc": "11",
             "clang": "13",
             "apple-clang": "15",
