@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <trompeloeil.hpp>
 
 struct S
