@@ -8,7 +8,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class LibPslConan(ConanFile):
@@ -61,6 +61,7 @@ class LibPslConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     @property
     def _idna_option(self):
@@ -89,7 +90,6 @@ class LibPslConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('fuzz')", "")
 
     def build(self):
-        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
