@@ -19,7 +19,7 @@ required_conan_version = ">=1.55.0"
 
 
 class QtConan(ConanFile):
-    _submodules = ["qtsvg", "qtdeclarative", "qttools", "qttranslations", "qtdoc",
+    _submodules = ["qtsvg", "qtdeclarative", "qttools", "qtquicktools", "qtqmltools", "qttranslations", "qtdoc",
                    "qtwayland", "qtquickcontrols2", "qtquicktimeline", "qtquick3d", "qtshadertools", "qt5compat",
                    "qtactiveqt", "qtcharts", "qtdatavis3d", "qtlottie", "qtscxml", "qtvirtualkeyboard",
                    "qt3d", "qtimageformats", "qtnetworkauth", "qtcoap", "qtmqtt", "qtopcua",
