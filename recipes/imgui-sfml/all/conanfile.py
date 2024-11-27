@@ -1,11 +1,11 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir, mkdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class ImGuiSFMLConan(ConanFile):
@@ -25,18 +25,7 @@ class ImGuiSFMLConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -47,28 +36,24 @@ class ImGuiSFMLConan(ConanFile):
         self.requires("opengl/system")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # This is a workaround to avoid installing vendorized imgui headers as well to the package folder
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), 'list(APPEND IMGUI_SFML_PUBLIC_HEADERS "${IMGUI_PUBLIC_HEADERS}")', "")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["IMGUI_DIR"] = self.dependencies["imgui"].package_folder
-        tc.variables["IMGUI_INCLUDE_DIR"] = self.dependencies["imgui"].cpp_info.includedir
+        tc.cache_variables["IMGUI_DIR"] = self.dependencies["imgui"].package_folder
+        tc.cache_variables["IMGUI_INCLUDE_DIR"] = self.dependencies["imgui"].cpp_info.includedir
         tc.generate()
 
         tc = CMakeDeps(self)
         tc.set_property("imgui", "cmake_file_name", "ImGui")
         tc.generate()
 
-    def _patch_sources(self):
-        # This is a workaround to avoid installing vendorized imgui headers as well to the package folder
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), 'list(APPEND IMGUI_SFML_PUBLIC_HEADERS "${IMGUI_PUBLIC_HEADERS}")', "")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
