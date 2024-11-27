@@ -191,7 +191,6 @@ class SDLConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -336,6 +335,7 @@ class SDLConan(ConanFile):
         tc.generate()
 
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
