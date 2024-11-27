@@ -19,30 +19,14 @@ class JsonStructConan(ConanFile):
     package_type = "header-library"
     no_copy_source = True
 
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        
-        compiler_version = self._min_compiler_versions.get(str(self.settings.compiler))
-        if compiler_version and (Version(self.settings.compiler.version) < compiler_version):
-            raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd} with {self.settings.compiler} {compiler_version} or newer")
+        check_min_cppstd(self, 14)
 
     def layout(self):
         basic_layout(self, src_folder="src")
+    
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
     
     def package_id(self):
         self.info.clear()
@@ -56,6 +40,3 @@ class JsonStructConan(ConanFile):
             os.path.join(self.source_folder, "include"),
             os.path.join(self.package_folder, "include"),
         )
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
