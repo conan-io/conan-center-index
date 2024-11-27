@@ -71,8 +71,6 @@ class LibPslConan(ConanFile):
         }.get(str(self.options.with_idna), str(self.options.with_idna))
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
         tc = MesonToolchain(self)
         tc.project_options["runtime"] = self._idna_option
         if Version(self.version) >= "0.21.2":
