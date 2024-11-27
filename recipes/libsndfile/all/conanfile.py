@@ -131,21 +131,21 @@ class LibsndfileConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "SndFile")
         self.cpp_info.set_property("cmake_target_name", "SndFile::sndfile")
         self.cpp_info.set_property("pkg_config_name", "sndfile")
-        self.cpp_info.components["sndfile"].libs = ["sndfile"]
+        self.cpp_info.libs = ["sndfile"]
         if self.options.with_sndio:
-            self.cpp_info.components["sndfile"].requires.append("libsndio::libsndio")
+            self.cpp_info.requires.append("libsndio::libsndio")
         if self.options.with_external_libs:
-            self.cpp_info.components["sndfile"].requires.extend([
+            self.cpp_info.requires.extend([
                 "ogg::ogg", "vorbis::vorbismain", "vorbis::vorbisenc",
                 "flac::flac", "opus::opus",
             ])
         if self.options.get_safe("with_mpeg", False):
-            self.cpp_info.components["sndfile"].requires.append("mpg123::mpg123")
-            self.cpp_info.components["sndfile"].requires.append("libmp3lame::libmp3lame")
+            self.cpp_info.requires.append("mpg123::mpg123")
+            self.cpp_info.requires.append("libmp3lame::libmp3lame")
         if self.options.get_safe("with_alsa"):
-            self.cpp_info.components["sndfile"].requires.append("libalsa::libalsa")
+            self.cpp_info.requires.append("libalsa::libalsa")
         if not self.options.shared:
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components["sndfile"].system_libs = ["m", "dl", "pthread", "rt"]
+                self.cpp_info.system_libs = ["m", "dl", "pthread", "rt"]
             elif self.settings.os == "Windows":
-                self.cpp_info.components["sndfile"].system_libs.append("winmm")
+                self.cpp_info.system_libs.append("winmm")
