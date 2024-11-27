@@ -3,8 +3,13 @@ sources:
   # > We don't commit the generated parser files to the main branch. Instead, you can find them on the gh-pages branch.
   # We have to obtain the corresponding snapshot of the github-pages branch.
   "0.3.7":
-    url: "https://github.com/DerekStride/tree-sitter-sql/archive/3d516e6ae778bd41f9d5178823798ff6af96da60.tar.gz"
-    sha256: "273f357389337521823e1af26baba81e6dcff175f133ccf3d9351150c53d1f97"
+    url: "https://github.com/DerekStride/tree-sitter-sql/archive/f58f33955ea0a3e6a0aa2ef4b90a133ebee02173.tar.gz"
+    sha256: "947f6236251b4e2388441f3748871e4a93884229a05b66c59603b80721c2c1fe"
   "0.3.5":
     url: "https://github.com/DerekStride/tree-sitter-sql/archive/c67ecbd37d8d12f22e4cc7138afd14bc20253e10.tar.gz"
     sha256: "d8cd967ca4daa376614995fe8a439a957a303c7ca5b9858ca15ad243e6b176d3"
+patches:
+  "0.3.7":
+    - patch_file: "patches/0.3.7-0001-fix-cmake.patch"
+      patch_description: "disable generating code and fPIC"
+      patch_type: "conan"
