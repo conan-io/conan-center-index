@@ -270,8 +270,10 @@ class BoostConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.with_stacktrace_backtrace
         # stacktrace_from_exception is available only for 1.85.0 and later
+        # for Windows, it requires Boost 1.86.0 or later
         # FIXME: https://github.com/boostorg/stacktrace/issues/196
-        if Version(self.version) < "1.85.0" or (self.settings.os == "Windows" and self.settings.compiler == "gcc"):
+        if Version(self.version) < "1.85.0" or (self.settings.os == "Windows" and self.settings.compiler == "gcc") \
+            or (Version(self.version) < "1.86.0" and self.settings.os == "Windows"):
             del self.options.with_stacktrace_from_exception
 
         # nowide requires a c++11-able compiler + movable std::fstream: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
@@ -1630,7 +1632,7 @@ class BoostConan(ConanFile):
                         continue
                     if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic") and self.settings.os == "Windows":
                         continue
-                    if name == "boost_stacktrace_from_exception" and self.options.get_safe("with_stacktrace_from_exception") == False:
+                    if name == "boost_stacktrace_from_exception" and self.options.get_safe("with_stacktrace_from_exception", False) == False:
                         continue
                     if name == "boost_stacktrace_addr2line" and not self._stacktrace_addr2line_available:
                         continue
