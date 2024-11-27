@@ -1,4 +1,7 @@
 sources:
+  "0.4.0":
+    url: "https://github.com/tcbrindle/flux/archive/refs/tags/v0.4.0.zip"
+    sha256: "d17c656934688e085197eb6bd576a2e468d2b513c4f3be60121b8863c0830e13"
   "cci.20240115":
     url: "https://codeload.github.com/tcbrindle/flux/zip/e942a678ed3b46c7f7ffeebe47eed5c5bec005b2"
     sha256: "3832fb160417d14cfb3636c8edab04b2d0cd6c230b4d474a18bb1389fa1c3b8f"
