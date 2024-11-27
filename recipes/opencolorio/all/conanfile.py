@@ -186,20 +186,6 @@ class OpenColorIOConan(ConanFile):
 
         self.cpp_info.libs = ["OpenColorIO"]
 
-        self.cpp_info.requires.append("expat::expat")
-        self.cpp_info.requires.append("yaml-cpp::yaml-cpp")
-        self.cpp_info.requires.append("openexr::openexr")
-        self.cpp_info.requires.append("lcms::lcms")
-
-        if Version(self.version) >= "2.0.0":
-            self.cpp_info.requires.append("pystring::pystring")
-        else:
-            self.cpp_info.requires.append("tinyxml::tinyxml")
-
-        if Version(self.version) >= "2.2.0":
-            self.cpp_info.requires.append("imath::imath")
-            self.cpp_info.requires.append("minizip-ng::minizip")
-
         if Version(self.version) < "2.1.0":
             if not self.options.shared:
                 self.cpp_info.defines.append("OpenColorIO_STATIC")
