@@ -24,7 +24,7 @@ class LibsndioConan(ConanFile):
         "with_alsa": [True, False]
     }
     default_options = {
-        "with_alsa": True,
+        "with_alsa": False,
     }
 
     def configure(self):
@@ -91,7 +91,7 @@ class LibsndioConan(ConanFile):
         # The original project source has a hand-written `configure` script that does not expose
         # many hooks for specifying additional build flags and library dependencies. Because the script is
         # not auto-generated with Autotools, the standard Conan workflow of using AutoolsDeps is not possible.
-        # The one hook the script does provide is a command line arg: `CC=*|CFLAGS=*|LDFLAGS=*|AR=*)`. 
+        # The one hook the script does provide is a command line arg: `CC=*|CFLAGS=*|LDFLAGS=*|AR=*)`.
         # We use this to inject the various flags, paths, and libraries that the Conan dependency tree specifies.
         dep_cflags = []
         dep_ldflags = []
