@@ -29,6 +29,7 @@ class LibsndfileConan(ConanFile):
         "with_alsa": [True, False],
         "with_external_libs": [True, False],
         "with_mpeg": [True, False],
+        "with_sndio": [True, False],
     }
     default_options = {
         "shared": False,
@@ -38,6 +39,7 @@ class LibsndfileConan(ConanFile):
         "with_alsa": True,
         "with_external_libs": True,
         "with_mpeg": True,
+        "with_sndio": False,
     }
 
     def export_sources(self):
@@ -57,15 +59,16 @@ class LibsndfileConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def validate(self):
-        if self.dependencies["libsndio"].options.get_safe("with_alsa") and not self.options.get_safe("with_alsa"):
-            raise ConanInvalidConfiguration(f"{self.ref} 'with_alsa' option should be True when the libsndio 'with_alsa' one is True")
+        if self.options.with_sndio:
+            if self.dependencies["libsndio"].options.get_safe("with_alsa") and not self.options.get_safe("with_alsa"):
+                raise ConanInvalidConfiguration(f"{self.ref} 'with_alsa' option should be True when the libsndio 'with_alsa' one is True")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libsndio/1.9.0",
-            options={"with_alsa": self.options.get_safe("with_alsa")})
+        if self.options.with_sndio:
+            self.requires("libsndio/1.9.0", options={"with_alsa": self.options.get_safe("with_alsa")})
         if self.options.get_safe("with_alsa"):
             self.requires("libalsa/1.2.10")
         if self.options.with_external_libs:
