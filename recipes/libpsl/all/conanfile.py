@@ -1,3 +1,5 @@
+import os
+
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
@@ -6,9 +8,8 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
-import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class LibPslConan(ConanFile):
@@ -114,6 +115,8 @@ class LibPslConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["PSL_STATIC"]
 
+
+# FIXME: Try new and improved deduce location mechanism (Conan >= 2.10)
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
     from conan.tools.files import rename
