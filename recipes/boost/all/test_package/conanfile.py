@@ -56,5 +56,7 @@ class TestPackageConan(ConanFile):
 
         for file in os.listdir(self.cpp.build.bindirs[0]):
             if file.startswith("test_boost_"):
+                if self.settings.os == "Windows" and not file.endswith(".exe"):
+                    continue
                 bin_path = os.path.join(self.cpp.build.bindirs[0], file)
                 self.run(bin_path, env="conanrun")
