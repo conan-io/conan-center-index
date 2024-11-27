@@ -1,11 +1,14 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import is_msvc
-from conan.tools.files import get, copy, rm, rmdir
+from conan.tools.files import get, copy, rm, rmdir, replace_in_file
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 class SoundTouchConan(ConanFile):
     name = "soundtouch"
@@ -14,6 +17,8 @@ class SoundTouchConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://codeberg.org/soundtouch/soundtouch"
     topics = ("audio", "processing", "tempo", "pitch", "playback")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -43,8 +48,26 @@ class SoundTouchConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def validate(self):
+        if Version(self.version) >= "2.3.3":
+            check_min_cppstd(self, 17)
+
+        if self.settings.os == "Macos" and self.options.integer_samples and self.options.with_dll:
+            # Undefined symbols for architecture arm64:
+            #   "soundtouch::BPMDetect::inputSamples(float const*, int)", referenced from:
+            #       _bpm_putSamples in SoundTouchDLL.cpp.o
+            #       _bpm_putSamples_i16 in SoundTouchDLL.cpp.o
+            raise ConanInvalidConfiguration('The -o="&:integer_samples=True" option is incompatible with -o="&:with_dll=True"')
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        self._patch_sources()
+
+    def _patch_sources(self):
+        if Version(self.version) >= "2.3.3":
+            # Let Conan handle the C++ standard
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "set(CMAKE_CXX_STANDARD 17)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -104,16 +127,6 @@ class SoundTouchConan(ConanFile):
             bin_path = os.path.join(self.package_folder, "bin")
             self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.PATH.append(bin_path)
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "SoundTouch"
-        self.cpp_info.names["cmake_find_package_multi"] = "SoundTouch"
-        self.cpp_info.components["_soundtouch"].names["cmake_find_package"] = "SoundTouch"
-        self.cpp_info.components["_soundtouch"].names["cmake_find_package_multi"] = "SoundTouch"
-        self.cpp_info.names["pkg_config"] = "SoundTouch"
-        if self.options.with_dll:
-            self.cpp_info.components["SoundTouchDLL"].names["cmake_find_package"] = "SoundTouchDLL"
-            self.cpp_info.components["SoundTouchDLL"].names["cmake_find_package_multi"] = "SoundTouchDLL"
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("mvec")

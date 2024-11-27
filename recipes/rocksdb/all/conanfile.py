@@ -1,5 +1,5 @@
-import os
 import glob
+import os
 import shutil
 
 from conan import ConanFile
@@ -7,10 +7,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class RocksDBConan(ConanFile):
@@ -55,16 +55,6 @@ class RocksDBConan(ConanFile):
     def _min_cppstd(self):
         return "11" if Version(self.version) < "8.8.1" else "17"
 
-    @property
-    def _compilers_minimum_version(self):
-        return {} if self._min_cppstd == "11" else {
-                "apple-clang": "10",
-                "clang": "7",
-                "gcc": "7",
-                "msvc": "191",
-                "Visual Studio": "15",
-            }
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -100,25 +90,13 @@ class RocksDBConan(ConanFile):
             self.requires("jemalloc/5.3.0")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, self._min_cppstd)
 
         if self.settings.arch not in ["x86_64", "ppc64le", "ppc64", "mips64", "armv8"]:
             raise ConanInvalidConfiguration("Rocksdb requires 64 bits")
 
-        check_min_vs(self, "191")
-
-        if self.version == "6.20.3" and \
-           self.settings.os == "Linux" and \
-           self.settings.compiler == "gcc" and \
-           Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration("Rocksdb 6.20.3 is not compilable with gcc <5.") # See https://github.com/facebook/rocksdb/issues/3522
+        if is_msvc(self) and Version(self.settings.compiler.version) < "191":
+            raise ConanInvalidConfiguration("Rocksdb requires MSVC version >= 191")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -213,11 +191,6 @@ class RocksDBConan(ConanFile):
         if self.options.lite:
             self.cpp_info.components["librocksdb"].defines.append("ROCKSDB_LITE")
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "RocksDB"
-        self.cpp_info.names["cmake_find_package_multi"] = "RocksDB"
-        self.cpp_info.components["librocksdb"].names["cmake_find_package"] = cmake_target
-        self.cpp_info.components["librocksdb"].names["cmake_find_package_multi"] = cmake_target
         self.cpp_info.components["librocksdb"].set_property("cmake_target_name", f"RocksDB::{cmake_target}")
         if self.options.with_gflags:
             self.cpp_info.components["librocksdb"].requires.append("gflags::gflags")
