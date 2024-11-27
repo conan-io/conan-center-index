@@ -43,8 +43,6 @@ class TestPackageConan(ConanFile):
         tc.cache_variables["WITH_PROCESS"] = not self._boost_option("without_process", True)
         tc.cache_variables["WITH_STACKTRACE"] = not self.dependencies["boost"].options.without_stacktrace
         tc.cache_variables["WITH_URL"] = not self._boost_option("without_url", True)
-        if self.dependencies["boost"].options.namespace != 'boost' and not self.dependencies["boost"].options.namespace_alias:
-            tc.cache_variables['BOOST_NAMESPACE'] = self.dependencies["boost"].options.namespace
         tc.generate()
 
     def build(self):
