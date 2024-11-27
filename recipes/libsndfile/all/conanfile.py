@@ -36,7 +36,7 @@ class LibsndfileConan(ConanFile):
         "fPIC": True,
         "programs": True,
         "experimental": False,
-        "with_alsa": True,
+        "with_alsa": False,
         "with_external_libs": True,
         "with_mpeg": True,
         "with_sndio": False,
@@ -131,9 +131,9 @@ class LibsndfileConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "SndFile")
         self.cpp_info.set_property("cmake_target_name", "SndFile::sndfile")
         self.cpp_info.set_property("pkg_config_name", "sndfile")
-        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["sndfile"].libs = ["sndfile"]
-        self.cpp_info.components["sndfile"].requires.append("libsndio::libsndio")
+        if self.options.with_sndio:
+            self.cpp_info.components["sndfile"].requires.append("libsndio::libsndio")
         if self.options.with_external_libs:
             self.cpp_info.components["sndfile"].requires.extend([
                 "ogg::ogg", "vorbis::vorbismain", "vorbis::vorbisenc",
@@ -149,10 +149,3 @@ class LibsndfileConan(ConanFile):
                 self.cpp_info.components["sndfile"].system_libs = ["m", "dl", "pthread", "rt"]
             elif self.settings.os == "Windows":
                 self.cpp_info.components["sndfile"].system_libs.append("winmm")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "SndFile"
-        self.cpp_info.names["cmake_find_package_multi"] = "SndFile"
-        self.cpp_info.components["sndfile"].set_property("cmake_target_name", "SndFile::sndfile")
-        if self.options.programs:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
