@@ -37,7 +37,7 @@ class TreeSitterSqlConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
-        if is_msvc(self):
+        if is_msvc(self) and Version(self.version) < "0.3.7":
             del self.options.shared
             self.package_type = "static-library"
         if self.options.get_safe("shared"):
