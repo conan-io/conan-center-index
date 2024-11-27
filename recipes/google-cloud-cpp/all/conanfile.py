@@ -43,7 +43,7 @@ class GoogleCloudCppConan(ConanFile):
     def _minimum_compiler_versions(self):
         return {
             "gcc": "5.4",
-            "clang": "3.8" if Version(self.version) < "1.30.0" else "6",
+            "clang": "6",
         }
 
     def config_options(self):
