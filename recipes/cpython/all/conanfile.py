@@ -109,7 +109,10 @@ class CPythonConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
         if self._supports_modules:
-            self.requires("openssl/[>=1.1 <4]")
+            # We only actually need this limitation when openssl is shared, but otherwise we get errors when trying to use openssl.
+            # For some extra context, openssl was only updated in cpython 3.11.5
+            openssl_upper_bound = 3 if is_msvc(self) and Version(self) < "3.12" else 4
+            self.requires(f"openssl/[>=1.1 <{openssl_upper_bound}]")
             self.requires("expat/[>=2.6.2 <3]")
             self.requires("libffi/3.4.4")
             if Version(self.version) < "3.10" or is_apple_os(self):
