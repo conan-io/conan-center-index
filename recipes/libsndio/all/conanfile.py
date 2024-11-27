@@ -122,23 +122,13 @@ class LibsndioConan(ConanFile):
 
     def build(self):
         autotools = Autotools(self)
-        if Version(self.version) > "1.2.4":
-            autotools.configure()
-            autotools.make()
-        else:
-            with chdir(self, self.source_folder):
-                autotools.configure()
-                autotools.make()
+        autotools.configure()
+        autotools.make()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        if Version(self.version) > "1.2.4":
-            autotools = Autotools(self)
-            autotools.install()
-        else:
-            with chdir(self, self.source_folder):
-                autotools = Autotools(self)
-                autotools.install()
+        autotools = Autotools(self)
+        autotools.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "bin"))
