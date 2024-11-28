@@ -64,7 +64,6 @@ class LibPslConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
 
     @property
     def _idna_option(self):
