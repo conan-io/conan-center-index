@@ -15,9 +15,10 @@ class OatppSwaggerConan(ConanFile):
     license = "Apache-2.0"
     homepage = "https://github.com/oatpp/oatpp-swagger"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "oat++ Swagger library"
+    description = "Swagger UI for oatpp services"
     topics = ("oat++", "oatpp", "swagger")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -34,16 +35,13 @@ class OatppSwaggerConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"oatpp/{self.version}")
+        self.requires(f"oatpp/{self.version}", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
@@ -56,8 +54,7 @@ class OatppSwaggerConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires GCC >=5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
