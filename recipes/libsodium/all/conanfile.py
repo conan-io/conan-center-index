@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
@@ -6,6 +6,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, MSBuild, MSBuildToolchain
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
@@ -25,12 +26,20 @@ class LibsodiumConan(ConanFile):
         "fPIC": [True, False],
         "use_soname": [True, False],
         "PIE": [True, False],
+        "minimal": [True, False],
+        "pthreads": [True, False],
+        "ssp": [True, False],
+        "asm": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "use_soname": True,
         "PIE": False,
+        "minimal": False,
+        "pthreads": True,
+        "ssp": True,
+        "asm": True,
     }
 
     @property
@@ -47,6 +56,11 @@ class LibsodiumConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.os == "Emscripten":
+            self.options.minimal = True
+            self.options.pthreads = False
+            self.options.ssp = False
+            self.options.asm = False
 
     def configure(self):
         if self.options.shared:
@@ -89,12 +103,16 @@ class LibsodiumConan(ConanFile):
             yes_no = lambda v: "yes" if v else "no"
             tc.configure_args.append("--enable-soname-versions={}".format(yes_no(self.options.use_soname)))
             tc.configure_args.append("--enable-pie={}".format(yes_no(self.options.PIE)))
+            tc.configure_args.append("--enable-minimal={}".format(yes_no(self.options.minimal)))
+            tc.configure_args.append("--with-pthreads={}".format(yes_no(self.options.pthreads)))
+            if not self.options.ssp:
+                tc.configure_args.append("--disable-ssp")
+            if not self.options.asm:
+                tc.configure_args.append("--disable-asm")
             if self._is_mingw:
                 tc.extra_ldflags.append("-lssp")
-            if self.settings.os == "Emscripten":
-                # FIXME: this is an old comment/test, has not been re-tested with conan2 upgrade
+            if self.settings.os == "Emscripten" and Version(conan_version).major < 2:
                 self.output.warn("os=Emscripten is not tested/supported by this recipe")
-                # FIXME: ./dist-build/emscripten.sh does not respect options of this recipe
             tc.generate()
 
     @property
