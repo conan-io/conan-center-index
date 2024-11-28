@@ -1,12 +1,12 @@
+import os
+
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
-import os
 
 required_conan_version = ">=2.0"
 
@@ -30,6 +30,9 @@ class LibPslConan(ConanFile):
         "fPIC": True,
         "with_idna": "icu",
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,8 +76,9 @@ class LibPslConan(ConanFile):
     def generate(self):
         tc = MesonToolchain(self)
         tc.project_options["runtime"] = self._idna_option
-        if Version(self.version) >= "0.21.2":
+        if Version(self.version) >= "0.21.5":
             tc.project_options["builtin"] = "true" if self.options.with_idna else "false"
+            tc.project_options["tests"] = "false"  # disable tests and fuzzes
         else:
             tc.project_options["builtin"] = self._idna_option
         if not self.options.shared:
@@ -83,11 +87,8 @@ class LibPslConan(ConanFile):
         deps = PkgConfigDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('tests')", "")
-        replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('fuzz')", "")
-
     def build(self):
+        apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
         meson.build()
