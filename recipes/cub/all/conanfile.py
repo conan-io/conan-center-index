@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, move_folder_contents
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
@@ -15,7 +15,7 @@ class CubConan(ConanFile):
     description = "Cooperative primitives for CUDA C++"
     license = "BSD 3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/NVIDIA/cub"
+    homepage = "https://github.com/NVIDIA/cccl/tree/main/cub"
     topics = ("algorithms", "cuda", "gpu", "nvidia", "nvidia-hpc-sdk", "header-only")
 
     package_type = "header-library"
@@ -42,6 +42,10 @@ class CubConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
+    def requirements(self):
+        if Version(self.version) >= "2.0":
+            self.requires(f"libcudacxx/{self.version}")
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
@@ -53,6 +57,8 @@ class CubConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        if Version(self.version) >= "2.0":
+            move_folder_contents(self, os.path.join(self.source_folder, "cub"), self.source_folder)
 
     def package(self):
         copy(self, "LICENSE.TXT",
