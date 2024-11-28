@@ -12,17 +12,17 @@ from conan.errors import ConanInvalidConfiguration
 import os
 
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0.9"
 
 
 class OpenH264Conan(ConanFile):
     name = "openh264"
+    description = "Open Source H.264 Codec"
+    license = "BSD-2-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.openh264.org/"
-    description = "Open Source H.264 Codec"
     topics = ("h264", "codec", "video", "compression", )
-    license = "BSD-2-Clause"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -32,6 +32,7 @@ class OpenH264Conan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    implements = ["auto_shared_fpic"]
 
     @property
     def _is_clang_cl(self):
@@ -41,21 +42,13 @@ class OpenH264Conan(ConanFile):
     def _preserve_dll_name(self):
         return (is_msvc(self) or self._is_clang_cl) and Version(self.version) <= "2.4.1" and self.options.shared
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
         self.tool_requires("meson/1.4.1")
-        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.2.0")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         if self.settings.arch in ["x86", "x86_64"]:
             self.tool_requires("nasm/2.16.01")
 
@@ -105,13 +98,14 @@ class OpenH264Conan(ConanFile):
 
         if is_msvc(self) or self._is_clang_cl:
             rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-            if self._preserve_dll_name:
-                # INFO: Preserve same old library name as when building with Make on Windows but using Meson
-                rename(self, os.path.join(self.package_folder, "lib", "openh264.lib"),
-                    os.path.join(self.package_folder, "lib", "openh264_dll.lib"))
-            else:
+            if Version(self.version) <= "2.4.1":
+                if self.options.shared:
+                    # INFO: Preserve same old library name as when building with Make on Windows but using Meson
+                    rename(self, os.path.join(self.package_folder, "lib", "openh264.lib"),
+                           os.path.join(self.package_folder, "lib", "openh264_dll.lib"))
+            if not self.options.shared:
                 rename(self, os.path.join(self.package_folder, "lib", "libopenh264.a"),
-                    os.path.join(self.package_folder, "lib", "openh264.lib"))
+                        os.path.join(self.package_folder, "lib", "openh264.lib"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
