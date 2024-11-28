@@ -1,9 +1,8 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir, apply_conandata_patches, export_conandata_patches
 import os
-
 
 required_conan_version = ">=2.0.9"
 
@@ -27,12 +26,15 @@ class ImGuiSFMLConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("sfml/2.6.1", transitive_headers=True)
-        self.requires("imgui/1.91.0", transitive_headers=True, transitive_libs=True)
+        self.requires("sfml/2.6.2", transitive_headers=True)
+        self.requires("imgui/1.91.5", transitive_headers=True, transitive_libs=True)
         self.requires("opengl/system")
 
     def validate(self):
@@ -40,17 +42,21 @@ class ImGuiSFMLConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_source()
+
+    def _patch_source(self):
+        apply_conandata_patches(self)
         # This is a workaround to avoid installing vendorized imgui headers as well to the package folder
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), 'list(APPEND IMGUI_SFML_PUBLIC_HEADERS "${IMGUI_PUBLIC_HEADERS}")', "")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["IMGUI_DIR"] = self.dependencies["imgui"].package_folder
-        tc.cache_variables["IMGUI_INCLUDE_DIR"] = self.dependencies["imgui"].cpp_info.includedir
+        tc.cache_variables["IMGUI_DIR"] = "UNUSED"
         tc.generate()
 
         tc = CMakeDeps(self)
         tc.set_property("imgui", "cmake_file_name", "ImGui")
+        tc.set_property("imgui", "cmake_additional_variables_prefixes", ["IMGUI"])
         tc.generate()
 
     def build(self):
@@ -71,7 +77,13 @@ class ImGuiSFMLConan(ConanFile):
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
-        self.cpp_info.libs = ["ImGui-SFML"]
+        postfix = ""
+        if self.settings.build_type == "Debug":
+            postfix = "_d"
+        self.cpp_info.libs = ["ImGui-SFML" + postfix]
+
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["imm32"]
 
         self.cpp_info.set_property("cmake_file_name", "ImGui-SFML")
         self.cpp_info.set_property("cmake_target_name", "ImGui-SFML::ImGui-SFML")

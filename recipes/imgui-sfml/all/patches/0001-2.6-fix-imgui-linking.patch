@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b040e6e..bae74ec 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -97,6 +97,7 @@ target_link_libraries(ImGui-SFML
+     sfml-system
+     sfml-window
+     ${OPENGL_LIBRARIES}
++    imgui::imgui
+ )
+ 
+ include(GNUInstallDirs)
