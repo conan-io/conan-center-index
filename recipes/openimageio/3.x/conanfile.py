@@ -58,7 +58,7 @@ class OpenImageIOConan(ConanFile):
         "with_libpng": True,
         "with_libwebp": True,
         "with_openjpeg": True,
-        "with_openvdb": True,  # FIXME: broken on M1
+        "with_openvdb": True,
         "with_opencv": False,
         "with_ptex": True,
         "with_raw": False,  # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
