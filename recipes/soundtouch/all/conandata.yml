@@ -1,4 +1,7 @@
 sources:
+  "2.3.3":
+    url: "https://www.surina.net/soundtouch/soundtouch-2.3.3.tar.gz"
+    sha256: "43b23dfac2f64a3aff55d64be096ffc7b73842c3f5665caff44975633a975a99"
   "2.3.2":
     url: "https://www.surina.net/soundtouch/soundtouch-2.3.2.tar.gz"
     sha256: "3bde8ddbbc3661f04e151f72cf21ca9d8f8c88e265833b65935b8962d12d6b08"
