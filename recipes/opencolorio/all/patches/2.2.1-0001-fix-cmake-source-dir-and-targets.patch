@@ -73,7 +73,7 @@ index 1c4d774..da70227 100755
          "$<BUILD_INTERFACE:xxHash>"
          yaml-cpp
 -        MINIZIP::minizip-ng
-+        MINIZIP::minizip
++        PUBLIC MINIZIP::minizip
  )
  
  if(APPLE)
