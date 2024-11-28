@@ -34,19 +34,10 @@ index d65ac62c4..39d03a43b 100644
              install_targets (${_plugin_NAME})
          endif ()
 diff --git src/cmake/externalpackages.cmake src/cmake/externalpackages.cmake
-index f8670a83f..27c279166 100644
+index f8670a83f..101bcfa50 100644
 --- src/cmake/externalpackages.cmake
 +++ src/cmake/externalpackages.cmake
-@@ -66,23 +66,22 @@ checked_find_package (OpenEXR REQUIRED
- # library.
- include_directories(BEFORE ${IMATH_INCLUDES} ${OPENEXR_INCLUDES})
- set (OPENIMAGEIO_IMATH_TARGETS Imath::Imath)
--set (OPENIMAGEIO_OPENEXR_TARGETS OpenEXR::OpenEXR)
--set (OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY "PRIVATE" CACHE STRING
-+set (OPENIMAGEIO_OPENEXR_TARGETS openexr::openexr)
-+set (OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY "PUBLIC" CACHE STRING
-      "Should we expose Imath library dependency as PUBLIC or PRIVATE")
- set (OPENIMAGEIO_CONFIG_DO_NOT_FIND_IMATH OFF CACHE BOOL
+@@ -73,16 +73,15 @@ set (OPENIMAGEIO_CONFIG_DO_NOT_FIND_IMATH OFF CACHE BOOL
       "Exclude find_dependency(Imath) from the exported OpenImageIOConfig.cmake")
  
  # JPEG -- prefer JPEG-Turbo to regular libjpeg
@@ -524,20 +515,22 @@ index 87b6a3e78..acd0cb985 100644
 +                        tsl::robin_map
 +                        fmt::fmt
                       )
-diff --git src/openexr.imageio/CMakeLists.txt src/openexr.imageio/CMakeLists.txt
-index 9820e1f78..aad581afb 100644
---- src/openexr.imageio/CMakeLists.txt
-+++ src/openexr.imageio/CMakeLists.txt
-@@ -23,7 +23,7 @@ endif ()
- add_oiio_plugin (${openexr_src}
-     INCLUDE_DIRS ${OPENEXR_INCLUDES} ${IMATH_INCLUDE_DIR}/OpenEXR
-     LINK_LIBRARIES
--        $<TARGET_NAME_IF_EXISTS:OpenEXR::OpenEXR>
--        $<TARGET_NAME_IF_EXISTS:OpenEXR::OpenEXRCore>
-+        Imath::Imath
-+        openexr::openexr
-     DEFINITIONS ${openexr_defs}
-     )
+diff --git src/openvdb.imageio/CMakeLists.txt src/openvdb.imageio/CMakeLists.txt
+index 55178d451..f292934ba 100644
+--- src/openvdb.imageio/CMakeLists.txt
++++ src/openvdb.imageio/CMakeLists.txt
+@@ -1,10 +1,8 @@
+-# Copyright Contributors to the OpenImageIO project.
+ # SPDX-License-Identifier: Apache-2.0
+ # https://github.com/AcademySoftwareFoundation/OpenImageIO
+ 
+ if (OpenVDB_FOUND)
+     add_oiio_plugin (openvdbinput.cpp
+-                     INCLUDE_DIRS  ${OPENVDB_INCLUDES} ${TBB_INCLUDE_DIRS}
+-                     LINK_LIBRARIES  ${OPENVDB_LIBRARIES}
++                     LINK_LIBRARIES  OpenVDB::openvdb
+                                      $<TARGET_NAME_IF_EXISTS:TBB::tbb>)
+ endif()
 diff --git src/ptex.imageio/CMakeLists.txt src/ptex.imageio/CMakeLists.txt
 index 73e3ad843..da45e8c5f 100644
 --- src/ptex.imageio/CMakeLists.txt

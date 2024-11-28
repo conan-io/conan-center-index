@@ -54,11 +54,11 @@ class OpenImageIOConan(ConanFile):
         "with_hdf5": True,
         "with_libheif": True,
         "with_libjpeg": "libjpeg",
-        "with_libjxl": True,  # TODO: Currently produces link failues
+        "with_libjxl": True,
         "with_libpng": True,
         "with_libwebp": True,
         "with_openjpeg": True,
-        "with_openvdb": False,  # FIXME: broken on M1
+        "with_openvdb": True,  # FIXME: broken on M1
         "with_opencv": False,
         "with_ptex": True,
         "with_raw": False,  # libraw is available under CDDL-1.0 or LGPL-2.1, for this reason it is disabled by default
@@ -85,7 +85,7 @@ class OpenImageIOConan(ConanFile):
         if self.options.with_libjpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_libjpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.4")
+            self.requires("libjpeg-turbo/[>=3.0.3 <4]")
         self.requires("pugixml/1.14")
         self.requires("libsquish/1.15")
         self.requires("tsl-robin-map/1.3.0")
@@ -130,11 +130,10 @@ class OpenImageIOConan(ConanFile):
 
     def build_requirements(self):
         # A minimum cmake version is now required that is reasonably new
-        self.build_requires("cmake/[>=3.18.2]")
+        self.build_requires("cmake/[>=3.18.2 <4]")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 17)
+        check_min_cppstd(self, 17)
 
         if is_msvc(self) and is_msvc_static_runtime(self) and self.options.shared:
             raise ConanInvalidConfiguration(
@@ -146,6 +145,7 @@ class OpenImageIOConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -193,12 +193,17 @@ class OpenImageIOConan(ConanFile):
         tc.variables["USE_NUKE"] = False
         tc.variables["USE_R3DSDK"] = False
 
+        # Override variable for internal linking visibility of Imath otherwise not visible
+        # in the tools included in the build that consume the library.
+        tc.cache_variables["OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY"] = "PUBLIC"
+
         tc.generate()
         cd = CMakeDeps(self)
+        # Map the name of openexr for the target name expected in OIIO cmake
+        cd.set_property("openexr", "cmake_target_name", "OpenEXR::OpenEXR")
         cd.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -221,16 +226,11 @@ class OpenImageIOConan(ConanFile):
     def _add_component(self, name):
         component = self.cpp_info.components[self._conan_comp(name)]
         component.set_property("cmake_target_name", f"OpenImageIO::{name}")
-        component.names["cmake_find_package"] = name
-        component.names["cmake_find_package_multi"] = name
         return component
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "OpenImageIO")
         self.cpp_info.set_property("pkg_config_name", "OpenImageIO")
-
-        self.cpp_info.names["cmake_find_package"] = "OpenImageIO"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenImageIO"
 
         # OpenImageIO::OpenImageIO_Util
         open_image_io_util = self._add_component("OpenImageIO_Util")
