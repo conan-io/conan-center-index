@@ -1,25 +1,11 @@
 versions:
   "9.7.4":
     folder: all
-  "9.7.3":
-    folder: all
-  "9.7.2":
-    folder: all
   "9.5.2":
     folder: all
   "9.4.0":
     folder: all
-  "9.2.1":
-    folder: all
-  "9.1.0":
-    folder: all
-  "9.0.0":
-    folder: all
   "8.8.1":
     folder: all
   "6.29.5":
-    folder: all
-  "6.27.3":
-    folder: all
-  "6.20.3":
     folder: all

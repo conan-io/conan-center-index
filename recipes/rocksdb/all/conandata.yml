@@ -2,47 +2,40 @@ sources:
   "9.7.4":
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.7.4.tar.gz"
     sha256: "9b810c81731835fda0d4bbdb51d3199d901fa4395733ab63752d297da84c5a47"
-  "9.7.3":
-    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.7.3.tar.gz"
-    sha256: "acfabb989cbfb5b5c4d23214819b059638193ec33dad2d88373c46448d16d38b"
-  "9.7.2":
-    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.7.2.tar.gz"
-    sha256: "13e9c41d290199ee0185590d4fa9d327422aaf75765b3193945303c3c314e07d"
   "9.5.2":
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.5.2.tar.gz"
     sha256: "B20780586D3DF4A3C5BCBDE341A2C1946B03D18237960BDA5BC5E9538F42AF40"
   "9.4.0":
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.4.0.tar.gz"
     sha256: "1f829976aa24b8ba432e156f52c9e0f0bd89c46dc0cc5a9a628ea70571c1551c"
-  "9.2.1":
-    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.2.1.tar.gz"
-    sha256: "bb20fd9a07624e0dc1849a8e65833e5421960184f9c469d508b58ed8f40a780f"
-  "9.1.0":
-    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.1.0.tar.gz"
-    sha256: "3c225e45bf6f6367cf5a4413f71abc4a3427627790e6d58c57adc2daa4b6309d"
-  "9.0.0":
-    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.0.0.tar.gz"
-    sha256: "013aac178aa12837cbfa3b1e20e9e91ff87962ab7fdd044fd820e859f8964f9b"
   "8.8.1":
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v8.8.1.tar.gz"
     sha256: "056c7e21ad8ae36b026ac3b94b9d6e0fcc60e1d937fc80330921e4181be5c36e"
   "6.29.5":
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v6.29.5.tar.gz"
     sha256: "ddbf84791f0980c0bbce3902feb93a2c7006f6f53bfd798926143e31d4d756f0"
-  "6.27.3":
-    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v6.27.3.tar.gz"
-    sha256: "ee29901749b9132692b26f0a6c1d693f47d1a9ed8e3771e60556afe80282bf58"
-  "6.20.3":
-    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v6.20.3.tar.gz"
-    sha256: "c6502c7aae641b7e20fafa6c2b92273d935d2b7b2707135ebd9a67b092169dca"
 patches:
+  "9.7.4":
+    - patch_file: "patches/9.x.x-0001-exclude-thirdparty.patch"
+      patch_description: "Do not include thirdparty.inc"
+      patch_type: "portability"
+  "9.5.2":
+    - patch_file: "patches/9.x.x-0001-exclude-thirdparty.patch"
+      patch_description: "Do not include thirdparty.inc"
+      patch_type: "portability"
+  "9.4.0":
+    - patch_file: "patches/9.x.x-0001-exclude-thirdparty.patch"
+      patch_description: "Do not include thirdparty.inc"
+      patch_type: "portability"
+  "8.8.1":
+    - patch_file: "patches/8.8.1-0001-exclude-thirdparty.patch"
+      patch_description: "Do not include thirdparty.inc"
+      patch_type: "portability"
   "6.29.5":
     - patch_file: "patches/6.29.5-0001-add-include-cstdint-for-gcc-13.patch"
       patch_description: "Fix build with gcc 13 by including cstdint"
       patch_type: "portability"
       patch_source: "https://github.com/facebook/rocksdb/pull/11118"
-  "6.27.3":
-    - patch_file: "patches/6.27.3-0001-add-include-cstdint-for-gcc-13.patch"
-      patch_description: "Fix build with gcc 13 by including cstdint"
+    - patch_file: "patches/6.29.5-0002-exclude-thirdparty.patch"
+      patch_description: "Do not include thirdparty.inc"
       patch_type: "portability"
-      patch_source: "https://github.com/facebook/rocksdb/pull/11118"
