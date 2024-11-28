@@ -103,13 +103,9 @@ class OpenH264Conan(ConanFile):
                     # INFO: Preserve same old library name as when building with Make on Windows but using Meson
                     rename(self, os.path.join(self.package_folder, "lib", "openh264.lib"),
                            os.path.join(self.package_folder, "lib", "openh264_dll.lib"))
-                else:
-                    rename(self, os.path.join(self.package_folder, "lib", "libopenh264.a"),
-                           os.path.join(self.package_folder, "lib", "openh264.lib"))
-            else:
-                if not self.options.shared:
-                    rename(self, os.path.join(self.package_folder, "lib", "libopenh264.a"),
-                           os.path.join(self.package_folder, "lib", "openh264.lib"))
+            if not self.options.shared:
+                rename(self, os.path.join(self.package_folder, "lib", "libopenh264.a"),
+                        os.path.join(self.package_folder, "lib", "openh264.lib"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
