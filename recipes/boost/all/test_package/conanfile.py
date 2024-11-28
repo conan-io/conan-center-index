@@ -36,6 +36,7 @@ class TestPackageConan(ConanFile):
         tc.cache_variables["WITH_REGEX"] = not self.dependencies["boost"].options.without_regex
         tc.cache_variables["WITH_TEST"] = not self.dependencies["boost"].options.without_test
         tc.cache_variables["WITH_COROUTINE"] = not self.dependencies["boost"].options.without_coroutine
+        tc.cache_variables["WITH_COBALT"] = not self._boost_option("without_cobalt", False)
         tc.cache_variables["WITH_CHRONO"] = not self.dependencies["boost"].options.without_chrono
         tc.cache_variables["WITH_FIBER"] = not self.dependencies["boost"].options.without_fiber
         tc.cache_variables["WITH_LOCALE"] = not self.dependencies["boost"].options.without_locale
