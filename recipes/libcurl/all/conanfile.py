@@ -445,7 +445,7 @@ class LibcurlConan(ConanFile):
             tc.configure_args.append(f"--with-wolfssl={path}")
         else:
             tc.configure_args.append("--without-wolfssl")
-
+        
         if self.options.with_ssl == "mbedtls":
             path = unix_path(self, self.dependencies["mbedtls"].package_folder)
             tc.configure_args.append(f"--with-mbedtls={path}")
