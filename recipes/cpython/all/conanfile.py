@@ -115,8 +115,10 @@ class CPythonConan(ConanFile):
             if Version(self.version) < "3.10" or is_apple_os(self):
                 # FIXME: mpdecimal > 2.5.0 on MacOS causes the _decimal module to not be importable
                 self.requires("mpdecimal/2.5.0")
-            else:
+            elif Version(self.version) < "3.13":
                 self.requires("mpdecimal/2.5.1")
+            else:
+                self.requires("mpdecimal/4.0.0")
         if self.settings.os != "Windows":
             if not is_apple_os(self):
                 self.requires("util-linux-libuuid/2.39.2")
