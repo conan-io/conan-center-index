@@ -6,8 +6,8 @@ class TestPackageConan(ConanFile):
     generators = "VirtualBuildEnv"
     test_type = "explicit"
 
-    def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
+    def requirements(self):
+        self.requires(self.tested_reference_str)
 
     def test(self):
-        self.run("clazy --version")
+        assert os.path.exists(os.path.join(self.cpp.build.bindir, "clazy"))

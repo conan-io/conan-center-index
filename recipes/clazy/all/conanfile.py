@@ -38,8 +38,6 @@ class ClazyConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.generate()
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
 
     def build(self):
         cmake = CMake(self)
