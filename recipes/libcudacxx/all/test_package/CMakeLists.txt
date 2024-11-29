@@ -1,0 +1,15 @@
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
+
+find_package(libcudacxx REQUIRED CONFIG)
+
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE libcudacxx::libcudacxx)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+
+message("LIBCUDACXX_VERSION: ${LIBCUDACXX_VERSION}")
+message("LIBCUDACXX_VERSION_MAJOR: ${LIBCUDACXX_VERSION_MAJOR}")
+message("LIBCUDACXX_VERSION_MINOR: ${LIBCUDACXX_VERSION_MINOR}")
+message("LIBCUDACXX_VERSION_PATCH: ${LIBCUDACXX_VERSION_PATCH}")
+message("LIBCUDACXX_VERSION_TWEAK: ${LIBCUDACXX_VERSION_TWEAK}")
+message("LIBCUDACXX_VERSION_COUNT: ${LIBCUDACXX_VERSION_COUNT}")
