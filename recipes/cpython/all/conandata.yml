@@ -22,9 +22,6 @@ sources:
     sha256: "c7fa55a36e5c7a19ec37d8f90f60a2197548908c9ac8b31e7c0dbffdd470eeac"
 patches:
   "3.13.0":
-    - patch_file: "patches/3.13/3.13.0-0001-_ctypes-ffi.patch"
-      patch_description: "Support shared libffi"
-      patch_type: "portability"
     - patch_file: "patches/3.13/3.13.0-0002-remove-module-deps.patch"
       patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
       patch_type: "conan"
