@@ -29,9 +29,6 @@ class ClazyConan(ConanFile):
         if not str(self.settings.compiler).endswith("clang"):
             raise ConanInvalidConfiguration(f"{self.ref} support only clang compiler")
 
-    def build_requirements(self):
-        self.tool_requires("llvm-core/13.0.0")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
