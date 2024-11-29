@@ -129,8 +129,9 @@ class GoogleCloudCppConan(ConanFile):
                         set(CMAKE_CXX_STANDARD 11 CACHE STRING "Configure the C++ standard version for all targets.")
                     endif()
                     """))
-        replace_in_file(self, os.path.join(self.source_folder, "google", "cloud", "internal", "openssl_util.h"),
-            "#include <vector>", "#include <vector>\n#include <algorithm>")
+        if self.settings.compiler == "msvc":
+            replace_in_file(self, os.path.join(self.source_folder, "google", "cloud", "internal", "openssl_util.h"),
+                "#include <vector>", "#include <vector>\n#include <algorithm>")
 
     def build(self):
         self._patch_sources()
