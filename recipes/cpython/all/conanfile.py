@@ -311,7 +311,9 @@ class CPythonConan(ConanFile):
             replace_in_file(self, self._msvc_project_path("_ctypes"), '<Import Project="libffi.props" />', "")
             if Version(self.version) < "3.11":
                 # Don't add this define, it should be added conditionally by the libffi package
-                replace_in_file(self, self._msvc_project_path("_ctypes"), "FFI_BUILDING;", "")
+                # Instead, add this define to fix duplicate symbols (goes along with the ffi patches)
+                # See https://github.com/python/cpython/commit/38f331d4656394ae0f425568e26790ace778e076#diff-6f6b7f83e2fb49775efdfa41b4aa4f8fadcf71f43c4f3bcf9f37743acafd3fdfR97
+                replace_in_file(self, self._msvc_project_path("_ctypes"), "FFI_BUILDING;", "USING_MALLOC_CLOSURE_DOT_C=1;")
 
         # Don't import vendored openssl
         replace_in_file(self, self._msvc_project_path("_hashlib"), '<Import Project="openssl.props" />', "")
