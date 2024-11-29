@@ -8,6 +8,12 @@ import os
 
 required_conan_version = ">=1.54.0"
 
+def get_abseil_version(re2_version: str) -> str:
+    if re2_version >= "20241128":
+        return "abseil/20240722.0"
+    if re2_version >= "20230601":
+        return "abseil/20240116.1"
+
 class Re2Conan(ConanFile):
     name = "re2"
     description = "Fast, safe, thread-friendly regular expression library"
@@ -61,8 +67,10 @@ class Re2Conan(ConanFile):
     def requirements(self):
         if self.options.get_safe("with_icu"):
             self.requires("icu/73.2")
-        if Version(self.version) >= "20230601":
-            self.requires("abseil/20240116.1", transitive_headers=True)
+
+        abseil_version = get_abseil_version(Version(self.version))
+        if abseil_version:
+            self.requires(abseil_version, transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
