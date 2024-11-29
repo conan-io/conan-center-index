@@ -6,7 +6,7 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class Re2CConan(ConanFile):
