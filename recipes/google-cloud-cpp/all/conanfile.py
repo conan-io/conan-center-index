@@ -82,6 +82,8 @@ class GoogleCloudCppConan(ConanFile):
             raise ConanInvalidConfiguration("Recipe not prepared for cross-building (yet)")
 
         if self.settings.compiler.get_safe("cppstd"):
+            if self.settings.os == "Windows":
+                check_min_cppstd(self, 20)
             check_min_cppstd(self, 11)
 
         check_min_vs(self, "192")
@@ -132,6 +134,8 @@ class GoogleCloudCppConan(ConanFile):
                         set(CMAKE_CXX_STANDARD 11 CACHE STRING "Configure the C++ standard version for all targets.")
                     endif()
                     """))
+        replace_in_file(self, os.path.join(self.source_folder, "google", "cloud", "internal", "openssl_util.h"),
+            "#include <vector>", "#include <vector>\n#include <algorithm>")
 
     def build(self):
         self._patch_sources()
