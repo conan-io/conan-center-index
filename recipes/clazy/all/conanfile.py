@@ -25,7 +25,7 @@ class ClazyConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
-    def validate(self):
+    def validate_build(self):
         if not str(self.settings.compiler).endswith("clang"):
             raise ConanInvalidConfiguration(f"{self.ref} support only clang compiler")
 
