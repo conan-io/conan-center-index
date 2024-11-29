@@ -32,12 +32,7 @@ class GoogleCloudCppConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
     short_paths = True
-
-    @property
-    def _min_cppstd(self):
-        return 11
 
     @property
     def _minimum_compiler_versions(self):
