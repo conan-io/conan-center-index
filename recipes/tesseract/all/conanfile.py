@@ -101,8 +101,9 @@ class TesseractConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         if self.dependencies["leptonica"].options.get_safe("with_tiff"):
+            # version <=5.2 do not contain this check, and if not replaced it fail, strict=False is safe
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), 
-                            "check_leptonica_tiff_support()", "")
+                            "check_leptonica_tiff_support()", "", strict=False)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
