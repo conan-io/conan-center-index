@@ -1,0 +1,10 @@
+sources:
+  "cci.20240727":
+    # Prefer the GitHub mirror because googlesource.com does not have a stable hash
+    url: "https://github.com/google/skia/archive/804999efe4024b8ecf305a5a1bd0271fe4be44b1.tar.gz"
+    sha256: "ce1c02b8b4b36ff4f8d367d6171f75c0467bc8fe12e930945a607bea65c03823"
+patches:
+  "cci.20240727":
+    - patch_file: "patches/0001-use-conan-dependencies.patch"
+      patch_description: "Replace all non-Rust dependencies with ones from Conan"
+      patch_type: "conan"
