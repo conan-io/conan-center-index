@@ -22,6 +22,7 @@ class GladConan(ConanFile):
         "no_loader": [True, False],
         "spec": ["gl", "egl", "glx", "wgl"], # Not relevant for 2.x. A spec will be included unless its version is None
         "extensions": ["ANY"], # A comma separated list of extensions, if missing all extensions are included
+        "debug": [True, False], # Enable the Debugging layer (only available if build_type=Debug)
 
         "gl_profile": ["compatibility", "core"],
         "gl_version": ["None", "1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "2.0",
@@ -44,6 +45,7 @@ class GladConan(ConanFile):
         "no_loader": False,
         "spec": "gl",
         "extensions": "",
+        "debug": True,
         "gl_profile": "compatibility",
         "gl_version": "3.3",
         "gles1_version": "None",
@@ -61,6 +63,8 @@ class GladConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.wgl_version
+        if self.settings.build_type != "Debug":
+            del self.options.debug
 
     def configure(self):
         if self.options.shared:
@@ -92,9 +96,9 @@ class GladConan(ConanFile):
         if not self.options.no_loader:
             tc.cache_variables["GLAD_CONAN_LOADER"] = "LOADER"
 
-        # This is more than just debug symbols - it wraps all gl calls in a debugging layer.
-        # See https://github.com/Dav1dde/glad/wiki/C#debugging
-        if self.settings.build_type == "Debug":
+        if self.settings.build_type == "Debug" and self.options.get_safe("debug"):
+            # This is more than just debug symbols - it wraps all gl calls in a debugging layer.
+            # See https://github.com/Dav1dde/glad/wiki/C#debugging
             tc.cache_variables["GLAD_CONAN_DEBUG"] = "DEBUG"
 
         tc.generate()
