@@ -13,7 +13,7 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         self.requires(self.tested_reference_str)
-        self.test_requires("gtest/1.12.1")
+        self.requires("gtest/1.12.1")
 
     def build(self):
         cmake = CMake(self)

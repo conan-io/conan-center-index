@@ -4,6 +4,6 @@ project(test_package LANGUAGES CXX)
 add_executable(test_package test.cpp)
 
 find_package(caches)
-find_package(gtest)
+find_package(GTest)
 
 target_link_libraries(test_package caches::caches gtest::gtest)
