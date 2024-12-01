@@ -51,9 +51,9 @@ class HictkConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_arrow"):
-            self.requires("arrow/17.0.0")
+            self.requires("arrow/18.1.0")
         self.requires("bshoshany-thread-pool/4.1.0")
-        self.requires("fast_float/6.1.5")
+        self.requires("fast_float/7.0.0")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         self.requires("fmt/11.0.2")
@@ -62,7 +62,7 @@ class HictkConan(ConanFile):
         self.requires("libdeflate/1.22")
         self.requires("parallel-hashmap/1.4.0")  # Note: v1.4.0 is more recent than v1.37
         self.requires("span-lite/0.11.0")
-        self.requires("spdlog/1.14.1")
+        self.requires("spdlog/1.15.0")
         self.requires("zstd/[>=1.5 <1.6]")
 
         if Version(self.version) == "0.0.3":
