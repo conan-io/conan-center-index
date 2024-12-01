@@ -2,8 +2,8 @@
 
 #include "hictk/file.hpp"
 
-#include "hictk/transformers/to_dataframe.hpp"  // test hictk/*:with_arrow
-#include "hictk/transformers/to_dense.hpp"      // test hictk/*:with_eigen
+#include "hictk/transformers/to_dataframe.hpp"     // test hictk/*:with_arrow
+#include "hictk/transformers/to_dense_matrix.hpp"  // test hictk/*:with_eigen
 
 
 int main(int argc, char** argv) {
