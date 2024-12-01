@@ -8,6 +8,7 @@ include(GladConfig)
 glad_add_library(glad
     ${GLAD_CONAN_LOADER}
     ${GLAD_CONAN_DEBUG}
+    ${GLAD_CONAN_MX}
     ${GLAD_CONAN_LIB_TYPE}
     LANGUAGE C
     API ${GLAD_CONAN_API}
