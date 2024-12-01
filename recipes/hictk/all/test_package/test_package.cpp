@@ -2,9 +2,13 @@
 
 #include "hictk/file.hpp"
 
+#if __has_include("hictk/transformers/to_dataframe.hpp")
 #include "hictk/transformers/to_dataframe.hpp"     // test hictk/*:with_arrow
-#include "hictk/transformers/to_dense_matrix.hpp"  // test hictk/*:with_eigen
+#endif
 
+#if __has_include("hictk/transformers/to_dense_matrix.hpp")
+#include "hictk/transformers/to_dense_matrix.hpp"  // test hictk/*:with_eigen
+#endif
 
 int main(int argc, char** argv) {
   try {
