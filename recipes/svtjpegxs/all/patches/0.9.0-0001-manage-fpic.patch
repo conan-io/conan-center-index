@@ -1,0 +1,40 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index e7cdc8d..6039b5c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -88,7 +88,6 @@ else()
+     set_property(CACHE SANITIZER PROPERTY STRINGS Address Memory Thread Undefined Integer)
+ endif()
+ 
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ set(CMAKE_C_STANDARD 99)
+ set(CMAKE_CXX_STANDARD 11)
+ 
+@@ -120,7 +119,6 @@ if(UNIX)
+ endif()
+ 
+ # Always build with -fPIC
+-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ 
+ function(check_flag lang flag)
+     string(REGEX REPLACE "[^A-Za-z0-9]" "_" flag_var "${flag}")
+diff --git a/third_party/cpuinfo/CMakeLists.txt b/third_party/cpuinfo/CMakeLists.txt
+index c994d47..7ca34bc 100644
+--- a/third_party/cpuinfo/CMakeLists.txt
++++ b/third_party/cpuinfo/CMakeLists.txt
+@@ -112,7 +112,6 @@ CPUINFO_TARGET_ENABLE_C99(cpuinfo)
+ 
+ INCLUDE_DIRECTORIES(deps/clog/include)
+ 
+-SET_PROPERTY(TARGET cpuinfo PROPERTY POSITION_INDEPENDENT_CODE ON)
+ 
+ CPUINFO_TARGET_RUNTIME_LIBRARY(cpuinfo)
+ IF(CMAKE_SYSTEM_NAME MATCHES "^(Windows|CYGWIN|MSYS)$")
+@@ -160,7 +159,6 @@ IF(NOT TARGET clog)
+   ADD_SUBDIRECTORY(
+     "${CLOG_SOURCE_DIR}")
+   # We build static version of clog but a dynamic library may indirectly depend on it
+-  SET_PROPERTY(TARGET clog PROPERTY POSITION_INDEPENDENT_CODE ON)
+ ENDIF()
+ 
+ ADD_LIBRARY(cpuinfo_public INTERFACE)
