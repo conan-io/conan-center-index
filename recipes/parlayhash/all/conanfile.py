@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import get, copy, rm
-from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd, check_max_cppstd
 from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class ParlayHashConan(ConanFile):
@@ -20,37 +20,24 @@ class ParlayHashConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    @property
-    def _minimum_cpp_standard(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "15.7",
-            "msvc": "191",
-            "gcc": "7",
-            "clang": "7",
-            "apple-clang": "11",
-        }
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
         self.info.clear()
 
-    def requirements(self):
-        # TODO: Upstream mentions jemalloc in https://github.com/cmuparlay/parlayhash/blob/main/CMakeLists.txt#L45
-        #     but it's not ported to Conan 2 yet. Add it here if needed in the future.
-        pass
-
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.get_safe("compiler.version")) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._minimum_cpp_standard}, which your compiler does not support.")
+        check_min_cppstd(self, 17)
+        if self.settings.compiler == "apple-clang":
+            if Version(self.settings.compiler.version) < "15":
+                # error: reference to local binding 'tag' declared in enclosing function 'parlay::parlay_hash::Find'
+                raise ConanInvalidConfiguration("Can't be used with apple-clang < 15, lacks proper C++17 support")
+            else:
+                # error: no type named 'result_of' in namespace 'std'
+                check_max_cppstd(self, 17)
+        if self.settings.compiler == "msvc":
+            # error C3861: '__builtin_prefetch': identifier not found
+            raise ConanInvalidConfiguration("Can't be used with msvc")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
