@@ -77,7 +77,7 @@ class GoogleCloudCppConan(ConanFile):
             raise ConanInvalidConfiguration("Recipe not prepared for cross-building (yet)")
 
         if self.settings.compiler.get_safe("cppstd"):
-            if self.settings.os == "Windows":
+            if self.settings.compiler == "msvc":
                 check_min_cppstd(self, 20)
             check_min_cppstd(self, 11)
 
@@ -105,8 +105,6 @@ class GoogleCloudCppConan(ConanFile):
         tc.cache_variables["GOOGLE_CLOUD_CPP_ENABLE_IAM"] = True
         tc.cache_variables["GOOGLE_CLOUD_CPP_ENABLE_LOGGING"] = True
         tc.cache_variables["GOOGLE_CLOUD_CPP_ENABLE_GENERATOR"] = False
-
-        tc.cache_variables["CMAKE_FIND_DEBUG_MODE"] = True
 
         if is_msvc(self):
             tc.preprocessor_definitions["_SILENCE_CXX20_REL_OPS_DEPRECATION_WARNING"] = 1
