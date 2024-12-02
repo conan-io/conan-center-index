@@ -135,9 +135,9 @@ class OpenCascadeConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
-        # Inject C++ standard from profile since we have removed hardcoded C++ standard from upstream build files
-        if not valid_min_cppstd(self, self._min_cppstd):
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        if Version(self.version) >= "7.8.0":
+            tc.cache_variables["BUILD_CPP_STANDARD"] = str(self.settings.compiler.cppstd).replace("gnu", "").upper()
+            # TODO: USE_MMGR_TYPE
 
         tc.cache_variables["BUILD_LIBRARY_TYPE"] = "Shared" if self.options.shared else "Static"
         tc.cache_variables["INSTALL_TEST_CASES"] = False
@@ -412,8 +412,9 @@ class OpenCascadeConan(ConanFile):
 
         # Honor fPIC option, compiler.cppstd and compiler.libcxx
         replace_in_file(self, occt_defs_flags_cmake, "-fPIC", "")
-        replace_in_file(self, occt_defs_flags_cmake, "-std=c++0x", "")
-        replace_in_file(self, occt_defs_flags_cmake, "-std=gnu++0x", "")
+        if Version(self.version) < "7.8.0":
+            replace_in_file(self, occt_defs_flags_cmake, "-std=c++0x", "")
+            replace_in_file(self, occt_defs_flags_cmake, "-std=gnu++0x", "")
         replace_in_file(self, occt_defs_flags_cmake, "-stdlib=libc++", "")
         replace_in_file(self, occt_csf_cmake,
                               "set (CSF_ThreadLibs  \"pthread rt stdc++\")",
@@ -502,6 +503,7 @@ class OpenCascadeConan(ConanFile):
             "CSF_Draco": {"externals": ["draco::draco"] if self.options.get_safe("with_draco") else []},
             "CSF_TBB": {"externals": ["onetbb::onetbb"] if self.options.with_tbb else []},
             "CSF_VTK": {},
+            "CSF_MMGR": {},
             # Android system libs
             "CSF_androidlog": {"system_libs": ["log"] if self.settings.os == "Android" else []},
             # Linux system libs
