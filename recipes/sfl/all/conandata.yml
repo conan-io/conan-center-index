@@ -1,4 +1,7 @@
 sources:
+  "1.8.2":
+    url: "https://github.com/slavenf/sfl-library/archive/refs/tags/1.8.2.tar.gz"
+    sha256: "06dc215f73ebfbbcbb4ef39cd556bffe0da16918f542045407f51c4b9effcabb"
   "1.8.0":
     url: "https://github.com/slavenf/sfl-library/archive/refs/tags/1.8.0.tar.gz"
     sha256: "bb473a8e0b46ecff957c06112593b9a4104e0d1ec8e9d5840ff33c20ad3a243e"

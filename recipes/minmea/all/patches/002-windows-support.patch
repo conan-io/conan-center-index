@@ -1,0 +1,16 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 4674f49..895b835 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -13,6 +13,11 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_POSIX_C_SOURCE=199309L -D_BSD_SOURCE -D_D
+
+ set(minmea_SRCS minmea.c minmea.h)
+ add_library(minmea ${minmea_SRCS})
++target_include_directories(minmea PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
++if (WIN32)
++    configure_file(compat/minmea_compat_windows.h ${CMAKE_CURRENT_SOURCE_DIR}/minmea_compat.h COPYONLY)
++    target_compile_definitions(minmea PRIVATE MINMEA_INCLUDE_COMPAT)
++endif()
+
+ add_executable(example example.c)
+ target_link_libraries(example minmea)

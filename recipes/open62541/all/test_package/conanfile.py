@@ -23,6 +23,7 @@ class TestPackageConan(ConanFile):
             "user.ua-nodeset:nodeset_dir").replace("\\", "/")  # sanitize path for windows systems
         tc.variables["open62541_TOOLS_DIR"] = self.dependencies["open62541"].conf_info.get(
             "user.open62541:tools_dir")
+        tc.variables["UA_SCHEMA_DIR"] = os.path.join(self.dependencies["ua-nodeset"].conf_info.get("user.ua-nodeset:nodeset_dir"), "Schema").replace("\\", "/")
         tc.generate()
 
     def build(self):

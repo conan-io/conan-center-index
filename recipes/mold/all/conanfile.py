@@ -1,5 +1,6 @@
 import os
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get, rmdir
 from conan.errors import ConanInvalidConfiguration
@@ -29,6 +30,20 @@ class MoldConan(ConanFile):
         "with_mimalloc": False,
     }
 
+    @property
+    def _min_cppstd(self):
+        return 20
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "11",
+            "clang": "12",
+            "apple-clang": "14",
+            "Visual Studio": "16",
+            "msvc": "192",
+        }
+
     def configure(self):
         if Version(self.version) < "2.0.0":
             self.license = "AGPL-3.0"
@@ -51,6 +66,17 @@ class MoldConan(ConanFile):
         del self.info.settings.compiler
 
     def validate(self):
+        # mold has required C+20 since 1.4.1. However, C++20 features are used for the first time in 2.34.0.
+        if Version(self.version) >= "2.34.0":
+            # validate the minimum cpp standard supported. For C++ projects only
+            if self.settings.compiler.cppstd:
+                check_min_cppstd(self, self._min_cppstd)
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
+
         # TODO most of these checks should run on validate_build, but the conan-center hooks are broken and fail the PR because they
         # think we're raising on the build() method
         if self.settings.build_type == "Debug":

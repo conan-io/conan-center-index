@@ -1,4 +1,16 @@
 versions:
+  "7.5.0":
+    folder: "all"
+  "7.4.0":
+    folder: "all"
+  "7.3.0":
+    folder: "all"
+  "7.2.2":
+    folder: "all"
+  "7.2.1":
+    folder: "all"
+  "7.1.0":
+    folder: "all"
   "6.1.0":
     folder: "all"
   "6.0.0":
@@ -7,21 +19,3 @@ versions:
     folder: "all"
   "4.4.1":
     folder: "all"
-  "4.4.0":
-    folder: "all"
-  "4.3.0":
-    folder: "all"
-  "3.9.0":
-    folder: "old"
-  "3.8.0":
-    folder: "old"
-  "3.7.0":
-    folder: "old"
-  "3.6.0":
-    folder: "old"
-  "3.5.1":
-    folder: "old"
-  "3.4.1":
-    folder: "old"
-  "3.3.1":
-    folder: "old"
