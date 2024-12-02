@@ -76,7 +76,7 @@ class CAFConan(ConanFile):
         tc.variables["CAF_ENABLE_EXAMPLES"] = False
         tc.variables["CAF_ENABLE_TOOLS"] = False
         tc.variables["CAF_ENABLE_TESTING"] = False
-        tc.variables["CAF_LOG_LEVEL"] = self.options.log_level.value.upper()
+        tc.variables["CAF_LOG_LEVEL"] = str(self.options.log_level).upper()
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
