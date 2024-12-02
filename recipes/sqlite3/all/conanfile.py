@@ -29,6 +29,7 @@ class Sqlite3Conan(ConanFile):
         "enable_fts4": [True, False],
         "enable_fts5": [True, False],
         "enable_json1": [True, False],
+        "enable_memsys5": [True, False],
         "enable_soundex": [True, False],
         "enable_preupdate_hook": [True, False],
         "enable_rtree": [True, False],
@@ -59,6 +60,7 @@ class Sqlite3Conan(ConanFile):
         "enable_fts4": False,
         "enable_fts5": False,
         "enable_json1": False,
+        "enable_memsys5": False,
         "enable_soundex": False,
         "enable_preupdate_hook": False,
         "enable_rtree": True,
@@ -118,6 +120,7 @@ class Sqlite3Conan(ConanFile):
         tc.variables["ENABLE_FTS4"] = self.options.enable_fts4
         tc.variables["ENABLE_FTS5"] = self.options.enable_fts5
         tc.variables["ENABLE_JSON1"] = self.options.enable_json1
+        tc.variables["ENABLE_MEMSYS5"] = self.options.enable_memsys5
         tc.variables["ENABLE_PREUPDATE_HOOK"] = self.options.enable_preupdate_hook
         tc.variables["ENABLE_SOUNDEX"] = self.options.enable_soundex
         tc.variables["ENABLE_RTREE"] = self.options.enable_rtree
