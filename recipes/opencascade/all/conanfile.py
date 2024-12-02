@@ -102,7 +102,7 @@ class OpenCascadeConan(ConanFile):
         self.requires("tcl/8.6.10")
         if self._link_tk:
             self.requires("tk/8.6.10")
-        self.requires("freetype/2.13.0")
+        self.requires("freetype/2.13.2")
         if self._link_opengl:
             self.requires("opengl/system")
         if self._is_linux:
@@ -136,7 +136,8 @@ class OpenCascadeConan(ConanFile):
         tc = CMakeToolchain(self)
 
         if Version(self.version) >= "7.8.0":
-            tc.cache_variables["BUILD_CPP_STANDARD"] = str(self.settings.compiler.cppstd).replace("gnu", "").upper()
+            cppstd = str(self.settings.compiler.cppstd).replace("gnu", "").upper()
+            tc.cache_variables["BUILD_CPP_STANDARD"] = f"C++{cppstd}"
             # TODO: USE_MMGR_TYPE, set to native for now
 
         tc.cache_variables["BUILD_LIBRARY_TYPE"] = "Shared" if self.options.shared else "Static"
