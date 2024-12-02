@@ -70,9 +70,7 @@ class CAFConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         cppstd = str(self.settings.compiler.cppstd).replace("gnu", "")
-        if Version(self.version) < "1.0.0":
-            tc.variables["CMAKE_CXX_STANDARD"] = cppstd
-        else:
+        if Version(self.version) >= "1.0.0":
             tc.variables["CAF_CXX_VERSION"] = cppstd
         tc.variables["CAF_ENABLE_OPENSSL_MODULE"] = self.options.with_openssl
         tc.variables["CAF_ENABLE_EXAMPLES"] = False
