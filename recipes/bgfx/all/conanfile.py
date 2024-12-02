@@ -33,7 +33,7 @@ class bgfxConan(ConanFile):
     @property
     def _bimg_folder(self):
         return "bimg"
-    
+
     @property
     def _bgfx_folder(self):
         return "bgfx"
@@ -54,8 +54,8 @@ class bgfxConan(ConanFile):
         # generate tools projects regardless of tools option because that also generates bimg_encode
         genie_extra += " --with-tools"
         # deal with macos 11 to 13
-        if self.settings.os == "Macos": 
-            if self.settings.get_safe("os.sdk_version"): 
+        if self.settings.os == "Macos":
+            if self.settings.get_safe("os.sdk_version"):
                 if self.settings.get_safe("os.sdk_version") < "13.0" and self.settings.get_safe("os.sdk_version") >= "11.0":
                     genie_extra += " --with-macos=11"
             else:
@@ -76,14 +76,14 @@ class bgfxConan(ConanFile):
             return "tools\\"
         else:
             return ""
-        
+
     @property
     def _shaderc_target_prefix(self):
         if is_msvc(self):
             return "shaderc\\"
         else:
             return ""
-        
+
     @property
     def _tools(self):
         return ["texturec", "texturev", "geometryc", "geometryv", "shaderc"]
@@ -179,7 +179,7 @@ class bgfxConan(ConanFile):
         else:
             # Not sure if XCode can be spefically handled by conan for building through, so assume everything not VS is make
             # gcc-multilib and g++-multilib required for 32bit cross-compilation, should see if we can check and install through conan
-            
+
             # Conan to Genie translation maps
             compiler_str = str(self.settings.compiler)
             compiler_and_os_to_genie = {"Windows": f"--gcc=mingw-{compiler_str}", "Linux": f"--gcc=linux-{compiler_str}",
@@ -286,7 +286,7 @@ class bgfxConan(ConanFile):
                     copy(self, pattern=f"{tool}*", dst=os.path.join(self.package_folder, "bin"), src=build_bin, keep_path=False)
 
         # Rename for consistency across platforms and configs
-        for lib_name in lib_names:  
+        for lib_name in lib_names:
             for out_file in Path(os.path.join(self.package_folder, "lib")).glob(f"*{lib_name}*"):
                 if out_file.suffix != "dylib": # dylibs break when renamed
                     lib_name_extra = ""
@@ -294,14 +294,14 @@ class bgfxConan(ConanFile):
                         lib_name_extra = "_encode"
                     elif out_file.name.find("decode") >= 0:
                         lib_name_extra = "_decode"
-                    rename(self, os.path.join(self.package_folder, "lib", out_file.name), 
+                    rename(self, os.path.join(self.package_folder, "lib", out_file.name),
                             os.path.join(self.package_folder, "lib", f"{package_lib_prefix}{lib_name}{lib_name_extra}{out_file.suffix}"))
         if self.options.tools:
             for tool in self._tools:
                 for out_file in Path(os.path.join(self.package_folder, "bin")).glob(f"*{tool}*"):
-                    rename(self, os.path.join(self.package_folder, "bin", out_file.name), 
+                    rename(self, os.path.join(self.package_folder, "bin", out_file.name),
                             os.path.join(self.package_folder, "bin", f"{tool}{out_file.suffix}"))
-        
+
         # Maybe this helps
         if is_apple_os(self):
             fix_apple_shared_install_name(self)
@@ -312,7 +312,7 @@ class bgfxConan(ConanFile):
         if self.options.shared and is_apple_os(self):
             self.cpp_info.libs.extend([f"bgfx-shared-lib{self.settings.build_type}"])
         else:
-            self.cpp_info.libs.extend(["bgfx"])        
+            self.cpp_info.libs.extend(["bgfx"])
         self.cpp_info.libs.extend(["bimg_encode", "bimg_decode", "bimg", "bx"])
 
         if self.options.shared:
