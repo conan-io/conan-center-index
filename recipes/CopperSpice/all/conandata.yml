@@ -1,0 +1,16 @@
+sources:
+  "1.9.2":
+    url: "https://github.com/copperspice/copperspice/archive/refs/tags/cs-1.9.2.tar.gz"
+    sha256: "875a12c9d6e94aebbceccbe4fcd33f5b1e305b3e43b1da50b2ee1115c6a518b9"
+  "1.7.2":
+    url: "https://github.com/copperspice/copperspice/archive/refs/tags/cs-1.7.2.tar.gz"
+    sha256: "ecc716d4f9aadc783add2e3c4215206e686a76b7be7bfff118af50dbf2750b73"
+  "1.7.1":
+    url: "https://github.com/copperspice/copperspice/archive/refs/tags/cs-1.7.1.tar.gz"
+    sha256: "2e74c809f6e9bffbe53f2f758b280781f6905631d9647717b47bc9202dba0d41"
+patches:
+  "1.7.1":
+    - "patch_description": "Require CMake 3.13 or newer for MSVC, ensure method pointers have a unique address"
+      "patch_file": "patches/noifc.patch"
+      "patch_source": "https://github.com/copperspice/copperspice/commit/f8790a3cd9a54799046786408ab718d2cea406b6"
+      "patch_type": "backport"
