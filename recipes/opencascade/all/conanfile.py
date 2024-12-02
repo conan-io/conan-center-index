@@ -137,7 +137,7 @@ class OpenCascadeConan(ConanFile):
 
         if Version(self.version) >= "7.8.0":
             tc.cache_variables["BUILD_CPP_STANDARD"] = str(self.settings.compiler.cppstd).replace("gnu", "").upper()
-            # TODO: USE_MMGR_TYPE
+            # TODO: USE_MMGR_TYPE, set to native for now
 
         tc.cache_variables["BUILD_LIBRARY_TYPE"] = "Shared" if self.options.shared else "Static"
         tc.cache_variables["INSTALL_TEST_CASES"] = False
@@ -503,6 +503,7 @@ class OpenCascadeConan(ConanFile):
             "CSF_Draco": {"externals": ["draco::draco"] if self.options.get_safe("with_draco") else []},
             "CSF_TBB": {"externals": ["onetbb::onetbb"] if self.options.with_tbb else []},
             "CSF_VTK": {},
+            # TODO: If requested, allow jemalloc/tbb instead of default native
             "CSF_MMGR": {},
             # Android system libs
             "CSF_androidlog": {"system_libs": ["log"] if self.settings.os == "Android" else []},
