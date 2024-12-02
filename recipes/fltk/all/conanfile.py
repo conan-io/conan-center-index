@@ -162,7 +162,8 @@ class FltkConan(ConanFile):
                 self.cpp_info.system_libs.append("gdiplus")
             if self.options.with_gl:
                 self.cpp_info.system_libs.append("opengl32")
-
+            if Version(self.version) >= "1.4.0":
+                self.cpp_info.system_libs.append("ws2_32")
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.names["cmake_find_package"] = "fltk"
         self.cpp_info.names["cmake_find_package_multi"] = "fltk"
