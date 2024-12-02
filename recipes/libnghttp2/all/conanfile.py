@@ -38,8 +38,6 @@ class Nghttp2Conan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
-    exports_sources = "src/*"
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -71,8 +69,7 @@ class Nghttp2Conan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires GCC >= 6.0")
 
     def source(self):
-        # get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        pass
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
