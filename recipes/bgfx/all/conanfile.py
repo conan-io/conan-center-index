@@ -119,8 +119,13 @@ class bgfxConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
-        if self.settings.os == "Macos" and self.settings.get_safe("os.sdk_version") and self.settings.get_safe("os.sdk_version") < "11.0":
-            raise ConanInvalidConfiguration(f"{self.ref} requires macos sdk version >= 11")
+        if self.settings.os == "Macos":
+            if self.settings.get_safe("os.sdk_version") and self.settings.get_safe("os.sdk_version") < "11.0":
+                raise ConanInvalidConfiguration(f"{self.ref} requires macos sdk version >= 11")
+            if (not self.settings.get_safe("os.sdk_version") and
+                    self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14.0"):
+                # This is actually the sdk, but the CI won't have the sdk version set, so we need to check the compiler version
+                raise ConanInvalidConfiguration(f"{self.ref} requires apple-clang >= 14.0")
         if self.settings.os in ["iOS", "tvOS"]  and self.settings.get_safe("os.sdk_version") and self.settings.get_safe("os.sdk_version") < "16.0":
             raise ConanInvalidConfiguration(f"{self.ref} requires iOS/tvOS sdk version >= 16")
 
