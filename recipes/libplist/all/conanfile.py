@@ -84,7 +84,7 @@ class PackageConan(ConanFile):
         autotools.install()
 
         rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        #rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
         fix_apple_shared_install_name(self)
@@ -94,7 +94,7 @@ class PackageConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "plist-2.0")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread"])
+            self.cpp_info.system_libs.extend(["m", "pthread"])
 
         if not self.options.shared:
             self.cpp_info.defines.append("LIBPLIST_STATIC")
