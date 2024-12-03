@@ -465,6 +465,8 @@ class OpenSSLConan(ConanFile):
                 shared_target = 'shared_target  => "gnu-shared",'
             if self.options.get_safe("fPIC", True):
                 shared_cflag = 'shared_cflag => "-fPIC",'
+        if self.settings.os == 'Android':
+            shared_extension = r'shared_extension => ".so",'
 
         if self.settings.os in ["iOS", "tvOS", "watchOS"] and self.conf.get("tools.apple:enable_bitcode", check_type=bool):
             cflags.append("-fembed-bitcode")
