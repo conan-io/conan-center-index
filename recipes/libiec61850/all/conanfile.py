@@ -25,6 +25,7 @@ class Libiec61850Conan(ConanFile):
     }
 
     languages = ["C"]
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self)
