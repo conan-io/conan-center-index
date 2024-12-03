@@ -32,10 +32,6 @@ class PackageConan(ConanFile):
     implements = ["auto_shared_fpic"]
     languages = ["C", "C++"]
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
