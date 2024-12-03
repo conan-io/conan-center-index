@@ -375,7 +375,8 @@ class BoostConan(ConanFile):
             if self.settings.os == "Windows" and self.settings.compiler == "gcc":
                 return False
             # https://github.com/boostorg/stacktrace/blob/boost-1.86.0/build/Jamfile.v2#L148
-            return not self.options.header_only and not self.options.without_stacktrace
+            # FIXME: from_exception is enabled by for intel only, but still can be built as exposed property.
+            return not self.options.header_only and not self.options.without_stacktrace and self._b2_architecture == "x86"
 
     def configure(self):
         if self.options.header_only:
