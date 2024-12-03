@@ -1,12 +1,10 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm, save, replace_in_file
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm, replace_in_file
 from conan.tools.scm import Version
 
 import os
-import textwrap
 
 required_conan_version = ">=2.1"
 
@@ -91,8 +89,6 @@ class TesseractConan(ConanFile):
         tc.variables["Leptonica_DIR"] = self.dependencies["leptonica"].package_folder.replace("\\", "/")
         tc.variables["DISABLE_CURL"] = not self.options.with_libcurl
         tc.variables["DISABLE_ARCHIVE"] = not self.options.with_libarchive
-        # Avoid failing of finding leptonica tiff support in MSVC-Debug
-        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -143,6 +139,7 @@ class TesseractConan(ConanFile):
             self.cpp_info.components["libtesseract"].system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["libtesseract"].system_libs = ["ws2_32"]
+        self.cpp_info.components["libtesseract"].set_property("pkg_config_name", "tesseract")
 
     @property
     def _libname(self):
