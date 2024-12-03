@@ -206,7 +206,8 @@ class BotanConan(ConanFile):
             raise ConanInvalidConfiguration(
                 'Using Botan with GCC >= 5 on Linux requires "compiler.libcxx=libstdc++11"')
 
-        if self.settings.compiler == 'clang' and self.settings.compiler.libcxx not in ['libstdc++11', 'libc++']:
+        if (self.settings.compiler == 'clang' and self.settings.os == "Linux" and self.settings.compiler.libcxx not in ['libstdc++11', 'libc++']
+           and self.settings.os != "Android"):
             raise ConanInvalidConfiguration(
                 'Using Botan with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
                 'or "compiler.libcxx=libc++"')
@@ -283,7 +284,7 @@ class BotanConan(ConanFile):
         return {'Windows': 'windows',
                 'Linux': 'linux',
                 'Macos': 'darwin',
-                'Android': 'linux',
+                'Android': 'android',
                 'baremetal': 'none',
                 'iOS': 'ios'}.get(str(self.settings.os))
 
