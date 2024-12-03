@@ -1,0 +1,305 @@
+From f23fbab92f7d1551584b3960382e3e64446c013d Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Fri, 5 Jul 2024 14:40:22 +0300
+Subject: [PATCH] Fix includes after unvendoring
+
+---
+ include/cilantro/3rd_party/libqhullcpp/Coordinates.h      | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/PointCoordinates.h | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/QhullFacet.h       | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/QhullHyperplane.h  | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/QhullIterator.h    | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/QhullLinkedList.h  | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/QhullPoint.h       | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/QhullPointSet.h    | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/QhullPoints.h      | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/QhullQh.h          | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/QhullRidge.h       | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/QhullSet.h         | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/QhullStat.h        | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/QhullUser.h        | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/QhullVertex.h      | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/RboxPoints.h       | 2 +-
+ include/cilantro/3rd_party/libqhullcpp/RoadError.h        | 2 +-
+ include/cilantro/clustering/spectral_clustering.hpp       | 4 ++--
+ include/cilantro/core/kd_tree.hpp                         | 2 +-
+ include/cilantro/utilities/multidimensional_scaling.hpp   | 2 +-
+ include/cilantro/utilities/ply_io.hpp                     | 2 +-
+ 21 files changed, 22 insertions(+), 22 deletions(-)
+
+diff --git a/include/cilantro/3rd_party/libqhullcpp/Coordinates.h b/include/cilantro/3rd_party/libqhullcpp/Coordinates.h
+index ca646f2..c33f778 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/Coordinates.h
++++ b/include/cilantro/3rd_party/libqhullcpp/Coordinates.h
+@@ -9,7 +9,7 @@
+ #ifndef QHCOORDINATES_H
+ #define QHCOORDINATES_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullError.h>
+ 
+ #include <cstddef> // ptrdiff_t, size_t
+diff --git a/include/cilantro/3rd_party/libqhullcpp/PointCoordinates.h b/include/cilantro/3rd_party/libqhullcpp/PointCoordinates.h
+index c4a851a..d14a85d 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/PointCoordinates.h
++++ b/include/cilantro/3rd_party/libqhullcpp/PointCoordinates.h
+@@ -9,7 +9,7 @@
+ #ifndef QHPOINTCOORDINATES_H
+ #define QHPOINTCOORDINATES_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullPoints.h>
+ #include <cilantro/3rd_party/libqhullcpp/Coordinates.h>
+ 
+diff --git a/include/cilantro/3rd_party/libqhullcpp/QhullFacet.h b/include/cilantro/3rd_party/libqhullcpp/QhullFacet.h
+index efce927..5699341 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/QhullFacet.h
++++ b/include/cilantro/3rd_party/libqhullcpp/QhullFacet.h
+@@ -9,7 +9,7 @@
+ #ifndef QHULLFACET_H
+ #define QHULLFACET_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullHyperplane.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullPoint.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullSet.h>
+diff --git a/include/cilantro/3rd_party/libqhullcpp/QhullHyperplane.h b/include/cilantro/3rd_party/libqhullcpp/QhullHyperplane.h
+index 3150b15..0ae9336 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/QhullHyperplane.h
++++ b/include/cilantro/3rd_party/libqhullcpp/QhullHyperplane.h
+@@ -9,7 +9,7 @@
+ #ifndef QHHYPERPLANE_H
+ #define QHHYPERPLANE_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullError.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullIterator.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullQh.h>
+diff --git a/include/cilantro/3rd_party/libqhullcpp/QhullIterator.h b/include/cilantro/3rd_party/libqhullcpp/QhullIterator.h
+index e2ae902..07dfa03 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/QhullIterator.h
++++ b/include/cilantro/3rd_party/libqhullcpp/QhullIterator.h
+@@ -9,7 +9,7 @@
+ #ifndef QHULLITERATOR_H
+ #define QHULLITERATOR_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ 
+ #include <assert.h>
+ #include <iterator>
+diff --git a/include/cilantro/3rd_party/libqhullcpp/QhullLinkedList.h b/include/cilantro/3rd_party/libqhullcpp/QhullLinkedList.h
+index b31fb04..a0e6067 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/QhullLinkedList.h
++++ b/include/cilantro/3rd_party/libqhullcpp/QhullLinkedList.h
+@@ -9,7 +9,7 @@
+ #ifndef QHULLLINKEDLIST_H
+ #define QHULLLINKEDLIST_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullError.h>
+ 
+ #include <cstddef>  // ptrdiff_t, size_t
+diff --git a/include/cilantro/3rd_party/libqhullcpp/QhullPoint.h b/include/cilantro/3rd_party/libqhullcpp/QhullPoint.h
+index 51dc36c..fa73fc0 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/QhullPoint.h
++++ b/include/cilantro/3rd_party/libqhullcpp/QhullPoint.h
+@@ -9,7 +9,7 @@
+ #ifndef QHPOINT_H
+ #define QHPOINT_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullError.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullIterator.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullQh.h>
+diff --git a/include/cilantro/3rd_party/libqhullcpp/QhullPointSet.h b/include/cilantro/3rd_party/libqhullcpp/QhullPointSet.h
+index ddf1c0a..db914d6 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/QhullPointSet.h
++++ b/include/cilantro/3rd_party/libqhullcpp/QhullPointSet.h
+@@ -9,7 +9,7 @@
+ #ifndef QHULLPOINTSET_H
+ #define QHULLPOINTSET_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullSet.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullPoint.h>
+ 
+diff --git a/include/cilantro/3rd_party/libqhullcpp/QhullPoints.h b/include/cilantro/3rd_party/libqhullcpp/QhullPoints.h
+index 7848f05..939b08a 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/QhullPoints.h
++++ b/include/cilantro/3rd_party/libqhullcpp/QhullPoints.h
+@@ -9,7 +9,7 @@
+ #ifndef QHULLPOINTS_H
+ #define QHULLPOINTS_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullPoint.h>
+ 
+ #include <cstddef>  // ptrdiff_t, size_t
+diff --git a/include/cilantro/3rd_party/libqhullcpp/QhullQh.h b/include/cilantro/3rd_party/libqhullcpp/QhullQh.h
+index d2c174f..7a505c9 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/QhullQh.h
++++ b/include/cilantro/3rd_party/libqhullcpp/QhullQh.h
+@@ -9,7 +9,7 @@
+ #ifndef QHULLQH_H
+ #define QHULLQH_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ 
+ #include <string>
+ 
+diff --git a/include/cilantro/3rd_party/libqhullcpp/QhullRidge.h b/include/cilantro/3rd_party/libqhullcpp/QhullRidge.h
+index 1f10a65..66ca9d4 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/QhullRidge.h
++++ b/include/cilantro/3rd_party/libqhullcpp/QhullRidge.h
+@@ -9,7 +9,7 @@
+ #ifndef QHULLRIDGE_H
+ #define QHULLRIDGE_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullSet.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullVertex.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullVertexSet.h>
+diff --git a/include/cilantro/3rd_party/libqhullcpp/QhullSet.h b/include/cilantro/3rd_party/libqhullcpp/QhullSet.h
+index e2e713e..8063712 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/QhullSet.h
++++ b/include/cilantro/3rd_party/libqhullcpp/QhullSet.h
+@@ -9,7 +9,7 @@
+ #ifndef QhullSet_H
+ #define QhullSet_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullError.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullQh.h>
+ 
+diff --git a/include/cilantro/3rd_party/libqhullcpp/QhullStat.h b/include/cilantro/3rd_party/libqhullcpp/QhullStat.h
+index c0e8287..c35bedb 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/QhullStat.h
++++ b/include/cilantro/3rd_party/libqhullcpp/QhullStat.h
+@@ -9,7 +9,7 @@
+ #ifndef QHULLSTAT_H
+ #define QHULLSTAT_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ 
+ #include <string>
+ #include <vector>
+diff --git a/include/cilantro/3rd_party/libqhullcpp/QhullUser.h b/include/cilantro/3rd_party/libqhullcpp/QhullUser.h
+index 4d46fb4..cc6c008 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/QhullUser.h
++++ b/include/cilantro/3rd_party/libqhullcpp/QhullUser.h
+@@ -9,7 +9,7 @@
+ #ifndef QhullUser_H
+ #define QhullUser_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullPoint.h>
+ #include <cilantro/3rd_party/libqhullcpp/PointCoordinates.h>
+ 
+diff --git a/include/cilantro/3rd_party/libqhullcpp/QhullVertex.h b/include/cilantro/3rd_party/libqhullcpp/QhullVertex.h
+index cf92110..55aeddc 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/QhullVertex.h
++++ b/include/cilantro/3rd_party/libqhullcpp/QhullVertex.h
+@@ -9,7 +9,7 @@
+ #ifndef QHULLVERTEX_H
+ #define QHULLVERTEX_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullPoint.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullLinkedList.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullSet.h>
+diff --git a/include/cilantro/3rd_party/libqhullcpp/RboxPoints.h b/include/cilantro/3rd_party/libqhullcpp/RboxPoints.h
+index 9fe4e5c..e396ff9 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/RboxPoints.h
++++ b/include/cilantro/3rd_party/libqhullcpp/RboxPoints.h
+@@ -9,7 +9,7 @@
+ #ifndef RBOXPOINTS_H
+ #define RBOXPOINTS_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/qhull_ra.h>
++#include <libqhull_r/qhull_ra.h>
+ #include <cilantro/3rd_party/libqhullcpp/QhullPoint.h>
+ #include <cilantro/3rd_party/libqhullcpp/PointCoordinates.h>
+ 
+diff --git a/include/cilantro/3rd_party/libqhullcpp/RoadError.h b/include/cilantro/3rd_party/libqhullcpp/RoadError.h
+index a73e2c3..5e283a2 100644
+--- a/include/cilantro/3rd_party/libqhullcpp/RoadError.h
++++ b/include/cilantro/3rd_party/libqhullcpp/RoadError.h
+@@ -9,7 +9,7 @@
+ #ifndef ROADERROR_H
+ #define ROADERROR_H
+ 
+-#include <cilantro/3rd_party/libqhull_r/user_r.h>  /* for QHULL_CRTDBG */
++#include <libqhull_r/user_r.h>  /* for QHULL_CRTDBG */
+ #include <cilantro/3rd_party/libqhullcpp/RoadLogEvent.h>
+ 
+ #include <iostream>
+diff --git a/include/cilantro/clustering/spectral_clustering.hpp b/include/cilantro/clustering/spectral_clustering.hpp
+index 6fd9268..4cf585c 100644
+--- a/include/cilantro/clustering/spectral_clustering.hpp
++++ b/include/cilantro/clustering/spectral_clustering.hpp
+@@ -1,8 +1,8 @@
+ #pragma once
+ 
+ #include <memory>
+-#include <cilantro/3rd_party/Spectra/SymEigsSolver.h>
+-#include <cilantro/3rd_party/Spectra/SymGEigsSolver.h>
++#include <Spectra/SymEigsSolver.h>
++#include <Spectra/SymGEigsSolver.h>
+ #include <cilantro/core/spectral_embedding_base.hpp>
+ #include <cilantro/clustering/kmeans.hpp>
+ 
+diff --git a/include/cilantro/core/kd_tree.hpp b/include/cilantro/core/kd_tree.hpp
+index b92d8db..cad0321 100644
+--- a/include/cilantro/core/kd_tree.hpp
++++ b/include/cilantro/core/kd_tree.hpp
+@@ -1,6 +1,6 @@
+ #pragma once
+ 
+-#include <cilantro/3rd_party/nanoflann/nanoflann.hpp>
++#include <nanoflann.hpp>
+ #include <cilantro/core/data_containers.hpp>
+ #include <cilantro/core/nearest_neighbors.hpp>
+ 
+diff --git a/include/cilantro/utilities/multidimensional_scaling.hpp b/include/cilantro/utilities/multidimensional_scaling.hpp
+index f81e428..6713a66 100644
+--- a/include/cilantro/utilities/multidimensional_scaling.hpp
++++ b/include/cilantro/utilities/multidimensional_scaling.hpp
+@@ -1,6 +1,6 @@
+ #pragma once
+ 
+-#include <cilantro/3rd_party/Spectra/SymEigsSolver.h>
++#include <Spectra/SymEigsSolver.h>
+ #include <cilantro/core/data_containers.hpp>
+ #include <cilantro/core/spectral_embedding_base.hpp>
+ 
+diff --git a/include/cilantro/utilities/ply_io.hpp b/include/cilantro/utilities/ply_io.hpp
+index 0ceb9f1..35610ec 100644
+--- a/include/cilantro/utilities/ply_io.hpp
++++ b/include/cilantro/utilities/ply_io.hpp
+@@ -2,7 +2,7 @@
+ 
+ #include <set>
+ #include <fstream>
+-#include <cilantro/3rd_party/tinyply/tinyply.h>
++#include <tinyply.h>
+ #include <cilantro/core/data_containers.hpp>
+ 
+ namespace cilantro {
+-- 
+2.25.1
+
