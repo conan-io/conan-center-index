@@ -1,22 +1,22 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd, valid_min_cppstd
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
 from conan.tools.scm import Version
-import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class CAFConan(ConanFile):
     name = "caf"
     description = "An open source implementation of the Actor Model in C++"
+    license = "BSD-3-Clause", "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/actor-framework/actor-framework"
-    topics = "actor-framework", "actor-model", "pattern-matching", "actors"
-    license = "BSD-3-Clause", "BSL-1.0"
-
+    topics = ("actor-framework", "actor-model", "pattern-matching", "actors")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -31,21 +31,6 @@ class CAFConan(ConanFile):
         "log_level": "quiet",
         "with_openssl": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return "17"
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "7",
-            "clang": "6",   # Should be 5 but clang 5 has a bug that breaks compiling CAF
-                            # see https://github.com/actor-framework/actor-framework/issues/1226
-            "apple-clang": "10",
-        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -66,15 +51,11 @@ class CAFConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, "17")
 
-        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
-
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "6":
+            raise ConanInvalidConfiguration("Link errors with clang 5. "
+                                            "See https://github.com/actor-framework/actor-framework/issues/1226")
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) > "10.0" and \
            self.settings.arch == "x86":
             raise ConanInvalidConfiguration("clang >= 11.0 does not support x86")
@@ -88,13 +69,14 @@ class CAFConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if not valid_min_cppstd(self, self._min_cppstd):
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        cppstd = str(self.settings.compiler.cppstd).replace("gnu", "")
+        if Version(self.version) >= "1.0.0":
+            tc.variables["CAF_CXX_VERSION"] = cppstd
         tc.variables["CAF_ENABLE_OPENSSL_MODULE"] = self.options.with_openssl
         tc.variables["CAF_ENABLE_EXAMPLES"] = False
         tc.variables["CAF_ENABLE_TOOLS"] = False
         tc.variables["CAF_ENABLE_TESTING"] = False
-        tc.variables["CAF_LOG_LEVEL"] = self.options.log_level.value.upper()
+        tc.variables["CAF_LOG_LEVEL"] = str(self.options.log_level).upper()
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -131,14 +113,3 @@ class CAFConan(ConanFile):
             self.cpp_info.components["caf_openssl"].set_property("cmake_target_name", "CAF::openssl")
             self.cpp_info.components["caf_openssl"].libs = ["caf_openssl"]
             self.cpp_info.components["caf_openssl"].requires = ["caf_io", "openssl::openssl"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "CAF"
-        self.cpp_info.names["cmake_find_package_multi"] = "CAF"
-        self.cpp_info.components["caf_core"].names["cmake_find_package"] = "core"
-        self.cpp_info.components["caf_core"].names["cmake_find_package_multi"] = "core"
-        self.cpp_info.components["caf_io"].names["cmake_find_package"] = "io"
-        self.cpp_info.components["caf_io"].names["cmake_find_package_multi"] = "io"
-        if self.options.with_openssl:
-            self.cpp_info.components["caf_openssl"].names["cmake_find_package"] = "openssl"
-            self.cpp_info.components["caf_openssl"].names["cmake_find_package_multi"] = "openssl"

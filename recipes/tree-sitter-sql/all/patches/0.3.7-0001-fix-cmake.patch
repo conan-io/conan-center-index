@@ -1,0 +1,34 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index faaef1e..c939c26 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -14,7 +14,7 @@ if(NOT ${TREE_SITTER_ABI_VERSION} MATCHES "^[0-9]+$")
+     unset(TREE_SITTER_ABI_VERSION CACHE)
+     message(FATAL_ERROR "TREE_SITTER_ABI_VERSION must be an integer")
+ endif()
+-
++if(0)
+ find_program(TREE_SITTER_CLI tree-sitter DOC "Tree-sitter CLI")
+ 
+ add_custom_command(OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/src/parser.c"
+@@ -23,9 +23,9 @@ add_custom_command(OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/src/parser.c"
+                             --abi=${TREE_SITTER_ABI_VERSION}
+                    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+                    COMMENT "Generating parser.c")
+-
++endif()
+ add_library(tree-sitter-sql src/parser.c)
+-if(EXISTS src/scanner.c)
++if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/scanner.c)
+   target_sources(tree-sitter-sql PRIVATE src/scanner.c)
+ endif()
+ target_include_directories(tree-sitter-sql PRIVATE src)
+@@ -37,7 +37,7 @@ target_compile_definitions(tree-sitter-sql PRIVATE
+ set_target_properties(tree-sitter-sql
+                       PROPERTIES
+                       C_STANDARD 11
+-                      POSITION_INDEPENDENT_CODE ON
++                      # POSITION_INDEPENDENT_CODE ON
+                       SOVERSION "${TREE_SITTER_ABI_VERSION}.${PROJECT_VERSION_MAJOR}"
+                       DEFINE_SYMBOL "")
+ 

@@ -1,0 +1,12 @@
+diff --git a/source/plutovg-surface.c b/source/plutovg-surface.c
+index f81a51b..70be9e2 100644
+--- a/source/plutovg-surface.c
++++ b/source/plutovg-surface.c
+@@ -1,5 +1,7 @@
+ #include "plutovg-private.h"
+ 
++#include <stdint.h>
++
+ #define STB_IMAGE_IMPLEMENTATION
+ #define STB_IMAGE_WRITE_IMPLEMENTATION
+ 
