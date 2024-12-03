@@ -1,4 +1,4 @@
 sources:
-  "0.3.1":
-    url: "https://github.com/JoelLefkowitz/caches/archive/refs/tags/v0.3.1.tar.gz"
-    sha256: "2361f6ae737521cf780a361dff3f84083018136946b43f8027bbabbeea0db903"
+  "0.4.0":
+    url: "https://github.com/JoelLefkowitz/caches/archive/refs/tags/v0.4.0.tar.gz"
+    sha256: ""
