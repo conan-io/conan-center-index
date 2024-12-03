@@ -58,3 +58,6 @@ class Libiec61850Conan(ConanFile):
         self.cpp_info.components["libiec61850"].set_property("pkg_config_name", "iec61850")
         self.cpp_info.components["libiec61850"].set_property("cmake_file_name", "libiec61850")
         self.cpp_info.components["libiec61850"].set_property("cmake_target_name", "libiec61850::libiec61850")
+        if self.settings.os in ["Linux"]:
+            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.system_libs.append("rt")
