@@ -84,7 +84,6 @@ if(NOT HEADER_ONLY)
         if(WIN32)
             set_target_properties(hello_ext PROPERTIES SUFFIX ".pyd")
         endif()
-        # add_test(NAME boost_python COMMAND Python::Interpreter "${CMAKE_CURRENT_SOURCE_DIR}/python.py")
         set_property(TEST boost_python PROPERTY ENVIRONMENT "PYTHONPATH=$<TARGET_FILE_DIR:hello_ext>")
 
         add_executable(test_boost_numpy numpy.cpp)

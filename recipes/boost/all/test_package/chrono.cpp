@@ -1,9 +1,9 @@
-// This comes from the following Boost example:
-// https://www.boost.org/doc/libs/1_72_0/doc/html/chrono/users_guide.html#chrono.users_guide.examples
 #include <boost/chrono.hpp>
+#include <iostream>
 
 int main()
 {
-    boost::chrono::system_clock::time_point start = boost::chrono::system_clock::now();
+    const auto now = boost::chrono::system_clock::now();
+    std::cout << "Current time: " << boost::chrono::system_clock::to_time_t(now) << std::endl;
     return 0;
 }
