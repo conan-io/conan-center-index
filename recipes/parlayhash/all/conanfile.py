@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import get, copy, rm
+from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd, check_max_cppstd
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
@@ -28,10 +28,10 @@ class ParlayHashConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 17)
-        if self.settings.compiler == "apple-clang":
+        if self.settings.compiler in ["apple-clang", "clang"]:
             if Version(self.settings.compiler.version) < "15":
                 # error: reference to local binding 'tag' declared in enclosing function 'parlay::parlay_hash::Find'
-                raise ConanInvalidConfiguration("Can't be used with apple-clang < 15, lacks proper C++17 support")
+                raise ConanInvalidConfiguration(f"Can't be used with {self.settings.compiler} < 15, lacks proper C++17 support")
             else:
                 # error: no type named 'result_of' in namespace 'std'
                 check_max_cppstd(self, 17)
@@ -41,16 +41,13 @@ class ParlayHashConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        rm(self, "#hash_table.h#", os.path.join(self.source_folder, "include", "parlay"))
-        rm(self, "#primitives.h#", os.path.join(self.source_folder, "include", "parlay"))
-        rm(self, ".#hash_table.h", os.path.join(self.source_folder, "include", "parlay"))
 
     def build(self):
         pass
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
+        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"), excludes=[".#hash_table.h"])
 
     def package_info(self):
         self.cpp_info.bindirs = []

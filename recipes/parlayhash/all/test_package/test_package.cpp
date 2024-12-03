@@ -20,4 +20,5 @@ int main() {
   std::cout << "size before remove: " << my_map.size() << std::endl;
   my_map.Remove("sue");
   std::cout << "size after remove: " << my_map.size() << std::endl;
+  return 0;
 }
