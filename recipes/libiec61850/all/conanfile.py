@@ -36,8 +36,6 @@ class Libiec61850Conan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_TESTS"] = False
-        tc.variables["BUILD_SHARED_LIBS"] = False
-        tc.variables["BUILD_STATIC_LIBS"] = True
         tc.generate()
 
     def build(self):
