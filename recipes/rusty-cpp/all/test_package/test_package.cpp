@@ -1,8 +1,10 @@
-#include <cstdlib>
-#include <rusty/macro.h>
+#include <iostream>
+#include <rusty/primitive.h>
 
 int main(void) {
-  rusty_assert_eq(233, 233);
+  size_t x = 233;
+  std::cout << "The next power of two of " << x << " is "
+            << rusty::next_power_of_two(x) << std::endl;
 
   return EXIT_SUCCESS;
 }
