@@ -18,6 +18,7 @@ class OatppWebSocketConan(ConanFile):
     topics = ("oat++", "oatpp", "websocket")
     url = "https://github.com/conan-io/conan-center-index"
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -43,7 +44,7 @@ class OatppWebSocketConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires(f"oatpp/{self.version}")
+        self.requires(f"oatpp/{self.version}", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.info.settings.compiler.get_safe("cppstd"):
@@ -56,8 +57,7 @@ class OatppWebSocketConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires GCC >=5")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
