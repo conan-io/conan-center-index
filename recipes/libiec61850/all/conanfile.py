@@ -47,11 +47,6 @@ class Libiec61850Conan(ConanFile):
 
     def package(self):
         copy(self, "COPYING", self.source_folder, join(self.package_folder, "licenses"))
-        copy(self, "*.h", self.source_folder, join(self.package_folder, "include"))
-        copy(self, "*.lib", self.source_folder, join(self.package_folder, "lib"))
-        copy(self, "*.so", self.source_folder, join(self.package_folder, "lib"))
-        copy(self, "*.a", self.source_folder, join(self.package_folder, "lib"))
-
         rm(self, "*.la", join(self.package_folder, "lib"))
         rmdir(self, join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, join(self.package_folder, "share"))
