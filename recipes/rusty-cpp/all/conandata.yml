@@ -1,0 +1,5 @@
+sources:
+  "0.1.11":
+    url:
+    - "https://github.com/seekstar/rusty-cpp/archive/refs/tags/v0.1.11.tar.gz"
+    sha256: "313b13c2df256ea46c98702c05080c1433d1c7f3b4378b083dea21491f55ac8f"
