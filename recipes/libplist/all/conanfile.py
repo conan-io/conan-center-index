@@ -30,13 +30,11 @@ class PackageConan(ConanFile):
     }
 
     implements = ["auto_shared_fpic"]
+    languages = ["C", "C++"]
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # It generates C++ bindings, but it is a C library
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -83,11 +81,19 @@ class PackageConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.libs = ["plist-2.0"]
-        self.cpp_info.set_property("pkg_config_name", "plist-2.0")
+        self.cpp_info.components["plist"].libs = ["plist-2.0"]
+        self.cpp_info.components["plist"].set_property("pkg_config_name", "plist-2.0")
+        self.cpp_info.components["plist"].set_property("cmake_target_name", "libplist::libplist")
+
+        self.cpp_info.components["plist++"].libs = ["plist++-2.0"]
+        self.cpp_info.components["plist++"].requires = ["plist"]
+        self.cpp_info.components["plist++"].set_property("pkg_config_name", "plist++-2.0")
+        self.cpp_info.components["plist++"].set_property("cmake_target_name", "libplist::libplist++")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["m", "pthread"])
+            self.cpp_info.components["plist"].system_libs.extend(["m", "pthread"])
+            self.cpp_info.components["plist++"].system_libs.extend(["m", "pthread"])
 
         if not self.options.shared:
-            self.cpp_info.defines.append("LIBPLIST_STATIC")
+            self.cpp_info.components["plist"].defines.append("LIBPLIST_STATIC")
+            self.cpp_info.components["plist++"].defines.append("LIBPLIST_STATIC")
