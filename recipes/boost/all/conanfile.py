@@ -107,7 +107,6 @@ class BoostConan(ConanFile):
         "python_buildid": [None, "ANY"],
         "system_use_utf8": [True, False],
         "with_stacktrace_backtrace": [True, False],
-        "with_stacktrace_from_exception": [True, False],
     }
     options.update({f"without_{_name}": [True, False] for _name in CONFIGURE_OPTIONS})
 
@@ -145,7 +144,6 @@ class BoostConan(ConanFile):
         "python_buildid": None,
         "system_use_utf8": False,
         "with_stacktrace_backtrace": True,
-        "with_stacktrace_from_exception": True,
     }
     default_options.update({f"without_{_name}": False for _name in CONFIGURE_OPTIONS})
     default_options.update({f"without_{_name}": True for _name in ("graph_parallel", "mpi", "python", "cobalt")})
@@ -269,12 +267,6 @@ class BoostConan(ConanFile):
         # stacktrace_backtrace not supported on Windows
         if self.settings.os == "Windows":
             del self.options.with_stacktrace_backtrace
-        # stacktrace_from_exception is available only for 1.85.0 and later
-        # for Windows, it requires Boost 1.86.0 or later
-        # FIXME: https://github.com/boostorg/stacktrace/issues/196
-        if Version(self.version) < "1.85.0" or (self.settings.os == "Windows" and self.settings.compiler == "gcc") \
-            or (Version(self.version) < "1.86.0" and self.settings.os == "Windows"):
-            del self.options.with_stacktrace_from_exception
 
         # nowide requires a c++11-able compiler + movable std::fstream: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
         # json requires a c++11-able compiler: change default to not build on compiler with too old default c++ standard or too low compiler.cppstd
@@ -409,7 +401,6 @@ class BoostConan(ConanFile):
 
         if self.options.get_safe("without_stacktrace", True):
             self.options.rm_safe("with_stacktrace_backtrace")
-            self.options.rm_safe("with_stacktrace_from_exception")
 
         if self.options.without_fiber:
             self.options.rm_safe("numa")
@@ -1018,10 +1009,6 @@ class BoostConan(ConanFile):
             flags.append("boost.locale.iconv=off")
             flags.append("--disable-iconv")
 
-        if self._stacktrace_from_exception_available:
-            flags.append("boost.stacktrace.from_exception={}"
-                            .format("on" if self.options.with_stacktrace_from_exception else "off"))
-
         def add_defines(library):
             for define in self.dependencies[library].cpp_info.aggregated_components().defines:
                 flags.append(f"define={define}")
@@ -1128,7 +1115,7 @@ class BoostConan(ConanFile):
                 cxx_flags.append("-fembed-bitcode")
         if self._with_stacktrace_backtrace:
             flags.append(f"-sLIBBACKTRACE_PATH={self.dependencies['libbacktrace'].package_folder}")
-        if self._stacktrace_from_exception_available and "x86" not in str(self.settings.arch) and self.options.with_stacktrace_from_exception:
+        if self._stacktrace_from_exception_available and "x86" not in str(self.settings.arch):
             # https://github.com/boostorg/stacktrace/blob/boost-1.85.0/src/from_exception.cpp#L29
             # This feature is guarded by BOOST_STACKTRACE_ALWAYS_STORE_IN_PADDING, but that is only enabled on x86.
             flags.append("define=BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK=1")
@@ -1632,7 +1619,7 @@ class BoostConan(ConanFile):
                         continue
                     if name in ("boost_stacktrace_addr2line", "boost_stacktrace_backtrace", "boost_stacktrace_basic") and self.settings.os == "Windows":
                         continue
-                    if name == "boost_stacktrace_from_exception" and self.options.get_safe("with_stacktrace_from_exception", False) == False:
+                    if name == "boost_stacktrace_from_exception" and not self._stacktrace_from_exception_available:
                         continue
                     if name == "boost_stacktrace_addr2line" and not self._stacktrace_addr2line_available:
                         continue
