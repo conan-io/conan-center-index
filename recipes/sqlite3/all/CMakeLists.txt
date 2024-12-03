@@ -186,5 +186,12 @@ if(SQLITE3_BUILD_EXECUTABLE)
     if(NOT HAVE_SYSTEM)
         target_compile_definitions(sqlite3-bin PRIVATE SQLITE_NOHAVE_SYSTEM)
     endif()
+    # The upstream source files're encoded in UTF-8,
+    # but some non-ASCII characters may be not be decoded
+    # in the user's current code page (e.g. CP936).
+    # Thus we need to instruct the MSVC to use UTF-8.
+    if(SQLITE3_VERSION VERSION_LESS "3.47.0")
+        target_compile_options(sqlite3-bin PRIVATE "$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+    endif()
     install(TARGETS sqlite3-bin DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
