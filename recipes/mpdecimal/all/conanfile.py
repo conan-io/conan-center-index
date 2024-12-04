@@ -127,7 +127,7 @@ class MpdecimalConan(ConanFile):
 
         license_file = "LICENSE.txt" if Version(self.version) < "4.0.0" else "COPYRIGHT.txt"
         copy(self, license_file, src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "vc*.h", src=mpdecdir, dst=os.path.join(self.package_folder, "include")) # <=2.5.0/MSVC only
+        copy(self, "vccompat.h", src=mpdecdir, dst=os.path.join(self.package_folder, "include")) # 2.5.0/MSVC only
         copy(self, "mpdecimal.h", src=mpdecdir, dst=os.path.join(self.package_folder, "include"))
         if self.options.get_safe("cxx"):
             copy(self, "decimal.hh", src=mpdecppdir, dst=os.path.join(self.package_folder, "include"))
