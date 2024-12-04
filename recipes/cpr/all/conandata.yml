@@ -1,4 +1,7 @@
 sources:
+  "1.11.1":
+    url: "https://github.com/libcpr/cpr/archive/refs/tags/1.11.1.tar.gz"
+    sha256: "e84b8ef348f41072609f53aab05bdaab24bf5916c62d99651dfbeaf282a8e0a2"
   "1.11.0":
     url: "https://github.com/libcpr/cpr/archive/refs/tags/1.11.0.tar.gz"
     sha256: "fdafa3e3a87448b5ddbd9c7a16e7276a78f28bbe84a3fc6edcfef85eca977784"
@@ -18,6 +21,10 @@ sources:
     url: "https://github.com/libcpr/cpr/archive/refs/tags/1.7.2.tar.gz"
     sha256: "aa38a414fe2ffc49af13a08b6ab34df825fdd2e7a1213d032d835a779e14176f"
 patches:
+  "1.11.1":
+    - patch_file: "patches/008-1.11.0-remove-warning-flags.patch"
+      patch_description: "disable warning flags and warning as error"
+      patch_type: "portability"
   "1.11.0":
     - patch_file: "patches/008-1.11.0-remove-warning-flags.patch"
       patch_description: "disable warning flags and warning as error"
