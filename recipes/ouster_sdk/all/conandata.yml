@@ -1,4 +1,7 @@
 sources:
+  "0.14.0":
+    url: "https://github.com/ouster-lidar/ouster-sdk/archive/refs/tags/release-0.13.1.tar.gz"
+    sha256: "291cdc67a46c2e00bf717a0685f17ed84e159b4d68330b5b51750f410e93ba99"
   "0.13.0":
     url: "https://github.com/ouster-lidar/ouster-sdk/archive/refs/tags/release-0.13.0.tar.gz"
     sha256: "baf65fbf547375fe73fdaee89c6c1246fdf9f0cabe4f4bd16391d3a06d0117a1"
