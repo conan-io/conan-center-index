@@ -1,6 +1,13 @@
 --- libmpdec/Makefile.vc
 +++ libmpdec/Makefile.vc
-@@ -51,13 +51,13 @@
+@@ -45,25 +45,25 @@
+ !if "$(DLL)" == "1"
+ BFLAGS= /DBUILD_DLL
+ UFLAGS= /DUSE_DLL
+-LFLAGS= $(LFLAGS) /DLL /MANIFEST
++LFLAGS= $(LFLAGS) /DLL /MANIFEST $(CONAN_LDFLAGS)
+ BUILDLIB = $(LIBSHARED)
+ USELIB = $(LIBIMPORT)
  !if "$(DEBUG)" == "1"
 -OPT = /MDd /Od /Zi
 +OPT = /Od /Zi
@@ -18,3 +25,10 @@
 -OPT = /MT /Ox /GS /EHsc
 +OPT = /Ox /GS /EHsc
  !endif
+ !endif
+ 
+-CFLAGS = /W3 /D_CRT_SECURE_NO_WARNINGS /nologo $(CONFIG) $(OPT)
++CFLAGS = /W3 /D_CRT_SECURE_NO_WARNINGS /nologo $(CONFIG) $(OPT) $(CONAN_CFLAGS)
+ 
+ 
+ default: $(BUILDLIB) runtest
