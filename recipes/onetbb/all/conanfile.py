@@ -116,9 +116,9 @@ class OneTBBConan(ConanFile):
         toolchain.variables["TBB_STRICT"] = False
         if Version(self.version) >= "2021.5.0":
             toolchain.variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
-        if self.options.get_safe("interprocedural_optimization"):
+        if self.options.get_safe("interprocedural_optimization") is not None:
             toolchain.variables["TBB_ENABLE_IPO"] = self.options.interprocedural_optimization
-        if Version(self.version) >= "2021.6.0" and self.options.get_safe("tbbmalloc"):
+        if Version(self.version) >= "2021.6.0" and self.options.get_safe("tbbmalloc") is not None:
             toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.tbbproxy
         toolchain.variables["TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH"] = not self._tbbbind_build
         if self._tbbbind_explicit_hwloc:
@@ -202,10 +202,3 @@ class OneTBBConan(ConanFile):
                 tbbproxy.requires = ["tbbmalloc"]
                 if self.settings.os in ["Linux", "FreeBSD"]:
                     tbbproxy.system_libs = ["m", "dl", "pthread"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "TBB"
-        self.cpp_info.names["cmake_find_package_multi"] = "TBB"
-        self.cpp_info.names["pkg_config"] = "tbb"
-        tbb.names["cmake_find_package"] = "tbb"
-        tbb.names["cmake_find_package_multi"] = "tbb"
