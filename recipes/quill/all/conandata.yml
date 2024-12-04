@@ -1,4 +1,10 @@
 sources:
+  "7.5.0":
+    url: "https://github.com/odygrd/quill/releases/download/v7.5.0/quill-7.5.0.zip"
+    sha256: "cb0b7d43e54af7cb7ea912d2079eb439d185ddc5fe684f8297d28bb25015d503"
+  "7.4.0":
+    url: "https://github.com/odygrd/quill/releases/download/v7.4.0/quill-7.4.0.zip"
+    sha256: "298820c6e18e87070e01d0d11cb35de2d5007718e2a81f9ec9533b75d6233eac"
   "7.3.0":
     url: "https://github.com/odygrd/quill/releases/download/v7.3.0/quill-7.3.0.zip"
     sha256: "ec58fadeecae50a331018ac0893d9d5d4dec7726cc213f9a343e12bb3fd4e50a"
