@@ -39,7 +39,7 @@ class CachesConan(ConanFile):
     def package(self):
         copy(
             self,
-            "LICENSE",
+            "LICENSE.md",
             self.source_folder,
             os.path.join(self.package_folder, "licenses"),
         )
