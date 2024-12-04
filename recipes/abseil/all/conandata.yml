@@ -39,6 +39,8 @@ patches:
       patch_description: "Do not build test_allocator target when tests are disabled"
       patch_type: "portability"
       patch_source: "https://github.com/abseil/abseil-cpp/commit/779a3565ac6c5b69dd1ab9183e500a27633117d5"
+    - patch_file: "patches/0006-backport-arm-compilation-fix.patch"
+      patch_source: "https://github.com/abseil/abseil-cpp/pull/1710"
   "20240116.1":
     - patch_file: "patches/0003-absl-string-libm-20240116.patch"
       patch_description: "link libm to absl string"
@@ -52,6 +54,8 @@ patches:
       patch_description: "Do not build test_allocator target when tests are disabled"
       patch_type: "portability"
       patch_source: "https://github.com/abseil/abseil-cpp/commit/779a3565ac6c5b69dd1ab9183e500a27633117d5"
+    - patch_file: "patches/0006-backport-arm-compilation-fix.patch"
+      patch_source: "https://github.com/abseil/abseil-cpp/pull/1710"
   "20230802.1":
     - patch_file: "patches/0003-absl-string-libm-20230802.patch"
       patch_description: "link libm to absl string"
@@ -61,10 +65,14 @@ patches:
       patch_description: "Fix build with MinGW"
       patch_type: "portability"
       patch_source: "https://github.com/abseil/abseil-cpp/commit/2f77684e8dc473a48dbc19167ffe69c40ce8ada4"
+    - patch_file: "patches/0006-backport-arm-compilation-fix.patch"
+      patch_source: "https://github.com/abseil/abseil-cpp/pull/1710"
   "20230125.3":
     - patch_file: "patches/0003-absl-string-libm.patch"
       patch_description: "link libm to absl string"
       patch_type: "portability"
+    - patch_file: "patches/0006-backport-arm-compilation-fix.patch"
+      patch_source: "https://github.com/abseil/abseil-cpp/pull/1710"
   "20220623.1":
     - patch_file: "patches/0003-absl-string-libm.patch"
       patch_description: "link libm to absl string"
@@ -73,6 +81,8 @@ patches:
       patch_description: "Workaround bug in GCC 7.2"
       patch_source: "https://github.com/abseil/abseil-cpp/pull/1250"
       patch_type: "portability"
+    - patch_file: "patches/0006-backport-arm-compilation-fix.patch"
+      patch_source: "https://github.com/abseil/abseil-cpp/pull/1710"
   "20211102.0":
     - patch_file: "patches/0003-absl-string-libm.patch"
       patch_description: "link libm to absl string"
