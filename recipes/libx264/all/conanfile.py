@@ -117,8 +117,8 @@ class LibX264Conan(ConanFile):
                 ndk_root = self.conf.get("tools.android:ndk_path", buildenv_vars.get("NDK_ROOT"))
 
                 # INFO: Conan package android-ndk does not expose toolchain path. Looks fragile but follows always same for Android NDK
-                build_os = {"Linux": "linux", "Macos": "darwin", "Windows": "windows"}.get(str(self._settings_build.os))
-                toolchain = os.path.join(ndk_root, "toolchains", "llvm", "prebuilt", f"{build_os}-{self._settings_build.arch}")
+                build_os = {"Linux": "linux", "Macos": "darwin", "Windows": "windows"}.get(str(self.settings_build.os))
+                toolchain = os.path.join(ndk_root, "toolchains", "llvm", "prebuilt", f"{build_os}-{self.settings_build.arch}")
 
                 sysroot = self.conf.get("tools.build:sysroot", buildenv_vars.get("SYSROOT", f"{toolchain}/sysroot"))
                 # INFO: x264 will look for strings appended to the cross prefix
