@@ -1,0 +1,4 @@
+sources:
+  "2.0":
+    url: "https://github.com/LMauricius/MMeter/archive/refs/tags/2.0.tar.gz"
+    sha256: "7c6186e5e93da09d12c012167bd9247a07345e94e00f57e4f3579188fbd58b5d"
