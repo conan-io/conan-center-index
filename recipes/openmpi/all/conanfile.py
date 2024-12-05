@@ -9,7 +9,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class OpenMPIConan(ConanFile):
@@ -190,15 +190,22 @@ class OpenMPIConan(ConanFile):
         # The components are modelled based on OpenMPI's pkg-config files
 
         # Run-time environment library
+        self.cpp_info.components["opal"].set_property("pkg_config_name", "opal")
+        self.cpp_info.components["opal"].libs = ["open-pal"]
+        self.cpp_info.components["opal"].includedirs.append(os.path.join("include", "openmpi"))
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["opal"].system_libs = ["dl", "pthread", "rt", "util"]
+        self.cpp_info.components["opal"].requires = requires
+
         self.cpp_info.components["orte"].set_property("pkg_config_name", "orte")
-        self.cpp_info.components["orte"].libs = ["open-rte", "open-pal"]
+        self.cpp_info.components["orte"].libs = ["open-rte"]
         self.cpp_info.components["orte"].includedirs.append(os.path.join("include", "openmpi"))
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["orte"].system_libs = ["dl", "pthread", "rt", "util"]
         self.cpp_info.components["orte"].cflags = ["-pthread"]
         if self.options.get_safe("enable_cxx_exceptions"):
             self.cpp_info.components["orte"].cflags.append("-fexceptions")
-        self.cpp_info.components["orte"].requires = requires
+        self.cpp_info.components["orte"].requires = requires + ["opal"]
 
         self.cpp_info.components["ompi"].set_property("pkg_config_name", "ompi")
         self.cpp_info.components["ompi"].libs = ["mpi"]
@@ -239,21 +246,3 @@ class OpenMPIConan(ConanFile):
         self.runenv_info.define_path("OPAL_LIBDIR", os.path.join(self.package_folder, "lib"))
         self.runenv_info.define_path("OPAL_DATADIR", os.path.join(self.package_folder, "res"))
         self.runenv_info.define_path("OPAL_DATAROOTDIR", os.path.join(self.package_folder, "res"))
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        self.env_info.PATH.append(bin_folder)
-        self.env_info.MPI_BIN = bin_folder
-        self.env_info.MPI_HOME = self.package_folder
-        self.env_info.OPAL_PREFIX = self.package_folder
-        self.env_info.OPAL_EXEC_PREFIX = self.package_folder
-        self.env_info.OPAL_LIBDIR = os.path.join(self.package_folder, "lib")
-        self.env_info.OPAL_DATADIR = os.path.join(self.package_folder, "res")
-        self.env_info.OPAL_DATAROOTDIR = os.path.join(self.package_folder, "res")
-
-        self.cpp_info.names["cmake_find_package"] = "MPI"
-        self.cpp_info.names["cmake_find_package_multi"] = "MPI"
-        self.cpp_info.components["ompi-c"].names["cmake_find_package"] = "MPI_C"
-        if self.options.enable_cxx:
-            self.cpp_info.components["ompi-cxx"].names["cmake_find_package"] = "MPI_CXX"
-        if self.options.fortran != "no":
-            self.cpp_info.components["ompi-fort"].names["cmake_find_package"] = "MPI_Fortran"
