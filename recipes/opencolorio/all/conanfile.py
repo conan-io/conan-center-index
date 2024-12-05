@@ -28,30 +28,30 @@ class OpenColorIOConan(ConanFile):
         # those defaults, True or False will intentionally set the values.
         # OCIO_USE_SSE was an option in older versions (< 2.3.2), newer versions support the following
         # instruction sets OCIO_USE_SSE2 up to OCIO_USE_AVX512 (no pure SSE anymore).
-        "use_sse": [None, True, False],
-        "use_sse2": [None, True, False],
-        "use_sse3": [None, True, False],
-        "use_ssse3": [None, True, False],
-        "use_sse4": [None, True, False],
-        "use_sse42": [None, True, False],
-        "use_avx": [None, True, False],
-        "use_avx2": [None, True, False],
-        "use_avx512": [None, True, False],
-        "use_f16c": [None, True, False],
+        "use_sse": ['default', True, False],
+        "use_sse2": ['default', True, False],
+        #"use_sse3": ['default', True, False],
+        "use_ssse3": ['default', True, False],
+        "use_sse4": ['default', True, False],
+        "use_sse42": ['default', True, False],
+        "use_avx": ['default', True, False],
+        "use_avx2": ['default', True, False],
+        #"use_avx512": ['default', True, False],
+        "use_f16c": ['default', True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "use_sse": True,
-        "use_sse2": None,
-        "use_sse3": None,
-        "use_ssse3": None,
-        "use_sse4": None,
-        "use_sse42": None,
-        "use_avx": None,
-        "use_avx2": None,
-        "use_avx512": None,
-        "use_f16c": None,
+        "use_sse2": 'default',
+        #"use_sse3": 'default',
+        "use_ssse3": 'default',
+        "use_sse4": 'default',
+        "use_sse42": 'default',
+        "use_avx": 'default',
+        "use_avx2": 'default',
+        #"use_avx512": 'default',
+        "use_f16c": 'default',
     }
 
     def export_sources(self):
@@ -142,25 +142,35 @@ class OpenColorIOConan(ConanFile):
             tc.variables["USE_EXTERNAL_LCMS"] = True
 
         # Selection of SIMD Instruction sets
-        if not self.options.get_safe("use_sse", None) is None:
+        if not self.options.get_safe("use_sse", 'default') is 'default':
+            print('Set OCIO_USE_SSE to ', self.options.use_sse)
             tc.variables["OCIO_USE_SSE"] = self.options.use_sse
         if not self.options.get_safe("use_sse2", None) is None:
+            print('Set OCIO_USE_SSE2 to ', self.options.use_sse2)
             tc.variables["OCIO_USE_SSE2"] = self.options.use_sse2
         if not self.options.get_safe("use_sse3", None) is None:
+            print('Set OCIO_USE_SSE3 to ', self.options.use_sse3)
             tc.variables["OCIO_USE_SSE3"] = self.options.use_sse3
         if not self.options.get_safe("use_ssse3", None) is None:
+            print('Set OCIO_USE_SSSE3 to ', self.options.use_ssse3)
             tc.variables["OCIO_USE_SSSE3"] = self.options.use_ssse3
         if not self.options.get_safe("use_sse4", None) is None:
+            print('Set OCIO_USE_SSE4 to ', self.options.use_sse4)
             tc.variables["OCIO_USE_SSE4"] = self.options.use_sse4
         if not self.options.get_safe("use_sse42", None) is None:
+            print('Set OCIO_USE_SSE42 to ', self.options.use_sse42)
             tc.variables["OCIO_USE_SSE42"] = self.options.use_sse42
-        if not self.options.get_safe("use_avx", None) is None:
+        if not self.options.get_safe("use_avx", 'default') is 'default':
+            print('Set OCIO_USE_AVX to ', self.options.use_avx)
             tc.variables["OCIO_USE_AVX"] = self.options.use_avx
-        if not self.options.get_safe("use_avx2", None) is None:
+        if not self.options.get_safe("use_avx2", 'default') is 'default':
+            print('Set OCIO_USE_AVX2 to ', self.options.use_avx2)
             tc.variables["OCIO_USE_AVX2"] = self.options.use_avx2
-        if not self.options.get_safe("use_avx512", None) is None:
+        if not self.options.get_safe("use_avx512", 'default') is 'default':
+            print('Set OCIO_USE_AVX512 to ', self.options.use_avx512)
             tc.variables["OCIO_USE_AVX512"] = self.options.use_avx512
-        if not self.options.get_safe("use_f16c", None) is None:
+        if not self.options.get_safe("use_f16c", 'default') is 'default':
+            print('Set OCIO_USE_F16C to ', self.options.use_f16c)
             tc.variables["OCIO_USE_F16C"] = self.options.use_f16c
 
         # openexr 2.x provides Half library
