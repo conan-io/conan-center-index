@@ -8,7 +8,7 @@ from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2.0"
 
 class LiefConan(ConanFile):
     name = "lief"
@@ -50,19 +50,9 @@ class LiefConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if Version(self.version) >= "0.15.1":
+            return "17"
         return "14" if self.options.with_frozen else "11"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "14": {
-                "gcc": "6",
-                "clang": "5",
-                "apple-clang": "10",
-                "Visual Studio": "15",
-                "msvc": "191",
-            },
-        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -79,11 +69,16 @@ class LiefConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("mbedtls/3.2.1")
+        # TODO: Check if we actually need transitive_headers
+        # LIEF.lib(x509.obj) external symbol mbedtls_snprintf referenced in function lief_mbedtls_x509_dn_gets
+        self.requires("mbedtls/3.2.1", transitive_headers=True, transitive_libs=True)
         if Version(self.version) < "0.12.2":
             self.requires("rang/3.2")
         else:
-            self.requires("utfcpp/3.2.3")
+            if Version(self.version) >= "0.15.1":
+                self.requires("utfcpp/4.0.5")
+            else:
+                self.requires("utfcpp/3.2.3")
             # lief doesn't supprot spdlog/1.11.0 with fmt/9.x yet.
             self.requires("spdlog/1.10.0")
             self.requires("boost/1.81.0", transitive_headers=True)
@@ -92,21 +87,22 @@ class LiefConan(ConanFile):
             self.requires("nlohmann_json/3.11.2")
         if self.options.with_frozen:
             self.requires("frozen/1.1.1")
+        if Version(self.version) >= "0.15.1":
+            self.requires("tl-expected/1.1.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
 
         if self.options.shared and is_msvc(self) and not check_min_vs(self, "191", raise_invalid=False):
             raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio < 15 with shared:True")
 
         if self.settings.compiler.get_safe("libcxx") == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} does not support libstdc++")
+
+    def build_requirements(self):
+        if Version(self.version) >= "0.15.1":
+            self.tool_requires("cmake/[>=3.24 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -141,6 +137,8 @@ class LiefConan(ConanFile):
             tc.variables["LIEF_INSTALL"] = True
             tc.variables["LIEF_EXTERNAL_SPAN_DIR"] = self.dependencies["tcb-span"].cpp_info.includedirs[0].replace("\\", "/")
             tc.variables["LIEF_EXTERNAL_LEAF_DIR"] = self.dependencies["boost"].cpp_info.includedirs[0].replace("\\", "/")
+        if Version(self.version) >= "0.15.1":
+            tc.cache_variables["LIEF_OPT_EXTERNAL_EXPECTED"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -157,6 +155,7 @@ class LiefConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
