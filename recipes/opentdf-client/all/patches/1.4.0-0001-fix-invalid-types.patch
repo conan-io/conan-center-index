@@ -1,0 +1,40 @@
+diff --git a/src/lib/src/tdf_xml_validator.cpp b/src/lib/src/tdf_xml_validator.cpp
+index 450ecbf..22392f4 100644
+--- a/src/lib/src/tdf_xml_validator.cpp
++++ b/src/lib/src/tdf_xml_validator.cpp
+@@ -11,6 +11,7 @@
+ #include "tdf_xml_validator.h"
+ #include "tdf_exception.h"
+ #include "logger.h"
++#include "libxml/xmlversion.h"
+ #include <string>
+ #include <sstream>
+ 
+@@ -19,7 +20,11 @@ using namespace virtru;
+ // Based on https://stackoverflow.com/questions/54124989/libxml2-get-xsd-validation-errors
+ 
+ // This routine is a callback for the parser, used when there is an error validating the supplied XML against the schema
++#if LIBXML_VERSION >= 21200
++static void schemaParseErrorHandler(void *arg, xmlError const* error)
++#else
+ static void schemaParseErrorHandler(void *arg, xmlErrorPtr error)
++#endif
+ {
+     std::ostringstream errorMsg;
+ 
+@@ -115,7 +120,7 @@ bool TDFXMLValidator::validate(xmlTextReaderPtr reader) {
+ 
+                 if (moreToRead != 0) {
+                     // There was an error parsing the supplied XML
+-                    xmlErrorPtr error = xmlGetLastError();
++                    xmlError const* error = xmlGetLastError();
+                     std::ostringstream errorMsg;
+                     errorMsg << "Schema validation error " << error->file << "(" << error->line << ") " << error->int2 << " " << error->code << " " << error->message;
+                     ThrowException(errorMsg.str(), VIRTRU_TDF_FORMAT_ERROR);
+@@ -127,4 +132,4 @@ bool TDFXMLValidator::validate(xmlTextReaderPtr reader) {
+         }
+     }
+     return retval;
+-}
+\ No newline at end of file
++}
