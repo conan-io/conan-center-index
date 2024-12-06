@@ -1,9 +1,11 @@
 import os
+import platform
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc
+from conan.tools.apple import is_apple_os
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -57,6 +59,11 @@ class WasmtimeConan(ConanFile):
         if self.info.settings.compiler == "clang":
             self.info.settings.compiler = "gcc"
 
+    @property
+    def _is_glibc_older_than_2_28(self):
+        libver = platform.libc_ver()
+        return self.settings.os == 'Linux' and libver[0] == 'glibc' and Version(libver[1]) < "2.28"
+
     def validate(self):
         try:
             self.conan_data["sources"][self.version][self._sources_os_key][str(self.settings.arch)]
@@ -68,6 +75,8 @@ class WasmtimeConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        if Version(self.version) >= "23.0.0" and self._is_glibc_older_than_2_28:
+            raise ConanInvalidConfiguration(f"{self.ref} requires glibc 2.28 or later.")
 
     def build(self):
         # This is packaging binaries so the download needs to be in build
@@ -107,3 +116,5 @@ class WasmtimeConan(ConanFile):
             self.cpp_info.system_libs = ["ws2_32", "bcrypt", "advapi32", "userenv", "ntdll", "shell32", "ole32"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread", "dl", "m", "rt"]
+        if is_apple_os(self):
+            self.cpp_info.frameworks.append("CoreFoundation")
