@@ -1,0 +1,654 @@
+diff --git a/Common.mak b/Common.mak
+index 803615b..770b32d 100644
+--- a/Common.mak
++++ b/Common.mak
+@@ -3,22 +3,22 @@ proxyC = OpenHome$(dirsep)Net$(dirsep)Bindings$(dirsep)C$(dirsep)ControlPoint$(d
+ proxyCppStd = OpenHome$(dirsep)Net$(dirsep)Bindings$(dirsep)Cpp$(dirsep)ControlPoint$(dirsep)Proxies$(dirsep)
+ proxyCs = OpenHome$(dirsep)Net$(dirsep)Bindings$(dirsep)Cs$(dirsep)ControlPoint$(dirsep)Proxies$(dirsep)
+ proxyJava = OpenHome$(dirsep)Net$(dirsep)Bindings$(dirsep)Java$(dirsep)org$(dirsep)openhome$(dirsep)net$(dirsep)controlpoint$(dirsep)proxies$(dirsep)
+ proxyJs = OpenHome$(dirsep)Net$(dirsep)Bindings$(dirsep)Js$(dirsep)ControlPoint$(dirsep)Proxies$(dirsep)
+ deviceCppCore = OpenHome$(dirsep)Net$(dirsep)Device$(dirsep)Providers$(dirsep)
+ deviceCppStd = OpenHome$(dirsep)Net$(dirsep)Bindings$(dirsep)Cpp$(dirsep)Device$(dirsep)Providers$(dirsep)
+ deviceC = OpenHome$(dirsep)Net$(dirsep)Bindings$(dirsep)C$(dirsep)Device$(dirsep)Providers$(dirsep)
+ deviceCs = OpenHome$(dirsep)Net$(dirsep)Bindings$(dirsep)Cs$(dirsep)Device$(dirsep)Providers$(dirsep)
+ deviceJava = OpenHome$(dirsep)Net$(dirsep)Bindings$(dirsep)Java$(dirsep)org$(dirsep)openhome$(dirsep)net$(dirsep)device$(dirsep)providers$(dirsep)
+ 
+-depDirCs = dependencies$(dirsep)$(depsPlatform)$(dirsep)ohNet-$(depsPlatform)-Release$(dirsep)lib$(dirsep)
+-ohNetLibDir = dependencies$(dirsep)$(depsPlatform)$(dirsep)ohNet-$(depsPlatform)-Release$(dirsep)lib$(dirsep)
++depDirCs ?= dependencies$(dirsep)$(depsPlatform)$(dirsep)ohNet-$(depsPlatform)-Release$(dirsep)lib$(dirsep)
++ohNetLibDir ?= dependencies$(dirsep)$(depsPlatform)$(dirsep)ohNet-$(depsPlatform)-Release$(dirsep)lib$(dirsep)
+ 
+ JavaAll : make_obj_dir $(objdir)ohnet-generated.jar
+ $(objdir)ohnet-generated.jar : CpProxyJavaClasses DvDeviceJavaClasses
+ 	$(jar) $(jarflags) $(objdir)ohnet-generated.jar -C $(objdir) org
+ 
+ Generated$(dirsep)GenerateSourceFiles.mak : $(tt) OpenHome$(dirsep)Net$(dirsep)Service$(dirsep)Services.xml OpenHome/Net/T4/Templates/UpnpMakeT4.tt
+ 	$(mkdir) Generated
+ 	$(t4) -o Generated$(dirsep)GenerateSourceFiles.mak OpenHome/Net/T4/Templates/UpnpMakeT4.tt -a xml:OpenHome/Net/Service/Services.xml
+ 	@echo Attention: a makefile has been re-generated.
+ 
+diff --git a/Makefile b/Makefile
+index bf7a1ba..6cd8f43 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,292 +1,379 @@
++#Makefile for linux
++# Could be extended to support Mac in future
+ 
+ rsync ?= yes
+ 
+ ifeq ($(rsync),yes)
+ cp = rsync -u
+ else
+-cp = cp -u
++cp = cp
+ endif
+ 
+ ifeq ($(debug),1)
+ debug_specific_cflags = -g -O0
+ debug_csharp = /define:DEBUG /debug+
+ build_dir = Debug
+ openhome_configuration = Debug
+ android_ndk_debug = 1
+ else
+ debug_specific_cflags = -g -O2
+ debug_csharp = /optimize+ /debug:pdbonly
+ build_dir = Release
+ openhome_configuration = Release
+ android_ndk_debug=0
+ endif
+ 
+ 
+ 
+ # Figure out platform, openhome_system and openhome_architecture
+ 
+-gcc_machine = $(shell ${CROSS_COMPILE}gcc -dumpmachine)
++cc_machine = $(shell ${CROSS_COMPILE}$(CC) -dumpmachine)
+ MACHINE = $(shell uname -s)
+ 
+ $(info CROSS_COMPILE: ${CROSS_COMPILE})
+-$(info Machine reported by compiler is: ${gcc_machine})
++$(info Machine reported by compiler is: ${cc_machine})
+ $(info Machine reported by uname is: ${MACHINE})
++$(info PLATFORM: ${PLATFORM})
+ 
+ ifeq ($(MACHINE),Darwin)
+-  ifeq ($(iOs-armv7),1)
+-    platform = iOS
+-    detected_openhome_system = iOs
+-    detected_openhome_architecture = armv7
+-  else ifeq ($(iOs-arm64),1)
++  ifeq ($(iOs-arm64),1)
+     platform = iOS
+     detected_openhome_system = iOs
+     detected_openhome_architecture = arm64
+-  else ifeq ($(iOs-x86),1)
++  else ifeq ($(iOs-x64),1)
+     platform = iOS
+     detected_openhome_system = iOs
+-    detected_openhome_architecture = x86
++    detected_openhome_architecture = x64
++  else ifeq ($(Linux-rpi),1)
++      platform = Linux
++      detected_openhome_system = Linux
++      detected_openhome_architecture = rpi
+   else
+-    platform = IntelMac
++    platform = Mac
+     detected_openhome_system = Mac
+-    ifeq ($(mac-64),1)
+-      detected_openhome_architecture = x64
++    ifeq ($(Mac-arm64),1)
++        detected_openhome_architecture = arm64
+     else
+-      detected_openhome_architecture = x86
++        detected_openhome_architecture = x64
+     endif
+   endif
+-else ifneq (, $(findstring powerpc, $(gcc_machine)))
+-    platform = Linux-ppc32
+-    detected_openhome_system = Linux
++else ifneq (, $(findstring powerpc, $(cc_machine)))
++    platform = Core-ppc32
++    detected_openhome_system = Core
+     detected_openhome_architecture = ppc32
+ else ifeq ($(Android-anycpu), 1)
+     platform = Android
+     detected_openhome_system = Android
+     detected_openhome_architecture = anycpu
++else ifeq ($(freebsd), 1)
++    platform = FreeBSD
++    detected_openhome_system = FreeBSD
++    detected_openhome_architecture = x86
++    compiler = $(CC) -o $(objdir)
++    link = ${CROSS_COMPILE}g++ $(platform_linkflags)
++    ar = ${CROSS_COMPILE}ar rc $(objdir)
++else ifneq (,$(findstring Linux-x86,${PLATFORM}))
++    ifneq (,$(findstring x86_64,$(cc_machine)))
++        platform = Vanilla
++        detected_openhome_system = Linux
++        detected_openhome_architecture = x86
++        CFLAGS = -m32
++        LDFLAGS = -m32
++    endif
+ else
+-  # At present, platform == Vanilla is used for Kirkwood, x86 and x64 Posix builds.
+-  platform ?= Vanilla
+-    ifeq ($(Qnap-anycpu), 1)
++    # At present, platform == Vanilla is used for Kirkwood, x86 and x64 Posix builds.
++    platform ?= Vanilla
++    ifneq (,$(findstring Qnap,$(platform)))
+         detected_openhome_system = Qnap
+-    else ifneq (,$(findstring linux,$(gcc_machine)))
++    else ifneq (,$(findstring linux,$(cc_machine)))
+       detected_openhome_system = Linux
+     endif
+-    ifeq ($(gcc_machine),arm-none-linux-gnueabi)
+-      detected_openhome_architecture = armel
++    ifneq (,$(findstring arm,$(cc_machine)))
++        ifneq (,$(findstring linux-gnueabihf,$(cc_machine)))
++            detected_openhome_architecture = armhf
++        else ifeq (${detected_openhome_system},Qnap)
++            detected_openhome_architecture = x19
++        else
++            detected_openhome_architecture = armel
++        endif
+     endif
+-    ifeq ($(gcc_machine),arm-linux-gnueabi)
+-      detected_openhome_architecture = armel
+-    endif
+-    ifeq ($(gcc_machine),arm-linux-gnueabihf)
+-      detected_openhome_architecture = armhf
+-    endif
+-    ifneq (,$(findstring i686,$(gcc_machine)))
++    ifneq (,$(findstring i686,$(cc_machine)))
+       detected_openhome_architecture = x86
+     endif
+-    ifneq (,$(findstring i586,$(gcc_machine)))
++    ifneq (,$(findstring i586,$(cc_machine)))
+       detected_openhome_architecture = x86
+     endif
+-    ifneq (,$(findstring i486,$(gcc_machine)))
++    ifneq (,$(findstring i486,$(cc_machine)))
+       detected_openhome_architecture = x86
+     endif
+-    ifneq (,$(findstring i386,$(gcc_machine)))
++    ifneq (,$(findstring i386,$(cc_machine)))
+       detected_openhome_architecture = x86
+     endif
+-    ifneq (,$(findstring amd64,$(gcc_machine)))
++    ifneq (,$(findstring amd64,$(cc_machine)))
+       detected_openhome_architecture = x64
+     endif
+-    ifneq (,$(findstring x86_64,$(gcc_machine)))
++    ifneq (,$(findstring x86_64,$(cc_machine)))
+       detected_openhome_architecture = x64
+     endif
+-
+-
++    ifneq (,$(findstring mipsel,$(cc_machine)))
++      detected_openhome_architecture = mipsel
++    endif
++    ifneq (,$(findstring mips,$(cc_machine)))
++      detected_openhome_architecture = mipsel
++    endif
++    ifneq (,$(findstring aarch64,$(cc_machine)))
++      detected_openhome_architecture = arm64
++    endif
++    ifneq (,$(findstring riscv64,$(cc_machine)))
++      detected_openhome_architecture = riscv64
++    endif
+ endif
+ 
+ detected_openhome_system ?= Unknown
+ detected_openhome_architecture ?= Unknown
+ 
+ ifneq (${openhome_system},)
+   ifneq (${openhome_system},${detected_openhome_system})
+     $(warning Detected compiler is for system ${detected_openhome_system} but expected ${openhome_system}. Build will probably fail.)
+   endif
+ endif
+ 
+ ifneq (${openhome_architecture},)
+   ifneq (${openhome_architecture},${detected_openhome_architecture})
+     $(warning Detected compiler is for architecture ${detected_openhome_architecture} but expected ${openhome_architecture}. Build will probably fail.)
+   endif
+ endif
+ 
+ openhome_system = ${detected_openhome_system}
+ openhome_architecture = ${detected_openhome_architecture}
+ 
++dotnetsdk = dotnet
++dotnetRuntime = linux-x64
++
++# NOTE: If you change this, you MUST go through an edit any of the csproj (or csproj generation code) to ensure that the correct defines
++#       are included for iOS builds. 
++dotnetFramework = net6.0
++
++ifeq ($(openhome_system),Linux)
++	dotnetsdk = ~/.dotnet/dotnet
++endif
++
++
+ ifeq ($(platform),Android)
+     osbuilddir = $(platform)-$(detected_openhome_architecture)
+     objdir = Build/Obj/$(osbuilddir)/$(build_dir)/
+     android_build_dir = OpenHome/Net/Bindings/Android/libs/
+     managed_only = yes
++
++    dotnetsdk = ~/.dotnet/dotnet
+ endif
+ 
+ ifeq ($(platform),iOS)
+ 	nocpp11=yes
+ 	linkopts_ohNet =
+ 	platform_prefix=iPhoneOS
+ 	platform_compiler=arm-apple-darwin10
+ 	platform_arch=$(detected_openhome_architecture)
+-	ifeq ($(detected_openhome_architecture),x86)
++	ifeq ($(detected_openhome_architecture),x64)
+ 		platform_prefix=iPhoneSimulator
+ 		platform_compiler=i686-apple-darwin10
+-		platform_arch=i386
++		platform_arch=x86_64
+ 	endif
+ 	devroot=/Applications/Xcode.app/Contents/Developer
+ 	toolroot=$(devroot)/Toolchains/XcodeDefault.xctoolchain/usr/bin
+ 	sdkroot=$(devroot)/Platforms/$(platform_prefix).platform/Developer/SDKs/$(platform_prefix).sdk
+-	platform_cflags = -I$(sdkroot)/usr/include/ -miphoneos-version-min=2.2 -pipe -no-cpp-precomp -isysroot $(sdkroot) -DPLATFORM_MACOSX_GNU -DPLATFORM_IOS
++	platform_cflags = -I$(sdkroot)/usr/include/ -miphoneos-version-min=12.0 -pipe -no-cpp-precomp -isysroot $(sdkroot) -DPLATFORM_MACOSX_GNU -DPLATFORM_IOS
+ 	# TODO: Support armv6 for old devices
+ 	osbuilddir = $(platform)-$(detected_openhome_architecture)
+ 	objdir = Build/Obj/$(osbuilddir)/$(build_dir)/
+-	platform_linkflags = -L$(sdkroot)/usr/lib/ -arch $(platform_arch)  -L$(sdkroot)/usr/lib/system
+-	compiler = $(toolroot)/clang -arch $(platform_arch) -isysroot $(sdkroot) -o $(objdir)
++	platform_linkflags = -L$(sdkroot)/usr/lib/ -arch $(platform_arch) -framework IOKit
++	compiler = $(toolroot)/clang -stdlib=libc++ -arch $(platform_arch) -isysroot $(sdkroot) -o $(objdir)
+ 	# No support for linking Shared Objects for ARM MAC
+ 	# link = $(devroot)/usr/bin/llvm-gcc-4.2  -pthread -Wl $(platform_linkflags)
++	# link = $(toolroot)/clang++ -pthread -stdlib=libc++ $(platform_linkflags)
+ 	ar = $(toolroot)/ar rc $(objdir)
+-    mono_lib_dir=/Developer/MonoTouch/usr/lib/mono/Xamarin.iOS
+-	csharpdefines = /define:IOS /r:$(mono_lib_dir)/Xamarin.iOS.dll /r:$(mono_lib_dir)/System.dll /r:$(mono_lib_dir)/System.Core.dll
+ 	no_shared_objects = yes
++
++    dotnetFramework = net6.0-ios
++    dotnetRuntime = osx-x64
+ endif
+ 
+-ifeq ($(platform),IntelMac)
+-	# Darwin, not ARM -> Intel Mac
+-	platform ?= IntelMac
++ifeq ($(platform),Mac)
++	# Darwin, not iOS or Linux-rpi -> Mac
+ 	linkopts_ohNet = -Wl,-install_name,@loader_path/libohNet.dylib
+-	ifeq ($(mac-64),1)
++    ifeq ($(detected_openhome_architecture),x64)
+ 		platform_cflags = -DPLATFORM_MACOSX_GNU -arch x86_64 -mmacosx-version-min=10.7
+-		platform_linkflags = -arch x86_64 -framework CoreFoundation -framework SystemConfiguration
++		platform_linkflags = -arch x86_64 -framework CoreFoundation -framework SystemConfiguration -framework IOKit
+ 		osbuilddir = Mac-x64
+ 		openhome_architecture = x64
+ 	else
+-		platform_cflags = -DPLATFORM_MACOSX_GNU -m32 -mmacosx-version-min=10.7
+-		platform_linkflags = -m32 -framework CoreFoundation -framework SystemConfiguration		
+-		osbuilddir = Mac-x86
+-		openhome_architecture = x86
++		# building for arm64
++		platform_cflags = -DPLATFORM_MACOSX_GNU -arch arm64 -mmacosx-version-min=11
++		platform_linkflags = -arch arm64 -framework CoreFoundation -framework SystemConfiguration -framework IOKit
++		osbuilddir = Mac-arm64
++		openhome_architecture = arm64
+ 	endif
+ 
+ 	objdir = Build/Obj/$(osbuilddir)/$(build_dir)/
+ 	compiler = clang -fPIC -stdlib=libc++ -o $(objdir)
+ 	link = clang++ -pthread -stdlib=libc++ $(platform_linkflags)
+ 	ar = ar rc $(objdir)
+ 	openhome_system = Mac
++
++	dotnetRuntime = osx-x64
+ endif
+ 
+-ifneq (,$(findstring $(platform),Vanilla Linux-ppc32))
++ifeq ($(platform), Core-ppc32)
++    # platform == Core1
++    openhome_system = Core
++    openhome_architecture = ppc32
++    endian = BIG
++    platform_cflags = -mcpu=405
++    platform_linkflags = -mcpu=405 ${CROSS_LINKFLAGS}
++    linkopts_ohNet =
++    osdir = Core
++    osbuilddir = Core-ppc32
++    objdir = Build/Obj/$(osbuilddir)/$(build_dir)/
++    native_only = yes
++    compiler = ${CROSS_COMPILE}$(CC) -o $(objdir)
++    link = ${CROSS_COMPILE}g++ $(platform_linkflags)
++    ar = ${CROSS_COMPILE}ar rc $(objdir)
++endif
++
++ifeq ($(platform), Core-armv6)
++    # platform == Core2
++    openhome_system = Core
++    openhome_architecture = armv6
++    endian = LITTLE
++    platform_cflags = -mcpu=arm926ej-s -Wno-psabi
++    platform_linkflags = -mcpu=arm926ej-s ${CROSS_LINKFLAGS}
++    linkopts_ohNet =
++    osdir = Core
++    osbuilddir = Core-armv6
++    objdir = Build/Obj/$(osbuilddir)/$(build_dir)/
++    native_only = yes
++    compiler = ${CROSS_COMPILE}$(CC) -o $(objdir)
++    link = ${CROSS_COMPILE}$(CXX) $(platform_linkflags)
++    ar = ${CROSS_COMPILE}ar rc $(objdir)
++endif
++
++ifneq (,$(findstring $(platform),Vanilla Qnap-x86 Qnap-x19 Linux-ppc32))
+   ifeq ($(gcc4_1), yes)
+     version_specific_cflags = ${CROSS_COMPILE_CFLAGS}
+     version_specific_cflags_third_party = -Wno-non-virtual-dtor
+     version_specific_java_cflags = -Wstrict-aliasing=0
+   else
+     gcc_min_ver = $(shell ${CROSS_COMPILE}gcc -dumpversion | cut -f2 -d'.')
+     version_specific_cflags = $(shell if [ $(gcc_min_ver) -ge 6 ]; then echo '-Wno-psabi'; fi)
+     version_specific_cflags += ${CROSS_COMPILE_CFLAGS}
+     version_specific_cflags_third_party =
+     version_specific_java_cflags =
+   endif
+ 
+   version_specific_linkflags = ${CROSS_COMPILE_LINKFLAGS}
+   version_specific_library_path = ${CROSS_COMPILE_LIBRARY_PATH}
+   version_specific_includes = ${CROSS_COMPILE_INCLUDES}
+ 
+   # Continuing with the non-Darwin settings...
+   objdir = Build/Obj/$(osdir)/$(build_dir)/
+-  compiler = ${CROSS_COMPILE}gcc -o $(objdir)
++  compiler = ${CROSS_COMPILE}$(CC) -o $(objdir)
+   link = $(version_specific_library_path) ${CROSS_COMPILE}g++ $(platform_linkflags)
+   ar = $(version_specific_library_path) ${CROSS_COMPILE}ar rc $(objdir)
+ endif
+ 
+-ifeq ($(platform), Core-ppc32)
+-    # platform == Core1
+-    openhome_system = Core
+-    openhome_architecture = ppc32
+-    endian = BIG
+-    platform_cflags = -mcpu=403
+-    platform_linkflags = -mcpu=403 ${CROSS_LINKFLAGS}
+-    linkopts_ohNet =
+-    osdir = Core
+-    osbuilddir = Core-ppc32
+-    objdir = Build/Obj/$(osbuilddir)/$(build_dir)/
+-    native_only = yes
+-    compiler = ${CROSS_COMPILE}gcc -o $(objdir)
+-    link = ${CROSS_COMPILE}g++ $(platform_linkflags)
+-    ar = ${CROSS_COMPILE}ar rc $(objdir)
+-endif
+-
+-ifeq ($(platform), Core-armv5)
+-    # platform == Core2
+-    openhome_system = Core
+-    openhome_architecture = armv5
+-    endian = LITTLE
+-    platform_cflags = -mcpu=arm926ej-s -Wno-psabi -fexceptions -marm -mapcs -fno-omit-frame-pointer
+-    platform_linkflags = -mcpu=arm926ej-s ${CROSS_LINKFLAGS}
+-    linkopts_ohNet =
+-    osdir = Core
+-    osbuilddir = Core-armv5
+-    objdir = Build/Obj/$(osbuilddir)/$(build_dir)/
+-    native_only = yes
+-    compiler = ${CROSS_COMPILE}gcc -o $(objdir)
+-    link = ${CROSS_COMPILE}g++ $(platform_linkflags)
+-    ar = ${CROSS_COMPILE}ar rc $(objdir)
+-endif
+-
+-ifeq ($(platform), Linux-ppc32)
+-    # platform == Linux-ppc32
+-    endian = BIG
+-    platform_cflags = $(version_specific_cflags) -fPIC
++ifeq ($(platform), FreeBSD)
++    platform_cflags = $(version_specific_cflags) -fPIC -DPLATFORM_FREEBSD
+     platform_linkflags = $(version_specific_linkflags) -pthread
+     linkopts_ohNet = -Wl,-soname,libohNet.so
+     osbuilddir = Posix
++    objdir = Build/Obj/$(osbuilddir)/$(build_dir)/
+     osdir = Posix
++    endian ?= LITTLE
+ endif
+ 
++vanilla_settings ?= no
+ ifeq ($(platform), Vanilla)
++    vanilla_settings = yes
++endif
++ifeq ($(platform), Linux-ppc32)
++    vanilla_settings = yes
++    endian = BIG
++endif
++ifeq ($(platform), Qnap-x86)
++    vanilla_settings = yes
++    nocpp11 = yes
++endif
++ifeq ($(platform), Qnap-x19)
++    vanilla_settings = yes
++    nocpp11 = yes
++endif
++
++ifeq ($(vanilla_settings), yes)
+ 	# platform == Vanilla (i.e. Kirkwood, x86 or x64)
+ 	platform_cflags = $(version_specific_cflags) -fPIC
+-	platform_linkflags = $(version_specific_linkflags) -pthread
+-        linkopts_ohNet = -Wl,-soname,libohNet.so
++	platform_linkflags = $(version_specific_linkflags) $(LDFLAGS) -pthread
++	linkopts_ohNet = -Wl,-soname,libohNet.so
+ 	osbuilddir = Posix
+ 	osdir = Posix
+ 	endian ?= LITTLE
+-	ifeq ($(Qnap-anycpu), 1)
+-	    openhome_system = Qnap
+-	else
+-	    openhome_system = Linux
++	openhome_system ?= Linux
++	ifeq ($(detected_openhome_architecture), mipsel)
++		platform_cflags += -EL
++		platform_linkflags += -EL
++	endif
++	enablestacktrace = 
++	enablepthreadnames = 
++	ifeq (,$(findstring Qnap,$(platform)))
++		# Enable stacktrace and pthread names for non-Qnap Linux platforms.
++		# These can be disabled by defining disable_stack_trace and
++		# disable_pthread_names when calling make
++		ifeq (,$(disable_stack_trace))
++			enablestacktrace = yes
++		endif
++		ifeq (,$(disable_pthread_names))
++			enablepthreadnames = yes
++		endif
++    else
++		platform_cflags += -DPLATFORM_QNAP
++	endif
++	ifdef enablestacktrace
++		platform_cflags += -DPOSIX_STACK_TRACE
++	endif
++	ifdef enablepthreadnames
++		platform_cflags += -DSET_PTHREAD_NAMES
+ 	endif
+ endif
+ 
++
++
++
+ $(info Building for system ${openhome_system} and architecture ${openhome_architecture})
+ 
+ # Macros used by Common.mak
+ native_only ?= no
+ managed_only ?= no
+ no_shared_objects ?= no
+ endian ?= LITTLE
+ cflags_base = -fexceptions -Wall $(version_specific_cflags_third_party) -pipe -D_GNU_SOURCE -D_REENTRANT -DDEFINE_$(endian)_ENDIAN -DDEFINE_TRACE $(debug_specific_cflags) -fvisibility=hidden $(platform_cflags)
+ cflags_third_party = $(cflags_base) -Wno-int-to-pointer-cast
+ ifeq ($(nocpp11), yes)
+     cppflags = $(cflags_base) -Werror
+-else ifeq ($(platform),IntelMac)
++else ifeq ($(platform),Mac)
+     cppflags = $(cflags_base) -std=c++11 -Werror
+ else
+-    cppflags = $(cflags_base) -std=c++0x -D__STDC_VERSION__=199901L -Werror
++    cppflags = $(cflags_base) -std=c++0x -Werror
+ endif
+ cflags = $(cflags_base) -Werror
+ depsPlatform = ${openhome_system}-${openhome_architecture}
+ header_install = Build/Include
+-inc_build = dependencies/$(depsPlatform)/ohNet-$(depsPlatform)-Release/include/ohnet
++inc_build ?= dependencies/$(depsPlatform)/ohNet-$(depsPlatform)-Release/include/ohnet
+ includes = -I$(inc_build)/ $(version_specific_includes)
+ bundle_build = Build/Bundles
+ osdir ?= Posix
+ objext = o
+ libprefix = lib
+ libext = a
+ sharedlibprefix = lib
+ ifeq ($(MACHINE), Darwin)
+ 	sharedlibext = dylib
+ 	dllext = dylib
+@@ -303,34 +390,47 @@ else
+ 	link_dll = $(version_specific_library_path) ${CROSS_COMPILE}g++ -pthread  $(platform_linkflags) -shared -shared-libgcc
+ endif
+ ifeq ($(platform), iOS)
+ 	csharp = /Developer/MonoTouch/usr/bin/smcs /nologo $(debug_csharp)
+ else
+ 	csharp = mcs /nologo $(debug_csharp)
+ endif
+ csharpdefines ?=
+ publicjavadir = OpenHome/Net/Bindings/Java/
+ 
+-ifeq ($(platform), IntelMac)
+-	includes_jni = -I/System/Library/Frameworks/JavaVM.framework/Headers -I/usr/include/malloc
+-	link_jvm = /System/Library/Frameworks/JavaVM.framework/JavaVM
++
++ifeq ($(platform), Mac)
++	platform_java_cflags = -Wno-self-assign
++	# arm64 builds need JAVA_HOME to be set because the Mac SDK for arm64 doesn't contain Java includes or dylibs
++	ifneq (${JAVA_HOME},)
++		includes_jni = -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -I${MACOSX_SDK}/usr/include/malloc
++		link_jvm = ${JAVA_HOME}/lib/server/libjvm.dylib
++	else
++		includes_jni = -I${MACOSX_SDK}/System/Library/Frameworks/JavaVM.framework/Headers -I${MACOSX_SDK}/usr/include/malloc
++		link_jvm = ${MACOSX_SDK}/System/Library/Frameworks/JavaVM.framework/JavaVM
++	endif
+ 	javac = /usr/bin/javac
+ 	jar = /usr/bin/jar
+ else
++	platform_java_cflags =
+ 	includes_jni = -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
+         ifeq ($(platform), Linux-ppc32)
+             libjvm_dir ?= $(JAVA_HOME)/jre/lib/ppc/server
+         else
+-            ifneq (,$(findstring arm,$(gcc_machine)))
++            ifneq (,$(findstring arm,$(cc_machine)))
+                 libjvm_dir ?= $(JAVA_HOME)/jre/lib/arm/server
+             else
+-                libjvm_dir ?= $(JAVA_HOME)/jre/lib/i386/server
++                ifneq (,$(findstring x64,$(cc_machine)))
++                    libjvm_dir ?= $(JAVA_HOME)/jre/lib/amd64/server
++                else
++                    libjvm_dir ?= $(JAVA_HOME)/jre/lib/i386/server
++                endif
+             endif
+         endif
+ 	link_jvm = $(libjvm_dir)/libjvm.so
+ 	javac = $(JAVA_HOME)/bin/javac
+ 	jar = $(JAVA_HOME)/bin/jar
+ endif
+ 
+ java_cflags = -fexceptions -Wall $(version_specific_java_cflags) -Werror -pipe -D_GNU_SOURCE -D_REENTRANT -DDEFINE_$(endian)_ENDIAN -DDEFINE_TRACE $(debug_specific_cflags) $(platform_cflags)
+ jarflags = cf
+ dirsep = /
+@@ -396,20 +496,30 @@ copy_build_includes:
+ 	$(mkdir) $(header_install)/OpenHome/Net
+ 	$(mkdir) $(header_install)/OpenHome/Net/Core
+ 	$(mkdir) $(header_install)/OpenHome/Net/C
+ 	$(mkdir) $(header_install)/OpenHome/Net/Cpp
+ 	$(cp) OpenHome/Net/ControlPoint/Proxies/*.h $(header_install)/OpenHome/Net/Core
+ 	$(cp) OpenHome/Net/Device/Providers/*.h $(header_install)/OpenHome/Net/Core
+ 	$(cp) OpenHome/Net/Bindings/C/ControlPoint/Proxies/*.h $(header_install)/OpenHome/Net/C
+ 	$(cp) OpenHome/Net/Bindings/C/Device/Providers/*.h $(header_install)/OpenHome/Net/C
+ 	$(cp) OpenHome/Net/Bindings/Cpp/ControlPoint/Proxies/*.h $(header_install)/OpenHome/Net/Cpp
+ 	$(cp) OpenHome/Net/Bindings/Cpp/Device/Providers/*.h $(header_install)/OpenHome/Net/Cpp
++	
++install : install-libs install-includes
++
++install-libs :
++	$(mkdir) $(installlibdir)
++	$(cp) $(objdir)* $(installlibdir)
++
++install-includes : copy_build_includes
++	$(mkdir) $(installincludedir)
++	$(cp) -r $(header_install)/* $(installincludedir)
+ 
+ java_packages = ohnet \
+ 				openhome.net.controlpoint \
+ 				openhome.net.controlpoint.proxies \
+ 				openhome.net.core \
+ 				org.openhome.net.device \
+ 				org.openhome.net.test \
+ 
+ docs:
+ 	rm -rf Build/Docs
+diff --git a/OhNet.mak b/OhNet.mak
+index f5306e6..9a03f4a 100644
+--- a/OhNet.mak
++++ b/OhNet.mak
+@@ -47,21 +47,21 @@ android_ndk_debug = 0
+ !message Building for system $(openhome_system), architecture $(openhome_architecture), configuration $(openhome_configuration)
+ 
+ # Macros used by Common.mak
+ ar = lib /nologo /out:$(objdir)
+ cflags_third_party = $(debug_specific_cflags) /W4 /EHsc /FR$(objdir) -DDEFINE_LITTLE_ENDIAN -DDEFINE_TRACE -D_CRT_SECURE_NO_WARNINGS
+ cflags = $(cflags_third_party) /WX
+ cppflags = $(cflags)
+ objdirbare = Build\Obj\Windows\$(build_dir)
+ objdir = $(objdirbare)^\
+ header_install = Build\Include
+-inc_build = dependencies\$(depsPlatform)\ohNet-$(depsPlatform)-Release\include\ohnet
++inc_build ?= dependencies\$(depsPlatform)\ohNet-$(depsPlatform)-Release\include\ohnet
+ includes = -I$(inc_build)
+ bundle_build = Build\Bundles
+ osdir = Windows
+ objext = obj
+ libprefix =
+ libext = lib
+ sharedlibprefix = 
+ sharedlibext = lib
+ exeext = exe
+ compiler = cl /nologo /Fo$(objdir)
+@@ -127,20 +127,27 @@ copy_build_includes:
+ 	if not exist $(header_install)\OpenHome\Net mkdir $(header_install)\OpenHome\Net
+ 	if not exist $(header_install)\OpenHome\Net\Core mkdir $(header_install)\OpenHome\Net\Core
+ 	if not exist $(header_install)\OpenHome\Net\C mkdir $(header_install)\OpenHome\Net\C
+ 	if not exist $(header_install)\OpenHome\Net\Cpp mkdir $(header_install)\OpenHome\Net\Cpp
+ 	copy OpenHome\Net\ControlPoint\Proxies\*.h $(header_install)\OpenHome\Net\Core > nul
+ 	copy OpenHome\Net\Device\Providers\*.h $(header_install)\OpenHome\Net\Core > nul
+ 	copy OpenHome\Net\Bindings\C\ControlPoint\Proxies\*.h $(header_install)\OpenHome\Net\C > nul
+ 	copy OpenHome\Net\Bindings\C\Device\Providers\*.h $(header_install)\OpenHome\Net\C > nul
+ 	copy OpenHome\Net\Bindings\Cpp\ControlPoint\Proxies\*.h $(header_install)\OpenHome\Net\Cpp > nul
+ 	copy OpenHome\Net\Bindings\Cpp\Device\Providers\*.h $(header_install)\OpenHome\Net\Cpp > nul
++ 
++install :
++	if not exist "$(installdir)" mkdir "$(installdir)"
++	if not exist "$(installlibdir)" mkdir "$(installlibdir)"
++	if not exist "$(installincludedir)" mkdir "$(installincludedir)"
++	copy "$(objdir)*" "$(installlibdir)" > nul
++	xcopy "$(inc_build)" "$(installincludedir)" /Y /S /I > nul
+ 
+ bundle-after-build: $(all_targets)
+ 	if not exist "$(bundle_build)" mkdir "$(bundle_build)"
+ 	python bundle_binaries.py --system $(openhome_system) --architecture $(openhome_architecture) --configuration $(openhome_configuration)
+ 	python bundle_binaries.py --system $(openhome_system) --architecture $(openhome_architecture) --configuration $(openhome_configuration) --managed
+ 
+ bundle:
+ 	if not exist "$(bundle_build)" mkdir "$(bundle_build)"
+ 	python bundle_binaries.py --system $(openhome_system) --architecture $(openhome_architecture) --configuration $(openhome_configuration)
+ 	python bundle_binaries.py --system $(openhome_system) --architecture $(openhome_architecture) --configuration $(openhome_configuration) --managed
