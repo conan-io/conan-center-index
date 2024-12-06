@@ -188,7 +188,7 @@ class CPythonConan(ConanFile):
                     raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
 
         # TEMPORARY: Merge https://github.com/conan-io/conan-center-index/pull/25890 first
-        if self.settings.os == "Windows" and self.dependencies["mpdecimal"].options.shared:
+        if self.settings.os == "Windows" and self._supports_modules and self.dependencies["mpdecimal"].options.shared:
             raise ConanInvalidConfiguration("TEMPORARY: Merge https://github.com/conan-io/conan-center-index/pull/25890 first")
 
     def source(self):
