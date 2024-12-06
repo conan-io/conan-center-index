@@ -178,14 +178,6 @@ class CPythonConan(ConanFile):
         if self.options.get_safe("with_curses", False) and not self.dependencies["ncurses"].options.with_widec:
             raise ConanInvalidConfiguration("cpython requires ncurses with wide character support")
 
-        if self._supports_modules:
-            if Version(self.version) >= "3.9.0":
-                if self.dependencies["mpdecimal"].ref.version < Version("2.5.0"):
-                    raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
-
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == 9 and Version(self.version) >= "3.12":
-            raise ConanInvalidConfiguration("FIXME: GCC 9 produces an internal compiler error locally, and a link error in CCI")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
