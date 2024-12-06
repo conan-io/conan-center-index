@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
-from conan.tools.files import copy, export_conandata_patches, get
+from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 import os
 
@@ -19,8 +19,8 @@ class RustyCppConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
-    def export_sources(self):
-        export_conandata_patches(self)
+    def package_id(self):
+        self.info.clear()
 
     def layout(self):
         basic_layout(self, src_folder="src")
