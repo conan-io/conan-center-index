@@ -1,5 +1,5 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index b204d5b7b..326b842b8 100644
+index 55a8ac1f9..a98144d3e 100644
 --- CMakeLists.txt
 +++ CMakeLists.txt
 @@ -42,7 +42,7 @@ endif ()
@@ -21,12 +21,12 @@ index b204d5b7b..326b842b8 100644
  endif ()
  
 diff --git src/cmake/add_oiio_plugin.cmake src/cmake/add_oiio_plugin.cmake
-index d65ac62c4..39d03a43b 100644
+index a1d87addf..7b4713f23 100644
 --- src/cmake/add_oiio_plugin.cmake
 +++ src/cmake/add_oiio_plugin.cmake
 @@ -72,7 +72,7 @@ macro (add_oiio_plugin)
                                          OpenImageIO_EXPORTS)
-             target_include_directories (${_plugin_NAME} PRIVATE ${_plugin_INCLUDE_DIRS})
+             target_include_directories (${_plugin_NAME} BEFORE PRIVATE ${_plugin_INCLUDE_DIRS})
              target_link_libraries (${_plugin_NAME} PUBLIC OpenImageIO
 -                                                   PRIVATE ${_plugin_LINK_LIBRARIES})
 +                                                   PUBLIC ${_plugin_LINK_LIBRARIES})
@@ -34,7 +34,7 @@ index d65ac62c4..39d03a43b 100644
              install_targets (${_plugin_NAME})
          endif ()
 diff --git src/cmake/externalpackages.cmake src/cmake/externalpackages.cmake
-index f8670a83f..101bcfa50 100644
+index eee6373d8..b7c1a7d4c 100644
 --- src/cmake/externalpackages.cmake
 +++ src/cmake/externalpackages.cmake
 @@ -73,16 +73,15 @@ set (OPENIMAGEIO_CONFIG_DO_NOT_FIND_IMATH OFF CACHE BOOL
@@ -62,7 +62,7 @@ index f8670a83f..101bcfa50 100644
  endif ()
  
  
-@@ -92,9 +91,11 @@ alias_library_if_not_exists (TIFF::TIFF TIFF::tiff)
+@@ -96,9 +95,11 @@ alias_library_if_not_exists (TIFF::TIFF TIFF::tiff)
  
  # JPEG XL
  option (USE_JXL "Enable JPEG XL support" ON)
@@ -77,7 +77,7 @@ index f8670a83f..101bcfa50 100644
  
  # Pugixml setup.  Normally we just use the version bundled with oiio, but
  # some linux distros are quite particular about having separate packages so we
-@@ -109,7 +110,7 @@ else ()
+@@ -113,7 +114,7 @@ else ()
  endif()
  
  # From pythonutils.cmake
@@ -86,11 +86,16 @@ index f8670a83f..101bcfa50 100644
  if (USE_PYTHON)
      checked_find_package (pybind11 REQUIRED VERSION_MIN 2.7)
  endif ()
-@@ -119,72 +120,104 @@ endif ()
+@@ -123,77 +124,104 @@ endif ()
  # Dependencies for optional formats and features. If these are not found,
  # we will continue building, but the related functionality will be disabled.
  
 -checked_find_package (PNG VERSION_MIN 1.6.0)
+-if (TARGET PNG::png_static)
+-    set (PNG_TARGET PNG::png_static)
+-elseif (TARGET PNG::PNG)
+-    set (PNG_TARGET PNG::PNG)
+-endif ()
 -
 -checked_find_package (Freetype
 -                      VERSION_MIN 2.10.0
@@ -241,7 +246,7 @@ index f8670a83f..101bcfa50 100644
  
  if (FFmpeg_FOUND OR FREETYPE_FOUND)
      checked_find_package (BZip2)   # Used by ffmpeg and freetype
-@@ -196,10 +229,10 @@ endif()
+@@ -205,10 +233,10 @@ endif()
  
  # Qt -- used for iv
  option (USE_QT "Use Qt if found" ON)
@@ -255,7 +260,7 @@ index f8670a83f..101bcfa50 100644
      checked_find_package (Qt6 COMPONENTS Core Gui Widgets OpenGLWidgets)
      if (NOT Qt6_FOUND)
          checked_find_package (Qt5 COMPONENTS Core Gui Widgets OpenGL)
-@@ -212,10 +245,7 @@ endif ()
+@@ -221,10 +249,7 @@ endif ()
  
  
  # Tessil/robin-map
@@ -267,7 +272,7 @@ index f8670a83f..101bcfa50 100644
  
  # fmtlib
  option (OIIO_INTERNALIZE_FMT "Copy fmt headers into <install>/include/OpenImageIO/detail/fmt" ON)
-@@ -223,7 +253,7 @@ checked_find_package (fmt REQUIRED
+@@ -232,7 +257,7 @@ checked_find_package (fmt REQUIRED
                        VERSION_MIN 7.0
                        BUILD_LOCAL missing
                       )
@@ -430,7 +435,7 @@ index 70d28318a..aec47621f 100644
  else()
      message (WARNING "JPEG XL plugin will not be built")
 diff --git src/libOpenImageIO/CMakeLists.txt src/libOpenImageIO/CMakeLists.txt
-index 1dd60922c..a6d193bef 100644
+index e08e34a8b..e34c335a6 100644
 --- src/libOpenImageIO/CMakeLists.txt
 +++ src/libOpenImageIO/CMakeLists.txt
 @@ -153,18 +153,29 @@ target_link_libraries (OpenImageIO
