@@ -187,9 +187,6 @@ class CPythonConan(ConanFile):
                 if self.dependencies["mpdecimal"].ref.version < Version("2.5.0"):
                     raise ConanInvalidConfiguration("cpython 3.9.0 (and newer) requires (at least) mpdecimal 2.5.0")
 
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == 9 and Version(self.version) >= "3.12":
-            raise ConanInvalidConfiguration("FIXME: GCC 9 produces an internal compiler error locally, and a link error in CCI")
-
         # TEMPORARY: Merge https://github.com/conan-io/conan-center-index/pull/25890 first
         if self.settings.os == "Windows" and self.dependencies["mpdecimal"].options.shared:
             raise ConanInvalidConfiguration("TEMPORARY: Merge https://github.com/conan-io/conan-center-index/pull/25890 first")
