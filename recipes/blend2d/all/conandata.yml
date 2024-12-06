@@ -1,4 +1,7 @@
 sources:
+  "0.11.5":
+    url: "https://blend2d.com/download/blend2d-0.11.5.tar.gz"
+    sha256: "733ad4f657b478450612bdf73490f3309713076eb30e0f4c55349d698a9d1ec9"
   "0.11.4":
     url: "https://blend2d.com/download/blend2d-0.11.4.tar.gz"
     sha256: "07f7d99d2ebb7b42a707a4f0035745b781faf9083933f944084f66e6246bb01c"
