@@ -1,0 +1,12 @@
+sources:
+  "20230806":
+    url: "https://github.com/RainerKuemmerle/g2o/archive/refs/tags/20230806_git.tar.gz"
+    sha256: "e717d3b96cc6d00fcbbaf637aae648c9823599e6aa8fcf4546fc9ad4034dcde5"
+patches:
+  "20230806":
+    - patch_file: "patches/001-unvendor-freeglut.patch"
+      patch_description: "Replace vendored FreeGLUT with a Conan version"
+      patch_type: "conan"
+    - patch_file: "patches/002-use-openmp-target.patch"
+      patch_description: "Require OpenMP if enabled, use a target instead of plain compiler flags"
+      patch_type: "portability"
