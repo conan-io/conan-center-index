@@ -12,7 +12,19 @@
  	touch $@
  
  $(shlib): $(OBJS) | $(SHLIB_PREREQS)
-@@ -371,12 +374,12 @@ $(stlib): $(shlib)
+@@ -358,7 +361,10 @@ else
+ # Win32 case
+ 
+ # See notes in src/backend/parser/Makefile about the following two rules
+-$(stlib): $(shlib)
++$(stlib): $(OBJS) | $(SHLIB_PREREQS)
++	rm -f $@
++	$(LINK.static) $@ $^
++	$(RANLIB) $@
+ 	touch $@
+ 
+ # XXX A backend that loads a module linked with libgcc_s_dw2-1.dll will exit
+@@ -371,12 +377,12 @@ $(stlib): $(shlib)
  # Else we just use --export-all-symbols.
  ifeq (,$(SHLIB_EXPORTS))
  $(shlib): $(OBJS) | $(SHLIB_PREREQS)
@@ -27,7 +39,7 @@
  
  UC_NAME = $(shell echo $(NAME) | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')
  
-@@ -457,6 +460,9 @@ endif # not aix
+@@ -457,6 +463,9 @@ endif # not aix
  ifneq (,$(findstring $(PORTNAME),win32 cygwin))
  	$(INSTALL_SHLIB) $< '$(DESTDIR)$(bindir)/$(shlib)'
  endif
