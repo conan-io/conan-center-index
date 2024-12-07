@@ -6,6 +6,7 @@ from conan.tools.files import chdir, copy, get, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
+from conan.tools.scm import Version
 
 import fnmatch
 import os
@@ -515,6 +516,14 @@ class OpenSSLConan(ConanFile):
                 # When `--prefix=/`, the scripts derive `\` without escaping, which
                 # causes issues on Windows
                 replace_in_file(self, "Makefile", "INSTALLTOP_dir=\\", "INSTALLTOP_dir=\\\\")
+                if Version(self.version) >= "3.3.0":
+                    # replace backslashes in paths with forward slashes
+                    mkinstallvars_pl = os.path.join(self.source_folder, "util", "mkinstallvars.pl")
+                    if Version(self.version) >= "3.3.2":
+                        replace_in_file(self, mkinstallvars_pl, "push @{$values{$k}}, $v;", """$v =~ s|\\\\|/|g; push @{$values{$k}}, $v;""")
+                        replace_in_file(self, mkinstallvars_pl, "$values{$k} = $v;", """$v->[0] =~ s|\\\\|/|g; $values{$k} = $v;""")
+                    else:
+                        replace_in_file(self, mkinstallvars_pl, "$ENV{$k} = $v;", """$v =~ s|\\\\|/|g; $ENV{$k} = $v;""")
             self._run_make()
 
     def _make_install(self):

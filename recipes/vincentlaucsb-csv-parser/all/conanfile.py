@@ -16,9 +16,9 @@ class VincentlaucsbCsvParserConan(ConanFile):
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/vincentlaucsb/csv-parser"
-    topics = ("csv", "rfc 4180", "parser", "generator")
-    settings = "os", "compiler"
+    topics = ("csv", "rfc 4180", "parser", "generator", "header-only")
     package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property

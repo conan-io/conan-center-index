@@ -56,12 +56,6 @@ class XsimdConan(ConanFile):
         if Version(self.version) < "8.0.0" and is_apple_os(self) and self.settings.arch in ["armv8", "armv8_32", "armv8.3"]:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support macOS M1")
 
-        # TODO: There are compilation errors on apple-clang/13.0.0 with cppstd=17
-        if self.settings.compiler == "apple-clang" and \
-            Version(self.settings.compiler.version).major <= "13" and \
-            self.settings.compiler.get_safe("cppstd") in ["17", "gnu17", "20", "gnu20",]:
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support apple-clang 13 with cppstd=17 or later")
-
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)

@@ -1,4 +1,10 @@
 sources:
+  "255.10":
+    url: "https://github.com/systemd/systemd-stable/archive/v255.10.tar.gz"
+    sha256: "1747b848e68223597abb90ca2758b25230ac4c19e252e9ec77c8518750f621ed"
+  "255.7":
+    url: "https://github.com/systemd/systemd-stable/archive/v255.7.tar.gz"
+    sha256: "da29f2490c192ca743511098b1d15e385b1b5e7744979661dc30514c1ac61f0e"
   "255.2":
     url: "https://github.com/systemd/systemd-stable/archive/v255.2.tar.gz"
     sha256: "ba7354a742dc9a8bb7dbeaa40cbf7cf2ca84f506d5b7ae5ab8d14c8eecb7aca0"
@@ -14,25 +20,15 @@ sources:
   "253.6":
     url: "https://github.com/systemd/systemd-stable/archive/v253.6.tar.gz"
     sha256: "a0aebcfaa2e001a4d846691631d1722c4cfa1a175e4ea62db6edca0ea3cf1e3e"
-  "252.12":
-    url: "https://github.com/systemd/systemd-stable/archive/v252.12.tar.gz"
-    sha256: "c6c249d65b3aff0a2b99410f430f404068c74a7cd96b63f482c933afd7288112"
-  "251.18":
-    url: "https://github.com/systemd/systemd-stable/archive/v251.18.tar.gz"
-    sha256: "aaa5eca2dcf3fda242ed6816a00a83c91762b44ef3c76ee4eb8476a592c38f7f"
-  "249.16":
-    url: "https://github.com/systemd/systemd-stable/archive/v249.16.tar.gz"
-    sha256: "e6c8a686023ef0ce402f4abde42245e3ada661e000c4811dc16c8cd9b4c6d885"
-  "248.12":
-    url: "https://github.com/systemd/systemd-stable/archive/v248.12.tar.gz"
-    sha256: "d0826453439363b57a4f092ae078b128a95e87047281a79e8b136116ab83abc9"
-  "247.13":
-    url: "https://github.com/systemd/systemd-stable/archive/v247.13.tar.gz"
-    sha256: "0958bfcebf3ed4e451f6cc49802f338fcc80eb4fe4f0cf5cb5b1b90fa62e5f47"
-  "246.16":
-    url: "https://github.com/systemd/systemd-stable/archive/v246.16.tar.gz"
-    sha256: "b69f9940d65870f090269a28f1047a633d4b80d0001e091d53a031dd40a822d2"
 patches:
+  "255.10":
+    - patch_file: "patches/251.18/0001-Remove-dependency-from-coreutils.patch"
+      patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
+      patch_type: "conan"
+  "255.7":
+    - patch_file: "patches/251.18/0001-Remove-dependency-from-coreutils.patch"
+      patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
+      patch_type: "conan"
   "255.2":
     - patch_file: "patches/251.18/0001-Remove-dependency-from-coreutils.patch"
       patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
@@ -74,47 +70,3 @@ patches:
       patch_source: "https://patch-diff.githubusercontent.com/raw/systemd/systemd/pull/29538"
       patch_description: "fixes cross-compilation by passing necessary compiler arguments to generator scripts"
       patch_type: "portability"
-  "252.12":
-    - patch_file: "patches/248.12/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
-      patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
-      patch_type: "conan"
-    - patch_file: "patches/251.18/0001-Remove-dependency-from-coreutils.patch"
-      patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
-      patch_type: "conan"
-  "251.18":
-    - patch_file: "patches/248.12/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
-      patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
-      patch_type: "conan"
-    - patch_file: "patches/251.18/0001-Remove-dependency-from-coreutils.patch"
-      patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
-      patch_type: "conan"
-  "249.16":
-    - patch_file: "patches/248.12/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
-      patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
-      patch_type: "conan"
-    - patch_file: "patches/249.16/0001-Remove-dependency-from-coreutils.patch"
-      patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
-      patch_type: "conan"
-  "248.12":
-    - patch_file: "patches/248.12/0001-missing_syscalls.py-Replace-unicode-with-ascii.patch"
-      patch_description: "allow to use meson.build with older versions of Python by replacing utf8 message to ascii message in the helper script"
-      patch_type: "conan"
-    - patch_file: "patches/247.13/0001-Remove-dependency-from-coreutils.patch"
-      patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
-      patch_type: "conan"
-  "247.13":
-    - patch_file: "patches/247.13/0001-Remove-dependency-from-coreutils.patch"
-      patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
-      patch_type: "conan"
-  "246.16":
-    - patch_file: "patches/246.16/0001-Drop-bundled-copy-of-linux-if_arp.h.patch"
-      patch_description: "fix build error with Linux headers >= 5.14 by removing a bundled copy of it"
-      patch_type: "portability"
-      patch_source: "https://github.com/systemd/systemd-stable/commit/06dea04b38ce506c1436cd4fef9bf9919a34f441"
-    - patch_file: "patches/246.16/0002-meson.build-change-operator-combining-bools-from-to-.patch"
-      patch_description: "allow to build with meson >= 0.60.0 by fixing syntax error"
-      patch_type: "bugfix"
-      patch_source: "https://github.com/systemd/systemd-stable/commit/3d0666d9091dd097022f02fae79890b5746285c1"
-    - patch_file: "patches/246.16/0003-Remove-dependency-from-coreutils.patch"
-      patch_description: "allow to build in environments without 'realpath --relative-to' by replacing it with conan-specific build variable"
-      patch_type: "conan"

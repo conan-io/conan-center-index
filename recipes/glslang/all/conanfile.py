@@ -233,3 +233,9 @@ class GlslangConan(ConanFile):
 
         if self.options.build_executables:
             self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+
+        if Version(self.version) >= "1.3.243":
+            self.cpp_info.components["glslang-default-resource-limits"].set_property("cmake_target_name", "glslang::glslang-default-resource-limits")
+            self.cpp_info.components["glslang-default-resource-limits"].names["cmake_find_package"] = "glslang-default-resource-limits"
+            self.cpp_info.components["glslang-default-resource-limits"].names["cmake_find_package_multi"] = "glslang-default-resource-limits"
+            self.cpp_info.components["glslang-default-resource-limits"].libs = [f"glslang-default-resource-limits{lib_suffix}"]

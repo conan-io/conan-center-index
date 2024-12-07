@@ -1,32 +1,38 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.32.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd, valid_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, get, rmdir
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+
+required_conan_version = ">=1.53.0"
 
 
 class KealibConan(ConanFile):
     name = "kealib"
     description = "C++ library providing complete access to the KEA image format."
     license = "MIT"
-    topics = ("conan", "kealib", "image", "raster")
-    homepage = "https://github.com/ubarsc/kealib"
     url = "https://github.com/conan-io/conan-center-index"
-    exports_sources = ["CMakeLists.txt", "patches/**"]
-    generators = "cmake"
+    homepage = "https://github.com/ubarsc/kealib"
+    topics = ("image", "raster")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-
-    _cmake = None
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
 
     @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def _min_cppstd(self):
+        return 11
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -34,41 +40,62 @@ class KealibConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         self.options["hdf5"].enable_cxx = True
         self.options["hdf5"].hl = True
 
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
-        self.requires("hdf5/1.12.0")
+        self.requires("hdf5/1.14.3", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if not (self.options["hdf5"].enable_cxx and self.options["hdf5"].hl):
-            raise ConanInvalidConfiguration("kealib requires hdf5 with cxx and hl enabled.")
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        hdf5_opts = self.dependencies["hdf5"].options
+        if not (hdf5_opts.enable_cxx and hdf5_opts.hl):
+            raise ConanInvalidConfiguration(f"{self.ref} requires dependencies options -o 'hdf5/*:enable_cxx=True' -o 'hdf5/*:hl=True'")
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("{0}-{0}-{1}".format(self.name, self.version), self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["HDF5_USE_STATIC_LIBRARIES"] = not self.options["hdf5"].shared
-        self._cmake.definitions["HDF5_PREFER_PARALLEL"] = False # TODO: rely on self.options["hdf5"].parallel when implemented in hdf5 recipe
-        self._cmake.definitions["LIBKEA_WITH_GDAL"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["HDF5_USE_STATIC_LIBRARIES"] = not self.dependencies["hdf5"].options.shared
+        tc.variables["HDF5_PREFER_PARALLEL"] = self.dependencies["hdf5"].options.parallel
+        tc.variables["HDF5_THREADSAFE"] = self.dependencies["hdf5"].options.get_safe("threadsafe", False)
+        tc.variables["LIBKEA_WITH_GDAL"] = False
+        # INFO: kealib uses C++11 but does not configure in cmake: https://github.com/ubarsc/kealib/pull/48
+        if not valid_min_cppstd(self, self._min_cppstd):
+            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
+
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        self.copy("LICENSE.txt", dst="licenses", src=self._source_subfolder)
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.txt",
+             dst=os.path.join(self.package_folder, "licenses"),
+             src=self.source_folder)
+        cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        if is_msvc(self):
+            if not self.options.shared and Version(self.version) <= "1.4.14":
+                self.cpp_info.libs = ["liblibkea"]
+            else:
+                self.cpp_info.libs = ["libkea"]
+        else:
+            self.cpp_info.libs = ["kea"]
+        
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("shlwapi")

@@ -1,4 +1,6 @@
 versions:
+  "9.9p1":
+    folder: all
   "9.6p1":
     folder: all
   "9.1p1":

@@ -3,7 +3,7 @@ project(elf LANGUAGES C)
 
 if(EXISTS "${LIBELF_SRC_DIR}/lib/sys_elf.h.w32")
     file(RENAME "${LIBELF_SRC_DIR}/lib/sys_elf.h.w32" "${LIBELF_SRC_DIR}/lib/sys_elf.h")
-    file(RENAME "${LIBELF_SRC_DIR}/lib/config.h.w32" "${LIBELF_SRC_DIR}/config.h")
+    file(RENAME "${LIBELF_SRC_DIR}/lib/config.h.w32" "${LIBELF_SRC_DIR}/lib/config.h")
 endif()
 
 file(GLOB_RECURSE SOURCES "${LIBELF_SRC_DIR}/lib/*.c")
@@ -15,7 +15,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     WINDOWS_EXPORT_ALL_SYMBOLS TRUE
 )
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC "${LIBELF_SRC_DIR}/lib")
-target_compile_definitions(${PROJECT_NAME} PUBLIC HAVE_MEMCMP=1 HAVE_MEMCPY=1 HAVE_MEMMOVE=1)
+target_compile_definitions(${PROJECT_NAME} PUBLIC HAVE_MEMCMP=1 HAVE_MEMCPY=1 HAVE_MEMMOVE=1 HAVE_CONFIG_H=1)
 
 include(GNUInstallDirs)
 

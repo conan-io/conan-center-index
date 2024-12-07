@@ -1,4 +1,7 @@
 versions:
+  "2.1.2":
+    folder: all
+  # 2.1.1 is the last version for Visual Studio 2017
   "2.1.1":
     folder: all
   "2.1.0":
@@ -7,5 +10,6 @@ versions:
     folder: all
   "2.0.7":
     folder: all
+  # v1 is required for the openvdb recipe
   "1.2.2":
     folder: all

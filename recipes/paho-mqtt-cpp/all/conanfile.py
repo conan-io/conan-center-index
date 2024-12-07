@@ -72,8 +72,9 @@ class PahoMqttCppConan(ConanFile):
         tc.variables["PAHO_WITH_SSL"] = self.dependencies["paho-mqtt-c"].options.ssl
         tc.generate()
         deps = CMakeDeps(self)
-        deps.set_property("paho-mqtt-c", "cmake_file_name", "PahoMqttC")
-        deps.set_property("paho-mqtt-c", "cmake_target_name", "PahoMqttC::PahoMqttC")
+        if Version(self.version) < "1.4.0":
+            deps.set_property("paho-mqtt-c", "cmake_file_name", "PahoMqttC")
+            deps.set_property("paho-mqtt-c", "cmake_target_name", "PahoMqttC::PahoMqttC")
         deps.generate()
 
     def build(self):

@@ -72,13 +72,6 @@ class SimdjsonConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not fully support."
             )
 
-        if self.settings.compiler == "gcc" and \
-            Version(self.settings.compiler.version).major == "9":
-            if self.settings.compiler.get_safe("libcxx") == "libstdc++11":
-                raise ConanInvalidConfiguration(f"{self.ref} doesn't support GCC 9 with libstdc++11.")
-            if self.settings.build_type == "Debug":
-                raise ConanInvalidConfiguration(f"{self.ref} doesn't support GCC 9 with Debug build type.")
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 

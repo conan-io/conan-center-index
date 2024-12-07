@@ -1,4 +1,7 @@
 sources:
+  "1.4.3":
+    url: "http://ftp.videolan.org/pub/videolan/dav1d/1.4.3/dav1d-1.4.3.tar.xz"
+    sha256: "42fe524bcc82ea3a830057178faace22923a79bad3d819a4962d8cfc54c36f19"
   "1.4.1":
     url: "http://ftp.videolan.org/pub/videolan/dav1d/1.4.1/dav1d-1.4.1.tar.xz"
     sha256: "8d407dd5fe7986413c937b14e67f36aebd06e1fa5cfec679d10e548476f2d5f8"
