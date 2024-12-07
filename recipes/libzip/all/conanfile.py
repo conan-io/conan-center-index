@@ -93,6 +93,11 @@ class LibZipConan(ConanFile):
         tc.variables["BUILD_DOC"] = False
         tc.variables["ENABLE_LZMA"] = self.options.with_lzma
         tc.variables["ENABLE_BZIP2"] = self.options.with_bzip2
+        if self.settings.compiler == "gcc" and Version(self.version) < "1.11":
+            # See https://github.com/conan-io/conan-center-index/issues/26034
+            # It's an error in gcc >= 14
+            # Upstream fixed this silencing this error implicitly from 1.11
+            tc.extra_cflags.append("-Wno-incompatible-pointer-types")
         if self._has_zstd_support:
             tc.variables["ENABLE_ZSTD"] = self.options.with_zstd
         tc.variables["ENABLE_COMMONCRYPTO"] = False  # TODO: We need CommonCrypto package
