@@ -27,12 +27,10 @@ class GetTextConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "threads": ["posix", "solaris", "pth", "windows", "disabled"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "threads": "posix",
     }
 
     @property
@@ -79,8 +77,8 @@ class GetTextConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
-        if self.version >= Version("0.22") or is_msvc(self) or self._is_clang_cl:
-            self.build_requires("automake/1.16.5")
+        #if self.version >= Version("0.22") or is_msvc(self) or self._is_clang_cl:
+        #    self.build_requires("automake/1.16.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -93,13 +91,14 @@ class GetTextConan(ConanFile):
         libiconv = self.dependencies["libiconv"]
         libiconv_root = unix_path(self, libiconv.package_folder)
 
-        tc = AutotoolsToolchain(self, namespace="libintl")
+        tc = AutotoolsToolchain(self)
         tc.configure_args.extend([
             "HELP2MAN=/bin/true",
             "EMACS=no",
             "--datarootdir=${prefix}/res",
             f"--with-libiconv-prefix={libiconv_root}",
-            "--disable-nls",
+            # "--disable-nls", # FIXME: error: too few arguments to function 'relocate'
+            "--enable-nls",
             "--disable-dependency-tracking",
             "--enable-relocatable",
             "--disable-c++",
@@ -108,7 +107,6 @@ class GetTextConan(ConanFile):
             "--disable-libasprintf",
             "--disable-openmp",
             "--disable-curses",
-            "--disable-threads" if self.options.threads == "disabled" else ("--enable-threads=" + str(self.options.threads)),
             "--with-included-glib",
             "--with-included-libxml",
             "--with-included-libunistring",
@@ -120,7 +118,7 @@ class GetTextConan(ConanFile):
             "--without-libncurses-prefix",
             "--without-libtermcap-prefix",
             "--without-libxcurses-prefix",
-            "--without-included-gettext",
+            # "--without-included-gettext",
         ])
 
         env = tc.environment()
@@ -176,88 +174,15 @@ class GetTextConan(ConanFile):
             ar_wrapper = unix_path(self, self.dependencies.build["automake"].conf_info.get("user.automake:lib-wrapper"))
             cc, ar, link, rc = programs()
             env.define("CC", "{} cl -nologo".format(unix_path(self, compile_wrapper)))
-            env.define("CXX", f"{compile_wrapper} {cc}")
-            env.define("LD", link)
-            env.define("AR", f"{ar_wrapper} {ar}")
+            env.define("LD", "link -nologo")
             env.define("NM", "dumpbin -symbols")
+            env.define("CXX", f"{compile_wrapper} {cc}")
+            env.define("AR", f"{ar_wrapper} {ar}")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
             if rc is not None:
                 env.define("RC", rc)
                 env.define("WINDRES", rc)
-        tc.generate(env)
-
-        tc = AutotoolsToolchain(self, namespace="gettext-tools")
-        tc.configure_args.extend([
-            "--datarootdir=${prefix}/res",
-            f"--with-libiconv-prefix={libiconv_root}",
-            "--disable-dependency-tracking",
-            "--disable-shared",
-            "--disable-static",
-            "--disable-nls",
-            "--disable-dependency-tracking",
-            "--enable-relocatable",
-            "--disable-c++",
-            "--disable-java",
-            "--disable-csharp",
-            "--disable-libasprintf",
-            "--disable-curses",
-            "--disable-threads",
-            "--without-emacs",
-            "--without-git",
-            "--without-cvs",
-            "--without-libcurses-prefix",
-            "--without-libncurses-prefix",
-            "--without-libtermcap-prefix",
-            "--without-libxcurses-prefix",
-            "--without-included-gettext",
-            "--with-included-glib",
-            "--with-included-libxml",
-            "--with-included-libunistring",
-            "--with-installed-libtextstyle=no",
-        ])
-        env = tc.environment()
-        if is_msvc(self):
-            if check_min_vs(self, "180", raise_invalid=False):
-                tc.extra_cflags.append("-FS")  # TODO: reference github issue
-
-            # prevent redefining compiler instrinsic functions
-            tc.configure_args.extend([
-                'ac_cv_func_memmove=yes',
-                'ac_cv_func_memset=yes'
-            ])
-
-            # Skip checking for the 'n' printf format directly
-            # in msvc, as it is known to not be available due to security concerns.
-            # Skipping it avoids a GUI prompt during ./configure for a debug build
-            # See https://github.com/conan-io/conan-center-index/issues/23698]
-            if self.settings.build_type == "Debug":
-                tc.configure_args.extend(['gl_cv_func_printf_directive_n=no'])
-
-            # The flag above `--with-libiconv-prefix` fails to correctly detect libiconv on windows+msvc
-            # so it needs an extra nudge. We could use `AutotoolsDeps` but it's currently affected by the
-            # following outstanding issue: https://github.com/conan-io/conan/issues/12784
-            iconv_includedir = unix_path(self, libiconv.cpp_info.aggregated_components().includedirs[0])
-            iconv_libdir = unix_path(self, libiconv.cpp_info.aggregated_components().libdirs[0])
-            tc.extra_cflags.append(f"-I{iconv_includedir}")
-            tc.extra_ldflags.append(f"-L{iconv_libdir}")
-
-            compile_wrapper = self.dependencies.build["automake"].conf_info.get("user.automake:compile-wrapper")
-            lib_wrapper = self.dependencies.build["automake"].conf_info.get("user.automake:lib-wrapper")
-            env.define("CC", "{} cl -nologo".format(unix_path(self, compile_wrapper)))
-            env.define("LD", "link -nologo")
-            env.define("NM", "dumpbin -symbols")
-            env.define("STRIP", ":")
-            env.define("AR", "{} lib".format(unix_path(self, lib_wrapper)))
-            env.define("RANLIB", ":")
-
-            # One of the checks performed by the configure script requires this as a preprocessor flag
-            # rather than a C compiler flag
-            env.prepend("CPPFLAGS", f"-I{iconv_includedir}")
-
-            windres_arch = {"x86": "i686", "x86_64": "x86-64"}[str(self.settings.arch)]
-            env.define("RC", f"windres --target=pe-{windres_arch}")
-            env.vars(self).save_script("conanbuild_msvc")
         tc.generate(env)
 
         if is_msvc(self) or self._is_clang_cl:
@@ -290,24 +215,14 @@ class GetTextConan(ConanFile):
             deps.generate()
 
     def build(self):
-        # apply_conandata_patches(self)
+        apply_conandata_patches(self)
         # INFO: We do a separated build to avoid generating executable with shared libraries and a linker error produced by textstyle
         # First we build libintl in a separated folder, honoring the shared option
         # Then we build all executables using static linkage only
+        autotools = Autotools(self)
+        autotools.configure()
+        autotools.make()
 
-        # libintl
-        mkdir(self, os.path.join(self.build_folder, "libintl_build"))
-        with chdir(self, os.path.join(self.build_folder, "libintl_build")):
-            autotools = Autotools(self, namespace="libintl")
-            autotools.configure("gettext-runtime")
-            autotools.make()
-
-        # gettext-runtime
-        mkdir(self, os.path.join(self.build_folder, "gettext_build"))
-        with chdir(self, os.path.join(self.build_folder, "gettext_build")):
-            autotools = Autotools(self, namespace="gettext-tools")
-            autotools.configure("gettext-runtime")
-            autotools.make()
 
     def _fix_msvc_libname(self):
         """Remove lib prefix & change extension to .lib in case of cl like compiler
@@ -325,25 +240,10 @@ class GetTextConan(ConanFile):
 
     def package(self):
         copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        with chdir(self, os.path.join(self.build_folder, "gettext_build")):
-            autotools = Autotools(self, namespace="gettext-tools")
-            autotools.install()
-        rmdir(self, os.path.join(self.package_folder, "lib"))
-        rmdir(self, os.path.join(self.package_folder, "include"))
-        rmdir(self, os.path.join(self.package_folder, "share", "doc"))
-        rmdir(self, os.path.join(self.package_folder, "share", "info"))
-        rmdir(self, os.path.join(self.package_folder, "share", "man"))
+        autotools = Autotools(self)
+        autotools.install()
 
-        with chdir(self, os.path.join(self.build_folder, "libintl_build")):
-            autotools = Autotools(self, namespace="libintl")
-            autotools.install()
-        copy(self, "*gnuintl*.dll", self.build_folder, os.path.join(self.package_folder, "bin"), keep_path=False)
-        copy(self, "*gnuintl*.lib", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*gnuintl*.a", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*gnuintl*.so*", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*gnuintl*.dylib", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*libgnuintl.h", self.build_folder, os.path.join(self.package_folder, "include"), keep_path=False)
-        rename(self, os.path.join(self.package_folder, "include", "libgnuintl.h"), os.path.join(self.package_folder, "include", "libintl.h"))
+        # rename(self, os.path.join(self.package_folder, "include", "libgnuintl.h"), os.path.join(self.package_folder, "include", "libintl.h"))
 
         copy(self, "FindGettext.cmake", src=os.path.join(self.export_sources_folder, "cmake"), dst=os.path.join(self.package_folder, "lib", "cmake"))
         self._fix_msvc_libname()
