@@ -1,14 +1,6 @@
 sources:
-  "0.22.5":
+  "0.23":
     url:
-      - "https://ftp.gnu.org/pub/gnu/gettext/gettext-0.22.5.tar.gz"
-      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gettext/gettext-0.22.5.tar.gz"
-    sha256: "ec1705b1e969b83a9f073144ec806151db88127f5e40fe5a94cb6c8fa48996a0"
-patches:
-  "0.22.5":
-    - patch_file: "patches/0004-autopoint-relocatable.patch"
-      patch_description: "relocatable autopoint with resources relative to script"
-      patch_type: "conan"
-    - patch_file: "patches/0.22.5-0001-fix-macos-crossbuild.patch"
-      patch_description: "fix ability to crossbuild on macos and assume macOS newer than 10.4"
-      patch_type: "conan"
+      - "https://ftp.gnu.org/pub/gnu/gettext/gettext-0.23.tar.gz"
+      - "https://www.mirrorservice.org/sites/ftp.gnu.org/gnu/gettext/gettext-0.23.tar.gz"
+    sha256: "945dd7002a02dd7108ad0510602e13416b41d327898cf8522201bc6af10907a6"
