@@ -194,7 +194,8 @@ class GetTextConan(ConanFile):
             "--disable-dependency-tracking",
             "--disable-shared",
             "--disable-static",
-            "--disable-nls",
+            "--enable-nls",
+            # "--disable-nls", # FIXME: msgcmp.c:109:36: error: too few arguments to function 'relocate'
             "--disable-dependency-tracking",
             "--enable-relocatable",
             "--disable-c++",
@@ -290,11 +291,6 @@ class GetTextConan(ConanFile):
             deps.generate()
 
     def build(self):
-        # apply_conandata_patches(self)
-        # INFO: We do a separated build to avoid generating executable with shared libraries and a linker error produced by textstyle
-        # First we build libintl in a separated folder, honoring the shared option
-        # Then we build all executables using static linkage only
-
         # libintl
         mkdir(self, os.path.join(self.build_folder, "libintl_build"))
         with chdir(self, os.path.join(self.build_folder, "libintl_build")):
@@ -306,7 +302,7 @@ class GetTextConan(ConanFile):
         mkdir(self, os.path.join(self.build_folder, "gettext_build"))
         with chdir(self, os.path.join(self.build_folder, "gettext_build")):
             autotools = Autotools(self, namespace="gettext-tools")
-            autotools.configure("gettext-runtime")
+            autotools.configure()
             autotools.make()
 
     def _fix_msvc_libname(self):
@@ -325,25 +321,19 @@ class GetTextConan(ConanFile):
 
     def package(self):
         copy(self, pattern="COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        with chdir(self, os.path.join(self.build_folder, "gettext_build")):
-            autotools = Autotools(self, namespace="gettext-tools")
-            autotools.install()
-        rmdir(self, os.path.join(self.package_folder, "lib"))
-        rmdir(self, os.path.join(self.package_folder, "include"))
-        rmdir(self, os.path.join(self.package_folder, "share", "doc"))
-        rmdir(self, os.path.join(self.package_folder, "share", "info"))
-        rmdir(self, os.path.join(self.package_folder, "share", "man"))
-
         with chdir(self, os.path.join(self.build_folder, "libintl_build")):
             autotools = Autotools(self, namespace="libintl")
             autotools.install()
-        copy(self, "*gnuintl*.dll", self.build_folder, os.path.join(self.package_folder, "bin"), keep_path=False)
-        copy(self, "*gnuintl*.lib", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*gnuintl*.a", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*gnuintl*.so*", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*gnuintl*.dylib", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*libgnuintl.h", self.build_folder, os.path.join(self.package_folder, "include"), keep_path=False)
-        rename(self, os.path.join(self.package_folder, "include", "libgnuintl.h"), os.path.join(self.package_folder, "include", "libintl.h"))
+
+        with chdir(self, os.path.join(self.build_folder, "gettext_build")):
+            autotools = Autotools(self, namespace="gettext-tools")
+            autotools.install()
+        rmdir(self, os.path.join(self.package_folder, "res", "doc"))
+        rmdir(self, os.path.join(self.package_folder, "res", "info"))
+        rmdir(self, os.path.join(self.package_folder, "res", "man"))
+
+        # TODO: check about the header name and preserve the original name
+        # rename(self, os.path.join(self.package_folder, "include", "libgnuintl.h"), os.path.join(self.package_folder, "include", "libintl.h"))
 
         copy(self, "FindGettext.cmake", src=os.path.join(self.export_sources_folder, "cmake"), dst=os.path.join(self.package_folder, "lib", "cmake"))
         self._fix_msvc_libname()
@@ -353,24 +343,19 @@ class GetTextConan(ConanFile):
         autopoint = os.path.join(self.package_folder, "bin", "autopoint")
         msgmerge = os.path.join(self.package_folder, "bin", "msgmerge")
         msgfmt = os.path.join(self.package_folder, "bin", "msgfmt")
+        gettext = os.path.join(self.package_folder, "bin", "gettext")
         self.buildenv_info.append_path("ACLOCAL_PATH", aclocal)
         self.buildenv_info.define_path("AUTOPOINT", autopoint)
         self.buildenv_info.define_path("MSGMERGE", msgmerge)
         self.buildenv_info.define_path("MSGFMT", msgfmt)
+        self.buildenv_info.define_path("GETTEXT", gettext)
 
-        self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_file_name", "Intl")
-        self.cpp_info.set_property("cmake_target_name", "Intl::Intl")
-        self.cpp_info.libs = ["gnuintl"]
+        self.cpp_info.components["intl"].set_property("cmake_find_mode", "both")
+        self.cpp_info.components["intl"].set_property("cmake_file_name", "Intl")
+        self.cpp_info.components["intl"].set_property("cmake_target_name", "Intl::Intl")
+        self.cpp_info.components["intl"].libs = ["gnuintl"]
         if is_apple_os(self):
-            self.cpp_info.frameworks.append("CoreFoundation")
+            self.cpp_info.components["intl"].frameworks.append("CoreFoundation")
 
-        self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
-        self.cpp_info.set_property("cmake_build_modules", [os.path.join("lib", "cmake", "FindGettext.cmake")])
-
-        # TODO: the following can be removed when the recipe supports Conan >= 2.0 only
-        self.cpp_info.names["cmake_find_package"] = "Intl"
-        self.cpp_info.names["cmake_find_package_multi"] = "Intl"
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.AUTOMAKE_CONAN_INCLUDES.append(unix_path_package_info_legacy(self, aclocal))
-        self.env_info.AUTOPOINT = unix_path_package_info_legacy(self, autopoint)
+        self.cpp_info.components["intl"].builddirs.append(os.path.join("lib", "cmake"))
+        self.cpp_info.components["intl"].set_property("cmake_build_modules", [os.path.join("lib", "cmake", "FindGettext.cmake")])
