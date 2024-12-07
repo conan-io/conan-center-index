@@ -3,9 +3,10 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class CapstoneConan(ConanFile):
@@ -35,6 +36,7 @@ class CapstoneConan(ConanFile):
         "fPIC": True,
         "use_default_alloc": True,
     }
+    implements = ["auto_shared_fpic"]
 
     _archs = ["arm", "m68k", "mips", "ppc", "sparc", "sysz", "xcore", "x86", "tms320c64x", "m680x", "evm"]
     options.update({a: [True, False] for a in _archs})
@@ -42,10 +44,6 @@ class CapstoneConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
@@ -62,18 +60,20 @@ class CapstoneConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         if Version(self.version) < "5.0":
-            tc.variables["CAPSTONE_BUILD_STATIC"] = not self.options.shared
-            tc.variables["CAPSTONE_BUILD_SHARED"] = self.options.shared
-        tc.variables["CAPSTONE_BUILD_TESTS"] = False
-        tc.variables["CAPSTONE_BUILD_CSTOOL"] = False
-        tc.variables["CAPSTONE_ARCHITECUTRE_DEFAULT"] = False
+            tc.cache_variables["CAPSTONE_BUILD_STATIC"] = not self.options.shared
+            tc.cache_variables["CAPSTONE_BUILD_SHARED"] = self.options.shared
+        tc.cache_variables["CAPSTONE_BUILD_TESTS"] = False
+        tc.cache_variables["CAPSTONE_BUILD_CSTOOL"] = False
+        tc.cache_variables["CAPSTONE_ARCHITECUTRE_DEFAULT"] = False
         if Version(self.version) < "5.0":
-            tc.variables["CAPSTONE_USE_SYS_DYN_MEM"] = self.options.use_default_alloc
+            tc.cache_variables["CAPSTONE_USE_SYS_DYN_MEM"] = self.options.use_default_alloc
         else:
-            tc.variables["CAPSTONE_USE_DEFAULT_ALLOC"] = self.options.use_default_alloc
+            tc.cache_variables["CAPSTONE_USE_DEFAULT_ALLOC"] = self.options.use_default_alloc
+        if Version(self.version) >= "5.0.3" and is_apple_os(self):
+            tc.cache_variables["CAPSTONE_BUILD_MACOS_THIN"] = True # Disable universal2 builds on macOS
         for a in self._archs:
-            tc.variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
-        tc.variables["CAPSTONE_BUILD_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+            tc.cache_variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
+        tc.cache_variables["CAPSTONE_BUILD_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
 
     def build(self):
@@ -86,6 +86,7 @@ class CapstoneConan(ConanFile):
         copy(self, "LICENSE*.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
+        fix_apple_shared_install_name(self)
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
