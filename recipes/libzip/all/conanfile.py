@@ -93,7 +93,9 @@ class LibZipConan(ConanFile):
         tc.variables["BUILD_DOC"] = False
         tc.variables["ENABLE_LZMA"] = self.options.with_lzma
         tc.variables["ENABLE_BZIP2"] = self.options.with_bzip2
-        if self.settings.compiler == "gcc" and Version(self.version) < "1.11":
+        if (self.settings.compiler == "gcc"
+                and Version(self.settings.compiler.version) >= "14"
+                and Version(self.version) < "1.11"):
             # See https://github.com/conan-io/conan-center-index/issues/26034
             # It's an error in gcc >= 14
             # Upstream fixed this silencing this error implicitly from 1.11
