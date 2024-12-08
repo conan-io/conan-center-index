@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.env.virtualbuildenv import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, collect_libs
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
@@ -8,7 +9,7 @@ import os
 
 required_conan_version = ">=1.53.0"
 
-class CppServer(ConanFile):
+class CppServerPackage(ConanFile):
     name = "cppserver"
     description = "Ultra fast and low latency asynchronous socket server and" \
         " client C++ library with support TCP, SSL, UDP, HTTP, HTTPS, WebSocket" \
@@ -57,17 +58,18 @@ class CppServer(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("asio/1.27.0")
-        self.requires("openssl/[>=1.1 <4]")
-        self.requires("cppcommon/1.0.3.0")
+        # Used in asio/asio.h public header
+        self.requires("asio/1.27.0", transitive_headers=True, transitive_libs=True)
+        # Used in transitive asio/ssl.hpp header from asio
+        self.requires("openssl/[>=1.1 <4]", transitive_headers=True, transitive_libs=True)
+        # threads/thread.h used in asio/service.h public header
+        self.requires("cppcommon/1.0.4.0", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if not minimum_version:
-            self.output.warn(f"{self.ref} requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-        elif Version(self.settings.compiler.version) < minimum_version:
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(f"{self.ref} requires a compiler that supports at least C++17")
 
     def build_requirements(self):
@@ -78,13 +80,13 @@ class CppServer(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
         tc = CMakeToolchain(self)
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.variables["CPPSERVER_MODULE"] = False
         tc.generate()
-
-        dpes = CMakeDeps(self)
-        dpes.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
