@@ -1,0 +1,8 @@
+sources:
+  "2.13.0":
+    source:
+      url: "https://github.com/mavlink/MAVSDK/archive/refs/tags/v2.13.0.tar.gz"
+      sha256: "9af60e71d707b0ca412198dc14ab7e1b632dd7f4558c2f5e7cefc0a0354ce3a6"
+    proto:
+      url: "https://github.com/mavlink/MAVSDK-Proto/archive/34bce6d61dba5f72b602bdbd31f04fceff093881.tar.gz"
+      sha256: "1f441671dddf38fe5ef6a4d0aa73be5634437a4e6bd516348e7f6e344ed05356"
