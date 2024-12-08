@@ -96,7 +96,7 @@ class CyrusSaslConan(ConanFile):
         if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.1.0")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.44.2")
+            self.requires("sqlite3/[>=3.45.0 <4]")
 
     def validate(self):
         if is_msvc(self) and not self.options.shared:
