@@ -87,6 +87,11 @@ class FltkConan(ConanFile):
             self.requires("xorg/system")
             if self.options.with_xft:
                 self.requires("libxft/2.3.8")
+            if Version(self.version) >= "1.4.0":
+                self.requires("gtk/system", options={"version": "3"})
+                self.requires("wayland/1.22.0")
+                self.requires("xkbcommon/1.6.0")
+                self.requires("dbus/1.15.8")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -109,6 +114,9 @@ class FltkConan(ConanFile):
         if Version(self.version) >= "1.3.9":
             if self._is_cl_like:
                 tc.variables["FLTK_MSVC_RUNTIME_DLL"] = not self._is_cl_like_static_runtime
+        if Version(self.version) >= "1.4.0":
+            tc.variables["FLTK_BUILD_FLUID"] = False
+            tc.variables["FLTK_BUILD_SHARED_LIBS"] = self.options.shared
 
         tc.generate()
         tc = CMakeDeps(self)
@@ -154,7 +162,8 @@ class FltkConan(ConanFile):
                 self.cpp_info.system_libs.append("gdiplus")
             if self.options.with_gl:
                 self.cpp_info.system_libs.append("opengl32")
-
+            if Version(self.version) >= "1.4.0":
+                self.cpp_info.system_libs.append("ws2_32")
         # TODO: to remove in conan v2 once legacy generators removed
         self.cpp_info.names["cmake_find_package"] = "fltk"
         self.cpp_info.names["cmake_find_package_multi"] = "fltk"
