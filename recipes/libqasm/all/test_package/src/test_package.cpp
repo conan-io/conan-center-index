@@ -1,7 +1,10 @@
+#if __has_include("cqasm.hpp")
 #include "cqasm.hpp"
+#else
+#include "libqasm/cqasm.hpp"
+#endif
 
 #include <iostream>
-
 
 int main() {
     auto analyzer = cqasm::v3x::default_analyzer();

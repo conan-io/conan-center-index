@@ -1,4 +1,10 @@
 sources:
+  "1.5.7":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.5.7.tar.gz"
+    sha256: "c30b97c8bcccc0557331dd1a043010a70984c9cff11b0bbd769651db68f8b91d"
+  "1.5.6":
+    url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.5.6.tar.gz"
+    sha256: "85602d0ad672cb233052504624dec23b47fc6d324bb82bd6eaff13b8f652dec3"
   "1.5.5":
     url: "https://github.com/aws/s2n-tls/archive/refs/tags/v1.5.5.tar.gz"
     sha256: "6316e1ad2c8ef5807519758bb159d314b9fef31d79ae27bc8f809104b978bb04"
