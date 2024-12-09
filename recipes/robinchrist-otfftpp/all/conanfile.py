@@ -3,6 +3,8 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get
 import os
 
+required_conan_version = ">=2.0.14"
+
 class otfftppRecipe(ConanFile):
     name = "robinchrist-otfftpp"
     package_type = "library"
