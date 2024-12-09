@@ -60,8 +60,8 @@ class OpenColorIOConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.arch not in ["x86", "x86_64"]:
-            del self.options.use_sse
+        if self.settings.arch not in ["x86", "x86_64"] and self.options.get_safe("use_sse", None):
+            self.options.use_sse = False
 
     def configure(self):
         if self.options.shared:
