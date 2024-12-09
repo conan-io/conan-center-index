@@ -108,8 +108,6 @@ class otfftppRecipe(ConanFile):
         self.cpp_info.libs = ["otfftpp"]
 
         if self.options.with_openmp:
-            if self.settings.compiler in ["clang", "apple-clang"]:
-                self.cpp_info.requires.append("llvm-openmp::llvm-openmp")
             openmp_flags = self._openmp_flags
             self.cpp_info.cflags = openmp_flags
             self.cpp_info.cxxflags = openmp_flags
