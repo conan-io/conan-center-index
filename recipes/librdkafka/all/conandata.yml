@@ -1,4 +1,7 @@
 sources:
+  "2.6.1":
+    url: "https://github.com/edenhill/librdkafka/archive/v2.6.1.tar.gz"
+    sha256: "0ddf205ad8d36af0bc72a2fec20639ea02e1d583e353163bf7f4683d949e901b"
   "2.6.0":
     url: "https://github.com/edenhill/librdkafka/archive/v2.6.0.tar.gz"
     sha256: "abe0212ecd3e7ed3c4818a4f2baf7bf916e845e902bb15ae48834ca2d36ac745"
@@ -24,6 +27,13 @@ sources:
     url: "https://github.com/edenhill/librdkafka/archive/v1.9.2.tar.gz"
     sha256: "3fba157a9f80a0889c982acdd44608be8a46142270a389008b22d921be1198ad"
 patches:
+  "2.6.1":
+    - patch_file: patches/0001-Change-library-names-1-9-1.patch
+      patch_description: "find_package conan packages"
+      patch_type: "conan"
+    - patch_file: patches/0002-Change-library-targets-and-result-variables-2-5-0.patch
+      patch_description: "refer conan package names"
+      patch_type: "conan"
   "2.6.0":
     - patch_file: patches/0001-Change-library-names-1-9-1.patch
       patch_description: "find_package conan packages"

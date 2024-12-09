@@ -8,7 +8,7 @@ from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rmdir, replace_in_file, mkdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
+required_conan_version = ">=2.1"
 
 class OrcRecipe(ConanFile):
     name = "orc"
@@ -48,10 +48,6 @@ class OrcRecipe(ConanFile):
         }
 
     @property
-    def _is_legacy_one_profile(self):
-        return not hasattr(self, "settings_build")
-
-    @property
     def _should_patch_thirdparty_toolchain(self):
         return self.version < "2.0.0"
 
@@ -79,11 +75,10 @@ class OrcRecipe(ConanFile):
         self.requires("lz4/1.9.4")
         self.requires("snappy/1.1.9")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("zstd/1.5.5")
+        self.requires("zstd/[~1.5]")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
@@ -91,11 +86,11 @@ class OrcRecipe(ConanFile):
             )
 
     def build_requirements(self):
-        if not self._is_legacy_one_profile:
-            self.tool_requires("protobuf/<host_version>")
+        self.tool_requires("protobuf/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         VirtualBuildEnv(self).generate()
@@ -113,11 +108,6 @@ class OrcRecipe(ConanFile):
         tc.variables["BUILD_ENABLE_AVX512"] = self.options.get_safe("build_avx512", False)
         tc.variables["STOP_BUILD_ON_WARNING"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-
-        # CMake versions less than 3.12 are supported by ORC pre-1.9.0 versions.
-        # Setting policy CMP0077 to NEW to remove unnecessary cache_variables settings.
-        if self.version < "1.9.0":
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         protoc_path = os.path.join(self.dependencies["protobuf"].cpp_info.bindir, "protoc")
         tc.variables["PROTOBUF_EXECUTABLE"] = protoc_path.replace("\\", "/")
@@ -137,7 +127,6 @@ class OrcRecipe(ConanFile):
                         "add_library (orc STATIC ${SOURCE_FILES})", "add_library (orc ${SOURCE_FILES})")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

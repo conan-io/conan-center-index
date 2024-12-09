@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, load, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, load, save, copy
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 
@@ -74,10 +74,13 @@ class QCBORConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
-        # Extract the License/s from README.md to a file
-        tmp = load(self, os.path.join(self.source_folder, "inc", "qcbor", "qcbor.h"))
-        license_contents = re.search("( Copyright.*) =====", tmp, re.DOTALL)[1]
-        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
+        if Version(self.version) >= "1.5":
+            copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        else:
+            # Extract the License/s from README.md to a file
+            tmp = load(self, os.path.join(self.source_folder, "inc", "qcbor", "qcbor.h"))
+            license_contents = re.search("( Copyright.*) =====", tmp, re.DOTALL)[1]
+            save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package_info(self):
         self.cpp_info.libs = ["qcbor"]

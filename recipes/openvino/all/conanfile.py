@@ -11,6 +11,7 @@ import yaml
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.8"
 
+
 class OpenvinoConan(ConanFile):
     name = "openvino"
 
@@ -226,6 +227,8 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_OV_TF_LITE_FRONTEND"] = self.options.enable_tf_lite_frontend
         toolchain.cache_variables["ENABLE_OV_ONNX_FRONTEND"] = self.options.enable_onnx_frontend
         toolchain.cache_variables["ENABLE_OV_PYTORCH_FRONTEND"] = self.options.enable_pytorch_frontend
+        if Version(self.version) >= "2024.3.0":
+            toolchain.cache_variables["ENABLE_OV_JAX_FRONTEND"] = False
         # Dependencies
         toolchain.cache_variables["ENABLE_SYSTEM_TBB"] = True
         toolchain.cache_variables["ENABLE_TBBBIND_2_5"] = False
@@ -418,3 +421,4 @@ class OpenvinoConan(ConanFile):
             openvino_tensorflow_lite.set_property("cmake_target_name", "openvino::frontend::tensorflow_lite")
             openvino_tensorflow_lite.libs = ["openvino_tensorflow_lite_frontend"]
             openvino_tensorflow_lite.requires = ["Runtime", "flatbuffers::flatbuffers"]
+

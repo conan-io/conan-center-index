@@ -1,4 +1,7 @@
 sources:
+  "0.11.1":
+    url: "https://github.com/davea42/libdwarf-code/archive/refs/tags/v0.11.1.tar.gz"
+    sha256: "dfd24db87c354b3ba6fa72d29a481014f81768fea15ddcde96a8a938b1557c17"
   "0.11.0":
     url: "https://github.com/davea42/libdwarf-code/archive/refs/tags/v0.11.0.tar.gz"
     sha256: "5135af38dc202206538a3dcdc90675aa8b320e132156849c6855dea5ea0c0729"
@@ -24,6 +27,10 @@ sources:
     url: "https://www.prevanders.net/libdwarf-0.5.0.tar.xz"
     sha256: "11fa822c60317fa00e1a01a2ac9e8388f6693e8662ab72d352c5f50c7e0112a9"
 patches:
+  "0.11.1":
+    - patch_file: "patches/0.11.1-0001-fixes.patch"
+      patch_description: "fix DW_API definition and cmake"
+      patch_type: "portability"
   "0.11.0":
     - patch_file: "patches/0.10.1-0001-fixes.patch"
       patch_description: "fix DW_API definition and cmake"

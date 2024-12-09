@@ -1,15 +1,12 @@
 import os
-import textwrap
 
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rmdir, save, replace_in_file
-from conan.tools.scm import Version
+from conan.tools.files import copy, get, rmdir, save
 
 required_conan_version = ">=1.53.0"
-
 
 class LibE57FormatConan(ConanFile):
     name = "libe57format"
@@ -65,18 +62,7 @@ class LibE57FormatConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        # replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-        #                 "POSITION_INDEPENDENT_CODE ON", "")
-        if Version(self.version) >= "3.0":
-            # Disable compiler warnings, which cause older versions of GCC to fail due to unrecognized flags
-            replace_in_file(self, os.path.join(self.source_folder, "cmake", "CompilerWarnings.cmake"),
-                            " -W", " # -W")
-            # Disable warnings as errors
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set_warning_as_error()", "")
-
     def build(self):
-        # self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -87,27 +73,6 @@ class LibE57FormatConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {"E57Format": "E57Format::E57Format"}
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "e57format")
         self.cpp_info.set_property("cmake_target_name", "E57Format")
@@ -115,11 +80,3 @@ class LibE57FormatConan(ConanFile):
         self.cpp_info.libs = [f"E57Format{suffix}"]
         if self.settings.os in ["Linux", "FreeBSD"] and not self.options.shared:
             self.cpp_info.system_libs.extend(["m", "pthread"])
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "e57format"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "e57format"
-        self.cpp_info.names["cmake_find_package"] = "E57Format"
-        self.cpp_info.names["cmake_find_package_multi"] = "E57Format"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
