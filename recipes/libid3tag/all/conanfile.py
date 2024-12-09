@@ -14,6 +14,7 @@ class LibId3TagConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://codeberg.org/tenacityteam/libid3tag/"
     topics = ("mad", "id3", "MPEG", "audio", "decoder")
+    generators = "CMakeDeps", "CMakeToolchain"
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
@@ -37,12 +38,6 @@ class LibId3TagConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def generate(self):
-        tc = CMakeToolchain(self)
-        tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def build(self):
         cmake = CMake(self)
