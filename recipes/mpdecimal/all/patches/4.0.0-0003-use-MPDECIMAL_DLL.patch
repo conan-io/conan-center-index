@@ -1,0 +1,39 @@
+diff --git a/libmpdec++/decimal.hh b/libmpdec++/decimal.hh
+index 9040290..5e057cb 100644
+--- a/libmpdec++/decimal.hh
++++ b/libmpdec++/decimal.hh
+@@ -58,7 +58,7 @@
+ #ifdef _MSC_VER
+   #if defined (BUILD_LIBMPDECXX)
+     #define IMPORTEXPORT __declspec(dllexport)
+-  #elif defined(_DLL)
++  #elif defined(MPDECIMAL_DLL)
+     #define IMPORTEXPORT __declspec(dllimport)
+   #else
+     #define IMPORTEXPORT
+diff --git a/libmpdec/mpdecimal32vc.h b/libmpdec/mpdecimal32vc.h
+index 6a35951..43e5631 100644
+--- a/libmpdec/mpdecimal32vc.h
++++ b/libmpdec/mpdecimal32vc.h
+@@ -59,7 +59,7 @@ extern "C" {
+ #if defined (BUILD_LIBMPDEC)
+   #undef IMPORTEXPORT
+   #define IMPORTEXPORT __declspec(dllexport)
+-#elif defined(_DLL)
++#elif defined(MPDECIMAL_DLL)
+   #undef IMPORTEXPORT
+   #define IMPORTEXPORT __declspec(dllimport)
+ #endif
+diff --git a/libmpdec/mpdecimal64vc.h b/libmpdec/mpdecimal64vc.h
+index 9320176..a9944fc 100644
+--- a/libmpdec/mpdecimal64vc.h
++++ b/libmpdec/mpdecimal64vc.h
+@@ -59,7 +59,7 @@ extern "C" {
+ #if defined (BUILD_LIBMPDEC)
+   #undef IMPORTEXPORT
+   #define IMPORTEXPORT __declspec(dllexport)
+-#elif defined(_DLL)
++#elif defined(MPDECIMAL_DLL)
+   #undef IMPORTEXPORT
+   #define IMPORTEXPORT __declspec(dllimport)
+ #endif

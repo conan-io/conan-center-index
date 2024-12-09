@@ -1,4 +1,7 @@
 sources:
+  "7.0.1":
+    url: "https://ffmpeg.org//releases/ffmpeg-7.0.1.tar.bz2"
+    sha256: "5e77e84b6434d656106fafe3bceccc77176449014f3eba24d33db3fbd0939dc9"
   "6.1.1":
     url: "http://ffmpeg.org/releases/ffmpeg-6.1.1.tar.bz2"
     sha256: "5e3133939a61ef64ac9b47ffd29a5ea6e337a4023ef0ad972094b4da844e3a20"
@@ -35,13 +38,25 @@ patches:
       patch_description: "Compatibility with vulkan >= 1.3.239"
       patch_type: "portability"
       patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/eb0455d64690eed0068e5cb202f72ecdf899837c"
+    - patch_file: "patches/5.1-0004-fix-binutils.patch"
+      patch_description: "Compatibility with binutils >= 2.41"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commitdiff/effadce6c756247ea8bae32dc13bb3e6f464f0eb"
   "5.0.3":
     - patch_file: "patches/5.0-0001-fix-hwcontext_vulkan.patch"
       patch_description: "Compatibility with vulkan >= 1.3.239"
       patch_type: "portability"
       patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/eb0455d64690eed0068e5cb202f72ecdf899837c"
+    - patch_file: "patches/5.1-0004-fix-binutils.patch"
+      patch_description: "Compatibility with binutils >= 2.41"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commitdiff/effadce6c756247ea8bae32dc13bb3e6f464f0eb"
   "4.4.4":
     - patch_file: "patches/4.4-0001-fix-aom_codec_av1_dx_algo.patch"
       patch_description: "Compatibility with shared libaom"
       patch_type: "portability"
       patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commit/d92fdc714496d43234733c315894abe0beeb3529"
+    - patch_file: "patches/5.1-0004-fix-binutils.patch"
+      patch_description: "Compatibility with binutils >= 2.41"
+      patch_type: "portability"
+      patch_source: "https://git.ffmpeg.org/gitweb/ffmpeg.git/commitdiff/effadce6c756247ea8bae32dc13bb3e6f464f0eb"

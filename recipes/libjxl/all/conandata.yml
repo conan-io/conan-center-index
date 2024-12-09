@@ -1,18 +1,10 @@
 sources:
-  "0.5.0":
-    url: "https://github.com/libjxl/libjxl/archive/v0.5.zip"
-    sha256: "a208be41542c6f81f10a82c6bb4bc75d3eceb9d4f7ecb6ea0ad2f2d236694c4b"
-  "0.6.1":
-    url: "https://github.com/libjxl/libjxl/archive/v0.6.1.zip"
-    sha256: "3e4877daef07724aa6f490bf80c45ada804f35fe3cce59c27e89c5ae3099535a"
-patches:
-  "0.5.0":
-    - patch_file: "patches/0001-clean-targets-v0.5.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-fix-dependencies-v0.5.patch"
-      base_path: "source_subfolder"
-  "0.6.1":
-    - patch_file: "patches/0001-clean-targets-v0.6.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/0002-fix-dependencies-v0.6.patch"
-      base_path: "source_subfolder"
+  "0.10.3":
+    url: "https://github.com/libjxl/libjxl/archive/v0.10.3.zip"
+    sha256: "a9e2103f61ab79f5561b506ad03fcba33207263284b1a796eba3ca826ab0a75f"
+  "0.10.2":
+    url: "https://github.com/libjxl/libjxl/archive/v0.10.2.zip"
+    sha256: "910ab4245eebe0fba801a057f5fbc4fe96dad7c9979880bb49ad3e2623a911a2"
+  "0.8.2":
+    url: "https://github.com/libjxl/libjxl/archive/v0.8.2.zip"
+    sha256: "1f2ccc06f07c4f6cf4aa6c7763ba0598f12a7544d597f02beb07f615eb08ccf0"

@@ -1,0 +1,26 @@
+From 925b7072ac1a242b0968f889585e61993f9ca449 Mon Sep 17 00:00:00 2001
+From: Mark Harfouche <mark.harfouche@gmail.com>
+Date: Mon, 27 Nov 2023 12:20:23 +0000
+Subject: [PATCH] specify osstatus_error takes in an OSStatus as its first
+ argument
+
+Signed-off-by: Mark Harfouche <mark.harfouche@gmail.com>
+---
+ lib/system/certs.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/system/certs.c b/lib/system/certs.c
+index 9619ed18c1..779d928609 100644
+--- a/lib/system/certs.c
++++ b/lib/system/certs.c
+@@ -289,7 +289,7 @@ static int add_system_trust(gnutls_x509_trust_list_t list,
+ 	return r;
+ }
+ #elif defined(__APPLE__) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 1070
+-static int osstatus_error(status)
++static int osstatus_error(OSStatus status)
+ {
+ 	CFStringRef err_str = SecCopyErrorMessageString(status, NULL);
+ 	_gnutls_debug_log("Error loading system root certificates: %s\n",
+-- 
+GitLab

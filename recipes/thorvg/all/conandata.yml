@@ -1,25 +1,19 @@
 sources:
-  "0.14.0":
-    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.14.0.tar.gz"
-    sha256: "6f186b53be3a0bd971dabde7a58022f43303467794e89e3641c774f38cdc2664"
+  "0.15.4":
+    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.15.4.tar.gz"
+    sha256: "3031a3e070322194fc5368419e996420f05f26ec2ec8137beca17eba5e5e8a58"
+  "0.15.3":
+    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.15.3.tar.gz"
+    sha256: "c3d57167a54f0ecc3ead8bb33340593acc00bcd8477e784287307bc4e2c82b38"
+  "0.14.10":
+    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.14.10.tar.gz"
+    sha256: "e11e2e27ef26ed018807e828cce3bca1fb9a7f25683a152c9cd1f7aac9f3b67a"
+  "0.14.6":
+    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.14.6.tar.gz"
+    sha256: "13d7778968ce10f4f7dd1ea1f66861d4ee8ff22f669566992b4ac00e050496cf"
   "0.13.8":
     url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.13.8.tar.gz"
     sha256: "ce49929a94d1686d4f1436da6ef5fa7a8439901c22b5fa0879d7d5879b8ba2bd"
   "0.13.7":
     url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.13.7.tar.gz"
     sha256: "972c84e5670a7138eec24062d4ccc243d161158ecd9c53788300a8ca6aaf3426"
-  "0.13.6":
-    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.13.6.tar.gz"
-    sha256: "f24fd3647e1a309dec00f6455b32258c0dd0e0dbd1133233169467571f188bad"
-  "0.13.5":
-    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.13.5.tar.gz"
-    sha256: "977ed74c3846c9a6acd5765aff776745d40e3c91507b22e51177d59c69afd198"
-  "0.13.4":
-    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.13.4.tar.gz"
-    sha256: "2521adf99fb04ae543f5c14bb5fafd5ba7df0ea2e2a9e61351105c27059fc9e6"
-  "0.13.2":
-    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.13.2.tar.gz"
-    sha256: "03b5dbb4c73ff221a4bd7243cc0ad377aecff4c3077f5a57ee2902e4122d3218"
-  "0.13.0":
-    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.13.0.tar.gz"
-    sha256: "4245c401fa637452c8526c0c4448d8c7915f09a6a2e1fa85d6e9032ee610b454"
