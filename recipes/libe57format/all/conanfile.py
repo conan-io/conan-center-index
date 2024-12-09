@@ -66,8 +66,8 @@ class LibE57FormatConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "POSITION_INDEPENDENT_CODE ON", "")
+        # replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+        #                 "POSITION_INDEPENDENT_CODE ON", "")
         if Version(self.version) >= "3.0":
             # Disable compiler warnings, which cause older versions of GCC to fail due to unrecognized flags
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "CompilerWarnings.cmake"),
@@ -76,7 +76,7 @@ class LibE57FormatConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set_warning_as_error()", "")
 
     def build(self):
-        self._patch_sources()
+        # self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
