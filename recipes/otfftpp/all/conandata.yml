@@ -1,0 +1,4 @@
+sources:
+  "0.0.1":
+    url: "https://github.com/robinchrist/otfftpp/archive/refs/tags/v0.0.1.tar.gz"
+    sha256: "2934cf785bef49875adccebe7ea9d8bc89b9090cbc16dc4553b22c4a331068b6"
