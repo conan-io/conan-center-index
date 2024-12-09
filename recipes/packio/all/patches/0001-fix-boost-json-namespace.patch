@@ -1,0 +1,35 @@
+From 6ed35ba444dc22a5bc4c3c84989f7b8357a28e5b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Martin=20M=C3=BCllenhaupt?=
+ <muellni@users.noreply.github.com>
+Date: Wed, 10 May 2023 10:39:03 +0200
+Subject: [PATCH] replace boost::json namespace macro
+
+---
+ include/packio/json_rpc/converters.h | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/include/packio/json_rpc/converters.h b/include/packio/json_rpc/converters.h
+index f8a176e..99dfa33 100644
+--- a/include/packio/json_rpc/converters.h
++++ b/include/packio/json_rpc/converters.h
+@@ -23,7 +23,8 @@ std::tuple<Args...> json_to_tuple(
+ } // json_rpc
+ } // packio
+ 
+-BOOST_JSON_NS_BEGIN
++namespace boost {
++namespace json {
+ 
+ template <typename... Args>
+ std::tuple<Args...> tag_invoke(value_to_tag<std::tuple<Args...>>, const value& jv)
+@@ -40,6 +41,7 @@ void tag_invoke(value_from_tag, value& jv, CStr&& from)
+     jv.emplace_string().assign(std::forward<CStr>(from));
+ }
+ 
+-BOOST_JSON_NS_END
++} // json
++} // boost
+ 
+-#endif // PACKIO_JSON_RPC_CONVERTERS_H
+\ No newline at end of file
++#endif // PACKIO_JSON_RPC_CONVERTERS_H
