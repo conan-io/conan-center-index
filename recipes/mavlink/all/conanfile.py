@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.4"
 
 
 class MavlinkConan(ConanFile):
@@ -44,6 +44,7 @@ class MavlinkConan(ConanFile):
         "dialect": "common",
         "wire_protocol": "2.0",
     }
+    languages = ["C"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
