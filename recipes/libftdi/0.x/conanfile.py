@@ -1,16 +1,22 @@
-from conans import CMake, ConanFile, tools
-from contextlib import contextmanager
 import os
+
+from conan import ConanFile
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+
+required_conan_version = ">=1.53.0"
 
 
 class LibFtdi(ConanFile):
     name = "libftdi"
     description = "libFTDI - FTDI USB driver with bitbang mode"
-    topics = ("conan", "libconfuse", "configuration", "parser")
+    license = "LGPL-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.intra2net.com/en/developer/libftdi"
-    license = "LGPL-2.0"
-    exports_sources = "CMakeLists.txt", "patches/**"
+    topics = ("libconfuse", "configuration", "parser")
+
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -22,17 +28,10 @@ class LibFtdi(ConanFile):
         "fPIC": True,
         "enable_cpp_wrapper": True,
     }
-    generators = "cmake"
 
-    _cmake = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
+        copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -40,51 +39,55 @@ class LibFtdi(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if not self.options.enable_cpp_wrapper:
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
+            self.settings.rm_safe("compiler.libcxx")
+            self.settings.rm_safe("compiler.cppstd")
 
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version])
-        os.rename("libftdi-{}".format(self.version), self._source_subfolder)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libusb-compat/0.1.7")
+        self.requires("libusb-compat/0.1.7", transitive_headers=True, transitive_libs=True)
         if self.options.enable_cpp_wrapper:
-            self.requires("boost/1.74.0")
+            self.requires("boost/1.83.0", transitive_headers=True)
 
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        self._cmake.definitions["FTDIPP"] = self.options.enable_cpp_wrapper
-        self._cmake.definitions["PYTHON_BINDINGS"] = False
-        self._cmake.definitions["EXAMPLES"] = False
-        self._cmake.definitions["DOCUMENTATION"] = False
-        self._cmake.configure(build_folder=self._build_subfolder)
-        return self._cmake
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["FTDIPP"] = self.options.enable_cpp_wrapper
+        tc.variables["PYTHON_BINDINGS"] = False
+        tc.variables["EXAMPLES"] = False
+        tc.variables["DOCUMENTATION"] = False
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "CMAKE_BINARY_DIR", "PROJECT_BINARY_DIR")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"), "CMAKE_SOURCE_DIR", "PROJECT_SOURCE_DIR")
-        tools.replace_in_file(os.path.join(self._source_subfolder, "ftdipp", "CMakeLists.txt"), "CMAKE_SOURCE_DIR", "PROJECT_SOURCE_DIR")
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "CMAKE_BINARY_DIR", "PROJECT_BINARY_DIR")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "CMAKE_SOURCE_DIR", "PROJECT_SOURCE_DIR")
+        replace_in_file(self, os.path.join(self.source_folder, "ftdipp", "CMakeLists.txt"),
+                        "CMAKE_SOURCE_DIR", "PROJECT_SOURCE_DIR")
 
     def build(self):
         self._patch_sources()
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
+        cmake.configure(build_script_folder=self.source_path.parent)
         cmake.build()
 
     def package(self):
-        self.copy(pattern="COPYING*", src=self._source_subfolder, dst="licenses")
-        cmake = self._configure_cmake()
+        copy(self, "COPYING*", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
-
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
+        self.cpp_info.libs = ["ftdi"]
+        self.cpp_info.requires = ["libusb-compat::libusb-compat"]
         if self.options.enable_cpp_wrapper:
             self.cpp_info.libs.append("ftdipp")
-        self.cpp_info.libs.append("ftdi")
+            self.cpp_info.requires.append("boost::headers")

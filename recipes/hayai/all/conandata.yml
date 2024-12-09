@@ -1,0 +1,9 @@
+sources:
+  "cci.20190823":
+    url: "https://github.com/nickbruun/hayai/archive/9bdca1c693e950ab2cb17c4ef885792c3c530234.tar.gz"
+    sha256: "3e4b703b675a30338c73d9b207824cebd6275de9757eb8eefeef892e863c242f"
+patches:
+  "cci.20190823":
+    - patch_file: "patches/fix-cmake-project.patch"
+      patch_description: "Move cmake_minimum_required() before project() in CMakeLists.txt"
+      patch_type: "conan"

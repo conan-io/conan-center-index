@@ -60,18 +60,18 @@ class WasmerConan(ConanFile):
         del self.info.settings.compiler.version
         self.info.settings.compiler = self._compiler_alias
 
-    def source(self):
+    def build(self):
         get(
             self,
-            **self.conan_data["sources"][self.version][str(self.info.settings.os)][str(self.info.settings.arch)][self._compiler_alias]
+            **self.conan_data["sources"][self.version][str(self.settings.os)][str(self.settings.arch)][self._compiler_alias]
         )
 
     def package(self):
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.build_folder)
 
-        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
+        copy(self, pattern="*.h", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.build_folder, "include"))
 
-        srclibdir = os.path.join(self.source_folder, "lib")
+        srclibdir = os.path.join(self.build_folder, "lib")
         dstlibdir = os.path.join(self.package_folder, "lib")
         dstbindir = os.path.join(self.package_folder, "bin")
         if self.options.shared:
@@ -94,5 +94,8 @@ class WasmerConan(ConanFile):
                     self.cpp_info.system_libs.append("rt")
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["bcrypt", "userenv", "ws2_32"]
-            elif is_apple_os(self) and Version(self.version) >= "3.2.0":
-                self.cpp_info.frameworks = ["Security"]
+            elif is_apple_os(self):
+                if Version(self.version) >= "3.2.0":
+                    self.cpp_info.frameworks += ["Security"]
+                if Version(self.version) >= "4.2.5":
+                    self.cpp_info.frameworks += ["CoreFoundation", "SystemConfiguration"]

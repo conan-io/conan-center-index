@@ -13,6 +13,7 @@ class HedleyConan(ConanFile):
     homepage = "https://nemequ.github.io/hedley/"
     description = "A C/C++ header to help move #ifdefs out of your code"
     topics = ("header", "header-only", "preprocessor", "#ifdef", "cross-platform")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -23,8 +24,7 @@ class HedleyConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

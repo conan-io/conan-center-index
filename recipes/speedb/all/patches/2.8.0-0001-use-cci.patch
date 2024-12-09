@@ -1,0 +1,35 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a579792..62299e9 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -195,7 +195,11 @@ else()
+     find_package(zstd REQUIRED)
+     add_definitions(-DZSTD)
+     include_directories(${ZSTD_INCLUDE_DIR})
+-    list(APPEND THIRDPARTY_LIBS zstd::zstd)
++    if (TARGET zstd::libzstd_shared)
++        list(APPEND THIRDPARTY_LIBS zstd::libzstd_shared)
++    else()
++        list(APPEND THIRDPARTY_LIBS zstd::libzstd_static)
++    endif()
+   endif()
+ endif()
+ 
+diff --git a/tools/CMakeLists.txt b/tools/CMakeLists.txt
+index 90e76e2..96180cc 100644
+--- a/tools/CMakeLists.txt
++++ b/tools/CMakeLists.txt
+@@ -2,11 +2,12 @@ set(CORE_TOOLS
+   sst_dump.cc
+   ldb.cc
+   beezcli.cc)
++find_package(readline REQUIRED)
+ foreach(src ${CORE_TOOLS})
+   get_filename_component(exename ${src} NAME_WE)
+   add_executable(${exename}${ARTIFACT_SUFFIX}
+     ${src})
+-  target_link_libraries(${exename}${ARTIFACT_SUFFIX} ${ROCKSDB_LIB} readline)
++  target_link_libraries(${exename}${ARTIFACT_SUFFIX} ${ROCKSDB_LIB} readline::readline)
+   list(APPEND core_tool_deps ${exename})
+ endforeach()
+ 

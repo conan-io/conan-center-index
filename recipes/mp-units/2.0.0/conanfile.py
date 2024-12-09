@@ -14,7 +14,7 @@ required_conan_version = ">=1.59.0"
 class MPUnitsConan(ConanFile):
     name = "mp-units"
     homepage = "https://github.com/mpusz/mp-units"
-    description = "A Physical Quantities and Units library for C++"
+    description = "A Quantities and Units library for C++"
     topics = (
         "units",
         "dimensions",
@@ -42,8 +42,8 @@ class MPUnitsConan(ConanFile):
 
     @property
     def _minimum_compilers_version(self):
-        # Note that apple-clang and msvc are disabled for now, their C++ 20 implementations are not up to speed
-        return {"gcc": "11", "clang": "16"}
+        # Note that msvc is disabled for now, its C++20 implementation are not up to speed
+        return {"gcc": "12", "clang": "16", "apple-clang": "15"}
 
     @property
     def _use_libfmt(self):
@@ -52,18 +52,10 @@ class MPUnitsConan(ConanFile):
         std_support = compiler == "msvc" and version >= 193 and compiler.cppstd == 23
         return not std_support
 
-    @property
-    def _use_range_v3(self):
-        compiler = self.settings.compiler
-        version = Version(self.settings.compiler.version)
-        return "clang" in compiler and compiler.libcxx == "libc++" and version < 14
-
     def requirements(self):
         self.requires("gsl-lite/0.40.0")
         if self._use_libfmt:
-            self.requires("fmt/10.1.0")
-        if self._use_range_v3:
-            self.requires("range-v3/0.11.0")
+            self.requires("fmt/10.2.1")
 
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
@@ -81,11 +73,12 @@ class MPUnitsConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires at least {compiler} {min_version} ({compiler.version} in use)"
             )
-        
-        # Note that apple-clang and msvc are disabled for now, their C++ 20 implementations are not up to speed
+
         # Re-enable once newer versions with better support come out
-        if is_msvc(self) or compiler == "apple-clang":
-            raise ConanInvalidConfiguration(f"{self.ref} disabled for {compiler} as their C++20 implementation is not up to speed yet")
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(
+                f"{self.ref} disabled for {compiler} as their C++20 implementation is not up to speed yet"
+            )
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -126,8 +119,6 @@ class MPUnitsConan(ConanFile):
         self.cpp_info.components["core"].requires = ["gsl-lite::gsl-lite"]
         if compiler == "msvc":
             self.cpp_info.components["core"].cxxflags = ["/utf-8"]
-        if self._use_range_v3:
-            self.cpp_info.components["core"].requires.append("range-v3::range-v3")
 
         # rest
         self.cpp_info.components["core-io"].requires = ["core"]

@@ -1,11 +1,11 @@
 from conan import ConanFile
-from conan.tools.files import get, copy
-from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.files import copy, get
+from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">=2.0"
 
 
 class PackageConan(ConanFile):
@@ -19,7 +19,7 @@ class PackageConan(ConanFile):
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"  # even for pre-built executables
 
-    # not needed but supress warning message from conan commands
+    # not needed but suppress warning message from conan commands
     def layout(self):
         pass
 
@@ -37,7 +37,7 @@ class PackageConan(ConanFile):
     def source(self):
         pass
 
-    # download the source here, than copy to package folder
+    # download the source here, then copy to package folder
     def build(self):
         get(
             self,
@@ -48,9 +48,9 @@ class PackageConan(ConanFile):
     # copy all needed files to the package folder
     def package(self):
         # a license file is always mandatory
-        copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(self, pattern="*.exe", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder)
-        copy(self, pattern="foo", dst=os.path.join(self.package_folder, "bin"), src=self.source_folder)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.exe", self.source_folder, os.path.join(self.package_folder, "bin"))
+        copy(self, "foo", self.source_folder, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         # folders not used for pre-built binaries
@@ -58,7 +58,3 @@ class PackageConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        bin_folder = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bin_folder)

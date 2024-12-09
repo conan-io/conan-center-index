@@ -1,0 +1,11 @@
+sources:
+  "1.11.1":
+    "x86_64":
+      url: "https://github.com/lucasg/Dependencies/releases/download/v1.11.1/Dependencies_x64_Release.zip"
+      sha256: "7d22dc00f1c09fd4415d48ad74d1cf801893e83b9a39944b0fce6dea7ceaea99"
+    "x86":
+      url: "https://github.com/lucasg/Dependencies/releases/download/v1.11.1/Dependencies_x86_Release.zip"
+      sha256: "3e6bc62b4163c4e8035e8a597515c116343fcb76fa4315317c3cafe0bdc9e257"
+    "license":
+      url: "https://raw.githubusercontent.com/lucasg/Dependencies/v1.11.1/LICENSE"
+      sha256: "5d7cbf9b08285c1f89e4f4f1341090c662f4078dbf7ce8a7d392d2482e550fb6"

@@ -1,0 +1,13 @@
+sources:
+  "2.21.0":
+    url: "https://github.com/intel/libva/archive/refs/tags/2.21.0.tar.gz"
+    sha256: "f7c3fffef3f04eb146e036dad2587d852bfb70e4926d014bf437244915ef7425"
+  "2.20.0":
+    url: "https://github.com/intel/libva/archive/refs/tags/2.20.0.tar.gz"
+    sha256: "117f8d658a5fc9ea406ca80a3eb4ae1d70b15a54807c9ed77199c812bed73b60"
+patches:
+  "2.20.0":
+    - patch_file: "patches/0001-fix-win32-debug.patch"
+      patch_description: "Fix win32 debug build break"
+      patch_type: "backport"
+      patch_source: "https://github.com/intel/libva/pull/759"

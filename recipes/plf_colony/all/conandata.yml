@@ -1,4 +1,7 @@
 sources:
+  "7.39":
+    url: "https://github.com/mattreecebentley/plf_colony/archive/5bb011979a33ee29b4c57ee6a7813a22efc419b7.tar.gz"
+    sha256: "15812bbd5899d6845d9aeb38ecc6b2884e221326516496a76ebbcc2fb7c3f48b"
   "7.06":
     url: "https://github.com/mattreecebentley/plf_colony/archive/348174f0da2ea65b7a561b08412e81ce1f5e6161.tar.gz"
     sha256: "c6a34d08d4946f0ce54a9836b564b329afffc7ce173720282c7e2b0b57cbc484"

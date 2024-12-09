@@ -2,14 +2,27 @@ sources:
   "0.0.5":
     url: "https://github.com/pistacheio/pistache/archive/refs/tags/0.0.5.tar.gz"
     sha256: "e2da87ebc01367e33bd8d7800cb2bf5c23e9fb4e6f49dce2cab5f8756df8dca0"
+  "cci.20240107":
+    url: "https://github.com/pistacheio/pistache/archive/1c733a145b01a4737cf5c7dd3709bd85be404886.tar.gz"
+    sha256: "156d2a4503be3d6c0726009c83e6d2e6e2e6378e6136436fc2d82d13597b6b0b"
   "cci.20201127":
     url: "https://github.com/pistacheio/pistache/archive/a3c5c68e0f08e19331d53d12846079ad761fe974.tar.gz"
     sha256: "f1abb9e43ff847ebff8edb72623c9942162df134bccfb571af9c7817d3261fae"
 patches:
-  "cci.20201127":
-    - patch_file: "patches/0001-remove-fpic.patch"
-      patch_description: "disable fPIC"
-      patch_type: "conan"
-    - patch_file: "patches/0002-include-stddef.patch"
+  "0.0.5":
+    - patch_file: "patches/0.0.5-0001-include-cstdint.patch"
       patch_description: "include <stddef>"
       patch_type: "portability"
+      patch_source: "https://github.com/pistacheio/pistache/pull/1142"
+  "cci.20201127":
+    - patch_file: "patches/cci.20201127-0001-remove-fpic.patch"
+      patch_description: "disable fPIC"
+      patch_type: "conan"
+    - patch_file: "patches/cci.20201127-0002-include-stddef.patch"
+      patch_description: "include <stddef>"
+      patch_type: "portability"
+      patch_source: "https://github.com/pistacheio/pistache/pull/965"
+    - patch_file: "patches/cci.20201127-0003-include-cstdint.patch"
+      patch_description: "include <stddef>"
+      patch_type: "portability"
+      patch_source: "https://github.com/pistacheio/pistache/pull/1142"

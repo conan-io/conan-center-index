@@ -1,0 +1,42 @@
+--- a/CLHEP/GenericFunctions/src/AnalyticConvolution.cc
++++ b/CLHEP/GenericFunctions/src/AnalyticConvolution.cc
+@@ -5,7 +5,7 @@
+ #include "CLHEP/GenericFunctions/Gaussian.hh"
+ #include "CLHEP/GenericFunctions/Exponential.hh"
+ #include <cmath>	// for isfinite
+-#if (defined _WIN32)
++#ifdef _MSC_VER
+ #include <float.h> //  Visual C++ _finite
+ #endif
+ #include <iostream>
+@@ -81,7 +81,7 @@ double AnalyticConvolution::operator() (double argument) const {
+   if (_type==SMEARED_NEG_EXP) {
+     expG = exp((xsigma*xsigma +2*tau*(/*xoffset*/x))/(2.0*tau*tau)) * 
+       erfc((xsigma*xsigma+tau*(/*xoffset*/x))/(sqrtTwo*xsigma*tau))/(2.0*tau);
+-#if (defined _WIN32)
++#ifdef _MSC_VER
+     if (!_finite(expG)) {
+       expG=0.0;
+     }
+@@ -99,7 +99,7 @@ double AnalyticConvolution::operator() (double argument) const {
+   
+   // Both sign distribution=> return smeared exponential:
+   if (_type==SMEARED_EXP) {
+-#if (defined _WIN32)
++#ifdef _MSC_VER
+     if (!_finite(expG)) {
+       expG=0.0;
+     }
+--- a/CLHEP/Random/src/DRand48Engine.cc
++++ b/CLHEP/Random/src/DRand48Engine.cc
+@@ -38,6 +38,10 @@
+ #include <string.h>	// for strcmp
+ #include <stdlib.h>	// for std::abs(int)
+ 
++#if !defined(HAVE_DRAND48) && defined(__MINGW32__)
++#include "drand48.src"
++#endif
++
+ //#define TRACE_IO
+ 
+ #include <ostream>

@@ -15,9 +15,9 @@ class SfmlConan(ConanFile):
     name = "sfml"
     description = "Simple and Fast Multimedia Library."
     license = "Zlib"
-    topics = ("multimedia", "games", "graphics", "audio")
-    homepage = "https://www.sfml-dev.org"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://www.sfml-dev.org"
+    topics = ("multimedia", "games", "graphics", "audio")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -60,10 +60,10 @@ class SfmlConan(ConanFile):
                 self.requires("libudev/system")
                 self.requires("xorg/system")
         if self.options.graphics:
-            self.requires("freetype/2.13.0")
-            self.requires("stb/cci.20220909")
+            self.requires("freetype/2.13.2")
+            self.requires("stb/cci.20230920")
         if self.options.audio:
-            self.requires("flac/1.4.2")
+            self.requires("flac/1.4.3")
             self.requires("openal-soft/1.22.2")
             self.requires("vorbis/1.3.7")
             if Version(self.version) >= "2.6.0":
@@ -99,6 +99,13 @@ class SfmlConan(ConanFile):
             tc.variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
         tc.generate()
         deps = CMakeDeps(self)
+        if Version(self.version) >= "2.6.2":
+            if self.options.audio:
+                deps.set_property("vorbis", "cmake_file_name", "VORBIS")
+            if self.options.graphics:
+                deps.set_property("freetype", "cmake_file_name", "Freetype")
+                deps.set_property("freetype", "cmake_additional_variables_prefixes", ["FREETYPE"])
+                deps.set_property("freetype", "cmake_target_name", "Freetype")
         deps.generate()
 
     def build(self):
@@ -115,27 +122,6 @@ class SfmlConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {values["target"]: f"SFML::{component}" for component, values in self._sfml_components.items()}
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
     @property
     def _sfml_components(self):
         def gdi32():
@@ -146,6 +132,9 @@ class SfmlConan(ConanFile):
 
         def ws2_32():
             return ["ws2_32"] if self.settings.os == "Windows" else []
+
+        def dl():
+            return ["dl"] if self.settings.os in ["Linux", "FreeBSD"] and Version(self.version) >= "2.6.0" else []
 
         def libudev():
             return ["libudev::libudev"] if self.settings.os == "Linux" else []
@@ -235,7 +224,7 @@ class SfmlConan(ConanFile):
                     "target": "sfml-window",
                     "libs": [f"sfml-window{suffix}"],
                     "requires": ["system"] + opengl() + xorg() + libudev(),
-                    "system_libs": gdi32() + winmm() + usbhid() + android() + opengles_android(),
+                    "system_libs": dl() + gdi32() + winmm() + usbhid() + android() + opengles_android(),
                     "frameworks": foundation() + appkit() + iokit() + carbon() +
                                   uikit() + coregraphics() + quartzcore() +
                                   coreservices() + coremotion() + opengles_ios(),
@@ -302,13 +291,4 @@ class SfmlConan(ConanFile):
                 self.cpp_info.components[component].frameworks = frameworks
                 self.cpp_info.components[component].exelinkflags = exelinkflags
 
-                # TODO: to remove in conan v2 once cmake_find_package* generators removed
-                self.cpp_info.components[component].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-                self.cpp_info.components[component].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-
         _register_components(self._sfml_components)
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "SFML"
-        self.cpp_info.names["cmake_find_package_multi"] = "SFML"
-        self.cpp_info.names["pkgconfig"] = "sfml-all"

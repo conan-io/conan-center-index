@@ -1,9 +1,21 @@
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag
-from conans import ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
 import os
+import shutil
+import platform
 
-required_conan_version = ">=1.45.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os, fix_apple_shared_install_name, XCRun
+from conan.tools.build import build_jobs, check_min_cppstd
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
+from conan.tools.gnu import AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, VCVars, check_min_vs
+from conan.tools.microsoft import unix_path
+from conan.tools.scm import Version
+
+
+required_conan_version = ">=1.55"
 
 
 class BotanConan(ConanFile):
@@ -11,9 +23,10 @@ class BotanConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/randombit/botan"
     license = "BSD-2-Clause"
-    description = "Botan is a cryptography library written in C++11."
-    topics = ("cryptography", "crypto", "C++11", "tls")
+    description = "Botan is a cryptography library written in modern C++."
+    topics = ("cryptography", "crypto", "c++11", "c++20", "tls")
 
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -21,7 +34,6 @@ class BotanConan(ConanFile):
         "amalgamation": [True, False],
         "with_bzip2": [True, False],
         "with_openssl": [True, False],
-        "single_amalgamation": [True, False],
         "with_sqlite3": [True, False],
         "with_zlib": [True, False],
         "with_boost": [True, False],
@@ -39,8 +51,11 @@ class BotanConan(ConanFile):
         "with_neon": [True, False],
         "with_armv8crypto": [True, False],
         "with_powercrypto": [True, False],
-        "enable_modules": "ANY",
-        "system_cert_bundle": "ANY",
+        "enable_modules": [None, "ANY"],
+        "disable_modules": [None, "ANY"],
+        "enable_experimental_features": [True, False],
+        "enable_deprecated_features": [True, False],
+        "system_cert_bundle": [None, "ANY"],
         "module_policy": [None, "bsi", "modern", "nist"],
     }
     default_options = {
@@ -49,7 +64,6 @@ class BotanConan(ConanFile):
         "amalgamation": True,
         "with_bzip2": False,
         "with_openssl": False,
-        "single_amalgamation": False,
         "with_sqlite3": False,
         "with_zlib": False,
         "with_boost": False,
@@ -68,9 +82,14 @@ class BotanConan(ConanFile):
         "with_armv8crypto": True,
         "with_powercrypto": True,
         "enable_modules": None,
+        "disable_modules": None,
+        "enable_experimental_features": False,
+        "enable_deprecated_features": True,
         "system_cert_bundle": None,
         "module_policy": None,
     }
+
+    _extra_cxxflags = None
 
     @property
     def _is_x86(self):
@@ -84,14 +103,8 @@ class BotanConan(ConanFile):
     def _is_arm(self):
         return 'arm' in str(self.settings.arch)
 
-    @property
-    def _source_subfolder(self):
-        # Required to build at least 2.12.1
-        return "sources"
-
     def export_sources(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            self.copy(patch["patch_file"])
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -115,86 +128,143 @@ class BotanConan(ConanFile):
             del self.options.with_altivec
             del self.options.with_powercrypto
 
-        # --single-amalgamation option is no longer available
-        # See also https://github.com/randombit/botan/pull/2246
-        if tools.Version(self.version) >= '2.14.0':
-            del self.options.single_amalgamation
+        # Support for the OpenSSL provider was removed in 2.19.2
+        if Version(self.version) >= '2.19.2':
+            del self.options.with_openssl
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
     def requirements(self):
         if self.options.with_bzip2:
             self.requires("bzip2/1.0.8")
-        if self.options.with_openssl:
-            self.requires("openssl/1.1.1o")
+        if self.options.get_safe('with_openssl', False):
+            self.requires("openssl/[>=1.1 <3]")
         if self.options.with_zlib:
-            self.requires("zlib/1.2.12")
+            self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.38.5")
+            self.requires("sqlite3/3.45.1")
         if self.options.with_boost:
-            self.requires("boost/1.79.0")
+            self.requires("boost/1.84.0")
 
     @property
     def _required_boost_components(self):
         return ['coroutine', 'system']
 
+    @property
+    def _min_cppstd(self):
+        # From the same links as below
+        return 11 if Version(self.version) < "3.0.0" else 20
+
+    @property
+    def _compilers_minimum_version(self):
+        if Version(self.version).major < 3:
+            # From https://github.com/randombit/botan/blob/2.19.3/doc/support.rst
+            return {
+                "gcc": "4.8",
+                "clang": "3.5",
+                "Visual Studio": "14",
+                "msvc": "190",
+            }
+        else:
+            # From https://github.com/randombit/botan/blob/master/doc/support.rst
+            return {
+                "gcc":  "11.2",
+                "clang": "14",
+                "apple-clang": "14",
+                "Visual Studio": "17",
+                "msvc": "193",
+            }
+
     def validate(self):
         if self.options.with_boost:
-            miss_boost_required_comp = any(getattr(self.options['boost'], 'without_{}'.format(boost_comp), True) for boost_comp in self._required_boost_components)
-            if self.options['boost'].header_only or self.options['boost'].shared or self.options['boost'].magic_autolink or miss_boost_required_comp:
-                raise ConanInvalidConfiguration('{0} requires non-header-only static boost, without magic_autolink, and with these components: {1}'.format(self.name, ', '.join(self._required_boost_components)))
+            boost_opts = self.dependencies['boost'].options
+            miss_boost_required_comp = any(getattr(boost_opts, 'without_{}'.format(boost_comp), True) for boost_comp in self._required_boost_components)
+            if boost_opts.header_only or boost_opts.shared or boost_opts.magic_autolink or miss_boost_required_comp:
+                raise ConanInvalidConfiguration(
+                    f"{self.name} requires non-header-only static boost, "
+                    f"without magic_autolink, and with these components: {', '.join(self._required_boost_components)}")
+        if self.settings.get_safe("compiler.cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
 
         compiler = self.settings.compiler
-        version = tools.Version(self.settings.compiler.version)
+        compiler_name = str(compiler)
+        compiler_version = Version(compiler.version)
 
-        if compiler == 'Visual Studio' and version < '14':
-            raise ConanInvalidConfiguration("Botan doesn't support MSVC < 14")
+        check_min_vs(self, self._compilers_minimum_version["msvc"])
+        if not is_msvc(self):
+            minimum_version = self._compilers_minimum_version.get(compiler_name, False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support (minimum {compiler_name} {minimum_version})."
+                )
+            if not minimum_version:
+                self.output.warning(f"{self.name} recipe lacks information about the {compiler_name} compiler support.")
 
-        elif compiler == 'gcc' and version >= '5' and compiler.libcxx != 'libstdc++11':
+        if self.settings.compiler == 'gcc' and compiler_version >= "5" and self.settings.compiler.libcxx != 'libstdc++11':
             raise ConanInvalidConfiguration(
                 'Using Botan with GCC >= 5 on Linux requires "compiler.libcxx=libstdc++11"')
 
-        elif compiler == 'clang' and compiler.libcxx not in ['libstdc++11', 'libc++']:
+        if self.settings.compiler == 'clang' and self.settings.compiler.libcxx not in ['libstdc++11', 'libc++']:
             raise ConanInvalidConfiguration(
                 'Using Botan with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
                 'or "compiler.libcxx=libc++"')
 
         # Some older compilers cannot handle the amalgamated build anymore
         # See also https://github.com/randombit/botan/issues/2328
-        if tools.Version(self.version) >= '2.14.0' and self.options.amalgamation:
-            if (compiler == 'apple-clang' and version < '10') or \
-               (compiler == 'gcc' and version < '8') or \
-               (compiler == 'clang' and version < '7'):
+        if self.options.amalgamation:
+            if (self.settings.compiler == 'apple-clang' and compiler_version < '10') or \
+               (self.settings.compiler == 'gcc' and compiler_version < '8') or \
+               (self.settings.compiler == 'clang' and compiler_version < '7'):
                 raise ConanInvalidConfiguration(
-                    'botan amalgamation is not supported for {}/{}'.format(compiler, version))
+                    f"botan amalgamation is not supported for {compiler}/{compiler_version}")
 
-        if self.options.get_safe("single_amalgamation", False) and not self.options.amalgamation:
-            raise ConanInvalidConfiguration("botan:single_amalgamation=True requires botan:amalgamation=True")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def source(self):
-        tools.get(**self.conan_data['sources'][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    @property
+    def _cxxflags(self):
+        global_cxxflags = " ".join(self.conf.get("tools.build:cxxflags", default=[], check_type=list))
+        env_cxxflags = VirtualBuildEnv(self).vars().get("CXXFLAGS", default="")
+        cxxflags = f"{env_cxxflags} {global_cxxflags}".strip()
+        return cxxflags if len(cxxflags) > 1 else None
+
+    def generate(self):
+        if is_msvc(self):
+            ms = VCVars(self)
+            ms.generate()
+
+        # This is to work around botan's configure script that *replaces* its
+        # standard (platform dependent) flags in presence of an environment
+        # variable ${CXXFLAGS}. Most notably, this would build botan with
+        # disabled compiler optimizations.
+        self._extra_cxxflags = self._cxxflags
+        self.buildenv.unset('CXXFLAGS')
+        VirtualBuildEnv(self).generate()
 
     def build(self):
-        for patch in self.conan_data.get('patches', {}).get(self.version, []):
-            tools.patch(**patch)
-        with tools.chdir(self._source_subfolder):
+        apply_conandata_patches(self)
+        with chdir(self, self.source_folder):
             self.run(self._configure_cmd)
             self.run(self._make_cmd)
 
     def package(self):
-        self.copy(pattern='license.txt', dst='licenses', src=self._source_subfolder)
-        with tools.chdir(self._source_subfolder):
+        copy(self, "license.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        with chdir(self, self.source_folder):
+            # Note: this will fail to properly consider the package_folder if a "conan build" followed by a "conan export-pkg" is executed
             self.run(self._make_install_cmd)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
-        major_version = tools.Version(self.version).major
+        major_version = Version(self.version).major
         self.cpp_info.set_property("pkg_config_name", f"botan-{major_version}")
-        self.cpp_info.names["pkg_config"] = f"botan-{major_version}"
-        self.cpp_info.libs = ["botan" if is_msvc(self) else f"botan-{major_version}"]
+        self.cpp_info.libs = ["botan" if is_msvc(self) and major_version < 3 else f"botan-{major_version}"]
         if self.settings.os == 'Linux':
-            self.cpp_info.system_libs.extend(['dl', 'rt', 'pthread'])
+            self.cpp_info.system_libs.extend(['dl', 'rt', 'pthread', 'm'])
         if self.settings.os == 'Macos':
             self.cpp_info.frameworks = ['Security', 'CoreFoundation']
         if self.settings.os == 'Windows':
@@ -220,10 +290,10 @@ class BotanConan(ConanFile):
     def _dependency_build_flags(self, dependency):
         # Since botan has a custom build system, we need to specifically inject
         # these build parameters so that it picks up the correct dependencies.
-        dep_cpp_info = self.deps_cpp_info[dependency]
+        dep_cpp_info = self.dependencies[dependency].cpp_info
         return \
-            ['--with-external-includedir={}'.format(include_path) for include_path in dep_cpp_info.include_paths] + \
-            ['--with-external-libdir={}'.format(lib_path) for lib_path in dep_cpp_info.lib_paths] + \
+            ['--with-external-includedir={}'.format(include_path) for include_path in dep_cpp_info.includedirs] + \
+            ['--with-external-libdir={}'.format(lib_path) for lib_path in dep_cpp_info.libdirs] + \
             ['--define-build-macro={}'.format(define) for define in dep_cpp_info.defines]
 
     @property
@@ -256,48 +326,55 @@ class BotanConan(ConanFile):
             elif self.settings.arch in ['x86_64']:
                 botan_abi_flags.append('-arch x86_64')
 
-        if self.options.get_safe('fPIC', True):
+        if self.options.get_safe('fPIC', True) and not is_msvc(self):
             botan_extra_cxx_flags.append('-fPIC')
 
-        if tools.is_apple_os(self.settings.os):
+        if is_apple_os(self):
             if self.settings.get_safe('os.version'):
                 # Required, see https://github.com/conan-io/conan-center-index/pull/3456
-                macos_min_version = tools.apple_deployment_target_flag(self.settings.os,
-                                                                       self.settings.get_safe('os.version'),
-                                                                       self.settings.get_safe('os.sdk'),
-                                                                       self.settings.get_safe('os.subsystem'),
-                                                                       self.settings.get_safe('arch'))
+                macos_min_version = macos_min_version = AutotoolsToolchain(self).apple_min_version_flag
                 botan_extra_cxx_flags.append(macos_min_version)
-            macos_sdk_path = '-isysroot {}'.format(tools.XCRun(self.settings).sdk_path)
+            macos_sdk_path = '-isysroot {}'.format(XCRun(self).sdk_path)
             botan_extra_cxx_flags.append(macos_sdk_path)
 
-        # This is to work around botan's configure script that *replaces* its
-        # standard (platform dependent) flags in presence of an environment
-        # variable ${CXXFLAGS}. Most notably, this would build botan with
-        # disabled compiler optimizations.
-        environment_cxxflags = tools.get_env('CXXFLAGS')
-        if environment_cxxflags:
-            del os.environ['CXXFLAGS']
-            botan_extra_cxx_flags.append(environment_cxxflags)
+        if self._extra_cxxflags:
+            botan_extra_cxx_flags.append(self._extra_cxxflags)
+
+        if Version(self.version) >= '3.4':
+            # Botan 3.4.0 introduced a 'module life cycle' feature, before that
+            # the experimental/deprecated feature switches are ignored.
+
+            if self.options.enable_experimental_features:
+                build_flags.append('--enable-experimental-features')
+            else:
+                build_flags.append('--disable-experimental-features')
+
+            if self.options.enable_deprecated_features:
+                build_flags.append('--enable-deprecated-features')
+            else:
+                build_flags.append('--disable-deprecated-features')
 
         if self.options.enable_modules:
             build_flags.append('--minimized-build')
             build_flags.append('--enable-modules={}'.format(self.options.enable_modules))
 
+        if self.options.disable_modules:
+            build_flags.append('--disable-modules={}'.format(self.options.disable_modules))
+
         if self.options.amalgamation:
             build_flags.append('--amalgamation')
 
-        if self.options.get_safe('single_amalgamation'):
-            build_flags.append('--single-amalgamation-file')
-
         if self.options.system_cert_bundle:
             build_flags.append('--system-cert-bundle={}'.format(self.options.system_cert_bundle))
+
+        if self.conf.get("tools.build:sysroot"):
+            build_flags.append(f'--with-sysroot-dir={self.conf.get("tools.build:sysroot")}')
 
         if self.options.with_bzip2:
             build_flags.append('--with-bzip2')
             build_flags.extend(self._dependency_build_flags('bzip2'))
 
-        if self.options.with_openssl:
+        if self.options.get_safe('with_openssl', False):
             build_flags.append('--with-openssl')
             build_flags.extend(self._dependency_build_flags('openssl'))
 
@@ -375,11 +452,17 @@ class BotanConan(ConanFile):
         if is_msvc(self):
             build_flags.append(f"--msvc-runtime={msvc_runtime_flag(self)}")
 
+        if self._is_glibc_older_than_2_25_on_linux and Version(self.version) >= '3.0':
+            # INFO: Botan 3.0+ requires glibc >= 2.25. Disable features to make it backward compatible
+            # FIXME: CCI Docker images are running Ubuntu 16.04. Remove it after supporting later version.
+            self.output.warning("Disabling usage of getentropy(), getrandom(), and explicit_bzero() due to old glibc version")
+            build_flags.append('--without-os-features=getentropy,getrandom,explicit_bzero')
+
         build_flags.append('--without-pkg-config')
 
         call_python = 'python' if self.settings.os == 'Windows' else ''
 
-        prefix = tools.unix_path(self.package_folder) if self._is_mingw_windows else self.package_folder
+        prefix = unix_path(self, self.package_folder) if self._is_mingw_windows else self.package_folder
 
         botan_abi = ' '.join(botan_abi_flags) if botan_abi_flags else ' '
         botan_cxx_extras = ' '.join(botan_extra_cxx_flags) if botan_extra_cxx_flags else ' '
@@ -392,7 +475,7 @@ class BotanConan(ConanFile):
                          ' --extra-cxxflags="{cxxflags}"'
                          ' --cc={compiler}'
                          ' --cpu={cpu}'
-                         ' --prefix={prefix}'
+                         ' --prefix="{prefix}"'
                          ' --os={os}'
                          ' {build_flags}').format(
                              python_call=call_python,
@@ -413,27 +496,23 @@ class BotanConan(ConanFile):
 
     @property
     def _make_program(self):
-        return tools.get_env('CONAN_MAKE_PROGRAM', tools.which('make') or tools.which('mingw32-make'))
+        return self.conf.get("tools.gnu:make_program", os.getenv('CONAN_MAKE_PROGRAM', shutil.which('make') or shutil.which('mingw32-make')))
 
     @property
     def _gnumake_cmd(self):
         make_ldflags = 'LDFLAGS=-lc++abi' if self._is_linux_clang_libcxx else ''
 
-        make_cmd = ('{ldflags}' ' {make}' ' -j{cpucount}').format(
-                        ldflags=make_ldflags, make=self._make_program, cpucount=tools.cpu_count())
+        make_cmd = f"{make_ldflags} {self._make_program} -j{build_jobs(self)}"
         return make_cmd
 
     @property
     def _nmake_cmd(self):
-        vcvars = tools.vcvars_command(self.settings)
-        make_cmd = vcvars + ' && nmake'
-        return make_cmd
+        return 'nmake'
 
     @property
     def _make_install_cmd(self):
         if is_msvc(self):
-            vcvars = tools.vcvars_command(self.settings)
-            make_install_cmd = vcvars + ' && nmake install'
+            make_install_cmd = '{make} install'.format(make=self._nmake_cmd)
         else:
             make_install_cmd = '{make} install'.format(make=self._make_program)
         return make_install_cmd
@@ -444,4 +523,22 @@ class BotanConan(ConanFile):
             self.settings.os == 'Linux' and
             self.settings.compiler == 'clang' and
             self.settings.compiler.libcxx == 'libc++'
+        )
+
+    @property
+    def _is_glibc_older_than_2_25_on_linux(self):
+        # FIXME: glibc below 2.25 lacks support for certain syscalls that botan assumes
+        # to be present. Once CCI updated their CI images and provides a newer
+        # glibc, we can (and should) remove this workaround.
+        #
+        # https://github.com/conan-io/conan-center-index/pull/18079#issuecomment-1919206949
+        # https://github.com/conan-io/conan-center-index/pull/18079#issuecomment-1919486839
+
+        if self.settings.os != 'Linux':
+            return False
+        libver = platform.libc_ver()
+        return (
+            self.settings.os == 'Linux' and
+            libver[0] == 'glibc' and
+            Version(libver[1]) < '2.25'
         )

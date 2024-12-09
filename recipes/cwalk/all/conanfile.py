@@ -13,13 +13,12 @@ class CwalkConan(ConanFile):
     description = "Path library for C/C++. Cross-Platform for Windows, " \
                   "MacOS and Linux. Supports UNIX and Windows path styles " \
                   "on those platforms."
-    url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://likle.github.io/cwalk/"
     topics = ("cross-platform", "windows", "macos", "osx", "linux",
               "path-manipulation", "path", "directory", "file", "file-system",
               "unc", "path-parsing", "file-path")
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -65,6 +64,7 @@ class CwalkConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self._create_cmake_module_alias_targets(
@@ -93,6 +93,8 @@ class CwalkConan(ConanFile):
         self.cpp_info.libs = ["cwalk"]
         if self.options.shared and Version(self.version) >= "1.2.5":
             self.cpp_info.defines.append("CWK_SHARED")
+        if Version(self.version) >= "1.2.8":
+            self.cpp_info.set_property("pkg_config_name", "cwalk")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "Cwalk"

@@ -1,9 +1,17 @@
 versions:
-  "20.47.0":
+  "20.70.0":
     folder: all
-  "20.45.0":
+  "20.68.0":
     folder: all
-  "19.3.0":
+  "20.67.0":
     folder: all
-  "18.3.0":
+  "20.66.0":
+    folder: all
+  "20.65.0":
+    folder: all
+  "20.64.0":
+    folder: all
+  "20.63.0":
+    folder: all
+  "20.62.0":
     folder: all

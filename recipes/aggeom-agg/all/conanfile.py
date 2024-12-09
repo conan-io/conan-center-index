@@ -50,7 +50,7 @@ class AggConan(ConanFile):
 
     def requirements(self):
         if self.options.with_freetype:
-            self.requires("freetype/2.13.0")
+            self.requires("freetype/2.13.2")
         if self.options.with_platform and self.settings.os in ["Linux"]:
             self.requires("xorg/system")
 

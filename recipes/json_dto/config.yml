@@ -1,15 +1,15 @@
 versions:
-  "0.2.11":
+  "0.3.4":
     folder: all
-  "0.2.12":
+  "0.3.3":
     folder: all
-  "0.2.13":
+  "0.3.2":
     folder: all
-  "0.2.14":
-    folder: all
-  "0.2.15":
+  "0.3.1":
     folder: all
   "0.3.0":
     folder: all
-  "0.3.1":
+  "0.2.15":
+    folder: all
+  "0.2.14":
     folder: all

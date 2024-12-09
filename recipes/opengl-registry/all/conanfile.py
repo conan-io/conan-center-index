@@ -13,6 +13,7 @@ class OpenGLRegistryConan(ConanFile):
     topics = ("opengl-registry", "opengl")
     homepage = "https://github.com/KhronosGroup/OpenGL-Registry"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -26,8 +27,7 @@ class OpenGLRegistryConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass
@@ -46,3 +46,4 @@ class OpenGLRegistryConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        self.cpp_info.resdirs = ["res"]

@@ -17,14 +17,12 @@ class AstroInformaticsSO3(ConanFile):
     homepage = "https://github.com/astro-informatics/so3"
     topics = ("physics", "astrophysics", "radio interferometry")
 
-    package_type = "library"
+    package_type = "static-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
-        "shared": False,
         "fPIC": True,
     }
 
@@ -40,8 +38,8 @@ class AstroInformaticsSO3(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("ssht/1.4.0", transitive_headers=True)
-        self.requires("fftw/3.3.9")
+        self.requires("ssht/1.5.2", transitive_headers=True, transitive_libs=True)
+        self.requires("fftw/3.3.10")
 
     def validate(self):
         if is_msvc(self):
@@ -68,9 +66,7 @@ class AstroInformaticsSO3(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=self.source_folder)
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 

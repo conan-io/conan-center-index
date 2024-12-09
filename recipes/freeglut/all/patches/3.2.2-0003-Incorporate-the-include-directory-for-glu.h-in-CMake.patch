@@ -1,0 +1,61 @@
+From 278ac11cf27c8112021735240dc0b34fe849045e Mon Sep 17 00:00:00 2001
+From: Jordan Williams <jordan@jwillikers.com>
+Date: Wed, 7 Feb 2024 10:09:25 -0600
+Subject: [PATCH] Incorporate the include directory for glu.h in CMake
+
+FreeGLUT doesn't properly check for the glu.h header file when it is required.
+The glu.h header is not necessary when FreeGLUT is built for GLES.
+However, the demos require use libGLU and so require the include and the library.
+
+CMake's FindOpenGL didn't properly search for the glu.h header file until very recently.
+Refer to this PR: https://gitlab.kitware.com/cmake/cmake/-/merge_requests/9216.
+
+This PR checks for the glu.h header and adds the corresponding include directory when it is required.
+For versions of CMake prior to 3.29, the include directory for GLU is added even when linking against the OpenGL::GLU target.
+Like the FindOpenGL module, GLU include directories are ignored on Windows.
+---
+ CMakeLists.txt | 21 ++++++++++++++++++++-
+ 1 file changed, 20 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c2549b1b..4ebc33af 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -294,6 +294,17 @@ ELSE()
+       LIST(APPEND LIBS ${OPENGL_gl_LIBRARY})
+       INCLUDE_DIRECTORIES(${OPENGL_INCLUDE_DIR})
+     endif()
++
++    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
++      # CMake 3.29 properly locates the include directory for glu.h in the OPENGL_GLU_INCLUDE_DIR variable for us.
++      if(CMAKE_VERSION VERSION_LESS "3.29")
++        FIND_PATH(OPENGL_GLU_INCLUDE_DIR NAMES GL/glu.h OpenGL/glu.h HINTS ${OPENGL_INCLUDE_DIR})
++      endif()
++      if(NOT OPENGL_GLU_INCLUDE_DIR)
++        message(FATAL_ERROR "Failed to find the glu.h header file.")
++      endif()
++      INCLUDE_DIRECTORIES(${OPENGL_GLU_INCLUDE_DIR})
++    endif()
+ ENDIF()
+ 
+ # For Wayland: compile with -DFREEGLUT_WAYLAND and pull EGL
+@@ -578,7 +589,15 @@ INSTALL(FILES ${FREEGLUT_HEADERS} DESTINATION include/GL COMPONENT Devel)
+ # Optionally build demos, on by default.
+ option( FREEGLUT_BUILD_DEMOS "Build FreeGLUT demos." ON )
+ 
+-SET(DEMO_LIBS ${OPENGL_glu_LIBRARY} ${LIBS})
++set(DEMO_LIBS ${LIBS})
++if (FREEGLUT_BUILD_DEMOS)
++    if (OPENGL_GLU_FOUND)
++        list(APPEND DEMO_LIBS ${OPENGL_glu_LIBRARY})
++    else()
++        message(FATAL_ERROR "Failed to find the GLU library which is required to build the demos.")
++    endif()
++endif()
++
+ # lib m for math, not needed on windows
+ IF (NOT WIN32)
+     LIST(APPEND DEMO_LIBS m)
+-- 
+2.43.2
+

@@ -1,13 +1,10 @@
-cmake_minimum_required(VERSION 3.2)
-
+cmake_minimum_required(VERSION 3.12)
 project(enchant VERSION "${CONAN_enchant_VERSION}")
 
-set(root "${PROJECT_SOURCE_DIR}/source_subfolder")
+set(root "${PROJECT_SOURCE_DIR}/src")
 set(src "${root}/src")
 set(bin "${PROJECT_BINARY_DIR}")
 
-include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-conan_basic_setup(TARGETS KEEP_RPATHS)
 
 # ---- Config headers ----
 
@@ -54,7 +51,9 @@ add_library(
     "${src}/pwl.c"
 )
 
-target_compile_definitions(enchant PRIVATE NO_XMALLOC=1 PIC=1 ENABLE_COSTLY_RELOCATABLE=1)
+find_package(glib REQUIRED CONFIG)
+
+target_compile_definitions(enchant PRIVATE NO_XMALLOC=1 PIC=1 ENABLE_COSTLY_RELOCATABLE=1 _GNU_SOURCE=1)
 target_include_directories(enchant PUBLIC "${bin}" "${src}" "${root}/lib")
 target_link_libraries(enchant PRIVATE glib::glib-2.0 glib::gmodule-2.0 ${DLADDR_LIBRARIES})
 
@@ -79,12 +78,7 @@ target_link_libraries(enchant_hunspell PRIVATE hunspell::hunspell glib::glib-2.0
 
 include(GNUInstallDirs)
 
-install(
-    TARGETS enchant
-    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
-    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-)
+install(TARGETS enchant)
 
 if(NOT providers STREQUAL "")
   install(

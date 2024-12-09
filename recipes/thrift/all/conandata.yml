@@ -1,4 +1,7 @@
 sources:
+  "0.20.0":
+    url: "http://archive.apache.org/dist/thrift/0.20.0/thrift-0.20.0.tar.gz"
+    sha256: "b5d8311a779470e1502c027f428a1db542f5c051c8e1280ccd2163fa935ff2d6"
   "0.18.1":
     url: "http://archive.apache.org/dist/thrift/0.18.1/thrift-0.18.1.tar.gz"
     sha256: "04c6f10e5d788ca78e13ee2ef0d2152c7b070c0af55483d6b942e29cff296726"
@@ -18,6 +21,10 @@ sources:
     url: "http://archive.apache.org/dist/thrift/0.14.1/thrift-0.14.1.tar.gz"
     sha256: "13da5e1cd9c8a3bb89778c0337cc57eb0c29b08f3090b41cf6ab78594b410ca5"
 patches:
+  "0.20.0":
+    - patch_file: "patches/cmake-0.16.0.patch"
+      patch_description: "use cci packages"
+      patch_type: "conan"
   "0.18.1":
     - patch_file: "patches/cmake-0.16.0.patch"
       patch_description: "use cci packages"

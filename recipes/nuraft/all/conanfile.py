@@ -10,7 +10,7 @@ required_conan_version = ">=1.53.0"
 
 class NuRaftConan(ConanFile):
     name = "nuraft"
-    homepage = "https://github.corp.ebay.com/sds/NuRaft"
+    homepage = "https://github.com/eBay/NuRaft"
     description = """Cornerstone based RAFT library."""
     topics = ("raft",)
     url = "https://github.com/conan-io/conan-center-index"

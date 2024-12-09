@@ -1,20 +1,19 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.1"
 
 
 class CpphttplibConan(ConanFile):
     name = "cpp-httplib"
     description = "A C++11 single-file header-only cross platform HTTP/HTTPS library."
     license = "MIT"
-    homepage = "https://github.com/yhirose/cpp-httplib"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/yhirose/cpp-httplib"
     topics = ("http", "https", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
@@ -22,41 +21,43 @@ class CpphttplibConan(ConanFile):
         "with_openssl": [True, False],
         "with_zlib": [True, False],
         "with_brotli": [True, False],
+        "use_macos_keychain_certs": [True, False],
     }
     default_options = {
         "with_openssl": False,
         "with_zlib": False,
         "with_brotli": False,
+        "use_macos_keychain_certs": True,
     }
     no_copy_source = True
 
     def config_options(self):
-        if Version(self.version) < "0.7.2":
-            del self.options.with_brotli
+        if self.settings.os != "Macos":
+            del self.options.use_macos_keychain_certs
 
     def requirements(self):
         if self.options.with_openssl:
-            self.requires("openssl/[>=1.1 <4]")
+            if Version(self.version) < "0.15":
+                self.requires("openssl/[>=1.1 <4]")
+            else:
+                # New version of httplib.h requires OpenSSL 3
+                self.requires("openssl/[>=3 <4]")
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
-        if self.options.get_safe("with_brotli"):
-            self.requires("brotli/1.0.9")
+        if self.options.with_brotli:
+            self.requires("brotli/1.1.0")
 
     def package_id(self):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def build(self):
-        pass
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
@@ -72,13 +73,12 @@ class CpphttplibConan(ConanFile):
             self.cpp_info.defines.append("CPPHTTPLIB_OPENSSL_SUPPORT")
         if self.options.with_zlib:
             self.cpp_info.defines.append("CPPHTTPLIB_ZLIB_SUPPORT")
-        if self.options.get_safe("with_brotli"):
+        if self.options.with_brotli:
             self.cpp_info.defines.append("CPPHTTPLIB_BROTLI_SUPPORT")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["crypt32", "cryptui", "ws2_32"]
-
-        # TODO: to remove in conan v2 once legacy generators removed
-        self.cpp_info.names["cmake_find_package"] = "httplib"
-        self.cpp_info.names["cmake_find_package_multi"] = "httplib"
+        elif self.settings.os == "Macos" and self.options.with_openssl and self.options.get_safe("use_macos_keychain_certs"):
+            self.cpp_info.frameworks = ["CoreFoundation", "Security"]
+            self.cpp_info.defines.append("CPPHTTPLIB_USE_CERTS_FROM_MACOSX_KEYCHAIN")

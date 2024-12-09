@@ -1,68 +1,78 @@
-from conans import ConanFile, tools, AutoToolsBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.tools.files import get, export_conandata_patches, apply_conandata_patches, chdir, copy, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 import os
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 class TinyAlsaConan(ConanFile):
     name = "tinyalsa"
+    description = "A small library to interface with ALSA in the Linux kernel"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/tinyalsa/tinyalsa"
     topics = ("tiny", "alsa", "sound", "audio", "tinyalsa")
-    description = "A small library to interface with ALSA in the Linux kernel"
-    exports_sources = ["patches/*",]
-    options = {"shared": [True, False], "with_utils": [True, False]}
-    default_options = {'shared': False, 'with_utils': False}
+    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
+    options = {"shared": [True, False], "with_utils": [True, False]}
+    default_options = {"shared": False, "with_utils": False}
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration("{} only works for Linux.".format(self.name))
 
     def configure(self):
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+    
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = AutotoolsToolchain(self)
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        with tools.chdir(self._source_subfolder):
-            env_build = AutoToolsBuildEnvironment(self)
-            env_build.make()
+        apply_conandata_patches(self)
+        with chdir(self, self.source_folder):
+            at = Autotools(self)
+            at.make()
 
     def package(self):
-        self.copy("NOTICE", dst="licenses", src=self._source_subfolder)
+        copy(self, "NOTICE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
-        with tools.chdir(self._source_subfolder):
-            env_build = AutoToolsBuildEnvironment(self)
-            env_build_vars = env_build.vars
-            env_build_vars['PREFIX'] = self.package_folder
-            env_build.install(vars=env_build_vars)
+        with chdir(self, self.source_folder):
+            at = Autotools(self)
+            at.install(args=[f"DESTDIR={self.package_folder}", "PREFIX="])
 
-        tools.rmdir(os.path.join(self.package_folder, "share"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
+        pattern_to_remove = "*.a" if self.options.shared else "*.so"
+        rm(self, pattern_to_remove, os.path.join(self.package_folder, "lib"))
 
         if not self.options.with_utils:
-            tools.rmdir(os.path.join(self.package_folder, "bin"))
-
-        with tools.chdir(os.path.join(self.package_folder, "lib")):
-            files = os.listdir()
-            for f in files:
-                if (self.options.shared and f.endswith(".a")) or (not self.options.shared and not f.endswith(".a")):
-                    os.unlink(f)
+            rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = ["tinyalsa"]
-        if tools.Version(self.version) >= "2.0.0":
+        if Version(self.version) >= "2.0.0":
             self.cpp_info.system_libs.append("dl")
+        
         if self.options.with_utils:
             bin_path = os.path.join(self.package_folder, "bin")
-            self.output.info('Appending PATH environment variable: %s' % bin_path)
+            self.output.info(f"Appending PATH environment variable: {bin_path}")
             self.env_info.path.append(bin_path)
+        
+        # Needed for compatibility with v1.x - Remove when 2.0 becomes the default
+        bin_path = os.path.join(self.package_folder, "bin")
+        self.output.info(f'Appending PATH environment variable: {bin_path}')
+        self.env_info.PATH.append(bin_path)

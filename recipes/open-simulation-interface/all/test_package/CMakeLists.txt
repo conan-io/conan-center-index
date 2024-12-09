@@ -1,16 +1,11 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(test_package CXX)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
-find_package(open_simulation_interface REQUIRED)
+find_package(open_simulation_interface REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
-
 target_link_libraries(${PROJECT_NAME}
   open_simulation_interface::open_simulation_interface
   )
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_11)
 

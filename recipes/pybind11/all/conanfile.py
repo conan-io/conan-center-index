@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.files import get, copy, replace_in_file, rm, rmdir
+from conan.tools.scm import Version
 import os
 
 
@@ -11,18 +12,22 @@ required_conan_version = ">=1.52.0"
 class PyBind11Conan(ConanFile):
     name = "pybind11"
     description = "Seamless operability between C++11 and Python"
-    topics = "pybind11", "python", "binding"
-    homepage = "https://github.com/pybind/pybind11"
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/pybind/pybind11"
+    topics = ("pybind11", "python", "binding", "header-only")
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def package_id(self):
+        self.info.clear()
+
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -45,15 +50,13 @@ class PyBind11Conan(ConanFile):
 
         rmdir(self, os.path.join(self.package_folder, "share"))
 
+        checked_target = "lto" if self.version < Version("2.11.0") else "pybind11"
         replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"),
-                              "if(TARGET pybind11::lto)",
+                              f"if(TARGET pybind11::{checked_target})",
                               "if(FALSE)")
         replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"),
                               "add_library(",
                               "# add_library(")
-
-    def package_id(self):
-        self.info.clear()
 
     def package_info(self):
         cmake_base_path = os.path.join("lib", "cmake", "pybind11")

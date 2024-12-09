@@ -13,10 +13,10 @@ required_conan_version = ">=1.53.0"
 class ZlibNgConan(ConanFile):
     name = "zlib-ng"
     description = "zlib data compression library for the next generation systems"
-    topics = ("zlib", "compression")
     license ="Zlib"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/zlib-ng/zlib-ng/"
+    topics = ("zlib", "compression")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -28,6 +28,7 @@ class ZlibNgConan(ConanFile):
         "with_new_strategies": [True, False],
         "with_native_instructions": [True, False],
         "with_reduced_mem": [True, False],
+        "with_runtime_cpu_detection": [True, False],
     }
     default_options = {
         "shared": False,
@@ -38,6 +39,7 @@ class ZlibNgConan(ConanFile):
         "with_new_strategies": True,
         "with_native_instructions": False,
         "with_reduced_mem": False,
+        "with_runtime_cpu_detection": True,
     }
 
     def config_options(self):
@@ -45,12 +47,16 @@ class ZlibNgConan(ConanFile):
             del self.options.fPIC
         if Version(self.version) < "2.1.0":
             del self.options.with_reduced_mem
+        if Version(self.version) < "2.2.1":
+            del self.options.with_runtime_cpu_detection
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        if self.options.zlib_compat:
+            self.provides = ["zlib"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -74,6 +80,8 @@ class ZlibNgConan(ConanFile):
         tc.variables["WITH_NATIVE_INSTRUCTIONS"] = self.options.with_native_instructions
         if Version(self.version) >= "2.1.0":
             tc.variables["WITH_REDUCED_MEM"] = self.options.with_reduced_mem
+        if Version(self.version) >= "2.2.1":
+            tc.variables["WITH_RUNTIME_CPU_DETECTION"] = self.options.with_runtime_cpu_detection
         tc.generate()
 
     def build(self):
@@ -87,6 +95,7 @@ class ZlibNgConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         # upstream CMakeLists intentionally hardcodes install_name with full
         # install path (to match autootools behavior), instead of @rpath
         fix_apple_shared_install_name(self)
@@ -106,6 +115,12 @@ class ZlibNgConan(ConanFile):
             self.cpp_info.libs = [f"z{suffix}"]
         if self.options.zlib_compat:
             self.cpp_info.defines.append("ZLIB_COMPAT")
+            #copied from zlib
+            self.cpp_info.set_property("cmake_find_mode", "both")
+            self.cpp_info.set_property("cmake_file_name", "ZLIB")
+            self.cpp_info.set_property("cmake_target_name", "ZLIB::ZLIB")
+            self.cpp_info.names["cmake_find_package"] = "ZLIB"
+            self.cpp_info.names["cmake_find_package_multi"] = "ZLIB"
         if self.options.with_gzfileop:
             self.cpp_info.defines.append("WITH_GZFILEOP")
         if not self.options.with_new_strategies:

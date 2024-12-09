@@ -1,6 +1,8 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -10,9 +12,9 @@ class LibnaboConan(ConanFile):
     name = "libnabo"
     description = "A fast K Nearest Neighbor library for low-dimensional spaces"
     license = "BSD-3-Clause"
-    topics = ("nearest-neighbor", "kd-tree")
-    homepage = "https://github.com/ethz-asl/libnabo"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/ethz-asl/libnabo"
+    topics = ("nearest-neighbor", "kd-tree")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -25,6 +27,11 @@ class LibnaboConan(ConanFile):
         "fPIC": True,
         "with_openmp": False,
     }
+    short_paths = True
+
+    @property
+    def _min_cppstd(self):
+        return 11
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -43,6 +50,10 @@ class LibnaboConan(ConanFile):
     def requirements(self):
         self.requires("eigen/3.4.0", transitive_headers=True)
 
+    def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
@@ -51,6 +62,12 @@ class LibnaboConan(ConanFile):
         tc.cache_variables["USE_OPEN_MP"] = self.options.with_openmp
         tc.cache_variables["USE_OPEN_CL"] = False
         tc.cache_variables["SHARED_LIBS"] = self.options.shared
+        if Version(self.version) >= "1.1.0":
+            tc.variables["LIBNABO_BUILD_DOXYGEN"] = False
+            tc.variables["LIBNABO_BUILD_EXAMPLES"] = False
+            tc.variables["LIBNABO_BUILD_TESTS"] = False
+            tc.variables["LIBNABO_BUILD_PYTHON"] = False
+            tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()

@@ -1,4 +1,20 @@
 sources:
+  "21.0.2":
+    Windows:
+      url: "https://download.java.net/java/GA/jdk21.0.2/f2283984656d49d69e91c558476027ac/13/GPL/openjdk-21.0.2_windows-x64_bin.zip"
+      sha256: "b6c17e747ae78cdd6de4d7532b3164b277daee97c007d3eaa2b39cca99882664"
+    Linux_x86_64:
+      url: "https://download.java.net/java/GA/jdk21.0.2/f2283984656d49d69e91c558476027ac/12/GPL/openjdk-21.0.2_linux-x64_bin.tar.gz"
+      sha256: "960a708e76bffa0864e3e756e03314d56aa9dfb253b0803ae8a35eef2188f475"
+    Linux_armv8:
+      url: "https://download.java.net/java/GA/jdk21.0.2/f2283984656d49d69e91c558476027ac/12/GPL/openjdk-21.0.2_linux-aarch64_bin.tar.gz"
+      sha256: "0fcd2bdd32de146288635e05a362a24217baf669a3fa8e145ed09c6ad96a8c38"
+    Macos_x86_64:
+      url: "https://download.java.net/java/GA/jdk21.0.2/f2283984656d49d69e91c558476027ac/12/GPL/openjdk-21.0.2_macos-x64_bin.tar.gz"
+      sha256: "2830aa583a7f1e6ea2673ead18c12a2b1f85e9d5b8d69b116666014b14b81656"
+    Macos_armv8:
+      url: "https://download.java.net/java/GA/jdk21.0.2/f2283984656d49d69e91c558476027ac/12/GPL/openjdk-21.0.2_macos-aarch64_bin.tar.gz"
+      sha256: "997e0797f304a423149fd72284e9bcf7782c4a969fcb49ef05dfa7e5e6b6fbd6"
   "21.0.1":
     Windows:
       url: "https://download.java.net/java/GA/jdk21.0.1/415e3f918a1f4062a0074a2794853d0d/12/GPL/openjdk-21.0.1_windows-x64_bin.zip"

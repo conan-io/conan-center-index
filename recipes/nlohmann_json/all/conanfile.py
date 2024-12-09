@@ -14,6 +14,7 @@ class NlohmannJsonConan(ConanFile):
     topics = "json", "header-only"
     url = "https://github.com/conan-io/conan-center-index"
     license = "MIT"
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
@@ -32,8 +33,7 @@ class NlohmannJsonConan(ConanFile):
             check_min_cppstd(self, self._minimum_cpp_standard)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         pass

@@ -1,7 +1,8 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir, replace_in_file
 from conan.tools.scm import Version
 import os
 
@@ -12,10 +13,10 @@ class OpenEXRConan(ConanFile):
     name = "openexr"
     description = "OpenEXR is a high dynamic-range (HDR) image file format developed by Industrial Light & " \
                   "Magic for use in computer imaging applications."
-    topics = ("openexr", "hdr", "image", "picture")
     license = "BSD-3-Clause"
-    homepage = "https://github.com/AcademySoftwareFoundation/openexr"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/AcademySoftwareFoundation/openexr"
+    topics = ("openexr", "hdr", "image", "picture")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -26,6 +27,24 @@ class OpenEXRConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+
+    @property
+    def _min_cppstd(self):
+        if Version(self.version) >= "3.3":
+            return 17
+        return 11
+
+    @property
+    def _minimum_compiler_version(self):
+        return {
+            "17": {
+                "gcc": "9"
+            }
+        }.get(str(self._min_cppstd), {})
+
+    @property
+    def _with_libdeflate(self):
+        return Version(self.version) >= "3.2"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -45,10 +64,16 @@ class OpenEXRConan(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         # Note: OpenEXR and Imath are versioned independently.
         self.requires("imath/3.1.9", transitive_headers=True)
+        if self._with_libdeflate:
+            self.requires("libdeflate/1.19")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+
+        minimum_version = self._minimum_compiler_version.get(str(self.settings.compiler))
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires {self.settings.compiler} >= {minimum_version}")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -57,13 +82,23 @@ class OpenEXRConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["OPENEXR_INSTALL_EXAMPLES"] = False
         tc.variables["BUILD_TESTING"] = False
+        tc.variables["BUILD_WEBSITE"] = False
         tc.variables["DOCS"] = False
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
 
-    def build(self):
+    def _patch_sources(self):
         apply_conandata_patches(self)
+
+        if Version(self.version) >= "3.2":
+            # Even with BUILD_WEBSITE, Website target is compiled in 3.2
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                            "add_subdirectory(website/src)",
+                            "#  add_subdirectory(website/src)")
+
+    def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -118,6 +153,8 @@ class OpenEXRConan(ConanFile):
         Iex = self._add_component("Iex")
         Iex.libs = [f"Iex{lib_suffix}"]
         Iex.requires = [self._conan_comp("IexConfig")]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            Iex.system_libs = ["m"]
 
         # OpenEXR::IlmThread
         IlmThread = self._add_component("IlmThread")
@@ -126,12 +163,16 @@ class OpenEXRConan(ConanFile):
             self._conan_comp("IlmThreadConfig"), self._conan_comp("Iex"),
         ]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            IlmThread.system_libs = ["pthread"]
+            IlmThread.system_libs = ["pthread", "m"]
 
         # OpenEXR::OpenEXRCore
         OpenEXRCore = self._add_component("OpenEXRCore")
         OpenEXRCore.libs = [f"OpenEXRCore{lib_suffix}"]
         OpenEXRCore.requires = [self._conan_comp("OpenEXRConfig"), "zlib::zlib"]
+        if self._with_libdeflate:
+            OpenEXRCore.requires.append("libdeflate::libdeflate")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            OpenEXRCore.system_libs = ["m"]
 
         # OpenEXR::OpenEXR
         OpenEXR = self._add_component("OpenEXR")
@@ -140,11 +181,15 @@ class OpenEXRConan(ConanFile):
             self._conan_comp("OpenEXRCore"), self._conan_comp("IlmThread"),
             self._conan_comp("Iex"), "imath::imath",
         ]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            OpenEXR.system_libs = ["m"]
 
         # OpenEXR::OpenEXRUtil
         OpenEXRUtil = self._add_component("OpenEXRUtil")
         OpenEXRUtil.libs = [f"OpenEXRUtil{lib_suffix}"]
         OpenEXRUtil.requires = [self._conan_comp("OpenEXR")]
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            OpenEXRUtil.system_libs = ["m"]
 
         # Add tools directory to PATH
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

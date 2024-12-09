@@ -1,13 +1,19 @@
 sources:
+  "0.7.1":
+    url: "https://github.com/google/glog/archive/refs/tags/v0.7.1.tar.gz"
+    sha256: "00e4a87e87b7e7612f519a41e491f16623b12423620006f59f5688bfd8d13b08"
+  "0.7.0":
+    url: "https://github.com/google/glog/archive/refs/tags/v0.7.0.tar.gz"
+    sha256: "375106b5976231b92e66879c1a92ce062923b9ae573c42b56ba28b112ee4cc11"
   "0.6.0":
-    sha256: 8a83bf982f37bb70825df71a9709fa90ea9f4447fb3c099e1d720a439d88bad6
-    url: https://github.com/google/glog/archive/refs/tags/v0.6.0.tar.gz
+    url: "https://github.com/google/glog/archive/refs/tags/v0.6.0.tar.gz"
+    sha256: "8a83bf982f37bb70825df71a9709fa90ea9f4447fb3c099e1d720a439d88bad6"
   "0.5.0":
-    sha256: eede71f28371bf39aa69b45de23b329d37214016e2055269b3b5e7cfd40b59f5
-    url: https://github.com/google/glog/archive/refs/tags/v0.5.0.tar.gz
+    url: "https://github.com/google/glog/archive/refs/tags/v0.5.0.tar.gz"
+    sha256: "eede71f28371bf39aa69b45de23b329d37214016e2055269b3b5e7cfd40b59f5"
   "0.4.0":
-    sha256: f28359aeba12f30d73d9e4711ef356dc842886968112162bc73002645139c39c
-    url: https://github.com/google/glog/archive/v0.4.0.tar.gz
+    url: "https://github.com/google/glog/archive/v0.4.0.tar.gz"
+    sha256: "f28359aeba12f30d73d9e4711ef356dc842886968112162bc73002645139c39c"
 patches:
   "0.5.0":
     - patch_file: "patches/0001-fix-msvc-snprintf.patch"

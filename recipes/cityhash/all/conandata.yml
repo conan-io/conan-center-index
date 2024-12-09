@@ -1,4 +1,7 @@
 sources:
+  "1.0.1":
+    url: "https://github.com/google/cityhash/archive/8eded14d8e7cabfcdb10d4be35d521683edc0407.zip"
+    sha256: "e49f5bdb0f93d303bf18cb72f2f18e10ac3b4f2734da7cc1d708f7f2d2674c7c"
   "cci.20130801":
     url: "https://github.com/google/cityhash/archive/8af9b8c2b889d80c22d6bc26ba0df1afb79a30db.zip"
     sha256: "3524f5ed43143974a29fddeeece29c8b6348f05db08dd180452da01a2837ddce"

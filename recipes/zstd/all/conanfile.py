@@ -1,8 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, replace_in_file, rmdir, rm
-from conan.tools.scm import Version
-from conan.tools.microsoft import is_msvc
+import glob
 import os
 
 required_conan_version = ">=1.53.0"
@@ -55,21 +54,13 @@ class ZstdConan(ConanFile):
         tc.variables["ZSTD_BUILD_STATIC"] = not self.options.shared or self.options.build_programs
         tc.variables["ZSTD_BUILD_SHARED"] = self.options.shared
         tc.variables["ZSTD_MULTITHREAD_SUPPORT"] = self.options.threading
-
-        if not is_msvc(self):
-            tc.variables["CMAKE_C_FLAGS"] = "-Wno-maybe-uninitialized"
-
-        if Version(self.version) < "1.4.3":
-            # Generate a relocatable shared lib on Macos
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
         # Don't force PIC
-        if Version(self.version) >= "1.4.5":
-            replace_in_file(self, os.path.join(self.source_folder, "build", "cmake", "lib", "CMakeLists.txt"),
-                                  "POSITION_INDEPENDENT_CODE On", "")
+        replace_in_file(self, os.path.join(self.source_folder, "build", "cmake", "lib", "CMakeLists.txt"),
+                              "POSITION_INDEPENDENT_CODE On", "")
 
     def build(self):
         self._patch_sources()
@@ -88,8 +79,10 @@ class ZstdConan(ConanFile):
         if self.options.shared and self.options.build_programs:
             # If we build programs we have to build static libs (see logic in generate()),
             # but if shared is True, we only want shared lib in package folder.
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
             rm(self, "*_static.*", os.path.join(self.package_folder, "lib"))
+            for lib in glob.glob(os.path.join(self.package_folder, "lib", "*.a")):
+                if not lib.endswith(".dll.a"):
+                    os.remove(lib)
 
     def package_info(self):
         zstd_cmake = "libzstd_shared" if self.options.shared else "libzstd_static"

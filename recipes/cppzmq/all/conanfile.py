@@ -12,25 +12,23 @@ class CppZmqConan(ConanFile):
     description = "C++ binding for 0MQ"
     homepage = "https://github.com/zeromq/cppzmq"
     license = "MIT"
-    topics = ("cppzmq", "zmq-cpp", "zmq", "cpp-bind")
+    topics = ("zmq-cpp", "zmq", "cpp-bind")
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-
     no_copy_source = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zeromq/4.3.4", transitive_headers=True, transitive_libs=True)
+        self.requires("zeromq/4.3.5")
 
     def package_id(self):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         pass

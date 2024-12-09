@@ -1,0 +1,7 @@
+sources:
+  "3.2.6":
+    url: "https://github.com/wxWidgets/wxWidgets/archive/v3.2.6.tar.gz"
+    sha256: "46372b2dbf976521e1d7cca22afc3d3542d171a488b391444cf89aba87ea7d16"
+  "3.2.5":
+    url: "https://github.com/wxWidgets/wxWidgets/archive/v3.2.5.tar.gz"
+    sha256: "c3a54d1c5dc3feefc2893c28923fd722c990c572253d5ad353eec99386ba11eb"

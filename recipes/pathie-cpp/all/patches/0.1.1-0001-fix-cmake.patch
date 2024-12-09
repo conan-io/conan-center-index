@@ -1,0 +1,47 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d765179..e31b54b 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -116,12 +116,14 @@ file(GLOB_RECURSE test_sources
+ # Targets
+ 
+ # Libraries
++if (NOT BUILD_SHARED_LIBS)
+ add_library(pathie STATIC ${pathie_sources})
+ if(APPLE)
+   target_link_libraries(pathie iconv)
+ endif()
++endif()
+ 
+-if (CMAKE_BUILD_SHARED_LIBS)
++if (BUILD_SHARED_LIBS)
+   add_library(pathie-dynamic SHARED ${pathie_sources})
+   set_target_properties(pathie-dynamic PROPERTIES OUTPUT_NAME pathie)
+   if(APPLE)
+@@ -130,9 +132,10 @@ if (CMAKE_BUILD_SHARED_LIBS)
+ endif()
+ 
+ if(WIN32)
++  if (NOT BUILD_SHARED_LIBS)
+   target_link_libraries(pathie shlwapi)
+-
+-  if (CMAKE_BUILD_SHARED_LIBS)
++  endif()
++  if (BUILD_SHARED_LIBS)
+     target_link_libraries(pathie-dynamic shlwapi)
+   endif()
+ endif()
+@@ -152,10 +155,12 @@ endif()
+ ########################################
+ # Installation information
+ 
++if (NOT BUILD_SHARED_LIBS)
+ install(TARGETS pathie
+   DESTINATION lib)
++endif()
+ 
+-if (CMAKE_BUILD_SHARED_LIBS)
++if (BUILD_SHARED_LIBS)
+   install(TARGETS pathie-dynamic
+     DESTINATION lib)
+ endif()

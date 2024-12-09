@@ -1,4 +1,7 @@
 sources:
+  "4.3.5":
+    url: "https://github.com/zeromq/libzmq/releases/download/v4.3.5/zeromq-4.3.5.tar.gz"
+    sha256: "6653ef5910f17954861fe72332e68b03ca6e4d9c7160eb3a8de5a5a913bfab43"
   "4.3.4":
     url: "https://github.com/zeromq/libzmq/releases/download/v4.3.4/zeromq-4.3.4.tar.gz"
     sha256: "c593001a89f5a85dd2ddf564805deb860e02471171b3f204944857336295c3e5"
@@ -9,14 +12,37 @@ sources:
     url: "https://github.com/zeromq/libzmq/releases/download/v4.3.2/zeromq-4.3.2.tar.gz"
     sha256: "ebd7b5c830d6428956b67a0454a7f8cbed1de74b3b01e5c33c5378e22740f763"
 patches:
+  "4.3.5":
+    - patch_file: "patches/0003-rpath-macos-4.3.5.patch"
+      patch_description: "hardcoded full install path on local machine"
+      patch_type: "portability"
+    - patch_file: "patches/0004-cmake-minimum-required-first.patch"
+      patch_description: "exchange positions between project and cmake_minimum_required"
+      patch_type: "portability"
   "4.3.4":
     - patch_file: "patches/0003-rpath-macos-4.3.3.patch"
+      patch_description: "hardcoded full install path on local machine"
+      patch_type: "portability"
     - patch_file: "patches/0004-cmake-minimum-required-first.patch"
+      patch_description: "exchange positions between project and cmake_minimum_required"
+      patch_type: "portability"
   "4.3.3":
     - patch_file: "patches/0003-rpath-macos-4.3.3.patch"
+      patch_description: "hardcoded full install path on local machine"
+      patch_type: "portability"
     - patch_file: "patches/0004-cmake-minimum-required-first.patch"
+      patch_description: "exchange positions between project and cmake_minimum_required"
+      patch_type: "portability"
   "4.3.2":
     - patch_file: "patches/0001-problem-__try-and-__except-isn-t-universally-supported-on-windows.patch"
+      patch_description: "__try and __except isn't universally supported on windows"
+      patch_type: "portability"
     - patch_file: "patches/0002-problem-invalid-syntax-for-calling-convention-on-function.patch"
+      patch_description: "invalid syntax for calling convention on function pointer"
+      patch_type: "portability"
     - patch_file: "patches/0003-rpath-macos-4.3.2.patch"
+      patch_description: "hardcoded full install path on local machine"
+      patch_type: "portability"
     - patch_file: "patches/0004-cmake-minimum-required-first.patch"
+      patch_description: "exchange positions between project and cmake_minimum_required"
+      patch_type: "portability"

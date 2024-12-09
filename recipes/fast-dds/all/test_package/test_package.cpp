@@ -5,12 +5,12 @@
 #include <fastrtps/publisher/Publisher.h>
 #include <fastrtps/Domain.h>
 
-#include "msg/HelloWorld.h"
-#include "msg/HelloWorldPubSubTypes.h"
+#include "HelloWorld.h"
+#include "HelloWorldPubSubTypes.h"
 
 int main()
 {
-    // Define msg to send 
+    // Define msg to send
     HelloWorld hello;
     hello.index(0);
     hello.message("HelloWorld");

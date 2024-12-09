@@ -1,4 +1,16 @@
 sources:
+  "1.14.5":
+    url: "https://github.com/HDFGroup/hdf5/archive/refs/tags/hdf5_1.14.5.tar.gz"
+    sha256: "c83996dc79080a34e7b5244a1d5ea076abfd642ec12d7c25388e2fdd81d26350"
+  "1.14.4.3":
+    url: "https://github.com/HDFGroup/hdf5/archive/refs/tags/hdf5_1.14.4.3.tar.gz"
+    sha256: "690c1db7ba0fed4ffac61709236675ffd99d95d191e8920ee79c58d7e7ea3361"
+  "1.14.3":
+    url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_14_3/hdf5-1_14_3.tar.gz"
+    sha256: "df5ee33c74d5efb59738075ef96f4201588e1f1eeb233f047ac7fd1072dee1f6"
+  "1.14.2":
+    url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_14_2.tar.gz"
+    sha256: "83eaee3f9d1790bb4b29368bf1a648ece763097a4122c80a81076e8fb1e890e6"
   "1.14.1":
     url: "https://github.com/HDFGroup/hdf5/archive/hdf5-1_14_1.tar.gz"
     sha256: "1f710f3846d9c3ef9a4c57ef252ee0570f0af4e028fd6ccc360a48b7b16c347d"

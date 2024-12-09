@@ -1,4 +1,8 @@
 versions:
+  "11.0":
+    folder: all
+  "10.0":
+    folder: all
   "9.0":
     folder: all
   "8.1":

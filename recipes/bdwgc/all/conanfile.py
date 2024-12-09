@@ -77,7 +77,7 @@ class BdwGcConan(ConanFile):
 
     def requirements(self):
         if self.settings.os == "Windows":
-            self.requires("libatomic_ops/7.8.0")
+            self.requires("libatomic_ops/7.8.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],

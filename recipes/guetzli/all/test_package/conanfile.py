@@ -1,16 +1,18 @@
 import os
 
-from conans import ConanFile, tools
+from conan import ConanFile
+from conan.tools.build import can_run
 
 
-class GoogleguetzliTestConan(ConanFile):
-    settings = "os", "compiler", "build_type", "arch"
+class TestPackageConan(ConanFile):
+    settings = "os", "arch", "compiler", "build_type"
+    generators = "VirtualBuildEnv"
+    test_type = "explicit"
+
+    def build_requirements(self):
+        self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        bees_path = os.path.join(self.source_folder, "bees.png")
-        if not tools.cross_building(self.settings):
-            app = "guetzli"
-            if self.settings.os == "Windows":
-                app += ".exe"
-            self.run("{} --quality 84 {} bees.jpg".format(app, bees_path),
-                     run_environment=True)
+        if can_run(self):
+            bees_path = os.path.join(self.source_folder, "bees.png")
+            self.run(f"guetzli --quality 84 {bees_path} bees.jpg")

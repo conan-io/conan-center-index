@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
+from conan.tools.build import can_run
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
@@ -50,18 +50,18 @@ class WaylandConan(ConanFile):
         if self.options.enable_libraries:
             self.requires("libffi/3.4.4")
         if self.options.enable_dtd_validation:
-            self.requires("libxml2/2.11.4")
-        self.requires("expat/2.5.0")
+            self.requires("libxml2/[>=2.12.5 <3]")
+        self.requires("expat/[>=2.6.2 <3]")
 
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.2.1")
+        self.tool_requires("meson/[>=1.4.0 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
-        if cross_building(self):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
+        if not can_run(self):
             self.tool_requires(str(self.ref))
 
     def source(self):
@@ -70,12 +70,12 @@ class WaylandConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if not cross_building(self):
+        if can_run(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
 
         pkg_config_deps = PkgConfigDeps(self)
-        if cross_building(self):
+        if not can_run(self):
             pkg_config_deps.build_context_activated = ["wayland"]
         elif self.dependencies["expat"].is_build_context:  # wayland is being built as build_require
             # If wayland is the build_require, all its dependencies are treated as build_requires
@@ -87,7 +87,7 @@ class WaylandConan(ConanFile):
         tc.project_options["libraries"] = self.options.enable_libraries
         tc.project_options["dtd_validation"] = self.options.enable_dtd_validation
         tc.project_options["documentation"] = False
-        if cross_building(self):
+        if not can_run(self):
             tc.project_options["build.pkg_config_path"] = self.generators_folder
         if Version(self.version) >= "1.18.91":
             tc.project_options["scanner"] = True
@@ -174,6 +174,3 @@ class WaylandConan(ConanFile):
 
             self.cpp_info.components["wayland-egl-backend"].set_property("pkg_config_name", "wayland-egl-backend")
             self.cpp_info.components["wayland-egl-backend"].set_property("component_version", "3")
-
-            # TODO: to remove in conan v2
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

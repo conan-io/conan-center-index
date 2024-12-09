@@ -1,35 +1,13 @@
 sources:
-  "1.1.2":
-    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v1.1.2.tar.gz"
-    sha256: "5ed3ec742302c7304bf188bde9c4012a65dc8124ff4e1a69b598480d664250e6"
-  "1.0":
-    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v1.0.tar.gz"
-    sha256: "5b8333e522206c2a74e57a9c9544c4fe4e7858cfe93e216905b463eaf91af5fe"
-  "0.4":
-    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v0.4.tar.gz"
-    sha256: "f23e66b00c9d38671b39b83c082a5b2db1cf05b3e3eff7b4a769487d9ed9d366"
-patches:
-  "1.1.2":
-    - patch_file: "patches/1.1.2-0001-install-dll-windows.patch"
-      patch_description: "add runtime destination path on install"
-      patch_type: "portability"
-    - patch_file: "patches/1.1.2-0002-remove-header-only-target.patch"
-      patch_description: "prevent to generate header only target for conan package"
-      patch_type: "conan"
-    - patch_file: "patches/1.1.2-0003-fix-link-keyword.patch"
-      patch_description: "use PRIVATE instead of INTERFACE"
-      patch_type: "conan"
-  "1.0":
-    - patch_file: "patches/1.0-0001-install-dll-windows.patch"
-      patch_description: "add runtime destination path on install"
-      patch_type: "portability"
-    - patch_file: "patches/1.0-0002-remove-header-only-target.patch"
-      patch_description: "prevent to generate header only target for conan package"
-      patch_type: "conan"
-    - patch_file: "patches/1.0-0003-use-conan-package.patch"
-      patch_description: "use conan package of fast-float"
-      patch_type: "conan"
-  "0.4":
-    - patch_file: "patches/0.4-0001-install-dll-windows.patch"
-      patch_description: "add runtime destination path on install"
-      patch_type: "portability"
+  "4.0.1":
+    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v4.0.1.tar.gz"
+    sha256: "ece17b26840894cc57a7127138fe4540929adcb297524dec02c490c233ff46a7"
+  "3.0.2":
+    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v3.0.2.tar.gz"
+    sha256: "27f17420ddad6971339e6d5db0d915204181c31f5cb0e92a63b9998d98e2852b"
+  "3.0.1":
+    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v3.0.1.tar.gz"
+    sha256: "bc8a668873601d00cce6841c2d0f2c93f836f63f0fbc77997834dea12e951eb1"
+  "2.0.3":
+    url: "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v2.0.3.tar.gz"
+    sha256: "507ed0e988f1d9460a9c921fc21f5a5244185a4015942f235522fbe5c21e6a51"

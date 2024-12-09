@@ -1,4 +1,24 @@
 versions:
+  "3.47.1":
+    folder: all
+  "3.47.0":
+    folder: all
+  "3.46.1":
+    folder: all
+  "3.46.0":
+    folder: all
+  "3.45.3":
+    folder: all
+  "3.45.2":
+    folder: all
+  "3.45.1":
+    folder: all
+  "3.45.0":
+    folder: all
+  "3.44.2":
+    folder: all
+  "3.44.1":
+    folder: all
   "3.44.0":
     folder: all
   "3.43.2":

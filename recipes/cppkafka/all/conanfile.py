@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.53.0"
@@ -10,11 +11,10 @@ required_conan_version = ">=1.53.0"
 class CppKafkaConan(ConanFile):
     name = "cppkafka"
     description = "Modern C++ Apache Kafka client library (wrapper for librdkafka)"
-    topics = ("librdkafka", "kafka")
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mfontanini/cppkafka"
-    license = "MIT"
-
+    topics = ("librdkafka", "kafka")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -41,8 +41,8 @@ class CppKafkaConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.81.0")
-        self.requires("librdkafka/2.0.2")
+        self.requires("boost/1.83.0", transitive_headers=True)
+        self.requires("librdkafka/2.3.0", transitive_headers=True)
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -57,7 +57,7 @@ class CppKafkaConan(ConanFile):
         tc.variables["CPPKAFKA_DISABLE_TESTS"] = True
         tc.variables["CPPKAFKA_DISABLE_EXAMPLES"] = True
         tc.variables["CPPKAFKA_RDKAFKA_STATIC_LIB"] = False # underlying logic is useless
-        if self.settings.os == "Windows":
+        if Version(self.version) < "0.4.1" and self.settings.os == "Windows":
             tc.preprocessor_definitions["NOMINMAX"] = 1
         tc.generate()
         cd = CMakeDeps(self)

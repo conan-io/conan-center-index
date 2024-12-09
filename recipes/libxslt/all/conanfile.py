@@ -7,6 +7,7 @@ from conan.tools.files import apply_conandata_patches, chdir, copy, export_conan
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, NMakeDeps, NMakeToolchain
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.55.0"
@@ -59,8 +60,14 @@ class LibxsltConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        # see https://github.com/conan-io/conan-center-index/pull/16205#discussion_r1149570846
-        self.requires("libxml2/2.11.4", transitive_headers=True, transitive_libs=True)
+        if Version(self.version) >= "1.1.42":
+            self.requires("libxml2/[>=2.12.5 <3]", transitive_headers=True, transitive_libs=True)
+        elif Version(self.version) >= "1.1.39":
+            # see https://github.com/conan-io/conan-center-index/pull/16205#discussion_r1149570846
+            # Older versions use deprecated functions that were removed in libxml2 2.13
+            self.requires("libxml2/[>=2.12.5 <2.13]", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("libxml2/2.11.6", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         if self.options.plugins and not self.options.shared:
@@ -190,6 +197,7 @@ class LibxsltConan(ConanFile):
             autotools.install()
             os.remove(os.path.join(self.package_folder, "bin", "xslt-config"))
             rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
             rm(self, "*.sh", os.path.join(self.package_folder, "lib"))
             rmdir(self, os.path.join(self.package_folder, "share"))
@@ -220,6 +228,8 @@ class LibxsltConan(ConanFile):
         self.cpp_info.components["exslt"].set_property("pkg_config_name", "libexslt")
         self.cpp_info.components["exslt"].libs = [f"{prefix}exslt{suffix}"]
         self.cpp_info.components["exslt"].requires = ["xslt"]
+        if not self.options.shared:
+            self.cpp_info.components["exslt"].defines = ["LIBEXSLT_STATIC"]
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "LibXslt"

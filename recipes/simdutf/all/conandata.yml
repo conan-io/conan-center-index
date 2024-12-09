@@ -1,61 +1,32 @@
 sources:
-  "4.0.3":
-    url: "https://github.com/simdutf/simdutf/archive/v4.0.3.tar.gz"
-    sha256: "00429eca296f00d9b93939d2561538bad601602ad02fd01ba9ad366268773751"
-  "3.2.17":
-    url: "https://github.com/simdutf/simdutf/archive/v3.2.17.tar.gz"
-    sha256: "c24e3eec1e08522a09b33e603352e574f26d367a7701bf069a65881f64acd519"
-  "3.2.15":
-    url: "https://github.com/simdutf/simdutf/archive/v3.2.15.tar.gz"
-    sha256: "c26d2e2e9124e1c20335d3880d74c8b0d74a5e247ba82ef82d15df4ccc413bcd"
-  "3.2.14":
-    url: "https://github.com/simdutf/simdutf/archive/v3.2.14.tar.gz"
-    sha256: "6bd6cd41e0e588312c3ae24adb297454bd9bd9622ed7443f41300d7201f233a1"
-  "3.2.2":
-    url: "https://github.com/simdutf/simdutf/archive/v3.2.2.tar.gz"
-    sha256: "5a5c84c05bf30d681126d1dcbde903615f2c927e201e0c6d489f74a91b7f506f"
-  "3.2.0":
-    url: "https://github.com/simdutf/simdutf/archive/v3.2.0.tar.gz"
-    sha256: "0d9f63e2f308b6b54f399ebbe3a02776b902a2670c88c28de2d75ea2197dc4e9"
-  "3.1.0":
-    url: "https://github.com/simdutf/simdutf/archive/v3.1.0.tar.gz"
-    sha256: "9757a04085ad3ebab9fe933d9198ec6b84a857632a540418b6cfeb7b889a8017"
-  "3.0.0":
-    url: "https://github.com/simdutf/simdutf/archive/v3.0.0.tar.gz"
-    sha256: "cc23b47fd0caf9018fc0dcf49ebeff2676654fff997f9f6ce50fa93cd36f661f"
-  "2.2.0":
-    url: "https://github.com/simdutf/simdutf/archive/v2.2.0.tar.gz"
-    sha256: "b0b8527e194700363cc47e75a7b8d58c88798b0dc31671f5ae5c8803d8678fe6"
-patches:
-  "3.2.17":
-    - patch_file: "patches/3.2.17-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
-  "3.2.15":
-    - patch_file: "patches/3.2.14-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
-  "3.2.14":
-    - patch_file: "patches/3.2.14-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
-  "3.2.2":
-    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
-  "3.2.0":
-    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
-  "3.1.0":
-    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
-  "3.0.0":
-    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
-  "2.2.0":
-    - patch_file: "patches/2.0.3-0001-fix-cmake.patch"
-      patch_description: "remove static build, enable rpath on macOS"
-      patch_type: "conan"
+  "5.6.3":
+    url: "https://github.com/simdutf/simdutf/archive/v5.6.3.tar.gz"
+    sha256: "503070ddf27e26c051b9500dfc7354ec8850e11076f47db32635931c85b630c0"
+  "5.6.2":
+    url: "https://github.com/simdutf/simdutf/archive/v5.6.2.tar.gz"
+    sha256: "c71b5478c9b912e07f75098f3a60920f1c4de3227b5285ea8a90a2fcf8bd6a89"
+  "5.6.0":
+    url: "https://github.com/simdutf/simdutf/archive/v5.6.0.tar.gz"
+    sha256: "98cc5761b638642b018a628b1609f1b2df489b555836fa88706055bb56a4d6fe"
+  "5.5.0":
+    url: "https://github.com/simdutf/simdutf/archive/v5.5.0.tar.gz"
+    sha256: "47090a770b8eecf610ac4d1fafadde60bb7ba3c9d576d2a3a545aba989a3d749"
+  "5.4.15":
+    url: "https://github.com/simdutf/simdutf/archive/v5.4.15.tar.gz"
+    sha256: "188a9516ee208659cab9a1e5063c1b8385d63d171c2381e9ce18af97936d9879"
+  "5.3.7":
+    url: "https://github.com/simdutf/simdutf/archive/v5.3.7.tar.gz"
+    sha256: "731fb29c8c0b05c77b0a29dc37ab8eabe09533f000864a7c55e1ed2e1d33d1e7"
+  "5.3.5":
+    url: "https://github.com/simdutf/simdutf/archive/v5.3.5.tar.gz"
+    sha256: "e6706d7fc68f6e1541414dcf45abe6190d591505d08bff3cc53f55642568f28d"
+  "5.3.2":
+    url: "https://github.com/simdutf/simdutf/archive/v5.3.2.tar.gz"
+    sha256: "3c146fb80d775b869ae9b132f41981dc3266f616f589b5f45045d6a22fdabdca"
+  "5.3.1":
+    url: "https://github.com/simdutf/simdutf/archive/v5.3.1.tar.gz"
+    sha256: "373e1e66a1c245817f0aa08ae8693b71d1703f9355d364e0d9d002929738ddcc"
+  # 4.0.5 is required by scnlib
+  "4.0.5":
+    url: "https://github.com/simdutf/simdutf/archive/v4.0.5.tar.gz"
+    sha256: "040d80ff4321f89ea9739ccc7f468ece9c4bc2630f3d4762b6d829000d2ec625"

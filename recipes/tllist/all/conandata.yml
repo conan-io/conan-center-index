@@ -1,4 +1,7 @@
 sources:
+  "1.1.0":
+    url: "https://codeberg.org/dnkl/tllist/archive/1.1.0.tar.gz"
+    sha256: "3f3fe2f7433719cec816c63937a7aa36e566bd317763ef46d11562073ab6361d"
   "1.0.5":
     url: "https://codeberg.org/dnkl/tllist/archive/1.0.5.tar.gz"
-    sha256: b0f32c9b2c2015c8d8dd068fd4e8b586aa91ca1670badc274ec962559ee0aadd
+    sha256: "b0f32c9b2c2015c8d8dd068fd4e8b586aa91ca1670badc274ec962559ee0aadd"

@@ -44,7 +44,7 @@ class UsocketsConan(ConanFile):
         return False
 
     @property
-    def _minimum_compilers_version(self, cppstd):
+    def _minimum_compilers_version(self):
         return {
             "14": {
                 "Visual Studio": "15",
@@ -122,7 +122,7 @@ class UsocketsConan(ConanFile):
             if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, self._min_cppstd)
 
-            minimum_version = self._minimum_compilers_version(self._min_cppstd)
+            minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler))
             if minimum_version and Version(self.settings.compiler.version) < minimum_version:
                 raise ConanInvalidConfiguration(
                     f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."

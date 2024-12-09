@@ -1,12 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(test_package C)
 
 if(NOT WIN32)
     message(FATAL_ERROR "pexports only supports Windows")
 endif()
-
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup()
 
 find_program(PEXPORTS_BIN "pexports")
 set(EXPORTS_DEF_PATH "${CMAKE_BINARY_DIR}/exports.def")

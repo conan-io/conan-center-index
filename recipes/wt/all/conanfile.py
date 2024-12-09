@@ -32,6 +32,8 @@ class WtConan(ConanFile):
         "with_dbo": [True, False],
         "with_opengl": [True, False],
         "with_unwind": [True, False],
+        "with_haru": [True, False],
+        "raster_image": ["none", "Direct2D", "GraphicsMagick"],
         "no_std_locale": [True, False],
         "no_std_wstring": [True, False],
         "multi_threaded": [True, False],
@@ -51,6 +53,8 @@ class WtConan(ConanFile):
         "with_dbo": True,
         "with_opengl": False,
         "with_unwind": True,
+        "with_haru": False,
+        "raster_image": "none",
         "no_std_locale": False,
         "no_std_wstring": False,
         "multi_threaded": True,
@@ -103,7 +107,7 @@ class WtConan(ConanFile):
         if self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.43.0")
+            self.requires("sqlite3/3.44.2")
         if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.1.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_postgres"):
@@ -112,7 +116,9 @@ class WtConan(ConanFile):
             self.requires("odbc/2.3.11")
         if self.options.get_safe("with_unwind"):
             self.requires("libunwind/1.7.2")
-
+        if self.options.with_haru:
+            self.requires("libharu/2.4.3")
+            
     def validate(self):
         miss_boost_required_comp = any(self.dependencies["boost"].options.get_safe(f"without_{boost_comp}", True)
                                        for boost_comp in self._required_boost_components)
@@ -121,6 +127,8 @@ class WtConan(ConanFile):
                 f"{self.ref} requires non header-only boost with these components: "
                 f"{', '.join(self._required_boost_components)}"
             )
+        if self.options.get_safe("raster_image", "none") == "Direct2D" and self.settings.os != "Windows":
+            raise ConanInvalidConfiguration("Direct2D is supported only on Windows.")
 
         # FIXME: https://redmine.emweb.be/issues/12073w
         if conan_version.major == 2 and Version(self.version) == "4.10.1" and is_msvc(self):
@@ -157,7 +165,7 @@ class WtConan(ConanFile):
         return "" if self.settings.os == "Windows" else "lib"
 
     def _cmakify_path_list(self, paths):
-        return ";".join(paths).replace("\\", "/")
+        return ";".join([p.replace("\\", "/") for p in paths])
 
     def _find_library(self, libname, dep):
         for path in self.dependencies[dep].cpp_info.aggregated_components().libdirs:
@@ -178,7 +186,7 @@ class WtConan(ConanFile):
         tc.variables["BUILD_EXAMPLES"] = False
         tc.variables["BUILD_TESTS"] = False
         tc.variables["ENABLE_SSL"] = self.options.with_ssl
-        tc.variables["ENABLE_HARU"] = False
+        tc.variables["ENABLE_HARU"] = self.options.with_haru
         tc.variables["ENABLE_PANGO"] = False
         tc.variables["ENABLE_SQLITE"] = self.options.get_safe("with_sqlite", False)
         tc.variables["ENABLE_POSTGRES"] = self.options.get_safe("with_postgres", False)
@@ -191,6 +199,7 @@ class WtConan(ConanFile):
         tc.variables["ENABLE_LIBWTDBO"] = self.options.with_dbo
         tc.variables["ENABLE_OPENGL"] = self.options.with_opengl
         tc.variables["ENABLE_UNWIND"] = self.options.get_safe("with_unwind", False)
+        tc.variables["WT_WRASTERIMAGE_IMPLEMENTATION"] = self.options.get_safe("raster_image", "none")
         tc.variables["WT_NO_STD_LOCALE"] = self.options.no_std_locale
         tc.variables["WT_NO_STD_WSTRING"] = self.options.no_std_wstring
         tc.variables["MULTI_THREADED"] = self.options.multi_threaded
@@ -201,16 +210,16 @@ class WtConan(ConanFile):
 
         # FIXME: all this logic coming from upstream custom find module files seems fragile, to improve later !
         #        we can't even inject cmake_find_package generator, it breaks the all upstream logic
-        tc.variables["BOOST_PREFIX"] = self._cmakify_path_list(self.dependencies["boost"].package_folder)
+        tc.variables["BOOST_PREFIX"] = self._cmakify_path_list([self.dependencies["boost"].package_folder])
         if self.options.connector_http:
-            tc.variables["ZLIB_PREFIX"] = self._cmakify_path_list(self.dependencies["zlib"].package_folder)
+            tc.variables["ZLIB_PREFIX"] = self._cmakify_path_list([self.dependencies["zlib"].package_folder])
         if self.options.with_ssl:
-            tc.variables["SSL_PREFIX"] = self._cmakify_path_list(self.dependencies["openssl"].package_folder)
+            tc.variables["SSL_PREFIX"] = self._cmakify_path_list([self.dependencies["openssl"].package_folder])
             tc.variables["OPENSSL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("openssl"))
             tc.variables["OPENSSL_INCLUDE_DIR"] = self._cmakify_path_list(self.dependencies["openssl"].cpp_info.aggregated_components().includedirs)
             tc.variables["OPENSSL_FOUND"] = True
         if self.options.get_safe("with_sqlite"):
-            tc.variables["SQLITE3_PREFIX"] = self._cmakify_path_list(self.dependencies["sqlite3"].package_folder)
+            tc.variables["SQLITE3_PREFIX"] = self._cmakify_path_list([self.dependencies["sqlite3"].package_folder])
         if self.options.get_safe("with_mysql"):
             tc.variables["MYSQL_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libmysqlclient"))
             libmysqlclient_cppinfo = self.dependencies["libmysqlclient"].cpp_info.aggregated_components()
@@ -218,17 +227,19 @@ class WtConan(ConanFile):
             tc.variables["MYSQL_DEFINITIONS"] = ";".join(f"-D{d}" for d in libmysqlclient_cppinfo.defines)
             tc.variables["MYSQL_FOUND"] = True
         if self.options.get_safe("with_postgres"):
-            tc.variables["POSTGRES_PREFIX"] = self._cmakify_path_list(self.dependencies["libpq"].package_folder)
+            tc.variables["POSTGRES_PREFIX"] = self._cmakify_path_list([self.dependencies["libpq"].package_folder])
             tc.variables["POSTGRES_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("libpq"))
             tc.variables["POSTGRES_INCLUDE"] = self._cmakify_path_list(self.dependencies["libpq"].cpp_info.aggregated_components().includedirs)
             tc.variables["POSTGRES_FOUND"] = True
         if self.options.get_safe("with_mssql") and self.settings.os != "Windows":
-            tc.variables["ODBC_PREFIX"] = self._cmakify_path_list(self.dependencies["odbc"].package_folder)
+            tc.variables["ODBC_PREFIX"] = self._cmakify_path_list([self.dependencies["odbc"].package_folder])
             tc.variables["ODBC_LIBRARIES"] = self._cmakify_path_list(self._find_libraries("odbc"))
             tc.variables["ODBC_INCLUDE"] = self._cmakify_path_list(self.dependencies["odbc"].cpp_info.aggregated_components().includedirs)
             tc.variables["ODBC_FOUND"] = True
+        if self.options.with_haru:
+            tc.variables["HARU_PREFIX"] = self._cmakify_path_list(self.dependencies["libharu"].package_folder)
         if self.options.get_safe("with_unwind"):
-            tc.variables["UNWIND_PREFIX"] = self._cmakify_path_list(self.dependencies["libunwind"].package_folder)
+            tc.variables["UNWIND_PREFIX"] = self._cmakify_path_list([self.dependencies["libunwind"].package_folder])
         if self.settings.os == "Windows":
             tc.variables["CONNECTOR_FCGI"] = False
             tc.variables["CONNECTOR_ISAPI"] = self.options.connector_isapi
@@ -306,6 +317,8 @@ class WtConan(ConanFile):
             self.cpp_info.components["wtmain"].requires.append("openssl::openssl")
         if self.options.get_safe("with_unwind"):
             self.cpp_info.components["wtmain"].requires.append("libunwind::libunwind")
+        if self.options.with_haru:
+            self.cpp_info.components["wtmain"].requires.append("libharu::libharu")
 
         # wttest
         if self.options.with_test:

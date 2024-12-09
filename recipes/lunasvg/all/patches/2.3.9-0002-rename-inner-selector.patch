@@ -1,0 +1,26 @@
+diff --git a/source/parser.cpp b/source/parser.cpp
+index 714228b..3ade738 100644
+--- a/source/parser.cpp
++++ b/source/parser.cpp
+@@ -1226,8 +1226,8 @@ bool RuleData::matchPseudoClassSelector(const PseudoClassSelector& selector, con
+         return element->parent == nullptr;
+ 
+     if(selector.type == PseudoClassSelector::Type::Is) {
+-        for(auto& selector : selector.subSelectors) {
+-            for(auto& sel : selector) {
++        for(auto& subselector : selector.subSelectors) {
++            for(auto& sel : subselector) {
+                 if(!matchSimpleSelector(sel, element)) {
+                     return false;
+                 }
+@@ -1238,8 +1238,8 @@ bool RuleData::matchPseudoClassSelector(const PseudoClassSelector& selector, con
+     }
+ 
+     if(selector.type == PseudoClassSelector::Type::Not) {
+-        for(auto& selector : selector.subSelectors) {
+-            for(auto& sel : selector) {
++        for(auto& subselector : selector.subSelectors) {
++            for(auto& sel : subselector) {
+                 if(matchSimpleSelector(sel, element)) {
+                     return false;
+                 }

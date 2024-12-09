@@ -8,4 +8,14 @@ sources:
 patches:
   "2.0.0":
     - patch_file: "patches/tinyalsa-2.0.0-strncpy-warning.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/tinyalsa-2.0.0-fix-hardcoded-gcc.patch"
+      patch_description: "Fix hardcoded references to GCC"
+      patch_type: "portability"
+  "1.1.1":
+    - patch_file: "patches/tinyalsa-1.1.1-fix-make-clang-build.patch"
+      patch_description: "fix clang build using make"
+      patch_type: "backport"
+      patch_source: "https://github.com/tinyalsa/tinyalsa/commit/1c13f7cbe1ebee24c2b62d5ba16f2702882da49a"
+    - patch_file: "patches/tinyalsa-1.1.1-fix-hardcoded-gcc.patch"
+      patch_description: "Fix hardcoded references to GCC"
+      patch_type: "portability"

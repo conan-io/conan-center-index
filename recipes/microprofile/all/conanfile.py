@@ -5,7 +5,10 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, download, export_conandata_patches, get, save, load
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, save, load
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -91,7 +94,13 @@ class MicroprofileConan(ConanFile):
         if self.options.enable_timer == "gl":
             self.requires("opengl/system")
         if self.options.enable_timer == "vulkan":
-            self.requires("vulkan-loader/1.3.243.0")
+            self.requires("vulkan-loader/1.3.268.0")
+        if Version(self.version) >= "4.0":
+            self.requires("stb/cci.20230920")
+
+    def build_requirements(self):
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/2.1.0")
 
     def _validate_int_options(self):
         positive_int_options = [
@@ -134,15 +143,23 @@ class MicroprofileConan(ConanFile):
             raise ConanInvalidConfiguration("microprofile:webserver_port must be between 0 and 65535.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        VirtualBuildEnv(self).generate()
+
         tc = CMakeToolchain(self)
         tc.variables["MP_MINIZ"] = self.options.with_miniz
         tc.variables["MP_GPU_TIMERS_VULKAN"] = self.options.enable_timer == "vulkan"
+        tc.variables["MICROPROFILE_USE_CONFIG_FILE"] = True
+        tc.preprocessor_definitions["STB_SPRINTF_IMPLEMENTATION"] = 1
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def build(self):
         self._create_defines_file(os.path.join(self.source_folder, "microprofile.config.h"))
@@ -203,6 +220,8 @@ class MicroprofileConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
+        if Version(self.version) < "4.0":
+            self.cpp_info.includedirs.append(os.path.join("include", "microprofile"))
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
         elif self.settings.os in ["Linux", "FreeBSD"]:

@@ -1,0 +1,52 @@
+diff --git a/cmakeUtils/setup.cmake b/cmakeUtils/setup.cmake
+--- cmakeUtils/setup.cmake
++++ cmakeUtils/setup.cmake
+@@ -1,6 +1,4 @@
+ include(utilities)
+-include(conan)
+-include(conanutils)
+ 
+ macro(setup_project)
+     if(NOT CMAKE_BUILD_TYPE)
+@@ -13,13 +11,9 @@
+     option(ENABLE_CODE_DOCUMENTATION "enable code documenation generation" OFF)
+     option(MSVC_DYNAMIC_RUNTIME "change default runtime" ON)
+ 
+-    conan_check(VERSION 1.22.2 REQUIRED)
+-
+     setup_default_cxx_compile_options()
+ 
+     set_output_directories(${CMAKE_BINARY_DIR}/bin)
+-
+-    run_conan()
+ 
+     include(CTest)
+     if(BUILD_TESTING)
+diff --git a/libsoundtrackutil/CMakeLists.txt b/libsoundtrackutil/CMakeLists.txt
+--- libsoundtrackutil/CMakeLists.txt
++++ libsoundtrackutil/CMakeLists.txt
+@@ -1,8 +1,10 @@
+-add_library(libsoundtrackutil STATIC)
++add_library(libsoundtrackutil)
+ 
++find_package(twitch-native-ipc REQUIRED CONFIG)
++find_package(Microsoft.GSL REQUIRED CONFIG)
+ target_link_libraries(libsoundtrackutil PUBLIC
+-  CONAN_PKG::twitch-native-ipc
+-  CONAN_PKG::ms-gsl
++  twitch-native-ipc::twitch-native-ipc
++  Microsoft.GSL::GSL
+   )
+ 
+ if(MSVC)
+@@ -27,7 +29,9 @@
+ target_compile_features(libsoundtrackutil PRIVATE cxx_std_17)
+ 
+ install(TARGETS libsoundtrackutil
+-  LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}
++  LIBRARY DESTINATION lib
++  ARCHIVE DESTINATION lib
++  RUNTIME DESTINATION bin
+ )
+ 
+ install(DIRECTORY include

@@ -1,7 +1,6 @@
 sources:
   "1.45":
-    url: [
-      "http://www.niu.edu/spmartin/TSIL/tsil-1.45.tar.gz",
-      "http://faculty.otterbein.edu/DRobertson/tsil/tsil-1.45.tar.gz"
-    ]
+    url:
+      - "http://www.niu.edu/spmartin/TSIL/tsil-1.45.tar.gz"
+      - "http://faculty.otterbein.edu/DRobertson/tsil/tsil-1.45.tar.gz"
     sha256: "420e389af9a77edcc373b88893bf13c9dddfea1d760219dc9a932f28ea0d5d24"

@@ -1,12 +1,15 @@
 sources:
-  "1.2.1":
-    url: "https://github.com/ggerganov/whisper.cpp/archive/ad1389003d3f8bd47b8ca7d4c21b4764cc3844fc.tar.gz"
-    sha256: "e1459ddfe45430b68a1951e4e071478180a3a100a68c0d54f78d113c735e6363"
-  "1.4.2":
-    url: "https://github.com/ggerganov/whisper.cpp/archive/a5defbc1b98bea0f070331ce1e8b62d947b0443d.tar.gz"
-    sha256: "6dd0690b084269b22b1b749103b047e6d45d7b910d7bc9587085ce057dca5431"
+  "1.7.2":
+    url: "https://github.com/ggerganov/whisper.cpp/archive/refs/tags/v1.7.2.tar.gz"
+    sha256: "d48e1b5b6ee18b931e98ac791eba838f83eb3b81bb8917db37fe9a79fa5e3ccb"
+  "1.6.2":
+    url: "https://github.com/ggerganov/whisper.cpp/archive/refs/tags/v1.6.2.tar.gz"
+    sha256: "da7988072022acc3cfa61b370b3c51baad017f1900c3dc4e68cb276499f66894"
+  "1.5.2":
+    url: "https://github.com/ggerganov/whisper.cpp/archive/refs/tags/v1.5.2.tar.gz"
+    sha256: "be9c4d5d4b5f28f02e36f28e602b7d2dcfd734dd1c834ddae91ae8db601e951f"
 patches:
-  "1.4.2":
-    - patch_file: "patches/1.4.2-0001-find_package_openblas.patch"
-      patch_description: "Fix OpenBlas cmake target name"
+  "1.6.2":
+    - patch_file: "patches/1.6.2-0001-remove_hardcoded_cxxstd.patch"
+      patch_description: "Remove hardcoded CMAKE_CXX_STANDARD"
       patch_type: "conan"

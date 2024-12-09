@@ -1,8 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.15)
 project(test_package C)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
+if (NOT DEFINED ENV{SUPPORT_PATH})
+    message(FATAL_ERROR "SUPPORT_PATH environment variable not defined")
+endif()
 
 set(STANDARD_ASN1_FILES
  BIT_STRING.c
@@ -39,7 +40,7 @@ set(GENERATED_FILES
 
 add_custom_command(
   OUTPUT ${GENERATED_FILES} ${STANDARD_ASN1_FILES}
-  COMMAND asn1c -S ${SUPPORT_PATH} MyModule.asn1
+  COMMAND asn1c -S "$ENV{SUPPORT_PATH}" MyModule.asn1
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   DEPENDS MyModule.asn1
 )

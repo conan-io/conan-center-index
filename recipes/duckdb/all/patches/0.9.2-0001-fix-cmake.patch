@@ -1,0 +1,117 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 67444db..c34c3ce 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -721,7 +721,7 @@ function(build_static_extension NAME PARAMETERS)
+   set(FILES ${ARGV})
+   list(REMOVE_AT FILES 0)
+   add_library(${NAME}_extension STATIC ${FILES})
+-  target_link_libraries(${NAME}_extension duckdb_static)
++#  target_link_libraries(${NAME}_extension duckdb_static)
+ endfunction()
+ 
+ # Internal extension register function
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index cda2d86..011ecb5 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -76,21 +76,21 @@ else()
+       duckdb_hyperloglog
+       duckdb_fastpforlib
+       duckdb_mbedtls)
+-
++  if(BUILD_SHARED_LIBS)
+   add_library(duckdb SHARED ${ALL_OBJECT_FILES})
+   target_link_libraries(duckdb ${DUCKDB_LINK_LIBS})
+   link_threads(duckdb)
+   link_extension_libraries(duckdb)
+-
++  endif()
+   add_library(duckdb_static STATIC ${ALL_OBJECT_FILES})
+   target_link_libraries(duckdb_static ${DUCKDB_LINK_LIBS})
+   link_threads(duckdb_static)
+   link_extension_libraries(duckdb_static)
+-
++  if(BUILD_SHARED_LIBS)
+   target_include_directories(
+     duckdb PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+-
++  endif()
+   target_include_directories(
+     duckdb_static PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                          $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+@@ -105,10 +105,18 @@ else()
+           DESTINATION "${INSTALL_INCLUDE_DIR}")
+ 
+ endif()
+-
++if(BUILD_SHARED_LIBS)
+ install(
+-  TARGETS duckdb duckdb_static
++  TARGETS duckdb
+   EXPORT "${DUCKDB_EXPORT_SET}"
+   LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
+   ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+   RUNTIME DESTINATION "${INSTALL_BIN_DIR}")
++else()
++install(
++  TARGETS duckdb_static
++  EXPORT "${DUCKDB_EXPORT_SET}"
++  LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
++  ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
++  RUNTIME DESTINATION "${INSTALL_BIN_DIR}")
++endif()
+diff --git a/tools/odbc/CMakeLists.txt b/tools/odbc/CMakeLists.txt
+index 4a8e7e1..8ae9681 100644
+--- a/tools/odbc/CMakeLists.txt
++++ b/tools/odbc/CMakeLists.txt
+@@ -53,6 +53,13 @@ add_library(
+ 
+ set_target_properties(duckdb_odbc PROPERTIES DEFINE_SYMBOL "DUCKDB_ODBC_API")
+ target_link_libraries(duckdb_odbc ${LINK_LIB_LIST} duckdb_static)
++install(
++    TARGETS duckdb_odbc
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
++)
+ 
+ if(NOT CLANG_TIDY)
+   add_subdirectory(test)
+diff --git a/tools/sqlite3_api_wrapper/CMakeLists.txt b/tools/sqlite3_api_wrapper/CMakeLists.txt
+index 3fa4166..42af485 100644
+--- a/tools/sqlite3_api_wrapper/CMakeLists.txt
++++ b/tools/sqlite3_api_wrapper/CMakeLists.txt
+@@ -25,20 +25,20 @@ if(NOT AMALGAMATION_BUILD)
+ endif()
+ link_threads(sqlite3_api_wrapper_static)
+ 
+-if(NOT WIN32 AND NOT ZOS)
++if(BUILD_SHARED_LIBS AND NOT WIN32 AND NOT ZOS)
+   add_library(sqlite3_api_wrapper SHARED ${SQLITE_API_WRAPPER_FILES})
+   target_link_libraries(sqlite3_api_wrapper duckdb ${DUCKDB_EXTRA_LINK_FLAGS})
+   link_threads(sqlite3_api_wrapper)
+ endif()
+ 
+-include_directories(../../third_party/catch)
++# include_directories(../../third_party/catch)
+ 
+-include_directories(test/include)
+-add_subdirectory(test)
++# include_directories(test/include)
++# add_subdirectory(test)
+ 
+-add_executable(test_sqlite3_api_wrapper ${SQLITE_TEST_FILES})
+-if(WIN32 OR ZOS)
+-  target_link_libraries(test_sqlite3_api_wrapper sqlite3_api_wrapper_static)
+-else()
+-  target_link_libraries(test_sqlite3_api_wrapper sqlite3_api_wrapper)
+-endif()
++#add_executable(test_sqlite3_api_wrapper ${SQLITE_TEST_FILES})
++#if(WIN32 OR ZOS)
++#  target_link_libraries(test_sqlite3_api_wrapper sqlite3_api_wrapper_static)
++#else()
++#  target_link_libraries(test_sqlite3_api_wrapper sqlite3_api_wrapper)
++#endif()

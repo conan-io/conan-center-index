@@ -18,6 +18,7 @@ class OpenColorIOConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("colors", "visual", "effects", "animation")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -46,39 +47,53 @@ class OpenColorIOConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("expat/2.5.0")
+        self.requires("expat/[>=2.6.2 <3]")
         if Version(self.version) < "2.2.0":
             self.requires("openexr/2.5.7")
         else:
-            self.requires("openexr/3.1.7")
-            self.requires("imath/3.1.6")
+            self.requires("openexr/3.2.3")
+            self.requires("imath/3.1.9")
 
-        self.requires("yaml-cpp/0.7.0")
         if Version(self.version) < "2.0.0":
             self.requires("tinyxml/2.6.2")
+            self.requires("yaml-cpp/0.7.0")
         else:
             self.requires("pystring/1.1.4")
+            self.requires("yaml-cpp/0.8.0")
 
-        if Version(self.version) >= "2.2.0":
-            self.requires("minizip-ng/3.0.7")
+        if Version(self.version) >= "2.3.0":
+            self.requires("minizip-ng/4.0.3")
+        elif Version(self.version) >= "2.2.0":
+            self.requires("minizip-ng/3.0.9")
 
         # for tools only
-        self.requires("lcms/2.14")
+        self.requires("lcms/2.16")
         # TODO: add GLUT (needed for ociodisplay tool)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
+        if Version(self.version) >= "2.3.0" and \
+            self.settings.compiler == "gcc" and \
+            Version(self.settings.compiler.version) < "6.0":
+            raise ConanInvalidConfiguration(f"{self.ref} requires gcc >= 6.0")
+
+        if Version(self.version) < "2.0.0" and \
+            self.settings.compiler.value == "msvc" and \
+            Version(self.settings.compiler.version) >= "17.0":
+            raise ConanInvalidConfiguration(f"{self.ref} < 2.0 not building on MSVC 2022")
+
+        if Version(self.version) >= "2.3.0" and \
+            self.settings.compiler == "clang" and \
+            self.settings.compiler.libcxx == "libc++":
+            raise ConanInvalidConfiguration(f"{self.ref} deosn't support clang with libc++")
 
         # opencolorio>=2.2.0 requires minizip-ng with with_zlib
         if Version(self.version) >= "2.2.0" and \
             not self.dependencies["minizip-ng"].options.get_safe("with_zlib", False):
-            raise ConanInvalidConfiguration(f"{self.ref} requires minizip-ng with with_zlib = True.")
+            raise ConanInvalidConfiguration(f"{self.ref} requires minizip-ng with with_zlib = True. On Apple platforms with_libcomp = False is also needed to enable the with_zlib option.")
 
         if Version(self.version) == "1.1.1" and self.options.shared and self.dependencies["yaml-cpp"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires static build yaml-cpp")
-        if Version(self.version) == "2.2.1" and self.options.shared and self.dependencies["minizip-ng"].options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} requires static build minizip-ng")
 
     def build_requirements(self):
         if Version(self.version) >= "2.2.0":
@@ -182,12 +197,3 @@ class OpenColorIOConan(ConanFile):
 
         if is_msvc(self) and not self.options.shared:
             self.cpp_info.defines.append("OpenColorIO_SKIP_IMPORTS")
-
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH env var with: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)
-
-        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "OpenColorIO"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenColorIO"
-        self.cpp_info.names["pkg_config"] = "OpenColorIO"

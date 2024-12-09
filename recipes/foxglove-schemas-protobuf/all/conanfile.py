@@ -8,7 +8,7 @@ from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0"
 
 
 class FoxgloveSchemasProtobufConan(ConanFile):
@@ -64,11 +64,11 @@ class FoxgloveSchemasProtobufConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration("Windows shared builds are not supported yet.")
 
-    def build_requirements(self):
-        self.tool_requires("protobuf/3.21.9")
-
     def requirements(self):
-        self.requires("protobuf/3.21.9", transitive_headers=True, transitive_libs=True)
+        self.requires("protobuf/3.21.12", transitive_headers=True, transitive_libs=True)
+
+    def build_requirements(self):
+        self.tool_requires("protobuf/<host_version>")
 
     def layout(self):
         cmake_layout(self, src_folder="src")

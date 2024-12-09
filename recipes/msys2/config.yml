@@ -1,4 +1,3 @@
 versions:
-    "cci.latest":
-      folder: "all"
-  
+  "cci.latest":
+    folder: "all"

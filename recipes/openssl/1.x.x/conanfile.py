@@ -5,7 +5,7 @@ from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import (
     apply_conandata_patches, chdir, copy, export_conandata_patches,
-    get, load, rename, replace_in_file, rm, rmdir, save
+    get, load, replace_in_file, rm, rmdir, save
 )
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
@@ -95,8 +95,9 @@ class OpenSSLConan(ConanFile):
     default_options["openssldir"] = None
 
     @property
-    def _is_clangcl(self):
-        return self.settings.compiler == "clang" and self.settings.os == "Windows"
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+               self.settings.compiler.get_safe("runtime")
 
     @property
     def _is_mingw(self):
@@ -104,7 +105,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _use_nmake(self):
-        return self._is_clangcl or is_msvc(self)
+        return self._is_clang_cl or is_msvc(self)
 
     @property
     def _settings_build(self):
@@ -143,7 +144,7 @@ class OpenSSLConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             if not self.options.no_asm:
-                self.tool_requires("nasm/2.15.05")
+                self.tool_requires("nasm/2.16.01")
             if self._use_nmake:
                 self.tool_requires("strawberryperl/5.32.1.1")
             else:
@@ -374,7 +375,7 @@ class OpenSSLConan(ConanFile):
 
         if self.settings.os == "Neutrino":
             args.append("no-asm -lsocket -latomic")
-        if self._is_clangcl:
+        if self._is_clang_cl:
             # #error <stdatomic.h> is not yet supported when compiling as C, but this is planned for a future release.
             args.append("-D__STDC_NO_ATOMICS__")
 
@@ -500,7 +501,7 @@ class OpenSSLConan(ConanFile):
         with self._make_context():
             with chdir(self, self.source_folder):
                 # workaround for clang-cl not producing .pdb files
-                if self._is_clangcl:
+                if self._is_clang_cl:
                     save(self, "ossl_static.pdb", "")
                 args = " ".join(self._configure_args)
                 self.output.info(self._configure_args)
@@ -538,10 +539,6 @@ class OpenSSLConan(ConanFile):
             with chdir(self, self.source_folder):
                 self.run(f"nmake -f Makefile install_sw DESTDIR={self.package_folder}")
             rm(self, "*.pdb", self.package_folder, recursive=True)
-            if self.settings.build_type == "Debug":
-                with chdir(self, os.path.join(self.package_folder, "lib")):
-                    rename(self, "libssl.lib", "libssld.lib")
-                    rename(self, "libcrypto.lib", "libcryptod.lib")
         else:
             autotools = Autotools(self)
             with chdir(self, self.source_folder):
@@ -618,9 +615,8 @@ class OpenSSLConan(ConanFile):
         self.cpp_info.components["ssl"].set_property("cmake_target_name", "OpenSSL::SSL")
         self.cpp_info.components["ssl"].set_property("pkg_config_name", "libssl")
         if self._use_nmake:
-            libsuffix = "d" if self.settings.build_type == "Debug" else ""
-            self.cpp_info.components["ssl"].libs = ["libssl" + libsuffix]
-            self.cpp_info.components["crypto"].libs = ["libcrypto" + libsuffix]
+            self.cpp_info.components["ssl"].libs = ["libssl"]
+            self.cpp_info.components["crypto"].libs = ["libcrypto"]
         else:
             self.cpp_info.components["ssl"].libs = ["ssl"]
             self.cpp_info.components["crypto"].libs = ["crypto"]

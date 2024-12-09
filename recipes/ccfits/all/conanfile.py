@@ -11,7 +11,7 @@ required_conan_version = ">=1.54.0"
 class CcfitsConan(ConanFile):
     name = "ccfits"
     description = "CCfits is an object oriented interface to the cfitsio library."
-    license = "ISC"
+    license = "CFITSIO"
     topics = ("fits", "image", "nasa", "astronomy", "astrophysics", "space")
     homepage = "https://heasarc.gsfc.nasa.gov/fitsio/ccfits"
     url = "https://github.com/conan-io/conan-center-index"

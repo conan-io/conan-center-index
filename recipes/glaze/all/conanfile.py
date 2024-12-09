@@ -4,6 +4,7 @@ from conan.tools.files import get, copy
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.51.1"
@@ -21,17 +22,26 @@ class GlazeConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return 20
+        return "20" if Version(self.version) < "3.0.0" else "23"
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "17" if Version(self.version) >= "1.3.3" else "16",
-            "msvc": "193" if Version(self.version) >= "1.3.3" else "192",
-            "gcc": "12",
-            "clang": "12",
-            "apple-clang": "13.1",
-        }
+            "20": {
+                "Visual Studio": "17",
+                "msvc": "193",
+                "gcc": "11" if Version(self.version) < "2.6.3" else "12",
+                "clang": "14",
+                "apple-clang": "13.1",
+            },
+            "23": {
+                "Visual Studio": "17",
+                "msvc": "193",
+                "gcc": "12",
+                "clang": "15",
+                "apple-clang": "14",
+            },
+        }.get(self._min_cppstd, {})
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -40,9 +50,8 @@ class GlazeConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.get_safe("compiler.cppstd"):
+        if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
-
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
@@ -64,3 +73,5 @@ class GlazeConan(ConanFile):
     def package_info(self):
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
+        if is_msvc(self):
+            self.cpp_info.cxxflags.append("/Zc:preprocessor")

@@ -1,4 +1,7 @@
 sources:
+  "3.1.10":
+    url: "https://github.com/stephane/libmodbus/releases/download/v3.1.10/libmodbus-3.1.10.tar.gz"
+    sha256: "899be4e25ab7fe5799d43f9567510d6f063d2e8f56136dd726b6fd976f9b2253"
   "3.1.8":
     url: "https://github.com/stephane/libmodbus/releases/download/v3.1.8/libmodbus-3.1.8.tar.gz"
     sha256: "b122f2bc29f749702a22c0a760a7ca2182d541f5fa26bf25e3431f907b606f3c"
@@ -6,6 +9,8 @@ sources:
     url: "https://libmodbus.org/releases/libmodbus-3.1.6.tar.gz"
     sha256: "d7d9fa94a16edb094e5fdf5d87ae17a0dc3f3e3d687fead81835d9572cf87c16"
 patches:
+  "3.1.10":
+    - patch_file: "patches/3.1.10-0001-msvc-fixes.patch"
   "3.1.8":
     - patch_file: "patches/3.1.8-0001-msvc-fixes.patch"
   "3.1.6":
