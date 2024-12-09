@@ -4,8 +4,7 @@ from conan.tools.files import copy, get
 import os
 
 class otfftppRecipe(ConanFile):
-    name = "otfftpp"
-    version = "0.0.2"
+    name = "robinchrist-otfftpp"
     package_type = "library"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
