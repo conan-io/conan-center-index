@@ -42,7 +42,7 @@ class OpenColorIOConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "use_sse": True,
+        "use_sse": None,
         "use_sse2": None,
         "use_sse3": None,
         "use_ssse3": None,
@@ -60,8 +60,9 @@ class OpenColorIOConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.arch not in ["x86", "x86_64"] and self.options.get_safe("use_sse", None):
-            self.options.use_sse = False
+        # Reproduce the previous default which was injected instead of letting it be determined
+        if self.options.get_safe("use_sse", None) == None:
+            self.options.use_sse = self.settings.arch in ["x86", "x86_64"]
 
     def configure(self):
         if self.options.shared:
