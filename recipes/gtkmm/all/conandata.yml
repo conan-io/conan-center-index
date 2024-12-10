@@ -1,0 +1,16 @@
+sources:
+  "4.16.0":
+    url: "https://download.gnome.org/sources/gtkmm/4.16/gtkmm-4.16.0.tar.xz"
+    sha256: "3b23fd3abf8fb223b00e9983b6010af2db80e38c89ab6994b8b6230aa85d60f9"
+  "3.24.9":
+    url: "https://download.gnome.org/sources/gtkmm/3.24/gtkmm-3.24.9.tar.xz"
+    sha256: "30d5bfe404571ce566a8e938c8bac17576420eb508f1e257837da63f14ad44ce"
+patches:
+  "4.16.0":
+    - patch_file: "patches/fix-find_library.patch"
+      patch_description: "Fix find_library() for glibmm_generate_extra_defs"
+      patch_type: "portability"
+  "3.24.9":
+    - patch_file: "patches/fix-find_library.patch"
+      patch_description: "Fix find_library() for glibmm_generate_extra_defs"
+      patch_type: "portability"
