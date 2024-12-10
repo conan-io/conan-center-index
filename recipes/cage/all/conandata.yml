@@ -1,0 +1,7 @@
+sources:
+  "cci.20240226":
+    url: "https://github.com/cage-kiosk/cage/archive/e7d8780f46277af87881e0be91cb2092541bb1d5.zip"
+    sha256: "3f1d1a77b45188ff47c9f3f80e47fb2dd8c91b59baf0bd0112f8b932d20466b1"
+  # "0.1.5":
+  #   url: "https://github.com/cage-kiosk/cage/releases/download/v0.1.5/cage-0.1.5.tar.gz"
+  #   sha256: "ece0312e559289df0238289ea6c60e9fed32d27fe3ae8a8f83eeff26ddc239e1"
