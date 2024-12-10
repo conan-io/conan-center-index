@@ -7,7 +7,6 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
-from conan.tools.scm import Version
 import os
 
 
@@ -41,17 +40,18 @@ class PackageConan(ConanFile):
         "fPIC": True,
         "with_foobar": True,
     }
+    # In case having config_options() or configure() method, the logic should be moved to the specific methods.
     implements = ["auto_shared_fpic"]
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     # no exports_sources attribute, but export_sources(self) method instead
     def export_sources(self):
         export_conandata_patches(self)
 
     def configure(self):
+        # Keep this logic only in case configure() is needed e.g pure-c project.
+        # Otherwise remove configure() and auto_shared_fpic will manage it.
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
         # for plain C projects only. Otherwise, remove this method.
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
@@ -86,7 +86,7 @@ class PackageConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         # required to suppport windows as a build machine
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")

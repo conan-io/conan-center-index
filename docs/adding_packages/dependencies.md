@@ -59,6 +59,7 @@ Version ranges for the following dependencies will be accepted in pull requests:
 * OpenSSL: `[>=1.1 <4]` for libraries known to be compatible with OpenSSL 1.x and 3.x
 * CMake: `[>3.XX <4]`, where `3.XX` is the minimum version of CMake required by the relevant build scripts. Note that CCI recipes assume 3.15 is installed in the system, so add this
 version range only when a requirement for a newer version is needed.
+* doxygen: `[>=1.8 <2]`
 * Libcurl: `[>=7.78 <9]`
 * Zlib: `[>=1.2.11 <2]`
 * Libpng: `[>=1.6 <2]`

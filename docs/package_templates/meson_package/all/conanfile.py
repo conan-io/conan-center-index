@@ -7,7 +7,6 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 import os
 
 
@@ -41,6 +40,7 @@ class PackageConan(ConanFile):
         "fPIC": True,
         "feature": True,
     }
+    # In case having config_options() or configure() method, the logic should be moved to the specific methods.
     implements = ["auto_shared_fpic"]
 
     # no exports_sources attribute, but export_sources(self) method instead
@@ -48,6 +48,10 @@ class PackageConan(ConanFile):
         export_conandata_patches(self)
 
     def configure(self):
+        # Keep this logic only in case configure() is needed e.g pure-c project.
+        # Otherwise remove configure() and auto_shared_fpic will manage it.
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
         # for plain C projects only. Otherwise, remove this method.
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
