@@ -29,7 +29,7 @@ class MavsdkConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "regenerate_protobuf": True,
+        "regenerate_protobuf": False,
         "build_server": False,
         "enable_reflection": False,
     }
