@@ -1431,9 +1431,11 @@ class BoostConan(ConanFile):
         if self.options.get_safe("addr2line_location"):
             cxx_flags.append(f"-DBOOST_STACKTRACE_ADDR2LINE_LOCATION={self.options.addr2line_location}")
 
-        if not self.options.get_safe('without_cobalt', True) and \
-            (self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "10"):
-            cxx_flags.append("-fcoroutines")
+        if not self.options.get_safe('without_cobalt', True):
+            # INFO: https://gcc.gnu.org/wiki/cxx-coroutines
+            if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "10":
+                cxx_flags.append("-fcoroutines")
+            flags.append('boost.cobalt.pmr=boost-container')
 
         cxx_flags = f'cxxflags="{" ".join(cxx_flags)}"'
         flags.append(cxx_flags)
@@ -2085,9 +2087,11 @@ class BoostConan(ConanFile):
                 else:
                     self.cpp_info.components["headers"].defines.extend(["BOOST_AC_DISABLE_THREADS", "BOOST_SP_DISABLE_THREADS"])
 
-            if not self.options.get_safe('without_cobalt', True) and \
-                (self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "10"):
-                self.cpp_info.components["cobalt"].cxxflags.append("-fcoroutines")
+            if not self.options.get_safe('without_cobalt', True):
+                if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) == "10":
+                    # INFO: https://gcc.gnu.org/wiki/cxx-coroutines
+                    self.cpp_info.components["cobalt"].cxxflags.append("-fcoroutines")
+                self.cpp_info.components["cobalt"].defines.append("BOOST_COBALT_USE_BOOST_CONTAINER_PMR")
 
         #TODO: remove in the future, user_info deprecated in conan2, but kept for compatibility while recipe is cross-compatible.
         self.user_info.stacktrace_addr2line_available = self._stacktrace_addr2line_available
