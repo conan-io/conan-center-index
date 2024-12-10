@@ -1,5 +1,5 @@
 diff --git a/aws-cpp-sdk-text-to-speech/CMakeLists.txt b/aws-cpp-sdk-text-to-speech/CMakeLists.txt
-index b1054515d5..d1a34ddfc5 100644
+index b105451..7de9367 100644
 --- a/aws-cpp-sdk-text-to-speech/CMakeLists.txt
 +++ b/aws-cpp-sdk-text-to-speech/CMakeLists.txt
 @@ -9,8 +9,6 @@ file( GLOB TEXT_TO_SPEECH_HEADERS "include/aws/text-to-speech/*.h" )
@@ -11,13 +11,15 @@ index b1054515d5..d1a34ddfc5 100644
  if(PLATFORM_WINDOWS)
      file( GLOB TEXT_TO_SPEECH_PLATFORM_HEADERS "include/aws/text-to-speech/windows/*.h" )
  	file( GLOB TEXT_TO_SPEECH_PLATFORM_SOURCE "source/text-to-speech/windows/*.cpp" )
-@@ -20,13 +18,14 @@ if(PLATFORM_WINDOWS)
+@@ -19,14 +17,15 @@ if(PLATFORM_WINDOWS)
+     set(PLATFORM_LIBS ${PLATFORM_LIBS} Winmm)
  endif()
  
- if (PLATFORM_LINUX)
+-if (PLATFORM_LINUX)
 -    if(HAVE_PULSE)
++if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 +    find_package(pulseaudio)
-+    if (1)
++    if (pulseaudio_FOUND)
          file( GLOB TEXT_TO_SPEECH_PLATFORM_HEADERS "include/aws/text-to-speech/linux/*.h" )
          file( GLOB TEXT_TO_SPEECH_PLATFORM_SOURCE "source/text-to-speech/linux/*.cpp" )
  
