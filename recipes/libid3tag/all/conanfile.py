@@ -2,6 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -54,14 +55,19 @@ class LibId3TagConan(ConanFile):
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
 
-    def validate(self):
-        if cross_building(self) and self.settings.arch == "armv8" and self.options.shared:
-            # https://github.com/conan-io/conan-center-index/pull/18987#issuecomment-1668243831
-            raise ConanInvalidConfiguration("shared library cross-building is not supported for armv8")
+    def validate_build(self):
+        if cross_building(self) and is_apple_os(self) and self.options.shared:
+            # Cannot cross-build due to a very old version of libtool that does not 
+            # correctly propagate `-sysroot` or `-arch` when creating a shared library
+            raise ConanInvalidConfiguration("Shared library cross-building is not supported on Apple platforms")
 
     def build_requirements(self):
         if not is_msvc(self):
             self.tool_requires("gnu-config/cci.20210814")
+            if self.settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -112,6 +118,7 @@ class LibId3TagConan(ConanFile):
                 autotools = Autotools(self)
                 autotools.install()
             rm(self, "*.la", self.package_folder, recursive=True)
+            fix_apple_shared_install_name(self)
 
     def package_info(self):
         if is_msvc(self):
