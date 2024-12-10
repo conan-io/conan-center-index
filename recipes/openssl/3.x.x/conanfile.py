@@ -467,7 +467,7 @@ class OpenSSLConan(ConanFile):
             cflags.append("-fembed-bitcode")
             cxxflags.append("-fembed-bitcode")
 
-        if is_msvc(self) or self._is_clang_cl(self):
+        if is_msvc(self) or self._is_clang_cl:
             # -FS was already passed, double check if this is needed
             cflags.append("/FS")
             cxxflags.append("/FS")
