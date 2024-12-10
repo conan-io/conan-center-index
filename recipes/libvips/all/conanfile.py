@@ -11,7 +11,7 @@ from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
+required_conan_version = ">=2.1"
 
 
 class LibvipsConan(ConanFile):
@@ -150,7 +150,7 @@ class LibvipsConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/[>=3.0 <3.1]")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.5")
         if self.options.with_jpeg_xl:
@@ -192,7 +192,7 @@ class LibvipsConan(ConanFile):
         if self.options.with_cgif and not (self.options.with_imagequant or self.options.with_quantizr):
             raise ConanInvalidConfiguration("with_cgif requires either with_imagequant or with_quantizr")
 
-        if Version(self.version) >= "8.15" and self.settings.compiler.cppstd:
+        if Version(self.version) >= "8.15":
             check_min_cppstd(self, 11)
 
         # Visual Studio < 2019 doesn't seem to like pointer restrict of pointer restrict in libnsgif
@@ -218,9 +218,9 @@ class LibvipsConan(ConanFile):
             raise ConanInvalidConfiguration("librsvg recipe not available in conancenter yet")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.4.0")
+        self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         if self.options.introspection:
             self.tool_requires("gobject-introspection/1.72.0")
         self.tool_requires("glib/<host_version>")
@@ -234,6 +234,7 @@ class LibvipsConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -316,7 +317,6 @@ class LibvipsConan(ConanFile):
                         )
 
     def build(self):
-        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -394,9 +394,6 @@ class LibvipsConan(ConanFile):
             self.cpp_info.components["vips-cpp"].set_property("pkg_config_name", "vips-cpp")
             self.cpp_info.components["vips-cpp"].libs = ["vips-cpp"]
             self.cpp_info.components["vips-cpp"].requires = ["vips"]
-
-        # TODO: to remove once conan v1 support dropped
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
