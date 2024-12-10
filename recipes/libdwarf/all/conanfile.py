@@ -79,6 +79,8 @@ class LibdwarfConan(ConanFile):
         dpes.generate()
 
     def build(self):
+        # Headers patches only makes sense for Windows, and CMake ones
+        # were solved since https://github.com/davea42/libdwarf-code/commit/6ffd41d39ba8e5db8651a35ac4f975baf786de4c (v0.9.2)
         if Version(self.version) < "0.9.2" or self.settings.os == "Windows":
             apply_conandata_patches(self)
         cmake = CMake(self)
