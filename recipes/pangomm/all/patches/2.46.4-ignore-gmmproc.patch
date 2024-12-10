@@ -1,0 +1,15 @@
+gmmproc is only used for code generation when in "maintainer mode".
+
+--- a/meson.build
++++ b/meson.build
+@@ -121,7 +121,9 @@
+ glibmm_dep = dependency('glibmm-2.@0@'.format(glibmm_req_minor_ver), version: glibmm_req)
+ 
+ # Where to find gmmproc and generate_wrap_init.pl.
+-gmmproc_dir = glibmm_dep.get_variable(pkgconfig: 'gmmprocdir', internal: 'gmmprocdir')
++if maintainer_mode
++  gmmproc_dir = glibmm_dep.get_variable(pkgconfig: 'gmmprocdir', internal: 'gmmprocdir')
++endif
+ 
+ if is_msvc
+   # Check later whether we compile pangomm without using gendef

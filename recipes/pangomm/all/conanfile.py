@@ -1,101 +1,88 @@
-from conans import ConanFile, Meson, tools
-from conan.tools.files import rename
-from conan.tools.microsoft import is_msvc
-from conans.errors import ConanInvalidConfiguration
 import os
-import shutil
+
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, replace_in_file, rm, rmdir
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.meson import MesonToolchain, Meson
+from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
+
+required_conan_version = ">=2.0.9"
 
 
 class PangommConan(ConanFile):
     name = "pangomm"
-    homepage = "https://gitlab.gnome.org/GNOME/pangomm"
+    description = "pangomm is a C++ API for Pango: a library for layout and rendering of text."
     license = "LGPL-2.1"
     url = "https://github.com/conan-io/conan-center-index"
-    description = "pangomm is a C++ API for Pango: a library for layout and rendering of text."
-    topics = ["pango", "wrapper", "text rendering", "fonts", "freedesktop"]
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": False, "fPIC": True}
-
-    generators = "pkg_config"
-    exports_sources = "patches/**"
-
-    @property
-    def _is_2_48_api(self):
-        return tools.Version(self.version) >= "2.48.0"
-
-    @property
-    def _is_1_4_api(self):
-        return tools.Version(self.version) >= "1.4.0" and tools.Version(
-            self.version) < "2.48.0"
+    homepage = "https://gitlab.gnome.org/GNOME/pangomm"
+    topics = "pango", "wrapper", "text rendering", "fonts", "freedesktop"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+    implements = ["auto_shared_fpic"]
 
     @property
-    def _api_version(self):
-        return "2.48" if self._is_2_48_api else "1.4"
+    def _abi_version(self):
+        return "2.48" if Version(self.version) >= "2.48.0" else "1.4"
 
-    def validate(self):
-        if hasattr(self, "settings_build") and tools.cross_building(self):
-            raise ConanInvalidConfiguration("Cross-building not implemented")
+    def export_sources(self):
+        export_conandata_patches(self)
 
-        if self.settings.compiler.get_safe("cppstd"):
-            if self._is_2_48_api:
-                tools.check_min_cppstd(self, 17)
-            elif self._is_1_4_api:
-                tools.check_min_cppstd(self, 11)
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    @property
-    def _build_subfolder(self):
-        return "build_subfolder"
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def build_requirements(self):
-        self.build_requires("meson/0.59.1")
-        self.build_requires("pkgconf/1.7.4")
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("pango/1.50.7")
+        self.requires("pango/1.54.0", transitive_headers=True, transitive_libs=True)
+        if self._abi_version == "2.48":
+            self.requires("glibmm/2.78.1", transitive_headers=True, transitive_libs=True)
+            self.requires("cairomm/1.18.0", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("glibmm/2.66.4", transitive_headers=True, transitive_libs=True)
+            self.requires("cairomm/1.14.5", transitive_headers=True, transitive_libs=True)
 
-        # FIXME: temporary fix for dependency versions mismatch
-        # once dependencies versions are bumped remove these requirements
-        self.requires("expat/2.4.8")
-        self.requires("zlib/1.2.12")
-        self.requires("glib/2.72.1")
+    def validate(self):
+        if self._abi_version == "2.48":
+            check_min_cppstd(self, 17)
+        else:
+            check_min_cppstd(self, 11)
 
-        if self._is_2_48_api:
-            self.requires("glibmm/2.72.1")
-            self.requires("cairomm/1.16.1")
-        elif self._is_1_4_api:
-            self.requires("glibmm/2.66.4")
-            self.requires("cairomm/1.14.3")
+    def build_requirements(self):
+        self.tool_requires("meson/[>=1.2.3 <2]")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
-        tools.get(
-            **self.conan_data["sources"][self.version],
-            strip_root=True,
-            destination=self._source_subfolder,
-        )
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+
+    def generate(self):
+        tc = MesonToolchain(self)
+        tc.project_options["build-documentation"] = "false"
+        tc.project_options["msvc14x-parallel-installable"] = "false"
+        tc.generate()
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
-
         # glibmm_generate_extra_defs library does not provide any standard way
         # for discovery, which is why pangomm uses "find_library" method instead
         # of "dependency". this patch adds a hint to where this library is
         glibmm_generate_extra_defs_dir = [
-            os.path.join(self.deps_cpp_info["glibmm"].rootpath, libdir) for
-            libdir in self.deps_cpp_info["glibmm"].libdirs]
+            os.path.join(self.dependencies["glibmm"].package_folder, libdir)
+            for libdir in self.dependencies["glibmm"].cpp_info.aggregated_components().libdirs
+        ]
 
-        tools.replace_in_file(
-            os.path.join(self._source_subfolder, "tools",
-                         "extra_defs_gen", "meson.build"),
+        replace_in_file(self, os.path.join(self.source_folder, "tools", "extra_defs_gen", "meson.build"),
             "required: glibmm_dep.type_name() != 'internal',",
             f"required: glibmm_dep.type_name() != 'internal', dirs: {glibmm_generate_extra_defs_dir}")
 
@@ -105,85 +92,51 @@ class PangommConan(ConanFile):
             # the problem is that older versions of Windows SDK is not standard
             # conformant! see:
             # https://developercommunity.visualstudio.com/t/error-c2760-in-combaseapih-with-windows-sdk-81-and/185399
-            tools.replace_in_file(
-                os.path.join(self._source_subfolder, "meson.build"),
-                "cpp_std=c++", "cpp_std=vc++")
-
-    def configure(self):
-        if self.options.shared:
-            del self.options.fPIC
+            replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                            "cpp_std=c++",
+                            "cpp_std=vc++")
 
     def build(self):
         self._patch_sources()
-        with tools.environment_append(tools.RunEnvironment(self).vars):
-            meson = self._configure_meson()
-            meson.build()
-
-    def _configure_meson(self):
         meson = Meson(self)
-        defs = {
-            "build-documentation": "false",
-            "msvc14x-parallel-installable": "false",
-            "default_library": "shared" if self.options.shared else "static",
-        }
-
-        meson.configure(
-            defs=defs,
-            build_folder=self._build_subfolder,
-            source_folder=self._source_subfolder,
-            pkg_config_paths=[self.install_folder],
-        )
-
-        return meson
+        meson.configure()
+        meson.build()
 
     def package(self):
-        self.copy("COPYING", dst="licenses", src=self._source_subfolder)
-        meson = self._configure_meson()
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        meson = Meson(self)
         meson.install()
 
-        shutil.move(
-            os.path.join(self.package_folder, "lib",
-                         f"pangomm-{self._api_version}", "include",
-                         "pangommconfig.h"),
-            os.path.join(self.package_folder, "include",
-                         f"pangomm-{self._api_version}", "pangommconfig.h"))
+        copy(self, "pangommconfig.h",
+             src=os.path.join(self.build_folder, "pango"),
+             dst=os.path.join(self.package_folder, "include", f"pangomm-{self._abi_version}"))
 
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(
-            os.path.join(self.package_folder, "lib",
-                         "pangomm-{self._api_version}", "include"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", f"pangomm-{self._abi_version}", "include"))
 
         if is_msvc(self):
-            tools.remove_files_by_mask(
-                os.path.join(self.package_folder, "bin"), "*.pdb")
+            rm(self, "*.pdb", self.package_folder, recursive=True)
             if not self.options.shared:
-                rename(
-                    self,
-                    os.path.join(self.package_folder, "lib",
-                                 f"libpangomm-{self._api_version}.a"),
-                    os.path.join(self.package_folder, "lib",
-                                 f"pangomm-{self._api_version}.lib"),
-                )
-
+                rename(self, os.path.join(self.package_folder, "lib", f"libpangomm-{self._abi_version}.a"),
+                             os.path.join(self.package_folder, "lib", f"pangomm-{self._abi_version}.lib"))
 
     def package_info(self):
-        pangomm_lib = f"pangomm-{self._api_version}"
-        glibmm_lib = "glibmm::glibmm-2.68" if self._is_2_48_api else "glibmm::glibmm-2.4"
-        giomm_lib = "glibmm::giomm-2.68" if self._is_2_48_api else "glibmm::giomm-2.4"
-        cairomm_lib = "cairomm::cairomm-1.16" if self._is_2_48_api else "cairomm::cairomm-1.0"
-
-        self.cpp_info.components[pangomm_lib].names["pkg_config"] = pangomm_lib
-        self.cpp_info.components[pangomm_lib].libs = [pangomm_lib]
-        self.cpp_info.components[pangomm_lib].includedirs = [
-            os.path.join("include", pangomm_lib)
-        ]
-        self.cpp_info.components[pangomm_lib].requires = [
-            "pango::pangocairo", glibmm_lib, giomm_lib, cairomm_lib
-        ]
-        self.cpp_info.components[pangomm_lib].set_property(
-            "pkg_config_custom_content",
-            f"gmmprocm4dir=${{libdir}}/{pangomm_lib}/proc/m4")
-
-        # FIXME: remove once dependency mismatch issues are solved
-        self.cpp_info.components[pangomm_lib].requires.extend(
-            ["expat::expat", "zlib::zlib", "glib::glib-2.0"])
+        pangomm_lib = f"pangomm-{self._abi_version}"
+        self.cpp_info.set_property("pkg_config_name", pangomm_lib)
+        self.cpp_info.set_property("pkg_config_custom_content", f"gmmprocm4dir=${{libdir}}/{pangomm_lib}/proc/m4")
+        self.cpp_info.libs = [pangomm_lib]
+        self.cpp_info.includedirs = [os.path.join("include", pangomm_lib)]
+        if self._abi_version == "2.48":
+            self.cpp_info.requires = [
+                "pango::pangocairo",
+                "glibmm::glibmm-2.68",
+                "glibmm::giomm-2.68",
+                "cairomm::cairomm-1.16",
+            ]
+        else:
+            self.cpp_info.requires = [
+                "pango::pangocairo",
+                "glibmm::glibmm-2.4",
+                "glibmm::giomm-2.4",
+                "cairomm::cairomm-1.0",
+            ]
