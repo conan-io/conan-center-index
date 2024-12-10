@@ -46,7 +46,7 @@ class BoostWinTLS(ConanFile):
     def validate(self):
         check_min_cppstd(self, 14)
         if self.settings.os != "Windows":
-            raise ConanInvalidConfiguration(f"{self.ref} can only be used on Windows.")
+            raise ConanInvalidConfiguration(f"The project WinTLS can only be used on Windows.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -71,5 +71,6 @@ class BoostWinTLS(ConanFile):
         if self.options.asio == "boost":
             self.cpp_info.requires = ["boost::headers"]
         else:
+            self.cpp_info.requires = ["asio::asio"]
             self.cpp_info.defines = ["ENABLE_WINTLS_STANDALONE_ASIO"]
         self.cpp_info.system_libs = ["crypt32", "secur32", "ws2_32", "wsock32"]
