@@ -12,6 +12,13 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
+    def build_requirements(self):
+        # shared=True is both required on Windows, and a recommended default.
+        # Recommended as a way for FindPython to work, see: https://github.com/conan-io/conan-center-index/issues/23151#issuecomment-2023141899
+        self.tool_requires("cpython/[>=3.7]", options={"shared": True})
+        # Required for test() below to find shared libraries.
+        self.test_requires("cpython/[>=3.7]", options={"shared": True})
+
     def layout(self):
         cmake_layout(self)
 
