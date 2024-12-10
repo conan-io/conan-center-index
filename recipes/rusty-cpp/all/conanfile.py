@@ -12,7 +12,7 @@ required_conan_version = ">=2.0"
 class RustyCppConan(ConanFile):
     name = "rusty-cpp"
     description = "Write C++ code like Rust!"
-    license = "Apache-2.0 OR MIT"
+    license = "Apache-2.0", "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/seekstar/rusty-cpp"
     topics = ("C++", "Rust", "header-only")
