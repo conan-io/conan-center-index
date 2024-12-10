@@ -1,0 +1,11 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -781,7 +781,7 @@
+ endif()
+ 
+ # The below means we are cross compiling for arm64 or x86_64 on MacOSX
+-if(NOT IOS
++if(FALSE
+    AND CMAKE_SYSTEM_NAME STREQUAL "Darwin"
+    AND CMAKE_OSX_ARCHITECTURES MATCHES "^(x86_64|arm64)$")
+   set(CROSS_COMPILING_MACOSX TRUE)
