@@ -1,0 +1,89 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1db128b..9838d6f 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1194,9 +1194,9 @@ if (NOT BUILD_STATIC_LIBS)
+ endif ()
+ 
+ add_subdirectory(util)
+-add_subdirectory(unit)
++# add_subdirectory(unit)
+ 
+-if (EXISTS ${CMAKE_SOURCE_DIR}/tools/CMakeLists.txt)
++if (0)
+     add_subdirectory(tools)
+ endif()
+ if (EXISTS ${CMAKE_SOURCE_DIR}/chimera/CMakeLists.txt AND BUILD_CHIMERA)
+diff --git a/chimera/CMakeLists.txt b/chimera/CMakeLists.txt
+index c3c50c3..d93fb5b 100644
+--- a/chimera/CMakeLists.txt
++++ b/chimera/CMakeLists.txt
+@@ -1,6 +1,6 @@
+ # Chimera lib
+ 
+-include_directories(${PCRE_INCLUDE_DIRS})
++find_package(pcre REQUIRED CONFIG)
+ 
+ # only set these after all tests are done
+ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_C_FLAGS}")
+@@ -28,8 +28,8 @@ SET(chimera_SRCS
+ )
+ 
+ add_library(chimera STATIC ${chimera_SRCS})
+-add_dependencies(chimera hs pcre)
+-target_link_libraries(chimera hs pcre)
++# add_dependencies(chimera hs pcre)
++target_link_libraries(chimera hs pcre::pcre)
+ 
+ install(TARGETS chimera DESTINATION ${CMAKE_INSTALL_LIBDIR})
+ 
+@@ -44,4 +44,4 @@ set(PRIVATE_LIBS "${PRIVATE_LIBS} -L${LIBDIR} -lpcre")
+ 
+ configure_file(libch.pc.in libch.pc @ONLY) # only replace @ quoted vars
+ install(FILES ${CMAKE_BINARY_DIR}/chimera/libch.pc
+-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+\ No newline at end of file
++    DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+diff --git a/cmake/pcre.cmake b/cmake/pcre.cmake
+index e0acda5..2294c21 100644
+--- a/cmake/pcre.cmake
++++ b/cmake/pcre.cmake
+@@ -50,14 +50,10 @@ if (PCRE_BUILD_SOURCE)
+     set(PCRE_INCLUDE_DIRS ${PCRE_SOURCE} ${PROJECT_BINARY_DIR}/pcre)
+     set(PCRE_LDFLAGS -L"${LIBDIR}" -lpcre)
+ else ()
+-    # pkgconf should save us
+-    find_package(PkgConfig)
+-    pkg_check_modules(PCRE libpcre>=${PCRE_REQUIRED_VERSION})
+-    if (PCRE_FOUND)
++    # conan should save us
++    find_package(pcre)
++    if(pcre_FOUND AND (pcre_VERSION VERSION_GREATER_EQUAL PCRE_REQUIRED_VERSION))
+         set(CORRECT_PCRE_VERSION TRUE)
+-        message(STATUS "PCRE version ${PCRE_REQUIRED_VERSION} or above")
+-    else ()
+-        message(STATUS "PCRE version ${PCRE_REQUIRED_VERSION} or above not found")
+-        return ()
++        set(PCRE_LDFLAGS "pcre::pcre")
+     endif ()
+ endif (PCRE_BUILD_SOURCE)
+diff --git a/cmake/sqlite3.cmake b/cmake/sqlite3.cmake
+index 92b18ce..4def33b 100644
+--- a/cmake/sqlite3.cmake
++++ b/cmake/sqlite3.cmake
+@@ -18,7 +18,7 @@ if (SQLITE3_FOUND)
+         message(FATAL_ERROR "sqlite3 is broken from 3.8.7 to 3.8.10 - please find a working version")
+     endif()
+ endif()
+-
++if(0)
+ if (NOT SQLITE3_BUILD_SOURCE)
+     set(_SAVED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+     list(INSERT CMAKE_REQUIRED_LIBRARIES 0 ${SQLITE3_LDFLAGS})
+@@ -32,5 +32,5 @@ else()
+     set_target_properties(sqlite3_static PROPERTIES COMPILE_FLAGS "-Wno-error -Wno-extra -Wno-unused -Wno-cast-qual -DSQLITE_OMIT_LOAD_EXTENSION")
+     endif()
+ endif()
+-
++endif()
+ # that's enough about sqlite
