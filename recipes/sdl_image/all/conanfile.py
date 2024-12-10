@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -67,6 +67,7 @@ class SDLImageConan(ConanFile):
     }
 
     def export_sources(self):
+        export_conandata_patches(self)
         if Version(self.version) < "2.6":
             copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
 
@@ -119,8 +120,12 @@ class SDLImageConan(ConanFile):
         if Version(self.version) >= "2.6":
             self.tool_requires("cmake/[>=3.16 <4]")
 
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)

@@ -44,39 +44,6 @@ sources:
       - "https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.tar.bz2"
       - "https://sourceforge.net/projects/boost/files/boost/1.78.0/boost_1_78_0.tar.bz2"
     sha256: "8681f175d4bdb26c52222665793eef08490d7758529330f98d3b29dd0735bccc"
-  "1.77.0":
-    url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.77.0/source/boost_1_77_0.tar.bz2"
-      - "https://sourceforge.net/projects/boost/files/boost/1.77.0/boost_1_77_0.tar.bz2"
-    sha256: "fc9f85fc030e233142908241af7a846e60630aa7388de9a5fafb1f3a26840854"
-  "1.76.0":
-    url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/boost_1_76_0.tar.bz2"
-      - "https://sourceforge.net/projects/boost/files/boost/1.76.0/boost_1_76_0.tar.bz2"
-    sha256: "f0397ba6e982c4450f27bf32a2a83292aba035b827a5623a14636ea583318c41"
-  "1.75.0":
-    url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.75.0/source/boost_1_75_0.tar.bz2"
-      - "https://sourceforge.net/projects/boost/files/boost/1.75.0/boost_1_75_0.tar.bz2"
-    sha256: "953db31e016db7bb207f11432bef7df100516eeb746843fa0486a222e3fd49cb"
-  "1.74.0":
-    url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.bz2"
-      - "https://sourceforge.net/projects/boost/files/boost/1.74.0/boost_1_74_0.tar.bz2"
-    sha256: "83bfc1507731a0906e387fc28b7ef5417d591429e51e788417fe9ff025e116b1"
-  "1.73.0":
-    url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.73.0/source/boost_1_73_0.tar.bz2"
-      - "https://sourceforge.net/projects/boost/files/boost/1.73.0/boost_1_73_0.tar.bz2"
-    sha256: "4eb3b8d442b426dc35346235c8733b5ae35ba431690e38c6a8263dce9fcbb402"
-  "1.72.0":
-    url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.72.0/source/boost_1_72_0.tar.bz2"
-      - "https://sourceforge.net/projects/boost/files/boost/1.72.0/boost_1_72_0.tar.bz2"
-    sha256: "59c9b274bc451cf91a9ba1dd2c7fdcaf5d60b1b3aa83f2c9fa143417cc660722"
-  "1.71.0":
-    url: "https://boostorg.jfrog.io/artifactory/main/release/1.71.0/source/boost_1_71_0.tar.bz2"
-    sha256: "d73a8da01e8bf8c7eda40b4c84915071a8c8a0df4a6734537ddde4a8580524ee"
 patches:
   "1.86.0":
     - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
