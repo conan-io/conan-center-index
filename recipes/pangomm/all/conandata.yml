@@ -1,18 +1,16 @@
 sources:
-  "2.50.0":
-    url: "https://download.gnome.org/sources/pangomm/2.50/pangomm-2.50.0.tar.xz"
-    sha256: "a27aa77e017b9afce9e751d85bd1cf890abbb3a58bf59d0fac917eef82db3b5b"
-  "2.46.2":
-    url: "https://download.gnome.org/sources/pangomm/2.46/pangomm-2.46.2.tar.xz"
-    sha256: "57442ab4dc043877bfe3839915731ab2d693fc6634a71614422fb530c9eaa6f4"
+  "2.54.0":
+    url: "https://download.gnome.org/sources/pangomm/2.54/pangomm-2.54.0.tar.xz"
+    sha256: "4a5b1fd1b7c47a1af45277ea82b5abeaca8e08fb10a27daa6394cf88d74e7acf"
+  "2.46.4":
+    url: "https://download.gnome.org/sources/pangomm/2.46/pangomm-2.46.4.tar.xz"
+    sha256: "b92016661526424de4b9377f1512f59781f41fb16c9c0267d6133ba1cd68db22"
 patches:
-  "2.50.0":
-    - patch_file: "patches/enable_static_libs_2_50_0.patch"
-      base_path: "source_subfolder"
+  "2.54.0":
+    - patch_file: "patches/2.54.0-enable_static_libs.patch"
+    - patch_file: "patches/2.54.0-ignore-gmmproc.patch"
     - patch_file: "patches/fix_exporting_pango_init.patch"
-      base_path: "source_subfolder"
-  "2.46.2":
-    - patch_file: "patches/enable_static_libs_2_46_2.patch"
-      base_path: "source_subfolder"
+  "2.46.4":
+    - patch_file: "patches/2.46.4-enable_static_libs.patch"
+    - patch_file: "patches/2.46.4-ignore-gmmproc.patch"
     - patch_file: "patches/fix_exporting_pango_init.patch"
-      base_path: "source_subfolder"

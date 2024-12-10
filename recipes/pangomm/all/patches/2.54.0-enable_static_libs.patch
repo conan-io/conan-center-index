@@ -1,8 +1,6 @@
-diff --git a/pango/meson.build b/pango/meson.build
-index f2df13e..0d379b7 100644
 --- a/pango/meson.build
 +++ b/pango/meson.build
-@@ -29,6 +29,10 @@ pkg_conf_data.set('PANGOMM_MAJOR_VERSION', pangomm_major_version)
+@@ -15,6 +15,10 @@
  pkg_conf_data.set('PANGOMM_MINOR_VERSION', pangomm_minor_version)
  pkg_conf_data.set('PANGOMM_MICRO_VERSION', pangomm_micro_version)
  
@@ -10,11 +8,9 @@ index f2df13e..0d379b7 100644
 +  pkg_conf_data.set('PANGOMM_STATIC_LIB', 1)
 +endif
 +
+ pangommconfig_h_meson = files('pangommconfig.h.meson')
+ install_includeconfigdir = install_libdir / pangomm_pcname / 'include'
  configure_file(
-   input: 'pangomm.pc.in',
-   output: pangomm_pcname + '.pc',
-diff --git a/pango/pangommconfig.h.meson b/pango/pangommconfig.h.meson
-index 58fa4d8..4f5363c 100644
 --- a/pango/pangommconfig.h.meson
 +++ b/pango/pangommconfig.h.meson
 @@ -16,6 +16,9 @@
