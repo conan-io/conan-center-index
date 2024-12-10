@@ -1,10 +1,12 @@
 #include <iostream>
 #include "multi/array.hpp"
 
-namespace multi = boost::multi;
 
 int main(void) {
-    multi::array<int, 2> arr({10, 20}, 99);
-
-    std::cout << "should print 99: " << arr[2][3] << std::endl;
+    boost::multi::array<double, 2> multi_array = {
+        {1.0, 2.0, 3.0},
+        {4.0, 5.0, 6.0},
+    };
+    std::cout << "Array size: " << multi_array.size() << std::endl;
+    return 0;
 }
