@@ -147,7 +147,11 @@ class OpenCVConan(ConanFile):
         "with_quirc": [True, False],
         # videoio module options
         "with_ffmpeg": [True, False],
+        "with_gstreamer": [True, False],
         "with_v4l": [True, False],
+        "with_aravis": [True, False],
+        "with_gphoto2": [True, False],
+        "with_librealsense": [True, False],
         # text module options
         "with_tesseract": [True, False],
         # TODO: deprecated options to remove in few months
@@ -206,7 +210,11 @@ class OpenCVConan(ConanFile):
         "with_quirc": True,
         # videoio module options
         "with_ffmpeg": True,
+        "with_gstreamer": False,
         "with_v4l": False,
+        "with_aravis": False,
+        "with_gphoto2": False,
+        "with_librealsense": False,
         # text module options
         "with_tesseract": True,
         # TODO: deprecated options to remove in few months
@@ -245,6 +253,15 @@ class OpenCVConan(ConanFile):
         return os.path.join(self._contrib_folder, "modules")
 
     @property
+    def _build_depends_on_pkgconfig(self):
+        return (
+            self.options.get_safe("with_aravis")
+            or self.options.get_safe("with_gphoto2")
+            or self.options.get_safe("with_gstreamer")
+            or self.options.get_safe("with_wayland")
+        )
+
+    @property
     def _has_with_jpeg2000_option(self):
         return self.settings.os != "iOS"
 
@@ -254,7 +271,19 @@ class OpenCVConan(ConanFile):
 
     @property
     def _has_with_ffmpeg_option(self):
-        return self.settings.os != "iOS" and self.settings.os != "WindowsStore"
+        return self.settings.os not in ["iOS", "WindowsStore"]
+
+    @property
+    def _has_with_gstreamer_option(self):
+        return self.settings.os not in ["Android", "iOS", "WindowsStore"]
+
+    @property
+    def _has_with_aravis_option(self):
+        return self.settings.os not in ["Android", "iOS", "Windows", "WindowsStore"]
+
+    @property
+    def _has_with_gphoto2_option(self):
+        return self.settings.os not in ["Android", "iOS", "Windows", "WindowsStore"]
 
     @property
     def _has_superres_option(self):
@@ -328,6 +357,12 @@ class OpenCVConan(ConanFile):
             del self.options.neon
         if not self._has_with_tiff_option:
             del self.options.with_tiff
+        if not self._has_with_gstreamer_option:
+            del self.options.with_gstreamer
+        if not self._has_with_aravis_option:
+            del self.options.with_aravis
+        if not self._has_with_gphoto2_option:
+            del self.options.with_gphoto2
         if not self._has_superres_option:
             del self.options.superres
         if not self._has_alphamat_option:
@@ -390,6 +425,9 @@ class OpenCVConan(ConanFile):
                 components.append("gdcm::gdcm")
             return components
 
+        def aravis():
+            return ["aravis::aravis"] if self.options.get_safe("with_aravis") else []
+
         def eigen():
             return ["eigen::eigen"] if self.options.with_eigen else []
 
@@ -398,6 +436,25 @@ class OpenCVConan(ConanFile):
             if self.options.get_safe("with_ffmpeg"):
                 components = ["ffmpeg::avcodec", "ffmpeg::avformat", "ffmpeg::avutil", "ffmpeg::swscale"]
             return components
+
+        def gphoto2():
+            return ["libgphoto2::libgphoto2"] if self.options.get_safe("with_gphoto2") else []
+
+        def gstreamer():
+            components = []
+            if self.options.get_safe("with_gstreamer"):
+                components.extend([
+                    "gstreamer::gstreamer-base-1.0",
+                    "gst-plugins-base::gstreamer-app-1.0",
+                    "gst-plugins-base::gstreamer-riff-1.0",
+                    "gst-plugins-base::gstreamer-pbutils-1.0",
+                    "gst-plugins-base::gstreamer-video-1.0",
+                    "gst-plugins-base::gstreamer-audio-1.0",
+                ])
+            return components
+
+        def gstreamer_in_gapi():
+            return gstreamer() if Version(self.version) >= "4.5.5" else []
 
         def gtk():
             return ["gtk::gtk"] if self.options.get_safe("with_gtk") else []
@@ -408,6 +465,9 @@ class OpenCVConan(ConanFile):
             elif self.options.with_ipp == "opencv-icv" and not self.options.shared:
                 return ["ippiw"]
             return []
+
+        def librealsense():
+            return ["librealsense::librealsense"] if self.options.get_safe("with_librealsense") else []
 
         def parallel():
             return ["onetbb::onetbb"] if self.options.parallel == "tbb" else []
@@ -521,7 +581,7 @@ class OpenCVConan(ConanFile):
             "gapi": {
                 "is_built": self.options.gapi,
                 "mandatory_options": ["imgproc"],
-                "requires": ["opencv_imgproc", "ade::ade"],
+                "requires": ["opencv_imgproc", "ade::ade"] + gstreamer_in_gapi(),
                 "system_libs": [
                     (self.settings.os == "Windows", ["ws2_32", "wsock32"]),
                 ],
@@ -581,7 +641,7 @@ class OpenCVConan(ConanFile):
             "videoio": {
                 "is_built": self.options.videoio,
                 "mandatory_options": ["imgcodecs", "imgproc"],
-                "requires": ["opencv_imgcodecs", "opencv_imgproc"] + ffmpeg() + ipp(),
+                "requires": ["opencv_imgcodecs", "opencv_imgproc"] + aravis() + ffmpeg() + gphoto2() + gstreamer() + librealsense() + ipp(),
                 "system_libs": [
                     (self.settings.os == "Android" and int(str(self.settings.os.api_level)) > 20, ["mediandk"]),
                 ],
@@ -1072,6 +1132,11 @@ class OpenCVConan(ConanFile):
         if not self.options.videoio:
             self.options.rm_safe("with_ffmpeg")
             self.options.rm_safe("with_v4l")
+            self.options.rm_safe("with_aravis")
+            self.options.rm_safe("with_gphoto2")
+            self.options.rm_safe("with_librealsense")
+        if not (self.options.videoio or (self.options.gapi and Version(self.version) >= "4.5.5")):
+            self.options.rm_safe("with_gstreamer")
         if not self.options.with_cuda:
             self.options.rm_safe("with_cublas")
             self.options.rm_safe("with_cudnn")
@@ -1148,6 +1213,15 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_ffmpeg"):
             # opencv doesn't support ffmpeg >= 5.0.0 for the moment (until 4.5.5 at least)
             self.requires("ffmpeg/4.4.4")
+        if self.options.get_safe("with_gstreamer"):
+            self.requires("gst-plugins-base/1.19.2")
+            self.requires("gstreamer/1.22.6")
+        if self.options.get_safe("with_aravis"):
+            self.requires("aravis/0.8.30")
+        if self.options.get_safe("with_gphoto2"):
+            self.requires("libgphoto2/2.5.31")
+        if self.options.get_safe("with_librealsense"):
+            self.requires("librealsense/2.53.1")
         # freetype module dependencies
         if self.options.freetype:
             self.requires("freetype/2.13.2")
@@ -1218,6 +1292,14 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_jpeg2000") == "openjpeg" and Version(self.version) < "4.3.0":
             raise ConanInvalidConfiguration("openjpeg is not available for OpenCV before 4.3.0")
 
+        if self.options.get_safe("with_aravis"):
+            aravis_version = Version(self.dependencies["aravis"].ref.version)
+            aravis_major_minor = f"{aravis_version.major}.{aravis_version.minor}"
+            supported_aravis_major_minor = "0.6" if Version(self.version) < "4.6.0" else "0.8"
+            if aravis_major_minor != supported_aravis_major_minor:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires aravis {supported_aravis_major_minor}.x when with_aravis option is enabled"
+                )
 
     def build_requirements(self):
         if self.options.get_safe("with_protobuf"):
@@ -1227,8 +1309,9 @@ class OpenCVConan(ConanFile):
             self.tool_requires("wayland-protocols/1.33")
             if not self._is_legacy_one_profile:
                 self.tool_requires("wayland/<host_version>")
+        if self._build_depends_on_pkgconfig:
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.1.0")
+                self.tool_requires("pkgconf/2.2.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
@@ -1261,6 +1344,12 @@ class OpenCVConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "${GDAL_LIBRARY}", "GDAL::GDAL")
         if Version(self.version) >= "4.8.0":
             replace_in_file(self, os.path.join(self.source_folder, "modules", "imgcodecs", "CMakeLists.txt"), "${AVIF_LIBRARY}", "avif")
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "modules", "videoio", "cmake", "detect_realsense.cmake"),
+            'ocv_add_external_target(librealsense "" "${realsense2_LIBRARY}" "HAVE_LIBREALSENSE")',
+            'ocv_add_external_target(librealsense "${realsense2_INCLUDE_DIRS}" "${realsense2_LIBRARIES}" "HAVE_LIBREALSENSE")',
+        )
 
         ## Fix detection of ffmpeg
         replace_in_file(self, os.path.join(self.source_folder, "modules", "videoio", "cmake", "detect_ffmpeg.cmake"),
@@ -1382,7 +1471,7 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_ts"] = False
 
         tc.variables["WITH_1394"] = False
-        tc.variables["WITH_ARAVIS"] = False
+        tc.variables["WITH_ARAVIS"] = self.options.get_safe("with_aravis", False)
         tc.variables["WITH_CLP"] = False
         tc.variables["WITH_NVCUVID"] = False
 
@@ -1404,7 +1493,9 @@ class OpenCVConan(ConanFile):
                     tc.variables[f"FFMPEG_lib{component}_VERSION"] = ffmpeg_component_version
             tc.variables["FFMPEG_LIBRARIES"] = ";".join(ffmpeg_libraries)
 
-        tc.variables["WITH_GSTREAMER"] = False
+        tc.variables["WITH_GSTREAMER"] = self.options.get_safe("with_gstreamer", False)
+        if Version(self.version) >= "4.5.5":
+            tc.variables["OPENCV_GAPI_GSTREAMER"] = self.options.get_safe("with_gstreamer", False)
         tc.variables["WITH_HALIDE"] = False
         tc.variables["WITH_HPX"] = False
         tc.variables["WITH_IMGCODEC_HDR"] = self.options.get_safe("with_imgcodec_hdr", False)
@@ -1417,7 +1508,7 @@ class OpenCVConan(ConanFile):
             tc.variables["IPPROOT"] = ipp_root
             tc.variables["IPPIWROOT"] = ipp_root
         tc.variables["WITH_ITT"] = False
-        tc.variables["WITH_LIBREALSENSE"] = False
+        tc.variables["WITH_LIBREALSENSE"] = self.options.get_safe("with_librealsense", False)
         tc.variables["WITH_MFX"] = False
         tc.variables["WITH_OPENCL"] = self.options.get_safe("with_opencl", False)
         tc.variables["WITH_OPENCLAMDBLAS"] = False
@@ -1457,6 +1548,7 @@ class OpenCVConan(ConanFile):
             tc.variables["WITH_OPENJPEG"] = self.options.get_safe("with_jpeg2000") == "openjpeg"
         tc.variables["WITH_OPENEXR"] = self.options.get_safe("with_openexr", False)
         tc.variables["WITH_GDAL"] = self.options.get_safe("with_gdal", False)
+        tc.variables["WITH_GPHOTO2"] = self.options.get_safe("with_gphoto2", False)
         tc.variables["WITH_GDCM"] = self.options.get_safe("with_gdcm", False)
         tc.variables["WITH_EIGEN"] = self.options.with_eigen
         tc.variables["WITH_DSHOW"] = self._is_cl_like
@@ -1555,24 +1647,25 @@ class OpenCVConan(ConanFile):
 
         CMakeDeps(self).generate()
 
-        if self.options.get_safe("with_wayland"):
+        if self._build_depends_on_pkgconfig:
             deps = PkgConfigDeps(self)
-            if self._is_legacy_one_profile:
-                # Manually generate pkgconfig file of wayland-protocols since
-                # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
-                wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
-                wp_version = self.dependencies.build["wayland-protocols"].ref.version
-                wp_pkg_content = textwrap.dedent(f"""\
-                    prefix={wp_prefix}
-                    datarootdir=${{prefix}}/res
-                    pkgdatadir=${{datarootdir}}/wayland-protocols
-                    Name: Wayland Protocols
-                    Description: Wayland protocol files
-                    Version: {wp_version}
-                """)
-                save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
-            else:
-                deps.build_context_activated = ["wayland-protocols"]
+            if self.options.get_safe("with_wayland"):
+                if self._is_legacy_one_profile:
+                    # Manually generate pkgconfig file of wayland-protocols since
+                    # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
+                    wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
+                    wp_version = self.dependencies.build["wayland-protocols"].ref.version
+                    wp_pkg_content = textwrap.dedent(f"""\
+                        prefix={wp_prefix}
+                        datarootdir=${{prefix}}/res
+                        pkgdatadir=${{datarootdir}}/wayland-protocols
+                        Name: Wayland Protocols
+                        Description: Wayland protocol files
+                        Version: {wp_version}
+                    """)
+                    save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
+                else:
+                    deps.build_context_activated = ["wayland-protocols"]
             deps.generate()
 
     def build(self):
