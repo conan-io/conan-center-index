@@ -1,0 +1,12 @@
+sources:
+  "cci.20240421":
+    url: "https://codeload.github.com/chichengcn/gici-open/zip/690d6dd7ab9a64a6ab741129a6e5988c09d3ac0c"
+    sha256: "4522ab262dd2bf6364f5d4ed8436438dc9e5e40899adfb29a0c5e118ada4d096"
+patches:
+  "cci.20240421":
+    - patch_file: "patches/001-cmake-tweaks.patch"
+      patch_description: "Allow shared builds, bump CMake standard"
+      patch_type: "conan"
+    - patch_file: "patches/002-add-missing-include.patch"
+      patch_description: "Add a missing include"
+      patch_type: "bugfix"
