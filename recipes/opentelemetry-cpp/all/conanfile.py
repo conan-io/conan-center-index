@@ -2,7 +2,7 @@ from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.files import get, copy, rmdir, replace_in_file, save
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, default_cppstd
 from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
@@ -10,7 +10,7 @@ from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 import os
 import textwrap
 
-required_conan_version = ">=1.56.0 <2 || >=2.0.6"
+required_conan_version = ">=2.1"
 
 class OpenTelemetryCppConan(ConanFile):
     name = "opentelemetry-cpp"
@@ -48,7 +48,6 @@ class OpenTelemetryCppConan(ConanFile):
         "shared": False,
 
         "with_no_deprecated_code": False,
-        # Enabling this causes stack overflow in the test_package
         "with_stl": False,
         "with_gsl": False,
         "with_abseil": True,
@@ -72,6 +71,9 @@ class OpenTelemetryCppConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if Version(self.version) < "1.12.0" and self.options.with_stl:
+            # Old versions require C++17 with STL
+            return 17
         if self.options.with_abseil and Version(self.dependencies["abseil"].ref.version) >= "20230125":
             return 14
         return 11
@@ -185,8 +187,7 @@ class OpenTelemetryCppConan(ConanFile):
         return ["locale"] if self.options.get_safe("with_jaeger") else []
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
         if minimum_version and Version(self.settings.compiler.version) < minimum_version:
             raise ConanInvalidConfiguration(
@@ -195,6 +196,11 @@ class OpenTelemetryCppConan(ConanFile):
 
         if self.settings.os != "Linux" and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} supports building shared libraries only on Linux")
+
+        if self.options.with_stl and self.settings.os == "Macos" and (Version(self.settings.compiler.version) <= "13"):
+            # TODO: The SDK 11 is the culprit, blanket-remove it for now
+            # See PR 24230 for logs,
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Apple Clang 13 or lower with -o=&:with_stl=True")
 
         if self.options.with_otlp_grpc:
             if not self.dependencies["grpc"].options.cpp_plugin:
@@ -239,14 +245,10 @@ class OpenTelemetryCppConan(ConanFile):
     @property
     def _stl_value(self):
         # From 1.12.0 onwards, the STL can have various values
-        if Version(self.version) < "1.12.1":
+        if Version(self.version) < "1.12.0":
             return self.options.with_stl
         if self.options.with_stl:
-            if self.settings.compiler.cppstd:
-                return "CXX" + str(self.settings.compiler.cppstd).replace("gnu", "")
-            else:
-                # ON for autodetection in upstream CML
-                return True
+            return "CXX" + str(self.settings.compiler.cppstd).replace("gnu", "")
         else:
             return False
 
@@ -286,8 +288,6 @@ class OpenTelemetryCppConan(ConanFile):
         tc.cache_variables["WITH_ASYNC_EXPORT_PREVIEW"] = self.options.with_async_export_preview
         tc.cache_variables["WITH_METRICS_EXEMPLAR_PREVIEW"] = self.options.with_metrics_exemplar_preview
         tc.cache_variables["OPENTELEMETRY_INSTALL"] = True
-        if not self.settings.compiler.cppstd:
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -434,13 +434,18 @@ class OpenTelemetryCppConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.components["opentelemetry_common"].system_libs.extend(["pthread"])
 
+        if self.options.with_stl:
+            if Version(self.version) < "1.12":
+                self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_CPP_STDLIB")
+            else:
+                stl = str(self.settings.compiler.cppstd).replace("gnu", "")
+                self.cpp_info.components["opentelemetry_common"].defines.append(f"OPENTELEMETRY_STL_VERSION=20{stl}")
+
         if Version(self.version) >= "1.16.0" and is_apple_os(self):
             self.cpp_info.components["opentelemetry_common"].frameworks.extend(["CoreFoundation"])
 
         if self.options.get_safe("with_otlp_http_compression"):
             self.cpp_info.components["opentelemetry_common"].defines.append("ENABLE_OTLP_COMPRESSION_PREVIEW")
-        if self._stl_value:
-            self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_CPP_STDLIB")
 
         if self.options.with_gsl:
             self.cpp_info.components["opentelemetry_common"].defines.append("HAVE_GSL")
@@ -577,4 +582,3 @@ class OpenTelemetryCppConan(ConanFile):
             self.cpp_info.components["opentelemetry_exporter_etw"].requires.append(
                 "nlohmann_json::nlohmann_json",
             )
-
