@@ -1,0 +1,19 @@
+--- a/build/cmake/toolkit.cmake
++++ b/build/cmake/toolkit.cmake
+@@ -127,13 +127,9 @@
+ 
+ if(WXQT)
+     set(QT_COMPONENTS Core Widgets Gui OpenGL Test)
+-    foreach(QT_COMPONENT ${QT_COMPONENTS})
+-        find_package(Qt5 COMPONENTS ${QT_COMPONENT} REQUIRED)
+-        list(APPEND wxTOOLKIT_INCLUDE_DIRS ${Qt5${QT_COMPONENT}_INCLUDE_DIRS})
+-        list(APPEND wxTOOLKIT_LIBRARIES ${Qt5${QT_COMPONENT}_LIBRARIES})
+-        list(APPEND wxTOOLKIT_DEFINITIONS ${Qt5${QT_COMPONENT}_COMPILE_DEFINITIONS})
+-    endforeach()
+-    set(wxTOOLKIT_VERSION ${Qt5Core_VERSION})
++    find_package(Qt5 COMPONENTS ${QT_COMPONENTS} REQUIRED)
++    list(APPEND wxTOOLKIT_LIBRARIES Qt5::Core Qt5::Widgets Qt5::Gui Qt5::OpenGL Qt5::Test)
++    set(wxTOOLKIT_VERSION ${Qt5_VERSION})
+ endif()
+ 
+ if(APPLE)
