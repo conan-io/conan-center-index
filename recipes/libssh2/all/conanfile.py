@@ -87,7 +87,7 @@ class Libssh2Conan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
 
     def requirements(self):
-        if self.options.with_zlib or self.options.crypto_backend == "openssl":
+        if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.crypto_backend == "openssl":
             self.requires("openssl/[>=1.1 <4]")
@@ -96,6 +96,10 @@ class Libssh2Conan(ConanFile):
                 self.requires("mbedtls/3.5.0")
             else:
                 self.requires("mbedtls/2.28.4")
+
+    def build_requirements(self):
+        if Version(self.version) >= "1.11":
+            self.tool_requires("cmake/[>=3.20 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -132,7 +136,7 @@ class Libssh2Conan(ConanFile):
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["_libssh2"].set_property("cmake_target_name", "Libssh2::libssh2")
         self.cpp_info.components["_libssh2"].set_property("pkg_config_name", "libssh2")
-        if self.options.with_zlib or self.options.crypto_backend == "openssl":
+        if self.options.with_zlib:
             self.cpp_info.components["_libssh2"].requires.append("zlib::zlib")
         if self.options.crypto_backend == "openssl":
             self.cpp_info.components["_libssh2"].requires.append("openssl::openssl")
