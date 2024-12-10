@@ -1,11 +1,7 @@
 sources:
-  "3.8.3":
-    url: "https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System/archive/refs/tags/3.8.3.tar.gz"
-    sha256: "bd5a9469b755bedf33baefd0b3dda6d167b7917a2888e2794eed5abee7d78f74"
-  "3.8.2":
-    url: "https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System/archive/refs/tags/3.8.2.tar.gz"
-    sha256: "e56811228fb4d5f5703c31cd83cb39ab2d5a849f581719d383db72f9322ec7f2"
-patches:
-  "3.8.2":
-    - patch_file: "patches/fix-cmake-license-install.patch"
-      base_path: "source_subfolder"
+  "4.2.0":
+    url: "https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System/archive/refs/tags/4.2.0.tar.gz"
+    sha256: "b6f030a2f9e7797803d8bd283bf01bae76d27a9f11a7cba5263cd775f264ab55"
+  "3.8.4":
+    url: "https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System/archive/refs/tags/3.8.4.tar.gz"
+    sha256: "9c876a7841ab6a6f05a879beb25dde043d42626b5acfd1b0b54d70055ebf1ebe"
