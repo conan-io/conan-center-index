@@ -56,7 +56,6 @@ class CairommConan(ConanFile):
 
     def requirements(self):
         self.requires("cairo/1.18.0", transitive_headers=True, transitive_libs=True)
-        self.requires("fontconfig/2.15.0", transitive_headers=True, transitive_libs=True)
         if self._abi_version == "1.16":
             self.requires("libsigcpp/3.0.7", transitive_headers=True, transitive_libs=True)
         else:
@@ -135,7 +134,7 @@ class CairommConan(ConanFile):
             os.path.join("lib", name, "include"),
         ]
         self.cpp_info.components[name].libs = [name]
-        self.cpp_info.components[name].requires = ["libsigcpp::libsigcpp", "cairo::cairo_", "fontconfig::fontconfig"]
+        self.cpp_info.components[name].requires = ["cairo::cairo_", "libsigcpp::libsigcpp"]
         if not self.options.shared:
             self.cpp_info.components[name].defines = ["CAIROMM_STATIC_LIB"]
         if is_apple_os(self):
