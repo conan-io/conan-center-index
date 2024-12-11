@@ -90,7 +90,7 @@ class libdatachannelConan(ConanFile):
         deps.set_property("libsrtp", "cmake_file_name", "libSRTP")
         deps.set_property("libsrtp", "cmake_target_name", "libSRTP::srtp2")
         if self.options.with_ssl == "mbedtls":
-            deps.set_property("mbedtls::libembedtls", "cmake_target_name", "MbedTLS::MbedTLS")
+            deps.set_property("mbedtls", "cmake_target_name", "MbedTLS::MbedTLS")
         elif self.options.with_ssl == "gnutls" and self.options.with_websocket:
             deps.set_property("nettle", "cmake_file_name", "Nettle")
             deps.set_property("nettle", "cmake_target_name", "Nettle::Nettle")
