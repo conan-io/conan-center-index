@@ -1,6 +1,4 @@
-import glob
 import os
-import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -119,33 +117,23 @@ class CairommConan(ConanFile):
         meson.build()
 
     def package(self):
-        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
-        if is_msvc(self):
-            rm(self, "*.pdb", os.path.join(self.package_folder, "bin"), recursive=True)
-            if not self.options.shared:
-                rename(self,
-                    os.path.join(self.package_folder, "lib", f"libcairomm-{self._abi_version}.a"),
-                    os.path.join(self.package_folder, "lib", f"cairomm-{self._abi_version}.lib"))
-
-        for header_file in glob.glob(
-            os.path.join(self.package_folder, "lib", f"cairomm-{self._abi_version}", "include", "*.h")
-        ):
-            shutil.move(
-                header_file,
-                os.path.join(self.package_folder, "include", f"cairomm-{self._abi_version}", os.path.basename(header_file)),
-            )
-
-        for dir_to_remove in ["pkgconfig", f"cairomm-{self._abi_version}"]:
-            rmdir(self, os.path.join(self.package_folder, "lib", dir_to_remove))
-
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"), recursive=True)
         fix_apple_shared_install_name(self)
+        if is_msvc(self) and not self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", f"libcairomm-{self._abi_version}.a"),
+                         os.path.join(self.package_folder, "lib", f"cairomm-{self._abi_version}.lib"))
 
     def package_info(self):
         name = f"cairomm-{self._abi_version}"
         self.cpp_info.components[name].set_property("pkg_config_name", name)
-        self.cpp_info.components[name].includedirs = [os.path.join("include", name)]
+        self.cpp_info.components[name].includedirs += [
+            os.path.join("include", name),
+            os.path.join("lib", name, "include"),
+        ]
         self.cpp_info.components[name].libs = [name]
         self.cpp_info.components[name].requires = ["libsigcpp::libsigcpp", "cairo::cairo", "fontconfig::fontconfig"]
         if not self.options.shared:
