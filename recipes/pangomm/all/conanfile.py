@@ -106,26 +106,21 @@ class PangommConan(ConanFile):
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
-
-        copy(self, "pangommconfig.h",
-             src=os.path.join(self.build_folder, "pango"),
-             dst=os.path.join(self.package_folder, "include", f"pangomm-{self._abi_version}"))
-
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "lib", f"pangomm-{self._abi_version}", "include"))
-
-        if is_msvc(self):
-            rm(self, "*.pdb", self.package_folder, recursive=True)
-            if not self.options.shared:
-                rename(self, os.path.join(self.package_folder, "lib", f"libpangomm-{self._abi_version}.a"),
-                             os.path.join(self.package_folder, "lib", f"pangomm-{self._abi_version}.lib"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"), recursive=True)
+        if is_msvc(self) and not self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", f"libpangomm-{self._abi_version}.a"),
+                         os.path.join(self.package_folder, "lib", f"pangomm-{self._abi_version}.lib"))
 
     def package_info(self):
         pangomm_lib = f"pangomm-{self._abi_version}"
         self.cpp_info.set_property("pkg_config_name", pangomm_lib)
-        self.cpp_info.set_property("pkg_config_custom_content", f"gmmprocm4dir=${{libdir}}/{pangomm_lib}/proc/m4")
+        self.cpp_info.set_property("pkg_config_custom_content", "gmmprocm4dir=${libdir}/%s/proc/m4" % pangomm_lib)
         self.cpp_info.libs = [pangomm_lib]
-        self.cpp_info.includedirs = [os.path.join("include", pangomm_lib)]
+        self.cpp_info.includedirs += [
+            os.path.join("include", pangomm_lib),
+            os.path.join("lib", pangomm_lib, "include"),
+        ]
         if self._abi_version == "2.48":
             self.cpp_info.requires = [
                 "pango::pangocairo",
