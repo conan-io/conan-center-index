@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import copy, get, rm, rmdir
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.apple import fix_apple_shared_install_name
 
@@ -64,6 +64,9 @@ class libdatachannelConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Let Conan handle fpic
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "set(CMAKE_POSITION_INDEPENDENT_CODE ON)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -91,7 +94,10 @@ class libdatachannelConan(ConanFile):
         elif self.options.with_ssl == "gnutls" and self.options.with_websocket:
             deps.set_property("nettle", "cmake_file_name", "Nettle")
             deps.set_property("nettle", "cmake_target_name", "Nettle::Nettle")
-        if not self.options.with_nice and not self.options.shared:
+        if self.options.with_nice:
+            deps.set_property("libnice", "cmake_file_name", "LibNice")
+            deps.set_property("libnice", "cmake_target_name", "LibNice::LibNice")
+        elif not self.options.shared:
             # Targetname is LibJuice::LibJuiceStatic for static, but upstream makes no distinction
             deps.set_property("libjuice", "cmake_target_name", "LibJuice::LibJuice")
         deps.generate()
@@ -124,14 +130,13 @@ class libdatachannelConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.system_libs.append("ws2_32")
 
         if not self.options.shared:
             self.cpp_info.defines.append("RTC_STATIC")
 
-        if self.settings.os == "Windows":
-            self.cpp_info.system_libs.append("ws2_32")
-            self.cpp_info.defines.append("WIN32_LEAN_AND_MEAN")
+        self.cpp_info.defines.append("RTC_ENABLE_WEBSOCKET=" + ("1" if self.options.with_websocket else "0"))
+        # This is True by default, and the recipe currently does not model it
+        self.cpp_info.defines.append("RTC_ENABLE_MEDIA=1")
 
-        if is_msvc(self):
-            self.cpp_info.cxxflags.append("/bigobj")
-            self.cpp_info.defines.extend(["_CRT_SECURE_NO_WARNINGS", "NOMINMAX"])
