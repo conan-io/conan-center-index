@@ -135,7 +135,7 @@ class CairommConan(ConanFile):
             os.path.join("lib", name, "include"),
         ]
         self.cpp_info.components[name].libs = [name]
-        self.cpp_info.components[name].requires = ["libsigcpp::libsigcpp", "cairo::cairo", "fontconfig::fontconfig"]
+        self.cpp_info.components[name].requires = ["libsigcpp::libsigcpp", "cairo::cairo_", "fontconfig::fontconfig"]
         if not self.options.shared:
             self.cpp_info.components[name].defines = ["CAIROMM_STATIC_LIB"]
         if is_apple_os(self):
