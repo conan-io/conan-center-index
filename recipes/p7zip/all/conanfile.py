@@ -18,6 +18,7 @@ class PSevenZipConan(ConanFile):
     homepage = "https://sourceforge.net/projects/p7zip/"
     topics = ("7zip", "zip", "compression", "decompression")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "application"
 
     def export_sources(self):
         export_conandata_patches(self)
