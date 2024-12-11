@@ -1,9 +1,9 @@
 sources:
-  "255.13":
-    url: "https://github.com/systemd/systemd-stable/archive/refs/tags/v255.13.tar.gz"
-    sha256: "b24bbfc18e27339f02bdef12d2be95b747c766e7eb9248554e53ad8979c01f2c"
+  "255.15":
+    url: "https://github.com/systemd/systemd-stable/archive/refs/tags/v255.15.tar.gz"
+    sha256: "f9c1754d65b6ab12c658e832292b3d3dd26722d016f9d065f85fe6f9747e51d2"
 patches:
-  "255.13":
+  "255.15":
     - patch_file: "patches/255.13/0001-fix-format-overflow.patch"
       patch_type: "bugfix"
       patch_description: "Fix a format overflow fatal compiler warning"
