@@ -114,22 +114,22 @@ class PangommConan(ConanFile):
 
     def package_info(self):
         pangomm_lib = f"pangomm-{self._abi_version}"
-        self.cpp_info.set_property("pkg_config_name", pangomm_lib)
-        self.cpp_info.set_property("pkg_config_custom_content", "gmmprocm4dir=${libdir}/%s/proc/m4" % pangomm_lib)
-        self.cpp_info.libs = [pangomm_lib]
-        self.cpp_info.includedirs += [
+        self.cpp_info.components[pangomm_lib].set_property("pkg_config_name", pangomm_lib)
+        self.cpp_info.components[pangomm_lib].set_property("pkg_config_custom_content", "gmmprocm4dir=${libdir}/%s/proc/m4" % pangomm_lib)
+        self.cpp_info.components[pangomm_lib].libs = [pangomm_lib]
+        self.cpp_info.components[pangomm_lib].includedirs += [
             os.path.join("include", pangomm_lib),
             os.path.join("lib", pangomm_lib, "include"),
         ]
         if self._abi_version == "2.48":
-            self.cpp_info.requires = [
+            self.cpp_info.components[pangomm_lib].requires = [
                 "pango::pangocairo",
                 "glibmm::glibmm-2.68",
                 "glibmm::giomm-2.68",
                 "cairomm::cairomm-1.16",
             ]
         else:
-            self.cpp_info.requires = [
+            self.cpp_info.components[pangomm_lib].requires = [
                 "pango::pangocairo",
                 "glibmm::glibmm-2.4",
                 "glibmm::giomm-2.4",
