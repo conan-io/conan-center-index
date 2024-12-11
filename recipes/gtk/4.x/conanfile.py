@@ -437,7 +437,44 @@ class GtkConan(ConanFile):
             self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "share", "gir-1.0"))
             self.buildenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
 
-        # TODO: add the following info to all generated .pc files:
-        # targets=wayland x11
-        # gtk_binary_version=4.0.0
-        # gtk_host=x86_64-linux
+        # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.16.7/meson.build?ref_type=tags#L862-873
+        pkgconfig_variables = {
+            "targets": " ".join(self._enabled_backends),
+            "gtk_binary_version": "4.0.0",
+            "gtk_host": f"{self._host_arch}-{self._host_os}",
+        }
+        extra_content = "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items())
+        for _, component in self.cpp_info.components.items():
+            component.set_property("pkg_config_custom_content", extra_content)
+
+    @property
+    def _enabled_backends(self):
+        backends = []
+        if self.options.enable_broadway_backend:
+            backends.append("broadway")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            if self.options.with_x11:
+                backends.append("x11")
+            if self.options.with_wayland:
+                backends.append("wayland")
+        elif is_apple_os(self):
+            backends.append("macos")
+        elif self.settings.os == "Windows":
+            backends.append("win32")
+        return backends
+
+    @property
+    def _host_arch(self):
+        # https://mesonbuild.com/Reference-tables.html#cpu-families
+        if self.settings.arch == "armv8":
+            return "aarch64"
+        elif str(self.settings.arch).startswith("arm"):
+            return "arm"
+        return str(self.settings.arch).lower()
+
+    @property
+    def _host_os(self):
+        # https://mesonbuild.com/Reference-tables.html#operating-system-names
+        if is_apple_os(self):
+            return "darwin"
+        return str(self.settings.os).lower()
