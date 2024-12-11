@@ -125,13 +125,14 @@ class GlibmmConan(ConanFile):
                     os.path.join(self.package_folder, "include", directory, os.path.basename(header_file)),
                 )
 
-        for dir_to_remove in ["pkgconfig", self._glibmm_lib, self._giomm_lib]:
-            rmdir(self, os.path.join(self.package_folder, "lib", dir_to_remove))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
         glibmm_component = f"glibmm-{self._abi_version}"
+        extra_pc_content = "gmmprocdir=${libdir}/%s/proc" % glibmm_component
         self.cpp_info.components[glibmm_component].set_property("pkg_config_name", glibmm_component)
+        self.cpp_info.components[glibmm_component].set_property("pkg_config_custom_content", extra_pc_content)
         self.cpp_info.components[glibmm_component].libs = [glibmm_component]
         self.cpp_info.components[glibmm_component].includedirs = [os.path.join("include", glibmm_component)]
         self.cpp_info.components[glibmm_component].requires = ["glib::gobject-2.0", "libsigcpp::libsigcpp"]
