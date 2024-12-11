@@ -1,6 +1,4 @@
-import glob
 import os
-import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -109,23 +107,11 @@ class GlibmmConan(ConanFile):
         meson.build()
 
     def package(self):
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
-
-        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
-
-        if is_msvc(self):
-            rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-
-        for directory in [self._glibmm_lib, self._giomm_lib]:
-            directory_path = os.path.join(self.package_folder, "lib", directory, "include", "*.h")
-            for header_file in glob.glob(directory_path):
-                shutil.move(
-                    header_file,
-                    os.path.join(self.package_folder, "include", directory, os.path.basename(header_file)),
-                )
-
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
@@ -134,11 +120,17 @@ class GlibmmConan(ConanFile):
         self.cpp_info.components[glibmm_component].set_property("pkg_config_name", glibmm_component)
         self.cpp_info.components[glibmm_component].set_property("pkg_config_custom_content", extra_pc_content)
         self.cpp_info.components[glibmm_component].libs = [glibmm_component]
-        self.cpp_info.components[glibmm_component].includedirs = [os.path.join("include", glibmm_component)]
+        self.cpp_info.components[glibmm_component].includedirs += [
+            os.path.join("include", glibmm_component),
+            os.path.join("lib", glibmm_component, "include"),
+        ]
         self.cpp_info.components[glibmm_component].requires = ["glib::gobject-2.0", "libsigcpp::libsigcpp"]
 
         giomm_component = f"giomm-{self._abi_version}"
         self.cpp_info.components[giomm_component].set_property("pkg_config_name", giomm_component)
         self.cpp_info.components[giomm_component].libs = [giomm_component]
-        self.cpp_info.components[giomm_component].includedirs = [os.path.join("include", giomm_component)]
+        self.cpp_info.components[giomm_component].includedirs += [
+            os.path.join("include", giomm_component),
+            os.path.join("lib", giomm_component, "include"),
+        ]
         self.cpp_info.components[giomm_component].requires = [glibmm_component, "glib::gio-2.0"]
