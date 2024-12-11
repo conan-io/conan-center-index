@@ -140,3 +140,24 @@ class CairommConan(ConanFile):
             self.cpp_info.components[name].defines = ["CAIROMM_STATIC_LIB"]
         if is_apple_os(self):
             self.cpp_info.components[name].frameworks = ["CoreFoundation"]
+
+        # https://gitlab.freedesktop.org/cairo/cairomm/-/blob/1.18.0/data/meson.build?ref_type=tags#L30-31
+        cairo_components = self.dependencies["cairo"].cpp_info.components
+        for cairomm_mod in [
+            "ft",
+            "pdf",
+            "png",
+            "ps",
+            "quartz",
+            "quartz-font",
+            "quartz-image",
+            "svg",
+            "win32",
+            "win32-font",
+            "xlib",
+            "xlib-xrender",
+        ]:
+            if f"cairo-{cairomm_mod}" in cairo_components:
+                component = f"cairomm-{cairomm_mod}-{self._abi_version}"
+                self.cpp_info.components[component].set_property("pkg_config_name", component)
+                self.cpp_info.components[component].requires = [name, f"cairo::cairo-{cairomm_mod}"]
