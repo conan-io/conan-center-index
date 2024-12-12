@@ -1,7 +1,7 @@
+import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rm, rmdir
-from os.path import join
 
 required_conan_version = ">=2.1"
 
@@ -48,15 +48,19 @@ class Libiec61850Conan(ConanFile):
         cmake.build(target=target)
 
     def package(self):
-        copy(self, "COPYING", self.source_folder, join(self.package_folder, "licenses"))
-        rm(self, "*.la", join(self.package_folder, "lib"))
-        rmdir(self, join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, join(self.package_folder, "share"))
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
-        cmake.install()
+        cmake.install(component="Development")  # Install header files
+        # Copy files manually no avoid messing with cmake install different targets mixing shared/static
+        copy(self, "*.lib", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.a", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.dll", self.build_folder, os.path.join(self.package_folder, "bin"), keep_path=False)
+        copy(self, "*.dylib", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.so", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
 
     def package_info(self):
-        self.cpp_info.components["libiec61850"].libs = ["iec61850"]
+        hal_lib =  "hal-shared" if self.options.get_safe("shared") else "hal"
+        self.cpp_info.components["libiec61850"].libs = ["iec61850", hal_lib]
         self.cpp_info.components["libiec61850"].set_property("pkg_config_name", "iec61850")
         if self.settings.os in ["Linux"]:
             self.cpp_info.system_libs.append("pthread")
