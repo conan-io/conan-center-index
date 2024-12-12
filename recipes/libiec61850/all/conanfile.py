@@ -60,7 +60,7 @@ class Libiec61850Conan(ConanFile):
             copy(self, "*.dll", self.build_folder, os.path.join(self.package_folder, "bin"), keep_path=False)
         else:
             cmake.install()
-            rmdir(self, join(self.package_folder, "share"))
+            rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         hal_lib =  "hal-shared" if self.options.get_safe("shared") else "hal"
