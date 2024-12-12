@@ -7,6 +7,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=1.53.0"
 
@@ -81,6 +82,11 @@ class FmtConan(ConanFile):
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, 11)
+        if self.settings.os == "Emscripten" and "20" in str(self.settings.compiler.cppstd):
+            # INFO: https://github.com/conan-io/conan-center-index/issues/26169
+            # Confirmed by upstream: https://github.com/fmtlib/fmt/issues/4177
+            # TODO: Revisit after be fixed in the upstream. There is no milestone for this hotfix.
+            raise ConanInvalidConfiguration(f"Emscripten with C++20 is not supported by fmt, please use C++17 instead. See https://github.com/fmtlib/fmt/issues/4177")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
