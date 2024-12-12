@@ -1,6 +1,7 @@
 #include <tree_sitter/api.h>
-#include <tree_sitter_cpp/api.h>
+#include <tree_sitter/tree-sitter-cpp.h>
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
