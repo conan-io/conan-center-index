@@ -43,7 +43,8 @@ class Libiec61850Conan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
-        cmake.build()
+        target = "iec61850-shared" if self.options.get_safe("shared") else "iec61850"
+        cmake.build(target=target)
 
     def package(self):
         copy(self, "COPYING", self.source_folder, join(self.package_folder, "licenses"))
@@ -56,8 +57,6 @@ class Libiec61850Conan(ConanFile):
     def package_info(self):
         self.cpp_info.components["libiec61850"].libs = ["iec61850"]
         self.cpp_info.components["libiec61850"].set_property("pkg_config_name", "iec61850")
-        self.cpp_info.components["libiec61850"].set_property("cmake_file_name", "libiec61850")
-        self.cpp_info.components["libiec61850"].set_property("cmake_target_name", "libiec61850::libiec61850")
         if self.settings.os in ["Linux"]:
             self.cpp_info.system_libs.append("pthread")
             self.cpp_info.system_libs.append("rt")
