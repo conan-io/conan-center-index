@@ -1,28 +1,14 @@
-From 9d212d304afb8c4210503cc38a134a39ac6db8b1 Mon Sep 17 00:00:00 2001
-From: Martin Valgur <martin.valgur@gmail.com>
-Date: Sun, 28 Jul 2024 01:20:41 +0300
-Subject: [PATCH] use conan dependencies
-
----
- WORKSPACE.bazel              | 5 ++++-
- src/ports/BUILD.bazel        | 2 +-
- src/sksl/codegen/BUILD.bazel | 8 +++-----
- 3 files changed, 8 insertions(+), 7 deletions(-)
-
-diff --git a/WORKSPACE.bazel b/WORKSPACE.bazel
-index 08c3136bee..806fe093c0 100644
 --- a/WORKSPACE.bazel
 +++ b/WORKSPACE.bazel
-@@ -1,5 +1,8 @@
+@@ -1,4 +1,7 @@
  workspace(name = "skia")
- 
++
 +load("@//conan:dependencies.bzl", "load_conan_dependencies")
 +load_conan_dependencies()
-+
+ 
  load("//bazel:deps.bzl", "bazel_deps", "c_plus_plus_deps")
  
- bazel_deps()
-@@ -504,7 +507,7 @@ local_repository(
+@@ -488,7 +491,7 @@
  # @wuffs - //bazel/external/wuffs:BUILD.bazel
  # @zlib_skia - //bazel/external/zlib_skia:BUILD.bazel
  #### END GENERATED LIST OF THIRD_PARTY DEPS
@@ -31,24 +17,22 @@ index 08c3136bee..806fe093c0 100644
  
  # In order to copy the Freetype configurations into the checked out Freetype folder,
  # it is easiest to treat them as a third-party dependency from the perspective of Freetype.
-diff --git a/src/ports/BUILD.bazel b/src/ports/BUILD.bazel
-index ab14acf023..67f60ee32f 100644
+
 --- a/src/ports/BUILD.bazel
 +++ b/src/ports/BUILD.bazel
-@@ -302,7 +302,7 @@ skia_cc_deps(
-         ":uses_freetype": ["@freetype"],
-         "//conditions:default": [],
-     }) + select({
--        ":uses_fontconfig": ["//bazel/external/fontconfig"],
-+        ":uses_fontconfig": ["@fontconfig"],
-         "//conditions:default": [],
-     }) + select({
-         "//bazel/common_config_settings:android_fontmgr": ["@expat"],
-diff --git a/src/sksl/codegen/BUILD.bazel b/src/sksl/codegen/BUILD.bazel
-index 75e91d4228..5fd28b2cf5 100644
+@@ -355,7 +355,7 @@
+         ":freetype_support",
+         ":typeface_proxy",
+         "//:core",
+-        "//bazel/external/fontconfig",
++        "@fontconfig",
+         "//src/base",
+         "//src/core:core_priv",
+     ],
+
 --- a/src/sksl/codegen/BUILD.bazel
 +++ b/src/sksl/codegen/BUILD.bazel
-@@ -167,7 +167,7 @@ skia_cc_library(
+@@ -103,7 +103,7 @@
          "//:core",
          "//src/base",
          "//src/core:core_priv",
@@ -57,7 +41,7 @@ index 75e91d4228..5fd28b2cf5 100644
      ],
  )
  
-@@ -232,7 +232,7 @@ skia_cc_library(
+@@ -168,7 +168,7 @@
      deps = [
          "//:core",
          "//src/core:core_priv",
@@ -66,16 +50,15 @@ index 75e91d4228..5fd28b2cf5 100644
      ],
  )
  
-@@ -272,8 +272,6 @@ skia_cc_library(
+@@ -208,8 +208,6 @@
      deps = [
          "//:core",
          "//src/core:core_priv",
 -        "@dawn//:tint",
 -        "@dawn//src/tint/lang/wgsl",
 -        "@dawn//src/tint/lang/wgsl/reader",
+-    ],
+-)
 +        "@dawn",
-     ],
- )
--- 
-2.43.0
-
++    ],
++)

@@ -1,10 +1,11 @@
+# The commit is the head of corresponding milestone branch, e.g. https://github.com/google/skia/tree/chrome/m132
+# Using the GitHub mirror because googlesource.com does not have a stable hash.
 sources:
-  "cci.20240727":
-    # Prefer the GitHub mirror because googlesource.com does not have a stable hash
-    url: "https://github.com/google/skia/archive/804999efe4024b8ecf305a5a1bd0271fe4be44b1.tar.gz"
-    sha256: "ce1c02b8b4b36ff4f8d367d6171f75c0467bc8fe12e930945a607bea65c03823"
+  "132":
+    url: "https://github.com/google/skia/archive/8699f9d8c8ae8c5d390325dbf5a5d9fbadbcc899.tar.gz"
+    sha256: "e0598f82899c1dfd9a03624d350494630588760a72ce0dd9697533e60f4007a8"
 patches:
-  "cci.20240727":
+  "132":
     - patch_file: "patches/0001-use-conan-dependencies.patch"
       patch_description: "Replace all non-Rust dependencies with ones from Conan"
       patch_type: "conan"
