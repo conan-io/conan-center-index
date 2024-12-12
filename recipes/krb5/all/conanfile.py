@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, can_run
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches, chdir
@@ -59,8 +59,7 @@ class Krb5Conan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} building with static OpenSSL generates linking errors. Please use '-o openssl/*:shared=True'")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -72,13 +71,13 @@ class Krb5Conan(ConanFile):
 
         tc = AutotoolsToolchain(self)
         yes_no = lambda v: "yes" if v else "no"
-        tls_impl = {"openssl": "openssl",}.get(str(self.options.get_safe('with_tls')))
+        tls_impl = {"openssl": "openssl",}.get(str(self.options.with_tls))
         tc.configure_args.extend([
             f"--enable-thread-support={yes_no(self.options.get_safe('use_thread'))}",
             f"--enable-dns-for-realm={yes_no(self.options.use_dns_realms)}",
-            f"--enable-pkinit={yes_no(self.options.get_safe('with_tls'))}",
+            f"--enable-pkinit={yes_no(self.options.with_tls)}",
             f"--with-crypto-impl={(tls_impl or 'builtin')}",
-            f"--with-spake-openssl={yes_no(self.options.get_safe('with_tls') == 'openssl')}",
+            f"--with-spake-openssl={yes_no(self.options.with_tls == 'openssl')}",
             f"--with-tls-impl={(tls_impl or 'no')}",
             "--disable-nls",
             "--disable-rpath",
@@ -89,6 +88,13 @@ class Krb5Conan(ConanFile):
             f"--with-keyutils={self.package_folder}",
             f"--with-tcl={(self.dependencies['tcl'].package_folder if self.options.get_safe('with_tcl') else 'no')}",
             ])
+        if not can_run(self):
+            # Use values from Linux GCC as a guess for try_compile checks.
+            tc.configure_args.extend([
+                "krb5_cv_attr_constructor_destructor=yes,yes",
+                "ac_cv_func_regcomp=yes",
+                "ac_cv_printf_positional=yes",
+            ])
         tc.generate()
 
         pkg = AutotoolsDeps(self)
@@ -98,14 +104,14 @@ class Krb5Conan(ConanFile):
 
     def requirements(self):
         self.requires("libverto/0.3.2")
-        if self.options.get_safe("with_tls") == "openssl":
+        if self.options.with_tls == "openssl":
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_tcl"):
             self.requires("tcl/8.6.11")
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         self.build_requires("automake/1.16.5")
         self.build_requires("bison/3.8.2")
 
@@ -126,44 +132,43 @@ class Krb5Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "var"))
 
     def package_info(self):
-        self.cpp_info.components["mit-krb5"].libs = ["krb5", "k5crypto", "com_err"]
-        if self.options.get_safe('with_tls') == "openssl":
-            self.cpp_info.components["mit-krb5"].requires = ["openssl::crypto"]
-        self.cpp_info.components["mit-krb5"].names["pkg_config"] = "mit-krb5"
+        self.cpp_info.components["mit-krb5"].set_property("pkg_config_name", "mit-krb5")
+        self.cpp_info.components["mit-krb5"].libs = ["krb5", "k5crypto", "com_err", "krb5support"]
+        self.cpp_info.components["mit-krb5"].requires = ["libverto::libverto"]
+        if self.options.with_tls == "openssl":
+            self.cpp_info.components["mit-krb5"].requires.append("openssl::openssl")
         if self.settings.os == "Linux":
             self.cpp_info.components["mit-krb5"].system_libs = ["resolv"]
 
-        self.cpp_info.components["libkrb5"].libs = []
+        self.cpp_info.components["libkrb5"].set_property("pkg_config_name", "krb5")
         self.cpp_info.components["libkrb5"].requires = ["mit-krb5"]
-        self.cpp_info.components["libkrb5"].names["pkg_config"] = "krb5"
 
+        self.cpp_info.components["mit-krb5-gssapi"].set_property("pkg_config_name", "mit-krb5-gssapi")
         self.cpp_info.components["mit-krb5-gssapi"].libs = ["gssapi_krb5"]
         self.cpp_info.components["mit-krb5-gssapi"].requires = ["mit-krb5"]
-        self.cpp_info.components["mit-krb5-gssapi"].names["pkg_config"] = "mit-krb5-gssapi"
 
-        self.cpp_info.components["krb5-gssapi"].libs = []
+        self.cpp_info.components["krb5-gssapi"].set_property("pkg_config_name", "krb5-gssapi")
         self.cpp_info.components["krb5-gssapi"].requires = ["mit-krb5-gssapi"]
-        self.cpp_info.components["krb5-gssapi"].names["pkg_config"] = "krb5-gssapi"
 
+        self.cpp_info.components["gssrpc"].set_property("pkg_config_name", "gssrpc")
         self.cpp_info.components["gssrpc"].libs = ["gssrpc"]
         self.cpp_info.components["gssrpc"].requires = ["mit-krb5-gssapi"]
-        self.cpp_info.components["gssrpc"].names["pkg_config"] = "gssrpc"
 
+        self.cpp_info.components["kadm-client"].set_property("pkg_config_name", "kadm-client")
         self.cpp_info.components["kadm-client"].libs = ["kadm5clnt_mit"]
         self.cpp_info.components["kadm-client"].requires = ["mit-krb5-gssapi", "gssrpc"]
-        self.cpp_info.components["kadm-client"].names["pkg_config"] = "kadm-client"
 
+        self.cpp_info.components["kdb"].set_property("pkg_config_name", "kdb")
         self.cpp_info.components["kdb"].libs = ["kdb5"]
         self.cpp_info.components["kdb"].requires = ["mit-krb5-gssapi", "mit-krb5", "gssrpc"]
-        self.cpp_info.components["kdb"].names["pkg_config"] = "kdb-client"
 
+        self.cpp_info.components["kadm-server"].set_property("pkg_config_name", "kadm-server")
         self.cpp_info.components["kadm-server"].libs = ["kadm5srv_mit"]
         self.cpp_info.components["kadm-server"].requires = ["kdb", "mit-krb5-gssapi"]
-        self.cpp_info.components["kadm-server"].names["pkg_config"] = "kadm-server"
 
         self.cpp_info.components["krad"].libs = ["krad"]
-        self.cpp_info.components["krad"].requires = ["libkrb5", "libverto::libverto"]
+        self.cpp_info.components["krad"].requires = ["libkrb5"]
 
         krb5_config = os.path.join(self.package_folder, "bin", "krb5-config").replace("\\", "/")
-        self.output.info("Appending KRB5_CONFIG environment variable: {}".format(krb5_config))
+        self.output.info(f"Appending KRB5_CONFIG environment variable: {krb5_config}")
         self.runenv_info.define_path("KRB5_CONFIG", krb5_config)
