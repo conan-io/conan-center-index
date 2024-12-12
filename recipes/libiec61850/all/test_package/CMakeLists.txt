@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES CXX)
 
-
-find_package(libiec61850 REQUIRED CONFIG)
+find_package(libiec61850)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} PRIVATE libiec61850::libiec61850)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
+target_link_libraries(${PROJECT_NAME} libiec61850::libiec61850)
