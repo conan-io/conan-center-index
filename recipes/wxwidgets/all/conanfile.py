@@ -132,20 +132,16 @@ class wxWidgetsConan(ConanFile):
         if not self._toolkit.startswith("gtk"):
             self.options.rm_safe("private_fonts")
 
-    def system_requirements(self):
-        if self.options.webview and self._toolkit.startswith("gtk"):
-            apt = package_manager.Apt(self)
-            apt.install(["libsoup3.0-dev", "libwebkit2gtk-4.0-dev"])
-            yum = package_manager.Yum(self)
-            yum.install(["libsoup3-devel", "webkit2gtk4.1-devel"])
-
     def requirements(self):
         if self._toolkit == "gtk3":
-            self.requires("gtk/3.24.43")
+            # Used in gtk/private/wrapgtk.h and other public headers
+            self.requires("gtk/3.24.43", transitive_headers=True, transitive_libs=True)
         elif self._toolkit == "gtk4":
-            self.requires("gtk/4.15.6")
+            # Used in gtk/private/wrapgtk.h and other public headers
+            self.requires("gtk/4.15.6", transitive_headers=True, transitive_libs=True)
         elif self._toolkit == "qt":
-            self.requires("qt/[~5.15]", run=can_run(self))
+            # Used in wx/qt/private/converter.h and other public headers
+            self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True, run=can_run(self))
 
         self.requires("expat/[>=2.6.2 <3]")
         self.requires("libpng/[>=1.6 <2]")
@@ -162,7 +158,8 @@ class wxWidgetsConan(ConanFile):
             self.requires("mozjpeg/4.1.5")
 
         if self.options.opengl:
-            self.requires("opengl/system")
+            # Used in wx/unix/glx11.h and other public headers
+            self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
         if self.options.cairo and not self._toolkit.startswith("gtk"):
             self.requires("cairo/1.18.0")
         if self.options.get_safe("private_fonts"):
@@ -185,6 +182,14 @@ class wxWidgetsConan(ConanFile):
                 self.requires("xkbcommon/1.6.0", options={"with_x11": True})
             if self.options.webrequest:
                 self.requires("libcurl/[>=7.78.0 <9]")
+
+    def system_requirements(self):
+        if self.options.webview and self._toolkit.startswith("gtk"):
+            # webkit2 is also used in a gtk/private/webkit.h public header
+            apt = package_manager.Apt(self)
+            apt.install(["libsoup3.0-dev", "libwebkit2gtk-4.0-dev"])
+            yum = package_manager.Yum(self)
+            yum.install(["libsoup3-devel", "webkit2gtk4.1-devel"])
 
     def validate(self):
         if self.options.toolkit == "native" and not (is_apple_os(self) or self.settings.os == "Windows"):
