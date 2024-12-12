@@ -80,7 +80,6 @@ class VectorscanConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "src", "util", "ue2string.h"), "return const_reverse_iterator(end());", "return const_reverse_iterator{end()};")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -117,8 +116,6 @@ class VectorscanConan(ConanFile):
 
         deps = CMakeDeps(self)
         deps.generate()
-
-        VirtualBuildEnv(self).generate()
 
     def build(self):
         cmake = CMake(self)
