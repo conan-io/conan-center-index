@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rm, rmdir
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
+from conan.tools.files import get, copy, rmdir
 
 required_conan_version = ">=2.1"
 
@@ -28,7 +28,7 @@ class Libiec61850Conan(ConanFile):
     implements = ["auto_shared_fpic"]
 
     def layout(self):
-        cmake_layout(self)
+        cmake_layout(self, src_folder="src")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -60,6 +60,7 @@ class Libiec61850Conan(ConanFile):
             copy(self, "*.dll", self.build_folder, os.path.join(self.package_folder, "bin"), keep_path=False)
         else:
             cmake.install()
+            rmdir(self, join(self.package_folder, "share"))
 
     def package_info(self):
         hal_lib =  "hal-shared" if self.options.get_safe("shared") else "hal"
