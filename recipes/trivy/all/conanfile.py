@@ -15,8 +15,8 @@ class TrivyConan(ConanFile):
     description = "Trivy Security Scanner."
     topics = ("build", "scanner")
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = ""
-    license = ""
+    homepage = "https://github.com/aquasecurity/trivy/"
+    license = "Apache-2.0"
     settings = "os", "arch"
 
     def build(self):
