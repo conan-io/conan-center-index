@@ -35,8 +35,8 @@ class Libiec61850Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_EXAMPLES"] = False
-        tc.variables["BUILD_TESTS"] = False
+        tc.cache_variables["BUILD_EXAMPLES"] = False
+        tc.cache_variables["BUILD_TESTS"] = False
         tc.cache_variables["FIND_PACKAGE_DISABLE_Doxygen"] = True
         tc.generate()
 
