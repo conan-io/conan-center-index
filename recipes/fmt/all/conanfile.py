@@ -82,11 +82,12 @@ class FmtConan(ConanFile):
     def validate(self):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, 11)
-        if self.settings.os == "Emscripten" and "20" in str(self.settings.compiler.cppstd):
-            # INFO: https://github.com/conan-io/conan-center-index/issues/26169
-            # Confirmed by upstream: https://github.com/fmtlib/fmt/issues/4177
-            # TODO: Revisit after be fixed in the upstream. There is no milestone for this hotfix.
-            raise ConanInvalidConfiguration(f"Emscripten with C++20 is not supported by fmt, please use C++17 instead. See https://github.com/fmtlib/fmt/issues/4177")
+        if Version(self.version) <= "11.0.2" and self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= "20":
+            # INFO: https://github.com/fmtlib/fmt/issues/4177
+            # Partially fixed by: https://github.com/fmtlib/fmt/commit/cacc3108c5b74020dba7bf3c6d3a7e58cdc085b2
+            # Completely fixed by: https://github.com/fmtlib/fmt/pull/4187
+            # TODO: Revisit after be released a new version of fmt
+            raise ConanInvalidConfiguration(f"FMT does not support Clang 20 for now, please use Clang 19 or earlier. See https://github.com/fmtlib/fmt/issues/4177")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
