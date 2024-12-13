@@ -98,7 +98,7 @@ class OpenTDFConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.name} does not currently support shared library on Windows")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, filename=f"{self.version}.tar.gz")
 
     def generate(self):
         tc = CMakeToolchain(self)
