@@ -50,14 +50,13 @@ class Libiec61850Conan(ConanFile):
     def package(self):
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
-        if self.settings.os == "Windows":
-            cmake.install(component="Development")  # Install header files
-            # Copy files manually no avoid messing with cmake install different targets mixing shared/static
-            copy(self, "*.lib", self.build_folder, os.path.join(self.package_folder, "lib"), keep_path=False)
-            copy(self, "*.dll", self.build_folder, os.path.join(self.package_folder, "bin"), keep_path=False)
-        else:
-            cmake.install()
-            rmdir(self, os.path.join(self.package_folder, "share"))
+        cmake.install(component="Development")  # Install header files
+        # Copy files manually because upstream CMakeLists tries to install both shared and static at once
+        copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
 
     def package_info(self):
         hal_lib =  "hal-shared" if self.options.get_safe("shared") else "hal"
