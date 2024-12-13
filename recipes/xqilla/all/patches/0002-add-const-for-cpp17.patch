@@ -1,0 +1,15 @@
+Fix a regression in C++17:
+
+stl_tree.h:770:15: error: static assertion failed: comparison object must be invocable as const
+
+--- a/include/xqilla/ast/XQDocumentOrder.hpp
++++ b/include/xqilla/ast/XQDocumentOrder.hpp
+@@ -68,7 +68,7 @@ private:
+   public:
+     uniqueLessThanCompareFn(const DynamicContext *context)
+       : context_(context) {}
+-    bool operator()(const Node::Ptr &first, const Node::Ptr &second)
++    bool operator()(const Node::Ptr &first, const Node::Ptr &second) const
+     {
+       return first->uniqueLessThan(second, context_);
+     }
