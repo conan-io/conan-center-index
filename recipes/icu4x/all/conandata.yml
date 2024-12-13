@@ -1,0 +1,7 @@
+sources:
+  "1.5.1":
+    url: "https://github.com/unicode-org/icu4x/archive/refs/tags/ind/icu_capi@1.5.1.tar.gz"
+    sha256: "5bf16ec5892c2b3cae71f4e718fd1ad9e2914087e75f9950f6119710948f6bba"
+  "1.4.1":
+    url: "https://github.com/unicode-org/icu4x/archive/refs/tags/ind/icu_capi@1.4.1.tar.gz"
+    sha256: "2d1788fe4d562853b9685b8f8c588114e06a9f2e9d240d4974098c15b7d6eff9"
