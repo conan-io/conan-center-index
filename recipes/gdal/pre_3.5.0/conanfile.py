@@ -252,7 +252,7 @@ class GdalConan(ConanFile):
         if self.options.with_hdf4:
             self.requires("hdf4/4.2.15")
         if self.options.with_hdf5:
-            self.requires("hdf5/1.14.0")
+            self.requires("hdf5/1.14.5")
         if self.options.with_kea:
             self.requires("kealib/1.4.14")
         if self.options.with_netcdf:
@@ -284,7 +284,7 @@ class GdalConan(ConanFile):
         # if self.options.with_spatialite:
         #     self.requires("libspatialite/4.3.0a")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.44.2")
+            self.requires("sqlite3/[>=3.45.0 <4]")
         # if self.options.with_rasterlite2:
         #     self.requires("rasterlite2/x.x.x")
         if self.options.get_safe("with_pcre"):
