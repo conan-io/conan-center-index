@@ -41,4 +41,14 @@ int main() {}
 "
 USE_STD_VARIANT)
 
+check_cxx_source_compiles("
+#include \"absl/base/config.h\"
+#if defined(ABSL_HAVE_STD_ORDERING) && ABSL_HAVE_STD_ORDERING == 1
+int main() {}
+#else
+#error \"no std::(partial|strong|weak)_ordering\"
+#endif
+"
+USE_STD_ORDERING)
+
 configure_file(${CMAKE_CURRENT_LIST_DIR}/abi.h.in ${PROJECT_BINARY_DIR}/abi.h)
