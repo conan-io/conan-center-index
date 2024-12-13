@@ -1,0 +1,8 @@
+--- a/tools/extra_defs_gen/meson.build
++++ b/tools/extra_defs_gen/meson.build
+@@ -9,4 +9,5 @@
+   required: glibmm_dep.type_name() != 'internal',
++  dirs: glibmm_dep.get_pkgconfig_variable('libdir'),
+ )
+ if not glibmm_generate_extra_defs_dep.found()
+   glibmm_generate_extra_defs_dep = dependency(
