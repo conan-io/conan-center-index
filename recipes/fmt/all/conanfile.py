@@ -83,12 +83,13 @@ class FmtConan(ConanFile):
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, 11)
         if Version(self.version).major in (8, 10, 11) and \
-             self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= "20":
+             self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= "20" and \
+             Version(str(self.settings.compiler.cppstd).replace("gnu", "")) >= "20":
             # INFO: https://github.com/fmtlib/fmt/issues/4177
             # Partially fixed by: https://github.com/fmtlib/fmt/commit/cacc3108c5b74020dba7bf3c6d3a7e58cdc085b2
             # Completely fixed by: https://github.com/fmtlib/fmt/pull/4187
             # TODO: Revisit after be released a new version of fmt
-            raise ConanInvalidConfiguration(f"This version of FMT does not currently support Clang 20; please use Clang 19 or an earlier version. See https://github.com/fmtlib/fmt/issues/4177")
+            raise ConanInvalidConfiguration(f"This version of FMT does not currently support Clang 20 with C++20; please use -s compiler.cppstd=17. See https://github.com/fmtlib/fmt/issues/4177")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
