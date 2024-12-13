@@ -1,0 +1,22 @@
+From 16c2c7e5b8dc80bb0eb46792fcb1f6e3dcbffbf4 Mon Sep 17 00:00:00 2001
+From: dominformant <26122827+dominformant@users.noreply.github.com>
+Date: Thu, 2 Nov 2023 10:33:46 +0100
+Subject: [PATCH] Update ObsID.hpp
+
+Add explicit import of cstdint
+---
+ core/lib/GNSSCore/ObsID.hpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/core/lib/GNSSCore/ObsID.hpp b/core/lib/GNSSCore/ObsID.hpp
+index d0251fe4c..612e4d2fa 100755
+--- a/core/lib/GNSSCore/ObsID.hpp
++++ b/core/lib/GNSSCore/ObsID.hpp
+@@ -47,6 +47,7 @@
+ #ifndef OBSID_HPP
+ #define OBSID_HPP
+ 
++#include <cstdint>
+ #include <iostream>
+ #include <iomanip>
+ #include <sstream>
