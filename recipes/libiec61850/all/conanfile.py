@@ -44,11 +44,8 @@ class Libiec61850Conan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.configure()
-        if self.settings.os == "Windows":
-            target = "iec61850-shared" if self.options.get_safe("shared") else "iec61850"
-            cmake.build(target=target)
-        else:
-            cmake.build()
+        targets = ["iec61850-shared", "hal-shared"] if self.options.get_safe("shared") else ["iec61850", "hal"]
+        cmake.build(target=targets)
 
     def package(self):
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
