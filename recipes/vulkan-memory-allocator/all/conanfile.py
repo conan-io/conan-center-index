@@ -18,10 +18,6 @@ class VulkanMemoryAllocatorConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
-    @property
-    def _min_cppstd(self):
-        return "11" if Version(self.version) < "3.0.0" else "14"
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -35,14 +31,13 @@ class VulkanMemoryAllocatorConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        if Version(self.version) < "3.0.0":
+            check_min_cppstd(self, 11)
+        else:
+            check_min_cppstd(self, 14)
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
-
-    def build(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
 
     def package(self):
@@ -54,5 +49,8 @@ class VulkanMemoryAllocatorConan(ConanFile):
         copy(self, "vk_mem_alloc.h", src=include_dir, dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
+        if Version(self.version) >= "3.1.0":
+            self.cpp_info.set_property("cmake_file_name", "VulkanMemoryAllocator")
+            self.cpp_info.set_property("cmake_target_name", "GPUOpen::VulkanMemoryAllocator")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
