@@ -14,7 +14,7 @@ class TinyOptionalConan(ConanFile):
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/Sedeniono/tiny-optional"
-    topics = ("optional", "header-only")
+    topics = ("optional", "memory-efficiency", "cache-friendly", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
