@@ -5,7 +5,7 @@ from conan.tools.files import copy, get
 import os
 
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.0"
 
 
 class TinyOptionalConan(ConanFile):
