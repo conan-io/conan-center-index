@@ -223,7 +223,7 @@ class LibwebsocketsConan(ConanFile):
             self.requires("libmount/2.39.2")
 
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.44.2")
+            self.requires("sqlite3/[>=3.45.0 <4]")
 
         if self.options.with_ssl == "openssl":
             self.requires("openssl/[>=1.1.1w <4]", transitive_headers=True)
@@ -440,7 +440,7 @@ class LibwebsocketsConan(ConanFile):
             save(self, project_include_file, 'find_package(OpenSSL REQUIRED)\nset(OPENSSL_INCLUDE_DIRS ${OPENSSL_INCLUDE_DIR})')
 
         # Prevent locating and copying OpenSSL binaries (not needed by the recipe)
-        replace_in_file(self, 
+        replace_in_file(self,
                         os.path.join(self.source_folder, "cmake", "FindOpenSSLbins.cmake"),
                         "if(OPENSSL_FOUND)", "if(FALSE)")
 
