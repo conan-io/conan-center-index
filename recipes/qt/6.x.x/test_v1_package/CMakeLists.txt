@@ -8,6 +8,7 @@ conan_set_libcxx()
 conan_output_dirs_setup()
 
 find_package(Qt6 COMPONENTS Core Network Sql Concurrent Xml REQUIRED CONFIG)
+find_package(Qt6 OPTIONAL_COMPONENTS Qml)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
@@ -23,3 +24,10 @@ qt_add_executable(${PROJECT_NAME}2 ../test_package/test_package.cpp ../test_pack
 set_property(TARGET ${PROJECT_NAME}2 PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(${PROJECT_NAME}2 PRIVATE Qt6::Core Qt6::Network Qt6::Sql Qt6::Concurrent Qt6::Xml)
+
+# check if QML modules are build and correctly deployed, if enabled
+if (TARGET Qt6::Qml)
+  add_executable(CheckQMLModules ../test_package/test_qml_modules.cpp)
+  set_property(TARGET CheckQMLModules PROPERTY CXX_STANDARD 17)
+  target_link_libraries(CheckQMLModules Qt6::Core Qt6::Qml)
+endif()
