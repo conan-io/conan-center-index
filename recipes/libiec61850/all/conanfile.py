@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, replace_in_file, rmdir
+from conan.tools.files import get, copy, replace_in_file, rmdir, rm
 
 required_conan_version = ">=2.1"
 
@@ -55,7 +55,10 @@ class Libiec61850Conan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rmdir(self, os.path.join(self.package_folder, "bin"))
+        # Remove MS runtime files
+        for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
+            rm(self, pattern=dll_pattern_to_remove, folder=os.path.join(self.package_folder, "bin"), 
+               recursive=True)
 
     def package_info(self):
         self.cpp_info.components["iec61850"].libs = ["iec61850"]
