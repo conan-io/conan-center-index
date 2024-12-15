@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy
 
 required_conan_version = ">=2.1"
 
@@ -35,31 +35,33 @@ class Libiec61850Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_EXAMPLES"] = False
-        tc.variables["BUILD_TESTS"] = False
+        tc.cache_variables["BUILD_EXAMPLES"] = False
+        tc.cache_variables["BUILD_TESTS"] = False
         tc.cache_variables["FIND_PACKAGE_DISABLE_Doxygen"] = True
         tc.generate()
 
     def build(self):
         cmake = CMake(self)
         cmake.configure()
-        targets = ["iec61850-shared", "hal-shared"] if self.options.get_safe("shared") else ["iec61850", "hal"]
-        cmake.build(target=targets)
+        target = "iec61850-shared" if self.options.get_safe("shared") else "iec61850"
+        cmake.build(target=target)
 
     def package(self):
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install(component="Development")  # Install header files
         # Copy files manually because upstream CMakeLists tries to install both shared and static at once
-        copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*.so*", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
+        copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*hal.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        copy(self, "*iec61850.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
 
     def package_info(self):
-        hal_lib =  "hal-shared" if self.options.get_safe("shared") else "hal"
-        self.cpp_info.components["libiec61850"].libs = ["iec61850", hal_lib]
+        self.cpp_info.components["libiec61850"].libs = ["iec61850"]
+        if self.options.get_safe("shared") == False:
+            self.cpp_info.components["libiec61850"].libs.append("hal")
         self.cpp_info.components["libiec61850"].set_property("pkg_config_name", "iec61850")
         if self.settings.os in ["Linux"]:
             self.cpp_info.components["libiec61850"].system_libs.append("pthread")
