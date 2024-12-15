@@ -1,0 +1,42 @@
+From cbc9e0dcabad4216dcc39a6e5204c91bc08bda94 Mon Sep 17 00:00:00 2001
+From: Chip Hogg <chogg@aurora.tech>
+Date: Sun, 15 Dec 2024 14:05:18 -0500
+Subject: [PATCH] Add `static_cast_checkers` to CMake
+
+This was apparently overlooked in #347.
+
+Helps #359.
+---
+ au/code/au/CMakeLists.txt | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/au/code/au/CMakeLists.txt b/au/code/au/CMakeLists.txt
+index edb965c..7c518bf 100644
+--- a/au/code/au/CMakeLists.txt
++++ b/au/code/au/CMakeLists.txt
+@@ -39,6 +39,7 @@ header_only_library(
+     quantity.hh
+     quantity_point.hh
+     rep.hh
++    static_cast_checkers.hh
+     unit_of_measure.hh
+     unit_symbol.hh
+     wrapper_operations.hh
+@@ -465,6 +466,14 @@ gtest_based_test(
+     au
+ )
+ 
++gtest_based_test(
++  NAME static_cast_checkers_test
++  SRCS
++    static_cast_checkers_test.cc
++  DEPS
++    au
++)
++
+ gtest_based_test(
+   NAME stdx_test
+   SRCS
+-- 
+2.34.1
+
