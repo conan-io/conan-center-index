@@ -55,7 +55,7 @@ class Libiec61850Conan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "share"))
-
+        rmdir(self, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.components["iec61850"].libs = ["iec61850"]
