@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, replace_in_file, rmdir
 
 required_conan_version = ">=2.1"
 
@@ -41,28 +41,28 @@ class Libiec61850Conan(ConanFile):
         tc.generate()
 
     def build(self):
+        target_type = "-shared" if self.options.get_safe("shared") else ""
+        replace_in_file(self, os.path.join(self.source_folder, "hal", "CMakeLists.txt"), 
+                       "install (TARGETS hal hal-shared", f"install (TARGETS hal{target_type}")
+        replace_in_file(self, os.path.join(self.source_folder, "src", "CMakeLists.txt"), 
+                       "install (TARGETS iec61850 iec61850-shared", f"install (TARGETS iec61850{target_type}")
         cmake = CMake(self)
         cmake.configure()
-        target = "iec61850-shared" if self.options.get_safe("shared") else "iec61850"
-        cmake.build(target=target)
+        cmake.build()
 
     def package(self):
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
-        cmake.install(component="Development")  # Install header files
-        # Copy files manually because upstream CMakeLists tries to install both shared and static at once
-        copy(self, "*.so*", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
-        copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*hal.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*iec61850.lib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
 
     def package_info(self):
-        self.cpp_info.components["libiec61850"].libs = ["iec61850"]
-        if self.options.get_safe("shared") == False:
-            self.cpp_info.components["libiec61850"].libs.append("hal")
-        self.cpp_info.components["libiec61850"].set_property("pkg_config_name", "iec61850")
+        self.cpp_info.components["iec61850"].libs = ["iec61850"]
+        self.cpp_info.components["iec61850"].set_property("cmake_target_name", "iec61850")
+        self.cpp_info.components["hal"].libs = ["hal-shared"] if self.options.get_safe("shared") else ["hal"]
+        self.cpp_info.components["iec61850"].requires=["hal"]
+        self.cpp_info.components["iec61850"].set_property("pkg_config_name", "libiec61850")
         if self.settings.os in ["Linux"]:
-            self.cpp_info.components["libiec61850"].system_libs.append("pthread")
-            self.cpp_info.components["libiec61850"].system_libs.append("rt")
+            self.cpp_info.components["iec61850"].system_libs.append("pthread")
+            self.cpp_info.components["iec61850"].system_libs.append("rt")

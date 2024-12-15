@@ -4,4 +4,4 @@ project(test_package LANGUAGES CXX)
 find_package(libiec61850)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} libiec61850::libiec61850)
+target_link_libraries(${PROJECT_NAME} iec61850)
