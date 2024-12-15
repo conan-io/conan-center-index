@@ -1,4 +1,7 @@
 sources:
+  "2.0.0":
+    url: "https://github.com/bluescarni/mppp/archive/v2.0.0.tar.gz"
+    sha256: "699a882b8506b2e3c555a42300ad473302bfac3d35a931898816a401ed5fc5f3"
   "1.0.3":
     url: "https://github.com/bluescarni/mppp/archive/v1.0.3.tar.gz"
     sha256: "d5beb0002910de4ea96dc15dc0d80d759afeb2c5e68716523d519d66a7dfe423"
@@ -15,6 +18,11 @@ sources:
     url: "https://github.com/bluescarni/mppp/archive/v0.26.tar.gz"
     sha256: "4dbfa68802d9a1365eda884f085418afc147d01b7a928e8333e4dcc1c3b3ce9e"
 patches:
+  "2.0.0":
+    - patch_file: "patches/2.0.0-0002-remove-fmt-version.patch"
+      # https://github.com/conan-io/conan/issues/14172
+      patch_description: "remove fmt version number from find_package"
+      patch_type: "conan"
   "1.0.3":
     - patch_file: "patches/1.0.3-0001-disable-warning-error.patch"
       patch_description: "disable the flag for treats warning as errors"
