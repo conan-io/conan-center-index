@@ -100,3 +100,19 @@ class DawnConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Dawn")
         self.cpp_info.set_property("cmake_target_name", "dawn::webgpu_dawn")
         self.cpp_info.libs = ["webgpu_dawn"]
+        self.cpp_info.requires = [
+            "abseil::absl_flat_hash_map",
+            "abseil::absl_flat_hash_set",
+            "abseil::absl_inlined_vector",
+            "abseil::absl_span",
+            "abseil::absl_str_format_internal",
+            "abseil::absl_string_view",
+            "abseil::absl_strings",
+            "spirv-headers::spirv-headers",
+            "glslang::glslang",
+            "glfw::glfw",
+            "vulkan-headers::vulkan-headers",
+            "vulkan-utility-libraries::vulkan-utility-libraries",
+            "opengl-registry::opengl-registry",
+            "spirv-tools::spirv-tools",
+        ]
