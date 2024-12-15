@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.layout import basic_layout
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, valid_max_cppstd
 from conan.tools.scm import Version
 from conan.tools.microsoft import is_msvc
 from conan.errors import ConanInvalidConfiguration
@@ -84,7 +84,7 @@ class FmtConan(ConanFile):
             check_min_cppstd(self, 11)
         if Version(self.version).major in (8, 10, 11) and \
              self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= "20" and \
-             Version(str(self.settings.compiler.cppstd).replace("gnu", "")) >= "20":
+             not valid_max_cppstd(self, 20):
             # INFO: https://github.com/fmtlib/fmt/issues/4177
             # Partially fixed by: https://github.com/fmtlib/fmt/commit/cacc3108c5b74020dba7bf3c6d3a7e58cdc085b2
             # Completely fixed by: https://github.com/fmtlib/fmt/pull/4187
