@@ -1,3 +1,16 @@
+diff --git a/cmake/JBIGCodec.cmake b/cmake/JBIGCodec.cmake
+index a4350028..4cb01552 100644
+--- a/cmake/JBIGCodec.cmake
++++ b/cmake/JBIGCodec.cmake
+@@ -34,7 +34,7 @@ if(JBIG_FOUND)
+     set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${JBIG_INCLUDE_DIRS})
+     set(CMAKE_REQUIRED_LIBRARIES_SAVE ${CMAKE_REQUIRED_LIBRARIES})
+     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${JBIG_LIBRARIES})
+-    check_symbol_exists(jbg_newlen "jbig.h" HAVE_JBG_NEWLEN)
++    set(HAVE_JBG_NEWLEN TRUE)
+     set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_SAVE})
+     set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_SAVE})
+ endif()
 diff --git a/cmake/JPEGCodec.cmake b/cmake/JPEGCodec.cmake
 index 8455a3ec..09fe975a 100644
 --- a/cmake/JPEGCodec.cmake
