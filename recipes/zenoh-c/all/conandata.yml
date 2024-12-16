@@ -1,4 +1,7 @@
 sources:
-  "0.10.1-rc":
-    url: "https://github.com/eclipse-zenoh/zenoh-c/archive/refs/tags/0.10.1-rc.tar.gz"
-    sha256: "9fb703eff79b7c1ef216f411dadcb7f0132c8ba665823b5a8252b467b4937438"
+  "1.1.0":
+    url: "https://github.com/eclipse-zenoh/zenoh-c/archive/refs/tags/1.1.0.tar.gz"
+    sha256: "9f84289b212723aec546cef840f00399aaef13820ccf2d0f8c957b3c87f71088"
+  "0.11.0.3":
+    url: "https://github.com/eclipse-zenoh/zenoh-c/archive/refs/tags/0.11.0.3.tar.gz"
+    sha256: "afe031ba273912ebed459f6b0290672147fc1519163a7b256417e83d85d5d477"
