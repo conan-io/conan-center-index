@@ -6,7 +6,7 @@ from conan.tools.files import copy, get, rmdir, rm
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4.0" # for attribute languages
 
 class LibnftnlConan(ConanFile):
     name = "libnftnl"
@@ -14,11 +14,13 @@ class LibnftnlConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://netfilter.org/projects/libnftnl/index.html"
     description = "Library providing a low-level netlink programming interface (API) to the in-kernel nf_tables subsystem"
-    topics = ("libnftnl", "netlink", "nftables")
+    topics = ("netlink", "nftables")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     package_type = "library"
+    languages = ["C"]
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -29,13 +31,9 @@ class LibnftnlConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def configure(self):
+    def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration("libnftnl is only supported on Linux")
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
     
     def generate(self):
         tc = AutotoolsToolchain(self)
@@ -60,3 +58,4 @@ class LibnftnlConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["nftnl"]
+        self.cpp_info.set_property("pkg_config_name", "libnftnl")
