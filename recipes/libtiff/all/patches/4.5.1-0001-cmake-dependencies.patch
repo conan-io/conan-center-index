@@ -29,3 +29,17 @@ index 8455a3ec..09fe975a 100644
  endif()
  
  if (NOT HAVE_JPEGTURBO_DUAL_MODE_8_12)
+diff --git a/cmake/LZMACodec.cmake b/cmake/LZMACodec.cmake
+index c51afe82..53ef874e 100644
+--- a/cmake/LZMACodec.cmake
++++ b/cmake/LZMACodec.cmake
+@@ -28,7 +28,7 @@
+ set(LZMA_SUPPORT FALSE)
+ find_package(liblzma)
+ 
+-option(lzma "use liblzma (required for LZMA2 compression)" ${LIBLZMA_FOUND})
+-if (lzma AND LIBLZMA_FOUND)
++option(lzma "use liblzma (required for LZMA2 compression)" ${liblzma_FOUND})
++if (lzma AND liblzma_FOUND)
+     set(LZMA_SUPPORT TRUE)
+ endif()
