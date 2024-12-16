@@ -5,18 +5,9 @@ sources:
   "5.4.1":
     url: "https://github.com/tesseract-ocr/tesseract/archive/5.4.1.tar.gz"
     sha256: "c4bc2a81c12a472f445b7c2fb4705a08bd643ef467f51ec84f0e148bd368051b"
-  "5.4.0":
-    url: "https://github.com/tesseract-ocr/tesseract/archive/5.4.0.tar.gz"
-    sha256: "30ceffd9b86780f01cbf4eaf9b7fc59abddfcbaf5bbd52f9a633c6528cb183fd"
   "5.3.4":
     url: "https://github.com/tesseract-ocr/tesseract/archive/5.3.4.tar.gz"
     sha256: "141afc12b34a14bb691a939b4b122db0d51bd38feda7f41696822bacea7710c7"
-  "5.3.3":
-    url: "https://github.com/tesseract-ocr/tesseract/archive/5.3.3.tar.gz"
-    sha256: "dc4329f85f41191b2d813b71b528ba6047745813474e583ccce8795ff2ff5681"
-  "5.3.0":
-    url: "https://github.com/tesseract-ocr/tesseract/archive/5.3.0.tar.gz"
-    sha256: "7e70870f8341e5ea228af2836ce79a36eefa11b01b56177b4a8997f330c014b8"
   "5.2.0":
     url: "https://github.com/tesseract-ocr/tesseract/archive/5.2.0.tar.gz"
     sha256: "eba4deb2f92a3f89a6623812074af8c53b772079525b3c263aa70bbf7b748b3c"
@@ -26,9 +17,6 @@ sources:
   "5.0.0":
     url: "https://github.com/tesseract-ocr/tesseract/archive/5.0.0.tar.gz"
     sha256: "72467b7876dc0c39ef7fbcb0f793f73aee1c78d9fabab3ab19cbac1eb42e9fed"
-  "4.1.1":
-    url: "https://github.com/tesseract-ocr/tesseract/archive/4.1.1.tar.gz"
-    sha256: "2a66ff0d8595bff8f04032165e6c936389b1e5727c3ce5a27b3e059d218db1cb"
 patches:
   "5.5.0":
     - patch_file: "patches/0004-control-optimizations-5.4.0.patch"
@@ -44,20 +32,8 @@ patches:
     - patch_file: "patches/0005-disable-install-pdb-5.4.1.patch"
       patch_description: "disable installing PDB files"
       patch_type: "portability"
-  "5.4.0":
-    - patch_file: "patches/0004-control-optimizations-5.4.0.patch"
-      patch_description: "fix condition for cpu optimizations"
-      patch_type: "portability"
   "5.3.4":
     - patch_file: "patches/0004-control-optimizations-5.3.3.patch"
-      patch_description: "fix condition for cpu optimizations"
-      patch_type: "portability"
-  "5.3.3":
-    - patch_file: "patches/0004-control-optimizations-5.3.3.patch"
-      patch_description: "fix condition for cpu optimizations"
-      patch_type: "portability"
-  "5.3.0":
-    - patch_file: "patches/0004-control-optimizations-5.3.0.patch"
       patch_description: "fix condition for cpu optimizations"
       patch_type: "portability"
   "5.2.0":
@@ -79,18 +55,5 @@ patches:
       patch_description: "link cci package"
       patch_type: "conan"
     - patch_file: "patches/0004-control-optimizations-5.0.0.patch"
-      patch_description: "fix condition for cpu optimizations"
-      patch_type: "portability"
-  "4.1.1":
-    - patch_file: "patches/0001-install-bundle.patch"
-      patch_description: "fix runtime install path"
-      patch_type: "conan"
-    - patch_file: "patches/0002-Link-with-targets.patch"
-      patch_description: "link cci package"
-      patch_type: "conan"
-    - patch_file: "patches/0003-Dont-change-locale.patch"
-      patch_description: "disable settings locale"
-      patch_type: "portability"
-    - patch_file: "patches/0004-control-optimizations-4.1.1.patch"
       patch_description: "fix condition for cpu optimizations"
       patch_type: "portability"
