@@ -10,11 +10,11 @@ required_conan_version = ">=2.4.0" # for attribute languages
 
 class Libnetfilter_logConan(ConanFile):
     name = "libnetfilter_log"
-    license = "GPL-2-or-later"
+    license = "GPL-2.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://netfilter.org/projects/libnetfilter_log/index.html"
     description = "Library providing interface to packets that have been logged by the kernel packet filter"
-    topics = ("libnfnetlink_log")
+    topics = ("libnfnetlink_log", "nftables")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
