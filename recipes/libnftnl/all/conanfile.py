@@ -10,7 +10,7 @@ required_conan_version = ">=2.4.0" # for attribute languages
 
 class LibnftnlConan(ConanFile):
     name = "libnftnl"
-    license = "GPL-2-or-later"
+    license = "GPL-2.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://netfilter.org/projects/libnftnl/index.html"
     description = "Library providing a low-level netlink programming interface (API) to the in-kernel nf_tables subsystem"
