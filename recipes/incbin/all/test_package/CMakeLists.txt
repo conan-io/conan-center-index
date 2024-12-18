@@ -3,9 +3,11 @@ project(test_package LANGUAGES C)
 
 find_package(incbin CONFIG REQUIRED)
 
+configure_file(${CMAKE_SOURCE_DIR}/hello_world.txt ${CMAKE_BINARY_DIR}/hello_world.txt COPYONLY)
+
 add_executable(${PROJECT_NAME} test_package.c)
 target_link_libraries(${PROJECT_NAME} incbin::incbin)
-target_compile_definitions(${PROJECT_NAME} PUBLIC INCBIN_FILE="${CMAKE_SOURCE_DIR}/CMakeLists.txt")
+target_compile_definitions(${PROJECT_NAME} PUBLIC INCBIN_FILE="${CMAKE_BINARY_DIR}/hello_world.txt")
 
 if(MSVC)
     add_custom_command(OUTPUT data.c

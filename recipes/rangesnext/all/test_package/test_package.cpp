@@ -9,7 +9,7 @@ bool test_enumerate_with(RangeT &&range) {
     auto enumerated_range = rangesnext::enumerate(range);
 
     std::size_t idx_ref = 0;
-    auto it_ref = std::ranges::begin(range);
+    auto it_ref = std::begin(range);
 
     bool success = true;
     for (auto &&[i, v] : enumerated_range) {

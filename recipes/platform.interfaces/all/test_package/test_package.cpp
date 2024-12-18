@@ -1,5 +1,5 @@
 #include <iostream>
-#include <ranges>
+#include <iterator>
 #include <vector>
 #include <set>
 
@@ -11,7 +11,7 @@ using namespace Platform::Interfaces;
 
 void print(IEnumerable auto&& enumerable)
 {
-    auto size = std::ranges::size(enumerable);
+    auto size = std::size(enumerable);
 
     std::cout << '[';
     for (int i = 0; auto&& item : enumerable)
@@ -48,7 +48,7 @@ void add(Collection& collection, const std::same_as<Item> auto& item)
 
 void print(CEnumerable auto&& enumerable)
 {
-    auto size = std::ranges::size(enumerable);
+  auto size = enumerable.size();
 
     std::cout << '[';
     for (int i = 0; auto&& item : enumerable)
