@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -307,6 +308,8 @@ class GdalConan(ConanFile):
     def build_requirements(self):
         # https://github.com/conan-io/conan/issues/3482#issuecomment-662284561
         self.tool_requires("cmake/[>=3.18 <4]")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def package_id(self):
         # Ignore deprecated options
@@ -457,15 +460,6 @@ class GdalConan(ConanFile):
         # General workaround for try_compile() tests in the project
         # https://github.com/conan-io/conan/issues/12180
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
-        # https://github.com/OSGeo/gdal/blob/v3.8.1/cmake/modules/packages/FindSQLite3.cmake
-        if self.options.with_sqlite3:
-            tc.cache_variables["SQLite3_HAS_COLUMN_METADATA"] = self.dependencies["sqlite3"].options.enable_column_metadata
-            tc.cache_variables["SQLite3_HAS_RTREE"] = self.dependencies["sqlite3"].options.enable_rtree
-            tc.cache_variables["SQLite3_HAS_LOAD_EXTENSION"] = not self.dependencies["sqlite3"].options.omit_load_extension
-            tc.cache_variables["SQLite3_HAS_PROGRESS_HANDLER"] = True
-            tc.cache_variables["SQLite3_HAS_MUTEX_ALLOC"] = True
-            tc.preprocessor_definitions["SQLite3_HAS_COLUMN_METADATA"] = 1 if self.dependencies["sqlite3"].options.enable_column_metadata else 0
-            tc.preprocessor_definitions["SQLite3_HAS_RTREE"] = 1 if self.dependencies["sqlite3"].options.enable_rtree else 0
         # https://github.com/OSGeo/gdal/blob/v3.8.0/cmake/helpers/CheckDependentLibraries.cmake#L419-L450
         tc.cache_variables["HAVE_JPEGTURBO_DUAL_MODE_8_12"] = bool(
             self.options.with_jpeg == "libjpeg-turbo" and
@@ -560,7 +554,7 @@ class GdalConan(ConanFile):
             "qhull": "QHULL",
             # "sfcgal": "SFCGAL",
             "shapelib": "Shapelib",
-            "sqlite3": "SQLite3",
+            "sqlite3": "SQLite3-disabled",  # Use FindSQLite3.cmake with pkg-config from GDAL
             "tiledb": "TileDB",
             "xerces-c": "XercesC",
             "xz_utils": "LibLZMA",
@@ -634,6 +628,9 @@ class GdalConan(ConanFile):
         for component, new_target_name in renamed_targets.items():
             deps.set_property(component, "cmake_target_name", new_target_name)
 
+        deps.generate()
+
+        deps = PkgConfigDeps(self)
         deps.generate()
 
     def _patch_sources(self):
