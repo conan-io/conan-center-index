@@ -81,6 +81,8 @@ class LibUdevConan(ConanFile):
         tc.project_options["xz"] = "false"
         tc.project_options["zstd"] = "false"
         tc.project_options["static-libudev"] = "false"
+        # sys/capability.h is treated as a system header by meson.build
+        tc.extra_cflags.append(f"-I{self.dependencies['libcap'].cpp_info.includedirs[0]}")
 
         # options unrelated to libsystemd
         unrelated = [
