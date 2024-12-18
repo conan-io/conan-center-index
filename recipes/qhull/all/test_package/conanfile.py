@@ -6,8 +6,7 @@ import os
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "VirtualRunEnv"
-    test_type = "explicit"
+    generators = "CMakeDeps"
 
     def layout(self):
         cmake_layout(self)
@@ -15,9 +14,14 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
+    @property
+    def _have_libqhullcpp(self):
+        return "libqhullcpp" in self.dependencies["qhull"].cpp_info.components
+
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["QHULL_REENTRANT"] = self.dependencies["qhull"].options.reentrant
+        tc.variables["QHULL_REENTRANT"] = self.dependencies["qhull"].options.get_safe("reentrant", True)
+        tc.variables["QHULL_CPP"] = self._have_libqhullcpp
         tc.generate()
 
     def build(self):
@@ -27,5 +31,9 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
+
+            if self._have_libqhullcpp:
+                bin_path = os.path.join(self.cpp.build.bindir, "test_package_cpp")
+                self.run(bin_path, env="conanrun")
