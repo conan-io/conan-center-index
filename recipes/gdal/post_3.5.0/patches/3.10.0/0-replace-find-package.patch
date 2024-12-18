@@ -1,5 +1,5 @@
---- a/cmake/helpers/CheckDependentLibraries.cmake
-+++ b/cmake/helpers/CheckDependentLibraries.cmake
+--- a/cmake/helpers/CheckDependentLibrariesCommon.cmake
++++ b/cmake/helpers/CheckDependentLibrariesCommon.cmake
 @@ -11,7 +11,7 @@
  include(CheckFunctionExists)
  include(CMakeDependentOption)
@@ -21,7 +21,9 @@
      set(_find_package_args)
      # For some reason passing the HDF5 version requirement cause a linking error of the libkea driver on Conda Windows builds...
      if (_GCP_VERSION AND NOT ("${name}" STREQUAL "TileDB") AND NOT ("${name}" STREQUAL "HDF5"))
-@@ -487,8 +486,8 @@
+--- a/cmake/helpers/CheckDependentLibraries.cmake
++++ b/cmake/helpers/CheckDependentLibraries.cmake
+@@ -176,8 +176,8 @@
    NAMES json-c
    TARGETS json-c::json-c JSONC::JSONC
  )

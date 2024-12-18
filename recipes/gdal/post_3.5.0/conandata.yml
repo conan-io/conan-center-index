@@ -1,7 +1,7 @@
 sources:
-  "3.9.3":
-    url: "https://github.com/OSGeo/gdal/releases/download/v3.9.3/gdal-3.9.3.tar.gz"
-    sha256: "f293d8ccc6b98f617db88f8593eae37f7e4b32d49a615b2cba5ced12c7bebdae"
+  "3.10.0":
+    url: "https://github.com/OSGeo/gdal/releases/download/v3.10.0/gdal-3.10.0.tar.gz"
+    sha256: "946ef444489bedbc1b04bd4c115d67ae8d3f3e4a5798d5a2f1cb2a11014105b2"
   "3.8.3":
     url: "https://github.com/OSGeo/gdal/releases/download/v3.8.3/gdal-3.8.3.tar.gz"
     sha256: "f7a30387a8239e9da26200f787a02136df2ee6473e86b36d05ad682761a049ea"
@@ -12,14 +12,14 @@ sources:
     url: "https://github.com/OSGeo/gdal/releases/download/v3.5.3/gdal-3.5.3.tar.gz"
     sha256: "a9ea0300d17e35bab71df4f16e62bb2fb8081caf994ab3ee0502ce4cf0d4e593"
 patches:
-  "3.9.3":
-    - patch_file: "patches/3.9.1/0-replace-find-package.patch"
+  "3.10.0":
+    - patch_file: "patches/3.10.0/0-replace-find-package.patch"
       patch_description: "Use custom version of find_package() for Conan deps"
       patch_type: "conan"
-    - patch_file: "patches/3.9.1/1-do-not-force-private-linking.patch"
+    - patch_file: "patches/3.10.0/1-do-not-force-private-linking.patch"
       patch_description: "Fix private linking not working for some Conan dependencies"
       patch_type: "conan"
-    - patch_file: "patches/3.9.1/2-allow-cycles-in-cmake-targets.patch"
+    - patch_file: "patches/3.10.0/2-allow-cycles-in-cmake-targets.patch"
       patch_description: "Fix CMake failure due to cyclical dependencies in CMakeDeps targets"
       patch_type: "conan"
   "3.8.3":
