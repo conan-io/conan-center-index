@@ -9,7 +9,7 @@ sources:
     url: "https://github.com/qhull/qhull/archive/v7.3.2.tar.gz"
     sha256: "619c8a954880d545194bc03359404ef36a1abd2dde03678089459757fd790cb0"
 patches:
-  "8.1-alpha4":
+  "8.1.alpha4":
     - patch_file: "patches/0005-install-non-reentrant-shared.patch"
       patch_description: "Install non-reentrant shared library"
       patch_type: "conan"
