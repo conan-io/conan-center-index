@@ -24,7 +24,7 @@ class FFMpegConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "A complete, cross-platform solution to record, convert and stream audio and video"
     # https://github.com/FFmpeg/FFmpeg/blob/master/LICENSE.md
-    license = ("LGPL-2.1-or-later", "GPL-2.0-or-later")
+    license = ("LGPL-2.1-or-later", "GPL-2.0-or-later", "LGPL-3.0-or-later", "GPL-3.0-or-later")
     homepage = "https://ffmpeg.org"
     topics = ("multimedia", "audio", "video", "encoder", "decoder", "encoding", "decoding",
               "transcoding", "multiplexer", "demultiplexer", "streaming")
@@ -78,6 +78,8 @@ class FFMpegConan(ConanFile):
         "with_jni": [True, False],
         "with_mediacodec": [True, False],
         "with_xlib": [True, False],
+        "with_opencore_amr": [True, False],
+        "with_lgpl_version_3": [True, False],
         "disable_everything": [True, False],
         "disable_all_encoders": [True, False],
         "disable_encoders": [None, "ANY"],
@@ -162,6 +164,8 @@ class FFMpegConan(ConanFile):
         "with_jni": False,
         "with_mediacodec": False,
         "with_xlib": True,
+        "with_opencore_amr": False,
+        "with_lgpl_version_3": False,
         "disable_everything": False,
         "disable_all_encoders": False,
         "disable_encoders": None,
@@ -235,6 +239,7 @@ class FFMpegConan(ConanFile):
             "with_libdav1d": ["avcodec"],
             "with_mediacodec": ["with_jni"],
             "with_xlib": ["avdevice"],
+            "with_opencore_amr": ["avcodec"],
         }
 
     @property
@@ -338,6 +343,8 @@ class FFMpegConan(ConanFile):
             self.requires("dav1d/1.4.3")
         if self.options.get_safe("with_libdrm"):
             self.requires("libdrm/2.4.119")
+        if self.options.get_safe("with_opencore_amr"):
+            self.requires("opencore-amr/0.1.6")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -364,6 +371,10 @@ class FFMpegConan(ConanFile):
             # src/libavcodec/x86/vvc/vvcdsp_init.c:69: undefined reference to `ff_h2656_put_pixels2_8_sse4'
             # May be related https://github.com/ffvvc/FFmpeg/issues/234
             raise ConanInvalidConfiguration(f"{self.ref} Conan recipe does not support build_type=Debug. Contributions are welcome to fix this issue.")
+
+        if self.options.get_safe("with_opencore_amr") and not self.options.get_safe("with_lgpl_version_3"):
+            raise ConanInvalidConfiguration(
+                "'with_opencore_amr' option requires 'with_lgpl_version_3' option to be enabled")
 
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
@@ -539,6 +550,9 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
         ]
 
+        if self.options.with_lgpl_version_3:
+            args.append("--enable-version3")
+
         # Individual Component Options
         opt_append_disable_if_set(args, "everything", self.options.disable_everything)
         opt_append_disable_if_set(args, "encoders", self.options.disable_all_encoders)
@@ -664,6 +678,16 @@ class FFMpegConan(ConanFile):
             args.append("--extra-cflags={}".format(" ".join(tc.cflags)))
         if tc.ldflags:
             args.append("--extra-ldflags={}".format(" ".join(tc.ldflags)))
+
+        if self.options.with_opencore_amr:
+            # enable opencore amr decoder and disable the internal amr decoder
+            args.extend(['--enable-decoder=libopencore_amrnb',
+                         '--enable-decoder=libopencore_amrwb',
+                         '--enable-libopencore-amrnb',
+                         '--enable-libopencore-amrwb',
+                         '--disable-decoder=amrnb',
+                         '--disable-decoder=amrwb'])
+
         tc.configure_args.extend(args)
         tc.generate()
 
@@ -896,6 +920,8 @@ class FFMpegConan(ConanFile):
                 avcodec.requires.append("libaom-av1::libaom-av1")
             if self.options.get_safe("with_libdav1d"):
                 avcodec.requires.append("dav1d::dav1d")
+            if self.options.get_safe("with_opencore_amr"):
+                avcodec.requires.append("opencore-amr::opencore-amr")
 
         if self.options.avformat:
             if self.options.with_bzip2:
