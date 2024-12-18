@@ -161,9 +161,9 @@ class DpdkConan(ConanFile):
         meson = Meson(self)
         meson.install()
         if self.options.shared:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.a", os.path.join(self.package_folder, "lib"), recursive=True)
         else:
-            rm(self, "*.so*", os.path.join(self.package_folder, "lib"))
+            rm(self, "*.so*", os.path.join(self.package_folder, "lib"), recursive=True)
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
