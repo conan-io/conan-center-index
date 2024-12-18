@@ -1,11 +1,12 @@
-from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rename
-from conan.tools.build import cross_building
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+from conan import ConanFile
+from conan.tools.build import cross_building
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rename
+from conan.tools.scm import Version
+
+required_conan_version = ">=2.0"
 
 class LibdwarfConan(ConanFile):
     name = "libdwarf"
@@ -78,7 +79,10 @@ class LibdwarfConan(ConanFile):
         dpes.generate()
 
     def build(self):
-        apply_conandata_patches(self)
+        # Headers patches only makes sense for Windows, and CMake ones
+        # were solved since https://github.com/davea42/libdwarf-code/commit/6ffd41d39ba8e5db8651a35ac4f975baf786de4c (v0.9.2)
+        if Version(self.version) < "0.9.2" or self.settings.os == "Windows":
+            apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -97,13 +101,11 @@ class LibdwarfConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.libs = ["dwarf"]
 
         if self.options.with_dwarfgen:
-            bindir = os.path.join(self.package_folder, "bin")
-            self.output.info(f'Appending PATH environment variable: {bindir}')
-            self.env_info.PATH.append(bindir)
             self.cpp_info.libs.append("dwarfp")
