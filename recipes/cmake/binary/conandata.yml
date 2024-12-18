@@ -10,7 +10,7 @@ sources:
     Macos:
       universal:
         url: "https://cmake.org/files/v3.31/cmake-3.31.1-macos10.10-universal.tar.gz"
-        sha256: "bc745f0a268bceef799c5ad23d96c5ea22822d3584b0aea75394d40cf703377c`"
+        sha256: "bc745f0a268bceef799c5ad23d96c5ea22822d3584b0aea75394d40cf703377c"
     Windows:
       armv8:
         url: "https://cmake.org/files/v3.31/cmake-3.31.1-windows-arm64.zip"
