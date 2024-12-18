@@ -1,7 +1,7 @@
 sources:
-  "9.8.4":
-    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.8.4.tar.gz"
-    sha256: "361AEAA07CEEE64FB69C49DAA94339DB93A4200B321E20BD61C1FE311F8BA12B"
+  "9.9.3":
+    url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.9.3.tar.gz"
+    sha256: "126C8409E98A3ACEA57446FB17FAF22767F8AC763A4516288DD7C05422E33DF2"
   "9.7.4":
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v9.7.4.tar.gz"
     sha256: "9b810c81731835fda0d4bbdb51d3199d901fa4395733ab63752d297da84c5a47"
@@ -18,7 +18,7 @@ sources:
     url: "https://github.com/facebook/rocksdb/archive/refs/tags/v6.29.5.tar.gz"
     sha256: "ddbf84791f0980c0bbce3902feb93a2c7006f6f53bfd798926143e31d4d756f0"
 patches:
-  "9.8.4":
+  "9.9.3":
     - patch_file: "patches/9.x.x-0001-exclude-thirdparty.patch"
       patch_description: "Do not include thirdparty.inc"
       patch_type: "portability"
