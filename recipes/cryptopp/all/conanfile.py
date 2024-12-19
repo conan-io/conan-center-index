@@ -48,6 +48,10 @@ class CryptoPPConan(ConanFile):
             # See https://github.com/abdes/cryptopp-cmake/pull/38
             raise ConanInvalidConfiguration("cryptopp 8.6.0 and lower do not support cross-building on Apple platforms")
 
+    def validate(self):
+        if self.options.shared and Version(self.version) >= "8.7.0":
+            raise ConanInvalidConfiguration("cryptopp 8.7.0 and higher do not support shared builds")
+
     def build_requirements(self):
         if Version(self.version) >= "8.7.0":
             self.tool_requires("cmake/[>=3.20 <4]")
