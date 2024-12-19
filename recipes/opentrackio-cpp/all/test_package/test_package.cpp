@@ -8,7 +8,7 @@ int main(void) {
     std::string example = R"({
       "protocol": {
         "name": "OpenTrackIO",
-        "version": "0.9.0"
+        "version": [0,9,1]
       },
       "tracker": {
         "notes": "Example generated sample.",
