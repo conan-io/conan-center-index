@@ -198,8 +198,11 @@ class WhisperCppConan(ConanFile):
         self.cpp_info.libs = ["whisper"]
         if Version(self.version) >= "1.7.0":
             self.cpp_info.libs.append("ggml")
+        if Version(self.version) >= "1.7.3":
+            self.cpp_info.libs.extend(["ggml-base", "ggml-blas", "ggml-cpu"])
         self.cpp_info.resdirs = ["res"]
-        self.cpp_info.libdirs = ["lib", "lib/static"]
+        if Version(self.version) < "1.7.0":
+            self.cpp_info.libdirs = ["lib", "lib/static"]
 
         if self.options.get_safe("with_openvino"):
             self.cpp_info.requires = ["openvino::Runtime"]
@@ -211,5 +214,7 @@ class WhisperCppConan(ConanFile):
                 self.cpp_info.frameworks.append("CoreML")
             if self.options.get_safe("metal"):
                 self.cpp_info.frameworks.extend(["CoreFoundation", "Foundation", "Metal", "MetalKit"])
+                if Version(self.version) >= "1.7.3":
+                    self.cpp_info.libs.append("ggml-metal")
         elif self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
