@@ -1,0 +1,27 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -209,18 +209,15 @@
+ endif()
+ 
+ set(QT5_VERSION "5.15")
+-find_soft_mandatory_package(ENABLE_QT5 Qt5Core ${QT5_VERSION})
+-find_soft_mandatory_package(ENABLE_QT5 Qt5Gui ${QT5_VERSION})
+-find_soft_mandatory_package(ENABLE_QT5 Qt5Xml ${QT5_VERSION})
+-find_soft_mandatory_package(ENABLE_QT5 Qt5Widgets ${QT5_VERSION})
+-find_soft_mandatory_package(ENABLE_QT5 Qt5Test ${QT5_VERSION})
++if(ENABLE_QT5)
++  find_package(Qt5 COMPONENTS Core Gui Xml Widgets Test REQUIRED CONFIG)
++endif()
+ 
+ set(QT6_VERSION "6.2")
+ SET(QT_NO_CREATE_VERSIONLESS_TARGETS ON)
+-find_soft_mandatory_package(ENABLE_QT6 Qt6Core ${QT6_VERSION})
+-find_soft_mandatory_package(ENABLE_QT6 Qt6Gui ${QT6_VERSION})
+-find_soft_mandatory_package(ENABLE_QT6 Qt6Widgets ${QT6_VERSION})
+-find_soft_mandatory_package(ENABLE_QT6 Qt6Test ${QT6_VERSION})
++if(ENABLE_QT6)
++  find_package(Qt6 COMPONENTS Core Gui Widgets Test REQUIRED CONFIG)
++endif()
+ 
+ # Check for Cairo rendering backend
+ macro_optional_find_package(Cairo ${CAIRO_VERSION})
