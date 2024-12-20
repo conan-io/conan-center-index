@@ -33,6 +33,7 @@ class Hdf5Conan(ConanFile):
         "szip_encoding": [True, False],
         "parallel": [True, False],
         "enable_unsupported": [True, False],
+        "lib_infix": [None, "ANY"],
     }
     default_options = {
         "shared": False,
@@ -45,7 +46,8 @@ class Hdf5Conan(ConanFile):
         "szip_support": None,
         "szip_encoding": False,
         "parallel": False,
-        "enable_unsupported": False
+        "enable_unsupported": False,
+        "lib_infix": None,
     }
 
     @property
@@ -72,6 +74,8 @@ class Hdf5Conan(ConanFile):
             del self.options.threadsafe
         if not bool(self.options.szip_support):
             del self.options.szip_encoding
+        if Version(self.version) < "1.14.5":
+            del self.options.lib_infix
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -140,6 +144,8 @@ class Hdf5Conan(ConanFile):
             tc.variables["USE_LIBAEC"] = True
         tc.variables["HDF5_EXTERNALLY_CONFIGURED"] = True
         tc.variables["HDF5_EXTERNAL_LIB_PREFIX"] = ""
+        if self.options.get_safe("lib_infix", False):
+            tc.variables["HDF5_LIB_INFIX"] = self.options.lib_infix
         tc.variables["HDF5_USE_FOLDERS"] = False
         tc.variables["HDF5_NO_PACKAGES"] = True
         tc.variables["ALLOW_UNSUPPORTED"] = False
@@ -272,6 +278,8 @@ class Hdf5Conan(ConanFile):
     def package_info(self):
         def add_component(component_name, component, alias_target, requirements):
             def _config_libname(lib):
+                if self.options.get_safe("lib_infix", False):
+                    lib = lib.replace("hdf5", f"hdf5{self.options.lib_infix}", 1)
                 if self.settings.os == "Windows" and self.settings.compiler != "gcc" and not self.options.shared:
                     lib = "lib" + lib
                 if self.settings.build_type == "Debug":
