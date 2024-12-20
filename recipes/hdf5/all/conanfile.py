@@ -177,6 +177,7 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_INSTALL_INCLUDE_DIR"] = "include/hdf5"
 
         tc.variables["HDF5_BUILD_TOOLS"] = False
+        tc.variables["HDF5_BUILD_UTILS"] = False
         tc.variables["HDF5_BUILD_EXAMPLES"] = False
         tc.variables["HDF5_BUILD_HL_LIB"] = self.options.hl
         tc.variables["HDF5_BUILD_FORTRAN"] = False
