@@ -2,7 +2,7 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.50.0"
@@ -21,6 +21,9 @@ class ExtracmakemodulesConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def package_id(self):
         self.info.clear()
@@ -48,6 +51,7 @@ class ExtracmakemodulesConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
