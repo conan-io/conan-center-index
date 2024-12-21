@@ -13,6 +13,9 @@ patches:
     - patch_file: "patches/1.4.2-002-ignore-dll_export-define.patch"
       patch_description: "Ignore autotools-specific DLL_EXPORT define in export.h"
       patch_type: "conan"
+    - patch_file: "patches/1.4.3-android32-pre-24.diff"
+      patch_description: "Fix building for 32-bit Android against API level < 24"
+      patch_type: "conan"
   "1.4.2":
     - patch_file: "patches/1.4.2-002-ignore-dll_export-define.patch"
       patch_description: "Ignore autotools-specific DLL_EXPORT define in export.h"

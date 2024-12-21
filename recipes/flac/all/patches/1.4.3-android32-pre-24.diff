@@ -1,0 +1,13 @@
+--- a/include/share/compat.h
++++ b/include/share/compat.h
+@@ -65,6 +65,10 @@
+ #else
+ #define FLAC__off_t off_t
+ #define FLAC__OFF_T_MAX OFF_T_MAX
++#if defined(__ANDROID_API__) && (__ANDROID_API__ < 24) && (defined __arm__ || defined __i386__)
++#define fseeko fseek
++#define ftello ftell
++#endif
+ #endif
+ 
+ 
