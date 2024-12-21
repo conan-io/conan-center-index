@@ -120,7 +120,7 @@ class OsgearthConan(ConanFile):
         if self.options.build_leveldb_cache:
             self.requires("leveldb/1.22")
         if self.options.build_rocksdb_cache:
-            self.requires("rocksdb/6.20.3")
+            self.requires("rocksdb/6.29.5")
         if self.options.build_zip_plugin:
             self.requires("zstd/1.5.5")  # override
         if self.options.with_geos:
