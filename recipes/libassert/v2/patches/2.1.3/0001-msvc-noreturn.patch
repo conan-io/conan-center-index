@@ -1,0 +1,13 @@
+diff --git a/include/libassert/assert.hpp b/include/libassert/assert.hpp
+index 53ba850..9c68910 100644
+--- a/include/libassert/assert.hpp
++++ b/include/libassert/assert.hpp
+@@ -169,7 +169,7 @@ namespace libassert {
+ 
+     struct assertion_info;
+ 
+-    LIBASSERT_EXPORT [[noreturn]] void default_failure_handler(const assertion_info& info);
++    [[noreturn]] LIBASSERT_EXPORT void default_failure_handler(const assertion_info& info);
+ 
+     LIBASSERT_EXPORT void set_failure_handler(void (*handler)(const assertion_info&));
+ 

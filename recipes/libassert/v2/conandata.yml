@@ -21,6 +21,11 @@ sources:
     url: "https://github.com/jeremy-rifkin/libassert/archive/refs/tags/v2.0.0.tar.gz"
     sha256: "d4b2da2179a94637b34d18813a814531a1eceb0ddc6dd6db6098050dd638f4a1"
 patches:
+  "2.1.3":
+    - patch_file: "patches/2.1.3/0001-msvc-noreturn.patch"
+      patch_type: "portability"
+      patch_source: todo
+      patch_description: "todo"
   "2.1.0":
     - patch_file: "patches/2.1.0/0001-msvc-ice.patch"
       patch_type: "portability"
