@@ -46,7 +46,7 @@ class CpptraceConan(ConanFile):
 
     def requirements(self):
         if Version(self.version) >= "0.4.0":
-            self.requires("libdwarf/0.9.1")
+            self.requires("libdwarf/0.11.1")
         else:
             self.requires("libdwarf/0.8.0")
         if self.options.unwind == "libunwind":
