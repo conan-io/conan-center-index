@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.android import android_abi
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -59,6 +60,9 @@ class FlacConan(ConanFile):
         tc.variables["BUILD_PROGRAMS"] = not is_apple_os(self) or self.settings.os == "Macos"
         tc.variables["BUILD_TESTING"] = False
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        if self.settings.os == "Android" and int(str(self.settings.os.api_level)) < 24 and "armeabi" in android_abi(self):
+            tc.preprocessor_definitions["fseeko"] = "fseek"
+            tc.preprocessor_definitions["ftello"] = "ftell"
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
