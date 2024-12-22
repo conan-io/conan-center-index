@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
+from conan.tools.scm import Version
 
 import os
 
@@ -34,10 +35,13 @@ class Md4cConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def _hasMd2html(self):
+        return Version(self.version) >= "0.5.0"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if is_apple_os(self) and self.settings.os != "Macos":
+        if not self._hasMd2html() or (is_apple_os(self) and self.settings.os != "Macos"):
             del self.options.md2html
 
     def configure(self):
@@ -58,7 +62,8 @@ class Md4cConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_MD2HTML_EXECUTABLE"] = self.options.get_safe("md2html", False)
+        if self._hasMd2html():
+            tc.variables["BUILD_MD2HTML_EXECUTABLE"] = self.options.get_safe("md2html", False)
         if self.options.encoding == "utf-8":
             tc.preprocessor_definitions["MD4C_USE_UTF8"] = "1"
         elif self.options.encoding == "utf-16":
