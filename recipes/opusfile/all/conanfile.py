@@ -135,6 +135,9 @@ class OpusFileConan(ConanFile):
             msbuild.platform = "Win32" if self.settings.arch == "x86" else msbuild.platform
             msbuild.build(os.path.join(sln_folder, "opusfile.sln"), targets=["opusfile"])
         else:
+            if self.settings.os == "Android":
+                replace_in_file(self, os.path.join(self.source_folder, "configure.ac"), "c89", "c99")
+
             autotools = Autotools(self)
             autotools.autoreconf()
             autotools.configure()
