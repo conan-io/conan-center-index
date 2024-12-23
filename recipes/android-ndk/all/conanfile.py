@@ -301,7 +301,11 @@ class AndroidNDKConan(ConanFile):
         self.buildenv_info.define_path("CC", compiler_executables["c"])
         self.buildenv_info.define_path("CXX", compiler_executables["cpp"])
         self.buildenv_info.define_path("AS", compiler_executables["c"])
-        self.buildenv_info.define_path("LD", compiler_executables["cpp"])
+
+        if self._ndk_version_major >= 22:
+            self.buildenv_info.define_path("LD", self._define_tool_var_naked("LD", "ld"))
+        else:
+            self.buildenv_info.define_path("LD", self._define_tool_var("LD", "ld"))
 
         # Versions greater than 23 had the naming convention
         # changed to no longer include the triplet.
