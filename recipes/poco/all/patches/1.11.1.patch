@@ -47,4 +47,4 @@ index 038779ec9..fa7afdb1b 100644
  		DOC "path to message compiler")
  	if(NOT CMAKE_MC_COMPILER)
  		message(FATAL_ERROR "message compiler not found: required to build")
-
+ 
