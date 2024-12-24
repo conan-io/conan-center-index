@@ -14,11 +14,23 @@ sources:
 patches:
   "1.3.1":
     - patch_file: "patches/minizip.patch"
+    - patch_file: "patches/android-pre-24.diff"
+      patch_description: "Fix building for Android against API level < 24"
+      patch_type: "portability"
   "1.2.13":
     - patch_file: "patches/minizip.patch"
+    - patch_file: "patches/android-pre-24.diff"
+      patch_description: "Fix building for Android against API level < 24"
+      patch_type: "portability"
   "1.2.12":
     - patch_file: "patches/minizip.patch"
     - patch_file: "patches/ioapi.patch"
+    - patch_file: "patches/android-pre-24.diff"
+      patch_description: "Fix building for Android against API level < 24"
+      patch_type: "portability"
   "1.2.11":
     - patch_file: "patches/minizip.patch"
     - patch_file: "patches/miniunz.patch"
+    - patch_file: "patches/android-pre-24.diff"
+      patch_description: "Fix building for Android against API level < 24"
+      patch_type: "portability"
