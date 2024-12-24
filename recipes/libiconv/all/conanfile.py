@@ -131,6 +131,8 @@ class LibiconvConan(ConanFile):
             env.define("RANLIB", ":")
             env.define("NM", "dumpbin -symbols")
             env.define("win32_target", "_WIN32_WINNT_VISTA")
+        elif self.settings.os == "Android":
+            env.define("LD", "ld")
         tc.generate(env)
 
     def _apply_resource_patch(self):
