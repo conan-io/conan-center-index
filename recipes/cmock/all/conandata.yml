@@ -1,0 +1,4 @@
+sources:
+  "2.5.3":
+    url: "https://github.com/ThrowTheSwitch/CMock/archive/refs/tags/v2.5.3.tar.gz"
+    sha256: "d30724405b527f2b1d2894b27a1600af3ccb4aad12e63e48ba4f0ea8ae88fe9c"
