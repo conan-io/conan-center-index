@@ -85,7 +85,7 @@ class CertifyConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "certify")
         self.cpp_info.set_property("cmake_target_name", "certify::core")
 
-        self.cpp_info.components["_certify"].requires = ["boost::boost", "openssl::openssl"]
+        self.cpp_info.components["_certify"].requires = ["boost::headers","boost::filesystem","boost::date_time","openssl::openssl"]
         self.cpp_info.components["_certify"].names["cmake_find_package"] = "core"
         self.cpp_info.components["_certify"].names["cmake_find_package_multi"] = "core"
 

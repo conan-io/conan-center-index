@@ -30,7 +30,7 @@ class ConfuJson(ConanFile):
 
     def requirements(self):
         self.requires("boost/1.85.0")
-        self.requires("magic_enum/0.9.5")
+        self.requires("magic_enum/0.9.6")
 
     def package_id(self):
         self.info.clear()
@@ -55,5 +55,5 @@ class ConfuJson(ConanFile):
         copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
-        self.cpp_info.bindirs = []
-        self.cpp_info.libdirs = []
+        self.cpp_info.components[self.name].requires = ["boost::headers","magic_enum::magic_enum"]
+        self.cpp_info.components[self.name].libs = [self.name]
