@@ -45,6 +45,8 @@ class GStreamerConan(ConanFile):
         if not self.dependencies.direct_host["glib"].options.shared and self.options.shared:
             # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
             raise ConanInvalidConfiguration("shared GStreamer cannot link to static GLib")
+        if self.options.with_introspection and not self.options.shared:
+            raise ConanInvalidConfiguration("-o with_introspection=True requires -o shared=True")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
@@ -65,8 +67,6 @@ class GStreamerConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        pkg_config_deps = PkgConfigDeps(self)
-        pkg_config_deps.generate()
         tc = MesonToolchain(self)
         if is_msvc(self) and not check_min_vs(self, "190", raise_invalid=False):
             tc.project_options["c_std"] = "c99"
@@ -84,6 +84,11 @@ class GStreamerConan(ConanFile):
         tc.project_options["bash-completion"] = "disabled"
         tc.project_options["ptp-helper"] = "disabled"  # requires rustc and libcap
         tc.generate()
+
+        deps = PkgConfigDeps(self)
+        if self.options.with_introspection:
+            deps.build_context_activated = ["gobject-introspection"]
+        deps.generate()
 
     def build(self):
         meson = Meson(self)
@@ -107,7 +112,7 @@ class GStreamerConan(ConanFile):
         self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
+        rename(self, os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
         fix_apple_shared_install_name(self)
 
@@ -136,6 +141,7 @@ class GStreamerConan(ConanFile):
         self.cpp_info.components["gstreamer-1.0"].libs = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
         self.cpp_info.components["gstreamer-1.0"].bindirs = [os.path.join("bin", "gstreamer-1.0")]
+        self.cpp_info.components["gstreamer-1.0"].resdirs = ["res"]
         if self.settings.os == "Linux":
             self.cpp_info.components["gstreamer-1.0"].system_libs = ["m", "dl"]
         self.cpp_info.components["gstreamer-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
@@ -195,3 +201,7 @@ class GStreamerConan(ConanFile):
             self.runenv_info.define_path("GSTREAMER_ROOT_X86", gstreamer_root)
         elif self.settings.arch == "x86_64":
             self.runenv_info.define_path("GSTREAMER_ROOT_X86_64", gstreamer_root)
+
+        if self.options.with_introspection:
+            self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "gir-1.0"))
+            self.buildenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
