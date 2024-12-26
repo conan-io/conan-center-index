@@ -26,11 +26,13 @@ class GStreamerConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_introspection": [True, False],
+        "tools": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_introspection": False,
+        "tools": True,  # required for gst-plugin-scanner
     }
     languages = ["C"]
     implements = ["auto_header_only"]
@@ -67,16 +69,19 @@ class GStreamerConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        def feature(v):
+            return "enabled" if v else "disabled"
+
         tc = MesonToolchain(self)
         if is_msvc(self) and not check_min_vs(self, "190", raise_invalid=False):
             tc.project_options["c_std"] = "c99"
-        tc.project_options["introspection"] = "enabled" if self.options.with_introspection else "disabled"
+        tc.project_options["introspection"] = feature(self.options.with_introspection)
+        tc.project_options["tools"] = feature(self.options.tools)
         tc.project_options["check"] = "enabled"  # explicitly enable plugin
         tc.project_options["coretracers"] = "enabled"  # explicitly enable plugin
         tc.project_options["libunwind"] = "disabled"  # TODO
         tc.project_options["libdw"] = "disabled"  # TODO
         tc.project_options["dbghelp"] = "disabled"  # TODO
-        tc.project_options["tools"] = "disabled"
         tc.project_options["examples"] = "disabled"
         tc.project_options["benchmarks"] = "disabled"
         tc.project_options["tests"] = "disabled"
@@ -140,7 +145,7 @@ class GStreamerConan(ConanFile):
             self.cpp_info.components["gstreamer-1.0"].defines.append("GST_STATIC_COMPILATION")
         self.cpp_info.components["gstreamer-1.0"].libs = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
-        self.cpp_info.components["gstreamer-1.0"].bindirs = [os.path.join("bin", "gstreamer-1.0")]
+        self.cpp_info.components["gstreamer-1.0"].bindirs = ["bin", os.path.join("bin", "gstreamer-1.0")]
         self.cpp_info.components["gstreamer-1.0"].resdirs = ["res"]
         if self.settings.os == "Linux":
             self.cpp_info.components["gstreamer-1.0"].system_libs = ["m", "dl"]
