@@ -320,14 +320,17 @@ class GStPluginsBaseConan(ConanFile):
         def _define_plugin_component(name, extra_requires):
             name = f"gst{name}"
             component = self.cpp_info.components[name]
-            component.libs = [name]
-            component.libdirs = [os.path.join("lib", "gstreamer-1.0")]
             component.requires = [
                 "gstreamer::gstreamer-1.0",
                 "gstreamer::gstreamer-base-1.0",
             ] + extra_requires
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                component.system_libs = ["m"]
+            if self.options.shared:
+                component.bindirs.append(os.path.join("bin", "gstreamer-1.0"))
+            else:
+                component.libs = [name]
+                component.libdirs = [os.path.join("lib", "gstreamer-1.0")]
+                if self.settings.os in ["Linux", "FreeBSD"]:
+                    component.system_libs = ["m"]
             gst_plugins.append(name)
             return component
 
