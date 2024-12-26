@@ -192,11 +192,8 @@ class GStPluginsBaseConan(ConanFile):
     def generate(self):
         tc = MesonToolchain(self)
 
-        if is_msvc(self):
-            tc.c_link_args.append("-lws2_32")
-            tc.c_args.append(f"-{msvc_runtime_flag(self)}")
-            if not check_min_vs(self, 190, raise_invalid=False):
-                tc.c_link_args.append("-Dsnprintf=_snprintf")
+        if is_msvc(self) and not check_min_vs(self, 190, raise_invalid=False):
+            tc.c_link_args.append("-Dsnprintf=_snprintf")
 
         gl_api, gl_platform, gl_winsys = self._gl_config()
 
