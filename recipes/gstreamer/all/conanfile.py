@@ -118,6 +118,7 @@ class GStreamerConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
         rename(self, os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
+        rmdir(self, os.path.join(self.package_folder, "res", "man"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
         fix_apple_shared_install_name(self)
 
