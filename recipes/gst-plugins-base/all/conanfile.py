@@ -9,7 +9,7 @@ from conan.tools.files import chdir, copy, get, rm, rmdir, rename
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag, check_min_vs
+from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.4"
@@ -144,11 +144,6 @@ class GStPluginsBaseConan(ConanFile):
         self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        if self.settings_build.os == "Windows":
-            self.tool_requires("winflexbison/2.5.25")
-        else:
-            self.tool_requires("bison/3.8.2")
-            self.tool_requires("flex/2.6.4")
         if self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/<host_version>")
             self.tool_requires("wayland-protocols/1.36")
