@@ -5,14 +5,14 @@ import shutil
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.files import chdir, copy, get, rm, rmdir
+from conan.tools.files import chdir, copy, get, rm, rmdir, rename
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, check_min_vs
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
+required_conan_version = ">=2.4"
 
 
 class GStPluginsBaseConan(ConanFile):
@@ -29,6 +29,7 @@ class GStPluginsBaseConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_libalsa": [True, False],
+        "with_libdrm": [True, False],
         "with_libpng": [True, False],
         "with_libjpeg": [False, "libjpeg", "libjpeg-turbo"],
         "with_graphene": [True, False],
@@ -47,6 +48,7 @@ class GStPluginsBaseConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_libalsa": True,
+        "with_libdrm": True,
         "with_libpng": True,
         "with_libjpeg": "libjpeg",
         "with_graphene": True,
@@ -61,12 +63,14 @@ class GStPluginsBaseConan(ConanFile):
         "with_xorg": True,
         "with_introspection": False,
     }
+    languages = ["C"]
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.os not in ["Linux", "FreeBSD"]:
             self.options.rm_safe("with_libalsa")
+            self.options.rm_safe("with_libdrm")
             self.options.rm_safe("with_egl")
             self.options.rm_safe("with_wayland")
             self.options.rm_safe("with_xorg")
@@ -74,8 +78,6 @@ class GStPluginsBaseConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
         if not self.options.with_gl:
             self.options.rm_safe("with_egl")
             self.options.rm_safe("with_wayland")
@@ -83,16 +85,18 @@ class GStPluginsBaseConan(ConanFile):
             self.options.rm_safe("with_libpng")
             self.options.rm_safe("with_libjpeg")
         self.options["gstreamer"].shared = self.options.shared
+        self.options["gstreamer"].with_introspection = self.options.with_introspection
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("gstreamer/1.24.7", transitive_headers=True, transitive_libs=True)
-        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
+        self.requires(f"gstreamer/{self.version}", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.12")
+        if self.options.get_safe("with_libdrm"):
+            self.requires("libdrm/2.4.119")
         if self.options.get_safe("with_xorg"):
             self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
         if self.options.with_gl:
@@ -137,7 +141,7 @@ class GStPluginsBaseConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
-        self.tool_requires("glib/2.81.0")
+        self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         if self.settings_build.os == "Windows":
@@ -146,7 +150,7 @@ class GStPluginsBaseConan(ConanFile):
             self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
         if self.options.get_safe("with_wayland"):
-            self.tool_requires("wayland/1.22.0")
+            self.tool_requires("wayland/<host_version>")
             self.tool_requires("wayland-protocols/1.36")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.78.1")
@@ -157,7 +161,7 @@ class GStPluginsBaseConan(ConanFile):
     def _gl_config(self):
         gl_api = set()
         gl_platform = set()
-        gl_winsys = set()  # TODO: winrt, dispamnx, viv-fb, gbm, android
+        gl_winsys = set()  # TODO: winrt, dispamnx, surfaceless, viv-fb, gbm, android
         if self.options.get_safe("with_egl"):
             gl_api.add("opengl")
             gl_platform.add("egl")
@@ -186,59 +190,88 @@ class GStPluginsBaseConan(ConanFile):
 
 
     def generate(self):
-        def add_compiler_flag(value):
-            tc.c_args.append(value)
-            tc.cpp_args.append(value)
-
-        def add_linker_flag(value):
-            tc.c_link_args.append(value)
-            tc.cpp_link_args.append(value)
-
         tc = MesonToolchain(self)
 
         if is_msvc(self):
-            add_linker_flag("-lws2_32")
-            add_compiler_flag(f"-{msvc_runtime_flag(self)}")
+            tc.c_link_args.append("-lws2_32")
+            tc.c_args.append(f"-{msvc_runtime_flag(self)}")
             if not check_min_vs(self, 190, raise_invalid=False):
-                add_compiler_flag("-Dsnprintf=_snprintf")
-            if msvc_runtime_flag(self):
-                tc.project_options["b_vscrt"] = msvc_runtime_flag(self).lower()
+                tc.c_link_args.append("-Dsnprintf=_snprintf")
 
         gl_api, gl_platform, gl_winsys = self._gl_config()
 
-        def _enabled(value):
+        def feature(value):
             return "enabled" if value else "disabled"
 
-        tc.project_options["tools"] = "disabled"
-        tc.project_options["examples"] = "disabled"
-        tc.project_options["tests"] = "disabled"
-        tc.project_options["wrap_mode"] = "nofallback"
-        tc.project_options["introspection"] = _enabled(self.options.with_introspection)
-        tc.project_options["orc"] = "disabled"  # TODO: orc
-        tc.project_options["gl"] = _enabled(self.options.with_gl)
-        tc.project_options["gl-graphene"] = _enabled(self.options.with_gl and self.options.with_graphene)
-        tc.project_options["gl-png"] = _enabled(self.options.with_gl and self.options.with_libpng)
-        tc.project_options["gl-jpeg"] = _enabled(self.options.with_gl and self.options.with_libjpeg)
+        # OpenGL integration library options
         tc.project_options["gl_api"] = gl_api
         tc.project_options["gl_platform"] = gl_platform
         tc.project_options["gl_winsys"] = gl_winsys
-        tc.project_options["alsa"] = _enabled(self.options.get_safe("with_libalsa"))
-        tc.project_options["cdparanoia"] = "disabled"  # enabled_disabled(self.options.with_cdparanoia) # TODO: cdparanoia
-        tc.project_options["libvisual"] = "disabled"  # enabled_disabled(self.options.with_libvisual) # TODO: libvisual
-        tc.project_options["ogg"] = _enabled(self.options.with_ogg)
-        tc.project_options["opus"] = _enabled(self.options.with_opus)
-        tc.project_options["pango"] = _enabled(self.options.with_pango)
-        tc.project_options["theora"] = _enabled(self.options.with_theora)
-        tc.project_options["tremor"] = "disabled"  # enabled_disabled(self.options.with_tremor) # TODO: tremor - only useful on machines without floating-point support
-        tc.project_options["vorbis"] = _enabled(self.options.with_vorbis)
-        tc.project_options["x11"] = _enabled(self.options.get_safe("with_xorg"))
-        tc.project_options["xshm"] = _enabled(self.options.get_safe("with_xorg"))
-        tc.project_options["xvideo"] = _enabled(self.options.get_safe("with_xorg"))
+
+        # Feature option for opengl plugin and integration library
+        tc.project_options["gl"] = feature(self.options.with_gl)
+        tc.project_options["gl-graphene"] = feature(self.options.with_gl and self.options.with_graphene)
+        tc.project_options["gl-jpeg"] = feature(self.options.with_gl and self.options.with_libjpeg)
+        tc.project_options["gl-png"] = feature(self.options.with_gl and self.options.with_libpng)
+
+        # Feature options for plugins with no external deps
+        tc.project_options["adder"] = "enabled"
+        tc.project_options["app"] = "enabled"
+        tc.project_options["audioconvert"] = "enabled"
+        tc.project_options["audiomixer"] = "enabled"
+        tc.project_options["audiorate"] = "enabled"
+        tc.project_options["audioresample"] = "enabled"
+        tc.project_options["audiotestsrc"] = "enabled"
+        tc.project_options["compositor"] = "enabled"
+        tc.project_options["debugutils"] = "enabled"
+        tc.project_options["drm"] = feature(self.options.get_safe("with_libdrm"))
+        tc.project_options["dsd"] = "enabled"
+        tc.project_options["encoding"] = "enabled"
+        tc.project_options["gio"] = "enabled"
+        tc.project_options["gio-typefinder"] = "enabled"
+        tc.project_options["overlaycomposition"] = "enabled"
+        tc.project_options["pbtypes"] = "enabled"
+        tc.project_options["playback"] = "enabled"
+        tc.project_options["rawparse"] = "enabled"
+        tc.project_options["subparse"] = "enabled"
+        tc.project_options["tcp"] = "enabled"
+        tc.project_options["typefind"] = "enabled"
+        tc.project_options["videoconvertscale"] = "enabled"
+        tc.project_options["videorate"] = "enabled"
+        tc.project_options["videotestsrc"] = "enabled"
+        tc.project_options["volume"] = "enabled"
+
+        # Feature options for plugins with external deps
+        tc.project_options["alsa"] = feature(self.options.get_safe("with_libalsa"))
+        tc.project_options["cdparanoia"] = "disabled"  # TODO: cdparanoia
+        tc.project_options["libvisual"] = "disabled"  # TODO: libvisual
+        tc.project_options["ogg"] = feature(self.options.with_ogg)
+        tc.project_options["opus"] = feature(self.options.with_opus)
+        tc.project_options["pango"] = feature(self.options.with_pango)
+        tc.project_options["theora"] = feature(self.options.with_theora)
+        tc.project_options["tremor"] = "disabled"  # TODO: tremor - only useful on machines without floating-point support
+        tc.project_options["vorbis"] = feature(self.options.with_vorbis)
+        tc.project_options["x11"] = feature(self.options.get_safe("with_xorg"))
+        tc.project_options["xshm"] = feature(self.options.get_safe("with_xorg"))
+        tc.project_options["xvideo"] = feature(self.options.get_safe("with_xorg"))
+        tc.project_options["xi"] = feature(self.options.get_safe("with_xorg"))
+
+        # Common feature options
+        tc.project_options["examples"] = "disabled"
+        tc.project_options["tests"] = "disabled"
+        tc.project_options["tools"] = "disabled"
+        tc.project_options["introspection"] = feature(self.options.with_introspection)
+        tc.project_options["nls"] = "disabled"
+        tc.project_options["orc"] = "disabled"  # TODO: orc
+        tc.project_options["iso-codes"] = "disabled"  # requires iso-codes package
+
         tc.generate()
 
         deps = PkgConfigDeps(self)
         if self.options.get_safe("with_wayland"):
-            deps.build_context_activated = ["wayland-protocols"]
+            deps.build_context_activated.append("wayland-protocols")
+        if self.options.with_introspection:
+            deps.build_context_activated.append("gobject-introspection")
         deps.generate()
 
     def build(self):
@@ -247,7 +280,6 @@ class GStPluginsBaseConan(ConanFile):
         meson.build()
 
     def _fix_library_names(self, path):
-        # regression in 1.16
         if is_msvc(self):
             with chdir(self, path):
                 for filename_old in glob.glob("*.a"):
@@ -261,169 +293,138 @@ class GStPluginsBaseConan(ConanFile):
         meson.install()
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
         self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
+        rename(self, os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
         gst_plugins = []
-        gst_plugin_path = os.path.join("lib", "gstreamer-1.0")
-        gst_include_path = os.path.join("include", "gstreamer-1.0")
 
         pkgconfig_variables = {
             "exec_prefix": "${prefix}",
             "toolsdir": "${exec_prefix}/bin",
             "pluginsdir": "${libdir}/gstreamer-1.0",
-            "datarootdir": "${prefix}/share",
+            "datarootdir": "${prefix}/res",
             "datadir": "${datarootdir}",
             "girdir": "${datadir}/gir-1.0",
             "typelibdir": "${libdir}/girepository-1.0",
             "libexecdir": "${prefix}/libexec",
+            "pluginscannerdir": "${libexecdir}/gstreamer-1.0",
         }
         pkgconfig_custom_content = "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items())
 
         if self.options.shared:
-            self.runenv_info.define_path("GST_PLUGIN_PATH", gst_plugin_path)
+            self.runenv_info.define_path("GST_PLUGIN_PATH", os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
 
-        def _define_plugin_component(name, requires):
-            self.cpp_info.components[name].libs = [name]
-            self.cpp_info.components[name].libdirs.append(gst_plugin_path)
-            self.cpp_info.components[name].requires = requires
+        def _define_plugin_component(name, extra_requires):
+            name = f"gst{name}"
+            component = self.cpp_info.components[name]
+            component.libs = [name]
+            component.libdirs = [os.path.join("lib", "gstreamer-1.0")]
+            component.requires = [
+                "gstreamer::gstreamer-1.0",
+                "gstreamer::gstreamer-base-1.0",
+            ] + extra_requires
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components[name].system_libs = ["m"]
+                component.system_libs = ["m"]
             gst_plugins.append(name)
+            return component
 
         # Plugins ('gst')
-        _define_plugin_component("gstadder", [
+        _define_plugin_component("adder", [
             "gstreamer-audio-1.0",
             # TODO: orc
         ])
-        _define_plugin_component("gstapp", [
-            "gstreamer::gstreamer-base-1.0",
+        _define_plugin_component("app", [
             "gstreamer-app-1.0",
             "gstreamer-tag-1.0",
         ])
-        _define_plugin_component("gstaudioconvert", [
-            "gstreamer::gstreamer-base-1.0",
+        _define_plugin_component("audioconvert", [
             "gstreamer-audio-1.0",
         ])
-        _define_plugin_component("gstaudiomixer", [
-            "gstreamer::gstreamer-base-1.0",
+        _define_plugin_component("audiomixer", [
             "gstreamer-audio-1.0",
             # TODO: orc
         ])
-        _define_plugin_component("gstaudiorate", [
-            "gstreamer::gstreamer-base-1.0",
+        _define_plugin_component("audiorate", [
             "gstreamer-audio-1.0",
         ])
-        _define_plugin_component("gstaudioresample", [
-            "gstreamer::gstreamer-base-1.0",
+        _define_plugin_component("audioresample", [
             "gstreamer-audio-1.0",
         ])
-        _define_plugin_component("gstaudiotestsrc", [
-            "gstreamer::gstreamer-base-1.0",
+        _define_plugin_component("audiotestsrc", [
             "gstreamer-audio-1.0",
         ])
-        _define_plugin_component("gstcompositor", [
-            "gstreamer::gstreamer-base-1.0",
+        _define_plugin_component("basedebug", [
+            "gstreamer-video-1.0",
+        ])
+        _define_plugin_component("compositor", [
             "gstreamer-video-1.0",
             # TODO: orc
         ])
-        _define_plugin_component("gstencoding", [
-            "gstreamer::gstreamer-base-1.0",
+        _define_plugin_component("dsd", [
+            "gstreamer-audio-1.0",
+        ])
+        _define_plugin_component("encoding", [
             "gstreamer-video-1.0",
             "gstreamer-pbutils-1.0",
         ])
-        _define_plugin_component("gstgio", [
-            "gstreamer::gstreamer-base-1.0",
-            "glib::gio-2.0",
-        ])
-        _define_plugin_component("gstoverlaycomposition", [
+        _define_plugin_component("gio", [])
+        _define_plugin_component("overlaycomposition", [
             "gstreamer-video-1.0",
         ])
-        _define_plugin_component("gstpbtypes", [
+        _define_plugin_component("pbtypes", [
             "gstreamer-video-1.0",
         ])
-        _define_plugin_component("gstplayback", [
+        _define_plugin_component("playback", [
             "gstreamer-audio-1.0",
             "gstreamer-video-1.0",
             "gstreamer-pbutils-1.0",
             "gstreamer-tag-1.0",
         ])
-        _define_plugin_component("gstrawparse", [
-            "gstreamer::gstreamer-base-1.0",
+        _define_plugin_component("rawparse", [
             "gstreamer-audio-1.0",
             "gstreamer-video-1.0",
         ])
-        _define_plugin_component("gstsubparse", [
-            "gstreamer::gstreamer-base-1.0",
-        ])
-        _define_plugin_component("gsttcp", [
-            "gstreamer::gstreamer-base-1.0",
+        _define_plugin_component("subparse", [])
+        _define_plugin_component("tcp", [
             "gstreamer::gstreamer-net-1.0",
-            "glib::gio-2.0",
         ])
-        _define_plugin_component("gsttypefindfunctions", [
-            "gstreamer::gstreamer-base-1.0",
+        _define_plugin_component("typefindfunctions", [
             "gstreamer-pbutils-1.0",
-            "glib::gio-2.0",
         ])
-        _define_plugin_component("gstvideoconvert", [
+        _define_plugin_component("videoconvertscale", [
             "gstreamer-video-1.0",
         ])
-        _define_plugin_component("gstvideorate", [
+        _define_plugin_component("videorate", [
             "gstreamer-video-1.0",
         ])
-        _define_plugin_component("gstvideoscale", [
-            "gstreamer::gstreamer-1.0",
-            "gstreamer::gstreamer-base-1.0",
+        _define_plugin_component("videotestsrc", [
             "gstreamer-video-1.0",
-            "glib::glib-2.0",
-            "glib::gobject-2.0",
-        ])
-        _define_plugin_component("gstvideotestsrc", [
-            "gstreamer::gstreamer-1.0",
-            "gstreamer::gstreamer-base-1.0",
-            "gstreamer-video-1.0",
-            "glib::glib-2.0",
-            "glib::gobject-2.0",
             # TODO: orc
         ])
-        _define_plugin_component("gstvolume", [
-            "gstreamer::gstreamer-1.0",
-            "gstreamer::gstreamer-base-1.0",
+        _define_plugin_component("volume", [
             "gstreamer-audio-1.0",
-            "glib::glib-2.0",
-            "glib::gobject-2.0",
             # TODO: orc
         ])
 
         # Plugins ('ext')
         if self.options.get_safe("with_libalsa"):
-            _define_plugin_component("gstalsa", [
-                "gstreamer::gstreamer-1.0",
-                "gstreamer::gstreamer-base-1.0",
+            _define_plugin_component("alsa", [
                 "gstreamer-audio-1.0",
                 "gstreamer-tag-1.0",
                 "libalsa::libalsa",
-                "glib::glib-2.0",
-                "glib::gobject-2.0",
             ])
 
         # if self.options.with_cdparanoia:  # TODO: cdparanoia
-        #     _define_plugin_component("gstcdparanoia", [
-        #         "gstreamer::gstreamer-1.0",
-        #         "gstreamer::gstreamer-base-1.0",
+        #     _define_plugin_component("cdparanoia", [
         #         "gstreamer-audio-1.0",
         #         "cdparanoia::cdparanoia",
-        #         "glib::glib-2.0",
-        #         "glib::gobject-2.0",
         #     ])
 
         if self.options.with_gl:
-            _define_plugin_component("gstopengl", [
-                "gstreamer::gstreamer-base-1.0",
+            gstopengl = _define_plugin_component("opengl", [
                 "gstreamer::gstreamer-controller-1.0",
                 "gstreamer-video-1.0",
                 "gstreamer-allocators-1.0",
@@ -432,208 +433,153 @@ class GStPluginsBaseConan(ConanFile):
                 # TODO: nvbuf_utils
             ])
             if is_apple_os(self):
-                self.cpp_info.components["gstopengl"].frameworks = ["CoreFoundation", "Foundation", "QuartzCore"]
+                gstopengl.frameworks = ["CoreFoundation", "Foundation", "QuartzCore"]
             if self.options.with_graphene:
-                self.cpp_info.components["gstopengl"].requires.append("graphene::graphene-gobject-1.0")
+                gstopengl.requires.append("graphene::graphene-gobject-1.0")
             if self.options.with_libpng:
-                self.cpp_info.components["gstopengl"].requires.append("libpng::libpng")
+                gstopengl.requires.append("libpng::libpng")
             if self.options.with_libjpeg == "libjpeg":
-                self.cpp_info.components["gstopengl"].requires.append("libjpeg::libjpeg")
+                gstopengl.requires.append("libjpeg::libjpeg")
             elif self.options.with_libjpeg == "libjpeg-turbo":
-                self.cpp_info.components["gstopengl"].requires.append("libjpeg-turbo::libjpeg-turbo")
+                gstopengl.requires.append("libjpeg-turbo::libjpeg-turbo")
             if self.options.get_safe("with_xorg"):
-                self.cpp_info.components["gstopengl"].requires.append("xorg::x11")
+                gstopengl.requires.append("xorg::x11")
 
         # if self.options.with_libvisual:  # TODO: libvisual
-        #     _define_plugin_component("gstlibvisual", [
-        #         "gstreamer::gstreamer-1.0",
-        #         "gstreamer::gstreamer-base-1.0",
+        #     _define_plugin_component("libvisual", [
         #         "gstreamer-audio-1.0",
         #         "gstreamer-video-1.0",
         #         "gstreamer-pbutils-1.0",
         #         "libvisual::libvisual",
-        #         "glib::glib-2.0",
-        #         "glib::gobject-2.0",
         #     ])
 
         if self.options.with_ogg:
-            _define_plugin_component("gstogg", [
-                "gstreamer::gstreamer-1.0",
-                "gstreamer::gstreamer-base-1.0",
+            _define_plugin_component("ogg", [
                 "gstreamer-audio-1.0",
                 "gstreamer-pbutils-1.0",
                 "gstreamer-tag-1.0",
                 "gstreamer-riff-1.0",
-                "ogg::ogglib",
-                "glib::glib-2.0",
-                "glib::gobject-2.0",
+                "ogg::ogg",
             ])
 
         if self.options.with_opus:
-            _define_plugin_component("gstopus", [
-                "gstreamer::gstreamer-1.0",
-                "gstreamer::gstreamer-base-1.0",
+            _define_plugin_component("opus", [
                 "gstreamer-audio-1.0",
                 "gstreamer-pbutils-1.0",
                 "gstreamer-tag-1.0",
-                "opus::libopus",
-                "glib::glib-2.0",
-                "glib::gobject-2.0",
+                "opus::opus",
             ])
 
         if self.options.with_pango:
-            _define_plugin_component("gstpango", [
-                "gstreamer::gstreamer-1.0",
-                "gstreamer::gstreamer-base-1.0",
+            _define_plugin_component("pango", [
                 "gstreamer-video-1.0",
                 "pango::pangocairo",
-                "glib::glib-2.0",
-                "glib::gobject-2.0",
             ])
 
         if self.options.with_theora:
-            _define_plugin_component("gsttheora", [
-                "gstreamer::gstreamer-1.0",
-                "gstreamer::gstreamer-base-1.0",
+            _define_plugin_component("theora", [
                 "gstreamer-video-1.0",
                 "gstreamer-tag-1.0",
                 "theora::theoraenc",
                 "theora::theoradec",
-                "glib::glib-2.0",
-                "glib::gobject-2.0",
             ])
 
         if self.options.with_vorbis:
-            _define_plugin_component("gstvorbis", [
-                "gstreamer::gstreamer-1.0",
-                "gstreamer::gstreamer-base-1.0",
+            _define_plugin_component("vorbis", [
                 "gstreamer-audio-1.0",
                 "gstreamer-tag-1.0",
                 "vorbis::vorbismain",
                 "vorbis::vorbisenc",
-                "glib::glib-2.0",
-                "glib::gobject-2.0",
             ])
 
         # if self.options.with_tremor:  # TODO: tremor
-        #     _define_plugin_component("gstivorbisdec", [
-        #         "gstreamer::gstreamer-1.0",
-        #         "gstreamer::gstreamer-base-1.0",
+        #     _define_plugin_component("ivorbisdec", [
         #         "gstreamer-audio-1.0",
         #         "gstreamer-tag-1.0",
         #         "tremor::tremor",
-        #         "glib::glib-2.0",
-        #         "glib::gobject-2.0",
         #     ])
 
         # Plugins ('sys')
         if self.options.get_safe("with_xorg"):
-            _define_plugin_component("gstximagesink", [
-                "gstreamer::gstreamer-1.0",
-                "gstreamer::gstreamer-base-1.0",
+            _define_plugin_component("ximagesink", [
                 "gstreamer-video-1.0",
                 "xorg::x11",
                 "xorg::xext",
-                "glib::glib-2.0",
-                "glib::gobject-2.0",
+                "xorg::xi",
             ])
-            _define_plugin_component("gstxvimagesink", [
-                "gstreamer::gstreamer-1.0",
-                "gstreamer::gstreamer-base-1.0",
+            _define_plugin_component("xvimagesink", [
                 "gstreamer-video-1.0",
                 "xorg::x11",
                 "xorg::xext",
                 "xorg::xv",
-                "glib::glib-2.0",
-                "glib::gobject-2.0",
+                "xorg::xi",
             ])
 
         # Libraries
-        def _define_library_component(name, requires):
+        def _define_library_component(name, extra_requires, interface=False):
             component_name = f"gstreamer-{name}-1.0"
-            self.cpp_info.components[component_name].set_property("pkg_config_name", component_name)
-            self.cpp_info.components[component_name].libs = [f"gst{name}-1.0"]
-            self.cpp_info.components[component_name].requires = requires
-            self.cpp_info.components[component_name].includedirs = [gst_include_path]
-            self.cpp_info.components[component_name].set_property("pkg_config_custom_content", pkgconfig_custom_content)
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.components[component_name].system_libs = ["m"]
+            component = self.cpp_info.components[component_name]
+            component.set_property("pkg_config_name", component_name)
+            component.requires = [
+                "gstreamer::gstreamer-1.0",
+                "gstreamer::gstreamer-base-1.0",
+            ] + extra_requires
+            if not interface:
+                component.libs = [f"gst{name}-1.0"]
+                component.includedirs = [os.path.join("include", "gstreamer-1.0")]
+                component.set_property("pkg_config_custom_content", pkgconfig_custom_content)
+                if self.settings.os in ["Linux", "FreeBSD"]:
+                    component.system_libs = ["m"]
+            return component
 
-        _define_library_component("plugins-base", [
-            "gstreamer::gstreamer-1.0",
-        ])
-        self.cpp_info.components["gstreamer-plugins-base-1.0"].libs = []
+        gst_plugins_base = _define_library_component("plugins-base", [])
+        gst_plugins_base.libs = []
         if not self.options.shared:
-            self.cpp_info.components["gstreamer-plugins-base-1.0"].defines.append("GST_PLUGINS_BASE_STATIC")
-            self.cpp_info.components["gstreamer-plugins-base-1.0"].requires.extend(gst_plugins)
+            gst_plugins_base.defines.append("GST_PLUGINS_BASE_STATIC")
+            gst_plugins_base.requires.extend(gst_plugins)
         else:
-            self.cpp_info.components["gstreamer-plugins-base-1.0"].bindirs.append(gst_plugin_path)
+            gst_plugins_base.bindirs.append(os.path.join("lib", "gstreamer-1.0"))
 
-        _define_library_component("allocators", [
-            "gstreamer::gstreamer-1.0",
-        ])
-        _define_library_component("app", [
-            "gstreamer::gstreamer-1.0",
-            "gstreamer::gstreamer-base-1.0",
-        ])
+        gst_allocators = _define_library_component("allocators", [])
+        if self.options.get_safe("with_libdrm"):
+            gst_allocators.requires.append("libdrm::libdrm")
+        _define_library_component("app", [])
         _define_library_component("audio", [
-            "gstreamer::gstreamer-1.0",
-            "gstreamer::gstreamer-base-1.0",
             "gstreamer-tag-1.0",
             # TODO: orc
         ])
-        _define_library_component("fft", [
-            "gstreamer::gstreamer-1.0",
-        ])
+        _define_library_component("fft", [])
         _define_library_component("pbutils", [
-            "gstreamer::gstreamer-1.0",
-            "gstreamer::gstreamer-base-1.0",
             "gstreamer-audio-1.0",
             "gstreamer-video-1.0",
             "gstreamer-tag-1.0",
         ])
         _define_library_component("riff", [
-            "gstreamer::gstreamer-1.0",
             "gstreamer-audio-1.0",
             "gstreamer-tag-1.0",
         ])
         _define_library_component("rtp", [
-            "gstreamer::gstreamer-1.0",
-            "gstreamer::gstreamer-base-1.0",
             "gstreamer-audio-1.0",
         ])
-        _define_library_component("rtsp", [
-            "gstreamer::gstreamer-1.0",
-            "gstreamer::gstreamer-base-1.0",
+        gst_rtsp = _define_library_component("rtsp", [
             "gstreamer-sdp-1.0",
-            "glib::gio-2.0",
         ])
         if self.settings.os == "Windows":
-            self.cpp_info.components["gstreamer-rtsp-1.0"].system_libs = ["ws2_32"]
+            gst_rtsp.system_libs = ["ws2_32"]
         _define_library_component("sdp", [
-            "gstreamer::gstreamer-1.0",
             "gstreamer-rtp-1.0",
-            "glib::glib-2.0",
-            "glib::gio-2.0",
         ])
         _define_library_component("tag", [
-            "gstreamer::gstreamer-1.0",
-            "gstreamer::gstreamer-base-1.0",
             "zlib::zlib",
         ])
         _define_library_component("video", [
-            "gstreamer::gstreamer-1.0",
-            "gstreamer::gstreamer-base-1.0",
             # TODO: orc
         ])
 
         if self.options.with_gl:
-            _define_library_component("gl", [
-                "gstreamer::gstreamer-1.0",
-                "gstreamer::gstreamer-base-1.0",
+            gst_gl = _define_library_component("gl", [
                 "gstreamer-allocators-1.0",
                 "gstreamer-video-1.0",
-                "glib::gmodule-no-export-2.0",
                 "opengl::opengl",
                 # TODO: bcm
             ])
@@ -645,63 +591,58 @@ class GStPluginsBaseConan(ConanFile):
                 "gl_winsys": " ".join(gl_winsys),
             }
             gl_custom_content = "\n".join(f"{key}={value}" for key, value in gl_variables.items())
-            self.cpp_info.components["gstreamer-gl-1.0"].set_property("pkg_config_custom_content", gl_custom_content)
+            gst_gl.set_property("pkg_config_custom_content", gl_custom_content)
 
-            self.cpp_info.components["gstreamer-gl-1.0"].libs = ["gstgl-1.0"]
-            self.cpp_info.components["gstreamer-gl-1.0"].requires = [
-                "gstreamer::gstreamer-1.0", "gstreamer::gstreamer-base-1.0",
-                "gstreamer-allocators-1.0", "gstreamer-video-1.0",
-                "glib::gmodule-no-export-2.0", "libglvnd::libglvnd"] # TODO: bcm
             if self.options.get_safe("with_egl"):
-                self.cpp_info.components["gstreamer-gl-1.0"].requires += ["egl::egl"]
+                gst_gl.requires += ["egl::egl"]
             if self.options.get_safe("with_xorg"):
-                self.cpp_info.components["gstreamer-gl-1.0"].requires += ["xorg::x11", "xorg::x11-xcb"]
+                gst_gl.requires += ["xorg::x11", "xorg::x11-xcb"]
             if self.options.get_safe("with_wayland"):
-                self.cpp_info.components["gstreamer-gl-1.0"].requires += [
+                gst_gl.requires += [
                     "wayland::wayland-client",
                     "wayland::wayland-cursor",
                     "wayland::wayland-egl",
                 ]
             if self.settings.os == "Windows":
-                self.cpp_info.components["gstreamer-gl-1.0"].requires.append("wglext::wglext")
-                self.cpp_info.components["gstreamer-gl-1.0"].requires.append("glext::glext")
-                self.cpp_info.components["gstreamer-gl-1.0"].system_libs = ["gdi32"]
+                gst_gl.requires.append("wglext::wglext")
+                gst_gl.requires.append("glext::glext")
+                gst_gl.system_libs = ["gdi32"]
             if is_apple_os(self):
-                self.cpp_info.components["gstreamer-gl-1.0"].frameworks = [
+                gst_gl.frameworks = [
                     "CoreFoundation",
                     "Foundation",
                     "QuartzCore",
                     "Cocoa",
                 ]
             if self.settings.os in ["iOS", "tvOS", "watchOS"]:
-                self.cpp_info.components["gstreamer-gl-1.0"].frameworks.extend(["CoreGraphics", "UIkit"])
-            self.cpp_info.components["gstreamer-gl-1.0"].includedirs.append("include")
-            self.cpp_info.components["gstreamer-gl-1.0"].includedirs.append(os.path.join(gst_plugin_path, "include"))
+                gst_gl.frameworks.extend(["CoreGraphics", "UIkit"])
+            gst_gl.includedirs.append("include")
+            gst_gl.includedirs.append(os.path.join(os.path.join("lib", "gstreamer-1.0"), "include"))
 
-            self.cpp_info.components["gstreamer-gl-prototypes-1.0"].set_property("pkg_config_name", "gstreamer-gl-prototypes-1.0")
-            self.cpp_info.components["gstreamer-gl-prototypes-1.0"].requires = [
+            _define_library_component("gl-prototypes", [
                 "gstreamer-gl-1.0",
                 "opengl::opengl",
-            ]
+            ], interface=True)
 
             if self.options.get_safe("with_egl"):
-                self.cpp_info.components["gstreamer-gl-egl-1.0"].set_property("pkg_config_name", "gstreamer-gl-egl-1.0")
-                self.cpp_info.components["gstreamer-gl-egl-1.0"].requires = [
+                _define_library_component("gl-egl", [
                     "gstreamer-gl-1.0",
                     "egl::egl",
-                ]
+                ], interface=True)
 
             if self.options.get_safe("with_wayland"):
-                self.cpp_info.components["gstreamer-gl-wayland-1.0"].set_property("pkg_config_name", "gstreamer-gl-wayland-1.0")
-                self.cpp_info.components["gstreamer-gl-wayland-1.0"].requires = [
+                _define_library_component("gl-wayland", [
                     "gstreamer-gl-1.0",
                     "wayland::wayland-client",
                     "wayland::wayland-egl",
-                ]
+                ], interface=True)
 
             if self.options.get_safe("with_xorg"):
-                self.cpp_info.components["gstreamer-gl-x11-1.0"].set_property("pkg_config_name", "gstreamer-gl-x11-1.0")
-                self.cpp_info.components["gstreamer-gl-x11-1.0"].requires = [
+                _define_library_component("gl-x11", [
                     "gstreamer-gl-1.0",
                     "xorg::x11-xcb",
-                ]
+                ], interface=True)
+
+        if self.options.with_introspection:
+            self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "gir-1.0"))
+            self.buildenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
