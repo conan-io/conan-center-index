@@ -128,9 +128,8 @@ class GStreamerConan(ConanFile):
         pkgconfig_variables = {
             "exec_prefix": "${prefix}",
             "toolsdir": "${exec_prefix}/bin",
-            # PkgConfigDep uses libdir1 instead of libdir, so the path is spelled out explicitly here.
             "pluginsdir": "${prefix}/lib/gstreamer-1.0",
-            "datarootdir": "${prefix}/share",
+            "datarootdir": "${prefix}/res",
             "datadir": "${datarootdir}",
             "girdir": "${datadir}/gir-1.0",
             "typelibdir": "${prefix}/lib/girepository-1.0",
