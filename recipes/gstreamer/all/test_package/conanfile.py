@@ -22,7 +22,7 @@ class TestPackageConan(ConanFile):
     def generate(self):
         # Print debug information from gstreamer at runtime
         env = Environment()
-        env.define("GST_DEBUG", "7")
+        env.define("GST_DEBUG", "1")
         env.vars(self, scope="run").save_script("conanrun_gstdebug")
 
     def build(self):

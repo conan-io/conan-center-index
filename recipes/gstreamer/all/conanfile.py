@@ -11,7 +11,7 @@ from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.60.0 <2 || >=2.0.5"
+required_conan_version = ">=2.4"
 
 class GStreamerConan(ConanFile):
     name = "gstreamer"
@@ -32,16 +32,8 @@ class GStreamerConan(ConanFile):
         "fPIC": True,
         "with_introspection": False,
     }
-
-    def config_options(self):
-        if self.settings.os == 'Windows':
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
+    languages = ["C"]
+    implements = ["auto_header_only"]
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -78,11 +70,19 @@ class GStreamerConan(ConanFile):
         tc = MesonToolchain(self)
         if is_msvc(self) and not check_min_vs(self, "190", raise_invalid=False):
             tc.project_options["c_std"] = "c99"
+        tc.project_options["introspection"] = "enabled" if self.options.with_introspection else "disabled"
+        tc.project_options["check"] = "enabled"  # explicitly enable plugin
+        tc.project_options["coretracers"] = "enabled"  # explicitly enable plugin
+        tc.project_options["libunwind"] = "disabled"  # TODO
+        tc.project_options["libdw"] = "disabled"  # TODO
+        tc.project_options["dbghelp"] = "disabled"  # TODO
         tc.project_options["tools"] = "disabled"
         tc.project_options["examples"] = "disabled"
         tc.project_options["benchmarks"] = "disabled"
         tc.project_options["tests"] = "disabled"
-        tc.project_options["introspection"] = "enabled" if self.options.with_introspection else "disabled"
+        tc.project_options["nls"] = "disabled"  # Ensure libnls from system is not used
+        tc.project_options["bash-completion"] = "disabled"
+        tc.project_options["ptp-helper"] = "disabled"  # requires rustc and libcap
         tc.generate()
 
     def build(self):
@@ -103,7 +103,6 @@ class GStreamerConan(ConanFile):
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
-
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
         self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
@@ -127,7 +126,7 @@ class GStreamerConan(ConanFile):
             "libexecdir": "${prefix}/libexec",
             "pluginscannerdir": "${libexecdir}/gstreamer-1.0",
         }
-        pkgconfig_custom_content = "\n".join("{}={}".format(key, value) for key, value in pkgconfig_variables.items())
+        pkgconfig_custom_content = "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items())
 
         self.cpp_info.components["gstreamer-1.0"].set_property("pkg_config_name", "gstreamer-1.0")
         self.cpp_info.components["gstreamer-1.0"].requires = ["glib::glib-2.0", "glib::gobject-2.0"]
@@ -136,6 +135,7 @@ class GStreamerConan(ConanFile):
             self.cpp_info.components["gstreamer-1.0"].defines.append("GST_STATIC_COMPILATION")
         self.cpp_info.components["gstreamer-1.0"].libs = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
+        self.cpp_info.components["gstreamer-1.0"].bindirs = [os.path.join("bin", "gstreamer-1.0")]
         if self.settings.os == "Linux":
             self.cpp_info.components["gstreamer-1.0"].system_libs = ["m", "dl"]
         self.cpp_info.components["gstreamer-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
