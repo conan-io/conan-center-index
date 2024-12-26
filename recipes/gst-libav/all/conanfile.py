@@ -4,44 +4,41 @@ import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import chdir, copy, get, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, msvc_runtime_flag
-from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime, check_min_vs
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.4"
 
 
 class GStLibAVConan(ConanFile):
     name = "gst-libav"
-    description = "GStreamer is a development framework for creating applications like media players, video editors, streaming media broadcasters and so on"
+    description = "GStreamer plugin for the FFmpeg libav libraries"
     license = "GPL-2.0-only"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gstreamer.freedesktop.org/"
-    topics = ("gstreamer", "multimedia", "video", "audio", "broadcasting", "framework", "media")
-
+    topics = ("gstreamer", "ffmpeg", "multimedia", "video", "audio", "broadcasting", "framework", "media")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_introspection": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_introspection": False,
     }
-    implements = ["auto_shared_fpic"]
+    languages = ["C"]
 
-    def export_sources(self):
-        export_conandata_patches(self)
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def configure(self):
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
         self.options["gstreamer"].shared = self.options.shared
         self.options["gst-plugins-base"].shared = self.options.shared
 
@@ -49,9 +46,8 @@ class GStLibAVConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.78.3")
-        self.requires(f"gstreamer/{self.version}")
-        self.requires(f"gst-plugins-base/{self.version}")
+        self.requires(f"gstreamer/{self.version}", transitive_headers=True, transitive_libs=True)
+        self.requires(f"gst-plugins-base/{self.version}", transitive_headers=True, transitive_libs=True)
         self.requires("ffmpeg/7.0.1")
 
     def validate(self):
@@ -62,54 +58,27 @@ class GStLibAVConan(ConanFile):
         ):
             # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
             raise ConanInvalidConfiguration("GLib, GStreamer and GstPlugins must be either all shared, or all static")
-        if Version(self.version) >= "1.18.2" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration(f"gst-plugins-good {self.version} does not support gcc older than 5")
         if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("shared build with static runtime is not supported due to the FlsAlloc limit")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
+        self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        if self.settings.os == "Windows":
-            self.tool_requires("winflexbison/2.5.25")
-        else:
-            self.tool_requires("bison/3.8.2")
-            self.tool_requires("flex/2.6.4")
-        if self.options.with_introspection:
-            self.tool_requires("gobject-introspection/1.78.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
 
     def generate(self):
-        def add_compiler_flag(value):
-            tc.c_args.append(value)
-            tc.cpp_args.append(value)
-
-        def add_linker_flag(value):
-            tc.c_link_args.append(value)
-            tc.cpp_link_args.append(value)
-
         tc = MesonToolchain(self)
-        if is_msvc(self):
-            add_linker_flag("-lws2_32")
-            add_compiler_flag(f"-{msvc_runtime_flag(self)}")
-            if int(str(self.settings.compiler.version)) < 14:
-                add_compiler_flag("-Dsnprintf=_snprintf")
-        if msvc_runtime_flag(self):
-            tc.project_options["b_vscrt"] = msvc_runtime_flag(self).lower()
-        tc.project_options["tools"] = "disabled"
-        tc.project_options["examples"] = "disabled"
-        tc.project_options["benchmarks"] = "disabled"
+        if is_msvc(self) and not check_min_vs(self, 190, raise_invalid=False):
+            tc.c_link_args.append("-Dsnprintf=_snprintf")
         tc.project_options["tests"] = "disabled"
-        tc.project_options["wrap_mode"] = "nofallback"
-        tc.project_options["introspection"] = "enabled" if self.options.with_introspection else "disabled"
+        tc.project_options["doc"] = "disabled"
         tc.generate()
-
-        tc = PkgConfigDeps(self)
-        tc.generate()
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def build(self):
         meson = Meson(self)
@@ -117,7 +86,6 @@ class GStLibAVConan(ConanFile):
         meson.build()
 
     def _fix_library_names(self, path):
-        # regression in 1.16
         if is_msvc(self):
             with chdir(self, path):
                 for filename_old in glob.glob("*.a"):
@@ -131,22 +99,32 @@ class GStLibAVConan(ConanFile):
         meson.install()
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
         self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        plugins = ["libav"]
+        self.cpp_info.set_property("pkg_config_name", "gstlibav")
 
-        gst_plugin_path = os.path.join(self.package_folder, "lib", "gstreamer-1.0")
+        self.cpp_info.includedirs = []
+        self.cpp_info.libdirs = []
+        self.cpp_info.bindirs = []
+
         if self.options.shared:
-            self.output.info(f"Appending GST_PLUGIN_PATH env var : {gst_plugin_path}")
-            self.cpp_info.bindirs.append(gst_plugin_path)
-            self.runenv_info.prepend_path("GST_PLUGIN_PATH", gst_plugin_path)
+            self.cpp_info.bindirs.append(os.path.join("lib", "gstreamer-1.0"))
+            self.runenv_info.append_path("GST_PLUGIN_PATH", os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
         else:
             self.cpp_info.defines.append("GST_LIBAV_STATIC")
-            self.cpp_info.libdirs.append(gst_plugin_path)
-            self.cpp_info.libs.extend([f"gst{plugin}" for plugin in plugins])
+            self.cpp_info.libdirs.append(os.path.join("lib", "gstreamer-1.0"))
+            self.cpp_info.libs = ["gstlibav"]
 
-        self.cpp_info.includedirs = ["include", os.path.join("include", "gstreamer-1.0")]
+        self.cpp_info.requires = [
+            "ffmpeg::avfilter",
+            "ffmpeg::avformat",
+            "ffmpeg::avcodec",
+            "gstreamer::gstreamer-1.0",
+            "gstreamer::gstreamer-base-1.0",
+            "gst-plugins-base::gstreamer-video-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+        ]
