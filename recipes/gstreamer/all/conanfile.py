@@ -123,8 +123,6 @@ class GStreamerConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        gst_plugin_path = os.path.join(self.package_folder, "lib", "gstreamer-1.0")
-
         pkgconfig_variables = {
             "exec_prefix": "${prefix}",
             "toolsdir": "${exec_prefix}/bin",
@@ -146,6 +144,8 @@ class GStreamerConan(ConanFile):
         self.cpp_info.components["gstreamer-1.0"].libs = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
         self.cpp_info.components["gstreamer-1.0"].bindirs = ["bin", os.path.join("bin", "gstreamer-1.0")]
+        if self.options.shared:
+            self.cpp_info.components["gstreamer-1.0"].bindirs.append(os.path.join("lib", "gstreamer-1.0"))
         self.cpp_info.components["gstreamer-1.0"].resdirs = ["res"]
         if self.settings.os == "Linux":
             self.cpp_info.components["gstreamer-1.0"].system_libs = ["m", "dl"]
@@ -187,16 +187,16 @@ class GStreamerConan(ConanFile):
             self.cpp_info.components["gstcoreelements"].requires = ["glib::gobject-2.0", "glib::glib-2.0", "gstreamer-1.0", "gstreamer-base-1.0"]
             self.cpp_info.components["gstcoreelements"].libs = ["gstcoreelements"]
             self.cpp_info.components["gstcoreelements"].includedirs = [os.path.join("include", "gstreamer-1.0")]
-            self.cpp_info.components["gstcoreelements"].libdirs = [gst_plugin_path]
+            self.cpp_info.components["gstcoreelements"].libdirs = [(os.path.join("lib", "gstreamer-1.0"))]
 
             self.cpp_info.components["gstcoretracers"].set_property("pkg_config_name", "gstcoretracers")
             self.cpp_info.components["gstcoretracers"].requires = ["gstreamer-1.0"]
             self.cpp_info.components["gstcoretracers"].libs = ["gstcoretracers"]
             self.cpp_info.components["gstcoretracers"].includedirs = [os.path.join("include", "gstreamer-1.0")]
-            self.cpp_info.components["gstcoretracers"].libdirs = [gst_plugin_path]
+            self.cpp_info.components["gstcoretracers"].libdirs = [(os.path.join("lib", "gstreamer-1.0"))]
 
         if self.options.shared:
-            self.runenv_info.define_path("GST_PLUGIN_PATH", gst_plugin_path)
+            self.runenv_info.define_path("GST_PLUGIN_PATH", os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
         gstreamer_root = self.package_folder
         gst_plugin_scanner = "gst-plugin-scanner.exe" if self.settings.os == "Windows" else "gst-plugin-scanner"
         gst_plugin_scanner = os.path.join(self.package_folder, "bin", "gstreamer-1.0", gst_plugin_scanner)
