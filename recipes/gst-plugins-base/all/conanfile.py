@@ -94,7 +94,7 @@ class GStPluginsBaseConan(ConanFile):
         self.requires(f"gstreamer/{self.version}", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_libalsa"):
-            self.requires("libalsa/1.2.12")
+            self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_libdrm"):
             self.requires("libdrm/2.4.119")
         if self.options.get_safe("with_xorg"):
@@ -119,7 +119,7 @@ class GStPluginsBaseConan(ConanFile):
         if self.options.with_ogg:
             self.requires("ogg/1.3.5")
         if self.options.with_opus:
-            self.requires("opus/1.5.2")
+            self.requires("opus/1.4")
         if self.options.with_theora:
             self.requires("theora/1.1.1")
         if self.options.with_vorbis:
