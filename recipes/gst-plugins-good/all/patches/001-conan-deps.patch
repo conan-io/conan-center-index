@@ -1,0 +1,17 @@
+Index: gst/matroska/meson.build
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/gst/matroska/meson.build b/gst/matroska/meson.build
+--- a/gst/matroska/meson.build	(revision d23663823503d7207ea14d4664cb1434f9a49bb6)
++++ b/gst/matroska/meson.build	(date 1735247548271)
+@@ -12,7 +12,7 @@
+   'lzo.c',
+ ]
+ 
+-bz2_dep = cc.find_library('bz2', required : get_option('bz2'))
++bz2_dep = dependency('bzip2', required : get_option('bz2'))
+ cdata.set('HAVE_BZ2', bz2_dep.found() and cc.has_header('bzlib.h'))
+ 
+ gstmatroska = library('gstmatroska',

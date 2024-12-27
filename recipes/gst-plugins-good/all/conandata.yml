@@ -1,4 +1,9 @@
 sources:
-  "1.19.1":
-    url: "https://gitlab.freedesktop.org/gstreamer/gst-plugins-good/-/archive/1.19.1/gst-plugins-good-1.19.1.tar.bz2"
-    sha256 : "c2c97b8bfeac812dbdca3a72a15a874de4845e4a042693dad8447272c8767a64"
+  "1.24.10":
+    url: "https://gstreamer.freedesktop.org/src/gst-plugins-good/gst-plugins-good-1.24.10.tar.xz"
+    sha256 : "fce748fa66d7a8ee1fb261489e59d01e3fa787623d6d5c35068416fe7cd0acb3"
+patches:
+  "1.24.10":
+    - patch_file: "patches/001-conan-deps.patch"
+      patch_description: "Use Conan dependencies"
+      patch_type: "conan"

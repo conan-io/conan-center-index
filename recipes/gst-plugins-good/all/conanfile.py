@@ -1,204 +1,681 @@
-from conans import ConanFile, tools, Meson, VisualStudioBuildEnvironment
-from conans.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 import glob
 import os
 import shutil
 
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import can_run
+from conan.tools.env import VirtualRunEnv
+from conan.tools.files import chdir, copy, get, rm, rmdir, rename, export_conandata_patches, apply_conandata_patches
+from conan.tools.gnu import PkgConfigDeps
+from conan.tools.layout import basic_layout
+from conan.tools.meson import MesonToolchain, Meson
+from conan.tools.microsoft import is_msvc, check_min_vs, is_msvc_static_runtime
+from conan.tools.scm import Version
+
+required_conan_version = ">=2.4"
+
 
 class GStPluginsGoodConan(ConanFile):
     name = "gst-plugins-good"
-    description = "GStreamer is a development framework for creating applications like media players, video editors, " \
-                  "streaming media broadcasters and so on"
+    description = "A set of good-quality plug-ins for GStreamer under GStreamer's preferred license, LGPL"
     topics = ("gstreamer", "multimedia", "video", "audio", "broadcasting", "framework", "media")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gstreamer.freedesktop.org/"
-    license = "GPL-2.0-only"
+    license = "LGPL-2.1-or-later"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_introspection": [True, False],
-        }
+        "with_asm": [True, False],
+        "with_bz2": [True, False],
+        "with_cairo": [True, False],
+        "with_egl": [True, False],
+        "with_flac": [True, False],
+        "with_gdk_pixbuf": [True, False],
+        "with_gtk": [True, False],
+        "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg", False],
+        "with_libcaca": [True, False],
+        "with_libxml2": [True, False],
+        "with_mp3lame": [True, False],
+        "with_mpg123": [True, False],
+        "with_png": [True, False],
+        "with_pulseaudio": [True, False],
+        "with_qt": [True, False],
+        "with_soup": [True, False],
+        "with_ssl": ["openssl", False],
+        "with_taglib": [True, False],
+        "with_v4l2": [True, False],
+        "with_vpx": [True, False],
+        "with_wayland": [True, False],
+        "with_xorg": [True, False],
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_introspection": False,
-        }
-    _source_subfolder = "source_subfolder"
-    _build_subfolder = "build_subfolder"
-    exports_sources = ["patches/*.patch"]
+        "with_asm": True,
+        "with_bz2": True,
+        "with_cairo": True,
+        "with_egl": True,
+        "with_flac": True,
+        "with_gdk_pixbuf": True,
+        "with_gtk": True,
+        "with_jpeg": "libjpeg",
+        "with_libcaca": True,
+        "with_libxml2": True,
+        "with_mp3lame": True,
+        "with_mpg123": True,
+        "with_png": True,
+        "with_pulseaudio": True,
+        "with_qt": True,
+        "with_soup": True,
+        "with_ssl": "openssl",
+        "with_taglib": True,
+        "with_v4l2": True,
+        "with_vpx": True,
+        "with_wayland": True,
+        "with_xorg": True,
+    }
+    languages = ["C"]
 
-    generators = "pkg_config"
+    def export_sources(self):
+        export_conandata_patches(self)
 
-    def validate(self):
-        if self.options.shared != self.options["gstreamer"].shared or \
-            self.options.shared != self.options["glib"].shared or \
-            self.options.shared != self.options["gst-plugins-base"].shared:
-                # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
-                raise ConanInvalidConfiguration("GLib, GStreamer and GstPlugins must be either all shared, or all static")
-        if tools.Version(self.version) >= "1.18.2" and\
-           self.settings.compiler == "gcc" and\
-           tools.Version(self.settings.compiler.version) < "5":
-            raise ConanInvalidConfiguration(
-                "gst-plugins-good %s does not support gcc older than 5" % self.version
-            )
-        if self.options.shared and str(msvc_runtime_flag(self)).startswith("MT"):
-            raise ConanInvalidConfiguration('shared build with static runtime is not supported due to the FlsAlloc limit')
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        if self.settings.os not in ["Linux", "FreeBSD"]:
+            del self.options.with_v4l2
+            del self.options.with_xorg
+            del self.options.with_wayland
+        if self.settings.arch != "x86_64":
+            del self.options.with_asm
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
-        self.options['gstreamer'].shared = self.options.shared
-        self.options['gst-plugins-base'].shared = self.options.shared
+            self.options.rm_safe("fPIC")
+        if self.options.with_qt:
+            self.options["gst-plugins-base"].with_egl = self.options.with_egl
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.options["gst-plugins-base"].with_xorg = self.options.with_xorg
+                self.options["gst-plugins-base"].with_wayland = self.options.with_wayland
+        else:
+            self.options.rm_safe("with_wayland")
+            self.options.rm_safe("with_egl")
+        self.options["gstreamer"].shared = self.options.shared
+        self.options["gst-plugins-base"].shared = self.options.shared
 
-    def config_options(self):
-        if self.settings.os == 'Windows':
-            del self.options.fPIC
+    def layout(self):
+        basic_layout(self, src_folder="src")
+
+    @property
+    def _qt_options(self):
+        opts = {}
+        opts["qtdeclarative"] = True
+        opts["qtshadertools"] = True
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            opts["with_x11"] = self.options.with_xorg
+            opts["with_egl"] = self.options.with_egl
+            opts["qtwayland"] = self.options.with_wayland
+        return opts
 
     def requirements(self):
-        self.requires("glib/2.70.0")
-        self.requires("gstreamer/1.19.1")
-        self.requires("gst-plugins-base/1.19.1")
+        self.requires(f"gstreamer/{self.version}", transitive_headers=True, transitive_libs=True)
+        self.requires(f"gst-plugins-base/{self.version}", transitive_headers=True, transitive_libs=True)
+
+        self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.with_bz2:
+            self.requires("bzip2/1.0.8")
+        if self.options.with_cairo:
+            self.requires("cairo/1.18.0")
+        if self.options.with_flac:
+            self.requires("flac/1.4.2")
+        if self.options.with_gdk_pixbuf:
+            self.requires("gdk-pixbuf/2.42.10")
+        if self.options.with_gtk:
+            # Only GTK 3 is supported
+            self.requires("gtk/3.24.43")
+        if self.options.with_jpeg == "libjpeg":
+            self.requires("libjpeg/9e")
+        elif self.options.with_jpeg == "libjpeg-turbo":
+            self.requires("libjpeg-turbo/3.0.4")
+        elif self.options.with_jpeg == "mozjpeg":
+            self.requires("mozjpeg/4.1.5")
+        if self.options.with_libcaca:
+            self.requires("libcaca/0.99.beta20")
+        if self.options.with_libxml2:
+            self.requires("libxml2/[>=2.12.5 <3]")
+        if self.options.with_mp3lame:
+            self.requires("libmp3lame/3.100")
+        if self.options.with_mpg123:
+            self.requires("mpg123/1.31.2")
+        if self.options.with_png:
+            self.requires("libpng/[>=1.6 <2]")
+        if self.options.with_pulseaudio:
+            self.requires("pulseaudio/17.0")
+        if self.options.with_qt:
+            self.requires("qt/[>=6.7 <7]", options={
+                **self._qt_options,
+                "qttools": can_run(self)
+            })
+        if self.options.with_soup:
+            self.requires("libsoup/3.6.1")
+        if self.options.with_ssl == "openssl":
+            self.requires("openssl/[>=1.1 <4]")
+        if self.options.with_taglib:
+            self.requires("taglib/2.0")
+        if self.options.get_safe("with_v4l2"):
+            self.requires("libv4l/1.28.1")
+        if self.options.with_vpx:
+            self.requires("libvpx/1.14.1")
+        if self.options.get_safe("with_xorg"):
+            self.requires("xorg/system")
+
+    def validate(self):
+        if (self.options.shared != self.dependencies["gstreamer"].options.shared or
+            self.options.shared != self.dependencies["glib"].options.shared or
+            self.options.shared != self.dependencies["gst-plugins-base"].options.shared):
+                # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
+                raise ConanInvalidConfiguration("GLib, GStreamer and GstPlugins must be either all shared, or all static")
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
+            raise ConanInvalidConfiguration(f"gst-plugins-good {self.version} does not support gcc older than 5")
+        if self.options.shared and is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration("shared build with static runtime is not supported due to the FlsAlloc limit")
+        if self.options.with_qt and not self.dependencies["gst-plugins-base"].options.with_gl:
+            raise ConanInvalidConfiguration("-o with_qt=True requires -o gst-plugins-base/*:with_gl=True")
 
     def build_requirements(self):
-        self.build_requires("meson/[>=1.2.3 <2]")
-        if not tools.which("pkg-config"):
-            self.build_requires("pkgconf/[>=2.2 <3]")
-        if self.settings.os == 'Windows':
-            self.build_requires("winflexbison/2.5.24")
-        else:
-            self.build_requires("bison/3.7.6")
-            self.build_requires("flex/2.6.4")
-        if self.options.with_introspection:
-            self.build_requires("gobject-introspection/1.68.0")
+        self.tool_requires("meson/[>=1.2.3 <2]")
+        self.tool_requires("glib/<host_version>")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
+        if self.options.get_safe("with_asm"):
+            self.tool_requires("nasm/2.16.01")
+        if self.options.with_qt and not can_run(self):
+            self.tool_requires("qt/<host_version>", options={
+                **self._qt_options,
+                "qttools": True
+            })
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version],
-                  destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
-    def _configure_meson(self):
-        defs = dict()
+    def generate(self):
+        if self.options.with_qt and can_run(self):
+            # Required for host-context Qt tools with shared deps
+            VirtualRunEnv(self).generate(scope="build")
 
-        def add_flag(name, value):
-            if name in defs:
-                defs[name] += " " + value
-            else:
-                defs[name] = value
+        tc = MesonToolchain(self)
 
-        def add_compiler_flag(value):
-            add_flag("c_args", value)
-            add_flag("cpp_args", value)
+        if is_msvc(self) and not check_min_vs(self, 190, raise_invalid=False):
+            tc.c_link_args.append("-Dsnprintf=_snprintf")
 
-        def add_linker_flag(value):
-            add_flag("c_link_args", value)
-            add_flag("cpp_link_args", value)
+        def feature(value):
+            return "enabled" if value else "disabled"
 
-        meson = Meson(self)
-        if is_msvc(self):
-            add_linker_flag("-lws2_32")
-            add_compiler_flag("-%s" % self.settings.compiler.runtime)
-            if int(str(self.settings.compiler.version)) < 14:
-                add_compiler_flag("-Dsnprintf=_snprintf")
-        if self.settings.get_safe("compiler.runtime"):
-            defs["b_vscrt"] = str(self.settings.compiler.runtime).lower()
-        defs["tools"] = "disabled"
-        defs["examples"] = "disabled"
-        defs["benchmarks"] = "disabled"
-        defs["tests"] = "disabled"
-        defs["wrap_mode"] = "nofallback"
-        defs["introspection"] = "enabled" if self.options.with_introspection else "disabled"
-        meson.configure(build_folder=self._build_subfolder,
-                        source_folder=self._source_subfolder,
-                        defs=defs)
-        return meson
+        # Feature options for plugins without external deps
+        tc.project_options["alpha"] = "enabled"
+        tc.project_options["apetag"] = "enabled"
+        tc.project_options["audiofx"] = "enabled"
+        tc.project_options["audioparsers"] = "enabled"
+        tc.project_options["auparse"] = "enabled"
+        tc.project_options["autodetect"] = "enabled"
+        tc.project_options["avi"] = "enabled"
+        tc.project_options["cutter"] = "enabled"
+        tc.project_options["debugutils"] = "enabled"
+        tc.project_options["deinterlace"] = "enabled"
+        tc.project_options["dtmf"] = "enabled"
+        tc.project_options["effectv"] = "enabled"
+        tc.project_options["equalizer"] = "enabled"
+        tc.project_options["flv"] = "enabled"
+        tc.project_options["flx"] = "enabled"
+        tc.project_options["goom"] = "enabled"
+        tc.project_options["goom2k1"] = "enabled"
+        tc.project_options["icydemux"] = "enabled"
+        tc.project_options["id3demux"] = "enabled"
+        tc.project_options["imagefreeze"] = "enabled"
+        tc.project_options["interleave"] = "enabled"
+        tc.project_options["isomp4"] = "enabled"
+        tc.project_options["law"] = "enabled"
+        tc.project_options["level"] = "enabled"
+        tc.project_options["matroska"] = "enabled"
+        tc.project_options["monoscope"] = "enabled"
+        tc.project_options["multifile"] = "enabled"
+        tc.project_options["multipart"] = "enabled"
+        tc.project_options["replaygain"] = "enabled"
+        tc.project_options["rtp"] = "enabled"
+        tc.project_options["rtpmanager"] = "enabled"
+        tc.project_options["rtsp"] = "enabled"
+        tc.project_options["shapewipe"] = "enabled"
+        tc.project_options["smpte"] = "enabled"
+        tc.project_options["spectrum"] = "enabled"
+        tc.project_options["udp"] = "enabled"
+        tc.project_options["videobox"] = "enabled"
+        tc.project_options["videocrop"] = "enabled"
+        tc.project_options["videofilter"] = "enabled"
+        tc.project_options["videomixer"] = "enabled"
+        tc.project_options["wavenc"] = "enabled"
+        tc.project_options["wavparse"] = "enabled"
+        tc.project_options["xingmux"] = "enabled"
+        tc.project_options["y4m"] = "enabled"
+
+        # Feature options for plugins with external deps
+        tc.project_options["aalib"] = "disabled"  # TODO: libaa1
+        tc.project_options["adaptivedemux2"] = feature(self.options.with_ssl and self.options.with_libxml2 and self.options.with_soup)
+        tc.project_options["amrnb"] = "disabled"  # TODO: libopencore-amrnb
+        tc.project_options["amrwbdec"] = "disabled"  # TODO: libopencore-amrwbdec
+        tc.project_options["bz2"] = feature(self.options.with_bz2)
+        tc.project_options["cairo"] = feature(self.options.with_cairo)
+        tc.project_options["directsound"] = feature(self.settings.os == "Windows")
+        tc.project_options["dv"] = "disabled"  # TODO: libdv4
+        tc.project_options["dv1394"] = "disabled"  # TODO: libraw1394, libavc1394, libiec61883
+        tc.project_options["flac"] = feature(self.options.with_flac)
+        tc.project_options["gdk-pixbuf"] = feature(self.options.with_gdk_pixbuf)
+        tc.project_options["gtk3"] = feature(self.options.with_gtk)
+        tc.project_options["jack"] = "enabled"  # requires libjack, but only via dlopen
+        tc.project_options["jpeg"] = feature(self.options.with_jpeg)
+        tc.project_options["lame"] = feature(self.options.with_mp3lame)
+        tc.project_options["libcaca"] = feature(self.options.with_libcaca)
+        tc.project_options["mpg123"] = feature(self.options.with_mpg123)
+        tc.project_options["oss"] = feature(self.settings.os in ["Linux", "FreeBSD"])
+        tc.project_options["oss4"] = feature(self.settings.os in ["Linux", "FreeBSD"])
+        tc.project_options["osxaudio"] = feature(is_apple_os(self))
+        tc.project_options["osxvideo"] = feature(is_apple_os(self))
+        tc.project_options["png"] = feature(self.options.with_png)
+        tc.project_options["pulse"] = feature(self.options.with_pulseaudio)
+        tc.project_options["rpicamsrc"] = "disabled" # Raspberry Pi camera module plugin
+        tc.project_options["shout2"] = "disabled"  # TODO: libshout
+        tc.project_options["soup"] = feature(self.options.with_soup)
+        tc.project_options["speex"] = "disabled"  # TODO: libspeex
+        tc.project_options["taglib"] = feature(self.options.with_taglib)
+        tc.project_options["twolame"] = "disabled"  # TODO: libtwolame
+        tc.project_options["v4l2"] = feature(self.options.get_safe("with_v4l2"))
+        tc.project_options["vpx"] = feature(self.options.get_safe("with_vpx"))
+        tc.project_options["waveform"] = feature(self.settings.os == "Windows")
+        tc.project_options["wavpack"] = "disabled"  # TODO: libwavpack
+
+        # HLS plugin options
+        tc.project_options["hls-crypto"] = "openssl"
+
+        # Qt plugin options
+        tc.project_options["qt-method"] = "pkg-config"
+        tc.project_options["qt5"] = feature(self.options.with_qt and Version(self.dependencies["qt"].ref.version).major == 5)
+        tc.project_options["qt6"] = feature(self.options.with_qt and Version(self.dependencies["qt"].ref.version).major == 6)
+        tc.project_options["qt-egl"] = feature(self.options.get_safe("with_egl"))
+        tc.project_options["qt-wayland"] = feature(self.options.get_safe("with_wayland"))
+        tc.project_options["qt-x11"] = feature(self.options.get_safe("with_xorg"))
+
+        # ximagesrc plugin options
+        tc.project_options["ximagesrc"] = feature(self.options.get_safe("with_xorg"))
+        tc.project_options["ximagesrc-xshm"] = feature(self.options.get_safe("with_xorg"))
+        tc.project_options["ximagesrc-xfixes"] = feature(self.options.get_safe("with_xorg"))
+        tc.project_options["ximagesrc-xdamage"] = feature(self.options.get_safe("with_xorg"))
+        tc.project_options["ximagesrc-navigation"] = feature(self.options.get_safe("with_xorg"))
+
+        # Common feature options
+        tc.project_options["doc"] = "disabled"
+        tc.project_options["examples"] = "disabled"
+        tc.project_options["tests"] = "disabled"
+        tc.project_options["nls"] = "disabled"
+        tc.project_options["orc"] = "disabled"
+        tc.project_options["asm"] = feature(self.options.get_safe("with_asm"))
+
+        tc.generate()
+
+        deps = PkgConfigDeps(self)
+        deps.set_property("libmp3lame", "pkg_config_name", "mp3lame")
+        deps.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-
-        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if is_msvc(self) else tools.no_op():
-            meson = self._configure_meson()
-            meson.build()
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def _fix_library_names(self, path):
-        # regression in 1.16
         if is_msvc(self):
-            with tools.chdir(path):
+            with chdir(self, path):
                 for filename_old in glob.glob("*.a"):
                     filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info("rename %s into %s" % (filename_old, filename_new))
+                    self.output.info(f"rename {filename_old} into {filename_new}")
                     shutil.move(filename_old, filename_new)
 
     def package(self):
-        self.copy(pattern="COPYING", dst="licenses", src=self._source_subfolder)
-        with tools.environment_append(VisualStudioBuildEnvironment(self).vars) if is_msvc(self) else tools.no_op():
-            meson = self._configure_meson()
-            meson.install()
-
+        copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        meson = Meson(self)
+        meson.install()
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
         self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
-        tools.rmdir(os.path.join(self.package_folder, "share"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "pkgconfig"))
-        tools.rmdir(os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
-        tools.remove_files_by_mask(self.package_folder, "*.pdb")
+        rename(self, os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-
-        plugins = ["alpha", "alphacolor",
-                   "apetag",
-                   "audiofx",
-                   "audioparsers",
-                   "auparse",
-                   "autodetect",
-                   "avi",
-                   "cutter",
-                   "debug",
-                   "deinterlace",
-                   "dtmf",
-                   "effectv",
-                   "equalizer",
-                   "flv",
-                   "flxdec",
-                   "goom",
-                   "goom2k1",
-                   "icydemux",
-                   "id3demux",
-                   "imagefreeze",
-                   "interleave",
-                   "isomp4",
-                   "alaw", "mulaw",
-                   "level",
-                   "matroska",
-                   "monoscope",
-                   "multifile",
-                   "multipart",
-                   "replaygain",
-                   "rtp",
-                   "rtpmanager",
-                   "rtsp",
-                   "shapewipe",
-                   "smpte",
-                   "spectrum",
-                   "udp",
-                   "videobox",
-                   "videocrop",
-                   "videofilter",
-                   "videomixer",
-                   "wavenc",
-                   "wavparse",
-                   "y4menc"]
-
-        gst_plugin_path = os.path.join(self.package_folder, "lib", "gstreamer-1.0")
         if self.options.shared:
-            self.output.info("Appending GST_PLUGIN_PATH env var : %s" % gst_plugin_path)
-            self.cpp_info.bindirs.append(gst_plugin_path)
-            self.runenv_info.prepend_path("GST_PLUGIN_PATH", gst_plugin_path)
-        else:
-            self.cpp_info.defines.append("GST_PLUGINS_GOOD_STATIC")
-            self.cpp_info.libdirs.append(gst_plugin_path)
-            self.cpp_info.libs.extend(["gst%s" % plugin for plugin in plugins])
+            self.runenv_info.append_path("GST_PLUGIN_PATH", os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
 
-        self.cpp_info.includedirs = ["include", os.path.join("include", "gstreamer-1.0")]
+        def _define_plugin(name, extra_requires):
+            name = f"gst{name}"
+            component = self.cpp_info.components[name]
+            component.requires = [
+                "gstreamer::gstreamer-1.0",
+                "gstreamer::gstreamer-base-1.0",
+            ] + extra_requires
+            component.includedirs = []
+            component.bindirs = []
+            if self.options.shared:
+                component.bindirs.append(os.path.join("lib", "gstreamer-1.0"))
+            else:
+                component.libs = [name]
+                component.libdirs = [os.path.join("lib", "gstreamer-1.0")]
+                if self.settings.os in ["Linux", "FreeBSD"]:
+                    component.system_libs = ["m", "dl"]
+                component.defines.append("GST_PLUGINS_GOOD_STATIC")
+            return component
+
+        if self.options.with_ssl and self.options.with_libxml2 and self.options.with_soup:
+            _define_plugin("adaptivedemux2", [
+                "gst-plugins-base::gstreamer-tag-1.0",
+                "gstreamer::gstreamer-net-1.0",
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "gst-plugins-base::gstreamer-app-1.0",
+                "libxml2::libxml2",
+                "openssl::crypto",
+                "libsoup::libsoup",
+            ])
+        _define_plugin("alaw", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        _define_plugin("alpha", [
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        _define_plugin("alphacolor", [
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        _define_plugin("apetag", [
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+            "gst-plugins-base::gstreamer-tag-1.0",
+        ])
+        _define_plugin("audiofx", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gst-plugins-base::gstreamer-fft-1.0",
+        ])
+        _define_plugin("audioparsers", [
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gst-plugins-base::gstreamer-tag-1.0",
+        ])
+        _define_plugin("auparse", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        _define_plugin("autodetect", [])
+        _define_plugin("avi", [
+            "gst-plugins-base::gstreamer-riff-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gst-plugins-base::gstreamer-video-1.0",
+            "gst-plugins-base::gstreamer-tag-1.0",
+        ])
+        if self.options.with_libcaca:
+            _define_plugin("cacasink", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "libcaca::libcaca",
+            ])
+        if self.options.with_cairo:
+            _define_plugin("cairo", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "cairo::cairo-gobject",
+            ])
+        _define_plugin("cutter", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        _define_plugin("debug", [
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        _define_plugin("deinterlace", [
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        _define_plugin("dtmf", [
+            "gst-plugins-base::gstreamer-rtp-1.0",
+        ])
+        _define_plugin("effectv", [
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        _define_plugin("equalizer", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        if self.options.with_flac:
+            _define_plugin("flac", [
+                "gst-plugins-base::gstreamer-tag-1.0",
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "flac::flac",
+            ])
+        _define_plugin("flv", [
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+            "gst-plugins-base::gstreamer-video-1.0",
+            "gst-plugins-base::gstreamer-tag-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        _define_plugin("flxdec", [
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        if self.options.with_gdk_pixbuf:
+            _define_plugin("gdkpixbuf", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gstreamer::gstreamer-controller-1.0",
+                "gdk-pixbuf::gdk-pixbuf",
+            ])
+        _define_plugin("goom", [
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+        ])
+        _define_plugin("goom2k1", [
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+        ])
+        if self.options.with_gtk:
+            _define_plugin("gtk", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gtk::gtk+-3.0",
+            ])
+        _define_plugin("icydemux", [
+            "gst-plugins-base::gstreamer-tag-1.0",
+            "zlib::zlib",
+        ])
+        _define_plugin("id3demux", [
+            "gst-plugins-base::gstreamer-tag-1.0",
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+        ])
+        _define_plugin("imagefreeze", [])
+        _define_plugin("interleave", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        _define_plugin("isomp4", [
+            "gst-plugins-base::gstreamer-riff-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gst-plugins-base::gstreamer-video-1.0",
+            "gst-plugins-base::gstreamer-rtp-1.0",
+            "gst-plugins-base::gstreamer-tag-1.0",
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+            "zlib::zlib",
+        ])
+        _define_plugin("jack", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        _define_plugin("jpeg", [
+            "gst-plugins-base::gstreamer-video-1.0",
+            "libjpeg::libjpeg",
+        ])
+        _define_plugin("lame", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "libmp3lame::libmp3lame",
+        ])
+        _define_plugin("level", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        if self.options.with_bz2:
+            _define_plugin("matroska", [
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "gst-plugins-base::gstreamer-riff-1.0",
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gst-plugins-base::gstreamer-tag-1.0",
+                "zlib::zlib",
+                "bzip2::bzip2",
+            ])
+        _define_plugin("monoscope", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        if self.options.with_mpg123:
+            _define_plugin("mpg123", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "mpg123::mpg123",
+            ])
+        _define_plugin("mulaw", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        _define_plugin("multifile", [
+            "gst-plugins-base::gstreamer-video-1.0",
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+        ])
+        _define_plugin("multipart", [])
+        _define_plugin("navigationtest", [
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        _define_plugin("oss4", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        _define_plugin("ossaudio", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        if self.options.with_png:
+            _define_plugin("png", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "libpng::libpng",
+            ])
+        if self.options.with_pulseaudio:
+            _define_plugin("pulseaudio", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "pulseaudio::pulseaudio",
+            ])
+        if self.options.with_qt:
+            qt_major = Version(self.dependencies["qt"].ref.version).major
+            qt_plugin = _define_plugin("qml6" if qt_major == 6 else "qmlgl", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gst-plugins-base::gstreamer-gl-1.0",
+                "gst-plugins-base::gstreamer-gl-prototypes-1.0",
+                "qt::qtCore",
+                "qt::qtGui",
+                "qt::qtQml",
+                "qt::qtQuick",
+            ])
+            if self.options.get_safe("with_xorg"):
+                qt_plugin.requires.append("gst-plugins-base::gstreamer-gl-x11-1.0")
+            if self.options.get_safe("with_wayland"):
+                qt_plugin.requires.append("gst-plugins-base::gstreamer-gl-wayland-1.0")
+                qt_plugin.requires.append("qt::qtWaylandClient")
+            if self.options.get_safe("with_egl"):
+                qt_plugin.requires.append("gst-plugins-base::gstreamer-gl-egl-1.0")
+            if self.settings.os == "Windows":
+                qt_plugin.system_libs.append("opengl32")
+            if qt_major == 5:
+                if self.options.get_safe("with_xorg"):
+                    qt_plugin.requires.append("qt::qtX11Extras")
+                if self.settings.os == "Android":
+                    qt_plugin.requires.append("qt::qtAndroidExtras")
+                    qt_plugin.system_libs.append("GLESv2")
+                if is_apple_os(self):
+                    qt_plugin.requires.append("qt::qtMacExtras")
+        _define_plugin("replaygain", [
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        _define_plugin("rtp", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gst-plugins-base::gstreamer-video-1.0",
+            "gst-plugins-base::gstreamer-tag-1.0",
+            "gst-plugins-base::gstreamer-rtp-1.0",
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+        ])
+        _define_plugin("rtpmanager", [
+            "gstreamer::gstreamer-net-1.0",
+            "gst-plugins-base::gstreamer-rtp-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        _define_plugin("rtsp", [
+            "gst-plugins-base::gstreamer-rtp-1.0",
+            "gst-plugins-base::gstreamer-rtsp-1.0",
+            "gst-plugins-base::gstreamer-sdp-1.0",
+            "gstreamer::gstreamer-net-1.0",
+        ])
+        _define_plugin("shapewipe", [
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        _define_plugin("smpte", [
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        if self.options.with_soup:
+            _define_plugin("soup", [
+                "gst-plugins-base::gstreamer-tag-1.0",
+                "libsoup::libsoup",
+            ])
+        _define_plugin("spectrum", [
+            "gst-plugins-base::gstreamer-fft-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        if self.options.with_taglib:
+            _define_plugin("taglib", [
+                "gst-plugins-base::gstreamer-tag-1.0",
+                "taglib::taglib",
+            ])
+        _define_plugin("udp", [
+            "gstreamer::gstreamer-net-1.0",
+        ])
+        if self.options.with_v4l2:
+            _define_plugin("video4linux2", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gst-plugins-base::gstreamer-allocators-1.0",
+                "libv4l::libv4l",
+            ])
+        _define_plugin("videobox", [
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        _define_plugin("videocrop", [
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        _define_plugin("videofilter", [
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        _define_plugin("videomixer", [
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        if self.options.with_vpx:
+            _define_plugin("vpx", [
+                "gst-plugins-base::gstreamer-tag-1.0",
+                "gst-plugins-base::gstreamer-video-1.0",
+                "libvpx::libvpx",
+            ])
+        _define_plugin("wavenc", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gst-plugins-base::gstreamer-riff-1.0",
+        ])
+        _define_plugin("wavparse", [
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+            "gst-plugins-base::gstreamer-riff-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gst-plugins-base::gstreamer-tag-1.0",
+        ])
+        if self.options.get_safe("with_xorg"):
+            _define_plugin("ximagesrc", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "xorg::x11",
+                "xorg::xext",
+                "xorg::xfixes",
+                "xorg::xdamage",
+                "xorg::xtst",
+            ])
+        _define_plugin("xingmux", [])
+        _define_plugin("y4menc", [
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
