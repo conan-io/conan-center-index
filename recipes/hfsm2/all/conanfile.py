@@ -37,7 +37,5 @@ class Hfsm2Conan(ConanFile):
         copy(self, "*.hpp", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include"))
 
     def package_info(self):
-        # For header-only packages, libdirs and bindirs are not used
-        # so it's necessary to set those as empty.
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
