@@ -17,7 +17,7 @@ required_conan_version = ">=2.4"
 
 class GStPluginsBaseConan(ConanFile):
     name = "gst-plugins-base"
-    description = "GStreamer is a development framework for creating applications like media players, video editors, streaming media broadcasters and so on"
+    description = "Base GStreamer plug-ins and helper libraries"
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gstreamer.freedesktop.org/"
@@ -283,6 +283,10 @@ class GStPluginsBaseConan(ConanFile):
         copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         meson = Meson(self)
         meson.install()
+        # The generated config headers (such as gst/gl/gstglconfig.h) are not installed for some reason
+        copy(self, "*config.h",
+             os.path.join(self.build_folder, "gst-libs"),
+             os.path.join(self.package_folder, "include", "gstreamer-1.0"))
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
         self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
         rename(self, os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
@@ -316,8 +320,10 @@ class GStPluginsBaseConan(ConanFile):
                 "gstreamer::gstreamer-1.0",
                 "gstreamer::gstreamer-base-1.0",
             ] + extra_requires
+            component.includedirs = []
+            component.bindirs = []
             if self.options.shared:
-                component.bindirs.append(os.path.join("bin", "gstreamer-1.0"))
+                component.bindirs.append(os.path.join("lib", "gstreamer-1.0"))
             else:
                 component.libs = [name]
                 component.libdirs = [os.path.join("lib", "gstreamer-1.0")]
