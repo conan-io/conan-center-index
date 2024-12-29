@@ -172,7 +172,7 @@ class GStPluginsBadConan(ConanFile):
         if self.options.with_libde265:
             self.requires("libde265/1.0.15")
         if self.options.get_safe("with_libssh2"):
-            self.requires("libssh2/1.11.1")
+            self.requires("libssh2/1.11.1", options={"shared": True})
         if self.options.with_libva:
             self.requires("libva/2.21.0")
         if self.options.with_libxml2:
@@ -258,6 +258,8 @@ class GStPluginsBadConan(ConanFile):
             raise ConanInvalidConfiguration(f"gst-plugins-good {self.version} does not support gcc older than 5")
         if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("shared build with static runtime is not supported due to the FlsAlloc limit")
+        if self.options.get_safe("with_libssh2") and not self.dependencies["libssh2"].options.shared:
+            raise ConanInvalidConfiguration("libssh2 must be built as a shared library")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
@@ -573,7 +575,7 @@ class GStPluginsBadConan(ConanFile):
                 "gstreamer::gstreamer-base-1.0",
             ] + extra_requires
             if not interface:
-                component.libs = [f"gst{name}-1.0"]
+                component.libs = [f"gst{name.replace('-', '')}-1.0"]
                 component.includedirs = [os.path.join("include", "gstreamer-1.0")]
                 component.set_property("pkg_config_custom_content", pkgconfig_custom_content)
                 if self.settings.os in ["Linux", "FreeBSD"] and not self.options.shared:
@@ -596,7 +598,7 @@ class GStPluginsBadConan(ConanFile):
                 component.libdirs = [os.path.join("lib", "gstreamer-1.0")]
                 if self.settings.os in ["Linux", "FreeBSD"]:
                     component.system_libs = ["m", "dl"]
-                component.defines.append("GST_PLUGINS_GOOD_STATIC")
+                component.defines.append("GST_PLUGINS_BAD_STATIC")
             return component
 
         # Libraries
@@ -644,17 +646,17 @@ class GStPluginsBadConan(ConanFile):
                 _define_library("vulkan-wayland", [
                     "gstreamer-vulkan-1.0",
                     "wayland::wayland-client",
-                ])
+                ], interface=True)
             if self.options.get_safe("with_xorg"):
                 gst_vulkan.requires.extend([
                     "xorg::xcb",
                     "xkbcommon::libxkbcommon",
-                    "xkbcommon::xkbcommon-x11",
+                    "xkbcommon::libxkbcommon-x11",
                 ])
                 _define_library("vulkan-xcb", [
                     "gstreamer-vulkan-1.0",
                     "xorg::xcb",
-                ])
+                ], interface=True)
         if self.options.get_safe("with_wayland"):
             _define_library("wayland", [
                 "gst-plugins-base::gstreamer-allocators-1.0",
@@ -744,7 +746,9 @@ class GStPluginsBadConan(ConanFile):
                 "lcms::lcms",
             ])
         if self.options.with_libcurl:
-            _define_plugin("curl", ["libcurl::libcurl"])
+            gst_curl = _define_plugin("curl", ["libcurl::libcurl"])
+            if self.options.with_libssh2:
+                gst_curl.requires.append("libssh2::libssh2")
         if self.options.with_libxml2:
             _define_plugin("dash", [
                 "gstreamer::gstreamer-net-1.0",
@@ -797,12 +801,12 @@ class GStPluginsBadConan(ConanFile):
         _define_plugin("gdp", [])
         _define_plugin("geometrictransform", ["gst-plugins-base::gstreamer-video-1.0"])
         if self.options.with_google_cloud_storage:
-            _define_plugin("gs", ["google-cloud-cpp::google_cloud_cpp_storage"])
+            _define_plugin("gs", ["google-cloud-cpp::storage"])
         if self.options.with_gtk and self.options.get_safe("with_wayland") and self.options.with_libdrm:
             _define_plugin("gtkwayland", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-allocators-1.0",
-                "gst-plugins-base::gstreamer-wayland-1.0",
+                "gstreamer-wayland-1.0",
                 "gtk::gtk+-3.0",
                 "libdrm::libdrm_libdrm",
                 "wayland::wayland-client",
@@ -881,7 +885,6 @@ class GStPluginsBadConan(ConanFile):
                 "opencv::opencv_objdetect",
                 "opencv::opencv_tracking",
                 "opencv::opencv_video",
-                "opencv::opencv_opencv",
             ])
         if self.options.with_openexr:
             _define_plugin("openexr", [
@@ -1041,9 +1044,9 @@ class GStPluginsBadConan(ConanFile):
             ])
         if self.options.with_wayland and self.options.with_libdrm:
             _define_plugin("waylandsink", [
-                "gst-plugins-base::gstreamer-wayland-1.0",
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-allocators-1.0",
+                "gstreamer-wayland-1.0",
                 "libdrm::libdrm_libdrm",
                 "wayland::wayland-client",
             ])
@@ -1082,5 +1085,5 @@ class GStPluginsBadConan(ConanFile):
         if self.options.with_zxing:
             _define_plugin("zxing", [
                 "gst-plugins-base::gstreamer-video-1.0",
-                "zxing::zxing",
+                "zxing-cpp::zxing-cpp",
             ])
