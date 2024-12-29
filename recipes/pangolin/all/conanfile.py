@@ -120,7 +120,6 @@ class PangolinConan(ConanFile):
         if self.options.get_safe("with_wayland"):
             # Wayland 1.20+ is not compatible as of v0.9.1
             self.requires("wayland/1.19.0")
-            self.requires("wayland-protocols/1.33")
             self.requires("xkbcommon/1.6.0")
         if self.options.get_safe("with_x11"):
             # https://github.com/stevenlovegrove/Pangolin/blob/v0.9.1/components/pango_windowing/include/pangolin/windowing/X11Window.h#L35
@@ -182,6 +181,8 @@ class PangolinConan(ConanFile):
         if self.options.get_safe("with_wayland"):
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
                 self.tool_requires("pkgconf/[>=2.2 <3]")
+        if self.options.get_safe("with_wayland"):
+            self.requires("wayland-protocols/1.33")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -234,6 +235,7 @@ class PangolinConan(ConanFile):
 
         if self.options.get_safe("with_wayland"):
             deps = PkgConfigDeps(self)
+            deps.build_context_activated.append("wayland-protocols")
             deps.generate()
 
     def _patch_sources(self):
@@ -352,7 +354,6 @@ class PangolinConan(ConanFile):
                 "wayland::wayland-client",
                 "wayland::wayland-cursor",
                 "wayland::wayland-egl",
-                "wayland-protocols::wayland-protocols",
                 "xkbcommon::xkbcommon",
             ])
         if self.options.get_safe("with_x11"):
