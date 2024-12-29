@@ -140,7 +140,6 @@ class GtkConan(ConanFile):
             self.requires("libdrm/2.4.120")
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0")
-            self.requires("wayland-protocols/1.36")
             self.requires("xkbcommon/1.6.0")
         if self.options.get_safe("with_x11"):
             # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.10.0/gdk/x11/gdkx11display.h#L35-36
@@ -200,6 +199,8 @@ class GtkConan(ConanFile):
         self.tool_requires("sassc/3.6.2")
         if self.options.with_vulkan:
             self.tool_requires("shaderc/2024.1")  # for glslc
+        if self.options.get_safe("with_wayland"):
+            self.tool_requires("wayland-protocols/1.36")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.78.1")  # for g-ir-scanner
 
@@ -283,6 +284,8 @@ class GtkConan(ConanFile):
         tc.generate()
 
         deps = PkgConfigDeps(self)
+        if self.options.get_safe("with_wayland"):
+            deps.build_context_activated.append("wayland-protocols")
         if self.options.with_introspection:
             # gnome.generate_gir() in Meson looks for gobject-introspection-1.0.pc
             deps.build_context_activated = ["gobject-introspection"]
@@ -399,7 +402,6 @@ class GtkConan(ConanFile):
                 "xkbcommon::xkbcommon",
                 "wayland::wayland-client",
                 "wayland::wayland-egl",
-                "wayland-protocols::wayland-protocols",
             ])
 
         if is_apple_os(self):
