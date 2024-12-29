@@ -6,8 +6,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run
-from conan.tools.files import chdir, copy, get, rm, rmdir, rename, export_conandata_patches, apply_conandata_patches, \
-    replace_in_file
+from conan.tools.files import chdir, copy, get, rm, rmdir, rename, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
@@ -39,6 +38,7 @@ class GStPluginsBadConan(ConanFile):
         "with_libdc1394": [True, False],
         "with_libde265": [True, False],
         "with_libssh2": [True, False],
+        "with_libva": [True, False],
         "with_libxml2": [True, False],
         "with_modplug": [True, False],
         "with_nice": [True, False],
@@ -63,9 +63,11 @@ class GStPluginsBadConan(ConanFile):
         "with_tinyalsa": [True, False],
         "with_voamrwbenc": [True, False],
         "with_vulkan": [True, False],
+        "with_wayland": [True, False],
         "with_webp": [True, False],
         "with_wildmidi": [True, False],
         "with_x265": [True, False],
+        "with_xorg": [True, False],
         "with_zbar": [True, False],
         "with_zxing": [True, False],
     }
@@ -84,6 +86,7 @@ class GStPluginsBadConan(ConanFile):
         "with_libdc1394": True,
         "with_libde265": True,
         "with_libssh2": True,
+        "with_libva": True,
         "with_libxml2": True,
         "with_modplug": True,
         "with_nice": True,
@@ -108,12 +111,15 @@ class GStPluginsBadConan(ConanFile):
         "with_tinyalsa": True,
         "with_voamrwbenc": True,
         "with_vulkan": True,
+        "with_wayland": True,
         "with_webp": True,
         "with_wildmidi": True,
         "with_x265": True,
+        "with_xorg": True,
         "with_zbar": True,
         "with_zxing": True,
     }
+    languages = ["C"]
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -121,12 +127,17 @@ class GStPluginsBadConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if not self.settings not in ["Linux", "FreeBSD"]:
+            del self.options.with_xorg
+            del self.options.with_wayland
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if not self.options.with_libcurl:
             del self.options.with_libssh2
+        if self.options.get_safe("with_wayland"):
+            self.options.with_libdrm = True
         self.options["gstreamer"].shared = self.options.shared
         self.options["gst-plugins-base"].shared = self.options.shared
 
@@ -162,6 +173,8 @@ class GStPluginsBadConan(ConanFile):
             self.requires("libde265/1.0.15")
         if self.options.get_safe("with_libssh2"):
             self.requires("libssh2/1.11.1")
+        if self.options.with_libva:
+            self.requires("libva/2.21.0")
         if self.options.with_libxml2:
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_lcms:
@@ -218,10 +231,16 @@ class GStPluginsBadConan(ConanFile):
             self.requires("vo-amrwbenc/0.1.3")
         if self.options.with_vulkan:
             self.requires("vulkan-loader/1.3.290.0")
+            if self.options.get_safe("with_wayland") or self.options.get_safe("with_xorg"):
+                self.requires("xkbcommon/1.6.0")
+        if self.options.get_safe("with_wayland"):
+            self.requires("wayland/1.22.0")
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
         if self.options.with_wildmidi:
             self.requires("wildmidi/0.4.5")
+        if self.options.with_xorg:
+            self.requires("xorg/system")
         if self.options.with_x265:
             self.requires("libx265/3.4")
         if self.options.with_zbar:
@@ -247,6 +266,8 @@ class GStPluginsBadConan(ConanFile):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         if self.options.with_vulkan:
             self.tool_requires("shaderc/2024.1")
+        if self.options.get_safe("with_wayland"):
+            self.tool_requires("wayland-protocols/1.33")
         if self.options.with_qt and not can_run(self):
             self.tool_requires("qt/<host_version>", options={
                 "qtdeclarative": True,
@@ -313,7 +334,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["ivtc"] = "enabled"
         tc.project_options["jp2kdecimator"] = "enabled"
         tc.project_options["jpegformat"] = "enabled"
-        tc.project_options["librfb"] = "enabled"
+        tc.project_options["librfb"] = feature(self.options.get_safe("with_xorg"))
         tc.project_options["midi"] = "enabled"
         tc.project_options["mpegdemux"] = "enabled"
         tc.project_options["mpegpsmux"] = "enabled"
@@ -351,10 +372,10 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["opencv"] = feature(self.options.with_opencv)
 
         # Feature options for optional deps in plugins
-        # option('drm', type : 'feature', value : 'auto', description: 'libdrm support in the GstVA library')
-        # option('udev', type : 'feature', value : 'auto', description: 'gudev support in the new VA-API plugin')
-        # option('wayland', type : 'feature', value : 'auto', description : 'Wayland plugin/library, support in the Vulkan plugin')
-        # option('x11', type : 'feature', value : 'auto', description : 'X11 support in Vulkan, GL and rfb plugins')
+        tc.project_options["drm"] = feature(self.options.with_libdrm)
+        tc.project_options["udev"] = "disabled"  # gudev-1.0
+        tc.project_options["wayland"] = feature(self.options.get_safe("with_wayland"))
+        tc.project_options["x11"] = feature(self.options.get_safe("with_xorg"))
 
         # Feature options for plugins that need external deps
         tc.project_options["aes"] = feature(self.options.with_ssl == "openssl")
@@ -452,7 +473,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["uvcgadget"] = "disabled"  # gudev-1.0
         tc.project_options["uvch264"] = "disabled"  # gudev-1.0
         tc.project_options["v4l2codecs"] = "disabled"  # gudev-1.0
-        tc.project_options["va"] = "enabled"  # TODO
+        tc.project_options["va"] = feature(self.options.with_libva)
         tc.project_options["voaacenc"] = "disabled"  # vo-aacenc
         tc.project_options["voamrwbenc"] = feature(self.options.with_voamrwbenc)
         tc.project_options["vulkan"] = feature(self.options.with_vulkan)
@@ -501,6 +522,8 @@ class GStPluginsBadConan(ConanFile):
 
         deps = PkgConfigDeps(self)
         deps.set_property("wildmidi", "pkg_config_name", "WildMIDI")
+        if self.options.get_safe("with_wayland"):
+            deps.build_context_activated.append("wayland-protocols")
         deps.generate()
 
     def build(self):
@@ -528,8 +551,34 @@ class GStPluginsBadConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        if self.options.shared:
-            self.runenv_info.append_path("GST_PLUGIN_PATH", os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
+        pkgconfig_variables = {
+            "exec_prefix": "${prefix}",
+            "toolsdir": "${exec_prefix}/bin",
+            "pluginsdir": "${libdir}/gstreamer-1.0",
+            "datarootdir": "${prefix}/res",
+            "datadir": "${datarootdir}",
+            "girdir": "${datadir}/gir-1.0",
+            "typelibdir": "${libdir}/girepository-1.0",
+            "libexecdir": "${prefix}/libexec",
+            "pluginscannerdir": "${libexecdir}/gstreamer-1.0",
+        }
+        pkgconfig_custom_content = "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items())
+
+        def _define_library(name, extra_requires, interface=False):
+            component_name = f"gstreamer-{name}-1.0"
+            component = self.cpp_info.components[component_name]
+            component.set_property("pkg_config_name", component_name)
+            component.requires = [
+                "gstreamer::gstreamer-1.0",
+                "gstreamer::gstreamer-base-1.0",
+            ] + extra_requires
+            if not interface:
+                component.libs = [f"gst{name}-1.0"]
+                component.includedirs = [os.path.join("include", "gstreamer-1.0")]
+                component.set_property("pkg_config_custom_content", pkgconfig_custom_content)
+                if self.settings.os in ["Linux", "FreeBSD"] and not self.options.shared:
+                    component.system_libs = ["m", "dl", "rt"]
+            return component
 
         def _define_plugin(name, extra_requires):
             name = f"gst{name}"
@@ -550,71 +599,488 @@ class GStPluginsBadConan(ConanFile):
                 component.defines.append("GST_PLUGINS_GOOD_STATIC")
             return component
 
-        plugins = [
-            "accurip",
-            "adpcmdec",
-            "adpcmenc",
-            "aiff",
-            "asfmux",
-            "audiobuffersplit",
-            "audiofxbad",
-            "audiolatency",
-            "audiomixmatrix",
-            "audiovisualizers",
-            "autoconvert",
-            "bayer",
-            "camerabin",
-            "codecalpha",
-            "coloreffects",
-            "debugutilsbad",
-            "dvbsubenc",
-            "dvbsuboverlay",
-            "dvdspu",
-            "faceoverlay",
-            "festival",
-            "fieldanalysis",
-            "freeverb",
-            "frei0r",
-            "gaudieffects",
-            "gdp",
-            "geometrictransform",
-            "id3tag",
-            "inter",
-            "interlace",
-            "ivfparse",
-            "ivtc",
-            "jp2kdecimator",
-            "jpegformat",
-            "rfbsrc",
-            "midi",
-            "mpegpsdemux",
-            "mpegpsmux",
-            "mpegtsdemux",
-            "mpegtsmux",
-            "mxf",
-            "netsim",
-            "rtponvif",
-            "pcapparse",
-            "pnm",
-            "proxy",
-            "legacyrawparse",
-            "removesilence",
-            "rist",
-            "rtmp2",
-            "rtpmanagerbad",
-            "sdpelem",
-            "segmentclip",
-            "siren",
-            "smooth",
-            "speed",
-            "subenc",
-            "switchbin",
-            "timecode",
-            "transcode",
-            "videofiltersbad",
-            "videoframe_audiolevel",
-            "videoparsersbad",
-            "videosignal",
-            "vmnc",
-            "y4mdec"
-        ]
+        # Libraries
+        _define_library("analytics", ["gst-plugins-base::gstreamer-video-1.0"])
+        _define_library("bad-audio", ["gst-plugins-base::gstreamer-audio-1.0"])
+        _define_library("codecparsers", [])
+        _define_library("cuda", ["gst-plugins-base::gstreamer-video-1.0", "gst-plugins-base::gstreamer-gl-prototypes-1.0"])
+        _define_library("insertbin", [])
+        _define_library("mpegts", [])
+        _define_library("mse", ["gst-plugins-base::gstreamer-app-1.0"])
+        _define_library("photography", [])
+        _define_library("play", [
+            "gst-plugins-base::gstreamer-video-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gst-plugins-base::gstreamer-tag-1.0",
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+        ])
+        _define_library("player", [
+            "gst-plugins-base::gstreamer-video-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gst-plugins-base::gstreamer-tag-1.0",
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+            "gstreamer-play-1.0",
+        ])
+        _define_library("sctp", [])
+        _define_library("transcoder", ["gst-plugins-base::gstreamer-pbutils-1.0"])
+        if self.options.with_libva and (self.options.with_libdrm or self.settings.os != "Linux"):
+            libva = _define_library("va", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gst-plugins-base::gstreamer-allocators-1.0",
+                "libva::libva_",
+            ])
+            if self.options.with_libdrm:
+                libva.requires.extend([
+                    "libva::libva-drm",
+                    "libdrm::libdrm_libdrm",
+                ])
+        if self.options.with_vulkan:
+            gst_vulkan = _define_library("vulkan", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "vulkan-loader::vulkan-loader",
+            ])
+            if self.options.get_safe("with_wayland"):
+                gst_vulkan.requires.append("wayland::wayland-client")
+                _define_library("vulkan-wayland", [
+                    "gstreamer-vulkan-1.0",
+                    "wayland::wayland-client",
+                ])
+            if self.options.get_safe("with_xorg"):
+                gst_vulkan.requires.extend([
+                    "xorg::xcb",
+                    "xkbcommon::libxkbcommon",
+                    "xkbcommon::xkbcommon-x11",
+                ])
+                _define_library("vulkan-xcb", [
+                    "gstreamer-vulkan-1.0",
+                    "xorg::xcb",
+                ])
+        if self.options.get_safe("with_wayland"):
+            _define_library("wayland", [
+                "gst-plugins-base::gstreamer-allocators-1.0",
+                "gst-plugins-base::gstreamer-video-1.0",
+                "libdrm::libdrm_libdrm",
+                "wayland::wayland-client",
+            ])
+        _define_library("webrtc", ["gst-plugins-base::gstreamer-sdp-1.0"])
+        if self.options.with_nice:
+            _define_library("webrtc-nice", [
+                "gst-plugins-base::gstreamer-sdp-1.0",
+                "gstreamer-webrtc-1.0",
+                "libnice::libnice",
+            ])
+
+        # Plugins
+        _define_plugin("accurip", ["gst-plugins-base::gstreamer-audio-1.0"])
+        _define_plugin("adpcmdec", ["gst-plugins-base::gstreamer-audio-1.0"])
+        _define_plugin("adpcmenc", ["gst-plugins-base::gstreamer-audio-1.0"])
+        if self.options.with_ssl:
+            _define_plugin("aes", [
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "gst-plugins-base::gstreamer-video-1.0",
+                "openssl::openssl",
+            ])
+        _define_plugin("aiff", [
+            "gst-plugins-base::gstreamer-tag-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+        ])
+        if self.options.with_pango:
+            _define_plugin("analyticsoverlay", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gstreamer-analytics-1.0",
+                "pango::pangocairo",
+            ])
+        if self.options.with_aom:
+            _define_plugin("aom", [
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "gst-plugins-base::gstreamer-video-1.0",
+                "libaom-av1::libaom-av1",
+            ])
+        _define_plugin("asfmux", ["gst-plugins-base::gstreamer-rtp-1.0"])
+        _define_plugin("audiobuffersplit", ["gst-plugins-base::gstreamer-audio-1.0"])
+        _define_plugin("audiofxbad", ["gst-plugins-base::gstreamer-audio-1.0"])
+        _define_plugin("audiolatency", [])
+        _define_plugin("audiomixmatrix", ["gst-plugins-base::gstreamer-audio-1.0"])
+        _define_plugin("audiovisualizers", [
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gst-plugins-base::gstreamer-video-1.0",
+            "gst-plugins-base::gstreamer-fft-1.0",
+        ])
+        _define_plugin("autoconvert", [
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        _define_plugin("bayer", ["gst-plugins-base::gstreamer-video-1.0"])
+        if self.options.with_bz2:
+            _define_plugin("bz2", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "bzip2::bzip2",
+            ])
+        _define_plugin("camerabin", [
+            "gst-plugins-base::gstreamer-app-1.0",
+            "gst-plugins-base::gstreamer-tag-1.0",
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+            "gstreamer-photography-1.0",
+        ])
+        if self.options.with_pango:
+            _define_plugin("closedcaption", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "pango::pangocairo",
+            ])
+        _define_plugin("codecalpha", [
+            "gst-plugins-base::gstreamer-video-1.0",
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+        ])
+        _define_plugin("codectimestamper", [
+            "gst-plugins-base::gstreamer-video-1.0",
+            "gstreamer-codecparsers-1.0",
+        ])
+        _define_plugin("coloreffects", ["gst-plugins-base::gstreamer-video-1.0"])
+        if self.options.with_lcms:
+            _define_plugin("colormanagement", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "lcms::lcms",
+            ])
+        if self.options.with_libcurl:
+            _define_plugin("curl", ["libcurl::libcurl"])
+        if self.options.with_libxml2:
+            _define_plugin("dash", [
+                "gstreamer::gstreamer-net-1.0",
+                "gst-plugins-base::gstreamer-tag-1.0",
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "libxml2::libxml2",
+            ])
+        if self.options.with_libdc1394:
+            _define_plugin("dc1394", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "libdc1394::libdc1394",
+            ])
+        if self.options.with_libde265:
+            _define_plugin("de265", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "libde265::libde265",
+            ])
+        _define_plugin("debugutilsbad", [
+            "gstreamer::gstreamer-net-1.0",
+            "gst-plugins-base::gstreamer-video-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        _define_plugin("decklink", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
+        if self.options.with_ssl:
+            _define_plugin("dtls", ["openssl::openssl"])
+        _define_plugin("dvb", ["gstreamer-mpegts-1.0"])
+        _define_plugin("dvbsubenc", ["gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("dvbsuboverlay", ["gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("dvdspu", ["gst-plugins-base::gstreamer-video-1.0"])
+        if self.options.with_faac:
+            _define_plugin("faac", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "gst-plugins-base::gstreamer-tag-1.0",
+                "faac::faac",
+            ])
+        _define_plugin("faceoverlay", ["gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("fbdevsink", ["gst-plugins-base::gstreamer-video-1.0"])
+        if self.options.with_fdk_aac:
+            _define_plugin("fdkaac", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "libfdk_aac::libfdk_aac",
+            ])
+        _define_plugin("festival", ["gst-plugins-base::gstreamer-audio-1.0"])
+        _define_plugin("fieldanalysis", ["gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("freeverb", ["gst-plugins-base::gstreamer-audio-1.0"])
+        _define_plugin("frei0r", ["gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("gaudieffects", ["gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("gdp", [])
+        _define_plugin("geometrictransform", ["gst-plugins-base::gstreamer-video-1.0"])
+        if self.options.with_google_cloud_storage:
+            _define_plugin("gs", ["google-cloud-cpp::google_cloud_cpp_storage"])
+        if self.options.with_gtk and self.options.get_safe("with_wayland") and self.options.with_libdrm:
+            _define_plugin("gtkwayland", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gst-plugins-base::gstreamer-allocators-1.0",
+                "gst-plugins-base::gstreamer-wayland-1.0",
+                "gtk::gtk+-3.0",
+                "libdrm::libdrm_libdrm",
+                "wayland::wayland-client",
+            ])
+        if self.options.with_ssl:
+            _define_plugin("hls", [
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "gst-plugins-base::gstreamer-tag-1.0",
+                "gst-plugins-base::gstreamer-video-1.0",
+                "openssl::openssl",
+            ])
+        _define_plugin("id3tag", ["gst-plugins-base::gstreamer-tag-1.0"])
+        _define_plugin("insertbin", ["gstreamer-insertbin-1.0"])
+        _define_plugin("interlace", ["gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("inter", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("ipcpipeline", [])
+        _define_plugin("ivfparse", [])
+        _define_plugin("ivtc", ["gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("jp2kdecimator", [])
+        _define_plugin("jpegformat", [
+            "gst-plugins-base::gstreamer-video-1.0",
+            "gst-plugins-base::gstreamer-tag-1.0",
+            "gstreamer-codecparsers-1.0",
+        ])
+        if self.options.with_libdrm:
+            _define_plugin("kms", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gst-plugins-base::gstreamer-allocators-1.0",
+                "libdrm::libdrm_libdrm",
+            ])
+        _define_plugin("legacyrawparse", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("midi", ["gst-plugins-base::gstreamer-tag-1.0"])
+        if self.options.with_modplug:
+            _define_plugin("modplug", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "libmodplug::libmodplug",
+            ])
+        _define_plugin("mpegpsdemux", [
+            "gst-plugins-base::gstreamer-tag-1.0",
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+        ])
+        _define_plugin("mpegpsmux", [])
+        _define_plugin("mpegtsdemux", [
+            "gst-plugins-base::gstreamer-tag-1.0",
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gstreamer-codecparsers-1.0",
+            "gstreamer-mpegts-1.0",
+        ])
+        _define_plugin("mpegtsmux", [
+            "gst-plugins-base::gstreamer-tag-1.0",
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gst-plugins-base::gstreamer-video-1.0",
+            "gstreamer-mpegts-1.0",
+        ])
+        _define_plugin("mse", [
+            "gst-plugins-base::gstreamer-app-1.0",
+            "gstreamer-mse-1.0",
+        ])
+        _define_plugin("mxf", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("netsim", [])
+        if self.options.with_openal:
+            _define_plugin("openal", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "openal-soft::openal-soft",
+            ])
+        if self.options.with_opencv:
+            _define_plugin("opencv", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "opencv::opencv_bgsegm",
+                "opencv::opencv_calib3d",
+                "opencv::opencv_core",
+                "opencv::opencv_imgcodecs",
+                "opencv::opencv_imgproc",
+                "opencv::opencv_objdetect",
+                "opencv::opencv_tracking",
+                "opencv::opencv_video",
+                "opencv::opencv_opencv",
+            ])
+        if self.options.with_openexr:
+            _define_plugin("openexr", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "openexr::openexr_ilmimf",
+            ])
+        if self.options.with_openh264:
+            _define_plugin("openh264", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "openh264::openh264",
+            ])
+        if self.options.with_openjpeg:
+            _define_plugin("openjpeg", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gstreamer-codecparsers-1.0",
+                "openjpeg::openjpeg",
+            ])
+        if self.options.with_openni2:
+            _define_plugin("openni2", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "openni2::openni2",
+            ])
+        if self.options.with_opus:
+            _define_plugin("opusparse", [
+                "gst-plugins-base::gstreamer-rtp-1.0",
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "gst-plugins-base::gstreamer-tag-1.0",
+                "opus::opus",
+            ])
+        _define_plugin("pcapparse", [])
+        _define_plugin("pnm", ["gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("proxy", [])
+        if self.options.with_libva and (self.options.with_libdrm or self.settings.os != "Linux"):
+            _define_plugin("qsv", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gst-plugins-base::gstreamer-allocators-1.0",
+                "gstreamer-codecparsers-1.0",
+                "gstreamer-va-1.0",
+            ])
+        _define_plugin("removesilence", ["gst-plugins-base::gstreamer-audio-1.0"])
+        if self.options.get_safe("with_xorg"):
+            _define_plugin("rfbsrc", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "xorg::x11",
+            ])
+        _define_plugin("rist", [
+            "gst-plugins-base::gstreamer-rtp-1.0",
+            "gstreamer::gstreamer-net-1.0",
+        ])
+        if self.options.with_rsvg:
+            _define_plugin("rsvg", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "librsvg::librsvg",
+            ])
+        _define_plugin("rtmp2", [])
+        _define_plugin("rtpmanagerbad", [
+            "gstreamer::gstreamer-net-1.0",
+            "gstreamer::gstreamer-controller-1.0",
+            "gst-plugins-base::gstreamer-rtp-1.0",
+        ])
+        _define_plugin("rtponvif", ["gst-plugins-base::gstreamer-rtp-1.0"])
+        if self.options.with_sctp:
+            _define_plugin("sctp", [
+                "gstreamer-sctp-1.0",
+                "usrsctp::usrsctp",
+            ])
+        _define_plugin("sdpelem", [
+            "gst-plugins-base::gstreamer-rtp-1.0",
+            "gst-plugins-base::gstreamer-app-1.0",
+            "gst-plugins-base::gstreamer-sdp-1.0",
+        ])
+        _define_plugin("segmentclip", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("shm", [])
+        _define_plugin("siren", ["gst-plugins-base::gstreamer-audio-1.0"])
+        _define_plugin("smooth", ["gst-plugins-base::gstreamer-video-1.0"])
+        if self.options.with_libxml2:
+            _define_plugin("smoothstreaming", [
+                "gstreamer-codecparsers-1.0",
+                "libxml2::libxml2",
+            ])
+        if self.options.with_sndfile:
+            _define_plugin("sndfile", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "libsndfile::libsndfile",
+            ])
+        if self.options.with_soundtouch:
+            _define_plugin("soundtouch", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "soundtouch::soundtouch",
+            ])
+        _define_plugin("speed", ["gst-plugins-base::gstreamer-audio-1.0"])
+        if self.options.with_srt:
+            _define_plugin("srt", [
+                "srt::srt",
+            ])
+        if self.options.with_srtp:
+            _define_plugin("srtp", [
+                "gst-plugins-base::gstreamer-rtp-1.0",
+                "gst-plugins-base::gstreamer-video-1.0",
+                "libsrtp::libsrtp",
+            ])
+        _define_plugin("subenc", [])
+        if self.options.with_svtav1:
+            _define_plugin("svtav1", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "libsvtav1::encoder",
+            ])
+        _define_plugin("switchbin", [])
+        _define_plugin("timecode", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
+        if self.options.with_tinyalsa:
+            _define_plugin("tinyalsa", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "tinyalsa::tinyalsa",
+            ])
+        _define_plugin("transcode", [
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+        ])
+        if self.options.with_pango and self.options.with_libxml2:
+            _define_plugin("ttmlsubs", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "libxml2::libxml2",
+                "pango::pangocairo",
+            ])
+        if self.settings.os != "Windows":
+            _define_plugin("unixfd", ["gst-plugins-base::gstreamer-allocators-1.0"])
+        if self.options.with_libva and (self.options.with_libdrm or self.settings.os != "Linux"):
+            _define_plugin("va", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gst-plugins-base::gstreamer-allocators-1.0",
+                "gstreamer-codecparsers-1.0",
+                "gstreamer-va-1.0",
+            ])
+        _define_plugin("videofiltersbad", ["gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("videoframe_audiolevel", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("videoparsersbad", [
+            "gst-plugins-base::gstreamer-pbutils-1.0",
+            "gst-plugins-base::gstreamer-video-1.0",
+            "gstreamer-codecparsers-1.0",
+        ])
+        _define_plugin("videosignal", ["gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("vmnc", ["gst-plugins-base::gstreamer-video-1.0"])
+        if self.options.with_voamrwbenc:
+            _define_plugin("voamrwbenc", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "gst-plugins-base::gstreamer-tag-1.0",
+                "vo-amrwbenc::vo-amrwbenc",
+            ])
+        if self.options.with_vulkan:
+            _define_plugin("vulkan", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gstreamer-vulkan-1.0",
+                "gstreamer-codecparsers-1.0",
+                "vulkan-loader::vulkan-loader",
+            ])
+        if self.options.with_wayland and self.options.with_libdrm:
+            _define_plugin("waylandsink", [
+                "gst-plugins-base::gstreamer-wayland-1.0",
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gst-plugins-base::gstreamer-allocators-1.0",
+                "libdrm::libdrm_libdrm",
+                "wayland::wayland-client",
+            ])
+        if self.options.with_webp:
+            _define_plugin("webp", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "libwebp::libwebp",
+            ])
+        gst_webrtc = _define_plugin("webrtc", [
+            "gst-plugins-base::gstreamer-app-1.0",
+            "gst-plugins-base::gstreamer-rtp-1.0",
+            "gst-plugins-base::gstreamer-sdp-1.0",
+            "gstreamer-webrtc-1.0",
+            "gstreamer-sctp-1.0",
+        ])
+        if self.options.with_nice:
+            gst_webrtc.requires.append("gstreamer-webrtc-nice-1.0")
+        if self.options.with_wildmidi:
+            _define_plugin("wildmidi", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "gstreamer-bad-audio-1.0",
+                "wildmidi::wildmidi",
+            ])
+        if self.options.with_x265:
+            _define_plugin("x265", [
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "gst-plugins-base::gstreamer-video-1.0",
+                "libx265::libx265",
+            ])
+        _define_plugin("y4mdec", ["gst-plugins-base::gstreamer-video-1.0"])
+        if self.options.with_zbar:
+            _define_plugin("zbar", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "zbar::zbar",
+            ])
+        if self.options.with_zxing:
+            _define_plugin("zxing", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "zxing::zxing",
+            ])
