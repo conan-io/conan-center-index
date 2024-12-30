@@ -1,0 +1,13 @@
+Fixes a "vl/kmeans.c:685:34: error: ‘vl_infinity_d’ not specified in enclosing ‘parallel’" error when building with OpenMP.
+
+--- a/vl/kmeans.c
++++ b/vl/kmeans.c
+@@ -670,7 +670,7 @@
+ 
+ #ifdef _OPENMP
+ #pragma omp parallel default(none) \
+-            shared(self, distances, assignments, numData, distFn, data) \
++            shared(self, distances, assignments, numData, distFn, data, vl_infinity_d) \
+             num_threads(vl_get_max_threads())
+ #endif
+   {
