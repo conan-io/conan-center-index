@@ -1,0 +1,32 @@
+From fd8e6d12b2127d5a22a9823942148b7404ebc57b Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Wed, 7 Aug 2024 10:05:10 +0300
+Subject: [PATCH] Fix ros_parser.cpp compilation failures on Clang
+
+---
+ src/ros_parser.cpp | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/src/ros_parser.cpp b/src/ros_parser.cpp
+index 40c161b..8a1523c 100644
+--- a/src/ros_parser.cpp
++++ b/src/ros_parser.cpp
+@@ -581,8 +581,7 @@ bool Parser::serializeFromJson(const std::string_view json_string,
+             }
+             else
+             {
+-              rapidjson::Value next_value = value_field->GetObject();
+-              serializeImpl(msg_node_child.get(), &next_value);
++              serializeImpl(msg_node_child.get(), value_field);
+             }
+           }
+           break;
+@@ -600,7 +599,7 @@ bool Parser::serializeFromJson(const std::string_view json_string,
+   auto root_msg =
+       _schema->field_tree.croot()->value()->getMessagePtr(_schema->msg_library);
+ 
+-  rapidjson::Value json_root = json_document.GetObject();
++  rapidjson::Value& json_root = json_document;
+   serializeImpl(root_msg.get(), &json_root);
+ 
+   return true;
