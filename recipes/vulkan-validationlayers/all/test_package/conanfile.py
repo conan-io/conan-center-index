@@ -12,8 +12,13 @@ class TestPackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
+    @property
+    def _vulkan_sdk_version(self):
+        return self.tested_reference_str.split("/")[1].split("#")[0]
+
     def requirements(self):
-        self.requires(self.tested_reference_str)
+        self.requires(self.tested_reference_str, run=True)
+        self.requires(f"vulkan-loader/{self._vulkan_sdk_version}")
 
     def build(self):
         cmake = CMake(self)
@@ -22,5 +27,6 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            # Tests that the VkLayer_khronos_validation runtime library is loaded and used correctly
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
