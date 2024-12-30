@@ -1,0 +1,4 @@
+sources:
+  "1.12.3":
+    url: "https://downloads.sourceforge.net/enlightenment/imlib2-1.12.3.tar.xz"
+    sha256: "96244656576a3e0a6f58b78e514ddc919622ac6806711bc231837eee62c1de34"
