@@ -1,0 +1,9 @@
+sources:
+  "17.0":
+    url: "https://ftp.postgresql.org/pub/source/v17.0/postgresql-17.0.tar.bz2"
+    sha256: "7e276131c0fdd6b62588dbad9b3bb24b8c3498d5009328dba59af16e819109de"
+patches:
+  "17.0":
+    - patch_file: "patches/17.0/0001-strictly-require-enabled-deps.patch"
+      patch_description: "Strictly require enabled dependencies is meson.build"
+      patch_type: "conan"
