@@ -28,20 +28,23 @@ class Md4cConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "md2html": True,
+        #"md2html": True,  # conditional default value in config_options
         "encoding": "utf-8",
     }
 
     def export_sources(self):
         export_conandata_patches(self)
 
-    def _hasMd2html(self):
-        return Version(self.version) >= "0.5.0"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._hasMd2html() or (is_apple_os(self) and self.settings.os != "Macos"):
+        if Version(self.version) >= "0.5.0":
+            # Set it to false for iOS, tvOS, watchOS, visionOS
+            # to prevent cmake from creating a bundle for the md2html executable
+            is_ios_variant = is_apple_os(self) and not self.settings.os == "Macos"
+            self.options.md2html = False if is_ios_variant else True
+        else:
+            # md2html was introduced in 0.5.0
             del self.options.md2html
 
     def configure(self):
@@ -62,8 +65,7 @@ class Md4cConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self._hasMd2html():
-            tc.cache_variables["BUILD_MD2HTML_EXECUTABLE"] = self.options.get_safe("md2html", False)
+        tc.cache_variables["BUILD_MD2HTML_EXECUTABLE"] = self.options.get_safe("md2html", True)
         if self.options.encoding == "utf-8":
             tc.preprocessor_definitions["MD4C_USE_UTF8"] = "1"
         elif self.options.encoding == "utf-16":
