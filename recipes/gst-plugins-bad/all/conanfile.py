@@ -689,40 +689,57 @@ class GStPluginsBadConan(ConanFile):
             return component
 
         # Libraries
+
+        # adaptivedemux
         _define_library("adaptivedemux", ["gstreamer-uridownloader-1.0"])
+        # analytics
         _define_library("analytics", ["gst-plugins-base::gstreamer-video-1.0"])
+        # bad-audio
         _define_library("bad-audio", ["gst-plugins-base::gstreamer-audio-1.0"])
+        # basecamerabinsrc
         _define_library("basecamerabinsrc", ["gst-plugins-base::gstreamer-app-1.0"])
+        # codecparsers
         _define_library("codecparsers", [])
+        # codecs
         _define_library("codecs", [
             "gstreamer-codecparsers-1.0",
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # cuda
         if self.settings.os in ["Linux", "Windows"]:
             gst_cuda = _define_library("cuda", ["gst-plugins-base::gstreamer-video-1.0", "gst-plugins-base::gstreamer-gl-prototypes-1.0"])
             if self.settings.os == "Linux" and self.settings.arch not in ["x86", "x86_64"]:
                 gst_cuda.system_libs.append("atomic")
             elif self.settings.os == "Windows":
                 gst_cuda.system_libs.append("advapi32")
+        # d3d11
         if self.options.get_safe("with_d3d11"):
             gst_d3d11 = _define_library("d3d11", ["gst-plugins-base::gstreamer-video-1.0"])
             gst_d3d11.system_libs.extend(["d3d11", "dxgi", "d3dcompiler", "runtimeobject"])
+        # insertbin
         _define_library("insertbin", [])
+        # isoff
         _define_library("isoff", [])
+        # mpegts
         _define_library("mpegts", [])
+        # mse
         _define_library("mse", ["gst-plugins-base::gstreamer-app-1.0"])
+        # opencv
         if self.options.with_opencv:
             _define_library("opencv", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "opencv::opencv_core",
             ])
+        # photography
         _define_library("photography", [])
+        # play
         _define_library("play", [
             "gst-plugins-base::gstreamer-video-1.0",
             "gst-plugins-base::gstreamer-audio-1.0",
             "gst-plugins-base::gstreamer-tag-1.0",
             "gst-plugins-base::gstreamer-pbutils-1.0",
         ])
+        # player
         _define_library("player", [
             "gst-plugins-base::gstreamer-video-1.0",
             "gst-plugins-base::gstreamer-audio-1.0",
@@ -730,8 +747,11 @@ class GStPluginsBadConan(ConanFile):
             "gst-plugins-base::gstreamer-pbutils-1.0",
             "gstreamer-play-1.0",
         ])
+        # sctp
         _define_library("sctp", [])
+        # transcoder
         _define_library("transcoder", ["gst-plugins-base::gstreamer-pbutils-1.0"])
+        # va
         if self.options.get_safe("with_libva"):
             libva = _define_library("va", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -746,7 +766,9 @@ class GStPluginsBadConan(ConanFile):
             if self.settings.os == "Windows":
                 libva.requires.append("libva::libva-win32")
                 libva.system_libs.append("dxgi")
+        # uridownloader
         _define_library("uridownloader", [])
+        # vulkan
         if self.options.with_vulkan:
             gst_vulkan = _define_library("vulkan", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -777,6 +799,7 @@ class GStPluginsBadConan(ConanFile):
                     gst_vulkan.frameworks.append("UIKit")
             elif self.settings.os == "Windows":
                 gst_vulkan.system_libs.append("gdi32")
+        # wayland
         if self.options.get_safe("with_wayland"):
             _define_library("wayland", [
                 "gst-plugins-base::gstreamer-allocators-1.0",
@@ -784,6 +807,7 @@ class GStPluginsBadConan(ConanFile):
                 "libdrm::libdrm_libdrm",
                 "wayland::wayland-client",
             ])
+        # webrtc
         if self.options.with_nice:
             _define_library("webrtc", ["gst-plugins-base::gstreamer-sdp-1.0"])
             _define_library("webrtc-nice", [
@@ -792,22 +816,28 @@ class GStPluginsBadConan(ConanFile):
                 "libnice::libnice",
             ])
 
-
         # Plugins
+
+        # accurip
         _define_plugin("accurip", ["gst-plugins-base::gstreamer-audio-1.0"])
+        # adpcmdec
         _define_plugin("adpcmdec", ["gst-plugins-base::gstreamer-audio-1.0"])
+        # adpcmenc
         _define_plugin("adpcmenc", ["gst-plugins-base::gstreamer-audio-1.0"])
+        # aes
         if self.options.with_ssl:
             _define_plugin("aes", [
                 "gst-plugins-base::gstreamer-pbutils-1.0",
                 "gst-plugins-base::gstreamer-video-1.0",
                 "openssl::openssl",
             ])
+        # aiff
         _define_plugin("aiff", [
             "gst-plugins-base::gstreamer-tag-1.0",
             "gst-plugins-base::gstreamer-audio-1.0",
             "gst-plugins-base::gstreamer-pbutils-1.0",
         ])
+        # amfcodec
         if self.options.get_safe("with_d3d11"):
             gst_amfcodec = _define_plugin("amfcodec", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -816,17 +846,20 @@ class GStPluginsBadConan(ConanFile):
                 "gstreamer-d3d11-1.0",
             ])
             gst_amfcodec.system_libs.append("winmm")
+        # analyticsoverlay
         if self.options.with_pango:
             _define_plugin("analyticsoverlay", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gstreamer-analytics-1.0",
                 "pango::pangocairo",
             ])
+        # aom
         if self.options.with_aom:
             _define_plugin("aom", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "libaom-av1::libaom-av1",
             ])
+        # applemedia
         if self.options.get_safe("with_applemedia"):
             gst_applemedia = _define_plugin("applemedia", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -846,61 +879,80 @@ class GStPluginsBadConan(ConanFile):
                 gst_applemedia.frameworks.extend(["Cocoa", "OpenGL"])
             else:
                 gst_applemedia.frameworks.extend(["Foundation", "AssetsLibrary"])
+        # asfmux
         _define_plugin("asfmux", ["gst-plugins-base::gstreamer-rtp-1.0"])
+        # audiobuffersplit
         _define_plugin("audiobuffersplit", ["gst-plugins-base::gstreamer-audio-1.0"])
+        # audiofxbad
         _define_plugin("audiofxbad", ["gst-plugins-base::gstreamer-audio-1.0"])
+        # audiolatency
         _define_plugin("audiolatency", [])
+        # audiomixmatrix
         _define_plugin("audiomixmatrix", ["gst-plugins-base::gstreamer-audio-1.0"])
+        # audiovisualizers
         _define_plugin("audiovisualizers", [
             "gst-plugins-base::gstreamer-pbutils-1.0",
             "gst-plugins-base::gstreamer-audio-1.0",
             "gst-plugins-base::gstreamer-video-1.0",
             "gst-plugins-base::gstreamer-fft-1.0",
         ])
+        # autoconvert
         _define_plugin("autoconvert", [
             "gst-plugins-base::gstreamer-pbutils-1.0",
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # bayer
         _define_plugin("bayer", ["gst-plugins-base::gstreamer-video-1.0"])
+        # bz2
         if self.options.with_bz2:
             _define_plugin("bz2", ["bzip2::bzip2"])
+        # camerabin
         _define_plugin("camerabin", [
             "gst-plugins-base::gstreamer-pbutils-1.0",
             "gstreamer-photography-1.0",
         ])
+        # closedcaption
         if self.options.with_pango:
             _define_plugin("closedcaption", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "pango::pangocairo",
             ])
+        # codec2json
         if self.options.with_json:
             _define_plugin("codec2json", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gstreamer-codecparsers-1.0",
                 "json-glib::json-glib",
             ])
+        # codecalpha
         _define_plugin("codecalpha", [
             "gst-plugins-base::gstreamer-video-1.0",
             "gst-plugins-base::gstreamer-pbutils-1.0",
         ])
+        # codectimestamper
         _define_plugin("codectimestamper", [
             "gst-plugins-base::gstreamer-video-1.0",
             "gstreamer-codecparsers-1.0",
         ])
+        # coloreffects
         _define_plugin("coloreffects", ["gst-plugins-base::gstreamer-video-1.0"])
+        # colormanagement
         if self.options.with_lcms:
             _define_plugin("colormanagement", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "lcms::lcms",
             ])
+        # curl
         if self.options.with_libcurl:
             gst_curl = _define_plugin("curl", ["libcurl::libcurl"])
             if self.options.with_libssh2:
                 gst_curl.requires.append("libssh2::libssh2")
+        # d3d
         if self.options.get_safe("with_d3d9"):
             gst_d3d11 = _define_plugin("d3d", ["gst-plugins-base::gstreamer-video-1.0"])
             if not self.options.shared:
                 gst_d3d11.system_libs.extend(["d3d9", "gdi32"])
+        # d3d11
         if self.options.get_safe("with_d3d11"):
             gst_d3d11 = _define_plugin("d3d11", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -910,6 +962,7 @@ class GStPluginsBadConan(ConanFile):
             ])
             if not self.options.shared:
                 gst_d3d11.system_libs.extend(["d2d1", "directxmath", "runtimeobject", "winmm", "dwmapi"])
+        # d3d12
         if self.options.get_safe("with_d3d12"):
             gst_d3d11 = _define_plugin("d3d12", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -918,6 +971,7 @@ class GStPluginsBadConan(ConanFile):
             ])
             if not self.options.shared:
                 gst_d3d11.system_libs.extend(["d3d12", "d3d11", "d2d1", "dxgi"])
+        # directshow
         if self.options.get_safe("with_directshow"):
             gst_directshow = _define_plugin("directshow", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -925,12 +979,14 @@ class GStPluginsBadConan(ConanFile):
             ])
             if not self.options.shared:
                 gst_directshow.system_libs.extend(["strmiids", "winmm", "dmoguids", "wmcodecdspuuid", "mfuuid", "rpcrt4"])
+        # directsoundsrc
         if self.options.get_safe("with_directsound"):
             gst_directsound = _define_plugin("directsoundsrc", [
                 "gst-plugins-base::gstreamer-audio-1.0",
             ])
             if not self.options.shared:
                 gst_directsound.system_libs.extend(["dsound", "winmm", "ole32"])
+        # dwrite
         if self.options.get_safe("with_directwrite") and self.options.get_safe("with_d3d11"):
             gst_dwrite = _define_plugin("dwrite", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -938,6 +994,7 @@ class GStPluginsBadConan(ConanFile):
             ])
             if not self.options.shared:
                 gst_dwrite.system_libs.extend(["d2d1", "dwrite", "windowscodecs"])
+        # dash
         if self.options.with_libxml2:
             _define_plugin("dash", [
                 "gstreamer-adaptivedemux-1.0",
@@ -947,21 +1004,25 @@ class GStPluginsBadConan(ConanFile):
                 "gst-plugins-base::gstreamer-pbutils-1.0",
                 "libxml2::libxml2",
             ])
+        # dc1394
         if self.options.with_libdc1394:
             _define_plugin("dc1394", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "libdc1394::libdc1394",
             ])
+        # de265
         if self.options.with_libde265:
             _define_plugin("de265", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "libde265::libde265",
             ])
+        # debugutilsbad
         _define_plugin("debugutilsbad", [
             "gstreamer::gstreamer-net-1.0",
             "gst-plugins-base::gstreamer-video-1.0",
             "gst-plugins-base::gstreamer-audio-1.0",
         ])
+        # decklink
         gst_decklink = _define_plugin("decklink", [
             "gst-plugins-base::gstreamer-audio-1.0",
             "gst-plugins-base::gstreamer-video-1.0",
@@ -972,12 +1033,18 @@ class GStPluginsBadConan(ConanFile):
             gst_decklink.frameworks.append("CoreFoundation")
         elif self.settings.os in ["Linux", "FreeBSD"]:
             gst_decklink.system_libs.extend(["pthread", "dl"])
+        # dtls
         if self.options.with_ssl and self.options.with_nice:
             _define_plugin("dtls", ["openssl::openssl"])
+        # dvb
         _define_plugin("dvb", ["gstreamer-mpegts-1.0"])
+        # dvbsubenc
         _define_plugin("dvbsubenc", ["gst-plugins-base::gstreamer-video-1.0"])
+        # dvbsuboverlay
         _define_plugin("dvbsuboverlay", ["gst-plugins-base::gstreamer-video-1.0"])
+        # dvdspu
         _define_plugin("dvdspu", ["gst-plugins-base::gstreamer-video-1.0"])
+        # faac
         if self.options.with_faac:
             _define_plugin("faac", [
                 "gst-plugins-base::gstreamer-audio-1.0",
@@ -985,23 +1052,35 @@ class GStPluginsBadConan(ConanFile):
                 "gst-plugins-base::gstreamer-tag-1.0",
                 "faac::faac",
             ])
+        # faceoverlay
         _define_plugin("faceoverlay", ["gst-plugins-base::gstreamer-video-1.0"])
+        # fbdevsink
         _define_plugin("fbdevsink", ["gst-plugins-base::gstreamer-video-1.0"])
+        # fdkaac
         if self.options.with_fdk_aac:
             _define_plugin("fdkaac", [
                 "gst-plugins-base::gstreamer-audio-1.0",
                 "gst-plugins-base::gstreamer-pbutils-1.0",
                 "libfdk_aac::libfdk_aac",
             ])
+        # festival
         _define_plugin("festival", ["gst-plugins-base::gstreamer-audio-1.0"])
+        # fieldanalysis
         _define_plugin("fieldanalysis", ["gst-plugins-base::gstreamer-video-1.0"])
+        # freeverb
         _define_plugin("freeverb", ["gst-plugins-base::gstreamer-audio-1.0"])
+        # frei0r
         _define_plugin("frei0r", ["gst-plugins-base::gstreamer-video-1.0"])
+        # gaudieffects
         _define_plugin("gaudieffects", ["gst-plugins-base::gstreamer-video-1.0"])
+        # gdp
         _define_plugin("gdp", [])
+        # geometrictransform
         _define_plugin("geometrictransform", ["gst-plugins-base::gstreamer-video-1.0"])
+        # gs
         if self.options.with_google_cloud_storage:
             _define_plugin("gs", ["google-cloud-cpp::storage"], cpp=True)
+        # gtkwayland
         if self.options.with_gtk and self.options.get_safe("with_wayland") and self.options.with_libdrm:
             _define_plugin("gtkwayland", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -1011,6 +1090,7 @@ class GStPluginsBadConan(ConanFile):
                 "libdrm::libdrm_libdrm",
                 "wayland::wayland-client",
             ])
+        # hls
         if self.options.with_ssl:
             _define_plugin("hls", [
                 "gst-plugins-base::gstreamer-pbutils-1.0",
@@ -1019,26 +1099,38 @@ class GStPluginsBadConan(ConanFile):
                 "gstreamer-adaptivedemux-1.0",
                 "openssl::openssl",
             ])
+        # id3tag
         _define_plugin("id3tag", ["gst-plugins-base::gstreamer-tag-1.0"])
+        # insertbin
         _define_plugin("insertbin", ["gstreamer-insertbin-1.0"])
+        # interlace
         _define_plugin("interlace", ["gst-plugins-base::gstreamer-video-1.0"])
+        # inter
         _define_plugin("inter", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
+        # ipcpipeline
         _define_plugin("ipcpipeline", [])
+        # ivfparse
         _define_plugin("ivfparse", [])
+        # ivtc
         _define_plugin("ivtc", ["gst-plugins-base::gstreamer-video-1.0"])
+        # jp2kdecimator
         _define_plugin("jp2kdecimator", [])
+        # jpegformat
         _define_plugin("jpegformat", [
             "gst-plugins-base::gstreamer-video-1.0",
             "gst-plugins-base::gstreamer-tag-1.0",
             "gstreamer-codecparsers-1.0",
         ])
+        # kms
         if self.options.with_libdrm:
             _define_plugin("kms", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-allocators-1.0",
                 "libdrm::libdrm_libdrm",
             ])
+        # legacyrawparse
         _define_plugin("legacyrawparse", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
+        # mediafoundation
         if self.options.get_safe("with_mediafoundation"):
             gst_mf = _define_plugin("mediafoundation", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -1049,17 +1141,22 @@ class GStPluginsBadConan(ConanFile):
                 gst_mf.requires.append("gstreamer-d3d11-1.0")
             if not self.options.shared:
                 gst_mf.system_libs.extend(["mf", "mfplat", "mfreadwrite", "mfuuid", "strmiids", "ole32", "runtimeobject"])
+        # midi
         _define_plugin("midi", ["gst-plugins-base::gstreamer-tag-1.0"])
+        # modplug
         if self.options.with_modplug:
             _define_plugin("modplug", [
                 "gst-plugins-base::gstreamer-audio-1.0",
                 "libmodplug::libmodplug",
             ], cpp=True)
+        # mpegpsdemux
         _define_plugin("mpegpsdemux", [
             "gst-plugins-base::gstreamer-tag-1.0",
             "gst-plugins-base::gstreamer-pbutils-1.0",
         ])
+        # mpegpsmux
         _define_plugin("mpegpsmux", ["gst-plugins-base::gstreamer-pbutils-1.0"])
+        # mpegtsdemux
         _define_plugin("mpegtsdemux", [
             "gst-plugins-base::gstreamer-tag-1.0",
             "gst-plugins-base::gstreamer-pbutils-1.0",
@@ -1067,6 +1164,7 @@ class GStPluginsBadConan(ConanFile):
             "gstreamer-codecparsers-1.0",
             "gstreamer-mpegts-1.0",
         ])
+        # mpegtsmux
         _define_plugin("mpegtsmux", [
             "gst-plugins-base::gstreamer-tag-1.0",
             "gst-plugins-base::gstreamer-pbutils-1.0",
@@ -1074,9 +1172,13 @@ class GStPluginsBadConan(ConanFile):
             "gst-plugins-base::gstreamer-video-1.0",
             "gstreamer-mpegts-1.0",
         ])
+        # mse
         _define_plugin("mse", ["gstreamer-mse-1.0"])
+        # mxf
         _define_plugin("mxf", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
+        # netsim
         _define_plugin("netsim", [])
+        # nvcodec
         if self.options.get_safe("with_cuda"):
             gst_nvcodec = _define_plugin("nvcodec", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -1088,6 +1190,7 @@ class GStPluginsBadConan(ConanFile):
             ], cpp=True)
             if self.settings.os == "Windows":
                 gst_nvcodec.requires.append("gstreamer-gstd3d11-1.0")
+        # onnx
         if self.options.with_onnx:
             gst_onnx = _define_plugin("onnx", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -1096,11 +1199,13 @@ class GStPluginsBadConan(ConanFile):
             ])
             if self.settings.os in ["Linux", "Windows"]:
                 gst_onnx.requires.append("gstreamer-cuda-1.0")
+        # openal
         if self.options.with_openal:
             _define_plugin("openal", [
                 "gst-plugins-base::gstreamer-audio-1.0",
                 "openal-soft::openal-soft",
             ])
+        # opencv
         if self.options.with_opencv:
             _define_plugin("opencv", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -1115,28 +1220,33 @@ class GStPluginsBadConan(ConanFile):
                 "opencv::opencv_tracking",
                 "opencv::opencv_video",
             ], cpp=True)
+        # openexr
         if self.options.with_openexr:
             _define_plugin("openexr", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "openexr::openexr",
             ], cpp=True)
+        # openh264
         if self.options.with_openh264:
             _define_plugin("openh264", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-pbutils-1.0",
                 "openh264::openh264",
             ], cpp=True)
+        # openjpeg
         if self.options.with_openjpeg:
             _define_plugin("openjpeg", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gstreamer-codecparsers-1.0",
                 "openjpeg::openjpeg",
             ])
+        # openni2
         if self.options.with_openni2:
             _define_plugin("openni2", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "openni2::openni2",
             ], cpp=True)
+        # opusparse
         if self.options.with_opus:
             _define_plugin("opusparse", [
                 "gst-plugins-base::gstreamer-rtp-1.0",
@@ -1145,15 +1255,20 @@ class GStPluginsBadConan(ConanFile):
                 "gst-plugins-base::gstreamer-tag-1.0",
                 "opus::opus",
             ])
+        # pcapparse
         _define_plugin("pcapparse", [])
+        # pnm
         _define_plugin("pnm", ["gst-plugins-base::gstreamer-video-1.0"])
+        # proxy
         _define_plugin("proxy", [])
+        # qroverlay
         if self.options.with_libqrencode and self.options.with_json:
             _define_plugin("qroverlay", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "libqrencode::libqrencode",
                 "json-glib::json-glib",
             ])
+        # qsv
         if self.options.get_safe("with_libva"):
             gst_qsv = _define_plugin("qsv", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -1165,6 +1280,7 @@ class GStPluginsBadConan(ConanFile):
                 gst_qsv.system_libs.extend(["pthread", "dl"])
             elif self.settings.os == "Windows":
                 gst_qsv.requires.append("gstreamer-d3d11-1.0")
+        # qt6d3d11
         if self.options.get_safe("with_qt") and self.options.with_with_d3d11:
             _define_plugin("qt6d3d11", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -1174,40 +1290,54 @@ class GStPluginsBadConan(ConanFile):
                 "qt::qtQml",
                 "qt::qtQuick",
             ], cpp=True)
+        # removesilence
         _define_plugin("removesilence", ["gst-plugins-base::gstreamer-audio-1.0"])
+        # rfbsrc
         if self.options.get_safe("with_xorg"):
             _define_plugin("rfbsrc", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "xorg::x11",
             ])
+        # rist
         _define_plugin("rist", [
             "gst-plugins-base::gstreamer-rtp-1.0",
             "gstreamer::gstreamer-net-1.0",
         ])
+        # rsvg
         if self.options.with_rsvg:
             _define_plugin("rsvg", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "librsvg::librsvg",
             ])
+        # rtmp2
         _define_plugin("rtmp2", [])
+        # rtpmanagerbad
         _define_plugin("rtpmanagerbad", [
             "gstreamer::gstreamer-net-1.0",
             "gst-plugins-base::gstreamer-rtp-1.0",
         ])
+        # rtponvif
         _define_plugin("rtponvif", ["gst-plugins-base::gstreamer-rtp-1.0"])
+        # sctp
         if self.options.with_sctp:
             _define_plugin("sctp", [
                 "gstreamer-sctp-1.0",
                 "usrsctp::usrsctp",
             ])
+        # sdpelem
         _define_plugin("sdpelem", [
             "gst-plugins-base::gstreamer-app-1.0",
             "gst-plugins-base::gstreamer-sdp-1.0",
         ])
+        # segmentclip
         _define_plugin("segmentclip", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
+        # shm
         _define_plugin("shm", [])
+        # siren
         _define_plugin("siren", ["gst-plugins-base::gstreamer-audio-1.0"])
+        # smooth
         _define_plugin("smooth", ["gst-plugins-base::gstreamer-video-1.0"])
+        # smoothstreaming
         if self.options.with_libxml2:
             _define_plugin("smoothstreaming", [
                 "gstreamer-adaptivedemux-1.0",
@@ -1215,47 +1345,61 @@ class GStPluginsBadConan(ConanFile):
                 "gstreamer-isoff-1.0",
                 "libxml2::libxml2",
             ])
+        # sndfile
         if self.options.with_sndfile:
             _define_plugin("sndfile", [
                 "gst-plugins-base::gstreamer-audio-1.0",
                 "libsndfile::libsndfile",
             ])
+        # soundtouch
         if self.options.with_soundtouch:
             _define_plugin("soundtouch", [
                 "gst-plugins-base::gstreamer-audio-1.0",
                 "soundtouch::soundtouch",
             ], cpp=True)
+        # speed
         _define_plugin("speed", ["gst-plugins-base::gstreamer-audio-1.0"])
+        # srt
         if self.options.with_srt:
             _define_plugin("srt", ["srt::srt"])
+        # srtp
         if self.options.with_srtp:
             _define_plugin("srtp", [
                 "gst-plugins-base::gstreamer-rtp-1.0",
                 "gst-plugins-base::gstreamer-video-1.0",
                 "libsrtp::libsrtp",
             ])
+        # subenc
         _define_plugin("subenc", [])
+        # svtav1
         if self.options.with_svtav1:
             _define_plugin("svtav1", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "libsvtav1::encoder",
             ])
+        # switchbin
         _define_plugin("switchbin", [])
+        # timecode
         _define_plugin("timecode", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
+        # tinyalsa
         if self.options.with_tinyalsa:
             _define_plugin("tinyalsa", [
                 "gst-plugins-base::gstreamer-audio-1.0",
                 "tinyalsa::tinyalsa",
             ])
+        # transcode
         _define_plugin("transcode", ["gst-plugins-base::gstreamer-pbutils-1.0"])
+        # ttmlsubs
         if self.options.with_pango and self.options.with_libxml2:
             _define_plugin("ttmlsubs", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "libxml2::libxml2",
                 "pango::pangocairo",
             ])
+        # unixfd
         if self.settings.os != "Windows":
             _define_plugin("unixfd", ["gst-plugins-base::gstreamer-allocators-1.0"])
+        # uvcgadget
         if self.options.with_libudev and self.options.with_v4l:
             _define_plugin("uvcgadget", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -1264,6 +1408,8 @@ class GStPluginsBadConan(ConanFile):
                 "libgudev::libgudev",
                 "libv4l::libv4l2",
             ])
+        # v4l2codecs
+        if self.options.with_libudev and self.options.with_v4l:
             _define_plugin("v4l2codecs", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-allocators-1.0",
@@ -1273,6 +1419,7 @@ class GStPluginsBadConan(ConanFile):
                 "libgudev::libgudev",
                 "libv4l::libv4l2",
             ])
+        # uvch264
         if self.options.with_libudev and self.options.with_libusb:
             _define_plugin("uvch264", [
                 "gst-plugins-base::gstreamer-app-1.0",
@@ -1281,6 +1428,7 @@ class GStPluginsBadConan(ConanFile):
                 "libgudev::libgudev",
                 "libusb::libusb",
             ])
+        # va
         if self.options.get_safe("with_libva"):
             gst_va = _define_plugin("va", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -1291,15 +1439,21 @@ class GStPluginsBadConan(ConanFile):
             ])
             if self.options.with_libudev:
                 gst_va.requires.append("libgudev::libgudev")
+        # videofiltersbad
         _define_plugin("videofiltersbad", ["gst-plugins-base::gstreamer-video-1.0"])
+        # videoframe_audiolevel
         _define_plugin("videoframe_audiolevel", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
+        # videoparsersbad
         _define_plugin("videoparsersbad", [
             "gst-plugins-base::gstreamer-pbutils-1.0",
             "gst-plugins-base::gstreamer-video-1.0",
             "gstreamer-codecparsers-1.0",
         ])
+        # videosignal
         _define_plugin("videosignal", ["gst-plugins-base::gstreamer-video-1.0"])
+        # vmnc
         _define_plugin("vmnc", ["gst-plugins-base::gstreamer-video-1.0"])
+        # voamrwbenc
         if self.options.with_voamrwbenc:
             _define_plugin("voamrwbenc", [
                 "gst-plugins-base::gstreamer-audio-1.0",
@@ -1307,6 +1461,7 @@ class GStPluginsBadConan(ConanFile):
                 "gst-plugins-base::gstreamer-tag-1.0",
                 "vo-amrwbenc::vo-amrwbenc",
             ])
+        # vulkan
         if self.options.with_vulkan:
             _define_plugin("vulkan", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -1315,12 +1470,14 @@ class GStPluginsBadConan(ConanFile):
                 "gstreamer-codecs-1.0",
                 "vulkan-loader::vulkan-loader",
             ])
+        # wasapi
         if self.options.get_safe("with_wasapi"):
             gst_wasapi = _define_plugin("wasapi", [
                 "gst-plugins-base::gstreamer-audio-1.0",
             ])
             if not self.options.shared:
                 gst_wasapi.system_libs.extend(["ole32", "ksuser"])
+        # wasapi2
         if self.options.get_safe("with_wasapi2"):
             gst_wasapi = _define_plugin("wasapi2", [
                 "gst-plugins-base::gstreamer-audio-1.0",
@@ -1328,6 +1485,7 @@ class GStPluginsBadConan(ConanFile):
             ])
             if not self.options.shared:
                 gst_wasapi.system_libs.extend(["ole32", "ksuser", "runtimeobject", "mmdevapi", "mfplat"])
+        # waylandsink
         if self.options.with_wayland and self.options.with_libdrm:
             _define_plugin("waylandsink", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -1336,11 +1494,13 @@ class GStPluginsBadConan(ConanFile):
                 "libdrm::libdrm_libdrm",
                 "wayland::wayland-client",
             ])
+        # webp
         if self.options.with_webp:
             _define_plugin("webp", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "libwebp::libwebp",
             ])
+        # webrtc
         if self.options.with_nice:
             _define_plugin("webrtc", [
                 "gst-plugins-base::gstreamer-app-1.0",
@@ -1350,42 +1510,49 @@ class GStPluginsBadConan(ConanFile):
                 "gstreamer-webrtc-1.0",
                 "gstreamer-sctp-1.0",
             ])
+        # wic
         if self.settings.os == "Windows":
-            gst_wic = _define_plugin("wic", [
-                "gst-plugins-base::gstreamer-video-1.0",
-            ])
+            gst_wic = _define_plugin("wic", ["gst-plugins-base::gstreamer-video-1.0"])
             if not self.options.shared:
                 gst_wic.system_libs.extend(["windowscodecs"])
+        # wildmidi
         if self.options.with_wildmidi:
             _define_plugin("wildmidi", [
                 "gst-plugins-base::gstreamer-audio-1.0",
                 "gstreamer-bad-audio-1.0",
                 "wildmidi::wildmidi",
             ])
+        # win32ipc
         if self.settings.os == "Windows":
             _define_plugin("win32ipc", ["gst-plugins-base::gstreamer-video-1.0"])
             gst_winrt = _define_plugin("winrt", [])
             gst_winrt.system_libs.extend(["runtimeobject"])
+        # winks
         if self.options.get_safe("with_directshow") and self.options.get_safe("with_wasapi"):
             gst_winks = _define_plugin("winks", [])
             if not self.options.shared:
                 gst_winks.system_libs.extend(["ksuser", "uuid", "strmiids", "dxguid", "setupapi", "ole32"])
+        # winscreencap
         if self.options.get_safe("with_d3d9"):
             gst_winscreencap = _define_plugin("winscreencap", ["gst-plugins-base::gstreamer-video-1.0"])
             if not self.options.shared:
                 gst_winscreencap.system_libs.extend(["d3d9", "gdi32"])
+        # x265
         if self.options.with_x265:
             _define_plugin("x265", [
                 "gst-plugins-base::gstreamer-pbutils-1.0",
                 "gst-plugins-base::gstreamer-video-1.0",
                 "libx265::libx265",
             ])
+        # y4mdec
         _define_plugin("y4mdec", ["gst-plugins-base::gstreamer-video-1.0"])
+        # zbar
         if self.options.with_zbar:
             _define_plugin("zbar", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "zbar::zbar",
             ])
+        # zxing
         if self.options.with_zxing:
             _define_plugin("zxing", [
                 "gst-plugins-base::gstreamer-video-1.0",
