@@ -21,7 +21,7 @@ diff --git a/sys/v4l2/meson.build b/sys/v4l2/meson.build
 -  if v4l2.enabled() and not have_v4l2
 -    error('V4L2 is requested but headers were not found')
 -  endif
-+  libv4l2_dep = dependency('libv4l2', required: get_option('v4l2codecs'))
++  libv4l2_dep = dependency('libv4l2', required: v4l2.enabled())
 +  have_v4l2 = true
  endif
  
