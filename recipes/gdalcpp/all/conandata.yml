@@ -1,0 +1,4 @@
+sources:
+  "1.3.0":
+    url: "https://github.com/joto/gdalcpp/archive/7e23085e7da80c8805fff54cc18e2705ac332074.zip"
+    sha256: "2240bbd376d91a3ea00fdef8261a1fb46f090798734422fbba0e716ea672031e"
