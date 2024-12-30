@@ -17,10 +17,14 @@ required_conan_version = ">=2.0"
 
 class GStPluginsBadConan(ConanFile):
     name = "gst-plugins-bad"
-    description = "A set of plugins for GStreamer that may pose distribution problems."
+    description = ("GStreamer Bad Plug-ins is a set of plug-ins that aren't up to par compared to the rest."
+                   "They might be close to being good quality, but they're missing something - be it a good code review, "
+                   "some documentation, a set of tests, a real live maintainer, or some actual wide use.")
     topics = ("gstreamer", "multimedia", "video", "audio", "broadcasting", "framework", "media")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gstreamer.freedesktop.org/"
+    # Most, but not all, plugins are LGPL. For details, see:
+    # https://gitlab.freedesktop.org/gstreamer/gstreamer/-/raw/1.24.10/subprojects/gst-plugins-bad/docs/plugins/gst_plugins_cache.json
     license = "LGPL-2.1-or-later"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -124,7 +128,7 @@ class GStPluginsBadConan(ConanFile):
         "with_wayland": True,
         "with_webp": True,
         "with_wildmidi": True,
-        "with_x265": True,
+        "with_x265": False,  # GPL-licensed
         "with_xorg": True,
         "with_zbar": True,
         "with_zxing": True,
@@ -424,11 +428,11 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["directshow"] = feature(is_msvc(self))
         tc.project_options["directsound"] = feature(self.settings.os == "Windows")
         tc.project_options["dtls"] = feature(self.options.with_ssl == "openssl")
-        tc.project_options["dts"] = "disabled"  # libdca
+        tc.project_options["dts"] = "disabled"  # libdca (GPL)
         tc.project_options["dvb"] = feature(self.settings.os == "Linux")
         tc.project_options["dwrite"] = feature(self.settings.os == "Windows")
         tc.project_options["faac"] = feature(self.options.with_faac)
-        tc.project_options["faad"] = "disabled"  # faad2
+        tc.project_options["faad"] = "disabled"  # faad2 (GPL)
         tc.project_options["fbdev"] = feature(self.settings.os == "Linux")
         tc.project_options["fdkaac"] = feature(self.options.with_fdk_aac)
         tc.project_options["flite"] = "disabled"  # flite
@@ -439,7 +443,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["gsm"] = "disabled"  # libgsm1
         tc.project_options["gtk3"] = feature(self.options.with_gtk)
         tc.project_options["ipcpipeline"] = "enabled"  # only system dependencies
-        tc.project_options["iqa"] = "disabled"  # kornelski/dssim
+        tc.project_options["iqa"] = "disabled"  # kornelski/dssim (GPL)
         tc.project_options["isac"] = "disabled"  # webrtc-audio-coding-1
         tc.project_options["kms"] = feature(self.options.with_libdrm)
         tc.project_options["ladspa"] = "disabled"  # ladspa-sdk
@@ -452,8 +456,8 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["mediafoundation"] = feature(self.settings.os == "Windows")
         tc.project_options["microdns"] = "disabled"  # libmicrodns
         tc.project_options["modplug"] = feature(self.options.with_modplug)
-        tc.project_options["mpeg2enc"] = "disabled"  # mjpegtools
-        tc.project_options["mplex"] = "disabled"  # mjpegtools
+        tc.project_options["mpeg2enc"] = "disabled"  # mjpegtools (GPL)
+        tc.project_options["mplex"] = "disabled"  # mjpegtools (GPL)
         tc.project_options["msdk"] = "disabled"  # Intel Media SDK or oneVPL SDK
         tc.project_options["musepack"] = "disabled"  # libmpcdec
         tc.project_options["neon"] = "disabled"  # libneon27
@@ -471,7 +475,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["qroverlay"] = feature(self.options.with_libqrencode and self.options.with_json)
         tc.project_options["qsv"] = "enabled"  # requires gstd3d11 on Windows, gstva on Linux
         tc.project_options["qt6d3d11"] = feature(self.options.with_qt)
-        tc.project_options["resindvd"] = "disabled"  # dvdnav
+        tc.project_options["resindvd"] = "disabled"  # dvdnav (GPL)
         tc.project_options["rsvg"] = feature(self.options.with_rsvg)
         tc.project_options["rtmp"] = "disabled"  # librtmp
         tc.project_options["sbc"] = "disabled" # libsbc
@@ -529,7 +533,7 @@ class GStPluginsBadConan(ConanFile):
         # Vulkan plugin options
         tc.project_options["vulkan-video"] = "enabled"
 
-        tc.project_options["gpl"] = "enabled"  # TODO
+        tc.project_options["gpl"] = "enabled"  # only applies to libx265 currently
         tc.project_options["doc"] = "disabled"
         tc.project_options["examples"] = "disabled"
         tc.project_options["tests"] = "disabled"
