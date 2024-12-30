@@ -121,6 +121,8 @@ class LibId3TagConan(ConanFile):
             fix_apple_shared_install_name(self)
 
     def package_info(self):
+        # Match the pkg-config name used by Debian and other distros
+        self.cpp_info.set_property("pkg_config_name", "id3tag")
         if is_msvc(self):
             self.cpp_info.libs = ["libid3tag"]
             self.cpp_info.defines.append("ID3TAG_EXPORT=" + ("__declspec(dllimport)" if self.options.shared else ""))
