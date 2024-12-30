@@ -63,7 +63,7 @@ class Md4cConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         if self._hasMd2html():
-            tc.variables["BUILD_MD2HTML_EXECUTABLE"] = self.options.get_safe("md2html", False)
+            tc.cache_variables["BUILD_MD2HTML_EXECUTABLE"] = self.options.get_safe("md2html", False)
         if self.options.encoding == "utf-8":
             tc.preprocessor_definitions["MD4C_USE_UTF8"] = "1"
         elif self.options.encoding == "utf-16":
