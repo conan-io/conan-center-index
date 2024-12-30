@@ -34,7 +34,7 @@ sources:
     sha256: "76c7114a3d142ad08b7208b3964a26e72a6320ee81331d3f0b87569fc9c47a28"
 patches:
   "1.1.0":
-    - patch_file: "patches/0016-disable-tests-for-1.1.0.patch"
+    - patch_file: "patches/0015-disable-tests-for-1.0.0.patch"
       patch_description: "disable test build"
       patch_type: "conan"
   "1.0.2":
