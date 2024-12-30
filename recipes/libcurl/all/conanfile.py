@@ -201,9 +201,9 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "openssl":
             openssl = self.dependencies["openssl"]
             if self.options.with_ntlm and openssl.options.no_des:
-                raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
+                raise ConanInvalidConfiguration("option with_ntlm=True requires openssl/*:no_des=False")
         if self.options.with_ssl == "wolfssl" and not self.dependencies["wolfssl"].options.with_curl:
-            raise ConanInvalidConfiguration("option with_ssl=wolfssl requires wolfssl:with_curl=True")
+            raise ConanInvalidConfiguration("option with_ssl=wolfssl requires wolfssl/*:with_curl=True")
 
     def build_requirements(self):
         if self._is_using_cmake_build:
@@ -383,15 +383,6 @@ class LibcurlConan(ConanFile):
             replace_in_file(self, cmakelists, "find_package(NGHTTP2)", "find_package(libnghttp2 REQUIRED CONFIG)")
         replace_in_file(self, cmakelists, "${NGHTTP2_INCLUDE_DIRS}", "${libnghttp2_INCLUDE_DIRS}")
         replace_in_file(self, cmakelists, "${NGHTTP2_LIBRARIES}", "libnghttp2::nghttp2")
-
-        # wolfssl
-        replace_in_file(self, cmakelists, "find_package(WolfSSL REQUIRED)", "find_package(wolfssl REQUIRED CONFIG)")
-        if Version(self.version) < "8.10.0":
-            replace_in_file(self, cmakelists, "${WolfSSL_LIBRARIES}", "${wolfssl_LIBRARIES}")
-            replace_in_file(self, cmakelists, "${WolfSSL_INCLUDE_DIRS}", "${wolfssl_INCLUDE_DIRS}")
-        else:
-            replace_in_file(self, cmakelists, "${WOLFSSL_LIBRARIES}", "${wolfssl_LIBRARIES}")
-            replace_in_file(self, cmakelists, "${WOLFSSL_INCLUDE_DIRS}", "${wolfssl_INCLUDE_DIRS}")
 
     def _yes_no(self, value):
         return "yes" if value else "no"
@@ -641,6 +632,8 @@ class LibcurlConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("wolfssl", "cmake_additional_variables_prefixes", ["WolfSSL", "WOLFSSL"])
+        deps.set_property("wolfssl", "cmake_file_name", "WolfSSL")
         deps.generate()
 
     def package(self):
@@ -669,64 +662,61 @@ class LibcurlConan(ConanFile):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("pkg_config_name", "libcurl")
 
-        if Version(self.version) >= "8.10.0":
-            self.cpp_info.set_property("cmake_additional_variables_prefixes", ["WOLFSS"])
-
-        self.cpp_info.components["curl"].resdirs = ["res"]
+        self.cpp_info.resdirs = ["res"]
         if is_msvc(self):
-            self.cpp_info.components["curl"].libs = ["libcurl_imp"] if self.options.shared else ["libcurl"]
+            self.cpp_info.libs = ["libcurl_imp"] if self.options.shared else ["libcurl"]
         else:
-            self.cpp_info.components["curl"].libs = ["curl"]
+            self.cpp_info.libs = ["curl"]
             if self.settings.os in ["Linux", "FreeBSD"]:
                 if self.options.with_libidn:
-                    self.cpp_info.components["curl"].libs.append("idn")
+                    self.cpp_info.libs.append("idn")
                 if self.options.with_librtmp:
-                    self.cpp_info.components["curl"].libs.append("rtmp")
+                    self.cpp_info.libs.append("rtmp")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["curl"].system_libs = ["rt", "pthread"]
+            self.cpp_info.system_libs = ["rt", "pthread"]
         elif self.settings.os == "Windows":
             # used on Windows for VS build, native and cross mingw build
-            self.cpp_info.components["curl"].system_libs = ["ws2_32"]
+            self.cpp_info.system_libs = ["ws2_32"]
             if self.options.with_ldap:
-                self.cpp_info.components["curl"].system_libs.append("wldap32")
+                self.cpp_info.system_libs.append("wldap32")
             if self.options.with_ssl == "schannel":
-                self.cpp_info.components["curl"].system_libs.append("crypt32")
+                self.cpp_info.system_libs.append("crypt32")
         elif is_apple_os(self):
-            self.cpp_info.components["curl"].frameworks.append("CoreFoundation")
-            self.cpp_info.components["curl"].frameworks.append("CoreServices")
-            self.cpp_info.components["curl"].frameworks.append("SystemConfiguration")
+            self.cpp_info.frameworks.append("CoreFoundation")
+            self.cpp_info.frameworks.append("CoreServices")
+            self.cpp_info.frameworks.append("SystemConfiguration")
             if self.options.with_ldap:
-                self.cpp_info.components["curl"].system_libs.append("ldap")
+                self.cpp_info.system_libs.append("ldap")
             if self.options.with_ssl == "darwinssl":
-                self.cpp_info.components["curl"].frameworks.append("Security")
+                self.cpp_info.frameworks.append("Security")
 
         if self._is_mingw:
             # provide pthread for dependent packages
-            self.cpp_info.components["curl"].cflags.append("-pthread")
-            self.cpp_info.components["curl"].exelinkflags.append("-pthread")
-            self.cpp_info.components["curl"].sharedlinkflags.append("-pthread")
+            self.cpp_info.cflags.append("-pthread")
+            self.cpp_info.exelinkflags.append("-pthread")
+            self.cpp_info.sharedlinkflags.append("-pthread")
 
         if not self.options.shared:
-            self.cpp_info.components["curl"].defines.append("CURL_STATICLIB=1")
+            self.cpp_info.defines.append("CURL_STATICLIB=1")
 
         if self.options.with_ssl == "openssl":
-            self.cpp_info.components["curl"].requires.append("openssl::openssl")
+            self.cpp_info.requires.append("openssl::openssl")
         if self.options.with_ssl == "wolfssl":
-            self.cpp_info.components["curl"].requires.append("wolfssl::wolfssl")
+            self.cpp_info.requires.append("wolfssl::wolfssl")
         if self.options.with_ssl == "mbedtls":
-            self.cpp_info.components["curl"].requires.append("mbedtls::mbedtls")
+            self.cpp_info.requires.append("mbedtls::mbedtls")
         if self.options.with_nghttp2:
-            self.cpp_info.components["curl"].requires.append("libnghttp2::libnghttp2")
+            self.cpp_info.requires.append("libnghttp2::libnghttp2")
         if self.options.with_libssh2:
-            self.cpp_info.components["curl"].requires.append("libssh2::libssh2")
+            self.cpp_info.requires.append("libssh2::libssh2")
         if self.options.with_zlib:
-            self.cpp_info.components["curl"].requires.append("zlib::zlib")
+            self.cpp_info.requires.append("zlib::zlib")
         if self.options.with_brotli:
-            self.cpp_info.components["curl"].requires.append("brotli::brotli")
+            self.cpp_info.requires.append("brotli::brotli")
         if self.options.with_zstd:
-            self.cpp_info.components["curl"].requires.append("zstd::zstd")
+            self.cpp_info.requires.append("zstd::zstd")
         if self.options.with_c_ares:
-            self.cpp_info.components["curl"].requires.append("c-ares::c-ares")
+            self.cpp_info.requires.append("c-ares::c-ares")
         if self.options.get_safe("with_libpsl"):
-            self.cpp_info.components["curl"].requires.append("libpsl::libpsl")
+            self.cpp_info.requires.append("libpsl::libpsl")
