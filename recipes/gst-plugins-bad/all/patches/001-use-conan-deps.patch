@@ -141,3 +141,27 @@ diff --git a/sys/v4l2codecs/meson.build b/sys/v4l2codecs/meson.build
      install : true,
      install_dir : plugins_install_dir,
    )
+diff --git a/gst-libs/gst/vulkan/meson.build b/gst-libs/gst/vulkan/meson.build
+--- a/gst-libs/gst/vulkan/meson.build
++++ b/gst-libs/gst/vulkan/meson.build
+@@ -113,7 +113,7 @@
+   #   retrieving the metal device from the VkDevice) which is currently waiting
+   #   on implementing a proper Metal extension for Vulkan
+   #   https://github.com/KhronosGroup/MoltenVK/issues/492
+-  vulkan_dep = cc.find_library('MoltenVK', required : get_option('vulkan'))
++  vulkan_dep = dependency('moltenvk', required : get_option('vulkan'))
+ elif host_system == 'windows'
+   vulkan_root = run_command(python3, '-c', 'import os; print(os.environ.get("VK_SDK_PATH"))', check: false).stdout().strip()
+   if vulkan_root != '' and vulkan_root != 'None'
+diff --git a/sys/applemedia/meson.build b/sys/applemedia/meson.build
+--- a/sys/applemedia/meson.build
++++ b/sys/applemedia/meson.build
+@@ -94,7 +94,7 @@
+ 
+ applemedia_objcpp_args = []
+ if gstvulkan_dep.found() and have_objcpp
+-  moltenvk_dep = cc.find_library('MoltenVK', required : false)
++  moltenvk_dep = dependency('moltenvk', required : false)
+   metal_dep = dependency('appleframeworks', modules : ['Metal'], required : false)
+   if metal_dep.found() and moltenvk_dep.found() and cc.has_header ('MoltenVK/vk_mvk_moltenvk.h')
+     applemedia_frameworks += [moltenvk_dep, gstvulkan_dep, metal_dep]
