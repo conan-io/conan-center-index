@@ -1,11 +1,6 @@
-Index: gst/matroska/meson.build
-IDEA additional info:
-Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
-<+>UTF-8
-===================================================================
 diff --git a/gst/matroska/meson.build b/gst/matroska/meson.build
---- a/gst/matroska/meson.build	(revision d23663823503d7207ea14d4664cb1434f9a49bb6)
-+++ b/gst/matroska/meson.build	(date 1735247548271)
+--- a/gst/matroska/meson.build
++++ b/gst/matroska/meson.build
 @@ -12,7 +12,7 @@
    'lzo.c',
  ]
@@ -15,3 +10,19 @@ diff --git a/gst/matroska/meson.build b/gst/matroska/meson.build
  cdata.set('HAVE_BZ2', bz2_dep.found() and cc.has_header('bzlib.h'))
  
  gstmatroska = library('gstmatroska',
+diff --git a/sys/v4l2/meson.build b/sys/v4l2/meson.build
+--- a/sys/v4l2/meson.build
++++ b/sys/v4l2/meson.build
+@@ -41,10 +41,8 @@
+   have_v4l2 = false
+   message('V4L2 plugin is disabled')
+ else
+-  have_v4l2 = cc.has_header('linux/videodev2.h') or cc.has_header('sys/videodev2.h') or cc.has_header('sys/videoio.h')
+-  if v4l2.enabled() and not have_v4l2
+-    error('V4L2 is requested but headers were not found')
+-  endif
++  libv4l2_dep = dependency('libv4l2', required: get_option('v4l2codecs'))
++  have_v4l2 = true
+ endif
+ 
+ cdata.set('GST_V4L2_ENABLE_PROBE', get_option('v4l2-probe'))
