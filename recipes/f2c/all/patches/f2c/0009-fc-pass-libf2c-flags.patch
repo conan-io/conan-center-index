@@ -1,0 +1,11 @@
+--- fc
++++ fc
+@@ -362,7 +362,7 @@
+ case $cOPT in 2)
+ #	case $trapuv in 1) OFILES="$OFILES -lfpe";; esac
+ #	$CC -Wl,-dont_warn_unused -o $OUTF -u MAIN__ $OFILES $LIBS
+-	$CC -o $OUTF -u MAIN__  $OFILES $LIBS
++	$CC -o $OUTF -u MAIN__ $OFILES $LIBS $CFLAGSF2C
+ 	case $strip in 1) strip $OUTF;; esac
+ 	;; esac
+ rc=$?
