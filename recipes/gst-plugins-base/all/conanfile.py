@@ -92,6 +92,7 @@ class GStPluginsBaseConan(ConanFile):
 
     def requirements(self):
         self.requires(f"gstreamer/{self.version}", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.10")
@@ -313,7 +314,7 @@ class GStPluginsBaseConan(ConanFile):
         if self.options.shared:
             self.runenv_info.define_path("GST_PLUGIN_PATH", os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
 
-        def _define_plugin_component(name, extra_requires):
+        def _define_plugin(name, extra_requires):
             name = f"gst{name}"
             component = self.cpp_info.components[name]
             component.requires = [
@@ -333,99 +334,103 @@ class GStPluginsBaseConan(ConanFile):
             return component
 
         # Plugins ('gst')
-        _define_plugin_component("adder", [
+        _define_plugin("adder", [
             "gstreamer-audio-1.0",
             # TODO: orc
         ])
-        _define_plugin_component("app", [
+        _define_plugin("app", [
             "gstreamer-app-1.0",
             "gstreamer-tag-1.0",
         ])
-        _define_plugin_component("audioconvert", [
+        _define_plugin("audioconvert", [
             "gstreamer-audio-1.0",
         ])
-        _define_plugin_component("audiomixer", [
+        _define_plugin("audiomixer", [
             "gstreamer-audio-1.0",
             # TODO: orc
         ])
-        _define_plugin_component("audiorate", [
+        _define_plugin("audiorate", [
             "gstreamer-audio-1.0",
         ])
-        _define_plugin_component("audioresample", [
+        _define_plugin("audioresample", [
             "gstreamer-audio-1.0",
         ])
-        _define_plugin_component("audiotestsrc", [
+        _define_plugin("audiotestsrc", [
             "gstreamer-audio-1.0",
         ])
-        _define_plugin_component("basedebug", [
+        _define_plugin("basedebug", [
             "gstreamer-video-1.0",
         ])
-        _define_plugin_component("compositor", [
+        _define_plugin("compositor", [
             "gstreamer-video-1.0",
             # TODO: orc
         ])
-        _define_plugin_component("dsd", [
+        _define_plugin("dsd", [
             "gstreamer-audio-1.0",
         ])
-        _define_plugin_component("encoding", [
+        _define_plugin("encoding", [
             "gstreamer-video-1.0",
             "gstreamer-pbutils-1.0",
         ])
-        _define_plugin_component("gio", [])
-        _define_plugin_component("overlaycomposition", [
+        _define_plugin("gio", [
+            "glib::gio-2.0",
+        ])
+        _define_plugin("overlaycomposition", [
             "gstreamer-video-1.0",
         ])
-        _define_plugin_component("pbtypes", [
+        _define_plugin("pbtypes", [
             "gstreamer-video-1.0",
         ])
-        _define_plugin_component("playback", [
+        _define_plugin("playback", [
             "gstreamer-audio-1.0",
             "gstreamer-video-1.0",
             "gstreamer-pbutils-1.0",
             "gstreamer-tag-1.0",
         ])
-        _define_plugin_component("rawparse", [
+        _define_plugin("rawparse", [
             "gstreamer-audio-1.0",
             "gstreamer-video-1.0",
         ])
-        _define_plugin_component("subparse", [])
-        _define_plugin_component("tcp", [
+        _define_plugin("subparse", [])
+        _define_plugin("tcp", [
             "gstreamer::gstreamer-net-1.0",
+            "glib::gio-2.0",
         ])
-        _define_plugin_component("typefindfunctions", [
+        _define_plugin("typefindfunctions", [
             "gstreamer-pbutils-1.0",
+            "glib::gio-2.0",
         ])
-        _define_plugin_component("videoconvertscale", [
+        _define_plugin("videoconvertscale", [
             "gstreamer-video-1.0",
         ])
-        _define_plugin_component("videorate", [
+        _define_plugin("videorate", [
             "gstreamer-video-1.0",
         ])
-        _define_plugin_component("videotestsrc", [
+        _define_plugin("videotestsrc", [
             "gstreamer-video-1.0",
             # TODO: orc
         ])
-        _define_plugin_component("volume", [
+        _define_plugin("volume", [
             "gstreamer-audio-1.0",
             # TODO: orc
         ])
 
         # Plugins ('ext')
         if self.options.get_safe("with_libalsa"):
-            _define_plugin_component("alsa", [
+            _define_plugin("alsa", [
                 "gstreamer-audio-1.0",
                 "gstreamer-tag-1.0",
                 "libalsa::libalsa",
             ])
 
         # if self.options.with_cdparanoia:  # TODO: cdparanoia
-        #     _define_plugin_component("cdparanoia", [
+        #     _define_plugin("cdparanoia", [
         #         "gstreamer-audio-1.0",
         #         "cdparanoia::cdparanoia",
         #     ])
 
         if self.options.with_gl:
-            gstopengl = _define_plugin_component("opengl", [
+            gstopengl = _define_plugin("opengl", [
                 "gstreamer::gstreamer-controller-1.0",
                 "gstreamer-video-1.0",
                 "gstreamer-allocators-1.0",
@@ -447,7 +452,7 @@ class GStPluginsBaseConan(ConanFile):
                 gstopengl.requires.append("xorg::x11")
 
         # if self.options.with_libvisual:  # TODO: libvisual
-        #     _define_plugin_component("libvisual", [
+        #     _define_plugin("libvisual", [
         #         "gstreamer-audio-1.0",
         #         "gstreamer-video-1.0",
         #         "gstreamer-pbutils-1.0",
@@ -455,7 +460,7 @@ class GStPluginsBaseConan(ConanFile):
         #     ])
 
         if self.options.with_ogg:
-            _define_plugin_component("ogg", [
+            _define_plugin("ogg", [
                 "gstreamer-audio-1.0",
                 "gstreamer-pbutils-1.0",
                 "gstreamer-tag-1.0",
@@ -464,7 +469,7 @@ class GStPluginsBaseConan(ConanFile):
             ])
 
         if self.options.with_opus:
-            _define_plugin_component("opus", [
+            _define_plugin("opus", [
                 "gstreamer-audio-1.0",
                 "gstreamer-pbutils-1.0",
                 "gstreamer-tag-1.0",
@@ -472,13 +477,13 @@ class GStPluginsBaseConan(ConanFile):
             ])
 
         if self.options.with_pango:
-            _define_plugin_component("pango", [
+            _define_plugin("pango", [
                 "gstreamer-video-1.0",
                 "pango::pangocairo",
             ])
 
         if self.options.with_theora:
-            _define_plugin_component("theora", [
+            _define_plugin("theora", [
                 "gstreamer-video-1.0",
                 "gstreamer-tag-1.0",
                 "theora::theoraenc",
@@ -486,7 +491,7 @@ class GStPluginsBaseConan(ConanFile):
             ])
 
         if self.options.with_vorbis:
-            _define_plugin_component("vorbis", [
+            _define_plugin("vorbis", [
                 "gstreamer-audio-1.0",
                 "gstreamer-tag-1.0",
                 "vorbis::vorbismain",
@@ -494,7 +499,7 @@ class GStPluginsBaseConan(ConanFile):
             ])
 
         # if self.options.with_tremor:  # TODO: tremor
-        #     _define_plugin_component("ivorbisdec", [
+        #     _define_plugin("ivorbisdec", [
         #         "gstreamer-audio-1.0",
         #         "gstreamer-tag-1.0",
         #         "tremor::tremor",
@@ -502,13 +507,13 @@ class GStPluginsBaseConan(ConanFile):
 
         # Plugins ('sys')
         if self.options.get_safe("with_xorg"):
-            _define_plugin_component("ximagesink", [
+            _define_plugin("ximagesink", [
                 "gstreamer-video-1.0",
                 "xorg::x11",
                 "xorg::xext",
                 "xorg::xi",
             ])
-            _define_plugin_component("xvimagesink", [
+            _define_plugin("xvimagesink", [
                 "gstreamer-video-1.0",
                 "xorg::x11",
                 "xorg::xext",
@@ -517,13 +522,15 @@ class GStPluginsBaseConan(ConanFile):
             ])
 
         # Libraries
-        def _define_library_component(name, extra_requires, interface=False):
+        def _define_library(name, extra_requires, interface=False):
             component_name = f"gstreamer-{name}-1.0"
             component = self.cpp_info.components[component_name]
             component.set_property("pkg_config_name", component_name)
             component.requires = [
                 "gstreamer::gstreamer-1.0",
                 "gstreamer::gstreamer-base-1.0",
+                "glib::gobject-2.0",
+                "glib::glib-2.0",
             ] + extra_requires
             if not interface:
                 component.libs = [f"gst{name}-1.0"]
@@ -533,7 +540,7 @@ class GStPluginsBaseConan(ConanFile):
                     component.system_libs = ["m"]
             return component
 
-        gst_plugins_base = _define_library_component("plugins-base", [])
+        gst_plugins_base = _define_library("plugins-base", [])
         gst_plugins_base.libs = []
         if not self.options.shared:
             gst_plugins_base.defines.append("GST_PLUGINS_BASE_STATIC")
@@ -541,46 +548,50 @@ class GStPluginsBaseConan(ConanFile):
         else:
             gst_plugins_base.bindirs.append(os.path.join("lib", "gstreamer-1.0"))
 
-        gst_allocators = _define_library_component("allocators", [])
+        gst_allocators = _define_library("allocators", [])
         if self.options.get_safe("with_libdrm"):
             gst_allocators.requires.append("libdrm::libdrm")
-        _define_library_component("app", [])
-        _define_library_component("audio", [
+        _define_library("app", [])
+        _define_library("audio", [
             "gstreamer-tag-1.0",
             # TODO: orc
         ])
-        _define_library_component("fft", [])
-        _define_library_component("pbutils", [
+        _define_library("fft", [])
+        _define_library("pbutils", [
             "gstreamer-audio-1.0",
             "gstreamer-video-1.0",
             "gstreamer-tag-1.0",
         ])
-        _define_library_component("riff", [
+        _define_library("riff", [
             "gstreamer-audio-1.0",
             "gstreamer-tag-1.0",
         ])
-        _define_library_component("rtp", [
+        _define_library("rtp", [
             "gstreamer-audio-1.0",
         ])
-        gst_rtsp = _define_library_component("rtsp", [
+        gst_rtsp = _define_library("rtsp", [
             "gstreamer-sdp-1.0",
+            "glib::gio-2.0",
         ])
         if self.settings.os == "Windows":
             gst_rtsp.system_libs = ["ws2_32"]
-        _define_library_component("sdp", [
+        _define_library("sdp", [
             "gstreamer-rtp-1.0",
+            "gstreamer-pbutils-1.0",
+            "glib::gio-2.0",
         ])
-        _define_library_component("tag", [
+        _define_library("tag", [
             "zlib::zlib",
         ])
-        _define_library_component("video", [
+        _define_library("video", [
             # TODO: orc
         ])
 
         if self.options.with_gl:
-            gst_gl = _define_library_component("gl", [
+            gst_gl = _define_library("gl", [
                 "gstreamer-allocators-1.0",
                 "gstreamer-video-1.0",
+                "glib::gmodule-2.0",
                 "opengl::opengl",
                 # TODO: bcm
             ])
@@ -620,26 +631,26 @@ class GStPluginsBaseConan(ConanFile):
             gst_gl.includedirs.append("include")
             gst_gl.includedirs.append(os.path.join(os.path.join("lib", "gstreamer-1.0"), "include"))
 
-            _define_library_component("gl-prototypes", [
+            _define_library("gl-prototypes", [
                 "gstreamer-gl-1.0",
                 "opengl::opengl",
             ], interface=True)
 
             if self.options.get_safe("with_egl"):
-                _define_library_component("gl-egl", [
+                _define_library("gl-egl", [
                     "gstreamer-gl-1.0",
                     "egl::egl",
                 ], interface=True)
 
             if self.options.get_safe("with_wayland"):
-                _define_library_component("gl-wayland", [
+                _define_library("gl-wayland", [
                     "gstreamer-gl-1.0",
                     "wayland::wayland-client",
                     "wayland::wayland-egl",
                 ], interface=True)
 
             if self.options.get_safe("with_xorg"):
-                _define_library_component("gl-x11", [
+                _define_library("gl-x11", [
                     "gstreamer-gl-1.0",
                     "xorg::x11-xcb",
                 ], interface=True)
