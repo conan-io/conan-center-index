@@ -1,7 +1,7 @@
 sources:
   "1.24.10":
     url: "https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-1.24.10.tar.xz"
-    sha256 : "1707e3103950c9baed364a8af2ba0495d6b113fcd36e1062dda5f582b8f8904d"
+    sha256: "1707e3103950c9baed364a8af2ba0495d6b113fcd36e1062dda5f582b8f8904d"
 patches:
   "1.24.10":
     - patch_file: "patches/001-use-conan-deps.patch"
