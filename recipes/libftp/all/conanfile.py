@@ -29,7 +29,7 @@ class LibFTPConan(ConanFile):
     implements = ["auto_shared_fpic"]
 
     def configure(self):
-        if is_msvc(self):
+        if Version(self.version) < "1.4.0" and is_msvc(self):
             del self.options.shared
             self.package_type = "static-library"
         if self.options.get_safe("shared"):

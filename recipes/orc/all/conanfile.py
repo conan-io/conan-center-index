@@ -49,7 +49,7 @@ class OrcRecipe(ConanFile):
 
     @property
     def _should_patch_thirdparty_toolchain(self):
-        return self.version < "2.0.0"
+        return Version(self.version) < "2.0.0"
 
     def export_sources(self):
         if self._should_patch_thirdparty_toolchain:
