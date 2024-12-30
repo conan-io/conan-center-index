@@ -141,6 +141,10 @@ class Openni2Conan(ConanFile):
         # Match the .pc file installed on Debian systems.
         self.cpp_info.set_property("pkg_config_name", "libopenni2")
 
+        # The exported .so files don't have the SONAME value set.
+        # The library will be listed by its full path in the consuming executables if nosoname is not set.
+        self.cpp_info.set_property("nosoname", True)
+
         self.cpp_info.libs = ["OpenNI2"]
         self.cpp_info.includedirs.append(os.path.join("include", "openni2"))
         self.cpp_info.bindirs.append(os.path.join("lib", "OpenNI2", "Drivers"))
