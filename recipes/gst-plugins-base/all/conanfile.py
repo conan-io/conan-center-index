@@ -320,6 +320,8 @@ class GStPluginsBaseConan(ConanFile):
             component.requires = [
                 "gstreamer::gstreamer-1.0",
                 "gstreamer::gstreamer-base-1.0",
+                "glib::gobject-2.0",
+                "glib::glib-2.0",
             ] + extra_requires
             component.includedirs = []
             component.bindirs = []
