@@ -117,8 +117,7 @@ class Log4cxxConan(ConanFile):
             compiler_version = Version(self.settings.compiler.version)
             if compiler_version < minimum_version:
                 raise ConanInvalidConfiguration(f"{self.settings.compiler} {compiler_version} does not support C++17: {minimum_version} required.")
-            if self.settings.compiler.get_safe("cppstd"):
-                check_min_cppstd(self, "17")
+            check_min_cppstd(self, "17")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -126,7 +125,7 @@ class Log4cxxConan(ConanFile):
     def build_requirements(self):
         if self.settings.os != "Windows":
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.0.3")
+                self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -146,9 +145,14 @@ class Log4cxxConan(ConanFile):
         tc.variables["LOG4CXX_CHARSET"] = self.options.char_encoding
         tc.variables["LOG4CXX_WCHAR_T"] = self.options.with_wchar_t
         tc.variables["LOG4CXX_QT_SUPPORT"] = self.options.with_qt
+        tc.variables["APR_STATIC"] = not self.dependencies["apr"].options.shared
+        tc.variables["APU_STATIC"] = not self.dependencies["apr-util"].options.shared
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("apr", "cmake_file_name", "APR")
+        deps.set_property("apr-util", "cmake_file_name", "APR-Util")
+        deps.set_property("apr-util", "cmake_additional_variables_prefixes", ["APR_UTIL"])
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -165,26 +169,6 @@ class Log4cxxConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path), {"log4cxx": "log4cxx::log4cxx"}
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", "conan-official-{}-targets.cmake".format(self.name))
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "log4cxx")
         self.cpp_info.set_property("cmake_target_name", "log4cxx")
@@ -195,8 +179,3 @@ class Log4cxxConan(ConanFile):
         self.cpp_info.libs = ["log4cxx"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["odbc32"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-
