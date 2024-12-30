@@ -16,7 +16,7 @@ Any maintenance, outage or important event related to the CI will be informed th
 
 ### Configure the Conan Center remote
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > The Conan Center remote URL changed for **Conan 2** on November 2024 - the new URL is the default on new installations of Conan since version 2.9.2.
 >
 > New recipe updates are only published to this remote and are only guaranteed to be compatible with recent versions of Conan 2.
@@ -61,10 +61,8 @@ This is a list of shortcuts to some interesting topics:
 
 * :rocket: If you want to learn how to **contribute new recipes**, please read [docs/adding_packages/](docs/adding_packages/README.md).
 * :speech_balloon: **FAQ**: most common questions are listed in [docs/faqs.md](docs/faqs.md).
-* :warning: The conan-center **hook errors** reported by CCI Bot can be found in the [docs/error_knowledge_base.md](docs/error_knowledge_base.md).
 * :hammer_and_wrench: The internal changes related to infrastructure can be checked in [docs/changelog.md](docs/changelog.md).
 * :world_map: There are various community lead initiatives which are outlined in [docs/community_resources.md](docs/community_resources.md).
-* :magic_wand: To start preparing your recipes for **Conan 2.0**, please check [docs/v2_migration.md](docs/v2_migration.md).
 
 ### Reporting Issues
 

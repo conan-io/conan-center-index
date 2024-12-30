@@ -1,6 +1,6 @@
 # conandata.yml
 
-[conandata.yml](https://docs.conan.io/1/reference/config_files/conandata.yml.html) is a [YAML](https://yaml.org/)
+[conandata.yml](https://docs.conan.io/2/tutorial/creating_packages/handle_sources_in_packages.html#using-the-conandata-yml-file) is a [YAML](https://yaml.org/)
 file to provide declarative data for the recipe (which is imperative). This is a built-in Conan feature (available since
 1.22.0) without a fixed structure, but ConanCenter has a specific format to ensure quality of recipes.
 
@@ -113,7 +113,7 @@ sources:
         sha256: "f5d48c4b0d558c5d71e8bf6fcdf135b0943210c1ff91f8191dfc447419a6b12e"
 ```
 
-This approach requires a special code within [build](https://docs.conan.io/1/reference/conanfile/methods.html#build) method to handle.
+This approach requires a special code within [build](https://docs.conan.io/2/reference/conanfile/methods/build.html) method to handle.
 
 ### Sources fields
 
@@ -172,7 +172,7 @@ An example of a full patch description could be: `port to Android: update config
 
 #### patch_type
 
-_Required_
+_Recommended_
 
 The `patch_type` field specifies the type of the patch. In ConanCenterIndex we currently accept only several kind of patches:
 
