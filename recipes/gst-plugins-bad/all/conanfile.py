@@ -5,7 +5,7 @@ import shutil
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import can_run
+from conan.tools.build import can_run, stdcpp_library
 from conan.tools.files import chdir, copy, get, rm, rmdir, rename, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -13,7 +13,7 @@ from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.microsoft import is_msvc, check_min_vs, is_msvc_static_runtime
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.4"
+required_conan_version = ">=2.0"
 
 class GStPluginsBadConan(ConanFile):
     name = "gst-plugins-bad"
@@ -32,12 +32,16 @@ class GStPluginsBadConan(ConanFile):
         "with_fdk_aac": [True, False],
         "with_google_cloud_storage": [True, False],
         "with_gtk": [True, False],
+        "with_json": [True, False],
         "with_lcms": [True, False],
         "with_libcurl": [True, False],
         "with_libdrm": [True, False],
         "with_libdc1394": [True, False],
         "with_libde265": [True, False],
+        "with_libqrencode": [True, False],
         "with_libssh2": [True, False],
+        "with_libusb": [True, False],
+        "with_libudev": [True, False],
         "with_libva": [True, False],
         "with_libxml2": [True, False],
         "with_modplug": [True, False],
@@ -62,6 +66,7 @@ class GStPluginsBadConan(ConanFile):
         "with_svtav1": [True, False],
         "with_tinyalsa": [True, False],
         "with_voamrwbenc": [True, False],
+        "with_v4l": [True, False],
         "with_vulkan": [True, False],
         "with_wayland": [True, False],
         "with_webp": [True, False],
@@ -80,12 +85,16 @@ class GStPluginsBadConan(ConanFile):
         "with_fdk_aac": True,
         "with_google_cloud_storage": True,
         "with_gtk": True,
+        "with_json": True,
         "with_lcms": True,
         "with_libcurl": True,
         "with_libdrm": True,
         "with_libdc1394": True,
         "with_libde265": True,
+        "with_libqrencode": True,
         "with_libssh2": True,
+        "with_libusb": True,
+        "with_libudev": True,
         "with_libva": True,
         "with_libxml2": True,
         "with_modplug": True,
@@ -110,6 +119,7 @@ class GStPluginsBadConan(ConanFile):
         "with_svtav1": True,
         "with_tinyalsa": True,
         "with_voamrwbenc": True,
+        "with_v4l": True,
         "with_vulkan": True,
         "with_wayland": True,
         "with_webp": True,
@@ -119,7 +129,6 @@ class GStPluginsBadConan(ConanFile):
         "with_zbar": True,
         "with_zxing": True,
     }
-    languages = ["C"]
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -161,18 +170,24 @@ class GStPluginsBadConan(ConanFile):
         if self.options.with_gtk:
             # Only GTK 3 is supported
             self.requires("gtk/3.24.43")
+        if self.options.with_json:
+            self.requires("json-glib/1.10.6")
         if self.options.with_libcurl:
             self.requires("libcurl/[>=7.78.0 <9]")
         if self.options.with_libdrm:
             self.requires("libdrm/2.4.119")
         if self.options.with_libdc1394:
             self.requires("libdc1394/2.2.7")
-        # if self.options.with_libqrencode:
-        #     self.requires("libqrencode/4.1.1")
+        if self.options.with_libqrencode:
+            self.requires("libqrencode/4.1.1")
         if self.options.with_libde265:
             self.requires("libde265/1.0.15")
         if self.options.get_safe("with_libssh2"):
             self.requires("libssh2/1.11.1", options={"shared": True})
+        if self.options.with_libusb:
+            self.requires("libusb/1.0.26")
+        if self.options.with_libudev:
+            self.requires("libgudev/238")
         if self.options.with_libva:
             self.requires("libva/2.21.0")
         if self.options.with_libxml2:
@@ -229,6 +244,8 @@ class GStPluginsBadConan(ConanFile):
             self.requires("tinyalsa/2.0.0")
         if self.options.with_voamrwbenc:
             self.requires("vo-amrwbenc/0.1.3")
+        if self.options.with_v4l:
+            self.requires("libv4l/1.28.1")
         if self.options.with_vulkan:
             self.requires("vulkan-loader/1.3.290.0")
             if self.options.get_safe("with_wayland") or self.options.get_safe("with_xorg"):
@@ -312,7 +329,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["autoconvert"] = "enabled"
         tc.project_options["bayer"] = "enabled"
         tc.project_options["camerabin2"] = "enabled"
-        tc.project_options["codec2json"] = "disabled"  # json-glib-1.0
+        tc.project_options["codec2json"] = feature(self.options.with_json)
         tc.project_options["codecalpha"] = "enabled"
         tc.project_options["codectimestamper"] = "enabled"
         tc.project_options["coloreffects"] = "enabled"
@@ -375,7 +392,7 @@ class GStPluginsBadConan(ConanFile):
 
         # Feature options for optional deps in plugins
         tc.project_options["drm"] = feature(self.options.with_libdrm)
-        tc.project_options["udev"] = "disabled"  # gudev-1.0
+        tc.project_options["udev"] = feature(self.options.with_libudev)
         tc.project_options["wayland"] = feature(self.options.get_safe("with_wayland"))
         tc.project_options["x11"] = feature(self.options.get_safe("with_xorg"))
 
@@ -451,7 +468,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["openni2"] = feature(self.options.with_openni2)
         tc.project_options["opensles"] = "disabled"  # opensles
         tc.project_options["opus"] = feature(self.options.with_opus)
-        tc.project_options["qroverlay"] = "disabled"  # libqrencode, json-glib-1.0
+        tc.project_options["qroverlay"] = feature(self.options.with_libqrencode and self.options.with_json)
         tc.project_options["qsv"] = "enabled"  # requires gstd3d11 on Windows, gstva on Linux
         tc.project_options["qt6d3d11"] = feature(self.options.with_qt)
         tc.project_options["resindvd"] = "disabled"  # dvdnav
@@ -472,9 +489,9 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["tinyalsa"] = feature(self.options.with_tinyalsa)
         tc.project_options["transcode"] = "enabled"  # no external deps
         tc.project_options["ttml"] = feature(self.options.with_pango and self.options.with_libxml2)
-        tc.project_options["uvcgadget"] = "disabled"  # gudev-1.0
-        tc.project_options["uvch264"] = "disabled"  # gudev-1.0
-        tc.project_options["v4l2codecs"] = "disabled"  # gudev-1.0
+        tc.project_options["uvcgadget"] = feature(self.options.with_libudev and self.options.with_v4l)
+        tc.project_options["uvch264"] = feature(self.options.with_libudev and self.options.with_libusb)
+        tc.project_options["v4l2codecs"] = feature(self.options.with_libudev and self.options.with_v4l)
         tc.project_options["va"] = feature(self.options.with_libva)
         tc.project_options["voaacenc"] = "disabled"  # vo-aacenc
         tc.project_options["voamrwbenc"] = feature(self.options.with_voamrwbenc)
@@ -547,6 +564,10 @@ class GStPluginsBadConan(ConanFile):
         meson.install()
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
         self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
+        # The generated config headers (such as gst/gl/gstglconfig.h) are not installed for some reason
+        copy(self, "*config.h",
+             os.path.join(self.build_folder, "gst-libs"),
+             os.path.join(self.package_folder, "include", "gstreamer-1.0"))
         rename(self, os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
@@ -566,6 +587,9 @@ class GStPluginsBadConan(ConanFile):
         }
         pkgconfig_custom_content = "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items())
 
+        if self.options.shared:
+            self.runenv_info.append_path("GST_PLUGIN_PATH", os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
+
         def _define_library(name, extra_requires, interface=False):
             component_name = f"gstreamer-{name}-1.0"
             component = self.cpp_info.components[component_name]
@@ -582,7 +606,7 @@ class GStPluginsBadConan(ConanFile):
                     component.system_libs = ["m", "dl", "rt"]
             return component
 
-        def _define_plugin(name, extra_requires):
+        def _define_plugin(name, extra_requires, cpp=False):
             name = f"gst{name}"
             component = self.cpp_info.components[name]
             component.requires = [
@@ -599,16 +623,31 @@ class GStPluginsBadConan(ConanFile):
                 if self.settings.os in ["Linux", "FreeBSD"]:
                     component.system_libs = ["m", "dl"]
                 component.defines.append("GST_PLUGINS_BAD_STATIC")
+            if cpp and not self.options.shared and stdcpp_library(self):
+                component.system_libs.append(stdcpp_library(self))
             return component
 
         # Libraries
+        _define_library("adaptivedemux", ["gstreamer-uridownloader-1.0"])
         _define_library("analytics", ["gst-plugins-base::gstreamer-video-1.0"])
         _define_library("bad-audio", ["gst-plugins-base::gstreamer-audio-1.0"])
+        _define_library("basecamerabinsrc", ["gst-plugins-base::gstreamer-app-1.0"])
         _define_library("codecparsers", [])
-        _define_library("cuda", ["gst-plugins-base::gstreamer-video-1.0", "gst-plugins-base::gstreamer-gl-prototypes-1.0"])
+        _define_library("codecs", [
+            "gstreamer-codecparsers-1.0",
+            "gst-plugins-base::gstreamer-video-1.0",
+        ])
+        if self.settings.os in ["Linux", "Windows"]:
+            _define_library("cuda", ["gst-plugins-base::gstreamer-video-1.0", "gst-plugins-base::gstreamer-gl-prototypes-1.0"])
         _define_library("insertbin", [])
+        _define_library("isoff", [])
         _define_library("mpegts", [])
         _define_library("mse", ["gst-plugins-base::gstreamer-app-1.0"])
+        if self.options.with_opencv:
+            _define_library("opencv", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "opencv::opencv_core",
+            ])
         _define_library("photography", [])
         _define_library("play", [
             "gst-plugins-base::gstreamer-video-1.0",
@@ -636,6 +675,7 @@ class GStPluginsBadConan(ConanFile):
                     "libva::libva-drm",
                     "libdrm::libdrm_libdrm",
                 ])
+        _define_library("uridownloader", [])
         if self.options.with_vulkan:
             gst_vulkan = _define_library("vulkan", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -695,7 +735,6 @@ class GStPluginsBadConan(ConanFile):
             ])
         if self.options.with_aom:
             _define_plugin("aom", [
-                "gst-plugins-base::gstreamer-pbutils-1.0",
                 "gst-plugins-base::gstreamer-video-1.0",
                 "libaom-av1::libaom-av1",
             ])
@@ -716,13 +755,8 @@ class GStPluginsBadConan(ConanFile):
         ])
         _define_plugin("bayer", ["gst-plugins-base::gstreamer-video-1.0"])
         if self.options.with_bz2:
-            _define_plugin("bz2", [
-                "gst-plugins-base::gstreamer-video-1.0",
-                "bzip2::bzip2",
-            ])
+            _define_plugin("bz2", ["bzip2::bzip2"])
         _define_plugin("camerabin", [
-            "gst-plugins-base::gstreamer-app-1.0",
-            "gst-plugins-base::gstreamer-tag-1.0",
             "gst-plugins-base::gstreamer-pbutils-1.0",
             "gstreamer-photography-1.0",
         ])
@@ -730,6 +764,12 @@ class GStPluginsBadConan(ConanFile):
             _define_plugin("closedcaption", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "pango::pangocairo",
+            ])
+        if self.options.with_json:
+            _define_plugin("codec2json", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gstreamer-codecparsers-1.0",
+                "json-glib::json-glib",
             ])
         _define_plugin("codecalpha", [
             "gst-plugins-base::gstreamer-video-1.0",
@@ -751,6 +791,8 @@ class GStPluginsBadConan(ConanFile):
                 gst_curl.requires.append("libssh2::libssh2")
         if self.options.with_libxml2:
             _define_plugin("dash", [
+                "gstreamer-adaptivedemux-1.0",
+                "gstreamer-isoff-1.0",
                 "gstreamer::gstreamer-net-1.0",
                 "gst-plugins-base::gstreamer-tag-1.0",
                 "gst-plugins-base::gstreamer-pbutils-1.0",
@@ -771,7 +813,10 @@ class GStPluginsBadConan(ConanFile):
             "gst-plugins-base::gstreamer-video-1.0",
             "gst-plugins-base::gstreamer-audio-1.0",
         ])
-        _define_plugin("decklink", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
+        _define_plugin("decklink", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+            "gst-plugins-base::gstreamer-video-1.0"
+        ], cpp=True)
         if self.options.with_ssl:
             _define_plugin("dtls", ["openssl::openssl"])
         _define_plugin("dvb", ["gstreamer-mpegts-1.0"])
@@ -801,7 +846,7 @@ class GStPluginsBadConan(ConanFile):
         _define_plugin("gdp", [])
         _define_plugin("geometrictransform", ["gst-plugins-base::gstreamer-video-1.0"])
         if self.options.with_google_cloud_storage:
-            _define_plugin("gs", ["google-cloud-cpp::storage"])
+            _define_plugin("gs", ["google-cloud-cpp::storage"], cpp=True)
         if self.options.with_gtk and self.options.get_safe("with_wayland") and self.options.with_libdrm:
             _define_plugin("gtkwayland", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -816,6 +861,7 @@ class GStPluginsBadConan(ConanFile):
                 "gst-plugins-base::gstreamer-pbutils-1.0",
                 "gst-plugins-base::gstreamer-tag-1.0",
                 "gst-plugins-base::gstreamer-video-1.0",
+                "gstreamer-adaptivedemux-1.0",
                 "openssl::openssl",
             ])
         _define_plugin("id3tag", ["gst-plugins-base::gstreamer-tag-1.0"])
@@ -843,12 +889,12 @@ class GStPluginsBadConan(ConanFile):
             _define_plugin("modplug", [
                 "gst-plugins-base::gstreamer-audio-1.0",
                 "libmodplug::libmodplug",
-            ])
+            ], cpp=True)
         _define_plugin("mpegpsdemux", [
             "gst-plugins-base::gstreamer-tag-1.0",
             "gst-plugins-base::gstreamer-pbutils-1.0",
         ])
-        _define_plugin("mpegpsmux", [])
+        _define_plugin("mpegpsmux", ["gst-plugins-base::gstreamer-pbutils-1.0"])
         _define_plugin("mpegtsdemux", [
             "gst-plugins-base::gstreamer-tag-1.0",
             "gst-plugins-base::gstreamer-pbutils-1.0",
@@ -863,12 +909,17 @@ class GStPluginsBadConan(ConanFile):
             "gst-plugins-base::gstreamer-video-1.0",
             "gstreamer-mpegts-1.0",
         ])
-        _define_plugin("mse", [
-            "gst-plugins-base::gstreamer-app-1.0",
-            "gstreamer-mse-1.0",
-        ])
+        _define_plugin("mse", ["gstreamer-mse-1.0"])
         _define_plugin("mxf", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
         _define_plugin("netsim", [])
+        if self.options.with_onnx:
+            gst_onnx = _define_plugin("onnx", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gstreamer-analytics-1.0",
+                "onnxruntime::onnxruntime",
+            ])
+            if self.settings.os in ["Linux", "Windows"]:
+                gst_onnx.requires.append("gstremaer-cuda-1.0")
         if self.options.with_openal:
             _define_plugin("openal", [
                 "gst-plugins-base::gstreamer-audio-1.0",
@@ -877,26 +928,28 @@ class GStPluginsBadConan(ConanFile):
         if self.options.with_opencv:
             _define_plugin("opencv", [
                 "gst-plugins-base::gstreamer-video-1.0",
+                "gstreamer-opencv-1.0",
                 "opencv::opencv_bgsegm",
                 "opencv::opencv_calib3d",
                 "opencv::opencv_core",
+                "opencv::opencv_features2d",
                 "opencv::opencv_imgcodecs",
                 "opencv::opencv_imgproc",
                 "opencv::opencv_objdetect",
                 "opencv::opencv_tracking",
                 "opencv::opencv_video",
-            ])
+            ], cpp=True)
         if self.options.with_openexr:
             _define_plugin("openexr", [
                 "gst-plugins-base::gstreamer-video-1.0",
-                "openexr::openexr_ilmimf",
-            ])
+                "openexr::openexr",
+            ], cpp=True)
         if self.options.with_openh264:
             _define_plugin("openh264", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-pbutils-1.0",
                 "openh264::openh264",
-            ])
+            ], cpp=True)
         if self.options.with_openjpeg:
             _define_plugin("openjpeg", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -907,7 +960,7 @@ class GStPluginsBadConan(ConanFile):
             _define_plugin("openni2", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "openni2::openni2",
-            ])
+            ], cpp=True)
         if self.options.with_opus:
             _define_plugin("opusparse", [
                 "gst-plugins-base::gstreamer-rtp-1.0",
@@ -919,13 +972,19 @@ class GStPluginsBadConan(ConanFile):
         _define_plugin("pcapparse", [])
         _define_plugin("pnm", ["gst-plugins-base::gstreamer-video-1.0"])
         _define_plugin("proxy", [])
+        if self.options.with_libqrencode and self.options.with_json:
+            _define_plugin("qroverlay", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "libqrencode::libqrencode",
+                "json-glib::json-glib",
+            ])
         if self.options.with_libva and (self.options.with_libdrm or self.settings.os != "Linux"):
             _define_plugin("qsv", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-allocators-1.0",
                 "gstreamer-codecparsers-1.0",
                 "gstreamer-va-1.0",
-            ])
+            ], cpp=True)
         _define_plugin("removesilence", ["gst-plugins-base::gstreamer-audio-1.0"])
         if self.options.get_safe("with_xorg"):
             _define_plugin("rfbsrc", [
@@ -944,7 +1003,6 @@ class GStPluginsBadConan(ConanFile):
         _define_plugin("rtmp2", [])
         _define_plugin("rtpmanagerbad", [
             "gstreamer::gstreamer-net-1.0",
-            "gstreamer::gstreamer-controller-1.0",
             "gst-plugins-base::gstreamer-rtp-1.0",
         ])
         _define_plugin("rtponvif", ["gst-plugins-base::gstreamer-rtp-1.0"])
@@ -954,7 +1012,6 @@ class GStPluginsBadConan(ConanFile):
                 "usrsctp::usrsctp",
             ])
         _define_plugin("sdpelem", [
-            "gst-plugins-base::gstreamer-rtp-1.0",
             "gst-plugins-base::gstreamer-app-1.0",
             "gst-plugins-base::gstreamer-sdp-1.0",
         ])
@@ -964,7 +1021,9 @@ class GStPluginsBadConan(ConanFile):
         _define_plugin("smooth", ["gst-plugins-base::gstreamer-video-1.0"])
         if self.options.with_libxml2:
             _define_plugin("smoothstreaming", [
+                "gstreamer-adaptivedemux-1.0",
                 "gstreamer-codecparsers-1.0",
+                "gstreamer-isoff-1.0",
                 "libxml2::libxml2",
             ])
         if self.options.with_sndfile:
@@ -976,12 +1035,10 @@ class GStPluginsBadConan(ConanFile):
             _define_plugin("soundtouch", [
                 "gst-plugins-base::gstreamer-audio-1.0",
                 "soundtouch::soundtouch",
-            ])
+            ], cpp=True)
         _define_plugin("speed", ["gst-plugins-base::gstreamer-audio-1.0"])
         if self.options.with_srt:
-            _define_plugin("srt", [
-                "srt::srt",
-            ])
+            _define_plugin("srt", ["srt::srt"])
         if self.options.with_srtp:
             _define_plugin("srtp", [
                 "gst-plugins-base::gstreamer-rtp-1.0",
@@ -1001,9 +1058,7 @@ class GStPluginsBadConan(ConanFile):
                 "gst-plugins-base::gstreamer-audio-1.0",
                 "tinyalsa::tinyalsa",
             ])
-        _define_plugin("transcode", [
-            "gst-plugins-base::gstreamer-pbutils-1.0",
-        ])
+        _define_plugin("transcode", ["gst-plugins-base::gstreamer-pbutils-1.0"])
         if self.options.with_pango and self.options.with_libxml2:
             _define_plugin("ttmlsubs", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -1012,13 +1067,41 @@ class GStPluginsBadConan(ConanFile):
             ])
         if self.settings.os != "Windows":
             _define_plugin("unixfd", ["gst-plugins-base::gstreamer-allocators-1.0"])
+        if self.options.with_libudev and self.options.with_v4l:
+            _define_plugin("uvcgadget", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gst-plugins-base::gstreamer-allocators-1.0",
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "libgudev::libgudev",
+                "libv4l::libv4l2",
+            ])
+            _define_plugin("v4l2codecs", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gst-plugins-base::gstreamer-allocators-1.0",
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "gstreamer-codecparsers-1.0",
+                "gstreamer-codecs-1.0",
+                "libgudev::libgudev",
+                "libv4l::libv4l2",
+            ])
+        if self.options.with_libudev and self.options.with_libusb:
+            _define_plugin("uvch264", [
+                "gst-plugins-base::gstreamer-app-1.0",
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gst-plugins-base::gstreamer-allocators-1.0",
+                "libgudev::libgudev",
+                "libusb::libusb",
+            ])
         if self.options.with_libva and (self.options.with_libdrm or self.settings.os != "Linux"):
-            _define_plugin("va", [
+            gst_va = _define_plugin("va", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-allocators-1.0",
                 "gstreamer-codecparsers-1.0",
+                "gstreamer-codecs-1.0",
                 "gstreamer-va-1.0",
             ])
+            if self.options.with_libudev:
+                gst_va.requires.append("libgudev::libgudev")
         _define_plugin("videofiltersbad", ["gst-plugins-base::gstreamer-video-1.0"])
         _define_plugin("videoframe_audiolevel", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
         _define_plugin("videoparsersbad", [
@@ -1040,6 +1123,7 @@ class GStPluginsBadConan(ConanFile):
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gstreamer-vulkan-1.0",
                 "gstreamer-codecparsers-1.0",
+                "gstreamer-codecs-1.0",
                 "vulkan-loader::vulkan-loader",
             ])
         if self.options.with_wayland and self.options.with_libdrm:
@@ -1086,4 +1170,4 @@ class GStPluginsBadConan(ConanFile):
             _define_plugin("zxing", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "zxing-cpp::zxing-cpp",
-            ])
+            ], cpp=True)

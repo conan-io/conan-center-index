@@ -1,0 +1,143 @@
+Use pkg-config instead of cc.find_library().
+
+Disable SCTP_DEBUG define - the Conan package would need to be built with it to be compatible.
+
+diff --git a/ext/sctp/meson.build b/ext/sctp/meson.build
+--- a/ext/sctp/meson.build
++++ b/ext/sctp/meson.build
+@@ -12,9 +12,9 @@
+ 
+ sctp_platform_deps = []
+ 
+-found_system_usrsctp = false
++found_system_usrsctp = true
+ 
+-if not get_option('sctp-internal-usrsctp').enabled()
++if false
+   sctp_dep = cc.find_library('usrsctp', required: false)
+   sctp_header = cc.has_header('usrsctp.h')
+   if host_system == 'windows'
+@@ -43,13 +43,14 @@
+   endif
+ endif
+ 
+-if not gst_debug_disabled
++if false
+   sctp_args = ['-DSCTP_DEBUG']
+ else
+   sctp_args = []
+ endif
+ 
+-if sctp_dep.found() and sctp_header
++sctp_dep = dependency('usrsctp', required: true)
++if sctp_dep.found()
+   gstsctp = library('gstsctp',
+     sctp_sources,
+     c_args : gst_plugins_bad_args + sctp_args,
+diff --git a/ext/sctp/usrsctp/meson.build b/ext/sctp/usrsctp/meson.build
+--- a/ext/sctp/usrsctp/meson.build	(revision d23663823503d7207ea14d4664cb1434f9a49bb6)
++++ b/ext/sctp/usrsctp/meson.build	(date 1735559989871)
+@@ -146,9 +146,6 @@
+ if false
+     compile_args += ['-DINVARIANTS']
+ endif
+-if not gst_debug_disabled
+-    compile_args += ['-DSCTP_DEBUG']
+-endif
+ # We do not need the socket API in GStreamer since we will wrap inside a
+ # DTLS packet anyway, because we use SCTP for WebRTC data channels.
+ if false
+diff --git a/ext/bz2/meson.build b/ext/bz2/meson.build
+--- a/ext/bz2/meson.build
++++ b/ext/bz2/meson.build
+@@ -4,7 +4,7 @@
+   'gstbz2enc.c',
+ ]
+ 
+-bz2_dep = cc.find_library('bz2', required : get_option('bz2'))
++bz2_dep = dependency('bzip2', required : get_option('bz2'))
+ 
+ if bz2_dep.found() and cc.has_header_symbol('bzlib.h', 'BZ2_bzlibVersion')
+   gstbz2 = library('gstbz2',
+diff --git a/ext/zxing/gstzxing.cpp b/ext/zxing/gstzxing.cpp
+--- a/ext/zxing/gstzxing.cpp
++++ b/ext/zxing/gstzxing.cpp
+@@ -60,9 +60,9 @@
+ 
+ #include <gst/video/video.h>
+ 
+-#include "ReadBarcode.h"
+-#include "TextUtfEncoding.h"
+-#include "ZXVersion.h"
++#include "ZXing/ReadBarcode.h"
++#include "ZXing/TextUtfEncoding.h"
++#include "ZXing/ZXVersion.h"
+ 
+ using namespace ZXing;
+ 
+diff --git a/ext/faac/meson.build b/ext/faac/meson.build
+--- a/ext/faac/meson.build
++++ b/ext/faac/meson.build
+@@ -1,8 +1,5 @@
+-faac_dep = cc.find_library('faac', required : get_option('faac'))
+-have_faac_h = cc.has_header_symbol('faac.h', 'faacEncOpen')
+-if not have_faac_h and get_option('faac').enabled()
+-  error('faac plugin enabled: found libfaac, but not faac.h')
+-endif
++faac_dep = dependency('faac', required : get_option('faac'))
++have_faac_h = true
+ 
+ if faac_dep.found() and have_faac_h
+   gstfaac = library('gstfaac',
+diff --git a/sys/uvcgadget/meson.build b/sys/uvcgadget/meson.build
+--- a/sys/uvcgadget/meson.build
++++ b/sys/uvcgadget/meson.build
+@@ -12,10 +12,8 @@
+ else
+   # Should only be built on Linux, check for Linux kernel headers even though
+   # we have our own copy.
+-  have_v4l2 = cc.has_header('linux/videodev2.h') or cc.has_header('sys/videodev2.h') or cc.has_header('sys/videoio.h')
+-  if get_option('uvcgadget').enabled() and not have_v4l2
+-    error('UVCGADGET is requested but kernel headers were not found')
+-  endif
++  libv4l2_dep = dependency('libv4l2', required: get_option('v4l2codecs'))
++  have_v4l2 = true
+ 
+   # Find makedev in various header files. Different operating systems put the
+   # macro in different header files.
+@@ -31,7 +29,7 @@
+     c_args : gst_plugins_bad_args,
+     cpp_args: gst_plugins_bad_args,
+     include_directories : [configinc, include_directories('../v4l2codecs')],
+-    dependencies : [gstbase_dep, gstvideo_dep, gstallocators_dep, libgudev_dep, gstpbutils_dep,],
++    dependencies : [gstbase_dep, gstvideo_dep, gstallocators_dep, libgudev_dep, gstpbutils_dep, libv4l2_dep],
+     install : true,
+     install_dir : plugins_install_dir,
+   )
+diff --git a/sys/v4l2codecs/meson.build b/sys/v4l2codecs/meson.build
+--- a/sys/v4l2codecs/meson.build
++++ b/sys/v4l2codecs/meson.build
+@@ -20,12 +20,8 @@
+   have_v4l2 = false
+   message('V4L2 CODECs plugin is disabled')
+ else
+-  # Should only be built on Linux, check for Linux kernel headers even though
+-  # we have our own copy.
+-  have_v4l2 = cc.has_header('linux/videodev2.h')
+-  if get_option('v4l2codecs').enabled() and not have_v4l2
+-    error('V4L2i CODECs is requested but kernel headers were not found')
+-  endif
++  libv4l2_dep = dependency('libv4l2', required: get_option('v4l2codecs'))
++  have_v4l2 = true
+ 
+   # Find makedev in various header files. Different operating systems put the
+   # macro in different header files.
+@@ -43,7 +39,7 @@
+     cpp_args: gst_plugins_bad_args,
+     include_directories : [configinc],
+     dependencies : [gstbase_dep, gstcodecs_dep, gstallocators_dep, libgudev_dep,
+-                   gstpbutils_dep,],
++                   gstpbutils_dep, libv4l2_dep],
+     install : true,
+     install_dir : plugins_install_dir,
+   )

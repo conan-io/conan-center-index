@@ -4,4 +4,4 @@ sources:
     sha256 : "1707e3103950c9baed364a8af2ba0495d6b113fcd36e1062dda5f582b8f8904d"
 patches:
   "1.24.10":
-    - patch_file: "patches/use-conan-deps.patch"
+    - patch_file: "patches/001-use-conan-deps.patch"
