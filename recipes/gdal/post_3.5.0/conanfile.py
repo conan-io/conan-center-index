@@ -240,7 +240,7 @@ class GdalConan(ConanFile):
         if self.options.with_libarchive:
             self.requires("libarchive/3.7.2")
         if self.options.with_libdeflate:
-            self.requires("libdeflate/1.19")
+            self.requires("libdeflate/1.22")
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
         if self.options.with_libkml:
