@@ -123,6 +123,7 @@ class GStPluginsGoodConan(ConanFile):
     def requirements(self):
         self.requires(f"gstreamer/{self.version}", transitive_headers=True, transitive_libs=True)
         self.requires(f"gst-plugins-base/{self.version}", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
 
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_bz2:
@@ -362,6 +363,8 @@ class GStPluginsGoodConan(ConanFile):
             component.requires = [
                 "gstreamer::gstreamer-1.0",
                 "gstreamer::gstreamer-base-1.0",
+                "glib::gobject-2.0",
+                "glib::glib-2.0",
             ] + extra_requires
             component.includedirs = []
             component.bindirs = []
@@ -384,6 +387,8 @@ class GStPluginsGoodConan(ConanFile):
                 "libxml2::libxml2",
                 "openssl::crypto",
                 "libsoup::libsoup",
+                "glib::gmodule-2.0",
+                "glib::gio-2.0",
             ])
         _define_plugin("alaw", [
             "gst-plugins-base::gstreamer-audio-1.0",
@@ -500,6 +505,7 @@ class GStPluginsGoodConan(ConanFile):
         ])
         _define_plugin("jack", [
             "gst-plugins-base::gstreamer-audio-1.0",
+            "glib::gmodule-2.0",
         ])
         _define_plugin("jpeg", [
             "gst-plugins-base::gstreamer-video-1.0",
@@ -537,6 +543,7 @@ class GStPluginsGoodConan(ConanFile):
         _define_plugin("multifile", [
             "gst-plugins-base::gstreamer-video-1.0",
             "gst-plugins-base::gstreamer-pbutils-1.0",
+            "glib::gio-2.0",
         ])
         _define_plugin("multipart", [])
         _define_plugin("navigationtest", [
@@ -602,12 +609,14 @@ class GStPluginsGoodConan(ConanFile):
             "gstreamer::gstreamer-net-1.0",
             "gst-plugins-base::gstreamer-rtp-1.0",
             "gst-plugins-base::gstreamer-audio-1.0",
+            "glib::gio-2.0",
         ])
         _define_plugin("rtsp", [
             "gst-plugins-base::gstreamer-rtp-1.0",
             "gst-plugins-base::gstreamer-rtsp-1.0",
             "gst-plugins-base::gstreamer-sdp-1.0",
             "gstreamer::gstreamer-net-1.0",
+            "glib::gio-2.0",
         ])
         _define_plugin("shapewipe", [
             "gst-plugins-base::gstreamer-video-1.0",
@@ -619,6 +628,8 @@ class GStPluginsGoodConan(ConanFile):
             _define_plugin("soup", [
                 "gst-plugins-base::gstreamer-tag-1.0",
                 "libsoup::libsoup",
+                "glib::gmodule-2.0",
+                "glib::gio-2.0",
             ])
         _define_plugin("spectrum", [
             "gst-plugins-base::gstreamer-fft-1.0",
@@ -631,6 +642,7 @@ class GStPluginsGoodConan(ConanFile):
             ])
         _define_plugin("udp", [
             "gstreamer::gstreamer-net-1.0",
+            "glib::gio-2.0",
         ])
         if self.options.with_v4l2:
             _define_plugin("video4linux2", [
