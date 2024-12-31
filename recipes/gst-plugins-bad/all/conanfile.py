@@ -177,8 +177,17 @@ class GStPluginsBadConan(ConanFile):
             del self.options.with_wasapi
             del self.options.with_wasapi2
         if self.settings.os not in ["Linux", "FreeBSD"]:
-            del self.options.with_xorg
+            del self.options.with_libdc1394
+            del self.options.with_libdrm
+            del self.options.with_libudev
+            del self.options.with_tinyalsa
+            del self.options.with_v4l
             del self.options.with_wayland
+            del self.options.with_xorg
+            if not is_apple_os(self):
+                del self.options.with_openni2
+                del self.options.with_zbar
+                self.options.with_gtk = False
         if not is_apple_os(self):
             del self.options.with_applemedia
         if self.settings.os not in ["Linux", "Windows"]:
@@ -190,10 +199,6 @@ class GStPluginsBadConan(ConanFile):
             self.options.rm_safe("fPIC")
         if not self.options.with_libcurl:
             del self.options.with_libssh2
-        if self.options.get_safe("with_libva") and self.settings.os == "Linux":
-            self.options.with_libdrm = True
-        if self.options.get_safe("with_wayland"):
-            self.options.with_libdrm = True
         if not self.options.get_safe("with_d3d11"):
             self.options.rm_safe("with_qt")
         self.options["gstreamer"].shared = self.options.shared
@@ -224,9 +229,9 @@ class GStPluginsBadConan(ConanFile):
             self.requires("json-glib/1.10.6")
         if self.options.with_libcurl:
             self.requires("libcurl/[>=7.78.0 <9]")
-        if self.options.with_libdrm:
+        if self.options.get_safe("with_libdrm"):
             self.requires("libdrm/2.4.119")
-        if self.options.with_libdc1394:
+        if self.options.get_safe("with_libdc1394"):
             self.requires("libdc1394/2.2.7")
         if self.options.with_libqrencode:
             self.requires("libqrencode/4.1.1")
@@ -236,7 +241,7 @@ class GStPluginsBadConan(ConanFile):
             self.requires("libssh2/1.11.1", options={"shared": True})
         if self.options.with_libusb:
             self.requires("libusb/1.0.26")
-        if self.options.with_libudev:
+        if self.options.get_safe("with_libudev"):
             self.requires("libgudev/238")
         if self.options.get_safe("with_libva"):
             self.requires("libva/2.21.0")
@@ -262,7 +267,7 @@ class GStPluginsBadConan(ConanFile):
             self.requires("openh264/2.5.0")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.5.2")
-        if self.options.with_openni2:
+        if self.options.get_safe("with_openni2"):
             self.requires("openni2/2.2.0.33")
         if self.options.with_opus:
             self.requires("opus/1.4")
@@ -290,11 +295,11 @@ class GStPluginsBadConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_svtav1:
             self.requires("libsvtav1/2.2.1")
-        if self.options.with_tinyalsa:
+        if self.options.get_safe("with_tinyalsa"):
             self.requires("tinyalsa/2.0.0")
         if self.options.with_voamrwbenc:
             self.requires("vo-amrwbenc/0.1.3")
-        if self.options.with_v4l:
+        if self.options.get_safe("with_v4l"):
             self.requires("libv4l/1.28.1")
         if self.options.with_vulkan:
             self.requires("vulkan-loader/1.3.290.0")
@@ -312,7 +317,7 @@ class GStPluginsBadConan(ConanFile):
             self.requires("xorg/system")
         if self.options.with_x265:
             self.requires("libx265/3.4")
-        if self.options.with_zbar:
+        if self.options.get_safe("with_zbar"):
             self.requires("zbar/0.23.92")
         if self.options.with_zxing:
             self.requires("zxing-cpp/2.2.1")
@@ -331,7 +336,7 @@ class GStPluginsBadConan(ConanFile):
             raise ConanInvalidConfiguration("libssh2 must be built as a shared library")
         if self.options.get_safe("with_directshow") and not is_msvc(self):
             raise ConanInvalidConfiguration("directshow plugin can only be built with MSVC")
-        if self.settings.os == "Linux" and self.options.with_libva and not self.options.with_libdrm:
+        if self.settings.os == "Linux" and self.options.with_libva and not self.options.get_safe("with_libdrm"):
             raise ConanInvalidConfiguration("with_libva=True requires with_libdrm=True")
         if self.options.get_safe("with_qt") or self.options.with_zxing:
             check_min_cppstd(self, 17)
@@ -453,8 +458,8 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["opencv"] = feature(self.options.with_opencv)
 
         # Feature options for optional deps in plugins
-        tc.project_options["drm"] = feature(self.options.with_libdrm)
-        tc.project_options["udev"] = feature(self.options.with_libudev)
+        tc.project_options["drm"] = feature(self.options.get_safe("with_libdrm"))
+        tc.project_options["udev"] = feature(self.options.get_safe("with_libudev"))
         tc.project_options["wayland"] = feature(self.options.get_safe("with_wayland"))
         tc.project_options["x11"] = feature(self.options.get_safe("with_xorg"))
 
@@ -480,7 +485,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["d3d12"] = feature(self.options.get_safe("with_d3d12"))
         tc.project_options["d3dvideosink"] = feature(self.options.get_safe("with_d3d9"))
         tc.project_options["dash"] = feature(self.options.with_libxml2)
-        tc.project_options["dc1394"] = feature(self.options.with_libdc1394)
+        tc.project_options["dc1394"] = feature(self.options.get_safe("with_libdc1394"))
         tc.project_options["decklink"] = "enabled"  # only system dependencies
         tc.project_options["directfb"] = "disabled"  # directfb
         tc.project_options["directshow"] = feature(self.options.get_safe("with_directshow"))
@@ -503,7 +508,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["ipcpipeline"] = "enabled"  # only system dependencies
         tc.project_options["iqa"] = "disabled"  # kornelski/dssim (GPL)
         tc.project_options["isac"] = "disabled"  # webrtc-audio-coding-1
-        tc.project_options["kms"] = feature(self.options.with_libdrm)
+        tc.project_options["kms"] = feature(self.options.get_safe("with_libdrm"))
         tc.project_options["ladspa"] = "disabled"  # ladspa-sdk
         tc.project_options["ladspa-rdf"] = "disabled"
         tc.project_options["lc3"] = "disabled"  # lc3
@@ -527,7 +532,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["openh264"] = feature(self.options.with_openh264)
         tc.project_options["openjpeg"] = feature(self.options.with_openjpeg)
         tc.project_options["openmpt"] = "disabled"  # openmpt
-        tc.project_options["openni2"] = feature(self.options.with_openni2)
+        tc.project_options["openni2"] = feature(self.options.get_safe("with_openni2"))
         tc.project_options["opensles"] = "disabled"  # opensles
         tc.project_options["opus"] = feature(self.options.with_opus)
         tc.project_options["qroverlay"] = feature(self.options.with_libqrencode and self.options.with_json)
@@ -548,12 +553,12 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["svtav1"] = feature(self.options.with_svtav1)
         tc.project_options["svthevcenc"] = "disabled"  # svt-hevc
         tc.project_options["teletext"] = "disabled"  # zvbi
-        tc.project_options["tinyalsa"] = feature(self.options.with_tinyalsa)
+        tc.project_options["tinyalsa"] = feature(self.options.get_safe("with_tinyalsa"))
         tc.project_options["transcode"] = "enabled"  # no external deps
         tc.project_options["ttml"] = feature(self.options.with_pango and self.options.with_libxml2)
-        tc.project_options["uvcgadget"] = feature(self.options.with_libudev and self.options.with_v4l)
-        tc.project_options["uvch264"] = feature(self.options.with_libudev and self.options.with_libusb)
-        tc.project_options["v4l2codecs"] = feature(self.options.with_libudev and self.options.with_v4l)
+        tc.project_options["uvcgadget"] = feature(self.options.get_safe("with_libudev") and self.options.get_safe("with_v4l"))
+        tc.project_options["uvch264"] = feature(self.options.get_safe("with_libudev") and self.options.with_libusb)
+        tc.project_options["v4l2codecs"] = feature(self.options.get_safe("with_libudev") and self.options.get_safe("with_v4l"))
         tc.project_options["va"] = feature(self.options.get_safe("with_libva"))
         tc.project_options["voaacenc"] = "disabled"  # vo-aacenc
         tc.project_options["voamrwbenc"] = feature(self.options.with_voamrwbenc)
@@ -570,7 +575,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["winscreencap"] = feature(self.options.get_safe("with_d3d9"))
         tc.project_options["wpe"] = "disabled"  # wpe-webkit
         tc.project_options["x265"] = feature(self.options.with_x265)
-        tc.project_options["zbar"] = feature(self.options.with_zbar)
+        tc.project_options["zbar"] = feature(self.options.get_safe("with_zbar"))
         tc.project_options["zxing"] = feature(self.options.with_zxing)
 
         # D3D11 plugin options
@@ -767,7 +772,7 @@ class GStPluginsBadConan(ConanFile):
                 "gst-plugins-base::gstreamer-allocators-1.0",
                 "libva::libva_",
             ])
-            if self.options.with_libdrm:
+            if self.options.get_safe("with_libdrm"):
                 libva.requires.extend([
                     "libva::libva-drm",
                     "libdrm::libdrm_libdrm",
@@ -1016,7 +1021,7 @@ class GStPluginsBadConan(ConanFile):
                 "glib::gio-2.0",
             ])
         # dc1394
-        if self.options.with_libdc1394:
+        if self.options.get_safe("with_libdc1394"):
             _define_plugin("dc1394", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "libdc1394::libdc1394",
@@ -1096,7 +1101,7 @@ class GStPluginsBadConan(ConanFile):
         if self.options.with_google_cloud_storage:
             _define_plugin("gs", ["google-cloud-cpp::storage"], cpp=True)
         # gtkwayland
-        if self.options.with_gtk and self.options.get_safe("with_wayland") and self.options.with_libdrm:
+        if self.options.with_gtk and self.options.get_safe("with_wayland") and self.options.get_safe("with_libdrm"):
             _define_plugin("gtkwayland", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-allocators-1.0",
@@ -1138,7 +1143,7 @@ class GStPluginsBadConan(ConanFile):
             "gstreamer-codecparsers-1.0",
         ])
         # kms
-        if self.options.with_libdrm:
+        if self.options.get_safe("with_libdrm"):
             _define_plugin("kms", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-allocators-1.0",
@@ -1259,7 +1264,7 @@ class GStPluginsBadConan(ConanFile):
                 "openjpeg::openjpeg",
             ])
         # openni2
-        if self.options.with_openni2:
+        if self.options.get_safe("with_openni2"):
             _define_plugin("openni2", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "openni2::openni2",
@@ -1407,7 +1412,7 @@ class GStPluginsBadConan(ConanFile):
         # timecode
         _define_plugin("timecode", ["gst-plugins-base::gstreamer-audio-1.0", "gst-plugins-base::gstreamer-video-1.0"])
         # tinyalsa
-        if self.options.with_tinyalsa:
+        if self.options.get_safe("with_tinyalsa"):
             _define_plugin("tinyalsa", [
                 "gst-plugins-base::gstreamer-audio-1.0",
                 "tinyalsa::tinyalsa",
@@ -1428,7 +1433,7 @@ class GStPluginsBadConan(ConanFile):
                 "glib::gio-2.0",
             ])
         # uvcgadget
-        if self.options.with_libudev and self.options.with_v4l:
+        if self.options.get_safe("with_libudev") and self.options.get_safe("with_v4l"):
             _define_plugin("uvcgadget", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-allocators-1.0",
@@ -1437,7 +1442,7 @@ class GStPluginsBadConan(ConanFile):
                 "libv4l::libv4l2",
             ])
         # v4l2codecs
-        if self.options.with_libudev and self.options.with_v4l:
+        if self.options.get_safe("with_libudev") and self.options.get_safe("with_v4l"):
             _define_plugin("v4l2codecs", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-allocators-1.0",
@@ -1448,7 +1453,7 @@ class GStPluginsBadConan(ConanFile):
                 "libv4l::libv4l2",
             ])
         # uvch264
-        if self.options.with_libudev and self.options.with_libusb:
+        if self.options.get_safe("with_libudev") and self.options.with_libusb:
             _define_plugin("uvch264", [
                 "gst-plugins-base::gstreamer-app-1.0",
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -1465,7 +1470,7 @@ class GStPluginsBadConan(ConanFile):
                 "gstreamer-codecs-1.0",
                 "gstreamer-va-1.0",
             ])
-            if self.options.with_libudev:
+            if self.options.get_safe("with_libudev"):
                 gst_va.requires.append("libgudev::libgudev")
         # videofiltersbad
         _define_plugin("videofiltersbad", ["gst-plugins-base::gstreamer-video-1.0"])
@@ -1515,7 +1520,7 @@ class GStPluginsBadConan(ConanFile):
             if not self.options.shared:
                 gst_wasapi.system_libs.extend(["ole32", "ksuser", "runtimeobject", "mmdevapi", "mfplat"])
         # waylandsink
-        if self.options.with_wayland and self.options.with_libdrm:
+        if self.options.with_wayland and self.options.get_safe("with_libdrm"):
             _define_plugin("waylandsink", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-allocators-1.0",
@@ -1576,7 +1581,7 @@ class GStPluginsBadConan(ConanFile):
         # y4mdec
         _define_plugin("y4mdec", ["gst-plugins-base::gstreamer-video-1.0"])
         # zbar
-        if self.options.with_zbar:
+        if self.options.get_safe("with_zbar"):
             _define_plugin("zbar", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "zbar::zbar",
