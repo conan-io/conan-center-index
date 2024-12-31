@@ -115,6 +115,8 @@ class MpppConan(ConanFile):
         if self.options.get_safe("with_flint"):
             deps.set_property("flint", "cmake_file_name", "mp++_FLINT")
             deps.set_property("flint", "cmake_target_name", "mp++::FLINT")
+        if Version(self.version) >= "2.0.0":
+            deps.set_property("fmt",  "cmake_config_version_compat", "AnyNewerVersion")
         deps.generate()
 
     def build(self):
