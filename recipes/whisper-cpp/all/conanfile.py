@@ -5,10 +5,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class WhisperCppConan(ConanFile):
@@ -48,7 +48,7 @@ class WhisperCppConan(ConanFile):
         "no_fma": False,
         "no_f16c": False,
         "no_accelerate": False,
-        "metal": False,
+        "metal": True,
         "metal_ndebug": False,
         "with_coreml": False,
         "coreml_allow_fallback": False,
@@ -74,10 +74,6 @@ class WhisperCppConan(ConanFile):
         }.get(self._min_cppstd, {})
 
     @property
-    def _is_metal_option_available(self):
-        return is_apple_os(self) and Version(self.version) >= "1.5.2"
-
-    @property
     def _is_openvino_option_available(self):
         return Version(self.version) >= "1.5.2"
 
@@ -85,16 +81,14 @@ class WhisperCppConan(ConanFile):
         if is_apple_os(self):
             del self.options.with_blas
         else:
+            del self.options.metal
+            del self.options.metal_ndebug
             del self.options.no_accelerate
             del self.options.with_coreml
             del self.options.coreml_allow_fallback
 
         if self.settings.os == "Windows":
             del self.options.fPIC
-
-        if not self._is_metal_option_available:
-            del self.options.metal
-            del self.options.metal_ndebug
 
         if not self._is_openvino_option_available:
             del self.options.with_openvino
@@ -158,6 +152,9 @@ class WhisperCppConan(ConanFile):
         if self.options.no_f16c:
             tc.variables["WHISPER_NO_F16C"] = True
 
+        # TODO: Implement OpenMP support
+        tc.variables["GGML_OPENMP"] = False
+
         if self.options.get_safe("with_openvino"):
             tc.variables["WHISPER_OPENVINO"] = True
             # TODO: remove with Conan 1.x support
@@ -166,15 +163,15 @@ class WhisperCppConan(ConanFile):
         if is_apple_os(self):
             if self.options.no_accelerate:
                 tc.variables["WHISPER_NO_ACCELERATE"] = True
-            if not self.options.get_safe("metal"):
-                tc.variables["WHISPER_METAL"] = False
             if self.options.get_safe("metal_ndebug"):
                 tc.variables["WHISPER_METAL_NDEBUG"] = True
             if self.options.with_coreml:
                 tc.variables["WHISPER_COREML"] = True
                 if self.options.coreml_allow_fallback:
                     tc.variables["WHISPER_COREML_ALLOW_FALLBACK"] = True
-            if self._is_metal_option_available:
+            if Version(self.version) >= "1.7.0":
+                tc.variables["GGML_METAL"] = self.options.metal
+            else:
                 tc.variables["WHISPER_METAL"] = self.options.metal
         else:
             if self.options.with_blas:
@@ -199,6 +196,8 @@ class WhisperCppConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["whisper"]
+        if Version(self.version) >= "1.7.0":
+            self.cpp_info.libs.append("ggml")
         self.cpp_info.resdirs = ["res"]
         self.cpp_info.libdirs = ["lib", "lib/static"]
 

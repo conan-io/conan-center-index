@@ -2,7 +2,7 @@ import os
 import textwrap
 
 from conan import ConanFile, conan_version
-from conan.tools.files import copy, get, rmdir, save
+from conan.tools.files import copy, get, rmdir, save, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 
@@ -51,6 +51,16 @@ class MesonConan(ConanFile):
             export PYTHONDONTWRITEBYTECODE=1
             exec "$meson_dir/meson.py" "$@"
         """))
+
+    def finalize(self):
+        copy(self, "*", src=self.immutable_package_folder, dst=self.package_folder)
+        replace_in_file(self, os.path.join(self.package_folder, "bin", "meson.cmd"),
+                        "set PYTHONDONTWRITEBYTECODE=1",
+                        "")
+
+        replace_in_file(self, os.path.join(self.package_folder, "bin", "meson"),
+                        "export PYTHONDONTWRITEBYTECODE=1",
+                        "")
 
     @staticmethod
     def _chmod_plus_x(filename):

@@ -1,4 +1,6 @@
 versions:
+  "3.7.1":
+    folder: 3.x.x
   "3.7.0":
     folder: 3.x.x
   "3.6.0":
