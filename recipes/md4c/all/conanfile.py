@@ -42,7 +42,7 @@ class Md4cConan(ConanFile):
             # Set it to false for iOS, tvOS, watchOS, visionOS
             # to prevent cmake from creating a bundle for the md2html executable
             is_ios_variant = is_apple_os(self) and not self.settings.os == "Macos"
-            self.options.md2html = False if is_ios_variant else True
+            self.options.md2html = not is_ios_variant
         else:
             # md2html was introduced in 0.5.0
             del self.options.md2html
@@ -116,10 +116,3 @@ class Md4cConan(ConanFile):
         # to create unofficial target or pkgconfig file
         self.cpp_info.set_property("cmake_target_name", "md4c::md4c-html")
         self.cpp_info.set_property("pkg_config_name", "md4c-html")
-
-        # TODO: to remove in conan v2
-        self.cpp_info.components["_md4c"].names["cmake_find_package"] = "md4c"
-        self.cpp_info.components["_md4c"].names["cmake_find_package_multi"] = "md4c"
-        self.cpp_info.components["md4c_html"].names["cmake_find_package"] = "md4c-html"
-        self.cpp_info.components["md4c_html"].names["cmake_find_package_multi"] = "md4c-html"
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
