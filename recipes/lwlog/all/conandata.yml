@@ -1,0 +1,5 @@
+sources:
+  "latest":
+    url:
+    - "https://github.com/ChristianPanov/lwlog/archive/refs/heads/master.zip"
+    sha256: "687ccccec729548526aecb5287df071f28b37aa78fb4923092a97f71a6869c31"
