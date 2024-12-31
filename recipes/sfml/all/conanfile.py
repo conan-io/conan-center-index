@@ -212,8 +212,12 @@ class SfmlConan(ConanFile):
                 "system_libs": winmm() + pthread() + rt() + android() + log(),
             },
         }
+
         if self.settings.os in ["Windows", "Android", "iOS"]:
-            sfml_main_suffix = "-d" if self.settings.build_type == "Debug" else ""
+            if Version(self.version) < "3.0.0":
+                sfml_main_suffix = "-d" if self.settings.build_type == "Debug" else ""
+            else:
+                sfml_main_suffix = suffix
             sfmlmain_libs = [f"sfml-main{sfml_main_suffix}"]
             if self.settings.os == "Android":
                 sfmlmain_libs.append(f"sfml-activity{suffix}")
