@@ -91,9 +91,11 @@ class SfmlConan(ConanFile):
         tc.variables["SFML_BUILD_AUDIO"] = self.options.audio
         tc.variables["SFML_INSTALL_PKGCONFIG_FILES"] = False
         tc.variables["SFML_GENERATE_PDB"] = False
-        tc.variables["SFML_USE_SYSTEM_DEPS"] = True
+        tc.variables["SFML_USE_SYSTEM_DEPS"] = Version(self.version) < "3.0.0"
         tc.variables["WARNINGS_AS_ERRORS"] = False
-        if Version(self.version) >= "2.6.0":
+        if Version(self.version) >= "3.0.0":
+            tc.variables["CMAKE_CXX_STANDARD"] = 17
+        elif Version(self.version) >= "2.6.0":
             tc.variables["CMAKE_CXX_STANDARD"] = 11
         if is_msvc(self):
             tc.variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)

@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <SFML/System.hpp>
 
 #ifdef SFML_WITH_WINDOW
@@ -16,10 +18,16 @@
 int main()
 {
     sf::Clock clock;
-    clock.getElapsedTime().asSeconds();
+    std::cout << "Seconds elapsed: "
+              << clock.getElapsedTime().asSeconds()
+              << std::endl;
 
 #ifdef SFML_WITH_WINDOW
+ #if SFML_VERSION_MAJOR >= 3
+    sf::VideoMode videoMode({720, 480});
+ #else
     sf::VideoMode videoMode(720, 480);
+ #endif
 #endif
 
 #ifdef SFML_WITH_GRAPHICS
@@ -29,13 +37,14 @@ int main()
 
 #ifdef SFML_WITH_NETWORK
     sf::TcpListener listener;
-    listener.isBlocking();
+    std::cout << "TCP blocking: "
+              << listener.isBlocking()
+              << std::endl;
 #endif
 
 #ifdef SFML_WITH_AUDIO
     sf::SoundBuffer buffer;
-    sf::Sound sound;
-    sound.setBuffer(buffer);
+    sf::Sound sound(buffer);
 #endif
 
     return 0;
