@@ -1,7 +1,4 @@
 sources:
-  "1.1.0":
-    url: "https://github.com/werto87/confu_json/archive/refs/tags/v1.1.0.tar.gz"
-    sha256: "0a993543edfb41923bd4190c14b5c7a1f1e1062c539d42eadcead66959401929"
-  "1.0.1":
-    url: "https://github.com/werto87/confu_json/archive/refs/tags/v1.0.1.tar.gz"
-    sha256: "f109027dee5ca5b16829320a0e79615cd35167f4acef278204cd46932dd50af8"
+  "1.1.1":
+    url: "https://github.com/werto87/confu_json/archive/refs/tags/v1.1.1.tar.gz"
+    sha256: "6b302c7c4b926db8ff0de65254eb0422eab04385a389715b88297bebf5378c35"
