@@ -1,4 +1,7 @@
 sources:
+  "6.0.2":
+    url: "https://github.com/sahlberg/libnfs/archive/refs/tags/libnfs-6.0.2.tar.gz"
+    sha256: "4e5459cc3e0242447879004e9ad28286d4d27daa42cbdcde423248fad911e747"
   "5.0.3":
     url: "https://github.com/sahlberg/libnfs/archive/refs/tags/libnfs-5.0.3.tar.gz"
     sha256: "d945cb4f4c8f82ee1f3640893a168810f794a28e1010bb007ec5add345e9df3e"
