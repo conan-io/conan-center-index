@@ -135,6 +135,7 @@ class GStPluginsGoodConan(ConanFile):
         self.requires(f"gstreamer/{self.version}", transitive_headers=True, transitive_libs=True)
         self.requires(f"gst-plugins-base/{self.version}", transitive_headers=True, transitive_libs=True)
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
+        self.requires("gst-orc/0.4.40")
 
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_bz2:
@@ -202,6 +203,7 @@ class GStPluginsGoodConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         self.tool_requires("glib/<host_version>")
+        self.tool_requires("gst-orc/<host_version>")
         self.tool_requires("gettext/0.22.5")
         if self.options.get_safe("with_asm"):
             self.tool_requires("nasm/2.16.01")
@@ -332,7 +334,7 @@ class GStPluginsGoodConan(ConanFile):
         tc.project_options["examples"] = "disabled"
         tc.project_options["tests"] = "disabled"
         tc.project_options["nls"] = "enabled"
-        tc.project_options["orc"] = "disabled"
+        tc.project_options["orc"] = "enabled"
         tc.project_options["asm"] = feature(self.options.get_safe("with_asm"))
 
         tc.generate()
@@ -423,6 +425,7 @@ class GStPluginsGoodConan(ConanFile):
         _define_plugin("audiofx", [
             "gst-plugins-base::gstreamer-audio-1.0",
             "gst-plugins-base::gstreamer-fft-1.0",
+            "gst-orc::gst-orc",
         ])
         # audioparsers
         _define_plugin("audioparsers", [
@@ -466,6 +469,7 @@ class GStPluginsGoodConan(ConanFile):
         # deinterlace
         _define_plugin("deinterlace", [
             "gst-plugins-base::gstreamer-video-1.0",
+            "gst-orc::gst-orc",
         ])
         # directsound
         if self.options.get_safe("with_directsound"):
@@ -513,6 +517,7 @@ class GStPluginsGoodConan(ConanFile):
         # goom
         _define_plugin("goom", [
             "gst-plugins-base::gstreamer-pbutils-1.0",
+            "gst-orc::gst-orc",
         ])
         # goom2k1
         _define_plugin("goom2k1", [
@@ -743,6 +748,7 @@ class GStPluginsGoodConan(ConanFile):
         # videobox
         _define_plugin("videobox", [
             "gst-plugins-base::gstreamer-video-1.0",
+            "gst-orc::gst-orc",
         ])
         # videocrop
         _define_plugin("videocrop", [
@@ -755,6 +761,7 @@ class GStPluginsGoodConan(ConanFile):
         # videomixer
         _define_plugin("videomixer", [
             "gst-plugins-base::gstreamer-video-1.0",
+            "gst-orc::gst-orc",
         ])
         # vpx
         if self.options.with_vpx:
