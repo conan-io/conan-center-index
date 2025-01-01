@@ -87,7 +87,6 @@ class OpenImageIOConan(ConanFile):
         elif self.options.with_libjpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/[>=3.0.3 <4]")
         self.requires("pugixml/1.14")
-        self.requires("libsquish/1.15")
         self.requires("tsl-robin-map/1.3.0")
         self.requires("fmt/10.2.1", transitive_headers=True)
         self.requires("opencolorio/2.4.0")
@@ -255,7 +254,6 @@ class OpenImageIOConan(ConanFile):
             "libtiff::libtiff",
             "pugixml::pugixml",
             "tsl-robin-map::tsl-robin-map",
-            "libsquish::libsquish",
             "fmt::fmt",
             "imath::imath",
             "openexr::openexr",
