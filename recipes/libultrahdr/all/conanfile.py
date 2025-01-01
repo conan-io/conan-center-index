@@ -1,14 +1,11 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
-from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.0"
 
 
 class LibultrahdrConan(ConanFile):
@@ -70,30 +67,25 @@ class LibultrahdrConan(ConanFile):
             tc.variables["CONAN_USE_MOZJPEG"] = True
 
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
 
     def build(self):
         self._patch_sources()
+
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        # if self.options.shared:
-        #     rm(self, "*[!.dll]", os.path.join(self.package_folder, "bin"))
-        # else:
-        #     rmdir(self, os.path.join(self.package_folder, "bin"))
-        # rmdir(self, os.path.join(self.package_folder, "lib", "libpng"))
-        # rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # rmdir(self, os.path.join(self.package_folder, "share"))
-        # rm(self, "*.cmake", os.path.join(self.package_folder, "lib", "cmake", "PNG"))
+
+        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
         self.cpp_info.libs = ['uhdr']

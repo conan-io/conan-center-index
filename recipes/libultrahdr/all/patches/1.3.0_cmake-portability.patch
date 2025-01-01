@@ -1,7 +1,16 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index c518d85..5757d1a 100644
+index c518d85..43495d4 100644
 --- CMakeLists.txt
 +++ CMakeLists.txt
+@@ -19,7 +19,7 @@ cmake_minimum_required(VERSION 3.15)
+ # CMP0091: MSVC runtime library flags are selected by an abstraction.
+ # New in CMake 3.15. https://cmake.org/cmake/help/latest/policy/CMP0091.html
+ if(POLICY CMP0091)
+-  cmake_policy(SET CMP0091 OLD)
++  cmake_policy(SET CMP0091 NEW)
+ endif()
+ 
+ set(UHDR_MAJOR_VERSION 1)
 @@ -165,9 +165,9 @@ endif()
  ###########################################################
  # Compile flags
