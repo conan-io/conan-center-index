@@ -289,10 +289,6 @@ class GStPluginsBaseConan(ConanFile):
         copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         meson = Meson(self)
         meson.install()
-        # The generated config headers (such as gst/gl/gstglconfig.h) are not installed for some reason
-        copy(self, "*config.h",
-             os.path.join(self.build_folder, "gst-libs"),
-             os.path.join(self.package_folder, "include", "gstreamer-1.0"))
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
         self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
         rename(self, os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
@@ -602,6 +598,7 @@ class GStPluginsBaseConan(ConanFile):
                 "opengl::opengl",
                 # TODO: bcm
             ])
+            gst_gl.includedirs.append(os.path.join("lib", "gstreamer-1.0", "include"))
             gl_api, gl_platform, gl_winsys = self._gl_config()
             gl_variables = {
                 **pkgconfig_variables,
