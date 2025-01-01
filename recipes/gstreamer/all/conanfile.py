@@ -1,10 +1,10 @@
-import glob
 import os
+from pathlib import Path
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.files import chdir, copy, get, rename, rm, rmdir
+from conan.tools.files import copy, get, rename, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -100,13 +100,10 @@ class GStreamerConan(ConanFile):
         meson.build()
 
     def _fix_library_names(self, path):
-        # regression in 1.16
         if is_msvc(self):
-            with chdir(self, path):
-                for filename_old in glob.glob("*.a"):
-                    filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info(f"rename {filename_old} into {filename_new}")
-                    rename(self, filename_old, filename_new)
+            for filename_old in Path(path).glob("*.a"):
+                filename_new = str(filename_old)[:-2] + ".lib"
+                rename(self, filename_old, filename_new)
 
     def package(self):
         copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))

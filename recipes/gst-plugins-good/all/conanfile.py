@@ -1,13 +1,13 @@
-import glob
 import os
 import shutil
+from pathlib import Path
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import chdir, copy, get, rm, rmdir, rename, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rm, rmdir, rename, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
@@ -348,11 +348,9 @@ class GStPluginsGoodConan(ConanFile):
 
     def _fix_library_names(self, path):
         if is_msvc(self):
-            with chdir(self, path):
-                for filename_old in glob.glob("*.a"):
-                    filename_new = filename_old[3:-2] + ".lib"
-                    self.output.info(f"rename {filename_old} into {filename_new}")
-                    shutil.move(filename_old, filename_new)
+            for filename_old in Path(path).glob("*.a"):
+                filename_new = str(filename_old)[:-2] + ".lib"
+                shutil.move(filename_old, filename_new)
 
     def package(self):
         copy(self, pattern="COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
