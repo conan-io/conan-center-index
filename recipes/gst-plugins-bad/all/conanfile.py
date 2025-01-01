@@ -127,7 +127,7 @@ class GStPluginsBadConan(ConanFile):
         "with_openni2": True,
         "with_opus": True,
         "with_pango": True,
-        "with_qt": False,
+        "with_qt": True,
         "with_rsvg": True,
         "with_sctp": True,
         "with_srt": True,
@@ -548,7 +548,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["opus"] = feature(self.options.with_opus)
         tc.project_options["qroverlay"] = feature(self.options.with_libqrencode and self.options.with_json)
         tc.project_options["qsv"] = "enabled"  # requires gstd3d11 on Windows, gstva on Linux
-        tc.project_options["qt6d3d11"] = feature(self.options.get_safe("with_qt") and self.options.with_with_d3d11)
+        tc.project_options["qt6d3d11"] = feature(self.options.get_safe("with_qt") and self.options.with_d3d11)
         tc.project_options["resindvd"] = "disabled"  # dvdnav (GPL)
         tc.project_options["rsvg"] = feature(self.options.with_rsvg)
         tc.project_options["rtmp"] = "disabled"  # librtmp
@@ -1042,7 +1042,7 @@ class GStPluginsBadConan(ConanFile):
             ])
             if not self.options.shared:
                 gst_d3d11.system_libs.extend([
-                    "d2d1", "directxmath", "runtimeobject", "winmm", "dwmapi",
+                    "d2d1", "runtimeobject", "winmm", "dwmapi",
                 ])
         # d3d12
         if self.options.get_safe("with_d3d12"):
@@ -1126,9 +1126,10 @@ class GStPluginsBadConan(ConanFile):
                 "openssl::openssl",
             ])
         # dvb
-        _define_plugin("dvb", [
-            "gstreamer-mpegts-1.0",
-        ])
+        if self.settings.os == "Linux":
+            _define_plugin("dvb", [
+                "gstreamer-mpegts-1.0",
+            ])
         # dvbsubenc
         _define_plugin("dvbsubenc", [
             "gst-plugins-base::gstreamer-video-1.0",
@@ -1154,9 +1155,10 @@ class GStPluginsBadConan(ConanFile):
             "gst-plugins-base::gstreamer-video-1.0",
         ])
         # fbdevsink
-        _define_plugin("fbdevsink", [
-            "gst-plugins-base::gstreamer-video-1.0",
-        ])
+        if self.settings.os == "Linux":
+            _define_plugin("fbdevsink", [
+                "gst-plugins-base::gstreamer-video-1.0",
+            ])
         # fdkaac
         if self.options.with_fdk_aac:
             _define_plugin("fdkaac", [
@@ -1427,7 +1429,7 @@ class GStPluginsBadConan(ConanFile):
             elif self.settings.os == "Windows":
                 gst_qsv.requires.append("gstreamer-d3d11-1.0")
         # qt6d3d11
-        if self.options.get_safe("with_qt") and self.options.with_with_d3d11:
+        if self.options.get_safe("with_qt") and self.options.with_d3d11:
             _define_plugin("qt6d3d11", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gstreamer-d3d11-1.0",
@@ -1718,8 +1720,6 @@ class GStPluginsBadConan(ConanFile):
             _define_plugin("win32ipc", [
                 "gst-plugins-base::gstreamer-video-1.0",
             ])
-            gst_winrt = _define_plugin("winrt", [])
-            gst_winrt.system_libs.extend(["runtimeobject"])
         # winks
         if self.options.get_safe("with_directshow") and self.options.get_safe("with_wasapi"):
             gst_winks = _define_plugin("winks", [])

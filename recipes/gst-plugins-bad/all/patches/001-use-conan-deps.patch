@@ -50,15 +50,19 @@ diff --git a/ext/sctp/usrsctp/meson.build b/ext/sctp/usrsctp/meson.build
 diff --git a/ext/bz2/meson.build b/ext/bz2/meson.build
 --- a/ext/bz2/meson.build
 +++ b/ext/bz2/meson.build
-@@ -4,7 +4,7 @@
+@@ -4,9 +4,9 @@
    'gstbz2enc.c',
  ]
  
 -bz2_dep = cc.find_library('bz2', required : get_option('bz2'))
 +bz2_dep = dependency('bzip2', required : get_option('bz2'))
  
- if bz2_dep.found() and cc.has_header_symbol('bzlib.h', 'BZ2_bzlibVersion')
+-if bz2_dep.found() and cc.has_header_symbol('bzlib.h', 'BZ2_bzlibVersion')
++if bz2_dep.found()
    gstbz2 = library('gstbz2',
+     bz2_sources,
+     c_args : gst_plugins_bad_args,
+
 diff --git a/ext/zxing/gstzxing.cpp b/ext/zxing/gstzxing.cpp
 --- a/ext/zxing/gstzxing.cpp
 +++ b/ext/zxing/gstzxing.cpp
