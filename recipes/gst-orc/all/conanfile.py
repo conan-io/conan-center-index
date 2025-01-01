@@ -52,7 +52,6 @@ class GStOrcConan(ConanFile):
         tc.project_options["gtk_doc"] = "disabled"
         tc.project_options["orc-test"] = "disabled"
         tc.project_options["tests"] = "disabled"
-        tc.project_options["default_library"] = "shared" if self.options.shared else "static"
         tc.generate()
 
     def build(self):
