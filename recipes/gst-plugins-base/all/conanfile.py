@@ -267,6 +267,10 @@ class GStPluginsBaseConan(ConanFile):
         tc.project_options["orc"] = "enabled"
         tc.project_options["iso-codes"] = "disabled"  # requires iso-codes package
 
+        if not self.dependencies["gst-orc"].options.shared:
+            # The define is not propagated correctly in the Meson build scripts
+            tc.extra_defines.append("ORC_STATIC_COMPILATION")
+
         tc.generate()
 
         deps = PkgConfigDeps(self)
