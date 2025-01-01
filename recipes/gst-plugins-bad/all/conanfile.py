@@ -363,9 +363,10 @@ class GStPluginsBadConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
-        self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
+        self.tool_requires("glib/<host_version>")
+        self.tool_requires("gettext/0.22.5")
         if self.options.with_vulkan:
             self.tool_requires("shaderc/2024.1")
         if self.options.get_safe("with_wayland"):
@@ -616,7 +617,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["doc"] = "disabled"
         tc.project_options["examples"] = "disabled"
         tc.project_options["tests"] = "disabled"
-        tc.project_options["nls"] = "disabled"
+        tc.project_options["nls"] = "enabled"
         tc.project_options["orc"] = "disabled"
         tc.project_options["introspection"] = "disabled"  # TODO
 
@@ -679,6 +680,7 @@ class GStPluginsBadConan(ConanFile):
                 "glib::glib-2.0",
                 "glib::gobject-2.0",
             ] + extra_requires
+            component.resdirs = ["res"]
             if not interface:
                 component.libs = [lib or f"gst{name.replace('-', '')}-1.0"]
                 component.includedirs = [os.path.join("include", "gstreamer-1.0")]

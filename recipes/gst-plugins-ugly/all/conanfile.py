@@ -57,9 +57,10 @@ class GStPluginsUglyConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
-        self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
+        self.tool_requires("glib/<host_version>")
+        self.tool_requires("gettext/0.22.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -95,7 +96,7 @@ class GStPluginsUglyConan(ConanFile):
         tc.project_options["gpl"] = "enabled"
         tc.project_options["doc"] = "disabled"
         tc.project_options["tests"] = "disabled"
-        tc.project_options["nls"] = "disabled"
+        tc.project_options["nls"] = "enabled"
         tc.project_options["orc"] = "disabled"
 
         tc.generate()
@@ -142,6 +143,7 @@ class GStPluginsUglyConan(ConanFile):
             ] + extra_requires
             component.includedirs = []
             component.bindirs = []
+            component.resdirs = ["res"]
             if self.options.shared:
                 component.bindirs.append(os.path.join("lib", "gstreamer-1.0"))
             else:

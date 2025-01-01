@@ -146,9 +146,10 @@ class GStPluginsBaseConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
-        self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
+        self.tool_requires("glib/<host_version>")
+        self.tool_requires("gettext/0.22.5")
         if self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/<host_version>")
             self.tool_requires("wayland-protocols/1.36")
@@ -259,7 +260,7 @@ class GStPluginsBaseConan(ConanFile):
         tc.project_options["tests"] = "disabled"
         tc.project_options["tools"] = "disabled"
         tc.project_options["introspection"] = feature(self.options.with_introspection)
-        tc.project_options["nls"] = "disabled"
+        tc.project_options["nls"] = "enabled"
         tc.project_options["orc"] = "disabled"  # TODO: orc
         tc.project_options["iso-codes"] = "disabled"  # requires iso-codes package
 
@@ -326,6 +327,7 @@ class GStPluginsBaseConan(ConanFile):
             ] + extra_requires
             component.includedirs = []
             component.bindirs = []
+            component.resdirs = ["res"]
             if self.options.shared:
                 component.bindirs.append(os.path.join("lib", "gstreamer-1.0"))
             else:

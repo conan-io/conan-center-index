@@ -52,9 +52,10 @@ class GStreamerConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
-        self.tool_requires("glib/<host_version>")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
+        self.tool_requires("glib/<host_version>")
+        self.tool_requires("gettext/0.22.5")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.78.1")
         if self.settings_build.os == "Windows":
@@ -83,7 +84,7 @@ class GStreamerConan(ConanFile):
         tc.project_options["examples"] = "disabled"
         tc.project_options["benchmarks"] = "disabled"
         tc.project_options["tests"] = "disabled"
-        tc.project_options["nls"] = "disabled"  # Ensure libnls from system is not used
+        tc.project_options["nls"] = "enabled"
         tc.project_options["bash-completion"] = "disabled"
         tc.project_options["ptp-helper"] = "disabled"  # requires rustc and libcap
         tc.generate()
