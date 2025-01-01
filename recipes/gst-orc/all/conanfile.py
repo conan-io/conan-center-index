@@ -80,6 +80,8 @@ class GStOrcConan(ConanFile):
         component.set_property("pkg_config_name", pkg_name)
         component.libs = [pkg_name]
         component.includedirs = [os.path.join("include", pkg_name)]
+        if not self.options.shared:
+            component.defines.append("ORC_STATIC_COMPILATION")
         if self.settings.os in ["Linux", "FreeBSD"]:
             component.system_libs = ["m", "pthread"]
         elif self.settings.os == "Android":
