@@ -42,7 +42,6 @@ class GStPluginsGoodConan(ConanFile):
         "with_mp3lame": [True, False],
         "with_mpg123": [True, False],
         "with_png": [True, False],
-        "with_pulseaudio": [True, False],
         "with_qt": [True, False],
         "with_soup": [True, False],
         "with_ssl": ["openssl", False],
@@ -50,6 +49,7 @@ class GStPluginsGoodConan(ConanFile):
         "with_vpx": [True, False],
 
         "with_egl": [True, False],
+        "with_pulseaudio": [True, False],
         "with_v4l2": [True, False],
         "with_wayland": [True, False],
         "with_xorg": [True, False],
@@ -72,7 +72,6 @@ class GStPluginsGoodConan(ConanFile):
         "with_mp3lame": True,
         "with_mpg123": True,
         "with_png": True,
-        "with_pulseaudio": True,
         "with_qt": True,
         "with_soup": True,
         "with_ssl": "openssl",
@@ -80,6 +79,7 @@ class GStPluginsGoodConan(ConanFile):
         "with_vpx": True,
 
         "with_egl": True,
+        "with_pulseaudio": True,
         "with_v4l2": True,
         "with_wayland": True,
         "with_xorg": True,
@@ -94,6 +94,7 @@ class GStPluginsGoodConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.with_pulseaudio
         else:
             del self.options.with_directsound
         if self.settings.os not in ["Linux", "FreeBSD"]:
@@ -165,7 +166,7 @@ class GStPluginsGoodConan(ConanFile):
             self.requires("mpg123/1.31.2")
         if self.options.with_png:
             self.requires("libpng/[>=1.6 <2]")
-        if self.options.with_pulseaudio:
+        if self.options.get_safe("with_pulseaudio"):
             self.requires("pulseaudio/17.0")
         if self.options.with_qt:
             self.requires("qt/[>=6.7 <7]", options={
@@ -299,7 +300,7 @@ class GStPluginsGoodConan(ConanFile):
         tc.project_options["osxaudio"] = feature(is_apple_os(self))
         tc.project_options["osxvideo"] = feature(self.settings.os == "Macos")
         tc.project_options["png"] = feature(self.options.with_png)
-        tc.project_options["pulse"] = feature(self.options.with_pulseaudio)
+        tc.project_options["pulse"] = feature(self.options.get_safe("with_pulseaudio"))
         tc.project_options["rpicamsrc"] = "disabled" # Raspberry Pi camera module plugin
         tc.project_options["shout2"] = "disabled"  # TODO: libshout
         tc.project_options["soup"] = feature(self.options.with_soup)
@@ -647,7 +648,7 @@ class GStPluginsGoodConan(ConanFile):
                 "libpng::libpng",
             ])
         # pulseaudio
-        if self.options.with_pulseaudio:
+        if self.options.get_safe("with_pulseaudio"):
             _define_plugin("pulseaudio", [
                 "gst-plugins-base::gstreamer-audio-1.0",
                 "gst-plugins-base::gstreamer-pbutils-1.0",
