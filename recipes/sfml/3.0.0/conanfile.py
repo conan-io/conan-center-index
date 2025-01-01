@@ -4,6 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.build import check_min_cppstd
 import os
 
 required_conan_version = ">=1.53.0"
@@ -74,6 +75,8 @@ class SfmlConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} not supported on {self.settings.os}")
         if self.options.graphics and not self.options.window:
             raise ConanInvalidConfiguration("sfml:graphics=True requires sfml:window=True")
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
