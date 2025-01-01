@@ -1,0 +1,188 @@
+diff --git CMakeLists.txt CMakeLists.txt
+index c518d85..5757d1a 100644
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -165,9 +165,9 @@ endif()
+ ###########################################################
+ # Compile flags
+ ###########################################################
+-set(CMAKE_CXX_STANDARD 17)
+-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-set(CMAKE_CXX_EXTENSIONS OFF)
++#set(CMAKE_CXX_STANDARD 17)
++#set(CMAKE_CXX_STANDARD_REQUIRED ON)
++#set(CMAKE_CXX_EXTENSIONS OFF)
+ if(BUILD_SHARED_LIBS)
+   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+   set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+@@ -410,61 +410,73 @@ if(UHDR_ENABLE_GLES)
+   endif()
+ endif()
+ 
+-# libjpeg-turbo
+-if(NOT UHDR_BUILD_DEPS)
+-  find_package(JPEG QUIET)
+-  if(NOT JPEG_FOUND)
+-    message(FATAL_ERROR "Could NOT find JPEG (missing: JPEG_LIBRARIES JPEG_INCLUDE_DIRS),\
+-                         retry after installing JPEG library at sysroot or try 'cmake -DUHDR_BUILD_DEPS=1'")
+-  else()
+-    message(STATUS "Found JPEG: ${JPEG_LIBRARIES} (found version \"${JPEG_VERSION}\")")
+-  endif()
+-endif()
+-
+-if(NOT JPEG_FOUND)
+-  set(JPEGTURBO_TARGET_NAME turbojpeg)
+-  set(JPEGTURBO_PREFIX_DIR ${CMAKE_CURRENT_BINARY_DIR}/${JPEGTURBO_TARGET_NAME})
+-  set(JPEGTURBO_SOURCE_DIR ${THIRD_PARTY_DIR}/${JPEGTURBO_TARGET_NAME})
+-  set(JPEGTURBO_BINARY_DIR ${JPEGTURBO_PREFIX_DIR}/src/${JPEGTURBO_TARGET_NAME}-build)
+-  set(JPEG_INCLUDE_DIRS ${JPEGTURBO_SOURCE_DIR} ${JPEGTURBO_BINARY_DIR})
+-  if(MSVC)
+-    set(JPEG_LIB ${CMAKE_STATIC_LIBRARY_PREFIX}jpeg-static${CMAKE_STATIC_LIBRARY_SUFFIX})
+-  else()
+-    set(JPEG_LIB ${CMAKE_STATIC_LIBRARY_PREFIX}jpeg${CMAKE_STATIC_LIBRARY_SUFFIX})
+-  endif()
+-  if(IS_MULTI)
+-    set(JPEG_LIB_PREFIX ${JPEGTURBO_BINARY_DIR}/$<CONFIG>/)
+-  else()
+-    set(JPEG_LIB_PREFIX ${JPEGTURBO_BINARY_DIR}/)
+-  endif()
+-  set(JPEG_LIBRARIES ${JPEG_LIB_PREFIX}${JPEG_LIB})
+-  if(EMSCRIPTEN)
+-    ExternalProject_Add(${JPEGTURBO_TARGET_NAME}
+-        GIT_REPOSITORY https://github.com/libjpeg-turbo/libjpeg-turbo.git
+-        GIT_TAG 3.0.1
+-        PREFIX ${JPEGTURBO_PREFIX_DIR}
+-        SOURCE_DIR ${JPEGTURBO_SOURCE_DIR}
+-        BINARY_DIR ${JPEGTURBO_BINARY_DIR}
+-        CONFIGURE_COMMAND emcmake cmake ${JPEGTURBO_SOURCE_DIR}
+-                          -DENABLE_SHARED=0 -DWITH_SIMD=0
+-        BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> --target jpeg-static
+-        BUILD_BYPRODUCTS ${JPEG_LIBRARIES}
+-        INSTALL_COMMAND ""
+-    )
+-  else()
+-    ExternalProject_Add(${JPEGTURBO_TARGET_NAME}
+-        GIT_REPOSITORY https://github.com/libjpeg-turbo/libjpeg-turbo.git
+-        GIT_TAG 3.0.1
+-        PREFIX ${JPEGTURBO_PREFIX_DIR}
+-        SOURCE_DIR ${JPEGTURBO_SOURCE_DIR}
+-        BINARY_DIR ${JPEGTURBO_BINARY_DIR}
+-        BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> --target jpeg-static
+-        CMAKE_ARGS ${UHDR_CMAKE_ARGS} -DENABLE_SHARED=0
+-        BUILD_BYPRODUCTS ${JPEG_LIBRARIES}
+-        INSTALL_COMMAND ""
+-    )
+-  endif()
+-endif()
++if(CONAN_USE_JPEG)
++  find_package(JPEG REQUIRED)
++endif()
++if(CONAN_USE_JPEGTURBO)
++  find_package(libjpeg-turbo REQUIRED)
++  add_library(JPEG::JPEG ALIAS libjpeg-turbo::libjpeg-turbo)
++endif()
++if(CONAN_USE_MOZJPEG)
++  find_package(mozjpeg REQUIRED)
++  add_library(JPEG::JPEG ALIAS mozjpeg::mozjpeg)
++endif()
++
++# # libjpeg-turbo
++# if(NOT UHDR_BUILD_DEPS)
++#   find_package(JPEG QUIET)
++#   if(NOT JPEG_FOUND)
++#     message(FATAL_ERROR "Could NOT find JPEG (missing: JPEG_LIBRARIES JPEG_INCLUDE_DIRS),\
++#                          retry after installing JPEG library at sysroot or try 'cmake -DUHDR_BUILD_DEPS=1'")
++#   else()
++#     message(STATUS "Found JPEG: ${JPEG_LIBRARIES} (found version \"${JPEG_VERSION}\")")
++#   endif()
++# endif()
++
++# if(NOT JPEG_FOUND)
++#   set(JPEGTURBO_TARGET_NAME turbojpeg)
++#   set(JPEGTURBO_PREFIX_DIR ${CMAKE_CURRENT_BINARY_DIR}/${JPEGTURBO_TARGET_NAME})
++#   set(JPEGTURBO_SOURCE_DIR ${THIRD_PARTY_DIR}/${JPEGTURBO_TARGET_NAME})
++#   set(JPEGTURBO_BINARY_DIR ${JPEGTURBO_PREFIX_DIR}/src/${JPEGTURBO_TARGET_NAME}-build)
++#   set(JPEG_INCLUDE_DIRS ${JPEGTURBO_SOURCE_DIR} ${JPEGTURBO_BINARY_DIR})
++#   if(MSVC)
++#     set(JPEG_LIB ${CMAKE_STATIC_LIBRARY_PREFIX}jpeg-static${CMAKE_STATIC_LIBRARY_SUFFIX})
++#   else()
++#     set(JPEG_LIB ${CMAKE_STATIC_LIBRARY_PREFIX}jpeg${CMAKE_STATIC_LIBRARY_SUFFIX})
++#   endif()
++#   if(IS_MULTI)
++#     set(JPEG_LIB_PREFIX ${JPEGTURBO_BINARY_DIR}/$<CONFIG>/)
++#   else()
++#     set(JPEG_LIB_PREFIX ${JPEGTURBO_BINARY_DIR}/)
++#   endif()
++#   set(JPEG_LIBRARIES ${JPEG_LIB_PREFIX}${JPEG_LIB})
++#   if(EMSCRIPTEN)
++#     ExternalProject_Add(${JPEGTURBO_TARGET_NAME}
++#         GIT_REPOSITORY https://github.com/libjpeg-turbo/libjpeg-turbo.git
++#         GIT_TAG 3.0.1
++#         PREFIX ${JPEGTURBO_PREFIX_DIR}
++#         SOURCE_DIR ${JPEGTURBO_SOURCE_DIR}
++#         BINARY_DIR ${JPEGTURBO_BINARY_DIR}
++#         CONFIGURE_COMMAND emcmake cmake ${JPEGTURBO_SOURCE_DIR}
++#                           -DENABLE_SHARED=0 -DWITH_SIMD=0
++#         BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> --target jpeg-static
++#         BUILD_BYPRODUCTS ${JPEG_LIBRARIES}
++#         INSTALL_COMMAND ""
++#     )
++#   else()
++#     ExternalProject_Add(${JPEGTURBO_TARGET_NAME}
++#         GIT_REPOSITORY https://github.com/libjpeg-turbo/libjpeg-turbo.git
++#         GIT_TAG 3.0.1
++#         PREFIX ${JPEGTURBO_PREFIX_DIR}
++#         SOURCE_DIR ${JPEGTURBO_SOURCE_DIR}
++#         BINARY_DIR ${JPEGTURBO_BINARY_DIR}
++#         BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --config $<CONFIG> --target jpeg-static
++#         CMAKE_ARGS ${UHDR_CMAKE_ARGS} -DENABLE_SHARED=0
++#         BUILD_BYPRODUCTS ${JPEG_LIBRARIES}
++#         INSTALL_COMMAND ""
++#     )
++#   endif()
++# endif()
+ 
+ if(UHDR_BUILD_JAVA)
+   # build jni and java util classes
+@@ -567,8 +579,8 @@ file(GLOB UHDR_TEST_SRCS_LIST "${TESTS_DIR}/*.cpp")
+ file(GLOB UHDR_BM_SRCS_LIST "${BENCHMARK_DIR}/*.cpp")
+ file(GLOB IMAGE_IO_SRCS_LIST "${THIRD_PARTY_DIR}/image_io/src/**/*.cc")
+ 
+-set(PRIVATE_INCLUDE_DIR ${SOURCE_DIR}/include/ ${JPEG_INCLUDE_DIRS})
+-set(COMMON_LIBS_LIST ${JPEG_LIBRARIES} Threads::Threads)
++set(PRIVATE_INCLUDE_DIR ${SOURCE_DIR}/include/)
++set(COMMON_LIBS_LIST JPEG::JPEG Threads::Threads)
+ 
+ ###########################################################
+ # Targets
+@@ -583,9 +595,9 @@ target_include_directories(${IMAGEIO_TARGET_NAME} PRIVATE
+ set(UHDR_CORE_LIB_NAME core)
+ add_library(${UHDR_CORE_LIB_NAME} STATIC ${UHDR_CORE_SRCS_LIST})
+ target_compile_options(${UHDR_CORE_LIB_NAME} PRIVATE ${UHDR_WERROR_FLAGS})
+-if(NOT JPEG_FOUND)
+-  add_dependencies(${UHDR_CORE_LIB_NAME} ${JPEGTURBO_TARGET_NAME})
+-endif()
++#if(NOT JPEG_FOUND)
++#  add_dependencies(${UHDR_CORE_LIB_NAME} ${JPEGTURBO_TARGET_NAME})
++#endif()
+ if(NOT MSVC)
+   target_compile_options(${UHDR_CORE_LIB_NAME} PRIVATE -Wall -Wextra -Wshadow)
+ endif()
+@@ -744,7 +756,7 @@ endif()
+ if(${CMAKE_SYSTEM_NAME} MATCHES "Android")
+   target_link_libraries(${UHDR_TARGET_NAME} PRIVATE ${log-lib})
+ endif()
+-target_link_libraries(${UHDR_TARGET_NAME} PRIVATE ${JPEG_LIBRARIES})
++target_link_libraries(${UHDR_TARGET_NAME} PRIVATE JPEG::JPEG)
+ set_target_properties(${UHDR_TARGET_NAME}
+                       PROPERTIES PUBLIC_HEADER ultrahdr_api.h)
+ if(BUILD_SHARED_LIBS)
+@@ -767,7 +779,7 @@ if(BUILD_SHARED_LIBS)
+   if(${CMAKE_SYSTEM_NAME} MATCHES "Android")
+     target_link_libraries(${UHDR_TARGET_NAME_STATIC} PRIVATE ${log-lib})
+   endif()
+-  target_link_libraries(${UHDR_TARGET_NAME_STATIC} PRIVATE ${JPEG_LIBRARIES})
++  target_link_libraries(${UHDR_TARGET_NAME_STATIC} PRIVATE JPEG::JPEG)
+   combine_static_libs(${UHDR_CORE_LIB_NAME} ${UHDR_TARGET_NAME_STATIC})
+   if(NOT MSVC)
+     set_target_properties(${UHDR_TARGET_NAME_STATIC}
