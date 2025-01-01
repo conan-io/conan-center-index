@@ -5,7 +5,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.env import Environment
-from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches, rename
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
@@ -139,6 +139,7 @@ class GtkConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         self.tool_requires("glib/<host_version>")
+        self.tool_requires("gettext/0.22.5")
         if self.options.get_safe("with_wayland"):
             self.tool_requires("wayland-protocols/1.33")
         if self.options.with_introspection:
