@@ -13,7 +13,9 @@ from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.microsoft import is_msvc, check_min_vs, is_msvc_static_runtime
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.0"
+# For PkgConfigDeps.set_property()
+required_conan_version = ">=2.8"
+
 
 class GStPluginsBadConan(ConanFile):
     name = "gst-plugins-bad"
@@ -175,7 +177,9 @@ class GStPluginsBadConan(ConanFile):
             del self.options.with_directwrite
             del self.options.with_mediafoundation
             del self.options.with_wasapi
-            del self.options.with_wasapi2
+        if not is_msvc(self):
+            # the required winrt library component only supports MSVC as of v1.24.10
+            self.options.with_wasapi2
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_libdc1394
             del self.options.with_libdrm
@@ -199,6 +203,8 @@ class GStPluginsBadConan(ConanFile):
             self.options.rm_safe("fPIC")
         if not self.options.with_libcurl:
             del self.options.with_libssh2
+        if not self.options.get_safe("with_libudev"):
+            del self.options.with_libusb
         if not self.options.get_safe("with_d3d11"):
             self.options.rm_safe("with_qt")
         self.options["gstreamer"].shared = self.options.shared
@@ -216,6 +222,8 @@ class GStPluginsBadConan(ConanFile):
             self.requires("libaom-av1/3.8.0")
         if self.options.with_bz2:
             self.requires("bzip2/1.0.8")
+        if self.options.get_safe("with_d3d12"):
+            self.requires("directx-headers/1.614.0")
         if self.options.with_faac:
             self.requires("faac/1.30")
         if self.options.with_fdk_aac:
@@ -239,7 +247,7 @@ class GStPluginsBadConan(ConanFile):
             self.requires("libde265/1.0.15")
         if self.options.get_safe("with_libssh2"):
             self.requires("libssh2/1.11.1", options={"shared": True})
-        if self.options.with_libusb:
+        if self.options.get_safe("with_libusb"):
             self.requires("libusb/1.0.26")
         if self.options.get_safe("with_libudev"):
             self.requires("libgudev/238")
@@ -332,6 +340,9 @@ class GStPluginsBadConan(ConanFile):
             raise ConanInvalidConfiguration(f"gst-plugins-good {self.version} does not support gcc older than 5")
         if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("shared build with static runtime is not supported due to the FlsAlloc limit")
+        if self.options.with_libcurl and is_msvc(self):
+            # Requires unistd.h
+            raise ConanInvalidConfiguration("-o with_libcurl=True is not compatible with MSVC")
         if self.options.get_safe("with_libssh2") and not self.dependencies["libssh2"].options.shared:
             raise ConanInvalidConfiguration("libssh2 must be built as a shared library")
         if self.options.get_safe("with_directshow") and not is_msvc(self):
@@ -446,7 +457,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["subenc"] = "enabled"
         tc.project_options["switchbin"] = "enabled"
         tc.project_options["timecode"] = "enabled"
-        tc.project_options["unixfd"] = "enabled"
+        tc.project_options["unixfd"] = feature(self.settings.os != "Windows")
         tc.project_options["videofilters"] = "enabled"
         tc.project_options["videoframe_audiolevel"] = "enabled"
         tc.project_options["videoparsers"] = "enabled"
@@ -543,7 +554,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["rtmp"] = "disabled"  # librtmp
         tc.project_options["sbc"] = "disabled" # libsbc
         tc.project_options["sctp"] = feature(self.options.with_sctp)
-        tc.project_options["shm"] = "enabled"  # only system dependencies
+        tc.project_options["shm"] = feature(self.settings.os != "Windows")  # no external deps
         tc.project_options["smoothstreaming"] = feature(self.options.with_libxml2)
         tc.project_options["sndfile"] = feature(self.options.with_sndfile)
         tc.project_options["soundtouch"] = feature(self.options.with_soundtouch)
@@ -631,10 +642,6 @@ class GStPluginsBadConan(ConanFile):
         meson.install()
         self._fix_library_names(os.path.join(self.package_folder, "lib"))
         self._fix_library_names(os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
-        # The generated config headers (such as gst/gl/gstglconfig.h) are not installed for some reason
-        copy(self, "*config.h",
-             os.path.join(self.build_folder, "gst-libs"),
-             os.path.join(self.package_folder, "include", "gstreamer-1.0"))
         rename(self, os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
@@ -657,7 +664,7 @@ class GStPluginsBadConan(ConanFile):
         if self.options.shared:
             self.runenv_info.append_path("GST_PLUGIN_PATH", os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
 
-        def _define_library(name, extra_requires, interface=False):
+        def _define_library(name, extra_requires, lib=None, interface=False):
             component_name = f"gstreamer-{name}-1.0"
             component = self.cpp_info.components[component_name]
             component.set_property("pkg_config_name", component_name)
@@ -668,7 +675,7 @@ class GStPluginsBadConan(ConanFile):
                 "glib::gobject-2.0",
             ] + extra_requires
             if not interface:
-                component.libs = [f"gst{name.replace('-', '')}-1.0"]
+                component.libs = [lib or f"gst{name.replace('-', '')}-1.0"]
                 component.includedirs = [os.path.join("include", "gstreamer-1.0")]
                 component.set_property("pkg_config_custom_content", pkgconfig_custom_content)
                 if self.settings.os in ["Linux", "FreeBSD"] and not self.options.shared:
@@ -702,7 +709,7 @@ class GStPluginsBadConan(ConanFile):
 
         # adaptivedemux
         _define_library("adaptivedemux", [
-            "gstreamer-uridownloader-1.0",
+            "gstreamer-downloader-1.0",
         ])
         # analytics
         _define_library("analytics", [
@@ -712,10 +719,10 @@ class GStPluginsBadConan(ConanFile):
         _define_library("bad-audio", [
             "gst-plugins-base::gstreamer-audio-1.0",
         ])
-        # basecamerabinsrc
-        _define_library("basecamerabinsrc", [
+        # bad-base-camerabinsrc
+        _define_library("bad-base-camerabinsrc", [
             "gst-plugins-base::gstreamer-app-1.0",
-        ])
+        ], lib="gstbasecamerabinsrc-1.0")
         # codecparsers
         _define_library("codecparsers", [])
         # codecs
@@ -739,8 +746,17 @@ class GStPluginsBadConan(ConanFile):
             gst_d3d11 = _define_library("d3d11", [
                 "gst-plugins-base::gstreamer-video-1.0",
             ])
+            gst_d3d11.includedirs.append(os.path.join("lib", "gstreamer-1.0", "include"))
             gst_d3d11.system_libs.extend([
                 "d3d11", "dxgi", "d3dcompiler", "runtimeobject",
+            ])
+        # downloader
+        _define_library("downloader", [], lib="gsturidownloader-1.0")
+        # dxva
+        if self.settings.os == "Windows":
+            _define_library("dxva", [
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gstreamer-codecs-1.0",
             ])
         # insertbin
         _define_library("insertbin", [])
@@ -796,8 +812,6 @@ class GStPluginsBadConan(ConanFile):
             if self.settings.os == "Windows":
                 libva.requires.append("libva::libva-win32")
                 libva.system_libs.append("dxgi")
-        # uridownloader
-        _define_library("uridownloader", [])
         # vulkan
         if self.options.with_vulkan:
             gst_vulkan = _define_library("vulkan", [
@@ -850,6 +864,10 @@ class GStPluginsBadConan(ConanFile):
                 "libnice::libnice",
                 "glib::gio-2.0",
             ])
+        # winrt
+        if is_msvc(self):
+            gst_winrt = _define_library("winrt", [])
+            gst_winrt.system_libs.append("runtimeobject")
 
         # Plugins
 
@@ -1020,7 +1038,7 @@ class GStPluginsBadConan(ConanFile):
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gstreamer::gstreamer-controller-1.0",
                 "gstreamer-d3d11-1.0",
-                "gstreamer-gstdxva-1.0",
+                "gstreamer-dxva-1.0",
             ])
             if not self.options.shared:
                 gst_d3d11.system_libs.extend([
@@ -1028,13 +1046,14 @@ class GStPluginsBadConan(ConanFile):
                 ])
         # d3d12
         if self.options.get_safe("with_d3d12"):
-            gst_d3d11 = _define_plugin("d3d12", [
+            gst_d3d12 = _define_plugin("d3d12", [
                 "gst-plugins-base::gstreamer-video-1.0",
+                "directx-headers::directx-headers",
                 "gstreamer-codecs-1.0",
-                "gstreamer-gstdxva-1.0",
+                "gstreamer-dxva-1.0",
             ])
             if not self.options.shared:
-                gst_d3d11.system_libs.extend(["d3d12", "d3d11", "d2d1", "dxgi"])
+                gst_d3d12.system_libs.extend(["d3d12", "d3d11", "d2d1", "dxgi"])
         # directshow
         if self.options.get_safe("with_directshow"):
             gst_directshow = _define_plugin("directshow", [
@@ -1314,7 +1333,7 @@ class GStPluginsBadConan(ConanFile):
                 "glib::gio-2.0",
             ], cpp=True)
             if self.settings.os == "Windows":
-                gst_nvcodec.requires.append("gstreamer-gstd3d11-1.0")
+                gst_nvcodec.requires.append("gstreamer-d3d11-1.0")
         # onnx
         if self.options.with_onnx:
             gst_onnx = _define_plugin("onnx", [
@@ -1411,7 +1430,7 @@ class GStPluginsBadConan(ConanFile):
         if self.options.get_safe("with_qt") and self.options.with_with_d3d11:
             _define_plugin("qt6d3d11", [
                 "gst-plugins-base::gstreamer-video-1.0",
-                "gstreamer-gstd3d11-1.0",
+                "gstreamer-d3d11-1.0",
                 "qt::qtCore",
                 "qt::qtGui",
                 "qt::qtQml",
@@ -1472,7 +1491,8 @@ class GStPluginsBadConan(ConanFile):
             "gst-plugins-base::gstreamer-video-1.0",
         ])
         # shm
-        _define_plugin("shm", [])
+        if self.settings.os != "Windows":
+            _define_plugin("shm", [])
         # siren
         _define_plugin("siren", [
             "gst-plugins-base::gstreamer-audio-1.0",
@@ -1655,7 +1675,7 @@ class GStPluginsBadConan(ConanFile):
                     "ole32", "ksuser", "runtimeobject", "mmdevapi", "mfplat",
                 ])
         # waylandsink
-        if self.options.with_wayland and self.options.get_safe("with_libdrm"):
+        if self.options.get_safe("with_wayland") and self.options.get_safe("with_libdrm"):
             _define_plugin("waylandsink", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-allocators-1.0",

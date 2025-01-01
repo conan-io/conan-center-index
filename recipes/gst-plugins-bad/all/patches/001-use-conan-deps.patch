@@ -144,15 +144,45 @@ diff --git a/sys/v4l2codecs/meson.build b/sys/v4l2codecs/meson.build
 diff --git a/gst-libs/gst/vulkan/meson.build b/gst-libs/gst/vulkan/meson.build
 --- a/gst-libs/gst/vulkan/meson.build
 +++ b/gst-libs/gst/vulkan/meson.build
-@@ -113,7 +113,7 @@
+@@ -113,8 +113,8 @@
    #   retrieving the metal device from the VkDevice) which is currently waiting
    #   on implementing a proper Metal extension for Vulkan
    #   https://github.com/KhronosGroup/MoltenVK/issues/492
 -  vulkan_dep = cc.find_library('MoltenVK', required : get_option('vulkan'))
+-elif host_system == 'windows'
 +  vulkan_dep = dependency('moltenvk', required : get_option('vulkan'))
- elif host_system == 'windows'
++elif false
    vulkan_root = run_command(python3, '-c', 'import os; print(os.environ.get("VK_SDK_PATH"))', check: false).stdout().strip()
    if vulkan_root != '' and vulkan_root != 'None'
+     vulkan_lib_dir = ''
+@@ -137,14 +137,14 @@
+     endif
+   endif
+ else
+-  vulkan_dep = dependency('vulkan', method: 'pkg-config', required : false)
+-  if not vulkan_dep.found()
++  vulkan_dep = dependency('vulkan', method: 'pkg-config', required : get_option('vulkan'))
++  if false
+     vulkan_dep = cc.find_library('vulkan', required : false)
+   endif
+ endif
+ 
+-if host_system != 'windows'
+-  has_vulkan_header = cc.has_header('vulkan/vulkan_core.h')
++if true
++  has_vulkan_header = true
+ endif
+ 
+ if not has_vulkan_header and get_option('vulkan').enabled()
+@@ -268,7 +268,7 @@
+   gdi_dep = cc.find_library('gdi32', required : get_option('vulkan'))
+ 
+   # Cannot use internal dependency object with cc.has_header()
+-  if gdi_dep.found() and cc.has_header('vulkan/vulkan_win32.h', args: '-I' + vulkan_inc_dir)
++  if gdi_dep.found() and cc.has_header('vulkan/vulkan_win32.h', dependencies : vulkan_dep)
+     vulkan_priv_sources += ['win32/gstvkwindow_win32.c']
+     optional_deps += [gdi_dep]
+     vulkan_windowing = true
 diff --git a/sys/applemedia/meson.build b/sys/applemedia/meson.build
 --- a/sys/applemedia/meson.build
 +++ b/sys/applemedia/meson.build
