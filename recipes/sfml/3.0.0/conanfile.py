@@ -51,6 +51,9 @@ class SfmlConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        self.tool_requires('cmake/[>=3.24]')
+
     def requirements(self):
         if self.options.window:
             # FIXME: use cci's glad
