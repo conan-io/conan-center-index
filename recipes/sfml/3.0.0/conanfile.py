@@ -2,11 +2,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save, copy
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 import os
-import textwrap
 
 required_conan_version = ">=1.53.0"
 
@@ -79,9 +77,6 @@ class SfmlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        # sfml/2.6.0 uses minimp3 and glad in extlibs
-        if Version(self.version) < "2.6.0":
-            rmdir(self, os.path.join(self.source_folder, "extlibs"))
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -95,19 +90,17 @@ class SfmlConan(ConanFile):
         tc.variables["SFML_GENERATE_PDB"] = False
         tc.variables["SFML_USE_SYSTEM_DEPS"] = True
         tc.variables["WARNINGS_AS_ERRORS"] = False
-        if Version(self.version) >= "2.6.0":
-            tc.variables["CMAKE_CXX_STANDARD"] = 11
+        tc.variables['CMAKE_CXX_STANDARD'] = 17
         if is_msvc(self):
             tc.variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
         tc.generate()
         deps = CMakeDeps(self)
-        if Version(self.version) >= "2.6.2":
-            if self.options.audio:
-                deps.set_property("vorbis", "cmake_file_name", "VORBIS")
-            if self.options.graphics:
-                deps.set_property("freetype", "cmake_file_name", "Freetype")
-                deps.set_property("freetype", "cmake_additional_variables_prefixes", ["FREETYPE"])
-                deps.set_property("freetype", "cmake_target_name", "Freetype")
+        if self.options.audio:
+            deps.set_property("vorbis", "cmake_file_name", "VORBIS")
+        if self.options.graphics:
+            deps.set_property("freetype", "cmake_file_name", "Freetype")
+            deps.set_property("freetype", "cmake_additional_variables_prefixes", ["FREETYPE"])
+            deps.set_property("freetype", "cmake_target_name", "Freetype")
         deps.generate()
 
     def build(self):
@@ -207,18 +200,6 @@ class SfmlConan(ConanFile):
                 "system_libs": winmm() + pthread() + rt() + android() + log(),
             },
         }
-        if Version(self.version) < "3.0.0" and self.settings.os in ["Windows", "Android", "iOS"]:
-            sfml_main_suffix = "-d" if self.settings.build_type == "Debug" else ""
-            sfmlmain_libs = [f"sfml-main{sfml_main_suffix}"]
-            if self.settings.os == "Android":
-                sfmlmain_libs.append(f"sfml-activity{suffix}")
-            sfml_components.update({
-                "main": {
-                    "target": "sfml-main",
-                    "libs": sfmlmain_libs,
-                    "system_libs": android() + log(),
-                },
-            })
         if self.options.window:
             sfml_components.update({
                 "window": {
@@ -250,9 +231,7 @@ class SfmlConan(ConanFile):
                 },
             })
         if self.options.audio:
-            audio_requires = ["system", "flac::flac", "openal-soft::openal-soft", "vorbis::vorbis"]
-            if Version(self.version) >= "2.6.0":
-                audio_requires.append("minimp3::minimp3")
+            audio_requires = ["system", "flac::flac", "openal-soft::openal-soft", "vorbis::vorbis", "minimp3::minimp3"]
             sfml_components.update({
                 "audio": {
                     "target": "sfml-audio",
