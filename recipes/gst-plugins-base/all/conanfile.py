@@ -96,6 +96,8 @@ class GStPluginsBaseConan(ConanFile):
     def requirements(self):
         self.requires(f"gstreamer/{self.version}", transitive_headers=True, transitive_libs=True)
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
+        self.requires("gst-orc/0.4.40")
+
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.10")
@@ -149,6 +151,7 @@ class GStPluginsBaseConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         self.tool_requires("glib/<host_version>")
+        self.tool_requires("gst-orc/<host_version>")
         self.tool_requires("gettext/0.22.5")
         if self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/<host_version>")
@@ -261,7 +264,7 @@ class GStPluginsBaseConan(ConanFile):
         tc.project_options["tools"] = "disabled"
         tc.project_options["introspection"] = feature(self.options.with_introspection)
         tc.project_options["nls"] = "enabled"
-        tc.project_options["orc"] = "disabled"  # TODO: orc
+        tc.project_options["orc"] = "enabled"
         tc.project_options["iso-codes"] = "disabled"  # requires iso-codes package
 
         tc.generate()
@@ -339,7 +342,7 @@ class GStPluginsBaseConan(ConanFile):
         # Plugins ('gst')
         _define_plugin("adder", [
             "gstreamer-audio-1.0",
-            # TODO: orc
+            "gst-orc::gst-orc",
         ])
         _define_plugin("app", [
             "gstreamer-app-1.0",
@@ -350,7 +353,7 @@ class GStPluginsBaseConan(ConanFile):
         ])
         _define_plugin("audiomixer", [
             "gstreamer-audio-1.0",
-            # TODO: orc
+            "gst-orc::gst-orc",
         ])
         _define_plugin("audiorate", [
             "gstreamer-audio-1.0",
@@ -366,7 +369,7 @@ class GStPluginsBaseConan(ConanFile):
         ])
         _define_plugin("compositor", [
             "gstreamer-video-1.0",
-            # TODO: orc
+            "gst-orc::gst-orc",
         ])
         _define_plugin("dsd", [
             "gstreamer-audio-1.0",
@@ -411,11 +414,11 @@ class GStPluginsBaseConan(ConanFile):
         ])
         _define_plugin("videotestsrc", [
             "gstreamer-video-1.0",
-            # TODO: orc
+            "gst-orc::gst-orc",
         ])
         _define_plugin("volume", [
             "gstreamer-audio-1.0",
-            # TODO: orc
+            "gst-orc::gst-orc",
         ])
 
         # Plugins ('ext')
@@ -557,7 +560,7 @@ class GStPluginsBaseConan(ConanFile):
         _define_library("app", [])
         _define_library("audio", [
             "gstreamer-tag-1.0",
-            # TODO: orc
+            "gst-orc::gst-orc",
         ])
         _define_library("fft", [])
         _define_library("pbutils", [
@@ -587,7 +590,7 @@ class GStPluginsBaseConan(ConanFile):
             "zlib::zlib",
         ])
         _define_library("video", [
-            # TODO: orc
+            "gst-orc::gst-orc",
         ])
 
         if self.options.with_gl:
