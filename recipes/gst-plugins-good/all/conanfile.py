@@ -14,7 +14,8 @@ from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.microsoft import is_msvc, check_min_vs, is_msvc_static_runtime
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.4"
+# For PkgConfigDeps.set_property()
+required_conan_version = ">=2.8"
 
 
 class GStPluginsGoodConan(ConanFile):
@@ -28,10 +29,10 @@ class GStPluginsGoodConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+
         "with_asm": [True, False],
         "with_bz2": [True, False],
         "with_cairo": [True, False],
-        "with_egl": [True, False],
         "with_flac": [True, False],
         "with_gdk_pixbuf": [True, False],
         "with_gtk": [True, False],
@@ -46,18 +47,22 @@ class GStPluginsGoodConan(ConanFile):
         "with_soup": [True, False],
         "with_ssl": ["openssl", False],
         "with_taglib": [True, False],
-        "with_v4l2": [True, False],
         "with_vpx": [True, False],
+
+        "with_egl": [True, False],
+        "with_v4l2": [True, False],
         "with_wayland": [True, False],
         "with_xorg": [True, False],
+
+        "with_directsound": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+
         "with_asm": True,
         "with_bz2": True,
         "with_cairo": True,
-        "with_egl": True,
         "with_flac": True,
         "with_gdk_pixbuf": True,
         "with_gtk": True,
@@ -72,10 +77,14 @@ class GStPluginsGoodConan(ConanFile):
         "with_soup": True,
         "with_ssl": "openssl",
         "with_taglib": True,
-        "with_v4l2": True,
         "with_vpx": True,
+
+        "with_egl": True,
+        "with_v4l2": True,
         "with_wayland": True,
         "with_xorg": True,
+
+        "with_directsound": True,
     }
     languages = ["C"]
 
@@ -85,21 +94,23 @@ class GStPluginsGoodConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        else:
+            del self.options.with_directsound
         if self.settings.os not in ["Linux", "FreeBSD"]:
+            del self.options.with_egl
             del self.options.with_v4l2
-            del self.options.with_xorg
             del self.options.with_wayland
+            del self.options.with_xorg
         if self.settings.arch != "x86_64":
             del self.options.with_asm
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if self.options.with_qt:
+        if self.options.with_qt and self.settings.os in ["Linux", "FreeBSD"]:
             self.options["gst-plugins-base"].with_egl = self.options.with_egl
-            if self.settings.os in ["Linux", "FreeBSD"]:
-                self.options["gst-plugins-base"].with_xorg = self.options.with_xorg
-                self.options["gst-plugins-base"].with_wayland = self.options.with_wayland
+            self.options["gst-plugins-base"].with_xorg = self.options.with_xorg
+            self.options["gst-plugins-base"].with_wayland = self.options.with_wayland
         else:
             self.options.rm_safe("with_wayland")
             self.options.rm_safe("with_egl")
@@ -269,7 +280,7 @@ class GStPluginsGoodConan(ConanFile):
         tc.project_options["amrwbdec"] = "disabled"  # TODO: libopencore-amrwbdec
         tc.project_options["bz2"] = feature(self.options.with_bz2)
         tc.project_options["cairo"] = feature(self.options.with_cairo)
-        tc.project_options["directsound"] = feature(self.settings.os == "Windows")
+        tc.project_options["directsound"] = feature(self.options.get_safe("with_directsound"))
         tc.project_options["dv"] = "disabled"  # TODO: libdv4
         tc.project_options["dv1394"] = "disabled"  # TODO: libraw1394, libavc1394, libiec61883
         tc.project_options["flac"] = feature(self.options.with_flac)
@@ -283,7 +294,7 @@ class GStPluginsGoodConan(ConanFile):
         tc.project_options["oss"] = feature(self.settings.os in ["Linux", "FreeBSD"])
         tc.project_options["oss4"] = feature(self.settings.os in ["Linux", "FreeBSD"])
         tc.project_options["osxaudio"] = feature(is_apple_os(self))
-        tc.project_options["osxvideo"] = feature(is_apple_os(self))
+        tc.project_options["osxvideo"] = feature(self.settings.os == "Macos")
         tc.project_options["png"] = feature(self.options.with_png)
         tc.project_options["pulse"] = feature(self.options.with_pulseaudio)
         tc.project_options["rpicamsrc"] = "disabled" # Raspberry Pi camera module plugin
@@ -378,6 +389,7 @@ class GStPluginsGoodConan(ConanFile):
                 component.defines.append("GST_PLUGINS_GOOD_STATIC")
             return component
 
+        # adaptivedemux2
         if self.options.with_ssl and self.options.with_libxml2 and self.options.with_soup:
             _define_plugin("adaptivedemux2", [
                 "gst-plugins-base::gstreamer-tag-1.0",
@@ -390,110 +402,145 @@ class GStPluginsGoodConan(ConanFile):
                 "glib::gmodule-2.0",
                 "glib::gio-2.0",
             ])
+        # alaw
         _define_plugin("alaw", [
             "gst-plugins-base::gstreamer-audio-1.0",
         ])
+        # alpha
         _define_plugin("alpha", [
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # alphacolor
         _define_plugin("alphacolor", [
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # apetag
         _define_plugin("apetag", [
             "gst-plugins-base::gstreamer-pbutils-1.0",
             "gst-plugins-base::gstreamer-tag-1.0",
         ])
+        # audiofx
         _define_plugin("audiofx", [
             "gst-plugins-base::gstreamer-audio-1.0",
             "gst-plugins-base::gstreamer-fft-1.0",
         ])
+        # audioparsers
         _define_plugin("audioparsers", [
             "gst-plugins-base::gstreamer-pbutils-1.0",
             "gst-plugins-base::gstreamer-audio-1.0",
             "gst-plugins-base::gstreamer-tag-1.0",
         ])
+        # auparse
         _define_plugin("auparse", [
             "gst-plugins-base::gstreamer-audio-1.0",
         ])
+        # autodetect
         _define_plugin("autodetect", [])
+        # avi
         _define_plugin("avi", [
             "gst-plugins-base::gstreamer-riff-1.0",
             "gst-plugins-base::gstreamer-audio-1.0",
             "gst-plugins-base::gstreamer-video-1.0",
             "gst-plugins-base::gstreamer-tag-1.0",
         ])
+        # cacasink
         if self.options.with_libcaca:
             _define_plugin("cacasink", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "libcaca::libcaca",
             ])
+        # cairo
         if self.options.with_cairo:
             _define_plugin("cairo", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "cairo::cairo-gobject",
             ])
+        # cutter
         _define_plugin("cutter", [
             "gst-plugins-base::gstreamer-audio-1.0",
         ])
+        # debug
         _define_plugin("debug", [
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # deinterlace
         _define_plugin("deinterlace", [
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # directsound
+        if self.options.get_safe("with_directsound"):
+            gst_ds = _define_plugin("directsound", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+            ])
+            gst_ds.system_libs = ["dsound", "winmm", "ole32"]
+        # dtmf
         _define_plugin("dtmf", [
             "gst-plugins-base::gstreamer-rtp-1.0",
         ])
+        # effectv
         _define_plugin("effectv", [
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # equalizer
         _define_plugin("equalizer", [
             "gst-plugins-base::gstreamer-audio-1.0",
         ])
+        # flac
         if self.options.with_flac:
             _define_plugin("flac", [
                 "gst-plugins-base::gstreamer-tag-1.0",
                 "gst-plugins-base::gstreamer-audio-1.0",
                 "flac::flac",
             ])
+        # flv
         _define_plugin("flv", [
             "gst-plugins-base::gstreamer-pbutils-1.0",
             "gst-plugins-base::gstreamer-video-1.0",
             "gst-plugins-base::gstreamer-tag-1.0",
             "gst-plugins-base::gstreamer-audio-1.0",
         ])
+        # flxdec
         _define_plugin("flxdec", [
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # gdkpixbuf
         if self.options.with_gdk_pixbuf:
             _define_plugin("gdkpixbuf", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gstreamer::gstreamer-controller-1.0",
                 "gdk-pixbuf::gdk-pixbuf",
             ])
+        # goom
         _define_plugin("goom", [
             "gst-plugins-base::gstreamer-pbutils-1.0",
         ])
+        # goom2k1
         _define_plugin("goom2k1", [
             "gst-plugins-base::gstreamer-pbutils-1.0",
         ])
+        # gtk
         if self.options.with_gtk:
             _define_plugin("gtk", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gtk::gtk+-3.0",
             ])
+        # icydemux
         _define_plugin("icydemux", [
             "gst-plugins-base::gstreamer-tag-1.0",
             "zlib::zlib",
         ])
+        # id3demux
         _define_plugin("id3demux", [
             "gst-plugins-base::gstreamer-tag-1.0",
             "gst-plugins-base::gstreamer-pbutils-1.0",
         ])
+        # imagefreeze
         _define_plugin("imagefreeze", [])
+        # interleave
         _define_plugin("interleave", [
             "gst-plugins-base::gstreamer-audio-1.0",
         ])
+        # isomp4
         _define_plugin("isomp4", [
             "gst-plugins-base::gstreamer-riff-1.0",
             "gst-plugins-base::gstreamer-audio-1.0",
@@ -503,21 +550,26 @@ class GStPluginsGoodConan(ConanFile):
             "gst-plugins-base::gstreamer-pbutils-1.0",
             "zlib::zlib",
         ])
+        # jack
         _define_plugin("jack", [
             "gst-plugins-base::gstreamer-audio-1.0",
             "glib::gmodule-2.0",
         ])
+        # jpeg
         _define_plugin("jpeg", [
             "gst-plugins-base::gstreamer-video-1.0",
             "libjpeg::libjpeg",
         ])
+        # lame
         _define_plugin("lame", [
             "gst-plugins-base::gstreamer-audio-1.0",
             "libmp3lame::libmp3lame",
         ])
+        # level
         _define_plugin("level", [
             "gst-plugins-base::gstreamer-audio-1.0",
         ])
+        # matroska
         if self.options.with_bz2:
             _define_plugin("matroska", [
                 "gst-plugins-base::gstreamer-pbutils-1.0",
@@ -528,44 +580,72 @@ class GStPluginsGoodConan(ConanFile):
                 "zlib::zlib",
                 "bzip2::bzip2",
             ])
+        # monoscope
         _define_plugin("monoscope", [
             "gst-plugins-base::gstreamer-audio-1.0",
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # mpg123
         if self.options.with_mpg123:
             _define_plugin("mpg123", [
                 "gst-plugins-base::gstreamer-audio-1.0",
                 "mpg123::mpg123",
             ])
+        # mulaw
         _define_plugin("mulaw", [
             "gst-plugins-base::gstreamer-audio-1.0",
         ])
+        # multifile
         _define_plugin("multifile", [
             "gst-plugins-base::gstreamer-video-1.0",
             "gst-plugins-base::gstreamer-pbutils-1.0",
             "glib::gio-2.0",
         ])
+        # multipart
         _define_plugin("multipart", [])
+        # navigationtest
         _define_plugin("navigationtest", [
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # oss4
         _define_plugin("oss4", [
             "gst-plugins-base::gstreamer-audio-1.0",
         ])
+        # ossaudio
         _define_plugin("ossaudio", [
             "gst-plugins-base::gstreamer-audio-1.0",
         ])
+        # osxaudio
+        if is_apple_os(self):
+            gst_osxaudio = _define_plugin("osxaudio", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+            ])
+            gst_osxaudio.frameworks = ["CoreAudio", "AudioToolbox"]
+            if self.settings.os == "Macos":
+                gst_osxaudio.frameworks.extend(["AudioUnit", "CoreServices"])
+        # osxvideo
+        if self.settings.os == "Macos":
+            gst_osxvideo = _define_plugin("osxvideo", [
+                "gst-plugins-base::gstreamer-video-1.0",
+            ])
+            gst_osxvideo.frameworks = ["OpenGL", "Cocoa"]
+        _define_plugin("ossaudio", [
+            "gst-plugins-base::gstreamer-audio-1.0",
+        ])
+        # png
         if self.options.with_png:
             _define_plugin("png", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "libpng::libpng",
             ])
+        # pulseaudio
         if self.options.with_pulseaudio:
             _define_plugin("pulseaudio", [
                 "gst-plugins-base::gstreamer-audio-1.0",
                 "gst-plugins-base::gstreamer-pbutils-1.0",
                 "pulseaudio::pulseaudio",
             ])
+        # qml6
         if self.options.with_qt:
             qt_major = Version(self.dependencies["qt"].ref.version).major
             qt_plugin = _define_plugin("qml6" if qt_major == 6 else "qmlgl", [
@@ -594,10 +674,12 @@ class GStPluginsGoodConan(ConanFile):
                     qt_plugin.system_libs.append("GLESv2")
                 if is_apple_os(self):
                     qt_plugin.requires.append("qt::qtMacExtras")
+        # replaygain
         _define_plugin("replaygain", [
             "gst-plugins-base::gstreamer-pbutils-1.0",
             "gst-plugins-base::gstreamer-audio-1.0",
         ])
+        # rtp
         _define_plugin("rtp", [
             "gst-plugins-base::gstreamer-audio-1.0",
             "gst-plugins-base::gstreamer-video-1.0",
@@ -605,12 +687,14 @@ class GStPluginsGoodConan(ConanFile):
             "gst-plugins-base::gstreamer-rtp-1.0",
             "gst-plugins-base::gstreamer-pbutils-1.0",
         ])
+        # rtpmanager
         _define_plugin("rtpmanager", [
             "gstreamer::gstreamer-net-1.0",
             "gst-plugins-base::gstreamer-rtp-1.0",
             "gst-plugins-base::gstreamer-audio-1.0",
             "glib::gio-2.0",
         ])
+        # rtsp
         _define_plugin("rtsp", [
             "gst-plugins-base::gstreamer-rtp-1.0",
             "gst-plugins-base::gstreamer-rtsp-1.0",
@@ -618,12 +702,15 @@ class GStPluginsGoodConan(ConanFile):
             "gstreamer::gstreamer-net-1.0",
             "glib::gio-2.0",
         ])
+        # shapewipe
         _define_plugin("shapewipe", [
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # smpte
         _define_plugin("smpte", [
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # soup
         if self.options.with_soup:
             _define_plugin("soup", [
                 "gst-plugins-base::gstreamer-tag-1.0",
@@ -631,53 +718,71 @@ class GStPluginsGoodConan(ConanFile):
                 "glib::gmodule-2.0",
                 "glib::gio-2.0",
             ])
+        # spectrum
         _define_plugin("spectrum", [
             "gst-plugins-base::gstreamer-fft-1.0",
             "gst-plugins-base::gstreamer-audio-1.0",
         ])
+        # taglib
         if self.options.with_taglib:
             _define_plugin("taglib", [
                 "gst-plugins-base::gstreamer-tag-1.0",
                 "taglib::taglib",
             ])
+        # udp
         _define_plugin("udp", [
             "gstreamer::gstreamer-net-1.0",
             "glib::gio-2.0",
         ])
-        if self.options.with_v4l2:
+        # video4linux2
+        if self.options.get_safe("with_v4l2"):
             _define_plugin("video4linux2", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-allocators-1.0",
                 "libv4l::libv4l",
             ])
+        # videobox
         _define_plugin("videobox", [
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # videocrop
         _define_plugin("videocrop", [
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # videofilter
         _define_plugin("videofilter", [
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # videomixer
         _define_plugin("videomixer", [
             "gst-plugins-base::gstreamer-video-1.0",
         ])
+        # vpx
         if self.options.with_vpx:
             _define_plugin("vpx", [
                 "gst-plugins-base::gstreamer-tag-1.0",
                 "gst-plugins-base::gstreamer-video-1.0",
                 "libvpx::libvpx",
             ])
+        # waveform
+        if self.settings.os == "Windows":
+            gst_wf = _define_plugin("waveform", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+            ])
+            gst_wf.system_libs = ["winmm"]
+        # wavenc
         _define_plugin("wavenc", [
             "gst-plugins-base::gstreamer-audio-1.0",
             "gst-plugins-base::gstreamer-riff-1.0",
         ])
+        # wavparse
         _define_plugin("wavparse", [
             "gst-plugins-base::gstreamer-pbutils-1.0",
             "gst-plugins-base::gstreamer-riff-1.0",
             "gst-plugins-base::gstreamer-audio-1.0",
             "gst-plugins-base::gstreamer-tag-1.0",
         ])
+        # ximagesrc
         if self.options.get_safe("with_xorg"):
             _define_plugin("ximagesrc", [
                 "gst-plugins-base::gstreamer-video-1.0",
@@ -687,7 +792,9 @@ class GStPluginsGoodConan(ConanFile):
                 "xorg::xdamage",
                 "xorg::xtst",
             ])
+        # xingmux
         _define_plugin("xingmux", [])
+        # y4menc
         _define_plugin("y4menc", [
             "gst-plugins-base::gstreamer-video-1.0",
         ])
