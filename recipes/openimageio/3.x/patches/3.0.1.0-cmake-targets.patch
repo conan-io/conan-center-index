@@ -34,7 +34,7 @@ index a1d87addf..7b4713f23 100644
              install_targets (${_plugin_NAME})
          endif ()
 diff --git src/cmake/externalpackages.cmake src/cmake/externalpackages.cmake
-index eee6373d8..4f12d5cb3 100644
+index eee6373d8..60dfc03aa 100644
 --- src/cmake/externalpackages.cmake
 +++ src/cmake/externalpackages.cmake
 @@ -73,16 +73,15 @@ set (OPENIMAGEIO_CONFIG_DO_NOT_FIND_IMATH OFF CACHE BOOL
@@ -261,7 +261,7 @@ index eee6373d8..4f12d5cb3 100644
      checked_find_package (Qt6 COMPONENTS Core Gui Widgets OpenGLWidgets)
      if (NOT Qt6_FOUND)
          checked_find_package (Qt5 COMPONENTS Core Gui Widgets OpenGL)
-@@ -221,10 +250,7 @@ endif ()
+@@ -221,18 +250,13 @@ endif ()
  
  
  # Tessil/robin-map
@@ -272,12 +272,14 @@ index eee6373d8..4f12d5cb3 100644
 +find_package (tsl-robin-map REQUIRED)
  
  # fmtlib
- option (OIIO_INTERNALIZE_FMT "Copy fmt headers into <install>/include/OpenImageIO/detail/fmt" ON)
-@@ -232,7 +258,7 @@ checked_find_package (fmt REQUIRED
-                       VERSION_MIN 7.0
-                       BUILD_LOCAL missing
-                      )
+-option (OIIO_INTERNALIZE_FMT "Copy fmt headers into <install>/include/OpenImageIO/detail/fmt" ON)
++option (OIIO_INTERNALIZE_FMT "Copy fmt headers into <install>/include/OpenImageIO/detail/fmt" OFF)
+ checked_find_package (fmt REQUIRED
+-                      VERSION_MIN 7.0
+-                      BUILD_LOCAL missing
+-                     )
 -get_target_property(FMT_INCLUDE_DIR fmt::fmt-header-only INTERFACE_INCLUDE_DIRECTORIES)
++                      VERSION_MIN 7.0)
 +get_target_property(FMT_INCLUDE_DIR fmt::fmt INTERFACE_INCLUDE_DIRECTORIES)
  
  

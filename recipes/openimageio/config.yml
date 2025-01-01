@@ -1,15 +1,15 @@
 versions:
   "2.4.7.1":
-    folder: all
+    folder: 2.x
   "2.4.17.0":
-    folder: all
+    folder: 2.x
   "2.5.14.0":
-    folder: all
+    folder: 2.x
   "2.5.15.0":
-    folder: all
+    folder: 2.x
   "2.5.16.0":
-    folder: all
+    folder: 2.x
   "2.5.17.0":
-    folder: all
+    folder: 2.x
   "3.0.1.0":
     folder: 3.x
