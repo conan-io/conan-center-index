@@ -58,6 +58,7 @@ class LibultrahdrConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
 
+        # Force-disable fallback to internal dependency builder if no deps found
         tc.variables["UHDR_BUILD_DEPS"] = False
         if self.options.with_jpeg == "libjpeg":
             tc.variables["CONAN_USE_JPEG"] = True
