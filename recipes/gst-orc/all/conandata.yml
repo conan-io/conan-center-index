@@ -1,0 +1,4 @@
+sources:
+  "0.4.40":
+    url: "https://gstreamer.freedesktop.org/src/orc/orc-0.4.40.tar.xz"
+    sha256: "3fc2bee78dfb7c41fd9605061fc69138db7df007eae2f669a1f56e8bacef74ab"
