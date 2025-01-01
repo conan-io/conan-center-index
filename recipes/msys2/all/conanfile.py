@@ -1,15 +1,16 @@
-from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
-from conan.tools.files import chdir, get, replace_in_file, copy
-from conan.tools.layout import basic_layout
+import ctypes
+import errno
 import fnmatch
 import os
 import shutil
 import subprocess
-import errno
-import ctypes
 
-required_conan_version = ">=1.47.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.tools.files import chdir, get, replace_in_file, copy
+from conan.tools.layout import basic_layout
+
+required_conan_version = ">=2.0.0"
 
 
 class lock:
