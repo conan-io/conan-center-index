@@ -5,7 +5,7 @@ import shutil
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.files import chdir, copy, get, rm, rmdir, rename
+from conan.tools.files import chdir, copy, get, rm, rmdir, rename, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
@@ -65,6 +65,9 @@ class GStPluginsBaseConan(ConanFile):
     }
     languages = ["C"]
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -105,6 +108,7 @@ class GStPluginsBaseConan(ConanFile):
             if self.settings.os == "Windows":
                 self.requires("wglext/cci.20200813", transitive_headers=True, transitive_libs=True)
                 self.requires("glext/cci.20210420", transitive_headers=True, transitive_libs=True)
+                self.requires("khrplatform/cci.20200529", transitive_headers=True, transitive_libs=True)
             if self.options.get_safe("with_egl"):
                 self.requires("egl/system", transitive_headers=True, transitive_libs=True)
             if self.options.get_safe("with_wayland"):
@@ -153,6 +157,7 @@ class GStPluginsBaseConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def _gl_config(self):
         gl_api = set()
@@ -618,8 +623,11 @@ class GStPluginsBaseConan(ConanFile):
                     "wayland::wayland-egl",
                 ]
             if self.settings.os == "Windows":
-                gst_gl.requires.append("wglext::wglext")
-                gst_gl.requires.append("glext::glext")
+                gst_gl.requires += [
+                    "glext::glext",
+                    "wglext::wglext",
+                    "khrplatform::khrplatform",
+                ]
                 gst_gl.system_libs = ["gdi32"]
             if is_apple_os(self):
                 gst_gl.frameworks = [

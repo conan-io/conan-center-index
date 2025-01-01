@@ -1,0 +1,19 @@
+--- a/gst-libs/gst/gl/meson.build
++++ b/gst-libs/gst/gl/meson.build
+@@ -322,6 +322,16 @@
+   compat_includes = subproject('gl-headers').get_variable('compatibility_includes')
+ else
+   compat_includes = []
++  if host_system == 'windows'
++    glext = dependency('glext', required : true)
++    wglext = dependency('wglext', required : true)
++    khrplatform = dependency('khrplatform', required : true)
++    compat_includes = include_directories(
++      glext.get_variable('includedir'),
++      wglext.get_variable('includedir'),
++      khrplatform.get_variable('includedir'),
++    )
++  endif
+ endif
+ 
+ # Desktop OpenGL checks
