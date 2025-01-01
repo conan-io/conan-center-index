@@ -608,13 +608,15 @@ class GStPluginsGoodConan(ConanFile):
             "gst-plugins-base::gstreamer-video-1.0",
         ])
         # oss4
-        _define_plugin("oss4", [
-            "gst-plugins-base::gstreamer-audio-1.0",
-        ])
+        if self.settings.os == "Linux":
+            _define_plugin("oss4", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+            ])
         # ossaudio
-        _define_plugin("ossaudio", [
-            "gst-plugins-base::gstreamer-audio-1.0",
-        ])
+        if self.settings.os == "Linux":
+            _define_plugin("ossaudio", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+            ])
         # osxaudio
         if is_apple_os(self):
             gst_osxaudio = _define_plugin("osxaudio", [
@@ -629,9 +631,6 @@ class GStPluginsGoodConan(ConanFile):
                 "gst-plugins-base::gstreamer-video-1.0",
             ])
             gst_osxvideo.frameworks = ["OpenGL", "Cocoa"]
-        _define_plugin("ossaudio", [
-            "gst-plugins-base::gstreamer-audio-1.0",
-        ])
         # png
         if self.options.with_png:
             _define_plugin("png", [
