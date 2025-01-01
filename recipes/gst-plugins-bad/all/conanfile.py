@@ -222,6 +222,7 @@ class GStPluginsBadConan(ConanFile):
         self.requires(f"gstreamer/{self.version}", transitive_headers=True, transitive_libs=True)
         self.requires(f"gst-plugins-base/{self.version}", transitive_headers=True, transitive_libs=True)
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
+        self.requires("gst-orc/0.4.40")
 
         if self.options.with_aom:
             self.requires("libaom-av1/3.8.0")
@@ -366,6 +367,7 @@ class GStPluginsBadConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         self.tool_requires("glib/<host_version>")
+        self.tool_requires("gst-orc/<host_version>")
         self.tool_requires("gettext/0.22.5")
         if self.options.with_vulkan:
             self.tool_requires("shaderc/2024.1")
@@ -618,7 +620,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["examples"] = "disabled"
         tc.project_options["tests"] = "disabled"
         tc.project_options["nls"] = "enabled"
-        tc.project_options["orc"] = "disabled"
+        tc.project_options["orc"] = "enabled"
         tc.project_options["introspection"] = "disabled"  # TODO
 
         tc.generate()
@@ -917,6 +919,18 @@ class GStPluginsBadConan(ConanFile):
                 "gstreamer-analytics-1.0",
                 "pango::pangocairo",
             ])
+        # androidmedia
+        if self.settings.os == "Android":
+            gst_am = _define_plugin("androidmedia", [
+                "gst-plugins-base::gstreamer-gl-1.0",
+                "gst-plugins-base::gstreamer-pbutils-1.0",
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "gst-plugins-base::gstreamer-video-1.0",
+                "gstreamer-photography-1.0",
+                "glib::gmodule-2.0",
+                "gst-orc::gst-orc",
+            ])
+            gst_am.system_libs.extend(["android"])
         # aom
         if self.options.with_aom:
             _define_plugin("aom", [
@@ -979,6 +993,7 @@ class GStPluginsBadConan(ConanFile):
         # bayer
         _define_plugin("bayer", [
             "gst-plugins-base::gstreamer-video-1.0",
+            "gst-orc::gst-orc",
         ])
         # bz2
         if self.options.with_bz2:
@@ -1178,6 +1193,7 @@ class GStPluginsBadConan(ConanFile):
         # fieldanalysis
         _define_plugin("fieldanalysis", [
             "gst-plugins-base::gstreamer-video-1.0",
+            "gst-orc::gst-orc",
         ])
         # freeverb
         _define_plugin("freeverb", [
@@ -1191,6 +1207,7 @@ class GStPluginsBadConan(ConanFile):
         # gaudieffects
         _define_plugin("gaudieffects", [
             "gst-plugins-base::gstreamer-video-1.0",
+            "gst-orc::gst-orc",
         ])
         # gdp
         _define_plugin("gdp", [])
@@ -1626,6 +1643,7 @@ class GStPluginsBadConan(ConanFile):
         # videofiltersbad
         _define_plugin("videofiltersbad", [
             "gst-plugins-base::gstreamer-video-1.0",
+            "gst-orc::gst-orc",
         ])
         # videoframe_audiolevel
         _define_plugin("videoframe_audiolevel", [
