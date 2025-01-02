@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class BenchmarkConan(ConanFile):
@@ -34,49 +34,27 @@ class BenchmarkConan(ConanFile):
         "enable_exceptions": True,
         "enable_libpfm": False,
     }
+    implements = ["auto_shared_fpic"]
 
     @property
     def _min_cppstd(self):
+        if Version(self.version) >= "1.9.1":
+            return 17
         if Version(self.version) >= "1.8.5":
             return 14
         if is_msvc(self):
             return 14
         return 11
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "14": {
-                "apple-clang": "10",
-                "clang": "7",
-                "gcc": "7",
-                "msvc": "191",
-                "Visual Studio": "15",
-            }
-        }.get(self._min_cppstd, {})
-
     def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
         if self.settings.os != "Linux" or Version(self.version) < "1.5.4":
             del self.options.enable_libpfm
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
-
+        check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, "190")
         if Version(self.version) < "1.7.0" and is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support msvc shared builds")
@@ -89,8 +67,17 @@ class BenchmarkConan(ConanFile):
         if Version(self.version) >= "1.7.1":
             self.tool_requires("cmake/[>=3.16.3 <4]")
 
+    def _patch_sources(self):
+        if Version(self.version) > "1.7.0":
+            replace_in_file(self,
+                os.path.join(self.source_folder, "CMakeLists.txt"),
+                "set(CMAKE_CXX_STANDARD",
+                "#"
+            )
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -114,16 +101,7 @@ class BenchmarkConan(ConanFile):
             tc.variables["BENCHMARK_USE_LIBCXX"] = False
         tc.generate()
     
-    def _patch_sources(self):
-        if Version(self.version) > "1.7.0":
-            replace_in_file(self,
-                os.path.join(self.source_folder, "CMakeLists.txt"),
-                "set(CMAKE_CXX_STANDARD",
-                "#"
-            )
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
