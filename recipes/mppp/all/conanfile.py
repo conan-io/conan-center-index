@@ -56,8 +56,6 @@ class MpppConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        if Version(self.version) < "0.27":
-            del self.options.with_fmt
         if Version(self.version) < "2.0.0":
             del self.options.with_flint
         else:
@@ -106,8 +104,7 @@ class MpppConan(ConanFile):
         tc.variables["MPPP_WITH_MPC"] = self.options.with_mpc
         tc.variables["MPPP_WITH_QUADMATH"] = self.options.with_quadmath
         tc.variables["MPPP_WITH_BOOST_S11N"] = self.options.with_boost
-        if Version(self.version) >= "0.27":
-            tc.variables["MPPP_WITH_FMT"] = self.options.with_fmt
+        tc.variables["MPPP_WITH_FMT"] = self.options.with_fmt
         if not self.options.shared:
             tc.variables["MPPP_BUILD_STATIC_LIBRARY_WITH_DYNAMIC_MSVC_RUNTIME"] = not is_msvc_static_runtime(self)
         tc.generate()
@@ -115,7 +112,6 @@ class MpppConan(ConanFile):
         if self.options.get_safe("with_flint"):
             deps.set_property("flint", "cmake_file_name", "mp++_FLINT")
             deps.set_property("flint", "cmake_target_name", "mp++::FLINT")
-        if Version(self.version) >= "2.0.0":
             deps.set_property("fmt",  "cmake_config_version_compat", "AnyNewerVersion")
         deps.generate()
 
