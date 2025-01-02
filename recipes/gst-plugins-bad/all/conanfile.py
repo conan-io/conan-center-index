@@ -32,6 +32,7 @@ class GStPluginsBadConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_introspection": [True, False],
 
         "with_aom": [True, False],
         "with_bz2": [True, False],
@@ -100,6 +101,7 @@ class GStPluginsBadConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_introspection": False,
 
         "with_aom": True,
         "with_bz2": True,
@@ -216,6 +218,8 @@ class GStPluginsBadConan(ConanFile):
             self.options.rm_safe("with_qt")
         self.options["gstreamer"].shared = self.options.shared
         self.options["gst-plugins-base"].shared = self.options.shared
+        self.options["gstreamer"].shared = self.options.with_introspection
+        self.options["gst-plugins-base"].shared = self.options.with_introspection
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -225,6 +229,8 @@ class GStPluginsBadConan(ConanFile):
         self.requires(f"gst-plugins-base/{self.version}", transitive_headers=True, transitive_libs=True)
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         self.requires("gst-orc/0.4.40")
+        if self.options.with_introspection:
+            self.requires("gobject-introspection/1.78.1")
 
         if self.options.with_aom:
             self.requires("libaom-av1/3.8.0")
@@ -371,6 +377,8 @@ class GStPluginsBadConan(ConanFile):
         self.tool_requires("glib/<host_version>")
         self.tool_requires("gst-orc/<host_version>")
         self.tool_requires("gettext/0.22.5")
+        if self.options.with_introspection:
+            self.tool_requires("gobject-introspection/<host_version>")
         if self.options.with_vulkan:
             self.tool_requires("shaderc/2024.1")
         if self.options.get_safe("with_wayland"):
@@ -676,6 +684,10 @@ class GStPluginsBadConan(ConanFile):
         if self.options.shared:
             self.runenv_info.append_path("GST_PLUGIN_PATH", os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
 
+        if self.options.with_introspection:
+            self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "gir-1.0"))
+            self.runenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
+
         def _define_library(name, extra_requires, lib=None, interface=False):
             component_name = f"gstreamer-{name}-1.0"
             component = self.cpp_info.components[component_name]
@@ -686,6 +698,8 @@ class GStPluginsBadConan(ConanFile):
                 "glib::glib-2.0",
                 "glib::gobject-2.0",
             ] + extra_requires
+            if self.options.with_introspection:
+                component.requires.append("gobject-introspection::gobject-introspection")
             component.resdirs = ["res"]
             if not interface:
                 component.libs = [lib or f"gst{name.replace('-', '')}-1.0"]

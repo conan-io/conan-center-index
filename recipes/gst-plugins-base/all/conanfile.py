@@ -98,6 +98,9 @@ class GStPluginsBaseConan(ConanFile):
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         self.requires("gst-orc/0.4.40")
 
+        if self.options.with_introspection:
+            self.requires("gobject-introspection/1.78.1", libs=False)
+
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.10")
@@ -157,7 +160,7 @@ class GStPluginsBaseConan(ConanFile):
             self.tool_requires("wayland/<host_version>")
             self.tool_requires("wayland-protocols/1.36")
         if self.options.with_introspection:
-            self.tool_requires("gobject-introspection/1.78.1")
+            self.tool_requires("gobject-introspection/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -276,8 +279,6 @@ class GStPluginsBaseConan(ConanFile):
         deps = PkgConfigDeps(self)
         if self.options.get_safe("with_wayland"):
             deps.build_context_activated.append("wayland-protocols")
-        if self.options.with_introspection:
-            deps.build_context_activated.append("gobject-introspection")
         deps.generate()
 
     def build(self):
@@ -542,6 +543,8 @@ class GStPluginsBaseConan(ConanFile):
                 "glib::gobject-2.0",
                 "glib::glib-2.0",
             ] + extra_requires
+            if self.options.with_introspection:
+                component.requires.append("gobject-introspection::gobject-introspection")
             if not interface:
                 component.libs = [f"gst{name}-1.0"]
                 component.includedirs = [os.path.join("include", "gstreamer-1.0")]
@@ -671,4 +674,4 @@ class GStPluginsBaseConan(ConanFile):
 
         if self.options.with_introspection:
             self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "gir-1.0"))
-            self.buildenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
+            self.runenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
