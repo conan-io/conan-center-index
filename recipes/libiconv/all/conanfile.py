@@ -81,6 +81,7 @@ class LibiconvConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -131,6 +132,8 @@ class LibiconvConan(ConanFile):
             env.define("RANLIB", ":")
             env.define("NM", "dumpbin -symbols")
             env.define("win32_target", "_WIN32_WINNT_VISTA")
+        elif self.settings.os == "Android":
+            env.define("LD", "ld")
         tc.generate(env)
 
     def _apply_resource_patch(self):
@@ -139,8 +142,7 @@ class LibiconvConan(ConanFile):
             self.output.info("Applying {} resource patch: {}".format(self.settings.arch, windres_options_path))
             replace_in_file(self, windres_options_path, '#   PACKAGE_VERSION_SUBMINOR', '#   PACKAGE_VERSION_SUBMINOR\necho "--target=pe-i386"', strict=True)
 
-    def build(self): 
-        apply_conandata_patches(self)
+    def build(self):
         self._apply_resource_patch()
         autotools = Autotools(self)
         autotools.configure()
