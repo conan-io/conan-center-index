@@ -15,7 +15,7 @@ class EigenConan(ConanFile):
                   " numerical solvers, and related algorithms."
     topics = ("algebra", "linear-algebra", "matrix", "vector", "numerical", "header-only")
     package_type = "header-library"
-    license = ("MPL-2.0", "LGPL-3.0-or-later")  # Taking into account the default value of MPL2_only option
+    license = "MPL-2.0 AND LGPL-3.0-or-later"  # Taking into account the default value of MPL2_only option
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -29,7 +29,7 @@ class EigenConan(ConanFile):
         export_conandata_patches(self)
 
     def configure(self):
-        self.license = "MPL-2.0" if self.options.MPL2_only else ("MPL-2.0", "LGPL-3.0-or-later")
+        self.license = "MPL-2.0" if self.options.MPL2_only else "MPL-2.0 AND LGPL-3.0-or-later"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
