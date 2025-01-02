@@ -150,6 +150,8 @@ class GtkConan(ConanFile):
             self.requires("vulkan-loader/1.3.290.0")
         if self.options.get_safe("with_ffmpeg"):
             self.requires("ffmpeg/5.0")
+        if self.options.with_introspection:
+            self.requires("gobject-introspection/1.78.1")
 
         # FIXME: gstreamer from CCI is currently not compatible
         # if self.options.with_gstreamer:
@@ -203,7 +205,7 @@ class GtkConan(ConanFile):
         if self.options.get_safe("with_wayland"):
             self.tool_requires("wayland-protocols/1.36")
         if self.options.with_introspection:
-            self.tool_requires("gobject-introspection/1.78.1")  # for g-ir-scanner
+            self.tool_requires("gobject-introspection/<host_version>")
 
     @property
     def _apt_packages(self):
@@ -287,9 +289,6 @@ class GtkConan(ConanFile):
         deps = PkgConfigDeps(self)
         if self.options.get_safe("with_wayland"):
             deps.build_context_activated.append("wayland-protocols")
-        if self.options.with_introspection:
-            # gnome.generate_gir() in Meson looks for gobject-introspection-1.0.pc
-            deps.build_context_activated = ["gobject-introspection"]
         deps.generate()
 
     def _get_system_pkg_config_paths(self):
@@ -437,8 +436,9 @@ class GtkConan(ConanFile):
             self.cpp_info.components["gtk4-unix-print"].includedirs.append(os.path.join("include", "gtk-4.0", "unix-print"))
 
         if self.options.with_introspection:
+            self.cpp_info.components["gtk4"].requires.append("gobject-introspection::gobject-introspection")
             self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "share", "gir-1.0"))
-            self.buildenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
+            self.runenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
 
         # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.16.7/meson.build?ref_type=tags#L862-873
         pkgconfig_variables = {

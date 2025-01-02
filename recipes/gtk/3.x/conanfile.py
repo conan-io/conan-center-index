@@ -107,6 +107,8 @@ class GtkConan(ConanFile):
             # Only the xorg::x11 component actually requires transitive headers/libs.
             self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
             self.requires("fontconfig/2.15.0")
+        if self.options.with_introspection:
+            self.requires("gobject-introspection/1.78.1")
 
         # TODO: fix libintl support on macOS by using gnuintl from gettext
         # if self.settings.os != "Linux":
@@ -143,7 +145,7 @@ class GtkConan(ConanFile):
         if self.options.get_safe("with_wayland"):
             self.tool_requires("wayland-protocols/1.33")
         if self.options.with_introspection:
-            self.tool_requires("gobject-introspection/1.78.1")  # for g-ir-scanner
+            self.tool_requires("gobject-introspection/<host_version>")
 
     @property
     def _apt_packages(self):
@@ -200,9 +202,6 @@ class GtkConan(ConanFile):
         deps = PkgConfigDeps(self)
         if self.options.get_safe("with_wayland"):
             deps.build_context_activated.append("wayland-protocols")
-        if self.options.with_introspection:
-            # gnome.generate_gir() in Meson looks for gobject-introspection-1.0.pc
-            deps.build_context_activated = ["gobject-introspection"]
         deps.generate()
 
     def _get_system_pkg_config_paths(self):
@@ -363,8 +362,10 @@ class GtkConan(ConanFile):
         self.cpp_info.components["gail-3.0"].includedirs = [os.path.join("include", "gail-3.0")]
 
         if self.options.with_introspection:
+            self.cpp_info.components["gdk-3.0"].requires.append("gobject-introspection::gobject-introspection")
+            self.cpp_info.components["gtk+-3.0"].requires.append("gobject-introspection::gobject-introspection")
             self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "share", "gir-1.0"))
-            self.buildenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
+            self.runenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
 
         # https://gitlab.gnome.org/GNOME/gtk/-/blob/3.24.43/meson.build?ref_type=tags#L886-887
         pkgconfig_variables = {
