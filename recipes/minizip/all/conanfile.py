@@ -52,13 +52,14 @@ class MinizipConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["MINIZIP_SRC_DIR"] = os.path.join(self.source_folder, "contrib", "minizip").replace("\\", "/")
         tc.variables["MINIZIP_ENABLE_BZIP2"] = self.options.bzip2
         tc.variables["MINIZIP_BUILD_TOOLS"] = self.options.tools
-        # fopen64 and similar are unavailable before API level 24: https://github.com/madler/zlib/pull/436
+        # fopen64 and similar are unavailable before API level 24: https://github.com/madler/zlib/pull/1025
         if self.settings.os == "Android" and int(str(self.settings.os.api_level)) < 24:
             tc.preprocessor_definitions["IOAPI_NO_64"] = "1"
         tc.generate()
@@ -66,7 +67,6 @@ class MinizipConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()
