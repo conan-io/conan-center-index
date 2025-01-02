@@ -184,7 +184,7 @@ class GStPluginsBadConan(ConanFile):
             del self.options.with_wasapi
         if not is_msvc(self):
             # the required winrt library component only supports MSVC as of v1.24.10
-            self.options.with_wasapi2
+            del self.options.with_wasapi2
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_libdc1394
             del self.options.with_libdrm
@@ -208,6 +208,8 @@ class GStPluginsBadConan(ConanFile):
             self.options.rm_safe("fPIC")
         if not self.options.with_libcurl:
             del self.options.with_libssh2
+        if not self.options.with_json:
+            del self.options.with_libqrencode
         if not self.options.get_safe("with_libudev"):
             del self.options.with_libusb
         if not self.options.get_safe("with_d3d11"):
@@ -247,7 +249,7 @@ class GStPluginsBadConan(ConanFile):
             self.requires("libdrm/2.4.119")
         if self.options.get_safe("with_libdc1394"):
             self.requires("libdc1394/2.2.7")
-        if self.options.with_libqrencode:
+        if self.options.get_safe("with_libqrencode"):
             self.requires("libqrencode/4.1.1")
         if self.options.with_libde265:
             self.requires("libde265/1.0.15")
@@ -554,8 +556,8 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["openni2"] = feature(self.options.get_safe("with_openni2"))
         tc.project_options["opensles"] = "disabled"  # opensles
         tc.project_options["opus"] = feature(self.options.with_opus)
-        tc.project_options["qroverlay"] = feature(self.options.with_libqrencode and self.options.with_json)
-        tc.project_options["qsv"] = "enabled"  # requires gstd3d11 on Windows, gstva on Linux
+        tc.project_options["qroverlay"] = feature(self.options.get_safe("with_libqrencode") and self.options.with_json)
+        tc.project_options["qsv"] = feature(self.options.get_safe("with_libva"))
         tc.project_options["qt6d3d11"] = feature(self.options.get_safe("with_qt") and self.options.with_d3d11)
         tc.project_options["resindvd"] = "disabled"  # dvdnav (GPL)
         tc.project_options["rsvg"] = feature(self.options.with_rsvg)
@@ -1436,7 +1438,7 @@ class GStPluginsBadConan(ConanFile):
         # proxy
         _define_plugin("proxy", [])
         # qroverlay
-        if self.options.with_libqrencode and self.options.with_json:
+        if self.options.get_safe("with_libqrencode") and self.options.with_json:
             _define_plugin("qroverlay", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "libqrencode::libqrencode",
