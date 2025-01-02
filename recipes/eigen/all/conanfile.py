@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir, download
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -37,8 +38,13 @@ class EigenConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        if Version(self.version) <= "3.4.0":
+            self.output.info("Patching DisableStupidWarnings.h to the latest version to avoid warnings from newer compiler versions")
+            path = os.path.join("Eigen", "src", "Core", "util", "DisableStupidWarnings.h")
+            assert os.path.isfile(path)
+            download(self, **self.conan_data["disable_stupid_warnings_h"], filename=path)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -47,7 +53,6 @@ class EigenConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
