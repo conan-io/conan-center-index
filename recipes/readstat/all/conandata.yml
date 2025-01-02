@@ -1,0 +1,6 @@
+sources:
+  "1.1.9":
+    - url: "https://github.com/WizardMac/ReadStat/archive/refs/tags/v1.1.9.zip"
+      sha256: "2a52026ae6e2348780060f4a769e272e0e1c04dd918b8e76d66e8c9861a81cbc"
+    - url: "https://github.com/WizardMac/ReadStat/releases/download/v1.1.9/readstat-1.1.9.tar.gz"
+      sha256: "3a232b9e852d10173e2f25da9155afe2e129a30d1fc6c9aac142cdc5cbfe527e"
