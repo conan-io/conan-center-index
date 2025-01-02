@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.android import android_abi
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
@@ -75,10 +76,17 @@ class OpusFileConan(ConanFile):
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
 
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
+        if self.settings.os == "Android":
+            replace_in_file(self, os.path.join(self.source_folder, "configure.ac"), "c89", "c99")
+
         if is_msvc(self):
             tc = MSBuildToolchain(self)
             tc.configuration = self._msbuild_configuration
@@ -95,11 +103,15 @@ class OpusFileConan(ConanFile):
                 f"--enable-http={yes_no(self.options.http)}",
                 "--disable-examples",
             ])
+            if self.settings.os == "Android" and int(str(self.settings.os.api_level)) < 24 and "armeabi" in android_abi(self):
+                tc.extra_defines.extend([
+                    "fseeko=fseek",
+                    "ftello=ftell",
+                ])
             tc.generate()
             PkgConfigDeps(self).generate()
 
     def build(self):
-        apply_conandata_patches(self)
         if is_msvc(self):
             sln_folder = os.path.join(self.source_folder, "win32", "VS2015")
             vcxproj = os.path.join(sln_folder, "opusfile.vcxproj")
