@@ -117,10 +117,13 @@ class LibtiffConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         if Version(self.version) >= "4.5.1":
+            deps.set_property("jbig", "cmake_file_name", "JBIG")
             deps.set_property("jbig", "cmake_target_name", "JBIG::JBIG")
+            deps.set_property("xz_utils", "cmake_file_name", "liblzma")
             deps.set_property("xz_utils", "cmake_target_name", "liblzma::liblzma")
             deps.set_property("libdeflate", "cmake_file_name", "Deflate")
             deps.set_property("libdeflate", "cmake_target_name", "Deflate::Deflate")
+            deps.set_property("zstd", "cmake_file_name", "ZSTD")
         deps.generate()
 
     def _patch_sources(self):
@@ -185,7 +188,7 @@ class LibtiffConan(ConanFile):
         if self.options.zstd:
             self.cpp_info.requires.append("zstd::zstd")
         if self.options.webp:
-            self.cpp_info.requires.append("libwebp::libwebp")
+            self.cpp_info.requires.append("libwebp::webp")
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.names["cmake_find_package"] = "TIFF"
