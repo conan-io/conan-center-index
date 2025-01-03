@@ -1,0 +1,60 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b218b696..80253eef 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -327,8 +327,7 @@ endif()
+ # Flags definition
+ # ----------------
+ set_target_properties(LIB_LIEF
+-  PROPERTIES POSITION_INDEPENDENT_CODE ON
+-             CXX_STANDARD              17
++  PROPERTIES CXX_STANDARD              17
+              CXX_STANDARD_REQUIRED     ON
+              VISIBILITY_INLINES_HIDDEN ON
+              CXX_VISIBILITY_PRESET     hidden
+@@ -511,7 +510,7 @@ if(LIEF_INSTALL)
+     EXPORT LIEFExport
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-    RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT libraries
+     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ 
+   install(
+luisc@luisc-mac LIEF % git diff
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b218b696..80253eef 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -327,8 +327,7 @@ endif()
+ # Flags definition
+ # ----------------
+ set_target_properties(LIB_LIEF
+-  PROPERTIES POSITION_INDEPENDENT_CODE ON
+-             CXX_STANDARD              17
++  PROPERTIES CXX_STANDARD              17
+              CXX_STANDARD_REQUIRED     ON
+              VISIBILITY_INLINES_HIDDEN ON
+              CXX_VISIBILITY_PRESET     hidden
+@@ -511,7 +510,7 @@ if(LIEF_INSTALL)
+     EXPORT LIEFExport
+     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+-    RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libraries
++    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT libraries
+     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+ 
+   install(
+diff --git a/src/logging.cpp b/src/logging.cpp
+index 39936fe8..843f18f6 100644
+--- a/src/logging.cpp
++++ b/src/logging.cpp
+@@ -20,7 +20,7 @@
+ #include "logging.hpp"
+ 
+ #include "spdlog/spdlog.h"
+-#include "spdlog/fmt/bundled/args.h"
++#include "fmt/args.h"
+ #include "spdlog/sinks/stdout_color_sinks.h"
+ #include "spdlog/sinks/basic_file_sink.h"
+ #include "spdlog/sinks/android_sink.h"
