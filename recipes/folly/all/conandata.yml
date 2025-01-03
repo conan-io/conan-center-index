@@ -1,7 +1,7 @@
 sources:
-  "2024.12.23.00":
-    url: "https://github.com/facebook/folly/releases/download/v2024.12.23.00/folly-v2024.12.23.00.tar.gz"
-    sha256: "954bfadc048b950f12f55dc5539c53abeb8cfa5baa434b4e644c76c5a2ab34c3"
+  "2024.12.30.00":
+    url: "https://github.com/facebook/folly/releases/download/v2024.12.30.00/folly-v2024.12.30.00.tar.gz"
+    sha256: "3360ffeb3a0819d27d487e1495402fcc2e36a7fa3721d48d358bfdb475be8c93"
   "2024.08.12.00":
     url: "https://github.com/facebook/folly/releases/download/v2024.08.12.00/folly-v2024.08.12.00.tar.gz"
     sha256: "18d7be721721db547cb9c5dd5cc50df05cd88b0a8e683e3126ec6f9ce2c41c4d"
