@@ -48,12 +48,6 @@ class LiefConan(ConanFile):
         "with_vdex": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        if Version(self.version) >= "0.15.1":
-            return "17"
-        return "14" if self.options.with_frozen else "11"
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -69,20 +63,16 @@ class LiefConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # TODO: Check if we actually need transitive_headers
-        # LIEF.lib(x509.obj) external symbol mbedtls_snprintf referenced in function lief_mbedtls_x509_dn_gets
-        self.requires("mbedtls/3.2.1", transitive_headers=True, transitive_libs=True)
-        if Version(self.version) < "0.12.2":
-            self.requires("rang/3.2")
+        self.requires("mbedtls/3.2.1")
+
+        if Version(self.version) >= "0.15.1":
+            self.requires("utfcpp/4.0.5")
         else:
-            if Version(self.version) >= "0.15.1":
-                self.requires("utfcpp/4.0.5")
-            else:
-                self.requires("utfcpp/3.2.3")
-            # lief doesn't supprot spdlog/1.11.0 with fmt/9.x yet.
-            self.requires("spdlog/1.10.0")
-            self.requires("boost/1.81.0", transitive_headers=True)
-            self.requires("tcb-span/cci.20220616", transitive_headers=True)
+            self.requires("utfcpp/3.2.3")
+        # lief doesn't supprot spdlog/1.11.0 with fmt/9.x yet.
+        self.requires("spdlog/1.10.0")
+        self.requires("boost/1.81.0", transitive_headers=True)
+        self.requires("tcb-span/cci.20220616", transitive_headers=True)
         if self.options.with_json:
             self.requires("nlohmann_json/3.11.2")
         if self.options.with_frozen:
@@ -91,14 +81,14 @@ class LiefConan(ConanFile):
             self.requires("tl-expected/1.1.0", transitive_headers=True)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
-        if self.options.shared and is_msvc(self) and not check_min_vs(self, "191", raise_invalid=False):
-            raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio < 15 with shared:True")
+        if Version(self.version) >= "0.15.1":
+            min_cppstd ="17"
+        else:
+            min_cppstd = "14" if self.options.with_frozen else "11"
+        check_min_cppstd(self, min_cppstd)
 
         if self.settings.compiler.get_safe("libcxx") == "libstdc++":
-            raise ConanInvalidConfiguration(f"{self.ref} does not support libstdc++")
+            raise ConanInvalidConfiguration("libstdc++ is only supported with the C++11 ABI enabled - try with compiler.cppstd=libstdc++11")
 
     def build_requirements(self):
         if Version(self.version) >= "0.15.1":
@@ -124,24 +114,28 @@ class LiefConan(ConanFile):
         tc.variables["LIEF_DOC"] = False
         tc.variables["LIEF_LOGGING"] = False
         tc.variables["LIEF_PYTHON_API"] = False
-        if Version(self.version) >= "0.12.2":
-            tc.variables["LIEF_USE_CCACHE"] = False
-            tc.variables["LIEF_OPT_MBEDTLS_EXTERNAL"] = True
-            tc.variables["LIEF_OPT_NLOHMANN_JSON_EXTERNAL"] = True
-            tc.variables["LIEF_OPT_FROZEN_EXTERNAL"] = True
-            tc.variables["LIEF_OPT_UTFCPP_EXTERNAL"] = True
-            tc.variables["LIEF_EXTERNAL_SPDLOG"] = True
-            tc.variables["LIEF_OPT_EXTERNAL_LEAF"] = True
-            tc.variables["LIEF_OPT_EXTERNAL_SPAN"] = True
-        if Version(self.version) >= "0.13.0":
-            tc.variables["LIEF_INSTALL"] = True
-            tc.variables["LIEF_EXTERNAL_SPAN_DIR"] = self.dependencies["tcb-span"].cpp_info.includedirs[0].replace("\\", "/")
-            tc.variables["LIEF_EXTERNAL_LEAF_DIR"] = self.dependencies["boost"].cpp_info.includedirs[0].replace("\\", "/")
+
+        tc.variables["LIEF_USE_CCACHE"] = False
+        tc.variables["LIEF_OPT_MBEDTLS_EXTERNAL"] = True
+        tc.variables["LIEF_OPT_NLOHMANN_JSON_EXTERNAL"] = True
+        tc.variables["LIEF_OPT_FROZEN_EXTERNAL"] = True
+        tc.variables["LIEF_OPT_UTFCPP_EXTERNAL"] = True
+        tc.variables["LIEF_EXTERNAL_SPDLOG"] = True
+        tc.variables["LIEF_OPT_EXTERNAL_LEAF"] = True
+        tc.variables["LIEF_OPT_EXTERNAL_SPAN"] = True
+
+        tc.variables["LIEF_INSTALL"] = True
+        tc.variables["LIEF_EXTERNAL_SPAN_DIR"] = self.dependencies["tcb-span"].cpp_info.includedirs[0].replace("\\", "/")
+        tc.variables["LIEF_EXTERNAL_LEAF_DIR"] = self.dependencies["boost"].cpp_info.includedirs[0].replace("\\", "/")
+
         if Version(self.version) >= "0.15.1":
             tc.cache_variables["LIEF_OPT_EXTERNAL_EXPECTED"] = True
+
         tc.generate()
 
         deps = CMakeDeps(self)
+        if Version(self.version) >= "0.16.1":
+            deps.set_property("utfcpp", "cmake_target_name", "utf8cpp::utf8cpp")
         deps.generate()
 
     def build(self):
@@ -174,6 +168,3 @@ class LiefConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "LIEF"
-        self.cpp_info.names["cmake_find_package_multi"] = "LIEF"
