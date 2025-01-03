@@ -51,6 +51,10 @@ class SfmlConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        if Version(self.version) >= "3.0.0":
+            self.tool_requires("cmake/[>=3.24]")
+
     def requirements(self):
         if self.options.window:
             # FIXME: use cci's glad
@@ -91,9 +95,11 @@ class SfmlConan(ConanFile):
         tc.variables["SFML_BUILD_AUDIO"] = self.options.audio
         tc.variables["SFML_INSTALL_PKGCONFIG_FILES"] = False
         tc.variables["SFML_GENERATE_PDB"] = False
-        tc.variables["SFML_USE_SYSTEM_DEPS"] = True
+        tc.variables["SFML_USE_SYSTEM_DEPS"] = Version(self.version) < "3.0.0"
         tc.variables["WARNINGS_AS_ERRORS"] = False
-        if Version(self.version) >= "2.6.0":
+        if Version(self.version) >= "3.0.0":
+            tc.variables["CMAKE_CXX_STANDARD"] = 17
+        elif Version(self.version) >= "2.6.0":
             tc.variables["CMAKE_CXX_STANDARD"] = 11
         if is_msvc(self):
             tc.variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
@@ -206,8 +212,12 @@ class SfmlConan(ConanFile):
                 "system_libs": winmm() + pthread() + rt() + android() + log(),
             },
         }
+
         if self.settings.os in ["Windows", "Android", "iOS"]:
-            sfml_main_suffix = "-d" if self.settings.build_type == "Debug" else ""
+            if Version(self.version) < "3.0.0":
+                sfml_main_suffix = "-d" if self.settings.build_type == "Debug" else ""
+            else:
+                sfml_main_suffix = suffix
             sfmlmain_libs = [f"sfml-main{sfml_main_suffix}"]
             if self.settings.os == "Android":
                 sfmlmain_libs.append(f"sfml-activity{suffix}")
