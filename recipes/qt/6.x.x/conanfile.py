@@ -1608,7 +1608,7 @@ class QtConan(ConanFile):
                 if os.path.isfile(module):
                     _add_build_module(component_name, module)
 
-                if self.version >= "6.8.0":
+                if Version(self.version) >= "6.8.0":
                     module = os.path.join("lib", "cmake", m, f"{m}PublicCMakeHelpers.cmake")
                     if os.path.isfile(module):
                         _add_build_module(component_name, module)
