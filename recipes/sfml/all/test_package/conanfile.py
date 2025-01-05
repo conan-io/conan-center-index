@@ -22,6 +22,7 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+
         tc.variables["SFML_WITH_WINDOW"] = self.dependencies["sfml"].options.window
         tc.variables["SFML_WITH_GRAPHICS"] = self.dependencies["sfml"].options.graphics
         tc.variables["SFML_WITH_NETWORK"] = self.dependencies["sfml"].options.network

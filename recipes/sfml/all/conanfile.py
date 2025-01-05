@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, save, copy
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
@@ -73,7 +74,18 @@ class SfmlConan(ConanFile):
             if Version(self.version) >= "2.6.0":
                 self.requires("minimp3/cci.20211201")
 
+    @property
+    def _min_cppstd(self):
+        if Version(self.version) >= "3.0.0":
+            return 17
+        elif Version(self.version) >= "2.6.0":
+            return 11
+
+        return 3
+
     def validate(self):
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
         if self.settings.os not in ["Windows", "Linux", "FreeBSD", "Android", "Macos", "iOS"]:
             raise ConanInvalidConfiguration(f"{self.ref} not supported on {self.settings.os}")
         if self.options.graphics and not self.options.window:
@@ -97,10 +109,10 @@ class SfmlConan(ConanFile):
         tc.variables["SFML_GENERATE_PDB"] = False
         tc.variables["SFML_USE_SYSTEM_DEPS"] = Version(self.version) < "3.0.0"
         tc.variables["WARNINGS_AS_ERRORS"] = False
-        if Version(self.version) >= "3.0.0":
-            tc.variables["CMAKE_CXX_STANDARD"] = 17
-        elif Version(self.version) >= "2.6.0":
-            tc.variables["CMAKE_CXX_STANDARD"] = 11
+
+        if self.settings.compiler.cppstd is not None:
+            tc.cache_variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
+
         if is_msvc(self):
             tc.variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
         tc.generate()
