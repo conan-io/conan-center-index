@@ -23,13 +23,14 @@ class ZXingCppConan(ConanFile):
         "fPIC": [True, False],
         "enable_encoders": [True, False],
         "enable_decoders": [True, False],
-        #TODO: consider adding an option to disable the C-API for 2.3.0 and up (ZXING_C_API=OFF)
+        "enable_c_api": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_encoders": True,
         "enable_decoders": True,
+        "enable_c_api": True,
     }
 
     @property
@@ -49,7 +50,6 @@ class ZXingCppConan(ConanFile):
                 "clang": "5" if Version(self.version) < "2.0.0" else "7",
                 "apple-clang": "5" if Version(self.version) < "2.0.0" else "12",
             }
-            #TODO: add info about c++20, which should be the default for 2.3.0 and up
         }
 
     def export_sources(self):
@@ -65,6 +65,9 @@ class ZXingCppConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def build_requirements(self):
+        self.build_requires("cmake/3.16")
 
     def validate(self):
         cpp_version = 17 if Version(self.version) >= "1.2.0" else 14
@@ -97,8 +100,8 @@ class ZXingCppConan(ConanFile):
         else:
             tc.variables["ZXING_WRITERS"] = "ON" if self.options.enable_encoders else "OFF"
             tc.variables["ZXING_READERS"] = "ON" if self.options.enable_decoders else "OFF"
+            tc.variables["ZXING_C_API"] = "ON" if self.options.enable_c_api else "OFF"
             tc.variables["ZXING_EXAMPLES"] = False
-            tc.variables["ZXING_BLACKBOX_TESTS"] = False
         if is_msvc(self):
             tc.variables["LINK_CPP_STATICALLY"] = is_msvc_static_runtime(self)
         tc.generate()
