@@ -46,9 +46,9 @@ class CcacheConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("zstd/1.5.5")
+        self.requires("zstd/1.5.6")
         if self.options.redis_storage_backend:
-            self.requires("hiredis/1.1.0")
+            self.requires("hiredis/1.2.0")
 
         if Version(self.version) >= "4.10":
             self.requires("fmt/[>=10.2.1 <=11.1.1]") # Explicitly tested with all versions in this range
