@@ -159,8 +159,8 @@ endif()
 
 if(ENABLE_ICU)
     find_package(ICU REQUIRED COMPONENTS data i18n uc)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ICU::data ICU::i18n ICU::uc)
-    enable_language(CXX)
+    target_link_libraries(${PROJECT_NAME} PRIVATE ICU::i18n ICU::uc ICU::data)
+    enable_language(CXX) # required for linking language since ICU has c++ code
 endif()
 
 if(NOT OMIT_LOAD_EXTENSION)
