@@ -3,9 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, load, save
-from conan.tools.scm import Version
 import os
-import textwrap
 
 required_conan_version = ">=1.53.0"
 
@@ -82,15 +80,9 @@ class Sqlite3Conan(ConanFile):
 
     exports_sources = "CMakeLists.txt"
 
-    @property
-    def _has_enable_math_function_option(self):
-        return Version(self.version) >= "3.35.0"
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self._has_enable_math_function_option:
-            del self.options.enable_math_functions
 
     def configure(self):
         if self.options.shared:
@@ -135,8 +127,7 @@ class Sqlite3Conan(ConanFile):
         tc.variables["USE_URI"] = self.options.use_uri
         tc.variables["OMIT_LOAD_EXTENSION"] = self.options.omit_load_extension
         tc.variables["OMIT_DEPRECATED"] = self.options.omit_deprecated
-        if self._has_enable_math_function_option:
-            tc.variables["ENABLE_MATH_FUNCTIONS"] = self.options.enable_math_functions
+        tc.variables["ENABLE_MATH_FUNCTIONS"] = self.options.enable_math_functions
         tc.variables["HAVE_FDATASYNC"] = True
         tc.variables["HAVE_GMTIME_R"] = True
         tc.variables["HAVE_LOCALTIME_R"] = self.settings.os != "Windows"
@@ -169,27 +160,6 @@ class Sqlite3Conan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        #       Indeed CMakeDeps uses 'cmake_file_name' property to qualify CMake variables
-        self._create_cmake_module_variables(
-            os.path.join(self.package_folder, self._module_file_rel_path)
-        )
-
-    def _create_cmake_module_variables(self, module_file):
-        content = textwrap.dedent("""\
-            if(DEFINED SQLite_INCLUDE_DIRS)
-                set(SQLite3_INCLUDE_DIRS ${SQLite_INCLUDE_DIRS})
-            endif()
-            if(DEFINED SQLite_LIBRARIES)
-                set(SQLite3_LIBRARIES ${SQLite_LIBRARIES})
-            endif()
-        """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
-
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_file_name", "SQLite3")
@@ -211,16 +181,5 @@ class Sqlite3Conan(ConanFile):
             if self.options.shared:
                 self.cpp_info.components["sqlite"].defines.append("SQLITE_API=__declspec(dllimport)")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "SQLite3"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "SQLite3"
-        self.cpp_info.names["cmake_find_package"] = "SQLite"
-        self.cpp_info.names["cmake_find_package_multi"] = "SQLite"
-        self.cpp_info.components["sqlite"].names["cmake_find_package"] = "SQLite3"
-        self.cpp_info.components["sqlite"].names["cmake_find_package_multi"] = "SQLite3"
-        self.cpp_info.components["sqlite"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.components["sqlite"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["sqlite"].set_property("cmake_target_name", "SQLite::SQLite3")
         self.cpp_info.components["sqlite"].set_property("pkg_config_name", "sqlite3")
-        if self.options.build_executable:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
