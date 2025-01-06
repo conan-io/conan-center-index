@@ -126,7 +126,7 @@ class OsgearthConan(ConanFile):
         if self.options.with_geos:
             self.requires("geos/3.11.1")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.42.0")
+            self.requires("sqlite3/[>=3.42 <4]")
         if self.options.with_draco:
             self.requires("draco/1.4.3")
         # if self.options.with_basisu:

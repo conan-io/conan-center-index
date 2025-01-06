@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 from conan.tools.microsoft import check_min_vs, is_msvc
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2.0.9"
 
 
 class CcacheConan(ConanFile):
@@ -51,12 +51,11 @@ class CcacheConan(ConanFile):
             self.requires("hiredis/1.1.0")
 
         if Version(self.version) >= "4.10":
-            self.requires("fmt/10.2.1")
+            self.requires("fmt/[>=10.2.1 <=11.1.1]") # Explicitly tested with all versions in this range
             self.requires("xxhash/[~0.8]")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, 192)
         if not is_msvc(self):
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -117,7 +116,3 @@ class CcacheConan(ConanFile):
     def package_info(self):
         self.cpp_info.libdirs = []
         self.cpp_info.includedirs = []
-
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bin_path))
-        self.env_info.PATH.append(bin_path)

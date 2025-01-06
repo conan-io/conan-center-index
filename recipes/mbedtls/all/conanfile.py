@@ -87,11 +87,8 @@ class MBedTLSConan(ConanFile):
         if Version(self.version) < "3.0.0":
             # relocatable shared libs on macOS
             tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-        if is_msvc(self):
-            if check_min_vs(self, 190, raise_invalid=False):
-                tc.preprocessor_definitions["MBEDTLS_PLATFORM_SNPRINTF_MACRO"] = "snprintf"
-            else:
-                tc.preprocessor_definitions["MBEDTLS_PLATFORM_SNPRINTF_MACRO"] = "MBEDTLS_PLATFORM_STD_SNPRINTF"
+        if is_msvc(self) and "2.16.12" <= Version(self.version) <= "3.6.0":
+            tc.preprocessor_definitions["MBEDTLS_PLATFORM_SNPRINTF_MACRO"] = "snprintf"
         if self.options.enable_threading:
             tc.preprocessor_definitions["MBEDTLS_THREADING_C"] = True
             tc.preprocessor_definitions["MBEDTLS_THREADING_PTHREAD"] = True
@@ -139,6 +136,11 @@ class MBedTLSConan(ConanFile):
         self.cpp_info.components["libembedtls"].set_property("cmake_target_name", "MbedTLS::mbedtls")
         self.cpp_info.components["libembedtls"].libs = ["mbedtls"]
         self.cpp_info.components["libembedtls"].requires = ["mbedx509"]
+
+        if is_msvc(self) and "2.16.12" <= Version(self.version) <= "3.6.0":
+            for component in ["mbedcrypto", "libembedtls", "mbedx509"]:
+                self.cpp_info.components[component].defines.append("MBEDTLS_PLATFORM_SNPRINTF_MACRO=snprintf")
+
         if Version(self.version) >= "3.6.0":
             self.cpp_info.components["libembedtls"].set_property("pkg_config_name", "embedtls")
 
