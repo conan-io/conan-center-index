@@ -78,7 +78,7 @@ class ReflectCppConan(ConanFile):
         if self.options.with_capnproto:
             self.requires("capnproto/1.1.0", transitive_headers=True)
         if self.options.with_cbor:
-            if self.version >= "0.17.0":
+            if Version(self.version) >= Version("0.17.0"):
                 self.requires("jsoncons/0.176.0", transitive_headers=True)
             else:
                 self.requires("tinycbor/0.6.0", transitive_headers=True)
