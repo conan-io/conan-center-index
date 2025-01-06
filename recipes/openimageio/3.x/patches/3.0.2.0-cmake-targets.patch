@@ -1,5 +1,5 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index 55a8ac1f9..a98144d3e 100644
+index 0818a8cf9..0928ddb7f 100644
 --- CMakeLists.txt
 +++ CMakeLists.txt
 @@ -42,7 +42,7 @@ endif ()
@@ -21,11 +21,11 @@ index 55a8ac1f9..a98144d3e 100644
  endif ()
  
 diff --git src/cmake/add_oiio_plugin.cmake src/cmake/add_oiio_plugin.cmake
-index a1d87addf..7b4713f23 100644
+index f66bf756e..6cea07a17 100644
 --- src/cmake/add_oiio_plugin.cmake
 +++ src/cmake/add_oiio_plugin.cmake
-@@ -72,7 +72,7 @@ macro (add_oiio_plugin)
-                                         OpenImageIO_EXPORTS)
+@@ -75,7 +75,7 @@ macro (add_oiio_plugin)
+             target_compile_options (${_plugin_NAME} PRIVATE ${_plugin_COMPILE_OPTIONS})
              target_include_directories (${_plugin_NAME} BEFORE PRIVATE ${_plugin_INCLUDE_DIRS})
              target_link_libraries (${_plugin_NAME} PUBLIC OpenImageIO
 -                                                   PRIVATE ${_plugin_LINK_LIBRARIES})
@@ -456,10 +456,10 @@ index 70d28318a..aec47621f 100644
  else()
      message (WARNING "JPEG XL plugin will not be built")
 diff --git src/libOpenImageIO/CMakeLists.txt src/libOpenImageIO/CMakeLists.txt
-index e08e34a8b..e34c335a6 100644
+index 98b3cec2e..fab3c8f39 100644
 --- src/libOpenImageIO/CMakeLists.txt
 +++ src/libOpenImageIO/CMakeLists.txt
-@@ -153,18 +153,29 @@ target_link_libraries (OpenImageIO
+@@ -155,18 +155,29 @@ target_link_libraries (OpenImageIO
              OpenImageIO_Util
              ${OPENIMAGEIO_IMATH_DEPENDENCY_VISIBILITY}
              ${OPENIMAGEIO_IMATH_TARGETS}
