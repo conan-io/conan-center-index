@@ -197,6 +197,11 @@ if(SQLITE3_BUILD_EXECUTABLE)
     if(ENABLE_ICU)
         set_target_properties(sqlite3-bin PROPERTIES LINKER_LANGUAGE CXX)
     endif()
+    if (MSVC)
+        # Prevent issue where an import library may be generated on Windows 
+        #  fatal error LNK1149: output filename matches input filename '\build\Release\sqlite3.lib'\
+        target_link_options(sqlite3-bin PRIVATE "/noimplib")
+    endif()
     set_target_properties(sqlite3-bin PROPERTIES OUTPUT_NAME "sqlite3" PDB_NAME "sqlite3-bin")
     include(CheckSymbolExists)
     check_symbol_exists(system "stdlib.h" HAVE_SYSTEM)
