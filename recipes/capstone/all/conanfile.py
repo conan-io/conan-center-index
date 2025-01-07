@@ -70,8 +70,8 @@ class CapstoneConan(ConanFile):
             tc.cache_variables["CAPSTONE_USE_SYS_DYN_MEM"] = self.options.use_default_alloc
         else:
             tc.cache_variables["CAPSTONE_USE_DEFAULT_ALLOC"] = self.options.use_default_alloc
-        if Version(self.version) >= "5.0.3" and is_apple_os(self):
-            tc.cache_variables["CAPSTONE_BUILD_MACOS_THIN"] = self.options.universal2
+        tc.cache_variables["CAPSTONE_BUILD_MACOS_THIN"] = self.options.universal2
+        if Version(self.version) >= "5.0.3" and is_apple_os(self) and self.options.universal2:
             tc.blocks["apple_system"].values["cmake_osx_architectures"] = "x86_64;arm64"
         for a in self._archs:
             tc.cache_variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
