@@ -6,8 +6,7 @@ from conan.tools.scm import Version
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 import os
 
-required_conan_version = ">=2.0"
-
+required_conan_version = ">=2.2.0"
 
 class CapstoneConan(ConanFile):
     name = "capstone"
@@ -30,11 +29,13 @@ class CapstoneConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "use_default_alloc": [True, False],
+        "universal2": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "use_default_alloc": True,
+        "universal2": True
     }
     implements = ["auto_shared_fpic"]
 
@@ -70,7 +71,8 @@ class CapstoneConan(ConanFile):
         else:
             tc.cache_variables["CAPSTONE_USE_DEFAULT_ALLOC"] = self.options.use_default_alloc
         if Version(self.version) >= "5.0.3" and is_apple_os(self):
-            tc.cache_variables["CAPSTONE_BUILD_MACOS_THIN"] = True # Disable universal2 builds on macOS
+            tc.cache_variables["CAPSTONE_BUILD_MACOS_THIN"] = self.options.universal2
+            tc.blocks["apple_system"].values["cmake_osx_architectures"] = "x86_64;arm64"
         for a in self._archs:
             tc.cache_variables[f"CAPSTONE_{a.upper()}_SUPPORT"] = self.options.get_safe(a)
         tc.cache_variables["CAPSTONE_BUILD_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
