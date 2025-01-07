@@ -65,7 +65,7 @@ class LibtiffConan(ConanFile):
         if self.options.zlib:
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.libdeflate:
-            self.requires("libdeflate/1.19")
+            self.requires("libdeflate/[>=1.19 <=1.22]") #tested with this range
         if self.options.lzma:
             self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.jpeg == "libjpeg":
@@ -189,7 +189,3 @@ class LibtiffConan(ConanFile):
             self.cpp_info.requires.append("zstd::zstd")
         if self.options.webp:
             self.cpp_info.requires.append("libwebp::webp")
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "TIFF"
-        self.cpp_info.names["cmake_find_package_multi"] = "TIFF"
