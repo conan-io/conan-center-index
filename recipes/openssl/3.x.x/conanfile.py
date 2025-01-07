@@ -535,7 +535,7 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _make_program(self):
-        use_jom = self._use_nmake and self.conf.get_safe("user.openssl:windows_use_jom", False)
+        use_jom = self._use_nmake and self.conf.get("user.openssl:windows_use_jom", False)
         if self._use_nmake:
             return "jom" if use_jom else "nmake"
         else:
