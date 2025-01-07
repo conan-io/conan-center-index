@@ -71,6 +71,8 @@ class ReflectCppConan(ConanFile):
     implements = ["auto_shared_fpic"]
 
     def config_options(self):
+        if self.settings.get_safe("os") == "Windows":
+            self.options.rm_safe("fPIC")
         if Version(self.version) < "0.17.0":
             del self.options.with_capnproto
 
