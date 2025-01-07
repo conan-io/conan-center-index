@@ -144,7 +144,8 @@ class OpenSSLConan(ConanFile):
 
     def build_requirements(self):
         if self.settings_build.os == "Windows":
-            self.tool_requires("jom/[*]")
+            if self.conf.get("user.openssl:windows_use_jom", False):
+                self.tool_requires("jom/[*]")
             if not self.options.no_asm and self.settings.arch in ["x86", "x86_64"]:
                 self.tool_requires("nasm/2.16.01")
             if self._use_nmake:
@@ -467,11 +468,6 @@ class OpenSSLConan(ConanFile):
             cflags.append("-fembed-bitcode")
             cxxflags.append("-fembed-bitcode")
 
-        if is_msvc(self) or self._is_clang_cl:
-            # -FS was already passed, double check if this is needed
-            cflags.append("/FS")
-            cxxflags.append("/FS")
-
         config = config_template.format(
             targets=targets,
             target=self._target,
@@ -539,7 +535,11 @@ class OpenSSLConan(ConanFile):
 
     @property
     def _make_program(self):
-        return "jom" if self._use_nmake else "make"
+        use_jom = self._use_nmake and self.conf.get_safe("user.openssl:windows_use_jom", False)
+        if self._use_nmake:
+            return "jom" if use_jom else "nmake"
+        else:
+            return "make"
 
     def _replace_runtime_in_file(self, filename):
         runtime = msvc_runtime_flag(self)
@@ -634,13 +634,9 @@ class OpenSSLConan(ConanFile):
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("pkg_config_name", "openssl")
         self.cpp_info.set_property("cmake_build_modules", [self._module_file_rel_path])
-        self.cpp_info.names["cmake_find_package"] = "OpenSSL"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenSSL"
         self.cpp_info.components["ssl"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["ssl"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["ssl"].set_property("cmake_build_modules", [self._module_file_rel_path])
         self.cpp_info.components["crypto"].builddirs.append(self._module_subfolder)
-        self.cpp_info.components["crypto"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
         self.cpp_info.components["crypto"].set_property("cmake_build_modules", [self._module_file_rel_path])
 
         if self._use_nmake:
@@ -673,13 +669,6 @@ class OpenSSLConan(ConanFile):
         self.cpp_info.components["crypto"].set_property("pkg_config_name", "libcrypto")
         self.cpp_info.components["ssl"].set_property("cmake_target_name", "OpenSSL::SSL")
         self.cpp_info.components["ssl"].set_property("pkg_config_name", "libssl")
-        self.cpp_info.components["crypto"].names["cmake_find_package"] = "Crypto"
-        self.cpp_info.components["crypto"].names["cmake_find_package_multi"] = "Crypto"
-        self.cpp_info.components["ssl"].names["cmake_find_package"] = "SSL"
-        self.cpp_info.components["ssl"].names["cmake_find_package_multi"] = "SSL"
 
         openssl_modules_dir = os.path.join(self.package_folder, "lib", "ossl-modules")
         self.runenv_info.define_path("OPENSSL_MODULES", openssl_modules_dir)
-
-        # For legacy 1.x downstream consumers, remove once recipe is 2.0 only:
-        self.env_info.OPENSSL_MODULES = openssl_modules_dir
