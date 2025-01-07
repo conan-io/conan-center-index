@@ -63,8 +63,9 @@ class CpptraceConan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "Autoconfig.cmake"),
-                        "set(CMAKE_CXX_STANDARD 11)", "", strict=False)
+        if Version(self.version) >= "0.7.5":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "Autoconfig.cmake"),
+                            "set(CMAKE_CXX_STANDARD 11)", "")
 
     def export_sources(self):
         export_conandata_patches(self)
