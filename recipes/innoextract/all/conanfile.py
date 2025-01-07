@@ -1,11 +1,12 @@
 import os
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
+from conan.tools.build import check_max_cppstd
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, rmdir, copy, apply_conandata_patches, export_conandata_patches, rm
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0"
 
 
 class InnoextractConan(ConanFile):
@@ -30,12 +31,7 @@ class InnoextractConan(ConanFile):
         self.requires("libiconv/1.17")
 
     def validate(self):
-        # TODO: Remove guard after dropping Conan 1.x support
-        if conan_version > "2":
-            # This was not backported to Conan 1.x
-            from conan.tools.build import check_max_cppstd
-            # Uses auto_ptr
-            check_max_cppstd(self, "14")
+        check_max_cppstd(self, "14")
 
     def package_id(self):
         del self.info.settings.compiler
@@ -73,7 +69,3 @@ class InnoextractConan(ConanFile):
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
-
-        # TODO: Remove after dropping Conan 1.x support
-        bindir = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bindir)
