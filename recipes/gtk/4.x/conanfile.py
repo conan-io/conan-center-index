@@ -134,7 +134,7 @@ class GtkConan(ConanFile):
         self.requires("fribidi/1.0.13")
         self.requires("harfbuzz/8.3.0")
         self.requires("libpng/[>=1.6 <2]")
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/[>=4.5 <5]")
         self.requires("libjpeg/9e")
         if self.settings.os == "Linux" and Version(self.version) >= "4.13.2":
             self.requires("libdrm/2.4.120")
