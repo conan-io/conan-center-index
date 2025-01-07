@@ -70,12 +70,16 @@ class ReflectCppConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
+    def config_options(self):
+        if Version(self.version) < "0.17.0":
+            del self.options.with_capnproto
+
     def requirements(self):
         self.requires("ctre/3.9.0", transitive_headers=True)
         # INFO: include/rfl/json/Writer.hpp includes yyjson.h
         # INFO: Transitive lib needed to avoid undefined reference to symbol 'yyjson_mut_doc_new'
         self.requires("yyjson/0.10.0", transitive_headers=True, transitive_libs=True)
-        if self.options.with_capnproto:
+        if self.options.get_safe("with_capnproto"):
             self.requires("capnproto/1.1.0", transitive_headers=True)
         if self.options.with_cbor:
             if Version(self.version) >= Version("0.17.0"):
@@ -123,7 +127,8 @@ class ReflectCppConan(ConanFile):
         tc.cache_variables["REFLECTCPP_BUILD_SHARED"] = self.options.shared
         tc.cache_variables["REFLECTCPP_USE_BUNDLED_DEPENDENCIES"] = False
         tc.cache_variables["REFLECTCPP_USE_VCPKG"] = False
-        tc.cache_variables["REFLECTCPP_CAPNPROTO"] = self.options.with_capnproto
+        if self.options.get_safe("with_capnproto") is not None:
+            tc.cache_variables["REFLECTCPP_CAPNPROTO"] = self.options.get_safe("with_capnproto")
         tc.cache_variables["REFLECTCPP_CBOR"] = self.options.with_cbor
         tc.cache_variables["REFLECTCPP_FLEXBUFFERS"] = self.options.with_flatbuffers
         tc.cache_variables["REFLECTCPP_MSGPACK"] = self.options.with_msgpack
