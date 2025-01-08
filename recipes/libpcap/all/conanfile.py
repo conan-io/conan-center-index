@@ -1,6 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
@@ -74,10 +73,6 @@ class LibPcapConan(ConanFile):
         if self.options.get_safe("enable_dbus"):
             self.requires("dbus/1.15.8")
         # TODO: Add libbluetooth when available
-
-    def validate(self):
-        if cross_building(self) and self.options.shared and is_apple_os(self):
-            raise ConanInvalidConfiguration("cross-build of libpcap shared is broken on Apple")
 
     def build_requirements(self):
         if self.settings_build.os == "Windows":
