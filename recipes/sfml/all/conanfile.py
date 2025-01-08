@@ -54,7 +54,8 @@ class SfmlConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "3.0.0":
-            self.tool_requires("cmake/[>=3.24]")
+            cmake_version = "3.24" if self.settings.os == "Windows" else "3.22"
+            self.tool_requires(f"cmake/[>={cmake_version}]")
 
     def requirements(self):
         if self.options.window:
@@ -107,7 +108,7 @@ class SfmlConan(ConanFile):
         tc.variables["SFML_BUILD_AUDIO"] = self.options.audio
         tc.variables["SFML_INSTALL_PKGCONFIG_FILES"] = False
         tc.variables["SFML_GENERATE_PDB"] = False
-        tc.variables["SFML_USE_SYSTEM_DEPS"] = Version(self.version) < "3.0.0"
+        tc.variables["SFML_USE_SYSTEM_DEPS"] = False
         tc.variables["WARNINGS_AS_ERRORS"] = False
 
         if self.settings.compiler.cppstd is not None:
