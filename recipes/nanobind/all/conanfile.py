@@ -1,13 +1,11 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import get, copy, rename, replace_in_file, mkdir
-from conan.tools.scm import Version
+from conan.tools.files import get, copy, rename
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class PackageConan(ConanFile):
@@ -21,20 +19,6 @@ class PackageConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "clang": "5",
-            "apple-clang": "10",
-            "msvc": "192",
-            "Visual Studio": "15",
-        }
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -45,13 +29,7 @@ class PackageConan(ConanFile):
         self.requires("tsl-robin-map/1.3.0")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -62,37 +40,28 @@ class PackageConan(ConanFile):
         tc.cache_variables["NB_USE_SUBMODULE_DEPS"] = False
         tc.generate()
 
-    def _patch_sources(self):
-        # Look for headers in <package_folder>/include
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "nanobind-config.cmake"),
-                        "${NB_DIR}/include",
-                        "${NB_DIR}/../../include")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     @property
     def _cmake_rel_dir(self):
-        return os.path.join("res", "nanobind", "cmake")
+        return os.path.join("lib", "cmake")
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rename(self,
-               os.path.join(self.package_folder, "nanobind", "include"),
-               os.path.join(self.package_folder, "include"))
-        mkdir(self, os.path.join(self.package_folder, "res"))
-        rename(self,
                os.path.join(self.package_folder, "nanobind"),
-               os.path.join(self.package_folder, "res", "nanobind"))
+               os.path.join(self.package_folder, "lib"))
         rename(self,
                os.path.join(self.package_folder, self._cmake_rel_dir, "nanobind-config.cmake"),
                os.path.join(self.package_folder, self._cmake_rel_dir, "nanobind.cmake"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "nanobind")
+        self.cpp_info.includedirs = [os.path.join("lib", "include")]
         self.cpp_info.builddirs = [self._cmake_rel_dir]
         self.cpp_info.set_property("cmake_build_modules", [os.path.join(self._cmake_rel_dir, "nanobind.cmake")])
