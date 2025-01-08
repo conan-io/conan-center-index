@@ -31,7 +31,7 @@ class GStPluginsUglyConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_libx264": True,
+        "with_libx264": False,
     }
     languages = ["C"]
 

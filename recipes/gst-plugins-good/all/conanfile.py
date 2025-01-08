@@ -60,26 +60,26 @@ class GStPluginsGoodConan(ConanFile):
         "shared": False,
         "fPIC": True,
 
-        "with_asm": True,
+        "with_asm": False,
         "with_bz2": True,
-        "with_cairo": True,
-        "with_flac": True,
-        "with_gdk_pixbuf": True,
-        "with_gtk": True,
+        "with_cairo": False,
+        "with_flac": False,
+        "with_gdk_pixbuf": False,
+        "with_gtk": False,
         "with_jpeg": "libjpeg",
-        "with_libcaca": True,
-        "with_libxml2": True,
-        "with_mp3lame": True,
-        "with_mpg123": True,
+        "with_libcaca": False,
+        "with_libxml2": False,
+        "with_mp3lame": False,
+        "with_mpg123": False,
         "with_png": True,
-        "with_qt": True,
-        "with_soup": True,
-        "with_ssl": "openssl",
-        "with_taglib": True,
-        "with_vpx": True,
+        "with_qt": False,
+        "with_soup": False,
+        "with_ssl": False,
+        "with_taglib": False,
+        "with_vpx": False,
 
         "with_egl": True,
-        "with_pulseaudio": True,
+        "with_pulseaudio": False,
         "with_v4l2": True,
         "with_wayland": True,
         "with_xorg": True,
@@ -571,10 +571,11 @@ class GStPluginsGoodConan(ConanFile):
             "libjpeg::libjpeg",
         ])
         # lame
-        _define_plugin("lame", [
-            "gst-plugins-base::gstreamer-audio-1.0",
-            "libmp3lame::libmp3lame",
-        ])
+        if self.options.with_mp3lame:
+            _define_plugin("lame", [
+                "gst-plugins-base::gstreamer-audio-1.0",
+                "libmp3lame::libmp3lame",
+            ])
         # level
         _define_plugin("level", [
             "gst-plugins-base::gstreamer-audio-1.0",
