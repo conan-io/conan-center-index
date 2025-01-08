@@ -130,7 +130,7 @@ class LibPcapConan(ConanFile):
             if Version(self.version) < "1.10":
                 tc.configure_args.append("--disable-packet-ring")
             if cross_building(self):
-                target_os = "linux" if self.settings.os == "Linux" else "null"
+                target_os = "linux" if self.settings.os in ["Linux", "Android"] else "null"
                 tc.configure_args.append(f"--with-pcap={target_os}")
             elif "arm" in self.settings.arch and self.settings.os == "Linux":
                 tc.configure_args.append("--host=arm-linux")

@@ -134,6 +134,8 @@ class ICUConan(ConanFile):
         if check_min_vs(self, "180", raise_invalid=False):
             tc.extra_cflags.append("-FS")
             tc.extra_cxxflags.append("-FS")
+        if Version(self.version) >= "75.1" and not self.settings.compiler.cppstd and is_msvc(self):
+            tc.extra_cxxflags.append(f"-std:c++{self._min_cppstd}")
         if not self.options.shared:
             tc.extra_defines.append("U_STATIC_IMPLEMENTATION")
         if is_apple_os(self):
@@ -177,10 +179,7 @@ class ICUConan(ConanFile):
         if is_msvc(self):
             env = Environment()
             env.define("CC", "cl -nologo")
-            if Version(self.version) < "75.1":
-                env.define("CXX", "cl -nologo")
-            else:
-                env.define("CXX", "cl -nologo -std:c++17")
+            env.define("CXX", "cl -nologo")
             if cross_building(self):
                 env.define("icu_cv_host_frag", "mh-msys-msvc")
             env.vars(self).save_script("conanbuild_icu_msvc")
