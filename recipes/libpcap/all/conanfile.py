@@ -8,6 +8,7 @@ from conan.tools.files import chdir, copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import glob
 import os
 import shutil
@@ -42,10 +43,6 @@ class LibPcapConan(ConanFile):
         "enable_rdma": False,
         "with_snf": False,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -83,7 +80,7 @@ class LibPcapConan(ConanFile):
             raise ConanInvalidConfiguration("cross-build of libpcap shared is broken on Apple")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("bison/3.8.2")
@@ -106,6 +103,10 @@ class LibPcapConan(ConanFile):
                 # to inject this compilation flag themselves
                 tc.variables["USE_STATIC_RT"] = False
             tc.cache_variables["DISABLE_DPDK"] = True
+
+            if Version(self.version) >= "1.10.5":
+                self.output.warning("PCAP on Windows is currently built with package capture capabilities - only support is for reading/writing capture files")
+                tc.cache_variables["PCAP_TYPE"] = "null"
             tc.generate()
         else:
             if not cross_building(self):
