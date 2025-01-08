@@ -8,7 +8,6 @@ from conan.tools.files import chdir, copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
 import glob
 import os
 import shutil
@@ -80,13 +79,8 @@ class LibPcapConan(ConanFile):
         # TODO: Add libbluetooth when available
 
     def validate(self):
-        if Version(self.version) < "1.10.0" and self.settings.os == "Macos" and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on OSX.")
-        if hasattr(self, "settings_build") and cross_building(self) and \
-           self.options.shared and is_apple_os(self):
+        if cross_building(self) and self.options.shared and is_apple_os(self):
             raise ConanInvalidConfiguration("cross-build of libpcap shared is broken on Apple")
-        if Version(self.version) < "1.10.1" and self.settings.os == "Windows" and not self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built static on Windows")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows":
@@ -111,6 +105,7 @@ class LibPcapConan(ConanFile):
                 # Don't force -static-libgcc for MinGW, because conan users expect
                 # to inject this compilation flag themselves
                 tc.variables["USE_STATIC_RT"] = False
+            tc.cache_variables["DISABLE_DPDK"] = True
             tc.generate()
         else:
             if not cross_building(self):
@@ -127,8 +122,8 @@ class LibPcapConan(ConanFile):
                 "--disable-bluetooth",
                 f"--with-snf={yes_no(self.options.get_safe('with_snf'))}",
             ])
-            if Version(self.version) < "1.10":
-                tc.configure_args.append("--disable-packet-ring")
+            tc.configure_args.append("--disable-packet-ring")
+            tc.configure_args.append("--without-dpdk")
             if cross_building(self):
                 target_os = "linux" if self.settings.os in ["Linux", "Android"] else "null"
                 tc.configure_args.append(f"--with-pcap={target_os}")
