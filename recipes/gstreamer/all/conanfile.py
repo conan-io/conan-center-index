@@ -13,6 +13,7 @@ from conan.tools.scm import Version
 
 required_conan_version = ">=2.4"
 
+
 class GStreamerConan(ConanFile):
     name = "gstreamer"
     description = "GStreamer is a development framework for creating applications like media players, video editors, streaming media broadcasters and so on"
@@ -25,17 +26,25 @@ class GStreamerConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "enable_backtrace": [True, False],
         "with_introspection": [True, False],
         "tools": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "enable_backtrace": False,
         "with_introspection": False,
         "tools": True,  # required for gst-plugin-scanner
     }
     languages = ["C"]
     implements = ["auto_header_only"]
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        if self.settings.os not in ["Linux", "FreeBSD", "Windows"]:
+            del self.options.enable_backtrace
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -44,6 +53,10 @@ class GStreamerConan(ConanFile):
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         if self.options.with_introspection:
             self.requires("gobject-introspection/1.78.1")
+        if self.options.get_safe("enable_backtrace"):
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.requires("libunwind/1.8.1")
+                self.requires("elfutils/0.190")
 
     def validate(self):
         if not self.dependencies.direct_host["glib"].options.shared and self.options.shared:
@@ -80,9 +93,9 @@ class GStreamerConan(ConanFile):
         tc.project_options["tools"] = feature(self.options.tools)
         tc.project_options["check"] = "enabled"  # explicitly enable plugin
         tc.project_options["coretracers"] = "enabled"  # explicitly enable plugin
-        tc.project_options["libunwind"] = "disabled"  # TODO
-        tc.project_options["libdw"] = "disabled"  # TODO
-        tc.project_options["dbghelp"] = "disabled"  # TODO
+        tc.project_options["libunwind"] = feature(self.options.get_safe("enable_backtrace") and self.settings.os in ["Linux", "FreeBSD"])
+        tc.project_options["libdw"] = feature(self.options.get_safe("enable_backtrace") and self.settings.os in ["Linux", "FreeBSD"])
+        tc.project_options["dbghelp"] = feature(self.options.get_safe("enable_backtrace") and self.settings.os == "Windows")
         tc.project_options["examples"] = "disabled"
         tc.project_options["benchmarks"] = "disabled"
         tc.project_options["tests"] = "disabled"
@@ -145,6 +158,14 @@ class GStreamerConan(ConanFile):
         self.cpp_info.components["gstreamer-1.0"].resdirs = ["res"]
         if self.settings.os == "Linux":
             self.cpp_info.components["gstreamer-1.0"].system_libs = ["m", "dl"]
+        if self.options.get_safe("enable_backtrace"):
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["gstreamer-1.0"].requires.extend([
+                    "libunwind::unwind",
+                    "elfutils::libdw",
+                ])
+            elif self.settings.os == "Windows":
+                self.cpp_info.components["gstreamer-1.0"].system_libs.append("dbghelp")
         self.cpp_info.components["gstreamer-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
         self.cpp_info.components["gstreamer-base-1.0"].set_property("pkg_config_name", "gstreamer-base-1.0")
