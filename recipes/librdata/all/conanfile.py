@@ -22,12 +22,10 @@ class Libreadstat(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_zip": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_zip": False,
     }
 
     def config_options(self):
