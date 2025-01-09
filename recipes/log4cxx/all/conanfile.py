@@ -1,12 +1,9 @@
 import os
-import textwrap
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
-from conan.tools.scm import Version
+from conan.tools.files import copy, get, rmdir
 
 required_conan_version = ">=1.53.0"
 
@@ -59,33 +56,10 @@ class Log4cxxConan(ConanFile):
         "with_qt": False,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "Visual Studio": "15",
-            "msvc": "191",
-            "clang": "5",
-            "apple-clang": "10",
-        }
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
             self.options.rm_safe("with_smtp_appender") # *nix only
-        elif Version(self.version) <= "1.0.0": # SMTP appender is broken in version 0.12 through 1.0.0
-            self.options.rm_safe("with_smtp_appender")
-        if Version(self.version) < "1.0.0":
-            self.options.rm_safe("with_multiprocess_rolling_file_appender")
-            self.options.rm_safe("with_networking")
-            self.options.rm_safe("with_fmt_layout")
 
     def configure(self):
         if self.options.shared:
@@ -107,20 +81,10 @@ class Log4cxxConan(ConanFile):
             self.requires("qt/[~5.15]")
 
     def validate(self):
-        if Version(self.version) < "1.0.0" or self.options.get_safe("with_multiprocess_rolling_file_appender"):
+        if self.options.get_safe("with_multiprocess_rolling_file_appender"):
             # TODO: if compiler doesn't support C++17, boost can be used instead
-            if Version(self.version) < "1.0.0":
-                self.output.info(f"Version {self.version} requires C++17. log4cxx version 1.x does not.")
-            else:
-                self.output.info("multiprocess rolling file appender requires C++17.")
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            compiler_version = Version(self.settings.compiler.version)
-            if compiler_version < minimum_version:
-                raise ConanInvalidConfiguration(f"{self.settings.compiler} {compiler_version} does not support C++17: {minimum_version} required.")
+            self.output.info("multiprocess rolling file appender requires C++17.")
             check_min_cppstd(self, "17")
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
 
     def build_requirements(self):
         if self.settings.os != "Windows":
@@ -134,11 +98,10 @@ class Log4cxxConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
         tc.variables["LOG4CXX_INSTALL_PDB"] = False
-        if Version(self.version) >= "1.0.0":
-            tc.variables["LOG4CXX_NETWORKING_SUPPORT"] = self.options.with_networking
-            tc.variables["LOG4CXX_MULTIPROCESS_ROLLING_FILE_APPENDER"] = self.options.with_multiprocess_rolling_file_appender
-            tc.variables["ENABLE_FMT_LAYOUT"] = self.options.with_fmt_layout
-        if Version(self.version) > "1.0.0" and self.settings.os != "Windows":
+        tc.variables["LOG4CXX_NETWORKING_SUPPORT"] = self.options.with_networking
+        tc.variables["LOG4CXX_MULTIPROCESS_ROLLING_FILE_APPENDER"] = self.options.with_multiprocess_rolling_file_appender
+        tc.variables["ENABLE_FMT_LAYOUT"] = self.options.with_fmt_layout
+        if self.settings.os != "Windows":
             tc.variables["LOG4CXX_ENABLE_ESMTP"] = self.options.with_smtp_appender
         tc.variables["LOG4CXX_ENABLE_ODBC"] = self.options.with_odbc_appender
         tc.variables["LOG4CXX_CHAR"] = self.options.char_type
@@ -155,7 +118,6 @@ class Log4cxxConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
