@@ -77,6 +77,6 @@ class Libreadstat(ConanFile):
 
     def package_info(self):
         suffix = "_i" if is_msvc(self) and self.options.shared else ""
-        self.cpp_info.libs = [f"librdata{suffix}"]
+        self.cpp_info.libs = [f"rdata{suffix}"]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs.append("m")
