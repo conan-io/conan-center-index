@@ -2,6 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, replace_in_file, rmdir, rm
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
 
@@ -59,6 +60,11 @@ class Libiec61850Conan(ConanFile):
         for dll_pattern_to_remove in ["concrt*.dll", "msvcp*.dll", "vcruntime*.dll"]:
             rm(self, pattern=dll_pattern_to_remove, folder=os.path.join(self.package_folder, "bin"), 
                recursive=True)
+
+        if Version(self.version) == "1.6.0":
+            # https://github.com/mz-automation/libiec61850/commit/a133aa8d573d63555899580869643590db9a7d85
+            copy(self, "tls_ciphers.h", os.path.join(self.source_folder, "hal", "inc"),
+                                        os.path.join(self.package_folder, "include", "libiec61850"))
 
     def package_info(self):
         self.cpp_info.components["iec61850"].libs = ["iec61850"]

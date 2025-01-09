@@ -1,4 +1,4 @@
 sources:
-  "1.5.3":
-    url: "https://github.com/mz-automation/libiec61850/archive/refs/tags/v1.5.3.tar.gz"
-    sha256: "a0f396a5e2249398f2432bb9698e3aecdb9de11b28e5af68f7fb8b14bc3b2f44"
+  "1.6.0":
+    url: "https://github.com/mz-automation/libiec61850/archive/refs/tags/v1.6.0.tar.gz"
+    sha256: "0dd0adc7f13215e961d22511bcb1dadfdbdaab969f11a0d975775a6ebdff8099"
