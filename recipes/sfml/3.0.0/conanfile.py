@@ -198,7 +198,7 @@ class SfmlConan(ConanFile):
 
         sfml_components = {
             "system": {
-                "target": "sfml-system",
+                "target": "SFML::System",
                 "libs": [f"sfml-system{suffix}"],
                 "system_libs": winmm() + pthread() + rt() + android() + log(),
             },
@@ -206,7 +206,7 @@ class SfmlConan(ConanFile):
         if self.options.window:
             sfml_components.update({
                 "window": {
-                    "target": "sfml-window",
+                    "target": "SFML::Window",
                     "libs": [f"sfml-window{suffix}"],
                     "requires": ["system"] + opengl() + xorg() + libudev(),
                     "system_libs": dl() + gdi32() + winmm() + usbhid() + android() + opengles_android(),
@@ -219,7 +219,7 @@ class SfmlConan(ConanFile):
         if self.options.graphics:
             sfml_components.update({
                 "graphics": {
-                    "target": "sfml-graphics",
+                    "target": "SFML::Graphics",
                     "libs": [f"sfml-graphics{suffix}"],
                     "requires": ["window", "freetype::freetype", "stb::stb"],
                 },
@@ -227,7 +227,7 @@ class SfmlConan(ConanFile):
         if self.options.network:
             sfml_components.update({
                 "network": {
-                    "target": "sfml-network",
+                    "target": "SFML::Network",
                     "libs": [f"sfml-network{suffix}"],
                     "requires": ["system"],
                     "system_libs": ws2_32(),
@@ -237,7 +237,7 @@ class SfmlConan(ConanFile):
             audio_requires = ["system", "flac::flac", "openal-soft::openal-soft", "vorbis::vorbis", "minimp3::minimp3"]
             sfml_components.update({
                 "audio": {
-                    "target": "sfml-audio",
+                    "target": "SFML::Audio",
                     "libs": [f"sfml-audio{suffix}"],
                     "requires": audio_requires,
                     "system_libs": android(),
