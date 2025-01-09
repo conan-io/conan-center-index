@@ -143,7 +143,7 @@ class OpenSSLConan(ConanFile):
             raise ConanInvalidConfiguration("OpenSSL 3 does not support building shared libraries for iOS")
 
     def build_requirements(self):
-        if self.settings_build.os == "Windows":
+        if self.settings.os == "Windows":
             if self.conf.get("user.openssl:windows_use_jom", False):
                 self.tool_requires("jom/[*]")
             if not self.options.no_asm and self.settings.arch in ["x86", "x86_64"]:
