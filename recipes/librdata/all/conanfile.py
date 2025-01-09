@@ -12,7 +12,6 @@ required_conan_version = ">=2.0.0"
 
 class Libreadstat(ConanFile):
     name = "librdata"
-    version = "0.1"
     description = "librdata is a library for read and write R data frames from C"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
