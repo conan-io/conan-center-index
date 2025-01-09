@@ -40,10 +40,9 @@ class Libreadstat(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_zip:
-            self.requires("bzip2/1.0.8")
-            self.requires("zlib/1.2.13")
-            self.requires("xz_utils/5.6.3")
+        self.requires("bzip2/1.0.8")
+        self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("xz_utils/[>=5.4.5 <6]")
 
     def source(self):
         # git = Git(self)
