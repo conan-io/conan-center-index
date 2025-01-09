@@ -93,7 +93,6 @@ class SfmlConan(ConanFile):
         tc.variables["SFML_GENERATE_PDB"] = False
         tc.variables["SFML_USE_SYSTEM_DEPS"] = True
         tc.variables["WARNINGS_AS_ERRORS"] = False
-        tc.variables['CMAKE_CXX_STANDARD'] = 17
         if is_msvc(self):
             tc.variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
         tc.generate()
@@ -262,8 +261,8 @@ class SfmlConan(ConanFile):
                 # TODO: Properly model COMPONENTS names in CMakeDeps for find_package() call
                 #       (see https://github.com/conan-io/conan/issues/10258)
                 #       It should be:
-                #         find_package(SFML REQUIRED COMPONENTS system window graphics network audio)
-                #         target_link_libraries(myApp sfml-system sfml-window sfml-graphics sfml-network sfml-audio)
+                #         find_package(SFML REQUIRED COMPONENTS System Window Graphics Network Audio)
+                #         target_link_libraries(myApp SFML::System SFL::Window SFML::Graphics SFML::Network SFML::Audio)
                 #       Do not use cmake_target_aliases to model this, names are too generic!
                 self.cpp_info.components[component].set_property("cmake_target_name", target)
                 self.cpp_info.components[component].set_property("pkg_config_name", target)

@@ -28,4 +28,3 @@ endif()
 
 find_package(SFML REQUIRED ${SFML_COMPONENTS} CONFIG)
 target_link_libraries(${PROJECT_NAME} PRIVATE ${SFML_TARGETS})
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
