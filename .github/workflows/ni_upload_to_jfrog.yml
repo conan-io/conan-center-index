@@ -28,6 +28,7 @@ jobs:
         # export packages to local cache
       - run: conan export recipes/expat/all --version 2.6.2
       - run: conan export recipes/fmt/all --version 10.2.1
+      - run: conan export recipes/gtest/all --version 1.12.1
       - run: conan export recipes/gtest/all --version 1.14.0
       - run: conan export recipes/gtest/all --version 1.15.0
       - run: conan export recipes/inih/all --version 58
