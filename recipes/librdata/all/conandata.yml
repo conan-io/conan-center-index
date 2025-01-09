@@ -1,4 +1,4 @@
 sources:
-  "0.1":
-    url: "https://github.com/WizardMac/librdata/archive/refs/heads/master.zip"
-    sha256: "0f3eb4a386b9dbf9bdebba424061f7e34a0e1ec27fa4e631257c3be6ca450c57"
+  "0.0.0.cci.20231003":
+    url: "https://github.com/WizardMac/librdata/archive/33bd276ecb0bbcd8997ccc71a544149b3da0d940.tar.gz"
+    sha256: "fc3e0d655c21d4b5144a0ad73f79a249903b5dde4dc8f7091cd0393d214294a2"
