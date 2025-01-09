@@ -17,8 +17,6 @@ class TestPackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.settings.os == "Windows" and self.dependencies[self.tested_reference_str].options.shared:
-            tc.preprocessor_definitions["CCI_SKIP_GLOBALS"] = 1
         tc.generate()
 
     def build(self):

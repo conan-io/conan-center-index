@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout
 from conan.tools.files import copy, get, rmdir
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.4"
 
@@ -56,3 +57,12 @@ class LibId3TagConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["id3tag"]
+
+        if Version(self.version) >= "0.16":
+            # These are the actual upstream target names
+            # However older versions of the recipe did not reflect these -
+            # So ensure only newly published versions use these target names, to prevent breakages
+            # (consumers still have to update when they move to using a new version)
+            self.cpp_info.set_property("cmake_file_name", "id3tag")
+            self.cpp_info.set_property("cmake_target_name", "id3tag::id3tag")
+            self.cpp_info.set_property("pkg_config_name", "id3tag")
