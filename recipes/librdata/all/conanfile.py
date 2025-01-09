@@ -45,8 +45,6 @@ class Libreadstat(ConanFile):
         self.requires("xz_utils/[>=5.4.5 <6]")
 
     def source(self):
-        # git = Git(self)
-        # git.clone(url="https://github.com/WizardMac/librdata.git", target=".")
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
 
