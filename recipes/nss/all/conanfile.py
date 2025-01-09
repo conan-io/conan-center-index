@@ -3,9 +3,9 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import cross_building, can_run
+from conan.tools.build import can_run
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
-from conan.tools.files import chdir, copy, get, rm, replace_in_file
+from conan.tools.files import chdir, copy, get, rm, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars, unix_path
 
@@ -22,6 +22,9 @@ class NSSConan(ConanFile):
 
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")
@@ -59,6 +62,19 @@ class NSSConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+
+    @property
+    def _vs_year(self):
+        compiler_version = str(self.settings.compiler.version)
+        return {
+            "180": "2013",
+            "190": "2015",
+            "191": "2017",
+            "192": "2019",
+            "193": "2022",
+            "194": "2022",
+        }.get(compiler_version)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -93,10 +109,7 @@ class NSSConan(ConanFile):
         env.prepend_path("LD_LIBRARY_PATH", os.path.join(self._dist_dir, "lib"))
 
         if is_msvc(self):
-            # Needed to locate vswhere.exe.
-            # https://github.com/Microsoft/vswhere/wiki/Installing
-            # "Starting with Visual Studio 15.2 (26418.1 Preview) vswhere.exe is installed in [the below path]"
-            env.append_path("PATH", r"C:\Program Files (x86)\Microsoft Visual Studio\Installer")
+            env.define("GYP_MSVS_VERSION", self._vs_year)
 
         env.vars(self, scope="build").save_script("conan_paths")
 

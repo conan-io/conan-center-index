@@ -1,0 +1,33 @@
+--- a/nss/coreconf/msvc.sh
++++ b/nss/coreconf/msvc.sh
+@@ -1,11 +1,6 @@
+ #!/bin/bash
+ # This configures the environment for running MSVC.  It uses vswhere, the
+ # registry, and a little knowledge of how MSVC is laid out.
+-
+-if ! hash vswhere 2>/dev/null; then
+-    echo "Can't find vswhere on the path, aborting" 1>&2
+-    exit 1
+-fi
+ 
+ if ! hash reg 2>/dev/null; then
+     echo "Can't find reg on the path, aborting" 1>&2
+@@ -44,8 +39,7 @@
+     return 1
+ }
+ 
+-VSCOMPONENT=Microsoft.VisualStudio.Component.VC.Tools.x86.x64
+-vsinstall=$(vswhere -latest -requires "$VSCOMPONENT" -property installationPath)
++vsinstall=$VSINSTALLDIR
+ 
+ # Attempt to setup paths if vswhere returns something and VSPATH isn't set.
+ # Otherwise, assume that the env is setup.
+@@ -99,7 +93,7 @@
+     export LIB
+ 
+     export GYP_MSVS_OVERRIDE_PATH="${VSPATH}"
+-    export GYP_MSVS_VERSION=$(vswhere -latest -requires "$VSCOMPONENT" -property catalog_productLineVersion)
++    # export GYP_MSVS_VERSION=$(vswhere -latest -requires "$VSCOMPONENT" -property catalog_productLineVersion)
+ else
+     echo Assuming env setup is already done.
+     echo VSPATH=$VSPATH
