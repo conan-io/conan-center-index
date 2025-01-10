@@ -191,8 +191,8 @@ class NSSConan(ConanFile):
         args.append("--disable-tests")
         args.append(f"--target={self._arch}")
         args.append(f"-Dtarget_arch={self._arch}")
-        args.append("-Dstatic_libs=" + ("1" if not self.options.shared else "0"))
-        if not self.options.shared:
+        args.append("-Dstatic_libs=" + ("1" if not self.options.get_safe("shared", True) else "0"))
+        if not self.options.get_safe("shared", True):
             args.append("--static")
         if self.settings.build_type != "Debug":
             args.append("--opt")
