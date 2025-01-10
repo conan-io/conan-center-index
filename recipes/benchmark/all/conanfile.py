@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, replace_in_file
@@ -14,7 +13,7 @@ class BenchmarkConan(ConanFile):
     name = "benchmark"
     description = "A microbenchmark support library."
     license = "Apache-2.0"
-    url = "https://github.com/conan-io/conan-center-index/"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/benchmark"
     topics = ("google", "microbenchmark")
 
@@ -48,7 +47,7 @@ class BenchmarkConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Linux" or Version(self.version) < "1.5.4":
+        if self.settings.os != "Linux":
             del self.options.enable_libpfm
 
     def configure(self):
@@ -61,24 +60,20 @@ class BenchmarkConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
         check_min_vs(self, "190")
-        if Version(self.version) < "1.7.0" and is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support msvc shared builds")
 
     def requirements(self):
         if self.options.get_safe("enable_libpfm"):
             self.requires("libpfm4/4.13.0")
 
     def build_requirements(self):
-        if Version(self.version) >= "1.7.1":
-            self.tool_requires("cmake/[>=3.16.3 <4]")
+        self.tool_requires("cmake/[>=3.16.3 <4]")
 
     def _patch_sources(self):
-        if Version(self.version) > "1.7.0":
-            replace_in_file(self,
-                os.path.join(self.source_folder, "CMakeLists.txt"),
-                "set(CMAKE_CXX_STANDARD",
-                "#"
-            )
+        replace_in_file(self,
+            os.path.join(self.source_folder, "CMakeLists.txt"),
+            "set(CMAKE_CXX_STANDARD",
+            "#"
+        )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -91,11 +86,8 @@ class BenchmarkConan(ConanFile):
         tc.variables["BENCHMARK_ENABLE_LTO"] = self.options.enable_lto
         tc.variables["BENCHMARK_ENABLE_EXCEPTIONS"] = self.options.enable_exceptions
         tc.variables["BENCHMARK_ENABLE_LIBPFM"] = self.options.get_safe("enable_libpfm", False)
-        if not self.settings.compiler.cppstd:
-            tc.cache_variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
-        if Version(self.version) >= "1.6.1":
-            tc.variables["BENCHMARK_ENABLE_WERROR"] = False
-            tc.variables["BENCHMARK_FORCE_WERROR"] = False
+        tc.variables["BENCHMARK_ENABLE_WERROR"] = False
+        tc.variables["BENCHMARK_FORCE_WERROR"] = False
         if self.settings.os != "Windows":
             if cross_building(self):
                 tc.variables["HAVE_STD_REGEX"] = False
@@ -125,7 +117,7 @@ class BenchmarkConan(ConanFile):
 
         self.cpp_info.components["_benchmark"].set_property("cmake_target_name", "benchmark::benchmark")
         self.cpp_info.components["_benchmark"].libs = ["benchmark"]
-        if Version(self.version) >= "1.7.0" and not self.options.shared:
+        if not self.options.shared:
             self.cpp_info.components["_benchmark"].defines.append("BENCHMARK_STATIC_DEFINE")
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.components["_benchmark"].system_libs.extend(["pthread", "rt", "m"])
