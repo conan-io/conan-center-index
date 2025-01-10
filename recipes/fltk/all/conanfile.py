@@ -98,26 +98,35 @@ class FltkConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["OPTION_BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["FLTK_BUILD_TEST"] = False
         tc.variables["FLTK_BUILD_EXAMPLES"] = False
-        tc.variables["OPTION_USE_GL"] = self.options.with_gl
-        tc.variables["OPTION_USE_THREADS"] = self.options.with_threads
-        tc.variables["OPTION_BUILD_HTML_DOCUMENTATION"] = False
-        tc.variables["OPTION_BUILD_PDF_DOCUMENTATION"] = False
-        tc.variables["OPTION_USE_XFT"] = self.options.with_xft
-        if self.options.abi_version:
-            tc.variables["OPTION_ABI_VERSION"] = self.options.abi_version
-        tc.variables["OPTION_USE_SYSTEM_LIBJPEG"] = True
-        tc.variables["OPTION_USE_SYSTEM_ZLIB"] = True
-        tc.variables["OPTION_USE_SYSTEM_LIBPNG"] = True
-        if Version(self.version) >= "1.3.9":
-            if self._is_cl_like:
-                tc.variables["FLTK_MSVC_RUNTIME_DLL"] = not self._is_cl_like_static_runtime
-        if Version(self.version) >= "1.4.0":
-            tc.variables["FLTK_BUILD_FLUID"] = False
+        if Version(self.version) < "1.4.0":
+            tc.variables["OPTION_BUILD_SHARED_LIBS"] = self.options.shared
+            tc.variables["OPTION_USE_GL"] = self.options.with_gl
+            tc.variables["OPTION_USE_THREADS"] = self.options.with_threads
+            tc.variables["OPTION_BUILD_HTML_DOCUMENTATION"] = False
+            tc.variables["OPTION_BUILD_PDF_DOCUMENTATION"] = False
+            tc.variables["OPTION_USE_XFT"] = self.options.with_xft
+            if self.options.abi_version:
+                tc.variables["OPTION_ABI_VERSION"] = self.options.abi_version
+            tc.variables["OPTION_USE_SYSTEM_LIBJPEG"] = True
+            tc.variables["OPTION_USE_SYSTEM_ZLIB"] = True
+            tc.variables["OPTION_USE_SYSTEM_LIBPNG"] = True
+        else:
             tc.variables["FLTK_BUILD_SHARED_LIBS"] = self.options.shared
-
+            tc.variables["FLTK_BUILD_GL"] = self.options.with_gl
+            tc.variables["FLTK_USE_PTHREADS"] = self.options.with_threads
+            tc.variables["FLTK_BUILD_HTML_DOCS"] = False
+            tc.variables["FLTK_BUILD_PDF_DOCS"] = False
+            tc.variables["FLTK_USE_XFT"] = self.options.with_xft
+            if self.options.abi_version:
+                tc.variables["FLTK_ABI_VERSION"] = self.options.abi_version
+            tc.variables["FLTK_USE_SYSTEM_LIBJPEG"] = True
+            tc.variables["FLTK_USE_SYSTEM_ZLIB"] = True
+            tc.variables["FLTK_USE_SYSTEM_LIBPNG"] = True
+            tc.variables["FLTK_BUILD_FLUID"] = False
+        if Version(self.version) >= "1.3.9" and self._is_cl_like:
+            tc.variables["FLTK_MSVC_RUNTIME_DLL"] = not self._is_cl_like_static_runtime
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -164,6 +173,3 @@ class FltkConan(ConanFile):
                 self.cpp_info.system_libs.append("opengl32")
             if Version(self.version) >= "1.4.0":
                 self.cpp_info.system_libs.append("ws2_32")
-        # TODO: to remove in conan v2 once legacy generators removed
-        self.cpp_info.names["cmake_find_package"] = "fltk"
-        self.cpp_info.names["cmake_find_package_multi"] = "fltk"
