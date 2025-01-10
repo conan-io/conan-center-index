@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import can_run
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
+from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import chdir, copy, get, rm, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars, unix_path
@@ -37,7 +37,7 @@ class NSSConan(ConanFile):
 
     def requirements(self):
         self.requires("nspr/4.35", transitive_headers=True, transitive_libs=True)
-        self.requires("sqlite3/[>=3.41.0 <4]", run=True)
+        self.requires("sqlite3/[>=3.41.0 <4]")
         self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
@@ -55,10 +55,10 @@ class NSSConan(ConanFile):
             self.tool_requires("mozilla-build/4.0.2")
         self.tool_requires("cpython/3.12.2")
         self.tool_requires("ninja/[>=1.10.2 <2]")
+        self.tool_requires("sqlite3/<host_version>")
         if not can_run(self):
             # Needed for shlibsign executable
             self.tool_requires(f"nss/{self.version}")
-            self.tool_requires("sqlite3/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -79,8 +79,7 @@ class NSSConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        env = VirtualRunEnv(self)
-        env.generate(scope="build")
+
         vc = VCVars(self)
         vc.generate()
 
@@ -174,20 +173,26 @@ class NSSConan(ConanFile):
                             "os.path.join(bin_path, 'shlibsign')", f"'{shlibsign}'")
 
     @property
+    def _arch(self):
+        if self.settings.arch == "x86_64":
+            return "x64"
+        elif self.settings.arch == "x86":
+            return "ia32"
+        elif self.settings.arch in ["armv8", "armv8.3"]:
+            return "aarch64"
+        return str(self.settings.arch)
+
+    @property
     def _build_args(self):
         # https://github.com/nss-dev/nss/blob/master/help.txt
         args = []
         # if self.settings.compiler == "gcc":
         #     args.append("XCFLAGS=-Wno-array-parameter")
         args.append("--disable-tests")
+        args.append(f"--target={self._arch}")
+        args.append(f"-Dtarget_arch={self._arch}")
         if self.settings.build_type != "Debug":
             args.append("--opt")
-        if self.settings.arch == "x86_64":
-            args.append("--target=x64")
-        elif self.settings.arch == "x86":
-            args.append("--target=ia32")
-        elif self.settings.arch in ["armv8", "armv8.3"]:
-            args.append("--target=aarch64")
         if is_msvc(self):
             args.append("--msvc")
         if not self.options.get_safe("shared", True):
