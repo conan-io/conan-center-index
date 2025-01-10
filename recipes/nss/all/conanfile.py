@@ -20,6 +20,7 @@ class NSSConan(ConanFile):
     description = "Network Security Services"
     topics = ("network", "security", "crypto", "ssl")
 
+    # TODO: static builds are supported, but the necessary package_info() is complex
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
 
@@ -30,7 +31,6 @@ class NSSConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
         self.options["nspr"].shared = True
-        self.options["sqlite3"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -43,8 +43,6 @@ class NSSConan(ConanFile):
     def validate(self):
         if not self.dependencies["nspr"].options.shared:
             raise ConanInvalidConfiguration("NSS cannot link to static NSPR. Please use option nspr:shared=True")
-        if not self.dependencies["sqlite3"].options.shared:
-            raise ConanInvalidConfiguration("NSS cannot link to static sqlite. Please use option sqlite3:shared=True")
 
     def build_requirements(self):
         if self.settings_build.os == "Windows":
@@ -138,7 +136,9 @@ class NSSConan(ConanFile):
                 if is_msvc(self):
                     if not library.endswith(".lib"):
                         library += ".lib"
-                    result.append(os.path.join(libdir, library).replace("\\", "/"))
+                    if libdir is not None:
+                        library = os.path.join(libdir, library).replace("\\", "/")
+                    result.append(library)
                 else:
                     result.append(f"-l{library}")
             return result
@@ -146,6 +146,7 @@ class NSSConan(ConanFile):
         sqlite_info = self.dependencies["sqlite3"].cpp_info.aggregated_components()
         sqlite_flags = " ".join([f"-I{unix_path(self, sqlite_info.includedir)}"] +
                                 _format_libraries(sqlite_info.libs, sqlite_info.libdir) +
+                                _format_libraries(sqlite_info.system_libs, None) +
                                 _format_library_paths(sqlite_info.libdirs))
         replace_in_file(self, os.path.join(self.source_folder, "nss", "lib", "sqlite", "sqlite.gyp"),
                         "'libraries': ['<(sqlite_libs)'],",
@@ -154,6 +155,7 @@ class NSSConan(ConanFile):
         zlib_info = self.dependencies["zlib"].cpp_info.aggregated_components()
         zlib_flags = " ".join([f"-I{unix_path(self, zlib_info.includedir)}"] +
                                 _format_libraries(zlib_info.libs, zlib_info.libdir) +
+                                _format_libraries(zlib_info.system_libs, None) +
                                 _format_library_paths(zlib_info.libdirs))
         replace_in_file(self, os.path.join(self.source_folder, "nss", "lib", "zlib", "zlib.gyp"),
                         "'libraries': ['<@(zlib_libs)'],",
@@ -186,17 +188,16 @@ class NSSConan(ConanFile):
     def _build_args(self):
         # https://github.com/nss-dev/nss/blob/master/help.txt
         args = []
-        # if self.settings.compiler == "gcc":
-        #     args.append("XCFLAGS=-Wno-array-parameter")
         args.append("--disable-tests")
         args.append(f"--target={self._arch}")
         args.append(f"-Dtarget_arch={self._arch}")
+        args.append("-Dstatic_libs=" + ("1" if not self.options.shared else "0"))
+        if not self.options.shared:
+            args.append("--static")
         if self.settings.build_type != "Debug":
             args.append("--opt")
         if is_msvc(self):
             args.append("--msvc")
-        if not self.options.get_safe("shared", True):
-            args.append("--static")
         nspr_root = self.dependencies["nspr"].package_folder
         nspr_includedir = unix_path(self, os.path.join(nspr_root, "include", "nspr"))
         nspr_libdir = unix_path(self, os.path.join(nspr_root, "lib"))
