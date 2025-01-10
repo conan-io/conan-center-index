@@ -140,14 +140,14 @@ class wxWidgetsConan(ConanFile):
                 self.requires("gstreamer/1.22.3")
                 self.requires("gst-plugins-base/1.19.2")
             self.requires("libcurl/[>=7.78.0 <9]")
-        
+
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.2")
         elif self.options.jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.5")
-        
+
         self.requires("libpng/[>=1.6 <2]")
         self.requires("libtiff/4.6.0")
         self.requires("zlib/[>=1.2.11 <2]")
@@ -240,6 +240,7 @@ class wxWidgetsConan(ConanFile):
         tc.variables["wxUSE_URL"] = self.options.protocol
         tc.variables["wxUSE_PROTOCOL"] = self.options.protocol
         tc.variables["wxUSE_FS_INET"] = self.options.fs_inet
+        tc.cache_variables["CMAKE_CONFIGURATION_TYPES"] = "Debug;Release;RelWithDebInfo;MinSizeRel"
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
 
         for item in str(self.options.custom_enables).split(","):

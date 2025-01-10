@@ -1,0 +1,21 @@
+From 61b2e8e5336d7d8b0e1ae7c1168035faa083310b Mon Sep 17 00:00:00 2001
+From: Transporter <ogre.transporter@gmail.com>
+Date: Sun, 18 Feb 2024 10:38:12 +0100
+Subject: [PATCH] Fix missing include (#5962)
+
+---
+ io/include/pcl/io/ply/ply_parser.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/io/include/pcl/io/ply/ply_parser.h b/io/include/pcl/io/ply/ply_parser.h
+index 3023d566607..244f3719506 100644
+--- a/io/include/pcl/io/ply/ply_parser.h
++++ b/io/include/pcl/io/ply/ply_parser.h
+@@ -49,6 +49,7 @@
+ #include <string>
+ #include <tuple>
+ #include <vector>
++#include <functional>
+ #include <boost/lexical_cast.hpp> // for lexical_cast
+ #include <boost/mpl/fold.hpp> // for fold
+ #include <boost/mpl/inherit.hpp> // for inherit

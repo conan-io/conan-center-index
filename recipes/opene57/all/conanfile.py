@@ -69,7 +69,7 @@ class Opene57Conan(ConanFile):
             self.requires("boost/1.84.0")
 
         if self.options.with_docs:
-            self.requires("doxygen/1.9.4")
+            self.requires("doxygen/[>=1.8 <2]")
 
         if self.settings.os != "Windows":
             self.requires("icu/74.1")

@@ -1,17 +1,9 @@
 sources:
-  "cci.20221225":
-    url: "https://github.com/lemire/FastPFor/archive/3e7358f8656b4456f4ea1762075553f2984fefcf.tar.gz"
-    sha256: "cc50b03421db3aa21be2243f5996ea6d027a6563e0863b77cfc46dd08bcfcaf5"
-  "cci.20220205":
-    url: "https://github.com/lemire/FastPFor/archive/773283d4a11fa2440a1b3b28fd77f775e86d7898.tar.gz"
-    sha256: "d4419512420f3bcc65862c5c367021f201b5ba3e8cb0dad895cdf444e0867b30"
-
+  "0.2.0":
+    url: "https://github.com/lemire/FastPFor/archive/refs/tags/v0.2.0.tar.gz"
+    sha256: "d9f0eacf9c3c61866cda23bae35107ca9c5d35fa7b7a96ca9ccc85803d7e753d"
 patches:
-  "cci.20221225":
-    - patch_file: "patches/cci.20221225-0001-fix-cmake.patch"
-      patch_description: "enable shared build, disable unittest/utility"
-      patch_type: "conan"
-  "cci.20220205":
-    - patch_file: "patches/cci.20220205-0001-fix-cmake.patch"
+  "0.2.0":
+    - patch_file: "patches/0.2.0-0001-fix-cmake.patch"
       patch_description: "enable shared build, disable unittest/utility"
       patch_type: "conan"

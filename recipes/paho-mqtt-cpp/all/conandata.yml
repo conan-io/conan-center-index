@@ -1,4 +1,7 @@
 sources:
+  "1.4.1":
+    url: "https://github.com/eclipse/paho.mqtt.cpp/archive/v1.4.1.tar.gz"
+    sha256: "48e7ba6e1032aa73e4d985a7387e02a77cc5807a8420d16790b84b941d86374e"
   "1.4.0":
     url: "https://github.com/eclipse/paho.mqtt.cpp/archive/v1.4.0.tar.gz"
     sha256: "758c504b585402fbeb47822e52897239bbd53b4236ac3908cc040e09d2a8d8e1"
@@ -9,6 +12,10 @@ sources:
     url: "https://github.com/eclipse/paho.mqtt.cpp/archive/v1.2.0.tar.gz"
     sha256: "435e97e4d5b1da13daa26cadd3e83fe9d154930abaa78b8ff1b8c854b5345d8b"
 patches:
+  "1.4.1":
+    - patch_file: "patches/1.4.1-0001-fix-cmake.patch"
+      patch_description: "CMake: Honor fPIC option"
+      patch_type: "conan"
   "1.4.0":
     - patch_file: "patches/1.4.0-0001-fix-cmake.patch"
       patch_description: "CMake: Honor fPIC option"

@@ -44,9 +44,9 @@ class LibmagicConan(ConanFile):
 
     def requirements(self):
         self.requires("bzip2/1.0.8")
-        self.requires("xz_utils/5.4.4")
+        self.requires("xz_utils/[>=5.4.5 <6]")
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("zstd/1.5.5")
+        self.requires("zstd/[^1.5]")
         # TODO: Add lzlib recipe
         # self.requires("lzlib/1.13")
 

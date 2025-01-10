@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save
+from conan.tools.files import copy, download, get, load, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -13,7 +13,7 @@ from conan.tools.scm import Version
 import os
 import re
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1.0"
 
 
 class LibcurlConan(ConanFile):
@@ -72,6 +72,8 @@ class LibcurlConan(ConanFile):
         "with_ca_bundle": [False, "auto", "ANY"],
         "with_ca_path": [False, "auto", "ANY"],
         "with_ca_fallback": [True, False],
+        "with_form_api": [True, False],
+        "with_websockets": [True, False],
     }
     default_options = {
         "shared": False,
@@ -118,6 +120,8 @@ class LibcurlConan(ConanFile):
         "with_ca_bundle": "auto",
         "with_ca_path": "auto",
         "with_ca_fallback": False,
+        "with_form_api": True,
+        "with_websockets": True,
     }
 
     @property
@@ -138,7 +142,6 @@ class LibcurlConan(ConanFile):
 
     def export_sources(self):
         copy(self, "lib_Makefile_add.am", self.recipe_folder, self.export_sources_folder)
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -146,8 +149,12 @@ class LibcurlConan(ConanFile):
         if self._is_using_cmake_build:
             del self.options.with_libgsasl
 
+        if Version(self.version) < "8.3.0":
+            del self.options.with_form_api
         if Version(self.version) < "8.7.0":
             del self.options.with_misc_docs
+        if Version(self.version) < "8.11.0":
+            del self.options.with_websockets
 
         # Default options
         self.options.with_ssl = "darwinssl" if is_apple_os(self) else "openssl"
@@ -194,9 +201,9 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "openssl":
             openssl = self.dependencies["openssl"]
             if self.options.with_ntlm and openssl.options.no_des:
-                raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
+                raise ConanInvalidConfiguration("option with_ntlm=True requires openssl/*:no_des=False")
         if self.options.with_ssl == "wolfssl" and not self.dependencies["wolfssl"].options.with_curl:
-            raise ConanInvalidConfiguration("option with_ssl=wolfssl requires wolfssl:with_curl=True")
+            raise ConanInvalidConfiguration("option with_ssl=wolfssl requires wolfssl/*:with_curl=True")
 
     def build_requirements(self):
         if self._is_using_cmake_build:
@@ -254,7 +261,6 @@ class LibcurlConan(ConanFile):
                     copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         self._patch_misc_files()
         self._patch_autotools()
         self._patch_cmake()
@@ -519,6 +525,16 @@ class LibcurlConan(ConanFile):
                 tc.configure_args.append("--enable-docs")
             else:
                 tc.configure_args.append("--disable-docs")
+        if "with_form_api" in self.options:
+            if self.options.with_form_api:
+                tc.configure_args.append("--enable-form-api")
+            else:
+                tc.configure_args.append("--disable-form-api")
+        if "with_websockets" in self.options:
+            if self.options.with_websockets:
+                tc.configure_args.append("--enable-websockets")
+            else:
+                tc.configure_args.append("--disable-websockets")
 
         # Cross building flags
         if cross_building(self):
@@ -607,6 +623,10 @@ class LibcurlConan(ConanFile):
         tc.variables["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
         tc.variables["CURL_DISABLE_CRYPTO_AUTH"] = not self.options.with_crypto_auth
         tc.variables["CURL_DISABLE_VERBOSE_STRINGS"] = not self.options.with_verbose_strings
+        if "with_form_api" in self.options:
+            tc.variables["CURL_DISABLE_FORM_API"] = not self.options.with_form_api
+        if "with_websockets" in self.options:
+            tc.variables["CURL_DISABLE_WEBSOCKETS"] = not self.options.with_websockets
 
         # Also disables NTLM_WB if set to false
         if not self.options.with_ntlm:
@@ -635,6 +655,8 @@ class LibcurlConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("wolfssl", "cmake_additional_variables_prefixes", ["WolfSSL", "WOLFSSL"])
+        deps.set_property("wolfssl", "cmake_file_name", "WolfSSL")
         deps.generate()
 
     def package(self):
@@ -722,10 +744,5 @@ class LibcurlConan(ConanFile):
         if self.options.get_safe("with_libpsl"):
             self.cpp_info.components["curl"].requires.append("libpsl::libpsl")
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "CURL"
-        self.cpp_info.names["cmake_find_package_multi"] = "CURL"
-        self.cpp_info.components["curl"].names["cmake_find_package"] = "libcurl"
-        self.cpp_info.components["curl"].names["cmake_find_package_multi"] = "libcurl"
         self.cpp_info.components["curl"].set_property("cmake_target_name", "CURL::libcurl")
         self.cpp_info.components["curl"].set_property("pkg_config_name", "libcurl")

@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import get, copy, rmdir
+from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches
@@ -59,6 +59,13 @@ class CpptraceConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        if Version(self.version) >= "0.7.5":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "Autoconfig.cmake"),
+                            "set(CMAKE_CXX_STANDARD 11)", "")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -82,7 +89,6 @@ class CpptraceConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
