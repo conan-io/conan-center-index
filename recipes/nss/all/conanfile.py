@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import msvc_runtime_flag, VCVars, is_msvc
 from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import get, chdir, rename, rm
+from conan.tools.files import get, chdir, rename, rm, copy
 from conan.tools.build import cross_building
 import os
 import glob
@@ -115,18 +115,13 @@ class NSSConan(ConanFile):
             for path with spaces, places double quotes around it
             converts slashes to backslashes, or vice versa
             """
-            compiler = _base_compiler(settings)
             if is_msvc(self):
                 path = path.replace('/', '\\')
             else:
                 path = path.replace('\\', '/')
             return '"%s"' % path if ' ' in path else path
 
-        def _base_compiler(settings):
-            return settings.get_safe("compiler.base") or settings.get_safe("compiler")
-
         def _format_library_paths(library_paths, settings):
-            compiler = _base_compiler(settings)
             pattern = "-LIBPATH:%s" if is_msvc(self) else "-L%s"
             return [pattern % adjust_path(library_path, settings)
                     for library_path in library_paths if library_path]
@@ -134,8 +129,6 @@ class NSSConan(ConanFile):
 
         def _format_libraries(libraries, settings):
             result = []
-            compiler = settings.get_safe("compiler")
-            compiler_base = settings.get_safe("compiler.base")
             for library in libraries:
                 if is_msvc(self):
                     if not library.endswith(".lib"):
@@ -173,19 +166,17 @@ class NSSConan(ConanFile):
             self.run("make %s" % " ".join(self._make_args))
 
     def package(self):
-        self.copy("COPYING", src = os.path.join(self._source_subfolder, "nss"), dst = "licenses")
+        copy(self, "COPYING", src=os.path.join(self._source_subfolder, "nss"), dst="licenses")
         with chdir(self, os.path.join(self._source_subfolder, "nss")):
             self.run("make install %s" % " ".join(self._make_args))
-        self.copy("*",
-                  src=os.path.join(self._source_subfolder, "dist", "public", "nss"),
-                  dst="include")
+        copy(self, "*", src=os.path.join(self._source_subfolder, "dist", "public", "nss"), dst="include")
         for d in os.listdir(os.path.join(self._source_subfolder, "dist")):
             if d in ["private","public"]:
                 continue
             f = os.path.join(self._source_subfolder, "dist", d)
             if not os.path.isdir(f):
                 continue
-            self.copy("*", src = f)
+            copy(self, "*", src=f, dst="")
 
         for dll_file in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
             rename(self, dll_file, os.path.join(self.package_folder, "bin", os.path.basename(dll_file)))
@@ -196,12 +187,10 @@ class NSSConan(ConanFile):
             rm(self, "*.so", os.path.join(self.package_folder, "lib"))
             rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
 
-
-
     def package_info(self):
-
         def _library_name(lib,vers):
             return f"{lib}{vers}" if self.options.shared else lib
+
         self.cpp_info.components["libnss"].libs.append(_library_name("nss", 3))
         self.cpp_info.components["libnss"].requires = ["nssutil", "nspr::nspr"]
 
