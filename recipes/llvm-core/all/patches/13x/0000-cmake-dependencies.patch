@@ -1,0 +1,84 @@
+diff --git a/cmake/config-ix.cmake b/cmake/config-ix.cmake
+index dd0aaadb47c..790a0b27a49 100644
+--- a/cmake/config-ix.cmake
++++ b/cmake/config-ix.cmake
+@@ -63,7 +63,13 @@ check_symbol_exists(FE_ALL_EXCEPT "fenv.h" HAVE_DECL_FE_ALL_EXCEPT)
+ check_symbol_exists(FE_INEXACT "fenv.h" HAVE_DECL_FE_INEXACT)
+ 
+ check_include_file(mach/mach.h HAVE_MACH_MACH_H)
+-check_include_file(histedit.h HAVE_HISTEDIT_H)
++if(LLVM_ENABLE_LIBEDIT)
++  find_package(editline REQUIRED)
++  cmake_push_check_state()
++  list(APPEND CMAKE_REQUIRED_INCLUDES ${editline_INCLUDE_DIRS})
++  check_include_file(histedit.h HAVE_HISTEDIT_H)
++  cmake_pop_check_state()
++endif()
+ check_include_file(CrashReporterClient.h HAVE_CRASHREPORTERCLIENT_H)
+ if(APPLE)
+   include(CheckCSourceCompiles)
+@@ -127,7 +133,7 @@ if(LLVM_ENABLE_ZLIB)
+     # library on a 64-bit system which would result in a link-time failure.
+     cmake_push_check_state()
+     list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
+-    list(APPEND CMAKE_REQUIRED_LIBRARIES ${ZLIB_LIBRARY})
++    list(APPEND CMAKE_REQUIRED_LIBRARIES ${ZLIB_LIBRARIES})
+     check_symbol_exists(compress2 zlib.h HAVE_ZLIB)
+     cmake_pop_check_state()
+     if(LLVM_ENABLE_ZLIB STREQUAL FORCE_ON AND NOT HAVE_ZLIB)
+@@ -166,7 +172,11 @@ if(NOT LLVM_USE_SANITIZER MATCHES "Memory.*")
+   if (NOT PURE_WINDOWS)
+     # Skip libedit if using ASan as it contains memory leaks.
+     if (LLVM_ENABLE_LIBEDIT AND HAVE_HISTEDIT_H AND NOT LLVM_USE_SANITIZER MATCHES ".*Address.*")
++      cmake_push_check_state()
++      list(APPEND CMAKE_REQUIRED_INCLUDES ${editline_INCLUDE_DIRS})
++      list(APPEND CMAKE_REQUIRED_LIBRARIES ${editline_LIBRARIES})
+       check_library_exists(edit el_init "" HAVE_LIBEDIT)
++      cmake_pop_check_state()
+     else()
+       set(HAVE_LIBEDIT 0)
+     endif()
+diff --git a/lib/LineEditor/CMakeLists.txt b/lib/LineEditor/CMakeLists.txt
+index 61328f76905..b95d073d972 100644
+--- a/lib/LineEditor/CMakeLists.txt
++++ b/lib/LineEditor/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ if(HAVE_LIBEDIT)
+-  set(link_libs edit)
++  set(link_libs editline::editline)
+ endif()
+ 
+ add_llvm_component_library(LLVMLineEditor
+diff --git a/lib/Support/CMakeLists.txt b/lib/Support/CMakeLists.txt
+index 014b4a2caf1..486e4f39642 100644
+--- a/lib/Support/CMakeLists.txt
++++ b/lib/Support/CMakeLists.txt
+@@ -267,7 +267,7 @@ if(LLVM_ENABLE_ZLIB)
+   # CMAKE_BUILD_TYPE is only meaningful to single-configuration generators.
+   if(CMAKE_BUILD_TYPE)
+     string(TOUPPER ${CMAKE_BUILD_TYPE} build_type)
+-    get_property(zlib_library TARGET ZLIB::ZLIB PROPERTY LOCATION_${build_type})
++    set(zlib_library ${ZLIB_LIBRARIES})
+   endif()
+   if(NOT zlib_library)
+     get_property(zlib_library TARGET ZLIB::ZLIB PROPERTY LOCATION)
+diff --git a/lib/WindowsManifest/CMakeLists.txt b/lib/WindowsManifest/CMakeLists.txt
+index 8134ac8c815..ccd772f6176 100644
+--- a/lib/WindowsManifest/CMakeLists.txt
++++ b/lib/WindowsManifest/CMakeLists.txt
+@@ -21,12 +21,13 @@ add_llvm_component_library(LLVMWindowsManifest
+ # This block is only needed for llvm-config. When we deprecate llvm-config and
+ # move to using CMake export, this block can be removed.
+ if(LLVM_ENABLE_LIBXML2)
++  find_package(libxml2 REQUIRED CONFIG)	
+   # CMAKE_BUILD_TYPE is only meaningful to single-configuration generators.
+   if(CMAKE_BUILD_TYPE)
+     string(TOUPPER ${CMAKE_BUILD_TYPE} build_type)
+-    get_property(libxml2_library TARGET LibXml2::LibXml2 PROPERTY LOCATION_${build_type})
++    set(libxml2_library ${libxml2_LIBRARIES})
+   endif()
+-  if(NOT zlib_library)
++  if(NOT libxml2_library)
+     get_property(libxml2_library TARGET LibXml2::LibXml2 PROPERTY LOCATION)
+   endif()
+   get_library_name(${libxml2_library} libxml2_library)

@@ -1,0 +1,13 @@
+diff --git a/lib/inc/drogon/RequestStream.h b/lib/inc/drogon/RequestStream.h
+index 852f075..b72e39e 100644
+--- a/lib/inc/drogon/RequestStream.h
++++ b/lib/inc/drogon/RequestStream.h
+@@ -16,7 +16,7 @@
+ #include <string>
+ #include <functional>
+ #include <memory>
+-
++#include <exception>
+ namespace drogon
+ {
+ class HttpRequest;

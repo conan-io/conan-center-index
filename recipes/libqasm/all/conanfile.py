@@ -70,7 +70,7 @@ class LibqasmConan(ConanFile):
         if self.settings.arch == "wasm":
             self.tool_requires("emsdk/3.1.50")
         if self._should_build_test:
-            self.test_requires("gtest/1.14.0")
+            self.test_requires("gtest/1.15.0")
         if self.options.build_python:
             self.tool_requires("cpython/3.12.2")
 
@@ -86,9 +86,13 @@ class LibqasmConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires antlr4-cppruntime to be built with the same shared option value.")
 
     def requirements(self):
-        self.requires("fmt/10.2.1", transitive_headers=True)
+        if Version(self.version) < "0.6.7":
+            self.requires("fmt/10.2.1", transitive_headers=True)
+            self.requires("tree-gen/1.0.7", transitive_headers=True, transitive_libs=True)
+        else:
+            self.requires("fmt/11.0.2", transitive_headers=True)
+            self.requires("tree-gen/1.0.8", transitive_headers=True, transitive_libs=True)
         self.requires("range-v3/0.12.0", transitive_headers=True)
-        self.requires("tree-gen/1.0.7", transitive_headers=True, transitive_libs=True)
         if not self.settings.arch == "wasm":
             self.requires("antlr4-cppruntime/4.13.1", transitive_headers=True)
 

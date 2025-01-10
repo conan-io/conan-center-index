@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index b96e1d7..4674f49 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -6,7 +6,6 @@ project(minmea)
+ 
+ find_package(Threads REQUIRED) # Workaround for https://github.com/libcheck/check/issues/48#issuecomment-322965461
+ find_package(PkgConfig)
+-pkg_check_modules(CHECK REQUIRED check)
+ link_directories(${CHECK_LIBRARY_DIRS})
+ 
+ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Wall -Wextra -Werror -std=c99")

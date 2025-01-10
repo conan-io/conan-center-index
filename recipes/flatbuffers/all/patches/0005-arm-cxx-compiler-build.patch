@@ -1,0 +1,16 @@
+diff --git a/include/flatbuffers/flatbuffers.h b/include/flatbuffers/flatbuffers.h
+index c4dc5bcd..0f3a7dfd 100644
+--- a/include/flatbuffers/flatbuffers.h
++++ b/include/flatbuffers/flatbuffers.h
+@@ -1871,10 +1871,7 @@ class FlatBufferBuilder {
+     vector_downward &buf_;
+ 
+    private:
+-    TableKeyComparator &operator=(const TableKeyComparator &other) {
+-      buf_ = other.buf_;
+-      return *this;
+-    }
++    FLATBUFFERS_DELETE_FUNC(TableKeyComparator &operator=(const TableKeyComparator &other))
+   };
+   /// @endcond
+ 

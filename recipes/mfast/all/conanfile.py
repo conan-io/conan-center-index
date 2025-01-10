@@ -74,7 +74,7 @@ class mFASTConan(ConanFile):
         self.requires("boost/1.75.0", transitive_headers=True)
         self.requires("tinyxml2/9.0.0")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.43.1")
+            self.requires("sqlite3/[>=3.43 <4]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
