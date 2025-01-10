@@ -1,4 +1,10 @@
 sources:
+  "1.9.8":
+    url: "https://github.com/drogonframework/drogon/archive/v1.9.8.tar.gz"
+    sha256: "62332a4882cc7db1c7cf04391b65c91ddf6fcbb49af129fc37eb0130809e0449"
+  "1.9.7":
+    url: "https://github.com/drogonframework/drogon/archive/v1.9.7.tar.gz"
+    sha256: "e54c5d604769a496b951e5af52a0f85e60eba584fae426d204eb5b2f02cfbf59"
   "1.9.6":
     url: "https://github.com/drogonframework/drogon/archive/v1.9.6.tar.gz"
     sha256: "a81d0ea0e87b0214aa56f7fa7bb851011efe606af67891a0945825104505a08a"
@@ -24,6 +30,24 @@ sources:
     url: "https://github.com/drogonframework/drogon/archive/v1.8.7.tar.gz"
     sha256: "d2d80d35becd69bf80d74bf09b69425193f1b7be3926bd44f3ac7b951e54465d"
 patches:
+  "1.9.8":
+    - patch_file: "patches/1.8.5-0001-remove-shared-libs.patch"
+      patch_description: "remove shared libs option"
+      patch_type: "conan"
+    - patch_file: "patches/1.9.7-0002-find-cci-packages.patch"
+      patch_description: "Fix jsoncpp cmake target name"
+      patch_type: "conan"
+  "1.9.7":
+    - patch_file: "patches/1.8.5-0001-remove-shared-libs.patch"
+      patch_description: "remove shared libs option"
+      patch_type: "conan"
+    - patch_file: "patches/1.9.7-0002-find-cci-packages.patch"
+      patch_description: "Fix jsoncpp cmake target name"
+      patch_type: "conan"
+    - patch_file: "patches/1.9.7-0003-include-exception.patch"
+      patch_description: "include exception for exception_ptr"
+      patch_type: "portability"
+      patch_source: "https://github.com/drogonframework/drogon/pull/2159"
   "1.9.6":
     - patch_file: "patches/1.8.5-0001-remove-shared-libs.patch"
       patch_description: "remove shared libs option"

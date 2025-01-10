@@ -1,7 +1,0 @@
-; The Windows test_package needs the following symbols from kernel32.dll
-
-LIBRARY kernel32
-EXPORTS
-    GetStdHandle
-    WriteConsoleA
-    ExitProcess

@@ -12,9 +12,6 @@ required_conan_version = ">=1.53.0"
 
 class Open62541Conan(ConanFile):
     name = "open62541"
-    license = ("MPL-2.0", "CC0-1.0")
-    homepage = "https://open62541.org/"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "open62541 is an open source and free implementation of OPC UA " \
                   "(OPC Unified Architecture) written in the common subset of the " \
                   "C99 and C++98 languages. The library is usable with all major " \
@@ -23,6 +20,9 @@ class Open62541Conan(ConanFile):
                   "into existing applications. open62541 library is platform independent. " \
                   "All platform-specific functionality is implemented via exchangeable " \
                   "plugins. Plugin implementations are provided for the major operating systems."
+    license = ("MPL-2.0", "CC0-1.0")
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://open62541.org/"
     topics = (
         "opc ua", "sdk", "server/client", "c", "iec-62541",
         "industrial automation", "tsn", "time sensitive networks", "publish-subscirbe", "pubsub"
@@ -161,11 +161,6 @@ class Open62541Conan(ConanFile):
             self.settings.rm_safe("compiler.libcxx")
             self.settings.rm_safe("compiler.cppstd")
 
-        # Due to https://github.com/open62541/open62541/issues/4687 we cannot build with 1.2.2 + Windows + shared
-        if Version(self.version) >= "1.2.2" and self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} doesn't properly support shared lib on Windows")
-
         if self.options.subscription == "With Events":
             # Deprecated in 1.2.2
             self.output.warning(
@@ -229,17 +224,20 @@ class Open62541Conan(ConanFile):
             raise ConanInvalidConfiguration(
                 "PubSub over Ethernet is not supported for your OS!")
 
+        # Due to https://github.com/open62541/open62541/issues/4687 we cannot build with 1.2.2 + Windows + shared
+        if Version(self.version) >= "1.2.2" and self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} doesn't properly support shared lib on Windows")
+
         if self.options.web_socket:
             if self.options["libwebsockets"].with_ssl != self.options.encryption:
                 raise ConanInvalidConfiguration(
                     "When web_socket is enabled, libwebsockets:with_ssl must have the value of open62541:encryption")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-        submodule_filename = os.path.join(
-            self.recipe_folder, 'submoduledata.yml')
+        submodule_filename = os.path.join(self.recipe_folder, 'submoduledata.yml')
         with open(submodule_filename, 'r') as submodule_stream:
             submodules_data = yaml.safe_load(submodule_stream)
             for path, submodule in submodules_data["submodules"][self.version].items():
@@ -327,6 +325,7 @@ class Open62541Conan(ConanFile):
                     tc.variables["UA_ENABLE_ENCRYPTION_OPENSSL"] = True
 
         tc.variables["UA_ENABLE_JSON_ENCODING"] = self.options.json_support
+        tc.variables["UA_ENABLE_PUBSUB_INFORMATIONMODEL"] = self.options.pub_sub != False
         tc.variables["UA_ENABLE_PUBSUB"] = self.options.pub_sub != False
         tc.variables["UA_ENABLE_PUBSUB_ENCRYPTION"] = self.options.pub_sub_encryption != False
 
@@ -359,6 +358,7 @@ class Open62541Conan(ConanFile):
 
         tc.generate()
         tc = CMakeDeps(self)
+        tc.set_property("mbedtls", "cmake_additional_variables_prefixes", ["MBEDTLS"])
         tc.generate()
 
     def _patch_sources(self):
@@ -431,15 +431,18 @@ class Open62541Conan(ConanFile):
         else:
             self.cpp_info.includedirs.append(
                 os.path.join("include", "open62541", "plugin"))
-            if self.settings.os == "Windows":
-                self.cpp_info.includedirs.append(
-                    os.path.join("include", "open62541", "win32"))
-            else:
-                self.cpp_info.includedirs.append(
-                    os.path.join("include", "open62541", "posix"))
+            if Version(self.version) < "1.4.0":
+                if self.settings.os == "Windows":
+                    self.cpp_info.includedirs.append(
+                        os.path.join("include", "open62541", "win32"))
+                else:
+                    self.cpp_info.includedirs.append(
+                        os.path.join("include", "open62541", "posix"))
 
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
+            if Version(self.version) >= "1.4.6":
+                self.cpp_info.system_libs.append("iphlpapi")
         elif self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["pthread", "m", "rt"])
 
@@ -451,4 +454,3 @@ class Open62541Conan(ConanFile):
             self._module_file_rel_path]
         self.cpp_info.set_property("cmake_build_modules", [
                                    self._module_file_rel_path])
-        
