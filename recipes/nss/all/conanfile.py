@@ -58,7 +58,7 @@ class NSSConan(ConanFile):
         if not can_run(self):
             # Needed for shlibsign executable
             self.tool_requires(f"nss/{self.version}")
-            self.tool_requires("sqlite3/[>=3.45.0 <4]")
+            self.tool_requires("sqlite3/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
