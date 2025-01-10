@@ -18,7 +18,7 @@ from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.4"
 
 
 class LibiconvConan(ConanFile):
@@ -31,6 +31,7 @@ class LibiconvConan(ConanFile):
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+    languages = "C"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -63,8 +64,6 @@ class LibiconvConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
         if Version(self.version) >= "1.17":
             self.license = "LGPL-2.1-or-later"
         else:
