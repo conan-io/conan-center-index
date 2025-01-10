@@ -188,13 +188,14 @@ class LibpqConan(ConanFile):
                 autotools.make()
             with chdir(self, os.path.join(self.build_folder, "src", "include")):
                 autotools.make()
+            with chdir(self, os.path.join(self.build_folder, "src", "bin", "pg_config")):
+                autotools.make()
             with chdir(self, os.path.join(self.build_folder, "src", "interfaces", "libpq")):
                 autotools.make()
             if Version(self.version) >= 12:
                 with chdir(self, os.path.join(self.build_folder, "src", "port")):
                     autotools.make()
-            with chdir(self, os.path.join(self.build_folder, "src", "bin", "pg_config")):
-                autotools.make()
+
 
     def _remove_unused_libraries_from_package(self):
         bin_folder = os.path.join(self.package_folder, "bin")
