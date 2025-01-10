@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc, check_min_vs
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.0.0"
 
 
 class BenchmarkConan(ConanFile):
@@ -34,7 +34,6 @@ class BenchmarkConan(ConanFile):
         "enable_exceptions": True,
         "enable_libpfm": False,
     }
-    implements = ["auto_shared_fpic"]
 
     @property
     def _min_cppstd(self):
@@ -47,8 +46,14 @@ class BenchmarkConan(ConanFile):
         return 11
 
     def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
         if self.settings.os != "Linux" or Version(self.version) < "1.5.4":
             del self.options.enable_libpfm
+
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -100,7 +105,7 @@ class BenchmarkConan(ConanFile):
         else:
             tc.variables["BENCHMARK_USE_LIBCXX"] = False
         tc.generate()
-    
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
