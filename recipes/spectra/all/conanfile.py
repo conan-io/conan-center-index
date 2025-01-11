@@ -1,6 +1,8 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, get
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.cmake.cmakedeps.cmakedeps import CMakeDeps
+from conan.tools.files import copy, get, rmdir
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
@@ -30,18 +32,27 @@ class SpectraConan(ConanFile):
 
     def validate(self):
         if Version(self.version) >= "1.0.0":
-            if self.settings.compiler.get_safe("cppstd"):
-                check_min_cppstd(self, 11)
+            check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
+
     def build(self):
-        pass
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "spectra")
@@ -50,9 +61,3 @@ class SpectraConan(ConanFile):
         self.cpp_info.libdirs = []
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "spectra"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "spectra"
-        self.cpp_info.names["cmake_find_package"] = "Spectra"
-        self.cpp_info.names["cmake_find_package_multi"] = "Spectra"
