@@ -42,9 +42,6 @@ class GobjectIntrospectionConan(ConanFile):
             # Building gobject-introspection as a tool_requires.
             # Build only the tools by default.
             self.options.build_introspection_data = False
-        if cross_building(self):
-            # Cross-compilation of introspection data requires an exe_wrapper like QEMU.
-            self.options.build_introspection_data = False
         if self.settings.os in ["Windows", "Macos"]:
             # FIXME: tools/g-ir-scanner fails to load glib
             self.options.build_introspection_data = False
@@ -76,7 +73,9 @@ class GobjectIntrospectionConan(ConanFile):
             # giscanner/_giscanner.cpython-37m-darwin.so, 0x0002): Library not loaded: /lib/libgnuintl.8.dylib
             raise ConanInvalidConfiguration(f"{self.ref} fails to run g-ir-scanner due glib loaded as shared. Use -o 'glib/*:shared=False'. Contributions to fix this are welcome.")
         if self.options.build_introspection_data and cross_building(self):
-            raise ConanInvalidConfiguration(f"{self.ref} build_introspection_data is not supported when cross-building. Use '&:build_introspection_data=False'.")
+            # Cross-compilation of introspection data requires an exe_wrapper like QEMU.
+            raise ConanInvalidConfiguration("build_introspection_data is not supported when cross-building."
+                                            f" Use '-o gobject-introspection/*:build_introspection_data=False' if it's not needed.")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
