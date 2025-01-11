@@ -6,7 +6,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import can_run
 from conan.tools.env import VirtualBuildEnv, Environment, VirtualRunEnv
-from conan.tools.files import copy, get, rm, replace_in_file, export_conandata_patches, apply_conandata_patches, rmdir, save, load
+from conan.tools.files import copy, get, replace_in_file, export_conandata_patches, apply_conandata_patches, rmdir, save, load, collect_libs
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars, unix_path
 
@@ -21,7 +21,7 @@ class NSSConan(ConanFile):
     description = "Network Security Services"
     topics = ("network", "security", "crypto", "ssl")
 
-    # TODO: static builds are supported, but the necessary package_info() is complex
+    # FIXME: NSS_Init() fails in test_package for static builds
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -244,21 +244,27 @@ class NSSConan(ConanFile):
 
     def package(self):
         copy(self, "COPYING", src=os.path.join(self.source_folder, "nss"), dst=os.path.join(self.package_folder, "licenses"))
+
         copy(self, "*",
              src=os.path.join(self._dist_dir, "public"),
              dst=os.path.join(self.package_folder, "include"))
         copy(self, "*",
-             src=os.path.join(self._dist_dir, "private"),
-             dst=os.path.join(self.package_folder, "include", "private"))
-        copy(self, "*", os.path.join(self._dist_dir, "bin"), os.path.join(self.package_folder, "bin"))
-        for pattern in ["*.a", "*.lib", "*.so", "*.chk", "*.dylib"]:
-            copy(self, pattern, os.path.join(self._dist_dir, "lib"), os.path.join(self.package_folder, "lib"))
-        copy(self, "*.dll", os.path.join(self._dist_dir, "lib"), os.path.join(self.package_folder, "bin"))
-        if not self.options.get_safe("shared", True):
-            rm(self, "*.so", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
+             src=os.path.join(self._dist_dir, "private", "nss"),
+             dst=os.path.join(self.package_folder, "include", "nss", "private"))
+
+        # Tools are always linked against shared libs only
+        if self.options.get_safe("shared", True):
+            exe_pattern = "*.exe" if self.settings.os == "Windows" else "*"
+            copy(self, exe_pattern, os.path.join(self._dist_dir, "bin"), os.path.join(self.package_folder, "bin"))
+
+        lib_dir = os.path.join(self._dist_dir, "lib")
+        if self.options.get_safe("shared", True):
+            for pattern in ["*.so", "*.chk", "*.dylib", "*.dll.lib"]:
+                copy(self, pattern, lib_dir, os.path.join(self.package_folder, "lib"))
+            copy(self, "*.dll", lib_dir, os.path.join(self.package_folder, "bin"))
         else:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+            copy(self, "*.a", lib_dir, os.path.join(self.package_folder, "lib"))
+            copy(self, "*.lib", lib_dir, os.path.join(self.package_folder, "lib"), excludes="*.dll.lib")
         fix_apple_shared_install_name(self)
 
     def package_info(self):
@@ -307,5 +313,44 @@ class NSSConan(ConanFile):
             self.cpp_info.components["dbm"].requires = ["util", "nspr::nspr"]
 
         # There are also nssckbi and nsssysinit shared libs, but these are meant to be loaded dynamically
+
+        if not self.options.get_safe("shared", True):
+            static_libs = collect_libs(self)
+
+            self.cpp_info.components["libnss"].libs = ["nss_static"]
+            self.cpp_info.components["libnss"].requires += [
+                "base", "certdb", "certhi", "cryptohi", "dev", "pk11wrap", "pki",
+            ]
+
+            freebl_private = [name for name in static_libs if
+                              name.startswith("freebl") or "c_lib" in name or "gcm-" in name or "hw-acc-crypto-" in name]
+            self.cpp_info.components["freebl"].libs = ["freebl", "freebl_static"] + freebl_private
+
+            self.cpp_info.components["smime"].libs = ["smime"]
+            self.cpp_info.components["softokn"].libs = ["softokn", "softokn_static"]
+            self.cpp_info.components["ssl"].libs = ["ssl"]
+            self.cpp_info.components["util"].libs = ["nssutil"]
+
+            if self.options.enable_legacy_db:
+                self.cpp_info.components["dbm"].libs = ["nssdbm"]
+
+            # Static-only libs
+            self.cpp_info.components["base"].libs = ["nssb"]
+            self.cpp_info.components["certdb"].libs = ["certdb"]
+            self.cpp_info.components["certhi"].libs = ["certhi"]
+            self.cpp_info.components["ckfw"].libs = ["nssckfw"]
+            self.cpp_info.components["crmf"].libs = ["crmf"]
+            self.cpp_info.components["cryptohi"].libs = ["cryptohi"]
+            self.cpp_info.components["dev"].libs = ["nssdev"]
+            self.cpp_info.components["jar"].libs = ["jar"]
+            self.cpp_info.components["mozpkix"].libs = ["mozpkix"]
+            self.cpp_info.components["mozpkix-testlib"].libs = ["mozpkix-testlib"]
+            self.cpp_info.components["pk11wrap"].libs = ["pk11wrap", "pk11wrap_static"]
+            self.cpp_info.components["pkcs7"].libs = ["pkcs7"]
+            self.cpp_info.components["pkcs12"].libs = ["pkcs12"]
+            self.cpp_info.components["pki"].libs = ["nsspki"]
+
+            # Not built by default
+            # self.cpp_info.components["sysinit"].libs = ["nsssysinit_static"]
 
         self.cpp_info.components["tools"].requires = ["zlib::zlib", "nspr::nspr", "sqlite3::sqlite3"]
