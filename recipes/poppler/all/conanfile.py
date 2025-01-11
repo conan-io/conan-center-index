@@ -159,7 +159,7 @@ class PopplerConan(ConanFile):
             self.tool_requires("glib/<host_version>")
         self.tool_requires("cmake/[>=3.16 <4]")
         if self.options.with_qt and not can_run(self):
-            self.tool_requires("qt/<host_version>")
+            self.tool_requires("qt/<host_version>", options={"gui": False, "widgets": False})
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

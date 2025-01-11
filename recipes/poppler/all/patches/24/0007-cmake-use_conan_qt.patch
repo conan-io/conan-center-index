@@ -3,7 +3,7 @@
 @@ -209,18 +209,15 @@
  endif()
  
- set(QT5_VERSION "5.15")
+ set(QT5_VERSION "5.12") # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when changing this
 -find_soft_mandatory_package(ENABLE_QT5 Qt5Core ${QT5_VERSION})
 -find_soft_mandatory_package(ENABLE_QT5 Qt5Gui ${QT5_VERSION})
 -find_soft_mandatory_package(ENABLE_QT5 Qt5Xml ${QT5_VERSION})
