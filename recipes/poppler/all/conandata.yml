@@ -1,8 +1,8 @@
 sources:
-  "24.05.0":
-    url: "https://poppler.freedesktop.org/poppler-24.05.0.tar.xz"
-    sha256: "d8c5eb30b50285ad9f0af8c6335cc2d3b9597fca475cbc2598a5479fa379f779"
+  "25.01.0":
+    url: "https://poppler.freedesktop.org/poppler-25.01.0.tar.xz"
+    sha256: "7eefc122207bbbd72a303c5e0743f4941e8ae861e24dcf0501e18ce1d1414112"
 patches:
-  "24.05.0":
-    - patch_file: "patches/24/0004-add-POPPLER_DATADIR-environment-variable.patch"
-    - patch_file: "patches/24/0007-cmake-use_conan_qt.patch"
+  "25.01.0":
+    - patch_file: "patches/25.01/use_conan_qt.patch"
+    - patch_file: "patches/25.01/add-POPPLER_DATADIR-environment-variable.patch"

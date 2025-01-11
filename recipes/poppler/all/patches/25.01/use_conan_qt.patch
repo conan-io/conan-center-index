@@ -1,9 +1,9 @@
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -209,18 +209,15 @@
+@@ -211,18 +211,15 @@
  endif()
  
- set(QT5_VERSION "5.12") # Update QT_DISABLE_DEPRECATED_BEFORE in qt5/CMakeLists.txt when changing this
+ set(QT5_VERSION "5.15")
 -find_soft_mandatory_package(ENABLE_QT5 Qt5Core ${QT5_VERSION})
 -find_soft_mandatory_package(ENABLE_QT5 Qt5Gui ${QT5_VERSION})
 -find_soft_mandatory_package(ENABLE_QT5 Qt5Xml ${QT5_VERSION})
@@ -19,7 +19,7 @@
 -find_soft_mandatory_package(ENABLE_QT6 Qt6Gui ${QT6_VERSION})
 -find_soft_mandatory_package(ENABLE_QT6 Qt6Widgets ${QT6_VERSION})
 -find_soft_mandatory_package(ENABLE_QT6 Qt6Test ${QT6_VERSION})
-+if(ENABLE_QT6)
++if (ENABLE_QT6)
 +  find_package(Qt6 COMPONENTS Core Gui Widgets Test REQUIRED CONFIG)
 +endif()
  
