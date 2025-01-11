@@ -1,4 +1,7 @@
 sources:
+  "0.8.33":
+    url: "https://github.com/AravisProject/aravis/releases/download/0.8.33/aravis-0.8.33.tar.xz"
+    sha256: "3c4409a12ea70bba4de25e5b08c777112de854bc801896594f2cb6f8c2bd6fbc"
   "0.8.30":
     url: "https://github.com/AravisProject/aravis/releases/download/0.8.30/aravis-0.8.30.tar.xz"
     sha256: "40380f06fa04524a7875bd456e5a5ea78b2c058fa84b5598bc6e0642fcef00b0"

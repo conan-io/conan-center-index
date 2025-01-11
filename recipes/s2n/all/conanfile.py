@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, save
+from conan.tools.files import copy, get, rmdir, save
 import os
 import textwrap
 
@@ -11,10 +11,10 @@ required_conan_version = ">=1.53.0"
 class S2nConan(ConanFile):
     name = "s2n"
     description = "An implementation of the TLS/SSL protocols"
-    topics = ("aws", "amazon", "cloud", )
+    license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/aws/s2n-tls"
-    license = "Apache-2.0"
+    topics = ("aws", "amazon", "cloud", )
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -28,7 +28,6 @@ class S2nConan(ConanFile):
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", src=self.recipe_folder, dst=self.export_sources_folder)
-        export_conandata_patches(self)
 
     def configure(self):
         if self.options.shared:
@@ -59,7 +58,6 @@ class S2nConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, os.pardir))
         cmake.build()

@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, load, save
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, load, save, copy
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.scm import Version
 
@@ -15,6 +15,7 @@ class QCBORConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/laurencelundblade/QCBOR"
     topics = ("serialization", "cbor", "rfc-7049", "rfc-8949")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -38,20 +39,23 @@ class QCBORConan(ConanFile):
             del self.options.disable_float
 
     def configure(self):
-        if self.options.shared:
+        if self.settings.os == "Windows":
+            self.package_type = "static-library"
+            del self.options.shared
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
-
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["BUILD_QCBOR_TEST"] = False
         if Version(self.version) >= "1.2":
             tc.variables["QCBOR_OPT_DISABLE_FLOAT_HW_USE"] = self.options.disable_float in ["HW_USE", "PREFERRED", "ALL"]
             tc.variables["QCBOR_OPT_DISABLE_FLOAT_PREFERRED"] = self.options.disable_float in ["PREFERRED", "ALL"]
@@ -70,10 +74,13 @@ class QCBORConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
-        # Extract the License/s from README.md to a file
-        tmp = load(self, os.path.join(self.source_folder, "inc", "qcbor", "qcbor.h"))
-        license_contents = re.search("( Copyright.*) =====", tmp, re.DOTALL)[1]
-        save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
+        if Version(self.version) >= "1.5":
+            copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        else:
+            # Extract the License/s from README.md to a file
+            tmp = load(self, os.path.join(self.source_folder, "inc", "qcbor", "qcbor.h"))
+            license_contents = re.search("( Copyright.*) =====", tmp, re.DOTALL)[1]
+            save(self, os.path.join(self.package_folder, "licenses", "LICENSE"), license_contents)
 
     def package_info(self):
         self.cpp_info.libs = ["qcbor"]
