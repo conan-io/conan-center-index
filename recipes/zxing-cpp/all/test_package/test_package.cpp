@@ -1,8 +1,8 @@
-#include "ZXing/BarcodeFormat.h"
-#include "ZXing/MultiFormatWriter.h"
-#include "ZXing/BitMatrix.h"
-#include "ZXing/ByteMatrix.h"
-#include "ZXing/TextUtfEncoding.h"
+#include "BarcodeFormat.h"
+#include "MultiFormatWriter.h"
+#include "BitMatrix.h"
+#include "ByteMatrix.h"
+#include "TextUtfEncoding.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
