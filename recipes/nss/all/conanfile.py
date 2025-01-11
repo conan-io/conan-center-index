@@ -269,30 +269,43 @@ class NSSConan(ConanFile):
         # https://salsa.debian.org/mozilla-team/nss/-/tree/master/debian
         # instead.
 
+        # Do not use
         self.cpp_info.set_property("pkg_config_name", "_nss")
 
-        # https://src.fedoraproject.org/rpms/nss/blob/rawhide/f/nss-util.pc.in
-        self.cpp_info.components["nssutil"].set_property("pkg_config_name", "nss-util")
-        self.cpp_info.components["nssutil"].libs = ["nssutil3"]
-        self.cpp_info.components["nssutil"].includedirs.append(os.path.join("include", "nss"))
-        self.cpp_info.components["nssutil"].requires = ["nspr::nspr"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["nssutil"].system_libs = ["pthread", "dl"]
-
         # https://src.fedoraproject.org/rpms/nss/blob/rawhide/f/nss.pc.in
-        self.cpp_info.components["libnss"].set_property("pkg_config_name", "nss")
-        self.cpp_info.components["libnss"].libs = ["ssl3", "smime3", "nss3"]
+        self.cpp_info.components["nss_pc"].set_property("pkg_config_name", "nss")
+        self.cpp_info.components["nss_pc"].requires = ["libnss", "ssl", "smime"]
+
+        self.cpp_info.components["libnss"].libs = ["nss3"]
         self.cpp_info.components["libnss"].includedirs.append(os.path.join("include", "nss"))
-        self.cpp_info.components["libnss"].requires = ["nspr::nspr", "nssutil"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["libnss"].system_libs = ["pthread", "dl"]
+        self.cpp_info.components["libnss"].requires = ["util", "nspr::nspr"]
+
+        # https://src.fedoraproject.org/rpms/nss/blob/rawhide/f/nss-util.pc.in
+        self.cpp_info.components["util"].set_property("pkg_config_name", "nss-util")
+        self.cpp_info.components["util"].libs = ["nssutil3"]
+        self.cpp_info.components["util"].includedirs.append(os.path.join("include", "nss"))
+        self.cpp_info.components["util"].requires = ["nspr::nspr"]
 
         # https://src.fedoraproject.org/rpms/nss/blob/rawhide/f/nss-softokn.pc.in
         self.cpp_info.components["softokn"].set_property("pkg_config_name", "nss-softokn")
-        self.cpp_info.components["softokn"].libs = ["freebl3", "nssdbm3", "softokn3"]
-        self.cpp_info.components["softokn"].includedirs.append(os.path.join("include", "nss"))
-        self.cpp_info.components["softokn"].requires = ["nspr::nspr", "sqlite3::sqlite3", "nssutil"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["softokn"].system_libs = ["pthread", "dl"]
+        self.cpp_info.components["softokn"].libs = ["softokn3"]
+        self.cpp_info.components["softokn"].requires = ["libnss", "freebl", "sqlite3::sqlite3"]
+        if self.options.enable_legacy_db:
+            self.cpp_info.components["softokn"].requires.append("dbm")
 
-        self.cpp_info.components["nss_executables"].requires = ["zlib::zlib", "nspr::nspr", "sqlite3::sqlite3"]
+        self.cpp_info.components["ssl"].libs = ["ssl3"]
+        self.cpp_info.components["ssl"].requires = ["libnss", "util", "nspr::nspr"]
+
+        self.cpp_info.components["smime"].libs = ["smime3"]
+        self.cpp_info.components["smime"].requires = ["libnss", "util", "nspr::nspr"]
+
+        self.cpp_info.components["freebl"].libs = ["freebl3"]
+        self.cpp_info.components["freebl"].includedirs.append(os.path.join("include", "nss"))
+
+        if self.options.enable_legacy_db:
+            self.cpp_info.components["dbm"].libs = ["nssdbm3"]
+            self.cpp_info.components["dbm"].requires = ["util", "nspr::nspr"]
+
+        # There are also nssckbi and nsssysinit shared libs, but these are meant to be loaded dynamically
+
+        self.cpp_info.components["tools"].requires = ["zlib::zlib", "nspr::nspr", "sqlite3::sqlite3"]
