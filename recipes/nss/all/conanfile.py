@@ -1,11 +1,12 @@
+import json
 import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import can_run
-from conan.tools.env import VirtualBuildEnv, Environment
-from conan.tools.files import chdir, copy, get, rm, replace_in_file, export_conandata_patches, apply_conandata_patches
+from conan.tools.env import VirtualBuildEnv, Environment, VirtualRunEnv
+from conan.tools.files import copy, get, rm, replace_in_file, export_conandata_patches, apply_conandata_patches, rmdir, save, load
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars, unix_path
 
@@ -23,6 +24,12 @@ class NSSConan(ConanFile):
     # TODO: static builds are supported, but the necessary package_info() is complex
     package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "enable_legacy_db": [True, False],
+    }
+    default_options = {
+        "enable_legacy_db": False,
+    }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -61,6 +68,9 @@ class NSSConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
+        # Remove vendored sources
+        rmdir(self, os.path.join("nss", "lib", "sqlite"))
+        rmdir(self, os.path.join("nss", "lib", "zlib"))
 
     @property
     def _vs_year(self):
@@ -74,12 +84,56 @@ class NSSConan(ConanFile):
             "194": "2022",
         }.get(compiler_version)
 
+    @property
+    def _dist_dir(self):
+        return os.path.join(self.build_folder, "dist")
+
+    @property
+    def _target_build_dir(self):
+        return os.path.join(self.build_folder, "out", "Debug" if self.settings.build_type == "Debug" else "Release")
+
+    @property
+    def _arch(self):
+        if self.settings.arch == "x86_64":
+            return "x64"
+        elif self.settings.arch == "x86":
+            return "ia32"
+        elif self.settings.arch in ["armv8", "armv8.3"]:
+            return "aarch64"
+        return str(self.settings.arch)
+
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
 
+        if can_run(self):
+            # The built shlibsign executable needs to find shared libs
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
+
         vc = VCVars(self)
         vc.generate()
+
+
+        nspr_root = self.dependencies["nspr"].package_folder
+        nspr_includedir = unix_path(self, os.path.join(nspr_root, "include", "nspr"))
+        nspr_libdir = unix_path(self, os.path.join(nspr_root, "lib"))
+
+        gyp_args = {}
+        gyp_args["nss_dist_dir"] = unix_path(self, self._dist_dir)
+        gyp_args["nss_dist_obj_dir"] = unix_path(self, self._dist_dir)
+        gyp_args["opt_build"] = 1 if self.settings.build_type != "Debug" else 0
+        gyp_args["static_libs"] = 1 if not self.options.get_safe("shared", True) else 0
+        gyp_args["target_arch"] = self._arch
+        gyp_args["disable_tests"] = 1
+        gyp_args["no_local_nspr"] = 1
+        gyp_args["nspr_include_dir"] = nspr_includedir
+        gyp_args["nspr_lib_dir"] = nspr_libdir
+        gyp_args["use_system_sqlite"] = 1
+        gyp_args["use_system_zlib"] = 1
+        gyp_args["disable_dbm"] = 0 if self.options.enable_legacy_db else 1
+        gyp_args["enable_sslkeylogfile"] = 1  # default in build.sh
+        save(self, "gyp_args.txt", "\n".join(f"-D{k}={v}" for k, v in gyp_args.items()))
 
         env = Environment()
 
@@ -94,6 +148,13 @@ class NSSConan(ConanFile):
         cxx = compilers_from_conf.get("cpp", buildenv_vars.get("CXX"))
         if cc:
             env.define("CXX", unix_path(self, cxx))
+            env.define("CCC", unix_path(self, cxx))
+
+        if is_msvc(self):
+            env.define("GYP_MSVS_VERSION", self._vs_year)
+
+        # For 'shlibsign -v -i <dist_dir>/lib/libfreebl3.so' etc to work during build
+        env.prepend_path("LD_LIBRARY_PATH", os.path.join(self._dist_dir, "lib"))
 
         # Add temporary site-packages to PYTHONPATH for gyp-next
         env.prepend_path("PYTHONPATH", self._site_packages_dir)
@@ -102,19 +163,7 @@ class NSSConan(ConanFile):
             env.prepend_path("PYTHONPATH", self._site_packages_dir.replace("\\", "/"))
         env.prepend_path("PATH", os.path.join(self._site_packages_dir, "bin"))
 
-        # For 'shlibsign -v -i <dist_dir>/lib/libfreebl3.so' etc to work during build
-        env.prepend_path("LD_LIBRARY_PATH", os.path.join(self._dist_dir, "lib"))
-
-        if is_msvc(self):
-            env.define("GYP_MSVS_VERSION", self._vs_year)
-
         env.vars(self, scope="build").save_script("conan_paths")
-
-    @property
-    def _dist_dir(self):
-        # location for installed lib/ and bin/ subdirs
-        dist_subdir = "Debug" if self.settings.build_type == "Debug" else "Release"
-        return os.path.join(self.source_folder, "dist", dist_subdir)
 
     @property
     def _site_packages_dir(self):
@@ -124,13 +173,8 @@ class NSSConan(ConanFile):
         site_packages_dir = self._site_packages_dir.replace("\\", "/")
         self.run(f"python -m pip install {' '.join(packages)} --no-cache-dir --target={site_packages_dir} --index-url https://pypi.org/simple",)
 
-    def _patch_sources(self):
-        def _format_library_paths(library_paths):
-            flag = "-LIBPATH:" if is_msvc(self) else "-L"
-            return [flag + unix_path(self, library_path)
-                    for library_path in library_paths if library_path]
-
-        def _format_libraries(libraries, libdir):
+    def _write_conan_gyp_target(self, conan_dep, target_name, file_name):
+        def _format_libs(libraries, libdir=None):
             result = []
             for library in libraries:
                 if is_msvc(self):
@@ -143,30 +187,44 @@ class NSSConan(ConanFile):
                     result.append(f"-l{library}")
             return result
 
-        sqlite_info = self.dependencies["sqlite3"].cpp_info.aggregated_components()
-        sqlite_flags = " ".join([f"-I{unix_path(self, sqlite_info.includedir)}"] +
-                                _format_libraries(sqlite_info.libs, sqlite_info.libdir) +
-                                _format_libraries(sqlite_info.system_libs, None) +
-                                _format_library_paths(sqlite_info.libdirs))
-        replace_in_file(self, os.path.join(self.source_folder, "nss", "lib", "sqlite", "sqlite.gyp"),
-                        "'libraries': ['<(sqlite_libs)'],",
-                        f"'libraries': ['{sqlite_flags}'],")
+        lib_dir = os.path.join(self.source_folder, "nss", "lib", file_name)
+        cpp_info = self.dependencies[conan_dep].cpp_info.aggregated_components()
+        build_gyp = {
+            "includes": ["../../coreconf/config.gypi"],
+            "targets": [{
+                "target_name": target_name,
+                "type": "none",
+                "direct_dependent_settings": {
+                    "defines": cpp_info.defines,
+                    "include_dirs": [cpp_info.includedir.replace("\\", "/")],
+                    "link_settings": {
+                        "libraries": _format_libs(cpp_info.libs, cpp_info.libdir.replace("\\", "/")) + _format_libs(cpp_info.system_libs),
+                        "library_dirs": [libdir.replace("\\", "/") for libdir in cpp_info.libdirs],
+                    },
+                }
+            }],
+        }
+        save(self, os.path.join(lib_dir, f"{file_name}.gyp"), json.dumps(build_gyp, indent=2))
 
-        zlib_info = self.dependencies["zlib"].cpp_info.aggregated_components()
-        zlib_flags = " ".join([f"-I{unix_path(self, zlib_info.includedir)}"] +
-                                _format_libraries(zlib_info.libs, zlib_info.libdir) +
-                                _format_libraries(zlib_info.system_libs, None) +
-                                _format_library_paths(zlib_info.libdirs))
-        replace_in_file(self, os.path.join(self.source_folder, "nss", "lib", "zlib", "zlib.gyp"),
-                        "'libraries': ['<@(zlib_libs)'],",
-                        f"'libraries': ['{zlib_flags}'],")
+        exports_gyp = {
+            "includes": ["../../coreconf/config.gypi"],
+            "targets": [{
+                "target_name": f"lib_{file_name}_exports",
+                "type": "none",
+            }],
+        }
+        save(self, os.path.join(lib_dir, "exports.gyp"), json.dumps(exports_gyp, indent=2))
+
+    def _patch_sources(self):
+        self._write_conan_gyp_target("sqlite3", "sqlite3", "sqlite")
+        self._write_conan_gyp_target("zlib", "nss_zlib", "zlib")
 
         # NSPR Windows libs on CCI don't include a lib prefix
         replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "config.gypi"),
                         "'nspr_libs%': ['libnspr4.lib', 'libplc4.lib', 'libplds4.lib'],",
                         "'nspr_libs%': ['nspr4.lib', 'plc4.lib', 'plds4.lib'],")
 
-        # Don't let shlibsign.py set LD_LIBRARY_PATH to the incorrect value.
+        # Don't let shlibsign.py set LD_LIBRARY_PATH to an incorrect value.
         replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "shlibsign.py"),
                         "env['LD_LIBRARY_PATH']", "pass # env['LD_LIBRARY_PATH']")
         if not can_run(self):
@@ -174,53 +232,26 @@ class NSSConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "shlibsign.py"),
                             "os.path.join(bin_path, 'shlibsign')", f"'{shlibsign}'")
 
-    @property
-    def _arch(self):
-        if self.settings.arch == "x86_64":
-            return "x64"
-        elif self.settings.arch == "x86":
-            return "ia32"
-        elif self.settings.arch in ["armv8", "armv8.3"]:
-            return "aarch64"
-        return str(self.settings.arch)
-
-    @property
-    def _build_args(self):
-        # https://github.com/nss-dev/nss/blob/master/help.txt
-        args = []
-        args.append("--disable-tests")
-        args.append(f"--target={self._arch}")
-        args.append(f"-Dtarget_arch={self._arch}")
-        args.append("-Dstatic_libs=" + ("1" if not self.options.get_safe("shared", True) else "0"))
-        if not self.options.get_safe("shared", True):
-            args.append("--static")
-        if self.settings.build_type != "Debug":
-            args.append("--opt")
-        if is_msvc(self):
-            args.append("--msvc")
-        nspr_root = self.dependencies["nspr"].package_folder
-        nspr_includedir = unix_path(self, os.path.join(nspr_root, "include", "nspr"))
-        nspr_libdir = unix_path(self, os.path.join(nspr_root, "lib"))
-        args.append(f"--with-nspr={nspr_includedir}:{nspr_libdir}")
-        args.append("--system-sqlite")
-        args.append("--enable-legacy-db")  # for libnssdbm3
-        return args
-
     def build(self):
         self._patch_sources()
         self._pip_install(["gyp-next"])
-        self.run(f"gyp --version")
-
-        with chdir(self, os.path.join(self.source_folder, "nss")):
-            self.run(f"./build.sh {' '.join(self._build_args)}")
+        args = load(self, os.path.join(self.generators_folder, "gyp_args.txt")).replace("\n", " ")
+        cmd = f'gyp -f ninja nss.gyp --depth=. --generator-output="{unix_path(self, self.build_folder)}" ' + args
+        if is_msvc(self):
+            cmd = f"bash -c 'target_arch={self._arch} source coreconf/msvc.sh; {cmd}'"
+        self.run(cmd, cwd=os.path.join(self.source_folder, "nss"))
+        self.run("ninja", cwd=self._target_build_dir)
 
     def package(self):
         copy(self, "COPYING", src=os.path.join(self.source_folder, "nss"), dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*",
-             src=os.path.join(self.source_folder, "dist", "public"),
+             src=os.path.join(self._dist_dir, "public"),
              dst=os.path.join(self.package_folder, "include"))
+        copy(self, "*",
+             src=os.path.join(self._dist_dir, "private"),
+             dst=os.path.join(self.package_folder, "include", "private"))
         copy(self, "*", os.path.join(self._dist_dir, "bin"), os.path.join(self.package_folder, "bin"))
-        for pattern in ["*.a", "*.lib", "*.so", "*.dylib"]:
+        for pattern in ["*.a", "*.lib", "*.so", "*.chk", "*.dylib"]:
             copy(self, pattern, os.path.join(self._dist_dir, "lib"), os.path.join(self.package_folder, "lib"))
         copy(self, "*.dll", os.path.join(self._dist_dir, "lib"), os.path.join(self.package_folder, "bin"))
         if not self.options.get_safe("shared", True):
