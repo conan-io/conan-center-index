@@ -428,7 +428,7 @@ class QtConan(ConanFile):
         if self.options.with_dbus:
             self.requires("dbus/1.15.8")
         if self.options.qtwayland:
-            self.requires("wayland/1.22.0")
+            self.requires("wayland/1.23.0")
         if self.settings.os in ['Linux', 'FreeBSD'] and self.options.get_safe("with_gssapi"):
             self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
         if self.options.get_safe("with_atspi"):
