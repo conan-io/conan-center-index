@@ -67,20 +67,6 @@ class PopplerConan(ConanFile):
         "float": False,
     }
 
-    @property
-    def _cppstd_required(self):
-        return 17
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "8",
-            "clang": "9",
-            "apple-clang": "11",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -131,7 +117,7 @@ class PopplerConan(ConanFile):
         if self.options.with_png:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_tiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.5 <5]")
         if self.options.splash:
             self.requires("boost/1.85.0")
         if self.options.with_libcurl:
@@ -143,14 +129,7 @@ class PopplerConan(ConanFile):
     def validate(self):
         if self.options.fontconfiguration == "win32" and self.settings.os != "Windows":
             raise ConanInvalidConfiguration("'win32' option of fontconfig is only available on Windows")
-
-        # C++ standard required
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._cppstd_required)
-
-        minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration("C++14 support required, which your compiler does not support.")
+        check_min_cppstd(self, 17)
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
@@ -163,13 +142,13 @@ class PopplerConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _dct_decoder(self):
-        if self.options.with_libjpeg == False:
-            return "none"
-        else:
+        if self.options.with_libjpeg:
             return str(self.options.with_libjpeg)
+        return "none"
 
     def generate(self):
         VirtualBuildEnv(self).generate()
@@ -262,10 +241,9 @@ class PopplerConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Use upper-case package names to force CMakeDeps to define upper-case variables
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "find_package(Freetype ${FREETYPE_VERSION}", "find_package(FREETYPE")
+                        "find_package(Freetype", "find_package(FREETYPE")
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "find_package(Cairo", "find_package(CAIRO")
         # Ignore package versions in find_soft_mandatory_package()
@@ -353,5 +331,3 @@ class PopplerConan(ConanFile):
 
         datadir = self.dependencies["poppler-data"].conf_info.get("user.poppler-data:datadir")
         self.runenv.define_path("POPPLER_DATADIR", datadir)
-        self.output.info(f"Setting POPPLER_DATADIR env var: {datadir}")
-        self.env_info.POPPLER_DATADIR = datadir
