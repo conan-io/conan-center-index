@@ -155,7 +155,7 @@ class GtkConan(ConanFile):
 
         # FIXME: gstreamer from CCI is currently not compatible
         # if self.options.with_gstreamer:
-        #     self.requires("gstreamer/1.24.7")
+        #     self.requires("gstreamer/1.24.11")
 
         # TODO: fix libintl support on macOS by using gnuintl from gettext
         # if self.settings.os != "Linux":
