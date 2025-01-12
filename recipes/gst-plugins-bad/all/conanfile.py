@@ -26,7 +26,7 @@ class GStPluginsBadConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gstreamer.freedesktop.org/"
     # Most, but not all, plugins are LGPL. For details, see:
-    # https://gitlab.freedesktop.org/gstreamer/gstreamer/-/raw/1.24.10/subprojects/gst-plugins-bad/docs/plugins/gst_plugins_cache.json
+    # https://gitlab.freedesktop.org/gstreamer/gstreamer/-/raw/1.24.11/subprojects/gst-plugins-bad/docs/plugins/gst_plugins_cache.json
     license = "LGPL-2.1-or-later"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -185,7 +185,7 @@ class GStPluginsBadConan(ConanFile):
             del self.options.with_mediafoundation
             del self.options.with_wasapi
         if not is_msvc(self):
-            # the required winrt library component only supports MSVC as of v1.24.10
+            # the required winrt library component only supports MSVC as of v1.24.11
             del self.options.with_wasapi2
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_libdc1394
