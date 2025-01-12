@@ -176,9 +176,13 @@ class GLibConan(ConanFile):
 
         self.cpp_info.components["gmodule-export-2.0"].set_property("pkg_config_name", "gmodule-export-2.0")
         self.cpp_info.components["gmodule-export-2.0"].requires += ["gmodule-no-export-2.0", "glib-2.0"]
+        if self.settings.os in ["Linux", "FreeBSD"] or self.settings.get_safe("os.subsystem") == "cygwin":
+            # https://gitlab.gnome.org/GNOME/glib/-/blob/2.82.4/meson.build?ref_type=tags#L2488-2501
+            self.cpp_info.components["gmodule-export-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
+            self.cpp_info.components["gmodule-export-2.0"].exelinkflags.append("-Wl,--export-dynamic")
 
         self.cpp_info.components["gmodule-2.0"].set_property("pkg_config_name", "gmodule-2.0")
-        self.cpp_info.components["gmodule-2.0"].requires += ["gmodule-no-export-2.0", "glib-2.0"]
+        self.cpp_info.components["gmodule-2.0"].requires = ["gmodule-export-2.0"]
 
         self.cpp_info.components["gobject-2.0"].set_property("pkg_config_name", "gobject-2.0")
         self.cpp_info.components["gobject-2.0"].libs = ["gobject-2.0"]
@@ -193,7 +197,7 @@ class GLibConan(ConanFile):
         self.cpp_info.components["gio-2.0"].set_property("pkg_config_name", "gio-2.0")
         self.cpp_info.components["gio-2.0"].libs = ["gio-2.0"]
         self.cpp_info.components["gio-2.0"].resdirs = ["res"]
-        self.cpp_info.components["gio-2.0"].requires += ["glib-2.0", "gobject-2.0", "gmodule-2.0", "zlib::zlib"]
+        self.cpp_info.components["gio-2.0"].requires += ["glib-2.0", "gobject-2.0", "gmodule-no-export-2.0", "zlib::zlib"]
 
         self.cpp_info.components["gresource"].set_property("pkg_config_name", "gresource")
         self.cpp_info.components["gresource"].libs = []  # this is actually an executable
