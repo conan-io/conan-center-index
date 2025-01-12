@@ -68,7 +68,7 @@ class XkbcommonConan(ConanFile):
         if self.options.get_safe("xkbregistry"):
             self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.get_safe("with_wayland"):
-            self.requires("wayland/1.22.0")
+            self.requires("wayland/[>=1.22.0 <2]")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
