@@ -1,4 +1,4 @@
 sources:
-  "1.24.10":
-    url: "https://gstreamer.freedesktop.org/src/gst-libav/gst-libav-1.24.10.tar.xz"
-    sha256 : "4cf2e2d8204e54ba8af9519a8b9b7ffa6e951a7087afa0dfe83c125d49bbb5fb"
+  "1.24.11":
+    url: "https://gstreamer.freedesktop.org/src/gst-libav/gst-libav-1.24.11.tar.xz"
+    sha256: "13776fc16f7ce587d437d56d83e08c9224768dddc897dd3c88208d970a6aa422"

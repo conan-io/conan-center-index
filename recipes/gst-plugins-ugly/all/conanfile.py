@@ -20,7 +20,7 @@ class GStPluginsUglyConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gstreamer.freedesktop.org/"
     # Mostly GPL, some LGPL plugins. For details, see:
-    # https://gitlab.freedesktop.org/gstreamer/gstreamer/-/raw/1.24.10/subprojects/gst-plugins-ugly/docs/gst_plugins_cache.json
+    # https://gitlab.freedesktop.org/gstreamer/gstreamer/-/raw/1.24.11/subprojects/gst-plugins-ugly/docs/gst_plugins_cache.json
     license = "GPL-2.0-only"
     settings = "os", "arch", "compiler", "build_type"
     options = {

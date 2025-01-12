@@ -1,7 +1,7 @@
 sources:
-  "1.24.10":
-    url: "https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.24.10.tar.xz"
-    sha256: "ebd57b1be924c6e24f327dd55bab9d8fbaaebe5e1dc8fca784182ab2b12d23eb"
+  "1.24.11":
+    url: "https://gstreamer.freedesktop.org/src/gst-plugins-base/gst-plugins-base-1.24.11.tar.xz"
+    sha256: "98572c1f8b710e52673e250cd96e4f2660d79bd66aa172c5dde5f690c1231e1d"
 patches:
-  "1.24.10":
+  "1.24.11":
     - patch_file: "patches/001-windows-gl-dep.patch"
