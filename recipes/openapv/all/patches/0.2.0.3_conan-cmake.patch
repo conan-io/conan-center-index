@@ -1,0 +1,13 @@
+diff --git src/CMakeLists.txt src/CMakeLists.txt
+index 865b7cd..b5a12c1 100644
+--- src/CMakeLists.txt
++++ src/CMakeLists.txt
+@@ -146,7 +146,7 @@ set(OAPV_PRIVATE_HEADERS "${LIB_BASE_INC}" "${LIB_SSE_INC}" "${LIB_AVX_INC}" "${
+ if(OAPV_BUILD_STATIC_LIB)
+   set_target_properties(${LIB_NAME_BASE} PROPERTIES PUBLIC_HEADER "${OAPV_PUBLIC_HEADERS}")
+   install(TARGETS ${LIB_NAME_BASE}
+-          ARCHIVE COMPONENT Development DESTINATION ${CMAKE_INSTALL_LIBDIR}/${LIB_NAME_BASE}
++          ARCHIVE COMPONENT Development DESTINATION ${CMAKE_INSTALL_LIBDIR}
+           PUBLIC_HEADER COMPONENT Development DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${LIB_NAME_BASE}
+   )
+ endif()
