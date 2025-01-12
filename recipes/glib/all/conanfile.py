@@ -3,7 +3,6 @@ import textwrap
 
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, rename
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -54,7 +53,6 @@ class GLibConan(ConanFile):
             del self.options.with_selinux
         if is_msvc(self):
             del self.options.with_elf
-
         if self.settings.os == "Neutrino":
             del self.options.with_elf
 
@@ -80,7 +78,6 @@ class GLibConan(ConanFile):
         if self.settings.os != "Linux":
             # for Linux, gettext is provided by libc
             self.requires("libgettext/0.22", transitive_headers=True, transitive_libs=True)
-
         if is_apple_os(self):
             self.requires("libiconv/1.17")
 
@@ -92,20 +89,20 @@ class GLibConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
-        virtual_build_env = VirtualBuildEnv(self)
-        virtual_build_env.generate()
-        tc = PkgConfigDeps(self)
-        tc.generate()
         tc = MesonToolchain(self)
 
-        tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
-        tc.project_options["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
+        def feature(value):
+            return "enabled" if value else "disabled"
+
+        tc.project_options["selinux"] = feature(self.options.get_safe("with_selinux"))
+        tc.project_options["libmount"] = feature(self.options.get_safe("with_mount"))
         if self.settings.os == "FreeBSD" or self.settings.os == "Neutrino":
             tc.project_options["xattr"] = "false"
         tc.project_options["tests"] = "false"
-        tc.project_options["libelf"] = "enabled" if self.options.get_safe("with_elf") else "disabled"
+        tc.project_options["libelf"] = feature(self.options.get_safe("with_elf"))
 
         if self.settings.os == "Neutrino":
             tc.cross_build["host"]["system"] = "qnx"
@@ -114,8 +111,10 @@ class GLibConan(ConanFile):
 
         tc.generate()
 
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
     def _patch_sources(self):
-        apply_conandata_patches(self)
         replace_in_file(self,
             os.path.join(self.source_folder, "meson.build"),
             "subdir('fuzzing')",
@@ -269,8 +268,7 @@ class GLibConan(ConanFile):
         if self.options.get_safe("with_elf"):
             self.cpp_info.components["gresource"].requires.append("libelf::libelf")  # this is actually an executable
 
-        self.env_info.GLIB_COMPILE_SCHEMAS = os.path.join(self.package_folder, "bin", "glib-compile-schemas")
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        self.buildenv_info.define_path("GLIB_COMPILE_SCHEMAS", os.path.join(self.package_folder, "bin", "glib-compile-schemas"))
 
         pkgconfig_variables = {
             'datadir': '${prefix}/res',
