@@ -6,6 +6,7 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
+from conan.tools.scm import Version
 import os
 
 
@@ -164,6 +165,9 @@ class GLibConan(ConanFile):
             os.path.join("lib", "glib-2.0", "include")
         ]
         self.cpp_info.components["glib-2.0"].resdirs = ["res"]
+        if Version(self.version) >= "2.81.0":
+            if not self.options.shared and self.settings.compiler in ["gcc", "clang"]:
+                self.cpp_info.components["glib-2.0"].system_libs.append("atomic")
 
         self.cpp_info.components["gmodule-no-export-2.0"].set_property("pkg_config_name", "gmodule-no-export-2.0")
         self.cpp_info.components["gmodule-no-export-2.0"].libs = ["gmodule-2.0"]
