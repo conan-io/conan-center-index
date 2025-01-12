@@ -1,3 +1,6 @@
+import os
+import textwrap
+
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.env import VirtualBuildEnv
@@ -7,8 +10,6 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
-import os
-
 
 required_conan_version = ">=2.0"
 
@@ -201,6 +202,19 @@ class GLibConan(ConanFile):
 
         self.cpp_info.components["gresource"].set_property("pkg_config_name", "gresource")
         self.cpp_info.components["gresource"].libs = []  # this is actually an executable
+
+        if Version(self.version) >= "2.79.0":
+            self.cpp_info.components["girepository-2.0"].set_property("pkg_config_name", "girepository-2.0")
+            self.cpp_info.components["girepository-2.0"].set_property("pkg_config_custom_content", textwrap.dedent("""\
+                gidatadir=${datadir}/gobject-introspection-1.0
+                girdir=${datadir}/gir-1.0
+                typelibdir=${libdir}/girepository-1.0
+            """))
+            self.cpp_info.components["girepository-2.0"].libs = ["girepository-2.0"]
+            self.cpp_info.components["girepository-2.0"].resdirs = ["res"]
+            self.cpp_info.components["girepository-2.0"].requires += ["glib-2.0", "gobject-2.0", "gmodule-no-export-2.0", "gio-2.0", "libffi::libffi"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["girepository-2.0"].system_libs.append("m")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["glib-2.0"].system_libs.append("pthread")
