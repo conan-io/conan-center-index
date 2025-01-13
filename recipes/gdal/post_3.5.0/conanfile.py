@@ -3,11 +3,11 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0"
 
 
 class GdalConan(ConanFile):
@@ -658,7 +658,7 @@ class GdalConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        os.rename(os.path.join(self.package_folder, "share"),
+        rename(self, os.path.join(self.package_folder, "share"),
                   os.path.join(self.package_folder, "res"))
         rmdir(self, os.path.join(self.package_folder, "res", "bash-completion"))
         rmdir(self, os.path.join(self.package_folder, "res", "man"))
@@ -812,10 +812,3 @@ class GdalConan(ConanFile):
 
         if self.options.tools:
             self.buildenv_info.define_path("GDAL_DATA", gdal_data_path)
-
-        # TODO: remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "GDAL"
-        self.cpp_info.names["cmake_find_package_multi"] = "GDAL"
-        self.cpp_info.filenames["cmake_find_package"] = "GDAL"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "GDAL"
-        self.env_info.GDAL_DATA = gdal_data_path
