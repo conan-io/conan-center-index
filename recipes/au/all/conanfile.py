@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 class PackageConan(ConanFile):
     name = "au"
@@ -15,23 +15,9 @@ class PackageConan(ConanFile):
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/aurora-opensource/au"
-    topics = ("units", "C++14")
+    topics = ("units", "C++14", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
-
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -43,13 +29,7 @@ class PackageConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 14)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -59,6 +39,9 @@ class PackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if Version(self.version) >= "0.4.1":
+            tc.variables["AU_ENABLE_TESTING"] = False
+            tc.variables["AU_EXCLUDE_GTEST_DEPENDENCY"] = True
         tc.generate()
 
     def build(self):
@@ -82,9 +65,3 @@ class PackageConan(ConanFile):
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
             self.cpp_info.system_libs.append("dl")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "Au"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Au"
-        self.cpp_info.names["cmake_find_package"] = "Au::au"
-        self.cpp_info.names["cmake_find_package_multi"] = "Au::au"
