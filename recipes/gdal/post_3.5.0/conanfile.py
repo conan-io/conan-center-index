@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -189,7 +190,7 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
-            self.requires("arrow/14.0.2")
+            self.requires("arrow/17.0.0")
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
@@ -207,7 +208,7 @@ class GdalConan(ConanFile):
         if self.options.with_ecw:
             self.requires("libecwj2/3.3")
         if self.options.with_expat:
-            self.requires("expat/2.5.0")
+            self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_exr:
             self.requires("openexr/3.2.1")
             self.requires("imath/3.1.9")
@@ -230,9 +231,10 @@ class GdalConan(ConanFile):
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.1")
         if self.options.with_jxl:
-            self.requires("libjxl/0.6.1")
+            # 0.9+ is not compatible as of v3.8.4
+            self.requires("libjxl/0.8.2")
         if self.options.with_kea:
-            self.requires("kealib/1.4.14")
+            self.requires("kealib/1.5.2")
         if self.options.with_lerc:
             self.requires("lerc/4.0.1")
         if self.options.get_safe("with_libaec"):
@@ -246,7 +248,7 @@ class GdalConan(ConanFile):
         if self.options.with_libkml:
             self.requires("libkml/1.3.0")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_mongocxx:
@@ -273,10 +275,9 @@ class GdalConan(ConanFile):
         # if self.options.with_pdfium:
         #     self.requires("pdfium/95.0.4629")
         if self.options.with_pg:
-            # libpq 15+ is not supported
-            self.requires("libpq/14.9")
+            self.requires("libpq/15.5")
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_podofo:
             self.requires("podofo/0.9.7")
         if self.options.with_poppler:
@@ -286,27 +287,29 @@ class GdalConan(ConanFile):
         if self.options.with_rasterlite2:
             self.requires("librasterlite2/1.1.0-beta1")
         if self.options.with_spatialite:
-            self.requires("libspatialite/5.0.1")
+            self.requires("libspatialite/5.1.0")
         if self.options.with_sqlite3:
             self.requires("sqlite3/3.44.2")
         if self.options.with_tiledb:
-            self.requires("tiledb/2.17.4")
+            self.requires("tiledb/2.26.1")
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.5")
         if self.options.with_xml2:
-            self.requires("libxml2/2.12.3")
+            self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[^1.5]")
         # Use of external shapelib is not recommended and is currently broken.
         # https://github.com/OSGeo/gdal/issues/5711
         # if self.options.with_shapelib:
-        #     self.requires("shapelib/1.6.0")
+        #     self.requires("shapelib/1.6.1")
 
     def build_requirements(self):
         # https://github.com/conan-io/conan/issues/3482#issuecomment-662284561
         self.tool_requires("cmake/[>=3.18 <4]")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def package_id(self):
         # Ignore deprecated options
@@ -339,151 +342,148 @@ class GdalConan(ConanFile):
             self.output.error(msg)
             raise ConanInvalidConfiguration(msg)
 
+        if self.options.tools and self.options.shared:
+            # FIXME: probably also broken for shared dependencies
+            # None of the deps are linked correctly for shared builds, probably due to CMake visibility issues.
+            raise ConanInvalidConfiguration("Building of tools is currently broken for shared=True")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["GDAL_OBJECT_LIBRARIES_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
-        tc.variables["GDAL_SET_INSTALL_RELATIVE_RPATH"] = True
+        tc.cache_variables["GDAL_OBJECT_LIBRARIES_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
+        tc.cache_variables["GDAL_SET_INSTALL_RELATIVE_RPATH"] = True
+        tc.cache_variables["GDAL_FIND_PACKAGE_PROJ_MODE"] = "CONFIG"
 
-        tc.variables["BUILD_JAVA_BINDINGS"] = False
-        tc.variables["BUILD_CSHARP_BINDINGS"] = False
-        tc.variables["BUILD_PYTHON_BINDINGS"] = False
-        tc.variables["BUILD_APPS"] = self.options.tools
-        tc.variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_JAVA_BINDINGS"] = False
+        tc.cache_variables["BUILD_CSHARP_BINDINGS"] = False
+        tc.cache_variables["BUILD_PYTHON_BINDINGS"] = False
+        tc.cache_variables["BUILD_APPS"] = self.options.tools
+        tc.cache_variables["BUILD_TESTING"] = False
 
-        tc.variables["GDAL_USE_ARCHIVE"] = self.options.with_libarchive
-        tc.variables["GDAL_USE_ARMADILLO"] = self.options.with_armadillo
-        tc.variables["GDAL_USE_ARROW"] = self.options.with_arrow
-        tc.variables["GDAL_USE_ARROWDATASET"] = self.options.with_arrow and self.dependencies["arrow"].options.dataset_modules
-        tc.variables["GDAL_USE_BASISU"] = self.options.with_basisu
-        tc.variables["GDAL_USE_BLOSC"] = self.options.with_blosc
-        tc.variables["GDAL_USE_BRUNSLI"] = self.options.with_brunsli
-        tc.variables["GDAL_USE_CFITSIO"] = self.options.with_cfitsio
-        tc.variables["GDAL_USE_CRNLIB"] = self.options.with_dds
-        tc.variables["GDAL_USE_CRYPTOPP"] = self.options.with_cryptopp
-        tc.variables["GDAL_USE_CURL"] = self.options.with_curl
-        tc.variables["GDAL_USE_DEFLATE"] = self.options.with_libdeflate
-        tc.variables["GDAL_USE_ECW"] = self.options.with_ecw
-        tc.variables["GDAL_USE_EXPAT"] = self.options.with_expat
-        tc.variables["GDAL_USE_FILEGDB"] = False
-        tc.variables["GDAL_USE_FREEXL"] = self.options.with_freexl
-        tc.variables["GDAL_USE_FYBA"] = False
-        tc.variables["GDAL_USE_GEOS"] = self.options.with_geos
-        tc.variables["GDAL_USE_GEOTIFF"] = True
-        tc.variables["GDAL_USE_GEOTIFF_INTERNAL"] = False
-        tc.variables["GDAL_USE_GIF"] = self.options.with_gif
-        tc.variables["GDAL_USE_GIF_INTERNAL"] = False
-        tc.variables["GDAL_USE_GTA"] = self.options.with_gta
-        tc.variables["GDAL_USE_HDF4"] = self.options.with_hdf4
-        tc.variables["GDAL_USE_HDF5"] = self.options.with_hdf5
-        tc.variables["GDAL_USE_HDFS"] = False
-        tc.variables["GDAL_USE_HEIF"] = self.options.with_heif
-        tc.variables["GDAL_USE_ICONV"] = self.options.with_libiconv
-        tc.variables["GDAL_USE_IDB"] = False
-        tc.variables["GDAL_USE_JPEG"] = bool(self.options.with_jpeg)
-        tc.variables["GDAL_USE_JPEG_INTERNAL"] = False
-        tc.variables["GDAL_USE_JPEG12_INTERNAL"] = False
-        tc.variables["GDAL_USE_JSONC"] = True
-        tc.variables["GDAL_USE_JSONC_INTERNAL"] = False
-        tc.variables["GDAL_USE_JXL"] = self.options.with_jxl
-        tc.variables["GDAL_USE_JXL_THREADS"] = self.options.with_jxl
-        tc.variables["GDAL_USE_KDU"] = False
-        tc.variables["GDAL_USE_KEA"] = self.options.with_kea
-        tc.variables["GDAL_USE_LERC"] = self.options.with_lerc
-        tc.variables["GDAL_USE_LERC_INTERNAL"] = False
-        tc.variables["GDAL_USE_LIBAEC"] = self.options.get_safe("with_libaec", False)
-        tc.variables["GDAL_USE_LIBCSF"] = False
-        tc.variables["GDAL_USE_LIBCSF_INTERNAL"] = self.options.with_libcsf
-        tc.variables["GDAL_USE_LIBKML"] = self.options.with_libkml
-        tc.variables["GDAL_USE_LIBLZMA"] = self.options.with_lzma
-        tc.variables["GDAL_USE_LIBQB3"] = False
-        tc.variables["GDAL_USE_LIBXML2"] = self.options.with_xml2
-        tc.variables["GDAL_USE_LURATECH"] = False
-        tc.variables["GDAL_USE_LZ4"] = self.options.with_lz4
-        tc.variables["GDAL_USE_MONGOCXX"] = self.options.with_mongocxx
-        tc.variables["GDAL_USE_MRSID"] = False
-        tc.variables["GDAL_USE_MSSQL_NCLI"] = False
-        tc.variables["GDAL_USE_MSSQL_ODBC"] = False
-        tc.variables["GDAL_USE_MYSQL"] = bool(self.options.with_mysql)
-        tc.variables["GDAL_USE_NETCDF"] = self.options.with_netcdf
-        tc.variables["GDAL_USE_ODBC"] = self.options.with_odbc
-        tc.variables["GDAL_USE_ODBCCPP"] = False
-        tc.variables["GDAL_USE_OGDI"] = False
-        tc.variables["GDAL_USE_OPENCAD"] = False
-        tc.variables["GDAL_USE_OPENCAD_INTERNAL"] = self.options.with_opencad
-        tc.variables["GDAL_USE_OPENCL"] = self.options.with_opencl
-        tc.variables["GDAL_USE_OPENEXR"] = self.options.with_exr
-        tc.variables["GDAL_USE_OPENJPEG"] = self.options.with_openjpeg
-        tc.variables["GDAL_USE_OPENSSL"] = self.options.with_openssl
-        tc.variables["GDAL_USE_ORACLE"] = False
-        tc.variables["GDAL_USE_PARQUET"] = self.options.with_arrow and self.dependencies["arrow"].options.parquet
-        tc.variables["GDAL_USE_PCRE"] = self.options.with_pcre
-        tc.variables["GDAL_USE_PCRE2"] = self.options.with_pcre2
-        tc.variables["GDAL_USE_PDFIUM"] = False  # self.options.with_pdfium
-        tc.variables["GDAL_USE_PNG"] = self.options.with_png
-        tc.variables["GDAL_USE_PNG_INTERNAL"] = False
-        tc.variables["GDAL_USE_PODOFO"] = self.options.with_podofo
-        tc.variables["GDAL_USE_POPPLER"] = self.options.with_poppler
-        tc.variables["GDAL_USE_POSTGRESQL"] = self.options.with_pg
-        tc.variables["GDAL_USE_PUBLICDECOMPWT"] = self.options.with_publicdecompwt
-        tc.variables["GDAL_USE_QHULL"] = self.options.with_qhull
-        tc.variables["GDAL_USE_QHULL_INTERNAL"] = False
-        tc.variables["GDAL_USE_RASTERLITE2"] = self.options.with_rasterlite2
-        tc.variables["GDAL_USE_SFCGAL"] = False
-        tc.variables["GDAL_USE_SHAPELIB"] = False
-        tc.variables["GDAL_USE_SHAPELIB_INTERNAL"] = self.options.with_shapelib
-        tc.variables["GDAL_USE_SPATIALITE"] = self.options.with_spatialite
-        tc.variables["GDAL_USE_SQLITE3"] = self.options.with_sqlite3
-        tc.variables["GDAL_USE_TEIGHA"] = False
-        tc.variables["GDAL_USE_TIFF_INTERNAL"] = False
-        tc.variables["GDAL_USE_TILEDB"] = self.options.with_tiledb
-        tc.variables["GDAL_USE_WEBP"] = self.options.with_webp
-        tc.variables["GDAL_USE_XERCESC"] = self.options.with_xerces
-        tc.variables["GDAL_USE_ZLIB"] = True
-        tc.variables["GDAL_USE_ZLIB_INTERNAL"] = False
-        tc.variables["GDAL_USE_ZSTD"] = self.options.with_zstd
+        tc.cache_variables["GDAL_USE_ARCHIVE"] = self.options.with_libarchive
+        tc.cache_variables["GDAL_USE_ARMADILLO"] = self.options.with_armadillo
+        tc.cache_variables["GDAL_USE_ARROW"] = self.options.with_arrow
+        tc.cache_variables["GDAL_USE_ARROWDATASET"] = self.options.with_arrow and self.dependencies["arrow"].options.dataset_modules
+        tc.cache_variables["GDAL_USE_BASISU"] = self.options.with_basisu
+        tc.cache_variables["GDAL_USE_BLOSC"] = self.options.with_blosc
+        tc.cache_variables["GDAL_USE_BRUNSLI"] = self.options.with_brunsli
+        tc.cache_variables["GDAL_USE_CFITSIO"] = self.options.with_cfitsio
+        tc.cache_variables["GDAL_USE_CRNLIB"] = self.options.with_dds
+        tc.cache_variables["GDAL_USE_CRYPTOPP"] = self.options.with_cryptopp
+        tc.cache_variables["GDAL_USE_CURL"] = self.options.with_curl
+        tc.cache_variables["GDAL_USE_DEFLATE"] = self.options.with_libdeflate
+        tc.cache_variables["GDAL_USE_ECW"] = self.options.with_ecw
+        tc.cache_variables["GDAL_USE_EXPAT"] = self.options.with_expat
+        tc.cache_variables["GDAL_USE_FILEGDB"] = False
+        tc.cache_variables["GDAL_USE_FREEXL"] = self.options.with_freexl
+        tc.cache_variables["GDAL_USE_FYBA"] = False
+        tc.cache_variables["GDAL_USE_GEOS"] = self.options.with_geos
+        tc.cache_variables["GDAL_USE_GEOTIFF"] = True
+        tc.cache_variables["GDAL_USE_GEOTIFF_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_GIF"] = self.options.with_gif
+        tc.cache_variables["GDAL_USE_GIF_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_GTA"] = self.options.with_gta
+        tc.cache_variables["GDAL_USE_HDF4"] = self.options.with_hdf4
+        tc.cache_variables["GDAL_USE_HDF5"] = self.options.with_hdf5
+        tc.cache_variables["GDAL_USE_HDFS"] = False
+        tc.cache_variables["GDAL_USE_HEIF"] = self.options.with_heif
+        tc.cache_variables["GDAL_USE_ICONV"] = self.options.with_libiconv
+        tc.cache_variables["GDAL_USE_IDB"] = False
+        tc.cache_variables["GDAL_USE_JPEG"] = bool(self.options.with_jpeg)
+        tc.cache_variables["GDAL_USE_JPEG_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_JPEG12_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_JSONC"] = True
+        tc.cache_variables["GDAL_USE_JSONC_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_JXL"] = self.options.with_jxl
+        tc.cache_variables["GDAL_USE_JXL_THREADS"] = self.options.with_jxl
+        tc.cache_variables["GDAL_USE_KDU"] = False
+        tc.cache_variables["GDAL_USE_KEA"] = self.options.with_kea
+        tc.cache_variables["GDAL_USE_LERC"] = self.options.with_lerc
+        tc.cache_variables["GDAL_USE_LERC_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_LIBAEC"] = self.options.get_safe("with_libaec", False)
+        tc.cache_variables["GDAL_USE_LIBCSF"] = False
+        tc.cache_variables["GDAL_USE_LIBCSF_INTERNAL"] = self.options.with_libcsf
+        tc.cache_variables["GDAL_USE_LIBKML"] = self.options.with_libkml
+        tc.cache_variables["GDAL_USE_LIBLZMA"] = self.options.with_lzma
+        tc.cache_variables["GDAL_USE_LIBQB3"] = False
+        tc.cache_variables["GDAL_USE_LIBXML2"] = self.options.with_xml2
+        tc.cache_variables["GDAL_USE_LURATECH"] = False
+        tc.cache_variables["GDAL_USE_LZ4"] = self.options.with_lz4
+        tc.cache_variables["GDAL_USE_MONGOCXX"] = self.options.with_mongocxx
+        tc.cache_variables["GDAL_USE_MRSID"] = False
+        tc.cache_variables["GDAL_USE_MSSQL_NCLI"] = False
+        tc.cache_variables["GDAL_USE_MSSQL_ODBC"] = False
+        tc.cache_variables["GDAL_USE_MYSQL"] = bool(self.options.with_mysql)
+        tc.cache_variables["GDAL_USE_NETCDF"] = self.options.with_netcdf
+        tc.cache_variables["GDAL_USE_ODBC"] = self.options.with_odbc
+        tc.cache_variables["GDAL_USE_ODBCCPP"] = False
+        tc.cache_variables["GDAL_USE_OGDI"] = False
+        tc.cache_variables["GDAL_USE_OPENCAD"] = False
+        tc.cache_variables["GDAL_USE_OPENCAD_INTERNAL"] = self.options.with_opencad
+        tc.cache_variables["GDAL_USE_OPENCL"] = self.options.with_opencl
+        tc.cache_variables["GDAL_USE_OPENEXR"] = self.options.with_exr
+        tc.cache_variables["GDAL_USE_OPENJPEG"] = self.options.with_openjpeg
+        tc.cache_variables["GDAL_USE_OPENSSL"] = self.options.with_openssl
+        tc.cache_variables["GDAL_USE_ORACLE"] = False
+        tc.cache_variables["GDAL_USE_PARQUET"] = self.options.with_arrow and self.dependencies["arrow"].options.parquet
+        tc.cache_variables["GDAL_USE_PCRE"] = self.options.with_pcre
+        tc.cache_variables["GDAL_USE_PCRE2"] = self.options.with_pcre2
+        tc.cache_variables["GDAL_USE_PDFIUM"] = False  # self.options.with_pdfium
+        tc.cache_variables["GDAL_USE_PNG"] = self.options.with_png
+        tc.cache_variables["GDAL_USE_PNG_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_PODOFO"] = self.options.with_podofo
+        tc.cache_variables["GDAL_USE_POPPLER"] = self.options.with_poppler
+        tc.cache_variables["GDAL_USE_POSTGRESQL"] = self.options.with_pg
+        tc.cache_variables["GDAL_USE_PUBLICDECOMPWT"] = self.options.with_publicdecompwt
+        tc.cache_variables["GDAL_USE_QHULL"] = self.options.with_qhull
+        tc.cache_variables["GDAL_USE_QHULL_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_RASTERLITE2"] = self.options.with_rasterlite2
+        tc.cache_variables["GDAL_USE_SFCGAL"] = False
+        tc.cache_variables["GDAL_USE_SHAPELIB"] = False
+        tc.cache_variables["GDAL_USE_SHAPELIB_INTERNAL"] = self.options.with_shapelib
+        tc.cache_variables["GDAL_USE_SPATIALITE"] = self.options.with_spatialite
+        tc.cache_variables["GDAL_USE_SQLITE3"] = self.options.with_sqlite3
+        tc.cache_variables["GDAL_USE_TEIGHA"] = False
+        tc.cache_variables["GDAL_USE_TIFF_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_TILEDB"] = self.options.with_tiledb
+        tc.cache_variables["GDAL_USE_WEBP"] = self.options.with_webp
+        tc.cache_variables["GDAL_USE_XERCESC"] = self.options.with_xerces
+        tc.cache_variables["GDAL_USE_ZLIB"] = True
+        tc.cache_variables["GDAL_USE_ZLIB_INTERNAL"] = False
+        tc.cache_variables["GDAL_USE_ZSTD"] = self.options.with_zstd
 
-        tc.variables["Parquet_FOUND"] = self.options.with_arrow and self.dependencies["arrow"].options.parquet
-        tc.variables["ArrowDataset_FOUND"] = self.options.with_arrow and self.dependencies["arrow"].options.dataset_modules
+        tc.cache_variables["Parquet_FOUND"] = self.options.with_arrow and self.dependencies["arrow"].options.parquet
+        tc.cache_variables["ArrowDataset_FOUND"] = self.options.with_arrow and self.dependencies["arrow"].options.dataset_modules
 
         # General workaround for try_compile() tests in the project
         # https://github.com/conan-io/conan/issues/12180
-        tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = self.settings.build_type
-        # https://github.com/OSGeo/gdal/blob/v3.8.1/cmake/modules/packages/FindSQLite3.cmake
-        if self.options.with_sqlite3:
-            tc.variables["SQLite3_HAS_COLUMN_METADATA"] = self.dependencies["sqlite3"].options.enable_column_metadata
-            tc.variables["SQLite3_HAS_RTREE"] = self.dependencies["sqlite3"].options.enable_rtree
-            tc.variables["SQLite3_HAS_LOAD_EXTENSION"] = not self.dependencies["sqlite3"].options.omit_load_extension
-            tc.variables["SQLite3_HAS_PROGRESS_HANDLER"] = True
-            tc.variables["SQLite3_HAS_MUTEX_ALLOC"] = True
-            tc.preprocessor_definitions["SQLite3_HAS_COLUMN_METADATA"] = 1 if self.dependencies["sqlite3"].options.enable_column_metadata else 0
-            tc.preprocessor_definitions["SQLite3_HAS_RTREE"] = 1 if self.dependencies["sqlite3"].options.enable_rtree else 0
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         # https://github.com/OSGeo/gdal/blob/v3.8.0/cmake/helpers/CheckDependentLibraries.cmake#L419-L450
-        tc.variables["HAVE_JPEGTURBO_DUAL_MODE_8_12"] = (
-                self.options.with_jpeg == "libjpeg-turbo" and
-                bool(self.dependencies["libjpeg-turbo"].options.get_safe("enable12bit"))
+        tc.cache_variables["HAVE_JPEGTURBO_DUAL_MODE_8_12"] = bool(
+            self.options.with_jpeg == "libjpeg-turbo" and
+            self.dependencies["libjpeg-turbo"].options.get_safe("enable12bit")
         )
         # https://github.com/OSGeo/gdal/blob/v3.8.0/port/CMakeLists.txt
-        tc.variables["BLOSC_HAS_BLOSC_CBUFFER_VALIDATE"] = (
-                self.options.with_blosc and
-                Version(self.dependencies["c-blosc"].ref.version) >= "1.21.5"
+        tc.cache_variables["BLOSC_HAS_BLOSC_CBUFFER_VALIDATE"] = bool(
+            self.options.with_blosc and
+            Version(self.dependencies["c-blosc"].ref.version) >= "1.21.5"
         )
         # https://github.com/OSGeo/gdal/blob/v3.8.0/frmts/hdf5/CMakeLists.txt#L61-L64
-        tc.variables["GDAL_ENABLE_HDF5_GLOBAL_LOCK"] = (
-                self.options.with_hdf5 and
-                bool(self.dependencies["hdf5"].options.get_safe("threadsafe"))
+        tc.cache_variables["GDAL_ENABLE_HDF5_GLOBAL_LOCK"] = bool(
+            self.options.with_hdf5 and
+            self.dependencies["hdf5"].options.get_safe("threadsafe")
         )
         # https://github.com/OSGeo/gdal/blob/v3.8.0/frmts/hdf4/CMakeLists.txt#L28-L46
-        tc.variables["HDF4_HAS_MAXOPENFILES"] = (
-                self.options.with_hdf4 and
-                Version(self.dependencies["hdf4"].ref.version) >= "4.2.5"
+        tc.cache_variables["HDF4_HAS_MAXOPENFILES"] = bool(
+            self.options.with_hdf4 and
+            Version(self.dependencies["hdf4"].ref.version) >= "4.2.5"
         )
         # https://github.com/OSGeo/gdal/blob/4bb78aab3ae9ab5433042bc27239d1555cbe272e/cmake/helpers/CheckDependentLibraries.cmake#L301-L318
         # The detection fails for some reason
         # Setting it to non-const is compatible with all platforms
-        tc.variables["_ICONV_SECOND_ARGUMENT_IS_NOT_CONST"] = True
+        tc.cache_variables["_ICONV_SECOND_ARGUMENT_IS_NOT_CONST"] = True
         tc.generate()
 
 
@@ -554,7 +554,7 @@ class GdalConan(ConanFile):
             "qhull": "QHULL",
             # "sfcgal": "SFCGAL",
             "shapelib": "Shapelib",
-            "sqlite3": "SQLite3",
+            "sqlite3": "SQLite3-disabled",  # Use FindSQLite3.cmake with pkg-config from GDAL
             "tiledb": "TileDB",
             "xerces-c": "XercesC",
             "xz_utils": "LibLZMA",
@@ -630,6 +630,9 @@ class GdalConan(ConanFile):
 
         deps.generate()
 
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
     def _patch_sources(self):
         apply_conandata_patches(self)
         # Fix Deflate::Deflate not being correctly propagated internally.
@@ -640,11 +643,17 @@ class GdalConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
                         "JXL_THREADS", "JXL", strict=False)
         # Workaround for Parquet and ArrowDataset being provided by Arrow on CCI.
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
-                        "gdal_check_package(Parquet", "# gdal_check_package(Parquet")
-        if Version(self.version) >= "3.6.0":
+        if Version(self.version) >= "3.10.0":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibrariesArrowParquet.cmake"),
+                            "gdal_check_package(Parquet", "# gdal_check_package(Parquet")
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibrariesArrowParquet.cmake"),
+                            "gdal_check_package(ArrowDataset", "# gdal_check_package(ArrowDataset")
+        elif Version(self.version) >= "3.6.0":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
                             "gdal_check_package(ArrowDataset", "# gdal_check_package(ArrowDataset")
+        else:
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
+                            "gdal_check_package(Parquet", "# gdal_check_package(Parquet")
 
     def build(self):
         self._patch_sources()
@@ -782,7 +791,7 @@ class GdalConan(ConanFile):
         if self.options.with_rasterlite2:
             self.cpp_info.requires.extend(["librasterlite2::librasterlite2"])
         if self.options.with_qhull:
-            self.cpp_info.requires.extend(["qhull::libqhull"])
+            self.cpp_info.requires.extend(["qhull::qhull"])
         if self.options.with_spatialite:
             self.cpp_info.requires.extend(["libspatialite::libspatialite"])
         if self.options.with_sqlite3:
