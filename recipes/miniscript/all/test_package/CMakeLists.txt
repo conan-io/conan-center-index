@@ -5,4 +5,6 @@ find_package(miniscript REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE miniscript::miniscript)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+if(miniscript_VERSION VERSION_GREATER_EQUAL "1.6.2")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE MINISCRIPT_1_6)
+endif()
