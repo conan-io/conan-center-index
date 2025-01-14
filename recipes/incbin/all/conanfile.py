@@ -5,8 +5,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.50.0"
-
+required_conan_version = ">=1.65.0"
 
 class IncbinConan(ConanFile):
     name = "incbin"
@@ -50,6 +49,6 @@ class IncbinConan(ConanFile):
     def package_info(self):
         self.cpp_info.libdirs = []
         if is_msvc(self):
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+            self.buildenv_info.append("PATH", os.path.join(self.package_folder, "bin"))
         else:
             self.cpp_info.bindirs = []

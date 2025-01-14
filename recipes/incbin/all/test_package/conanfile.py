@@ -1,5 +1,4 @@
 from conan import ConanFile
-from conan.tools.microsoft import is_msvc
 from conan.tools.build import can_run, cross_building
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
