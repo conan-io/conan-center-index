@@ -99,11 +99,10 @@ class Mpg123Conan(ConanFile):
             self.tool_requires("pkgconf/2.0.3")
         if self.settings.arch in ["x86", "x86_64"]:
             self.tool_requires("yasm/1.3.0")
-        if self._settings_build.os == "Windows":
-            if is_msvc(self) == False:
-                self.win_bash = True
-                if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
-                    self.tool_requires("msys2/cci.latest")
+        if self._settings_build.os == "Windows" and not is_msvc(self):
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", default=False, check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
