@@ -1,0 +1,44 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0e7ed4b..9c4f8c7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -6,16 +6,16 @@ set(LUNASVG_VERSION_MICRO 0)
+ 
+ project(lunasvg LANGUAGES CXX VERSION ${LUNASVG_VERSION_MAJOR}.${LUNASVG_VERSION_MINOR}.${LUNASVG_VERSION_MICRO})
+ 
+-include(FetchContent)
+-FetchContent_Declare(plutovg
+-    GIT_REPOSITORY https://github.com/sammycage/plutovg.git
+-    GIT_TAG main
+-    GIT_SHALLOW ON
+-    FIND_PACKAGE_ARGS 0.0.4
+-)
+-
+-FetchContent_MakeAvailable(plutovg)
+-
++# include(FetchContent)
++# FetchContent_Declare(plutovg
++#     GIT_REPOSITORY https://github.com/sammycage/plutovg.git
++#     GIT_TAG main
++#     GIT_SHALLOW ON
++#     FIND_PACKAGE_ARGS 0.0.4
++# )
++
++# FetchContent_MakeAvailable(plutovg)
++find_package(plutovg CONFIG REQUIRED)
+ set(lunasvg_sources
+     source/lunasvg.cpp
+     source/graphics.cpp
+diff --git a/source/graphics.h b/source/graphics.h
+index 775f53c..5676f01 100644
+--- a/source/graphics.h
++++ b/source/graphics.h
+@@ -1,7 +1,7 @@
+ #ifndef LUNASVG_GRAPHICS_H
+ #define LUNASVG_GRAPHICS_H
+ 
+-#include <plutovg.h>
++#include <plutovg/plutovg.h>
+ 
+ #include <cstdint>
+ #include <algorithm>

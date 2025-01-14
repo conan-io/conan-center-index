@@ -1,4 +1,7 @@
 sources:
+  "7.10.0":
+    url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.10.0.tar.gz"
+    sha256: "d588bca36357eda8bcafd5bc1f95df1afe613fdc70c80e426fc89eecb828fc3e"
   "7.9.2":
     url: "https://github.com/jtv/libpqxx/archive/refs/tags/7.9.2.tar.gz"
     sha256: "e37d5774c39f6c802e32d7f418e88b8e530404fb54758516e884fc0ebdee6da4"
@@ -33,6 +36,10 @@ sources:
     url: "https://github.com/jtv/libpqxx/archive/6.4.8.tar.gz"
     sha256: "3f7aba951822e01f1b9f9f353702954773323dd9f9dc376ffb57cb6bbd9a7a2f"
 patches:
+  "7.10.0":
+    - patch_file: "patches/0001-cmake-fix-module.patch"
+      patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."
+      patch_type: "conan"
   "7.9.2":
     - patch_file: "patches/0001-cmake-fix-module.patch"
       patch_description: "Keep `CMAKE_MODULE_PATH` to be changed by conan."

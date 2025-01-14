@@ -24,13 +24,11 @@ class LibuvcConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_jpeg": [False, "libjpeg", "libjpeg-turbo", "mozjpeg"],
-        "jpeg_turbo": [True, False, "deprecated"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_jpeg": "libjpeg",
-        "jpeg_turbo": "deprecated",
     }
 
     def export_sources(self):
@@ -46,12 +44,6 @@ class LibuvcConan(ConanFile):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
 
-        # TODO: to remove once deprecated jpeg_turbo option removed
-        if self.options.jpeg_turbo != "deprecated":
-            self.output.warning("jpeg_turbo option is deprecated, please use with_jpeg option instead")
-            if self.options.jpeg_turbo:
-                self.options.with_jpeg == "libjpeg-turbo"
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -63,10 +55,6 @@ class LibuvcConan(ConanFile):
             self.requires("libjpeg-turbo/3.0.0")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.3")
-
-    def package_id(self):
-        # TODO: to remove once deprecated jpeg_turbo option removed
-        del self.info.options.jpeg_turbo
 
     def validate(self):
         if is_msvc(self):
