@@ -2,8 +2,10 @@ import os
 
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, replace_in_file
+from conan.tools.files import copy, get, rmdir
 from conan.tools.build import check_min_cppstd
+from conan.tools.scm import Version
+from conan.errors import ConanInvalidConfiguration
 
 required_conan_version = ">=2"
 
@@ -11,7 +13,7 @@ class LibsersiConan(ConanFile):
     name = "libsersi"
     homepage = "https://github.com/crhowell3/libsersi"
     description = "Modern C++ implementation of IEEE 1278.1a-1998"
-    topics = ("dis", "ieee", "1278.1a-1998")
+    topics = ("library", "protocol", "dis")
     url = "https://github.com/conan-io/conan-center-index"
     license = "BSD-2-Clause"
     package_type = "library"
@@ -25,7 +27,23 @@ class LibsersiConan(ConanFile):
         "fPIC": True
     }
 
-    implements = ["auto_shared_fpic"]
+    @property
+    def _min_cppstd(self):
+        return "14"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "Visual Studio": "15",
+            "msvc": "191",
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "10",
+        }
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -36,16 +54,22 @@ class LibsersiConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "libsersi-api.cmake"),
-                        "set(CMAKE_CXX_STANDARD 17)", "")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22 <4]")
 
     def validate(self):
-        check_min_cppstd(self, 14)
+        if self.settings.compiler.cppstd:
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
 
     def build(self):
         cmake = CMake(self)
