@@ -47,6 +47,10 @@ class LibsersiConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+
+        # build scripts assume CMAKE_BUILD_TYPE is a cache variable,
+        # but CMakeToolchain sets it as a regular variable otherwise
+        tc.cache_variables["CMAKE_BUILD_TYPE"] = str(self.settings.build_type)
         tc.cache_variables["BUILD_EXAMPLES"] = False
         tc.cache_variables["BUILD_TESTS"] = False
         tc.generate()
