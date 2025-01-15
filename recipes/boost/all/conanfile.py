@@ -1046,9 +1046,19 @@ class BoostConan(ConanFile):
         flags.append(f"toolset={self._toolset}")
 
         cppstd_version = cppstd_flag(self)
+        if cppstd_version[-2:].isdigit():
+            # expected -std=c++11 or /std:c++11
+            cppstd_version = cppstd_version[-2:]
+        elif cppstd_version.endswith("latest"):
+            # expected -std=c++latest or /std:c++latest
+            cppstd_version = "latest"
+        else:
+            # most probably is 1z, 2a ...
+            cppstd_version = cppstd_version[-2:]
+
         if "gnu" in cppstd_version:
             flags.append("cxxstd-dialect=gnu")
-        flags.append(f'cxxstd={cppstd_version[-2:]}')
+        flags.append(f'cxxstd={cppstd_version}')
 
         # LDFLAGS
         link_flags = []
