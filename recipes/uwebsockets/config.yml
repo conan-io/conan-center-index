@@ -3,15 +3,5 @@ versions:
     folder: all
   "20.68.0":
     folder: all
-  "20.67.0":
-    folder: all
-  "20.66.0":
-    folder: all
-  "20.65.0":
-    folder: all
-  "20.64.0":
-    folder: all
-  "20.63.0":
-    folder: all
-  "20.62.0":
+  "20.62.0": # keeping it since it's the last to provide the C-API (this needs to be reviewed)
     folder: all

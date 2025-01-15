@@ -1,7 +1,18 @@
 sources:
+  "1.4.9":
+    url: "https://github.com/QtExcel/QXlsx/archive/refs/tags/v1.4.9.zip"
+    sha256: "2582c8929163c267658ed65b5b1d3e2edff34c2dd53a6e34ea5f4d3e3f7359cd"
   "1.4.5":
     url: "https://github.com/QtExcel/QXlsx/archive/refs/tags/v1.4.5.zip"
     sha256: "eadcad2718335673f86fe20fd91e822e6c1e3624483be9d79cf79254e5426067"
-  "1.4.4":
-    url: "https://github.com/QtExcel/QXlsx/archive/refs/tags/v1.4.4.zip"
-    sha256: "3efbd6f63a1ffd521c535dce7b5a5a7e9ebd23db51e6ae8e3e2eb89796e57675"
+patches:
+  "1.4.5":
+    - patch_file: "patches/1.4.5-0001-fix-qt6-version.patch"
+      patch_description: "Fix Qt find package version"
+      patch_type: "portability"
+      patch_source: "https://github.com/QtExcel/QXlsx/commit/08c8128e9b533de15127a5cfd0fc69122a2d82d9"
+  "1.4.9":
+    - patch_file: "patches/1.4.9-0001-fix-qstring-error.patch"
+      patch_description: "Fix a QString compilation error"
+      patch_type: "backport"
+      patch_source: "https://github.com/QtExcel/QXlsx/commit/11bafef83286e79a95f17773926b62253ba53cab"
