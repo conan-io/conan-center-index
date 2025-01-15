@@ -13,7 +13,8 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def build_requirements(self):
-        self.tool_requires("cpython/<host_version>")
+        if not can_run(self):
+            self.tool_requires("cpython/<host_version>")
 
     def generate(self):
         deps = CMakeDeps(self)
