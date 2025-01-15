@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.build import can_run, cross_building
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.microsoft import is_msvc
 import os
 
 
@@ -17,17 +18,12 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str)
 
     def build_requirements(self):
-        if cross_building(self) and hasattr(self, "settings_build"):
-            self.tool_requires(self.tested_reference_str) # incbin_tool
+        if is_msvc(self):
+            self.tool_requires(self.tested_reference_str)
 
     def generate(self):
-        VirtualRunEnv(self).generate()
-        if cross_building(self) and hasattr(self, "settings_build"):
+        if is_msvc(self):
             VirtualBuildEnv(self).generate()
-        else:
-            VirtualRunEnv(self).generate(scope="build")
-        tc = CMakeToolchain(self)
-        tc.generate()
 
     def build(self):
         cmake = CMake(self)

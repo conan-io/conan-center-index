@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.cmake import CMake
+from conan.tools.cmake import CMake, CMakeToolchain
 from conan.tools.files import get, copy
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
@@ -21,9 +21,19 @@ class IncbinConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def configure(self):
+        self._is_msvc = is_msvc(self)
+
+    def package_id(self):
+        if self._is_msvc:
+            self.info.settings.rm_safe("compiler.libcxx")
+            self.info.settings.rm_safe("compiler.cppstd")
+        else:
+            self.info.clear()
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        if is_msvc(self):
+        if self._is_msvc:
             with open("CMakeLists.txt", "w") as f:
                 f.write("cmake_minimum_required(VERSION 3.0)\n"
                         "project(incbin_tool)\n"
@@ -31,7 +41,9 @@ class IncbinConan(ConanFile):
                         "install(TARGETS incbin_tool)")
 
     def build(self):
-        if is_msvc(self):
+        if self._is_msvc:
+            tc = CMakeToolchain(self)
+            tc.generate()
             cmake = CMake(self)
             cmake.configure()
             cmake.build()
@@ -42,13 +54,9 @@ class IncbinConan(ConanFile):
         copy(self, "incbin.h", dst=os.path.join(self.package_folder, "include"), src=self.source_folder)
         copy(self, "incbin_tool.exe", dst=os.path.join(self.package_folder, "bin"), src=self.build_folder, keep_path=False)
 
-    def package_id(self):
-        if not is_msvc(self):
-            self.info.clear()
-
     def package_info(self):
         self.cpp_info.libdirs = []
-        if is_msvc(self):
+        if self._is_msvc:
             self.buildenv_info.append("PATH", os.path.join(self.package_folder, "bin"))
         else:
             self.cpp_info.bindirs = []
