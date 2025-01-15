@@ -1,14 +1,12 @@
 from conan import ConanFile
-from conan.tools.build import can_run, cross_building
-from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.build import can_run
+from conan.tools.cmake import cmake_layout, CMake
 from conan.tools.microsoft import is_msvc
 import os
 
-
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv"
+    generators = "CMakeDeps", "CMakeToolchain"
     test_type = "explicit"
 
     def layout(self):
@@ -19,11 +17,7 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         if is_msvc(self):
-            self.tool_requires(self.tested_reference_str)
-
-    def generate(self):
-        if is_msvc(self):
-            VirtualBuildEnv(self).generate()
+            self.tool_requires(self.tested_reference_str) # incbin_tool
 
     def build(self):
         cmake = CMake(self)

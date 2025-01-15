@@ -24,18 +24,11 @@ class IncbinConan(ConanFile):
     def configure(self):
         self._is_msvc = is_msvc(self)
 
-    def package_id(self):
-        if self._is_msvc:
-            self.info.settings.rm_safe("compiler.libcxx")
-            self.info.settings.rm_safe("compiler.cppstd")
-        else:
-            self.info.clear()
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         if self._is_msvc:
             with open("CMakeLists.txt", "w") as f:
-                f.write("cmake_minimum_required(VERSION 3.0)\n"
+                f.write("cmake_minimum_required(VERSION 3.10)\n"
                         "project(incbin_tool)\n"
                         "add_executable(incbin_tool incbin.c)\n"
                         "install(TARGETS incbin_tool)")
@@ -56,7 +49,5 @@ class IncbinConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libdirs = []
-        if self._is_msvc:
-            self.buildenv_info.append("PATH", os.path.join(self.package_folder, "bin"))
-        else:
+        if not self._is_msvc:
             self.cpp_info.bindirs = []

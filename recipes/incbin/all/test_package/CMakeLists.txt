@@ -13,7 +13,7 @@ if(MSVC)
     add_custom_command(OUTPUT data.c
             COMMAND incbin_tool
             ARGS ${CMAKE_CURRENT_LIST_DIR}/test_package.c -p g_ -Ssnakecase -o ${CMAKE_BINARY_DIR}/data.c
-            WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
             COMMENT "Generating resources with incbin_tool...")
     target_sources(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/data.c)
 endif()
