@@ -46,6 +46,7 @@ class GodotCppConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("scons/4.3.0")
+        self.tool_requires("cpython/[~3.12]")
 
     @property
     def _bits(self):
