@@ -1,14 +1,11 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -45,37 +42,7 @@ class GodotCppConan(ConanFile):
             self.info.settings.build_type = "Release"
 
     def validate(self):
-        minimal_cpp_standard = 14
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, minimal_cpp_standard)
-
-        minimal_version = {
-            "gcc": "5",
-            "clang": "4",
-            "apple-clang": "10",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
-        compiler = str(self.settings.compiler)
-        if compiler not in minimal_version:
-            self.output.warning(
-                f"{self.name} recipe lacks information about the {compiler} compiler standard version support"
-            )
-            self.output.warning(
-                f"{self.name} requires a compiler that supports at least C++{minimal_cpp_standard}"
-            )
-            return
-
-        version = Version(self.settings.compiler.version)
-        if version < minimal_version[compiler]:
-            if compiler in ["apple-clang", "clang"]:
-                raise ConanInvalidConfiguration(
-                    f"{self.name} requires a clang version that supports the '-Og' flag"
-                )
-            raise ConanInvalidConfiguration(
-                f"{self.name} requires a compiler that supports at least C++{minimal_cpp_standard}"
-            )
+        check_min_cppstd(self, 14)
 
     def build_requirements(self):
         self.tool_requires("scons/4.3.0")
@@ -128,9 +95,6 @@ class GodotCppConan(ConanFile):
         VirtualBuildEnv(self).generate()
 
     def build(self):
-        self.run("python  --version")
-        if is_apple_os(self):
-            self.run("which python")
         self.run("scons  --version")
         self.run(" ".join([
             "scons",
