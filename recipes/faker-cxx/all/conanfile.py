@@ -77,7 +77,8 @@ class FakerCXXConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["USE_SYSTEM_DEPENDENCIES"] = True
+        if Version(self.version) < "4.0.0":
+            tc.variables["USE_SYSTEM_DEPENDENCIES"] = True
         tc.variables["BUILD_TESTING"] = False
         tc.variables["WARNINGS_AS_ERRORS"] = False
         tc.variables["WITH_STD_FORMAT"] = self.options.with_std_format
