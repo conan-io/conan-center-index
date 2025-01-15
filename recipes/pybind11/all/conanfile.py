@@ -1,10 +1,10 @@
-from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain
-from conan.tools.layout import basic_layout
-from conan.tools.files import get, copy, replace_in_file, rm, rmdir
-from conan.tools.scm import Version
 import os
 
+from conan import ConanFile
+from conan.tools.cmake import CMake, CMakeToolchain
+from conan.tools.files import get, copy, replace_in_file, rm, rmdir
+from conan.tools.layout import basic_layout
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.52.0"
 
@@ -25,6 +25,12 @@ class PyBind11Conan(ConanFile):
 
     def package_id(self):
         self.info.clear()
+
+    def requirements(self):
+        self.requires("cpython/[~3.12]", transitive_headers=True, transitive_libs=True)
+
+    def build_requirements(self):
+        self.tool_requires("cpython/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -57,6 +63,14 @@ class PyBind11Conan(ConanFile):
         replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11Common.cmake"),
                               "add_library(",
                               "# add_library(")
+
+        # Force find_package(Python) with the correct components to be re-run by pybind11
+        replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11NewTools.cmake"),
+                        "if(NOT Python_FOUND AND NOT Python3_FOUND)",
+                        "if(TRUE)")
+        replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11NewTools.cmake"),
+                        "Python 3.7 REQUIRED",
+                        "Python3 REQUIRED")
 
     def package_info(self):
         cmake_base_path = os.path.join("lib", "cmake", "pybind11")

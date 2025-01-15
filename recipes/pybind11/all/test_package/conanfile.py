@@ -1,11 +1,9 @@
-from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import Environment, VirtualRunEnv
-from conan.tools.build import can_run
-
 import os
-from pathlib import PurePath
-import sys
+
+from conan import ConanFile
+from conan.tools.build import can_run
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import Environment
 
 
 class TestPackageConan(ConanFile):
@@ -14,23 +12,22 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
+    def build_requirements(self):
+        self.tool_requires("cpython/<host_version>")
+
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
 
-        toolchain = CMakeToolchain(self)
-        # Used by FindPython.cmake in CMake
-        toolchain.variables["Python_EXECUTABLE"] = PurePath(self._python_interpreter).as_posix()
-        # Used by FindPythonLibsNew.cmake in pybind11
-        toolchain.variables["PYTHON_EXECUTABLE"] = PurePath(self._python_interpreter).as_posix()
-        toolchain.generate()
+        tc = CMakeToolchain(self)
+        if not can_run(self):
+            tc.variables["Python_EXECUTABLE"] = os.path.join(self.dependencies.build["cpython"].package_folder, "bin", "python").replace("\\", "/")
+        tc.generate()
 
         env = Environment()
         env.append_path("PYTHONPATH", os.path.join(self.build_folder, self.cpp.build.libdirs[0]))
         env.vars(self, scope="run").save_script("testrun")
 
-        run = VirtualRunEnv(self)
-        run.generate()
 
     def layout(self):
         cmake_layout(self)
@@ -40,13 +37,7 @@ class TestPackageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
-    @property
-    def _python_interpreter(self):
-        if getattr(sys, "frozen", False):
-            return "python"
-        return sys.executable
-
     def test(self):
         if can_run(self):
             module_path = os.path.join(self.source_folder, "test.py")
-            self.run(f"{self._python_interpreter} \"{module_path}\"", env="conanrun")
+            self.run(f'python "{module_path}"', env="conanrun")
