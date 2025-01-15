@@ -69,8 +69,7 @@ class PyBind11Conan(ConanFile):
                         "if(NOT Python_FOUND AND NOT Python3_FOUND)",
                         "if(TRUE)")
         replace_in_file(self, os.path.join(self.package_folder, "lib", "cmake", "pybind11", "pybind11NewTools.cmake"),
-                        "Python 3.7 REQUIRED",
-                        "Python3 REQUIRED")
+                        "Python 3.", "Python3 3.")
 
     def package_info(self):
         cmake_base_path = os.path.join("lib", "cmake", "pybind11")
