@@ -14,8 +14,6 @@ class TestPackageConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cpython/<host_version>")
-        # Required for Development.Module in find_package(Python)
-        self.tool_requires("cmake/[>=3.18 <4]")
 
     def layout(self):
         cmake_layout(self)
@@ -23,7 +21,7 @@ class TestPackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         if not can_run(self):
-            tc.variables["Python_NATIVE_EXECUTABLE"] = os.path.join(self.dependencies.build["cpython"].package_folder, "bin", "python").replace("\\", "/")
+            tc.variables["Python_EXECUTABLE"] = os.path.join(self.dependencies.build["cpython"].package_folder, "bin", "python").replace("\\", "/")
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
