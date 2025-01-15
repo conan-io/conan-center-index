@@ -382,7 +382,6 @@ class BoostConan(ConanFile):
         if self.options.header_only:
             self.options.rm_safe("shared")
             self.options.rm_safe("fPIC")
-            self.package_type = "header-library"
         elif self.options.shared:
             self.options.rm_safe("fPIC")
 
