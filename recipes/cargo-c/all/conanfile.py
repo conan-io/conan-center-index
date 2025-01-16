@@ -15,7 +15,7 @@ class CargoCConan(ConanFile):
     name = "cargo-c"
     description = "Rust cargo applet to build and install C-ABI compatible dynamic and static libraries"
     license = "MIT"
-    homepage = "https://unicode-org.github.io/icu4x/cppdoc/"
+    homepage = "https://github.com/lu-zero/cargo-c"
     url = "https://github.com/conan-io/conan-center-index"
     topics = ("rust", "cargo")
     package_type = "application"
