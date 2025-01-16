@@ -25,6 +25,7 @@ class CycloneDDSConan(ConanFile):
         "fPIC": [True, False],
         "with_ssl": [True, False],
         "with_shm" : [True, False],
+        "with_lto": [True, False],
         "enable_security" : [True, False],
         "enable_discovery" : [True, False],
     }
@@ -35,6 +36,7 @@ class CycloneDDSConan(ConanFile):
         "with_shm": False,
         "enable_security": False,
         "enable_discovery": True,
+        "with_lto": True,
     }
 
     short_paths = True
@@ -77,7 +79,7 @@ class CycloneDDSConan(ConanFile):
 
     def requirements(self):
         if self.options.with_shm:
-            self.requires("iceoryx/2.0.5")
+            self.requires("iceoryx/2.0.6")
         if self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]")
 
@@ -111,6 +113,7 @@ class CycloneDDSConan(ConanFile):
         # variables which effects build
         tc.variables["ENABLE_SSL"] = self.options.with_ssl
         tc.variables["ENABLE_SHM"] = self.options.with_shm
+        tc.variables["ENABLE_LTO"] = self.options.with_lto
         tc.variables["ENABLE_SECURITY"] = self.options.enable_security
         tc.variables["ENABLE_TYPE_DISCOVERY"] = self.options.enable_discovery
         tc.variables["ENABLE_TOPIC_DISCOVERY"] = self.options.enable_discovery
