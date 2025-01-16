@@ -99,7 +99,7 @@ class ZenohCConan(ConanFile):
 
         env = Environment()
         # Ensure the correct linker is used, especially when cross-compiling
-        target_upper = self.conf.get("user.rust:target", check_type=str).upper().replace("-", "_")
+        target_upper = self.conf.get("user.rust:target_host", check_type=str).upper().replace("-", "_")
         cc = GnuToolchain(self).extra_env.vars(self)["CC"]
         env.define_path(f"CARGO_TARGET_{target_upper}_LINKER", cc)
         # Don't add the Cargo dependencies to a global Cargo cache
