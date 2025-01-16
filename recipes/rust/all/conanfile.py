@@ -148,10 +148,14 @@ class RustConan(ConanFile):
         target_target = self._target_rust_target
         if target_target and target_target != host_target:
             self.buildenv_info.define("CARGO_BUILD_TARGET", target_target)
+            # Host and build in the Conan sense, which is the opposite of Rust's terminology
+            self.conf_info.define("user.rust:target_host", target_target)
+            self.conf_info.define("user.rust:target_build", host_target)
             # FIXME: Conan currently does not provide a way to get the actual compiler path
-            cc = str(self.settings_target.compiler)
-            target_upper = host_target.upper().replace("-", "_")
-            self.buildenv_info.define_path(f"CARGO_TARGET_{target_upper}_LINKER", cc)
-            self.conf_info.define("user.rust:target", target_target)
+            # cc = str(self.settings_target.compiler)
+            # target = host_target.replace("-", "_")
+            # target_upper = host_target.upper().replace("-", "_")
+            # self.buildenv_info.define_path(f"CARGO_TARGET_{target_upper}_LINKER", cc)
+            # self.buildenv_info.define_path(f"CC_{target}", cc)
         else:
-            self.conf_info.define("user.rust:target", host_target)
+            self.conf_info.define("user.rust:target_host", host_target)
