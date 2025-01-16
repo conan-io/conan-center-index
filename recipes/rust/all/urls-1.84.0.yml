@@ -1,0 +1,335 @@
+rustc:
+  aarch64-apple-darwin:
+    sha256: 506dfc14115d2efa96fad9fa542d67027525aa46882a8e1ffb41e891737b689b
+    url: https://static.rust-lang.org/dist/rust-1.84.0-aarch64-apple-darwin.tar.gz
+  aarch64-pc-windows-msvc:
+    sha256: 99787ed2a276423d72388a4fc08c9274a25460cbe2c1b37a94ec92bd71add02e
+    url: https://static.rust-lang.org/dist/rust-1.84.0-aarch64-pc-windows-msvc.tar.gz
+  aarch64-unknown-linux-gnu:
+    sha256: 282d281cb389bdc2c0671c2a74eeda46e010a158810d2137c3a948ae6c713543
+    url: https://static.rust-lang.org/dist/rust-1.84.0-aarch64-unknown-linux-gnu.tar.gz
+  aarch64-unknown-linux-musl:
+    sha256: 1055e2c6f8e3823f5213eb55eb77e63cf6b9bd6eb243897dae7259f4d8ab8c54
+    url: https://static.rust-lang.org/dist/rust-1.84.0-aarch64-unknown-linux-musl.tar.gz
+  arm-unknown-linux-gnueabi:
+    sha256: 6dd71f55bee7015aa6bfe6ac93003455c3e886684b8b1df5a21db4ebcd7b2a56
+    url: https://static.rust-lang.org/dist/rust-1.84.0-arm-unknown-linux-gnueabi.tar.gz
+  arm-unknown-linux-gnueabihf:
+    sha256: e571a4e57e60360e0783cd9d4bcc10290394cfd312ede5e4fcc81aebd0625307
+    url: https://static.rust-lang.org/dist/rust-1.84.0-arm-unknown-linux-gnueabihf.tar.gz
+  armv7-unknown-linux-gnueabihf:
+    sha256: b63040017c831aa607d18287d8af6548daca038e9bb95030e0e1f0d45c9c471f
+    url: https://static.rust-lang.org/dist/rust-1.84.0-armv7-unknown-linux-gnueabihf.tar.gz
+  i686-pc-windows-gnu:
+    sha256: bfa8ab887cbdedf9c6bf5d9433f01393c1666a1fd32e6b9d583b0abd36a7488b
+    url: https://static.rust-lang.org/dist/rust-1.84.0-i686-pc-windows-gnu.tar.gz
+  i686-pc-windows-msvc:
+    sha256: 36ade05cfd99cf5802fbb46ca1ed42f70cfd1546a76644f5477883279fe8af2e
+    url: https://static.rust-lang.org/dist/rust-1.84.0-i686-pc-windows-msvc.tar.gz
+  i686-unknown-linux-gnu:
+    sha256: 3f9fea653bc68139fa1476f9b00ec55a2637650960872029cfc91ea729d0fd82
+    url: https://static.rust-lang.org/dist/rust-1.84.0-i686-unknown-linux-gnu.tar.gz
+  loongarch64-unknown-linux-gnu:
+    sha256: 90c7d7a2845e91d9ee8d74cdb2bc1f7360f311fb8a6c0b2225726d94614e68bf
+    url: https://static.rust-lang.org/dist/rust-1.84.0-loongarch64-unknown-linux-gnu.tar.gz
+  powerpc-unknown-linux-gnu:
+    sha256: f857dba40dee9b69c9d5a414dbbec1a9e53e24bddcdce267192eac9919d93b89
+    url: https://static.rust-lang.org/dist/rust-1.84.0-powerpc-unknown-linux-gnu.tar.gz
+  powerpc64-unknown-linux-gnu:
+    sha256: b70bf56a0962429c7364d5ef0858fe11c9ff8e76ff5f91b0a88a782a1392c4ae
+    url: https://static.rust-lang.org/dist/rust-1.84.0-powerpc64-unknown-linux-gnu.tar.gz
+  powerpc64le-unknown-linux-gnu:
+    sha256: 26a60519303194e245968b2d34d405a49e20bdb86b240ab230e973e03c283c86
+    url: https://static.rust-lang.org/dist/rust-1.84.0-powerpc64le-unknown-linux-gnu.tar.gz
+  riscv64gc-unknown-linux-gnu:
+    sha256: 4534d86f55f1851c90097bfc03e38ab88ba6893940a7dcb6dce9139f0aa377fa
+    url: https://static.rust-lang.org/dist/rust-1.84.0-riscv64gc-unknown-linux-gnu.tar.gz
+  s390x-unknown-linux-gnu:
+    sha256: 76099d34b8e5ae4d47e55e7bd472918cde2c2945b97dca926c739082c051ab2b
+    url: https://static.rust-lang.org/dist/rust-1.84.0-s390x-unknown-linux-gnu.tar.gz
+  x86_64-apple-darwin:
+    sha256: eafe087277ad8d7473f978d0779b4504d5b8064a781784aebd3e33c2541a13ce
+    url: https://static.rust-lang.org/dist/rust-1.84.0-x86_64-apple-darwin.tar.gz
+  x86_64-pc-windows-gnu:
+    sha256: 468c3bf6cbb6dd23f2cdf9e1f3cedad431b9d77ef90a1579af9f86861cea412e
+    url: https://static.rust-lang.org/dist/rust-1.84.0-x86_64-pc-windows-gnu.tar.gz
+  x86_64-pc-windows-msvc:
+    sha256: 39cb7059ebfc88b79be8341f84bfef4a356ba0f38f41017fffe62ccbe2402a85
+    url: https://static.rust-lang.org/dist/rust-1.84.0-x86_64-pc-windows-msvc.tar.gz
+  x86_64-unknown-freebsd:
+    sha256: b484de5908612b3ea132bdd76afde1c980c6bf70cf6f1b27e13d74b3729136b9
+    url: https://static.rust-lang.org/dist/rust-1.84.0-x86_64-unknown-freebsd.tar.gz
+  x86_64-unknown-illumos:
+    sha256: 3b6815d6e3dc92ffc187bba9b64ec38bf37c13db2a3ffb04ba51b6d36a361958
+    url: https://static.rust-lang.org/dist/rust-1.84.0-x86_64-unknown-illumos.tar.gz
+  x86_64-unknown-linux-gnu:
+    sha256: de2b041a6e62ec2c37c517eb58518f68fde5fc2f076218393ae06145d92a5682
+    url: https://static.rust-lang.org/dist/rust-1.84.0-x86_64-unknown-linux-gnu.tar.gz
+  x86_64-unknown-linux-musl:
+    sha256: 0e98d242074f566f72bf48dfbd6c8457f6cbc02be7e8e8dac04347ad15ad3f41
+    url: https://static.rust-lang.org/dist/rust-1.84.0-x86_64-unknown-linux-musl.tar.gz
+  x86_64-unknown-netbsd:
+    sha256: dbce07864779ad55bf99622feaf8957d02cdfe0350d07513b2ee4e20e2a5f602
+    url: https://static.rust-lang.org/dist/rust-1.84.0-x86_64-unknown-netbsd.tar.gz
+stdlib:
+  aarch64-apple-darwin:
+    sha256: 0a0626661ac576a67da46af73e2e74d6e42d79cb2f54321b08ab81a86eab94a0
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-aarch64-apple-darwin.tar.gz
+  aarch64-apple-ios:
+    sha256: 97187cb3ce3ccee2befc68e40423606b041e72c5b11f251a028075ac7e33e065
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-aarch64-apple-ios.tar.gz
+  aarch64-apple-ios-sim:
+    sha256: 326ec821c7967797a2173a84353e1423a1b3071f52facd988af05b1e5824faea
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-aarch64-apple-ios-sim.tar.gz
+  aarch64-linux-android:
+    sha256: 210576203cc79ecf17e987673060aa0fb5df85b31d54f1bac0e51f591a26a4d1
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-aarch64-linux-android.tar.gz
+  aarch64-pc-windows-gnullvm:
+    sha256: 7c45d37a0e0883b7f40a6398ed5e547c749f8261d7f7475e438384d055a134f9
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-aarch64-pc-windows-gnullvm.tar.gz
+  aarch64-pc-windows-msvc:
+    sha256: 4a44d1d4f5024e8479d06aca32e628a82aee02f94d54222e2d5e6b6219d97f1e
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-aarch64-pc-windows-msvc.tar.gz
+  aarch64-unknown-fuchsia:
+    sha256: bbb84f1dedb70c094580355bc6ae7b49b151ca5f6c888d4fb5620c4077268e35
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-aarch64-unknown-fuchsia.tar.gz
+  aarch64-unknown-linux-gnu:
+    sha256: 11a698df87efacfb472b32e91fc39df0261b9b7acda48ea01a7f296424cf5f5d
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-aarch64-unknown-linux-gnu.tar.gz
+  aarch64-unknown-linux-musl:
+    sha256: 31bbac8bbe4d733f72f96290630676cb3297035b11bd618616dfd64a93a13f2d
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-aarch64-unknown-linux-musl.tar.gz
+  aarch64-unknown-linux-ohos:
+    sha256: b302c530f35a3391b8e01c198e09512f22f3087ceac944bc73e7980fc4ddba35
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-aarch64-unknown-linux-ohos.tar.gz
+  aarch64-unknown-none:
+    sha256: 9e2368fb1207c3b429db693fd0099ae250ff6e9c391dec6200b286a7acf166e7
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-aarch64-unknown-none.tar.gz
+  aarch64-unknown-none-softfloat:
+    sha256: ac9ccded250ad6f757d19ca07d492d43f417dbbf6229c5ee6a2940fc92d47dc8
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-aarch64-unknown-none-softfloat.tar.gz
+  aarch64-unknown-uefi:
+    sha256: 14bb9f716560a5eec0e8fb09e4446bc127af8d33a430cd71f861dd83cbbc6207
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-aarch64-unknown-uefi.tar.gz
+  arm-linux-androideabi:
+    sha256: ab4f38c1b440bf444eea502ae6e5ba297ecc55dc8e2585adfdd7ac3970f15e0a
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-arm-linux-androideabi.tar.gz
+  arm-unknown-linux-gnueabi:
+    sha256: 7cd501d1ee2f10fa048e0aa0825085251009eb0e546b19499987d5b17b6aea86
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-arm-unknown-linux-gnueabi.tar.gz
+  arm-unknown-linux-gnueabihf:
+    sha256: 02e88bfe926d25bfbba357fc017b2e6e03587d2863e5c1639b48c125f2903157
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-arm-unknown-linux-gnueabihf.tar.gz
+  arm-unknown-linux-musleabi:
+    sha256: a023c77dce5f3b9758a85babef759ccfb4a862bad80da1e10f69d00902de36ba
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-arm-unknown-linux-musleabi.tar.gz
+  arm-unknown-linux-musleabihf:
+    sha256: 65e2072d49aaf24a12cff5d31f5321eaf38fe92c3bc08e471c892635c2e33063
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-arm-unknown-linux-musleabihf.tar.gz
+  armebv7r-none-eabi:
+    sha256: f5f53d8ca2d392286361b2e516fd9d74b650b60694a3a6c0fc72d8c7f7e5a689
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-armebv7r-none-eabi.tar.gz
+  armebv7r-none-eabihf:
+    sha256: 1bc841bcca521905e4c55dcbd42c96a88830697e9ae77252fbb4bbc173bf19e8
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-armebv7r-none-eabihf.tar.gz
+  armv5te-unknown-linux-gnueabi:
+    sha256: e2919a98419d7ea7763b198501378c1e4bcaeb7b8a7a41d5d46117f3adbc71b5
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-armv5te-unknown-linux-gnueabi.tar.gz
+  armv5te-unknown-linux-musleabi:
+    sha256: 54c588181d8a38f1ced59eaea076aaae8cb76a672c2538c186b879f26283da56
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-armv5te-unknown-linux-musleabi.tar.gz
+  armv7-linux-androideabi:
+    sha256: b6e1947d55d09e15cd1504641e6c340e7415e6a59a11739c7d6c8f5890465025
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-armv7-linux-androideabi.tar.gz
+  armv7-unknown-linux-gnueabi:
+    sha256: 5375124e7a90dc6d64997dd5da52a7d88eb6fae1a950bc125d8b4fb260ac0f53
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-armv7-unknown-linux-gnueabi.tar.gz
+  armv7-unknown-linux-gnueabihf:
+    sha256: 44a93e9c8ce63dc9cfe4417ae015b9de3aa6538689e37ef1b4a513957b09d536
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-armv7-unknown-linux-gnueabihf.tar.gz
+  armv7-unknown-linux-musleabi:
+    sha256: 6c8fd72175959e4321179baea08315d4d5b32a5d92ecc07b23aa1e3bec6587eb
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-armv7-unknown-linux-musleabi.tar.gz
+  armv7-unknown-linux-musleabihf:
+    sha256: db1eb3bbb54438acc263faf40ac21ccdfef124683132c1842ab9f027a4677fad
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-armv7-unknown-linux-musleabihf.tar.gz
+  armv7-unknown-linux-ohos:
+    sha256: 17c8f5ed01836a83c5b80cd8c6f65f40a0e540d2d8ca7bcf9f6bc649110cbdd3
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-armv7-unknown-linux-ohos.tar.gz
+  armv7a-none-eabi:
+    sha256: 34d02cfb66a60f4550395e6655c853f9ea6cdd169b5148bc0e273acd5081dcfd
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-armv7a-none-eabi.tar.gz
+  armv7r-none-eabi:
+    sha256: 6a81015a0ddae96ad271ce95df7c13c19deb25db3898f01071bdbe596addc3e8
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-armv7r-none-eabi.tar.gz
+  armv7r-none-eabihf:
+    sha256: 2e66baeb2c81f258ab9db191810e38538a3674fb7c84a9722bbe973d92cf7a03
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-armv7r-none-eabihf.tar.gz
+  i586-pc-windows-msvc:
+    sha256: 76d7e7802a6183a95c5224d9a9ccb2f5ca5251c74db6949768fe5582bbd2aaf1
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-i586-pc-windows-msvc.tar.gz
+  i586-unknown-linux-gnu:
+    sha256: b1ab3d8c46c2b776ec86594ea88f4699f4540fda87c07fbe5ea653490851ffcf
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-i586-unknown-linux-gnu.tar.gz
+  i586-unknown-linux-musl:
+    sha256: d541de5d00e420d38fb6f10b84de50db73bb845e6e7115dfb99e41efcb23f3ba
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-i586-unknown-linux-musl.tar.gz
+  i686-linux-android:
+    sha256: 1c608948a1be6356a4763e732474e3ebc27e4d786fb7d1ad407b6d36ff31b741
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-i686-linux-android.tar.gz
+  i686-pc-windows-gnu:
+    sha256: 368913ba0cbfe273ed2347ca8a5ced2b93a95405e379f868f63a4c228eb2f2ea
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-i686-pc-windows-gnu.tar.gz
+  i686-pc-windows-msvc:
+    sha256: 3af23f34bfd68d8c9e2bd32f40a88cf2b76b98a6ec331dd0161b9dc48eb65773
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-i686-pc-windows-msvc.tar.gz
+  i686-unknown-freebsd:
+    sha256: f4ca55b89f39d05ab852de45b8bc62f4bec8b7b257c7392f23690145a95642e9
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-i686-unknown-freebsd.tar.gz
+  i686-unknown-linux-gnu:
+    sha256: 81fb46f365f0dca15ef3ac7f8d18ed78a292e5e51c19de21a19294daf1c4f32b
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-i686-unknown-linux-gnu.tar.gz
+  i686-unknown-linux-musl:
+    sha256: 725199040c50c7db7a840228f64e9e4f5b4117aa2ed62e2af0be9d0c02fa5671
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-i686-unknown-linux-musl.tar.gz
+  i686-unknown-uefi:
+    sha256: 48b5461d01d9c38d49310c8bf170eaa132dde2b749576f344d407b7008145445
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-i686-unknown-uefi.tar.gz
+  loongarch64-unknown-linux-gnu:
+    sha256: a212a96ebf70f9a56162196c5bcc553fcb1a236553c424fd11c0335c5376f000
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-loongarch64-unknown-linux-gnu.tar.gz
+  loongarch64-unknown-none:
+    sha256: ef5789315d2c89c63d947221e5a3d5d2eb0b6c1ff2d5464122fe3c378b263e0c
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-loongarch64-unknown-none.tar.gz
+  loongarch64-unknown-none-softfloat:
+    sha256: b5670cbbc2f6257f0b78abf0ab81a6752e11293c22c1442fc240ba1f5639c092
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-loongarch64-unknown-none-softfloat.tar.gz
+  nvptx64-nvidia-cuda:
+    sha256: d407d2c4e7fad3212787ed32740575971e6d8fce81d11a598c8e999a76ff388c
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-nvptx64-nvidia-cuda.tar.gz
+  powerpc-unknown-linux-gnu:
+    sha256: 3f91b82e8e78dbbbb3b61e39428c151afd887bdabc595344475563f43b1bf04e
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-powerpc-unknown-linux-gnu.tar.gz
+  powerpc64-unknown-linux-gnu:
+    sha256: 5a48ffbd7270cef21555641dc932f997543d34b026828a3231603518e34a669f
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-powerpc64-unknown-linux-gnu.tar.gz
+  powerpc64le-unknown-linux-gnu:
+    sha256: d1dacba52577c23210b417dafd7c41bc36e9ba1b83702c6c7b851e9f06f5ac07
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-powerpc64le-unknown-linux-gnu.tar.gz
+  riscv32i-unknown-none-elf:
+    sha256: 6118fc5f11a16ba380a90c6ffc4c0326d6dbdf30490b923e277dee1174099e7f
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-riscv32i-unknown-none-elf.tar.gz
+  riscv32im-unknown-none-elf:
+    sha256: c6179c399020f4eac03f20624c27aff749f2a9d451b6b954cf3e864478687f3c
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-riscv32im-unknown-none-elf.tar.gz
+  riscv32imac-unknown-none-elf:
+    sha256: 81d6ec63779b7d4370d7a48e5cf44ae0e6b515cdd49158ba8da1c837c98386e3
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-riscv32imac-unknown-none-elf.tar.gz
+  riscv32imc-unknown-none-elf:
+    sha256: 8202c761abb1650a2cc69520d919a58a4f86b0ecf054c95d27f3102e4132699e
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-riscv32imc-unknown-none-elf.tar.gz
+  riscv64gc-unknown-linux-gnu:
+    sha256: 8bffde598c149881bb03883469a442f95ecc58e3a05e4b6dd2cdf973fb0a5f9e
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-riscv64gc-unknown-linux-gnu.tar.gz
+  riscv64gc-unknown-none-elf:
+    sha256: 37a24186a8ff0ba8d06727562aaff220a593c2a8242410e2dd6dd2f82c73ad5a
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-riscv64gc-unknown-none-elf.tar.gz
+  riscv64imac-unknown-none-elf:
+    sha256: 4dcc04f0b05beb546f74ed076c63283b121699338bfa3d27782f1e7122eed14f
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-riscv64imac-unknown-none-elf.tar.gz
+  s390x-unknown-linux-gnu:
+    sha256: 5d0420ad2685a90fc83f46cb075d72a2eca9603ce92da5282558e2a32fa192f1
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-s390x-unknown-linux-gnu.tar.gz
+  sparc64-unknown-linux-gnu:
+    sha256: fdbd4028e5fdf43acb3761ba402e6d9e0ed3f872222481db60e374545e08a74a
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-sparc64-unknown-linux-gnu.tar.gz
+  sparcv9-sun-solaris:
+    sha256: 92cff117ef26b6d44f918223de4dc0a16bc90f7cb68a12afcba8dd98b1f0343d
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-sparcv9-sun-solaris.tar.gz
+  thumbv6m-none-eabi:
+    sha256: 4e13683d108b9d50ba44ab64a8e323231756088fab1c1f96f93d771c40f73b8d
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-thumbv6m-none-eabi.tar.gz
+  thumbv7em-none-eabi:
+    sha256: 8add5a38a287294a282db0de480dab914bb328663dcc24cbd8975d41d5963a8c
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-thumbv7em-none-eabi.tar.gz
+  thumbv7em-none-eabihf:
+    sha256: 4b11b6a973a77c2dad9f8aa34a1dbc99b59acaff3ed481d6cc11fb239193fdc1
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-thumbv7em-none-eabihf.tar.gz
+  thumbv7m-none-eabi:
+    sha256: 7820cd9f7c691527feb68088582a5fb8200983a18edd9015b2a580199d0ec807
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-thumbv7m-none-eabi.tar.gz
+  thumbv7neon-linux-androideabi:
+    sha256: fb44a1dca4ce8c8674ccca8d5b89618bb159e8ecba0eb7cb9ee80df0ea1029ae
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-thumbv7neon-linux-androideabi.tar.gz
+  thumbv7neon-unknown-linux-gnueabihf:
+    sha256: b66f640db796302c28732d56a505dd6ae6effa27fb0d125ef28d254f189a3e5f
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-thumbv7neon-unknown-linux-gnueabihf.tar.gz
+  thumbv8m.base-none-eabi:
+    sha256: bfa6573cbb2624c76985ba18e82c98b673cb9f382ee05a012b85d1dfc8ed3c8b
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-thumbv8m.base-none-eabi.tar.gz
+  thumbv8m.main-none-eabi:
+    sha256: be4170d0346dd715274048a47720c19cf3bafbf013b4ffa435ae9fc556840326
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-thumbv8m.main-none-eabi.tar.gz
+  thumbv8m.main-none-eabihf:
+    sha256: e611edf2f24615eb856a0d606cc5fc5410705086d2082295a3dcc1dcfef96fa6
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-thumbv8m.main-none-eabihf.tar.gz
+  wasm32-unknown-emscripten:
+    sha256: 767d06523ae6a0aa2cb8627eb890202c6e43434e01be9a1fad5c8613edeb8e26
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-wasm32-unknown-emscripten.tar.gz
+  wasm32-unknown-unknown:
+    sha256: 76e74b68fa4561f94434b37e16d06e3167d5524870515e62d52a7d3c93d0dc14
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-wasm32-unknown-unknown.tar.gz
+  x86_64-apple-darwin:
+    sha256: a77b82c6c6b0c32808cc812e100b1274cffc81818d25754b92d197409e5c12b9
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-apple-darwin.tar.gz
+  x86_64-apple-ios:
+    sha256: 3cfa1b7774289b94f398a4b273606f420bb584da8a1210f48603adb0904fef6f
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-apple-ios.tar.gz
+  x86_64-fortanix-unknown-sgx:
+    sha256: bde7d1a4b6c67a67be6f7863530466c5d5051d4fbf719c3ed83ba2a659f193f8
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-fortanix-unknown-sgx.tar.gz
+  x86_64-linux-android:
+    sha256: c979d55799eb0e709b8278a861f19279b5ff4de96f92b398f86032c907523e6c
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-linux-android.tar.gz
+  x86_64-pc-solaris:
+    sha256: 3b491848310e30a3623d27eb38aa698258db809e81a79994227b30774bec007f
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-pc-solaris.tar.gz
+  x86_64-pc-windows-gnu:
+    sha256: c3e62fc054b1d4b30f5daf70820365def8b5cf489ae158cdbe6412ca28df5d65
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-pc-windows-gnu.tar.gz
+  x86_64-pc-windows-gnullvm:
+    sha256: c5c62253a0e80cda2f56a314fbfe79a158e9233949c14dea462ec54809a23765
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-pc-windows-gnullvm.tar.gz
+  x86_64-pc-windows-msvc:
+    sha256: d61cd761c4531dbb4f21e50e4d27ba7816c834bc5fe1d802998d9797619d61aa
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-pc-windows-msvc.tar.gz
+  x86_64-unknown-freebsd:
+    sha256: c506c6b50cac025268e1ee4536cf6149c3efb81898ddca51c68c52e9fbd68938
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-unknown-freebsd.tar.gz
+  x86_64-unknown-fuchsia:
+    sha256: 2b1635e37c504598209152e01fef4b55a0735fc85fd806ce6a6efd90abb606ff
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-unknown-fuchsia.tar.gz
+  x86_64-unknown-illumos:
+    sha256: ab68afbf5469678cd4e8e8a1e6e6a418e140b867da69c3b07a7c57f31fcefde7
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-unknown-illumos.tar.gz
+  x86_64-unknown-linux-gnu:
+    sha256: b3050a3b63da621f27517bd1252e976fd69ca45adf24e307627d4ca8b3efd7d7
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-unknown-linux-gnu.tar.gz
+  x86_64-unknown-linux-gnux32:
+    sha256: 4ec178dba32f3f93ccb2b8493fe12538fe410a70a58cead607f26ed633fb6e71
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-unknown-linux-gnux32.tar.gz
+  x86_64-unknown-linux-musl:
+    sha256: 9c226ea54ceb03d97a70068ec2b9606a2741df6938fe5916d741ccbc099712f7
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-unknown-linux-musl.tar.gz
+  x86_64-unknown-netbsd:
+    sha256: 3613adadfacd038d0e38ebac81e1986903b5e9982ae521cb8828b4c9d8b814db
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-unknown-netbsd.tar.gz
+  x86_64-unknown-none:
+    sha256: a404fbb75cb6e6ff0c30f9643788353886044b4fa47d71e587e0856f865366d7
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-unknown-none.tar.gz
+  x86_64-unknown-redox:
+    sha256: 3bc885a374b7ae76ff0024d90f13f1ccf6813cc73c50bc2106170920398824d6
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-unknown-redox.tar.gz
+  x86_64-unknown-uefi:
+    sha256: ee310ac0b2c4ad259fcff30d13ca368cab0755f7597afdeb744a70c3ce6536d5
+    url: https://static.rust-lang.org/dist/rust-std-1.84.0-x86_64-unknown-uefi.tar.gz

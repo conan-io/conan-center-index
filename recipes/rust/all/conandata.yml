@@ -1,5 +1,6 @@
 # Use ./add_urls.py <version> to add URLs and hashes for a new version of Rust.
 sources:
+  "1.84.0":
   "1.81.0":
   "1.77.1":
   "1.75.0":
