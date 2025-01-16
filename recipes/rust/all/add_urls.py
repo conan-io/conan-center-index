@@ -145,5 +145,5 @@ def get_url_dict(version):
 if __name__ == "__main__":
     rust_version = sys.argv[1] if len(sys.argv) > 1 else None
     url_dict = get_url_dict(rust_version)
-    with (script_dir / f"urls-{rust_version}.yml").open("w") as f:
+    with (script_dir / "urls" / f"{rust_version}.yml").open("w") as f:
         yaml.dump(url_dict, f)

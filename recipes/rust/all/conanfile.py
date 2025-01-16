@@ -75,10 +75,10 @@ class RustConan(ConanFile):
 
     @property
     def _urls(self):
-        return yaml.load(Path(self.recipe_folder, f"urls-{self.version}.yml").read_text(), Loader=yaml.SafeLoader)
+        return yaml.load(Path(self.recipe_folder, "urls", f"{self.version}.yml").read_text(), Loader=yaml.SafeLoader)
 
     def export(self):
-        copy(self, "urls-*.yml", self.recipe_folder, self.export_folder)
+        copy(self, "urls/*.yml", self.recipe_folder, self.export_folder)
 
     def layout(self):
         pass
