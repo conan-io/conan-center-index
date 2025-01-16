@@ -109,6 +109,7 @@ class GStPluginsGoodConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
         if self.options.with_qt and self.settings.os in ["Linux", "FreeBSD"]:
+            self.options["gst-plugins-base"].with_gl = True
             self.options["gst-plugins-base"].with_egl = self.options.with_egl
             self.options["gst-plugins-base"].with_xorg = self.options.with_xorg
             self.options["gst-plugins-base"].with_wayland = self.options.with_wayland
