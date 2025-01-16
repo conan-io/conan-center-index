@@ -1,15 +1,16 @@
-from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, copy, get
-from conan.tools.layout import basic_layout
-
-from contextlib import contextmanager
 import os
-from io import StringIO
+import shutil
 
-required_conan_version = ">=1.47.0"
+from conan import ConanFile
+from conan.tools.build import can_run, check_min_cppstd
+from conan.tools.env import VirtualBuildEnv, Environment
+from conan.tools.files import copy, get, save, load, replace_in_file
+from conan.tools.gnu import AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import VCVars, is_msvc
+from conan.tools.scm import Version
+
+required_conan_version = ">=2.0"
 
 
 class B2Conan(ConanFile):
@@ -20,189 +21,154 @@ class B2Conan(ConanFile):
     license = "BSL-1.0"
     url = "https://github.com/conan-io/conan-center-index"
 
-    settings = "os", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     package_type = "application"
-
-    '''
-    * use_cxx_env: False, True
-
-    Indicates if the build will use the CXX and
-    CXXFLAGS environment variables. The common use is to add additional flags
-    for building on specific platforms or for additional optimization options.
-
-    * toolset: 'auto', 'cxx', 'cross-cxx',
-    'acc', 'borland', 'clang', 'como', 'gcc-nocygwin', 'gcc',
-    'intel-darwin', 'intel-linux', 'intel-win32', 'kcc', 'kylix',
-    'mingw', 'mipspro', 'pathscale', 'pgi', 'qcc', 'sun', 'sunpro',
-    'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142', 'vc143'
-
-    Specifies the toolset to use for building. The default of 'auto' detects
-    a usable compiler for building and should be preferred. The 'cxx' toolset
-    uses the 'CXX' and 'CXXFLAGS' solely for building. Using the 'cxx'
-    toolset will also turn on the 'use_cxx_env' option. And the 'cross-cxx'
-    toolset uses the 'BUILD_CXX' and 'BUILD_CXXFLAGS' vars. This frees the
-    'CXX' and 'CXXFLAGS' variables for use in subprocesses.
-    '''
     options = {
-        'use_cxx_env': [False, True],
-        'toolset': [
-            'auto', 'cxx', 'cross-cxx',
-            'acc', 'borland', 'clang', 'como', 'gcc-nocygwin', 'gcc',
-            'intel-darwin', 'intel-linux', 'intel-win32', 'kcc', 'kylix',
-            'mingw', 'mipspro', 'pathscale', 'pgi', 'qcc', 'sun', 'sunpro',
-            'tru64cxx', 'vacpp', 'vc12', 'vc14', 'vc141', 'vc142', 'vc143',
+        "build_grammar": [True, False],
+        "use_cxx_env": ["deprecated", False, True],
+        "toolset": [
+            "deprecated",
+            "auto", "cxx", "cross-cxx",
+            "acc", "borland", "clang", "como", "gcc-nocygwin", "gcc",
+            "intel-darwin", "intel-linux", "intel-win32", "kcc", "kylix",
+            "mingw", "mipspro", "pathscale", "pgi", "qcc", "sun", "sunpro",
+            "tru64cxx", "vacpp", "vc12", "vc14", "vc141", "vc142", "vc143",
         ]
     }
     default_options = {
-        'use_cxx_env': False,
-        'toolset': 'auto'
+        "build_grammar": False,
+        "use_cxx_env": "deprecated",
+        "toolset": "deprecated",
     }
+
+    def _is_macos_intel_or_arm(self, settings):
+        return settings.os == "Macos" and settings.arch in ["x86_64", "armv8"]
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def package_id(self):
-        del self.info.options.use_cxx_env
-        del self.info.options.toolset
-
+        del self.info.settings.compiler
         if self._is_macos_intel_or_arm(self.info.settings):
             self.info.settings.arch = "x86_64,armv8"
 
     def validate_build(self):
-        if hasattr(self, "settings_build") and cross_building(self) and not self._is_macos_intel_or_arm(self.settings):
-            raise ConanInvalidConfiguration(f"{self.ref} recipe doesn't support cross-build yet")
+        check_min_cppstd(self, 11)
+
+    def requirements(self):
+        if Version(self.version) >= "5.2.0":
+            self.requires("nlohmann_json/[^3]")
 
     def validate(self):
-        if (self.options.toolset == 'cxx' or self.options.toolset == 'cross-cxx') and not self.options.use_cxx_env:
-            raise ConanInvalidConfiguration(
-                "Option toolset 'cxx' and 'cross-cxx' requires 'use_cxx_env=True'")
+        if self.options.use_cxx_env.value != "deprecated":
+            self.output.warn("The 'use_cxx_env' option is deprecated and will be removed in a future version.")
+        if self.options.toolset.value != "deprecated":
+            self.output.warn("The 'toolset' option is deprecated and will be removed in a future version.")
+
+    def build_requirements(self):
+        if not can_run(self):
+            self.tool_requires(f"b2/{self.version}")
+        if self.options.build_grammar:
+            if self.settings_build.os == "Windows":
+                self.tool_requires("winflexbison/2.5.25")
+            else:
+                self.tool_requires("bison/3.8.2")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Ensure CXXFLAGS are respected
+        replace_in_file(self, os.path.join("src", "engine", "config_toolset.bat"),
+                        '"B2_CXX="%CXX%" ',
+                        '"B2_CXX="%CXX%" %CXXFLAGS% ')
+        if Version(self.version) >= "5.2.0":
+            os.unlink(os.path.join("src", "engine", "ext_nlohmann_json.hpp"))
+            replace_in_file(self, os.path.join("src", "engine", "mod_db.cpp"),
+                            '#include "ext_nlohmann_json.hpp"',
+                            "#include <nlohmann/json.hpp>")
 
     @property
-    def _b2_dir(self):
-        return self.source_folder
+    def _toolchain_vars(self):
+        return AutotoolsToolchain(self).environment().vars(self)
+
+    @property
+    def _cxx(self):
+        if is_msvc(self):
+            return "cl"
+        cxx = self._toolchain_vars.get("CXX")
+        if cxx:
+            return cxx
+        compiler_version = Version(self.settings.compiler.version)
+        major = compiler_version.major
+        compiler = str(self.settings.compiler)
+        compiler = {"gcc": "g++", "clang": "clang++"}.get(compiler, compiler)
+        return shutil.which(f"{compiler}-{compiler_version}") or shutil.which(f"{compiler}-{major}") or compiler
+
+    @property
+    def _cxxflags(self):
+        cxxflags = self._toolchain_vars.get("CXXFLAGS", "")
+        cxxflags += " " + VirtualBuildEnv(self).vars().get("CXXFLAGS", default="")
+        if self._is_macos_intel_or_arm(self.settings):
+            cxxflags += " -arch arm64 -arch x86_64"
+        if Version(self.version) >= "5.2.0":
+            json_incdir = self.dependencies["nlohmann_json"].cpp_info.includedir
+            cxxflags += f" -I{json_incdir}"
+        return cxxflags.strip()
+
+    @property
+    def _windows_toolset(self):
+        # msvc, borland, como, gcc, clang, clang-win, gcc-nocygwin, intel-win32, mingw
+        if self.settings.compiler == "clang" and self.settings.compiler.get_safe("runtime"):
+            return "clang-win"
+        return {
+            "msvc": "msvc",
+            "gcc": "mingw",
+            "clang": "clang",
+            "intel-cc": "intel-win32",
+        # Use "clang" as the fall-back since it has the most generic build flags
+        }.get(str(self.settings.compiler), "clang")
+
+    def generate(self):
+        VirtualBuildEnv(self).generate()
+        build_args = []
+        if self.settings_build.os == "Windows":
+            if is_msvc(self):
+                VCVars(self).generate()
+            env = Environment()
+            env.define("CXX", self._cxx)
+            env.define("CXXFLAGS", self._cxxflags)
+            env.define("BISON", "win_bison")
+            env.vars(self).save_script("b2_vars")
+            build_args.append(self._windows_toolset)
+        else:
+            build_args.append(f"--cxx={self._cxx}")
+            cxxflags = self._cxxflags
+            if cxxflags:
+                build_args.append(f'--cxxflags="{cxxflags}"')
+            if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
+                build_args.append("--debug")
+        save(self, "build_args", " ".join(build_args))
 
     @property
     def _b2_engine_dir(self):
-        return os.path.join(self._b2_dir, "src", "engine")
-
-    @property
-    def _b2_output_dir(self):
-        return os.path.join(self.build_folder, "output")
-
-    @property
-    def _pkg_bin_dir(self):
-        return os.path.join(self.package_folder, "bin")
-
-    def _is_macos_intel_or_arm(self, settings):
-        return settings.os == "Macos" and settings.arch in ["x86_64", "armv8"]
-
-    @contextmanager
-    def _bootstrap_env(self):
-        saved_env = dict(os.environ)
-        # Vcvars will change the directory after it runs in the situation when
-        # the user has previously run the VS command console inits. In that
-        # context it remembers the dir and resets it at each vcvars invocation.
-        os.environ.update({"VSCMD_START_DIR": os.getcwd()})
-        if not self.options.use_cxx_env:
-            # To avoid using the CXX env vars we clear them out for the build.
-            os.environ.update({
-                "CXX": "",
-                "CXXFLAGS": ""})
-        try:
-            yield
-        finally:
-            os.environ.clear()
-            os.environ.update(saved_env)
-
-    def _write_project_config(self, cxx):
-        with open(os.path.join(self.source_folder, "project-config.jam"), "w") as f:
-            f.write(
-                f"using {self.options.toolset} : : {cxx} ;\n"
-            )
+        return os.path.join(self.source_folder, "src", "engine")
 
     def build(self):
-        # The order of the with:with: below is important. The first one changes
-        # the current dir. While the second does env changes that guarantees
-        # that dir doesn't change if/when vsvars runs to set the msvc compile
-        # env.
-        self.output.info("Build engine..")
-        command = ""
-        b2_toolset = self.options.toolset
-        use_windows_commands = os.name == 'nt'
-        if b2_toolset == 'auto':
-            if use_windows_commands:
-                # For windows auto detection it can evaluate to a msvc version
-                # that it's not aware of. Most likely because it's a future one
-                # that didn't exist when the build was written. This turns that
-                # into a generic msvc toolset build assuming it could work,
-                # since it's a better version.
-                with chdir(self, self._b2_engine_dir):
-                    with self._bootstrap_env():
-                        buf = StringIO()
-                        self.run('guess_toolset && set', buf)
-                        guess_vars = map(
-                            lambda x: x.strip(), buf.getvalue().split("\n"))
-                        if "B2_TOOLSET=vcunk" in guess_vars:
-                            b2_toolset = 'msvc'
-                            for kv in guess_vars:
-                                if kv.startswith("B2_TOOLSET_ROOT="):
-                                    b2_vcvars = os.path.join(
-                                        kv.split('=')[1].strip(), 'Auxiliary', 'Build', 'vcvars32.bat')
-                                    command += '"'+b2_vcvars+'" && '
-        command += "build" if use_windows_commands else "./build.sh"
-
-        cxxflags = ""
-        if self._is_macos_intel_or_arm(self.settings):
-            cxxflags += " -arch arm64 -arch x86_64"
-
-        if self.options.use_cxx_env:
-            envvars = VirtualBuildEnv(self).vars()
-
-            cxx_env = envvars.get("CXX")
-            if cxx_env:
-                command += f" --cxx={cxx_env}"
-                self._write_project_config(cxx_env)
-
-            cxxflags_env = envvars.get("CXXFLAGS")
-            if cxxflags_env:
-                cxxflags = f"{cxxflags} {cxxflags_env}"
-
-        if cxxflags:
-            command += f' --cxxflags="{cxxflags}"'
-
-        if b2_toolset != 'auto':
-            command += " "+str(b2_toolset)
-        with chdir(self, self._b2_engine_dir):
-            with self._bootstrap_env():
-                self.run(command)
-
-        self.output.info("Install..")
-        command = os.path.join(
-            self._b2_engine_dir, "b2.exe" if use_windows_commands else "b2")
-        if b2_toolset not in ["auto", "cxx", "cross-cxx"]:
-            command += " toolset=" + str(b2_toolset)
-        full_command = \
-            (f"{command} --ignore-site-config " +
-             f"--prefix={self._b2_output_dir} " +
-             "--abbreviate-paths " +
-             "install " +
-             "b2-install-layout=portable")
-        with chdir(self, self._b2_dir):
-            self.run(full_command)
+        command = "build.bat" if self.settings_build.os == "Windows" else "./build.sh"
+        args = load(self, os.path.join(self.generators_folder, "build_args"))
+        self.run(f"{command} {args}", cwd=self._b2_engine_dir)
 
     def package(self):
-        copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.LICENSE", src=self._b2_engine_dir, dst=os.path.join(self.package_folder, "licenses"))
-        copy(self, "*b2", dst=self._pkg_bin_dir, src=self._b2_output_dir)
-        copy(self, "*b2.exe", dst=self._pkg_bin_dir, src=self._b2_output_dir)
-        copy(self, "*.jam", dst=self._pkg_bin_dir, src=self._b2_output_dir)
+        copy(self, "LICENSE.txt", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        b2 = os.path.join(self._b2_engine_dir, "b2") if can_run(self) else "b2"
+        self.run(" ".join([
+            b2,
+            "install",
+            "b2-install-layout=portable",
+            "--ignore-site-config",
+            "--abbreviate-paths",
+            f"--prefix={os.path.join(self.package_folder, 'bin')}",
+        ]), cwd=self.source_folder)
 
     def package_info(self):
         self.cpp_info.includedirs = []
         self.cpp_info.libdirs = []
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(self._pkg_bin_dir)
