@@ -1,23 +1,15 @@
 versions:
+  "1.29.2":
+    folder: all
+  "1.29.1":
+    folder: all
+  "1.29.0":
+    folder: all
   "1.28.1":
     folder: all
-  "1.28.0":
-    folder: all
   "1.27.6":
-    folder: all
-  "1.27.5":
-    folder: all
-  "1.27.4":
-    folder: all
-  "1.27.3":
-    folder: all
-  "1.27.2":
-    folder: all
-  "1.27.1":
     folder: all
   "1.26.2":
     folder: all
   "1.24.3":
-    folder: all
-  "1.23.5":
     folder: all
