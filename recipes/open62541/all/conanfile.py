@@ -363,8 +363,9 @@ class Open62541Conan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        if Version(self.version) >= "1.3.1":
-            os.unlink(os.path.join(self.source_folder, "tools", "cmake", "FindPython3.cmake"))
+        py_path = os.path.join(self.source_folder, "tools", "cmake", "FindPython3.cmake")
+        if os.path.exists(py_path):
+            os.unlink(py_path)
 
     def build(self):
         self._patch_sources()
@@ -445,6 +446,8 @@ class Open62541Conan(ConanFile):
                 self.cpp_info.system_libs.append("iphlpapi")
         elif self.settings.os in ("Linux", "FreeBSD"):
             self.cpp_info.system_libs.extend(["pthread", "m", "rt"])
+        elif self.settings.os == "Neutrino":
+            self.cpp_info.system_libs.extend(["m", "rt", "socket"])
 
         self.cpp_info.builddirs.append(self._module_subfolder)
         # v1 legacy support for open62541Macros.cmake auto-include
