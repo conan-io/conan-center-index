@@ -38,6 +38,7 @@ class GStPluginsBadConan(ConanFile):
         "with_bz2": [True, False],
         "with_cuda": [True, False],
         "with_faac": [True, False],
+        "with_gl": [True, False],
         "with_fdk_aac": [True, False],
         "with_google_cloud_storage": [True, False],
         "with_gtk": [True, False],
@@ -108,6 +109,7 @@ class GStPluginsBadConan(ConanFile):
         "with_cuda": False,  # does not require CUDA during build
         "with_faac": False,
         "with_fdk_aac": False,
+        "with_gl": True,
         "with_google_cloud_storage": False,
         "with_gtk": False,
         "with_json": False,
@@ -168,10 +170,6 @@ class GStPluginsBadConan(ConanFile):
         "with_wasapi2": True,
     }
 
-    @property
-    def _with_gl(self):
-        return self.dependencies["gst-plugins-base"].options.with_gl
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -225,8 +223,7 @@ class GStPluginsBadConan(ConanFile):
         self.options["gst-plugins-base"].shared = self.options.shared
         self.options["gstreamer"].shared = self.options.with_introspection
         self.options["gst-plugins-base"].shared = self.options.with_introspection
-        if self.options.get_safe("with_cuda"):
-            self.options["gst-plugins-base"].with_gl = True
+        self.options["gst-plugins-base"].with_gl = self.options.with_gl
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -238,6 +235,9 @@ class GStPluginsBadConan(ConanFile):
         self.requires("gst-orc/0.4.40")
         if self.options.with_introspection:
             self.requires("gobject-introspection/1.78.1")
+
+        # Should not be necessary, but [replace_requires] appears to be buggy
+        self.requires("opengl/system")
 
         if self.options.with_aom:
             self.requires("libaom-av1/3.8.0")
@@ -357,6 +357,8 @@ class GStPluginsBadConan(ConanFile):
             self.options.shared != self.dependencies["gst-plugins-base"].options.shared):
                 # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
                 raise ConanInvalidConfiguration("GLib, GStreamer and GstPlugins must be either all shared, or all static")
+        if self.options.with_gl != self.dependencies["gst-plugins-base"].options.with_gl:
+            raise ConanInvalidConfiguration("with_gl option must match gst-plugins-base/with_gl")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
             raise ConanInvalidConfiguration(f"gst-plugins-good {self.version} does not support gcc older than 5")
         if self.options.shared and is_msvc_static_runtime(self):
@@ -372,7 +374,8 @@ class GStPluginsBadConan(ConanFile):
             raise ConanInvalidConfiguration("with_libva=True requires with_libdrm=True")
         if self.options.get_safe("with_qt") or self.options.with_zxing:
             check_min_cppstd(self, 17)
-        elif self.options.get_safe("with_cuda"):
+        elif self.options.with_gl:
+            # for gstcuda library
             check_min_cppstd(self, 14)
         elif self.options.with_opencv or self.options.get_safe("with_applemedia"):
             check_min_cppstd(self, 11)
@@ -503,9 +506,9 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["aes"] = feature(self.options.with_ssl == "openssl")
         tc.project_options["aja"] = "disabled"  # libajantv2
         tc.project_options["amfcodec"] =  feature(self.options.get_safe("with_d3d11"))
-        tc.project_options["androidmedia"] = feature(self.settings.os == "Android" and self._with_gl)
+        tc.project_options["androidmedia"] = feature(self.settings.os == "Android" and self.options.with_gl)
         tc.project_options["aom"] = feature(self.options.with_aom)
-        tc.project_options["applemedia"] = feature(self.options.get_safe("with_applemedia") and self._with_gl)
+        tc.project_options["applemedia"] = feature(self.options.get_safe("with_applemedia") and self.options.with_gl)
         tc.project_options["asio"] = "disabled"  # proprietary
         tc.project_options["assrender"] = "disabled"  # libass
         tc.project_options["avtp"] = "disabled"  # avtp
@@ -536,7 +539,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["fdkaac"] = feature(self.options.with_fdk_aac)
         tc.project_options["flite"] = "disabled"  # flite
         tc.project_options["fluidsynth"] = "disabled"  # fluidsynth
-        tc.project_options["gl"] = feature(self._with_gl)
+        tc.project_options["gl"] = feature(self.options.with_gl)
         tc.project_options["gme"] = "disabled"  # gme
         tc.project_options["gs"] = feature(self.options.with_google_cloud_storage)
         tc.project_options["gsm"] = "disabled"  # libgsm1
@@ -560,7 +563,7 @@ class GStPluginsBadConan(ConanFile):
         tc.project_options["msdk"] = "disabled"  # Intel Media SDK or oneVPL SDK
         tc.project_options["musepack"] = "disabled"  # libmpcdec
         tc.project_options["neon"] = "disabled"  # libneon27
-        tc.project_options["nvcodec"] = feature(self.options.get_safe("with_cuda") and self._with_gl)
+        tc.project_options["nvcodec"] = feature(self.options.get_safe("with_cuda") and self.options.with_gl)
         tc.project_options["onnx"] = feature(self.options.with_onnx)
         tc.project_options["openal"] = feature(self.options.with_openal)
         tc.project_options["openaptx"] = "disabled"  # openaptx
@@ -765,11 +768,12 @@ class GStPluginsBadConan(ConanFile):
             "gst-plugins-base::gstreamer-video-1.0",
         ])
         # cuda
-        if self.settings.os in ["Linux", "Windows"] and self._with_gl:
+        if self.settings.os in ["Linux", "Windows"] and self.options.with_gl:
             gst_cuda = _define_library("cuda", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-gl-prototypes-1.0",
                 "glib::gmodule-2.0",
+                "opengl::opengl",
             ])
             if self.settings.os == "Linux" and self.settings.arch not in ["x86", "x86_64"]:
                 gst_cuda.system_libs.append("atomic")
@@ -947,7 +951,7 @@ class GStPluginsBadConan(ConanFile):
                 "pango::pangocairo",
             ])
         # androidmedia
-        if self.settings.os == "Android" and self._with_gl:
+        if self.settings.os == "Android" and self.options.with_gl:
             gst_am = _define_plugin("androidmedia", [
                 "gst-plugins-base::gstreamer-gl-1.0",
                 "gst-plugins-base::gstreamer-pbutils-1.0",
@@ -956,6 +960,7 @@ class GStPluginsBadConan(ConanFile):
                 "gstreamer-photography-1.0",
                 "glib::gmodule-2.0",
                 "gst-orc::gst-orc",
+                "opengl::opengl",
             ])
             gst_am.system_libs.extend(["android"])
         # aom
@@ -965,7 +970,7 @@ class GStPluginsBadConan(ConanFile):
                 "libaom-av1::libaom-av1",
             ])
         # applemedia
-        if self.options.get_safe("with_applemedia") and self._with_gl:
+        if self.options.get_safe("with_applemedia") and self.options.with_gl:
             gst_applemedia = _define_plugin("applemedia", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-audio-1.0",
@@ -973,6 +978,7 @@ class GStPluginsBadConan(ConanFile):
                 "gst-plugins-base::gstreamer-gl-1.0",
                 "gst-plugins-base::gstreamer-gl-prototypes-1.0",
                 "gstreamer-codecparsers-1.0",
+                "opengl::opengl",
             ])
             if self.options.with_vulkan:
                 gst_applemedia.requires.extend([
@@ -1372,7 +1378,7 @@ class GStPluginsBadConan(ConanFile):
         # netsim
         _define_plugin("netsim", [])
         # nvcodec
-        if self.options.get_safe("with_cuda") and self._with_gl:
+        if self.options.get_safe("with_cuda") and self.options.with_gl:
             gst_nvcodec = _define_plugin("nvcodec", [
                 "gst-plugins-base::gstreamer-video-1.0",
                 "gst-plugins-base::gstreamer-pbutils-1.0",
@@ -1382,6 +1388,7 @@ class GStPluginsBadConan(ConanFile):
                 "gstreamer-cuda-1.0",
                 "glib::gmodule-2.0",
                 "glib::gio-2.0",
+                "opengl::opengl",
             ], cpp=True)
             if self.settings.os == "Windows":
                 gst_nvcodec.requires.append("gstreamer-d3d11-1.0")
