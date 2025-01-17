@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.build import stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir
-from packaging.version import Version
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.54.0"
