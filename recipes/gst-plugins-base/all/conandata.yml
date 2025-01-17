@@ -5,3 +5,4 @@ sources:
 patches:
   "1.24.11":
     - patch_file: "patches/001-windows-gl-dep.patch"
+    - patch_file: "patches/002-gl-internal-transitive-dep.patch"

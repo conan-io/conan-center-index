@@ -1,0 +1,14 @@
+gl_dep internal dependency is not propagated correctly to the gstopengl plugin otherwise.
+Fails due to a missing GL/gl.h include.
+
+--- a/ext/gl/meson.build
++++ b/ext/gl/meson.build
+@@ -150,7 +150,7 @@
+   objc_args : gst_plugins_base_args + gl_objc_args + extra_c_args,
+   link_args : noseh_link_args,
+   include_directories : [configinc],
+-  dependencies : [gstgl_dep, video_dep,
++  dependencies : [gl_lib_deps, gstgl_dep, video_dep,
+                   gst_base_dep, gst_controller_dep, libm] + optional_deps,
+   install : true,
+   install_dir : plugins_install_dir)
