@@ -109,7 +109,7 @@ class GStPluginsBaseConan(ConanFile):
         if self.options.get_safe("with_xorg"):
             self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
         if self.options.with_gl:
-            self.requires("opengl/system")
+            self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
             if self.settings.os == "Windows":
                 self.requires("wglext/cci.20200813", transitive_headers=True, transitive_libs=True)
                 self.requires("glext/cci.20210420", transitive_headers=True, transitive_libs=True)
