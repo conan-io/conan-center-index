@@ -7,11 +7,11 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
-class OpenDis6Conan(ConanFile):
-    name = "opendis6"
-    homepage = "https://github.com/crhowell3/opendis6"
+class LibsersiConan(ConanFile):
+    name = "libsersi"
+    homepage = "https://github.com/crhowell3/libsersi"
     description = "Modern C++ implementation of IEEE 1278.1a-1998"
     topics = ("library", "protocol", "dis")
     url = "https://github.com/conan-io/conan-center-index"
@@ -26,9 +26,6 @@ class OpenDis6Conan(ConanFile):
         "shared": False,
         "fPIC": True
     }
-
-    provides = "libsersi"
-    deprecated = "libsersi"
 
     @property
     def _min_cppstd(self):
@@ -50,6 +47,10 @@ class OpenDis6Conan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+
+        # build scripts assume CMAKE_BUILD_TYPE is a cache variable,
+        # but CMakeToolchain sets it as a regular variable otherwise
+        tc.cache_variables["CMAKE_BUILD_TYPE"] = str(self.settings.build_type)
         tc.cache_variables["BUILD_EXAMPLES"] = False
         tc.cache_variables["BUILD_TESTS"] = False
         tc.generate()
@@ -89,10 +90,8 @@ class OpenDis6Conan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
-        self.cpp_info.libs = ["OpenDIS6"]
-        self.cpp_info.set_property("cmake_file_name", "OpenDIS")
-        self.cpp_info.set_property("cmake_target_name", "OpenDIS::OpenDIS6")
-        self.cpp_info.set_property("cmake_target_aliases", ["OpenDIS::DIS6","OpenDIS6"])
+        self.cpp_info.libs = ["sersi"]
+        self.cpp_info.set_property("cmake_target_name", "libsersi::sersi")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
