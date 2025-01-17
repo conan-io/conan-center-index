@@ -82,9 +82,6 @@ class GtkConan(ConanFile):
             del self.options.with_x11
         if Version(self.version) >= "4.13.7":
             del self.options.with_ffmpeg
-        if self.options.with_gstreamer:
-            # elfutils required by system gstreamer conflicts with libelf dep of glib otherwise
-            self.options["glib"].with_elf = False
 
     def configure(self):
         self.settings.rm_safe("compiler.libcxx")
@@ -153,9 +150,9 @@ class GtkConan(ConanFile):
         if self.options.with_introspection:
             self.requires("gobject-introspection/1.78.1")
 
-        # FIXME: gstreamer from CCI is currently not compatible
-        # if self.options.with_gstreamer:
-        #     self.requires("gstreamer/1.24.11")
+        if self.options.with_gstreamer:
+            self.requires("gst-plugins-base/1.24.11")
+            self.requires("gst-plugins-bad/1.24.11")
 
         # TODO: fix libintl support on macOS by using gnuintl from gettext
         # if self.settings.os != "Linux":
@@ -221,12 +218,6 @@ class GtkConan(ConanFile):
             packages.append("libtracker-sparql-3.0-dev")
         if self.options.with_iso_codes:
             packages.append("iso-codes")
-        if self.options.with_gstreamer:
-            packages.append("libgstreamer1.0-dev")
-            # for gstreamer-player-1.0
-            packages.append("libgstreamer-plugins-bad1.0-dev")
-            # for gstreamer-gl-1.0 and gstreamer-allocators-1.0
-            packages.append("libgstreamer-plugins-base1.0-dev")
         return packages
 
     def system_requirements(self):
@@ -349,13 +340,13 @@ class GtkConan(ConanFile):
             # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.15.6/gtk/meson.build#L1038-1044
             self.cpp_info.components["gdk-3.0"].system_libs = ["advapi32", "comctl32", "crypt32", "dwmapi", "imm32", "setupapi", "winmm"]
 
-        # if self.options.with_gstreamer:
-        #     # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.15.6/modules/media/meson.build#L11
-        #     self.cpp_info.components["gtk4"].requires.extend([
-        #         "gstreamer::gstreamer-player-1.0",
-        #         "gstreamer::gstreamer-gl-1.0",
-        #         "gstreamer::gstreamer-allocators-1.0",
-        #     ])
+        if self.options.with_gstreamer:
+            # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.15.6/modules/media/meson.build#L11
+            self.cpp_info.components["gtk4"].requires.extend([
+                "gst-plugins-bad::gstreamer-player-1.0",
+                "gst-plugins-base::gstreamer-gl-1.0",
+                "gst-plugins-base::gstreamer-allocators-1.0",
+            ])
         if self.options.get_safe("with_ffmpeg"):
             self.cpp_info.components["gtk4"].requires.append("ffmpeg::ffmpeg")
 
