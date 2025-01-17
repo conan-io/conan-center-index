@@ -2,12 +2,6 @@ sources:
   "2.9.1":
     url: "https://github.com/stevengj/nlopt/archive/refs/tags/v2.9.1.tar.gz"
     sha256: "1e6c33f8cbdc4138d525f3326c231f14ed50d99345561e85285638c49b64ee93"
-  "2.9.0":
-    url: "https://github.com/stevengj/nlopt/archive/refs/tags/v2.9.0.tar.gz"
-    sha256: "6e899e297485e457ec1bf84844de29921aeef674f9d5caf60277df45dca6ff76"
-  "2.8.0":
-    url: "https://github.com/stevengj/nlopt/archive/refs/tags/v2.8.0.tar.gz"
-    sha256: "e02a4956a69d323775d79fdaec7ba7a23ed912c7d45e439bc933d991ea3193fd"
   "2.7.1":
     url: "https://github.com/stevengj/nlopt/archive/refs/tags/v2.7.1.tar.gz"
     sha256: "db88232fa5cef0ff6e39943fc63ab6074208831dc0031cf1545f6ecd31ae2a1a"
