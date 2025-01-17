@@ -1,0 +1,15 @@
+--- snmplib/snmp_api.c	2024-12-16 13:24:24.714579100 +0100
++++ snmplib/snmp_api.c	2024-12-16 13:29:38.407792100 +0100
+@@ -896,8 +896,11 @@
+ 
+     /*
+      * set our current locale properly to initialize isprint() type functions 
++     *
++     * Do not use setlocale on qnx, it is buggy 
++     * https://www.qnx.com/developers/docs/7.1/#com.qnx.doc.neutrino.lib_ref/topic/s/setlocale.html
+      */
+-#ifdef HAVE_SETLOCALE
++#if defined(HAVE_SETLOCALE) && !defined(__QNX__)
+     setlocale(LC_CTYPE, "");
+ #endif
+ 

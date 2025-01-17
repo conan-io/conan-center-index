@@ -118,6 +118,9 @@ class NetSnmpConan(ConanFile):
             if self.settings.os in ["Linux"]:
                 tc.extra_ldflags.append("-ldl")
                 tc.extra_ldflags.append("-lpthread")
+            elif self.settings.os in ["Neutrino"]:
+                tc.extra_ldflags.append("-lregex")
+
             tc.generate()
 
             deps = AutotoolsDeps(self)
@@ -217,5 +220,7 @@ class NetSnmpConan(ConanFile):
         self.cpp_info.libs = ["netsnmp"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["rt", "pthread", "m"])
+        elif self.settings.os == "Neutrino":
+            self.cpp_info.system_libs.extend(["rt", "m", "regex"])
         if is_apple_os(self):
             self.cpp_info.frameworks.extend(["CoreFoundation", "DiskArbitration", "IOKit"])

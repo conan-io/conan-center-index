@@ -1,0 +1,13 @@
+--- include/net-snmp/types.h	2025-03-28 09:24:46.119625466 +0100
++++ include/net-snmp/types.h	2025-03-28 09:25:15.299604273 +0100
+@@ -24,6 +24,10 @@
+ 
+ #include <sys/types.h>
+ 
++#if HAVE_SYS_SELECT_H
++  #include <sys/select.h>
++#endif
++
+ #if defined(WIN32) && !defined(cygwin)
+ typedef HANDLE netsnmp_pid_t;
+ #define NETSNMP_NO_SUCH_PROCESS INVALID_HANDLE_VALUE
