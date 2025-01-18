@@ -1079,7 +1079,14 @@ Prefix = ..""")
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt5::{pluginname}")
             self.cpp_info.components[componentname].names["cmake_find_package"] = pluginname
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
-            self.cpp_info.components[componentname].libs = [libname + libsuffix]
+            if not (self.settings.os == "Windows" and self.options.shared):
+                # it's useful to populate the libs property so that installers can use CMake to find
+                # plugins, however we can't do this on Windows Shared builds as on Windows
+                # CMake `find_library` expects to find an import lib which doesn't exist for plugins.
+                # See eg:
+                # * https://discourse.cmake.org/t/find-library-wont-find-dlls/4050/4
+                # * https://github.com/conan-io/conan/issues/12654
+                self.cpp_info.components[componentname].libs = [libname + libsuffix]
             self.cpp_info.components[componentname].libdirs = [os.path.join("plugins", plugintype)]
             self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
