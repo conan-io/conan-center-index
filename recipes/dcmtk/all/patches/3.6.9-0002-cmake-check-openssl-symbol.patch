@@ -1,0 +1,39 @@
+--- a/CMake/dcmtkPrepare.cmake
++++ b/CMake/dcmtkPrepare.cmake
+@@ -681,21 +681,24 @@ if(DCMTK_WITH_OPENSSL)
+   CHECK_INCLUDE_FILE_CXX("openssl/provider.h" HAVE_OPENSSL_PROVIDER_H)
+ 
+   # test presence of functions, constants and macros needed for the dcmtls module
+-  CHECK_FUNCTIONWITHHEADER_EXISTS("NID_dsa_with_SHA512" "openssl/obj_mac.h" HAVE_OPENSSL_PROTOTYPE_NID_DSA_WITH_SHA512)
+-  CHECK_FUNCTIONWITHHEADER_EXISTS("NID_ecdsa_with_SHA3_256" "openssl/obj_mac.h" HAVE_OPENSSL_PROTOTYPE_NID_ECDSA_WITH_SHA3_256)
+-  CHECK_FUNCTIONWITHHEADER_EXISTS("NID_sha512_256WithRSAEncryption" "openssl/obj_mac.h" HAVE_OPENSSL_PROTOTYPE_NID_SHA512_256WITHRSAENCRYPTION)
+-  CHECK_FUNCTIONWITHHEADER_EXISTS("RAND_egd" "openssl/rand.h" HAVE_OPENSSL_PROTOTYPE_RAND_EGD)
+-  CHECK_FUNCTIONWITHHEADER_EXISTS("SSL_CTX_set0_tmp_dh_pkey" "openssl/ssl.h" HAVE_OPENSSL_PROTOTYPE_SSL_CTX_SET0_TMP_DH_PKEY)
+-  CHECK_FUNCTIONWITHHEADER_EXISTS("SSL_CTX_set1_sigalgs(0,0,0)" "openssl/ssl.h" HAVE_OPENSSL_PROTOTYPE_SSL_CTX_SET1_SIGALGS)
+-  CHECK_FUNCTIONWITHHEADER_EXISTS("TLS1_TXT_ECDHE_ECDSA_WITH_AES_256_CCM_8" "openssl/ssl.h" HAVE_OPENSSL_PROTOTYPE_TLS1_TXT_ECDHE_ECDSA_WITH_AES_256_CCM_8)
+-  CHECK_FUNCTIONWITHHEADER_EXISTS("TLS1_TXT_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384" "openssl/ssl.h" HAVE_OPENSSL_PROTOTYPE_TLS1_TXT_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384)
+-  CHECK_FUNCTIONWITHHEADER_EXISTS("TS_VERIFY_CTX_set0_store(0,0)" "openssl/ts.h" HAVE_OPENSSL_PROTOTYPE_TS_VERIFY_CTX_SET0_STORE)
++  include(CheckSymbolExists)
++  include(CheckCSourceCompiles)
++
++  check_symbol_exists("NID_dsa_with_SHA512" "openssl/obj_mac.h" HAVE_OPENSSL_PROTOTYPE_NID_DSA_WITH_SHA512)
++  check_symbol_exists("NID_ecdsa_with_SHA3_256" "openssl/obj_mac.h" HAVE_OPENSSL_PROTOTYPE_NID_ECDSA_WITH_SHA3_256)
++  check_symbol_exists("NID_sha512_256WithRSAEncryption" "openssl/obj_mac.h" HAVE_OPENSSL_PROTOTYPE_NID_SHA512_256WITHRSAENCRYPTION)
++  check_symbol_exists("RAND_egd" "openssl/rand.h" HAVE_OPENSSL_PROTOTYPE_RAND_EGD)
++  check_symbol_exists("SSL_CTX_set0_tmp_dh_pkey" "openssl/ssl.h" HAVE_OPENSSL_PROTOTYPE_SSL_CTX_SET0_TMP_DH_PKEY)
++  check_symbol_exists("SSL_CTX_set1_sigalgs" "openssl/ssl.h" HAVE_OPENSSL_PROTOTYPE_SSL_CTX_SET1_SIGALGS)
++  check_symbol_exists("TLS1_TXT_ECDHE_ECDSA_WITH_AES_256_CCM_8" "openssl/ssl.h" HAVE_OPENSSL_PROTOTYPE_TLS1_TXT_ECDHE_ECDSA_WITH_AES_256_CCM_8)
++  check_symbol_exists("TLS1_TXT_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384" "openssl/ssl.h" HAVE_OPENSSL_PROTOTYPE_TLS1_TXT_ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384)
++  check_symbol_exists("TS_VERIFY_CTX_set0_store(0,0)" "openssl/ts.h" HAVE_OPENSSL_PROTOTYPE_TS_VERIFY_CTX_SET0_STORE)
+ 
+   # test presence of functions, constants and macros needed for the dcmsign module
+-  CHECK_FUNCTIONWITHHEADER_EXISTS("EVP_PKEY_get_group_name" "openssl/evp.h" HAVE_OPENSSL_PROTOTYPE_EVP_PKEY_GET_GROUP_NAME)
+-  CHECK_FUNCTIONWITHHEADER_EXISTS("OSSL_PROVIDER_load" "openssl/provider.h" HAVE_OPENSSL_PROTOTYPE_OSSL_PROVIDER_LOAD)
++  check_symbol_exists("EVP_PKEY_get_group_name" "openssl/evp.h" HAVE_OPENSSL_PROTOTYPE_EVP_PKEY_GET_GROUP_NAME)
++  check_symbol_exists("OSSL_PROVIDER_load" "openssl/provider.h" HAVE_OPENSSL_PROTOTYPE_OSSL_PROVIDER_LOAD)
+   # check if type EVP_MD_CTX is defined as typedef for "struct evp_md_ctx_st" (new) or "struct env_md_ctx_st" (old)
+-  CHECK_FUNCTIONWITHHEADER_EXISTS("struct evp_md_ctx_st *a; EVP_MD_CTX *b=a" "openssl/evp.h" HAVE_OPENSSL_DECLARATION_NEW_EVP_MD_CTX)
++  check_c_source_compiles("#include <openssl/evp.h>\nint main() {struct evp_md_ctx_st *a; EVP_MD_CTX *b=a; return 0;}" HAVE_OPENSSL_DECLARATION_NEW_EVP_MD_CTX)
+ 
+   # restore previous value of CMAKE_REQUIRED_LIBRARIES
+   set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_TEMP})
