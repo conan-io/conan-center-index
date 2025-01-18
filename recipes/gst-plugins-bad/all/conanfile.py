@@ -64,7 +64,7 @@ class GStPluginsBadConan(ConanFile):
         for plugins_yml in Path(self.recipe_folder, "plugins").glob("*.yml"):
             plugins_info = yaml.safe_load(plugins_yml.read_text())
             for plugin, info in plugins_info.items():
-                has_ext_deps = any("::" in r for r in info["requires"]) or plugin == "webrtc"
+                has_ext_deps = any("::" in r for r in info["requires"] if r != "gst-orc") or plugin == "webrtc"
                 for opt in info.get("options", [plugin]):
                     options_defaults[opt] = options_defaults.get(opt, True) and not has_ext_deps
         self.options.update(
@@ -164,8 +164,6 @@ class GStPluginsBadConan(ConanFile):
             if not opt.startswith("with_") and opt not in ["shared", "fPIC"]:
                 if opt not in self._all_options:
                     self.options.rm_safe(opt)
-
-        self.options.onnx = False
 
     def configure(self):
         if self.options.shared:
