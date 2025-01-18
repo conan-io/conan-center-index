@@ -1,8 +1,10 @@
 import os
 import re
 import shutil
+from functools import lru_cache
 from pathlib import Path
 
+import yaml
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
@@ -18,24 +20,6 @@ from conan.tools.scm import Version
 # For PkgConfigDeps.set_property()
 required_conan_version = ">=2.8"
 
-def _get_option(plugin):
-    return {
-        "alaw": "law",
-        "alphacolor": "alpha",
-        "cacasink": "libcaca",
-        "debug": "debugutils",
-        "flxdec": "flx",
-        "gdkpixbuf": "gdk-pixbuf",
-        "gtk": "gtk3",
-        "mulaw": "law",
-        "navigationtest": "debugutils",
-        "ossaudio": "oss",
-        "pulseaudio": "pulse",
-        "qml6": "qt6",
-        "qmlgl": "qt5",
-        "video4linux2": "v4l2",
-        "y4menc": "y4m",
-    }.get(plugin, plugin)
 
 class GStPluginsGoodConan(ConanFile):
     name = "gst-plugins-good"
@@ -46,315 +30,6 @@ class GStPluginsGoodConan(ConanFile):
     license = "LGPL-2.1-or-later"
     settings = "os", "arch", "compiler", "build_type"
 
-    _plugins = {
-        "adaptivedemux2": [
-            "gstreamer-tag-1.0",
-            "gstreamer-net-1.0",
-            "gstreamer-pbutils-1.0",
-            "gstreamer-app-1.0",
-            "libxml2::libxml2",
-            "openssl::crypto",
-            "libsoup::libsoup",
-            "glib::gmodule-2.0",
-            "glib::gio-2.0",
-        ],
-        "alaw": [
-            "gstreamer-audio-1.0",
-        ],
-        "alpha": [
-            "gstreamer-video-1.0",
-        ],
-        "alphacolor": [
-            "gstreamer-video-1.0",
-        ],
-        "apetag": [
-            "gstreamer-pbutils-1.0",
-            "gstreamer-tag-1.0",
-        ],
-        "audiofx": [
-            "gstreamer-audio-1.0",
-            "gstreamer-fft-1.0",
-            "gst-orc::gst-orc",
-        ],
-        "audioparsers": [
-            "gstreamer-pbutils-1.0",
-            "gstreamer-audio-1.0",
-            "gstreamer-tag-1.0",
-        ],
-        "auparse": [
-            "gstreamer-audio-1.0",
-        ],
-        "autodetect": [],
-        "avi": [
-            "gstreamer-riff-1.0",
-            "gstreamer-audio-1.0",
-            "gstreamer-video-1.0",
-            "gstreamer-tag-1.0",
-        ],
-        "cacasink": [
-            "gstreamer-video-1.0",
-            "libcaca::libcaca",
-        ],
-        "cairo": [
-            "gstreamer-video-1.0",
-            "cairo::cairo-gobject",
-        ],
-        "cutter": [
-            "gstreamer-audio-1.0",
-        ],
-        "debug": [
-            "gstreamer-video-1.0",
-        ],
-        "deinterlace": [
-            "gstreamer-video-1.0",
-            "gst-orc::gst-orc",
-        ],
-        "directsound": [
-            "gstreamer-audio-1.0",
-        ],
-        "dtmf": [
-            "gstreamer-rtp-1.0",
-        ],
-        "effectv": [
-            "gstreamer-video-1.0",
-        ],
-        "equalizer": [
-            "gstreamer-audio-1.0",
-        ],
-        "flac": [
-            "gstreamer-tag-1.0",
-            "gstreamer-audio-1.0",
-            "flac::flac",
-        ],
-        "flv": [
-            "gstreamer-pbutils-1.0",
-            "gstreamer-video-1.0",
-            "gstreamer-tag-1.0",
-            "gstreamer-audio-1.0",
-        ],
-        "flxdec": [
-            "gstreamer-video-1.0",
-        ],
-        "gdkpixbuf": [
-            "gstreamer-video-1.0",
-            "gstreamer-controller-1.0",
-            "gdk-pixbuf::gdk-pixbuf",
-        ],
-        "goom": [
-            "gstreamer-pbutils-1.0",
-            "gst-orc::gst-orc",
-        ],
-        "goom2k1": [
-            "gstreamer-pbutils-1.0",
-        ],
-        "gtk": [
-            "gstreamer-video-1.0",
-            "gtk::gtk+-3.0",
-            "opengl::opengl"
-        ],
-        "icydemux": [
-            "gstreamer-tag-1.0",
-            "zlib::zlib",
-        ],
-        "id3demux": [
-            "gstreamer-tag-1.0",
-            "gstreamer-pbutils-1.0",
-        ],
-        "imagefreeze": [],
-        "interleave": [
-            "gstreamer-audio-1.0",
-        ],
-        "isomp4": [
-            "gstreamer-riff-1.0",
-            "gstreamer-audio-1.0",
-            "gstreamer-video-1.0",
-            "gstreamer-rtp-1.0",
-            "gstreamer-tag-1.0",
-            "gstreamer-pbutils-1.0",
-            "zlib::zlib",
-        ],
-        "jack": [
-            "gstreamer-audio-1.0",
-            "glib::gmodule-2.0",
-        ],
-        "jpeg": [
-            "gstreamer-video-1.0",
-            "libjpeg::libjpeg",
-        ],
-        "lame": [
-            "gstreamer-audio-1.0",
-            "libmp3lame::libmp3lame",
-        ],
-        "level": [
-            "gstreamer-audio-1.0",
-        ],
-        "matroska": [
-            "gstreamer-pbutils-1.0",
-            "gstreamer-audio-1.0",
-            "gstreamer-riff-1.0",
-            "gstreamer-video-1.0",
-            "gstreamer-tag-1.0",
-            "zlib::zlib",
-            "bzip2::bzip2",
-        ],
-        "monoscope": [
-            "gstreamer-audio-1.0",
-            "gstreamer-video-1.0",
-        ],
-        "mpg123": [
-            "gstreamer-audio-1.0",
-            "mpg123::mpg123",
-        ],
-        "mulaw": [
-            "gstreamer-audio-1.0",
-        ],
-        "multifile": [
-            "gstreamer-video-1.0",
-            "gstreamer-pbutils-1.0",
-            "glib::gio-2.0",
-        ],
-        "multipart": [],
-        "navigationtest": [
-            "gstreamer-video-1.0",
-        ],
-        "oss4": [
-            "gstreamer-audio-1.0",
-        ],
-        "ossaudio": [
-            "gstreamer-audio-1.0",
-        ],
-        "osxaudio": [
-            "gstreamer-audio-1.0",
-        ],
-        "osxvideo": [
-            "gstreamer-video-1.0",
-        ],
-        "png": [
-            "gstreamer-video-1.0",
-            "libpng::libpng",
-        ],
-        "pulseaudio": [
-            "gstreamer-audio-1.0",
-            "gstreamer-pbutils-1.0",
-            "pulseaudio::pulseaudio",
-        ],
-        "qmlgl": [
-            "gstreamer-video-1.0",
-            "gstreamer-gl-1.0",
-            "gstreamer-gl-prototypes-1.0",
-            "qt::qtCore",
-            "qt::qtGui",
-            "qt::qtQml",
-            "qt::qtQuick",
-        ],
-        "qml6": [
-            "gstreamer-video-1.0",
-            "gstreamer-gl-1.0",
-            "gstreamer-gl-prototypes-1.0",
-            "qt::qtCore",
-            "qt::qtGui",
-            "qt::qtQml",
-            "qt::qtQuick",
-        ],
-        "replaygain": [
-            "gstreamer-pbutils-1.0",
-            "gstreamer-audio-1.0",
-        ],
-        "rtp": [
-            "gstreamer-audio-1.0",
-            "gstreamer-video-1.0",
-            "gstreamer-tag-1.0",
-            "gstreamer-rtp-1.0",
-            "gstreamer-pbutils-1.0",
-        ],
-        "rtpmanager": [
-            "gstreamer-net-1.0",
-            "gstreamer-rtp-1.0",
-            "gstreamer-audio-1.0",
-            "glib::gio-2.0",
-        ],
-        "rtsp": [
-            "gstreamer-rtp-1.0",
-            "gstreamer-rtsp-1.0",
-            "gstreamer-sdp-1.0",
-            "gstreamer-net-1.0",
-            "glib::gio-2.0",
-        ],
-        "shapewipe": [
-            "gstreamer-video-1.0",
-        ],
-        "smpte": [
-            "gstreamer-video-1.0",
-        ],
-        "soup": [
-            "gstreamer-tag-1.0",
-            "libsoup::libsoup",
-            "glib::gmodule-2.0",
-            "glib::gio-2.0",
-        ],
-        "spectrum": [
-            "gstreamer-fft-1.0",
-            "gstreamer-audio-1.0",
-        ],
-        "taglib": [
-            "gstreamer-tag-1.0",
-            "taglib::taglib",
-        ],
-        "udp": [
-            "gstreamer-net-1.0",
-            "glib::gio-2.0",
-        ],
-        "video4linux2": [
-            "gstreamer-video-1.0",
-            "gstreamer-allocators-1.0",
-            "libv4l::libv4l",
-        ],
-        "videobox": [
-            "gstreamer-video-1.0",
-            "gst-orc::gst-orc",
-        ],
-        "videocrop": [
-            "gstreamer-video-1.0",
-        ],
-        "videofilter": [
-            "gstreamer-video-1.0",
-        ],
-        "videomixer": [
-            "gstreamer-video-1.0",
-            "gst-orc::gst-orc",
-        ],
-        "vpx": [
-            "gstreamer-tag-1.0",
-            "gstreamer-video-1.0",
-            "libvpx::libvpx",
-        ],
-        "waveform": [
-            "gstreamer-audio-1.0",
-        ],
-        "wavenc": [
-            "gstreamer-audio-1.0",
-            "gstreamer-riff-1.0",
-        ],
-        "wavparse": [
-            "gstreamer-pbutils-1.0",
-            "gstreamer-riff-1.0",
-            "gstreamer-audio-1.0",
-            "gstreamer-tag-1.0",
-        ],
-        "ximagesrc": [
-            "gstreamer-video-1.0",
-            "xorg::x11",
-            "xorg::xext",
-            "xorg::xfixes",
-            "xorg::xdamage",
-            "xorg::xtst",
-        ],
-        "xingmux": [],
-        "y4menc": [
-            "gstreamer-video-1.0",
-        ],
-    }
-
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -364,8 +39,6 @@ class GStPluginsGoodConan(ConanFile):
         "with_egl": [True, False],
         "with_wayland": [True, False],
         "with_xorg": [True, False],
-
-        **{_get_option(plugin): [True, False] for plugin in _plugins},
     }
     default_options = {
         "shared": False,
@@ -373,13 +46,29 @@ class GStPluginsGoodConan(ConanFile):
 
         "with_asm": True,
         "with_jpeg": "libjpeg",
-        "with_egl": True,
-        "with_wayland": True,
-        "with_xorg": True,
+        "with_egl": False,
+        "with_wayland": False,
+        "with_xorg": False,
 
-        **{_get_option(plugin): True for plugin in _plugins},
+        # Additionally, all supported plugins can be enabled/disabled using the same option names as in meson_options.txt
     }
     languages = ["C"]
+
+    def export(self):
+        copy(self, "plugins/*.yml", self.recipe_folder, self.export_folder)
+
+    def init(self):
+        options_defaults = {}
+        for plugins_yml in Path(self.recipe_folder, "plugins").glob("*.yml"):
+            plugins_info = yaml.safe_load(plugins_yml.read_text())
+            for plugin, info in plugins_info.items():
+                has_ext_deps = any("::" in r for r in info["requires"]) or plugin == "webrtc"
+                for opt in info.get("options", [plugin]):
+                    options_defaults[opt] = options_defaults.get(opt, True) and not has_ext_deps
+        self.options.update(
+            {option: [True, False] for option in options_defaults},
+            options_defaults
+        )
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -421,12 +110,20 @@ class GStPluginsGoodConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def _is_enabled(self, plugin):
-        return self.options.get_safe(_get_option(plugin), False)
+    @property
+    @lru_cache()
+    def _plugins(self):
+        version = Version(self.version)
+        return yaml.safe_load(Path(self.recipe_folder, "plugins", f"{version.major}.{version.minor}.yml").read_text())
 
-    def _reqs(self, plugin):
+    def _is_enabled(self, plugin):
+        required_options = self._plugins[plugin].get("options", [plugin])
+        return all(self.options.get_safe(opt, False) for opt in required_options)
+
+    @lru_cache()
+    def _plugin_reqs(self, plugin):
         reqs = []
-        for req in self._plugins[plugin]:
+        for req in self._plugins[plugin]["requires"]:
             m = re.fullmatch("gstreamer-(.+)-1.0", req)
             if m:
                 if m[1] in _gstreamer_libs:
@@ -440,12 +137,23 @@ class GStPluginsGoodConan(ConanFile):
         return reqs
 
     @property
-    def _plugin_reqs(self):
-        requires = set()
+    @lru_cache()
+    def _all_reqs(self):
+        reqs = set()
         for plugin in self._plugins:
             if self._is_enabled(plugin):
-                requires.update({req.split("::")[0] for req in self._reqs(plugin)})
-        return requires
+                reqs.update(r.split("::")[0] for r in self._plugin_reqs(plugin) if "::" in r)
+        return reqs
+
+    @property
+    @lru_cache()
+    def _all_options(self):
+        options = set()
+        for plugins_yml in Path(self.recipe_folder, "plugins").glob("*.yml"):
+            plugins_info = yaml.safe_load(plugins_yml.read_text())
+            for plugin, info in plugins_info.items():
+                options.update(info.get("options", [plugin]))
+        return options
 
     @property
     def _with_qt(self):
@@ -463,12 +171,13 @@ class GStPluginsGoodConan(ConanFile):
         return opts
 
     def requirements(self):
-        reqs = self._plugin_reqs
+        reqs = self._all_reqs
         self.requires(f"gstreamer/{self.version}", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         if "gst-plugins-base" in reqs:
             self.requires(f"gst-plugins-base/{self.version}", transitive_headers=True, transitive_libs=True)
-        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
-        self.requires("gst-orc/0.4.40")
+        if "gst-orc" in reqs:
+            self.requires("gst-orc/0.4.40")
 
         if "zlib" in reqs:
             self.requires("zlib/[>=1.2.11 <2]")
@@ -543,8 +252,9 @@ class GStPluginsGoodConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         self.tool_requires("glib/<host_version>")
-        self.tool_requires("gst-orc/<host_version>")
         self.tool_requires("gettext/0.22.5")
+        if "gst-orc" in self._all_reqs:
+            self.tool_requires("gst-orc/<host_version>")
         if self.options.get_safe("with_asm"):
             self.tool_requires("nasm/2.16.01")
         if self._with_qt and not can_run(self):
@@ -570,8 +280,8 @@ class GStPluginsGoodConan(ConanFile):
         def feature(value):
             return "enabled" if value else "disabled"
 
-        for plugin in self._plugins:
-            tc.project_options[_get_option(plugin)] = feature(self._is_enabled(plugin))
+        for opt in self._all_options:
+            tc.project_options[opt] = feature(self.options.get_safe(opt))
 
         # Feature options for plugins with external deps
         tc.project_options["aalib"] = "disabled"  # TODO: libaa1
@@ -606,7 +316,7 @@ class GStPluginsGoodConan(ConanFile):
         tc.project_options["examples"] = "disabled"
         tc.project_options["tests"] = "disabled"
         tc.project_options["nls"] = "enabled"
-        tc.project_options["orc"] = "enabled"
+        tc.project_options["orc"] = feature("gst-orc" in self._all_reqs)
         tc.project_options["asm"] = feature(self.options.get_safe("with_asm"))
 
         if not self.dependencies["gst-orc"].options.shared:
@@ -667,9 +377,9 @@ class GStPluginsGoodConan(ConanFile):
                 component.defines.append("GST_PLUGINS_GOOD_STATIC")
             return component
 
-        for plugin in self._plugins:
+        for plugin, info in self._plugins.items():
             if self._is_enabled(plugin):
-                _define_plugin(plugin, self._reqs(plugin))
+                _define_plugin(plugin, self._plugin_reqs(plugin))
 
         # directsound
         if self.options.get_safe("directsound"):
