@@ -139,6 +139,9 @@ class GtkConan(ConanFile):
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0")
             self.requires("xkbcommon/1.6.0")
+            # workaround for [replace_requires] bug of not propagating egl from libepoxy correctly,
+            # when egl/system is replaced with libglvnd
+            self.requires("egl/system")
         if self.options.get_safe("with_x11"):
             # https://gitlab.gnome.org/GNOME/gtk/-/blob/4.10.0/gdk/x11/gdkx11display.h#L35-36
             # Only the xorg::x11 component actually requires transitive headers/libs.
@@ -404,6 +407,7 @@ class GtkConan(ConanFile):
                 "xkbcommon::xkbcommon",
                 "wayland::wayland-client",
                 "wayland::wayland-egl",
+                "egl::egl",
             ])
 
         if is_apple_os(self):
