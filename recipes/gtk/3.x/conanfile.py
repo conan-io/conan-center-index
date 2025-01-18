@@ -4,7 +4,8 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.env import Environment
+from conan.tools.build import can_run, cross_building
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.files import copy, get, rm, rmdir, export_conandata_patches, apply_conandata_patches, rename
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -141,8 +142,10 @@ class GtkConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         self.tool_requires("glib/<host_version>")
+        self.tool_requires("gdk-pixbuf/<host_version>")
         self.tool_requires("gettext/0.22.5")
         if self.options.get_safe("with_wayland"):
+            self.tool_requires("wayland/<host_version>")
             self.tool_requires("wayland-protocols/1.33")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/<host_version>")
@@ -168,6 +171,10 @@ class GtkConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        # Required for glib-compile-resources
+        if can_run(self):
+            VirtualRunEnv(self).generate(scope="build")
+
         true_false = lambda opt: "true" if opt else "false"
         tc = MesonToolchain(self)
         tc.project_options["wayland_backend"] = true_false(self.options.get_safe("with_wayland"))
@@ -189,19 +196,22 @@ class GtkConan(ConanFile):
         tc.project_options["localedir"] = os.path.join("res", "share", "locale")
         tc.project_options["sysconfdir"] = os.path.join("res", "etc")
 
-        if self._apt_packages:
-            # Don't force generators folder as the only PKG_CONFIG_PATH if system packages are in use.
-            tc.pkg_config_path = None
-            env = Environment()
-            env.define_path("PKG_CONFIG_PATH", self.generators_folder)
-            env.append_path("PKG_CONFIG_PATH", self._get_system_pkg_config_paths())
-            env.vars(self).save_script("conan_pkg_config_path")
+        tc.pkg_config_path = None
+        env = Environment()
+        env.define_path("PKG_CONFIG_PATH", self.generators_folder)
+        if cross_building(self):
+            env.append_path("PKG_CONFIG_PATH", os.path.join(self.generators_folder, "build"))
+            env.define_path("PKG_CONFIG_FOR_BUILD", self.conf.get("tools.gnu:pkg_config", default="pkgconf", check_type=str))
+            env.define_path("PKG_CONFIG_PATH_FOR_BUILD", os.path.join(self.generators_folder, "build"))
+        env.vars(self).save_script("conan_pkg_config_path")
 
         tc.generate()
 
         deps = PkgConfigDeps(self)
         if self.options.get_safe("with_wayland"):
+            deps.build_context_activated.append("wayland")
             deps.build_context_activated.append("wayland-protocols")
+            deps.build_context_folder = os.path.join(self.generators_folder, "build")
         deps.generate()
 
     def _get_system_pkg_config_paths(self):
