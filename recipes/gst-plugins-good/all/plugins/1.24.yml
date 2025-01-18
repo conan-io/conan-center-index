@@ -1,0 +1,340 @@
+adaptivedemux2:
+  requires:
+    - gstreamer-tag-1.0
+    - gstreamer-net-1.0
+    - gstreamer-pbutils-1.0
+    - gstreamer-app-1.0
+    - libxml2::libxml2
+    - openssl::crypto
+    - libsoup::libsoup
+    - glib::gmodule-2.0
+    - glib::gio-2.0
+alaw:
+  options:
+    - law
+  requires:
+    - gstreamer-audio-1.0
+alpha:
+  requires:
+    - gstreamer-video-1.0
+alphacolor:
+  options:
+    - alpha
+  requires:
+    - gstreamer-video-1.0
+apetag:
+  requires:
+    - gstreamer-pbutils-1.0
+    - gstreamer-tag-1.0
+audiofx:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-fft-1.0
+    - gst-orc::gst-orc
+audioparsers:
+  requires:
+    - gstreamer-pbutils-1.0
+    - gstreamer-audio-1.0
+    - gstreamer-tag-1.0
+auparse:
+  requires:
+    - gstreamer-audio-1.0
+autodetect:
+  requires: [ ]
+avi:
+  requires:
+    - gstreamer-riff-1.0
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+    - gstreamer-tag-1.0
+cacasink:
+  options:
+    - libcaca
+  requires:
+    - gstreamer-video-1.0
+    - libcaca::libcaca
+cairo:
+  requires:
+    - gstreamer-video-1.0
+    - cairo::cairo-gobject
+cutter:
+  requires:
+    - gstreamer-audio-1.0
+debug:
+  options:
+    - debugutils
+  requires:
+    - gstreamer-video-1.0
+deinterlace:
+  requires:
+    - gstreamer-video-1.0
+    - gst-orc::gst-orc
+directsound:
+  requires:
+    - gstreamer-audio-1.0
+dtmf:
+  requires:
+    - gstreamer-rtp-1.0
+effectv:
+  requires:
+    - gstreamer-video-1.0
+equalizer:
+  requires:
+    - gstreamer-audio-1.0
+flac:
+  requires:
+    - gstreamer-tag-1.0
+    - gstreamer-audio-1.0
+    - flac::flac
+flv:
+  requires:
+    - gstreamer-pbutils-1.0
+    - gstreamer-video-1.0
+    - gstreamer-tag-1.0
+    - gstreamer-audio-1.0
+flxdec:
+  options:
+    - flx
+  requires:
+    - gstreamer-video-1.0
+gdkpixbuf:
+  options:
+    - gdk-pixbuf
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-controller-1.0
+    - gdk-pixbuf::gdk-pixbuf
+goom:
+  requires:
+    - gstreamer-pbutils-1.0
+    - gst-orc::gst-orc
+goom2k1:
+  requires:
+    - gstreamer-pbutils-1.0
+gtk:
+  options:
+    - gtk3
+  requires:
+    - gstreamer-video-1.0
+    - gtk::gtk+-3.0
+    - opengl::opengl
+icydemux:
+  requires:
+    - gstreamer-tag-1.0
+    - zlib::zlib
+id3demux:
+  requires:
+    - gstreamer-tag-1.0
+    - gstreamer-pbutils-1.0
+imagefreeze:
+  requires: [ ]
+interleave:
+  requires:
+    - gstreamer-audio-1.0
+isomp4:
+  requires:
+    - gstreamer-riff-1.0
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+    - gstreamer-rtp-1.0
+    - gstreamer-tag-1.0
+    - gstreamer-pbutils-1.0
+    - zlib::zlib
+jack:
+  requires:
+    - gstreamer-audio-1.0
+    - glib::gmodule-2.0
+jpeg:
+  requires:
+    - gstreamer-video-1.0
+    - libjpeg::libjpeg
+lame:
+  requires:
+    - gstreamer-audio-1.0
+    - libmp3lame::libmp3lame
+level:
+  requires:
+    - gstreamer-audio-1.0
+matroska:
+  requires:
+    - gstreamer-pbutils-1.0
+    - gstreamer-audio-1.0
+    - gstreamer-riff-1.0
+    - gstreamer-video-1.0
+    - gstreamer-tag-1.0
+    - zlib::zlib
+    - bzip2::bzip2
+monoscope:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+mpg123:
+  requires:
+    - gstreamer-audio-1.0
+    - mpg123::mpg123
+mulaw:
+  options:
+    - law
+  requires:
+    - gstreamer-audio-1.0
+multifile:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-pbutils-1.0
+    - glib::gio-2.0
+multipart:
+  requires: [ ]
+navigationtest:
+  options:
+    - debugutils
+  requires:
+    - gstreamer-video-1.0
+oss4:
+  requires:
+    - gstreamer-audio-1.0
+ossaudio:
+  options:
+    - oss
+  requires:
+    - gstreamer-audio-1.0
+osxaudio:
+  requires:
+    - gstreamer-audio-1.0
+osxvideo:
+  requires:
+    - gstreamer-video-1.0
+png:
+  requires:
+    - gstreamer-video-1.0
+    - libpng::libpng
+pulseaudio:
+  options:
+    - pulse
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-pbutils-1.0
+    - pulseaudio::pulseaudio
+qmlgl:
+  options:
+    - qt5
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-gl-1.0
+    - gstreamer-gl-prototypes-1.0
+    - qt::qtCore
+    - qt::qtGui
+    - qt::qtQml
+    - qt::qtQuick
+qml6:
+  options:
+    - qt6
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-gl-1.0
+    - gstreamer-gl-prototypes-1.0
+    - qt::qtCore
+    - qt::qtGui
+    - qt::qtQml
+    - qt::qtQuick
+replaygain:
+  requires:
+    - gstreamer-pbutils-1.0
+    - gstreamer-audio-1.0
+rtp:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+    - gstreamer-tag-1.0
+    - gstreamer-rtp-1.0
+    - gstreamer-pbutils-1.0
+rtpmanager:
+  requires:
+    - gstreamer-net-1.0
+    - gstreamer-rtp-1.0
+    - gstreamer-audio-1.0
+    - glib::gio-2.0
+rtsp:
+  requires:
+    - gstreamer-rtp-1.0
+    - gstreamer-rtsp-1.0
+    - gstreamer-sdp-1.0
+    - gstreamer-net-1.0
+    - glib::gio-2.0
+shapewipe:
+  requires:
+    - gstreamer-video-1.0
+smpte:
+  requires:
+    - gstreamer-video-1.0
+soup:
+  requires:
+    - gstreamer-tag-1.0
+    - libsoup::libsoup
+    - glib::gmodule-2.0
+    - glib::gio-2.0
+spectrum:
+  requires:
+    - gstreamer-fft-1.0
+    - gstreamer-audio-1.0
+taglib:
+  requires:
+    - gstreamer-tag-1.0
+    - taglib::taglib
+udp:
+  requires:
+    - gstreamer-net-1.0
+    - glib::gio-2.0
+video4linux2:
+  options:
+    - v4l2
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-allocators-1.0
+    - libv4l::libv4l
+videobox:
+  requires:
+    - gstreamer-video-1.0
+    - gst-orc::gst-orc
+videocrop:
+  requires:
+    - gstreamer-video-1.0
+videofilter:
+  requires:
+    - gstreamer-video-1.0
+videomixer:
+  requires:
+    - gstreamer-video-1.0
+    - gst-orc::gst-orc
+vpx:
+  requires:
+    - gstreamer-tag-1.0
+    - gstreamer-video-1.0
+    - libvpx::libvpx
+waveform:
+  requires:
+    - gstreamer-audio-1.0
+wavenc:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-riff-1.0
+wavparse:
+  requires:
+    - gstreamer-pbutils-1.0
+    - gstreamer-riff-1.0
+    - gstreamer-audio-1.0
+    - gstreamer-tag-1.0
+ximagesrc:
+  requires:
+    - gstreamer-video-1.0
+    - xorg::x11
+    - xorg::xext
+    - xorg::xfixes
+    - xorg::xdamage
+    - xorg::xtst
+xingmux:
+  requires: [ ]
+y4menc:
+  options:
+    - y4m
+  requires:
+    - gstreamer-video-1.0
