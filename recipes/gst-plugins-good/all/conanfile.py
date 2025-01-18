@@ -62,7 +62,7 @@ class GStPluginsGoodConan(ConanFile):
         for plugins_yml in Path(self.recipe_folder, "plugins").glob("*.yml"):
             plugins_info = yaml.safe_load(plugins_yml.read_text())
             for plugin, info in plugins_info.items():
-                has_ext_deps = any("::" in r for r in info["requires"]) or plugin == "webrtc"
+                has_ext_deps = any("::" in r for r in info["requires"] if r != "gst-orc")
                 for opt in info.get("options", [plugin]):
                     options_defaults[opt] = options_defaults.get(opt, True) and not has_ext_deps
         self.options.update(
