@@ -1,7 +1,10 @@
 import os
+import re
 import shutil
+from functools import lru_cache
 from pathlib import Path
 
+import yaml
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
@@ -28,16 +31,10 @@ class GStPluginsBaseConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_libalsa": [True, False],
         "with_libdrm": [True, False],
         "with_libpng": [True, False],
         "with_libjpeg": [False, "libjpeg", "libjpeg-turbo"],
         "with_graphene": [True, False],
-        "with_pango": [True, False],
-        "with_ogg": [True, False],
-        "with_opus": [True, False],
-        "with_theora": [True, False],
-        "with_vorbis": [True, False],
         "with_gl": [True, False],
         "with_egl": [True, False],
         "with_wayland": [True, False],
@@ -47,36 +44,88 @@ class GStPluginsBaseConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_libalsa": False,
         "with_libdrm": False,
-        "with_libpng": True,
-        "with_libjpeg": "libjpeg",
+        "with_libpng": False,
+        "with_libjpeg": False,
         "with_graphene": False,
-        "with_pango": False,
-        "with_ogg": False,
-        "with_opus": False,
-        "with_theora": False,
-        "with_vorbis": False,
-        "with_gl": True,
-        "with_egl": True,
-        "with_wayland": True,
-        "with_xorg": True,
+        "with_gl": False,
+        "with_egl": False,
+        "with_wayland": False,
+        "with_xorg": False,
         "with_introspection": False,
+
+        # Additionally, all supported plugins can be enabled/disabled using the same option names as in meson_options.txt
     }
     languages = ["C"]
 
+    def export(self):
+        copy(self, "plugins/*.yml", self.recipe_folder, self.export_folder)
+
+    def init(self):
+        options_defaults = {}
+        for plugins_yml in Path(self.recipe_folder, "plugins").glob("*.yml"):
+            plugins_info = yaml.safe_load(plugins_yml.read_text())
+            for plugin, info in plugins_info.items():
+                has_ext_deps = any("::" in r for r in info["requires"] if r != "gst-orc")
+                for opt in info.get("options", [plugin]):
+                    options_defaults[opt] = options_defaults.get(opt, True) and not has_ext_deps
+        self.options.update(
+            {option: [True, False] for option in options_defaults},
+            options_defaults
+        )
+
     def export_sources(self):
         export_conandata_patches(self)
+
+    @property
+    @lru_cache()
+    def _plugins(self):
+        version = Version(self.version)
+        return yaml.safe_load(Path(self.recipe_folder, "plugins", f"{version.major}.{version.minor}.yml").read_text())
+
+    def _is_enabled(self, plugin):
+        required_options = self._plugins[plugin].get("options", [plugin])
+        return all(self.options.get_safe(opt, False) for opt in required_options)
+
+    @lru_cache()
+    def _plugin_reqs(self, plugin):
+        reqs = []
+        for req in self._plugins[plugin]["requires"]:
+            m = re.fullmatch("gstreamer-(.+)-1.0", req)
+            if m and m[1] in _gstreamer_libs:
+                reqs.append(f"gstreamer::{m[1]}")
+            else:
+                reqs.append(req)
+        return reqs
+
+    @property
+    @lru_cache()
+    def _all_reqs(self):
+        reqs = set()
+        for plugin in self._plugins:
+            if self._is_enabled(plugin):
+                reqs.update(r.split("::")[0] for r in self._plugin_reqs(plugin) if "::" in r)
+        return reqs
+
+    @property
+    @lru_cache()
+    def _all_options(self):
+        options = set()
+        for plugins_yml in Path(self.recipe_folder, "plugins").glob("*.yml"):
+            plugins_info = yaml.safe_load(plugins_yml.read_text())
+            for plugin, info in plugins_info.items():
+                options.update(info.get("options", [plugin]))
+        return options
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.os not in ["Linux", "FreeBSD"]:
-            self.options.rm_safe("with_libalsa")
-            self.options.rm_safe("with_libdrm")
-            self.options.rm_safe("with_egl")
-            self.options.rm_safe("with_wayland")
-            self.options.rm_safe("with_xorg")
+            del self.options.alsa
+            del self.options.with_libdrm
+            del self.options.with_egl
+            del self.options.with_wayland
+            del self.options.with_xorg
 
     def configure(self):
         if self.options.shared:
@@ -94,6 +143,7 @@ class GStPluginsBaseConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
+        reqs = self._all_reqs
         self.requires(f"gstreamer/{self.version}", transitive_headers=True, transitive_libs=True)
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         self.requires("gst-orc/0.4.40")
@@ -102,11 +152,11 @@ class GStPluginsBaseConan(ConanFile):
             self.requires("gobject-introspection/1.78.1", libs=False)
 
         self.requires("zlib/[>=1.2.11 <2]")
-        if self.options.get_safe("with_libalsa"):
+        if "libalsa" in reqs:
             self.requires("libalsa/1.2.10")
-        if self.options.get_safe("with_libdrm"):
+        if "libdrm" in reqs:
             self.requires("libdrm/2.4.119")
-        if self.options.get_safe("with_xorg"):
+        if "xorg" in reqs or self.options.with_gl and self.options.get_safe("with_xorg"):
             self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
         if self.options.with_gl:
             self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
@@ -126,15 +176,15 @@ class GStPluginsBaseConan(ConanFile):
                 self.requires("libjpeg/9e")
             elif self.options.with_libjpeg == "libjpeg-turbo":
                 self.requires("libjpeg-turbo/3.0.2")
-        if self.options.with_ogg:
+        if "ogg" in reqs:
             self.requires("ogg/1.3.5")
-        if self.options.with_opus:
+        if "opus" in reqs:
             self.requires("opus/1.4")
-        if self.options.with_theora:
+        if "theora" in reqs:
             self.requires("theora/1.1.1")
-        if self.options.with_vorbis:
+        if "vorbis" in reqs:
             self.requires("vorbis/1.3.7")
-        if self.options.with_pango:
+        if "pango" in reqs:
             self.requires("pango/1.54.0")
 
     def validate(self):
@@ -154,8 +204,8 @@ class GStPluginsBaseConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         self.tool_requires("glib/<host_version>")
-        self.tool_requires("gst-orc/<host_version>")
         self.tool_requires("gettext/0.22.5")
+        self.tool_requires("gst-orc/<host_version>")
         if self.options.get_safe("with_wayland"):
             self.tool_requires("wayland/<host_version>")
             self.tool_requires("wayland-protocols/1.36")
@@ -196,7 +246,6 @@ class GStPluginsBaseConan(ConanFile):
             gl_winsys.add("win32")
         return list(gl_api), list(gl_platform), list(gl_winsys)
 
-
     def generate(self):
         tc = MesonToolchain(self)
 
@@ -207,6 +256,9 @@ class GStPluginsBaseConan(ConanFile):
 
         def feature(value):
             return "enabled" if value else "disabled"
+
+        for opt in self._all_options - {"with_xorg"}:
+            tc.project_options[opt] = feature(self.options.get_safe(opt))
 
         # OpenGL integration library options
         tc.project_options["gl_api"] = gl_api
@@ -219,43 +271,11 @@ class GStPluginsBaseConan(ConanFile):
         tc.project_options["gl-jpeg"] = feature(self.options.with_gl and self.options.with_libjpeg)
         tc.project_options["gl-png"] = feature(self.options.with_gl and self.options.with_libpng)
 
-        # Feature options for plugins with no external deps
-        tc.project_options["adder"] = "enabled"
-        tc.project_options["app"] = "enabled"
-        tc.project_options["audioconvert"] = "enabled"
-        tc.project_options["audiomixer"] = "enabled"
-        tc.project_options["audiorate"] = "enabled"
-        tc.project_options["audioresample"] = "enabled"
-        tc.project_options["audiotestsrc"] = "enabled"
-        tc.project_options["compositor"] = "enabled"
-        tc.project_options["debugutils"] = "enabled"
-        tc.project_options["drm"] = feature(self.options.get_safe("with_libdrm"))
-        tc.project_options["dsd"] = "enabled"
-        tc.project_options["encoding"] = "enabled"
-        tc.project_options["gio"] = "enabled"
-        tc.project_options["gio-typefinder"] = "enabled"
-        tc.project_options["overlaycomposition"] = "enabled"
-        tc.project_options["pbtypes"] = "enabled"
-        tc.project_options["playback"] = "enabled"
-        tc.project_options["rawparse"] = "enabled"
-        tc.project_options["subparse"] = "enabled"
-        tc.project_options["tcp"] = "enabled"
-        tc.project_options["typefind"] = "enabled"
-        tc.project_options["videoconvertscale"] = "enabled"
-        tc.project_options["videorate"] = "enabled"
-        tc.project_options["videotestsrc"] = "enabled"
-        tc.project_options["volume"] = "enabled"
-
-        # Feature options for plugins with external deps
-        tc.project_options["alsa"] = feature(self.options.get_safe("with_libalsa"))
+        # Feature options
         tc.project_options["cdparanoia"] = "disabled"  # TODO: cdparanoia
+        tc.project_options["drm"] = feature(self.options.get_safe("with_libdrm"))
         tc.project_options["libvisual"] = "disabled"  # TODO: libvisual
-        tc.project_options["ogg"] = feature(self.options.with_ogg)
-        tc.project_options["opus"] = feature(self.options.with_opus)
-        tc.project_options["pango"] = feature(self.options.with_pango)
-        tc.project_options["theora"] = feature(self.options.with_theora)
         tc.project_options["tremor"] = "disabled"  # TODO: tremor - only useful on machines without floating-point support
-        tc.project_options["vorbis"] = feature(self.options.with_vorbis)
         tc.project_options["x11"] = feature(self.options.get_safe("with_xorg"))
         tc.project_options["xshm"] = feature(self.options.get_safe("with_xorg"))
         tc.project_options["xvideo"] = feature(self.options.get_safe("with_xorg"))
@@ -321,216 +341,6 @@ class GStPluginsBaseConan(ConanFile):
 
         if self.options.shared:
             self.runenv_info.define_path("GST_PLUGIN_PATH", os.path.join(self.package_folder, "lib", "gstreamer-1.0"))
-
-        def _define_plugin(name, extra_requires):
-            name = f"gst{name}"
-            component = self.cpp_info.components[name]
-            component.requires = [
-                "gstreamer::gstreamer-1.0",
-                "gstreamer::gstreamer-base-1.0",
-                "glib::gobject-2.0",
-                "glib::glib-2.0",
-            ] + extra_requires
-            component.includedirs = []
-            component.bindirs = []
-            component.resdirs = ["res"]
-            if self.options.shared:
-                component.bindirs.append(os.path.join("lib", "gstreamer-1.0"))
-            else:
-                component.libs = [name]
-                component.libdirs = [os.path.join("lib", "gstreamer-1.0")]
-                if self.settings.os in ["Linux", "FreeBSD"]:
-                    component.system_libs = ["m"]
-            gst_plugins.append(name)
-            return component
-
-        # Plugins ('gst')
-        _define_plugin("adder", [
-            "gstreamer-audio-1.0",
-            "gst-orc::gst-orc",
-        ])
-        _define_plugin("app", [
-            "gstreamer-app-1.0",
-            "gstreamer-tag-1.0",
-        ])
-        _define_plugin("audioconvert", [
-            "gstreamer-audio-1.0",
-        ])
-        _define_plugin("audiomixer", [
-            "gstreamer-audio-1.0",
-            "gst-orc::gst-orc",
-        ])
-        _define_plugin("audiorate", [
-            "gstreamer-audio-1.0",
-        ])
-        _define_plugin("audioresample", [
-            "gstreamer-audio-1.0",
-        ])
-        _define_plugin("audiotestsrc", [
-            "gstreamer-audio-1.0",
-        ])
-        _define_plugin("basedebug", [
-            "gstreamer-video-1.0",
-        ])
-        _define_plugin("compositor", [
-            "gstreamer-video-1.0",
-            "gst-orc::gst-orc",
-        ])
-        _define_plugin("dsd", [
-            "gstreamer-audio-1.0",
-        ])
-        _define_plugin("encoding", [
-            "gstreamer-video-1.0",
-            "gstreamer-pbutils-1.0",
-        ])
-        _define_plugin("gio", [
-            "glib::gio-2.0",
-        ])
-        _define_plugin("overlaycomposition", [
-            "gstreamer-video-1.0",
-        ])
-        _define_plugin("pbtypes", [
-            "gstreamer-video-1.0",
-        ])
-        _define_plugin("playback", [
-            "gstreamer-audio-1.0",
-            "gstreamer-video-1.0",
-            "gstreamer-pbutils-1.0",
-            "gstreamer-tag-1.0",
-        ])
-        _define_plugin("rawparse", [
-            "gstreamer-audio-1.0",
-            "gstreamer-video-1.0",
-        ])
-        _define_plugin("subparse", [])
-        _define_plugin("tcp", [
-            "gstreamer::gstreamer-net-1.0",
-            "glib::gio-2.0",
-        ])
-        _define_plugin("typefindfunctions", [
-            "gstreamer-pbutils-1.0",
-            "glib::gio-2.0",
-        ])
-        _define_plugin("videoconvertscale", [
-            "gstreamer-video-1.0",
-        ])
-        _define_plugin("videorate", [
-            "gstreamer-video-1.0",
-        ])
-        _define_plugin("videotestsrc", [
-            "gstreamer-video-1.0",
-            "gst-orc::gst-orc",
-        ])
-        _define_plugin("volume", [
-            "gstreamer-audio-1.0",
-            "gst-orc::gst-orc",
-        ])
-
-        # Plugins ('ext')
-        if self.options.get_safe("with_libalsa"):
-            _define_plugin("alsa", [
-                "gstreamer-audio-1.0",
-                "gstreamer-tag-1.0",
-                "libalsa::libalsa",
-            ])
-
-        # if self.options.with_cdparanoia:  # TODO: cdparanoia
-        #     _define_plugin("cdparanoia", [
-        #         "gstreamer-audio-1.0",
-        #         "cdparanoia::cdparanoia",
-        #     ])
-
-        if self.options.with_gl:
-            gstopengl = _define_plugin("opengl", [
-                "gstreamer::gstreamer-controller-1.0",
-                "gstreamer-video-1.0",
-                "gstreamer-allocators-1.0",
-                "opengl::opengl",
-                # TODO: bcm
-                # TODO: nvbuf_utils
-            ])
-            if is_apple_os(self):
-                gstopengl.frameworks = ["CoreFoundation", "Foundation", "QuartzCore"]
-            if self.options.with_graphene:
-                gstopengl.requires.append("graphene::graphene-gobject-1.0")
-            if self.options.with_libpng:
-                gstopengl.requires.append("libpng::libpng")
-            if self.options.with_libjpeg == "libjpeg":
-                gstopengl.requires.append("libjpeg::libjpeg")
-            elif self.options.with_libjpeg == "libjpeg-turbo":
-                gstopengl.requires.append("libjpeg-turbo::libjpeg-turbo")
-            if self.options.get_safe("with_xorg"):
-                gstopengl.requires.append("xorg::x11")
-
-        # if self.options.with_libvisual:  # TODO: libvisual
-        #     _define_plugin("libvisual", [
-        #         "gstreamer-audio-1.0",
-        #         "gstreamer-video-1.0",
-        #         "gstreamer-pbutils-1.0",
-        #         "libvisual::libvisual",
-        #     ])
-
-        if self.options.with_ogg:
-            _define_plugin("ogg", [
-                "gstreamer-audio-1.0",
-                "gstreamer-pbutils-1.0",
-                "gstreamer-tag-1.0",
-                "gstreamer-riff-1.0",
-                "ogg::ogg",
-            ])
-
-        if self.options.with_opus:
-            _define_plugin("opus", [
-                "gstreamer-audio-1.0",
-                "gstreamer-pbutils-1.0",
-                "gstreamer-tag-1.0",
-                "opus::opus",
-            ])
-
-        if self.options.with_pango:
-            _define_plugin("pango", [
-                "gstreamer-video-1.0",
-                "pango::pangocairo",
-            ])
-
-        if self.options.with_theora:
-            _define_plugin("theora", [
-                "gstreamer-video-1.0",
-                "gstreamer-tag-1.0",
-                "theora::theoraenc",
-                "theora::theoradec",
-            ])
-
-        if self.options.with_vorbis:
-            _define_plugin("vorbis", [
-                "gstreamer-audio-1.0",
-                "gstreamer-tag-1.0",
-                "vorbis::vorbismain",
-                "vorbis::vorbisenc",
-            ])
-
-        # if self.options.with_tremor:  # TODO: tremor
-        #     _define_plugin("ivorbisdec", [
-        #         "gstreamer-audio-1.0",
-        #         "gstreamer-tag-1.0",
-        #         "tremor::tremor",
-        #     ])
-
-        # Plugins ('sys')
-        if self.options.get_safe("with_xorg"):
-            _define_plugin("ximagesink", [
-                "gstreamer-video-1.0",
-                "xorg::x11",
-                "xorg::xext",
-                "xorg::xi",
-            ])
-            _define_plugin("xvimagesink", [
-                "gstreamer-video-1.0",
-                "xorg::x11",
-                "xorg::xext",
-                "xorg::xv",
-                "xorg::xi",
-            ])
 
         # Libraries
         def _define_library(name, extra_requires, interface=False):
@@ -675,3 +485,58 @@ class GStPluginsBaseConan(ConanFile):
         if self.options.with_introspection:
             self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "gir-1.0"))
             self.runenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
+
+        def _define_plugin(name, extra_requires):
+            name = f"gst{name}"
+            component = self.cpp_info.components[name]
+            component.requires = [
+                "gstreamer::gstreamer-1.0",
+                "gstreamer::gstreamer-base-1.0",
+                "glib::gobject-2.0",
+                "glib::glib-2.0",
+            ] + extra_requires
+            component.includedirs = []
+            component.bindirs = []
+            component.resdirs = ["res"]
+            if self.options.shared:
+                component.bindirs.append(os.path.join("lib", "gstreamer-1.0"))
+            else:
+                component.libs = [name]
+                component.libdirs = [os.path.join("lib", "gstreamer-1.0")]
+                if self.settings.os in ["Linux", "FreeBSD"]:
+                    component.system_libs = ["m"]
+            gst_plugins.append(name)
+            return component
+
+        for plugin, info in self._plugins.items():
+            if self._is_enabled(plugin):
+                _define_plugin(plugin, self._plugin_reqs(plugin))
+
+        if self.options.with_gl:
+            gstopengl = _define_plugin("opengl", [
+                "gstreamer::gstreamer-controller-1.0",
+                "gstreamer-video-1.0",
+                "gstreamer-allocators-1.0",
+                "opengl::opengl",
+                # TODO: bcm
+                # TODO: nvbuf_utils
+            ])
+            if is_apple_os(self):
+                gstopengl.frameworks = ["CoreFoundation", "Foundation", "QuartzCore"]
+            if self.options.with_graphene:
+                gstopengl.requires.append("graphene::graphene-gobject-1.0")
+            if self.options.with_libpng:
+                gstopengl.requires.append("libpng::libpng")
+            if self.options.with_libjpeg == "libjpeg":
+                gstopengl.requires.append("libjpeg::libjpeg")
+            elif self.options.with_libjpeg == "libjpeg-turbo":
+                gstopengl.requires.append("libjpeg-turbo::libjpeg-turbo")
+            if self.options.get_safe("with_xorg"):
+                gstopengl.requires.append("xorg::x11")
+
+_gstreamer_libs = {
+    "base",
+    "check",
+    "controller",
+    "net",
+}
