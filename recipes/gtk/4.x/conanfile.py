@@ -135,7 +135,7 @@ class GtkConan(ConanFile):
         self.requires("libtiff/[>=4.5 <5]")
         self.requires("libjpeg/9e")
         if self.settings.os == "Linux" and Version(self.version) >= "4.13.2":
-            self.requires("libdrm/2.4.120")
+            self.requires("libdrm/2.4.119")
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0")
             self.requires("xkbcommon/1.6.0")
