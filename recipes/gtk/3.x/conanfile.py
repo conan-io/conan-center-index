@@ -103,6 +103,7 @@ class GtkConan(ConanFile):
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0")
             self.requires("xkbcommon/1.6.0")
+            self.requires("egl/system")
         if self.options.get_safe("with_x11"):
             # https://gitlab.gnome.org/GNOME/gtk/-/blob/3.24.37/gdk/x11/gdkx11display.h#L34-35
             # Only the xorg::x11 component actually requires transitive headers/libs.
@@ -333,6 +334,7 @@ class GtkConan(ConanFile):
                 "wayland::wayland-client",
                 "wayland::wayland-cursor",
                 "wayland::wayland-egl",
+                "egl::egl",
             ])
             self.cpp_info.components["gtk+-3.0"].requires.append("pango::pangoft2")
 
