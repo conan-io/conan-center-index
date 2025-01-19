@@ -178,7 +178,8 @@ class OpenblasConan(ConanFile):
 
     def build_requirements(self):
         if self.options.use_openmp:
-            self.tool_requires("cmake/[>=3.16 <4]")
+            # Required for LINK_LANGUAGE generator expression
+            self.tool_requires("cmake/[>=3.18 <4]")
 
     def validate_build(self):
         # If we're cross-compiling, and the user didn't provide the target, and
