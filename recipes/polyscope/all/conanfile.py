@@ -75,7 +75,7 @@ class PolyscopeConan(ConanFile):
             self.requires("egl/system", transitive_headers=True, transitive_libs=True)
         if self.options.backend_glfw or self.options.get_safe("backend_egl"):
             self.requires("glad/0.1.36")
-        self.requires("glm/cci.20230113", transitive_headers=True, transitive_libs=True)
+        self.requires("glm/1.0.1", transitive_headers=True, transitive_libs=True)
         self.requires("imgui/1.90.5", transitive_headers=True, transitive_libs=True)
         self.requires("nlohmann_json/3.11.3")
         # Using a newer unvendored stb causes "undefined symbol" errors on Windows
