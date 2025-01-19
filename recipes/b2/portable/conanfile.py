@@ -1,13 +1,15 @@
 import os
+import re
 import shutil
 
 from conan import ConanFile
+from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run, check_min_cppstd
 from conan.tools.env import VirtualBuildEnv, Environment
 from conan.tools.files import copy, get, save, load, replace_in_file
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import VCVars, is_msvc
+from conan.tools.microsoft import VCVars, is_msvc, MSBuildToolchain
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.0"
@@ -115,17 +117,38 @@ class B2Conan(ConanFile):
         return cxxflags.strip()
 
     @property
-    def _windows_toolset(self):
-        # msvc, borland, como, gcc, clang, clang-win, gcc-nocygwin, intel-win32, mingw
-        if self.settings.compiler == "clang" and self.settings.compiler.get_safe("runtime"):
+    def _toolset_version(self):
+        toolset = MSBuildToolchain(self).toolset
+        if toolset:
+            match = re.match(r"v(\d+)(\d)$", toolset)
+            if match:
+                return f"{match.group(1)}.{match.group(2)}"
+        return ""
+
+    @property
+    def _toolset(self):
+        if is_msvc(self):
+            return "clang-win" if self.settings.compiler.get_safe("toolset") == "ClangCL" else "msvc"
+        if self.settings.os == "Windows" and self.settings.compiler == "clang":
             return "clang-win"
-        return {
-            "msvc": "msvc",
-            "gcc": "mingw",
-            "clang": "clang",
-            "intel-cc": "intel-win32",
-        # Use "clang" as the fall-back since it has the most generic build flags
-        }.get(str(self.settings.compiler), "clang")
+        if self.settings.os == "Emscripten" and self.settings.compiler == "clang":
+            return "emscripten"
+        if self.settings.compiler == "gcc" and is_apple_os(self):
+            return "darwin"
+        if self.settings.compiler == "apple-clang":
+            return "clang-darwin"
+        if self.settings.os == "Android" and self.settings.compiler == "clang":
+            return "clang-linux"
+        if self.settings.compiler in ["clang", "gcc"]:
+            return str(self.settings.compiler)
+        if self.settings.compiler == "sun-cc":
+            return "sunpro"
+        if "intel" in str(self.settings.compiler):
+            return {
+                "Macos": "intel-darwin",
+                "Windows": "intel-win",
+                "Linux": "intel-linux",
+            }[str(self.settings.os)]
 
     def generate(self):
         VirtualBuildEnv(self).generate()
@@ -138,7 +161,7 @@ class B2Conan(ConanFile):
             env.define("CXXFLAGS", self._cxxflags)
             env.define("BISON", "win_bison")
             env.vars(self).save_script("b2_vars")
-            build_args.append(self._windows_toolset)
+            build_args.append(self._toolset)
         else:
             build_args.append(f"--cxx={self._cxx}")
             cxxflags = self._cxxflags
@@ -147,6 +170,12 @@ class B2Conan(ConanFile):
             if self.settings.build_type in ["Debug", "RelWithDebInfo"]:
                 build_args.append("--debug")
         save(self, "build_args", " ".join(build_args))
+        # Generate project-config.jam to ensure that `b2 install ...` does not fail
+        # due to the compiler executable not being found, even if it's not really used.
+        cxx_path = self._cxx.replace("\\", "/")
+        save(self, os.path.join(self.source_folder, "project-config.jam"),
+             f'using "{self._toolset}" : {self._toolset_version} : "{cxx_path}" ;\n'
+         )
 
     @property
     def _b2_engine_dir(self):
@@ -164,6 +193,7 @@ class B2Conan(ConanFile):
             b2,
             "install",
             "b2-install-layout=portable",
+            f"toolset={self._toolset}",
             "--ignore-site-config",
             "--abbreviate-paths",
             f"--prefix={os.path.join(self.package_folder, 'bin')}",
