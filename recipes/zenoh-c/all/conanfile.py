@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
+from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment
 from conan.tools.files import get, copy, save
@@ -87,6 +88,14 @@ class ZenohCConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def _define_rust_env(self, env, scope="host", cflags=None):
+        target = self.conf.get(f"user.rust:target_{scope}", check_type=str).replace("-", "_")
+        cc = GnuToolchain(self).extra_env.vars(self)["CC" if scope == "host" else "CC_FOR_BUILD"]
+        env.define_path(f"CARGO_TARGET_{target.upper()}_LINKER", cc)
+        env.define_path(f"CC_{target}", cc)
+        if cflags:
+            env.append(f"CFLAGS_{target}", cflags)
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["ZENOHC_INSTALL_STATIC_LIBRARY"] = not self.options.shared
@@ -98,11 +107,9 @@ class ZenohCConan(ConanFile):
         tc.generate()
 
         env = Environment()
-        # Ensure the correct linker is used, especially when cross-compiling
-        target_upper = self.conf.get("user.rust:target_host", check_type=str).upper().replace("-", "_")
-        cc = GnuToolchain(self).extra_env.vars(self)["CC"]
-        env.define_path(f"CARGO_TARGET_{target_upper}_LINKER", cc)
-        # Don't add the Cargo dependencies to a global Cargo cache
+        self._define_rust_env(env, "host")
+        if cross_building(self):
+            self._define_rust_env(env, "build")
         env.define_path("CARGO_HOME", os.path.join(self.build_folder, "cargo"))
         env.vars(self).save_script("cargo_paths")
 
