@@ -51,7 +51,6 @@ class QtADS(ConanFile):
 
     def requirements(self):
         self.requires("qt/[>=6.0 <7]", transitive_headers=True, transitive_libs=True, run=can_run(self))
-        self.requires("libpng/[>=1.6 <2]")
 
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
