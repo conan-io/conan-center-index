@@ -35,10 +35,6 @@ class PackageConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
-    def configure(self):
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
