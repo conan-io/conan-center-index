@@ -71,15 +71,7 @@ class QtADS(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        qt_version = self.dependencies["qt"].ref.version
-        replace_in_file(self, os.path.join(self.source_folder, "src", "ads_globals.cpp"),
-                        "#include <qpa/qplatformnativeinterface.h>",
-                        f"#include <{qt_version}/QtGui/qpa/qplatformnativeinterface.h>",
-        )
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -88,6 +80,7 @@ class QtADS(ConanFile):
         cmake = CMake(self)
         cmake.install()
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "gnu-lgpl-v2.1.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
         rmdir(self, os.path.join(self.package_folder, "license"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
@@ -104,7 +97,3 @@ class QtADS(ConanFile):
         else:
             self.cpp_info.defines.append("ADS_STATIC")
             self.cpp_info.libs = [f"{lib_name}_static"]
-
-        if is_msvc(self) and self._qt_major >= 6:
-            # Qt 6 requires C++17 and a valid __cplusplus value
-            self.cpp_info.cxxflags.append("/Zc:__cplusplus")
