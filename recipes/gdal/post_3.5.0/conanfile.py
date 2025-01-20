@@ -31,8 +31,6 @@ class GdalConan(ConanFile):
         "with_blosc": [True, False],
         "with_brunsli": [True, False],
         "with_cfitsio": [True, False],
-        # with_cypto option has been renamed with_openssl in version 3.5.1
-        "with_crypto": ["deprecated", True, False],
         "with_cryptopp": [True, False],
         "with_curl": [True, False],
         "with_dds": [True, False],
@@ -56,7 +54,6 @@ class GdalConan(ConanFile):
         "with_libdeflate": [True, False],
         "with_libiconv": [True, False],
         "with_libkml": [True, False],
-        "with_libtiff": ["deprecated", True, False], # always enabled
         "with_lzma": [True, False],
         "with_lz4": [True, False],
         "with_mongocxx": [True, False],
@@ -74,7 +71,6 @@ class GdalConan(ConanFile):
         "with_png": [True, False],
         "with_podofo": [True, False],
         "with_poppler": [True, False],
-        "with_proj": ["deprecated", True, False], # always enabled
         "with_publicdecompwt": [True, False],
         "with_qhull": [True, False],
         "with_rasterlite2": [True, False],
@@ -85,7 +81,6 @@ class GdalConan(ConanFile):
         "with_webp": [True, False],
         "with_xerces": [True, False],
         "with_xml2": [True, False],
-        "with_zlib": ["deprecated", True, False], # always enabled
         "with_zstd": [True, False],
     }
     default_options = {
@@ -98,7 +93,6 @@ class GdalConan(ConanFile):
         "with_blosc": False,
         "with_brunsli": False,
         "with_cfitsio": False,
-        "with_crypto": "deprecated",
         "with_cryptopp": False,
         "with_curl": True,
         "with_dds": False,
@@ -122,7 +116,6 @@ class GdalConan(ConanFile):
         "with_libdeflate": True,
         "with_libiconv": True,
         "with_libkml": False,
-        "with_libtiff": "deprecated",
         "with_lzma": False,
         "with_lz4": False,
         "with_mongocxx": False,
@@ -140,7 +133,6 @@ class GdalConan(ConanFile):
         "with_png": True,
         "with_podofo": False,
         "with_poppler": False,
-        "with_proj": "deprecated",
         "with_publicdecompwt": False,
         "with_qhull": True,
         "with_rasterlite2": False,
@@ -151,7 +143,6 @@ class GdalConan(ConanFile):
         "with_webp": False,
         "with_xerces": False,
         "with_xml2": False,
-        "with_zlib": "deprecated",
         "with_zstd": False,
     }
 
@@ -307,13 +298,6 @@ class GdalConan(ConanFile):
     def build_requirements(self):
         # https://github.com/conan-io/conan/issues/3482#issuecomment-662284561
         self.tool_requires("cmake/[>=3.18 <4]")
-
-    def package_id(self):
-        # Ignore deprecated options
-        del self.info.options.with_crypto
-        del self.info.options.with_libtiff
-        del self.info.options.with_proj
-        del self.info.options.with_zlib
 
     def validate(self):
         for option in ["crypto", "zlib", "proj", "libtiff"]:
