@@ -50,7 +50,7 @@ class QtADS(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/[>=6.0 <7]", transitive_headers=True, transitive_libs=True, run=can_run(self))
+        self.requires("qt/[>=5.15 <7]", transitive_headers=True)
 
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
