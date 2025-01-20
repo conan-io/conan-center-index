@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(test_package CXX)
 
-find_package(qt-advanced-docking-system REQUIRED CONFIG)
+find_package(qt6advanceddocking REQUIRED CONFIG)
 
 add_executable(example example.cpp)
-target_link_libraries(example qt-advanced-docking-system::qt-advanced-docking-system)
-target_compile_features(example PRIVATE cxx_std_17)
+target_link_libraries(example ads::qt6advanceddocking)

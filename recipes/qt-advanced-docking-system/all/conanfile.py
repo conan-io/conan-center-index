@@ -92,6 +92,9 @@ class QtADS(ConanFile):
         else:
             lib_name = "qtadvanceddocking"
 
+        self.cpp_info.set_property("cmake_file_name", lib_name)
+        self.cpp_info.set_property("cmake_target_name", f"ads::{lib_name}")
+
         if self.options.shared:
             self.cpp_info.libs = [lib_name]
         else:
