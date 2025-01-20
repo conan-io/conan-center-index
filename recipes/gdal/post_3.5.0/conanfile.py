@@ -82,6 +82,8 @@ class GdalConan(ConanFile):
         "with_xerces": [True, False],
         "with_xml2": [True, False],
         "with_zstd": [True, False],
+        "gdal_optional_drivers": [True, False],
+        "ogr_optional_drivers": [True, False],
     }
     default_options = {
         "shared": False,
@@ -144,6 +146,8 @@ class GdalConan(ConanFile):
         "with_xerces": False,
         "with_xml2": False,
         "with_zstd": False,
+        "gdal_optional_drivers": True,
+        "ogr_optional_drivers": True,
     }
 
     def export_sources(self):
@@ -468,6 +472,11 @@ class GdalConan(ConanFile):
         # The detection fails for some reason
         # Setting it to non-const is compatible with all platforms
         tc.variables["_ICONV_SECOND_ARGUMENT_IS_NOT_CONST"] = True
+
+        # https://github.com/OSGeo/gdal/blob/v3.10.1/gdal.cmake#L31C8-L31C35
+        tc.cache_variables["GDAL_BUILD_OPTIONAL_DRIVERS"] = self.options.gdal_optional_drivers
+        tc.cache_variables["OGR_BUILD_OPTIONAL_DRIVERS"] = self.options.ogr_optional_drivers
+
         tc.generate()
 
 
