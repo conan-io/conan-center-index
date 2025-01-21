@@ -116,7 +116,7 @@ index 1aff5d765..17017da13 100644
  
  add_custom_target(format 
 diff --git a/cmake_modules/ThirdpartyToolchain.cmake b/cmake_modules/ThirdpartyToolchain.cmake
-index 017e6c5b8..1a946f564 100644
+index 017e6c5b8..5b71f7671 100644
 --- a/cmake_modules/ThirdpartyToolchain.cmake
 +++ b/cmake_modules/ThirdpartyToolchain.cmake
 @@ -37,7 +37,7 @@ option(ORC_PREFER_STATIC_GMOCK    "Prefer static gmock library, if available"
@@ -275,16 +275,19 @@ index 017e6c5b8..1a946f564 100644
  
    list (APPEND ORC_VENDOR_DEPENDENCIES "orc::vendored_zstd|${ZSTD_STATIC_LIB_NAME}")
    list (APPEND ORC_INSTALL_INTERFACE_TARGETS "$<INSTALL_INTERFACE:orc::vendored_zstd>")
-@@ -330,7 +333,8 @@ add_library (orc::zstd ALIAS orc_zstd)
+@@ -330,9 +333,10 @@ add_library (orc::zstd ALIAS orc_zstd)
  # LZ4
  if (ORC_PACKAGE_KIND STREQUAL "conan")
    find_package (LZ4 REQUIRED CONFIG)
 -  add_resolved_library (orc_lz4 ${lz4_LIBRARIES} ${lz4_INCLUDE_DIR})
 +  add_library (orc_lz4 INTERFACE IMPORTED GLOBAL)
-+  target_link_libraries(orc_lz4 INTERFACE LZ4::lz4)
++  target_link_libraries(orc_lz4 INTERFACE $<IF:$<TARGET_EXISTS:LZ4::lz4_shared>,LZ4::lz4_shared,LZ4::lz4_static>)
    list (APPEND ORC_SYSTEM_DEPENDENCIES LZ4)
-   list (APPEND ORC_INSTALL_INTERFACE_TARGETS "$<INSTALL_INTERFACE:LZ4::lz4>")
+-  list (APPEND ORC_INSTALL_INTERFACE_TARGETS "$<INSTALL_INTERFACE:LZ4::lz4>")
++  list (APPEND ORC_INSTALL_INTERFACE_TARGETS "$<INSTALL_INTERFACE:$<IF:$<TARGET_EXISTS:LZ4::lz4_shared>,LZ4::lz4_shared,LZ4::lz4_static>>")
  elseif (ORC_PACKAGE_KIND STREQUAL "vcpkg")
+   find_package(lz4 CONFIG REQUIRED)
+   add_library (orc_lz4 INTERFACE IMPORTED)
 @@ -342,13 +346,13 @@ elseif (ORC_PACKAGE_KIND STREQUAL "vcpkg")
  elseif (NOT "${LZ4_HOME}" STREQUAL "")
    find_package (LZ4 REQUIRED)
