@@ -1,37 +1,40 @@
 sources:
-  "2.1.0":
-    url: "https://github.com/stephenberry/glaze/archive/v2.1.0.tar.gz"
-    sha256: "b3bb4d886f17d266f37a6eec2c42b2e57e287918b20511297c4eb6b9960f0f8f"
-  "2.0.9":
-    url: "https://github.com/stephenberry/glaze/archive/v2.0.9.tar.gz"
-    sha256: "c1ffede3db5c74d2c46a3abe576985dc729c95df1b48ab575079427b55488bbd"
-  "2.0.7":
-    url: "https://github.com/stephenberry/glaze/archive/v2.0.7.tar.gz"
-    sha256: "1bf981e72733fb5a02a91c9642d91fa39e4a1ebe42f81e8fc6a016c11ed762cb"
-  "2.0.6":
-    url: "https://github.com/stephenberry/glaze/archive/v2.0.6.tar.gz"
-    sha256: "aa5d4921382e9781998ebbf6d36964556daa3367a2aef5ca814122502b450abc"
-  "2.0.5":
-    url: "https://github.com/stephenberry/glaze/archive/v2.0.5.tar.gz"
-    sha256: "a826c823dd125e25ecd29881775df5db07ccacd5358a04efba2b290eb6c945eb"
-  "2.0.3":
-    url: "https://github.com/stephenberry/glaze/archive/v2.0.3.tar.gz"
-    sha256: "7e155d2970329ff4a13fe1d4c4e4b63509405a984b4f37ef9f92b8756bb3c8ce"
-  "2.0.2":
-    url: "https://github.com/stephenberry/glaze/archive/v2.0.2.tar.gz"
-    sha256: "af65752fb523c82313bfbe9c04ab47e332d881154f06c63967b973ee51e5923d"
-  "2.0.1":
-    url: "https://github.com/stephenberry/glaze/archive/v2.0.1.tar.gz"
-    sha256: "0f515588189796696a802c88b0308b5386376d202c7ff1875683f38316f09c90"
-  "2.0.0":
-    url: "https://github.com/stephenberry/glaze/archive/v2.0.0.tar.gz"
-    sha256: "8553ade81a20b1a7c8398f95490ab540f34a78f226f7fe5555dfcbbaf216e108"
-  "1.9.9":
-    url: "https://github.com/stephenberry/glaze/archive/v1.9.9.tar.gz"
-    sha256: "7e2605046742a89ec455887a5a0d6b3188ed5c14ea309c5eb9814848c26bedca"
-  "1.9.5":
-    url: "https://github.com/stephenberry/glaze/archive/v1.9.5.tar.gz"
-    sha256: "3800fa7283a1d4e5bd2c746fe9e268d2f8af76d3a75be7318b2084f38f529c7f"
-  "1.8.5":
-    url: "https://github.com/stephenberry/glaze/archive/v1.8.5.tar.gz"
-    sha256: "5d876eed5689f1947ea4eafd9f13a4e0b527611a6b1857c79a5d598a856287b4"
+  "4.0.1":
+    url: "https://github.com/stephenberry/glaze/archive/v4.0.1.tar.gz"
+    sha256: "0026aca33201ee6d3a820fb5926f36ba8c838bfd3120e2e179b0eee62b5bd231"
+  "3.6.2":
+    url: "https://github.com/stephenberry/glaze/archive/v3.6.2.tar.gz"
+    sha256: "74b14656b7a47c0a03d0a857adf5059e8c2351a7a84623593be0dd16b293216c"
+  "3.6.1":
+    url: "https://github.com/stephenberry/glaze/archive/v3.6.1.tar.gz"
+    sha256: "70324ad952adee32d6bbf95a0983f0c1623ce61bd237aa28c8337af2d8bb9ed5"
+  # keep 3.4.3 for breaking change: API(naming) change
+  "3.4.3":
+    url: "https://github.com/stephenberry/glaze/archive/v3.4.3.tar.gz"
+    sha256: "2af1ecc9fbdcb8182d5633979a12b950f6728dd0d76f02affa1e11b1a3369314"
+  "3.4.1":
+    url: "https://github.com/stephenberry/glaze/archive/v3.4.1.tar.gz"
+    sha256: "73a38c4d7731714581061a918b33ad57cf38404abc68d9a58dbe57d56fe26a79"
+  "3.3.4":
+    url: "https://github.com/stephenberry/glaze/archive/v3.3.4.tar.gz"
+    sha256: "7fe31c14e7ede69d937aa8f126894fef11ebf3156f25cb95446d3d6d38e9da9c"
+  "3.3.2":
+    url: "https://github.com/stephenberry/glaze/archive/v3.3.2.tar.gz"
+    sha256: "e492d3f662c3c096ce7abac86780af6c84f74c4f19b29223ad92fccc054aafad"
+  "3.3.1":
+    url: "https://github.com/stephenberry/glaze/archive/v3.3.1.tar.gz"
+    sha256: "edb16f7b75bf9a7c86a704c006a9859474e1d49467f8ddeabdc8c3a3d5a982a2"
+  "3.1.9":
+    url: "https://github.com/stephenberry/glaze/archive/v3.1.9.tar.gz"
+    sha256: "adfce5acc9d3d88525c006a525e8f21d2a4bb628b5f7022720625f052d88a73d"
+  "3.1.7":
+    url: "https://github.com/stephenberry/glaze/archive/v3.1.7.tar.gz"
+    sha256: "388483bb3dfa1fe25c1dfec24f0afd1651e0303833cfa1b7f51020a2569e992a"
+  # keep 2.9.5 for c++20 compilers
+  "2.9.5":
+    url: "https://github.com/stephenberry/glaze/archive/v2.9.5.tar.gz"
+    sha256: "67fda0fb0cc701451c261bb1e0c94d63bafaaba13390527521e02a034eff085e"
+  # keep 2.8.4 for breaking change: pure reflection support for C style arrays
+  "2.8.4":
+    url: "https://github.com/stephenberry/glaze/archive/v2.8.4.tar.gz"
+    sha256: "6ca8e63783f0a1dbe69f50c0bc289134301ecf930ada83489b9715cdd2a49252"

@@ -44,12 +44,12 @@ class ZookeeperClientCConan(ConanFile):
 
     def requirements(self):
         if self.options.with_cyrus_sasl:
-            self.requires("cyrus-sasl/2.1.27")
+            self.requires("cyrus-sasl/2.1.28")
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
 
     def build_requirements(self):
-        self.tool_requires("maven/3.9.2")
+        self.tool_requires("maven/3.9.4")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -69,7 +69,9 @@ class ZookeeperClientCConan(ConanFile):
         apply_conandata_patches(self)
 
         # We have to install maven to generate jute files which are required by zookeeper-client
-        self.run("mvn compile", cwd=os.path.join(self.source_folder, "zookeeper-jute"))
+        # Override maven.repo.local to avoid writing to ~/.m2
+        m2_repository = os.path.join(self.build_folder, "m2", "repository")
+        self.run(f'mvn compile -Dmaven.repo.local="{m2_repository}"', cwd=os.path.join(self.source_folder, "zookeeper-jute"))
 
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "zookeeper-client", "zookeeper-client-c"))

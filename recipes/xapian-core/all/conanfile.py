@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, save
@@ -101,6 +101,12 @@ class XapianCoreConan(ConanFile):
             env.define("OBJDUMP", ":")
             env.define("RANLIB", ":")
             env.define("STRIP", ":")
+
+        if is_apple_os(self) and self.settings.arch == "armv8":
+            # A fix for ./configure issues on armv8
+            tc.configure_args.append("--host=aarch64-apple-darwin")
+            tc.extra_ldflags.append("-arch arm64")
+
         tc.generate(env)
 
         if is_msvc(self):

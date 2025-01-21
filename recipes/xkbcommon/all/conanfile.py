@@ -66,7 +66,7 @@ class XkbcommonConan(ConanFile):
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.options.get_safe("xkbregistry"):
-            self.requires("libxml2/2.12.3")
+            self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.get_safe("with_wayland"):
             self.requires("wayland/1.22.0")
 
@@ -75,14 +75,14 @@ class XkbcommonConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} is only compatible with Linux and FreeBSD")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.1")
+        self.tool_requires("meson/1.3.2")
         self.tool_requires("bison/3.8.2")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         if self.options.get_safe("with_wayland"):
             if self._has_build_profile:
                 self.tool_requires("wayland/<host_version>")
-            self.tool_requires("wayland-protocols/1.32")
+            self.tool_requires("wayland-protocols/1.33")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -95,6 +95,8 @@ class XkbcommonConan(ConanFile):
             env.generate(scope="build")
 
         tc = MesonToolchain(self)
+        if Version(self.version) >= "1.6":
+            tc.project_options["enable-bash-completion"] = False
         tc.project_options["enable-docs"] = False
         tc.project_options["enable-wayland"] = self.options.get_safe("with_wayland", False)
         tc.project_options["enable-x11"] = self.options.with_x11
@@ -111,10 +113,8 @@ class XkbcommonConan(ConanFile):
             else:
                 # Manually generate pkgconfig file of wayland-protocols since
                 # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
-                # We must use legacy conan v1 deps_cpp_info because self.dependencies doesn't
-                # contain build requirements when using 1 profile.
-                wp_prefix = self.deps_cpp_info["wayland-protocols"].rootpath
-                wp_version = self.deps_cpp_info["wayland-protocols"].version
+                wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
+                wp_version = self.dependencies.build["wayland-protocols"].ref.version
                 wp_pkg_content = textwrap.dedent(f"""\
                     prefix={wp_prefix}
                     datarootdir=${{prefix}}/res

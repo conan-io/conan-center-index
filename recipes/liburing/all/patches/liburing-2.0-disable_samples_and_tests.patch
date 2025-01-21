@@ -1,0 +1,13 @@
+diff --git a/Makefile b/Makefile
+index 5d9c4dc..66ee81e 100644
+--- a/Makefile
++++ b/Makefile
+@@ -10,8 +10,6 @@ default: all
+ 
+ all:
+ 	@$(MAKE) -C src
+-	@$(MAKE) -C test
+-	@$(MAKE) -C examples
+ 
+ .PHONY: all install default clean test
+ .PHONY: FORCE cscope

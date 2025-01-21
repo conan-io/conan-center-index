@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir
+from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.layout import basic_layout
@@ -9,7 +9,7 @@ from conan.errors import ConanInvalidConfiguration
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 class ScnlibConan(ConanFile):
     name = "scnlib"
@@ -35,38 +35,15 @@ class ScnlibConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        if Version(self.version) < "2.0.0":
-            return "11"
-        else:
-            # scn/2.0.0 has complation error on MSVC c++17
-            # we have to use versions which support c++20
-            # https://github.com/eliaskosunen/scnlib/issues/97
-            # https://github.com/conan-io/conan-center-index/pull/22455#issuecomment-1924444193
-            return "20" if is_msvc(self) else "17"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "17": {
-                "gcc": "8",
-                "clang": "7",
-                # scn/2.0.0 requires std::regex_constants::multiline
-                "apple-clang": "14",
-            },
-            "20": {
-                "Visual Studio": "17",
-                "msvc": "193",
-            }
-        }.get(self._min_cppstd, {})
-
-    def export_sources(self):
-        export_conandata_patches(self)
+        # scn/2.0.0 has complation error on MSVC c++17
+        # we have to use versions which support c++20
+        # https://github.com/eliaskosunen/scnlib/issues/97
+        # https://github.com/conan-io/conan-center-index/pull/22455#issuecomment-1924444193
+        return "20" if is_msvc(self) else "17"
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "2.0":
-            del self.options.regex_backend
 
     def configure(self):
         if self.options.get_safe("header_only") or self.options.shared:
@@ -83,7 +60,7 @@ class ScnlibConan(ConanFile):
 
     def requirements(self):
         self.requires("fast_float/6.1.0")
-        if Version(self.version) >= "2.0":
+        if Version(self.version) < "3.0":
             self.requires("simdutf/4.0.5")
         if self.options.get_safe("regex_backend") in ["boost", "boost_icu"]:
             self.requires("boost/1.83.0")
@@ -95,21 +72,17 @@ class ScnlibConan(ConanFile):
             self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, self._min_cppstd)
+
         if self.options.get_safe("regex_backend") == "boost_icu" and \
             not self.dependencies["boost"].options.get_safe("i18n_backend_icu"):
             raise ConanInvalidConfiguration(
                 f"{self.ref} with regex_backend=Boost_icu option requires boost::i18n_backend_icu to be enabled."
             )
-        if Version(self.version) >= "2.0.0" and self.options.header_only:
+        # TODO: This should probably be a del self.options.header_only in config_options once the CI supports it
+        if self.options.header_only:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support header only mode.")
-        if Version(self.version) >= "2.0.0" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "11":
+        if Version(self.version) < "3.0.2" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "11":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc 11.x due to std::regex_constants::multiline is not defined.")
 
     def build_requirements(self):
@@ -129,24 +102,21 @@ class ScnlibConan(ConanFile):
         tc.variables["SCN_DOCS"] = False
         tc.variables["SCN_INSTALL"] = True
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        if Version(self.version) < "2.0":
-            tc.variables["SCN_USE_BUNDLED_FAST_FLOAT"] = False
-        else:
-            tc.variables["SCN_USE_EXTERNAL_SIMDUTF"] = True
-            tc.variables["SCN_USE_EXTERNAL_FAST_FLOAT"] = True
-            tc.variables["SCN_BENCHMARKS_BUILDTIME"] = False
-            tc.variables["SCN_BENCHMARKS_BINARYSIZE"] = False
-            tc.variables["SCN_DISABLE_REGEX"] = self.options.regex_backend is None
-            if self.options.regex_backend is not None:
-                tc.variables["SCN_REGEX_BACKEND"] = self.options.regex_backend
-                tc.variables["SCN_USE_EXTERNAL_REGEX_BACKEND"] = True
+
+        tc.variables["SCN_USE_EXTERNAL_SIMDUTF"] = True
+        tc.variables["SCN_USE_EXTERNAL_FAST_FLOAT"] = True
+        tc.variables["SCN_BENCHMARKS_BUILDTIME"] = False
+        tc.variables["SCN_BENCHMARKS_BINARYSIZE"] = False
+        tc.variables["SCN_DISABLE_REGEX"] = self.options.regex_backend is None
+        if self.options.regex_backend is not None:
+            tc.variables["SCN_REGEX_BACKEND"] = self.options.regex_backend
+            tc.variables["SCN_USE_EXTERNAL_REGEX_BACKEND"] = True
         tc.generate()
 
         deps = CMakeDeps(self)
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         if not self.options.get_safe("header_only"):
             cmake = CMake(self)
             cmake.configure()
@@ -157,13 +127,10 @@ class ScnlibConan(ConanFile):
         if self.options.get_safe("header_only"):
             copy(self, "*", dst=os.path.join(self.package_folder, "include"), src=os.path.join(self.source_folder, "include"))
             src_folder = os.path.join(self.source_folder, "src")
-            if Version(self.version) >= "1.0":
-                copy(self, "reader_*.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "reader"))
-                copy(self, "vscan.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "scan"))
-                copy(self, "locale.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "detail"))
-                copy(self, "file.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "detail"))
-            else:
-                copy(self, "*.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "detail"))
+            copy(self, "reader_*.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "reader"))
+            copy(self, "vscan.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "scan"))
+            copy(self, "locale.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "detail"))
+            copy(self, "file.cpp", src=src_folder, dst=os.path.join(self.package_folder, "include", "scn", "detail"))
         else:
             cmake = CMake(self)
             cmake.install()
@@ -184,12 +151,8 @@ class ScnlibConan(ConanFile):
             self.cpp_info.components["_scnlib"].defines = ["SCN_HEADER_ONLY=0"]
             self.cpp_info.components["_scnlib"].libs = ["scn"]
         self.cpp_info.components["_scnlib"].requires.append("fast_float::fast_float")
-        if Version(self.version) >= "2.0":
+        if Version(self.version) < "3.0":
             self.cpp_info.components["_scnlib"].requires.append("simdutf::simdutf")
-            if self.options.get_safe("regex_backend") in ["boost", "boost_icu"]:
-                self.cpp_info.components["_scnlib"].requires.append("boost::regex")
-            elif self.options.get_safe("regex_backend") == "re2":
-                self.cpp_info.components["_scnlib"].requires.append("re2::re2")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_scnlib"].system_libs.append("m")

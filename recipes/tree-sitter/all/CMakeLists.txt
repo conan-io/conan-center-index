@@ -1,25 +1,30 @@
 cmake_minimum_required(VERSION 3.4)
-project(tree-sitter C)
+project(tree-sitter LANGUAGES C)
 
 # Use cmake script instead of Makefile to support MSVC + follow fPIC option
 
-file(GLOB SOURCES RELATIVE "${PROJECT_SOURCE_DIR}" src/lib/src/*.c)
-list(REMOVE_ITEM SOURCES src/lib/src/lib.c)
+file(GLOB SOURCES ${TREE_SITTER_SRC_DIR}/lib/src/*.c)
+list(REMOVE_ITEM SOURCES ${TREE_SITTER_SRC_DIR}/lib/src/lib.c)
 
-file(GLOB HEADERS src/lib/include/tree_sitter/*.h)
+file(GLOB HEADERS ${TREE_SITTER_SRC_DIR}/lib/include/tree_sitter/*.h)
 
 add_library(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME}
     PRIVATE
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/lib/include>
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/lib/src>
+        $<BUILD_INTERFACE:${TREE_SITTER_SRC_DIR}/lib/include>
+        $<BUILD_INTERFACE:${TREE_SITTER_SRC_DIR}/lib/src>
 )
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
-        C_STANDARD 99
         PUBLIC_HEADER "${HEADERS}"
         WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
+
+if(TREE_SITTER_VERSION VERSION_LESS "0.21.0")
+    target_compile_features(${PROJECT_NAME} PRIVATE c_std_99)
+else()
+    target_compile_features(${PROJECT_NAME} PRIVATE c_std_11)
+endif()
 
 include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME}

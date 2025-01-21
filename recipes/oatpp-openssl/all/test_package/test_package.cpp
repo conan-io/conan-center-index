@@ -2,8 +2,7 @@
 #include "oatpp-openssl/Config.hpp"
 
 int main() {
-     
-    oatpp::openssl::Config config;
-    
+    std::shared_ptr<oatpp::openssl::Config> config = oatpp::openssl::Config::createShared();
+    std::cout << "Test package successful\n";
     return 0;
 }

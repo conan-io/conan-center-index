@@ -48,3 +48,7 @@ class LibUDEVConan(ConanFile):
         self.cpp_info.libdirs = []
         pkg_config = PkgConfig(self, "libudev")
         pkg_config.fill_cpp_info(self.cpp_info)
+        self.cpp_info.set_property("system_package_version", str(pkg_config.version))
+
+        # todo Remove this workaround for Conan v1
+        self.cpp_info.set_property("component_version", str(pkg_config.version))

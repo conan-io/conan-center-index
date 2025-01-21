@@ -1,9 +1,10 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, load, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, load, rmdir, rm
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
@@ -52,7 +53,9 @@ class OneTBBConan(ConanFile):
 
     @property
     def _tbbbind_supported(self):
-        return self.settings.os != "Macos"
+        if is_apple_os(self):
+            return self.settings.os == "Macos" and Version(self.version) >= "2021.11.0"
+        return True
 
     @property
     def _tbbbind_build(self):
@@ -113,14 +116,16 @@ class OneTBBConan(ConanFile):
         toolchain.variables["TBB_STRICT"] = False
         if Version(self.version) >= "2021.5.0":
             toolchain.variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
-        if self.options.get_safe("interprocedural_optimization"):
+        if self.options.get_safe("interprocedural_optimization") is not None:
             toolchain.variables["TBB_ENABLE_IPO"] = self.options.interprocedural_optimization
         if Version(self.version) >= "2021.6.0" and self.options.get_safe("tbbmalloc"):
             toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.tbbproxy
         toolchain.variables["TBB_DISABLE_HWLOC_AUTOMATIC_SEARCH"] = not self._tbbbind_build
         if self._tbbbind_explicit_hwloc:
             hwloc_package_folder = self.dependencies["hwloc"].package_folder
-            hwloc_lib_name = "hwloc.lib" if self.settings.os == "Windows" else "libhwloc.so"
+            hwloc_lib_name = ("hwloc.lib" if self.settings.os == "Windows" else
+                              "libhwloc.dylib" if self.settings.os == "Macos" else
+                              "libhwloc.so")
             toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_LIBRARY_PATH"] = \
                 os.path.join(hwloc_package_folder, "lib", hwloc_lib_name).replace("\\", "/")
             toolchain.variables[f"CMAKE_HWLOC_{self._tbbbind_hwloc_version}_INCLUDE_PATH"] = \
@@ -147,6 +152,7 @@ class OneTBBConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "TBB")

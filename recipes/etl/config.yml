@@ -1,33 +1,19 @@
 versions:
+  "20.39.4":
+    folder: all
+  "20.39.3":
+    folder: all
+  "20.38.17":
+    folder: all
+  "20.38.16":
+    folder: all
+  "20.38.15":
+    folder: all
+  "20.38.14":
+    folder: all
+  "20.38.13":
+    folder: all
+  "20.38.11":
+    folder: all
   "20.38.10":
-    folder: all
-  "20.38.7":
-    folder: all
-  "20.38.6":
-    folder: all
-  "20.38.4":
-    folder: all
-  "20.38.3":
-    folder: all
-  "20.38.0":
-    folder: all
-  "20.37.3":
-    folder: all
-  "20.37.2":
-    folder: all
-  "20.37.1":
-    folder: all
-  "20.37.0":
-    folder: all
-  "20.36.0":
-    folder: all
-  "20.35.14":
-    folder: all
-  "20.35.11":
-    folder: all
-  "20.35.8":
-    folder: all
-  "20.35.7":
-    folder: all
-  "20.34.0":
     folder: all

@@ -8,6 +8,8 @@ conanbuildinfo.txt
 conaninfo.txt
 graph_info.json
 build/
+.conanrunner/
+.conanrc
 
 # CMake
 CMakeUserPresets.json

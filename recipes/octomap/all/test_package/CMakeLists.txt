@@ -9,3 +9,7 @@ if(TARGET octomap-static)
 else()
   target_link_libraries(${PROJECT_NAME} PRIVATE octomap octomath)
 endif()
+
+if(octomap_VERSION VERSION_GREATER_EQUAL "1.10.0")
+  target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+endif()

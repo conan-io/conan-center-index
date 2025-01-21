@@ -1,0 +1,16 @@
+diff --git a/Source/CMakeLists.txt b/Source/CMakeLists.txt
+index 6cdab6c..04c9c4f 100644
+--- a/Source/CMakeLists.txt
++++ b/Source/CMakeLists.txt
+@@ -27,9 +27,9 @@ elseif (_7BIT_CONF_HEADER_ONLY_LIB)
+ endif ()
+ 
+ if (_7BIT_CONF_HEADER_ONLY_LIB)
+-    target_link_libraries(7bitConf INTERFACE taocpp-json)
++    target_link_libraries(7bitConf INTERFACE taocpp::json)
+ else ()
+-    target_link_libraries(7bitConf taocpp-json)
++    target_link_libraries(7bitConf taocpp::json)
+ endif ()
+ 
+ add_library(7bitConf::7bitConf ALIAS 7bitConf)

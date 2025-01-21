@@ -1,0 +1,65 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index dbc7d48..a3810a5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -118,10 +118,15 @@ include_directories(
+ 
+ add_subdirectory(deps/crc32)
+ add_subdirectory(src)
+-add_subdirectory(tools)
++# add_subdirectory(tools)
+ 
+ # Tests
+ if(CIO_TESTS)
+   enable_testing()
+   add_subdirectory(tests)
+ endif()
++
++include(GNUInstallDirs)
++install(FILES ${PROJECT_BINARY_DIR}/include/chunkio/cio_info.h ${PROJECT_BINARY_DIR}/include/chunkio/cio_version.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/chunkio)
++install(DIRECTORY include/chunkio DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} PATTERN "*.in" EXCLUDE)
++install(DIRECTORY deps/monkey/include/monkey DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+diff --git a/deps/crc32/CMakeLists.txt b/deps/crc32/CMakeLists.txt
+index 8ae1823..0b7dba0 100644
+--- a/deps/crc32/CMakeLists.txt
++++ b/deps/crc32/CMakeLists.txt
+@@ -3,3 +3,12 @@ set(src
+   )
+ 
+ add_library(cio-crc32 STATIC ${src})
++
++if(CIO_LIB_STATIC)
++  include(GNUInstallDirs)
++  install(
++    TARGETS cio-crc32
++    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++  )
++endif()
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index bb52273..b6e37b1 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -51,3 +51,22 @@ endif()
+ if (NOT CIO_LIB_STATIC AND NOT CIO_LIB_SHARED)
+   message(FATAL_ERROR "What are you doing?, you should build something")
+ endif()
++
++include(GNUInstallDirs)
++
++if(CIO_LIB_STATIC)
++    install(
++        TARGETS chunkio-static
++        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        )
++endif()
++
++if(CIO_LIB_SHARED)
++    install(
++        TARGETS chunkio-shared
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
++        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++    )
++endif()

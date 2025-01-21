@@ -27,18 +27,21 @@ class OpenDis6Conan(ConanFile):
         "fPIC": True
     }
 
+    provides = "libsersi"
+    deprecated = "libsersi"
+
     @property
     def _min_cppstd(self):
-        return "17"
+        return "14"
 
     @property
     def _compilers_minimum_version(self):
         return {
             "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "8.5",
-            "clang": "6",
-            "apple-clang": "14",
+            "gcc": "7",
+            "clang": "7",
+            "apple-clang": "10",
         }
 
     def config_options(self):
@@ -63,7 +66,7 @@ class OpenDis6Conan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.22 <4]")
-    
+
     def validate(self):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
@@ -90,6 +93,6 @@ class OpenDis6Conan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "OpenDIS")
         self.cpp_info.set_property("cmake_target_name", "OpenDIS::OpenDIS6")
         self.cpp_info.set_property("cmake_target_aliases", ["OpenDIS::DIS6","OpenDIS6"])
-        
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")

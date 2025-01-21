@@ -1,19 +1,13 @@
 sources:
-  "7.3.0":
-    url: "https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.3.0/openapi-generator-cli-7.3.0.jar"
-    sha256: "879c15340a75a19a7e720efc242c3223e0e4207b0694d6d1cea5c7dd87cf1cce"
-  "7.2.0":
-    url: "https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.2.0/openapi-generator-cli-7.2.0.jar"
-    sha256: "1cf0c80de12c0fdc8594289c19e414b402108ef10b8dd0bfda1953151341ab5d"
-  "7.0.0":
-    url: "https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.0.0/openapi-generator-cli-7.0.0.jar"
-    sha256: "80e8e9d71bdbdf513b8c65cf7d3fc2fe3d88aaeb4e39a2c6e20831f00032c775"
+  "7.8.0":
+    url: "https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.8.0/openapi-generator-cli-7.8.0.jar"
+    sha256: "d1879cf42da31f8cf61cf68798b8ef2418af0c6bd93a5c1870e1ff543fbb9365"
+  "7.5.0":
+    url: "https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.5.0/openapi-generator-cli-7.5.0.jar"
+    sha256: "47ebbd1beddaf7dfbee523e7b87623c6ec1b1d42960fbe15f6cad2f6426c69bf"
+  "7.4.0":
+    url: "https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.4.0/openapi-generator-cli-7.4.0.jar"
+    sha256: "e42769a98fef5634bee0f921e4b90786a6b3292aa11fe8d2f84c045ac435ab29"
   "6.6.0":
     url: "https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/6.6.0/openapi-generator-cli-6.6.0.jar"
     sha256: "9718ff7844e89462c75dcd9b20a35136f6db257bfe1b874db1e3002e99de4609"
-  "6.5.0":
-    url: "https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/6.5.0/openapi-generator-cli-6.5.0.jar"
-    sha256: "f18d771e98f2c5bb169d1d1961de4f94866d2901abc1e16177dd7e9299834721"
-  "6.4.0":
-    url: "https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/6.4.0/openapi-generator-cli-6.4.0.jar"
-    sha256: "35aead300e0c9469fbd9d30cf46f4153897dcb282912091ca4ec9212dce9d151"
