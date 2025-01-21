@@ -116,7 +116,7 @@ index 1aff5d765..17017da13 100644
  
  add_custom_target(format 
 diff --git a/cmake_modules/ThirdpartyToolchain.cmake b/cmake_modules/ThirdpartyToolchain.cmake
-index 017e6c5b8..5b71f7671 100644
+index 017e6c5b8..9ac4e9746 100644
 --- a/cmake_modules/ThirdpartyToolchain.cmake
 +++ b/cmake_modules/ThirdpartyToolchain.cmake
 @@ -37,7 +37,7 @@ option(ORC_PREFER_STATIC_GMOCK    "Prefer static gmock library, if available"
@@ -314,16 +314,19 @@ index 017e6c5b8..5b71f7671 100644
  
    list (APPEND ORC_VENDOR_DEPENDENCIES "orc::vendored_lz4|${LZ4_STATIC_LIB_NAME}")
    list (APPEND ORC_INSTALL_INTERFACE_TARGETS "$<INSTALL_INTERFACE:orc::vendored_lz4>")
-@@ -491,7 +495,8 @@ endif ()
+@@ -491,9 +495,10 @@ endif ()
  
  if (ORC_PACKAGE_KIND STREQUAL "conan")
    find_package (Protobuf REQUIRED CONFIG)
 -  add_resolved_library (orc_protobuf ${protobuf_LIBRARIES} ${protobuf_INCLUDE_DIR})
 +  add_library (orc_protobuf INTERFACE IMPORTED GLOBAL)
-+  target_link_libraries(orc_protobuf INTERFACE protobuf::libprotobuf)
++  target_link_libraries(orc_protobuf INTERFACE protobuf::protobuf)
    list (APPEND ORC_SYSTEM_DEPENDENCIES Protobuf)
-   list (APPEND ORC_INSTALL_INTERFACE_TARGETS "$<INSTALL_INTERFACE:protobuf::libprotobuf>")
+-  list (APPEND ORC_INSTALL_INTERFACE_TARGETS "$<INSTALL_INTERFACE:protobuf::libprotobuf>")
++  list (APPEND ORC_INSTALL_INTERFACE_TARGETS "$<INSTALL_INTERFACE:protobuf::protobuf>")
  elseif (ORC_PACKAGE_KIND STREQUAL "vcpkg")
+   find_package(Protobuf CONFIG REQUIRED)
+   add_library (orc_protobuf INTERFACE IMPORTED)
 @@ -505,20 +510,20 @@ elseif (NOT "${PROTOBUF_HOME}" STREQUAL "")
    find_package (Protobuf REQUIRED)
  
