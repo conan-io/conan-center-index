@@ -18,7 +18,7 @@ index 1f8931508..e8f894657 100644
  
 +option(ORC_ENABLE_CLANG_TOOLS
 +    "Enable Clang tools"
-+    OFF)
++    ON)
 +
  # Make sure that a build type is selected
  if (NOT CMAKE_BUILD_TYPE)
@@ -40,11 +40,53 @@ index 1f8931508..e8f894657 100644
 +if (ORC_ENABLE_CLANG_TOOLS)
 +  INCLUDE(CheckFormat)
 +endif ()
+diff --git a/c++/src/Adaptor.hh.in b/c++/src/Adaptor.hh.in
+index 2cce8158e..5fb12be01 100644
+--- a/c++/src/Adaptor.hh.in
++++ b/c++/src/Adaptor.hh.in
+@@ -28,7 +28,6 @@
+ #cmakedefine HAS_POST_2038
+ #cmakedefine HAS_STD_ISNAN
+ #cmakedefine HAS_BUILTIN_OVERFLOW_CHECK
+-#cmakedefine NEEDS_Z_PREFIX
+ 
+ #include "orc/orc-config.hh"
+ #include <string>
+@@ -103,10 +102,6 @@ typedef SSIZE_T ssize_t;
+ 
+ #include <mutex>
+ 
+-#ifdef NEEDS_Z_PREFIX
+-#define Z_PREFIX 1
+-#endif
+-
+ namespace orc {
+   std::string to_string(double val);
+   std::string to_string(int64_t val);
 diff --git a/c++/src/CMakeLists.txt b/c++/src/CMakeLists.txt
-index 694667c06..e378429f1 100644
+index 694667c06..17b6ce559 100644
 --- a/c++/src/CMakeLists.txt
 +++ b/c++/src/CMakeLists.txt
-@@ -218,11 +218,11 @@ target_include_directories (orc
+@@ -121,18 +121,6 @@ CHECK_CXX_SOURCE_RUNS("
+   HAS_POST_2038
+ )
+ 
+-set(CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIR})
+-set(CMAKE_REQUIRED_LIBRARIES orc_zlib)
+-CHECK_CXX_SOURCE_COMPILES("
+-    #define Z_PREFIX
+-    #include<zlib.h>
+-    z_stream strm;
+-    int main(int, char *[]) {
+-        deflateReset(&strm);
+-    }"
+-  NEEDS_Z_PREFIX
+-)
+-
+ configure_file (
+   "Adaptor.hh.in"
+   "${CMAKE_CURRENT_BINARY_DIR}/Adaptor.hh"
+@@ -218,11 +206,11 @@ target_include_directories (orc
    INTERFACE
      $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
    PUBLIC
