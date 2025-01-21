@@ -1,10 +1,9 @@
 import os
 
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd, can_run
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, replace_in_file, rmdir
-from conan.tools.microsoft import is_msvc
+from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.0.9"
@@ -54,10 +53,6 @@ class QtADS(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
-
-    def build_requirements(self):
-        if not can_run(self):
-            self.tool_requires("qt/<host_version>", options={"gui": False, "widgets": False})
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
