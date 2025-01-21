@@ -18,7 +18,7 @@ index e17aee620..ae061f58e 100644
  
 +option(ORC_ENABLE_CLANG_TOOLS
 +    "Enable Clang tools"
-+    ON)
++    OFF)
 +
  # Make sure that a build type is selected
  if (NOT CMAKE_BUILD_TYPE)
@@ -135,7 +135,7 @@ index 017e6c5b8..fa5a1c0e1 100644
 -macro (add_resolved_library target_name link_lib include_dir)
 -  add_library (${target_name} INTERFACE IMPORTED)
 +macro (orc_add_resolved_library target_name link_lib include_dir)
-+  add_library (${target_name} INTERFACE IMPORTED GLOBAL)
++  add_library (${target_name} INTERFACE IMPORTED )
    target_link_libraries (${target_name} INTERFACE ${link_lib})
    target_include_directories (${target_name} SYSTEM INTERFACE ${include_dir})
  endmacro ()
