@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.microsoft import msvc_runtime_flag
 from conan.tools.scm import Version
 
@@ -90,6 +90,16 @@ class FltkConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            # Fix relocated X11 and OpenGL not being linked against correctly
+            replace_in_file(self, os.path.join(self.source_folder, "CMake", "options.cmake"),
+                            "include (FindX11)" if Version(self.version) < "1.4.0" else "include(FindX11)",
+                            "find_package(X11 REQUIRED)\n"
+                            "link_libraries(X11::X11 X11::Xext)\n" +
+                            ("find_package(OpenGL REQUIRED)\n"
+                             "link_libraries(OpenGL::GLX)\n" if self.options.with_gl else ""))
+
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -113,9 +123,7 @@ class FltkConan(ConanFile):
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
-
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -176,7 +184,3 @@ class FltkConan(ConanFile):
                 self.cpp_info.requires.append("libxft::libxft")
             if self.options.with_gl:
                 self.cpp_info.requires.extend(["opengl::opengl", "glu::glu"])
-
-        # TODO: to remove in conan v2 once legacy generators removed
-        self.cpp_info.names["cmake_find_package"] = "fltk"
-        self.cpp_info.names["cmake_find_package_multi"] = "fltk"
