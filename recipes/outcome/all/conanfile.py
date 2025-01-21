@@ -12,11 +12,11 @@ required_conan_version = ">=1.50.0"
 
 class OutcomeConan(ConanFile):
     name = "outcome"
-    homepage = "https://github.com/ned14/outcome"
     description = "Provides very lightweight outcome<T> and result<T>"
     license = "Apache-2.0"
     url = "https://github.com/conan-io/conan-center-index"
-    topics = ("result",)
+    homepage = "https://github.com/ned14/outcome"
+    topics = ("result", "header-only")
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True

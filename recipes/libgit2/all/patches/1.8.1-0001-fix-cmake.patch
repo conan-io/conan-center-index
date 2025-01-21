@@ -1,0 +1,72 @@
+diff --git a/cmake/SelectHTTPParser.cmake b/cmake/SelectHTTPParser.cmake
+index 4fc1f69..1e8d83e 100644
+--- a/cmake/SelectHTTPParser.cmake
++++ b/cmake/SelectHTTPParser.cmake
+@@ -1,10 +1,10 @@
+ # Optional external dependency: http-parser
+ if(USE_HTTP_PARSER STREQUAL "http-parser")
+-	find_package(HTTPParser)
++	find_package(http_parser)
+ 
+-	if(HTTP_PARSER_FOUND AND HTTP_PARSER_VERSION_MAJOR EQUAL 2)
+-		list(APPEND LIBGIT2_SYSTEM_INCLUDES ${HTTP_PARSER_INCLUDE_DIRS})
+-		list(APPEND LIBGIT2_SYSTEM_LIBS ${HTTP_PARSER_LIBRARIES})
++	if(http_parser_FOUND)
++		list(APPEND LIBGIT2_SYSTEM_INCLUDES ${http_parser_INCLUDE_DIRS})
++		list(APPEND LIBGIT2_SYSTEM_LIBS ${http_parser_LIBRARIES})
+ 		list(APPEND LIBGIT2_PC_LIBS "-lhttp_parser")
+ 		set(GIT_HTTPPARSER_HTTPPARSER 1)
+ 		add_feature_info(http-parser ON "using http-parser (system)")
+diff --git a/cmake/SelectHTTPSBackend.cmake b/cmake/SelectHTTPSBackend.cmake
+index d293001..acffba9 100644
+--- a/cmake/SelectHTTPSBackend.cmake
++++ b/cmake/SelectHTTPSBackend.cmake
+@@ -9,6 +9,11 @@ if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+ endif()
+ 
+ if(USE_HTTPS)
++	if(WIN32)
++		list(APPEND LIBGIT2_SYSTEM_LIBS "secur32")
++		list(APPEND LIBGIT2_PC_LIBS "-lsecur32")
++	endif()
++
+ 	# Auto-select TLS backend
+ 	sanitizebool(USE_HTTPS)
+ 	if(USE_HTTPS STREQUAL ON)
+diff --git a/cmake/SelectSSH.cmake b/cmake/SelectSSH.cmake
+index 079857f..652b310 100644
+--- a/cmake/SelectSSH.cmake
++++ b/cmake/SelectSSH.cmake
+@@ -4,15 +4,11 @@ if(USE_SSH STREQUAL "exec")
+ 
+ 	add_feature_info(SSH ON "using OpenSSH exec support")
+ elseif(USE_SSH STREQUAL ON OR USE_SSH STREQUAL "libssh2")
+-	find_pkglibraries(LIBSSH2 libssh2)
+-
+-	if(NOT LIBSSH2_FOUND)
+-		find_package(LibSSH2)
+-		set(LIBSSH2_INCLUDE_DIRS ${LIBSSH2_INCLUDE_DIR})
+-		get_filename_component(LIBSSH2_LIBRARY_DIRS "${LIBSSH2_LIBRARY}" DIRECTORY)
+-		set(LIBSSH2_LIBRARIES ${LIBSSH2_LIBRARY})
+-		set(LIBSSH2_LDFLAGS "-lssh2")
+-	endif()
++	FIND_PACKAGE(Libssh2 REQUIRED)
++	SET(LIBSSH2_FOUND ON)
++	SET(LIBSSH2_INCLUDE_DIRS ${Libssh2_INCLUDE_DIRS})
++	SET(LIBSSH2_LIBRARIES ${Libssh2_LIBRARIES})
++	SET(LIBSSH2_LIBRARY_DIRS ${Libssh2_LIB_DIRS})
+ 
+ 	if(NOT LIBSSH2_FOUND)
+ 		message(FATAL_ERROR "LIBSSH2 not found. Set CMAKE_PREFIX_PATH if it is installed outside of the default search path.")
+@@ -22,10 +18,7 @@ elseif(USE_SSH STREQUAL ON OR USE_SSH STREQUAL "libssh2")
+ 	list(APPEND LIBGIT2_SYSTEM_LIBS ${LIBSSH2_LIBRARIES})
+ 	list(APPEND LIBGIT2_PC_LIBS ${LIBSSH2_LDFLAGS})
+ 
+-	check_library_exists("${LIBSSH2_LIBRARIES}" libssh2_userauth_publickey_frommemory "${LIBSSH2_LIBRARY_DIRS}" HAVE_LIBSSH2_MEMORY_CREDENTIALS)
+-	if(HAVE_LIBSSH2_MEMORY_CREDENTIALS)
+-		set(GIT_SSH_LIBSSH2_MEMORY_CREDENTIALS 1)
+-	endif()
++	set(GIT_SSH_MEMORY_CREDENTIALS 1)
+ 
+ 	if(WIN32 AND EMBED_SSH_PATH)
+ 		file(GLOB SSH_SRC "${EMBED_SSH_PATH}/src/*.c")

@@ -105,12 +105,6 @@ class AutoconfConan(ConanFile):
         self.cpp_info.includedirs = []
         self.cpp_info.resdirs = ["res"]
 
-        # TODO: These variables can be removed since the scripts now locate the resources
-        #       relative to themselves.
-        dataroot_path = os.path.join(self.package_folder, "res", "autoconf")
-        self.buildenv_info.define_path("AC_MACRODIR", dataroot_path)
-        self.buildenv_info.define_path("autom4te_perllibdir", dataroot_path)
-
         bin_path = os.path.join(self.package_folder, "bin")
         self.buildenv_info.define_path("AUTOCONF", os.path.join(bin_path, "autoconf"))
         self.buildenv_info.define_path("AUTORECONF", os.path.join(bin_path, "autoreconf"))

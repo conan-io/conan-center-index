@@ -1,0 +1,63 @@
+# This workflow warns and then closes issues and PRs that have had no activity for a specified amount of time.
+#
+# You can adjust the behavior by modifying this file.
+# For more information, see:
+# https://github.com/actions/stale
+name: Mark stale pull requests
+
+
+on:
+  schedule:
+  - cron: '34 6 * * *'
+
+jobs:
+  stale:
+    if: github.repository == 'conan-io/conan-center-index'
+
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: read
+
+
+    steps:
+    - uses: actions/stale@v9
+      with:
+        # Do not make issues as stale
+        days-before-issue-stale: -1
+        # Number of days before stale PRs are closed
+        days-before-pr-stale: 30
+
+
+        # Do not close issues automatically
+        days-before-issue-close: -1
+        # Idle number of days before closing stale PRs
+        days-before-pr-close: 30
+
+        # process older PRs first
+        ascending: true
+
+        # Labels on PRs exempted from stale
+        exempt-pr-labels: blocked,infrastructure
+
+        # Label to apply on staled PRs
+        stale-pr-label: 'stale'
+
+        # Skip issues when having stale state
+        remove-issue-stale-when-updated: false
+        ignore-issue-updates: true
+
+
+        # Comment on the staled PRs
+        stale-pr-message: >
+            This pull request has been automatically marked as stale because it has not had
+            recent activity. It will be closed if no further activity occurs. Thank you
+            for your contributions.
+
+        # Comment on the staled PRs while closed
+        close-pr-message: >
+            This pull request has been automatically closed because it has not had
+            recent activity. Thank you for your contributions.
+
+        # Max number of operations per run
+        operations-per-run: 30

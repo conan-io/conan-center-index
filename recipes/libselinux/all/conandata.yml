@@ -40,6 +40,18 @@ patches:
       base_path: libselinux-3.6
       patch_description: "Fix a missing #include <stdint.h>"
       patch_type: "portability"
+    - patch_file: patches/0004-libsepol-src-Makefile-fix-reallocarray-detection.patch
+      patch_description: "libsepol/src/Makefile: fix reallocarray detection"
+      patch_source: "https://lore.kernel.org/selinux/20240108210314.339682-1-fontaine.fabrice@gmail.com/"
+      patch_type: "portability"
+      base_path: libsepol-3.6
+    - patch_file: patches/0005-libselinux-libsepol-Add-CFLAGS-and-LDFLAGS.patch
+      patch_description: "libselinux, libsepol: Add CFLAGS and LDFLAGS to Makefile checks"
+      patch_source: "https://lore.kernel.org/selinux/20240313224806.2859045-1-jwcart2@gmail.com/T/#u"
+      patch_type: "portability"
+  "3.3":
+    - patch_file: patches/0003-fix-link-pcre.patch
+      base_path: libselinux-3.3
   "3.0":
     - patch_file: patches/0001-fix-fno-common-3.0.patch
       base_path: libsepol-3.0

@@ -1,4 +1,7 @@
 sources:
+  "0.8.8":
+    url: "https://github.com/uNetworking/uSockets/archive/v0.8.8.tar.gz"
+    sha256: "d14d2efe1df767dbebfb8d6f5b52aa952faf66b30c822fbe464debaa0c5c0b17"
   "0.8.7":
     url: "https://github.com/uNetworking/uSockets/archive/v0.8.7.tar.gz"
     sha256: "920313a2ae42bbda17bded6fc83b3df635af24cc9abefc87905ad60fdc596edf"
@@ -27,6 +30,10 @@ sources:
     url: "https://github.com/uNetworking/uSockets/archive/v0.4.0.tar.gz"
     sha256: "f9f15b395def578cc79a5b32abc64fa9cff5dac873062911f515b984b90f7cc2"
 patches:
+  "0.8.8":
+    - patch_file: "patches/0001-makefile_0.8.6.patch"
+      patch_description: "remove lto options"
+      patch_type: "portability"
   "0.8.7":
     - patch_file: "patches/0001-makefile_0.8.6.patch"
       patch_description: "remove lto options"

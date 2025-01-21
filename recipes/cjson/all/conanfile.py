@@ -13,12 +13,11 @@ class CjsonConan(ConanFile):
     name = "cjson"
     description = "Ultralightweight JSON parser in ANSI C."
     license = "MIT"
-    topics = ("json", "parser")
-    homepage = "https://github.com/DaveGamble/cJSON"
     url = "https://github.com/conan-io/conan-center-index"
-
-    package_type = "library"
+    homepage = "https://github.com/DaveGamble/cJSON"
+    topics = ("json", "parser")
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],

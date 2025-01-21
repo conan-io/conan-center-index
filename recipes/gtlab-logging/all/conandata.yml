@@ -1,0 +1,4 @@
+sources:
+  "4.4.1":
+    sha256: "3f905b36de130e32a3b2230b78fee8dfc2747775a6171c7a81d3d02843093e72"
+    url: "https://github.com/dlr-gtlab/gt-logging/archive/refs/tags/4-4-1.tar.gz"

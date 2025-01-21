@@ -1,0 +1,51 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7ba5fb7..36ab3a0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -91,17 +91,17 @@ endif ()
+ include(GNUInstallDirs)
+ 
+ # eigen 2 or 3
+-find_path(EIGEN_INCLUDE_DIR NAMES signature_of_eigen3_matrix_library
+-  HINTS  ENV EIGEN3_INC_DIR
+-         ENV EIGEN3_DIR
+-  PATHS  Eigen/Core
+-         /usr/local/include
+-         /usr/include
+-         /opt/local/include
+-  PATH_SUFFIXES include eigen3 eigen2 eigen
+-  DOC "Directory containing the Eigen3 header files"
+-)
+-
++# find_path(EIGEN_INCLUDE_DIR NAMES signature_of_eigen3_matrix_library
++#   HINTS  ENV EIGEN3_INC_DIR
++#          ENV EIGEN3_DIR
++#   PATHS  Eigen/Core
++#          /usr/local/include
++#          /usr/include
++#          /opt/local/include
++#   PATH_SUFFIXES include eigen3 eigen2 eigen
++#   DOC "Directory containing the Eigen3 header files"
++# )
++find_package(Eigen3 REQUIRED CONFIG)
+ # optionally, opencl
+ # OpenCL disabled as its code is not up-to-date with API
+ set(USE_OPEN_CL FALSE CACHE BOOL "Set to TRUE to look for OpenCL")
+@@ -146,14 +146,14 @@ if (SHARED_LIBS)
+ else ()
+ 	add_library(${LIB_NAME} STATIC ${NABO_SRC})
+ 	if (NOT MSVC)
+-		target_compile_options(${LIB_NAME} PRIVATE -fPIC)
++#		target_compile_options(${LIB_NAME} PRIVATE -fPIC)
+ 	endif()
+ 	install(TARGETS ${LIB_NAME} ARCHIVE DESTINATION lib)
+ endif ()
+ set_target_properties(${LIB_NAME} PROPERTIES VERSION "${PROJECT_VERSION}" SOVERSION 1)
+-
++target_link_libraries(${LIB_NAME} PUBLIC Eigen3::Eigen)
+ target_include_directories(${LIB_NAME} PUBLIC
+-	${EIGEN_INCLUDE_DIR}
++#	${EIGEN_INCLUDE_DIR}
+ 	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+ 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+   )

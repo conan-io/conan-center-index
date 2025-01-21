@@ -1,0 +1,9 @@
+sources:
+  "1.11.2":
+    url: "https://github.com/ukoethe/vigra/archive/refs/tags/Version-1-11-2.tar.gz"
+    sha256: "4841936f5c3c137611ec782e293d961df29d3b5b70ade8cb711374de0f4cb5d3"
+patches:
+  "1.11.2":
+    - patch_file: "patches/1.11.2-001-disable_doc_build.patch"
+      patch_description: "enable build to proceed when documentation is disabled"
+      patch_type: "conan"

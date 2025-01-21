@@ -68,6 +68,9 @@ class SdlttfConan(ConanFile):
             if is_msvc(self) and self.options.shared:
                 raise ConanInvalidConfiguration(f"{self.ref} shared is not supported with Visual Studio")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 

@@ -1,0 +1,10 @@
+sources:
+  "9.9p1":
+    url: "https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-9.9p1.tar.gz"
+    sha256: "b343fbcdbff87f15b1986e6e15d6d4fc9a7d36066be6b7fb507087ba8f966c02"
+  "9.6p1":
+    url: "https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-9.6p1.tar.gz"
+    sha256: "910211c07255a8c5ad654391b40ee59800710dd8119dd5362de09385aa7a777c"
+  "9.1p1":
+    url: "https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-9.1p1.tar.gz"
+    sha256: "19f85009c7e3e23787f0236fbb1578392ab4d4bf9f8ec5fe6bc1cd7e8bfdd288"

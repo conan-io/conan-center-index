@@ -1,0 +1,39 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0e855c7..f38f37a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -183,9 +183,9 @@ endif()
+ 
+ if(NOT BUILD_SHARED_LIBS)
+     if(UNIX)
+-        set(CMAKE_POSITION_INDEPENDENT_CODE ON)
++#        set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+     elseif(MINGW OR MSYS)
+-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -static -static-libgcc -Wno-char-subscripts -Wno-long-long")
++        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-char-subscripts -Wno-long-long")
+         list(APPEND LXW_PRIVATE_COMPILE_DEFINITIONS USE_FILE32API)
+     elseif(MSVC)
+         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Fd\"${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pdb\"")
+@@ -224,7 +224,7 @@ enable_language(CXX)
+ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+ 
+ # ZLIB
+-find_package(ZLIB "1.0" REQUIRED)
++find_package(ZLIB REQUIRED CONFIG)
+ list(APPEND LXW_PRIVATE_INCLUDE_DIRS ${ZLIB_INCLUDE_DIRS})
+ message("zlib version: " ${ZLIB_VERSION})
+ 
+@@ -294,9 +294,11 @@ target_sources(${PROJECT_NAME}
+     PRIVATE ${LXW_SOURCES}
+     PUBLIC ${LXW_HEADERS}
+ )
+-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC ${ZLIB_LIBRARIES} ${MINIZIP_LIBRARIES} ${LIB_CRYPTO} ${OPENSSL_CRYPTO_LIBRARY})
++target_link_libraries(${PROJECT_NAME} PRIVATE ZLIB::ZLIB minizip::minizip)
++if(USE_OPENSSL_MD5)
++    target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::Crypto)
++endif()
+ target_compile_definitions(${PROJECT_NAME} PRIVATE ${LXW_PRIVATE_COMPILE_DEFINITIONS})
+-
+ # /utf-8 needs VS2015 Update 2 or above.
+ # In CMake 3.7 and above, we can use (MSVC_VERSION GREATER_EQUAL 1900) here.
+ if(MSVC AND NOT (MSVC_VERSION LESS 1900))

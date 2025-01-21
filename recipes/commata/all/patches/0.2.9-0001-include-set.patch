@@ -1,0 +1,12 @@
+diff --git a/include/commata/field_scanners.hpp b/include/commata/field_scanners.hpp
+index 9b19b8c..9606732 100644
+--- a/include/commata/field_scanners.hpp
++++ b/include/commata/field_scanners.hpp
+@@ -15,6 +15,7 @@
+ #include <string_view>
+ #include <type_traits>
+ #include <utility>
++#include <set>
+ 
+ #include "text_error.hpp"
+ #include "text_value_translation.hpp"
