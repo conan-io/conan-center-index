@@ -1,10 +1,10 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e17aee620..ae061f58e 100644
+index 1f8931508..e8f894657 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -30,8 +30,8 @@ SET(CPACK_PACKAGE_VERSION_MAJOR "2")
  SET(CPACK_PACKAGE_VERSION_MINOR "1")
- SET(CPACK_PACKAGE_VERSION_PATCH "1-SNAPSHOT")
+ SET(CPACK_PACKAGE_VERSION_PATCH "0")
  SET(ORC_VERSION "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 -set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules")
  set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # For clang-tidy.
@@ -135,7 +135,7 @@ index 017e6c5b8..fa5a1c0e1 100644
 -macro (add_resolved_library target_name link_lib include_dir)
 -  add_library (${target_name} INTERFACE IMPORTED)
 +macro (orc_add_resolved_library target_name link_lib include_dir)
-+  add_library (${target_name} INTERFACE IMPORTED )
++  add_library (${target_name} INTERFACE IMPORTED GLOBAL)
    target_link_libraries (${target_name} INTERFACE ${link_lib})
    target_include_directories (${target_name} SYSTEM INTERFACE ${include_dir})
  endmacro ()

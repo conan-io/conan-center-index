@@ -14,3 +14,6 @@ sources:
 patches:
   "2.1.0":
     - patch_file: "patches/2.1.0-0001-fix-cmake.patch"
+      patch_description: "fix cmake build specific to 2.1.0"
+      patch_type: "backport"
+      patch_source: "https://github.com/apache/orc/pull/2108"
