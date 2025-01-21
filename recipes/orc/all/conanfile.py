@@ -141,8 +141,10 @@ class OrcRecipe(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.os == "Windows" and self.options.shared:
             mkdir(self, os.path.join(self.package_folder, "bin"))
-            os.rename(os.path.join(self.package_folder, "lib", "orc.dll"),
-                      os.path.join(self.package_folder, "bin", "orc.dll"))
+            if os.path.exists(os.path.join(self.package_folder, "lib", "orc.dll")) and \
+               not os.path.exists(os.path.join(self.package_folder, "bin", "orc.dll")):
+                os.rename(os.path.join(self.package_folder, "lib", "orc.dll"),
+                          os.path.join(self.package_folder, "bin", "orc.dll"))
 
     def package_info(self):
         self.cpp_info.libs = ["orc"]
