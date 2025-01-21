@@ -73,35 +73,6 @@ class VulkanUtilityLibrariesConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     @property
-    def _exported_cxxflags(self):
-        # https://github.com/KhronosGroup/Vulkan-Utility-Libraries/blob/vulkan-sdk-1.3.268.0/src/CMakeLists.txt#L9-L40
-        cxxflags = []
-        if self.settings.compiler in ["gcc", "clang", "apple-clang"]:
-            cxxflags += [
-                "-Wpedantic",
-                "-Wunreachable-code",
-                "-Wunused-function",
-                "-Wall",
-                "-Wextra",
-                "-Wpointer-arith",
-                "-Wextra-semi",
-            ]
-            if self.settings.compiler != "gcc":
-                cxxflags += [
-                    "-Wunreachable-code-return",
-                    "-Wconversion",
-                    "-Wimplicit-fallthrough",
-                    "-Wstring-conversion",
-                ]
-        elif is_msvc(self):
-            cxxflags += [
-                "/W4",
-                "/we5038",
-                "/permissive-",
-            ]
-        return cxxflags
-
-    @property
     def _exported_defines(self):
         # https://github.com/KhronosGroup/Vulkan-Utility-Libraries/blob/vulkan-sdk-1.3.268.0/src/CMakeLists.txt#L42-L56
         defines = ["VK_ENABLE_BETA_EXTENSIONS"]
@@ -140,7 +111,6 @@ class VulkanUtilityLibrariesConan(ConanFile):
         if Version(self.version) >= "1.3.265":
             self.cpp_info.components["CompilerConfiguration"].set_property("cmake_target_name", "Vulkan::CompilerConfiguration")
             self.cpp_info.components["CompilerConfiguration"].requires = ["vulkan-headers::vulkanheaders"]
-            self.cpp_info.components["CompilerConfiguration"].cxxflags = self._exported_cxxflags
             self.cpp_info.components["CompilerConfiguration"].defines = self._exported_defines
             self.cpp_info.components["CompilerConfiguration"].includedirs = []
             self.cpp_info.components["CompilerConfiguration"].libdirs = []
