@@ -1,4 +1,7 @@
 sources:
+  "1.12":
+    url: "https://github.com/Chlumsky/msdfgen/archive/refs/tags/v1.12.tar.gz"
+    sha256: "f058117496097217d12e4ea86adbff8467adaf6f12af793925d243b86b0c4f57"
   "1.11":
     url: "https://github.com/Chlumsky/msdfgen/archive/refs/tags/v1.11.tar.gz"
     sha256: "fad74e33274f591e72511bc0546189e7aec439f2a512ef1b2fde243554d457cb"

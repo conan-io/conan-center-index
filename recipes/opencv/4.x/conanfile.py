@@ -191,15 +191,15 @@ class OpenCVConan(ConanFile):
         "with_jpeg": "libjpeg",
         "with_png": True,
         "with_tiff": True,
-        "with_jpeg2000": "jasper",
+        "with_jpeg2000": "openjpeg",
         "with_openexr": True,
         "with_webp": True,
         "with_gdal": False,
         "with_gdcm": False,
-        "with_imgcodec_hdr": False,
-        "with_imgcodec_pfm": False,
-        "with_imgcodec_pxm": False,
-        "with_imgcodec_sunraster": False,
+        "with_imgcodec_hdr": True,
+        "with_imgcodec_pfm": True,
+        "with_imgcodec_pxm": True,
+        "with_imgcodec_sunraster": True,
         "with_msmf": True,
         "with_msmf_dxva": True,
         # objdetect module options
@@ -319,10 +319,13 @@ class OpenCVConan(ConanFile):
         else:
             del self.options.with_ffmpeg
 
-        if "arm" not in self.settings.arch:
-            del self.options.neon
         if not self._has_with_jpeg2000_option:
             del self.options.with_jpeg2000
+        elif Version(self.version) < "4.3.0":
+            self.options.with_jpeg2000 = "jasper"
+
+        if "arm" not in self.settings.arch:
+            del self.options.neon
         if not self._has_with_tiff_option:
             del self.options.with_tiff
         if not self._has_superres_option:
@@ -662,7 +665,7 @@ class OpenCVConan(ConanFile):
             "cudaoptflow": {
                 "is_built": self.options.cudaoptflow,
                 "mandatory_options": ["with_cuda", "video", "cudaarithm", "cudaimgproc", "cudawarping", "optflow"],
-                "requires": ["opencv_video", "opencv_cudaarithm", "cudaimgproc", "opencv_cudawarping",
+                "requires": ["opencv_video", "opencv_cudaarithm", "opencv_cudaimgproc", "opencv_cudawarping",
                              "opencv_optflow"] + opencv_cudalegacy() + ipp(),
             },
             "cudastereo": {
@@ -1212,6 +1215,9 @@ class OpenCVConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "viz module can't be enabled yet. It requires VTK which is not available in conan-center."
             )
+        if self.options.get_safe("with_jpeg2000") == "openjpeg" and Version(self.version) < "4.3.0":
+            raise ConanInvalidConfiguration("openjpeg is not available for OpenCV before 4.3.0")
+
 
     def build_requirements(self):
         if self.options.get_safe("with_protobuf"):
@@ -1485,6 +1491,15 @@ class OpenCVConan(ConanFile):
         if Version(self.version) >= "4.8.0":
             tc.variables["WITH_AVIF"] = self.options.get_safe("with_avif", False)
             tc.variables["WITH_FLATBUFFERS"] = self.options.get_safe("with_flatbuffers", False)
+
+        if Version(self.version) >= "4.10.0":
+            tc.variables["WITH_KLEIDICV"] = False
+            tc.variables["WITH_NDSRVP"] = False
+            tc.variables["OBSENSOR_USE_ORBBEC_SDK"] = False
+            if is_apple_os(self):
+                # default behavior for 4.9.0
+                tc.variables["WITH_OBSENSOR"] = False
+            tc.variables["WITH_ZLIB_NG"] = False
 
         # Special world option merging all enabled modules into one big library file
         tc.variables["BUILD_opencv_world"] = self.options.world
