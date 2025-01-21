@@ -3,13 +3,12 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building, check_min_cppstd
+from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.files import rm, get, rmdir, collect_libs, export_conandata_patches, copy, rename
-from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
+from conan.tools.files import rename, rm, get, rmdir, collect_libs, export_conandata_patches, copy, apply_conandata_patches, save
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0.9"
 
 
 class DiligentCoreConan(ConanFile):
@@ -33,45 +32,11 @@ class DiligentCoreConan(ConanFile):
         "with_glslang": True
     }
     short_paths = True
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "6",
-            "clang": "3.4",
-            "apple-clang": "5.1",
-        }
-
-    @property
-    def _minimum_cpp_standard(self):
-        return 14
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if min_version and Version(self.settings.compiler.version) < min_version:
-            raise ConanInvalidConfiguration("{} requires C++{} support. The current compiler {} {} does not support it.".format(
-                self.name, self._minimum_cpp_standard, self.settings.compiler, self.settings.compiler.version))
-        if is_msvc_static_runtime(self):
-            raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
         export_conandata_patches(self)
-
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def package_id(self):
         if is_msvc(self.info):
@@ -79,6 +44,59 @@ class DiligentCoreConan(ConanFile):
                 self.info.settings.compiler.runtime = "MT/MTd"
             else:
                 self.info.settings.compiler.runtime = "MD/MDd"
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("opengl/system")
+        self.requires("glew/2.2.0")
+        if self.settings.os == "Linux":
+            self.requires("wayland/1.22.0")
+
+        self.requires("spirv-headers/1.3.290.0")
+        self.requires("spirv-cross/1.3.290.0")
+        self.requires("spirv-tools/1.3.290.0")
+        if self.options.with_glslang:
+            self.requires("glslang/1.3.224.0")
+        self.requires("vulkan-headers/1.3.224.0")
+        self.requires("vulkan-validationlayers/1.3.224.1")
+        self.requires("volk/1.3.224.0")
+        self.requires("xxhash/0.8.2")
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.requires("xorg/system")
+            if can_run(self):
+                self.requires("xkbcommon/1.6.0")
+
+    def validate(self):
+        check_min_cppstd(self, 14)
+        if is_msvc_static_runtime(self):
+            raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.24 <4]")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        save(self, os.path.join("ThirdParty", "CMakeLists.txt"), "")
+        apply_conandata_patches(self)
+
+    def _diligent_platform(self):
+        if self.settings.os == "Windows":
+            return "PLATFORM_WIN32"
+        elif self.settings.os == "Macos":
+            return "PLATFORM_MACOS"
+        elif self.settings.os == "Linux":
+            return "PLATFORM_LINUX"
+        elif self.settings.os == "Android":
+            return "PLATFORM_ANDROID"
+        elif self.settings.os == "iOS":
+            return "PLATFORM_IOS"
+        elif self.settings.os == "Emscripten":
+            return "PLATFORM_EMSCRIPTEN"
+        elif self.settings.os == "watchOS":
+            return "PLATFORM_TVOS"
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -97,49 +115,8 @@ class DiligentCoreConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("glew", "cmake_target_name", "GLEW::glew")
         deps.generate()
-
-    def layout(self):
-        cmake_layout(self, src_folder="src")
-
-    def build_requirements(self):
-        self.tool_requires("cmake/[>=3.24 <4]")
-
-    def requirements(self):
-        self.requires("opengl/system")
-        self.requires("glew/2.2.0")
-        if self.settings.os == "Linux":
-            self.requires("wayland/1.22.0")
-
-        self.requires("spirv-cross/1.3.224.0")
-        self.requires("spirv-tools/1.3.224.0")
-        if self.options.with_glslang:
-            self.requires("glslang/1.3.224.0")
-        self.requires("vulkan-headers/1.3.224.0")
-        self.requires("vulkan-validationlayers/1.3.224.1")
-        self.requires("volk/1.3.224.0")
-        self.requires("xxhash/0.8.2")
-
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("xorg/system")
-            if not cross_building(self, skip_x64_x86=True):
-                self.requires("xkbcommon/1.6.0")
-
-    def _diligent_platform(self):
-        if self.settings.os == "Windows":
-            return "PLATFORM_WIN32"
-        elif self.settings.os == "Macos":
-            return "PLATFORM_MACOS"
-        elif self.settings.os == "Linux":
-            return "PLATFORM_LINUX"
-        elif self.settings.os == "Android":
-            return "PLATFORM_ANDROID"
-        elif self.settings.os == "iOS":
-            return "PLATFORM_IOS"
-        elif self.settings.os == "Emscripten":
-            return "PLATFORM_EMSCRIPTEN"
-        elif self.settings.os == "watchOS":
-            return "PLATFORM_TVOS"
 
     def build(self):
         cmake = CMake(self)
@@ -222,8 +199,8 @@ class DiligentCoreConan(ConanFile):
             self.cpp_info.includedirs.append(os.path.join("include", "Graphics", "GraphicsEngineD3D11", "interface"))
             self.cpp_info.includedirs.append(os.path.join("include", "Graphics", "GraphicsEngineD3D12", "interface"))
 
-        self.cpp_info.defines.append("SPIRV_CROSS_NAMESPACE_OVERRIDE={}".format(self.dependencies["spirv-cross"].options.namespace))
-        self.cpp_info.defines.append("{}=1".format(self._diligent_platform()))
+        self.cpp_info.defines.append(f"SPIRV_CROSS_NAMESPACE_OVERRIDE={self.dependencies['spirv-cross'].options.namespace}")
+        self.cpp_info.defines.append(f"{self._diligent_platform()}=1")
 
         if self.settings.os in ["Macos", "Linux"]:
             self.cpp_info.system_libs = ["dl", "pthread"]

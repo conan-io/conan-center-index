@@ -1,3 +1,4 @@
+find_package(SPIRV-Headers REQUIRED CONFIG)
 find_package(SPIRV-Tools REQUIRED CONFIG)
 find_package(spirv-cross REQUIRED CONFIG)
 find_package(volk REQUIRED CONFIG)
@@ -12,6 +13,11 @@ if(NOT DILIGENT_NO_GLSLANG)
     add_library(SPIRV ALIAS glslang::SPIRV)
 endif()
 
+if(LINUX)
+    # X11/XCB is not acutally linked against or included anywhere
+    find_package(X11 REQUIRED)
+    link_libraries(X11::X11)
+endif()
+
 add_library(SPIRV-Headers ALIAS SPIRV-Headers::SPIRV-Headers)
 add_library(spirv-tools-core ALIAS spirv-tools::spirv-tools)
-add_library(GLEW::glew ALIAS GLEW::GLEW)
