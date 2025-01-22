@@ -1,4 +1,4 @@
 sources:
-  "2.5.1":
-    url: "https://github.com/andrew-gresyk/HFSM2/archive/refs/tags/2.5.1.zip"
-    sha256: "77252DB9FD25BB28A6EEA2776F4397963A3B4F00437C1439FFF0484AA551A052"
+  "2.5.2":
+    url: "https://github.com/andrew-gresyk/HFSM2/archive/refs/tags/2.5.2.tar.gz"
+    sha256: "b5a35ce065ea3e32cf9cda48813877e35526a0e377b9344f726d1d80aeaeaa5d"
