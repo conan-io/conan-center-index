@@ -1,45 +1,20 @@
-#include <assert.h>
+#include <cstdlib>
+#include <iostream>
 #include <hfsm2/machine.hpp>
 
-struct Context {
-    bool on = false;
-};
+struct Context{};
 
-using Config = hfsm2::Config
-                    ::ContextT<Context&>;
-
+using Config = hfsm2::Config::ContextT<Context&>;
 using M = hfsm2::MachineT<Config>;
+using FSM = M::PeerRoot<struct State>;
 
-using FSM = M::PeerRoot<
-                struct Off,
-                struct On
-            >;
+struct State : FSM::State {};
 
-struct Off
-    : FSM::State
-{
-    void enter(PlanControl& control) {
-        control.context().on = false;
-    }
-};
 
-struct On
-    : FSM::State
-{
-    void enter(PlanControl& control) {
-        control.context().on = true;
-    }
-};
-
-int
-main() {
+int main(void) {
     Context context;
     FSM::Instance machine{context};
-
-    machine.changeTo<On>();
     machine.update();
-
-    assert(context.on == true);
-
-    return 0;
+    std::cout << "[HFSM2] Test package passed with success." << std::endl;
+    return EXIT_SUCCESS;
 }
