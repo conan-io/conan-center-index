@@ -2,12 +2,11 @@ import os
 
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout
 from conan.tools.files import copy, get
-from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class GodotCppConan(ConanFile):
@@ -18,39 +17,29 @@ class GodotCppConan(ConanFile):
     homepage = "https://github.com/godotengine/godot-cpp"
     topics = ("game-engine", "game-development", "c++")
 
-    package_type = "static-library"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
+        "shared": [True, False],
         "fPIC": [True, False],
     }
     default_options = {
+        "shared": False,
         "fPIC": True,
     }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
-        basic_layout(self, src_folder="src")
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires(f"godot_headers/{self.version}", transitive_headers=True)
-
-    def package_id(self):
-        if self.info.settings.build_type != "Debug":
-            self.info.settings.build_type = "Release"
 
     def validate(self):
         check_min_cppstd(self, 14)
 
     def build_requirements(self):
-        self.tool_requires("scons/4.3.0")
         self.tool_requires("cpython/[~3.12]")
-
-    @property
-    def _bits(self):
-        return 32 if self.settings.arch in ["x86"] else 64
 
     @property
     def _godot_headers(self):
@@ -62,7 +51,7 @@ class GodotCppConan(ConanFile):
 
     @property
     def _headers_dir(self):
-        return self._godot_headers.includedirs[0]
+        return self._godot_headers.includedir
 
     @property
     def _platform(self):
@@ -78,12 +67,8 @@ class GodotCppConan(ConanFile):
         return "debug" if self.settings.build_type == "Debug" else "release"
 
     @property
-    def _use_llvm(self):
-        return self.settings.compiler in ["clang", "apple-clang"]
-
-    @property
-    def _use_mingw(self):
-        return self.settings.os == "Windows" and self.settings.compiler == "gcc"
+    def _bits(self):
+        return 32 if self.settings.arch in ["x86"] else 64
 
     @property
     def _libname(self):
@@ -93,38 +78,24 @@ class GodotCppConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
+        tc = CMakeToolchain(self)
+        tc.variables["GODOT_HEADERS_DIR"] = self._headers_dir.replace("\\", "/")
+        tc.variables["GODOT_CUSTOM_API_FILE"] = self._custom_api_file.replace("\\", "/")
+        tc.generate()
 
     def build(self):
-        self.run("scons  --version")
-        self.run(" ".join([
-            "scons",
-            f"-C{self.source_folder}",
-            f"-j{os.cpu_count()}",
-            "generate_bindings=yes",
-            "use_custom_api_file=yes",
-            f"bits={self._bits}",
-            f"custom_api_file={self._custom_api_file}",
-            f"headers_dir={self._headers_dir}",
-            f"platform={self._platform}",
-            f"target={self._target}",
-            f"use_llvm={self._use_llvm}",
-            f"use_mingw={self._use_mingw}",
-        ]))
+        cmake = CMake(self)
+        cmake.configure()
+        cmake.build()
 
     def package(self):
-        copy(self, "LICENSE*",
-             dst=os.path.join(self.package_folder, "licenses"),
-             src=self.source_folder)
-        copy(self, "*.hpp",
-             dst=os.path.join(self.package_folder, "include/godot-cpp"),
-             src=os.path.join(self.source_folder, "include"))
-        copy(self, "*.a",
-             dst=os.path.join(self.package_folder, "lib"),
-             src=os.path.join(self.source_folder, "bin"))
-        copy(self, "*.lib",
-             dst=os.path.join(self.package_folder, "lib"),
-             src=os.path.join(self.source_folder, "bin"))
+        copy(self, "LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.hpp", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include/godot-cpp"))
+        bin_dir = os.path.join(self.source_folder, "bin")
+        copy(self, "*.a", bin_dir, os.path.join(self.package_folder, "lib"))
+        copy(self, "*.so", bin_dir, os.path.join(self.package_folder, "lib"))
+        copy(self, "*.lib", bin_dir, os.path.join(self.package_folder, "lib"))
+        copy(self, "*.dll", bin_dir, os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         if is_msvc(self):
