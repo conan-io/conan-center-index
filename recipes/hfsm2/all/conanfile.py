@@ -6,7 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.layout import basic_layout
 from conan.tools.files import get
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 class Hfsm2Conan(ConanFile):
     name = "hfsm2"
@@ -26,8 +26,7 @@ class Hfsm2Conan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
