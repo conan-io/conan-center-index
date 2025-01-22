@@ -68,8 +68,6 @@ class VulkanUtilityLibrariesConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
-        fix_apple_shared_install_name(self)
 
     @property
     def _exported_defines(self):
@@ -102,22 +100,19 @@ class VulkanUtilityLibrariesConan(ConanFile):
 
         # Vulkan::LayerSettings
         self.cpp_info.components["LayerSettings"].set_property("cmake_target_name", "Vulkan::LayerSettings")
-        self.cpp_info.components["LayerSettings"].requires = ["vulkan-headers::vulkanheaders", "UtilityHeaders"]
+        self.cpp_info.components["LayerSettings"].requires = ["vulkan-headers::vulkanheaders", "CompilerConfiguration"]
         self.cpp_info.components["LayerSettings"].libs = ["VulkanLayerSettings"]
         self.cpp_info.components["LayerSettings"].bindirs = []
 
         # Vulkan::CompilerConfiguration
         self.cpp_info.components["CompilerConfiguration"].set_property("cmake_target_name", "Vulkan::CompilerConfiguration")
-        self.cpp_info.components["CompilerConfiguration"].requires = ["vulkan-headers::vulkanheaders"]
         self.cpp_info.components["CompilerConfiguration"].defines = self._exported_defines
         self.cpp_info.components["CompilerConfiguration"].includedirs = []
         self.cpp_info.components["CompilerConfiguration"].libdirs = []
         self.cpp_info.components["CompilerConfiguration"].bindirs = []
-        self.cpp_info.components["LayerSettings"].requires.append("CompilerConfiguration")
 
         # Vulkan::SafeStruct
         self.cpp_info.components["SafeStruct"].set_property("cmake_target_name", "Vulkan::SafeStruct")
         self.cpp_info.components["SafeStruct"].requires = ["vulkan-headers::vulkanheaders", "UtilityHeaders", "CompilerConfiguration"]
         self.cpp_info.components["SafeStruct"].libs = ["VulkanSafeStruct"]
         self.cpp_info.components["SafeStruct"].bindirs = []
-        self.cpp_info.components["LayerSettings"].requires.append("SafeStruct")
