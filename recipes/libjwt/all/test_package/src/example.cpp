@@ -1,5 +1,13 @@
 #include "jwt.h"
-#include <string>
-#include <vector>
 
-int main() { return 0; }
+int main() {
+    
+    jwt_t *jwt = NULL;
+	int ret = 0;
+
+	ret = jwt_new(&jwt);
+
+	jwt_free(jwt);
+    
+    return ret; 
+}
