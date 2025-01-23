@@ -5,7 +5,7 @@ from conan.tools.gnu import PkgConfigDeps
 
 class libjwtRecipe(ConanFile):
     name = "libjwt"
-    version = "1.0"
+    version = "1.18.3"
     package_type = "library"
 
     # Optional metadata
@@ -21,10 +21,10 @@ class libjwtRecipe(ConanFile):
     default_options = {"shared": False, "fPIC": True}
 
     def source(self):
-        get(self, 'https://github.com/benmcollins/libjwt/archive/refs/tags/v2.1.1.zip', strip_root=True)
+        get(self, 'https://github.com/benmcollins/libjwt/archive/refs/tags/v1.18.3.zip', strip_root=True)
 
     def requirements(self):
-        self.requires("jansson/2.14", transitive_headers=True)
+        self.requires("jansson/2.14")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -38,14 +38,15 @@ class libjwtRecipe(ConanFile):
         cmake_layout(self)
 
     def generate(self):
-        deps = CMakeDeps(self)
-        # deps.set_property("jansson", "cmake_file_name", "Jansson")
-        # deps.set_property("jansson", "cmake_target_name", "Jansson::Jansson")
-        deps.generate()
+        cmakeDeps = CMakeDeps(self)
+        # cmakeDeps.set_property("jansson", "pkg_config_name", "jansson")
+        # cmakeDeps.set_property("jansson", "cmake_file_name", "JANSSON")
+        # cmakeDeps.set_property("jansson", "cmake_target_name", "PkgConfig::JANSSON")
+        cmakeDeps.generate()
 
         deps = PkgConfigDeps(self)
         deps.generate()
-        
+
         tc = CMakeToolchain(self)
         tc.generate()
 
@@ -53,7 +54,7 @@ class libjwtRecipe(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-    
+
     def build_requirements(self):
         self.tool_requires("pkgconf/[>=2.2 <3]")
 
@@ -63,9 +64,10 @@ class libjwtRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["libjwt"]
-        self.cpp_info.requires = ["Jansson::Jansson"]
+        self.cpp_info.set_property("cmake_file_name", "libjwt")
+        self.cpp_info.set_property("cmake_target_name", "libjwt::libjwt")
+        # self.cpp_info.requires = ["jansson::jansson"]
 
-    
-
-    
-
+        # self.cpp_info.components["jansson"].includedirs = ["include"]
+        # self.cpp_info.components["libjansson-dev"].set_property("pkg_config_name", "jansson")
+        # self.cpp_info.components["libjansson-dev"].set_property("pkg_config_aliases", ["jansson", "Jansson"])
