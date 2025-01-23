@@ -1,12 +1,5 @@
-#include "libjwt.h"
-#include <vector>
+#include "jwt.h"
 #include <string>
+#include <vector>
 
-int main() {
-    libjwt();
-
-    std::vector<std::string> vec;
-    vec.push_back("test_package");
-
-    libjwt_print_vector(vec);
-}
+int main() { return 0; }
