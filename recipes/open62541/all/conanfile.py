@@ -278,6 +278,9 @@ class Open62541Conan(ConanFile):
         tc.variables["UA_LOGLEVEL"] = self._get_log_level()
         tc.variables["UA_ENABLE_SUBSCRIPTIONS"] = self.options.subscription != False
 
+        if self.settings.os == "Neutrino":
+          tc.cache_variables["UA_ARCHITECTURE"] = "posix"
+
         if self.options.subscription != False:
             if "events" in str(self.options.subscription):
                 tc.variables["UA_ENABLE_SUBSCRIPTIONS_EVENTS"] = True
