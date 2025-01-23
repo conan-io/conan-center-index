@@ -7,12 +7,11 @@ from conan.tools.scm import Version
 
 class libjwtRecipe(ConanFile):
     name = "libjwt"
-    version = "1.18.3"
     package_type = "library"
 
     # Optional metadata
     license = "Mozilla Public License Version 2.0"
-    author = "Ben Collins>"
+    author = "Ben Collins"
     url = "https://github.com/benmcollins/libjwt"
     description = "The C JSON Web Token Library +JWK +JWKS"
     topics = ("json", "jwt", "jwt-token")
