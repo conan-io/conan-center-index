@@ -41,6 +41,7 @@ jobs:
       - run: conan export recipes/spdlog/all --version 1.14.1
       - run: conan export recipes/dbus-cxx/2.x.x --version 2.4.0
       - run: conan export recipes/libxml2/all --version 2.12.6
+      - run: conan export recipes/tinyxml2/all --version 10.0.0
         # upload everthing
       - run: conan upload -r rnd-conan-ci -c "*"
 
