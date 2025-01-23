@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get
-from conan.tools.gnu import PkgConfigDeps
 
 class libjwtRecipe(ConanFile):
     name = "libjwt"
@@ -23,9 +22,6 @@ class libjwtRecipe(ConanFile):
     def source(self):
         get(self, 'https://github.com/benmcollins/libjwt/archive/refs/tags/v1.18.3.zip', strip_root=True)
 
-    def requirements(self):
-        self.requires("jansson/2.14")
-
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
@@ -39,13 +35,7 @@ class libjwtRecipe(ConanFile):
 
     def generate(self):
         cmakeDeps = CMakeDeps(self)
-        # cmakeDeps.set_property("jansson", "pkg_config_name", "jansson")
-        # cmakeDeps.set_property("jansson", "cmake_file_name", "JANSSON")
-        # cmakeDeps.set_property("jansson", "cmake_target_name", "PkgConfig::JANSSON")
         cmakeDeps.generate()
-
-        deps = PkgConfigDeps(self)
-        deps.generate()
 
         tc = CMakeToolchain(self)
         tc.generate()
@@ -55,15 +45,12 @@ class libjwtRecipe(ConanFile):
         cmake.configure()
         cmake.build()
 
-    def build_requirements(self):
-        self.tool_requires("pkgconf/[>=2.2 <3]")
-
     def package(self):
         cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["libjwt"]
+        self.cpp_info.libs = ["jwt"]
         self.cpp_info.set_property("cmake_file_name", "libjwt")
         self.cpp_info.set_property("cmake_target_name", "libjwt::libjwt")
         # self.cpp_info.requires = ["jansson::jansson"]
