@@ -1,8 +1,8 @@
 sources:
-  "2024.5.0":
+  "2024.6.0":
     "openvino":
-      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2024.5.0.tar.gz"
-      sha256: "3d5b89760e1c946aca7b219dff4bf4cf5eb511932863c90cafc47d3c01c85744"
+      url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2024.6.0.tar.gz"
+      sha256: "93f417409f3bf12445cb0d72b2af13d849d2b5125d5330d832f1bae55283e5b7"
     "arm_compute":
       url: "https://github.com/ARM-software/ComputeLibrary/archive/refs/tags/v24.09.tar.gz"
       sha256: "49b8620f21cbbe49e825a131d9eacd548532646289b50e070b83860bd88087fe"
@@ -13,8 +13,8 @@ sources:
       url: "https://github.com/openvinotoolkit/mlas/archive/d1bc25ec4660cddd87804fcf03b2411b5dfb2e94.tar.gz"
       sha256: "0a44fbfd4b13e8609d66ddac4b11a27c90c1074cde5244c91ad197901666004c"
     "onednn_gpu":
-      url: "https://github.com/oneapi-src/oneDNN/archive/1722066ad4c0f15495f2d0fcbe9deb2bfd188c36.tar.gz"
-      sha256: "8955f19800066d8a705df2eb8b462085d6142b4f771ff88ae196e59a0d4ab1bb"
+      url: "https://github.com/oneapi-src/oneDNN/archive/0f269193c7466313888d3338209d0d06a22cc6fa.tar.gz"
+      sha256: "abad1ff4ac138c593b7a927ef2099b01447af1f7364848392a950ba17b32bcd8"
   "2023.3.0":
     "openvino":
       url: "https://github.com/openvinotoolkit/openvino/archive/refs/tags/2023.3.0.tar.gz"
@@ -31,4 +31,3 @@ sources:
     "onednn_gpu":
       url: "https://github.com/oneapi-src/oneDNN/archive/cb77937ffcf5e83b5d1cf2940c94e8b508d8f7b4.tar.gz"
       sha256: "2ca304c033786aa5c3ec1ec6f8fc3936ae5c6874d5964b586311da11bec2ec4a"
-patches:
