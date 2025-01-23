@@ -1,7 +1,8 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get
 from conan.tools.system import package_manager
+from conan.tools.scm import Version
 
 
 class libjwtRecipe(ConanFile):
@@ -27,6 +28,25 @@ class libjwtRecipe(ConanFile):
     def system_requirements(self):
         apt = package_manager.Apt(self)
         apt.install(["libjansson-dev"], update=True, check=True)
+        
+        yum = package_manager.Yum(self)
+        yum.install(["jansson-devel"], update=True, check=True)
+
+        dnf = package_manager.Dnf(self)
+        dnf.install(["jansson-devel"], update=True, check=True)
+
+        zypper = package_manager.Zypper(self)
+        zypper.install(["libjansson-devel"], update=True, check=True)
+
+        pacman = package_manager.PacMan(self)
+        pacman.install(["jansson"], update=True, check=True)
+
+        pkg = package_manager.Pkg(self)
+        pkg.install(["jansson"], update=True, check=True)
+        
+        if Version(conan_version) >= "2.0.10":
+            alpine = package_manager.Apk(self)
+            alpine.install(["jansson"], update=True, check=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
