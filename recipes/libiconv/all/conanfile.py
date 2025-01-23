@@ -18,7 +18,7 @@ from conan.tools.microsoft import is_msvc, unix_path
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.4"
 
 
 class LibiconvConan(ConanFile):
@@ -31,6 +31,7 @@ class LibiconvConan(ConanFile):
 
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+    languages = "C"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -63,8 +64,6 @@ class LibiconvConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
         if Version(self.version) >= "1.17":
             self.license = "LGPL-2.1-or-later"
         else:
@@ -81,6 +80,7 @@ class LibiconvConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -131,6 +131,8 @@ class LibiconvConan(ConanFile):
             env.define("RANLIB", ":")
             env.define("NM", "dumpbin -symbols")
             env.define("win32_target", "_WIN32_WINNT_VISTA")
+        elif self.settings.os == "Android":
+            env.define("LD", "ld")
         tc.generate(env)
 
     def _apply_resource_patch(self):
@@ -139,8 +141,7 @@ class LibiconvConan(ConanFile):
             self.output.info("Applying {} resource patch: {}".format(self.settings.arch, windres_options_path))
             replace_in_file(self, windres_options_path, '#   PACKAGE_VERSION_SUBMINOR', '#   PACKAGE_VERSION_SUBMINOR\necho "--target=pe-i386"', strict=True)
 
-    def build(self): 
-        apply_conandata_patches(self)
+    def build(self):
         self._apply_resource_patch()
         autotools = Autotools(self)
         autotools.configure()
