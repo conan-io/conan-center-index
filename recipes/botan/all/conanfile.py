@@ -7,7 +7,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name, XCRun
 from conan.tools.build import build_jobs, check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, VCVars, check_min_vs
@@ -206,7 +206,8 @@ class BotanConan(ConanFile):
             raise ConanInvalidConfiguration(
                 'Using Botan with GCC >= 5 on Linux requires "compiler.libcxx=libstdc++11"')
 
-        if self.settings.compiler == 'clang' and self.settings.compiler.libcxx not in ['libstdc++11', 'libc++']:
+        if (self.settings.compiler == 'clang' and self.settings.os == "Linux" and self.settings.compiler.libcxx not in ['libstdc++11', 'libc++']
+           and self.settings.os != "Android"):
             raise ConanInvalidConfiguration(
                 'Using Botan with Clang on Linux requires either "compiler.libcxx=libstdc++11" ' \
                 'or "compiler.libcxx=libc++"')
@@ -257,6 +258,8 @@ class BotanConan(ConanFile):
         with chdir(self, self.source_folder):
             # Note: this will fail to properly consider the package_folder if a "conan build" followed by a "conan export-pkg" is executed
             self.run(self._make_install_cmd)
+        if Version(self.version) >= "3.3.0":
+            rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
@@ -283,7 +286,7 @@ class BotanConan(ConanFile):
         return {'Windows': 'windows',
                 'Linux': 'linux',
                 'Macos': 'darwin',
-                'Android': 'linux',
+                'Android': 'android',
                 'baremetal': 'none',
                 'iOS': 'ios'}.get(str(self.settings.os))
 
