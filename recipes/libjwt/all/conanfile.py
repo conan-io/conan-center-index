@@ -24,6 +24,9 @@ class libjwtRecipe(ConanFile):
     def source(self):
         get(self, self.conan_data["sources"][self.version]["url"], strip_root=True)
 
+    def requirements(self):
+        self.requires("openssl/3.3.2")
+
     def system_requirements(self):
         apt = package_manager.Apt(self)
         apt.install(["libjansson-dev"], update=True, check=True)
