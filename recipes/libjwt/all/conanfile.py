@@ -26,6 +26,7 @@ class libjwtRecipe(ConanFile):
 
     def requirements(self):
         self.requires("openssl/3.3.2")
+        self.requires("jansson/2.14")
 
     def system_requirements(self):
         apt = package_manager.Apt(self)
