@@ -2,17 +2,18 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get
 
+
 class libjwtRecipe(ConanFile):
     name = "libjwt"
     version = "1.18.3"
     package_type = "library"
 
     # Optional metadata
-    license = "<Put the package license here>"
-    author = "<Put your name here> <And your email here>"
-    url = "<Package recipe repository url here, for issues about the package>"
-    description = "<Description of libjwt package here>"
-    topics = ("<Put some tag here>", "<here>", "<and here>")
+    license = "Mozilla Public License Version 2.0"
+    author = "Ben Collins>"
+    url = "https://github.com/benmcollins/libjwt"
+    description = "The C JSON Web Token Library +JWK +JWKS"
+    topics = ("json", "jwt", "jwt-token")
 
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
@@ -20,7 +21,7 @@ class libjwtRecipe(ConanFile):
     default_options = {"shared": False, "fPIC": True}
 
     def source(self):
-        get(self, 'https://github.com/benmcollins/libjwt/archive/refs/tags/v1.18.3.zip', strip_root=True)
+        get(self, self.conan_data["sources"][self.version]["url"], strip_root=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,10 +52,3 @@ class libjwtRecipe(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["jwt"]
-        self.cpp_info.set_property("cmake_file_name", "libjwt")
-        self.cpp_info.set_property("cmake_target_name", "libjwt::libjwt")
-        # self.cpp_info.requires = ["jansson::jansson"]
-
-        # self.cpp_info.components["jansson"].includedirs = ["include"]
-        # self.cpp_info.components["libjansson-dev"].set_property("pkg_config_name", "jansson")
-        # self.cpp_info.components["libjansson-dev"].set_property("pkg_config_aliases", ["jansson", "Jansson"])
