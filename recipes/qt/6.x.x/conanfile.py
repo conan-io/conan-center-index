@@ -235,7 +235,7 @@ class QtConan(ConanFile):
                     self.output.warning(f"qt6: {module} requested because {status}_modules=True"
                                         f" but it has been explicitly disabled with {module}=False")
 
-        self.output.info(f"qt6: requested modules {list(requested_modules)}")
+        self._debug_output(f"qt6: requested modules {list(requested_modules)}")
 
         required_modules =  {}
         for module in requested_modules:
