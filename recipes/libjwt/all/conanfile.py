@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get
+from conan.tools.system.package_manager import Apt
 
 
 class libjwtRecipe(ConanFile):
@@ -22,6 +23,10 @@ class libjwtRecipe(ConanFile):
 
     def source(self):
         get(self, self.conan_data["sources"][self.version]["url"], strip_root=True)
+
+    def system_requirements(self):
+        apt = Apt(self)
+        apt.install(["libjansson-dev"])
 
     def config_options(self):
         if self.settings.os == "Windows":
