@@ -1,0 +1,325 @@
+# Manually derived from
+# https://github.com/google/fuzztest/blob/e317d5277e34948ae7048cb5e48309e0288e8df3/fuzztest/CMakeLists.txt
+# Any targets suffixed with "_test" were removed.
+
+fuzztest:
+  header_only: True
+  deps:
+    - domain
+    - fuzztest_macros
+
+fuzztest_core:
+  header_only: True
+  deps:
+    - domain_core
+    - fuzztest_macros
+
+fuzztest_macros:
+  header_only: True
+  deps:
+    - io
+    - registration
+    - registry
+
+fuzztest_gtest_main:
+  header_only: False
+  deps:
+    - abseil::absl_flags_parse
+    - abseil::absl_strings
+    - init_fuzztest
+    - gtest::gtest
+
+init_fuzztest:
+  header_only: False
+  deps:
+    - configuration
+    - googletest_adaptor
+    - io
+    - registry
+    - runtime
+    - abseil::absl_flags
+    - abseil::absl_strings
+    - abseil::absl_str_format
+    - abseil::absl_time
+    - gtest::gtest
+
+llvm_fuzzer_main:
+  header_only: False
+  deps:
+    - init_fuzztest
+    - abseil::absl_flags
+    - abseil::absl_flags_parse
+    - gtest::gtest
+    
+
+llvm_fuzzer_wrapper:
+  header_only: False
+  deps:
+    - domain_core
+    - fuzztest
+    - io
+    - llvm_fuzzer_main
+    - abseil::absl_flags
+    - abseil::absl_log
+    - abseil::absl_random_random
+    - abseil::absl_random_bit_gen_ref
+    - abseil::absl_strings
+    - abseil::absl_string_view
+    - re2::re2
+
+# The rest are loosely marked as "internal", though not sure which ones, as some seem useful.
+
+absl_helpers:
+  header_only: True
+  deps:
+    - logging
+    - abseil::absl_time
+
+any:
+  header_only: True
+  deps:
+    - logging
+    - meta
+
+compatibility_mode:
+  header_only: False
+  deps:
+    - domain_core
+    - fixture_driver
+    - logging
+    - runtime
+    - abseil::absl_random_distributions
+    - abseil::absl_strings
+    - abseil::absl_str_format
+    - abseil::absl_time
+
+configuration:
+  header_only: False
+  deps:
+    - io
+    - abseil::absl_strings
+    - abseil::absl_string_view
+
+coverage:
+  header_only: False
+  deps:
+    - logging
+    - table_of_recent_compares
+    - abseil::absl_core_headers
+    - abseil::absl_str_format
+    - abseil::absl_span
+
+domain:
+  header_only: False
+  deps:
+    - any
+    - domain_core
+    - logging
+    - meta
+    - regexp_dfa
+    - serialization
+    - status
+    - type_support
+    - abseil::absl_core_headers
+    - abseil::absl_flat_hash_map
+    - abseil::absl_flat_hash_set
+    - abseil::absl_random_random
+    - abseil::absl_random_bit_gen_ref
+    - abseil::absl_random_distributions
+    - abseil::absl_status
+    - abseil::absl_strings
+    - abseil::absl_synchronization
+    - abseil::absl_span
+
+domain_core:
+  header_only: False
+  deps:
+    - absl_helpers
+    - any
+    - coverage
+    - logging
+    - meta
+    - printer
+    - seed_seq
+    - serialization
+    - status
+    - table_of_recent_compares
+    - type_support
+    - abseil::absl_flat_hash_map
+    - abseil::absl_flat_hash_set
+    - abseil::absl_function_ref
+    - abseil::absl_bits
+    - abseil::absl_int128
+    - abseil::absl_random_random
+    - abseil::absl_random_bit_gen_ref
+    - abseil::absl_random_distributions
+    - abseil::absl_status
+    - abseil::absl_strings
+    - abseil::absl_str_format
+    - abseil::absl_time
+    - abseil::absl_span
+
+fixture_driver:
+  header_only: False
+  deps:
+    - any
+    - domain_core
+    - logging
+    - meta
+    - printer
+    - registration
+    - type_support
+    - abseil::absl_status
+    - abseil::absl_str_format
+    - abseil::absl_span
+
+googletest_adaptor:
+  header_only: False
+  deps:
+    - configuration
+    - io
+    - registry
+    - runtime
+    - abseil::absl_strings
+    - abseil::absl_string_view
+    - gtest::gtest
+
+googletest_fixture_adapter:
+  header_only: True
+  deps:
+    - fixture_driver
+    - gtest::gtest
+
+io:
+  header_only: False
+  deps:
+    - logging
+    - abseil::absl_hash
+    - abseil::absl_str_format
+
+logging:
+  header_only: False
+  deps:
+    - abseil::absl_strings
+
+meta:
+  header_only: True
+  deps:
+    - abseil::absl_int128
+
+printer:
+  header_only: True
+  deps:
+    - meta
+    - abseil::absl_str_format
+
+regexp_dfa:
+  header_only: False
+  deps:
+    - logging
+    - abseil::absl_flat_hash_map
+    - abseil::absl_random_bit_gen_ref
+    - abseil::absl_random_distributions
+    - re2::re2
+
+registration:
+  header_only: True
+  deps:
+    - domain_core
+    - meta
+    - printer
+    - type_support
+    - abseil::absl_any_invocable
+    - abseil::absl_status
+    - abseil::absl_str_format
+    - abseil::absl_span
+
+registry:
+  header_only: False
+  deps:
+    - compatibility_mode
+    - fixture_driver
+    - registration
+    - runtime
+    - abseil::absl_flat_hash_map
+    - abseil::absl_function_ref
+    - abseil::absl_string_view
+
+runtime:
+  header_only: False
+  deps:
+    - configuration
+    - coverage
+    - domain_core
+    - fixture_driver
+    - io
+    - logging
+    - meta
+    - printer
+    - registration
+    - seed_seq
+    - serialization
+    - type_support
+    - abseil::absl_any_invocable
+    - abseil::absl_function_ref
+    - abseil::absl_random_random
+    - abseil::absl_random_bit_gen_ref
+    - abseil::absl_random_distributions
+    - abseil::absl_status
+    - abseil::absl_strings
+    - abseil::absl_str_format
+    - abseil::absl_time
+    - abseil::absl_span
+
+seed_seq:
+  header_only: False
+  deps:
+    - logging
+    - abseil::absl_random_random
+    - abseil::absl_strings
+    - abseil::absl_span
+
+serialization:
+  header_only: False
+  deps:
+    - meta
+    - abseil::absl_int128
+    - abseil::absl_strings
+    - abseil::absl_str_format
+    - abseil::absl_span
+
+status:
+  header_only: False
+  deps:
+    - abseil::absl_status
+    - abseil::absl_strings
+    - abseil::absl_cord
+
+subprocess:
+  header_only: False
+  deps:
+    - logging
+    - abseil::absl_flat_hash_map
+    - abseil::absl_strings
+    - abseil::absl_time
+
+table_of_recent_compares:
+  header_only: True
+  deps:
+    - type_support
+    - abseil::absl_flat_hash_set
+    - abseil::absl_random_bit_gen_ref
+    - abseil::absl_random_distributions
+
+type_support:
+  header_only: False
+  deps:
+    - absl_helpers
+    - meta
+    - printer
+    - abseil::absl_function_ref
+    - abseil::absl_symbolize
+    - abseil::absl_int128
+    - abseil::absl_strings
+    - abseil::absl_str_format
+    - abseil::absl_time
