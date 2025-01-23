@@ -373,7 +373,8 @@ class FFMpegConan(ConanFile):
                 self.tool_requires("nasm/2.16.01")
             else:
                 self.tool_requires("yasm/1.3.0")
-        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+        if self.settings.os != "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            # See https://github.com/conan-io/conan-center-index/pull/26447#discussion_r1926682155
             self.tool_requires("pkgconf/[>=2.1 <3]")
         if self._settings_build.os == "Windows":
             self.win_bash = True
