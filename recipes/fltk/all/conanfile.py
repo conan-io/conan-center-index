@@ -82,7 +82,10 @@ class FltkConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             if self.options.with_gl:
                 self.requires("opengl/system")
-                self.requires("glu/system")
+                if is_apple_os(self) or self.settings.os == "Windows":
+                    self.requires("glu/system")
+                else:
+                    self.requires("mesa-glu/9.0.3")
             self.requires("fontconfig/2.15.0")
             self.requires("xorg/system")
             if self.options.with_xft:
@@ -93,9 +96,9 @@ class FltkConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["OPTION_BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["FLTK_BUILD_TEST"] = False
         tc.variables["FLTK_BUILD_EXAMPLES"] = False
+        tc.variables["OPTION_BUILD_SHARED_LIBS"] = self.options.shared
         tc.variables["OPTION_USE_GL"] = self.options.with_gl
         tc.variables["OPTION_USE_THREADS"] = self.options.with_threads
         tc.variables["OPTION_BUILD_HTML_DOCUMENTATION"] = False
@@ -138,7 +141,7 @@ class FltkConan(ConanFile):
             if self.options.with_threads:
                 self.cpp_info.system_libs.extend(["pthread", "dl"])
             if self.options.with_gl:
-                self.cpp_info.system_libs.extend(["GL", "GLU"])
+                self.cpp_info.system_libs.append("GL")
         elif is_apple_os(self):
             self.cpp_info.frameworks = [
                 "AppKit", "ApplicationServices", "Carbon", "Cocoa", "CoreFoundation", "CoreGraphics",
