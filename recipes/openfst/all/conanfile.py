@@ -66,7 +66,7 @@ class OpenFstConan(ConanFile):
         # in the configure script which does not have a fallback in case of cross building
         # There is neither a way of disabling the check nor a way of providing a fallback as `cross_compiling`
         # variable is assigned on the fly in the configuration script
-        if hasattr(self, "settings_build") and cross_building(self):
+        if cross_building(self):
             raise ConanInvalidConfiguration(f"{self.ref} recipe doesn't support cross-built")
 
     def validate(self):
