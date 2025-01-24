@@ -358,6 +358,7 @@ class Open62541Conan(ConanFile):
 
         tc.generate()
         tc = CMakeDeps(self)
+        tc.set_property("mbedtls", "cmake_additional_variables_prefixes", ["MBEDTLS"])
         tc.generate()
 
     def _patch_sources(self):

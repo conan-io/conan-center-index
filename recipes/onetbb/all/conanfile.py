@@ -116,7 +116,7 @@ class OneTBBConan(ConanFile):
         toolchain.variables["TBB_STRICT"] = False
         if Version(self.version) >= "2021.5.0":
             toolchain.variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
-        if self.options.get_safe("interprocedural_optimization"):
+        if self.options.get_safe("interprocedural_optimization") is not None:
             toolchain.variables["TBB_ENABLE_IPO"] = self.options.interprocedural_optimization
         if Version(self.version) >= "2021.6.0" and self.options.get_safe("tbbmalloc"):
             toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.tbbproxy
