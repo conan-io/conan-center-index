@@ -1,0 +1,9 @@
+sources:
+  "0.3.0":
+    url: "https://github.com/minio/minio-cpp/archive/refs/tags/v0.3.0.tar.gz"
+    sha256: "da0f2f54bf169ad9e5e9368cc9143df4db056fc5c05bb55d8c1d9065e7211f7c"
+patches:
+  "0.3.0":
+    - patch_file: "patches/0.3.0-0001-fix-fpic-cmake.patch"
+      patch_description: "Honor fPIC option in CMakeLists.txt"
+      patch_type: "conan"

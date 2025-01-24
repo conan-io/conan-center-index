@@ -1,0 +1,38 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index baf5964..dc3704e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -147,13 +147,13 @@ option(AVIF_LOCAL_FUZZTEST
+ 
+ # Whether the libavif library uses c++ indirectly (e.g. through linking to libyuv).
+ set(AVIF_LIB_USE_CXX OFF)
+-
++if(0)
+ if(APPLE)
+     set(XCRUN xcrun)
+ else()
+     set(XCRUN)
+ endif()
+-
++endif()
+ # This is also needed to get shared libraries (e.g. pixbufloader-avif) to compile against a static libavif.
+ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+ if(BUILD_SHARED_LIBS)
+@@ -269,7 +269,7 @@ if(AVIF_ENABLE_EXPERIMENTAL_GAIN_MAP)
+     check_avif_option(AVIF_LIBXML2 TARGET LibXml2::LibXml2 PKG_NAME LibXml2)
+ endif()
+ # ---------------------------------------------------------------------------------------
+-
++if(0)
+ # Enable all warnings
+ include(CheckCCompilerFlag)
+ if(MSVC)
+@@ -310,7 +310,7 @@ elseif(CMAKE_C_COMPILER_ID MATCHES "GNU")
+ else()
+     message(FATAL_ERROR "libavif: Unknown compiler, bailing out")
+ endif()
+-
++endif()
+ if(AVIF_ENABLE_WERROR)
+     # Warnings as errors
+     if(MSVC)

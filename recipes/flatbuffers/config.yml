@@ -1,4 +1,8 @@
 versions:
+  "24.12.23":
+    folder: all
+  "24.3.25":
+    folder: all
   "24.3.7":
     folder: all
   "23.5.26":
@@ -6,8 +10,6 @@ versions:
   "23.3.3":
     folder: all
   "23.1.21":
-    folder: all
-  "23.1.4":
     folder: all
   "22.12.06":
     folder: all
@@ -17,11 +19,7 @@ versions:
     folder: all
   "22.9.29":
     folder: all
-  "22.9.24":
-    folder: all
   "2.0.8":
-    folder: all
-  "2.0.6":
     folder: all
   "2.0.5":
     folder: all

@@ -1,21 +1,21 @@
 versions:
+  "3.4.0":
+    folder: all
+  "3.3.0":
+    folder: all
+  "3.2.0":
+    folder: all
+  "3.1.0":
+    folder: all
   "3.0.0":
     folder: all
   "2.3.0":
     folder: all
+  # last version for C++20
   "2.2.0":
     folder: all
   "2.1.0":
     folder: all
+  # last version for C++17
   "2.0.0":
-    folder: all
-  "1.22.0":
-    folder: all
-  "1.21.0":
-    folder: all
-  "1.20.0":
-    folder: all
-  "1.19.0":
-    folder: all
-  "1.18.0":
     folder: all

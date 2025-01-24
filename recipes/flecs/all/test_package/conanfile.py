@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeToolchain", "CMakeDeps", "VirtualRunEnv"
+    generators = "CMakeDeps", "VirtualRunEnv"
     test_type = "explicit"
 
     def layout(self):
@@ -14,6 +14,12 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if self.dependencies[self.tested_reference_str].ref.version < "4.0.0":
+            tc.preprocessor_definitions["LESS_VERSION_4"] = "1"
+        tc.generate()
 
     def build(self):
         cmake = CMake(self)

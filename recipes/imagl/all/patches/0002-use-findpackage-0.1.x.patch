@@ -1,0 +1,15 @@
+--- a/imaGL/CMakeLists.txt
++++ b/imaGL/CMakeLists.txt
+@@ -12,9 +12,10 @@ set_property(TARGET libImaGL PROPERTY OUTPUT_NAME imaGL)
+ set_property(TARGET libImaGL PROPERTY PUBLIC_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/public/imaGL/imaGL.h")
+ target_include_directories(libImaGL INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/public")
+ 
+-if(TARGET CONAN_PKG::libpng)
++find_package(PNG)
++if(PNG_FOUND)
+     add_compile_definitions(_HAS_PNG)
+-    target_link_libraries (libImaGL CONAN_PKG::libpng)
++    target_link_libraries (libImaGL PNG::PNG)
+ endif()
+ 
+ file(GLOB_RECURSE ImaGL_SRC "*.h" "*.cpp")

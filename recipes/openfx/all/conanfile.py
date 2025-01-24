@@ -50,7 +50,7 @@ class openfx(ConanFile):
 
     def requirements(self):
         self.requires("opengl/system")
-        self.requires("expat/2.5.0")
+        self.requires("expat/[>=2.6.2 <3]")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):

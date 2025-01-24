@@ -1,4 +1,10 @@
 sources:
+  "0.12.1":
+    url: "https://github.com/jbaldwin/libcoro/archive/refs/tags/v0.12.1.tar.gz"
+    sha256: "2cb6f45fc73dad6008cc930d92939785684835e03b12df422b98fcab9e393add"
+  "0.12":
+    url: "https://github.com/jbaldwin/libcoro/archive/refs/tags/v0.12.tar.gz"
+    sha256: "9a89f329e12fda7d6425523fb2cbd1ebaf41e0e1d41e210d93ad4f3a196333a2"
   "0.11.1":
     url: "https://github.com/jbaldwin/libcoro/archive/refs/tags/v0.11.1.tar.gz"
     sha256: "c7eb1bf133519ec0e0bc2e3e018ac4d1447a143e5e7385dab19204277d7c7671"

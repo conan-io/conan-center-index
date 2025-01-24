@@ -1,5 +1,6 @@
 import os
 from conan import ConanFile
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import copy, get, rmdir
 from conan.errors import ConanInvalidConfiguration
@@ -29,6 +30,20 @@ class MoldConan(ConanFile):
         "with_mimalloc": False,
     }
 
+    @property
+    def _min_cppstd(self):
+        return 20
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "11",
+            "clang": "12",
+            "apple-clang": "14",
+            "Visual Studio": "16",
+            "msvc": "192",
+        }
+
     def configure(self):
         if Version(self.version) < "2.0.0":
             self.license = "AGPL-3.0"
@@ -40,16 +55,28 @@ class MoldConan(ConanFile):
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
-        self.requires("openssl/[>=1.1 <4]")
         self.requires("xxhash/0.8.2")
-        self.requires("onetbb/2021.10.0")
         if self.options.with_mimalloc:
             self.requires("mimalloc/2.1.2")
+        if Version(self.version) < "2.2.0":
+            # Newer versions use vendored-in BLAKE3
+            self.requires("openssl/[>=1.1 <4]")
 
     def package_id(self):
         del self.info.settings.compiler
 
     def validate(self):
+        # mold has required C+20 since 1.4.1. However, C++20 features are used for the first time in 2.34.0.
+        if Version(self.version) >= "2.34.0":
+            # validate the minimum cpp standard supported. For C++ projects only
+            if self.settings.compiler.cppstd:
+                check_min_cppstd(self, self._min_cppstd)
+            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+                raise ConanInvalidConfiguration(
+                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+                )
+
         # TODO most of these checks should run on validate_build, but the conan-center hooks are broken and fail the PR because they
         # think we're raising on the build() method
         if self.settings.build_type == "Debug":
@@ -64,6 +91,8 @@ class MoldConan(ConanFile):
             raise ConanInvalidConfiguration("Clang version 12 or higher required")
         if self.settings.compiler == "apple-clang" and "armv8" == self.settings.arch :
             raise ConanInvalidConfiguration(f'{self.name} is still not supported by Mac M1.')
+        if Version(self.version) == "2.33.0" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14":
+            raise ConanInvalidConfiguration(f'{self.ref} doesn\'t support Apple-Clang < 14.')
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18.0 <4]")
@@ -75,7 +104,7 @@ class MoldConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["MOLD_USE_MIMALLOC"] = self.options.with_mimalloc
         tc.variables["MOLD_USE_SYSTEM_MIMALLOC"] = True
-        tc.variables["MOLD_USE_SYSTEM_TBB"] = True
+        tc.variables["MOLD_USE_SYSTEM_TBB"] = False # see https://github.com/conan-io/conan-center-index/pull/23575#issuecomment-2059154281
         tc.variables["CMAKE_INSTALL_LIBEXECDIR"] = "libexec"
         tc.generate()
 
