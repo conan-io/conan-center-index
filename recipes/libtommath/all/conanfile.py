@@ -42,11 +42,7 @@ class LibTomMathConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def source(self):
-        if Version(self.version) >= "1.3":
-            get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        else:
-            get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
-            download(self, **self.conan_data["sources"][self.version]["cmakelists"], filename="CMakeLists.txt")
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -55,13 +51,6 @@ class LibTomMathConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        if Version(self.version) < "1.3":
-            save(self, os.path.join(self.source_folder, "sources.cmake"),
-                 "file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.c)\n"
-                 "file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)\n")
-            # Disable installation of docs, which is not valid for < 1.3
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                            "# Windows uses a different help sytem.\nif(", "if(0 AND")
         if is_msvc(self):
             # libtommath requires /O1 on MSVC Debug builds for dead code elimination.
             # I could not find a way short of forcing settings.build_type=RelWithDebInfo to get that to work, though.
@@ -96,8 +85,6 @@ class LibTomMathConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libtommath")
 
         self.cpp_info.libs = ["tommath"]
-        if Version(self.version) < "1.3":
-            self.cpp_info.includedirs.append(os.path.join("include", "libtommath"))
         if not self.options.shared:
             if self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["advapi32", "crypt32"]
