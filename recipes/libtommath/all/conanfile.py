@@ -76,8 +76,6 @@ class LibTomMathConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "libtommath")
