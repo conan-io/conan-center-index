@@ -16,7 +16,6 @@ class LibTomMathConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.libtom.net/"
     topics = ("math", "multi-precision")
-
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -31,12 +30,15 @@ class LibTomMathConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            del self.options.shared
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
+        if self.settings.os == "Windows":
+            self.package_type = "static-library"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -46,8 +48,6 @@ class LibTomMathConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
     def _patch_sources(self):
@@ -85,6 +85,5 @@ class LibTomMathConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "libtommath")
 
         self.cpp_info.libs = ["tommath"]
-        if not self.options.shared:
-            if self.settings.os == "Windows":
-                self.cpp_info.system_libs = ["advapi32", "crypt32"]
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs = ["advapi32", "crypt32"]
