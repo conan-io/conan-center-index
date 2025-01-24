@@ -645,11 +645,11 @@ class FFMpegConan(ConanFile):
         ranlib = compilers_from_conf.get("ranlib", buildenv_vars.get("RANLIB"))
         if ranlib:
             args.append(f"--ranlib={unix_path(self, ranlib)}")
-        pkg_config = self.conf.get("tools.gnu:pkg_config", default=buildenv_vars.get("PKG_CONFIG"), check_type=str)
+        if cross_building(self):
+            build_cc = AutotoolsToolchain(self).vars()["CC_FOR_BUILD"]
+            args.append(f"--host-cc={unix_path(self, build_cc)}")
+        pkg_config = self.conf.get("tools.gnu:pkg_config", default="pkgconf", check_type=str)
         if pkg_config:
-            # the ffmpeg configure script hardcodes the name of the executable,
-            # unlike other tools that use the PKG_CONFIG environment variable
-            # if we are aware the user has requested a specific pkg-config, we pass it to the configure script
             args.append(f"--pkg-config={unix_path(self, pkg_config)}")
         if is_msvc(self):
             args.append("--toolchain=msvc")
