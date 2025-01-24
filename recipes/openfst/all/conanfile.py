@@ -1,16 +1,14 @@
 import os
-from itertools import product
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class OpenFstConan(ConanFile):
@@ -55,47 +53,26 @@ class OpenFstConan(ConanFile):
         "enable_pdt": False,
         "enable_special": False,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-
     def layout(self):
         basic_layout(self, src_folder="src")
+
+    def validate_build(self):
+        # Cross building is not supported. `configure` fails due to the existing AC_RUN_IFELSE autotools macro
+        # in the configure script which does not have a fallback in case of cross building
+        # There is neither a way of disabling the check nor a way of providing a fallback as `cross_compiling`
+        # variable is assigned on the fly in the configuration script
+        if hasattr(self, "settings_build") and cross_building(self):
+            raise ConanInvalidConfiguration(f"{self.ref} recipe doesn't support cross-built")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
             raise ConanInvalidConfiguration(f"OpenFst is only supported on Linux, FreeBSD, and Macos (got: {self.settings.os})")
-
-        compilers = {
-            "gcc": "8",
-            "clang": "7",
-        }
-
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 17)
-        minimum_compiler = compilers.get(str(self.settings.compiler))
-        if minimum_compiler:
-            if Version(self.settings.compiler.version) < minimum_compiler:
-                raise ConanInvalidConfiguration(
-                    f"{self.name} requires c++17, which your compiler does not support."
-                )
-        else:
-            self.output.warning(
-                f"{self.name} requires c++17, but this compiler is unknown to this recipe."
-                f" Assuming your compiler supports c++17."
-            )
+        check_min_cppstd(self, 17)
 
         # Check stdlib ABI compatibility
         if self.settings.compiler == "gcc" and self.settings.compiler.libcxx != "libstdc++11":
@@ -109,6 +86,7 @@ class OpenFstConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
@@ -131,11 +109,7 @@ class OpenFstConan(ConanFile):
         tc.extra_cxxflags.append("-pthread")
         tc.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
@@ -165,9 +139,6 @@ class OpenFstConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "OpenFst")
         self.cpp_info.set_property("cmake_target_name", "OpenFst::OpenFst")
         self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.names["cmake_find_package"] = "OpenFst"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenFst"
-
         self.cpp_info.libs = ["fst"]
 
         if self.options.enable_compact_fsts:
@@ -197,8 +168,3 @@ class OpenFstConan(ConanFile):
                 self.cpp_info.libs.append("fstpdtscript")
 
         self.cpp_info.system_libs = ["pthread", "dl", "m"]
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH environment var: {bindir}")
-        self.env_info.PATH.append(bindir)
