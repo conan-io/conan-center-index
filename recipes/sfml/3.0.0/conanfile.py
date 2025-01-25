@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy
+from conan.tools.files import get, rmdir, copy
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.build import check_min_cppstd
 import os
@@ -35,9 +35,6 @@ class SfmlConan(ConanFile):
         "network": True,
         "audio": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -99,7 +96,6 @@ class SfmlConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
