@@ -187,7 +187,7 @@ class SDLConan(ConanFile):
         if self.options.get_safe("wayland"):
             replace_in_file(self,
                 os.path.join(self.source_folder, "cmake", "sdlchecks.cmake"),
-                "find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED)",
+                "find_program(WAYLAND_SCANNER NAMES wayland-scanner)",
                 'find_program(WAYLAND_SCANNER NAMES wayland-scanner REQUIRED PATHS "${WAYLAND_BIN_DIR}" NO_DEFAULT_PATH)',
             )
 
@@ -391,6 +391,7 @@ class SDLConan(ConanFile):
                     "ForceFeedback",
                     "CoreFoundation",
                     "CoreServices",
+                    "CoreMedia",
                     "AppKit"
                 ])
                 self.cpp_info.components[component_name].frameworks.append("GameController")
