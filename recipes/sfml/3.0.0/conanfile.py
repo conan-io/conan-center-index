@@ -66,7 +66,6 @@ class SfmlConan(ConanFile):
             self.requires("stb/cci.20230920")
         if self.options.audio:
             self.requires("flac/1.4.3")
-            self.requires("openal-soft/1.22.2")
             self.requires("vorbis/1.3.7")
             self.requires("minimp3/cci.20211201")
 
@@ -83,8 +82,6 @@ class SfmlConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["SFML_DEPENDENCIES_INSTALL_PREFIX"] = self.package_folder.replace("\\", "/")
-        tc.cache_variables["SFML_MISC_INSTALL_PREFIX"] = os.path.join(self.package_folder, "licenses").replace("\\", "/")
         tc.variables["SFML_BUILD_WINDOW"] = self.options.window
         tc.variables["SFML_BUILD_GRAPHICS"] = self.options.graphics
         tc.variables["SFML_BUILD_NETWORK"] = self.options.network
@@ -92,7 +89,6 @@ class SfmlConan(ConanFile):
         tc.variables["SFML_INSTALL_PKGCONFIG_FILES"] = False
         tc.variables["SFML_GENERATE_PDB"] = False
         tc.variables["SFML_USE_SYSTEM_DEPS"] = True
-        tc.variables["WARNINGS_AS_ERRORS"] = False
         if is_msvc(self):
             tc.variables["SFML_USE_STATIC_STD_LIBS"] = is_msvc_static_runtime(self)
         tc.generate()
@@ -227,7 +223,7 @@ class SfmlConan(ConanFile):
                 },
             })
         if self.options.audio:
-            audio_requires = ["system", "flac::flac", "openal-soft::openal-soft", "vorbis::vorbis", "minimp3::minimp3"]
+            audio_requires = ["system", "flac::flac", "vorbis::vorbis", "minimp3::minimp3"]
             sfml_components.update({
                 "audio": {
                     "target": "SFML::Audio",
