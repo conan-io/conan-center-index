@@ -51,7 +51,10 @@ class SfmlConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires('cmake/[>=3.24]')
+        if self.settings.os == 'Windows':
+            self.tool_requires('cmake/[>=3.24 <4]')
+        else:
+            self.tool_requires('cmake/[>=3.22 <4]')
 
     def requirements(self):
         if self.options.window:
