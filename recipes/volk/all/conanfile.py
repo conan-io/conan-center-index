@@ -59,15 +59,24 @@ class VolkConan(ConanFile):
 
     def _patch_sources(self):
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        replace_in_file(self, cmakelists, "find_package(Vulkan QUIET)", "find_package(VulkanHeaders REQUIRED)")
+        if Version(self.version) < "1.3.296":
+            replace_in_file(self, cmakelists, "find_package(Vulkan QUIET)", "find_package(VulkanHeaders REQUIRED)")
+
         if Version(self.version) < "1.3.261":
             replace_in_file(self, cmakelists, "Vulkan::Vulkan", "Vulkan::Headers")
-        else:
+        elif Version(self.version) < "1.3.296":
             replace_in_file(
                 self,
                 cmakelists,
                 "if(VULKAN_HEADERS_INSTALL_DIR)",
                 "if(1)\nset(VOLK_INCLUDES ${VulkanHeaders_INCLUDE_DIRS})\nelseif(VULKAN_HEADERS_INSTALL_DIR)",
+            )
+        else:
+            replace_in_file(
+                self,
+                cmakelists,
+                "if(VULKAN_HEADERS_INSTALL_DIR)",
+                "if(1)\nfind_package(VulkanHeaders REQUIRED)\nset(VOLK_INCLUDES ${VulkanHeaders_INCLUDE_DIRS})\nelseif(VULKAN_HEADERS_INSTALL_DIR)",
             )
 
     def build(self):

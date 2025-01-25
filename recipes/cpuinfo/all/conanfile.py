@@ -108,3 +108,6 @@ class CpuinfoConan(ConanFile):
             self.cpp_info.components["cpuinfo"].requires = ["clog"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["cpuinfo"].system_libs.append("pthread")
+
+        if self.settings.os == "Android":
+            self.cpp_info.components["cpuinfo"].system_libs.append("log")

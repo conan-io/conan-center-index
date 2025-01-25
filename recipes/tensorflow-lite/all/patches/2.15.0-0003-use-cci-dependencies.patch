@@ -1,0 +1,68 @@
+diff --git a/tensorflow/lite/CMakeLists.txt b/tensorflow/lite/CMakeLists.txt
+index 0958ed1b9ce..13d06f12ca6 100644
+--- a/tensorflow/lite/CMakeLists.txt
++++ b/tensorflow/lite/CMakeLists.txt
+@@ -147,7 +147,7 @@ set(TFLITE_TARGET_DEPENDENCIES "")
+ find_package(absl REQUIRED)
+ find_package(Eigen3 REQUIRED)
+ find_package(farmhash REQUIRED)
+-find_package(fft2d REQUIRED)
++find_package(fft REQUIRED)
+ find_package(FlatBuffers REQUIRED)
+ find_package(gemmlowp REQUIRED)
+ if (NOT CMAKE_SYSTEM_PROCESSOR OR CMAKE_SYSTEM_PROCESSOR MATCHES "x86")
+@@ -155,7 +155,6 @@ if (NOT CMAKE_SYSTEM_PROCESSOR OR CMAKE_SYSTEM_PROCESSOR MATCHES "x86")
+   list(APPEND TFLITE_TARGET_DEPENDENCIES NEON_2_SSE::NEON_2_SSE)
+ endif()
+ find_package(cpuinfo REQUIRED)  #CPUINFO is used by XNNPACK and RUY library
+-find_package(ml_dtypes REQUIRED)
+ find_package(ruy REQUIRED)
+ # Include TSL, which is in tensorflow/third_party
+ include_directories(
+@@ -183,6 +182,11 @@ if(NOT SYSTEM_PTHREADPOOL AND NOT TARGET pthreadpool)
+     "${PTHREADPOOL_SOURCE_DIR}"
+     "${CMAKE_BINARY_DIR}/pthreadpool")
+ endif()
++if(TARGET flatbuffers::flatbuffers_shared)
++    set(FLATBUFFERS_TARGET flatbuffers::flatbuffers_shared)
++else()
++    set(FLATBUFFERS_TARGET flatbuffers::flatbuffers)
++endif()
+ set(TF_TARGET_PRIVATE_OPTIONS "")
+ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang$")
+   # TensorFlow uses a heap of deprecated proto fields so surpress these
+@@ -483,13 +487,13 @@ else()
+ endif()
+ if(TFLITE_ENABLE_XNNPACK)
+   find_package(fp16_headers REQUIRED)
+-  find_package(XNNPACK REQUIRED)
++  find_package(xnnpack REQUIRED)
+   populate_tflite_source_vars("delegates/xnnpack"
+     TFLITE_DELEGATES_XNNPACK_SRCS
+     FILTER ".*(_test|_tester)\\.(cc|h)"
+   )
+   list(APPEND TFLITE_TARGET_DEPENDENCIES
+-    XNNPACK
++    xnnpack::xnnpack
+   )
+   list(APPEND TFLITE_TARGET_PUBLIC_OPTIONS "-DTFLITE_BUILD_WITH_XNNPACK_DELEGATE")
+ endif()
+@@ -633,13 +637,12 @@ target_link_libraries(tensorflow-lite
+     absl::strings
+     absl::synchronization
+     absl::variant
+-    farmhash
+-    fft2d_fftsg2d
+-    flatbuffers::flatbuffers
+-    gemmlowp::gemmlowp
+-    ml_dtypes
++    farmhash::farmhash
++    fft::fft
++    ${FLATBUFFERS_TARGET}
++    gemmlowp::eight_bit_int_gemm
+     ruy::ruy
+-    pthreadpool
++    pthreadpool::pthreadpool
+     ${CMAKE_DL_LIBS}
+     ${TFLITE_TARGET_DEPENDENCIES}
+ )

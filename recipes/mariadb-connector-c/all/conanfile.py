@@ -92,6 +92,7 @@ class MariadbConnectorcConan(ConanFile):
         tc.variables["INSTALL_BINDIR"] = "bin"
         tc.variables["INSTALL_LIBDIR"] = "lib"
         tc.variables["INSTALL_PLUGINDIR"] = os.path.join("lib", "plugin").replace("\\", "/")
+        tc.variables["ZLIB_LIBRARY"] = "ZLIB::ZLIB"
         # To install relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         tc.generate()
@@ -104,7 +105,7 @@ class MariadbConnectorcConan(ConanFile):
         apply_conandata_patches(self)
 
         root_cmake = os.path.join(self.source_folder, "CMakeLists.txt")
-        replace_in_file(self, root_cmake, "${ZLIB_LIBRARY}", "${ZLIB_LIBRARIES}")
+        libmariadb_cmake = os.path.join(self.source_folder, "libmariadb", "CMakeLists.txt")
         replace_in_file(self,
             root_cmake,
             "SET(SSL_LIBRARIES ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})",
@@ -113,6 +114,14 @@ class MariadbConnectorcConan(ConanFile):
         replace_in_file(self, root_cmake, "${CURL_LIBRARIES}", "CURL::libcurl")
         plugins_io_cmake = os.path.join(self.source_folder, "plugins", "io", "CMakeLists.txt")
         replace_in_file(self, plugins_io_cmake, "${CURL_LIBRARIES}", "CURL::libcurl")
+        if Version(self.version) >= "3.3.6":
+            replace_in_file(self, root_cmake, "${WARNING_AS_ERROR}", "")
+        elif Version(self.version) >= "3.1.18":
+            replace_in_file(self, root_cmake, " -WX", "")
+        if Version(self.version) >= "3.3":
+            replace_in_file(self, root_cmake,
+                            "INCLUDE(${CC_SOURCE_DIR}/cmake/FindZStd.cmake)",
+                            "find_package(ZSTD REQUIRED CONFIG)")
 
     def build(self):
         self._patch_sources()

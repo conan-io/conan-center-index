@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -9,7 +9,7 @@ from conan.tools.files import copy, get, rm, rmdir, replace_in_file, export_cona
 from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=1.53.0"
 
 
 class LibiglConan(ConanFile):
@@ -78,14 +78,18 @@ class LibiglConan(ConanFile):
         if self.info.options.header_only:
             self.info.clear()
 
+    def validate_build(self):
+        if (os.getenv('CONAN_CENTER_BUILD_SERVICE') is not None and
+                Version(self.version) == "2.3.0" and self.settings.build_type == "Debug"):
+            raise ConanInvalidConfiguration("Debug build disabled from building in CCI due to excessive memory use in ConanCenter CI")
+
     def validate(self):
-        if "arm" in self.settings.arch or self.settings.arch == "x86":
-            raise ConanInvalidConfiguration(f"Not available for arm. Requested arch: {self.settings.arch}")
+        if Version(self.version) < "2.4.0" and "arm" in self.settings.arch:
+            raise ConanInvalidConfiguration(f"Old versions of this library do not support {self.settings.arch} architecture")
+        if self.settings.arch == "x86":
+            raise ConanInvalidConfiguration(f"Architecture {self.settings.arch} is not supported")
         if is_msvc_static_runtime(self) and not self.options.header_only:
             raise ConanInvalidConfiguration("Visual Studio build with MT runtime is not supported")
-
-        if self.version == "2.3.0" and conan_version.major == 1 and self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration("Debug build disabled for Conan 1.x due to excessive memory use in ConanCenter CI")
 
         def loose_lt_semver(v1, v2):
             return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))

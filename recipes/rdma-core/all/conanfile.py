@@ -36,8 +36,8 @@ class PackageConan(ConanFile):
         "build_libibnetdisc": True,
         "build_libmana": True,
         "build_libmlx4": True,
-        "build_libmlx5": False,
-        "build_librdmacm": False,
+        "build_libmlx5": True,
+        "build_librdmacm": True,
     }
 
     def configure(self):
@@ -49,8 +49,7 @@ class PackageConan(ConanFile):
 
     def requirements(self):
         self.requires("libnl/3.8.0")
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.requires("libudev/system")
+        self.requires("libudev/system")
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
@@ -59,7 +58,7 @@ class PackageConan(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/2.2.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -73,6 +72,11 @@ class PackageConan(ConanFile):
         # tc.variables["ENABLE_STATIC"] = not self.options.shared
         tc.variables["NO_PYVERBS"] = True
         tc.variables["NO_MAN_PAGES"] = True
+        # Otherwise get set to ${install_prefix}/car/run and the paths in
+        # https://github.com/linux-rdma/rdma-core/blob/v52.0/buildlib/config.h.in
+        # can exceed the 108-character limit for socket paths on Linux
+        if "CMAKE_INSTALL_RUNDIR" not in self.conf.get("tools.cmake.cmaketoolchain:extra_variables", check_type=dict, default={}):
+            tc.variables["CMAKE_INSTALL_RUNDIR"] = "/var/run"
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
