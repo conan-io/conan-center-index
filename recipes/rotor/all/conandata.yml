@@ -1,4 +1,7 @@
 sources:
+  "0.33":
+    url: "https://github.com/basiliscos/cpp-rotor/archive/refs/tags/v0.33.tar.gz"
+    sha256: "0a57af1018e2ca89c9cd95ae134c4b2af2c8e803c81ebee5433495776830eea6"
   "0.32":
     url: "https://github.com/basiliscos/cpp-rotor/archive/refs/tags/v0.32.tar.gz"
     sha256: "b0b7a294704f1ab779b95ab433eb5f4a2859db3539108a0e08709fc97f6bccee"
