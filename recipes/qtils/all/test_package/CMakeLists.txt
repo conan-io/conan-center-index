@@ -1,14 +1,13 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
+cmake_minimum_required(VERSION 3.15)
+project(test_package CXX)
 
-PROJECT(test_package LANGUAGES CXX)
+find_package(qtils REQUIRED CONFIG)
+find_package(Boost REQUIRED)
+find_package(fmt REQUIRED CONFIG)
 
-find_package(qtils  CONFIG REQUIRED)
-
-add_executable(${PROJECT_NAME}
-        test_package.cpp
+add_executable(${PROJECT_NAME} test_package.cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE qtils::qtils fmt::fmt Boost::boost)
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    CXX_STANDARD 20
+    CXX_STANDARD_REQUIRED ON
 )
-
-target_link_libraries(${PROJECT_NAME} PRIVATE
-        qtils::qtils
-)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)

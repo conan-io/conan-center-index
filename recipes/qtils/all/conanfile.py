@@ -11,6 +11,7 @@ required_conan_version = ">=1.53.0"
 
 class PackageConan(ConanFile):
     name = "qtils"
+    version = "0.0.4"
     description = "Utils for KAGOME C++ projects"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
@@ -18,20 +19,22 @@ class PackageConan(ConanFile):
     topics = ("KAGOME", "header-only")
     package_type = "header-library"
     settings = "os", "compiler", "build_type", "arch"
+    options = {}
+    default_options = {}
     no_copy_source = True
 
     @property
     def _min_cppstd(self):
-        return 14
+        return 20
 
     @property
     def _compilers_minimum_version(self):
         return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
+            "apple-clang": "11",
+            "clang": "10",
+            "gcc": "10",
+            "msvc": "192",
+            "Visual Studio": "16",
         }
 
     def export_sources(self):
@@ -56,7 +59,25 @@ class PackageConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
         if self.settings.os == "Windows":
-            raise ConanInvalidConfiguration(f"{self.ref} can not be used on Windows.")
+            raise ConanInvalidConfiguration(
+                f"{self.ref} can not be used on Windows due to platform-specific dependencies."
+            )
+        
+        if self.dependencies["boost"].ref.version < "1.74.0":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires Boost >= 1.74.0"
+            )
+        
+        if self.dependencies["fmt"].ref.version < "8.0.0":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires fmt >= 8.0.0"
+            )
+        
+        if self.settings.compiler.get_safe("cppstd") and \
+           Version(str(self.settings.compiler.cppstd)) < "20":
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++20 or higher for std::span and concepts support"
+            )
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -80,6 +101,8 @@ class PackageConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "qtils")
         self.cpp_info.set_property("cmake_target_name", "qtils::qtils")
         self.cpp_info.set_property("pkg_config_name", "qtils")
+
+        self.cpp_info.defines = []
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["dl", "m", "pthread"])
