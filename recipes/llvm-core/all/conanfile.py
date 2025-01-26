@@ -183,17 +183,26 @@ class LLVMCoreConan(ConanFile):
 
     @property
     def _min_cppstd(self):
+        if Version(self.version) >= 19:
+            return 17
         return 14
 
     @property
     def _compilers_minimum_version(self):
-        return {
+        return {14: {
             "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
+            "clang": "3.4",
+            "gcc": "5",
             "msvc": "191",
             "Visual Studio": "15",
-        }
+        }, 17: {
+            "apple-clang": "10",
+            "clang": "6",
+            "gcc": "7",
+            "msvc": "192",
+            "Visual Studio": "16",
+        },
+        }.get(self._min_cppstd, {})
 
     def export_sources(self):
         export_conandata_patches(self)
