@@ -67,6 +67,8 @@ class MSYS2Conan(ConanFile):
     def validate(self):
         if self.settings.os != "Windows":
             raise ConanInvalidConfiguration("Only Windows supported")
+        if self.settings.arch == "armv8":
+            raise ConanInvalidConfiguration("msys2 does not support arm64 natively now, you may use the setting of build: \"msys2/*:arch=x86_64\" to let msys2 run on x86 emulation.")
         if self.settings.arch != "x86_64":
             raise ConanInvalidConfiguration("Only Windows x64 supported")
 
