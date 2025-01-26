@@ -8,6 +8,10 @@ sources:
   "0.6.3":
     url: "https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.3.tar.gz"
     sha256: "77ea1b90b3718aa0c324207cb29418f5bced2354c2e483a9523d98c3460af1ed"
+  "0.6.2-0f9a586-p1":
+    url: "https://github.com/hunter-packages/yaml-cpp/archive/refs/tags/v0.6.2-0f9a586-p1.tar.gz"
+    sha256: "b416ab3f1b018e55755dafe6af0ed59150e7bcfadef59425195a8814c9a19bed"
+
 patches:
   "0.7.0":
     - patch_file: "patches/0001-install-0.7.0.patch"
@@ -18,3 +22,8 @@ patches:
       patch_description: "Adds assert to enable compilation with libcxx + gcc"
       patch_type: "portability"
       patch_source: "https://github.com/jbeder/yaml-cpp/pull/947"
+  "0.6.2-0f9a586-p1":
+    - patch_file: "patches/0003-update-0.6.2-0f9a586-p1.patch"
+      patch_description: "Adapt to CPP 11 standard"
+      patch_type: "portability"
+      patch_source: "https://github.com/simbahebinbo/yaml-cpp/commit/b633ec8ef18b6ca4f02972a6a99691f2d8210abe"
