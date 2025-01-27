@@ -142,16 +142,22 @@ class VectorscanConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
 
     def package_info(self):
+        hs_include_dir = os.path.join("include", "hs")
         self.cpp_info.components["hs"].set_property("pkg_config_name", "libhs")
+        self.cpp_info.components["hs"].set_property("cmake_target_name", "hs")
         self.cpp_info.components["hs"].libs = ["hs"]
         self.cpp_info.components["hs"].requires = ["boost::headers", "simde::simde"]
+        self.cpp_info.components["hs"].includedirs = [hs_include_dir]
 
         self.cpp_info.components["hs_runtime"].libs = ["hs_runtime"]
+        self.cpp_info.components["hs_runtime"].includedirs = [hs_include_dir]
 
         if self.options.with_chimera:
             self.cpp_info.components["chimera"].set_property("pkg_config_name", "libch")
+            self.cpp_info.components["chimera"].set_property("cmake_target_name", "chimera")
             self.cpp_info.components["chimera"].libs = ["chimera"]
             self.cpp_info.components["chimera"].requires = ["pcre::libpcre", "hs"]
+            self.cpp_info.components["chimera"].includedirs = [hs_include_dir]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["hs"].system_libs = ["m"]

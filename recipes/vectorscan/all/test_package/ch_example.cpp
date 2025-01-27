@@ -1,5 +1,5 @@
 #include <cstdio>
-#include "hs/ch.h"
+#include "ch.h"
 
 int main(int argc, char **argv) {
     ch_compile_error_t* err = nullptr;
