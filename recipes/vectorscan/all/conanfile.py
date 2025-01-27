@@ -76,6 +76,8 @@ class VectorscanConan(ConanFile):
         check_min_cppstd(self, 17)
         if self.options.shared and self.options.with_chimera:
             raise ConanInvalidConfiguration("Chimera build requires static building")
+        if self.settings.compiler == "msvc":
+            raise ConanInvalidConfiguration("MSVC is not supported by upstream build scripts")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18.4 <4]")
