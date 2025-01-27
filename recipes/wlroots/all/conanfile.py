@@ -1,13 +1,13 @@
 import os
-import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, replace_in_file, rmdir, save
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
+from conan.tools.scm import Version
 
 
 required_conan_version = ">=2.0"
@@ -67,7 +67,7 @@ class WlrootsConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libdrm/2.4.119")
+        self.requires("libdrm/2.4.124", force=True)
         self.requires("pixman/0.43.4")
         self.requires("wayland/1.23.0", force=True)
         self.requires("xkbcommon/1.6.0")
@@ -142,6 +142,11 @@ class WlrootsConan(ConanFile):
 
     def generate(self):
         tc = MesonToolchain(self)
+
+        # https://gitlab.freedesktop.org/wlroots/wlroots/-/wikis/Packaging-recommendations
+        if str(self.settings.build_type) != "Debug":
+            tc.project_options["werror"] = False
+
         tc.project_options["allocators"] = [
             allocator
             for allocator in allocators
@@ -208,7 +213,14 @@ class WlrootsConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
-        self.cpp_info.libs = ["wlroots"]
+        version = Version(self.version)
+        versioned_name = f"wlroots-{version.major}.{version.minor}"
+        self.cpp_info.includedirs = [os.path.join("include", versioned_name)]
+        self.cpp_info.libs = [versioned_name]
+
+        if self.options.allocator_gbm:
+            self.cpp_info.system_libs.append("gbm")
+
         self.cpp_info.requires = [
             "libdrm::libdrm",
             "libseat::libseat",
@@ -218,8 +230,6 @@ class WlrootsConan(ConanFile):
             "wayland::wayland-server",
             "xkbcommon::libxkbcommon",
         ]
-        if self.options.allocator_gbm or self.options.renderer_gles2:
-            self.cpp_info.requires.append("mesa::gbm")
         if self.options.backend_drm:
             self.cpp_info.requires.append("libdisplay-info::libdisplay-info")
             self.cpp_info.requires.append("libliftoff::libliftoff")

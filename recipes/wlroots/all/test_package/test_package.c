@@ -6,7 +6,7 @@
 int main(void) {
 	wlr_log_init(WLR_ERROR, NULL);
 	struct wl_display *display = wl_display_create();
-	struct wlr_backend *backend = wlr_backend_autocreate(display, NULL);
+	struct wlr_backend *backend = wlr_backend_autocreate(wl_display_get_event_loop(display), NULL);
 	if (!backend) {
 		return EXIT_FAILURE;
 	}
