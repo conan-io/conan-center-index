@@ -6,7 +6,7 @@ from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 import os
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2"
 
 
 class VectorscanConan(ConanFile):
@@ -40,22 +40,28 @@ class VectorscanConan(ConanFile):
         "with_sve": False,
         "with_chimera": False,
     }
-    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
-        if self.settings.os != "Linux" or self.options.with_cpu_native:
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        if self.settings.os != "Linux":
             del self.options.with_fat_runtime
-        if self.settings.arch not in ["x86", "x86_64"] or self.options.with_fat_runtime:
+        if self.settings.arch not in ["x86", "x86_64"]:
             del self.options.with_avx
-        if str(self.settings.arch).startswith("arm") or self.options.with_fat_runtime:
+        if str(self.settings.arch).startswith("arm"):
             del self.options.with_sve
 
     def configure(self):
-        if self.options.shared:
+        if self.options.shared or self.options.with_cpu_native:
             self.options.rm_safe("fPIC")
+        if self.options.with_cpu_native:
+            self.options.rm_safe("with_fat_runtime")
+        if self.options.get_safe("with_fat_runtime"):
+            self.options.rm_safe("with_avx")
+            self.options.rm_safe("with_sve")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -92,7 +98,7 @@ class VectorscanConan(ConanFile):
         if "with_fat_runtime" in self.options:
             tc.variables["WITH_FAT_RUNTIME"] = self.options.with_fat_runtime
         if "with_avx" in self.options:
-            if self.options.with_avx:
+            if not self.options.with_avx:
                 tc.cache_variables["BUILD_AVX2"] = False
             elif self.options.with_avx == "avx2":
                 tc.cache_variables["BUILD_AVX2"] = True
@@ -101,7 +107,7 @@ class VectorscanConan(ConanFile):
             elif self.options.with_avx == "avx512vbmi":
                 tc.variables["BUILD_AVX512VBMI"] = True
         if "with_sve" in self.options:
-            if self.options.with_sve:
+            if not self.options.with_sve:
                 tc.cache_variables["BUILD_SVE"] = False
             elif self.options.with_sve == "sve":
                 tc.cache_variables["BUILD_SVE"] = True
