@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
@@ -78,6 +78,10 @@ class VectorscanConan(ConanFile):
             raise ConanInvalidConfiguration("Chimera build requires static building")
         if self.settings.compiler == "msvc":
             raise ConanInvalidConfiguration("MSVC is not supported by upstream build scripts")
+
+    def validate_build(self):
+        if self.settings.os == "Macos" and cross_building(self):
+            raise ConanInvalidConfiguration("Cross-building is not supported on macOS")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.18.4 <4]")
