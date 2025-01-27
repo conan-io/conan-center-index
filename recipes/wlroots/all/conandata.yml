@@ -1,4 +1,4 @@
 sources:
-  "0.17.2":
-    url: "https://gitlab.freedesktop.org/wlroots/wlroots/-/archive/0.17.2/wlroots-0.17.2.tar.bz2"
-    sha256: "1d925ceff68a23ba73aa56a01e52d3260c4544d48e0c9d8cf4dc247c71612ed3"
+  "0.18.2":
+    url: "https://gitlab.freedesktop.org/wlroots/wlroots/-/archive/0.18.2/wlroots-0.18.2.tar.bz2"
+    sha256: "a28061f7778f28f7be377fd4d6f0ebd58cb2a63b52460e9fde28e2ab43e80cab"
