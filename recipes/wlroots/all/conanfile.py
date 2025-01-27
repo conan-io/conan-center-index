@@ -10,7 +10,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 allocators = ["gbm"]
@@ -51,10 +51,6 @@ class WlrootsConan(ConanFile):
     # todo When xcb-xinput is available in the xorg/system package, enable this option by default.
     default_options["backend_x11"] = False
 
-    @property
-    def _has_build_profile(self):
-        return hasattr(self, "settings_build")
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -67,16 +63,13 @@ class WlrootsConan(ConanFile):
             self.options["libglvnd"].egl = True
             self.options["libglvnd"].gles2 = True
 
-        if self.options.allocator_gbm or self.options.renderer_gles2:
-            self.options["mesa"].gbm = True
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("libdrm/2.4.119")
-        self.requires("pixman/0.43.0")
-        self.requires("wayland/1.22.0")
+        self.requires("pixman/0.43.4")
+        self.requires("wayland/1.23.0", force=True)
         self.requires("xkbcommon/1.6.0")
 
         # For session support.
@@ -84,12 +77,9 @@ class WlrootsConan(ConanFile):
             self.requires("libseat/0.8.0")
         self.requires("libudev/system")
 
-        if self.options.allocator_gbm or self.options.renderer_gles2:
-            self.requires("mesa/24.0.3")
-
         if self.options.backend_drm:
-            self.requires("libdisplay-info/0.1.1")
-            self.requires("libliftoff/0.4.1")
+            self.requires("libdisplay-info/0.2.0")
+            self.requires("libliftoff/0.5.0")
 
         if self.options.backend_libinput:
             self.requires("libinput/1.25.0")
@@ -98,8 +88,8 @@ class WlrootsConan(ConanFile):
             self.requires("libglvnd/1.7.0")
 
         if self.options.renderer_vulkan:
-            self.requires("vulkan-headers/1.3.268.0")
-            self.requires("vulkan-loader/1.3.268.0")
+            self.requires("vulkan-headers/1.3.290.0")
+            self.requires("vulkan-loader/1.3.290.0")
 
         if self.options.backend_x11 or self.options.xwayland:
             self.requires("xorg/system")
@@ -110,12 +100,6 @@ class WlrootsConan(ConanFile):
         if not self.dependencies["xkbcommon"].options.with_wayland:
             raise ConanInvalidConfiguration(
                 f"{self.name} requires the with_wayland option of the xkbcommon package to be enabled"
-            )
-        if (
-            self.options.allocator_gbm or self.options.renderer_gles2
-        ) and not self.dependencies["mesa"].options.gbm:
-            raise ConanInvalidConfiguration(
-                f"{self.name} requires the gbm option of the mesa package to be enabled when the renderer_gles2 or allocator_gbm options are enabled"
             )
         if (
             self.options.renderer_gles2
@@ -143,15 +127,15 @@ class WlrootsConan(ConanFile):
             )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.2")
+        self.tool_requires("meson/[>=1.3.2 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.1.0 <3]")
         self.tool_requires("wayland/<host_version>")
-        self.tool_requires("wayland-protocols/1.33")
+        self.tool_requires("wayland-protocols/1.36")
         if self.options.backend_drm:
-            self.tool_requires("hwdata/0.374")
+            self.tool_requires("hwdata/[>=0.374 <1]")
         if self.options.renderer_vulkan:
-            self.tool_requires("glslang/11.7.0")
+            self.tool_requires("glslang/[>=11.7.0 <12]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -189,43 +173,22 @@ class WlrootsConan(ConanFile):
         tc.generate()
 
         pkg_config_deps = PkgConfigDeps(self)
-        if self._has_build_profile:
-            pkg_config_deps.build_context_activated = ["wayland", "wayland-protocols"]
-            if self.options.backend_drm:
-                pkg_config_deps.build_context_activated.append("hwdata")
-            pkg_config_deps.build_context_suffix = {"wayland": "_BUILD"}
-        else:
-            # Manually generate pkgconfig file of wayland-protocols since
-            # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
-            # We must use legacy conan v1 deps_cpp_info because self.dependencies doesn't
-            # contain build requirements when using 1 profile.
-            wp_prefix = self.deps_cpp_info["wayland-protocols"].rootpath
-            wp_version = self.deps_cpp_info["wayland-protocols"].version
-            wp_pkg_content = textwrap.dedent(f"""\
-                prefix={wp_prefix}
-                datarootdir=${{prefix}}/res
-                pkgdatadir=${{datarootdir}}/wayland-protocols
-                Name: Wayland Protocols
-                Description: Wayland protocol files
-                Version: {wp_version}
-            """)
-            save(
-                self,
-                os.path.join(self.generators_folder, "wayland-protocols.pc"),
-                wp_pkg_content,
-            )
+        pkg_config_deps.build_context_activated = ["wayland", "wayland-protocols"]
+        if self.options.backend_drm:
+            pkg_config_deps.build_context_activated.append("hwdata")
+
+        pkg_config_deps.build_context_suffix = {"wayland": "_BUILD"}
         pkg_config_deps.generate()
         tc = VirtualBuildEnv(self)
         tc.generate()
 
     def _patch_sources(self):
-        if self._has_build_profile:
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "protocol", "meson.build"),
-                "wayland_scanner_dep = dependency('wayland-scanner', native: true)",
-                "wayland_scanner_dep = dependency('wayland-scanner_BUILD', native: true)",
-            )
+        replace_in_file(
+            self,
+            os.path.join(self.source_folder, "protocol", "meson.build"),
+            "wayland_scanner_dep = dependency('wayland-scanner', native: true)",
+            "wayland_scanner_dep = dependency('wayland-scanner_BUILD', native: true)",
+        )
 
     def build(self):
         self._patch_sources()
