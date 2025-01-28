@@ -50,7 +50,7 @@ class ResiprocateConan(ConanFile):
     def validate(self):
         check_min_cppstd(self, 11)
         if is_msvc(self) and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
+            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on msvc, it does not export required symbols.")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.21 <4]")
@@ -112,7 +112,6 @@ class ResiprocateConan(ConanFile):
 
     def package_info(self):
         resiprocate_lib = "resiprocate" if self.settings.os == "Windows" else "resip"
-        self.cpp_info.libs = [resiprocate_lib, "rutil", "dum"]
 
         self.cpp_info.components["resip"].libs = [resiprocate_lib]
         self.cpp_info.components["resip"].requires = ["rutil"]
