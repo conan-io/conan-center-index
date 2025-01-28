@@ -291,7 +291,7 @@ class QtConan(ConanFile):
 
         # C++ minimum standard required
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 17)
+            check_min_cppstd(self, 17, gnu_extensions=Version(self.version) >= "6.8.0")
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
         if not minimum_version:
             self.output.warning("C++17 support required. Your compiler is unknown. Assuming it supports C++17.")
@@ -715,9 +715,6 @@ class QtConan(ConanFile):
         # workaround https://bugreports.qt.io/browse/QTBUG-94356
         if Version(self.version) < "6.8.0":
             replace_in_file(self, os.path.join(self.source_folder, "qtbase", "cmake", "FindWrapSystemZLIB.cmake"), '"-lz"', "ZLIB::ZLIB")
-            replace_in_file(self, os.path.join(self.source_folder, "qtbase", "configure.cmake"),
-                "set_property(TARGET ZLIB::ZLIB PROPERTY IMPORTED_GLOBAL TRUE)",
-                "")
             
         if Version(self.version) <= "6.4.0":
             # use official variable name https://cmake.org/cmake/help/latest/module/FindFontconfig.html
