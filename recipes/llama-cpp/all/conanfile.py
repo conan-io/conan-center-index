@@ -68,6 +68,7 @@ class LlamaCppConan(ConanFile):
         tc.variables["LLAMA_CURL"] = self.options.get_safe("with_curl")
         if cross_building(self):
             tc.variables["LLAMA_NATIVE"] = False
+            tc.variables["GGML_NATIVE_DEFAULT"] = False
 
         tc.variables["GGML_BUILD_TESTS"] = False
         #tc.variables["GGML_BUILD_EXAMPLES"] = self.options.get_safe("with_examples")
@@ -108,6 +109,7 @@ class LlamaCppConan(ConanFile):
         self.cpp_info.components["common"].requires = ["llama"]
         if self.options.with_curl:
             self.cpp_info.components["common"].requires.append("libcurl::libcurl")
+            self.cpp_info.components["common"].defines.append("LLAMA_USE_CURL")
         if is_apple_os(self):
             self.cpp_info.components["common"].frameworks.extend(["Foundation", "Accelerate", "Metal"])
         elif self.settings.os in ("Linux", "FreeBSD"):

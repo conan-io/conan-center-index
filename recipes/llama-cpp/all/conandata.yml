@@ -12,6 +12,8 @@ sources:
     url: "https://github.com/ggerganov/llama.cpp/archive/refs/tags/b3040.tar.gz"
     sha256: "020e040139660eb40113503bb1057d5387677d249b990e008e04821532f7cd62"
 patches:
+  "b4570":
+    - patch_file: "patches/b4570-001-curl-patch-targets.patch"
   "b4079":
     - patch_file: "patches/b4079-001-curl-patch-targets.patch"
   "b3542":
