@@ -6,7 +6,6 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
-from conan.tools.scm import Version
 
 
 required_conan_version = ">=2.0.9"
@@ -45,6 +44,10 @@ class LlamaCppConan(ConanFile):
 
     def validate(self):
         check_min_cppstd(self, 11)
+
+    def validate_build(self):
+        if self.settings.compiler == "msvc" and "arm" in self.settings.arch:
+            raise ConanInvalidConfiguration("llama-cpp does not support ARM architecture on msvc, it recommends to use clang instead")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -151,4 +154,3 @@ class LlamaCppConan(ConanFile):
             self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
             module_path = os.path.join("lib", "cmake", "llama-cpp-cuda-static.cmake")
             self.cpp_info.set_property("cmake_build_modules", [module_path])
-
