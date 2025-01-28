@@ -70,7 +70,7 @@ class LlamaCppConan(ConanFile):
             tc.variables["LLAMA_NATIVE"] = False
 
         tc.variables["GGML_BUILD_TESTS"] = False
-        tc.variables["GGML_BUILD_EXAMPLES"] = self.options.get_safe("with_examples")
+        #tc.variables["GGML_BUILD_EXAMPLES"] = self.options.get_safe("with_examples")
         tc.variables["GGML_CUDA"] = self.options.get_safe("with_cuda")
         tc.generate()
 
