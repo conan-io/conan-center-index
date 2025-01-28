@@ -113,11 +113,40 @@ class ResiprocateConan(ConanFile):
     def package_info(self):
         resiprocate_lib = "resiprocate" if self.settings.os == "Windows" else "resip"
         self.cpp_info.libs = [resiprocate_lib, "rutil", "dum"]
-        if not self.options.with_cares:
-            self.cpp_info.libs.append("resipares")
+
+        self.cpp_info.components["resip"].libs = [resiprocate_lib]
+        self.cpp_info.components["resip"].requires = ["rutil"]
         if is_apple_os(self):
-            self.cpp_info.frameworks.extend(["CoreFoundation", "CoreServices", "Security"])
+            self.cpp_info.components["resip"].frameworks.extend(["CoreFoundation", "CoreServices", "Security"])
+        elif self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["resip"].system_libs.append("m")
+        elif self.settings.os == "Windows" and self.options.with_ssl:
+            self.cpp_info.components["resip"].system_libs.extend(["crypt32", "ncrypt"])
+
+        if not self.options.with_cares:
+            self.cpp_info.components["resipares"].libs = ["resipares"]
+            if is_apple_os(self):
+                self.cpp_info.components["resipares"].frameworks.extend(["CoreFoundation", "SystemConfiguration"])
+            elif self.settings.os == "Windows":
+                self.cpp_info.components["resipares"].system_libs.append("ws2_32")
+
+        self.cpp_info.components["rutil"].libs = ["rutil"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["m", "pthread"])
-        elif self.settings.os in ["Windows"]:
-            self.cpp_info.system_libs.extend(["winmm", "ws2_32"])
+            self.cpp_info.components["rutil"].system_libs.extend(["resolv", "rt", "pthread"])
+        elif self.settings.os == "Macos":
+            self.cpp_info.components["rutil"].system_libs.append("resolv")
+        elif self.settings.os == "Windows":
+            self.cpp_info.components["rutil"].system_libs.append("winmm")
+        if self.options.with_ssl:
+            self.cpp_info.components["rutil"].requires.extend(["openssl::ssl", "openssl::crypto"])
+        if self.options.with_cares:
+            self.cpp_info.components["rutil"].requires.append("c-ares::c-ares")
+        else:
+            self.cpp_info.components["rutil"].requires.append("resipares")
+
+        self.cpp_info.components["dum"].libs = ["dum"]
+        self.cpp_info.components["dum"].requires = ["resip"]
+
+        if self.options.with_ssl:
+            self.cpp_info.components["sipdial"].libs = ["sipdial"]
+            self.cpp_info.components["sipdial"].requires = ["dum"]
