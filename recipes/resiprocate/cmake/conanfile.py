@@ -18,7 +18,7 @@ class ResiprocateConan(ConanFile):
         "The project is dedicated to maintaining a complete, correct, "
         "and commercially usable implementation of SIP and a few related protocols."
     )
-    license = "VSL-1.0"
+    license = "VSL-1.0", "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/resiprocate/resiprocate/wiki/"
     topics = ("sip", "voip", "communication", "signaling")
@@ -99,7 +99,7 @@ class ResiprocateConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
 
