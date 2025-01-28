@@ -72,7 +72,6 @@ class LlamaCppConan(ConanFile):
         tc.variables["GGML_BUILD_TESTS"] = False
         tc.variables["GGML_BUILD_EXAMPLES"] = self.options.get_safe("with_examples")
         tc.variables["GGML_CUDA"] = self.options.get_safe("with_cuda")
-        tc.variables["GGML_BLAS"] = False
         tc.generate()
 
     def build(self):
@@ -99,7 +98,7 @@ class LlamaCppConan(ConanFile):
     def _get_default_backends(self):
         results = ["cpu"]
         if is_apple_os(self):
-            # results.append("blas")
+            results.append("blas")
             results.append("metal")
         return results
 
@@ -141,7 +140,7 @@ class LlamaCppConan(ConanFile):
             if self.options.shared:
                 self.cpp_info.components[f"ggml-{backend}"].defines.append("GGML_BACKEND_SHARED")
             self.cpp_info.components["ggml"].defines.append(f"GGML_USE_{backend.upper()}")
-            self.cpp_info.components["ggml"].requires = [f"ggml-{backend}"]
+            self.cpp_info.components["ggml"].requires.append(f"ggml-{backend}")
 
         if is_apple_os(self):
             self.cpp_info.components["ggml-blas"].frameworks.append("Accelerate")
