@@ -1,0 +1,4 @@
+sources:
+  "2.28":
+    url: "https://github.com/logological/gpp/releases/download/2.28/gpp-2.28.tar.bz2"
+    sha256: "343d33d562e2492ca9b51ff2cc4b06968a17a85fdc59d5d4e78eed3b1d854b70"
