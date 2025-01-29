@@ -6,6 +6,11 @@ sources:
     url: "https://sourceforge.net/projects/doxygen/files/doxygen-1.9.4.src.tar.gz"
     sha256: "a15e9cd8c0d02b7888bc8356eac200222ecff1defd32f3fe05257d81227b1f37"
 patches:
+  "1.12.0":
+    - patch_file: "patches/1.9.4-0001-enable-modern-compilers.patch"
+      patch_description: "Fix compiler error when compiling doxygen in C++20 mode"
+      patch_type: "portability"
+      patch_source: "https://github.com/doxygen/doxygen/commit/54259f7ad46f91316468248d92b2a65e58d4586d"
   "1.9.4":
     - patch_file: "patches/1.9.4-0001-enable-modern-compilers.patch"
       patch_description: "Enable modern compilers"

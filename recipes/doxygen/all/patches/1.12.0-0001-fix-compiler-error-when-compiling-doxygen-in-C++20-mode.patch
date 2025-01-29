@@ -1,0 +1,40 @@
+From 54259f7ad46f91316468248d92b2a65e58d4586d Mon Sep 17 00:00:00 2001
+From: Dimitri van Heesch <doxygen@gmail.com>
+Date: Sun, 29 Dec 2024 22:48:47 +0100
+Subject: [PATCH] Fix compiler error when compiling doxygen in C++20 mode
+
+---
+ src/trace.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/trace.h b/src/trace.h
+index 2d70079328..858b1df23d 100644
+--- a/src/trace.h
++++ b/src/trace.h
+@@ -100,7 +100,7 @@ class AutoTrace
+         }
+         else
+         {
+-          g_tracer->log(m_loc,spdlog::level::trace,"> "+fmt,std::forward<Args>(args)...);
++          g_tracer->log(m_loc,spdlog::level::trace,fmt::runtime("> "+fmt),std::forward<Args>(args)...);
+         }
+       }
+     }
+@@ -126,7 +126,7 @@ class AutoTrace
+     {
+       if (g_tracer)
+       {
+-        g_tracer->log(loc,spdlog::level::trace,": "+fmt,std::forward<Args>(args)...);
++        g_tracer->log(loc,spdlog::level::trace,fmt::runtime(": "+fmt),std::forward<Args>(args)...);
+       }
+     }
+     template<typename... Args>
+@@ -134,7 +134,7 @@ class AutoTrace
+                  const std::string &msg,Args&&...args)
+     {
+       m_loc = loc;
+-      m_exitMessage = fmt::format(msg,std::forward<Args>(args)...);
++      m_exitMessage = fmt::format(fmt::runtime(msg),std::forward<Args>(args)...);
+     }
+   private:
+    spdlog::source_loc m_loc;
