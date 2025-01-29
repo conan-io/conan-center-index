@@ -62,7 +62,7 @@ class CppCommon(ConanFile):
         if Version(self.version) < "1.0.3" or self.version == "cci.20201104":
             self.requires("fmt/8.1.1", transitive_headers=True)
         else:
-            self.requires("fmt/10.2.0", transitive_headers=True)
+            self.requires("fmt/10.2.0", transitive_headers=True, transitive_libs=True)
         if self.settings.os == "Linux":
             self.requires("util-linux-libuuid/2.39.2", transitive_headers=True)
 
