@@ -38,12 +38,16 @@ class LlamaCppConan(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
+    @property
+    def _is_new_llama(self):
+        return Version(self.version) >= "b4570"
+
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "cmake/*", dst=self.export_sources_folder, src=self.recipe_folder)
 
     def validate(self):
-        check_min_cppstd(self, 11)
+        check_min_cppstd(self, 17 if self._is_new_llama else 11)
 
     def validate_build(self):
         if Version(self.version) >= "b4570" and self.settings.compiler == "msvc" and "arm" in self.settings.arch:
@@ -74,7 +78,9 @@ class LlamaCppConan(ConanFile):
             tc.variables["GGML_NATIVE_DEFAULT"] = False
 
         tc.variables["GGML_BUILD_TESTS"] = False
-        #tc.variables["GGML_BUILD_EXAMPLES"] = self.options.get_safe("with_examples")
+        # Follow with_examples when newer versions can compile examples,
+        # right now it tries to add_subdirectory to a non-existent folder
+        tc.variables["GGML_BUILD_EXAMPLES"] = False
         tc.variables["GGML_CUDA"] = self.options.get_safe("with_cuda")
         tc.generate()
 
@@ -99,30 +105,40 @@ class LlamaCppConan(ConanFile):
         copy(self, "*common*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*.cmake", src=os.path.join(self.export_sources_folder, "cmake"), dst=os.path.join(self.package_folder, "lib", "cmake"))
 
-    def _get_default_backends(self):
+    def _get_backends(self):
         results = ["cpu"]
         if is_apple_os(self):
             results.append("blas")
             results.append("metal")
+        if self.options.with_cuda:
+            results.append("cuda")
         return results
 
     def package_info(self):
-        # New structure in llama
-        if Version(self.version) >= "b4570":
-            self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
-            self.cpp_info.components["common"].libs = ["common"]
-            self.cpp_info.components["common"].requires = ["llama"]
-            if self.options.with_curl:
-                self.cpp_info.components["common"].requires.append("libcurl::libcurl")
-                self.cpp_info.components["common"].defines.append("LLAMA_USE_CURL")
-            if is_apple_os(self):
-                self.cpp_info.components["common"].frameworks.extend(["Foundation", "Accelerate", "Metal"])
-            elif self.settings.os in ("Linux", "FreeBSD"):
-                self.cpp_info.components["common"].system_libs.extend(["dl", "m", "pthread", "gomp"])
+        self.cpp_info.components["llama"].set_property("cmake_target_aliases", ["common"])
+        self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
+        self.cpp_info.components["common"].libs = ["common"]
+        self.cpp_info.components["common"].requires = ["llama"]
+        if self.options.with_curl:
+            self.cpp_info.components["common"].requires.append("libcurl::libcurl")
+            self.cpp_info.components["common"].defines.append("LLAMA_USE_CURL")
+        if is_apple_os(self):
+            self.cpp_info.components["common"].frameworks.extend(["Foundation", "Accelerate", "Metal"])
+        elif self.settings.os in ("Linux", "FreeBSD"):
+            self.cpp_info.components["common"].system_libs.extend(["dl", "m", "pthread", "gomp"])
 
-            self.cpp_info.components["llama"].libs = ["llama"]
-            self.cpp_info.components["llama"].resdirs = ["res"]
-            self.cpp_info.components["llama"].requires = ["ggml", "ggml-base"]
+        self.cpp_info.components["llama"].set_property("cmake_target_aliases", ["llama"])
+        self.cpp_info.components["llama"].libs = ["llama"]
+        self.cpp_info.components["llama"].resdirs = ["res"]
+
+        if self.options.with_cuda and not self.options.shared:
+            self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
+            module_path = os.path.join("lib", "cmake", "llama-cpp-cuda-static.cmake")
+            self.cpp_info.set_property("cmake_build_modules", [module_path])
+
+        # New structure in llama
+        if self._is_new_llama:
+            self.cpp_info.components["llama"].requires = ["ggml"]
 
             self.cpp_info.components["ggml-base"].libs = ["ggml-base"]
             self.cpp_info.components["ggml-base"].resdirs = ["res"]
@@ -132,6 +148,7 @@ class LlamaCppConan(ConanFile):
             self.cpp_info.components["ggml"].libs = ["ggml"]
             self.cpp_info.components["ggml"].resdirs = ["res"]
             self.cpp_info.components["ggml"].requires = ["ggml-base"]
+            self.cpp_info.components["ggml"].set_property("cmake_target_name", "ggml::all")
             if self.settings.os in ("Linux", "FreeBSD"):
                 self.cpp_info.components["ggml"].system_libs.append("dl")
 
@@ -140,7 +157,7 @@ class LlamaCppConan(ConanFile):
                 self.cpp_info.components["ggml-base"].defines.append("GGML_SHARED")
                 self.cpp_info.components["ggml"].defines.append("GGML_SHARED")
 
-            backends = self._get_default_backends()
+            backends = self._get_backends()
             for backend in backends:
                 self.cpp_info.components[f"ggml-{backend}"].libs = [f"ggml-{backend}"]
                 self.cpp_info.components[f"ggml-{backend}"].resdirs = ["res"]
@@ -150,29 +167,13 @@ class LlamaCppConan(ConanFile):
                 self.cpp_info.components["ggml"].requires.append(f"ggml-{backend}")
 
             if is_apple_os(self):
-                self.cpp_info.components["ggml-blas"].frameworks.append("Accelerate")
-
-            if self.options.with_cuda and not self.options.shared:
-                self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
-                module_path = os.path.join("lib", "cmake", "llama-cpp-cuda-static.cmake")
-                self.cpp_info.set_property("cmake_build_modules", [module_path])
+                if "blas" in backends:
+                    self.cpp_info.components["ggml-blas"].frameworks.append("Accelerate")
+                if "metal" in backends:
+                    self.cpp_info.components["ggml-metal"].frameworks.extend(["Metal", "MetalKit", "Foundation", "CoreFoundation"])
+            if "cuda" in backends:
+                # TODO: Add CUDA information
+                pass
         else:
-            self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
-            self.cpp_info.components["common"].libs = ["common"]
-            self.cpp_info.components["common"].libdirs = ["lib"]
             if self.version >= Version("b3240"):
                 self.cpp_info.components["common"].libs.append("ggml")
-
-            self.cpp_info.components["llama"].libs = ["llama"]
-            self.cpp_info.components["llama"].resdirs = ["res"]
-            self.cpp_info.components["llama"].libdirs = ["lib"]
-
-            if self.options.with_cuda and not self.options.shared:
-                self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
-                module_path = os.path.join("lib", "cmake", "llama-cpp-cuda-static.cmake")
-                self.cpp_info.set_property("cmake_build_modules", [module_path])
-
-            if is_apple_os(self):
-                self.cpp_info.components["common"].frameworks.extend(["Foundation", "Accelerate", "Metal"])
-            elif self.settings.os in ("Linux", "FreeBSD"):
-                self.cpp_info.components["common"].system_libs.extend(["dl", "m", "pthread", "gomp"])
