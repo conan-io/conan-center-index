@@ -92,4 +92,4 @@ class JoltPhysicsConan(ConanFile):
                                           "JPH_USE_F16C", "JPH_USE_FMADD"])
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["m", "pthread"])
+            self.cpp_info.system_libs.append("pthread")
