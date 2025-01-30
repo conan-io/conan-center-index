@@ -115,7 +115,6 @@ class LlamaCppConan(ConanFile):
         return results
 
     def package_info(self):
-        self.cpp_info.components["llama"].set_property("cmake_target_aliases", ["common"])
         self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
         self.cpp_info.components["common"].libs = ["common"]
         self.cpp_info.components["common"].requires = ["llama"]
