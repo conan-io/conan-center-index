@@ -17,7 +17,6 @@ from conan.errors import ConanException, ConanInvalidConfiguration
 
 required_conan_version = ">=2.0"
 
-
 class QtConan(ConanFile):
     _submodules = ["qtsvg", "qtdeclarative", "qttools", "qttranslations", "qtdoc",
                    "qtwayland", "qtquickcontrols2", "qtquicktimeline", "qtquick3d", "qtshadertools", "qt5compat",
@@ -181,7 +180,7 @@ class QtConan(ConanFile):
 
         for submodule in self._submodules:
             if submodule not in self._get_module_tree:
-                self._debug_output(f"Qt6: Removing {submodule} option as it is not in the module tree for this version, or is marked as obsolete or ignore")
+                self.output.debug(f"Qt6: Removing {submodule} option as it is not in the module tree for this version, or is marked as obsolete or ignore")
                 self.options.rm_safe(submodule)
 
     def configure(self):
@@ -264,14 +263,19 @@ class QtConan(ConanFile):
         for option in self.options.items():
             self.output.debug(f"qt6 option: {option}")
 
-    def validate(self):
-        if os.getenv('CONAN_CENTER_BUILD_SERVICE') is not None:
-            if self.info.settings.compiler == "gcc" and Version(self.info.settings.compiler.version) >= "11" or \
-                self.info.settings.compiler == "clang" and Version(self.info.settings.compiler.version) >= "12":
-                raise ConanInvalidConfiguration("qt is not supported on gcc11 and clang >= 12 on C3I until conan-io/conan-center-index#13472 is fixed")
-
-        # C++ minimum standard required
+    def validate_build(self):
         check_min_cppstd(self, 17)
+
+    def validate(self):
+        skip_ci_reason = self.conf.get("user.conancenter:skip_ci_build", check_type=str)
+        if skip_ci_reason:
+            # Currently failing on CI for gcc11, see conan-io/conan-center-index#13472
+            raise ConanInvalidConfiguration(skip_ci_reason)
+
+        if self.settings_target is None:
+            # Raise when consumed in the host context, but allow comaptible when
+            # in the build context
+            check_min_cppstd(self, 17)
 
         if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "12":
             raise ConanInvalidConfiguration("apple-clang >= 12 required by qt >= 6.4.0")
@@ -1568,3 +1572,5 @@ class QtConan(ConanFile):
             _add_build_modules_for_component(c)
 
         self.cpp_info.set_property("cmake_build_modules", build_modules_list)
+
+        self.conf_info.define("user.qt:tools_directory", os.path.join(self.package_folder, "bin" if self.settings.os == "Windows" else "libexec"))
