@@ -1,4 +1,7 @@
 sources:
+  "8.0.0":
+    url: "https://github.com/MarcDirven/cpp-lazy/releases/download/v8.0.0/cpp-lazy-src.zip"
+    sha256: "7247a8806b9fd71fe2fcd76d55c3327217e7d24a2fb256c7ec57750c21896155"
   "7.0.2":
     url: "https://github.com/MarcDirven/cpp-lazy/releases/download/v7.0.2/cpp-lazy-src.zip"
     sha256: "fb6dd0870e07050f9e0bba3ddb5f53ee35d8d9a05987f73cb0d667ca1f8348aa"
