@@ -3,7 +3,6 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, collect_libs
 from conan.tools.build import check_min_cppstd
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.meson import Meson, MesonToolchain
@@ -12,7 +11,7 @@ from conan.tools.gnu import PkgConfigDeps
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 class PistacheConan(ConanFile):
     name = "pistache"
@@ -33,28 +32,10 @@ class PistacheConan(ConanFile):
         "fPIC": True,
         "with_ssl": False,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "clang": "6",
-        }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         if self.version == "cci.20201127":
@@ -70,19 +51,12 @@ class PistacheConan(ConanFile):
             self.requires("date/3.0.1")
 
     def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(f"{self.ref} is only support on Linux.")
-
+        if self.settings.os != "Linux" and self.version in ["cci.20201127", "0.0.5"]:
+                raise ConanInvalidConfiguration(f"{self.ref} is only support on Linux.")
         if self.settings.compiler == "clang" and self.version in ["cci.20201127", "0.0.5"]:
             raise ConanInvalidConfiguration(f"{self.ref}'s clang support is broken. See pistacheio/pistache#835.")
 
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
     def build_requirements(self):
         if self.version != "cci.20201127":
@@ -167,13 +141,3 @@ class PistacheConan(ConanFile):
             self.cpp_info.components["libpistache"].system_libs = ["pthread"]
             if self.version != "cci.20201127":
                 self.cpp_info.components["libpistache"].system_libs.append("m")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "Pistache"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Pistache"
-        self.cpp_info.names["cmake_find_package"] = "Pistache"
-        self.cpp_info.names["cmake_find_package_multi"] = "Pistache"
-        self.cpp_info.names["pkg_config"] = "libpistache"
-        suffix = "_{}".format("shared" if self.options.shared else "static")
-        self.cpp_info.components["libpistache"].names["cmake_find_package"] = "pistache" + suffix
-        self.cpp_info.components["libpistache"].names["cmake_find_package_multi"] = "pistache" + suffix
