@@ -1,0 +1,10 @@
+--- a/modules/gapi/src/compiler/gislandmodel.hpp
++++ b/modules/gapi/src/compiler/gislandmodel.hpp
+@@ -10,6 +10,7 @@
+ 
+ #include <unordered_set>
+ #include <memory>        // shared_ptr
++#include <exception>     // exception_ptr
+ 
+ #include <ade/graph.hpp>
+ #include <ade/typed_graph.hpp>
