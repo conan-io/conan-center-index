@@ -43,12 +43,18 @@ patches:
     - patch_file: patches/1.13.0-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
       patch_type: "portability"
+    - patch_file: patches/1.13.0-0003-pocomsg-resource.patch
+      patch_description: "include pocomsg.rc in dll"
+      patch_type: "portability"
   "1.13.2":
     - patch_file: patches/1.13.0.patch
       patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
       patch_type: "conan"
     - patch_file: patches/1.13.0-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
+    - patch_file: patches/1.13.0-0003-pocomsg-resource.patch
+      patch_description: "include pocomsg.rc in dll"
       patch_type: "portability"
   "1.13.1":
     - patch_file: patches/1.13.0.patch
@@ -57,12 +63,18 @@ patches:
     - patch_file: patches/1.13.0-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
       patch_type: "portability"
+    - patch_file: patches/1.13.0-0003-pocomsg-resource.patch
+      patch_description: "include pocomsg.rc in dll"
+      patch_type: "portability"
   "1.13.0":
     - patch_file: patches/1.13.0.patch
       patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
       patch_type: "conan"
     - patch_file: patches/1.13.0-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
+    - patch_file: patches/1.13.0-0003-pocomsg-resource.patch
+      patch_description: "include pocomsg.rc in dll"
       patch_type: "portability"
   "1.12.5p2":
     - patch_file: patches/1.12.3.patch
@@ -71,12 +83,18 @@ patches:
     - patch_file: patches/1.12.5-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
       patch_type: "portability"
+    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+      patch_description: "include pocomsg.rc in dll"
+      patch_type: "portability"
   "1.12.5p1":
     - patch_file: patches/1.12.3.patch
       patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
       patch_type: "conan"
     - patch_file: patches/1.12.5-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
+    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+      patch_description: "include pocomsg.rc in dll"
       patch_type: "portability"
   "1.12.4":
     - patch_file: patches/1.12.3.patch
@@ -85,12 +103,18 @@ patches:
     - patch_file: patches/1.11.0-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
       patch_type: "portability"
+    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+      patch_description: "include pocomsg.rc in dll"
+      patch_type: "portability"
   "1.12.3":
     - patch_file: patches/1.12.3.patch
       patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
       patch_type: "conan"
     - patch_file: patches/1.11.0-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
+    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+      patch_description: "include pocomsg.rc in dll"
       patch_type: "portability"
   "1.12.2":
     - patch_file: patches/1.12.0.patch
@@ -99,12 +123,18 @@ patches:
     - patch_file: patches/1.11.0-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
       patch_type: "portability"
+    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+      patch_description: "include pocomsg.rc in dll"
+      patch_type: "portability"
   "1.12.1":
     - patch_file: patches/1.12.0.patch
       patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
       patch_type: "conan"
     - patch_file: patches/1.11.0-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
+    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+      patch_description: "include pocomsg.rc in dll"
       patch_type: "portability"
   "1.12.0":
     - patch_file: patches/1.12.0.patch
@@ -113,10 +143,16 @@ patches:
     - patch_file: patches/1.11.0-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
       patch_type: "portability"
+    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+      patch_description: "include pocomsg.rc in dll"
+      patch_type: "portability"
   "1.11.3":
     - patch_file: "patches/1.11.1.patch"
       patch_description: "use cci's packages, use crypt32 symbol, add windmc.exe to find_program"
       patch_type: "conan"
     - patch_file: "patches/1.11.0-0002-mysql-include.patch"
       patch_description: "include mysql.h instead of mysql/mysql.h"
+      patch_type: "portability"
+    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+      patch_description: "include pocomsg.rc in dll"
       patch_type: "portability"
