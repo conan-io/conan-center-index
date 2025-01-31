@@ -373,8 +373,7 @@ class FFMpegConan(ConanFile):
                 self.tool_requires("nasm/2.16.01")
             else:
                 self.tool_requires("yasm/1.3.0")
-        if self.settings.os != "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            # See https://github.com/conan-io/conan-center-index/pull/26447#discussion_r1926682155
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.1 <3]")
         if self._settings_build.os == "Windows":
             self.win_bash = True
@@ -648,7 +647,7 @@ class FFMpegConan(ConanFile):
         if cross_building(self):
             build_cc = AutotoolsToolchain(self).vars()["CC_FOR_BUILD"]
             args.append(f"--host-cc={unix_path(self, build_cc)}")
-        pkg_config = self.conf.get("tools.gnu:pkg_config", default="pkgconf", check_type=str)
+        pkg_config = self.conf.get("tools.gnu:pkg_config", default=buildenv_vars.get("PKG_CONFIG", "pkgconf"), check_type=str)
         if pkg_config:
             args.append(f"--pkg-config={unix_path(self, pkg_config)}")
         if is_msvc(self):
