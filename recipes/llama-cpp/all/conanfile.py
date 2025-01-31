@@ -192,6 +192,3 @@ class LlamaCppConan(ConanFile):
                     self.cpp_info.components["ggml-blas"].frameworks.append("Accelerate")
                 if "metal" in backends:
                     self.cpp_info.components["ggml-metal"].frameworks.extend(["Metal", "MetalKit", "Foundation", "CoreFoundation"])
-            if "cuda" in backends:
-                # TODO: Add CUDA information
-                pass
