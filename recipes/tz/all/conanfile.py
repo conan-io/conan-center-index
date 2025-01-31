@@ -1,9 +1,11 @@
 import os
 
 from conan import ConanFile
+from conan.tools.build import cross_building
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.files import get, copy, rmdir, replace_in_file
+from conan.tools.files import get, copy, rmdir
 from conan.tools.layout import basic_layout
+from conan.tools.microsoft import unix_path
 
 required_conan_version = ">=1.53.0"
 
@@ -38,15 +40,15 @@ class TzConan(ConanFile):
 
     def generate(self):
         tc = AutotoolsToolchain(self)
+        build_cc = unix_path(self, tc.vars().get("CC_FOR_BUILD" if cross_building(self) else "CC", "cc"))
+        awk_path = unix_path(self, os.path.join(self.dependencies.direct_build["mawk"].package_folder, "bin", "mawk"))
+        tc.make_args.extend([
+            f"cc={build_cc}",
+            f"AWK={awk_path}",
+        ])
         tc.generate()
 
-    def _patch_sources(self):
-        # INFO: The Makefile enforces /usr/bin/awk, but we want to use tool requirements
-        awk_path = os.path.join(self.dependencies.direct_build['mawk'].package_folder, "bin", "mawk").replace("\\", "/")
-        replace_in_file(self, os.path.join(self.source_folder, "Makefile"), "AWK=		awk", f"AWK={awk_path}")
-
     def build(self):
-        self._patch_sources()
         autotools = Autotools(self)
         autotools.make(args=["-C", self.source_folder.replace("\\", "/")])
 
