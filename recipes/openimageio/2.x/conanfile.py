@@ -22,6 +22,7 @@ class OpenImageIOConan(ConanFile):
     license = "Apache-2.0", "BSD-3-Clause"
     homepage = "http://www.openimageio.org/"
     url = "https://github.com/conan-io/conan-center-index"
+    package_type = "library"
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
