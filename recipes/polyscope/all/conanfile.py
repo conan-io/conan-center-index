@@ -99,12 +99,16 @@ class PolyscopeConan(ConanFile):
         tc.variables["POLYSCOPE_BACKEND_OPENGL3_GLFW"] = self.options.backend_glfw
         tc.variables["POLYSCOPE_BACKEND_OPENGL3_EGL"] = self.options.get_safe("backend_egl", False)
         tc.variables["POLYSCOPE_BACKEND_OPENGL_MOCK"] = self.options.backend_mock
+        tc.variables["HAVE_EGL_LIB"] = self.options.get_safe("backend_egl", False)  # Skip EGL/egl.h check for libglvnd
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         if not valid_min_cppstd(self, self._min_cppstd):
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         if self.settings.os == "Windows" and not self.options.get_safe("shared"):
             # Avoid the default IMGUI_API=__declspec(dllimport)
             tc.preprocessor_definitions["IMGUI_API"] = ""
+        # #error "GLM: GLM_GTX_norm is an experimental extension and may change in the future.
+        #         Use #define GLM_ENABLE_EXPERIMENTAL before including it, if you really want to use it."
+        tc.preprocessor_definitions["GLM_ENABLE_EXPERIMENTAL"] = 1
         tc.generate()
 
         deps = CMakeDeps(self)
