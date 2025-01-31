@@ -117,8 +117,8 @@ class LlamaCppConan(ConanFile):
         copy(self, "*common*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*common*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*common*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "*.cmake", src=os.path.join(self.export_sources_folder, "cmake"), dst=os.path.join(self.package_folder, "lib", "cmake"))
-        save(self, os.path.join(self.package_folder, "lib", "cmake", "llama-cpp-cuda-static.cmake"), self._cuda_build_module)
+        if self.options.with_cuda and not self.options.shared:
+            save(self, os.path.join(self.package_folder, "lib", "cmake", "llama-cpp-cuda-static.cmake"), self._cuda_build_module)
 
     def _get_backends(self):
         results = ["cpu"]
