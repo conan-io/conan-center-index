@@ -1,0 +1,12 @@
+sources:
+  "cci.20240802":
+    url: "https://github.com/colmap/glomap/archive/6c05589e6a2d5374c930415419010c47c82ba933.zip"
+    sha256: "63e0b42e9915bf9053d9909875df7716911b5c73daac65d13fbd3bcd6b1baf6a"
+patches:
+  "cci.20240802":
+    - patch_file: "patches/0001-update-COLMAP-includes.patch"
+      patch_description: "Update COLMAP includes for v3.10"
+      patch_type: "portability"
+    - patch_file: "patches/0002-cmake-fixes.patch"
+      patch_description: "Fix CHOLMOD handling in CMake, install library"
+      patch_type: "conan"
