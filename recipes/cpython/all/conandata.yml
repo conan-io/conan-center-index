@@ -1,4 +1,7 @@
 sources:
+  "3.13.1":
+    url: "https://www.python.org/ftp/python/3.13.1/Python-3.13.1.tgz"
+    sha256: "1513925a9f255ef0793dbf2f78bb4533c9f184bdd0ad19763fd7f47a400a7c55"
   "3.12.7":
     url: "https://www.python.org/ftp/python/3.12.7/Python-3.12.7.tgz"
     sha256: "73ac8fe780227bf371add8373c3079f42a0dc62deff8d612cd15a618082ab623"
@@ -18,6 +21,13 @@ sources:
     url: "https://www.python.org/ftp/python/3.8.19/Python-3.8.19.tgz"
     sha256: "c7fa55a36e5c7a19ec37d8f90f60a2197548908c9ac8b31e7c0dbffdd470eeac"
 patches:
+  "3.13.1":
+    - patch_file: "patches/3.13/3.13.0-0002-remove-module-deps.patch"
+      patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
+      patch_type: "conan"
+    - patch_file: "patches/3.13/3.13.0-0003-relocatable-python-config.patch"
+      patch_description: "Allow package to be relocatable"
+      patch_type: "conan"
   "3.12.7":
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
       patch_description: "Fix ARM/ARM64 mismatch in project file"
