@@ -1,18 +1,14 @@
 #include <qcustomplot.h>
 
-#include <QApplication>
-#include <QMainWindow>
 #include <QVector>
 
-int main(int argc, char *argv[]) {
-    QApplication app(argc, argv);
-    QMainWindow window;
-
+void dummy()
+{
     QCustomPlot customPlot;
-    window.setCentralWidget(&customPlot);
 
     QVector<double> x(101), y(101);
-    for (int i = 0; i < 101; ++i) {
+    for (int i = 0; i < 101; ++i)
+    {
         x[i] = i / 50.0 - 1;
         y[i] = x[i] * x[i];
     }
@@ -21,7 +17,9 @@ int main(int argc, char *argv[]) {
     customPlot.xAxis->setLabel("x");
     customPlot.yAxis->setLabel("y");
     customPlot.rescaleAxes();
+}
 
-    window.setGeometry(100, 100, 500, 400);
+int main(int argc, char *argv[])
+{
     return 0;
 }
