@@ -63,6 +63,10 @@ class Libssh2Conan(ConanFile):
         tc.cache_variables['BUILD_TESTING'] = not self.conf.get("tools.build:skip_test", default=True, check_type=bool)
         tc.cache_variables["BUILD_STATIC_LIBS"] = not self.options.shared
         tc.cache_variables["BUILD_SHARED_LIBS"] = self.options.shared
+        # Ensure DLL symbols are exported correctly
+        tc.cache_variables["HIDE_SYMBOLS"] = True # sets -DLIBSSH2_EXPORTS
+        if Version(self.version) < "1.11" and self.options.shared:
+            tc.preprocessor_definitions["LIBSSH2_EXPORTS"] = ""
         # To install relocatable shared lib on Macos by default
         tc.variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
         # Workaround until github.com/conan-io/conan/pull/12600 is merged
@@ -132,6 +136,9 @@ class Libssh2Conan(ConanFile):
             self.cpp_info.components["_libssh2"].system_libs.append("ws2_32")
         elif self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["_libssh2"].system_libs.extend(["pthread", "dl"])
+
+        if self.options.shared:
+            self.cpp_info.components["_libssh2"].defines.append("LIBSSH2_EXPORTS")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["_libssh2"].set_property("cmake_target_name", "Libssh2::libssh2")
