@@ -173,6 +173,11 @@ class OsrmConan(ConanFile):
         path = Path(self.source_folder, "include", "extractor", "suffix_table.hpp")
         path.write_text("#include <vector>\n" + path.read_text())
 
+        if Version(self.dependencies["boost"].ref.version) >= "1.85":
+            # The header has been removed from Boost
+            replace_in_file(self, os.path.join(self.source_folder, "include", "util", "lua_util.hpp"),
+                            "#include <boost/filesystem/convenience.hpp>", "")
+
     def build(self):
         self._patch_source()
         cmake = CMake(self)
