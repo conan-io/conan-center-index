@@ -264,6 +264,9 @@ class QtConan(ConanFile):
             self.output.debug(f"qt6 option: {option}")
 
     def validate_build(self):
+        if cross_building(self):
+            raise ConanInvalidConfiguration("cross compiling qt 6 is not yet supported. Contributions are welcome")
+
         check_min_cppstd(self, 17)
 
     def validate(self):
@@ -323,9 +326,6 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled when the 'with_x11' option is enabled")
         if self.options.get_safe("qtwayland", False) and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
             raise ConanInvalidConfiguration("The 'with_wayland' option for the 'xkbcommon' package must be enabled when the 'qtwayland' option is enabled")
-
-        if cross_building(self):
-            raise ConanInvalidConfiguration("cross compiling qt 6 is not yet supported. Contributions are welcome")
 
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
@@ -421,8 +421,6 @@ class QtConan(ConanFile):
         self.tool_requires("ninja/[>=1.12 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        if self.settings.os == "Windows":
-            self.tool_requires('strawberryperl/5.32.1.1')
 
         if self.options.get_safe("qtwebengine"):
             self.tool_requires("nodejs/18.15.0")
@@ -530,8 +528,8 @@ class QtConan(ConanFile):
                 tc.variables["QT_FEATURE_openssl_linked"] = "ON"
 
         # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
-        if is_msvc(self):
-            tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        # Required for qt_config_compile_test() calls against CMakeDeps targets to work correctly.
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
 
         if self.options.with_dbus:
             tc.variables["INPUT_dbus"] = "linked"
@@ -632,8 +630,6 @@ class QtConan(ConanFile):
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
             tc.variables["BUILD_WITH_PCH"] = "OFF"  # disabling PCH to save disk space
 
-        if self.settings.os == "Windows":
-            tc.variables["HOST_PERL"] = self.dependencies.build["strawberryperl"].conf_info.get("user.strawberryperl:perl", check_type=str)
                                #"set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
                                #"set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
                                #"set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
@@ -1161,7 +1157,10 @@ class QtConan(ConanFile):
                     self.cpp_info.components["QCocoaIntegrationPlugin"].frameworks = [
                         "AppKit", "Carbon", "CoreServices", "CoreVideo", "IOKit", "IOSurface", "Metal", "QuartzCore"
                     ]
-                elif self.settings.os in ["iOS", "tvOS"]:
+                if self.settings.os in ["Macos", "iOS"]:
+                    # https://github.com/qt/qtbase/blob/v6.5.3/src/gui/CMakeLists.txt#L963
+                    self.cpp_info.components["qtGui"].frameworks.append("Metal")
+                if self.settings.os in ["iOS", "tvOS"]:
                     _create_plugin("QIOSIntegrationPlugin", "qios", "platforms", [])
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/ios/CMakeLists.txt#L32-L37
                     self.cpp_info.components["QIOSIntegrationPlugin"].frameworks = [
