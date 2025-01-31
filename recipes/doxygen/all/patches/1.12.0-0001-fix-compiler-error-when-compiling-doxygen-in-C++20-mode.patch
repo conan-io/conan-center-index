@@ -1,14 +1,5 @@
-From 54259f7ad46f91316468248d92b2a65e58d4586d Mon Sep 17 00:00:00 2001
-From: Dimitri van Heesch <doxygen@gmail.com>
-Date: Sun, 29 Dec 2024 22:48:47 +0100
-Subject: [PATCH] Fix compiler error when compiling doxygen in C++20 mode
-
----
- src/trace.h | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
-
 diff --git a/src/trace.h b/src/trace.h
-index 2d70079328..858b1df23d 100644
+index 13a816650..858b1df23 100644
 --- a/src/trace.h
 +++ b/src/trace.h
 @@ -100,7 +100,7 @@ class AutoTrace
@@ -20,7 +11,7 @@ index 2d70079328..858b1df23d 100644
          }
        }
      }
-@@ -126,7 +126,7 @@ class AutoTrace
+@@ -126,13 +126,15 @@ class AutoTrace
      {
        if (g_tracer)
        {
@@ -29,12 +20,121 @@ index 2d70079328..858b1df23d 100644
        }
      }
      template<typename... Args>
-@@ -134,7 +134,7 @@ class AutoTrace
-                  const std::string &msg,Args&&...args)
+-    void setExit(const std::string &msg,Args&&...args)
++    void setExit(spdlog::source_loc loc,
++                 const std::string &msg,Args&&...args)
      {
-       m_loc = loc;
 -      m_exitMessage = fmt::format(msg,std::forward<Args>(args)...);
++      m_loc = loc;
 +      m_exitMessage = fmt::format(fmt::runtime(msg),std::forward<Args>(args)...);
      }
    private:
     spdlog::source_loc m_loc;
+@@ -142,7 +144,7 @@ class AutoTrace
+ #if ENABLE_TRACING
+ #define AUTO_TRACE(...)      AutoTrace trace_{spdlog::source_loc{__FILE__,__LINE__,SPDLOG_FUNCTION},__VA_ARGS__}
+ #define AUTO_TRACE_ADD(...)  trace_.add(spdlog::source_loc{__FILE__,__LINE__,SPDLOG_FUNCTION},__VA_ARGS__)
+-#define AUTO_TRACE_EXIT(...) trace_.setExit(__VA_ARGS__)
++#define AUTO_TRACE_EXIT(...) trace_.setExit(spdlog::source_loc{__FILE__,__LINE__,SPDLOG_FUNCTION},__VA_ARGS__)
+ #else
+ #define AUTO_TRACE(...)      (void)0
+ #define AUTO_TRACE_ADD(...)  (void)0
+@@ -156,7 +158,7 @@ namespace fmt { template<typename T> struct formatter {}; }
+ //! adds support for formatting QCString
+ template<> struct fmt::formatter<QCString> : formatter<std::string>
+ {
+-  auto format(const QCString &c, format_context& ctx) {
++  auto format(const QCString &c, format_context& ctx) const {
+     return formatter<std::string>::format(c.str(), ctx);
+   }
+ };
+@@ -164,7 +166,7 @@ template<> struct fmt::formatter<QCString> : formatter<std::string>
+ //! adds support for formatting Protected
+ template<> struct fmt::formatter<Protection> : formatter<std::string>
+ {
+-  auto format(Protection prot, format_context& ctx) {
++  auto format(Protection prot, format_context& ctx) const {
+     std::string result="Unknown";
+     switch (prot)
+     {
+@@ -180,7 +182,7 @@ template<> struct fmt::formatter<Protection> : formatter<std::string>
+ //! adds support for formatting Specifier
+ template<> struct fmt::formatter<Specifier> : formatter<std::string>
+ {
+-  auto format(Specifier spec, format_context& ctx) {
++  auto format(Specifier spec, format_context& ctx) const {
+     std::string result="Unknown";
+     switch (spec)
+     {
+@@ -195,7 +197,7 @@ template<> struct fmt::formatter<Specifier> : formatter<std::string>
+ //! adds support for formatting MethodTypes
+ template<> struct fmt::formatter<MethodTypes> : formatter<std::string>
+ {
+-  auto format(MethodTypes mtype, format_context& ctx) {
++  auto format(MethodTypes mtype, format_context& ctx) const {
+     std::string result="Unknown";
+     switch (mtype)
+     {
+@@ -213,7 +215,7 @@ template<> struct fmt::formatter<MethodTypes> : formatter<std::string>
+ //! adds support for formatting RelatesType
+ template<> struct fmt::formatter<RelatesType> : formatter<std::string>
+ {
+-  auto format(RelatesType type, format_context& ctx) {
++  auto format(RelatesType type, format_context& ctx) const {
+     std::string result="Unknown";
+     switch (type)
+     {
+@@ -228,7 +230,7 @@ template<> struct fmt::formatter<RelatesType> : formatter<std::string>
+ //! adds support for formatting RelationShip
+ template<> struct fmt::formatter<Relationship> : formatter<std::string>
+ {
+-  auto format(Relationship relation, format_context& ctx) {
++  auto format(Relationship relation, format_context& ctx) const {
+     std::string result="Unknown";
+     switch (relation)
+     {
+@@ -243,7 +245,7 @@ template<> struct fmt::formatter<Relationship> : formatter<std::string>
+ //! adds support for formatting SrcLangExt
+ template<> struct fmt::formatter<SrcLangExt> : formatter<std::string>
+ {
+-  auto format(SrcLangExt lang, format_context& ctx) {
++  auto format(SrcLangExt lang, format_context& ctx) const {
+     std::string result="Unknown";
+     switch (lang)
+     {
+@@ -273,7 +275,7 @@ template<> struct fmt::formatter<SrcLangExt> : formatter<std::string>
+ //! adds support for formatting MemberType
+ template<> struct fmt::formatter<MemberType> : formatter<std::string>
+ {
+-  auto format(MemberType mtype, format_context& ctx) {
++  auto format(MemberType mtype, format_context& ctx) const {
+     std::string result="Unknown";
+     switch (mtype)
+     {
+@@ -301,7 +303,7 @@ template<> struct fmt::formatter<MemberType> : formatter<std::string>
+ //! adds support for formatting TypeSpecifier
+ template<> struct fmt::formatter<TypeSpecifier> : formatter<std::string>
+ {
+-  auto format(TypeSpecifier type, format_context& ctx) {
++  auto format(TypeSpecifier type, format_context& ctx) const {
+     return formatter<std::string>::format(type.to_string(),ctx);
+   }
+ };
+@@ -309,7 +311,7 @@ template<> struct fmt::formatter<TypeSpecifier> : formatter<std::string>
+ //! adds support for formatting EntryType
+ template<> struct fmt::formatter<EntryType> : formatter<std::string>
+ {
+-  auto format(EntryType type, format_context& ctx) {
++  auto format(EntryType type, format_context& ctx) const {
+     return formatter<std::string>::format(type.to_string(),ctx);
+   }
+ };
+@@ -317,7 +319,7 @@ template<> struct fmt::formatter<EntryType> : formatter<std::string>
+ //! adds support for formatting MemberListType
+ template<> struct fmt::formatter<MemberListType> : formatter<std::string>
+ {
+-  auto format(MemberListType type, format_context& ctx) {
++  auto format(MemberListType type, format_context& ctx) const {
+     return formatter<std::string>::format(type.to_string(),ctx);
+   }
+ };
