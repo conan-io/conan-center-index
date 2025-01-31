@@ -1,0 +1,5 @@
+sources:
+  # FIXME: use a proper release once a new release with Meson support is available
+  "1.6.1":
+    url: "https://github.com/linux-pam/linux-pam/archive/63ba6e4aa17761461fbddf71af7cb154f1e5b9ae.tar.gz"
+    sha256: "4abc0c7842abd8f38ae11c36a1ef296c4864ed15d45dbe32c2557b2d60a44890"
