@@ -36,6 +36,7 @@ class QtConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.qt.io"
     license = "LGPL-3.0-only"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
@@ -698,7 +699,7 @@ class QtConan(ConanFile):
             "")
 
         replace_in_file(self,
-                        os.path.join(self.source_folder, "qtbase", "cmake", "QtAutoDetect.cmake" if Version(self.version) < "6.6.2" else "QtAutoDetectHelpers.cmake"),
+                        os.path.join(self.source_folder, "qtbase", "cmake", "QtAutoDetectHelpers.cmake" if (Version(self.version) > "6.5.4" or Version(self.version) > "6.6.1") else "QtAutoDetect.cmake"),
                         "qt_auto_detect_vcpkg()",
                         "# qt_auto_detect_vcpkg()")
 
@@ -878,8 +879,11 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             targets.extend(["windeployqt"])
         if self.options.qttools:
-            targets.extend(["qhelpgenerator", "qtattributionsscanner"])
-            targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
+            targets.extend(["qtattributionsscanner"])
+            if "assistant" not in str(self.options.disabled_features).split():
+                targets.extend(["qhelpgenerator"])
+            if "linguist" not in str(self.options.disabled_features).split():
+                targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
         if self.options.qtshadertools:
             targets.append("qsb")
         if self.options.qtdeclarative:
@@ -1464,6 +1468,11 @@ class QtConan(ConanFile):
                 self.cpp_info.components["qtCore"].system_libs.append("ws2_32")
                 self.cpp_info.components["qtCore"].system_libs.append("mpr")
                 self.cpp_info.components["qtCore"].system_libs.append("userenv")
+                # https://github.com/qt/qtbase/blob/v6.5.0/src/plugins/tls/schannel/CMakeLists.txt#L28-L31
+                self.cpp_info.components["qtCore"].system_libs.append("crypt32")
+                self.cpp_info.components["qtCore"].system_libs.append("secur32")
+                self.cpp_info.components["qtCore"].system_libs.append("bcrypt")
+                self.cpp_info.components["qtCore"].system_libs.append("ncrypt")
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/network/CMakeLists.txt#L196-L200
                 self.cpp_info.components["qtNetwork"].system_libs.append("advapi32")
                 self.cpp_info.components["qtNetwork"].system_libs.append("dnsapi")
