@@ -73,7 +73,7 @@ class LibE57FormatConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "CompilerWarnings.cmake"),
                             " -W", " # -W")
             # Disable warnings as errors
-            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set_warning_as_error()", "")
+            replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set_warning_as_error()", "", strict=False)
 
     def build(self):
         self._patch_sources()
