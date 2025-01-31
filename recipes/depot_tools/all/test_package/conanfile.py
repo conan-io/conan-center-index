@@ -14,5 +14,4 @@ class TestPackageConan(ConanFile):
         self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        # cit: Chrome Infrastructure CLI
-        self.run("cit --help")
+        self.run("gclient --version")
