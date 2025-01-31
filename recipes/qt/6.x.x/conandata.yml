@@ -17,7 +17,7 @@ sources:
       - "https://mirror.bjtu.edu.cn/qt/archive/qt/6.8/6.8.2/single/qt-everywhere-src-6.8.2.tar.xz"
       - "https://ftp.jaist.ac.jp/pub/qtproject/archive/qt/6.8/6.8.2/single/qt-everywhere-src-6.8.2.tar.xz"
       - "https://mirror.aarnet.edu.au/pub/qtproject/archive/qt/6.8/6.8.2/single/qt-everywhere-src-6.8.2.tar.xz"
-    sha256: "45e3a9f6d33c92ffe65a1fde1a8eba5b228112df675f7f9026eaa332b2e2edff"
+    sha256: "659d8bb5931afac9ed5d89a78e868e6bd00465a58ab566e2123db02d674be559"
   "6.7.3":
     url:
       - "https://download.qt.io/official_releases/qt/6.7/6.7.3/single/qt-everywhere-src-6.7.3.tar.xz"
