@@ -1,0 +1,13 @@
+sources:
+  "1.0.2":
+    url: "https://github.com/facontidavide/rosx_introspection/archive/refs/tags/1.0.2.zip"
+    sha256: "cd10448e8857c900e2803bea7526e8889bc5bf4d3807ce0e4bb745f4bc2fdddc"
+patches:
+  "1.0.2":
+    - patch_file: "patches/0001-cmake-fixes.patch"
+      patch_description: "Use dependencies from conan"
+      patch_type: "conan"
+    - patch_file: "patches/0002-fix-clang-errors.patch"
+      patch_description: "Fix compilation errors on Clang and AppleClang"
+      patch_type: "bugfix"
+      patch_source: "https://github.com/facontidavide/rosx_introspection/pull/11"
