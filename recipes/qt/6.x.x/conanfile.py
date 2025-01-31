@@ -264,6 +264,9 @@ class QtConan(ConanFile):
             self.output.debug(f"qt6 option: {option}")
 
     def validate_build(self):
+        if cross_building(self):
+            raise ConanInvalidConfiguration("cross compiling qt 6 is not yet supported. Contributions are welcome")
+
         check_min_cppstd(self, 17)
 
     def validate(self):
@@ -323,9 +326,6 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled when the 'with_x11' option is enabled")
         if self.options.get_safe("qtwayland", False) and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
             raise ConanInvalidConfiguration("The 'with_wayland' option for the 'xkbcommon' package must be enabled when the 'qtwayland' option is enabled")
-
-        if cross_building(self):
-            raise ConanInvalidConfiguration("cross compiling qt 6 is not yet supported. Contributions are welcome")
 
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
