@@ -45,7 +45,9 @@ class OpenvinoConan(ConanFile):
         "enable_tf_frontend": [True, False],
         "enable_tf_lite_frontend": [True, False],
         "enable_paddle_frontend": [True, False],
-        "enable_pytorch_frontend": [True, False]
+        "enable_pytorch_frontend": [True, False],
+        # Threading
+        "threading": ["tbb", "omp", "seq"]
     }
     default_options = {
         "shared": False,
@@ -63,7 +65,9 @@ class OpenvinoConan(ConanFile):
         "enable_tf_frontend": True,
         "enable_tf_lite_frontend": True,
         "enable_paddle_frontend": True,
-        "enable_pytorch_frontend": True
+        "enable_pytorch_frontend": True,
+        # Threading
+        "threading": "tbb"
     }
 
     @property
@@ -170,7 +174,8 @@ class OpenvinoConan(ConanFile):
             self.tool_requires("cmake/[>=3.18 <4]")
 
     def requirements(self):
-        self.requires("onetbb/2021.10.0")
+        if self.options.threading == "tbb":
+            self.requires("onetbb/2021.10.0")
         self.requires("pugixml/1.14")
         if self._target_x86_64:
             self.requires("xbyak/6.73")
@@ -230,8 +235,15 @@ class OpenvinoConan(ConanFile):
         if Version(self.version) >= "2024.3.0":
             toolchain.cache_variables["ENABLE_OV_JAX_FRONTEND"] = False
         # Dependencies
-        toolchain.cache_variables["ENABLE_SYSTEM_TBB"] = True
+        toolchain.cache_variables["ENABLE_SYSTEM_TBB"] = False
         toolchain.cache_variables["ENABLE_TBBBIND_2_5"] = False
+        if self.options.threading == "tbb":
+            toolchain.cache_variables["ENABLE_SYSTEM_TBB"] = True
+            toolchain.cache_variables["THREADING"] = "TBB"
+        elif self.options.threading == "omp":
+            toolchain.cache_variables["THREADING"] = "OMP"
+        else:
+            toolchain.cache_variables["THREADING"] = "SEQ"
         toolchain.cache_variables["ENABLE_SYSTEM_PUGIXML"] = True
         if self._protobuf_required:
             toolchain.cache_variables["ENABLE_SYSTEM_PROTOBUF"] = True
@@ -304,14 +316,20 @@ class OpenvinoConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
     def package_info(self):
+        def l(name):
+            debug = "d" if self.settings.build_type == "Debug" and self.settings.os in ["Windows", "Macos"] else ""
+            return f"{name}{debug}"
+
         self.cpp_info.set_property("cmake_find_mode", "config")
         self.cpp_info.set_property("cmake_file_name", "OpenVINO")
         self.cpp_info.set_property("pkg_config_name", "openvino")
 
         openvino_runtime = self.cpp_info.components["Runtime"]
         openvino_runtime.set_property("cmake_target_name", "openvino::runtime")
-        openvino_runtime.requires = ["onetbb::libtbb", "pugixml::pugixml"]
-        openvino_runtime.libs = ["openvino"]
+        openvino_runtime.requires = ["pugixml::pugixml"]
+        if self.options.threading == "tbb":
+            openvino_runtime.requires.append("onetbb::libtbb")
+        openvino_runtime.libs = [l("openvino")]
         if self._preprocessing_available:
             openvino_runtime.requires.append("ade::ade")
         if self._target_x86_64:
@@ -329,54 +347,54 @@ class OpenvinoConan(ConanFile):
         if not self.options.shared:
             # HW plugins
             if self.options.enable_cpu:
-                openvino_runtime.libs.append("openvino_arm_cpu_plugin" if self._target_arm else \
-                                             "openvino_intel_cpu_plugin")
-                openvino_runtime.libs.extend(["openvino_onednn_cpu", "openvino_snippets", "mlas"])
+                openvino_runtime.libs.append(l("openvino_arm_cpu_plugin") if self._target_arm else \
+                                             l("openvino_intel_cpu_plugin"))
+                openvino_runtime.libs.extend([l("openvino_onednn_cpu"), l("openvino_snippets"), l("mlas")])
                 if self._target_arm:
-                    openvino_runtime.libs.append("arm_compute-static")
+                    openvino_runtime.libs.append(l("arm_compute-static"))
             if self.options.get_safe("enable_gpu"):
-                openvino_runtime.libs.extend(["openvino_intel_gpu_plugin", "openvino_intel_gpu_graph",
-                                              "openvino_intel_gpu_runtime", "openvino_intel_gpu_kernels"])
+                openvino_runtime.libs.extend([l("openvino_intel_gpu_plugin"), l("openvino_intel_gpu_graph"),
+                                              l("openvino_intel_gpu_runtime"), l("openvino_intel_gpu_kernels")])
                 if not self.options.enable_cpu or Version(self.version) >= "2024.4.0":
                     openvino_runtime.libs.append("openvino_onednn_gpu")
             # SW plugins
             if self.options.enable_auto:
-                openvino_runtime.libs.append("openvino_auto_plugin")
+                openvino_runtime.libs.append(l("openvino_auto_plugin"))
             if self.options.enable_hetero:
-                openvino_runtime.libs.append("openvino_hetero_plugin")
+                openvino_runtime.libs.append(l("openvino_hetero_plugin"))
             if self.options.enable_auto_batch:
-                openvino_runtime.libs.append("openvino_auto_batch_plugin")
+                openvino_runtime.libs.append(l("openvino_auto_batch_plugin"))
             # Preprocessing should come after plugins, because plugins depend on it
             if self._preprocessing_available:
-                openvino_runtime.libs.extend(["openvino_gapi_preproc", "fluid"])
+                openvino_runtime.libs.extend([l("openvino_gapi_preproc"), l("fluid")])
             # Frontends
             if self.options.enable_ir_frontend:
-                openvino_runtime.libs.append("openvino_ir_frontend")
+                openvino_runtime.libs.append(l("openvino_ir_frontend"))
             if self.options.enable_onnx_frontend:
-                openvino_runtime.libs.extend(["openvino_onnx_frontend", "openvino_onnx_common"])
+                openvino_runtime.libs.extend([l("openvino_onnx_frontend"), l("openvino_onnx_common")])
                 openvino_runtime.requires.extend(["protobuf::libprotobuf", "onnx::onnx"])
             if self.options.enable_tf_frontend:
-                openvino_runtime.libs.extend(["openvino_tensorflow_frontend"])
+                openvino_runtime.libs.extend([l("openvino_tensorflow_frontend")])
                 openvino_runtime.requires.extend(["protobuf::libprotobuf", "snappy::snappy"])
             if self.options.enable_tf_lite_frontend:
-                openvino_runtime.libs.extend(["openvino_tensorflow_lite_frontend"])
+                openvino_runtime.libs.extend([l("openvino_tensorflow_lite_frontend")])
                 openvino_runtime.requires.extend(["flatbuffers::flatbuffers"])
             if self.options.enable_tf_frontend or self.options.enable_tf_lite_frontend:
-                openvino_runtime.libs.extend(["openvino_tensorflow_common"])
+                openvino_runtime.libs.extend([l("openvino_tensorflow_common")])
             if self.options.enable_paddle_frontend:
-                openvino_runtime.libs.append("openvino_paddle_frontend")
+                openvino_runtime.libs.append(l("openvino_paddle_frontend"))
                 openvino_runtime.requires.append("protobuf::libprotobuf")
             if self.options.enable_pytorch_frontend:
-                openvino_runtime.libs.append("openvino_pytorch_frontend")
+                openvino_runtime.libs.append(l("openvino_pytorch_frontend"))
             # Common private dependencies should go last, because they satisfy dependencies for all other libraries
             if Version(self.version) < "2024.0.0":
-                openvino_runtime.libs.append("openvino_builders")
-            openvino_runtime.libs.extend(["openvino_reference", "openvino_shape_inference", "openvino_itt",
+                openvino_runtime.libs.append(l("openvino_builders"))
+            openvino_runtime.libs.extend([l("openvino_reference"), l("openvino_shape_inference"), l("openvino_itt"),
                                           # utils goes last since all others depend on it
-                                          "openvino_util"])
+                                          l("openvino_util")])
             # set 'openvino' once again for transformations objects files (cyclic dependency)
-            # openvino_runtime.libs.append("openvino")
-            full_openvino_lib_path = os.path.join(self.package_folder, "lib", "openvino.lib").replace("\\", "/") if self.settings.os == "Windows" else \
+            # openvino_runtime.libs.append(l("openvino"))
+            full_openvino_lib_path = os.path.join(self.package_folder, "lib", l("openvino") + ".lib").replace("\\", "/") if self.settings.os == "Windows" else \
                                      os.path.join(self.package_folder, "lib", "libopenvino.a")
             openvino_runtime.system_libs.insert(0, full_openvino_lib_path)
             # Add definition to prevent symbols importing
@@ -389,36 +407,36 @@ class OpenvinoConan(ConanFile):
 
         openvino_runtime_c = self.cpp_info.components["Runtime_C"]
         openvino_runtime_c.set_property("cmake_target_name", "openvino::runtime::c")
-        openvino_runtime_c.libs = ["openvino_c"]
+        openvino_runtime_c.libs = [l("openvino_c")]
         openvino_runtime_c.requires = ["Runtime"]
 
         if self.options.enable_onnx_frontend:
             openvino_onnx = self.cpp_info.components["ONNX"]
             openvino_onnx.set_property("cmake_target_name", "openvino::frontend::onnx")
-            openvino_onnx.libs = ["openvino_onnx_frontend"]
+            openvino_onnx.libs = [l("openvino_onnx_frontend")]
             openvino_onnx.requires = ["Runtime", "onnx::onnx", "protobuf::libprotobuf"]
 
         if self.options.enable_paddle_frontend:
             openvino_paddle = self.cpp_info.components["Paddle"]
             openvino_paddle.set_property("cmake_target_name", "openvino::frontend::paddle")
-            openvino_paddle.libs = ["openvino_paddle_frontend"]
+            openvino_paddle.libs = [l("openvino_paddle_frontend")]
             openvino_paddle.requires = ["Runtime", "protobuf::libprotobuf"]
 
         if self.options.enable_tf_frontend:
             openvino_tensorflow = self.cpp_info.components["TensorFlow"]
             openvino_tensorflow.set_property("cmake_target_name", "openvino::frontend::tensorflow")
-            openvino_tensorflow.libs = ["openvino_tensorflow_frontend"]
+            openvino_tensorflow.libs = [l("openvino_tensorflow_frontend")]
             openvino_tensorflow.requires = ["Runtime", "protobuf::libprotobuf", "snappy::snappy"]
 
         if self.options.enable_pytorch_frontend:
             openvino_pytorch = self.cpp_info.components["PyTorch"]
             openvino_pytorch.set_property("cmake_target_name", "openvino::frontend::pytorch")
-            openvino_pytorch.libs = ["openvino_pytorch_frontend"]
+            openvino_pytorch.libs = [l("openvino_pytorch_frontend")]
             openvino_pytorch.requires = ["Runtime"]
 
         if self.options.enable_tf_lite_frontend:
             openvino_tensorflow_lite = self.cpp_info.components["TensorFlowLite"]
             openvino_tensorflow_lite.set_property("cmake_target_name", "openvino::frontend::tensorflow_lite")
-            openvino_tensorflow_lite.libs = ["openvino_tensorflow_lite_frontend"]
+            openvino_tensorflow_lite.libs = [l("openvino_tensorflow_lite_frontend")]
             openvino_tensorflow_lite.requires = ["Runtime", "flatbuffers::flatbuffers"]
 
