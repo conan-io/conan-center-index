@@ -51,6 +51,10 @@ class QtADS(ConanFile):
     def requirements(self):
         self.requires("qt/[>=5.15 <7]", transitive_headers=True)
 
+    def build_requirements(self):
+        self.tool_requires("qt/<host_version>")
+        self.tool_requires("cmake/[>=3.27 <4]") # to be able to use CMAKE_AUTOMOC_EXECUTABLE
+
     def validate(self):
         check_min_cppstd(self, self._min_cppstd)
 
@@ -60,8 +64,16 @@ class QtADS(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["ADS_VERSION"] = self.version
-        tc.variables["BUILD_EXAMPLES"] = "OFF"
-        tc.variables["BUILD_STATIC"] = not self.options.shared
+        tc.cache_variables["BUILD_EXAMPLES"] = "OFF"
+        tc.cache_variables["BUILD_STATIC"] = not self.options.shared
+        # https://github.com/githubuser0xFFFF/Qt-Advanced-Docking-System/blob/a16d17a8bf375127847ac8f40af1ebcdb841b13c/src/CMakeLists.txt#L12
+        # TODO: the upstream Qt recipe should expose this variable
+        qt_version = str(self.dependencies["qt"].ref.version)
+        qt_include_root = self.dependencies["qt"].cpp_info.includedirs[0]
+        tc.cache_variables[f"Qt{self._qt_major}Gui_PRIVATE_INCLUDE_DIRS"] = os.path.join(qt_include_root, "QtGui", qt_version, "QtGui")
+        qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
+        tc.cache_variables["CMAKE_AUTOMOC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "moc.exe" if self.settings_build.os == "Windows" else "moc")
+        tc.cache_variables["CMAKE_AUTORCC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "rcc.exe" if self.settings_build.os == "Windows" else "rcc")
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
