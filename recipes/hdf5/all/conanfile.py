@@ -33,6 +33,7 @@ class Hdf5Conan(ConanFile):
         "szip_encoding": [True, False],
         "parallel": [True, False],
         "enable_unsupported": [True, False],
+        "lib_infix": [None, "ANY"],
     }
     default_options = {
         "shared": False,
@@ -45,7 +46,8 @@ class Hdf5Conan(ConanFile):
         "szip_support": None,
         "szip_encoding": False,
         "parallel": False,
-        "enable_unsupported": False
+        "enable_unsupported": False,
+        "lib_infix": None,
     }
 
     @property
@@ -72,6 +74,8 @@ class Hdf5Conan(ConanFile):
             del self.options.threadsafe
         if not bool(self.options.szip_support):
             del self.options.szip_encoding
+        if Version(self.version) < "1.14.5":
+            del self.options.lib_infix
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -102,6 +106,10 @@ class Hdf5Conan(ConanFile):
             raise ConanInvalidConfiguration("with_zlib and with_zlibng cannot be enabled at the same time")
         if self.options.get_safe("with_zlibng") and Version(self.version) < "1.14.5":
             raise ConanInvalidConfiguration("with_zlibng=True is incompatible with versions prior to v1.14.5")
+        if self.options.get_safe("with_zlibng", False) and \
+                not self.dependencies["zlib-ng"].options.zlib_compat:
+            zlibng_ref = self.dependencies["zlib-ng"].ref
+            raise ConanInvalidConfiguration(f"ZLIB compatibility must be enabled in zlib-ng dependency ({zlibng_ref}:zlib_compat=True)")
         if self.settings.get_safe("compiler.cppstd"):
             check_min_cppstd(self, self._min_cppstd)
 
@@ -136,6 +144,8 @@ class Hdf5Conan(ConanFile):
             tc.variables["USE_LIBAEC"] = True
         tc.variables["HDF5_EXTERNALLY_CONFIGURED"] = True
         tc.variables["HDF5_EXTERNAL_LIB_PREFIX"] = ""
+        if self.options.get_safe("lib_infix", False):
+            tc.variables["HDF5_LIB_INFIX"] = self.options.lib_infix
         tc.variables["HDF5_USE_FOLDERS"] = False
         tc.variables["HDF5_NO_PACKAGES"] = True
         tc.variables["ALLOW_UNSUPPORTED"] = False
@@ -155,7 +165,7 @@ class Hdf5Conan(ConanFile):
         if self.settings.build_type == "Debug":
             tc.variables["HDF5_ENABLE_INSTRUMENT"] = False  # Option?
         tc.variables["HDF5_ENABLE_PARALLEL"] = self.options.parallel
-        tc.variables["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib
+        tc.variables["HDF5_ENABLE_Z_LIB_SUPPORT"] = self.options.with_zlib or self.options.get_safe("with_zlibng", False)
         tc.variables["HDF5_ENABLE_SZIP_SUPPORT"] = bool(self.options.szip_support)
         tc.variables["HDF5_ENABLE_SZIP_ENCODING"] = self.options.get_safe("szip_encoding", False)
         tc.variables["HDF5_USE_ZLIB_NG"] = self.options.get_safe("with_zlibng", False)
@@ -167,6 +177,7 @@ class Hdf5Conan(ConanFile):
         tc.variables["HDF5_INSTALL_INCLUDE_DIR"] = "include/hdf5"
 
         tc.variables["HDF5_BUILD_TOOLS"] = False
+        tc.variables["HDF5_BUILD_UTILS"] = False
         tc.variables["HDF5_BUILD_EXAMPLES"] = False
         tc.variables["HDF5_BUILD_HL_LIB"] = self.options.hl
         tc.variables["HDF5_BUILD_FORTRAN"] = False
@@ -189,6 +200,8 @@ class Hdf5Conan(ConanFile):
         hdf5_requirements = []
         if self.options.with_zlib:
             hdf5_requirements.append("zlib::zlib")
+        if self.options.with_zlibng:
+            hdf5_requirements.append("zlib-ng::zlib-ng")
         if self.options.szip_support == "with_libaec":
             hdf5_requirements.append("libaec::libaec")
         elif self.options.szip_support == "with_szip":
@@ -266,6 +279,8 @@ class Hdf5Conan(ConanFile):
     def package_info(self):
         def add_component(component_name, component, alias_target, requirements):
             def _config_libname(lib):
+                if self.options.get_safe("lib_infix", False):
+                    lib = lib.replace("hdf5", f"hdf5{self.options.lib_infix}", 1)
                 if self.settings.os == "Windows" and self.settings.compiler != "gcc" and not self.options.shared:
                     lib = "lib" + lib
                 if self.settings.build_type == "Debug":
