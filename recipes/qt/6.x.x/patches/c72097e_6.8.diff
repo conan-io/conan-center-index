@@ -1,0 +1,36 @@
+commit 1e904d94557f68b95b32f7f9da079432c16e9dff
+Author: Martin Delille <martin@delille.org>
+Date:   Fri Jan 31 10:48:50 2025 +0100
+
+    [PATCH] chromium: workaround for too long .rps file name
+    
+    Ninja may fail when the build directory is too long:
+    
+    ninja: error: WriteFile(__third_party_WebKit_Source_bindings_modules_\
+    interfaces_info_individual_modules__home_qt_work_build_build-nitrogen\
+    6x_tmp_work_cortexa9hf-neon-mx6qdl-poky-linux-gnueabi_qtwebengine_5.9\
+    .0_gitAUTOINC_29afdb0a34_049134677a-r0_build_src_toolchain_target__ru\
+    le.rsp): Unable to create file. File name too long
+    
+    Task-number: QTBUG-59769
+    Change-Id: I73c5e64ae5174412be2a675e35b0b6047f2bf4c1
+
+diff --git a/gn/src/gn/ninja_action_target_writer.cc b/gn/src/gn/ninja_action_target_writer.cc
+index 06da2447760..a646ed90b6f 100644
+--- a/gn/src/gn/ninja_action_target_writer.cc
++++ b/gn/src/gn/ninja_action_target_writer.cc
+@@ -151,6 +151,14 @@ std::string NinjaActionTargetWriter::WriteRuleDefinition() {
+     // strictly necessary for regular one-shot actions, but it's easier to
+     // just always define unique_name.
+     std::string rspfile = custom_rule_name;
++
++    //quick workaround if filename length > 255 - ".rsp", just cut the dirs starting from the end
++    //please note ".$unique_name" is not used at the moment
++    int pos = 0;
++    std::string delimiter("_");
++    while (rspfile.length() > 250 && (pos = rspfile.find_last_of(delimiter)) != std::string::npos)
++        rspfile = rspfile.substr(0,pos);
++
+     if (!target_->sources().empty())
+       rspfile += ".$unique_name";
+     rspfile += ".rsp";

@@ -84,6 +84,12 @@ sources:
       - "https://ftp.yz.yamagata-u.ac.jp/pub/qtproject/archive/qt/6.5/6.5.3/single/qt-everywhere-src-6.5.3.tar.xz"
     sha256: "7cda4d119aad27a3887329cfc285f2aba5da85601212bcb0aea27bd6b7b544cb"
 patches:
+  "6.8.2":
+    - "base_path": "qtwebengine/src/3rdparty"
+      "patch_description": "Workaround for too long .rps file name"
+      "patch_file": "patches/c72097e_6.8.diff"
+      "patch_source": "https://codereview.qt-project.org/c/yocto/meta-qt5/+/192172"
+      "patch_type": "bugfix"
   "6.7.3":
     - "base_path": "qtwebengine"
       "patch_description": "Workaround for too long .rps file name"
