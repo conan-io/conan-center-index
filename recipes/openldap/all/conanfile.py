@@ -5,9 +5,9 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import chdir, copy, get, rm, rmdir, replace_in_file
+from conan.tools.files import chdir, copy, get, rm, rmdir, replace_in_file, save
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, GnuToolchain
-from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.53.0"
@@ -76,9 +76,6 @@ class OpenldapConan(ConanFile):
             tc.configure_args["--with-yielding_select"] = "yes"
             # Workaround: https://bugs.openldap.org/show_bug.cgi?id=9228
             tc.configure_args["ac_cv_func_memcmp_working"] = "yes"
-        if is_apple_os(self):
-            # macOS Ventura does not have soelim, but mandoc_soelim
-            tc.make_args["SOELIM"] = "soelim" if shutil.which("soelim") else "mandoc_soelim"
         tc.generate()
         tc = AutotoolsDeps(self)
         tc.generate()
@@ -86,6 +83,8 @@ class OpenldapConan(ConanFile):
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "configure"),
                         "WITH_SYSTEMD=no\nsystemdsystemunitdir=", "WITH_SYSTEMD=no")
+        # Disable docs and avoid a dependency on soelim tool
+        save(self, os.path.join(self.source_folder, "doc", "Makefile.in"), "all:\ninstall:\n")
 
     def build(self):
         self._patch_sources()
