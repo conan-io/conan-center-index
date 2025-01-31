@@ -1,0 +1,15 @@
+sources:
+  "1.0.12.cci.20241205":
+    mavlink:
+      url: "https://github.com/mavlink/mavlink/archive/35f70c4a7e0c4aa91edc1eaa5205a1077490442c.tar.gz"
+      sha256: "be2e9583bc72cc894056b903578879128fe8c68a92fbcbb3268ab92c78c7ddef"
+    pymavlink:
+      url: "https://github.com/ArduPilot/pymavlink/archive/refs/tags/v2.4.42.tar.gz"
+      sha256: "bbe1b78759211597c98214e31b6dfc9cc42b3cb4548c813674463cb664b56a9f"
+  "1.0.12.cci.20240530":
+    mavlink:
+      url: "https://github.com/mavlink/mavlink/archive/f1d42e2774cae767a1c0651b0f95e3286c587257.tar.gz"
+      sha256: "3eb515843143fd9b1e275141c4c82f5f3cbbb77c12e1eb2b929a6a005f016a51"
+    pymavlink:
+      url: "https://github.com/ArduPilot/pymavlink/archive/refs/tags/v2.4.42.tar.gz"
+      sha256: "bbe1b78759211597c98214e31b6dfc9cc42b3cb4548c813674463cb664b56a9f"
