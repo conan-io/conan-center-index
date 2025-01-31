@@ -1,11 +1,12 @@
 import os
+import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches
+from conan.tools.files import save, copy, get, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.0.9"
@@ -43,9 +44,21 @@ class LlamaCppConan(ConanFile):
         # Structure of llama.cpp libraries was changed after b4079
         return Version(self.version) >= "b4570"
 
+    @property
+    def _cuda_build_module(self):
+        cuda_target = "ggml-cuda" if self._is_new_llama else "ggml"
+        return textwrap.dedent(f"""\
+            find_dependency(CUDAToolkit REQUIRED)
+            if (WIN32)
+                # As of CUDA 12.3.1, Windows does not offer a static cublas library
+                target_link_libraries({cuda_target} INTERFACE CUDA::cudart_static CUDA::cublas CUDA::cublasLt CUDA::cuda_driver)
+            else ()
+                target_link_libraries({cuda_target} INTERFACE CUDA::cudart_static CUDA::cublas_static CUDA::cublasLt_static CUDA::cuda_driver)
+            endif()
+        """)
+
     def export_sources(self):
         export_conandata_patches(self)
-        copy(self, "cmake/*", dst=self.export_sources_folder, src=self.recipe_folder)
 
     def validate(self):
         check_min_cppstd(self, 17 if self._is_new_llama else 11)
@@ -105,6 +118,7 @@ class LlamaCppConan(ConanFile):
         copy(self, "*common*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*common*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
         copy(self, "*.cmake", src=os.path.join(self.export_sources_folder, "cmake"), dst=os.path.join(self.package_folder, "lib", "cmake"))
+        save(self, os.path.join(self.package_folder, "lib", "cmake", "llama-cpp-cuda-static.cmake"), self._cuda_build_module)
 
     def _get_backends(self):
         results = ["cpu"]
