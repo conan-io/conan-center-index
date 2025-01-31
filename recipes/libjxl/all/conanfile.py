@@ -9,7 +9,7 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class LibjxlConan(ConanFile):
@@ -199,6 +199,7 @@ class LibjxlConan(ConanFile):
                 self.cpp_info.components["jxl"].defines.append("JXL_CMS_STATIC_DEFINE")
             if libcxx:
                 self.cpp_info.components["jxl_cms"].system_libs.append(libcxx)
+            self.cpp_info.components["jxl"].requires.append("jxl_cms")
 
         # jxl_dec
         if Version(self.version) < "0.9.0":
