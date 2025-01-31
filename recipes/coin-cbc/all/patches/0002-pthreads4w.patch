@@ -1,11 +1,11 @@
---- a/Cbc/configure
-+++ b/Cbc/configure
-@@ -30970,7 +30970,7 @@ cat >>confdefs.h <<\_ACEOF
- #define CBC_THREAD 1
- _ACEOF
- 
+--- a/Cbc/configure.ac
++++ b/Cbc/configure.ac
+@@ -179,7 +179,7 @@
+ if test "$enable_cbc_parallel" = yes; then
+   # Define the preprocessor macro
+   AC_DEFINE([CBC_THREAD],[1],[Define to 1 if the SMP version of Cbc should be compiled])
 -  if test $coin_cxx_is_cl = true ;
 +  if test "${with_pthreadsw32_lib+set}" = set ;
    then
      # TODO we should check whether the library works and pthread.h is indeed there
- 
+     AC_ARG_WITH(pthreadsw32-lib, 
