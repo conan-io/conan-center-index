@@ -59,6 +59,8 @@ class PackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["AU_EXCLUDE_GTEST_DEPENDENCY"] = "ON"
+        tc.variables["AU_ENABLE_TESTING"] = "OFF"
         tc.generate()
 
     def build(self):
