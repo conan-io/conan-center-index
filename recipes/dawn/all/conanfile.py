@@ -44,6 +44,9 @@ class DawnConan(ConanFile):
         if self.settings.compiler.cppstd:
             check_min_cppstd(self, 11)
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.17.2 <4]")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         # Dawn uses SPIRV-Tools internals, so we need to provide a vendored version
