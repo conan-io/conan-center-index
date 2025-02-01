@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.env import Environment
 from conan.tools.files import copy, get, rm, rmdir, chdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -26,6 +27,8 @@ class LibbpfConan(ConanFile):
         "fPIC": True,
     }
 
+    exports_sources = "config.mk"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -39,6 +42,9 @@ class LibbpfConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def requirements(self):
+        self.requires("libbpf/1.3.0")
+
     def validate(self):
         if self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} is only available on Linux")
@@ -48,6 +54,7 @@ class LibbpfConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        copy(self, "config.mk", self.export_sources_folder, self.source_folder)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
@@ -56,8 +63,6 @@ class LibbpfConan(ConanFile):
             "DESTDIR={}".format(self.package_folder),
             "LIBSUBDIR={}".format("lib"),
         ])
-        if not self.options.shared:
-            tc.configure_args.append("BUILD_STATIC_ONLY={}".format(1))
         tc.generate()
 
         pkgdeps = PkgConfigDeps(self)
@@ -69,14 +74,13 @@ class LibbpfConan(ConanFile):
     def build(self):
         with chdir(self, os.path.join(self.source_folder)):
             autotools = Autotools(self)
-            autotools.configure()
             with chdir(self, os.path.join(self.source_folder, "lib")):
-                autotools.make()
+                autotools.make(target="libxdp")
 
     def package(self):
         with chdir(self, os.path.join(self.source_folder, "lib")):
             autotools = Autotools(self)
-            autotools.install()
+            autotools.install(target="libxdp_install")
         if self.options.shared:
             rm(self, "libxdp.a", os.path.join(self.package_folder, "lib"))
         else:
