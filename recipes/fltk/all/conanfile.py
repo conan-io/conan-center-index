@@ -145,8 +145,6 @@ class FltkConan(ConanFile):
         if self.settings.os in ("Linux", "FreeBSD"):
             if self.options.with_threads:
                 self.cpp_info.system_libs.extend(["pthread", "dl"])
-            if self.options.with_gl:
-                self.cpp_info.system_libs.extend(["GL", "GLU"])
         elif is_apple_os(self):
             self.cpp_info.frameworks = [
                 "AppKit", "ApplicationServices", "Carbon", "Cocoa", "CoreFoundation", "CoreGraphics",
