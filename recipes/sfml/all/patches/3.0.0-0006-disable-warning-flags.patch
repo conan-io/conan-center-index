@@ -1,0 +1,22 @@
+diff --git a/cmake/Macros.cmake b/cmake/Macros.cmake
+index 2a8bec05..04bdcc2f 100644
+--- a/cmake/Macros.cmake
++++ b/cmake/Macros.cmake
+@@ -82,7 +82,7 @@ macro(sfml_add_library module)
+         target_link_options(${target} PUBLIC $<$<CONFIG:DEBUG>:--coverage>)
+     endif()
+ 
+-    set_target_warnings(${target})
++    #set_target_warnings(${target})
+     set_public_symbols_hidden(${target})
+ 
+     # enable precompiled headers
+@@ -324,7 +324,7 @@ macro(sfml_add_example target)
+         target_precompile_headers(${target} REUSE_FROM sfml-system)
+     endif()
+ 
+-    set_target_warnings(${target})
++    #set_target_warnings(${target})
+     set_public_symbols_hidden(${target})
+ 
+     # set the debug suffix
