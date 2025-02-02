@@ -108,7 +108,7 @@ class PolyscopeConan(ConanFile):
             tc.preprocessor_definitions["IMGUI_API"] = ""
         # #error "GLM: GLM_GTX_norm is an experimental extension and may change in the future.
         #         Use #define GLM_ENABLE_EXPERIMENTAL before including it, if you really want to use it."
-        tc.preprocessor_definitions["GLM_ENABLE_EXPERIMENTAL"] = 1
+        tc.preprocessor_definitions["GLM_ENABLE_EXPERIMENTAL"] = ""
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -138,6 +138,7 @@ class PolyscopeConan(ConanFile):
     def package_info(self):
         # The project does not define any CMake targets
         self.cpp_info.libs = ["polyscope"]
+        self.cpp_info.defines.append("GLM_ENABLE_EXPERIMENTAL")
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["m"]
         elif is_apple_os(self):
