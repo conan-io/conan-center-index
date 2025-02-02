@@ -91,6 +91,8 @@ class OpenImageIOConan(ConanFile):
         self.requires("fmt/10.2.1", transitive_headers=True)
         self.requires("opencolorio/2.4.0")
 
+        self.requires("libdeflate/1.22", override=True)
+
         # Optional libraries
         if self.options.with_libjxl:
             self.requires("libjxl/0.10.3")
