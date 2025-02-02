@@ -41,3 +41,13 @@ Prefix = {path}""")
             copy(self, "qt.conf", src=self.generators_folder, dst=os.path.join(self.cpp.build.bindirs[0]))
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
+            # Related to https://github.com/conan-io/conan-center-index/issues/20574
+            if self.settings.os == "Macos":
+                bin_macos_path = os.path.join(self.cpp.build.bindirs[0], "test_macos_bundle.app", "Contents", "MacOS", "test_macos_bundle")
+                self.run(bin_macos_path, env="conanrun")
+
+        # Check that the directory exposed in the configuration exists and includes moc
+        qt_tools_dir = self.dependencies.host["qt"].conf_info.get("user.qt:tools_directory")
+        assert os.path.isdir(qt_tools_dir)
+        moc = os.path.join(qt_tools_dir, "moc.exe" if self.settings.os == "Windows" else "moc")
+        assert os.path.exists(moc)

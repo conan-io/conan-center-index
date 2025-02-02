@@ -3,6 +3,8 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.scm import Version
+from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.55.0"
@@ -29,6 +31,7 @@ class LibrdkafkaConan(ConanFile):
         "ssl": [True, False],
         "sasl": [True, False],
         "curl": [True, False],
+        "syslog": [True, False],
     }
     default_options = {
         "shared": False,
@@ -39,6 +42,7 @@ class LibrdkafkaConan(ConanFile):
         "ssl": False,
         "sasl": False,
         "curl": False,
+        "syslog": False,
     }
 
     @property
@@ -51,6 +55,8 @@ class LibrdkafkaConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if is_msvc(self):
+            del self.options.syslog
 
     def configure(self):
         if self.options.shared:
@@ -98,6 +104,8 @@ class LibrdkafkaConan(ConanFile):
         tc.variables["WITH_SASL"] = self.options.sasl
         tc.variables["ENABLE_LZ4_EXT"] = True
         tc.variables["WITH_CURL"] = self.options.curl
+        tc.variables["WITH_SNAPPY"] = True
+        tc.preprocessor_definitions["WITH_SYSLOG"] = "1" if self.options.get_safe("syslog") else "0"
         tc.generate()
 
         cd = CMakeDeps(self)

@@ -24,7 +24,7 @@ grpc_targets:
         - abseil::absl_time
         - abseil::absl_optional
         - abseil::absl_variant
-    - name: "grpc"
+    - name: "_grpc"
       lib: "grpc"
       requires:
         - upb_json_lib
@@ -105,7 +105,7 @@ grpc_targets:
       requires:
         - abseil::absl_absl_check
         - abseil::absl_absl_log
-        - grpc
+        - _grpc
         - protobuf::libprotobuf
     - name: "grpc++_alts"
       lib: "grpc++_alts"
@@ -172,3 +172,5 @@ grpc_plugins:
       executable: "grpc_python_plugin"
     - target: "gRPC::grpc_ruby_plugin"
       executable: "grpc_ruby_plugin"
+    - target: "gRPC::grpc_otel_plugin"
+      executable: "grpc_otel_plugin"

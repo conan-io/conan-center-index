@@ -1,4 +1,7 @@
 sources:
+  "0.11.1":
+    url: "https://github.com/libjxl/libjxl/archive/v0.11.1.tar.gz"
+    sha256: "1492dfef8dd6c3036446ac3b340005d92ab92f7d48ee3271b5dac1d36945d3d9"
   "0.10.3":
     url: "https://github.com/libjxl/libjxl/archive/v0.10.3.zip"
     sha256: "a9e2103f61ab79f5561b506ad03fcba33207263284b1a796eba3ca826ab0a75f"
@@ -8,6 +11,3 @@ sources:
   "0.8.2":
     url: "https://github.com/libjxl/libjxl/archive/v0.8.2.zip"
     sha256: "1f2ccc06f07c4f6cf4aa6c7763ba0598f12a7544d597f02beb07f615eb08ccf0"
-  "0.6.1":
-    url: "https://github.com/libjxl/libjxl/archive/v0.6.1.zip"
-    sha256: "3e4877daef07724aa6f490bf80c45ada804f35fe3cce59c27e89c5ae3099535a"
