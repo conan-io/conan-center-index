@@ -1,0 +1,22 @@
+sources:
+  "3.0.1":
+    url: "https://github.com/SFML/SFML/archive/refs/tags/3.0.1.zip"
+    sha256: "8c791368c4afbcb6890d6674158f8f6e9ef3b4e96fbd4cee82f6d61f5a7e89a5"
+  "3.0.0":
+    url: "https://github.com/SFML/SFML/archive/refs/tags/3.0.0.zip"
+    sha256: "8cc41db46b59f07c44ecf21c74a0f956d37735dec9d90ff4522856cb162ba642"
+patches:
+  "3.0.1":
+    - patch_file: "patches/3.0.0-0001-cmake-robust-find-deps.patch"
+      patch_description: "Robust discovery of dependencies"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.0-0003-allow-shared-MT.patch"
+      patch_description: "Allow to build shared SFML with MT runtime"
+      patch_type: "portability"
+  "3.0.0":
+    - patch_file: "patches/3.0.0-0001-cmake-robust-find-deps.patch"
+      patch_description: "Robust discovery of dependencies"
+      patch_type: "conan"
+    - patch_file: "patches/3.0.0-0003-allow-shared-MT.patch"
+      patch_description: "Allow to build shared SFML with MT runtime"
+      patch_type: "portability"
