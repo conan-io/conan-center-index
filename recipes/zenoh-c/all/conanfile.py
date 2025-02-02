@@ -8,7 +8,6 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment
 from conan.tools.files import get, copy, save
 from conan.tools.gnu import GnuToolchain
-from conan.tools.scm import Version
 
 required_conan_version = ">=2.3.0"
 
@@ -51,8 +50,6 @@ class ZenohCConan(ConanFile):
     def config_options(self):
         # The library is always built as PIC
         del self.options.fPIC
-        if Version(self.version) < "1.0":
-            del self.options.build_unstable_api
 
     def configure(self):
         # Does not use the C or C++ compiler
@@ -80,10 +77,7 @@ class ZenohCConan(ConanFile):
         self.tool_requires("cmake/[>=3.16 <4]")
         # Match the upstream Rust version:
         # https://github.com/eclipse-zenoh/zenoh-c/blob/1.1.0/rust-toolchain.toml
-        if Version(self.version) >= "1.0":
-            self.tool_requires("rust/1.75.0")
-        else:
-            self.tool_requires("rust/1.72.1")
+        self.tool_requires("rust/1.75.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -102,8 +96,7 @@ class ZenohCConan(ConanFile):
         tc.variables["ZENOHC_BUILD_WITH_LOGGER_AUTOINIT"] = self.options.logger_autoinit
         tc.variables["ZENOHC_BUILD_WITH_SHARED_MEMORY"] = self.options.shared_memory
         tc.variables["ZENOHC_CARGO_FLAGS"] = str(self.options.extra_cargo_flags)
-        if Version(self.version) >= "1.0":
-            tc.variables["ZENOHC_BUILD_WITH_UNSTABLE_API"] = self.options.build_unstable_api
+        tc.variables["ZENOHC_BUILD_WITH_UNSTABLE_API"] = self.options.build_unstable_api
         tc.generate()
 
         env = Environment()
