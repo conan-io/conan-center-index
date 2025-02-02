@@ -90,7 +90,12 @@ class GodotCppConan(ConanFile):
 
     def package(self):
         copy(self, "LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"))
-        copy(self, "*.hpp", os.path.join(self.source_folder, "include"), os.path.join(self.package_folder, "include/godot-cpp"))
+        copy(self, "*.hpp",
+             os.path.join(self.source_folder, "include"),
+             os.path.join(self.package_folder, "include", "godot-cpp"))
+        copy(self, "*.hpp",
+             os.path.join(self.build_folder, "include"),
+             os.path.join(self.package_folder, "include", "godot-cpp"))
         bin_dir = os.path.join(self.source_folder, "bin")
         copy(self, "*.a", bin_dir, os.path.join(self.package_folder, "lib"))
         copy(self, "*.so", bin_dir, os.path.join(self.package_folder, "lib"))
