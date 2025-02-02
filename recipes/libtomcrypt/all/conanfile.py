@@ -2,9 +2,9 @@ import os
 
 from conan import ConanFile
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, chdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, GnuToolchain
+from conan.tools.env import VirtualRunEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, chdir, replace_in_file
+from conan.tools.gnu import Autotools, AutotoolsDeps, GnuToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, NMakeDeps
 
@@ -32,10 +32,6 @@ class LibTomCryptConan(ConanFile):
         "fPIC": True,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, f"tomcrypt-{self.version}.def",
@@ -61,17 +57,21 @@ class LibTomCryptConan(ConanFile):
     def build_requirements(self):
         if not is_msvc(self):
             if self.options.shared:
-                self.build_requires("libtool/2.4.7")
-            if self._settings_build.os == "Windows":
-                self.build_requires("make/4.4")
+                self.tool_requires("libtool/2.4.7")
+            if self.settings_build.os == "Windows":
+                self.tool_requires("make/4.4")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "makefile_include.mk"),
+                        "PKG_CONFIG_PATH=$(LIBPATH)/pkgconfig pkg-config",
+                        self.conf.get("tools.gnu:pkg_config", default="pkgconf", check_type=str))
+
 
     def generate(self):
-        venv = VirtualBuildEnv(self)
-        venv.generate()
-
         if not cross_building(self):
             venv = VirtualRunEnv(self)
             venv.generate(scope="build")
@@ -88,19 +88,21 @@ class LibTomCryptConan(ConanFile):
         ldflags.append(dep_vars.get("LDFLAGS", ""))
         tc.make_args["CFLAGS"] = " ".join(cflags)
         tc.make_args["LDFLAGS"] = " ".join(ldflags)
-        tc.make_args["CC"] = tc.extra_env.vars(self)["CC"]
-        tc.make_args["STRIP"] = tc.extra_env.vars(self).get("STRIP", "strip")
+        tc_vars = tc.extra_env.vars(self)
+        tc.make_args["CC"] = tc_vars["CC"]
+        if cross_building(self):
+            tc.make_args["CROSS_COMPILE"] = tc_vars["STRIP"].replace("-strip", "-")
+        tc.extra_env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
         tc.generate()
 
         if is_msvc(self):
             deps = NMakeDeps(self)
             deps.generate()
         else:
-            deps = AutotoolsDeps(self)
+            deps = PkgConfigDeps(self)
             deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         with chdir(self, self.source_folder):
             if is_msvc(self):
                 if self.options.shared:
@@ -109,12 +111,13 @@ class LibTomCryptConan(ConanFile):
                     target = "tomcrypt.lib"
                 self.run(f"nmake -f makefile.msvc {target}")
             else:
-                target = None
-                if self.settings.os == "Windows":
-                    if self.options.shared:
+                if self.options.shared:
+                    if self.settings.os == "Windows":
                         target = "libtomcrypt.dll"
                     else:
-                        target = "libtomcrypt.a"
+                        target = "libtomcrypt.la"
+                else:
+                    target = "libtomcrypt.a"
                 autotools = Autotools(self)
                 if self.settings.os == "Windows":
                     makefile = "makefile.mingw"
