@@ -49,6 +49,13 @@ class ZXingCppConan(ConanFile):
                 "msvc": "192",
                 "clang": "5" if Version(self.version) < "2.0.0" else "7",
                 "apple-clang": "5" if Version(self.version) < "2.0.0" else "12",
+            },
+            "20" : {
+                "gcc": "11",
+                "Visual Studio": "17",
+                "msvc": "193",
+                "clang": "13",
+                "apple-clang": "15",
             }
         }
 
@@ -70,7 +77,11 @@ class ZXingCppConan(ConanFile):
         self.build_requires("cmake/[>=3.16 <4]")
 
     def validate(self):
-        cpp_version = 17 if Version(self.version) >= "1.2.0" else 14
+        cpp_version = 14
+        if Version(self.version) >= "2.3.0":
+            cpp_version = 20
+        elif Version(self.version) >= "1.2.0":
+            cpp_version = 17
 
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, cpp_version)
