@@ -1,5 +1,5 @@
 diff --git CMakeLists.txt CMakeLists.txt
-index 0818a8cf9..0928ddb7f 100644
+index 35af090a2..4d3504d36 100644
 --- CMakeLists.txt
 +++ CMakeLists.txt
 @@ -42,7 +42,7 @@ endif ()
@@ -11,7 +11,7 @@ index 0818a8cf9..0928ddb7f 100644
        "${PROJECT_SOURCE_DIR}/src/cmake")
  
  # Utilities
-@@ -233,7 +233,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
+@@ -276,7 +276,7 @@ if (OIIO_BUILD_TOOLS AND NOT BUILD_OIIOUTIL_ONLY)
      add_subdirectory (src/iinfo)
      add_subdirectory (src/maketx)
      add_subdirectory (src/oiiotool)
@@ -369,7 +369,7 @@ index 31d205d53..6d6a5390f 100644
      message (WARNING "libpng not found, so ICO support will not work")
      set (format_plugin_definitions ${format_plugin_definitions} DISABLE_ICO=1 PARENT_SCOPE)
 diff --git src/iconvert/CMakeLists.txt src/iconvert/CMakeLists.txt
-index 735b88def..8f5bb3b54 100644
+index c83dbe0e8..8f5bb3b54 100644
 --- src/iconvert/CMakeLists.txt
 +++ src/iconvert/CMakeLists.txt
 @@ -2,4 +2,4 @@
@@ -377,9 +377,10 @@ index 735b88def..8f5bb3b54 100644
  # https://github.com/AcademySoftwareFoundation/OpenImageIO
  
 -fancy_add_executable (LINK_LIBRARIES OpenImageIO)
+\ No newline at end of file
 +fancy_add_executable (LINK_LIBRARIES OpenImageIO fmt::fmt)
 diff --git src/idiff/CMakeLists.txt src/idiff/CMakeLists.txt
-index 735b88def..8f5bb3b54 100644
+index c83dbe0e8..8f5bb3b54 100644
 --- src/idiff/CMakeLists.txt
 +++ src/idiff/CMakeLists.txt
 @@ -2,4 +2,4 @@
@@ -387,6 +388,7 @@ index 735b88def..8f5bb3b54 100644
  # https://github.com/AcademySoftwareFoundation/OpenImageIO
  
 -fancy_add_executable (LINK_LIBRARIES OpenImageIO)
+\ No newline at end of file
 +fancy_add_executable (LINK_LIBRARIES OpenImageIO fmt::fmt)
 diff --git src/igrep/CMakeLists.txt src/igrep/CMakeLists.txt
 index 735b88def..8f5bb3b54 100644
@@ -456,7 +458,7 @@ index 70d28318a..aec47621f 100644
  else()
      message (WARNING "JPEG XL plugin will not be built")
 diff --git src/libOpenImageIO/CMakeLists.txt src/libOpenImageIO/CMakeLists.txt
-index 98b3cec2e..fab3c8f39 100644
+index dcd3059b3..4a4b98aba 100644
 --- src/libOpenImageIO/CMakeLists.txt
 +++ src/libOpenImageIO/CMakeLists.txt
 @@ -155,18 +155,29 @@ target_link_libraries (OpenImageIO
@@ -493,7 +495,7 @@ index 98b3cec2e..fab3c8f39 100644
  if (WIN32)
      target_link_libraries (OpenImageIO PRIVATE psapi)
 diff --git src/libutil/CMakeLists.txt src/libutil/CMakeLists.txt
-index 941c1bbc9..3126fd267 100644
+index 9af7e28a5..712f7ab63 100644
 --- src/libutil/CMakeLists.txt
 +++ src/libutil/CMakeLists.txt
 @@ -58,6 +58,8 @@ function (setup_oiio_util_library targetname)
