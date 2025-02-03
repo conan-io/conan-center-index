@@ -2,7 +2,6 @@ import os
 from conan import ConanFile
 from conan.tools.files import get, copy, rmdir
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
-from conan.tools.env import VirtualRunEnv
 
 required_conan_version = ">=2.0.9"
 
@@ -34,21 +33,22 @@ class NodeEditorConan(ConanFile):
     def build_requirements(self):
         # INFO: Uses Qt rcc tool to generate resources.cpp file via resources.qrc
         self.tool_requires("qt/<host_version>")
+        # INFO: To be able to use CMAKE_AUTOMOC_EXECUTABLE
+        self.tool_requires("cmake/[>=3.27 <4]")
 
     def generate(self):
-        # INFO: Qt executable could not find pcre2-16.dll without environment
-        # CMake Error: AUTOMOC for target QtNodes: Test run of "moc" executable
-        env = VirtualRunEnv(self)
-        env.generate(scope="build")
-
         deps = CMakeDeps(self)
         deps.generate()
 
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_DOCS"] = False
         tc.cache_variables["BUILD_EXAMPLES"] = False
+        tc.cache_variables["BUILD_TESTING"] = False
         # INFO: replcate requires could be used to replace the Qt version by 5.x
         tc.cache_variables["USE_QT6"] = self.dependencies["qt"].ref.version.major == "6"
+        # INFO: In order to execute the moc tool and avoid failing to find its dependencies
+        qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
+        tc.cache_variables["CMAKE_AUTOMOC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "moc.exe" if self.settings_build.os == "Windows" else "moc")
         tc.generate()
 
     def build(self):
