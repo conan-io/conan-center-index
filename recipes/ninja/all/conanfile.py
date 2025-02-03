@@ -21,6 +21,7 @@ class NinjaConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def package_id(self):
+        del self.info.settings.build_type
         del self.info.settings.compiler
 
     def source(self):
