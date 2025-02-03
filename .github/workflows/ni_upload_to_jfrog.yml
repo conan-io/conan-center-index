@@ -26,6 +26,7 @@ jobs:
       - run: conan remote add rnd-conan-ci ${{ env.REPO_CI }}
       - run: conan remote login rnd-conan-ci ${{ vars.JFROG_USERNAME }} --password ${{ secrets.JFROG_ACCESS_TOKEN }}
         # export packages to local cache
+      - run: conan export recipes/cryptopp/all --version 8.9.0
       - run: conan export recipes/expat/all --version 2.6.2
       - run: conan export recipes/fmt/all --version 10.2.1
       - run: conan export recipes/gtest/all --version 1.10.0
