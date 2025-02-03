@@ -26,7 +26,7 @@ class Libnetfilter_logConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libmnl/1.0.4")
+        self.requires("libmnl/1.0.5")
         self.requires("libnfnetlink/1.0.2")
 
     def source(self):
