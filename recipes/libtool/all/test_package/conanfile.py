@@ -103,6 +103,10 @@ class TestPackageConan(ConanFile):
             env.append_path(var, os.path.join(self.autotools_package_folder, "lib"))
         env.vars(self, scope="run").save_script("conanrun_libtool_testpackage")
 
+        env = Environment()
+        env.prepend_path("PATH", os.path.join(self.dependencies["libtool"].package_folder, "bin"))
+        env.vars(self, scope="build").save_script("conanbuild_libtoolize")
+
         runenv = VirtualRunEnv(self)
         runenv.generate()
 
