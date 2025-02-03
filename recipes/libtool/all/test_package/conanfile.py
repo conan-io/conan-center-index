@@ -17,11 +17,6 @@ class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     test_type = "explicit"
     short_paths = True
-    win_bash = True # This assignment must be *here* to avoid "Cannot wrap command with different envs." in Conan 1.x
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def layout(self):
         basic_layout(self)
@@ -30,9 +25,6 @@ class TestPackageConan(ConanFile):
         self.requires(self.tested_reference_str) # Since we are testing libltdl as well
 
     def build_requirements(self):
-        if hasattr(self, "settings_build") and not cross_building(self):
-            self.tool_requires(self.tested_reference_str) # We are testing libtool/libtoolize
-    
         self.tool_requires("autoconf/2.71")
         self.tool_requires("automake/1.16.5")
         if self._settings_build.os == "Windows":
