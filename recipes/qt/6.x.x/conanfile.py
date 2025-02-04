@@ -827,6 +827,10 @@ class QtConan(ConanFile):
     def _cmake_entry_point_file(self):
         return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_entry_point.cmake")
 
+    @property
+    def _cmake_platform_target_setup_file(self):
+        return os.path.join("lib", "cmake", "Qt6", "conan_qt_platform_target_setup.cmake")
+
     def _cmake_qt6_private_file(self, module):
         return os.path.join("lib", "cmake", f"Qt6{module}", f"conan_qt_qt6_{module.lower()}private.cmake")
 
@@ -973,6 +977,29 @@ class QtConan(ConanFile):
                 )""")
             save(self, os.path.join(self.package_folder, self._cmake_entry_point_file), contents)
 
+        if self.settings.os == "Windows" or is_msvc(self):
+            contents = textwrap.dedent("""\
+                set(utf8_flags "")
+                if(MSVC)
+                    list(APPEND utf8_flags "$<$<CXX_COMPILER_ID:MSVC>:-utf-8>")
+                endif()
+
+                if(utf8_flags)
+                    set(opt_out_condition "$<NOT:$<BOOL:$<TARGET_PROPERTY:QT_NO_UTF8_SOURCE>>>")
+                    set(language_condition "$<COMPILE_LANGUAGE:C,CXX>")
+                    set(genex_condition "$<AND:${opt_out_condition},${language_condition}>")
+                    set(utf8_flags "$<${genex_condition}:${utf8_flags}>")
+                    target_compile_options(Qt6::Platform INTERFACE "${utf8_flags}")
+                endif()
+
+                if(WIN32)
+                    set(no_unicode_condition
+                        "$<NOT:$<BOOL:$<TARGET_PROPERTY:QT_NO_UNICODE_DEFINES>>>")
+                    target_compile_definitions(Qt6::Platform
+                        INTERFACE "$<${no_unicode_condition}:UNICODE$<SEMICOLON>_UNICODE>")
+                endif()""")
+            save(self, os.path.join(self.package_folder, self._cmake_platform_target_setup_file), contents)
+
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Qt6")
         self.cpp_info.set_property("pkg_config_name", "qt6")
@@ -1036,7 +1063,18 @@ class QtConan(ConanFile):
                 requires.append("Core")
             self.cpp_info.components[componentname].requires = _get_corrected_reqs(requires)
 
-        core_reqs = ["zlib::zlib"]
+        # https://github.com/qt/qtbase/blob/v6.7.3/cmake/QtPlatformTargetHelpers.cmake
+        self.cpp_info.components["qtPlatform"].set_property("cmake_target_name", "Qt6::Platform")
+        self.cpp_info.components["qtPlatform"].includedirs = [os.path.join("mkspecs", self._xplatform())]
+        if self.settings.os == "Android":
+            self.cpp_info.components["qtPlatform"].system_libs.append("log")
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["qtPlatform"].system_libs.append("pthread")
+        if is_msvc(self):
+            self.cpp_info.components["qtPlatform"].cxxflags.append("-permissive-")
+            self.cpp_info.components["qtPlatform"].cxxflags.append("-Zc:__cplusplus")
+
+        core_reqs = ["Platform", "zlib::zlib"]
         if self.options.with_pcre2:
             core_reqs.append("pcre2::pcre2")
         if self.options.with_doubleconversion:
@@ -1063,12 +1101,8 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.components["qtCore"].system_libs.append("authz")
         if is_msvc(self):
-            self.cpp_info.components["qtCore"].cxxflags.append("-permissive-")
-            self.cpp_info.components["qtCore"].cxxflags.append("-Zc:__cplusplus")
             self.cpp_info.components["qtCore"].system_libs.append("synchronization")
             self.cpp_info.components["qtCore"].system_libs.append("runtimeobject")
-        self.cpp_info.components["qtPlatform"].set_property("cmake_target_name", "Qt6::Platform")
-        self.cpp_info.components["qtPlatform"].includedirs = [os.path.join("mkspecs", self._xplatform())]
         if self.options.with_dbus:
             _create_module("DBus", ["dbus::dbus"])
             if self.settings.os == "Windows":
@@ -1525,6 +1559,9 @@ class QtConan(ConanFile):
                 if self.settings.os == "watchOS":
                     # https://github.com/qt/qtbase/blob/v6.6.1/src/corelib/CMakeLists.txt#L1079-L1082
                     self.cpp_info.components["qtCore"].frameworks.append("WatchKit")
+
+        if self.settings.os == "Windows" or is_msvc(self):
+            _add_build_module("qtPlatform", self._cmake_platform_target_setup_file)
 
         self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin"))
         _add_build_module("qtCore", self._cmake_executables_file)
