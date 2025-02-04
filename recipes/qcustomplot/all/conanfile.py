@@ -48,12 +48,10 @@ class QCustomPlotConan(ConanFile):
     def requirements(self):
         if Version(self.version) >= "2.0.0":
             # INFO: Public header qcustomplot.h includes QObject
-            # INFO: transitive libs: undefined reference to 'QMainWindow::Event'
-            self.requires("qt/[>=6.5 <7]", transitive_headers=True, transitive_libs=True)
+            self.requires("qt/[>=6.5 <7]", transitive_headers=True)
         else:
             # INFO: Public header qcustomplot.h includes QObject
-            # INFO: transitive libs: undefined reference to 'QMainWindow::Event'
-            self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
+            self.requires("qt/[~5.15]", transitive_headers=True)
         if self.options.with_opengl and self.settings.os == "Windows":
             self.requires("opengl/system")
 
@@ -71,14 +69,14 @@ class QCustomPlotConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+            destination=self.source_folder, strip_root=True, verify=False)
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["QCUSTOMPLOT_SRC_DIR"] = self.source_folder.replace("\\", "/")
-        tc.cache_variables["QCUSTOMPLOT_VERSION"] = self.version
+        tc.cache_variables["QCUSTOMPLOT_VERSION"] = str(self.version)
         tc.cache_variables["QCUSTOMPLOT_VERSION_MAJOR"] = str(Version(self.version).major)
-        tc.cache_variables["QT_VERSION"] = self.dependencies["qt"].ref.version
+        tc.cache_variables["QT_VERSION"] = str(self.dependencies["qt"].ref.version)
         tc.cache_variables["QCUSTOMPLOT_USE_OPENGL"] = self.options.with_opengl
         qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
         tc.cache_variables["CMAKE_AUTOMOC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "moc.exe" if self.settings_build.os == "Windows" else "moc")
