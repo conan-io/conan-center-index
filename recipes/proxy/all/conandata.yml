@@ -1,4 +1,7 @@
 sources:
+  "3.1.0":
+    url: "https://github.com/microsoft/proxy/archive/refs/tags/3.1.0.tar.gz"
+    sha256: "c86ed7767ed3e90250632f2b5269c83225b0ae986314c58596d421b245f26cd1"
   "3.0.0":
     url: "https://github.com/microsoft/proxy/archive/refs/tags/3.0.0.tar.gz"
     sha256: "7e073e217e5572bc4c17ed5893273c80ea34c87e1406c853beeb9ca9bdda9733"

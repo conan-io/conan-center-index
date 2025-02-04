@@ -14,11 +14,9 @@ class TestPackageConan(ConanFile):
 
     def layout(self):
         cmake_layout(self)
-        
+
     def generate(self):
         tc = CMakeToolchain(self)
-        if self.dependencies[self.tested_reference_str].options.with_msgpack:
-            tc.cache_variables["CONAN_TEST_WITH_MSGPACK"] = True
         tc.generate()
 
     def build(self):
