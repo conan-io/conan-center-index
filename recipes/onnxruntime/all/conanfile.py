@@ -232,7 +232,9 @@ class OnnxRuntimeConan(ConanFile):
                 "flatbuffers",
             ]
             if self.options.with_xnnpack:
-                onnxruntime_libs.append("providers_xnnpack")
+                # Static linkning in gcc is order dependent.
+                # session, providers_xnnpack and optimizer needs to link in that order
+                onnxruntime_libs.insert(1, "providers_xnnpack")
             self.cpp_info.libs = [f"onnxruntime_{lib}" for lib in onnxruntime_libs]
 
         if Version(self.version) < "1.16.0" or not self.options.shared:
