@@ -48,21 +48,18 @@ class QCustomPlotConan(ConanFile):
     def requirements(self):
         if Version(self.version) >= "2.0.0":
             # INFO: Public header qcustomplot.h includes QObject
-            self.requires("qt/[>=6.5 <7]", transitive_headers=True)
+            self.requires("qt/[>=6.5 <7]", transitive_headers=True, options={"widgets": True, "gui": True})
         else:
             # INFO: Public header qcustomplot.h includes QObject
-            self.requires("qt/[~5.15]", transitive_headers=True)
+            self.requires("qt/[~5.15]", transitive_headers=True, options={"widgets": True, "gui": True})
         if self.options.with_opengl and self.settings.os == "Windows":
             self.requires("opengl/system")
 
     def validate(self):
-        if self.info.settings.compiler.cppstd:
-            min_cppstd = "11" if Version(self.dependencies["qt"].ref.version) < "6.0.0" else "17"
-            check_min_cppstd(self, min_cppstd)
-        if not (self.dependencies["qt"].options.gui and self.dependencies["qt"].options.widgets):
-            raise ConanInvalidConfiguration(f"{self.ref} requires qt gui and widgets")
+        min_cppstd = "11" if Version(self.dependencies["qt"].ref.version) < "6" else "17"
+        check_min_cppstd(self, min_cppstd)
         if self.info.options.with_opengl and self.dependencies["qt"].options.opengl == "no":
-            raise ConanInvalidConfiguration(f"{self.ref} with opengl requires Qt with opengl enabled")
+            raise ConanInvalidConfiguration(f"{self.ref} with opengl requires Qt with opengl enabled: -o 'qt/*:opengl=desktop/dynamic'")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -78,7 +75,7 @@ class QCustomPlotConan(ConanFile):
         tc.cache_variables["QCUSTOMPLOT_VERSION_MAJOR"] = str(Version(self.version).major)
         tc.cache_variables["QT_VERSION"] = str(self.dependencies["qt"].ref.version)
         tc.cache_variables["QCUSTOMPLOT_USE_OPENGL"] = self.options.with_opengl
-        qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
+        qt_tools_rootdir = self.conf.get("user.qt:tools_directory", self.dependencies["qt"].cpp_info.bindirs[0])
         tc.cache_variables["CMAKE_AUTOMOC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "moc.exe" if self.settings_build.os == "Windows" else "moc")
         tc.cache_variables["CMAKE_AUTORCC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "rcc.exe" if self.settings_build.os == "Windows" else "rcc")
         tc.generate()
