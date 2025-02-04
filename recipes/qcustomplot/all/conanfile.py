@@ -80,6 +80,7 @@ class QCustomPlotConan(ConanFile):
         tc.cache_variables["QCUSTOMPLOT_VERSION_MAJOR"] = str(Version(self.version).major)
         tc.cache_variables["QT_VERSION"] = self.dependencies["qt"].ref.version
         tc.cache_variables["QCUSTOMPLOT_USE_OPENGL"] = self.options.with_opengl
+        qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
         tc.cache_variables["CMAKE_AUTOMOC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "moc.exe" if self.settings_build.os == "Windows" else "moc")
         tc.cache_variables["CMAKE_AUTORCC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "rcc.exe" if self.settings_build.os == "Windows" else "rcc")
         tc.generate()
