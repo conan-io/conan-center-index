@@ -11,6 +11,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        self.requires("qt/[*]")
 
     def layout(self):
         cmake_layout(self)
