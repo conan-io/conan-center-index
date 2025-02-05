@@ -516,7 +516,8 @@ class AwsSdkCppConan(ConanFile):
             self.requires("aws-c-sdkutils/0.1.15")  # No mention of this in the code
             self.requires("aws-checksums/0.1.18")
             # missing aws-lc, but only needed as openssl replacement if USE_OPENSSL is OFF
-            self.requires("s2n/1.4.16")  # No mention of this in the code, we might be overlinking
+            if self.settings.os in ["Linux", "FreeBSD", "Android"]:
+                self.requires("s2n/1.4.16")  # No mention of this in the code, we might be overlinking
         if self.version == "1.9.234":
             self.requires("aws-crt-cpp/0.17.1a", transitive_headers=True)
             self.requires("aws-c-auth/0.6.4")
@@ -530,7 +531,8 @@ class AwsSdkCppConan(ConanFile):
             if self.options.get_safe("s3-crt"):
                 self.requires("aws-c-s3/0.1.26")
             self.requires("aws-checksums/0.1.12")
-            self.requires("s2n/1.3.15")  # No mention of this in the code, we might be overlinking
+            if self.settings.os in ["Linux", "FreeBSD", "Android"]:
+                self.requires("s2n/1.3.15")  # No mention of this in the code, we might be overlinking
         if self.settings.os != "Windows":
             # Used transitively in core/utils/crypto/openssl/CryptoImpl.h public header
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
@@ -552,7 +554,6 @@ class AwsSdkCppConan(ConanFile):
         if self._settings_build.os == "Windows" and self.settings.os == "Android":
             raise ConanInvalidConfiguration("Cross-building from Windows to Android is not supported")
 
-    def validate_build(self):
         if (self.options.shared
                 and self.settings.compiler == "gcc"
                 and Version(self.settings.compiler.version) < "6.0"):
@@ -702,9 +703,11 @@ class AwsSdkCppConan(ConanFile):
             "aws-c-io::aws-c-io",
             "aws-c-mqtt::aws-c-mqtt",
             "aws-checksums::aws-checksums",
-            "zlib::zlib",
-            "s2n::s2n"
+            "zlib::zlib"
         ]
+
+        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
+            self.cpp_info.components["core"].requires.append("s2n::s2n")
 
         if Version(self.version) >= "1.11.352":
             self.cpp_info.components["core"].requires.extend([

@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
@@ -20,6 +21,7 @@ class GlewConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_egl": [True, False],
+        "with_glu": ["mesa-glu", "system"]
     }
     default_options = {
         "shared": False,
@@ -30,10 +32,20 @@ class GlewConan(ConanFile):
     def export_sources(self):
         export_conandata_patches(self)
 
+    def validate(self):
+        if self.options.with_glu == "mesa-glu" and (is_apple_os(self) or self.settings.os == "Windows"):
+            raise ConanInvalidConfiguration("mesa-glu only suppported on Linux.")
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.with_egl
+
+        if self.options.with_glu == None:
+            if is_apple_os(self) or self.settings.os == "Windows":
+                self.options.with_glu = "system"
+            else:
+                self.options.with_glu = "mesa-glu"
 
     def configure(self):
         if self.options.shared:
@@ -47,10 +59,10 @@ class GlewConan(ConanFile):
     def requirements(self):
         self.requires("opengl/system")
         # GL/glew.h includes glu.h.
-        if is_apple_os(self) or self.settings.os == "Windows":
-            self.requires("glu/system", transitive_headers=True)
-        else:
+        if self.options.with_glu == "mesa-glu":
             self.requires("mesa-glu/9.0.3", transitive_headers=True)
+        else:
+            self.requires("glu/system", transitive_headers=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -79,7 +91,6 @@ class GlewConan(ConanFile):
         glewlib_target_name = "glew" if self.options.shared else "glew_s"
         self.cpp_info.set_property("cmake_find_mode", "both")
         self.cpp_info.set_property("cmake_module_file_name", "GLEW")
-        self.cpp_info.set_property("cmake_file_name", "glew")
         self.cpp_info.set_property("cmake_target_name", "GLEW::GLEW")
         self.cpp_info.set_property("pkg_config_name", "glew")
         self.cpp_info.components["glewlib"].set_property("cmake_module_target_name", "GLEW::GLEW")
@@ -96,15 +107,8 @@ class GlewConan(ConanFile):
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.components["glewlib"].defines.append("GLEW_STATIC")
         self.cpp_info.components["glewlib"].requires = ["opengl::opengl"]
-        if is_apple_os(self) or self.settings.os == "Windows":
-            self.cpp_info.components["glewlib"].requires.append("glu::glu")
-        else:
-            self.cpp_info.components["glewlib"].requires.append("mesa-glu::mesa-glu")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "GLEW"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "glew"
-        self.cpp_info.names["cmake_find_package"] = "GLEW"
-        self.cpp_info.names["cmake_find_package_multi"] = "GLEW"
-        self.cpp_info.components["glewlib"].names["cmake_find_package"] = "GLEW"
-        self.cpp_info.components["glewlib"].names["cmake_find_package_multi"] = glewlib_target_name
+        if self.options.with_glu == "mesa-glu":
+            self.cpp_info.components["glewlib"].requires.append("mesa-glu::mesa-glu")
+        else:
+            self.cpp_info.components["glewlib"].requires.append("glu::glu")

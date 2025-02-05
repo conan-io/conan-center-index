@@ -118,7 +118,7 @@ class MingwConan(ConanFile):
 
         # Add binutils to path. Required for gcc build.
         env = Environment()
-        env.append_path("PATH", os.path.join(self.package_folder, "bin"))
+        env.prepend_path("PATH", os.path.join(self.package_folder, "bin"))
         env.vars(self).save_script("conanbuild_package_bin_path")
 
         venv = VirtualBuildEnv(self)
