@@ -64,7 +64,7 @@ TEST_F(LoggerTests, LogBasicMessages)
 
     // Log messages
     logger.log(Severity::INFO, "BasicTest", "Logging INFO message.");
-    logger.log(Severity::ERROR, "BasicTest", "Logging ERROR message.");
+    logger.log(Severity::ERR, "BasicTest", "Logging ERROR message.");
 
     // Flush logs to ensure all messages are written
     logger.flush();
@@ -82,7 +82,7 @@ TEST_F(LoggerTests, HighLoadLogging)
     // Log a large number of messages
     for (int i = 0; i < 1000; ++i)
     {
-        logger.log(Severity::DEBUG, "HighLoadTest", "Logging message #" + std::to_string(i));
+        logger.log(Severity::DEB, "HighLoadTest", "Logging message #" + std::to_string(i));
     }
 
     // Flush logs to ensure all messages are written and rotations are complete
@@ -190,7 +190,7 @@ TEST_F(LoggerTests, BufferedWritingTimeThreshold)
     // Log fewer than the flush threshold
     for (int i = 0; i < 5; ++i)
     {
-        logger.log(Severity::DEBUG, "BufferTest", "Buffered message #" + std::to_string(i));
+        logger.log(Severity::DEB, "BufferTest", "Buffered message #" + std::to_string(i));
     }
 
     // Wait for the time threshold to elapse
@@ -214,7 +214,7 @@ TEST_F(LoggerTests, BufferedWritingMessageThreshold)
     // Log exactly the flush threshold number of messages
     for (int i = 0; i < 10; ++i)
     {
-        logger.log(Severity::DEBUG, "BufferTest", "Buffered message #" + std::to_string(i));
+        logger.log(Severity::DEB, "BufferTest", "Buffered message #" + std::to_string(i));
     }
 
     // Wait for the worker thread to process

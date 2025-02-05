@@ -6,7 +6,7 @@ import os, shutil
 
 class StdxConan(ConanFile):
     name = "stdx"
-    version = "0.1.4"
+    version = "0.1.5"
     license = "MIT"
     author = "Yashar A.Rezaei"
     url = "https://github.com/yrezaei/stdx"
@@ -86,7 +86,6 @@ class StdxConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        
 
     def package(self):
         cmake = CMake(self)
