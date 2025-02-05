@@ -1,47 +1,47 @@
 sources:
   "1.86.0":
     url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.86.0/source/boost_1_86_0.tar.bz2"
+      - "https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.bz2"
       - "https://sourceforge.net/projects/boost/files/boost/1.86.0/boost_1_86_0.tar.bz2"
     sha256: "1bed88e40401b2cb7a1f76d4bab499e352fa4d0c5f31c0dbae64e24d34d7513b"
   "1.85.0":
     url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.85.0/source/boost_1_85_0.tar.bz2"
+      - "https://archives.boost.io/release/1.85.0/source/boost_1_85_0.tar.bz2"
       - "https://sourceforge.net/projects/boost/files/boost/1.85.0/boost_1_85_0.tar.bz2"
     sha256: "7009fe1faa1697476bdc7027703a2badb84e849b7b0baad5086b087b971f8617"
   "1.84.0":
     url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.84.0/source/boost_1_84_0.tar.bz2"
+      - "https://archives.boost.io/release/1.84.0/source/boost_1_84_0.tar.bz2"
       - "https://sourceforge.net/projects/boost/files/boost/1.84.0/boost_1_84_0.tar.bz2"
     sha256: "cc4b893acf645c9d4b698e9a0f08ca8846aa5d6c68275c14c3e7949c24109454"
   "1.83.0":
     url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.tar.bz2"
+      - "https://archives.boost.io/release/1.83.0/source/boost_1_83_0.tar.bz2"
       - "https://sourceforge.net/projects/boost/files/boost/1.83.0/boost_1_83_0.tar.bz2"
     sha256: "6478edfe2f3305127cffe8caf73ea0176c53769f4bf1585be237eb30798c3b8e"
   "1.82.0":
     url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.bz2"
+      - "https://archives.boost.io/release/1.82.0/source/boost_1_82_0.tar.bz2"
       - "https://sourceforge.net/projects/boost/files/boost/1.82.0/boost_1_82_0.tar.bz2"
     sha256: "a6e1ab9b0860e6a2881dd7b21fe9f737a095e5f33a3a874afc6a345228597ee6"
   "1.81.0":
     url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.bz2"
+      - "https://archives.boost.io/release/1.81.0/source/boost_1_81_0.tar.bz2"
       - "https://sourceforge.net/projects/boost/files/boost/1.81.0/boost_1_81_0.tar.bz2"
     sha256: "71feeed900fbccca04a3b4f2f84a7c217186f28a940ed8b7ed4725986baf99fa"
   "1.80.0":
     url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.80.0/source/boost_1_80_0.tar.bz2"
+      - "https://archives.boost.io/release/1.80.0/source/boost_1_80_0.tar.bz2"
       - "https://sourceforge.net/projects/boost/files/boost/1.80.0/boost_1_80_0.tar.bz2"
     sha256: "1e19565d82e43bc59209a168f5ac899d3ba471d55c7610c677d4ccf2c9c500c0"
   "1.79.0":
     url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.bz2"
+      - "https://archives.boost.io/release/1.79.0/source/boost_1_79_0.tar.bz2"
       - "https://sourceforge.net/projects/boost/files/boost/1.79.0/boost_1_79_0.tar.bz2"
     sha256: "475d589d51a7f8b3ba2ba4eda022b170e562ca3b760ee922c146b6c65856ef39"
   "1.78.0":
     url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.78.0/source/boost_1_78_0.tar.bz2"
+      - "https://archives.boost.io/release/1.78.0/source/boost_1_78_0.tar.bz2"
       - "https://sourceforge.net/projects/boost/files/boost/1.78.0/boost_1_78_0.tar.bz2"
     sha256: "8681f175d4bdb26c52222665793eef08490d7758529330f98d3b29dd0735bccc"
 patches:
