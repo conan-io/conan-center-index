@@ -126,6 +126,8 @@ class RotorConan(ConanFile):
         if self.options.enable_asio:
             self.cpp_info.components["asio"].libs = ["rotor_asio"]
             self.cpp_info.components["asio"].requires = ["core"]
+            if self.settings.os == "Windows":
+                self.cpp_info.components["asio"].system_libs = ["ws2_32"]
 
         if self.options.enable_thread:
             self.cpp_info.components["thread"].libs = ["rotor_thread"]
