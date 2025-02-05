@@ -139,14 +139,10 @@ class LlamaCppConan(ConanFile):
         self.cpp_info.components["llama"].libs = ["llama"]
         self.cpp_info.components["llama"].resdirs = ["res"]
         self.cpp_info.components["llama"].requires.append("ggml")
-        self.cpp_info.components["llama"].set_property("cmake_target_name", "llama")
-        self.cpp_info.components["llama"].set_property("cmake_target_aliases", ["llama-cpp::llama"])
 
         self.cpp_info.components["common"].includedirs = [os.path.join("include", "common")]
         self.cpp_info.components["common"].libs = ["common"]
         self.cpp_info.components["common"].requires = ["llama"]
-        self.cpp_info.components["common"].set_property("cmake_target_name", "common")
-        self.cpp_info.components["common"].set_property("cmake_target_aliases", ["llama-cpp::common"])
 
         if self.options.with_curl:
             self.cpp_info.components["common"].requires.append("libcurl::libcurl")
@@ -166,7 +162,7 @@ class LlamaCppConan(ConanFile):
             self.cpp_info.components["ggml-base"].libs = ["ggml-base"]
             self.cpp_info.components["ggml-base"].resdirs = ["res"]
             self.cpp_info.components["ggml-base"].set_property("cmake_target_name", "ggml-base")
-    
+
             self.cpp_info.components["ggml"].requires = ["ggml-base"]
             if self.settings.os in ("Linux", "FreeBSD"):
                 self.cpp_info.components["ggml-base"].system_libs.extend(["dl", "m", "pthread"])
@@ -186,7 +182,7 @@ class LlamaCppConan(ConanFile):
                     self.cpp_info.components[f"ggml-{backend}"].defines.append("GGML_BACKEND_SHARED")
                 self.cpp_info.components["ggml"].defines.append(f"GGML_USE_{backend.upper()}")
                 self.cpp_info.components["ggml"].requires.append(f"ggml-{backend}")
-                
+
             if is_apple_os(self):
                 if "blas" in backends:
                     self.cpp_info.components["ggml-blas"].frameworks.append("Accelerate")
