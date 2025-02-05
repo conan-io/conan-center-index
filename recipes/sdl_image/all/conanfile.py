@@ -100,7 +100,7 @@ class SDLImageConan(ConanFile):
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.2")
         if self.options.get_safe("with_avif"):
-            self.requires("libavif/1.0.1")
+            self.requires("libavif/1.1.1")
         if self.options.with_jxl:
             self.requires("libjxl/0.11.1")
 
