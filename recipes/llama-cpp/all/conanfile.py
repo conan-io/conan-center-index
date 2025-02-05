@@ -46,6 +46,8 @@ class LlamaCppConan(ConanFile):
 
     @property
     def _cuda_build_module(self):
+        # Adding this to the package info is necessary if we want consumers of llama to link correctly when
+        # they activate the CUDA option. In the future, when we have a CUDA recipe this could be removed.
         cuda_target = "ggml-cuda" if self._is_new_llama else "ggml"
         return textwrap.dedent(f"""\
             find_dependency(CUDAToolkit REQUIRED)
