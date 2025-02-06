@@ -77,7 +77,6 @@ class LibelfConan(ConanFile):
                 # it's required, libelf doesnt seem to understand DESTDIR
                 f"--prefix={unix_path(self, self.package_folder)}",
             ])
-            tc.update_configure_args({"--host": None})
             tc.generate()
 
     def build(self):
