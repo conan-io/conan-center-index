@@ -40,8 +40,6 @@ class Md4QtConan(ConanFile):
     def requirements(self):
         self.requires("icu/74.1")
         self.requires("uriparser/0.9.7")
-        if Version(self.version) >= "4.0.0":
-            self.requires("extra-cmake-modules/6.2.0")
 
     def package_id(self):
         self.info.clear()
