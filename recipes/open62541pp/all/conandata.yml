@@ -1,4 +1,4 @@
 sources:
-  "0.15.0":
-    url: "https://github.com/open62541pp/open62541pp/archive/refs/tags/v0.15.0.tar.gz"
-    sha256: "ab95617c00b59aca9d10f499d16acfd27a3f2981cf9184cfb0800ebc8d5e9121"
+  "0.17.0":
+    url: "https://github.com/open62541pp/open62541pp/archive/refs/tags/v0.17.0.tar.gz"
+    sha256: "79d83fcf9673a75870f12d7f54e2d21d245931699b916e6c925df25444ce0189"

@@ -35,13 +35,14 @@ class Open62541ppConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("open62541/1.3.9", transitive_headers=True, transitive_libs=True)
+        self.requires("open62541/1.4.6", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         check_min_cppstd(self, 17)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -63,7 +64,6 @@ class Open62541ppConan(ConanFile):
                         "get_target_property(open62541_ipo open62541::open62541 INTERPROCEDURAL_OPTIMIZATION)", "")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -76,9 +76,6 @@ class Open62541ppConan(ConanFile):
         rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
-        self.cpp_info.set_property("cmake_file_name", "open62541pp")
-        self.cpp_info.set_property("cmake_target_name", "open62541pp::open62541pp")
-
         self.cpp_info.libs = ["open62541pp"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
