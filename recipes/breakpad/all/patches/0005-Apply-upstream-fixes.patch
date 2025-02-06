@@ -1,0 +1,24 @@
+--- a/src/processor/exploitability_linux.cc
++++ b/src/processor/exploitability_linux.cc
+@@ -516,18 +516,17 @@
+            raw_bytes_tmpfile);
+   FILE* objdump_fp = popen(cmd, "r");
+   if (!objdump_fp) {
+-    fclose(objdump_fp);
+     unlink(raw_bytes_tmpfile);
+     BPLOG(ERROR) << "Failed to call objdump.";
+     return false;
+   }
+-  if (fread(objdump_output_buffer, 1, buffer_len, objdump_fp) <= 0) {
+-    fclose(objdump_fp);
++  if (fread(objdump_output_buffer, 1, buffer_len, objdump_fp) != buffer_len) {
++    pclose(objdump_fp);
+     unlink(raw_bytes_tmpfile);
+     BPLOG(ERROR) << "Failed to read objdump output.";
+     return false;
+   }
+-  fclose(objdump_fp);
++  pclose(objdump_fp);
+   unlink(raw_bytes_tmpfile);
+   return true;
+ }

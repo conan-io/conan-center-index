@@ -204,11 +204,10 @@ class SDLImageConan(ConanFile):
 
     def package_info(self):
         lib_postfix = ""
-        if Version(self.version) >= "2.6":
-            if self.settings.os == "Windows" and not self.options.shared:
-                lib_postfix += "-static"
-            if self.settings.build_type == "Debug":
-                lib_postfix += "d"
+        if self.settings.compiler == "msvc" and not self.options.shared:
+            lib_postfix += "-static"
+        if self.settings.build_type == "Debug":
+            lib_postfix += "d"
 
         self.cpp_info.set_property("cmake_file_name", "SDL2_image")
         self.cpp_info.set_property("cmake_target_name", "SDL2_image::SDL2_image")
