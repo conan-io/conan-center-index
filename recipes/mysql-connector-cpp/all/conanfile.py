@@ -1,15 +1,13 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import get, copy, rm, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.microsoft import is_msvc_static_runtime
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2.0.9"
 
 
 class MysqlConnectorCppConan(ConanFile):
@@ -30,31 +28,10 @@ class MysqlConnectorCppConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "8",
-            "clang": "7",
-            "apple-clang": "10",
-        }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -69,11 +46,7 @@ class MysqlConnectorCppConan(ConanFile):
         self.requires("zstd/[~1.5]")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires {self.settings.compiler} {minimum_version} or newer")
+        check_min_cppstd(self, 17)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -81,6 +54,7 @@ class MysqlConnectorCppConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
         VirtualBuildEnv(self).generate()
@@ -116,7 +90,6 @@ class MysqlConnectorCppConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "bootstrap()", "")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
