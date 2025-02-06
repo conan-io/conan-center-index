@@ -1,4 +1,4 @@
-#include <stdlib>
+#include <cstdlib>
 #include "log4cpp/Category.hh"
 #include "log4cpp/Appender.hh"
 #include "log4cpp/OstreamAppender.hh"
