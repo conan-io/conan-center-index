@@ -53,6 +53,8 @@ class Log4cppConan(ConanFile):
         yes_no = lambda v: "yes" if v else "no"
         tc.configure_args.extend([
             "--enable-debug={}".format(yes_no(self.settings.build_type == "Debug")),
+            # Always use system snprintf instead of internal one
+            "ac_cv_func_snprintf=yes",
         ])
         tc.generate()
 
