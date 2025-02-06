@@ -1,0 +1,13 @@
+diff --git a/aclocal.m4 b/aclocal.m4
+index 0dba347..fc1fb7a 100644
+--- a/aclocal.m4
++++ b/aclocal.m4
+@@ -238,7 +238,7 @@ AC_DEFUN(mr_ENABLE_SHARED, [
+       *-linux*|*-gnu*)
+ 	if test "$GCC" = yes; then
+ 	  mr_TARGET_ELF
+-	  if test "$mr_cv_target_elf" = yes; then
++	  if test "$mr_cv_target_elf" = yes || test "$cross_compiling" = yes; then
+ 	    PICFLAGS='-fPIC -DPIC'
+ 	    if test "$mr_enable_gnu_names" = yes
+ 	    then SHLIB_SFX='-$(VERSION).so'
