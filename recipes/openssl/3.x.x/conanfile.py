@@ -380,16 +380,42 @@ class OpenSSLConan(ConanFile):
         if not self.options.no_zlib:
             zlib_cpp_info = self.dependencies["zlib"].cpp_info.aggregated_components()
             include_path = self._adjust_path(zlib_cpp_info.includedirs[0])
+            is_shared_zlib = self.dependencies["zlib"].options.shared
+
             if self._use_nmake:
-                lib_path = self._adjust_path(os.path.join(zlib_cpp_info.libdirs[0], f"{zlib_cpp_info.libs[0]}.lib"))
+                # The libraries defined in zlib_cpp_info.libs are *static* libraries. On Windows, we expect this list to be
+                # populated with one of the following:
+                #
+                #   * The static library zlib.lib if ZLIB was built as a static library.
+                #   * The import library zdll.lib if ZLIB was built as a shared library.
+                #
+                # (NOTE: These library names are inconsistent with those used by ZLIB's original CMakeLists.txt file. We
+                # assume that our patched CMakeLists.txt is being used, instead.)
+                #
+                # There is an important distinction to make here. Specifically, when the "zlib-dynamic" command line argument
+                # is specified during the configuration of OpenSSL (as would be the case when is_shared_zlib == True), the
+                # library specified via the "--with-zlib-lib" command line argument is expected to be a *DLL*, rather than a
+                # static library.
+                #
+                # This implies that we cannot always rely on the library specified as the first entry in zlib_cpp_info.libs,
+                # since said library will actually be the import library in the event that is_shared_zlib == True. In that case,
+                # we ought to instead specify the generated DLL zlib1.dll.
+
+                if is_shared_zlib:
+                    # NOTE: We specify the generated DLL as a relative path, rather than an absolute path. Since the DLL is loaded
+                    # at runtime by OpenSSL, we cannot possibly predict what the "best" relative path would be.
+                    zlib_path = "zlib1.dll"
+                else:
+                    zlib_parent_path = zlib_cpp_info.libdirs[0]
+                    zlib_path = f"{zlib_parent_path}/zlib.lib"
+
+                lib_path = self._adjust_path(zlib_path)
             else:
                 # Just path, GNU like compilers will find the right file
                 lib_path = self._adjust_path(zlib_cpp_info.libdirs[0])
 
-            if self.dependencies["zlib"].options.shared:
-                args.append("zlib-dynamic")
-            else:
-                args.append("zlib")
+            zlib_configure_arg = "zlib-dynamic" if is_shared_zlib else "zlib"
+            args.append(zlib_configure_arg)
 
             args.extend([
                 f'--with-zlib-include="{include_path}"',
