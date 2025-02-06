@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import Environment
 from conan.tools.files import (
     apply_conandata_patches,
     collect_libs,
@@ -21,10 +22,9 @@ from conan.tools.scm import Version
 
 import json
 import os
-from pathlib import Path
 import re
 import textwrap
-
+from pathlib import Path
 
 required_conan_version = ">=1.62.0"
 
@@ -282,7 +282,9 @@ class LLVMCoreConan(ConanFile):
             tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
 
         if cross_building(self):
-            tc.variables["LLVM_HOST_TRIPLE"] = GnuToolchain(self).triplets_info["host"]["triplet"]
+            gtc = GnuToolchain(self)
+            gtc_vars = gtc.extra_env.vars(self)
+            tc.variables["LLVM_HOST_TRIPLE"] = gtc.triplets_info["host"]["triplet"]
             # The native build utilities don't need any external dependencies.
             tc.variables["CROSS_TOOLCHAIN_FLAGS_NATIVE"] = ";".join([
                 "-DLLVM_ENABLE_LIBEDIT=FALSE",
@@ -292,6 +294,11 @@ class LLVMCoreConan(ConanFile):
                 "-DLLVM_ENABLE_LIBXML2=FALSE",
                 "-DLLVM_ENABLE_TERMINFO=FALSE",
             ])
+            # CC/CXX env vars are used by LLVM to build native build tools
+            env = Environment()
+            env.define_path("CC", gtc_vars["CC_FOR_BUILD"])
+            env.define_path("CXX", gtc_vars["CXX_FOR_BUILD"])
+            env.vars(self).save_script("native_compiler_env")
 
         tc.cache_variables.update(cmake_variables)
         tc.generate()
