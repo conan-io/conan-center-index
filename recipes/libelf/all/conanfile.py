@@ -5,7 +5,6 @@ from conan.tools.files import copy, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
-from conan.tools.build import cross_building
 import os
 
 required_conan_version = ">=1.54.0"
@@ -75,9 +74,7 @@ class LibelfConan(ConanFile):
                 # it's required, libelf doesnt seem to understand DESTDIR
                 f"--prefix={unix_path(self, self.package_folder)}",
             ])
-            # INFO: libelf fails to validate shared-library support on cross-compiling
-            if cross_building(self):
-                tc.update_configure_args({"--host": None})
+            tc.update_configure_args({"--host": None})
             tc.generate()
 
     def build(self):
