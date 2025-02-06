@@ -50,6 +50,7 @@ class QtConan(ConanFile):
         "with_fontconfig": [True, False],
         "with_icu": [True, False],
         "with_harfbuzz": [True, False],
+        "with_libb2": [True, False],
         "with_libjpeg": ["libjpeg", "libjpeg-turbo", False],
         "with_libpng": [True, False],
         "with_sqlite3": [True, False],
@@ -95,6 +96,7 @@ class QtConan(ConanFile):
         "with_fontconfig": True,
         "with_icu": True,
         "with_harfbuzz": True,
+        "with_libb2": False,
         "with_libjpeg": False,
         "with_libpng": True,
         "with_sqlite3": True,
@@ -329,6 +331,9 @@ class QtConan(ConanFile):
 
         if self.options.get_safe("qtspeech") and not self.options.qtdeclarative:
             raise ConanInvalidConfiguration("qtspeech requires qtdeclarative, cf QTBUG-108381")
+
+        if self.options.get_safe("with_libb2") and self.options.multiconfiguration:
+            raise ConanInvalidConfiguration("non system variant of libb2 is not supported by qt. Contributions welcomed")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -583,6 +588,7 @@ class QtConan(ConanFile):
                               ("with_doubleconversion", "doubleconversion"),
                               ("with_freetype", "freetype"),
                               ("with_harfbuzz", "harfbuzz"),
+                              ("with_libb2", "libb2"),
                               ("with_libjpeg", "libjpeg"),
                               ("with_libpng", "libpng"),
                               ("with_md4c", "libmd4c"),
