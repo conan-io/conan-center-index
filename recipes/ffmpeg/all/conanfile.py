@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools import CppInfo
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
@@ -12,10 +12,11 @@ from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgCon
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 from conan.tools.scm import Version
-import os
 import glob
-import shutil
+import io
+import os
 import re
+import shutil
 
 required_conan_version = ">=2.0.5"
 
@@ -458,6 +459,17 @@ class FFMpegConan(ConanFile):
         })
         return tc
 
+    def _get_system_pkg_config_paths(self):
+        # Global PKG_CONFIG_PATH is generally not filled by default, so ask for the default paths from pkg-config instead.
+        # Assumes that pkg-config is installed system-wide.
+        pkg_config = self.conf.get("tools.gnu:pkg_config", default="pkg-config", check_type=str)
+        output = io.StringIO()
+        try:
+            self.run(f"{pkg_config} --variable pc_path pkg-config", output, scope=None)
+            return output.getvalue().strip()
+        except ConanException:
+            return None
+
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -686,6 +698,15 @@ class FFMpegConan(ConanFile):
         else:
             deps = AutotoolsDeps(self)
             deps.generate()
+
+        using_system_deps = any(dep.ref.version == "system" for dep, _ in self.dependencies.items())
+        if using_system_deps:
+            system_pkg_config_path = self._get_system_pkg_config_paths()
+            if system_pkg_config_path:
+                env = Environment()
+                env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
+                env.append_path("PKG_CONFIG_PATH", system_pkg_config_path)
+                env.vars(self).save("system_pkg_config_path")
 
         deps = PkgConfigDeps(self)
         deps.generate()
