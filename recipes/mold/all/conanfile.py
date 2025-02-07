@@ -7,7 +7,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.scm import Version
 from conan.tools.env import VirtualBuildEnv
 
-required_conan_version = ">=1.47.0"
+required_conan_version = ">2.0"
 
 
 class MoldConan(ConanFile):
@@ -30,20 +30,6 @@ class MoldConan(ConanFile):
         "with_mimalloc": False,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 20
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "11",
-            "clang": "12",
-            "apple-clang": "14",
-            "Visual Studio": "16",
-            "msvc": "192",
-        }
-
     def configure(self):
         if Version(self.version) < "2.0.0":
             self.license = "AGPL-3.0"
@@ -65,25 +51,15 @@ class MoldConan(ConanFile):
     def package_id(self):
         del self.info.settings.compiler
 
-    def validate(self):
-        # mold has required C+20 since 1.4.1. However, C++20 features are used for the first time in 2.34.0.
+    def validate_build(self):
+        # perform these checks in validate_build() - since the compiler is removed from the package_id,
+        # this lets the compatibility plugin consider the executable built with other compilers
         if Version(self.version) >= "2.34.0":
-            # validate the minimum cpp standard supported. For C++ projects only
-            if self.settings.compiler.cppstd:
-                check_min_cppstd(self, self._min_cppstd)
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
-
-        # TODO most of these checks should run on validate_build, but the conan-center hooks are broken and fail the PR because they
-        # think we're raising on the build() method
-        if self.settings.build_type == "Debug":
-            raise ConanInvalidConfiguration('Mold is a build tool, specify mold:build_type=Release in your build profile, see https://github.com/conan-io/conan-center-index/pull/11536#issuecomment-1195607330')
+            # mold has required C+20 since 1.4.1. However, C++20 features are used for the first time in 2.34.0.
+            check_min_cppstd(self, 20)
         if self.settings.compiler in ["gcc", "clang", "intel-cc"] and self.settings.compiler.libcxx != "libstdc++11":
             raise ConanInvalidConfiguration('Mold can only be built with libstdc++11; specify mold:compiler.libcxx=libstdc++11 in your build profile')
-        if self.settings.os == "Windows":
+        if self.settings.compiler == "msvc":
             raise ConanInvalidConfiguration(f'{self.name} can not be built on {self.settings.os}.')
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "10":
             raise ConanInvalidConfiguration("GCC version 10 or higher required")
@@ -141,8 +117,3 @@ class MoldConan(ConanFile):
         self.conf_info.define("user.mold:path", mold_executable)
         self.buildenv_info.define_path("MOLD_ROOT", bindir)
         self.buildenv_info.define("LD", mold_executable)
-
-        # For legacy Conan 1.x consumers only:
-        self.env_info.PATH.append(bindir)
-        self.env_info.MOLD_ROOT = bindir
-        self.env_info.LD = mold_executable
