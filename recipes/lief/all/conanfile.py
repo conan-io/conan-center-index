@@ -81,6 +81,11 @@ class LiefConan(ConanFile):
             self.requires("tl-expected/1.1.0", transitive_headers=True)
 
     def validate(self):
+        skip_ci_reason = self.conf.get("user.conancenter:skip_ci_build", check_type=str)
+        if skip_ci_reason:
+            # lief/0.13.1 fails with fmt 8.x and specific versions of msvc 193
+            # https://developercommunity.visualstudio.com/t/Internal-compiler-error-compiler-file-m/10376323
+            raise ConanInvalidConfiguration(skip_ci_reason)
         if Version(self.version) >= "0.15.1":
             min_cppstd ="17"
         else:
