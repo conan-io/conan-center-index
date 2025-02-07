@@ -26,7 +26,7 @@ import re
 import textwrap
 from pathlib import Path
 
-required_conan_version = ">=1.62.0"
+required_conan_version = ">=2.4"
 
 # LLVM's default config is to enable all targets, but end users can significantly reduce
 # build times for the package by specifying only the targets they need as a
