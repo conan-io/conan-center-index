@@ -18,7 +18,7 @@ import os
 import re
 import shutil
 
-required_conan_version = ">=2.0.5"
+required_conan_version = ">=2.0"
 
 
 class FFMpegConan(ConanFile):
