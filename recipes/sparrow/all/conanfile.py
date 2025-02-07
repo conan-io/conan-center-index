@@ -14,22 +14,12 @@ class SparrowRecipe(ConanFile):
     name = "sparrow"
     description = "C++20 idiomatic APIs for the Apache Arrow Columnar Format"
     license = "Apache-2.0"
-    author = "Man Group"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/man-group/sparrow"
     topics = ("arrow", "apache arrow", "columnar format", "dataframe")
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     generators = "CMakeDeps"
-    exports_sources = (
-        "include/*",
-        "LICENSE",
-        "src/*",
-        "cmake/*",
-        "docs/*",
-        "CMakeLists.txt",
-        "sparrowConfig.cmake.in",
-    )
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -38,7 +28,7 @@ class SparrowRecipe(ConanFile):
     default_options = {"shared": False, "fPIC": True, "use_date_polyfill": False}
 
     def requirements(self):
-        if self.options.get_safe("use_date_polyfill"):
+        if self.options.use_date_polyfill:
             self.requires("date/3.0.3")
 
     @property
@@ -50,7 +40,7 @@ class SparrowRecipe(ConanFile):
         return {"apple-clang": "16", "clang": "18", "gcc": "12", "msvc": "194"}
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
+        if self.settings.compiler.cppstd:
             check_min_cppstd(self, self._min_cppstd)
 
         minimum_version = self._compilers_minimum_version.get(
@@ -77,9 +67,7 @@ class SparrowRecipe(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["USE_DATE_POLYFILL"] = self.options.get_safe(
-            "use_date_polyfill", False
-        )
+        tc.variables["USE_DATE_POLYFILL"] = self.options.use_date_polyfill
         if is_msvc(self):
             tc.variables["USE_LARGE_INT_PLACEHOLDERS"] = True
         tc.generate()
@@ -101,7 +89,7 @@ class SparrowRecipe(ConanFile):
 
     def package_info(self):
         defines = []
-        if self.options.get_safe("use_date_polyfill", False):
+        if self.options.use_date_polyfill:
             defines.append("SPARROW_USE_DATE_POLYFILL")
         if is_msvc(self):
             defines.append("SPARROW_USE_LARGE_INT_PLACEHOLDERS")
