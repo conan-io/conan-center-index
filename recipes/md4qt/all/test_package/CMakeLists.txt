@@ -8,5 +8,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE md4qt::md4qt)
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 if(md4qt_VERSION_STRING VERSION_GREATER_EQUAL "4.0.0")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE MD4QT_GREATER_EQUAL_4)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE MD4QT_VERSION_GREATER_EQUAL_4)
 endif()

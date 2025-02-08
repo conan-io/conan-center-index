@@ -1,5 +1,5 @@
 #define MD4QT_ICU_STL_SUPPORT
-#ifdef MD4QT_GREATER_EQUAL_4
+#ifdef MD4QT_VERSION_GREATER_EQUAL_4
 #include <md4qt/parser.h>
 #else
 #include <md4qt/parser.hpp>
