@@ -6,7 +6,7 @@ import textwrap
 
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
+from conan.tools.build import cross_building, can_run, check_min_cppstd, default_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.files import copy, get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
@@ -76,10 +76,9 @@ class QtConan(ConanFile):
 
         "unity_build": [True, False],
         "device": [None, "ANY"],
-        "cross_compile": [None, "ANY"],
-        "sysroot": [None, "ANY"],
         "multiconfiguration": [True, False],
         "disabled_features": [None, "ANY"],
+        "force_build_tools": [True, False],
     }
     options.update({module: [True, False] for module in _submodules})
     options.update({f"{status}_modules": [True, False] for status in _module_statuses})
@@ -124,10 +123,9 @@ class QtConan(ConanFile):
 
         "unity_build": False,
         "device": None,
-        "cross_compile": None,
-        "sysroot": None,
         "multiconfiguration": False,
         "disabled_features": "",
+        "force_build_tools": False,
     }
     # essential_modules, addon_modules, deprecated_modules, preview_modules:
     #    these are only provided for convenience, set to False by default
@@ -186,6 +184,8 @@ class QtConan(ConanFile):
             del self.options.with_gssapi
         if self.settings.os != "Linux":
             self.options.qtwayland = False
+        if not cross_building(self):
+            del self.options.force_build_tools
 
         for submodule in self._submodules:
             if submodule not in self._get_module_tree:
@@ -275,6 +275,13 @@ class QtConan(ConanFile):
             self.output.debug(f"qt6 option: {option}")
 
     def validate_build(self):
+        if cross_building(self):
+            if self.options.get_safe("qtquickeffectmaker"):
+                # https://github.com/qt/qtquickeffectmaker/blob/v6.8.1/CMakeLists.txt#L53
+                raise ConanInvalidConfiguration("Cross-compiling qtquickeffectmaker is not supported")
+            if self.options.get_safe("qtwebengine") and not can_run(self):
+                # Qt needs to build and use GN to build Chromium
+                raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
         check_min_cppstd(self, 17)
 
     def validate(self):
@@ -303,9 +310,6 @@ class QtConan(ConanFile):
                 raise ConanInvalidConfiguration("option qt:qtwebengine requires also qt:gui, qt:qtdeclarative and qt:qtwebchannel")
             if not self.options.with_dbus and self.settings.os == "Linux":
                 raise ConanInvalidConfiguration("option qt:webengine requires also qt:with_dbus on Linux")
-
-            if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
-                raise ConanInvalidConfiguration("Cross compiling Qt WebEngine is not supported")
 
         if self.options.widgets and not self.options.gui:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
@@ -343,6 +347,14 @@ class QtConan(ConanFile):
 
     def layout(self):
         cmake_layout(self, src_folder="src")
+
+    def package_id(self):
+        if self.info.settings.os == "Android":
+            del self.info.options.android_sdk
+        for status in self._module_statuses:
+            self.info.options.rm_safe(f"{status}_modules")
+        if self.info.options.multiconfiguration and is_msvc(self):
+            self.info.settings.compiler.runtime_type = "Release/Debug"
 
     def requirements(self):
         self.requires("zlib/[>=1.2.11 <2]")
@@ -446,8 +458,11 @@ class QtConan(ConanFile):
             self.tool_requires(f"qt/{self.version}")
 
     def generate(self):
-        ms = VirtualBuildEnv(self)
-        ms.generate()
+        vbe = VirtualBuildEnv(self)
+        vbe.generate()
+        if not cross_building(self):
+            vre = VirtualRunEnv(self)
+            vre.generate(scope="build")
 
         tc = CMakeDeps(self)
         tc.set_property("libdrm", "cmake_file_name", "Libdrm")
@@ -467,6 +482,10 @@ class QtConan(ConanFile):
         tc.set_property("gstreamer", "cmake_file_name", "gstreamer_conan")
         tc.set_property("gstreamer", "cmake_find_mode", "module")
 
+        if cross_building(self) and self.options.get_safe("qtwebengine"):
+            # https://github.com/qt/qtwebengine/blob/v6.8.1/src/host/CMakeLists.txt#L22
+            tc.build_context_activated.append("qt")
+
         tc.generate()
 
         for f in glob.glob("*.cmake"):
@@ -477,28 +496,13 @@ class QtConan(ConanFile):
         pc = PkgConfigDeps(self)
         pc.generate()
 
-        vbe = VirtualBuildEnv(self)
-        vbe.generate()
-        if not cross_building(self):
-            vre = VirtualRunEnv(self)
-            vre.generate(scope="build")
-        # TODO: to remove when properly handled by conan (see https://github.com/conan-io/conan/issues/11962)
+        # Unset potentially conflicting environment variables
         env = Environment()
         env.unset("VCPKG_ROOT")
-        env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
-        env.vars(self).save_script("conanbuildenv_pkg_config_path")
-        if self.settings_build.os == "Macos":
-            # On macOS, SIP resets DYLD_LIBRARY_PATH injected by VirtualBuildEnv & VirtualRunEnv
-            dyld_library_path = "$DYLD_LIBRARY_PATH"
-            dyld_library_path_build = vbe.vars().get("DYLD_LIBRARY_PATH")
-            if dyld_library_path_build:
-                dyld_library_path = f"{dyld_library_path_build}:{dyld_library_path}"
-            if not cross_building(self):
-                dyld_library_path_host = vre.vars().get("DYLD_LIBRARY_PATH")
-                if dyld_library_path_host:
-                    dyld_library_path = f"{dyld_library_path_host}:{dyld_library_path}"
-            save(self, "bash_env", f'export DYLD_LIBRARY_PATH="{dyld_library_path}"')
-            env.define_path("BASH_ENV", os.path.abspath("bash_env"))
+        if not cross_building(self):
+            env.unset("QT_HOST_PATH")
+            env.unset("QT_HOST_PATH_CMAKE_DIR")
+        env.vars(self).save_script("conanbuildenv_unset_vars")
 
         # Using ON/OFF to avoid warnings like
         # Auto-resetting 'FEATURE_widgets' from 'TRUE' to 'ON', because the dependent feature 'gui' was marked dirty.
@@ -625,9 +629,6 @@ class QtConan(ConanFile):
                                            "x86": "x86",
                                            "x86_64": "x86_64"}.get(str(self.settings.arch))
 
-        if self.options.sysroot:
-            tc.variables["CMAKE_SYSROOT"] = self.options.sysroot
-
         if self.options.device:
             tc.variables["QT_QMAKE_TARGET_MKSPEC"] = f"devices/{self.options.device}"
         else:
@@ -673,18 +674,6 @@ class QtConan(ConanFile):
         tc.cache_variables["QT_USE_VCPKG"] = False
 
         tc.generate()
-
-    def package_id(self):
-        del self.info.options.cross_compile
-        del self.info.options.sysroot
-        if self.info.options.multiconfiguration:
-            if self.info.settings.compiler == "Visual Studio":
-                if "MD" in self.info.settings.compiler.runtime:
-                    self.info.settings.compiler.runtime = "MD/MDd"
-                else:
-                    self.info.settings.compiler.runtime = "MT/MTd"
-            elif self.info.settings.compiler == "msvc":
-                self.info.settings.compiler.runtime_type = "Release/Debug"
 
     def source(self):
         destination = self.source_folder
