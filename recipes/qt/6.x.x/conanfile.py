@@ -74,6 +74,7 @@ class QtConan(ConanFile):
         "gui": [True, False],
         "widgets": [True, False],
 
+        "unity_build": [True, False],
         "device": [None, "ANY"],
         "cross_compile": [None, "ANY"],
         "sysroot": [None, "ANY"],
@@ -121,6 +122,7 @@ class QtConan(ConanFile):
         "gui": True,
         "widgets": True,
 
+        "unity_build": False,
         "device": None,
         "cross_compile": None,
         "sysroot": None,
@@ -498,9 +500,16 @@ class QtConan(ConanFile):
             save(self, "bash_env", f'export DYLD_LIBRARY_PATH="{dyld_library_path}"')
             env.define_path("BASH_ENV", os.path.abspath("bash_env"))
 
+        # Using ON/OFF to avoid warnings like
+        # Auto-resetting 'FEATURE_widgets' from 'TRUE' to 'ON', because the dependent feature 'gui' was marked dirty.
+        def _on_off(value):
+            return "ON" if value else "OFF"
+
         tc = CMakeToolchain(self, generator="Ninja")
 
         tc.absolute_paths = True
+
+        tc.variables["QT_UNITY_BUILD"] = _on_off(self.options.unity_build)
 
         tc.variables["QT_BUILD_TESTS"] = "OFF"
         tc.variables["QT_BUILD_EXAMPLES"] = "OFF"
@@ -627,15 +636,17 @@ class QtConan(ConanFile):
                 tc.variables["QT_QMAKE_TARGET_MKSPEC"] = xplatform_val
             else:
                 self.output.warning(f"host not supported: {self.settings.os} {self.settings.compiler} {self.settings.compiler.version} {self.settings.arch}")
-        if self.options.cross_compile:
-            tc.variables["QT_QMAKE_DEVICE_OPTIONS"] = f"CROSS_COMPILE={self.options.cross_compile}"
+
         if cross_building(self):
+            host_path = self.dependencies.build["qt"].package_folder.replace("\\", "/")
+            tc.cache_variables["QT_QMAKE_DEVICE_OPTIONS"] = f"CROSS_COMPILE={host_path}"
             # Mainly to locate Qt6HostInfoConfig.cmake
-            tc.cache_variables["QT_HOST_PATH"] = self.dependencies.direct_build["qt"].package_folder
+            tc.cache_variables["QT_HOST_PATH"] = host_path
+            tc.variables["QT_HOST_PATH_CMAKE_DIR"] = f"{host_path}/lib/cmake"
             # Stand-in for Qt6CoreTools - which is loaded for the executable targets
-            tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = os.path.join(self.dependencies.direct_build["qt"].package_folder, self._cmake_executables_file)
+            tc.cache_variables["CMAKE_PROJECT_Qt_INCLUDE"] = f"{host_path}/{self._cmake_executables_file}"
             # Ensure tools for host are always built
-            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = True
+            tc.cache_variables["QT_FORCE_BUILD_TOOLS"] = self.options.force_build_tools
 
         tc.variables["FEATURE_pkg_config"] = "ON"
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
