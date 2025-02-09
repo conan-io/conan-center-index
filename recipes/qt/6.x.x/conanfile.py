@@ -6,15 +6,15 @@ import textwrap
 from pathlib import Path
 
 from conan import ConanFile
+from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building, can_run, check_min_cppstd, default_cppstd
+from conan.tools.build import cross_building, can_run, check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv, Environment
 from conan.tools.files import copy, get, replace_in_file, apply_conandata_patches, save, rm, rmdir, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
-from conan.errors import ConanException, ConanInvalidConfiguration
 
 required_conan_version = ">=2.0"
 
@@ -293,7 +293,7 @@ class QtConan(ConanFile):
             raise ConanInvalidConfiguration(skip_ci_reason)
 
         if self.settings_target is None:
-            # Raise when consumed in the host context, but allow comaptible when
+            # Raise when consumed in the host context, but allow compatible when
             # in the build context
             check_min_cppstd(self, 17)
 
@@ -302,6 +302,7 @@ class QtConan(ConanFile):
 
         if Version(self.version) >= "6.6.1" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "13":
             # note: assuming that by now, any xcode 13 is updated to the latest 13.4.1
+            # https://bugreports.qt.io/browse/QTBUG-119490
             raise ConanInvalidConfiguration("apple-clang >= 13.1 is required by qt >= 6.6.1 cf QTBUG-119490")
 
         if self.options.get_safe("qtwebengine"):
@@ -316,36 +317,51 @@ class QtConan(ConanFile):
         if self.options.widgets and not self.options.gui:
             raise ConanInvalidConfiguration("using option qt:widgets without option qt:gui is not possible. "
                                             "You can either disable qt:widgets or enable qt:gui")
+
+        if not self.options.gui:
+            for module in [
+                "qt3d",
+                "qtactiveqt",
+                "qtcharts",
+                "qtdatavis3d",
+                "qtimageformats",
+                "qtlottie",
+                "qtmultimedia",
+                "qtquick3d",
+                "qtquick3dphysics",
+                "qtquickeffectmaker",
+                "qtquicktimeline",
+                "qtshadertools",
+                "qtvirtualkeyboard",
+                "qtwayland",
+                "qtwebview",
+            ]:
+                if self.options.get_safe(module):
+                    raise ConanInvalidConfiguration(f"{module} cannot be built without -o qt/*:gui=True")
+
         if self.settings.os == "Android" and self.options.get_safe("opengl", "no") == "desktop":
             raise ConanInvalidConfiguration("OpenGL desktop is not supported on Android.")
 
         if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") == "dynamic":
             raise ConanInvalidConfiguration("Dynamic OpenGL is supported only on Windows.")
 
-        if self.options.get_safe("with_fontconfig", False) and not self.options.get_safe("with_freetype", False):
+        if self.options.get_safe("with_fontconfig") and not self.options.get_safe("with_freetype"):
             raise ConanInvalidConfiguration("with_fontconfig cannot be enabled if with_freetype is disabled.")
 
-        if "MT" in self.settings.get_safe("compiler.runtime", default="") and self.options.shared:
+        if is_msvc_static_runtime(self) and self.options.shared:
             raise ConanInvalidConfiguration("Qt cannot be built as shared library with static runtime")
 
-        if self.options.get_safe("with_pulseaudio", False) or self.options.get_safe("with_libalsa", False):
-            raise ConanInvalidConfiguration("alsa and pulseaudio are not supported (QTBUG-95116), please disable them.")
         if not self.options.with_pcre2:
             raise ConanInvalidConfiguration("pcre2 is actually required by qt (QTBUG-92454). please use option qt:with_pcre2=True")
 
-        if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
-            raise ConanInvalidConfiguration("gssapi cannot be enabled until conan-io/conan-center-index#4102 is closed")
-
-        if self.options.get_safe("with_x11", False) and not self.dependencies.direct_host["xkbcommon"].options.with_x11:
+        if self.options.get_safe("with_x11") and not self.dependencies.direct_host["xkbcommon"].options.with_x11:
             raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled when the 'with_x11' option is enabled")
-        if self.options.get_safe("qtwayland", False) and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
+
+        if self.options.get_safe("qtwayland") and not self.dependencies.direct_host["xkbcommon"].options.with_wayland:
             raise ConanInvalidConfiguration("The 'with_wayland' option for the 'xkbcommon' package must be enabled when the 'qtwayland' option is enabled")
 
         if self.options.with_sqlite3 and not self.dependencies["sqlite3"].options.enable_column_metadata:
             raise ConanInvalidConfiguration("sqlite3 option enable_column_metadata must be enabled for qt")
-
-        if self.options.get_safe("qtspeech") and not self.options.qtdeclarative:
-            raise ConanInvalidConfiguration("qtspeech requires qtdeclarative, cf QTBUG-108381")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -411,11 +427,12 @@ class QtConan(ConanFile):
             self.requires("xorg/system")
         if self.options.get_safe("with_egl"):
             self.requires("egl/system")
-        if self.settings.os != "Windows" and self.options.get_safe("opengl", "no") != "no":
-            self.requires("opengl/system")
+        if self.options.get_safe("opengl", "no") != "no" and self.settings.os != "Windows":
+            # https://github.com/qt/qtbase/blob/6.8.1/src/gui/opengl/qopengl.h#L105-L118
+            self.requires("opengl/system", transitive_headers=True, transitive_libs=True)
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
-        if self.options.qtwayland:
+        if self.options.get_safe("qtwayland"):
             self.requires("wayland/1.22.0")
         if self.options.with_brotli:
             self.requires("brotli/1.1.0")
@@ -433,8 +450,8 @@ class QtConan(ConanFile):
             self.requires("pulseaudio/14.2")
         if self.options.with_dbus:
             self.requires("dbus/1.15.8")
-        if self.settings.os in ['Linux', 'FreeBSD'] and self.options.with_gssapi:
-            self.requires("krb5/1.18.3") # conan-io/conan-center-index#4102
+        if self.options.get_safe("with_gssapi"):
+            self.requires("krb5/1.21.2")
         if self.options.get_safe("with_md4c", False):
             self.requires("md4c/0.4.8")
 
@@ -443,7 +460,6 @@ class QtConan(ConanFile):
         self.tool_requires("ninja/[>=1.12 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-
         if self.options.get_safe("qtwebengine"):
             self.tool_requires("nodejs/18.15.0")
             self.tool_requires("gperf/3.1")
@@ -453,8 +469,7 @@ class QtConan(ConanFile):
             else:
                 self.tool_requires("bison/3.8.2")
                 self.tool_requires("flex/2.6.4")
-
-        if self.options.qtwayland:
+        if self.options.get_safe("qtwayland"):
             self.tool_requires("wayland/1.22.0")
         if cross_building(self):
             need_gui = any(self.options.get_safe(m) for m in [
@@ -553,8 +568,8 @@ class QtConan(ConanFile):
         tc.variables["QT_BUILD_TESTS"] = "OFF"
         tc.variables["QT_BUILD_EXAMPLES"] = "OFF"
 
-        if is_msvc(self) and "MT" in msvc_runtime_flag(self):
-            tc.variables["FEATURE_static_runtime"] = "ON"
+        tc.variables["FEATURE_static_runtime"] = _on_off(is_msvc_static_runtime(self))
+        tc.variables["FEATURE_optimize_size"] = _on_off(self.settings.build_type == "MinSizeRel")
 
         if self.options.multiconfiguration:
             tc.variables["CMAKE_CONFIGURATION_TYPES"] = "Release;Debug"
@@ -591,16 +606,14 @@ class QtConan(ConanFile):
             tc.variables["FEATURE_dbus"] = "OFF"
         tc.variables["CMAKE_FIND_DEBUG_MODE"] = "FALSE"
 
-        if not self.options.with_zstd:
-            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapZSTD"] = "ON"
-
-        if not self.options.get_safe("with_vulkan"):
-            tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapVulkanHeaders"] = "ON"
-
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapZSTD"] = not self.options.with_zstd
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapVulkanHeaders"] = not self.options.get_safe("with_vulkan", False)
         # Prevent finding LibClang from the system
         # this is needed by the QDoc tool inside Qt Tools
         # See: https://github.com/conan-io/conan-center-index/issues/24729#issuecomment-2255291495
-        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapLibClang"] = "ON"
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_WrapLibClang"] = True
+        # Do not accidentally enable xkbcommon-x11 support when qtwayand is enabled
+        tc.variables["CMAKE_DISABLE_FIND_PACKAGE_XKB_COMMON_X11"] = not self.options.get_safe("with_x11", False)
 
         for opt, conf_arg in [("with_glib", "glib"),
                               ("with_icu", "icu"),
@@ -688,25 +701,25 @@ class QtConan(ConanFile):
         if self.settings.compiler == "gcc" and self.settings.build_type == "Debug" and not self.options.shared:
             tc.variables["BUILD_WITH_PCH"] = "OFF"  # disabling PCH to save disk space
 
-                               #"set(QT_EXTRA_INCLUDEPATHS ${CONAN_INCLUDE_DIRS})\n"
-                               #"set(QT_EXTRA_DEFINES ${CONAN_DEFINES})\n"
-                               #"set(QT_EXTRA_LIBDIRS ${CONAN_LIB_DIRS})\n"
-
-        current_cpp_std = self.settings.get_safe("compiler.cppstd", default_cppstd(self))
-        current_cpp_std = str(current_cpp_std).replace("gnu", "")
+        current_cpp_std = int(str(self.settings.compiler.cppstd).replace("gnu", ""))
         cpp_std_map = {
             11: "FEATURE_cxx11",
             14: "FEATURE_cxx14",
             17: "FEATURE_cxx17",
             20: "FEATURE_cxx20",
-            23: "FEATURE_cxx2b"
+            23: "FEATURE_cxx2b",
         }
-
         for std, feature in cpp_std_map.items():
-            tc.variables[feature] = "ON" if int(current_cpp_std) >= std else "OFF"
+            tc.variables[feature] = _on_off(current_cpp_std >= std)
 
         tc.variables["QT_USE_VCPKG"] = False
         tc.cache_variables["QT_USE_VCPKG"] = False
+
+        # Fix for a deluge of warnings on CMake 3.31
+        #   The VERSION keyword was followed by an empty string or no value at all.
+        #   Policy CMP0174 is not set, so cmake_parse_arguments() will unset the
+        #   arg_VERSION variable rather than setting it to an empty string.
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0174"] = "OLD"
 
         tc.generate()
 
