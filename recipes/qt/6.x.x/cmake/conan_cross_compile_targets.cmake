@@ -1,0 +1,16 @@
+# Inject Qt6::moc etc targets using the build-context Qt6 for cross-compilation support.
+# While Qt makes use of the QT_HOST_PATH variable when building Qt, it does not appear to do so when consuming it.
+if(DEFINED ENV{QT_HOST_PATH})
+    set(QT_HOST_PATH $ENV{QT_HOST_PATH})
+endif()
+if(QT_HOST_PATH)
+    file(GLOB _qt6_libexec_files ${QT_HOST_PATH}/libexec/*)
+    file(GLOB _qt6_bin_files ${QT_HOST_PATH}/bin/*)
+    foreach(_qt6_executable ${_qt6_libexec_files} ${_qt6_bin_files})
+        get_filename_component(_qt6_exe_name ${_qt6_executable} NAME_WE)
+        if(NOT TARGET Qt6::${_qt6_exe_name})
+            add_executable(Qt6::${_qt6_exe_name} IMPORTED)
+            set_target_properties(Qt6::${_qt6_exe_name} PROPERTIES IMPORTED_LOCATION ${_qt6_executable})
+        endif()
+    endforeach()
+endif()

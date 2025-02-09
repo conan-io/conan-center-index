@@ -3,6 +3,7 @@ import glob
 import os
 import platform
 import textwrap
+from pathlib import Path
 
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
@@ -162,11 +163,12 @@ class QtConan(ConanFile):
 
         return self._submodules_tree
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def export(self):
         copy(self, f"qtmodules{self.version}.conf", self.recipe_folder, self.export_folder)
+
+    def export_sources(self):
+        export_conandata_patches(self)
+        copy(self, "cmake/*", self.recipe_folder, self.export_sources_folder, keep_path=True)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -455,7 +457,40 @@ class QtConan(ConanFile):
         if self.options.qtwayland:
             self.tool_requires("wayland/1.22.0")
         if cross_building(self):
-            self.tool_requires(f"qt/{self.version}")
+            need_gui = any(self.options.get_safe(m) for m in [
+                "qtactiveqt",
+                "qtquick3d",
+                "qtquick3dphysics",
+                "qtquickeffectmaker",
+                "qtshadertools",
+                "qtwayland",
+            ])
+            self.tool_requires(f"qt/{self.version}", options={
+                "gui": self.options.gui and need_gui,
+                "widgets": self.options.widgets and need_gui,
+                # Make sure all required tools are built
+                "qttools": self.options.get_safe("qttools"),
+                "qtactiveqt": self.options.get_safe("qtactiveqt"),
+                "qtconnectivity": self.options.get_safe("qtconnectivity") and self.options.get_safe("with_bluez", False),
+                "qtdeclarative": self.options.qtdeclarative,
+                "qtdoc": self.options.qtdoc,
+                "qtgrpc": self.options.get_safe("qtgrpc"),
+                "qtopcua": self.options.get_safe("qtopcua"),
+                "qtquick3d": self.options.get_safe("qtquick3d"),
+                "qtquick3dphysics": self.options.get_safe("qtquick3dphysics"),
+                "qtquickeffectmaker": self.options.get_safe("qtquickeffectmaker"),
+                "qtremoteobjects": self.options.get_safe("qtremoteobjects"),
+                "qtscxml": self.options.get_safe("qtscxml"),
+                "qtserialbus": self.options.get_safe("qtserialbus"),
+                "qtshadertools": self.options.get_safe("qtshadertools"),
+                "qtsvg": self.options.get_safe("qtsvg"),
+                "qttranslations": self.options.get_safe("qttranslations"),
+                "qtwayland": self.options.get_safe("qtwayland"),
+                "with_dbus": self.options.with_dbus,
+                # Some tools are only built when shared=True
+                # https://github.com/qt/qtdeclarative/blob/v6.8.1/tools/CMakeLists.txt#L37
+                "shared": self.options.shared,
+            })
 
     def generate(self):
         vbe = VirtualBuildEnv(self)
@@ -831,48 +866,11 @@ class QtConan(ConanFile):
     def _cmake_qt6_private_file(self, module):
         return os.path.join("lib", "cmake", f"Qt6{module}", f"conan_qt_qt6_{module.lower()}private.cmake")
 
-    def package(self):
-        if self.settings.os == "Macos":
-            save(self, ".qmake.stash", "")
-            save(self, ".qmake.super", "")
-        cmake = CMake(self)
-        cmake.install()
-        copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"),
-             excludes="qtbase/examples/*")
-        for module in self._get_module_tree:
-            if not getattr(self.options, module):
-                rmdir(self, os.path.join(self.package_folder, "licenses", module))
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        for mask in ["Find*.cmake", "*Config.cmake", "*-config.cmake"]:
-            rm(self, mask, self.package_folder, recursive=True, excludes="Qt6HostInfoConfig.cmake")
-        rm(self, "*.la*", os.path.join(self.package_folder, "lib"), recursive=True)
-        rm(self, "*.pdb*", self.package_folder, recursive=True)
-        rm(self, "ensure_pro_file.cmake", self.package_folder, recursive=True)
-        os.remove(os.path.join(self.package_folder, "libexec" if self.settings.os != "Windows" else "bin", "qt-cmake-private-install.cmake"))
-
-        for m in os.listdir(os.path.join(self.package_folder, "lib", "cmake")):
-            if os.path.isfile(os.path.join(self.package_folder, "lib", "cmake", m, f"{m}Macros.cmake")):
-                continue
-            if glob.glob(os.path.join(self.package_folder, "lib", "cmake", m, "QtPublic*Helpers.cmake")):
-                continue
-            if m.endswith("Tools"):
-                if os.path.isfile(os.path.join(self.package_folder, "lib", "cmake", m, f"{m[:-5]}Macros.cmake")):
-                    continue
-
-            if m != "Qt6HostInfo":
-                rmdir(self, os.path.join(self.package_folder, "lib", "cmake", m))
-
-        extension = ""
-        if self.settings.os == "Windows":
-            extension = ".exe"
-        filecontents = "set(QT_CMAKE_EXPORT_NAMESPACE Qt6)\n"
-        ver = Version(self.version)
-        filecontents += f"set(QT_VERSION_MAJOR {ver.major})\n"
-        filecontents += f"set(QT_VERSION_MINOR {ver.minor})\n"
-        filecontents += f"set(QT_VERSION_PATCH {ver.patch})\n"
-        if self.settings.os == "Macos":
-            filecontents += 'set(__qt_internal_cmake_apple_support_files_path "${CMAKE_CURRENT_LIST_DIR}/../../../lib/cmake/Qt6/macos")\n'
-        targets = ["moc", "qlalr", "rcc", "tracegen", "cmake_automoc_parser", "qmake", "qtpaths", "syncqt", "tracepointgen"]
+    @property
+    def _built_tools(self):
+        if cross_building(self) and not self.options.force_build_tools:
+            return []
+        targets = ["moc", "rcc", "tracegen", "cmake_automoc_parser", "qlalr", "qmake"]
         if self.options.with_dbus:
             targets.extend(["qdbuscpp2xml", "qdbusxml2cpp"])
         if self.options.gui:
@@ -884,64 +882,119 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             targets.extend(["windeployqt"])
         if self.options.qttools:
-            targets.extend(["qhelpgenerator", "qtattributionsscanner"])
+            if self.options.gui:
+                targets.extend(["qhelpgenerator"])
+            targets.extend(["qtattributionsscanner"])
             targets.extend(["lconvert", "lprodump", "lrelease", "lrelease-pro", "lupdate", "lupdate-pro"])
-        if self.options.qtshadertools:
+        if self.options.qtshadertools and self.options.gui:
             targets.append("qsb")
         if self.options.qtdeclarative:
             targets.extend(["qmltyperegistrar", "qmlcachegen", "qmllint", "qmlimportscanner"])
             targets.extend(["qmlformat", "qml", "qmlprofiler", "qmlpreview"])
+            if Version(self.version) >= "6.8.0":
+                targets.append("qmlaotstats")
             # Note: consider "qmltestrunner", see https://github.com/conan-io/conan-center-index/issues/24276
         if self.options.get_safe("qtremoteobjects"):
             targets.append("repc")
         if self.options.get_safe("qtscxml"):
             targets.append("qscxmlc")
-        for target in targets:
-            exe_path = None
-            for path_ in [f"bin/{target}{extension}",
-                          f"lib/{target}{extension}",
-                          f"libexec/{target}{extension}"]:
-                if os.path.isfile(os.path.join(self.package_folder, path_)):
-                    exe_path = path_
+        return targets
+
+    def package(self):
+        package_path = Path(self.package_folder)
+
+        if self.settings.os == "Macos":
+            save(self, ".qmake.stash", "")
+            save(self, ".qmake.super", "")
+
+        cmake = CMake(self)
+        cmake.install()
+
+        copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"),
+             excludes="qtbase/examples/*")
+        for module in self._get_module_tree:
+            if not getattr(self.options, module):
+                rmdir(self, os.path.join(self.package_folder, "licenses", module))
+
+        rm(self, "*.la*", package_path.joinpath("lib"), recursive=True)
+        rm(self, "*.pdb*", self.package_folder, recursive=True)
+
+        cmake_dir = package_path.joinpath("lib", "cmake")
+        tool_dirs = []
+        for path in sorted(list(cmake_dir.rglob("Find*.cmake")) + list(cmake_dir.rglob("*Config.cmake")) + list(cmake_dir.rglob("*-config.cmake"))):
+            if path.parent.name.endswith("Tools") or path.parent.name in ["Qt6HostInfo", "Qt6BuildInternals"]:
+                tool_dirs.append(path.parent)
+                continue
+            # Keep tool and host info configs for cross-compilation support.
+            self.output.info(f"Removing {path.relative_to(package_path)}")
+            path.unlink()
+        for path in cmake_dir.iterdir():
+            if path in tool_dirs:
+                continue
+            if path.joinpath(f"{path.name}Macros.cmake").is_file():
+                continue
+            if any(path.glob("QtPublic*Helpers.cmake")):
+                continue
+            self.output.info(f"Removing {path.relative_to(package_path)}")
+            rmdir(self, path)
+        rm(self, "ensure_pro_file.cmake", self.package_folder, recursive=True)
+        rm(self, "qt-cmake-private-install.cmake", self.package_folder, recursive=True)
+        rmdir(self, package_path.joinpath("lib", "pkgconfig"))
+
+        # Copy
+        # - conan_cross_compile_targets.cmake
+        # - conan_qt_entry_point.cmake
+        copy(self, "cmake/*", self.export_sources_folder, package_path.joinpath("lib", "cmake", "Qt6Core"), keep_path=False)
+
+        # Generate lib/cmake/Qt6Core/conan_qt_executables_variables.cmake
+        filecontents = 'get_filename_component(PACKAGE_PREFIX_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../" ABSOLUTE)\n'
+        filecontents += "set(QT_CMAKE_EXPORT_NAMESPACE Qt6)\n"
+        ver = Version(self.version)
+        filecontents += f"set(QT_VERSION_MAJOR {ver.major})\n"
+        filecontents += f"set(QT_VERSION_MINOR {ver.minor})\n"
+        filecontents += f"set(QT_VERSION_PATCH {ver.patch})\n"
+        if self.settings.os == "Macos":
+            filecontents += 'set(__qt_internal_cmake_apple_support_files_path "${PACKAGE_PREFIX_DIR}/lib/cmake/Qt6/macos")\n'
+        extension = ".exe" if self.settings.os == "Windows" else ""
+        for target in self._built_tools:
+            for subdir in ["bin", "lib", "libexec"]:
+                exe_path = f"{subdir}/{target}{extension}"
+                if package_path.joinpath(exe_path).is_file():
                     break
             else:
-                assert False, f"Could not find executable {target}{extension} in {self.package_folder}"
-            if not exe_path:
-                self.output.warning(f"Could not find path to {target}{extension}")
+                raise ConanException(f"Could not find executable {target}{extension} in {self.package_folder}")
             filecontents += textwrap.dedent(f"""\
                 if(NOT TARGET ${{QT_CMAKE_EXPORT_NAMESPACE}}::{target})
                     add_executable(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} IMPORTED)
-                    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} PROPERTIES IMPORTED_LOCATION ${{CMAKE_CURRENT_LIST_DIR}}/../../../{exe_path})
+                    set_target_properties(${{QT_CMAKE_EXPORT_NAMESPACE}}::{target} PROPERTIES IMPORTED_LOCATION ${{PACKAGE_PREFIX_DIR}}/{exe_path})
                 endif()
-                """)
-
+            """)
         filecontents += textwrap.dedent(f"""\
             if(NOT DEFINED QT_DEFAULT_MAJOR_VERSION)
                 set(QT_DEFAULT_MAJOR_VERSION {ver.major})
             endif()
-            """)
+        """)
         filecontents += 'set(CMAKE_AUTOMOC_MACRO_NAMES "Q_OBJECT" "Q_GADGET" "Q_GADGET_EXPORT" "Q_NAMESPACE" "Q_NAMESPACE_EXPORT")\n'
-        save(self, os.path.join(self.package_folder, self._cmake_executables_file), filecontents)
+        save(self, package_path.joinpath(self._cmake_executables_file), filecontents)
 
         def _create_private_module(module, dependencies):
-            dependencies_string = ';'.join(f"Qt6::{dependency}" for dependency in dependencies)
-            contents = textwrap.dedent(f"""\
-            if(NOT TARGET Qt6::{module}Private)
-                add_library(Qt6::{module}Private INTERFACE IMPORTED)
+            dependencies_string = ";".join(f"Qt6::{dependency}" for dependency in dependencies)
+            save(self, package_path.joinpath(self._cmake_qt6_private_file(module)), textwrap.dedent(f"""\
+                if(NOT TARGET Qt6::{module}Private)
+                    add_library(Qt6::{module}Private INTERFACE IMPORTED)
 
-                set_target_properties(Qt6::{module}Private PROPERTIES
-                    INTERFACE_INCLUDE_DIRECTORIES "${{CMAKE_CURRENT_LIST_DIR}}/../../../include/Qt{module}/{self.version};${{CMAKE_CURRENT_LIST_DIR}}/../../../include/Qt{module}/{self.version}/Qt{module}"
-                    INTERFACE_LINK_LIBRARIES "{dependencies_string}"
-                )
+                    set_target_properties(Qt6::{module}Private PROPERTIES
+                        INTERFACE_INCLUDE_DIRECTORIES "${{PACKAGE_PREFIX_DIR}}/include/Qt{module}/{self.version};${{PACKAGE_PREFIX_DIR}}/include/Qt{module}/{self.version}/Qt{module}"
+                        INTERFACE_LINK_LIBRARIES "{dependencies_string}"
+                    )
 
-                add_library(Qt::{module}Private INTERFACE IMPORTED)
-                set_target_properties(Qt::{module}Private PROPERTIES
-                    INTERFACE_LINK_LIBRARIES "Qt6::{module}Private"
-                    _qt_is_versionless_target "TRUE"
-                )
-            endif()""")
-
-            save(self, os.path.join(self.package_folder, self._cmake_qt6_private_file(module)), contents)
+                    add_library(Qt::{module}Private INTERFACE IMPORTED)
+                    set_target_properties(Qt::{module}Private PROPERTIES
+                        INTERFACE_LINK_LIBRARIES "Qt6::{module}Private"
+                        _qt_is_versionless_target "TRUE"
+                    )
+                endif()
+            """))
 
         _create_private_module("Core", ["Core"])
 
@@ -953,36 +1006,22 @@ class QtConan(ConanFile):
 
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
-            save(self, os.path.join(self.package_folder, "lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake"), textwrap.dedent("""\
-                    set(QT_KNOWN_POLICY_QTP0001 TRUE)
-                    """))
+            module = package_path.joinpath("lib", "cmake", "Qt6Qml", "conan_qt_qt6_policies.cmake")
+            save(self, module, "set(QT_KNOWN_POLICY_QTP0001 TRUE)\n")
             if self.options.gui and self.options.qtshadertools:
                 _create_private_module("Quick", ["CorePrivate", "GuiPrivate", "QmlPrivate", "Quick"])
-
-        if self.settings.os in ["Windows", "iOS"]:
-            contents = textwrap.dedent("""\
-                set(entrypoint_conditions "$<NOT:$<BOOL:$<TARGET_PROPERTY:qt_no_entrypoint>>>")
-                list(APPEND entrypoint_conditions "$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>")
-                if(WIN32)
-                    list(APPEND entrypoint_conditions "$<BOOL:$<TARGET_PROPERTY:WIN32_EXECUTABLE>>")
-                endif()
-                list(JOIN entrypoint_conditions "," entrypoint_conditions)
-                set(entrypoint_conditions "$<AND:${entrypoint_conditions}>")
-                set_property(
-                    TARGET ${QT_CMAKE_EXPORT_NAMESPACE}::Core
-                    APPEND PROPERTY INTERFACE_LINK_LIBRARIES "$<${entrypoint_conditions}:${QT_CMAKE_EXPORT_NAMESPACE}::EntryPointPrivate>"
-                )""")
-            save(self, os.path.join(self.package_folder, self._cmake_entry_point_file), contents)
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Qt6")
         self.cpp_info.set_property("pkg_config_name", "qt6")
 
         # consumers will need the QT_PLUGIN_PATH defined in runenv
-        self.runenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "plugins"))
-        self.buildenv_info.define("QT_PLUGIN_PATH", os.path.join(self.package_folder, "plugins"))
+        self.runenv_info.define_path("QT_PLUGIN_PATH", os.path.join(self.package_folder, "plugins"))
+        self.buildenv_info.define_path("QT_PLUGIN_PATH", os.path.join(self.package_folder, "plugins"))
 
-        self.buildenv_info.define("QT_HOST_PATH", self.package_folder)
+        if not cross_building(self):
+            self.buildenv_info.define_path("QT_HOST_PATH", self.package_folder)
+            self.buildenv_info.define_path("QT_HOST_PATH_CMAKE_DIR", os.path.join(self.package_folder, "lib", "cmake"))
 
         build_modules = {}
         def _add_build_module(component, module):
