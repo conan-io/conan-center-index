@@ -37,9 +37,12 @@ class QtConan(ConanFile):
     homepage = "https://www.qt.io"
     license = "LGPL-3.0-only"
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "library"
 
     options = {
         "shared": [True, False],
+        "fPIC": [True, False],
+
         "opengl": ["no", "desktop", "dynamic"],
         "with_vulkan": [True, False],
         "openssl": [True, False],
@@ -85,6 +88,8 @@ class QtConan(ConanFile):
 
     default_options = {
         "shared": False,
+        "fPIC": True,
+
         "opengl": "desktop",
         "with_vulkan": False,
         "openssl": True,
@@ -164,6 +169,8 @@ class QtConan(ConanFile):
         copy(self, f"qtmodules{self.version}.conf", self.recipe_folder, self.export_folder)
 
     def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
         if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_icu
             del self.options.with_fontconfig
@@ -184,6 +191,8 @@ class QtConan(ConanFile):
                 self.options.rm_safe(submodule)
 
     def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
         if not self.options.gui:
             del self.options.opengl
             del self.options.with_vulkan
