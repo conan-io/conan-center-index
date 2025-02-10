@@ -8,7 +8,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class IridescenceConan(ConanFile):
@@ -29,31 +29,10 @@ class IridescenceConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "9",
-            "clang": "9",
-            "apple-clang": "11",
-            "Visual Studio": "16",
-            "msvc": "192",
-        }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -76,13 +55,7 @@ class IridescenceConan(ConanFile):
         self.requires("khrplatform/cci.20200529", transitive_headers=True)
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
         if is_msvc(self):
             # Build fails with several compilation errors
@@ -95,6 +68,13 @@ class IridescenceConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        if Version(self.dependencies["imgui"].ref.version) >= "1.90":
+            # https://github.com/ocornut/imgui/blob/master/imgui.cpp#L460
+            replace_in_file(self, os.path.join(self.source_folder, "src", "guik", "viewer", "viewer_ui.cpp"),
+                            "ImGui::GetWindowContentRegionWidth()",
+                            "(ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x)")
+
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -106,6 +86,10 @@ class IridescenceConan(ConanFile):
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         if "docking" not in str(self.dependencies["imgui"].ref.version):
             tc.preprocessor_definitions["ImGuiConfigFlags_DockingEnable"] = "0"
+        if self.settings.os == "Windows":
+            # TODO: submit a patch upstream
+            tc.preprocessor_definitions["_USE_MATH_DEFINES"] = ""
+            tc.preprocessor_definitions["NOMINMAX"] = ""
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -113,16 +97,7 @@ class IridescenceConan(ConanFile):
 
         VirtualBuildEnv(self).generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        if Version(self.dependencies["imgui"].ref.version) >= "1.90":
-            # https://github.com/ocornut/imgui/blob/master/imgui.cpp#L460
-            replace_in_file(self, os.path.join(self.source_folder, "src", "guik", "viewer", "viewer_ui.cpp"),
-                            "ImGui::GetWindowContentRegionWidth()",
-                            "(ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x)")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
