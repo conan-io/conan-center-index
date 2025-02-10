@@ -151,20 +151,6 @@ class LibtorchConan(ConanFile):
     provides = ["miniz", "pocketfft", "kineto", "nnpack", "qnnpack"]
 
     @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "clang": "5",
-            "apple-clang": "9",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
-    @property
     def _is_mobile_os(self):
         return self.settings.os in ["Android", "iOS"]
 
@@ -194,6 +180,9 @@ class LibtorchConan(ConanFile):
             # del self.options.distributed
         if self.settings.arch not in ["x86", "x86_64", "armv8"]:
             self.options.rm_safe("with_mkldnn")
+        if self.settings.arch not in ["x86", "x86_64"]:
+            # armv8 is not yet supported
+            self.options.with_fbgemm = False
         if not is_apple_os(self) or self.settings.os not in ["Linux", "Android"]:
             del self.options.with_nnpack
         self.options.with_itt = self.settings.arch in ["x86", "x86_64"]
@@ -258,13 +247,13 @@ class LibtorchConan(ConanFile):
         # fmt/11.x is not yet supported as of v2.4.0
         self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
         self.requires("foxi/cci.20210217", libs=False)
-        self.requires("onnx/1.16.1", transitive_headers=True, transitive_libs=True)
+        self.requires("onnx/1.17.0", transitive_headers=True, transitive_libs=True)
         self.requires("protobuf/3.21.12")
         self.requires("fp16/cci.20210320")
-        self.requires("cpp-httplib/0.16.0")
-        self.requires("libbacktrace/cci.20210118")
+        self.requires("cpp-httplib/0.18.0")
+        self.requires("libbacktrace/cci.20240730")
         if self._depends_on_sleef:
-            self.requires("sleef/3.6")
+            self.requires("sleef/3.6.1")
         if self._depends_on_flatbuffers:
             self.requires("flatbuffers/24.3.25", libs=False)
         if self.options.blas == "openblas":
@@ -273,7 +262,7 @@ class LibtorchConan(ConanFile):
         if self.options.with_openmp:
             self.requires("openmp/system", transitive_headers=True, transitive_libs=True)
         if self.options.with_fbgemm:
-            self.requires("fbgemm/0.8.0", transitive_headers=True, transitive_libs=True)
+            self.requires("fbgemm/1.1.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_gflags:
             self.requires("gflags/2.2.2")
         if self.options.with_glog:
@@ -293,8 +282,8 @@ class LibtorchConan(ConanFile):
             self.requires("opencl-headers/2023.12.14")
             self.requires("opencl-icd-loader/2023.12.14")
         if self.options.with_vulkan:
-            self.requires("vulkan-headers/1.3.268.0")
-            self.requires("vulkan-loader/1.3.268.0")
+            self.requires("vulkan-headers/1.3.290.0")
+            self.requires("vulkan-loader/1.3.290.0")
         if self.options.with_mimalloc:
             self.requires("mimalloc/2.1.7")
 
@@ -314,13 +303,7 @@ class LibtorchConan(ConanFile):
         # - tensorpipe
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
         if self.options.get_safe("with_numa") and not self.dependencies["libnuma"].options.shared:
             raise ConanInvalidConfiguration(
@@ -358,6 +341,7 @@ class LibtorchConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
         # Keep only a restricted set of vendored dependencies.
         # Do it before build() to limit the amount of files to copy.
@@ -469,7 +453,6 @@ class LibtorchConan(ConanFile):
         self.run(f"python -m pip install {' '.join(packages)} --no-cache-dir --target={self._site_packages_dir}")
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Recreate some for add_subdirectory() to work
         for pkg in ["foxi", "fmt", "FXdiv", "psimd", "mimalloc"]:
             save(self, os.path.join(self.source_folder, "third_party", pkg, "CMakeLists.txt"), "")
