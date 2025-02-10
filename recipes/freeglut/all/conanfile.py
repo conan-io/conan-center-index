@@ -7,7 +7,7 @@ from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class freeglutConan(ConanFile):
@@ -125,9 +125,13 @@ class freeglutConan(ConanFile):
         if self._requires_libglvnd_glx and not self.dependencies["libglvnd"].options.glx:
             raise ConanInvalidConfiguration(f"{self.ref} requires the glx option of libglvnd to be enabled when the gles option is disabled")
 
+    def build_requirements(self):
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -150,7 +154,6 @@ class freeglutConan(ConanFile):
         pkg_config_deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -173,7 +176,6 @@ class freeglutConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", f"FreeGLUT::{config_target}")
         self.cpp_info.set_property("pkg_config_name", pkg_config)
 
-        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
         self.cpp_info.components["freeglut_"].libs = collect_libs(self)
         if self.settings.os in ["FreeBSD", "Linux"]:
             self.cpp_info.components["freeglut_"].system_libs.extend(["pthread", "m", "dl", "rt"])
@@ -183,15 +185,6 @@ class freeglutConan(ConanFile):
             self.cpp_info.components["freeglut_"].defines.append("FREEGLUT_LIB_PRAGMAS=0")
             self.cpp_info.components["freeglut_"].system_libs.extend(["glu32", "gdi32", "winmm", "user32"])
 
-        # TODO: to remove in conan v2 once cmake_find_package_* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "GLUT"
-        self.cpp_info.names["cmake_find_package_multi"] = "FreeGLUT"
-        self.cpp_info.names["pkg_config"] = pkg_config
-        self.cpp_info.components["freeglut_"].names["cmake_find_package"] = "GLUT"
-        self.cpp_info.components["freeglut_"].set_property("cmake_module_target_name", "GLUT::GLUT")
-        self.cpp_info.components["freeglut_"].names["cmake_find_package_multi"] = config_target
-        self.cpp_info.components["freeglut_"].set_property("cmake_target_name", f"FreeGLUT::{config_target}")
-        self.cpp_info.components["freeglut_"].set_property("pkg_config_name", pkg_config)
         if self._requires_libglvnd_egl:
             self.cpp_info.components["freeglut_"].requires.append("libglvnd::egl")
         if self._requires_libglvnd_gles:
