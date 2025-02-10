@@ -6,7 +6,7 @@ from conan.tools.cmake import cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class LibosmiumConan(ConanFile):
