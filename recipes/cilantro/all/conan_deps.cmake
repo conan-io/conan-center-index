@@ -7,11 +7,8 @@ find_package(tinyply REQUIRED CONFIG)
 
 link_libraries(
     Spectra::Spectra
+    Qhull::qhullstatic_r
+    Qhull::qhullcpp
     nanoflann::nanoflann
     tinyply::tinyply
 )
-if(TARGET Qhull::qhull_r)
-    link_libraries(Qhull::qhull_r)
-else()
-    link_libraries(Qhull::qhullstatic_r)
-endif()
