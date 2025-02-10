@@ -5,7 +5,7 @@ from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps, cmake_layout
 from conan.tools.files import copy, get
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.4"
 
 class TheoraConan(ConanFile):
     name = "theora"
@@ -15,7 +15,6 @@ class TheoraConan(ConanFile):
     description = "Theora is a free and open video compression format from the Xiph.org Foundation"
     topics = ("video", "video-compressor", "video-format")
 
-    package_type = "library"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "shared": [True, False],
@@ -25,19 +24,11 @@ class TheoraConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
+    languages = ["C"]
+    implements = ["auto_header_only"]
 
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, os.path.join(self.export_sources_folder,"src"))
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
