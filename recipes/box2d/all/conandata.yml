@@ -19,6 +19,9 @@ patches:
     - patch_file: "patches/3.0.0-0002-use-cci.patch"
       patch_description: "use cci package"
       patch_type: "conan"
+    - patch_file: "patches/3.0.0-0003-disable-warning-as-errors.patch"
+      patch_description: "disable warnign as errors"
+      patch_type: "conan"
   "2.4.0":
     - patch_file: "patches/0001-install-and-allow-shared.patch"
       patch_description: "add install, allow shared build"
