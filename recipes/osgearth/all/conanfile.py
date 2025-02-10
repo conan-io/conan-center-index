@@ -1,13 +1,11 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rename
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -82,20 +80,6 @@ class OsgearthConan(ConanFile):
     }
     short_paths = True
 
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "15",
-            "msvc": "191",
-            "gcc": "5",
-            "clang": "5",
-            "apple-clang": "5",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
@@ -123,23 +107,20 @@ class OsgearthConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("gdal/3.8.3")
+        self.requires("gdal/3.10.0")
         self.requires("glew/2.2.0")
         self.requires("imgui/1.90.9")
         self.requires("lerc/4.0.1")
-        self.requires("libcurl/[>=7.78.0 <9]")
-        self.requires("libzip/1.10.1")
+        self.requires("libcurl/[>=7.78 <9]")
+        self.requires("libzip/1.11.1")
         self.requires("opengl/system")
         self.requires("openscenegraph/3.6.5", transitive_headers=True, transitive_libs=True)
         self.requires("rapidjson/cci.20230929")
 
-        # Cannot unvendor tinygltf because of modifications to it:
-        # https://github.com/gwaldron/osgearth/commit/dae4c9115d80eb3e655496471bbe8cdd5d6a9969
-
         if self.options.enable_profiling:
-            self.requires("tracy/0.10")
+            self.requires("tracy/0.11.1")
         if self.options.with_basisu:
-            self.requires("libbasisu/1.15.0")
+            self.requires("libbasisu/1.16.4")
         if self.options.with_blend2d:
             # v0.10+ is not compatible as of v3.7
             self.requires("blend2d/0.9")
@@ -153,10 +134,10 @@ class OsgearthConan(ConanFile):
             # https://github.com/gwaldron/osgearth/blob/osgearth-3.6/src/osgEarth/GEOS#L32
             self.requires("geos/3.12.0", transitive_headers=True, transitive_libs=True)
         if self.options.with_imgui:
-            self.requires("glew/2.2.0")
             # TODO: unvendor
             # self.requires("imgui/1.90.2")
             # self.requires("portable-file-dialogs/cci.20221111")
+            pass
         if self.options.with_protobuf:
             # Used transitively by the generated headers
             self.requires("protobuf/5.27.0", transitive_headers=True, transitive_libs=True)
@@ -171,17 +152,11 @@ class OsgearthConan(ConanFile):
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
 
-        self.requires("libpng/[>=1.6 <2]", override=True)
-        self.requires("expat/[>=2.6.2 <3]", override=True)
+        # Cannot unvendor tinygltf because of modifications to it:
+        # https://github.com/gwaldron/osgearth/commit/dae4c9115d80eb3e655496471bbe8cdd5d6a9969
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 14)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.20 <4]")
@@ -190,6 +165,7 @@ class OsgearthConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -224,11 +200,7 @@ class OsgearthConan(ConanFile):
 
         VirtualBuildEnv(self).generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -349,9 +321,5 @@ class OsgearthConan(ConanFile):
         setup_plugin("fastdxt")
 
         if self.settings.os == "Windows":
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
             osg_version = self.dependencies["openscenegraph"].ref.version
-            self.env_info.PATH.append(os.path.join(self.package_folder, os.path.join("bin", f"osgPlugins-{osg_version}")))
             self.runenv_info.append_path("PATH", os.path.join(self.package_folder, os.path.join("bin", f"osgPlugins-{osg_version}")))
-        elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.env_info.LD_LIBRARY_PATH.append(os.path.join(self.package_folder, "lib"))
