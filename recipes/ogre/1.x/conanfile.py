@@ -1,5 +1,6 @@
 import os
 import textwrap
+from pathlib import Path
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -260,7 +261,7 @@ class OgreConanFile(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("zziplib/0.13.72")
         if self.options.get_safe("build_component_bites") or self.options.get_safe("build_rendersystem_tiny"):
-            self.requires("sdl/2.30.8")
+            self.requires("sdl/2.30.9")
         if self.options.get_safe("build_rendersystem_tiny") and self.options.with_openmp:
             self.requires("openmp/system")
         if self._build_opengl:
@@ -302,8 +303,7 @@ class OgreConanFile(ConanFile):
         # TODO: add support for DirectX, DirectX11, Softimage, GLSLOptimizer, HLSL2GLSL
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
         # https://github.com/OGRECave/ogre/blob/v14.3.0/CMake/ConfigureBuild.cmake#L21-L25
         if self.options.shared and is_apple_os(self) and self.settings.os != "Macos":
@@ -475,19 +475,15 @@ class OgreConanFile(ConanFile):
                             "if(OGRE_BUILD_COMPONENT_OVERLAY_IMGUI)", "if(0)")
             replace_in_file(self, os.path.join(self.source_folder, "Components", "Overlay", "CMakeLists.txt"),
                             "list(REMOVE_ITEM SOURCE_FILES", "# list(REMOVE_ITEM SOURCE_FILES")
-        # Require DirectX if enabled
-        if self.options.get_safe("build_rendersystem_d3d9"):
-            replace_in_file(self, os.path.join(self.source_folder, "CMake", "Dependencies.cmake"),
-                            "find_package(DirectX)", "find_package(DirectX REQUIRED)")
-        if self.options.get_safe("build_rendersystem_d3d11"):
-            replace_in_file(self, os.path.join(self.source_folder, "CMake", "Dependencies.cmake"),
-                            "find_package(DirectX11)", "find_package(DirectX11 REQUIRED)")
-
+        # Use a target for EGL to supported relocated EGL from libglvnd
+        replace_in_file(self, os.path.join(self.source_folder, "CMake", "Packages", "FindOpenGLES2.cmake"),
+                        "${OPENGL_egl_LIBRARY}",
+                        "OpenGL::EGL")
 
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-        cmake.configure(build_script_folder=self.source_path.parent)
+        cmake.configure(build_script_folder=Path(self.source_folder).parent)
         cmake.build()
 
     def _create_cmake_module_variables(self, module_file):
