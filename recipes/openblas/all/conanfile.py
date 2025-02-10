@@ -87,7 +87,7 @@ class OpenblasConan(ConanFile):
         "fPIC": True,
         "ilp64": False,
         "build_lapack": True,
-        "build_relapack": False,
+        "build_relapack": True,
         "build_bfloat16": False,
         "use_openmp": True,
         "use_thread": True,
@@ -110,16 +110,6 @@ class OpenblasConan(ConanFile):
         "max_threads": "The maximum number of parallel threads you expect to need (defaults to the number of cores in the build cpu)",
         "max_omp_parallel": "Number of OpenMP instances that your code may use for parallel calls into OpenBLAS",
     }
-    options_description = {
-        "ilp64": "Build with ILP64 interface instead of LP64 (incompatible with the standard API)",
-        "build_lapack": "Build LAPACK and LAPACKE",
-        "build_relapack": "Build with ReLAPACK (recursive implementation of several LAPACK functions on top of standard LAPACK)",
-        "build_bfloat16": "Build with bfloat16 support",
-        "use_openmp": "Enable OpenMP support",
-        "use_thread": "Enable threads support",
-        "use_locking": "Use locks even in single-threaded builds to make them callable from multiple threads",
-        "dynamic_arch": "Include support for multiple CPU targets, with automatic selection at runtime (x86/x86_64, aarch64 or ppc only)",
-    }
     short_paths = True
 
     @property
@@ -141,11 +131,8 @@ class OpenblasConan(ConanFile):
             self.options.rm_safe("fPIC")
         if not self.options.build_lapack:
             del self.options.build_relapack
-        if not self.options.use_thread:
-            del self.options.max_threads
-        if not self.options.use_openmp:
-            del self.options.max_omp_parallel
-
+        else:
+            self.options.build_relapack = self.settings.compiler in ["gcc", "clang"]
         if not self.options.use_thread:
             del self.options.max_threads
         if not self.options.use_openmp:
@@ -189,6 +176,7 @@ class OpenblasConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -239,7 +227,6 @@ class OpenblasConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Disable test subdirs.
         # ctest also otherwise fails to compile on Android API 22 and earlier due to incomplete complex support.
         save(self, os.path.join(self.source_folder, "cpp_thread_test", "CMakeLists.txt"), "")
@@ -291,6 +278,18 @@ class OpenblasConan(ConanFile):
                 self.cpp_info.components["openblas_component"].system_libs.append("pthread")
             if self.options.build_lapack and self._fortran_compiler:
                 self.cpp_info.components["openblas_component"].system_libs.append("gfortran")
+        if self.options.use_openmp:
+            self.cpp_info.components["openblas_component"].requires.append("openmp::openmp")
+
+        # OpenBLAS always has one and only one of these components defined: openmp, pthread or serial.
+        if self.options.use_openmp:
+            component = "openmp"
+        elif self.options.use_thread:
+            component = "pthread"
+        else:
+            component = "serial"
+        self.cpp_info.components[component].set_property("cmake_target_name", f"OpenBLAS::{component}")
+        self.cpp_info.components[component].requires = ["openblas_component"]
 
         if self.options.use_openmp:
             if self.options.use_openmp and self.settings.compiler in ["clang", "apple-clang"]:
@@ -317,10 +316,3 @@ class OpenblasConan(ConanFile):
 
         self.buildenv_info.define_path("OpenBLAS_HOME", self.package_folder)
         self.runenv_info.define_path("OpenBLAS_HOME", self.package_folder)
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = f"OpenBLAS{self._64bit}"
-        self.cpp_info.filenames["cmake_find_package_multi"] = f"OpenBLAS{self._64bit}"
-        self.cpp_info.names["cmake_find_package"] = "OpenBLAS"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenBLAS"
-        self.env_info.OpenBLAS_HOME = self.package_folder
