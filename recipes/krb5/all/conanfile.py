@@ -8,7 +8,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 class Krb5Conan(ConanFile):
     name = "krb5"
@@ -51,15 +51,10 @@ class Krb5Conan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} Conan recipe is not prepared for Windows yet. Contributions are welcome!")
         if self.settings.os == "Macos":
             raise ConanInvalidConfiguration(f"{self.ref} Conan recipe is not prepared for Macos yet. Contributions are welcome!")
-        if self.options.with_tls == "openssl" and not self.dependencies["openssl"].options.shared:
-            # k5tls does not respect linkage order, it passes krb5 and krb5support before openssl to the linker, which causes linking errors
-            # gcc -shared -fPIC -Wl,-h,k5tls.so.0 -Wl,--no-undefined -o k5tls.so openssl.so notls.so -L../../../lib -lkrb5 -lkrb5support ...
-            # /usr/bin/ld: /.../lib/libssl.a(libssl-lib-ssl_cert_comp.o): in function `OSSL_COMP_CERT_from_uncompressed_data':
-            #     ssl_cert_comp.c:(.text+0x3d1): undefined reference to `COMP_CTX_free'
-            raise ConanInvalidConfiguration(f"{self.ref} building with static OpenSSL generates linking errors. Please use '-o openssl/*:shared=True'")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -112,11 +107,10 @@ class Krb5Conan(ConanFile):
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        self.build_requires("automake/1.16.5")
-        self.build_requires("bison/3.8.2")
+        self.tool_requires("automake/1.16.5")
+        self.tool_requires("bison/3.8.2")
 
     def build(self):
-        apply_conandata_patches(self)
         with chdir(self, os.path.join(self.source_folder, "src")):
             self.run("autoreconf -vif")
         autotools = Autotools(self)
