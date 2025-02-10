@@ -9,7 +9,7 @@ from conan.tools.scm import Version
 import glob
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 class OpenmvgConan(ConanFile):
     name = "openmvg"
@@ -96,15 +96,14 @@ class OpenmvgConan(ConanFile):
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.5")
         self.requires("libpng/[>=1.6 <2]")
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/[>=4.5 <5]")
         if self.options.with_openmp:
             # '#pragma omp' is used in public headers
             self.requires("llvm-openmp/18.1.8", transitive_headers=True, transitive_libs=True)
         # TODO: unvendor vlfeat
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "11")
+        check_min_cppstd(self, "11")
 
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration(
@@ -114,6 +113,7 @@ class OpenmvgConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -169,10 +169,11 @@ class OpenmvgConan(ConanFile):
         deps.set_property("coin-osi", "cmake_file_name", "Osi")
         deps.set_property("coin-utils", "cmake_file_name", "CoinUtils")
         deps.set_property("flann", "cmake_file_name", "Flann")
+        deps.set_property("flann::flann_c", "cmake_target_name", "flann::flann")
+        deps.set_property("flann::flann_cpp", "cmake_target_name", "flann::flann_cpp")
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # bypass a check for submodules
         mkdir(self, os.path.join(self.source_folder, "src", "dependencies", "cereal", "include"))
         # ensure internal dependencies are not used by accident
@@ -366,10 +367,6 @@ class OpenmvgConan(ConanFile):
             self.cpp_info.components[component].system_libs = values.get("system_libs", [])
             self.cpp_info.components[component].resdirs = ["res"]
 
-            # TODO: to remove in conan v2
-            self.cpp_info.components[component].names["cmake_find_package"] = target
-            self.cpp_info.components[component].names["cmake_find_package_multi"] = target
-
         if self.options.with_openmp:
             for component_name in ["cameras", "features", "image", "matching", "matching_image_collection", "robust_estimation", "sfm", "vlsift"]:
                 component = self.cpp_info.components[f"openmvg_{component_name}"]
@@ -377,8 +374,3 @@ class OpenmvgConan(ConanFile):
                 component.cflags += self._openmp_flags
                 component.cxxflags += self._openmp_flags
 
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "OpenMVG"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenMVG"
-        if self.options.programs:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
