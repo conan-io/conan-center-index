@@ -116,7 +116,7 @@ class YojimboConan(ConanFile):
         return generator
 
     def _inject_msbuild_toolchain(self):
-        vcxproj_files = list(self.source_path.rglob("*.vcxproj"))
+        vcxproj_files = list(Path(self.source_folder).rglob("*.vcxproj"))
         platform_toolset = MSBuildToolchain(self).toolset
         import_conan_generators = ""
         for props_file in ["conantoolchain.props", "conandeps.props"]:
