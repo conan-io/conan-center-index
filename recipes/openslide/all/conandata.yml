@@ -1,0 +1,10 @@
+sources:
+  "4.0.0":
+    url: "https://github.com/openslide/openslide/releases/download/v4.0.0/openslide-4.0.0.tar.xz"
+    sha256: "cc227c44316abb65fb28f1c967706eb7254f91dbfab31e9ae6a48db6cf4ae562"
+patches:
+  "4.0.0":
+    - patch_file: "patches/0001-no-openslide-poison.patch"
+      patch_description: "Fix 'error__use__openslide_fclose_instead' compilation error"
+      patch_type: "backport"
+      patch_source: "https://github.com/openslide/openslide/commit/048865a3b61e9bc2b61219168d434b61e784d355"

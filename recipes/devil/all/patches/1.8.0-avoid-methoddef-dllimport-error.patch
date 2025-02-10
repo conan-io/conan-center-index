@@ -1,0 +1,82 @@
+--- a/DevIL/src-IL/src/il_jpeg.cpp
++++ b/DevIL/src-IL/src/il_jpeg.cpp
+@@ -219,7 +219,7 @@ typedef iread_mgr * iread_ptr;
+ #define INPUT_BUF_SIZE  4096  // choose an efficiently iread'able size
+ 
+ 
+-METHODDEF(void)
++static void
+ init_source (j_decompress_ptr cinfo)
+ {
+ 	iread_ptr src = (iread_ptr) cinfo->src;
+@@ -227,7 +227,7 @@ init_source (j_decompress_ptr cinfo)
+ }
+ 
+ 
+-METHODDEF(boolean)
++static boolean
+ fill_input_buffer (j_decompress_ptr cinfo)
+ {
+ 	iread_ptr src = (iread_ptr) cinfo->src;
+@@ -259,7 +259,7 @@ fill_input_buffer (j_decompress_ptr cinfo)
+ }
+ 
+ 
+-METHODDEF(void)
++static void
+ skip_input_data (j_decompress_ptr cinfo, long num_bytes)
+ {
+ 	iread_ptr src = (iread_ptr) cinfo->src;
+@@ -275,14 +275,14 @@ skip_input_data (j_decompress_ptr cinfo, long num_bytes)
+ }
+ 
+ 
+-METHODDEF(void)
++static void
+ term_source (j_decompress_ptr cinfo)
+ {
+ 	// no work necessary here
+ }
+ 
+ 
+-GLOBAL(void)
++void
+ devil_jpeg_read_init (j_decompress_ptr cinfo)
+ {
+ 	iread_ptr src;
+@@ -371,7 +371,7 @@ typedef iwrite_mgr *iwrite_ptr;
+ #define OUTPUT_BUF_SIZE 4096
+ 
+ 
+-METHODDEF(void)
++static void
+ init_destination(j_compress_ptr cinfo)
+ {
+ 	iwrite_ptr dest = (iwrite_ptr)cinfo->dest;
+@@ -384,7 +384,7 @@ init_destination(j_compress_ptr cinfo)
+ 	return;
+ }
+ 
+-METHODDEF(boolean)
++static boolean
+ empty_output_buffer (j_compress_ptr cinfo)
+ {
+ 	iwrite_ptr dest = (iwrite_ptr)cinfo->dest;
+@@ -394,7 +394,7 @@ empty_output_buffer (j_compress_ptr cinfo)
+ 	return static_cast< boolean >( IL_TRUE );
+ }
+ 
+-METHODDEF(void)
++static void
+ term_destination (j_compress_ptr cinfo)
+ {
+ 	iwrite_ptr dest = (iwrite_ptr)cinfo->dest;
+@@ -403,7 +403,7 @@ term_destination (j_compress_ptr cinfo)
+ }
+ 
+ 
+-GLOBAL(void)
++void
+ devil_jpeg_write_init(j_compress_ptr cinfo)
+ {
+ 	iwrite_ptr dest;
