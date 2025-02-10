@@ -31,6 +31,9 @@ patches:
     - patch_file: "patches/3.12/3.12.1-0002-remove-module-deps.patch"
       patch_description: "Remove section of solution file forcing projects to be built that might not be used for this recipe"
       patch_type: "conan"
+    - patch_file: "patches/3.12/3.12.2-0003-disable-nis.patch"
+      patch_description: "Avoid libnsl dependency, which is missing from newer glibc versions"
+      patch_type: "conan"
   "3.12.2":
     - patch_file: "patches/3.9/3.9.7-0002-_msi-vcxproj.patch"
       patch_description: "Fix ARM/ARM64 mismatch in project file"

@@ -1,7 +1,7 @@
 import os
 from io import StringIO
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanException
 from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run
@@ -11,11 +11,8 @@ from conan.tools.gnu import AutotoolsDeps
 from conan.tools.microsoft import is_msvc, VCVars
 from conan.tools.scm import Version
 
-conan2 = conan_version.major >= 2
-
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    test_type = "explicit"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -26,38 +23,28 @@ class TestPackageConan(ConanFile):
         # with your global pip, then it will fail to run in this test package.
         # To avoid that, just add a requirement on CMake.
         self.tool_requires("cmake/[>=3.16 <4]")
+        if not can_run(self):
+            self.tool_requires("cpython/<host_version>")
 
     def layout(self):
         cmake_layout(self)
 
     @property
     def _python(self):
-        if conan2:
-            return self.dependencies["cpython"].conf_info.get("user.cpython:python", check_type=str)
-        else:
-            return self.deps_user_info["cpython"].python
+        return self.dependencies["cpython"].conf_info.get("user.cpython:python", check_type=str)
 
     def _cpython_option(self, name):
-        if conan2:
-            return self.dependencies["cpython"].options.get_safe(name, False)
-        else:
-            try:
-                return getattr(self.options["cpython"], name, False)
-            except ConanException:
-                return False
+        return self.dependencies["cpython"].options.get_safe(name, False)
 
     @property
     def _py_version(self):
-        if conan2:
-            return Version(self.dependencies["cpython"].ref.version)
-        else:
-            return Version(self.deps_cpp_info["cpython"].version)
+        return Version(self.dependencies["cpython"].ref.version)
 
     @property
     def _test_setuptools(self):
         # TODO Should we still try to test this?
         # https://github.com/python/cpython/pull/101039
-        return can_run(self) and self._supports_modules and self._py_version < "3.12"
+        return self._supports_modules and self._py_version < "3.12"
 
     @property
     def _supports_modules(self):
@@ -66,6 +53,8 @@ class TestPackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_MODULE"] = self._supports_modules
+        if not can_run(self):
+            tc.variables["Python_EXECUTABLE"] = os.path.join(self.dependencies.build["cpython"].package_folder, "bin", "python").replace("\\", "/")
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -177,9 +166,6 @@ class TestPackageConan(ConanFile):
 
             # MSVC builds need PYTHONHOME set. Linux and Mac don't require it to be set if tested after building,
             # but if the package is relocated then it needs to be set.
-            if conan2:
-                os.environ["PYTHONHOME"] = self.dependencies["cpython"].conf_info.get("user.cpython:pythonhome", check_type=str)
-            else:
-                os.environ["PYTHONHOME"] = self.deps_user_info["cpython"].pythonhome
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
+            os.environ["PYTHONHOME"] = self.dependencies["cpython"].conf_info.get("user.cpython:pythonhome", check_type=str)
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")
