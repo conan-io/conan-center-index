@@ -4,7 +4,7 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class NetcdfConan(ConanFile):
@@ -138,9 +138,8 @@ class NetcdfConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "netCDF")
-        self.cpp_info.set_property("cmake_target_name", "netCDF::netcdf")
-        self.cpp_info.set_property("pkg_config_name", "netcdf")
-        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
+        self.cpp_info.components["libnetcdf"].set_property("cmake_target_name", "netCDF::netcdf")
+        self.cpp_info.components["libnetcdf"].set_property("pkg_config_name", "netcdf")
         self.cpp_info.components["libnetcdf"].libs = ["netcdf"]
         if self._with_hdf5:
             self.cpp_info.components["libnetcdf"].requires.append("hdf5::hdf5")
@@ -156,10 +155,3 @@ class NetcdfConan(ConanFile):
             if self.options.shared:
                 self.cpp_info.components["libnetcdf"].defines.append("DLL_NETCDF")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "netCDF"
-        self.cpp_info.names["cmake_find_package_multi"] = "netCDF"
-        self.cpp_info.components["libnetcdf"].names["cmake_find_package"] = "netcdf"
-        self.cpp_info.components["libnetcdf"].names["cmake_find_package_multi"] = "netcdf"
-        self.cpp_info.components["libnetcdf"].set_property("cmake_target_name", "netCDF::netcdf")
-        self.cpp_info.components["libnetcdf"].set_property("pkg_config_name", "netcdf")
