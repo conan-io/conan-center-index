@@ -6,7 +6,7 @@ from conan.tools.files import apply_conandata_patches, chdir, copy, export_conan
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, VCVars, is_msvc_static_runtime
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class PremakeConan(ConanFile):
