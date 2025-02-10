@@ -9,7 +9,7 @@ from conan.tools.scm import Version
 import glob
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class AeronConan(ConanFile):
@@ -34,40 +34,13 @@ class AeronConan(ConanFile):
         "build_aeron_driver": True,
         "build_aeron_archive_api": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return "11"
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "5",
-        }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
-
+        check_min_cppstd(self, 11)
         if self.settings.os == "Macos" and self.settings.arch == "armv8":
             raise ConanInvalidConfiguration("This platform (os=Macos arch=armv8) is not yet supported by this recipe")
 
@@ -159,6 +132,3 @@ class AeronConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["winmm", "wsock32", "ws2_32", "iphlpapi"]
             self.cpp_info.defines.append("HAVE_WSAPOLL")
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
