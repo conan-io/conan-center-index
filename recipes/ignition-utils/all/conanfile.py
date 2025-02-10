@@ -2,15 +2,13 @@ import os
 import textwrap
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rm, rmdir, save, replace_in_file
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.56.0 <2 || >=2.0.6"
+required_conan_version = ">=2.0.9"
 
 
 class IgnitionUtilsConan(ConanFile):
@@ -33,32 +31,7 @@ class IgnitionUtilsConan(ConanFile):
         "fPIC": True,
         "ign_utils_vendor_cli11": True,
     }
-
-    @property
-    def _minimum_cpp_standard(self):
-        return 17
-
-    @property
-    def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "8",
-            "clang": "5",
-            "apple-clang": "10",
-        }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -69,24 +42,12 @@ class IgnitionUtilsConan(ConanFile):
             self.requires("cli11/2.4.2")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._minimum_cpp_standard)
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if min_version and Version(self.settings.compiler.version) < min_version:
-            raise ConanInvalidConfiguration(
-                f"{self.name} requires c++17 support. "
-                f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it."
-            )
-
-    def requirements(self):
-        self.requires("doxygen/[>=1.8 <2]")
-        if self.options.ign_utils_vendor_cli11:
-            self.requires("cli11/2.1.2")
+        check_min_cppstd(self, 17)
 
     def build_requirements(self):
         self.tool_requires("ignition-cmake/2.17.1")
-        self.tool_requires("doxygen/1.9.4")
-        if self._settings_build.os == "Windows":
+        self.tool_requires("doxygen/[>=1.8 <2]")
+        if self.settings_build.os == "Windows":
             # For sed
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -162,7 +123,6 @@ class IgnitionUtilsConan(ConanFile):
         lib_name = f"ignition-utils{version_major}"
         self.cpp_info.set_property("cmake_file_name", lib_name)
         self.cpp_info.set_property("cmake_target_name", f"{lib_name}::{lib_name}")
-        build_dirs = os.path.join(self.package_folder, "lib", "cmake")
         include_dir = os.path.join(self.package_folder, "include", "ignition", f"utils{version_major}")
 
         main_component = self.cpp_info.components[lib_name]
@@ -175,22 +135,3 @@ class IgnitionUtilsConan(ConanFile):
         cli_component.includedirs.append(os.path.join(include_dir, "ignition", "utils"))
         if self.options.ign_utils_vendor_cli11:
             cli_component.requires.append("cli11::cli11")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = lib_name
-        self.cpp_info.names["cmake_find_package_multi"] = lib_name
-        self.cpp_info.names["cmake_paths"] = lib_name
-        main_component.names["cmake_find_package"] = lib_name
-        main_component.names["cmake_find_package_multi"] = lib_name
-        main_component.names["cmake_paths"] = lib_name
-        main_component.builddirs.append(build_dirs)
-        main_component.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        main_component.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        main_component.build_modules["cmake_paths"] = [self._module_file_rel_path]
-        cli_component.names["cmake_find_package"] = "cli"
-        cli_component.names["cmake_find_package_multi"] = "cli"
-        cli_component.names["cmake_paths"] = "cli"
-        cli_component.builddirs.append(build_dirs)
-        cli_component.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        cli_component.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        cli_component.build_modules["cmake_paths"] = [self._module_file_rel_path]
