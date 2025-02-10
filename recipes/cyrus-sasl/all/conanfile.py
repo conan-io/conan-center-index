@@ -1,15 +1,16 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path, is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild
-import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class CyrusSaslConan(ConanFile):
@@ -61,10 +62,6 @@ class CyrusSaslConan(ConanFile):
         "with_saslauthd": True,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -101,7 +98,9 @@ class CyrusSaslConan(ConanFile):
         if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.1.0")
         if self.options.get_safe("with_sqlite3"):
-            self.requires("sqlite3/3.44.2")
+            self.requires("sqlite3/[>=3.45.0 <4]")
+        if self.options.with_saslauthd and self.settings.os in ["Linux", "FreeBSD"]:
+            self.requires("libxcrypt/4.4.36")
 
     def validate(self):
         if is_msvc(self) and not self.options.shared:
@@ -116,10 +115,9 @@ class CyrusSaslConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def _generate_autotools(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
@@ -229,7 +227,6 @@ class CyrusSaslConan(ConanFile):
             self._generate_autotools()
 
     def build(self):
-        apply_conandata_patches(self)
         if is_msvc(self):
             self._build_msvc()
         else:
@@ -255,10 +252,5 @@ class CyrusSaslConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["resolv"]
-            if self.options.with_saslauthd:
-                self.cpp_info.system_libs.append("crypt")
         elif is_msvc(self):
             self.cpp_info.system_libs = ["ws2_32"]
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
