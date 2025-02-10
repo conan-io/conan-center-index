@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import check_min_cstd
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import  copy, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -9,7 +10,7 @@ from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.4.0"
 
 
 class LibTasn1Conan(ConanFile):
@@ -30,20 +31,8 @@ class LibTasn1Conan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
+    languages = ["C"]
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -51,14 +40,16 @@ class LibTasn1Conan(ConanFile):
     def validate(self):
         if is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support Visual Studio")
+        if self.settings.get_safe("compiler.cstd"):
+            check_min_cstd(self, 99)
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("bison/3.8.2")
 
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -92,7 +83,6 @@ class LibTasn1Conan(ConanFile):
                             "# define _GL_EXTERN_INLINE _GL_UNUSED")
 
     def build(self):
-        self._patch_sources()
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
@@ -110,6 +100,3 @@ class LibTasn1Conan(ConanFile):
         self.cpp_info.libs = ["tasn1"]
         if not self.options.shared:
             self.cpp_info.defines = ["ASN1_STATIC"]
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
