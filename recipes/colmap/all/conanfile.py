@@ -1,11 +1,12 @@
 import os
+from pathlib import Path
 
 from conan import ConanFile
-from conan.tools.build import check_min_cppstd, can_run
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rm, rmdir, replace_in_file, load, save
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 class ColmapConan(ConanFile):
     name = "colmap"
@@ -38,13 +39,10 @@ class ColmapConan(ConanFile):
         "tools": True,
         "cuda_architectures": "all-major",
     }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         copy(self, "colmap-conan-vars.cmake.in", self.recipe_folder, self.export_sources_folder)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def configure(self):
         if not self.options.cuda:
@@ -54,7 +52,7 @@ class ColmapConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.84.0", transitive_headers=True, transitive_libs=True)
+        self.requires("boost/1.86.0", transitive_headers=True, transitive_libs=True)
         # Ceres 2.2.0 is not compatible as of v3.10
         self.requires("ceres-solver/2.1.0", transitive_headers=True, transitive_libs=True)
         self.requires("eigen/3.4.0", transitive_headers=True, transitive_libs=True)
@@ -70,7 +68,7 @@ class ColmapConan(ConanFile):
             self.requires("cgal/5.6.1")
         if self.options.gui:
             # Qt6 is not supported
-            self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True, run=can_run(self))
+            self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
         if self.options.gui or self.options.cuda:
             self.requires("glew/2.2.0")
             self.requires("opengl/system")
@@ -81,9 +79,8 @@ class ColmapConan(ConanFile):
         check_min_cppstd(self, 14)
 
     def build_requirements(self):
-        if self.options.cuda:
-            self.tool_requires("cmake/[>=3.24 <4]")
-        if self.options.gui and not can_run(self):
+        self.tool_requires("cmake/[>=3.27 <4]")
+        if self.options.gui:
             self.tool_requires("qt/<host_version>")
 
     def source(self):
@@ -127,10 +124,10 @@ class ColmapConan(ConanFile):
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "set(CMAKE_CUDA_STANDARD 14)", "")
 
-        for module in self.source_path.joinpath("cmake").glob("Find*.cmake"):
+        for module in Path(self.source_folder, "cmake").glob("Find*.cmake"):
             if module.name != "FindDependencies.cmake":
                 module.unlink()
-        find_dependencies = self.source_path.joinpath("cmake", "FindDependencies.cmake")
+        find_dependencies = Path(self.source_folder, "cmake", "FindDependencies.cmake")
         replace_in_file(self, find_dependencies, " QUIET", " REQUIRED")
 
         if not self.options.gui and not self.options.cuda:
@@ -171,8 +168,6 @@ class ColmapConan(ConanFile):
         module_rel_path = os.path.join("lib", "cmake", "colmap-conan-vars.cmake")
         self.cpp_info.builddirs.append(os.path.join("lib", "cmake"))
         self.cpp_info.set_property("cmake_build_modules", [module_rel_path])
-        self.cpp_info.build_modules["cmake_find_package"] = [module_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [module_rel_path]
 
         def _add_component(name, requires):
             component = self.cpp_info.components[name]
