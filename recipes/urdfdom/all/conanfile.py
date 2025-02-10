@@ -6,7 +6,7 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class PackageConan(ConanFile):
@@ -26,21 +26,10 @@ class PackageConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 14
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -54,11 +43,11 @@ class PackageConan(ConanFile):
             self.requires("tinyxml/2.6.2", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 14)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -73,7 +62,6 @@ class PackageConan(ConanFile):
         CMakeDeps(self).generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Do not hard-code libraries to SHARED
         parser_cmakelists = os.path.join(self.source_folder, "urdf_parser", "CMakeLists.txt")
         replace_in_file(self, parser_cmakelists, " SHARED", "")
