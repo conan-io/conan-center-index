@@ -6,9 +6,8 @@ from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import get, copy, rmdir, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class USearchConan(ConanFile):
@@ -40,16 +39,6 @@ class USearchConan(ConanFile):
     }
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
-
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "6",
-        }
 
     def export_sources(self):
         copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
@@ -83,20 +72,14 @@ class USearchConan(ConanFile):
         #     self.requires("llvm-openmp/17.0.6")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
-
+        check_min_cppstd(self, 11)
         if is_msvc(self) and not self.options.header_only and not self.options.shared:
             # test_package fails with STATUS_ACCESS_VIOLATION
             raise ConanInvalidConfiguration("usearch does not support static linkage with MSVC")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         if not self.options.header_only:
@@ -119,7 +102,6 @@ class USearchConan(ConanFile):
             deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Disable address sanitizer, which is not compatible with Conan packages
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
                         "-fsanitize=address", "")
@@ -153,9 +135,8 @@ class USearchConan(ConanFile):
         else:
             prefix = "lib" if self.settings.os == "Windows" else ""
             self.cpp_info.libs = [prefix + "usearch_c"]
-
-        if stdcpp_library(self):
-            self.cpp_info.system_libs.append(stdcpp_library(self))
+            if stdcpp_library(self):
+                self.cpp_info.system_libs.append(stdcpp_library(self))
 
         self.cpp_info.defines += [
             f"USEARCH_USE_OPENMP={int(self.options.get_safe('with_openmp', False))}",
