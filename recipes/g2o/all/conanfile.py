@@ -144,6 +144,23 @@ class G2oConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        copy(self, "FindSuiteSparse.cmake", self.export_sources_folder, os.path.join(self.source_folder, "cmake_modules"))
+        save(self, os.path.join(self.source_folder, "g2o", "EXTERNAL", "CMakeLists.txt"), "")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "find_package(CSparse)", "find_package(CSPARSE)")
+        replace_in_file(self, os.path.join(self.source_folder, "g2o", "solvers", "csparse", "CMakeLists.txt"),
+                        "$<BUILD_INTERFACE:${CSPARSE_INCLUDE_DIR}>",
+                        '"$<BUILD_INTERFACE:${CSPARSE_INCLUDE_DIR}>"')
+        replace_in_file(self, os.path.join(self.source_folder, "g2o", "solvers", "csparse", "CMakeLists.txt"),
+                        "${CSPARSE_LIBRARY}", "${CSPARSE_LIBRARIES}")
+        # Ensure GLU from Conan is used
+        glu = "glu" if "glu" in self.dependencies else "mesa-glu"
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "find_package(OpenGL)",
+                        f"find_package(OpenGL)\nfind_package({glu})")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "OpenGL::GLU", f"{glu}::{glu}")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -180,27 +197,7 @@ class G2oConan(ConanFile):
         deps.set_property("suitesparse-cxsparse", "cmake_file_name", "CSPARSE")
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        copy(self, "FindSuiteSparse.cmake", self.export_sources_folder, os.path.join(self.source_folder, "cmake_modules"))
-        save(self, os.path.join(self.source_folder, "g2o", "EXTERNAL", "CMakeLists.txt"), "")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "find_package(CSparse)", "find_package(CSPARSE)")
-        replace_in_file(self, os.path.join(self.source_folder, "g2o", "solvers", "csparse", "CMakeLists.txt"),
-                        "$<BUILD_INTERFACE:${CSPARSE_INCLUDE_DIR}>",
-                        '"$<BUILD_INTERFACE:${CSPARSE_INCLUDE_DIR}>"')
-        replace_in_file(self, os.path.join(self.source_folder, "g2o", "solvers", "csparse", "CMakeLists.txt"),
-                        "${CSPARSE_LIBRARY}", "${CSPARSE_LIBRARIES}")
-        # Ensure GLU from Conan is used
-        glu = "glu" if "glu" in self.dependencies else "mesa-glu"
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "find_package(OpenGL)",
-                        f"find_package(OpenGL)\nfind_package({glu})")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "OpenGL::GLU", f"{glu}::{glu}")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
