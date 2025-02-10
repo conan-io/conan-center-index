@@ -4,7 +4,6 @@ from pathlib import Path
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
@@ -141,11 +140,11 @@ class wxWidgetsConan(ConanFile):
             self.requires("gtk/4.15.6", transitive_headers=True, transitive_libs=True)
         elif self._toolkit == "qt":
             # Used in wx/qt/private/converter.h and other public headers
-            self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True, run=can_run(self))
+            self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
 
         self.requires("expat/[>=2.6.2 <3]")
         self.requires("libpng/[>=1.6 <2]")
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/[>=4.5 <5]")
         self.requires("nanosvg/cci.20231025")
         self.requires("pcre2/10.42")
         self.requires("xz_utils/[>=5.4.5 <6]")
@@ -176,8 +175,7 @@ class wxWidgetsConan(ConanFile):
             if self.options.secretstore:
                 self.requires("libsecret/0.21.4")
             if self.options.mediactrl and self._toolkit.startswith("gtk"):
-                self.requires("gstreamer/1.22.3")
-                self.requires("gst-plugins-base/1.19.2")
+                self.requires("gst-plugins-base/1.24.11")
             if self._toolkit.startswith("gtk"):
                 self.requires("xkbcommon/1.6.0", options={"with_x11": True})
             if self.options.webrequest:
@@ -199,9 +197,11 @@ class wxWidgetsConan(ConanFile):
                 raise ConanInvalidConfiguration("The 'with_x11' option for the 'xkbcommon' package must be enabled")
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.17 <4]")
+        self.tool_requires("cmake/[>=3.27 <4]")
         self.tool_requires("ninja/[>=1.10.2 <2]")
-        if self._toolkit == "qt" and not can_run(self):
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
+        if self._toolkit == "qt":
             self.tool_requires("qt/<host_version>")
 
     def layout(self):
@@ -440,7 +440,7 @@ class wxWidgetsConan(ConanFile):
         if self.settings.os == "Windows":
             self.cpp_info.defines.append("UNICODE")
         if self.settings.os != "Windows":
-            self.cpp_info.defines.append("-D_FILE_OFFSET_BITS=64")
+            self.cpp_info.defines.append("_FILE_OFFSET_BITS=64")
         if self.options.shared:
             self.cpp_info.defines.append("WXUSINGDLL")
         # https://github.com/wxWidgets/wxWidgets/blob/v3.2.6/build/cmake/toolkit.cmake
