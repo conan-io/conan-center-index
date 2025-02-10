@@ -5,7 +5,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0"
 
 class GdalcppConan(ConanFile):
     name = "gdalcpp"
@@ -23,14 +23,13 @@ class GdalcppConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("gdal/3.8.3")
+        self.requires("gdal/3.10.0")
 
     def package_id(self):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
