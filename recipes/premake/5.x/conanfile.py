@@ -55,6 +55,7 @@ class PremakeConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _conan_deps_lua(self):
@@ -78,8 +79,6 @@ class PremakeConan(ConanFile):
              (includedirs, libdirs, libs, defines))
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         if self.options.get_safe("lto", None) is False:
             replace_in_file(self, os.path.join(self.source_folder, "premake5.lua"),
                             '"LinkTimeOptimization"', "")
@@ -128,19 +127,14 @@ class PremakeConan(ConanFile):
 
     @property
     def _vs_ide_year(self):
-        compiler_version = str(self.settings.compiler.version)
-        if str(self.settings.compiler) == "Visual Studio":
-            year = {"17": "2022",
-                    "16": "2019",
-                    "15": "2017",
-                    "14": "2015",
-                    "12": "2013"}.get(compiler_version)
-        else:
-            year = {"193": "2022",
-                    "192": "2019",
-                    "191": "2017",
-                    "190": "2015",
-                    "180": "2013"}.get(compiler_version)
+        year = {
+            "194": "2022",
+            "193": "2022",
+            "192": "2019",
+            "191": "2017",
+            "190": "2015",
+            "180": "2013",
+        }.get(str(self.settings.compiler.version))
         if self.version == "5.0.0-alpha15" and year == "2022":
             year = "2019"
         return year
@@ -169,7 +163,3 @@ class PremakeConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        bindir = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bindir)
