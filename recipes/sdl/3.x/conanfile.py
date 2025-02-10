@@ -27,7 +27,6 @@ _subsystems = [
     ("dialog", []),
 ]
 
-
 class SDLConan(ConanFile):
     name = "sdl"
     description = "A cross-platform development library designed to provide low level access to audio, keyboard, mouse, joystick, and graphics hardware"
@@ -43,7 +42,10 @@ class SDLConan(ConanFile):
             "shared": [True, False],
             "fPIC": [True, False],
         },
-        **{subsystem: [None, True, False] for subsystem, _ in _subsystems}
+        **{subsystem: [None, True, False] for subsystem, _ in _subsystems},
+        **{
+            "alsa": [None, True, False],
+        }
     }
 
     default_options = {
@@ -51,7 +53,10 @@ class SDLConan(ConanFile):
             "shared": False,
             "fPIC": False,
         },
-        **{subsystem: None for subsystem, _ in _subsystems}
+        **{subsystem: None for subsystem, _ in _subsystems},
+        **{
+            "alsa": None,
+        }
     }
 
     def config_options(self):
@@ -75,6 +80,10 @@ class SDLConan(ConanFile):
                     # CMakeLists.txt#L343
                     default_subsystem_value = False
                 setattr(self.options, subsystem, default_subsystem_value)
+
+        if self.options.get_safe("alsa") == None:
+            # CMakeLists.txt#L298
+            setattr(self.options, "alsa", self._is_unix_sys and self.options.get_safe("audio"))
 
     def validate(self):
         # If any of the subsystems is enabled, then the corresponding dependencies must be enabled
@@ -140,6 +149,8 @@ class SDLConan(ConanFile):
             self.requires("dbus/1.15.8")
         if self._supports_pulseaudio:
             self.requires("pulseaudio/17.0")
+        if self.options.get_safe("alsa"):
+            self.requires("libalsa/1.2.12")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -148,16 +159,19 @@ class SDLConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["SDL_SHARED"] = self.options.shared
-        tc.variables["SDL_STATIC"] = not self.options.shared
+        tc.cache_variables["SDL_SHARED"] = self.options.shared
+        tc.cache_variables["SDL_STATIC"] = not self.options.shared
         # Todo: Remove after recipe develop is finished
-        tc.variables["SDL_TEST_LIBRARY"] = True
-        tc.variables["SDL_TESTS"] = True
-        tc.variables["SDL_EXAMPLES"] = True
+        tc.cache_variables["SDL_TEST_LIBRARY"] = True
+        tc.cache_variables["SDL_TESTS"] = True
+        tc.cache_variables["SDL_EXAMPLES"] = True
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         if self._needs_libusb:
-            tc.variables["SDL_HIDAPI_LIBUSB"] = True
-            tc.variables["SDL_HIDAPI_LIBUSB_SHARED"] = self.dependencies["libusb"].options.get_safe("shared", False)
+            tc.cache_variables["SDL_HIDAPI_LIBUSB"] = True
+            tc.cache_variables["SDL_HIDAPI_LIBUSB_SHARED"] = self.dependencies["libusb"].options.get_safe("shared", False)
+        if self.options.get_safe("alsa"):
+            tc.cache_variables["SDL_ALSA"] = True
+            tc.cache_variables["SDL_ALSA_SHARED"] = self.dependencies["libalsa"].options.shared
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("libusb", "cmake_target_name", "LibUSB::LibUSB")

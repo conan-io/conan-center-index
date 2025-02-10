@@ -1,4 +1,4 @@
 sources:
-  "3.1.6-pre":
-    url: "https://github.com/libsdl-org/SDL/archive/refs/tags/preview-3.1.6.tar.gz"
-    sha256: "5da5e265c150b954d007bf1465b155d9df1d0d52f10115a49bb918dc8fe2826a"
+  "3.2.2":
+    url: "https://github.com/libsdl-org/SDL/releases/download/release-3.2.2/SDL3-3.2.2.tar.gz"
+    sha256: "d3dcf1b2f64746be0f248ef27b35aec4f038dafadfb83491f98a7fecdaf6efec"
