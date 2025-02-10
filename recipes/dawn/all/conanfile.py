@@ -6,7 +6,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches, save
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class DawnConan(ConanFile):
@@ -41,8 +41,7 @@ class DawnConan(ConanFile):
         self.requires("spirv-tools/1.3.290.0", headers=False, libs=False, visible=False)
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.17.2 <4]")
@@ -52,6 +51,7 @@ class DawnConan(ConanFile):
         # Dawn uses SPIRV-Tools internals, so we need to provide a vendored version
         get(self, **self.conan_data["spirv-tools-sources"][str(self.dependencies["spirv-tools"].ref.version)], strip_root=True,
             destination=os.path.join(self.source_folder, "third_party", "spirv-tools", "src"))
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -80,7 +80,6 @@ class DawnConan(ConanFile):
         save(self, "SPIRV-ToolsConfig.cmake", "set(SPIRV-Tools_FOUND TRUE)")
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Make sure everything is unvendored
         for path in Path(self.source_folder, "third_party").iterdir():
             if path.is_dir() and path.name != "spirv-tools":
