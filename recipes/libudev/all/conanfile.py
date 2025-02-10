@@ -69,6 +69,7 @@ class LibUdevConan(ConanFile):
         with tarfile.open("sources.tar.gz", "r:gz") as tar:
             tar.extractall()
         move_folder_contents(self, os.path.join(self.source_folder, f"systemd-stable-{self.version}"), self.source_folder)
+        apply_conandata_patches(self)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -113,7 +114,6 @@ class LibUdevConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
         meson.build(target="udev:shared_library")
