@@ -1,11 +1,10 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import chdir, copy, get, save
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps, GnuToolchain
+from conan.tools.files import chdir, copy, get, save, replace_in_file
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps, GnuToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc
 
@@ -46,6 +45,8 @@ class NativefiledialogConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("premake/5.0.0-alpha15")
+        if not is_msvc(self) and not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -53,22 +54,14 @@ class NativefiledialogConan(ConanFile):
     @property
     def _vs_ide_year(self):
         compiler_version = str(self.settings.compiler.version)
-        if str(self.settings.compiler) == "Visual Studio":
-            return {
-                "12": "2013",
-                "14": "2015",
-                "15": "2017",
-                "16": "2019",
-                "17": "2022",
-            }[compiler_version]
-        else:
-            return {
-                "180": "2013",
-                "190": "2015",
-                "191": "2017",
-                "192": "2019",
-                "193": "2022",
-            }[compiler_version]
+        return {
+            "180": "2013",
+            "190": "2015",
+            "191": "2017",
+            "192": "2019",
+            "193": "2022",
+            "194": "2022",
+        }[compiler_version]
 
     @property
     def _build_subdir(self):
@@ -110,6 +103,9 @@ class NativefiledialogConan(ConanFile):
 
     def build(self):
         with chdir(self, self._build_subdir):
+            # Use the correct pkg-config executable
+            replace_in_file(self, "premake5.lua",  "pkg-config", self.conf.get("tools.gnu:pkg_config", default="pkgconf", check_type=str))
+
             if is_msvc(self):
                 ide_year = self._vs_ide_year
                 # 2022 is not directly supported as of v116
