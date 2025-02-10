@@ -5,7 +5,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class ZintConan(ConanFile):
@@ -53,7 +53,7 @@ class ZintConan(ConanFile):
             self.requires("libpng/[>=1.6 <2]")
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_qt:
-            self.requires("qt/5.15.11")
+            self.requires("qt/[~5.15]")
 
     def validate(self):
         if self.options.with_qt and not self.dependencies["qt"].options.gui:
@@ -61,6 +61,7 @@ class ZintConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -83,7 +84,6 @@ class ZintConan(ConanFile):
         deps.generate()
 
     def _patch_source(self):
-        apply_conandata_patches(self)
         cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
         # Disable subdirectories
         save(self, os.path.join(self.source_folder, "frontend", "CMakeLists.txt"), "")
@@ -148,12 +148,3 @@ class ZintConan(ConanFile):
 
         # Trick to only define Zint::QZint and Zint::Zint in CMakeDeps generator
         self.cpp_info.set_property("cmake_target_name", "Zint::QZint" if self.options.with_qt else "Zint::Zint")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Zint"
-        self.cpp_info.names["cmake_find_package_multi"] = "Zint"
-        self.cpp_info.components["libzint"].names["cmake_find_package"] = "Zint"
-        self.cpp_info.components["libzint"].names["cmake_find_package_multi"] = "Zint"
-        if self.options.with_qt:
-            self.cpp_info.components["libqzint"].names["cmake_find_package"] = "QZint"
-            self.cpp_info.components["libqzint"].names["cmake_find_package_multi"] = "QZint"
