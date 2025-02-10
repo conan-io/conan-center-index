@@ -4,14 +4,13 @@ import re
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, load, mkdir, rm, rmdir, save
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvs_toolset, msvc_runtime_flag
 from conan.tools.scm import Version
 from conan.tools.scons import SConsDeps
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class SerfConan(ConanFile):
@@ -66,6 +65,9 @@ class SerfConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        pc_in = os.path.join(self.source_folder, "build", "serf.pc.in")
+        save(self, pc_in, load(self, pc_in))
 
     @property
     def _cc(self):
@@ -78,9 +80,6 @@ class SerfConan(ConanFile):
         return str(self.settings.compiler)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = SConsDeps(self)
         tc.generate()
 
@@ -102,10 +101,6 @@ class SerfConan(ConanFile):
         save(self, os.path.join(self.generators_folder, "scons_args"), scons_args)
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-        pc_in = os.path.join(self.source_folder, "build", "serf.pc.in")
-        save(self, pc_in, load(self, pc_in))
-
         sconstruct = os.path.join(self.source_folder, "SConstruct")
         if is_msvc(self):
             content = load(self, sconstruct)
