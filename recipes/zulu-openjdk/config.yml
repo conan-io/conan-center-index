@@ -1,7 +1,11 @@
 versions:
+  "21.0.4":
+    folder: all
   "21.0.1":
     folder: all
   "17.0.9":
+    folder: all
+  "11.0.24":
     folder: all
   "11.0.19":
     folder: all

@@ -1,27 +1,35 @@
 sources:
+  "1.34.3":
+    url: "https://github.com/c-ares/c-ares/releases/download/v1.34.3/c-ares-1.34.3.tar.gz"
+    sha256: "26e1f7771da23e42a18fdf1e58912a396629e53a2ac71b130af93bbcfb90adbe"
+  "1.34.1":
+    url: "https://github.com/c-ares/c-ares/releases/download/v1.34.1/c-ares-1.34.1.tar.gz"
+    sha256: "7e846f1742ab5998aced36d170408557de5292b92ec404fb0f7422f946d60103"
+  "1.33.1":
+    url: "https://github.com/c-ares/c-ares/releases/download/v1.33.1/c-ares-1.33.1.tar.gz"
+    sha256: "06869824094745872fa26efd4c48e622b9bd82a89ef0ce693dc682a23604f415"
+  "1.33.0":
+    url: "https://github.com/c-ares/c-ares/releases/download/v1.33.0/c-ares-1.33.0.tar.gz"
+    sha256: "3e41df2f172041eb4ecb754a464c11ccc5046b2a1c8b1d6a40dac45d3a3b2346"
+  "1.32.3":
+    url: "https://github.com/c-ares/c-ares/releases/download/v1.32.3/c-ares-1.32.3.tar.gz"
+    sha256: "5f02cc809aac3f6cc5edc1fac6c4423fd5616d7406ce47b904c24adf0ff2cd0f"
+  "1.32.2":
+    url: "https://github.com/c-ares/c-ares/releases/download/v1.32.2/c-ares-1.32.2.tar.gz"
+    sha256: "072ff6b30b9682d965b87eb9b77851dc1cd8e6d8090f6821a56bd8fa89595061"
   "1.32.1":
     url: "https://github.com/c-ares/c-ares/releases/download/v1.32.1/c-ares-1.32.1.tar.gz"
     sha256: "63be2c4ee121faa47e9766f735b4cde750fff2c563f81c11e572d3dc6401e5e7"
   "1.31.0":
     url: "https://github.com/c-ares/c-ares/releases/download/v1.31.0/c-ares-1.31.0.tar.gz"
     sha256: "0167a33dba96ca8de29f3f598b1e6cabe531799269fd63d0153aa0e6f5efeabd"
-  "1.30.0":
-    url: "https://github.com/c-ares/c-ares/releases/download/v1.30.0/c-ares-1.30.0.tar.gz"
-    sha256: "4fea312112021bcef081203b1ea020109842feb58cd8a36a3d3f7e0d8bc1138c"
-  "1.28.1":
-    url: "https://github.com/c-ares/c-ares/releases/download/cares-1_28_1/c-ares-1.28.1.tar.gz"
-    sha256: "675a69fc54ddbf42e6830bc671eeb6cd89eeca43828eb413243fd2c0a760809d"
-  "1.27.0":
-    url: "https://github.com/c-ares/c-ares/releases/download/cares-1_27_0/c-ares-1.27.0.tar.gz"
-    sha256: "0a72be66959955c43e2af2fbd03418e82a2bd5464604ec9a62147e37aceb420b"
-  "1.26.0":
-    url: "https://github.com/c-ares/c-ares/releases/download/cares-1_26_0/c-ares-1.26.0.tar.gz"
-    sha256: "bed58c4f02b009080ebda6c2467ba469722ac6aebbf4497dc44a83d8c6194e50"
   # keep 1.25.0 for libnghttp2, trantor, libcoro
   "1.25.0":
     url: "https://github.com/c-ares/c-ares/releases/download/cares-1_25_0/c-ares-1.25.0.tar.gz"
     sha256: "71832b93a48f5ff579c505f4869120c14e57b783275367207f1a98314aa724e5"
-  # keep 1.19.1 for grpc
-  "1.19.1":
-    url: "https://github.com/c-ares/c-ares/releases/download/cares-1_19_1/c-ares-1.19.1.tar.gz"
-    sha256: "321700399b72ed0e037d0074c629e7741f6b2ec2dda92956abe3e9671d3e268e"
+patches:
+  "1.33.0":
+    - patch_file: "patches/1.33.0-0001-fix-tcp-fastopen.patch"
+      patch_description: "fix compilation error for TCP_FASTOPEN_CONNECT"
+      patch_type: "portability"
+      patch_source: "https://github.com/c-ares/c-ares/commit/4abdf7de3678d98f474bd2abeedea741f6c50231"

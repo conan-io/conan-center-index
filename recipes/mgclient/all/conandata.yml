@@ -1,8 +1,15 @@
 sources:
+  "1.4.3":
+    url: "https://github.com/memgraph/mgclient/archive/refs/tags/v1.4.3.tar.gz"
+    sha256: "f446b469532cd5154b8fb986ac57ca9880763e34c77e564d2c4c948989b0244e"
   "1.4.2":
     url: "https://github.com/memgraph/mgclient/archive/refs/tags/v1.4.2.tar.gz"
     sha256: "aa89422636b1e25b8f9f34453f331e15d32a5957a9b2381c3598fc3644dbc043"
 patches:
+  "1.4.3":
+    - patch_file: "patches/1.4.2-0001-static-shared.build.patch"
+      patch_description: "make static and shared build separated"
+      patch_type: "conan"
   "1.4.2":
     - patch_file: "patches/1.4.2-0001-static-shared.build.patch"
       patch_description: "make static and shared build separated"

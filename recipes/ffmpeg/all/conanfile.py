@@ -5,7 +5,7 @@ from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import (
     apply_conandata_patches, chdir, copy, export_conandata_patches, get, rename,
-    replace_in_file, rm, rmdir
+    replace_in_file, rm, rmdir, save, load
 )
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -74,6 +74,10 @@ class FFMpegConan(ConanFile):
         "with_libsvtav1": [True, False],
         "with_libaom": [True, False],
         "with_libdav1d": [True, False],
+        "with_libdrm": [True, False],
+        "with_jni": [True, False],
+        "with_mediacodec": [True, False],
+        "with_xlib": [True, False],
         "disable_everything": [True, False],
         "disable_all_encoders": [True, False],
         "disable_encoders": [None, "ANY"],
@@ -154,6 +158,10 @@ class FFMpegConan(ConanFile):
         "with_libsvtav1": True,
         "with_libaom": True,
         "with_libdav1d": True,
+        "with_libdrm": False,
+        "with_jni": False,
+        "with_mediacodec": False,
+        "with_xlib": True,
         "disable_everything": False,
         "disable_all_encoders": False,
         "disable_encoders": None,
@@ -190,8 +198,6 @@ class FFMpegConan(ConanFile):
         "disable_filters": None,
         "enable_filters": None,
     }
-    # Fix for mslink: Argument list too long
-    short_paths = True
 
     @property
     def _settings_build(self):
@@ -227,19 +233,13 @@ class FFMpegConan(ConanFile):
             "with_libsvtav1": ["avcodec"],
             "with_libaom": ["avcodec"],
             "with_libdav1d": ["avcodec"],
+            "with_mediacodec": ["with_jni"],
+            "with_xlib": ["avdevice"],
         }
-
-    @property
-    def _version_supports_vulkan(self):
-        return Version(self.version) >= "4.3.0"
 
     @property
     def _version_supports_libsvtav1(self):
         return Version(self.version) >= "5.1.0"
-
-    @property
-    def _version_supports_libdav1d(self):
-        return Version(self.version) >= "4.3.0"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -247,13 +247,15 @@ class FFMpegConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if not self.settings.os in ["Linux", "FreeBSD"]:
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             del self.options.with_vaapi
             del self.options.with_vdpau
             del self.options.with_vulkan
             del self.options.with_xcb
             del self.options.with_libalsa
             del self.options.with_pulse
+            del self.options.with_xlib
+            del self.options.with_libdrm
         if self.settings.os != "Macos":
             del self.options.with_appkit
         if self.settings.os not in ["Macos", "iOS", "tvOS"]:
@@ -262,12 +264,13 @@ class FFMpegConan(ConanFile):
             del self.options.with_videotoolbox
         if not is_apple_os(self):
             del self.options.with_avfoundation
-        if not self._version_supports_vulkan:
-            self.options.rm_safe("with_vulkan")
+        if not self.settings.os == "Android":
+            del self.options.with_jni
+            del self.options.with_mediacodec
         if not self._version_supports_libsvtav1:
             self.options.rm_safe("with_libsvtav1")
-        if not self._version_supports_libdav1d:
-            self.options.rm_safe("with_libdav1d")
+        if self.settings.os == "Android":
+            del self.options.with_libfdk_aac
 
     def configure(self):
         if self.options.shared:
@@ -290,9 +293,9 @@ class FFMpegConan(ConanFile):
         if self.options.with_freetype:
             self.requires("freetype/2.13.2")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.5.0")
+            self.requires("openjpeg/2.5.2")
         if self.options.with_openh264:
-            self.requires("openh264/2.3.1")
+            self.requires("openh264/2.4.1")
         if self.options.with_vorbis:
             self.requires("vorbis/1.3.7")
         if self.options.with_opus:
@@ -302,14 +305,14 @@ class FFMpegConan(ConanFile):
         if self.options.with_sdl:
             self.requires("sdl/2.28.5")
         if self.options.with_libx264:
-            self.requires("libx264/cci.20220602")
+            self.requires("libx264/cci.20240224")
         if self.options.with_libx265:
             self.requires("libx265/3.4")
         if self.options.with_libvpx:
-            self.requires("libvpx/1.13.1")
+            self.requires("libvpx/1.14.1")
         if self.options.with_libmp3lame:
             self.requires("libmp3lame/3.100")
-        if self.options.with_libfdk_aac:
+        if self.options.get_safe("with_libfdk_aac"):
             self.requires("libfdk_aac/2.0.3")
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.2")
@@ -317,7 +320,7 @@ class FFMpegConan(ConanFile):
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_libalsa"):
             self.requires("libalsa/1.2.10")
-        if self.options.get_safe("with_xcb") or self.options.get_safe("with_vaapi"):
+        if self.options.get_safe("with_xcb") or self.options.get_safe("with_xlib"):
             self.requires("xorg/system")
         if self.options.get_safe("with_pulse"):
             self.requires("pulseaudio/14.2")
@@ -325,14 +328,16 @@ class FFMpegConan(ConanFile):
             self.requires("vaapi/system")
         if self.options.get_safe("with_vdpau"):
             self.requires("vdpau/system")
-        if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
+        if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.243.0")
         if self.options.get_safe("with_libsvtav1"):
-            self.requires("libsvtav1/1.6.0")
+            self.requires("libsvtav1/2.1.0")
         if self.options.with_libaom:
             self.requires("libaom-av1/3.6.1")
         if self.options.get_safe("with_libdav1d"):
-            self.requires("dav1d/1.2.1")
+            self.requires("dav1d/1.4.3")
+        if self.options.get_safe("with_libdrm"):
+            self.requires("libdrm/2.4.119")
 
     def validate(self):
         if self.options.with_ssl == "securetransport" and not is_apple_os(self):
@@ -349,15 +354,28 @@ class FFMpegConan(ConanFile):
                 raise ConanInvalidConfiguration("FFmpeg '{}' option requires '{}' option to be enabled".format(
                     dependency, "' or '".join(features)))
 
-        if conan_version.major == 1 and is_msvc(self) and self.options.shared:
+        if Version(self.version) >= "6.1" and conan_version.major == 1 and is_msvc(self) and self.options.shared:
             # Linking fails with "Argument list too long" for some reason on Conan v1
             raise ConanInvalidConfiguration("MSVC shared build is not supported for Conan v1")
 
+        if Version(self.version) == "7.0.1" and self.settings.build_type == "Debug":
+            # FIXME: FFMpeg fails to build in Debug mode with the following error:
+            # ld: libavcodec/libavcodec.a(vvcdsp_init.o): in function `ff_vvc_put_pixels2_8_sse4':
+            # src/libavcodec/x86/vvc/vvcdsp_init.c:69: undefined reference to `ff_h2656_put_pixels2_8_sse4'
+            # May be related https://github.com/ffvvc/FFmpeg/issues/234
+            raise ConanInvalidConfiguration(f"{self.ref} Conan recipe does not support build_type=Debug. Contributions are welcome to fix this issue.")
+
     def build_requirements(self):
         if self.settings.arch in ("x86", "x86_64"):
-            self.tool_requires("yasm/1.3.0")
-        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            if Version(self.version) >= "7.0":
+                # INFO: FFmpeg 7.0+ added avcodec vvc_mc.asm which fails to assemble with yasm 1.3.0
+                # src/libavcodec/x86/vvc/vvc_mc.asm:55: error: operand 1: expression is not simple or relocatable
+                self.tool_requires("nasm/2.16.01")
+            else:
+                self.tool_requires("yasm/1.3.0")
+        if self.settings.os != "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            # See https://github.com/conan-io/conan-center-index/pull/26447#discussion_r1926682155
+            self.tool_requires("pkgconf/[>=2.1 <3]")
         if self._settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -403,11 +421,10 @@ class FFMpegConan(ConanFile):
                                   "#define X264_API_IMPORTS 1", "")
         if self.options.with_ssl == "openssl":
             # https://trac.ffmpeg.org/ticket/5675
-            openssl_libraries = " ".join(
-                [f"-l{lib}" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs])
+            openssl_libs = load(self, os.path.join(self.build_folder, "openssl_libs.list"))
             replace_in_file(self, os.path.join(self.source_folder, "configure"),
                                   "check_lib openssl openssl/ssl.h SSL_library_init -lssl -lcrypto -lws2_32 -lgdi32 ||",
-                                  f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libraries} || ")
+                                  f"check_lib openssl openssl/ssl.h OPENSSL_init_ssl {openssl_libs} || ")
 
         replace_in_file(self, os.path.join(self.source_folder, "configure"), "echo libx264.lib", "echo x264.lib")
 
@@ -491,13 +508,14 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("libx265", self.options.with_libx265),
             opt_enable_disable("libvpx", self.options.with_libvpx),
             opt_enable_disable("libmp3lame", self.options.with_libmp3lame),
-            opt_enable_disable("libfdk-aac", self.options.with_libfdk_aac),
+            opt_enable_disable("libfdk-aac", self.options.get_safe("with_libfdk_aac")),
             opt_enable_disable("libwebp", self.options.with_libwebp),
             opt_enable_disable("libaom", self.options.with_libaom),
             opt_enable_disable("openssl", self.options.with_ssl == "openssl"),
             opt_enable_disable("alsa", self.options.get_safe("with_libalsa")),
             opt_enable_disable("libpulse", self.options.get_safe("with_pulse")),
             opt_enable_disable("vaapi", self.options.get_safe("with_vaapi")),
+            opt_enable_disable("libdrm", self.options.get_safe("with_libdrm")),
             opt_enable_disable("vdpau", self.options.get_safe("with_vdpau")),
             opt_enable_disable("libxcb", self.options.get_safe("with_xcb")),
             opt_enable_disable("libxcb-shm", self.options.get_safe("with_xcb")),
@@ -509,10 +527,15 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("audiotoolbox", self.options.get_safe("with_audiotoolbox")),
             opt_enable_disable("videotoolbox", self.options.get_safe("with_videotoolbox")),
             opt_enable_disable("securetransport", self.options.with_ssl == "securetransport"),
+            opt_enable_disable("vulkan", self.options.get_safe("with_vulkan")),
+            opt_enable_disable("libdav1d", self.options.get_safe("with_libdav1d")),
+            opt_enable_disable("jni", self.options.get_safe("with_jni")),
+            opt_enable_disable("mediacodec", self.options.get_safe("with_mediacodec")),
+            opt_enable_disable("xlib", self.options.get_safe("with_xlib")),
             "--disable-cuda",  # FIXME: CUDA support
             "--disable-cuvid",  # FIXME: CUVID support
             # Licenses
-            opt_enable_disable("nonfree", self.options.with_libfdk_aac or (self.options.with_ssl and (
+            opt_enable_disable("nonfree", self.options.get_safe("with_libfdk_aac") or (self.options.with_ssl and (
                 self.options.with_libx264 or self.options.with_libx265 or self.options.postproc))),
             opt_enable_disable("gpl", self.options.with_libx264 or self.options.with_libx265 or self.options.postproc)
         ]
@@ -577,12 +600,8 @@ class FFMpegConan(ConanFile):
         args.extend(self._split_and_format_options_string(
             "disable-filter", self.options.disable_filters))
 
-        if self._version_supports_vulkan:
-            args.append(opt_enable_disable("vulkan", self.options.get_safe("with_vulkan")))
         if self._version_supports_libsvtav1:
             args.append(opt_enable_disable("libsvtav1", self.options.get_safe("with_libsvtav1")))
-        if self._version_supports_libsvtav1:
-            args.append(opt_enable_disable("libdav1d", self.options.get_safe("with_libdav1d")))
         if is_apple_os(self):
             # relocatable shared libs
             args.append("--install-name-dir=@rpath")
@@ -624,11 +643,12 @@ class FFMpegConan(ConanFile):
         ranlib = buildenv_vars.get("RANLIB")
         if ranlib:
             args.append(f"--ranlib={unix_path(self, ranlib)}")
-        # for some reason pkgconf from conan can't find .pc files on Linux in the context of ffmpeg configure...
-        if self._settings_build.os != "Linux":
-            pkg_config = self.conf.get("tools.gnu:pkg_config", default=buildenv_vars.get("PKG_CONFIG"), check_type=str)
-            if pkg_config:
-                args.append(f"--pkg-config={unix_path(self, pkg_config)}")
+        pkg_config = self.conf.get("tools.gnu:pkg_config", default=buildenv_vars.get("PKG_CONFIG"), check_type=str)
+        if pkg_config:
+            # the ffmpeg configure script hardcodes the name of the executable,
+            # unlike other tools that use the PKG_CONFIG environment variable
+            # if we are aware the user has requested a specific pkg-config, we pass it to the configure script
+            args.append(f"--pkg-config={unix_path(self, pkg_config)}")
         if is_msvc(self):
             args.append("--toolchain=msvc")
             if not check_min_vs(self, "190", raise_invalid=False):
@@ -682,6 +702,10 @@ class FFMpegConan(ConanFile):
 
         deps = PkgConfigDeps(self)
         deps.generate()
+
+        if self.options.with_ssl == "openssl":
+            openssl_libs = " ".join([f"-l{lib}" for lib in self.dependencies["openssl"].cpp_info.aggregated_components().libs])
+            save(self, os.path.join(self.build_folder, "openssl_libs.list"), openssl_libs)
 
     def _split_and_format_options_string(self, flag_name, options_list):
         if not options_list:
@@ -824,6 +848,8 @@ class FFMpegConan(ConanFile):
                 avdevice.requires.append("libalsa::libalsa")
             if self.options.get_safe("with_xcb"):
                 avdevice.requires.extend(["xorg::xcb", "xorg::xcb-shm", "xorg::xcb-xfixes", "xorg::xcb-shape", "xorg::xv", "xorg::xext"])
+            if self.options.get_safe("with_xlib"):
+                avdevice.requires.extend(["xorg::x11", "xorg::xext", "xorg::xv"])
             if self.options.get_safe("with_pulse"):
                 avdevice.requires.append("pulseaudio::pulseaudio")
             if self.options.get_safe("with_appkit"):
@@ -832,6 +858,8 @@ class FFMpegConan(ConanFile):
                 avdevice.frameworks.append("AVFoundation")
             if self.options.get_safe("with_audiotoolbox"):
                 avdevice.frameworks.append("CoreAudio")
+            if self.settings.os == "Android" and not self.options.shared:
+                avdevice.system_libs.extend(["android", "camera2ndk", "mediandk"])
 
         if self.options.avcodec:
             if self.options.with_zlib:
@@ -856,7 +884,7 @@ class FFMpegConan(ConanFile):
                 avcodec.requires.append("libvpx::libvpx")
             if self.options.with_libmp3lame:
                 avcodec.requires.append("libmp3lame::libmp3lame")
-            if self.options.with_libfdk_aac:
+            if self.options.get_safe("with_libfdk_aac"):
                 avcodec.requires.append("libfdk_aac::libfdk_aac")
             if self.options.with_libwebp:
                 avcodec.requires.append("libwebp::libwebp")
@@ -893,11 +921,18 @@ class FFMpegConan(ConanFile):
             if Version(self.version) >= "5.0" and is_apple_os(self):
                 avfilter.frameworks.append("Metal")
 
+        if self.options.get_safe("with_libdrm"):
+            avutil.requires.append("libdrm::libdrm_libdrm")
         if self.options.get_safe("with_vaapi"):
-            avutil.requires.extend(["vaapi::vaapi", "xorg::x11"])
+            avutil.requires.append("vaapi::vaapi")
+        if self.options.get_safe("with_xcb"):
+            avutil.requires.append("xorg::x11")
 
         if self.options.get_safe("with_vdpau"):
             avutil.requires.append("vdpau::vdpau")
 
-        if self._version_supports_vulkan and self.options.get_safe("with_vulkan"):
+        if self.options.with_ssl == "openssl":
+            avutil.requires.append("openssl::ssl")
+
+        if self.options.get_safe("with_vulkan"):
             avutil.requires.append("vulkan-loader::vulkan-loader")
