@@ -1,17 +1,16 @@
+import glob
+import os
+
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
-from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
-import glob
-import os
-import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class ITKConan(ConanFile):
@@ -31,33 +30,12 @@ class ITKConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
+    implements = ["auto_shared_fpic"]
     short_paths = True
-
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "14",
-            "gcc": "4.8.1",
-            "clang": "3.3",
-            "apple-clang": "9",
-        }
 
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -73,10 +51,10 @@ class ITKConan(ConanFile):
         self.requires("expat/[>=2.6.2 <3]")
         self.requires("fftw/3.3.10")
         self.requires("gdcm/3.0.23")
-        self.requires("hdf5/1.14.3")
+        self.requires("hdf5/1.14.5")
         self.requires("libjpeg/9e")
         self.requires("libpng/[>=1.6 <2]")
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/[>=4.5 <5]")
         self.requires("openjpeg/2.5.2")
         self.requires("onetbb/2021.9.0")
         self.requires("zlib/[>=1.2.11 <2]")
@@ -89,21 +67,14 @@ class ITKConan(ConanFile):
         if Version(self.version) < "5.2" and is_apple_os(self) and self.settings.arch == "armv8":
             # https://discourse.itk.org/t/error-building-v5-1-1-for-mac-big-sur-11-2-3/3959
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on on Apple armv8 architecture.")
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        check_min_vs(self, 190)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
+        check_min_cppstd(self, 11)
         if Version(self.version) < "5.2" and self.settings.os == "Macos":
             raise ConanInvalidConfiguration(f"{self.ref} fails to compile in {self.settings.os}, fixed in 5.2.0")
 
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -241,7 +212,6 @@ class ITKConan(ConanFile):
         venv.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         #The CMake policy CMP0091 must be NEW, but is ''
         replace_in_file(self,
                         os.path.join(self.source_folder, "Modules", "ThirdParty", "VNL", "src", "vxl", "config", "cmake", "config", "VXLIntrospectionConfig.cmake"),
@@ -289,10 +259,6 @@ class ITKConan(ConanFile):
     @property
     def _module_variables_file_rel_path(self):
         return os.path.join(self._cmake_module_dir, f"conan-official-{self.name}-variables.cmake")
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join(self._cmake_module_dir, f"conan-official-{self.name}-targets.cmake")
 
     @property
     def _itk_components(self):
@@ -487,18 +453,6 @@ class ITKConan(ConanFile):
         content = 'set(ITK_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}")'
         save(self, os.path.join(self.package_folder, self._module_variables_file_rel_path), content)
 
-    def _create_cmake_module_alias_targets(self):
-        targets = {target:f"ITK::{target}" for target in self._itk_components.keys()}
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, os.path.join(self.package_folder, self._module_file_rel_path), content)
-
     @property
     def _itk_modules_files(self):
         cmake_files = []
@@ -523,7 +477,6 @@ class ITKConan(ConanFile):
                 os.remove(cmake_file)
 
         self._create_cmake_module_variables()
-        self._create_cmake_module_alias_targets()
 
     def package_info(self):
         itk_version = Version(self.version)
@@ -545,14 +498,3 @@ class ITKConan(ConanFile):
                 self.cpp_info.components[name].libs = [f"{name}{lib_suffix}"]
             self.cpp_info.components[name].system_libs = system_libs
             self.cpp_info.components[name].requires = requires
-
-            # TODO: to remove in conan v2 once cmake_find_package* generators removed
-            for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-                self.cpp_info.components[name].names[generator] = name
-                self.cpp_info.components[name].build_modules[generator].extend([self._module_file_rel_path, self._module_variables_file_rel_path])
-                self.cpp_info.components[name].build_modules[generator].extend(
-                    [os.path.join(self._cmake_module_dir, f) for f in self._itk_modules_files])
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-            self.cpp_info.names[generator] = "ITK"
