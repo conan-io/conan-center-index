@@ -8,9 +8,8 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, export_conandata_patches, get, load, replace_in_file, save, rmdir, apply_conandata_patches
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class VtkmConan(ConanFile):
@@ -60,20 +59,6 @@ class VtkmConan(ConanFile):
         "with_tbb": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -116,13 +101,7 @@ class VtkmConan(ConanFile):
     # - optionparser
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 14)
 
         if self.options.with_cuda:
             raise ConanInvalidConfiguration("CUDA support is not yet implemented")
@@ -131,6 +110,9 @@ class VtkmConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "vtkm", "thirdparty", "diy", "vtkmdiy", "cmake", "DIYConfigureMPI.cmake"),
+                        "${MPI_CXX_LIBRARIES}", "MPI::MPI_CXX")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -169,13 +151,7 @@ class VtkmConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "vtkm", "thirdparty", "diy", "vtkmdiy", "cmake", "DIYConfigureMPI.cmake"),
-                        "${MPI_CXX_LIBRARIES}", "MPI::MPI_CXX")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -293,8 +269,8 @@ class VtkmConan(ConanFile):
             component.requires = info.get("requires", [])
             component.system_libs = info.get("system_libs", [])
 
-        if "vtkm_io" in components and self.options.with_hdf5:
-            self.cpp_info.components["vtkm_io"].requires.append("hdf5::hdf5_hl")
+        if "io" in components and self.options.with_hdf5:
+            self.cpp_info.components["io"].requires.append("hdf5::hdf5_hl")
 
         for component_name, component in self.cpp_info.components.items():
             self.output.info(f"COMPONENT: {component_name}")
