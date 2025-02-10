@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import cross_building
+from conan.tools.build import cross_building, check_min_cstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import Environment
 from conan.tools.files import get, copy, save
@@ -72,6 +72,8 @@ class ZenohCConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.settings.os}/{self.settings.arch} combination is not supported"
             )
+        if self.settings.compiler.get_safe("cstd"):
+            check_min_cstd(self, 11)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
