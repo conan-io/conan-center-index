@@ -1,4 +1,9 @@
 sources:
+  "10.13.0":
+    - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.13.0/ApprovalTests.v.10.13.0.hpp
+      sha256: c00f6390b81d9924dc646e9d32b61e1e09abda106c13704f714ac349241bb9ff
+    - url: "https://raw.githubusercontent.com/approvals/ApprovalTests.cpp/v.10.13.0/LICENSE"
+      sha256: c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4
   "10.12.2":
     - url: https://github.com/approvals/ApprovalTests.cpp/releases/download/v.10.12.2/ApprovalTests.v.10.12.2.hpp
       sha256: 4c43d0ea98669e3d6fbb5810cc47b19adaf88cabb1421b488aa306b08c434131

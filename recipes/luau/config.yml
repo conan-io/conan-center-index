@@ -1,27 +1,17 @@
 versions:
-  "0.615":
+  "0.655":
     folder: all
-  "0.610":
+  "0.650":
     folder: all
-  "0.607":
+  "0.645":
     folder: all
-  "0.603":
+  "0.640":
     folder: all
-  "0.598":
+  "0.635":
     folder: all
-  "0.593":
+  "0.630":
     folder: all
-  "0.589":
+  "0.625":
     folder: all
-  "0.582":
-    folder: all
-  "0.577":
-    folder: all
-  "0.572":
-    folder: all
-  "0.568":
-    folder: all
-  "0.563":
-    folder: all
-  "0.558":
+  "0.620":
     folder: all

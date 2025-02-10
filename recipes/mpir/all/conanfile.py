@@ -1,26 +1,28 @@
-from conan import ConanFile
-from conan.tools.microsoft import msvc_runtime_flag, is_msvc
-from conan.tools.build import cross_building
-from conan.tools.files import get, copy, replace_in_file, chdir, rmdir, rm
-from conan.tools.scm import Version
-from conans import tools, AutoToolsBuildEnvironment, MSBuild
-from conan.errors import ConanInvalidConfiguration
-import contextlib
 import os
 
-required_conan_version = ">=1.50.0"
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import XCRun, to_apple_arch
+from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.gnu import Autotools, AutotoolsToolchain
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import MSBuild, MSBuildToolchain, is_msvc, is_msvc_static_runtime, msvc_runtime_flag
+
+required_conan_version = ">=1.53.0"
+
 
 class MpirConan(ConanFile):
     name = "mpir"
-    description = "MPIR is a highly optimised library for bignum arithmetic" \
-                  "forked from the GMP bignum library."
-    topics = ("mpir", "multiprecision", "math", "mathematics")
-    url = "https://github.com/conan-io/conan-center-index"
-    homepage = "http://mpir.org/"
+    description = ("MPIR is a highly optimised library for bignum arithmetic "
+                  "forked from the GMP bignum library.")
     license = "LGPL-3.0-or-later"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/wbhart/mpir"
+    topics = ("multiprecision", "math", "mathematics")
 
-    provides = []
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -35,15 +37,12 @@ class MpirConan(ConanFile):
         "enable_gmpcompat": True,
     }
 
-    _autotools = None
-
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -51,29 +50,71 @@ class MpirConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
         if is_msvc(self) and self.options.shared:
             del self.options.enable_cxx
         if not self.options.get_safe("enable_cxx", False):
-            del self.settings.compiler.libcxx
-            del self.settings.compiler.cppstd
+            self.settings.rm_safe("compiler.libcxx")
+            self.settings.rm_safe("compiler.cppstd")
         if self.options.enable_gmpcompat:
-            self.provides.append("gmp")
+            self.provides = ["gmp"]
+
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
             raise ConanInvalidConfiguration("Cross-building doesn't work (yet)")
 
     def build_requirements(self):
+        self.tool_requires("libtool/2.4.7")
         self.tool_requires("yasm/1.3.0")
         if not is_msvc(self):
             self.tool_requires("m4/1.4.19")
-            if self._settings_build.os == "Windows" and not tools.get_env("CONAN_BASH_PATH"):
-                self.tool_requires("msys2/cci.latest")
+            if self._settings_build.os == "Windows":
+                self.win_bash = True
+                if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                    self.tool_requires("msys2/cci.latest")
 
     def source(self):
-        get(self, keep_permissions=True, **self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True, keep_permissions=True)
+
+    def _generate_msvc(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+        tc = MSBuildToolchain(self)
+        tc.generate()
+
+    def _generate_autotools(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
+
+        tc = AutotoolsToolchain(self)
+        tc.configure_args.append("--disable-silent-rules")
+        tc.configure_args.append("--enable-cxx" if self.options.get_safe("enable_cxx") else "--disable-cxx")
+        tc.configure_args.append("--enable-gmpcompat" if self.options.enable_gmpcompat else "--disable-gmpcompat")
+
+        # compiler checks are written for C89 but compilers that default to C99 treat implicit functions as error
+        tc.extra_cxxflags.append("-Wno-implicit-function-declaration")
+
+        if self.settings.compiler == "apple-clang":
+            if hasattr(self, "settings_build"):
+                # there is no CFLAGS_FOR_BUILD/CXXFLAGS_FOR_BUILD
+                sdk_path = XCRun(self).sdk_path
+                tc.extra_cxxflags += [
+                    "-Wno-implicit-function-declaration",
+                    "-isysroot", sdk_path,
+                    "-arch", to_apple_arch(self),
+                ]
+        # Disable docs
+        tc.make_args.append("MAKEINFO=true")
+        tc.generate()
+
+    def generate(self):
+        if is_msvc(self):
+            self._generate_msvc()
+        else:
+            self._generate_autotools()
 
     @property
     def _platforms(self):
@@ -84,74 +125,40 @@ class MpirConan(ConanFile):
         return "dll" if self.options.shared else "lib"
 
     @property
+    def _vs_ide_version(self):
+        if str(self.settings.compiler) == "Visual Studio":
+            return self.settings.compiler.version
+        msvc_to_ide = {"170": "11", "180": "12", "190": "14", "191": "15", "192": "16", "193": "17"}
+        return msvc_to_ide.get(str(self.settings.compiler.version), "17")
+
+    @property
     def _vcxproj_paths(self):
-        compiler_version = self.settings.compiler.version if Version(self.settings.compiler.version) <= "17" else "17"
-        build_subdir = "build.vc{}".format(compiler_version)
+        build_subdir = f"build.vc{self._vs_ide_version}"
         vcxproj_paths = [
-            os.path.join(self._source_subfolder, build_subdir,
-                         "{}_mpir_gc".format(self._dll_or_lib),
-                         "{}_mpir_gc.vcxproj".format(self._dll_or_lib))
+            os.path.join(self.source_folder, build_subdir, f"{self._dll_or_lib}_mpir_gc", f"{self._dll_or_lib}_mpir_gc.vcxproj")
         ]
         if self.options.get_safe("enable_cxx"):
-            vcxproj_paths.append(os.path.join(self._source_subfolder, build_subdir,
+            vcxproj_paths.append(os.path.join(self.source_folder, build_subdir,
                                               "lib_mpir_cxx", "lib_mpir_cxx.vcxproj"))
         return vcxproj_paths
 
-    def _build_visual_studio(self):
-        if not self.options.shared: # RuntimeLibrary only defined in lib props files
+    def _build_msvc(self):
+        if not self.options.shared:  # RuntimeLibrary only defined in lib props files
             build_type = "debug" if self.settings.build_type == "Debug" else "release"
-            props_path = os.path.join(self._source_subfolder, "build.vc",
-                                      "mpir_{}_lib.props".format(build_type))
-            old_runtime = "MultiThreaded{}".format(
-                "Debug" if build_type == "debug" else "",
-            )
+            props_path = os.path.join(self.source_folder, "build.vc", f"mpir_{build_type}_lib.props")
+            old_runtime = "MultiThreaded{}".format("Debug" if build_type == "debug" else "")
             new_runtime = "MultiThreaded{}{}".format(
                 "Debug" if "d" in msvc_runtime_flag(self) else "",
-                "DLL" if "MD" in msvc_runtime_flag(self) else "",
+                "DLL" if not is_msvc_static_runtime(self) else "",
             )
             replace_in_file(self, props_path, old_runtime, new_runtime)
         msbuild = MSBuild(self)
         for vcxproj_path in self._vcxproj_paths:
-            msbuild.build(vcxproj_path, platforms=self._platforms, upgrade_project=False)
-
-    @contextlib.contextmanager
-    def _build_context(self):
-        if self.settings.compiler == "apple-clang":
-            env_build = {"CC": tools.XCRun(self.settings).cc,
-                         "CXX": tools.XCRun(self.settings).cxx}
-            if hasattr(self, "settings_build"):
-                # there is no CFLAGS_FOR_BUILD/CXXFLAGS_FOR_BUILD
-                xcrun = tools.XCRun(self.settings_build)
-                flags = " -Wno-implicit-function-declaration -isysroot {} -arch {}".format(xcrun.sdk_path, tools.to_apple_arch(self.settings_build.arch))
-                env_build["CC_FOR_BUILD"] = xcrun.cc + flags
-                env_build["CXX_FOR_BUILD"] = xcrun.cxx + flags
-            with tools.environment_append(env_build):
-                yield
-        else:
-            yield
-
-    def _configure_autotools(self):
-        if not self._autotools:
-            self._autotools = AutoToolsBuildEnvironment(self, win_bash=tools.os_info.is_windows)
-            args = []
-            if self.options.shared:
-                args.extend(["--disable-static", "--enable-shared"])
-            else:
-                args.extend(["--disable-shared", "--enable-static"])
-            args.append("--with-pic" if self.options.get_safe("fPIC", True) else "--without-pic")
-
-            args.append("--disable-silent-rules")
-            args.append("--enable-cxx" if self.options.get_safe("enable_cxx") else "--disable-cxx")
-            args.append("--enable-gmpcompat" if self.options.enable_gmpcompat else "--disable-gmpcompat")
-
-            # compiler checks are written for C89 but compilers that default to C99 treat implicit functions as error
-            self._autotools.flags.append("-Wno-implicit-function-declaration")
-            self._autotools.configure(args=args)
-        return self._autotools
+            msbuild.build(vcxproj_path)
 
     def _patch_new_msvc_version(self, ver, toolset):
-        new_dir = os.path.join(self._source_subfolder, f'build.vc{ver}')
-        copy(self, pattern="*", src=os.path.join(self._source_subfolder, 'build.vc15'), dst=new_dir)
+        new_dir = os.path.join(self.source_folder, f"build.vc{ver}")
+        copy(self, pattern="*", src=os.path.join(self.source_folder, "build.vc15"), dst=new_dir)
 
         for root, _, files in os.walk(new_dir):
             for file in files:
@@ -167,6 +174,7 @@ class MpirConan(ConanFile):
                 replace_in_file(self, full_file, 'check_config $(Platform) $(Configuration) 15', f'check_config $(Platform) $(Configuration) {ver}', strict=False)
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
         if is_msvc(self):
             self._patch_new_msvc_version(16, "v142")
             self._patch_new_msvc_version(17, "v143")
@@ -174,20 +182,25 @@ class MpirConan(ConanFile):
     def build(self):
         self._patch_sources()
         if is_msvc(self):
-            self._build_visual_studio()
+            self._build_msvc()
         else:
-            with chdir(self, self._source_subfolder), self._build_context():
+            with chdir(self, self.source_folder):
+                autotools = Autotools(self)
+                autotools.autoreconf()
                 # relocatable shared lib on macOS
                 replace_in_file(self, "configure", "-install_name \\$rpath/", "-install_name @rpath/")
-                autotools = self._configure_autotools()
+                autotools.configure()
                 autotools.make()
 
     def package(self):
-        copy(self, "COPYING*", dst=os.path.join(self.package_folder, "licenses"), src=os.path.join(self.source_folder, self._source_subfolder))
+        copy(self, "COPYING*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         if is_msvc(self):
-            lib_folder = os.path.join(self.build_folder, self._source_subfolder, self._dll_or_lib,
-                                    self._platforms.get(str(self.settings.arch)),
-                                    str(self.settings.build_type))
+            lib_folder = os.path.join(
+                self.source_folder,
+                self._dll_or_lib,
+                self._platforms.get(str(self.settings.arch)),
+                str(self.settings.build_type),
+            )
             include_folder = os.path.join(self.package_folder, "include")
             copy(self, "mpir.h", dst=include_folder, src=lib_folder, keep_path=True)
             if self.options.enable_gmpcompat:
@@ -196,11 +209,11 @@ class MpirConan(ConanFile):
                 copy(self, "mpirxx.h", dst=include_folder, src=lib_folder, keep_path=True)
                 if self.options.enable_gmpcompat:
                     copy(self, "gmpxx.h", dst=include_folder, src=lib_folder, keep_path=True)
-            copy(self, pattern="*.dll*", dst=os.path.join(self.package_folder, "bin"), src=lib_folder, keep_path=False)
-            copy(self, pattern="*.lib", dst=os.path.join(self.package_folder, "lib"), src=lib_folder, keep_path=False)
+            copy(self, "*.dll*", dst=os.path.join(self.package_folder, "bin"), src=lib_folder, keep_path=False)
+            copy(self, "*.lib", dst=os.path.join(self.package_folder, "lib"), src=lib_folder, keep_path=False)
         else:
-            with chdir(self, self._source_subfolder), self._build_context():
-                autotools = self._configure_autotools()
+            with chdir(self, self.source_folder):
+                autotools = Autotools(self)
                 autotools.install()
             rmdir(self, os.path.join(self.package_folder, "share"))
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))

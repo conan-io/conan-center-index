@@ -60,7 +60,10 @@ class Md4QtConan(ConanFile):
         pass
 
     def package(self):
-        copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        if Version(self.version) <= "2.8.1":
+            copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        else:
+            copy(self, "MIT.txt", src=os.path.join(self.source_folder, "LICENSES"), dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*.hpp", src=os.path.join(self.source_folder, "md4qt"), dst=os.path.join(self.package_folder, "include", "md4qt"))
 
     def package_info(self):

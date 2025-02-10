@@ -1,14 +1,11 @@
 sources:
-  "1.6.0":
-    url: "https://getdnsapi.net/dist/getdns-1.6.0.tar.gz"
-    sha256: "40e5737471a3902ba8304b0fd63aa7c95802f66ebbc6eae53c487c8e8a380f4a"
+  "1.7.3":
+    url: "https://getdnsapi.net/dist/getdns-1.7.3.tar.gz"
+    sha256: "f1404ca250f02e37a118aa00cf0ec2cbe11896e060c6d369c6761baea7d55a2c"
 patches:
-  "1.6.0":
-    - patch_file: "patches/1.6.0-0001-install-runtimes.patch"
-      base_path: "source_subfolder"
+  "1.7.3":
     - patch_file: "patches/1.6.0-0002-fix-exports-extension-libraries.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.6.0-0003-let-find-modules-use-pkgconfig.patch"
-      base_path: "source_subfolder"
-    - patch_file: "patches/1.6.0-0004-dont-install-symlinked-license.patch"
-      base_path: "source_subfolder"
+    - patch_file: "patches/1.7.3-fix-windows-build.patch"
+      patch_description: "Fix Windows build"
+      patch_source: "https://github.com/getdnsapi/getdns/pull/538"
+      patch_type: "portability"

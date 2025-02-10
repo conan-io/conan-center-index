@@ -1,0 +1,4 @@
+sources:
+  "1.3.3.cci.20240629":
+    url: "https://github.com/TsudaKageyu/minhook/archive/91cc9466e383d13a43d7cf33c7c8fdccb27095d3.tar.gz"
+    sha256: "b84b2ff19afe5fb9430948680146bee2e198392ee6333a71f81e339c36a819f1"

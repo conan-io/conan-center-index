@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 82913aa..f3a2d27 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -125,8 +125,6 @@ find_package(Threads REQUIRED)
+ #compile flag sycl
+ if (WHISPER_SYCL)
+     set(CMAKE_CXX_STANDARD 17)
+-else()
+-    set(CMAKE_CXX_STANDARD 11)
+ endif()
+ 
+ if (WHISPER_FFMPEG)

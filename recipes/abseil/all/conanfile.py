@@ -70,9 +70,14 @@ class AbseilConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if self.options.shared and is_msvc(self):
+        if self.options.shared and is_msvc(self) and Version(self.version) < "20230802.1":
             # upstream tries its best to export symbols, but it's broken for the moment
-            raise ConanInvalidConfiguration(f"{self.ref} shared not availabe for Visual Studio (yet)")
+            raise ConanInvalidConfiguration(f"{self.ref} shared not availabe for Visual Studio, please use version 20230802.1 or newer")
+
+    def build_requirements(self):
+        # https://github.com/abseil/abseil-cpp/blob/20240722.0/CMakeLists.txt#L19
+        if Version(self.version) >= "20240722.0":
+            self.tool_requires("cmake/[>=3.16 <4]")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -161,7 +166,7 @@ class AbseilConan(ConanFile):
             if cmake_function_name == "add_library":
                 cmake_imported_target_type = cmake_function_args[1]
                 if cmake_imported_target_type in ["STATIC", "SHARED"]:
-                    components[potential_lib_name]["libs"] = [potential_lib_name] if cmake_target_nonamespace != "abseil_dll" else []
+                    components[potential_lib_name]["libs"] = [potential_lib_name] if cmake_target_nonamespace != "abseil_dll" else ['abseil_dll']
             elif cmake_function_name == "set_target_properties":
                 target_properties = re.findall(r"(?P<property>INTERFACE_COMPILE_DEFINITIONS|INTERFACE_INCLUDE_DIRECTORIES|INTERFACE_LINK_LIBRARIES)[\n|\s]+(?P<values>.+)", cmake_function_args[2])
                 for target_property in target_properties:

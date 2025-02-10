@@ -1,11 +1,10 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
@@ -28,28 +27,29 @@ class LibPcapConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "enable_dbus": [True, False],
+        "enable_libnl": [True, False],
         "enable_libusb": [True, False],
+        "enable_rdma": [True, False],
+        "with_snf": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "enable_dbus": False,
+        "enable_libnl": False,
         "enable_libusb": False,
+        "enable_rdma": False,
+        "with_snf": False,
     }
-
-    # TODO: Add dbus-glib when available
-    # TODO: Add libnl-genl when available
-    # TODO: Add libbluetooth when available
-    # TODO: Add libibverbs when available
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.os != "Linux":
             del self.options.enable_libusb
+            del self.options.enable_libnl
+            del self.options.enable_rdma
 
     def configure(self):
         if self.options.shared:
@@ -66,19 +66,17 @@ class LibPcapConan(ConanFile):
     def requirements(self):
         if self.options.get_safe("enable_libusb"):
             self.requires("libusb/1.0.26")
-
-    def validate(self):
-        if Version(self.version) < "1.10.0" and self.settings.os == "Macos" and self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on OSX.")
-        if hasattr(self, "settings_build") and cross_building(self) and \
-           self.options.shared and is_apple_os(self):
-            raise ConanInvalidConfiguration("cross-build of libpcap shared is broken on Apple")
-        if Version(self.version) < "1.10.1" and self.settings.os == "Windows" and not self.options.shared:
-            raise ConanInvalidConfiguration(f"{self.ref} can not be built static on Windows")
+        if self.options.get_safe("enable_libnl"):
+            self.requires("libnl/3.8.0")
+        if self.options.get_safe("enable_rdma"):
+            self.requires("rdma-core/52.0")
+        if self.options.get_safe("enable_dbus"):
+            self.requires("dbus/1.15.8")
+        # TODO: Add libbluetooth when available
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
-            self.tool_requires("winflexbison/2.5.24")
+        if self.settings_build.os == "Windows":
+            self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
@@ -99,6 +97,11 @@ class LibPcapConan(ConanFile):
                 # Don't force -static-libgcc for MinGW, because conan users expect
                 # to inject this compilation flag themselves
                 tc.variables["USE_STATIC_RT"] = False
+            tc.cache_variables["DISABLE_DPDK"] = True
+
+            if Version(self.version) >= "1.10.5":
+                self.output.warning("PCAP on Windows is currently built with package capture capabilities - only support is for reading/writing capture files")
+                tc.cache_variables["PCAP_TYPE"] = "null"
             tc.generate()
         else:
             if not cross_building(self):
@@ -107,22 +110,26 @@ class LibPcapConan(ConanFile):
             tc = AutotoolsToolchain(self)
             yes_no = lambda v: "yes" if v else "no"
             tc.configure_args.extend([
-                f"--enable-usb={yes_no(self.options.get_safe('enable_libusb'))}",
-                "--disable-universal",
-                "--without-libnl",
+                "--disable-universal",  # don't build universal binaries on macOS
+                "--enable-usb" if self.options.get_safe("enable_libusb") else "--disable-usb",
+                "--enable-dbus" if self.options.get_safe("enable_dbus") else "--disable-dbus",
+                "--enable-rdma" if self.options.get_safe("enable_rdma") else "--disable-rdma",
+                "--with-libnl" if self.options.get_safe("enable_libnl") else "--without-libnl",
                 "--disable-bluetooth",
-                "--disable-packet-ring",
-                "--disable-dbus",
-                "--disable-rdma",
+                f"--with-snf={yes_no(self.options.get_safe('with_snf'))}",
             ])
+            tc.configure_args.append("--disable-packet-ring")
+            tc.configure_args.append("--without-dpdk")
             if cross_building(self):
-                target_os = "linux" if self.settings.os == "Linux" else "null"
+                target_os = "linux" if self.settings.os in ["Linux", "Android"] else "null"
                 tc.configure_args.append(f"--with-pcap={target_os}")
             elif "arm" in self.settings.arch and self.settings.os == "Linux":
                 tc.configure_args.append("--host=arm-linux")
             tc.generate()
 
             AutotoolsDeps(self).generate()
+            deps = PkgConfigDeps(self)
+            deps.generate()
 
     def build(self):
         if self.settings.os == "Windows":
@@ -171,3 +178,13 @@ class LibPcapConan(ConanFile):
         self.cpp_info.libs = [f"pcap{suffix}"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
+        if self.options.get_safe("enable_libusb"):
+            self.cpp_info.requires.append("libusb::libusb")
+        if self.options.get_safe("enable_libnl"):
+            self.cpp_info.requires.append("libnl::nl-genl")
+        if self.options.get_safe("enable_rdma"):
+            self.cpp_info.requires.append("rdma-core::libibverbs")
+        if self.options.get_safe("enable_dbus"):
+            self.cpp_info.requires.append("dbus::dbus")
+        if self.options.get_safe("with_snf"):
+            self.cpp_info.system_libs.append("snf")

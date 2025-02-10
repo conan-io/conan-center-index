@@ -1,4 +1,10 @@
 sources:
+  "2.14.3":
+    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.14.3.tar.gz"
+    sha256: "292e4170e4689d878eb5ddd38661134a704a1541402a4f564353190e4aadd23d"
+  "2.14.0":
+    url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.14.0.tar.gz"
+    sha256: "a6f12bce6b77f265cab81abde5dc2e08133be9a55bc29e573c84571d44eddbc2"
   "2.13.3":
     url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.13.3.tar.gz"
     sha256: "0f33596a8a48b5da4c43a964f2dc70127c6449defd5698944dddbdfb16d2b268"
@@ -12,6 +18,17 @@ sources:
     url: "https://github.com/eProsima/Fast-DDS/archive/refs/tags/v2.3.4.tar.gz"
     sha256: "b1b2322de0ca55a16495666e3fbda8aca32b888bbfaecda29f2ffc4b072ef7ac"
 patches:
+  "2.14.3":
+    - patch_file: "patches/2.13.3-0001-fix-find-asio-and-tinyxml2.patch"
+      patch_type: "conan"
+      patch_description: "Fixup find asio and tinyxml2"
+  "2.14.0":
+    - patch_file: "patches/2.13.3-0001-fix-find-asio-and-tinyxml2.patch"
+      patch_type: "conan"
+      patch_description: "Fixup find asio and tinyxml2"
+    - patch_file: "patches/2.13.3-0002-add-gettid-macro-for-glibc-compat.patch"
+      patch_type: "conan"
+      patch_description: "Add gettid macro for glibc compat. See: eProsima/Fast-DDS#4565"
   "2.13.3":
     - patch_file: "patches/2.13.3-0001-fix-find-asio-and-tinyxml2.patch"
       patch_type: "conan"

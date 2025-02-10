@@ -5,21 +5,18 @@ sources:
   "15.6":
     url: "https://ftp.postgresql.org/pub/source/v15.6/postgresql-15.6.tar.bz2"
     sha256: "8455146ed9c69c93a57de954aead0302cafad035c2b242175d6aa1e17ebcb2fb"
+  "15.5":
+    url: "https://ftp.postgresql.org/pub/source/v15.5/postgresql-15.5.tar.bz2"
+    sha256: "8f53aa95d78eb8e82536ea46b68187793b42bba3b4f65aa342f540b23c9b10a6"
   "15.4":
     url: "https://ftp.postgresql.org/pub/source/v15.4/postgresql-15.4.tar.bz2"
     sha256: "baec5a4bdc4437336653b6cb5d9ed89be5bd5c0c58b94e0becee0a999e63c8f9"
   "14.11":
     url: "https://ftp.postgresql.org/pub/source/v14.11/postgresql-14.11.tar.bz2"
     sha256: "a670bd7dce22dcad4297b261136b3b1d4a09a6f541719562aa14ca63bf2968a8"
-  "13.14":
-    url: "https://ftp.postgresql.org/pub/source/v13.14/postgresql-13.14.tar.gz"
-    sha256: "003fea1564136d98ac05eef8f118c24d854410875b0bb3bfc43d180390eff803"
-  "12.18":
-    url: "https://ftp.postgresql.org/pub/source/v12.18/postgresql-12.18.tar.gz"
-    sha256: "f1dec6b5041779c6219c11ce1322480cd7836ec5e905eb85bfe8452721c5d1a8"
-  "11.22":
-    url: "https://ftp.postgresql.org/pub/source/v11.22/postgresql-11.22.tar.gz"
-    sha256: "6445a4e1533c1e8bb616d4a3784bdc4c0226b541f6f0c8d996d9f27d581d49c3"
+  "14.9":
+    url: "https://ftp.postgresql.org/pub/source/v14.9/postgresql-14.9.tar.bz2"
+    sha256: "b1fe3ba9b1a7f3a9637dd1656dfdad2889016073fd4d35f13b50143cbbb6a8ef"
 patches:
   "16.2":
     - patch_file: "patches/16/001-mingw-build-static-libraries.patch"
@@ -40,15 +37,7 @@ patches:
     - patch_file: "patches/13/002-mingw-build-static-libraries.patch"
       patch_description: "port MinGW: Enable building static libraries in MinGW."
       patch_type: "portability"
-  "13.14":
-    - patch_file: "patches/13/002-mingw-build-static-libraries.patch"
-      patch_description: "port MinGW: Enable building static libraries in MinGW."
-      patch_type: "portability"
-  "12.18":
-    - patch_file: "patches/12/002-mingw-build-static-libraries.patch"
-      patch_description: "port MinGW: Enable building static libraries in MinGW."
-      patch_type: "portability"
-  "11.22":
-    - patch_file: "patches/10/002-mingw-build-static-libraries.patch"
+  "14.9":
+    - patch_file: "patches/14/002-mingw-build-static-libraries.patch"
       patch_description: "port MinGW: Enable building static libraries in MinGW."
       patch_type: "portability"

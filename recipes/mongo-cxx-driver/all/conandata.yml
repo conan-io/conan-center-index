@@ -1,4 +1,13 @@
 sources:
+  "3.11.0":
+    url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.11.0/mongo-cxx-driver-r3.11.0.tar.gz"
+    sha256: "cb4263229d769ec44aa66563e2dd2d70c6384c85d93840a52fe26b15436c54f1"
+  "3.10.2":
+    url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.10.2/mongo-cxx-driver-r3.10.2.tar.gz"
+    sha256: "52b99b2866019b5ea25d15c5a39e2a88c70fe1259c40f1091deff8bfae0194be"
+  "3.10.1":
+    url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.10.1/mongo-cxx-driver-r3.10.1.tar.gz"
+    sha256: "0297d9d1a513f09438cc05254b14baa49edd1fa64a6ce5d7a80a1eb7677cf2be"
   "3.8.1":
     url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.8.1/mongo-cxx-driver-r3.8.1.tar.gz"
     sha256: "b12c96670e1e68bae1a6f5cb08541f3da52f5ddeb5def274d2cf5d662ef73160"
@@ -14,16 +23,28 @@ sources:
   "3.6.7":
     url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.6.7/mongo-cxx-driver-r3.6.7.tar.gz"
     sha256: "2c58005d4fe46f1973352fba821f7bb37e818cefc922377ce979a9fd1bff38ac"
-  "3.6.6":
-    url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.6.6/mongo-cxx-driver-r3.6.6.tar.gz"
-    sha256: "d5906b9e308a8a353a2ef92b699c9b27ae28ec6b34fdda94e15d2981b27e64ca"
-  "3.6.2":
-    url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.6.2/mongo-cxx-driver-r3.6.2.tar.gz"
-    sha256: "24325dce74723f7632da76d0eeb5f5020828498cc5bc1a624c6d7117efb2b7cf"
-  "3.6.1":
-    url: "https://github.com/mongodb/mongo-cxx-driver/releases/download/r3.6.1/mongo-cxx-driver-r3.6.1.tar.gz"
-    sha256: "83523e897ef18f7ce05d85d1632dd4ba486c264a1b89c09020163ab29e11eab7"
 patches:
+  "3.11.0":
+    - patch_file: "patches/3.10.2-0001-dirs.patch"
+      patch_description: "disable documentation features, fix directories"
+      patch_type: "conan"
+    - patch_file: "patches/3.10.1-0002-remove-abi-suffixes.patch"
+      patch_description: "remove abi suffixes for MSVC"
+      patch_type: "conan"
+  "3.10.2":
+    - patch_file: "patches/3.10.2-0001-dirs.patch"
+      patch_description: "disable documentation features, fix directories"
+      patch_type: "conan"
+    - patch_file: "patches/3.10.1-0002-remove-abi-suffixes.patch"
+      patch_description: "remove abi suffixes for MSVC"
+      patch_type: "conan"
+  "3.10.1":
+    - patch_file: "patches/3.10.1-0001-dirs.patch"
+      patch_description: "disable documentation features, fix directories"
+      patch_type: "conan"
+    - patch_file: "patches/3.10.1-0002-remove-abi-suffixes.patch"
+      patch_description: "remove abi suffixes for MSVC"
+      patch_type: "conan"
   "3.8.1":
     - patch_file: "patches/3.8.1-0001-dirs.patch"
       patch_description: "disable documentation features, fix directories"
@@ -53,27 +74,6 @@ patches:
       patch_description: "use poly macro instead __cplusplus"
       patch_type: "portability"
   "3.6.7":
-    - patch_file: "patches/3.6.x-dirs_and_tests.patch"
-      patch_description: "disable test and documentation features, fix directories"
-      patch_type: "conan"
-    - patch_file: "patches/poly_use_std_define.patch"
-      patch_description: "use poly macro instead __cplusplus"
-      patch_type: "portability"
-  "3.6.6":
-    - patch_file: "patches/3.6.x-dirs_and_tests.patch"
-      patch_description: "disable test and documentation features, fix directories"
-      patch_type: "conan"
-    - patch_file: "patches/poly_use_std_define.patch"
-      patch_description: "use poly macro instead __cplusplus"
-      patch_type: "portability"
-  "3.6.2":
-    - patch_file: "patches/3.6.x-dirs_and_tests.patch"
-      patch_description: "disable test and documentation features, fix directories"
-      patch_type: "conan"
-    - patch_file: "patches/poly_use_std_define.patch"
-      patch_description: "use poly macro instead __cplusplus"
-      patch_type: "portability"
-  "3.6.1":
     - patch_file: "patches/3.6.x-dirs_and_tests.patch"
       patch_description: "disable test and documentation features, fix directories"
       patch_type: "conan"

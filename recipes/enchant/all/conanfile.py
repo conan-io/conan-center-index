@@ -15,7 +15,7 @@ class EnchantConan(ConanFile):
     )
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://abiword.github.io/enchant/"
+    homepage = "https://rrthomas.github.io/enchant/"
     topics = ("enchant", "spell", "spell-check")
 
     package_type = "shared-library"

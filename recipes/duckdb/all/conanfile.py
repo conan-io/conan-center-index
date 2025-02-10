@@ -25,7 +25,6 @@ class DuckdbConan(ConanFile):
         "fPIC": [True, False],
         "with_autocomplete": [True, False],
         "with_icu": [True, False],
-        "with_parquet": [True, False],
         "with_tpch": [True, False],
         "with_tpcds": [True, False],
         "with_fts": [True, False],
@@ -46,7 +45,6 @@ class DuckdbConan(ConanFile):
         "fPIC": True,
         "with_autocomplete": False,
         "with_icu": False,
-        "with_parquet": False,
         "with_tpch": False,
         "with_tpcds": False,
         "with_fts": False,
@@ -74,8 +72,8 @@ class DuckdbConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) >= "0.9.0":
-            del self.options.with_parquet
+        if Version(self.version) >= "1.1.0":
+            del self.options.with_odbc
 
     def configure(self):
         if self.options.shared:
@@ -86,7 +84,7 @@ class DuckdbConan(ConanFile):
 
     def requirements(self):
         # FIXME: duckdb vendors a bunch of deps by modify the source code to have their own namespace
-        if self.options.with_odbc:
+        if self.options.get_safe("with_odbc"):
             self.requires("odbc/2.3.11")
         if self.options.with_httpfs:
             self.requires("openssl/[>=1.1 <4]")
@@ -109,46 +107,34 @@ class DuckdbConan(ConanFile):
         tc.variables["DUCKDB_PATCH_VERSION"] = Version(self.version).patch
         tc.variables["DUCKDB_DEV_ITERATION"] = 0
         tc.variables["OVERRIDE_GIT_DESCRIBE"] = f"v{self.version}"
-        if "with_parquet" in self.options:
-            tc.variables["BUILD_PARQUET_EXTENSION"] = self.options.with_parquet
 
-        if Version(self.version) >= "0.9.0":
-            build_extensions = ""
-            if self.options.with_icu:
-                build_extensions += ";icu"
-            if self.options.with_autocomplete:
-                build_extensions += ";autocomplete"
-            if self.options.with_tpch:
-                build_extensions += ";tpch"
-            if self.options.with_tpcds:
-                build_extensions += ";tpcds"
-            if self.options.with_fts:
-                build_extensions += ";fts"
-            if self.options.with_visualizer:
-                build_extensions += ";visualizer"
-            if self.options.with_httpfs:
-                build_extensions += ";httpfs"
-            if self.options.with_json:
-                build_extensions += ";json"
-            if self.options.with_excel:
-                build_extensions += ";excel"
-            if self.options.with_inet:
-                build_extensions += ";inet"
-            if self.options.with_sqlsmith:
-                build_extensions += ";sqlsmith"
-            tc.variables["BUILD_EXTENSIONS"] = build_extensions
-        else:
-            tc.variables["BUILD_ICU_EXTENSION"] = self.options.with_icu
-            tc.variables["BUILD_TPCH_EXTENSION"] = self.options.with_tpch
-            tc.variables["BUILD_TPCDS_EXTENSION"] = self.options.with_tpcds
-            tc.variables["BUILD_FTS_EXTENSION"] = self.options.with_fts
-            tc.variables["BUILD_HTTPFS_EXTENSION"] = self.options.with_httpfs
-            tc.variables["BUILD_VISUALIZER_EXTENSION"] = self.options.with_visualizer
-            tc.variables["BUILD_JSON_EXTENSION"] = self.options.with_json
-            tc.variables["BUILD_EXCEL_EXTENSION"] = self.options.with_excel
-            tc.variables["BUILD_SQLSMITH_EXTENSION"] = self.options.with_sqlsmith
+        build_extensions = ""
+        if self.options.with_icu:
+            build_extensions += ";icu"
+        if self.options.with_autocomplete:
+            build_extensions += ";autocomplete"
+        if self.options.with_tpch:
+            build_extensions += ";tpch"
+        if self.options.with_tpcds:
+            build_extensions += ";tpcds"
+        if self.options.with_fts:
+            build_extensions += ";fts"
+        if self.options.with_visualizer:
+            build_extensions += ";visualizer"
+        if self.options.with_httpfs:
+            build_extensions += ";httpfs"
+        if self.options.with_json:
+            build_extensions += ";json"
+        if self.options.with_excel:
+            build_extensions += ";excel"
+        if self.options.with_inet:
+            build_extensions += ";inet"
+        if self.options.with_sqlsmith:
+            build_extensions += ";sqlsmith"
+        tc.variables["BUILD_EXTENSIONS"] = build_extensions
 
-        tc.variables["BUILD_ODBC_DRIVER"] = self.options.with_odbc
+        if "with_odbc" in self.options:
+            tc.variables["BUILD_ODBC_DRIVER"] = self.options.with_odbc
         tc.variables["FORCE_QUERY_LOG"] = self.options.with_query_log
         tc.variables["BUILD_SHELL"] = self.options.with_shell
         tc.variables["DISABLE_THREADS"] = not self.options.with_threads
@@ -211,10 +197,11 @@ class DuckdbConan(ConanFile):
                 "duckdb_fastpforlib",
                 "duckdb_mbedtls",
             ]
-            if Version(self.version) >= "0.6.0":
-                self.cpp_info.libs.append("duckdb_fsst")
+            self.cpp_info.libs.append("duckdb_fsst")
             if Version(self.version) >= "0.10.0":
                 self.cpp_info.libs.append("duckdb_skiplistlib")
+            if Version(self.version) >= "0.10.3":
+                self.cpp_info.libs.append("duckdb_yyjson")
 
             if self.options.with_autocomplete:
                 self.cpp_info.libs.append("autocomplete_extension")
@@ -232,7 +219,8 @@ class DuckdbConan(ConanFile):
                 self.cpp_info.libs.append("visualizer_extension")
             if self.options.with_httpfs:
                 self.cpp_info.libs.append("httpfs_extension")
-            if Version(self.version) >= "0.6.0" and self.settings.os == "Linux":
+            if (self.settings.os == "Linux" and
+                (Version(self.version) < "0.10.1" or self.settings.arch == "x86_64")):
                 self.cpp_info.libs.append("jemalloc_extension")
             if self.options.with_json:
                 self.cpp_info.libs.append("json_extension")
