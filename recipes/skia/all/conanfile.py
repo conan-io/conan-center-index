@@ -7,7 +7,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, load, replace_in_file
 from conan.tools.google import BazelToolchain, BazelDeps, bazel_layout, Bazel
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=2.0.9"
 
 
 class SkiaConan(ConanFile):
@@ -27,29 +27,25 @@ class SkiaConan(ConanFile):
     default_options = {
         "fPIC": True,
     }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def layout(self):
         bazel_layout(self, src_folder="src", build_folder="src")
 
     def requirements(self):
         self.requires("dawn/cci.20240726")
-        self.requires("spirv-tools/1.3.268.0")
-        self.requires("spirv-cross/1.3.268.0")
+        self.requires("spirv-tools/1.3.290.0")
+        self.requires("spirv-cross/1.3.290.0")
         self.requires("expat/[>=2.6.2 <3]")
         self.requires("freetype/2.13.2")
         self.requires("fontconfig/2.15.0")
         self.requires("icu/75.1")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 17)
+        check_min_cppstd(self, 17)
 
     def build_requirements(self):
         self.tool_requires("bazel/6.5.0")
