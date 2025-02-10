@@ -9,7 +9,7 @@ from conan.tools.scm import Version
 
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class Base64Conan(ConanFile):
@@ -60,6 +60,7 @@ class Base64Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _use_cmake(self):
@@ -82,7 +83,6 @@ class Base64Conan(ConanFile):
             deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         if self._use_cmake:
             cmake = CMake(self)
             cmake.configure()
