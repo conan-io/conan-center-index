@@ -89,14 +89,10 @@ class B2Conan(ConanFile):
                             "#include <nlohmann/json.hpp>")
 
     @property
-    def _toolchain_vars(self):
-        return AutotoolsToolchain(self).environment().vars(self)
-
-    @property
     def _cxx(self):
         if is_msvc(self):
             return "cl"
-        cxx = self._toolchain_vars.get("CXX")
+        cxx = AutotoolsToolchain(self).vars().get("CXX")
         if cxx:
             return cxx
         compiler_version = Version(self.settings.compiler.version)
@@ -107,7 +103,7 @@ class B2Conan(ConanFile):
 
     @property
     def _cxxflags(self):
-        cxxflags = self._toolchain_vars.get("CXXFLAGS", "")
+        cxxflags = AutotoolsToolchain(self).vars().get("CXXFLAGS", "")
         cxxflags += " " + VirtualBuildEnv(self).vars().get("CXXFLAGS", default="")
         if self._is_macos_intel_or_arm(self.settings):
             cxxflags += " -arch arm64 -arch x86_64"
