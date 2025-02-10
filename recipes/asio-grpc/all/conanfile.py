@@ -6,7 +6,7 @@ from conan.tools.files import copy, get, rm
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.0"
 
 
 class AsioGrpcConan(ConanFile):
@@ -28,20 +28,6 @@ class AsioGrpcConan(ConanFile):
         "local_allocator": "auto",
     }
     no_copy_source = True
-
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "Visual Studio": "15.7",
-            "msvc": "191",
-            "clang": "6",
-            "apple-clang": "11",
-        }
 
     def configure(self):
         self._local_allocator_option = self.options.local_allocator
@@ -72,20 +58,8 @@ class AsioGrpcConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 17)
         compiler_version = Version(self.settings.compiler.version)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.name} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
-        else:
-            self.output.warning(
-                f"{self.name} requires C++{self._min_cppstd}. Your compiler is unknown. Assuming it supports"
-                f" C++{self._min_cppstd}."
-            )
         if Version(self.version) == "2.7.0" and self.settings.compiler == "gcc" and compiler_version.major == "11" and \
             compiler_version < "11.3":
             raise ConanInvalidConfiguration(f"{self.ref} does not support gcc 11.0-11.2")
@@ -110,10 +84,13 @@ class AsioGrpcConan(ConanFile):
         rm(self, "asio-grpc*", os.path.join(self.package_folder, "lib", "cmake", "asio-grpc"))
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "asio-grpc")
+        self.cpp_info.set_property("cmake_target_name", "asio-grpc::asio-grpc")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
 
         build_modules = [os.path.join("lib", "cmake", "asio-grpc", "AsioGrpcProtobufGenerator.cmake")]
+        self.cpp_info.set_property("cmake_build_modules", build_modules)
 
         self.cpp_info.requires = ["grpc::grpc++_unsecure"]
         if self.options.backend == "boost":
@@ -128,11 +105,3 @@ class AsioGrpcConan(ConanFile):
 
         if self._local_allocator_option == "boost_container":
             self.cpp_info.requires.append("boost::container")
-
-        self.cpp_info.set_property("cmake_file_name", "asio-grpc")
-        self.cpp_info.set_property("cmake_target_name", "asio-grpc::asio-grpc")
-        self.cpp_info.set_property("cmake_build_modules", build_modules)
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.build_modules["cmake_find_package"] = build_modules
-        self.cpp_info.build_modules["cmake_find_package_multi"] = build_modules
