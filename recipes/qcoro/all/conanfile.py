@@ -3,10 +3,9 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, can_run
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rm, replace_in_file, rmdir
-from conan.tools.scm import Version
+from conan.tools.files import copy, get, rm, rmdir
 
 required_conan_version = ">=2.0.9"
 
@@ -32,48 +31,26 @@ class QCoroConan(ConanFile):
     }
     implements = ["auto_shared_fpic"]
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "10",
-            "Visual Studio": "17",
-            "msvc": "192",
-            "clang": "8",
-            "apple-clang": "13",
-        }
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/[>=5.15 <7]", transitive_headers=True, transitive_libs=True, run=can_run(self))
+        self.requires("qt/[>=6.6 <7]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         check_min_cppstd(self, 20)
         # Special check for clang that can only be linked to libc++
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx != "libc++":
             raise ConanInvalidConfiguration(
-                "qcoro requires some C++20 features, which are only available in libc++ for clang compiler."
-            )
-
-        compiler_version = str(self.settings.compiler.version)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(compiler_version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"qcoro requires some C++20 features, which your {str(self.settings.compiler)} "
-                f"{compiler_version} compiler does not support."
+                "qcoro requires some C++20 features, which are available in libc++ for clang compiler."
             )
 
     def build_requirements(self):
-        self.tool_requires("cmake/[>=3.23 <4]")
-        if not can_run(self):
-            self.tool_requires("qt/<host_version>")
+        self.tool_requires("cmake/[>=3.27 <4]")
+        self.tool_requires("qt/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        replace_in_file(self, os.path.join(self.source_folder, "cmake", "ECMQueryQt.cmake"),
-                        "get_target_property(_qtpaths_executable Qt6::qtpaths LOCATION)",
-                        "set(_qtpaths_executable qtpaths)")
 
     @property
     def _with_qml(self):
@@ -97,7 +74,7 @@ class QCoroConan(ConanFile):
         tc.variables["QCORO_BUILD_EXAMPLES"] = False
         tc.variables["QCORO_ENABLE_ASAN"] = self.options.asan
         tc.variables["BUILD_TESTING"] = False
-        tc.variables["USE_QT_VERSION"] = self.dependencies["qt"].ref.version.major
+        tc.variables["USE_QT_VERSION"] = str(self.dependencies["qt"].ref.version.major)
         tc.variables["QCORO_WITH_QML"] = self._with_qml
         tc.variables["QCORO_WITH_QTDBUS"] = self._with_qml
         tc.variables["QCORO_WITH_QTQUICK"] = self._with_quick
