@@ -8,9 +8,8 @@ from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, get, copy, rm
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.60.0 <2 || >=2.0.6"
+required_conan_version = ">=2.0.6"
 
 
 class PackageConan(ConanFile):
@@ -32,20 +31,6 @@ class PackageConan(ConanFile):
     }
     short_paths = True
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "9",
-            "clang": "12",
-            "apple-clang": "12",
-            "Visual Studio": "15",
-            "msvc": "191",
-        }
-
     def configure(self):
         if self.options.with_python and is_msvc(self):
             # Required to create import .lib for building extension module.
@@ -64,14 +49,7 @@ class PackageConan(ConanFile):
         if is_apple_os(self):
             raise ConanInvalidConfiguration(f"{self.ref} does not support MacOS at this time")
 
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
         if is_msvc(self) and not self.dependencies["cpython"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} requires cpython:shared=True when using MSVC compiler")
@@ -83,6 +61,7 @@ class PackageConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -96,7 +75,6 @@ class PackageConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -129,7 +107,3 @@ class PackageConan(ConanFile):
             self.cpp_info.components["openassetio-python-bridge"].set_property("cmake_target_name", "OpenAssetIO::openassetio-python-bridge")
             self.cpp_info.components["openassetio-python-bridge"].requires = ["openassetio-core"]
             self.cpp_info.components["openassetio-python-bridge"].libs = ["openassetio-python"]
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "OpenAssetIO"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenAssetIO"
