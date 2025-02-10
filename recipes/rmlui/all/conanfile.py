@@ -1,13 +1,12 @@
-from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
-from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
-from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, replace_in_file, copy, rmdir
-from conan.tools.scm import Version
 import os
 
+from conan import ConanFile
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools.files import get, replace_in_file, copy, rmdir
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 class RmluiConan(ConanFile):
     name = "rmlui"
@@ -37,22 +36,6 @@ class RmluiConan(ConanFile):
         "with_thirdparty_containers": True
     }
 
-    @property
-    def _minimum_compilers_version(self):
-        # Reference: https://en.cppreference.com/w/cpp/compiler_support/14
-        return {
-            "apple-clang": "5.1",
-            "clang": "3.4",
-            "gcc": "5",
-            "intel": "17",
-            "sun-cc": "5.15",
-            "Visual Studio": "15"
-        }
-
-    @property
-    def _minimum_cpp_standard(self):
-        return 14
-
     def export_sources(self):
         copy(self, "CMakeLists.txt", self.recipe_folder, self.export_sources_folder)
 
@@ -67,22 +50,7 @@ class RmluiConan(ConanFile):
             self.options.rm_safe("fPIC")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._minimum_cpp_standard)
-
-        def loose_lt_semver(v1, v2):
-            return all(int(p1) < int(p2) for p1, p2 in zip(str(v1).split("."), str(v2).split(".")))
-
-        min_version = self._minimum_compilers_version.get(
-            str(self.settings.compiler))
-        if not min_version:
-            self.output.warning(f"{self.ref} recipe lacks information about the {self.settings.compiler} compiler support.")
-        else:
-            if loose_lt_semver(str(self.settings.compiler.version), min_version):
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._minimum_cpp_standard} support. "
-                    f"The current compiler {self.settings.compiler} {self.settings.compiler.version} does not support it."
-                )
+        check_min_cppstd(self, 14)
 
     def requirements(self):
         if self.options.font_interface == "freetype":
