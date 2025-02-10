@@ -45,6 +45,7 @@ class SDLConan(ConanFile):
         **{subsystem: [None, True, False] for subsystem, _ in _subsystems},
         **{
             "alsa": [None, True, False],
+            "pulseaudio": [None, True, False],
         }
     }
 
@@ -56,6 +57,7 @@ class SDLConan(ConanFile):
         **{subsystem: None for subsystem, _ in _subsystems},
         **{
             "alsa": None,
+            "pulseaudio": None,
         }
     }
 
@@ -84,6 +86,9 @@ class SDLConan(ConanFile):
         if self.options.get_safe("alsa") == None:
             # CMakeLists.txt#L298
             setattr(self.options, "alsa", self._is_unix_sys and self.options.get_safe("audio"))
+
+        if self.options.get_safe("pulseaudio") == None:
+            setattr(self.options, "pulseaudio", self._supports_pulseaudio)
 
     def validate(self):
         # If any of the subsystems is enabled, then the corresponding dependencies must be enabled
@@ -147,7 +152,7 @@ class SDLConan(ConanFile):
             self.requires("libudev/system")
         if self._supports_dbus:
             self.requires("dbus/1.15.8")
-        if self._supports_pulseaudio:
+        if self.options.get_safe("pulseaudio"):
             self.requires("pulseaudio/17.0")
         if self.options.get_safe("alsa"):
             self.requires("libalsa/1.2.12")
@@ -169,6 +174,9 @@ class SDLConan(ConanFile):
         if self._needs_libusb:
             tc.cache_variables["SDL_HIDAPI_LIBUSB"] = True
             tc.cache_variables["SDL_HIDAPI_LIBUSB_SHARED"] = self.dependencies["libusb"].options.get_safe("shared", False)
+        if self.options.get("pulseaudio"):
+            tc.cache_variables["SDL_PULSEAUDIO"] = True
+            tc.cache_variables["SDL_PULSEAUDIO_SHARED"] = self.dependencies["pulseaudio"].options.get_safe("shared", True)
         if self.options.get_safe("alsa"):
             tc.cache_variables["SDL_ALSA"] = True
             tc.cache_variables["SDL_ALSA_SHARED"] = self.dependencies["libalsa"].options.shared
