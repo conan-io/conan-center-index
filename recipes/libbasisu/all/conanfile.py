@@ -1,14 +1,13 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class LibBasisUniversalConan(ConanFile):
@@ -40,20 +39,6 @@ class LibBasisUniversalConan(ConanFile):
         "with_opencl": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    @property
-    def _minimum_compiler_version(self):
-        return {
-            "Visual Studio": "15",
-            "msvc": "191",
-            "gcc": "5.4",
-            "clang": "3.9",
-            "apple-clang": "10",
-        }
-
     def _use_custom_iterator_debug_level(self):
         return self.options.get_safe("custom_iterator_debug_level",
                                      default=self.default_options["custom_iterator_debug_level"])
@@ -83,18 +68,11 @@ class LibBasisUniversalConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        min_version = self._minimum_compiler_version.get(str(self.settings.compiler))
-        if min_version and Version(self.settings.compiler.version) < min_version:
-            raise ConanInvalidConfiguration(
-                f"{self.name} {self.version} does not support compiler with version"
-                f" {self.settings.compiler} {self.settings.compiler.version}, minimum supported compiler"
-                f" version is {min_version} "
-            )
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -114,7 +92,6 @@ class LibBasisUniversalConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
