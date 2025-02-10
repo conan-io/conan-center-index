@@ -14,9 +14,10 @@ class OpenJPH(ConanFile):
     name = "openjph"
     description = "Open-source implementation of JPEG2000 Part-15 (or JPH or HTJ2K)"
     license = "BSD-2-Clause"
-    homepage = "https://github.com/aous72/OpenJPH"
     url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/aous72/OpenJPH"
     topics = ("ht-j2k", "jpeg2000", "jp2", "openjph", "image", "multimedia", "format", "graphics")
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],

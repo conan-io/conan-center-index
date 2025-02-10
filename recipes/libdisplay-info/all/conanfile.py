@@ -9,12 +9,12 @@ from conan.tools.meson import Meson, MesonToolchain
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class LibdisplayInfoConan(ConanFile):
     name = "libdisplay-info"
-    description = "EDID and DisplayID library."
+    description = "EDID and DisplayID library"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.freedesktop.org/emersion/libdisplay-info"
@@ -29,14 +29,7 @@ class LibdisplayInfoConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _has_build_profile(self):
-        return getattr(self, "settings_build", None)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    implements = ["auto_shared_fpic"]
 
     def configure(self):
         if self.options.shared:
@@ -47,35 +40,31 @@ class LibdisplayInfoConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def requirements(self):
-        if not self._has_build_profile:
-            self.requires("hwdata/0.374")
-
     def validate(self):
         if not self.settings.os in ["FreeBSD", "Linux"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}")
 
     def build_requirements(self):
-        if self._has_build_profile:
-            self.tool_requires("hwdata/0.374")
-        self.tool_requires("meson/1.2.3")
+        self.tool_requires("hwdata/0.376")
+        self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
         tc = MesonToolchain(self)
         if cross_building(self):
+            # https://mesonbuild.com/Builtin-options.html#specifying-options-per-machine
             tc.project_options["build.pkg_config_path"] = self.generators_folder
         tc.generate()
+
         pkg_config_deps = PkgConfigDeps(self)
-        if self._has_build_profile:
-            pkg_config_deps.build_context_activated = ["hwdata"]
+        pkg_config_deps.build_context_activated = ["hwdata"]
         pkg_config_deps.generate()
-        virtual_build_env = VirtualBuildEnv(self)
-        virtual_build_env.generate()
 
     def _patch_sources(self):
         replace_in_file(self, os.path.join(self.source_folder, "meson.build"), "subdir('test')", "# subdir('test')")

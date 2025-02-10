@@ -6,7 +6,7 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class NiftiClibConan(ConanFile):
@@ -32,10 +32,8 @@ class NiftiClibConan(ConanFile):
         "use_cifti": False,  # seems to be beta?
         "use_fslio": False  # Note in CMakeLists.txt: "If OFF, The copyright of this code is questionable for inclusion with nifti."
     }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    implements = ["auto_shared_fpic"]
+    languages = ["C"]
 
     def validate(self):
         if is_msvc(self) and self.options.shared:
@@ -43,12 +41,6 @@ class NiftiClibConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support -o {self.ref}:shared=True with MSVC compiler.")
         if not self.options.use_nifti2 and self.options.use_cifti:
             raise ConanInvalidConfiguration(f"{self.ref} -o '&:use_cifti=True' requires -o '&:use_nifti2=True'")
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -72,8 +64,8 @@ class NiftiClibConan(ConanFile):
             tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
             tc.preprocessor_definitions["_CRT_SECURE_NO_WARNINGS"] = 1
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -102,9 +94,9 @@ class NiftiClibConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             sys_libs += ["m"]
 
-        self.cpp_info.required_components = ["ZLIB::ZLIB"]
+        self.cpp_info.requires = ["zlib::zlib"]
         if self.options.use_cifti:
-            self.cpp_info.required_components += ["EXPAT::EXPAT"]
+            self.cpp_info.requires += ["expat::expat"]
 
         self.cpp_info.components["znz"].libs = ["znz"]
         self.cpp_info.components["znz"].set_property("pkg_config_name", "znz")

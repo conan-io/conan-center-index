@@ -1,4 +1,13 @@
 sources:
+  "5.6.3":
+    url: "https://github.com/simdutf/simdutf/archive/v5.6.3.tar.gz"
+    sha256: "503070ddf27e26c051b9500dfc7354ec8850e11076f47db32635931c85b630c0"
+  "5.6.2":
+    url: "https://github.com/simdutf/simdutf/archive/v5.6.2.tar.gz"
+    sha256: "c71b5478c9b912e07f75098f3a60920f1c4de3227b5285ea8a90a2fcf8bd6a89"
+  "5.6.0":
+    url: "https://github.com/simdutf/simdutf/archive/v5.6.0.tar.gz"
+    sha256: "98cc5761b638642b018a628b1609f1b2df489b555836fa88706055bb56a4d6fe"
   "5.5.0":
     url: "https://github.com/simdutf/simdutf/archive/v5.5.0.tar.gz"
     sha256: "47090a770b8eecf610ac4d1fafadde60bb7ba3c9d576d2a3a545aba989a3d749"
@@ -17,24 +26,6 @@ sources:
   "5.3.1":
     url: "https://github.com/simdutf/simdutf/archive/v5.3.1.tar.gz"
     sha256: "373e1e66a1c245817f0aa08ae8693b71d1703f9355d364e0d9d002929738ddcc"
-  "5.2.8":
-    url: "https://github.com/simdutf/simdutf/archive/v5.2.8.tar.gz"
-    sha256: "2706f1bef85a6d8598f82defd3848f1c5100e2e065c5d416d993118b53ea8d77"
-  "5.2.6":
-    url: "https://github.com/simdutf/simdutf/archive/v5.2.6.tar.gz"
-    sha256: "ab9e56facf7cf05f4e9d062a0adef310fc6a0f82a8132e8ec1e1bb7ab5e234df"
-  "5.2.3":
-    url: "https://github.com/simdutf/simdutf/archive/v5.2.3.tar.gz"
-    sha256: "dfa55d85c3ee51e9b52e55c02701b16f83dcf1921e1075b67f99b1036df5adb8"
-  "5.2.2":
-    url: "https://github.com/simdutf/simdutf/archive/v5.2.2.tar.gz"
-    sha256: "6cd905ac7fcf6293e34d7acaa9d5af901d85f182f82ec6ec3ee9f9273881791d"
-  "5.0.0":
-    url: "https://github.com/simdutf/simdutf/archive/v5.0.0.tar.gz"
-    sha256: "088d750466bf3487117cce7f828eb94a0a3474d7e76b45d4902c99a2387212b7"
-  "4.0.9":
-    url: "https://github.com/simdutf/simdutf/archive/v4.0.9.tar.gz"
-    sha256: "599E6558FC8D06F8346E5F210564F8B18751C93D83BCE1A40A0E6A326C57B61E"
   # 4.0.5 is required by scnlib
   "4.0.5":
     url: "https://github.com/simdutf/simdutf/archive/v4.0.5.tar.gz"
