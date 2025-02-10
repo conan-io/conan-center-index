@@ -84,7 +84,7 @@ class ZenohCConan(ConanFile):
 
     def _define_rust_env(self, env, scope="host", cflags=None):
         target = self.conf.get(f"user.rust:target_{scope}", check_type=str).replace("-", "_")
-        cc = GnuToolchain(self).extra_env.vars(self)["CC" if scope == "host" else "CC_FOR_BUILD"]
+        cc = GnuToolchain(self).extra_env.vars(self).get("CC" if scope == "host" else "CC_FOR_BUILD", "cc")
         env.define_path(f"CARGO_TARGET_{target.upper()}_LINKER", cc)
         env.define_path(f"CC_{target}", cc)
         if cflags:
