@@ -1,16 +1,16 @@
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import rename, get, apply_conandata_patches, replace_in_file, rmdir, rm, export_conandata_patches, mkdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2.0.9"
 
 
 class LibMysqlClientCConan(ConanFile):
@@ -45,6 +45,7 @@ class LibMysqlClientCConan(ConanFile):
 
     package_type = "library"
     short_paths = True
+    implements = ["auto_shared_fpic"]
 
     @property
     def _min_cppstd(self):
@@ -61,14 +62,6 @@ class LibMysqlClientCConan(ConanFile):
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -136,11 +129,9 @@ class LibMysqlClientCConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
-        vbenv = VirtualBuildEnv(self)
-        vbenv.generate()
-
         if not cross_building(self):
             vrenv = VirtualRunEnv(self)
             vrenv.generate(scope="build")
@@ -195,8 +186,6 @@ class LibMysqlClientCConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
-
         libs_to_remove = []
         # Rapidjson vars are set via CMakeToolchain
         libs_to_remove.append("rapidjson")
@@ -322,5 +311,3 @@ class LibMysqlClientCConan(ConanFile):
 
         # TODO: There is no official FindMySQL.cmake, but it's a common Find files in many projects
         #       do we want to support it in CMakeDeps?
-        self.cpp_info.names["cmake_find_package"] = "MySQL"
-        self.cpp_info.names["cmake_find_package_multi"] = "MySQL"
