@@ -1,4 +1,3 @@
-import glob
 import os
 from pathlib import Path
 
@@ -11,7 +10,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class LibpqConan(ConanFile):
@@ -164,15 +163,11 @@ class LibpqConan(ConanFile):
         if self.options.with_zstd:
             self.requires("zstd/[~1.5]")
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def build_requirements(self):
         self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.24")
             self.tool_requires("strawberryperl/5.32.1.1")
         else:
@@ -372,7 +367,3 @@ class LibpqConan(ConanFile):
         self.cpp_info.components["_tools"].requires = tool_requires
 
         self.runenv_info.define_path("PostgreSQL_ROOT", self.package_folder)
-
-        self.cpp_info.names["cmake_find_package"] = "PostgreSQL"
-        self.cpp_info.names["cmake_find_package_multi"] = "PostgreSQL"
-        self.env_info.PostgreSQL_ROOT = self.package_folder
