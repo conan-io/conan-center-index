@@ -1,14 +1,15 @@
+import os
+
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import Environment, VirtualRunEnv
 from conan.tools.files import copy, get, rename, rm
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, unix_path, check_min_vs
-import os
+from conan.tools.microsoft import is_msvc, unix_path
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1.0"
 
 
 class GlpkConan(ConanFile):
@@ -31,10 +32,6 @@ class GlpkConan(ConanFile):
         "with_gmp": True,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -54,7 +51,7 @@ class GlpkConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -65,9 +62,6 @@ class GlpkConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
@@ -76,9 +70,6 @@ class GlpkConan(ConanFile):
         tc.configure_args.append("--with-gmp" if self.options.with_gmp else "--without-gmp")
         if is_msvc(self):
             tc.extra_defines.append("__WOE__")
-            if check_min_vs(self, 180, raise_invalid=False):
-                tc.extra_cflags.append("-FS")
-                tc.extra_cxxflags.append("-FS")
         tc.generate()
 
         if is_msvc(self):
@@ -148,5 +139,3 @@ class GlpkConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
 
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
