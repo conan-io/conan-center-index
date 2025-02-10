@@ -1,12 +1,13 @@
-from conan import ConanFile
-from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches, save
-from conan.tools.build import check_min_cppstd
-from conan.tools.scm import Version
-from conan.tools.build import cross_building
-from conan.errors import ConanInvalidConfiguration
 import os
 import textwrap
+from pathlib import Path
+
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
+from conan.tools.files import copy, get, rmdir, apply_conandata_patches, export_conandata_patches, save
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.55.0"
 
@@ -108,8 +109,7 @@ class ArmadilloConan(ConanFile):
             )
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
         if self.settings.os != "Macos" and (
             self.options.use_blas == "framework_accelerate"
@@ -119,23 +119,12 @@ class ArmadilloConan(ConanFile):
                 "framework_accelerate can only be used on Macos"
             )
 
-        if self.options.use_hdf5 and Version(self.version) > "12" and cross_building(self):
-            raise ConanInvalidConfiguration(
-                "Armadillo does not support cross building with hdf5. Set use_hdf5=False and try again."
-            )
-
         for value, options in self._co_dependencies.items():
-            options_without_value = [
-                x for x in options if self.options.get_safe(x) != value
-            ]
+            options_without_value = [x for x in options if self.options.get_safe(x) != value]
             if options_without_value and (len(options) != len(options_without_value)):
                 raise ConanInvalidConfiguration(
-                    "Options {} must all be set to '{}' to use this feature. To fix this, set option {} to '{}'.".format(
-                        ", ".join(options),
-                        value,
-                        ", ".join(options_without_value),
-                        value,
-                    )
+                    f"Options {', '.join(options)} must all be set to '{value}' to use this feature. "
+                    f"To fix this, set option {', '.join(options_without_value)} to '{value}'."
                 )
 
         if (
@@ -180,7 +169,7 @@ class ArmadilloConan(ConanFile):
         if self.options.use_hdf5 and Version(self.version) < "12":
             # Use the conan dependency if the system lib isn't being used
             # Libraries not required to be propagated transitively when the armadillo run-time wrapper is used
-            self.requires("hdf5/1.14.3", transitive_headers=True, transitive_libs=not self.options.use_wrapper)
+            self.requires("hdf5/1.14.5", transitive_headers=True, transitive_libs=not self.options.use_wrapper)
 
         if self.options.use_blas == "openblas":
             # Libraries not required to be propagated transitively when the armadillo run-time wrapper is used
@@ -230,12 +219,11 @@ class ArmadilloConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def _patch_sources(self):
         apply_conandata_patches(self)
 
+    def _patch_sources(self):
         def _override_pkg_module(pkg, content):
-            save(self, self.source_path.joinpath("cmake_aux", "Modules", f"ARMA_Find{pkg}.cmake"), content)
+            save(self, Path(self.source_folder, "cmake_aux", "Modules", f"ARMA_Find{pkg}.cmake"), content)
 
         def _disable_pkg_module(pkg, var=None):
             _override_pkg_module(pkg, f"set({var or pkg}_FOUND NO)")
@@ -324,14 +312,6 @@ class ArmadilloConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "Armadillo::Armadillo")
         self.cpp_info.set_property("cmake_target_aliases", ["armadillo", "armadillo::armadillo"])
         self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
-
-        # Remove when cmake_find_package and pkg_config generators are no
-        # longer supported
-        self.cpp_info.names["pkg_config"] = "armadillo"
-        self.cpp_info.names["cmake_find_package"] = "Armadillo"
-        self.cpp_info.names["cmake_find_package_multi"] = "Armadillo"
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_vars_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_vars_rel_path]
 
         if self.options.get_safe("use_extern_rng"):
             self.cpp_info.defines.append("ARMA_USE_EXTERN_RNG")
