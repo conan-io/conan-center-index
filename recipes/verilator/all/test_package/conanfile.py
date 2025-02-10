@@ -5,13 +5,11 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain, CMakeDeps
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import save, load
 from conan.tools.scm import Version
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    test_type = "explicit"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -41,8 +39,6 @@ class TestPackageConan(ConanFile):
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
-        save(self, os.path.join(self.generators_folder, "verilator_path"),
-             os.path.join(self.dependencies["verilator"].package_folder, "bin", "verilator"))
 
     def build(self):
         if can_run(self):
@@ -52,7 +48,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
-            verilator_path = load(self, os.path.join(self.generators_folder, "verilator_path"))
+            verilator_path = os.path.join(self.dependencies["verilator"].cpp_info.bindir, "verilator")
             self.run(f"perl {verilator_path} --version")
             bin_path = os.path.join(self.cpp.build.bindir, "blinky")
             self.run(bin_path, env="conanrun")
