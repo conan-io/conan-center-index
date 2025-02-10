@@ -1,5 +1,6 @@
 #include <zenoh.h>
 
 int main() {
-    zc_init_log_from_env_or("error");
+  z_owned_config_t config;
+  z_config_default(&config);
 }
