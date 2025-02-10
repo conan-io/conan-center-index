@@ -13,7 +13,7 @@ from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.microsoft import is_msvc
 from conan.tools.system.package_manager import Apt
 
-required_conan_version = ">=2.0.9"
+required_conan_version = ">=2.0.6"
 
 
 class GtkConan(ConanFile):
@@ -52,13 +52,13 @@ class GtkConan(ConanFile):
         "with_iso_codes": False,
     }
     no_copy_source = True
-    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
+            del self.options.fPIC
             # Fix duplicate definitions of DllMain
             self.options["gdk-pixbuf"].shared = True
             # Fix segmentation fault
@@ -71,6 +71,8 @@ class GtkConan(ConanFile):
             self.options["pango"].with_freetype = True
 
     def configure(self):
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
 
@@ -170,6 +172,7 @@ class GtkConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         # Required for glib-compile-resources
@@ -224,7 +227,6 @@ class GtkConan(ConanFile):
         return output.getvalue().strip()
 
     def build(self):
-        apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
         meson.build()
