@@ -7,7 +7,6 @@ from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.54.0"
@@ -90,7 +89,7 @@ class AprUtilConan(ConanFile):
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.1.0")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.45.0")
+            self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.with_expat:
             self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_postgresql:
@@ -118,6 +117,8 @@ class AprUtilConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), " SHARED ", " ")
 
     @property
     def _with_crypto(self):
@@ -173,12 +174,7 @@ class AprUtilConan(ConanFile):
             deps = AutotoolsDeps(self)
             deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), " SHARED ", " ")
-
     def build(self):
-        self._patch_sources()
         if self.settings.os == "Windows":
             cmake = CMake(self)
             cmake.configure()
@@ -226,9 +222,3 @@ class AprUtilConan(ConanFile):
         libdirs = [p for dep in deps for p in dep.cpp_info.aggregated_components().libdirs]
         aprutil_ldflags = " ".join([f"-L{p}" for p in libdirs])
         self.runenv_info.define("APRUTIL_LDFLAGS", aprutil_ldflags)
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.APR_UTIL_ROOT = self.package_folder
-        if not is_msvc(self):
-            self.env_info.APRUTIL_LDFLAGS = aprutil_ldflags
