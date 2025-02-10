@@ -1,9 +1,9 @@
 sources:
-  "0.8.0":
+  "1.1.0":
     url: "https://github.com/pytorch/FBGEMM/archive/refs/tags/v0.8.0.tar.gz"
     sha256: "f754dbc6becf8ece0474872c4e797445b55c21799c1f1d219470c0c5818207dd"
 patches:
-  "0.8.0":
+  "1.1.0":
     - patch_file: "patches/0001-use-conan-dependencies.patch"
       patch_description: "Use Conan dependencies"
       patch_type: "conan"

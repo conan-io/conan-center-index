@@ -1,15 +1,13 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration, ConanException
-from conan.tools.build import check_min_cppstd, valid_min_cppstd
+from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, export_conandata_patches, get, apply_conandata_patches, rmdir, replace_in_file, rm
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class FbgemmConan(ConanFile):
@@ -32,32 +30,11 @@ class FbgemmConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "6",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -73,26 +50,20 @@ class FbgemmConan(ConanFile):
         # https://github.com/pytorch/FBGEMM/issues/2074
         if str(self.settings.arch).startswith("arm"):
             raise ConanInvalidConfiguration("FBGEMM does not yet support ARM architectures")
-
-        if self.settings.compiler == "clang":
-            # test_package fails with libfbgemm.so: undefined reference to __gnu_f2h_ieee
-            # Might be fixed in v1.0:
-            # https://github.com/pytorch/FBGEMM/commit/273d964b5aa8b9b3ea75c0146a85ef4b2aa7dfad#diff-dd5678511c7f6486912de08742713b8c05e3718f28f92522d72d6b2995d4790f
-            raise ConanInvalidConfiguration("Clang is currently not supported. Contributions are welcome.")
-
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        rmdir(self, os.path.join(self.source_folder, "third_party"))
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "-Werror", "")
+        # asmjit has been unvendored
+        replace_in_file(self, cmakelists, "$<TARGET_PDB_FILE:asmjit>", "")
+        replace_in_file(self, cmakelists, "install(TARGETS asmjit", "# install(TARGETS asmjit")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -103,8 +74,6 @@ class FbgemmConan(ConanFile):
         tc.variables["FBGEMM_BUILD_BENCHMARKS"] = False
         tc.variables["FBGEMM_BUILD_DOCS"] = False
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_OpenMP"] = True
-        if not valid_min_cppstd(self, self._min_cppstd):
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.variables["CMAKE_C_STANDARD"] = 99
         if is_msvc(self) and self.settings.build_type == "Debug":
             # Avoid "fatal error C1128: number of sections exceeded object file format limit: compile with /bigobj"
@@ -117,19 +86,7 @@ class FbgemmConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
-        VirtualBuildEnv(self).generate()
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        rmdir(self, os.path.join(self.source_folder, "third_party"))
-        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
-        replace_in_file(self, cmakelists, "-Werror", "")
-        # asmjit has been unvendored
-        replace_in_file(self, cmakelists, "$<TARGET_PDB_FILE:asmjit>", "")
-        replace_in_file(self, cmakelists, "install(TARGETS asmjit", "# install(TARGETS asmjit")
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         if os.getenv("CONAN_CENTER_BUILD_SERVICE", False):
