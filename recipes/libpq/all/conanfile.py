@@ -1,14 +1,15 @@
+import glob
+import os
+
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.build import cross_building
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.build import cross_building, can_run
+from conan.tools.env import Environment, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, VCVars
 from conan.tools.scm import Version
-import glob
-import os
 
 required_conan_version = ">=1.54.0"
 
@@ -84,16 +85,17 @@ class LibpqConan(ConanFile):
 
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         if is_msvc(self):
             self.tool_requires("strawberryperl/5.32.1.1")
-        elif self._settings_build.os == "Windows":
+        elif self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         if is_msvc(self):
@@ -115,7 +117,7 @@ class LibpqConan(ConanFile):
             tc.configure_args.append("--with-zlib" if self.options.with_zlib else "--without-zlib")
             if cross_building(self) and not self.options.with_openssl:
                 tc.configure_args.append("--disable-strong-random")
-            if cross_building(self, skip_x64_x86=True):
+            if not can_run(self):
                 tc.configure_args.append("USE_DEV_URANDOM=1")
             if self.settings.os != "Windows" and self.options.disable_rpath:
                 tc.configure_args.append("--disable-rpath")
@@ -198,7 +200,6 @@ class LibpqConan(ConanFile):
                             "echo #")
 
     def build(self):
-        apply_conandata_patches(self)
         self._patch_sources()
         if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "src", "tools", "msvc")):
@@ -317,5 +318,3 @@ class LibpqConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
 
-        self.cpp_info.names["cmake_find_package"] = "PostgreSQL"
-        self.cpp_info.names["cmake_find_package_multi"] = "PostgreSQL"
