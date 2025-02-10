@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=2.4.0"
 
 
 class OatppSwaggerConan(ConanFile):
@@ -28,14 +28,7 @@ class OatppSwaggerConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -44,8 +37,7 @@ class OatppSwaggerConan(ConanFile):
         self.requires(f"oatpp/{self.version}", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared library with msvc")
@@ -82,29 +74,15 @@ class OatppSwaggerConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "oatpp-swagger")
         self.cpp_info.set_property("cmake_target_name", "oatpp::oatpp-swagger")
-        # TODO: back to global scope in conan v2 once legacy generators removed
-        self.cpp_info.components["_oatpp-swagger"].includedirs = [
-            os.path.join("include", f"oatpp-{self.version}", "oatpp-swagger")
-        ]
-        self.cpp_info.components["_oatpp-swagger"].libdirs = [os.path.join("lib", f"oatpp-{self.version}")]
+        self.cpp_info.includedirs = [os.path.join("include", f"oatpp-{self.version}", "oatpp-swagger")]
+        self.cpp_info.libdirs = [os.path.join("lib", f"oatpp-{self.version}")]
         if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.components["_oatpp-swagger"].bindirs = [os.path.join("bin", f"oatpp-{self.version}")]
+            self.cpp_info.bindirs = [os.path.join("bin", f"oatpp-{self.version}")]
         else:
-            self.cpp_info.components["_oatpp-swagger"].bindirs = []
-        self.cpp_info.components["_oatpp-swagger"].libs = ["oatpp-swagger"]
+            self.cpp_info.bindirs = []
+        self.cpp_info.libs = ["oatpp-swagger"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["_oatpp-swagger"].system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread"]
         # export env var
         res_path = os.path.join(self.package_folder, "include", f"oatpp-{self.version}", "bin", "oatpp-swagger", "res")
         self.runenv_info.prepend_path("OATPP_SWAGGER_RES_PATH", res_path)
-
-        # TODO: to remove in conan v2 once legacy generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "oatpp-swagger"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "oatpp-swagger"
-        self.cpp_info.names["cmake_find_package"] = "oatpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "oatpp"
-        self.cpp_info.components["_oatpp-swagger"].names["cmake_find_package"] = "oatpp-swagger"
-        self.cpp_info.components["_oatpp-swagger"].names["cmake_find_package_multi"] = "oatpp-swagger"
-        self.cpp_info.components["_oatpp-swagger"].set_property("cmake_target_name", "oatpp::oatpp-swagger")
-        self.cpp_info.components["_oatpp-swagger"].requires = ["oatpp::oatpp"]
-        self.env_info.OATPP_SWAGGER_RES_PATH = res_path
