@@ -2,13 +2,12 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class GnuGetoptConan(ConanFile):
@@ -21,10 +20,6 @@ class GnuGetoptConan(ConanFile):
 
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")
@@ -42,7 +37,7 @@ class GnuGetoptConan(ConanFile):
             raise ConanInvalidConfiguration("MSVC is not supported. Consider using MSYS2 instead.")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -51,9 +46,6 @@ class GnuGetoptConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = AutotoolsToolchain(self)
         # liblastlog support requires sqlite3
         tc.configure_args.append("--disable-liblastlog2")
