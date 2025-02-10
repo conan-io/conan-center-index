@@ -152,14 +152,14 @@ class CImgConan(ConanFile):
         elif self.options.enable_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.5")
         if self.options.enable_openexr:
-            self.requires("openexr/3.2.3")
+            self.requires("openexr/3.3.2")
             self.requires("imath/3.1.9")
         if self.options.enable_png:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.enable_tiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.5 <5]")
         if self.options.enable_ffmpeg:
-            self.requires("ffmpeg/6.1")
+            self.requires("ffmpeg/7.0.1")
         if self.options.enable_opencv:
             # FIXME: OpenCV 4.x fails to link ffmpeg libraries correctly
             self.requires("opencv/3.4.20")
@@ -182,8 +182,7 @@ class CImgConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "11")
+        check_min_cppstd(self, 11)
 
         if not self.options.get_safe("enable_display"):
             if self.options.get_safe("enable_xrandr") or self.options.get_safe("enable_xshm"):
@@ -283,8 +282,3 @@ class CImgConan(ConanFile):
             self.cpp_info.cxxflags = openmp_flags
             self.cpp_info.sharedlinkflags = openmp_flags
             self.cpp_info.exelinkflags = openmp_flags
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        #       do not use this name in CMakeDeps, it was a mistake, there is no official CMake config file
-        self.cpp_info.names["cmake_find_package"] = "CImg"
-        self.cpp_info.names["cmake_find_package_multi"] = "CImg"
