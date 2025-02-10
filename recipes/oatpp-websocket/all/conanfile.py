@@ -7,7 +7,7 @@ from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.51.1"
+required_conan_version = ">=2.0.9"
 
 
 class OatppWebSocketConan(ConanFile):
@@ -28,17 +28,7 @@ class OatppWebSocketConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            try:
-                del self.options.fPIC
-            except Exception:
-                pass
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -47,8 +37,7 @@ class OatppWebSocketConan(ConanFile):
         self.requires(f"oatpp/{self.version}", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
         if is_msvc(self) and self.info.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared library with msvc")
@@ -85,25 +74,12 @@ class OatppWebSocketConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "oatpp-websocket")
         self.cpp_info.set_property("cmake_target_name", "oatpp::oatpp-websocket")
-        # TODO: back to global scope in conan v2 once legacy generators removed
-        self.cpp_info.components["_oatpp-websocket"].includedirs = [
-            os.path.join("include", f"oatpp-{self.version}", "oatpp-websocket")
-        ]
-        self.cpp_info.components["_oatpp-websocket"].libdirs = [os.path.join("lib", f"oatpp-{self.version}")]
+        self.cpp_info.includedirs = [os.path.join("include", f"oatpp-{self.version}", "oatpp-websocket")]
+        self.cpp_info.libdirs = [os.path.join("lib", f"oatpp-{self.version}")]
         if self.settings.os == "Windows" and self.options.shared:
-            self.cpp_info.components["_oatpp-websocket"].bindirs = [os.path.join("bin", f"oatpp-{self.version}")]
+            self.cpp_info.bindirs = [os.path.join("bin", f"oatpp-{self.version}")]
         else:
-            self.cpp_info.components["_oatpp-websocket"].bindirs = []
-        self.cpp_info.components["_oatpp-websocket"].libs = ["oatpp-websocket"]
+            self.cpp_info.bindirs = []
+        self.cpp_info.libs = ["oatpp-websocket"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["_oatpp-websocket"].system_libs = ["pthread"]
-
-        # TODO: to remove in conan v2 once legacy generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "oatpp-websocket"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "oatpp-websocket"
-        self.cpp_info.names["cmake_find_package"] = "oatpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "oatpp"
-        self.cpp_info.components["_oatpp-websocket"].names["cmake_find_package"] = "oatpp-websocket"
-        self.cpp_info.components["_oatpp-websocket"].names["cmake_find_package_multi"] = "oatpp-websocket"
-        self.cpp_info.components["_oatpp-websocket"].set_property("cmake_target_name", "oatpp::oatpp-websocket")
-        self.cpp_info.components["_oatpp-websocket"].requires = ["oatpp::oatpp"]
+            self.cpp_info.system_libs = ["pthread"]
