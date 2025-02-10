@@ -9,7 +9,7 @@ from conan.tools.files import copy, get, chdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class MrcalConan(ConanFile):
@@ -29,17 +29,14 @@ class MrcalConan(ConanFile):
         # Disabled by default due to being GPL-licensed
         "with_libelas": False,
     }
-
-    def configure(self):
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
+    languages = ["C"]
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         # https://github.com/dkogan/libdogleg/blob/master/dogleg.h#L8
-        self.requires("suitesparse-cholmod/5.2.1", transitive_headers=True, transitive_libs=True)
+        self.requires("suitesparse-cholmod/5.3.0", transitive_headers=True, transitive_libs=True)
         self.requires("freeimage/3.18.0")
         if self.options.with_libelas:
             self.requires("libelas/cci.20150630")
