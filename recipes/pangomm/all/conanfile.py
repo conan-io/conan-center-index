@@ -69,6 +69,7 @@ class PangommConan(ConanFile):
         tc = MesonToolchain(self)
         tc.project_options["build-documentation"] = "false"
         tc.project_options["msvc14x-parallel-installable"] = "false"
+        tc.project_options["libdir"] = "lib"
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
