@@ -105,7 +105,7 @@ class SundialsConan(ConanFile):
         if self.options.get_safe("with_ginkgo"):
             self.requires("ginkgo/1.8.0", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_klu"):
-            self.requires("suitesparse-klu/2.3.4", transitive_headers=True, transitive_libs=True)
+            self.requires("suitesparse-klu/2.3.5", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_lapack"):
             self.requires("openblas/0.3.28")
         if self.options.get_safe("with_mpi"):
@@ -336,5 +336,3 @@ class SundialsConan(ConanFile):
             self.cpp_info.builddirs.append(os.path.join("lib", "cmake", "sundials"))
             cmake_module = os.path.join("lib", "cmake", "sundials", "conan-cuda-support.cmake")
             self.cpp_info.set_property("cmake_build_modules", [cmake_module])
-            self.cpp_info.build_modules["cmake_find_package"] = [cmake_module]
-            self.cpp_info.build_modules["cmake_find_package_multi"] = [cmake_module]
