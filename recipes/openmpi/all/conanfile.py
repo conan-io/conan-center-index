@@ -81,7 +81,7 @@ class OpenMPIConan(ConanFile):
     def requirements(self):
         # OpenMPI public headers don't include anything besides stddef.h.
         # transitive_headers=True is not needed for any dependencies.
-        self.requires("hwloc/2.10.0")
+        self.requires("hwloc/2.11.1")
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("libevent/2.1.12")
         if self.settings.os == "Linux":
@@ -116,7 +116,7 @@ class OpenMPIConan(ConanFile):
             return "yes" if v else "no"
 
         tc = GnuToolchain(self)
-        tc.configure_args["--with-pic"] = self.options.get_safe("fPIC", True)
+        tc.configure_args["--with-pic"] = self.options.get_safe("fPIC")
         tc.configure_args["--enable-mpi-fortran"] = self.options.fortran
         tc.configure_args["--with-hwloc"] = root("hwloc")
         tc.configure_args["--with-libevent"] = root("libevent")
@@ -173,7 +173,7 @@ class OpenMPIConan(ConanFile):
         # libtool's libltdl is not really needed, OpenMPI provides its own equivalent.
         # Not adding it as it fails to be detected by ./configure in some cases.
         # https://github.com/open-mpi/ompi/blob/v4.1.6/opal/mca/dl/dl.h#L20-L25
-        tc.configure_args.append("--with-libltdl=no")
+        tc.configure_args["--with-libltdl"] = "no"
         tc.generate()
 
         deps = AutotoolsDeps(self)
@@ -249,7 +249,7 @@ class OpenMPIConan(ConanFile):
             self.cpp_info.components["prrte"].libs = ["prrte"]
             self.cpp_info.components["prrte"].requires = ["pmix"]
             self.cpp_info.components["ompi"].requires = ["pmix"]
-            main_component = self.cpp_info.components["pmix"]
+            main_component = self.cpp_info.components["ompi"]
         else:
             self.cpp_info.components["orte"].set_property("pkg_config_name", "orte")
             self.cpp_info.components["orte"].libs = ["open-rte"]
@@ -301,21 +301,3 @@ class OpenMPIConan(ConanFile):
         self.runenv_info.define_path("OPAL_LIBDIR", os.path.join(self.package_folder, "lib"))
         self.runenv_info.define_path("OPAL_DATADIR", os.path.join(self.package_folder, "res"))
         self.runenv_info.define_path("OPAL_DATAROOTDIR", os.path.join(self.package_folder, "res"))
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        self.env_info.PATH.append(bin_folder)
-        self.env_info.MPI_BIN = bin_folder
-        self.env_info.MPI_HOME = self.package_folder
-        self.env_info.OPAL_PREFIX = self.package_folder
-        self.env_info.OPAL_EXEC_PREFIX = self.package_folder
-        self.env_info.OPAL_LIBDIR = os.path.join(self.package_folder, "lib")
-        self.env_info.OPAL_DATADIR = os.path.join(self.package_folder, "res")
-        self.env_info.OPAL_DATAROOTDIR = os.path.join(self.package_folder, "res")
-
-        self.cpp_info.names["cmake_find_package"] = "MPI"
-        self.cpp_info.names["cmake_find_package_multi"] = "MPI"
-        self.cpp_info.components["ompi-c"].names["cmake_find_package"] = "MPI_C"
-        if self.options.get_safe("enable_cxx"):
-            self.cpp_info.components["ompi-cxx"].names["cmake_find_package"] = "MPI_CXX"
-        if self.options.fortran != "no":
-            self.cpp_info.components["ompi-fort"].names["cmake_find_package"] = "MPI_Fortran"
