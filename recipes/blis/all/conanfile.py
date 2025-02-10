@@ -3,13 +3,12 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4.0"
 
 
 class BlisConan(ConanFile):
@@ -54,10 +53,8 @@ class BlisConan(ConanFile):
     }
 
     provides = ["blas"]
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    languages = ["C"]
+    implements = ["auto_shared_fpic"]
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -73,12 +70,6 @@ class BlisConan(ConanFile):
         else:
             self.options.config = "generic"
 
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
-
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -87,7 +78,7 @@ class BlisConan(ConanFile):
             raise ConanInvalidConfiguration("Only clang-cl, GCC and ICC are supported on Windows")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -96,9 +87,6 @@ class BlisConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = AutotoolsToolchain(self)
         # BLIS uses a custom configure script, which does not support all the standard options
         remove = ["--bindir", "--sbindir", "--oldincludedir", "--build", "--host"]
