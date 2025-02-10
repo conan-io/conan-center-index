@@ -4,7 +4,7 @@ from conan.tools.files import copy, get, apply_conandata_patches, export_conanda
 from conan.tools.layout import basic_layout
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.0"
 
 
 class PlflistConan(ConanFile):
@@ -15,6 +15,7 @@ class PlflistConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/mattreecebentley/plf_list"
     settings = "os", "arch", "compiler", "build_type"
+
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -25,13 +26,10 @@ class PlflistConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 98)
+        check_min_cppstd(self, 98)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
-    def build(self):
         apply_conandata_patches(self)
 
     def package(self):
