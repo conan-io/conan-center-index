@@ -191,10 +191,22 @@ class SDLConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
+    @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang" and \
+            self.settings.compiler.get_safe("runtime")
+
     def package_info(self):
-        self.cpp_info.libs = ["SDL3"]
+        sdl_lib_name = "SDL3"
+        if (is_msvc(self) or self._is_clang_cl) and not self.options.shared:
+            sdl_lib_name = f"{sdl_lib_name}-static"
+        self.cpp_info.libs = [sdl_lib_name]
         self.cpp_info.set_property("cmake_file_name", "SDL3")
         self.cpp_info.set_property("cmake_target_name", "SDL3::SDL3")
+        if self.options.shared:
+            self.cpp_info.set_property("cmake_target_aliases", ["SDL3::SDL3-static"])
+        else:
+            self.cpp_info.set_property("cmake_target_aliases", ["SDL3::SDL3-shared"])
         # CMakeLists.txt#L120
         if self.settings.os in ("Linux", "FreeBSD", "Macos"):
             self.cpp_info.system_libs.append("pthread")
