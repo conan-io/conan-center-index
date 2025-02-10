@@ -1,15 +1,14 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import check_min_cppstd, valid_min_cppstd
+from conan.tools.build import check_min_cppstd, check_max_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, copy, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.scm import Version
 import os
 
 
-required_conan_version = ">=1.56.0 <2 || >=2.0.6"
+required_conan_version = ">=2.0.6"
 
 
 class BearConan(ConanFile):
@@ -21,18 +20,6 @@ class BearConan(ConanFile):
     topics = ("clang", "compilation", "database", "llvm")
     package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
-
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "9",
-            "clang": "12",
-            "apple-clang": "12",
-        }
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -50,7 +37,8 @@ class BearConan(ConanFile):
             self.requires("nlohmann_json/3.11.2")
 
     def build_requirements(self):
-        self.tool_requires("pkgconf/[>=2.2 <3]")
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         self.tool_requires("grpc/<host_version>")
         self.tool_requires("protobuf/3.21.12")
         # Older version of CMake fails to build object libraries in the correct order
@@ -61,13 +49,9 @@ class BearConan(ConanFile):
         del self.info.settings.build_type
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
+        # fmt/ranges.h fails to compile with C++20
+        check_max_cppstd(self, 17)
         if self.settings.os == "Windows":
             raise ConanInvalidConfiguration(f"{self.ref} can not be built on windows.")
 
@@ -76,8 +60,6 @@ class BearConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if not valid_min_cppstd(self, self._min_cppstd):
-            tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.variables["ENABLE_UNIT_TESTS"] = False
         tc.variables["ENABLE_FUNC_TESTS"] = False
         tc.generate()
@@ -87,9 +69,6 @@ class BearConan(ConanFile):
 
         pc = PkgConfigDeps(self)
         pc.generate()
-
-        tc = VirtualBuildEnv(self)
-        tc.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -114,7 +93,3 @@ class BearConan(ConanFile):
         self.cpp_info.libdirs = []
         self.cpp_info.resdirs = []
         self.cpp_info.includedirs = []
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        bin_folder = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bin_folder)
