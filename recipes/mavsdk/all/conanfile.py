@@ -37,7 +37,7 @@ class MavsdkConan(ConanFile):
 
     def configure(self):
         if self.options.shared:
-            self.options.rm_rf("fPIC")
+            self.options.rm_safe("fPIC")
         if self.options.build_server:
             # The .proto files were processed with protobuf v4, which is not compatible with
             # the gRPC protobuf version on CCI, so we need to regenerate them.
