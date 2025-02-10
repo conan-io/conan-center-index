@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -10,7 +11,7 @@ from conan.tools.files import apply_conandata_patches, chdir, copy, export_conan
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class Openni2Conan(ConanFile):
@@ -53,8 +54,7 @@ class Openni2Conan(ConanFile):
             self.requires("libusb/1.0.26")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
         if self.settings.os != "Linux" and not is_apple_os(self):
             # The library should also support Windows via MSBuild.
             raise ConanInvalidConfiguration("Only Linux and macOS builds are currently supported. Contributions are welcome!")
@@ -65,6 +65,12 @@ class Openni2Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        rmdir(self, os.path.join(self.source_folder, "ThirdParty", "LibJPEG"))
+        replace_in_file(self, os.path.join(self.source_folder, "Source", "Drivers", "PS1080", "Sensor", "Bayer.cpp"), "register ", "")
+        if is_apple_os(self):
+            for makefile in Path(self.source_folder, "Source", "Drivers").rglob("Makefile"):
+                replace_in_file(self, makefile, "usb-1.0.0", "usb-1.0", strict=False)
 
     @property
     def _build_type(self):
@@ -110,16 +116,7 @@ class Openni2Conan(ConanFile):
         deps = AutotoolsDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        rmdir(self, os.path.join(self.source_folder, "ThirdParty", "LibJPEG"))
-        replace_in_file(self, os.path.join(self.source_folder, "Source", "Drivers", "PS1080", "Sensor", "Bayer.cpp"), "register ", "")
-        if is_apple_os(self):
-            for makefile in self.source_path.joinpath("Source", "Drivers").rglob("Makefile"):
-                replace_in_file(self, makefile, "usb-1.0.0", "usb-1.0", strict=False)
-
     def build(self):
-        self._patch_sources()
         with chdir(self, self.source_folder):
             autotools = Autotools(self)
             autotools.make()
