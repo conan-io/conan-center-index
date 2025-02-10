@@ -9,7 +9,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class OpenMPIConan(ConanFile):
@@ -242,21 +242,3 @@ class OpenMPIConan(ConanFile):
         self.runenv_info.define_path("OPAL_LIBDIR", os.path.join(self.package_folder, "lib"))
         self.runenv_info.define_path("OPAL_DATADIR", os.path.join(self.package_folder, "res"))
         self.runenv_info.define_path("OPAL_DATAROOTDIR", os.path.join(self.package_folder, "res"))
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        self.env_info.PATH.append(bin_folder)
-        self.env_info.MPI_BIN = bin_folder
-        self.env_info.MPI_HOME = self.package_folder
-        self.env_info.OPAL_PREFIX = self.package_folder
-        self.env_info.OPAL_EXEC_PREFIX = self.package_folder
-        self.env_info.OPAL_LIBDIR = os.path.join(self.package_folder, "lib")
-        self.env_info.OPAL_DATADIR = os.path.join(self.package_folder, "res")
-        self.env_info.OPAL_DATAROOTDIR = os.path.join(self.package_folder, "res")
-
-        self.cpp_info.names["cmake_find_package"] = "MPI"
-        self.cpp_info.names["cmake_find_package_multi"] = "MPI"
-        self.cpp_info.components["ompi-c"].names["cmake_find_package"] = "MPI_C"
-        if self.options.enable_cxx:
-            self.cpp_info.components["ompi-cxx"].names["cmake_find_package"] = "MPI_CXX"
-        if self.options.fortran != "no":
-            self.cpp_info.components["ompi-fort"].names["cmake_find_package"] = "MPI_Fortran"
