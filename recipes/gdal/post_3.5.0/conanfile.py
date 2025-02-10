@@ -3,11 +3,11 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0"
 
 
 class GdalConan(ConanFile):
@@ -207,7 +207,7 @@ class GdalConan(ConanFile):
         if self.options.with_ecw:
             self.requires("libecwj2/3.3")
         if self.options.with_expat:
-            self.requires("expat/2.5.0")
+            self.requires("expat/[>2.6.2 <3]")
         if self.options.with_exr:
             self.requires("openexr/3.2.1")
             self.requires("imath/3.1.9")
@@ -226,7 +226,7 @@ class GdalConan(ConanFile):
         if self.options.with_heif:
             self.requires("libheif/1.16.2")
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.1")
         if self.options.with_jxl:
@@ -240,13 +240,13 @@ class GdalConan(ConanFile):
         if self.options.with_libarchive:
             self.requires("libarchive/3.7.2")
         if self.options.with_libdeflate:
-            self.requires("libdeflate/1.19")
+            self.requires("libdeflate/[>=1.19 <=1.22]") #tested with these
         if self.options.with_libiconv:
             self.requires("libiconv/1.17")
         if self.options.with_libkml:
             self.requires("libkml/1.3.0")
         if self.options.with_lzma:
-            self.requires("xz_utils/5.4.5")
+            self.requires("xz_utils/[>=5.4.5 <6]")
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_mongocxx:
@@ -276,7 +276,7 @@ class GdalConan(ConanFile):
             # libpq 15+ is not supported
             self.requires("libpq/14.9")
         if self.options.with_png:
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         if self.options.with_podofo:
             self.requires("podofo/0.9.7")
         if self.options.with_poppler:
@@ -288,7 +288,7 @@ class GdalConan(ConanFile):
         if self.options.with_spatialite:
             self.requires("libspatialite/5.0.1")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.44.2")
+            self.requires("sqlite3/[>=3.44 <4]")
         if self.options.with_tiledb:
             self.requires("tiledb/2.17.4")
         if self.options.with_webp:
@@ -296,9 +296,9 @@ class GdalConan(ConanFile):
         if self.options.with_xerces:
             self.requires("xerces-c/3.2.5")
         if self.options.with_xml2:
-            self.requires("libxml2/2.12.3")
+            self.requires("libxml2/[>=2.12.5 <3]")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5 <1.6]")
         # Use of external shapelib is not recommended and is currently broken.
         # https://github.com/OSGeo/gdal/issues/5711
         # if self.options.with_shapelib:
@@ -658,7 +658,7 @@ class GdalConan(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        os.rename(os.path.join(self.package_folder, "share"),
+        rename(self, os.path.join(self.package_folder, "share"),
                   os.path.join(self.package_folder, "res"))
         rmdir(self, os.path.join(self.package_folder, "res", "bash-completion"))
         rmdir(self, os.path.join(self.package_folder, "res", "man"))
@@ -812,10 +812,3 @@ class GdalConan(ConanFile):
 
         if self.options.tools:
             self.buildenv_info.define_path("GDAL_DATA", gdal_data_path)
-
-        # TODO: remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "GDAL"
-        self.cpp_info.names["cmake_find_package_multi"] = "GDAL"
-        self.cpp_info.filenames["cmake_find_package"] = "GDAL"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "GDAL"
-        self.env_info.GDAL_DATA = gdal_data_path

@@ -55,16 +55,16 @@ class LibrasterliteConan(ConanFile):
     def requirements(self):
         self.requires("libgeotiff/1.7.1")
         self.requires("libjpeg/9e")
-        self.requires("libpng/1.6.40")
+        self.requires("libpng/[>=1.6 <2]")
         self.requires("libspatialite/5.0.1")
-        self.requires("libtiff/4.5.1")
-        self.requires("sqlite3/3.42.0")
+        self.requires("libtiff/[>=4.5 <5]")
+        self.requires("sqlite3/[>=3.42 <4]")
 
     def build_requirements(self):
         if not is_msvc(self):
             self.tool_requires("libtool/2.4.7")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/1.9.3")
+                self.tool_requires("pkgconf/[>=2.2 <3]")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):

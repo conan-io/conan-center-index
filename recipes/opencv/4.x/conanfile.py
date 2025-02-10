@@ -665,7 +665,7 @@ class OpenCVConan(ConanFile):
             "cudaoptflow": {
                 "is_built": self.options.cudaoptflow,
                 "mandatory_options": ["with_cuda", "video", "cudaarithm", "cudaimgproc", "cudawarping", "optflow"],
-                "requires": ["opencv_video", "opencv_cudaarithm", "cudaimgproc", "opencv_cudawarping",
+                "requires": ["opencv_video", "opencv_cudaarithm", "opencv_cudaimgproc", "opencv_cudawarping",
                              "opencv_optflow"] + opencv_cudalegacy() + ipp(),
             },
             "cudastereo": {
