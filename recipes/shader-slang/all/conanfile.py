@@ -1,15 +1,13 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, mkdir, replace_in_file
-from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, mkdir
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class ShaderSlangConan(ConanFile):
@@ -23,7 +21,7 @@ class ShaderSlangConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/shader-slang/slang"
     topics = ("shaders", "vulkan", "glsl", "cuda", "hlsl", "d3d12")
-    package_type = "library"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -39,20 +37,6 @@ class ShaderSlangConan(ConanFile):
         "with_x11": True,
         "with_cuda": False,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "8",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -86,13 +70,7 @@ class ShaderSlangConan(ConanFile):
                 self.requires("xorg/system")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25 <4]")
@@ -101,6 +79,7 @@ class ShaderSlangConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -118,7 +97,6 @@ class ShaderSlangConan(ConanFile):
         VirtualBuildEnv(self).generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Everything except dxc/dxcapi.h is unvendored
         mkdir(self, os.path.join(self.source_folder, "external_headers"))
         os.rename(os.path.join(self.source_folder, "external", "dxc"),
