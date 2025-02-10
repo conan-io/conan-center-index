@@ -130,7 +130,7 @@ class Libssh2Conan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Libssh2")
         self.cpp_info.set_property("cmake_target_name", "Libssh2::libssh2")
         self.cpp_info.set_property("pkg_config_name", "libssh2")
-        # TODO: back to global scope in conan v2 once cmake_find_package_* generators removed
+
         self.cpp_info.components["_libssh2"].libs = collect_libs(self)
         if self.settings.os == "Windows":
             self.cpp_info.components["_libssh2"].system_libs.append("ws2_32")
@@ -140,9 +140,6 @@ class Libssh2Conan(ConanFile):
         if self.options.shared:
             self.cpp_info.components["_libssh2"].defines.append("LIBSSH2_EXPORTS")
 
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["_libssh2"].set_property("cmake_target_name", "Libssh2::libssh2")
-        self.cpp_info.components["_libssh2"].set_property("pkg_config_name", "libssh2")
         if self.options.with_zlib:
             self.cpp_info.components["_libssh2"].requires.append("zlib::zlib")
         if self.options.crypto_backend == "openssl":
