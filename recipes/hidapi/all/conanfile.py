@@ -1,14 +1,14 @@
 import os
 
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conans.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0"
 
 
 class HidapiConan(ConanFile):
