@@ -9,7 +9,7 @@ from pathlib import Path
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd, can_run
+from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 from conan.tools.files import export_conandata_patches, get, rmdir, rename, replace_in_file, load, save, copy, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
@@ -187,20 +187,6 @@ class VtkConan(ConanFile):
     # Note that only YES/NO values are validated in the Conan recipe,
     # WANT/DONT_WANT are only checked in the CMake configure step.
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "9",
-            "Visual Studio": "15",
-            "msvc": "191",
-            "clang": "7",
-            "apple-clang": "11",
-        }
-
     def export(self):
         copy(self, "*.json", self.recipe_folder, self.export_folder)
 
@@ -308,14 +294,14 @@ class VtkConan(ConanFile):
         if self.options.with_expat:
             self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_ffmpeg:
-            self.requires("ffmpeg/6.1.1")
+            self.requires("ffmpeg/7.0.1")
         if self.options.with_fontconfig:
             self.requires("fontconfig/2.15.0")
         if self.options.with_freetype:
             # Used in public vtkFreeTypeTools.h
             self.requires("freetype/2.13.2", transitive_headers=True, transitive_libs=True)
         if self.options.with_gdal:
-            self.requires("gdal/3.9.1")
+            self.requires("gdal/3.10.0")
         if self.options.with_glew:
             # Used in public vtk_glew.h
             self.requires("glew/2.2.0", transitive_headers=True, transitive_libs=True)
@@ -375,16 +361,16 @@ class VtkConan(ConanFile):
             self.requires("libpq/15.5")
         if self.options.with_qt:
             # Used in public vtkQWidgetWidget.h
-            self.requires("qt/[>=5.15 <7]", transitive_headers=True, transitive_libs=True, run=can_run(self))
+            self.requires("qt/[>=5.15 <7]", transitive_headers=True, transitive_libs=True)
         if self.options.with_sdl2:
             # Used in public vtkSDL2OpenGLRenderWindow.h
-            self.requires("sdl/2.30.5", transitive_headers=True, transitive_libs=True)
+            self.requires("sdl/2.30.9", transitive_headers=True, transitive_libs=True)
         if self.options.with_sqlite:
             self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.with_theora:
             self.requires("theora/1.1.1")
         if self.options.with_tiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.5 <5]")
         if self.options.get_safe("with_x11"):
             # Used in public vtkXOpenGLRenderWindow.h
             self.requires("xorg/system", transitive_headers=True, transitive_libs=True)
@@ -416,7 +402,8 @@ class VtkConan(ConanFile):
         # zSpace | zSpace::zSpace
 
     def tool_requirements(self):
-        if self.options.with_qt and not can_run(self):
+        if self.options.with_qt:
+            self.tool_requires("cmake/[>=3.27 <4]")
             self.tool_requires("qt/<host_version>")
 
     def validate(self):
@@ -426,13 +413,7 @@ class VtkConan(ConanFile):
             raise ConanInvalidConfiguration(
                 "-o shared=False is currently not supported on MSVC due to linker errors. Contributions are welcome!"
             )
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
         if self.dependencies["pugixml"].options.wchar_mode:
             raise ConanInvalidConfiguration(f"{self.ref} requires pugixml/*:wchar_mode=False")
@@ -589,6 +570,7 @@ class VtkConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -688,6 +670,7 @@ class VtkConan(ConanFile):
         # TODO: Remove after fixing https://github.com/conan-io/conan/issues/12012
         # Needed for try_compile() calls with MPI::MPI_CXX to work.
         tc.variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -836,7 +819,6 @@ class VtkConan(ConanFile):
                 replace_in_file(self, path, "tools/kiss_fftnd.h", "kiss_fftnd.h")
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         self._patch_kissfft()
