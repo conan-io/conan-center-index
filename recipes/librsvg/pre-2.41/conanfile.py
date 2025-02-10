@@ -6,7 +6,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, replace_in_file, save, rmdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 
@@ -32,10 +32,6 @@ class LibrsvgConan(ConanFile):
         "fPIC": True,
         "tools": True,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -63,16 +59,17 @@ class LibrsvgConan(ConanFile):
         self.requires("libcroco/0.6.13")
 
     def validate(self):
-        if not self.dependencies["pango"].options.with_cairo:
+        pango_opt = self.dependencies["pango"].options
+        if not pango_opt.with_cairo:
             raise ConanInvalidConfiguration("librsvg requires -o pango/*:with_cairo=True")
-        if not self.dependencies["pango"].options.with_freetype:
-            raise ConanInvalidConfiguration("librsvg requires -o pango/*:with_freetype=True")
+        if not (pango_opt.with_freetype and pango_opt.with_fontconfig):
+            raise ConanInvalidConfiguration("librsvg requires -o pango/*:with_freetype=True -o pango/*:with_fontconfig=True")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -81,6 +78,7 @@ class LibrsvgConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         VirtualBuildEnv(self).generate()
@@ -117,7 +115,6 @@ class LibrsvgConan(ConanFile):
             env.vars(self).save_script("conanbuild_msvc")
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         # Force disable docs
         replace_in_file(self, os.path.join(self.source_folder, "configure.ac"),
                         "GTK_DOC_CHECK(", "# GTK_DOC_CHECK(")
@@ -143,7 +140,10 @@ class LibrsvgConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "librsvg-2.0")
         self.cpp_info.set_property("pkg_config_custom_content", "svgz_supported=true\ncss_supported=true\n")
         self.cpp_info.includedirs.append(os.path.join("include", "librsvg-2.0"))
-        self.cpp_info.libs = ["librsvg-2"]
+        lib = "rsvg-2"
+        if self.settings.os == "Windows" and self.options.shared:
+            lib += ".dll"
+        self.cpp_info.libs = [lib]
         self.cpp_info.requires = [
             "cairo::cairo_",
             "cairo::cairo-png",
