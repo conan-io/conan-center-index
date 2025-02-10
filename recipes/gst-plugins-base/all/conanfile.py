@@ -63,12 +63,15 @@ class GStPluginsBaseConan(ConanFile):
 
     def init(self):
         options_defaults = {}
+        self.output.info("Plugins:")
         for plugins_yml in Path(self.recipe_folder, "plugins").glob("*.yml"):
             plugins_info = yaml.safe_load(plugins_yml.read_text())
             for plugin, info in plugins_info.items():
-                has_ext_deps = any("::" in r for r in info["requires"] if r != "gst-orc")
+                has_ext_deps = any("::" in r for r in info["requires"] if r != "gst-orc::gst-orc")
                 for opt in info.get("options", [plugin]):
-                    options_defaults[opt] = options_defaults.get(opt, True) and not has_ext_deps
+                    is_enabled = options_defaults.get(opt, True) and not has_ext_deps
+                    options_defaults[opt] = is_enabled
+                    self.output.info(f"- {plugin}: {'enabled' if is_enabled else 'disabled'}")
         self.options.update(
             {option: [True, False] for option in options_defaults},
             options_defaults
