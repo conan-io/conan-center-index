@@ -52,7 +52,7 @@ class PistacheConan(ConanFile):
 
     def validate(self):
         if self.settings.os != "Linux" and self.version in ["cci.20201127", "0.0.5"]:
-                raise ConanInvalidConfiguration(f"{self.ref} is only support on Linux.")
+            raise ConanInvalidConfiguration(f"{self.ref} is only support on Linux.")
         if self.settings.compiler == "clang" and self.version in ["cci.20201127", "0.0.5"]:
             raise ConanInvalidConfiguration(f"{self.ref}'s clang support is broken. See pistacheio/pistache#835.")
 

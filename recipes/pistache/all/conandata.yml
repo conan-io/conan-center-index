@@ -12,6 +12,10 @@ sources:
     url: "https://github.com/pistacheio/pistache/archive/a3c5c68e0f08e19331d53d12846079ad761fe974.tar.gz"
     sha256: "f1abb9e43ff847ebff8edb72623c9942162df134bccfb571af9c7817d3261fae"
 patches:
+  "0.4.25":
+    - patch_file: "patches/0.4.25-0001-remove-cxx17.patch"
+      patch_description: "remove C++1"
+      patch_type: "conan"
   "0.0.5":
     - patch_file: "patches/0.0.5-0001-include-cstdint.patch"
       patch_description: "include <stddef>"
