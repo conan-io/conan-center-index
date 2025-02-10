@@ -1,9 +1,9 @@
 sources:
-  "2.6.1":
-    url: "https://github.com/NVIDIA/cccl/archive/refs/tags/v2.6.1.tar.gz"
-    sha256: "993f483a3f8134bd719dc61651c0a0db17ad6007ee22e97f4ac4a3c310834004"
+  "2.7.0":
+    url: "https://github.com/NVIDIA/cccl/archive/refs/tags/v2.7.0.tar.gz"
+    sha256: "50e9c8bba572a217e7d6748b8c93e76fc42f7c125f6d1da7f117240a14d9a31b"
 patches:
-  "2.6.1":
+  "2.7.0":
     - patch_file: "patches/2.2.0-001-adjust-libcudacxx-config.cmake.patch"
       patch_description: "Adapt the official libcudacxx-config.cmake to be compatible with Conan"
       patch_type: "conan"
