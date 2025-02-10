@@ -5,7 +5,6 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import can_run
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import get, save, replace_in_file, chdir, rmdir, rm, rename, copy
 from conan.tools.gnu import Autotools, PkgConfigDeps, GnuToolchain
 from conan.tools.layout import basic_layout
@@ -38,10 +37,6 @@ class NetpbmConan(ConanFile):
         "with_libjpeg": "libjpeg",
         "with_x11": True,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -112,9 +107,6 @@ class NetpbmConan(ConanFile):
                 return "unixstatic", "a"
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = GnuToolchain(self)
         lib_type, suffix = self._libtype_and_suffix
         tc.make_args["NETPBMLIBTYPE"] = lib_type
