@@ -5,13 +5,11 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, replace_in_file, rmdir, rm
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc_static_runtime
-from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class PangolinConan(ConanFile):
@@ -92,20 +90,6 @@ class PangolinConan(ConanFile):
         "with_zstd": "Support Zstd compression",
     }
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "clang": "5",
-            "apple-clang": "10",
-            "Visual Studio": "15",
-            "msvc": "191",
-        }
-
     def export_sources(self):
         copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
@@ -183,13 +167,7 @@ class PangolinConan(ConanFile):
         # TODO: dynalo, NaturalSort
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
 
         if self.settings.os == "Windows" and self.options.shared:
             # Fails with linker errors for internal symbols
@@ -257,8 +235,6 @@ class PangolinConan(ConanFile):
         if self.options.get_safe("with_wayland"):
             deps = PkgConfigDeps(self)
             deps.generate()
-            venv = VirtualBuildEnv(self)
-            venv.generate()
 
     def _patch_sources(self):
         rm(self, "Find*.cmake", os.path.join(self.source_folder, "cmake"))
