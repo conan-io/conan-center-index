@@ -2,6 +2,7 @@ import os
 import shutil
 
 from conan import ConanFile
+from conan.tools import CppInfo
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
@@ -10,7 +11,7 @@ from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgCon
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2.0.5"
 
 
 class CoinUtilsConan(ConanFile):
@@ -36,10 +37,6 @@ class CoinUtilsConan(ConanFile):
         "fPIC": True,
         "with_glpk": True,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -67,13 +64,14 @@ class CoinUtilsConan(ConanFile):
         self.tool_requires("gnu-config/cci.20210814")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -137,36 +135,21 @@ class CoinUtilsConan(ConanFile):
         if is_msvc(self):
             # Custom AutotoolsDeps for cl like compilers
             # workaround for https://github.com/conan-io/conan/issues/12784
-            includedirs = []
-            defines = []
-            libs = []
-            libdirs = []
-            linkflags = []
-            cxxflags = []
-            cflags = []
+            cpp_info = CppInfo(self)
             for dependency in self.dependencies.values():
-                deps_cpp_info = dependency.cpp_info.aggregated_components()
-                includedirs.extend(deps_cpp_info.includedirs)
-                defines.extend(deps_cpp_info.defines)
-                libs.extend(deps_cpp_info.libs + deps_cpp_info.system_libs)
-                libdirs.extend(deps_cpp_info.libdirs)
-                linkflags.extend(deps_cpp_info.sharedlinkflags + deps_cpp_info.exelinkflags)
-                cxxflags.extend(deps_cpp_info.cxxflags)
-                cflags.extend(deps_cpp_info.cflags)
-
+                cpp_info.merge(dependency.cpp_info.aggregated_components())
             env = Environment()
-            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in includedirs] + [f"-D{d}" for d in defines])
-            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in libs])
-            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in libdirs] + linkflags)
-            env.append("CXXFLAGS", cxxflags)
-            env.append("CFLAGS", cflags)
+            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in cpp_info.includedirs] + [f"-D{d}" for d in cpp_info.defines])
+            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in cpp_info.libs])
+            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in cpp_info.libdirs] + cpp_info.sharedlinkflags + cpp_info.exelinkflags)
+            env.append("CXXFLAGS", cpp_info.cxxflags)
+            env.append("CFLAGS", cpp_info.cflags)
             env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
         else:
             deps = AutotoolsDeps(self)
             deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         copy(self, "*", os.path.join(self.dependencies.build["coin-buildtools"].package_folder, "res"),
              os.path.join(self.source_folder, "BuildTools"))
         copy(self, "*", os.path.join(self.dependencies.build["coin-buildtools"].package_folder, "res"),
