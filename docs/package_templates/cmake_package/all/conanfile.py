@@ -2,14 +2,12 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
-from conan.tools.scm import Version
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 #
 # INFO: Please, remove all comments before pushing your PR!
@@ -20,13 +18,13 @@ class PackageConan(ConanFile):
     name = "package"
     description = "short description"
     # Use short name only, conform to SPDX License List: https://spdx.org/licenses/
-    # In case not listed there, use "LicenseRef-<license-file-name>"
+    # In case not listed there, use "DocumentRef-<license-file-name>:LicenseRef-<package-name>"
     license = ""
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/project/package"
     # no "conan" and project name in topics. Use topics from the upstream listed on GH
     topics = ("topic1", "topic2", "topic3")
-    # package_type should usually be "library" (if there is shared option)
+    # package_type should usually be "library", "shared-library" or "static-library"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -37,32 +35,16 @@ class PackageConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 14
-
-    # in case the project requires C++14/17/20/... the minimum compiler version should be listed
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "apple-clang": "10",
-            "clang": "7",
-            "gcc": "7",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
+    # In case having config_options() or configure() method, the logic should be moved to the specific methods.
+    implements = ["auto_shared_fpic"]
 
     # no exports_sources attribute, but export_sources(self) method instead
-    # this allows finer grain exportation of patches per version
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
     def configure(self):
+        # Keep this logic only in case configure() is needed e.g pure-c project.
+        # Otherwise remove configure() and auto_shared_fpic will manage it.
         if self.options.shared:
             self.options.rm_safe("fPIC")
         # for plain C projects only
@@ -70,62 +52,52 @@ class PackageConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
-        # src_folder must use the same source folder name the project
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        # prefer self.requires method instead of requires attribute
+        # Always prefer self.requirements() method instead of self.requires attribute.
         self.requires("dependency/0.8.1")
+        if self.options.with_foobar:
+            # INFO: used in foo/baz.hpp:34
+            self.requires("foobar/0.1.0", transitive_headers=True, transitive_libs=True)
+        # Some dependencies on CCI are allowed to use version ranges.
+        # See https://github.com/conan-io/conan-center-index/blob/master/docs/adding_packages/dependencies.md#version-ranges
+        self.requires("openssl/[>=1.1 <4]")
 
     def validate(self):
-        # validate the minimum cpp standard supported. For C++ projects only
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
-        # in case it does not work in another configuration, it should validated here too
+        # validate the minimum cpp standard supported. For C++ projects only.
+        check_min_cppstd(self, 14)
+        # in case it does not work in another configuration, it should be validated here. Always comment the reason including the upstream issue.
+        # INFO: Upstream does not support DLL: See <URL>
         if is_msvc(self) and self.options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} can not be built as shared on Visual Studio and msvc.")
 
-    # if another tool than the compiler or CMake is required to build the project (pkgconf, bison, flex etc)
+    # if a tool other than the compiler or CMake newer than 3.15 is required to build the project (pkgconf, bison, flex etc)
     def build_requirements(self):
-        self.tool_requires("tool/x.y.z")
+        self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        # Using patches is always the last resort to fix issues. If possible, try to fix the issue in the upstream project.
+        apply_conandata_patches(self)
 
     def generate(self):
-        # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are automatically parsed when self.options.shared or self.options.fPIC exist
+        # BUILD_SHARED_LIBS and POSITION_INDEPENDENT_CODE are set automatically as tc.variables when self.options.shared or self.options.fPIC exist
         tc = CMakeToolchain(self)
         # Boolean values are preferred instead of "ON"/"OFF"
-        tc.variables["PACKAGE_CUSTOM_DEFINITION"] = True
+        tc.cache_variables["PACKAGE_BUILD_TESTS"] = False
         if is_msvc(self):
-            # don't use self.settings.compiler.runtime
-            tc.variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
-        # deps_cpp_info, deps_env_info and deps_user_info are no longer used
-        if self.dependencies["dependency"].options.foobar:
-            tc.variables["DEPENDENCY_LIBPATH"] = self.dependencies["dependency"].cpp_info.libdirs
-        # cache_variables should be used sparingly, example setting cmake policies
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+            tc.cache_variables["USE_MSVC_RUNTIME_LIBRARY_DLL"] = not is_msvc_static_runtime(self)
         tc.generate()
-        # In case there are dependencies listed on requirements, CMakeDeps should be used
-        tc = CMakeDeps(self)
-        tc.generate()
-        # In case there are dependencies listed on build_requirements, VirtualBuildEnv should be used
-        tc = VirtualBuildEnv(self)
-        tc.generate(scope="build")
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # remove bundled xxhash
-        rm(self, "whateer.*", os.path.join(self.source_folder, "lib"))
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "...", "")
+        # In case there are dependencies listed under requirements, CMakeDeps should be used
+        deps = CMakeDeps(self)
+        # You can override the CMake package and target names if they don't match the names used in the project
+        deps.set_property("fontconfig", "cmake_file_name", "Fontconfig")
+        deps.set_property("fontconfig", "cmake_target_name", "Fontconfig::Fontconfig")
+        deps.generate()
 
     def build(self):
-        self._patch_sources()  # It can be apply_conandata_patches(self) only in case no more patches are needed
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -135,17 +107,16 @@ class PackageConan(ConanFile):
         cmake = CMake(self)
         cmake.install()
 
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
+        # Some files extensions and folders are not allowed. Please, read the FAQs to get informed.
+        # Consider disabling these at first to verify that the package_info() output matches the info exported by the project.
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
 
     def package_info(self):
+        # library name to be packaged
         self.cpp_info.libs = ["package_lib"]
-
         # if package has an official FindPACKAGE.cmake listed in https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html#find-modules
         # examples: bzip2, freetype, gdal, icu, libcurl, libjpeg, libpng, libtiff, openssl, sqlite3, zlib...
         self.cpp_info.set_property("cmake_module_file_name", "PACKAGE")
@@ -161,9 +132,3 @@ class PackageConan(ConanFile):
             self.cpp_info.system_libs.append("m")
             self.cpp_info.system_libs.append("pthread")
             self.cpp_info.system_libs.append("dl")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "PACKAGE"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "package"
-        self.cpp_info.names["cmake_find_package"] = "PACKAGE"
-        self.cpp_info.names["cmake_find_package_multi"] = "package"

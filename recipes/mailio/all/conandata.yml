@@ -1,4 +1,7 @@
 sources:
+  "0.24.1":
+    url: "https://github.com/karastojko/mailio/archive/refs/tags/0.24.1.tar.gz"
+    sha256: "52d5ced35b6a87677d897010fb2e7c2d2ddbd834d59aab991c65c0c6627af40f"
   "0.23.0":
     url: "https://github.com/karastojko/mailio/archive/refs/tags/0.23.0.tar.gz"
     sha256: "9fc3f1f803a85170c2081cbbef2e301473a400683fc1dffefa2d6707598206a5"
@@ -12,6 +15,10 @@ sources:
     url: "https://github.com/karastojko/mailio/archive/refs/tags/0.20.0.tar.gz"
     sha256: "073d6b1ff891444b54a01c2a3f17074fd612f9e2e14d9ebd61863c70737b1882"
 patches:
+  "0.24.1":
+    - patch_file: "patches/0.24.1-adapt-cmakelists.patch"
+      patch_description: "fix install path"
+      patch_type: "conan"
   "0.23.0":
     - patch_file: "patches/0.23.0-adapt-cmakelists.patch"
       patch_description: "fix install path"

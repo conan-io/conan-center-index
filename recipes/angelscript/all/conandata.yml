@@ -1,4 +1,7 @@
 sources:
+  "2.37.0":
+    url: "https://www.angelcode.com/angelscript/sdk/files/angelscript_2.37.0.zip"
+    sha256: "0c52d1688016a0b2484e9ca549471c4e295df060770c57840144c64815f54f10"
   "2.36.1":
     url: "https://www.angelcode.com/angelscript/sdk/files/angelscript_2.36.1.zip"
     sha256: "58bb749af9c7e386304705f4e6e627ae41dfe03e0b6a73c3d0d2e017c4fc948f"

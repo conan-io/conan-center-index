@@ -2,3 +2,10 @@ sources:
   "7.0.3":
     url: "https://chipmunk-physics.net/release/Chipmunk-7.x/Chipmunk-7.0.3.tgz"
     sha256: "048b0c9eff91c27bab8a54c65ad348cebd5a982ac56978e8f63667afbb63491a"
+
+patches:
+  "7.0.3":
+    - patch_file: "patches/0001-remove-sysctl-linux-win.patch"
+      patch_type: bugfix
+      patch_source: https://github.com/slembcke/Chipmunk2D/pull/175
+      patch_description: "Needed to build with glib > 2.30"
