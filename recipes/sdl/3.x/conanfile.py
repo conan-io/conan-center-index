@@ -77,7 +77,7 @@ class SDLConan(ConanFile):
             if self.options.get_safe(subsystem) == None:
                 default_subsystem_value = True
                 if subsystem == "hidapi" and self.settings.os == "visionOS":
-                    # CMakeLists.txt#L343
+                    # CMakeLists.txt#L378
                     default_subsystem_value = False
                 setattr(self.options, subsystem, default_subsystem_value)
 
