@@ -5,11 +5,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMakeToolchain, CMakeDeps, CMake
-from conan.tools.files import copy, get, apply_conandata_patches, export_conandata_patches, rm, save
+from conan.tools.files import copy, get, export_conandata_patches, rm, save, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class DrogonConan(ConanFile):
@@ -78,33 +78,9 @@ class DrogonConan(ConanFile):
     def _min_cppstd(self):
         return 14 if Version(self.version) < "1.8.2" else 17
 
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "14": {
-                "Visual Studio": "15",
-                "msvc": "191",
-                "gcc": "6",
-                "clang": "5",
-                "apple-clang": "10",
-            },
-            "17": {
-                "Visual Studio": "16",
-                "msvc": "192",
-                "gcc": "8",
-                "clang": "7",
-                "apple-clang": "12",
-            }
-        }.get(str(self._min_cppstd), {})
-
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.info.settings.compiler), False)
-        if minimum_version and Version(self.info.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
-
-        if self.settings.compiler.get_safe("cppstd") == "14" and not self.options.with_boost:
+        check_min_cppstd(self, 14)
+        if self.settings.compiler.cppstd in ["14", "gnu14"] and not self.options.with_boost:
             raise ConanInvalidConfiguration(f"{self.ref} requires boost on C++14")
 
     def requirements(self):
@@ -128,7 +104,7 @@ class DrogonConan(ConanFile):
         if self.options.get_safe("with_mysql"):
             self.requires("libmysqlclient/8.1.0")
         if self.options.get_safe("with_sqlite"):
-            self.requires("sqlite3/3.45.0")
+            self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.get_safe("with_redis"):
             self.requires("hiredis/1.2.0")
         if self.options.get_safe("with_yaml_cpp"):
@@ -136,6 +112,7 @@ class DrogonConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -156,8 +133,7 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
         tc.variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
         if is_msvc(self):
-            # TODO: use tc.extra_cxxflags after Conan 1 has been dropped on CCI
-            tc.blocks["cmake_flags_init"].template += '\nstring(APPEND CMAKE_CXX_FLAGS_INIT " /Zc:__cplusplus /EHsc")\n'
+            tc.extra_cxxflags("/Zc:__cplusplus /EHsc")
         if Version(self.version) >= "1.8.4":
             tc.variables["USE_SUBMODULE"] = False
         # Required for tc.variables to work reliably on v3.5 < v3.12 CMake standard used by the project
@@ -167,7 +143,6 @@ class DrogonConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -199,10 +174,6 @@ class DrogonConan(ConanFile):
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "8":
             self.cpp_info.system_libs.append("stdc++fs")
 
-        if self.options.with_ctl:
-            bin_path = os.path.join(self.package_folder, "bin")
-            self.env_info.PATH.append(bin_path)
-
         # Include official CMake modules and exported CMake variables
         # https://github.com/drogonframework/drogon/blob/v1.9.6/cmake/templates/DrogonConfig.cmake.in#L55-L57
         cmake_folder = os.path.join("lib", "cmake", "Drogon")
@@ -213,11 +184,3 @@ class DrogonConan(ConanFile):
         ]
         self.cpp_info.builddirs.append(cmake_folder)
         self.cpp_info.set_property("cmake_build_modules", modules)
-
-        # TODO: Remove after Conan 2.0
-        self.cpp_info.filenames["cmake_find_package"] = "Drogon"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Drogon"
-        self.cpp_info.names["cmake_find_package"] = "Drogon"
-        self.cpp_info.names["cmake_find_package_multi"] = "Drogon"
-        self.cpp_info.build_modules["cmake_find_package"] = modules
-        self.cpp_info.build_modules["cmake_find_package_multi"] = modules
