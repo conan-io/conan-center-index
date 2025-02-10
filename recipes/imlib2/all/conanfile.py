@@ -61,10 +61,6 @@ class Imlib2Conan(ConanFile):
         "with_zlib": False,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -72,7 +68,7 @@ class Imlib2Conan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
         if self.settings.os not in ["Linux", "FreeBSD"]:
-            del self.options.with_x
+            self.options.rm_safe("with_x")
 
     def configure(self):
         if self.options.shared:
@@ -93,7 +89,7 @@ class Imlib2Conan(ConanFile):
         if self.options.with_heif:
             self.requires("libheif/1.18.2")
         if self.options.with_id3:
-            self.requires("libid3tag/0.15.1b")
+            self.requires("libid3tag/0.16.3")
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
@@ -111,7 +107,7 @@ class Imlib2Conan(ConanFile):
         if self.options.with_raw:
             self.requires("libraw/0.21.2")
         if self.options.with_tiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.5 <5]")
         if self.options.with_webp:
             self.requires("libwebp/1.3.2")
         if self.options.get_safe("with_x"):
@@ -130,7 +126,7 @@ class Imlib2Conan(ConanFile):
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -139,6 +135,7 @@ class Imlib2Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         VirtualBuildEnv(self).generate()
@@ -191,7 +188,6 @@ class Imlib2Conan(ConanFile):
             env.vars(self).save_script("conanbuild_msvc")
 
     def build(self):
-        apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
