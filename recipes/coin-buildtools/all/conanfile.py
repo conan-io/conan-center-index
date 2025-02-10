@@ -1,11 +1,11 @@
 import os
 
 from conan import ConanFile
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, mkdir, download
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, download
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0"
 
 
 class CoinBuildtoolsConan(ConanFile):
@@ -38,8 +38,6 @@ class CoinBuildtoolsConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version]["source"], strip_root=True)
         download(self, **self.conan_data["sources"][self.version]["license"], filename="LICENSE")
-
-    def build(self):
         apply_conandata_patches(self)
 
     @staticmethod
@@ -63,7 +61,3 @@ class CoinBuildtoolsConan(ConanFile):
 
         aclocal_dir = unix_path(self, os.path.join(self.package_folder, "res"))
         self.buildenv_info.append_path("ACLOCAL_PATH", aclocal_dir)
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.ACLOCAL_PATH.append(aclocal_dir)
