@@ -2,14 +2,14 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, cross_building, valid_min_cppstd
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, load, rename, rm, save
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class XqillaConan(ConanFile):
@@ -33,25 +33,10 @@ class XqillaConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _min_cppstd(self):
-        return "11"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -60,25 +45,23 @@ class XqillaConan(ConanFile):
         self.requires("xerces-c/3.2.5", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if self.info.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 11)
         if is_msvc(self):
             raise ConanInvalidConfiguration("xqilla recipe doesn't support msvc build yet")
 
     def build_requirements(self):
         self.tool_requires("gnu-config/cci.20210814")
         self.tool_requires("libtool/2.4.7")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
@@ -95,7 +78,6 @@ class XqillaConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         for gnu_config in [
             self.conf.get("user.gnu-config:config_guess", check_type=str),
             self.conf.get("user.gnu-config:config_sub", check_type=str),
@@ -133,6 +115,3 @@ class XqillaConan(ConanFile):
         self.cpp_info.libs = ["xqilla"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
