@@ -2,13 +2,12 @@ import os
 import shutil
 
 from conan import ConanFile
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, mkdir, rename, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, check_min_vs
+from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1.0"
 
 
 class CoinCbcConan(ConanFile):
@@ -31,21 +30,10 @@ class CoinCbcConan(ConanFile):
         "fPIC": True,
         "parallel": False,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -70,18 +58,16 @@ class CoinCbcConan(ConanFile):
         self.tool_requires("gnu-config/cci.20210814")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = PkgConfigDeps(self)
         tc.generate()
 
@@ -110,9 +96,6 @@ class CoinCbcConan(ConanFile):
         if is_msvc(self):
             tc.extra_cxxflags.append("-EHsc")
             tc.configure_args.append(f"--enable-msvc={msvc_runtime_flag(self)}")
-            if check_min_vs(self, "180", raise_invalid=False):
-                tc.extra_cflags.append("-FS")
-                tc.extra_cxxflags.append("-FS")
             if self.options.parallel:
                 pthreads4w_info = self.dependencies["pthreads4w"].cpp_info
                 pthreads_path = os.path.join(pthreads4w_info.libdir, pthreads4w_info.libs[0] + ".lib")
@@ -131,12 +114,11 @@ class CoinCbcConan(ConanFile):
             env.define("AR", f"{ar_wrapper} lib")
             env.define("NM", "dumpbin -symbols")
             env.vars(self).save_script("conanbuild_msvc")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             env.define("PKG_CONFIG_PATH", self.generators_folder)
         tc.generate(env)
 
     def build(self):
-        apply_conandata_patches(self)
         copy(self, "*", os.path.join(self.dependencies.build["coin-buildtools"].package_folder, "res"),
              os.path.join(self.source_folder, "BuildTools"))
         copy(self, "*", os.path.join(self.dependencies.build["coin-buildtools"].package_folder, "res"),
@@ -187,7 +169,3 @@ class CoinCbcConan(ConanFile):
         self.cpp_info.components["osi-cbc"].set_property("pkg_config_name", "osi-cbc")
         self.cpp_info.components["osi-cbc"].libs = ["OsiCbc"]
         self.cpp_info.components["osi-cbc"].requires = ["libcbc"]
-
-        # TODO: remove in conan v2
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.env_info.PATH.append(bin_path)
