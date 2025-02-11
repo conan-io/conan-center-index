@@ -16,7 +16,7 @@ class NodeEditorConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     package_type = "library"
-    impplements = ["auto_shared_fpic"]
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
