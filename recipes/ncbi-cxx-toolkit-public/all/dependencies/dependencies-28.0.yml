@@ -164,7 +164,7 @@ libraries:
              "ncbi_seqext",
                 "blast_services","blastdb_format","gene_info","id1cli","id1","id2cli","id2",
                 "id2_split","writedb","seqdb","seqmasks_io","seqsplit","snputil","uudutil",
-                "valerr","valid","variation_utils","xformat","xalnmgr","xcleanup",
+                "valerr","valid","variation_utils","xformat","xalnmgr","xcleanup", "xhugeasn",
                 "xobjedit","xobjreadex","xobjwrite","xobjread","xlogging","xobjimport",
                 "xobjmanip","xunittestutil","xobjutil","xobjmgr",
             ]

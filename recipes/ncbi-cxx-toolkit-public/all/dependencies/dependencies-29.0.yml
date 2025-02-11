@@ -1,4 +1,4 @@
-version: 27.0
+version: 29.0
 #----------------------------------------------------------------------------
 components:
   - algo
@@ -32,19 +32,21 @@ components:
 #----------------------------------------------------------------------------
 libraries:
   algo:     ["ncbi_algo",
-                  "cobalt","phytree_format","prosplign","proteinkmer","xalgoalignsplign",
-                  "xalgocontig_assembly","xprimer","xalgoalignnw","xalgoalignutil",
-                  "xblastformat","xblast","xalgoblastdbindex","xalgodustmask",
-                  "xalgoseqqa","xalgognomon","xalgophytree","xalgosegmask",
-                  "xalgoseq","xalgotext","xalgowinmask","composition_adjustment",
-                  "fastme","utrtprof"
+                  "prosplign","xalgoalignsplign",
+                  "cobalt","proteinkmer","xalgocontig_assembly","xalgoalignutil","xblastformat",
+                  "phytree_format","xblast","xalgoseqqa",
+                  "xprimer","xalgognomon","xalgowinmask",
+                  "xalgoblastdbindex","xalgophytree","xalgoseq",
+                  "xalgoalignnw","xalgodustmask","xalgosegmask","xid_mapper",
+                  "xalgotext","composition_adjustment","fastme",
+             "utrtprof"
             ]
   algo-ms:  ["ncbi_algo_ms",
                 "xomssa","omssa","pepXML"
             ]
   algo-structure:
             ["ncbi_algo_structure",
-                "xbma_refiner","xcd_utils","xstruct_util","xstruct_dp","xstruct_thread"
+                "xcd_utils","xstruct_util","xstruct_thread","xstruct_dp"
             ]
   align-format:
             ["xalntool",
@@ -52,28 +54,30 @@ libraries:
                 "align_format"
             ]
   bamread:  ["bamread"]
-  blast:    ["xngalign", "igblast",
-             "vdb2blast", "blast_sra_input",
+  blast:    ["xngalign","vdb2blast",
+             "igblast",
              "ncbi_blastinput",
                 "blastinput",
+             "blast_sra_input",
              "xmergetree",
              "xalgoblastdbindex_search",
              "gumbelparams"
             ]
-  core:     ["xconnext",
+  core:     ["xconnext","xxconnect2","xalgovmerge",
              "ncbi_core",
-                "xconnserv","xcompress","xthrserv","sequtil","xconnect",
-                "xdiff","xqueryparse","xregexp","xser","xutil","tables","xncbi",
-             "xxconnect2"
+                "xconnserv","xcompress","xthrserv","xregexp","xser",
+                "sequtil","xconnect","xdiff","xqueryparse","xutil",
+                "tables","xncbi",
+             "zcf"
             ]
   dbapi:    ["sdbapi",
-             "ncbi_xdbapi_ftds","ncbi_xdbapi_ftds100",
-             "ct_ftds100","tds_ftds100",
+             "dbapi_util_blobstore",
+             "ncbi_xdbapi_ftds","ncbi_xdbapi_ftds14","ncbi_xdbapi_ftds100",
              "ncbi_dbapi",
                 "dbapi",
-             "dbapi_util_blobstore",
              "ncbi_dbapi_driver",
-                "dbapi_driver"
+                "dbapi_driver",
+             "ct_ftds14", "tds_ftds14","ct_ftds100", "tds_ftds100"
             ]
   eutils:   ["eutils_client",
              "ncbi_eutils",
@@ -135,41 +139,44 @@ libraries:
                 "ncbimime","cdd","cn3d","mmdb",
              "pcassay2",
              "ncbi_misc",
-                "proj","pcassay","pcsubstance","entrez2cli","biotree",
-                "access","docsum","entrez2","entrezgene","featdef","gbseq",
-                "genesbyloc","insdseq","mim","objcoords","objprt","remapcli",
-                "remap","tinyseq",
-             "macro",
+                "proj","remapcli","remap","pcassay","entrezgene",
+                "pcsubstance","entrez2cli","biotree",
+                "access","docsum","entrez2","featdef","gbseq",
+                "genesbyloc","insdseq","mim","objcoords","objprt",
+                "tinyseq",
              "gencoll_client",
-             "homologene",
              "local_taxon",
+             "macro",
+             "homologene",
              "ncbi_seq",
-                "blastdb","genome_collection","xnetblastcli","xnetblast","scoremat",
-                "seqtest","taxon1","taxon3","variation","seqset","seq","seqedit","submit",
-                "blastxml","blastxml2","seqcode",
+                "blastdb","xnetblastcli","xnetblast",
+                "scoremat","seqedit","submit",
+                "genome_collection","seqtest","taxon1","taxon3","variation","seqset",
+                "seq","blastxml","blastxml2","seqcode",
+             "efetch",
              "ncbi_pub",
-                "mlacli","mla","medlars","pub","pubmed","medline","biblio",
+                "pub","pubmed","medlars","medline","biblio",
              "ncbi_general",
-                "generalasn",
-             "efetch"
+                "generalasn"
             ]
   psg-client:   ["psg_client",
                  "psg_protobuf"
                 ]
-  seqext:   ["gene_info_writer",
-             "ncbi_validator",
+  seqext:   ["ncbi_validator",
                 "xvalidate",
              "ncbi_xdiscrepancy",
                 "xdiscrepancy",
              "ncbi_seqext",
-                "blast_services","blastdb_format","gene_info","id1cli","id1","id2cli","id2",
-                "id2_split","writedb","seqdb","seqmasks_io","seqsplit","snputil","uudutil",
-                "valerr","valid","variation_utils","xformat","xalnmgr","xcleanup",
-                "xobjedit","xobjreadex","xobjwrite","xobjread","xlogging","xobjimport",
-                "xobjmanip","xunittestutil","xobjutil","xobjmgr",
+                "xobjwrite","xformat",
+                "blastdb_format","writedb","seqmasks_io","xcleanup",
+                "blast_services","seqdb","variation_utils","xalnmgr","xobjedit",
+                "xobjreadex","xobjimport","xunittestutil",
+                "id2cli","id2_split","snputil","uudutil","xhugeasn","xobjutil",
+                "xobjread","id2","id1cli","xobjmgr","id1","seqsplit","valerr",
+                "xobjmanip","valid","xlogging",
             ]
   sqlitewrapp:  ["sqlitewrapp"]
-  sraread:  ["sraread"]
+  sraread:  ["srareadx", "sraread"]
   xmlwrapp: ["xmlreaders",
              "xmlwrapp"
             ]
@@ -182,19 +189,20 @@ requirements:
   bamread:      ["VDB"]
   bdb:          ["BerkeleyDB"]
   blast_sra_input: ["VDB"]
-  dbsnp_ptis:   ["GRPC", "PROTOBUF"]
-  grpc_integration: ["GRPC", "PROTOBUF"]
-  psg_protobuf: ["GRPC", "PROTOBUF"]
+  dbsnp_ptis:   ["GRPC"]
+  grpc_integration: ["GRPC"]
+  psg_protobuf: ["GRPC"]
   seqdb:        ["LMDB"]
   sqlitewrapp:  ["SQLITE3"]
   sraread:      ["VDB"]
   vdb2blast:    ["VDB"]
   writedb:      ["LMDB"]
   xcompress:    ["Z", "BZ2", "LZO", "ZSTD"]
-  xregexp:      ["PCRE"]
+  xregexp:      ["PCRE", "PCRE2"]
   ximage:       ["Z", "JPEG", "PNG", "GIF", "TIFF"]
   xmlwrapp:     ["XML", "XSLT"]
   xncbi:        ["BACKWARD", "UNWIND"]
+  xconnext:     ["NCBICRYPT"]
   xxconnect2:   ["UV", "NGHTTP2"]
   xfcgi:        ["FASTCGI"]
 #----------------------------------------------------------------------------

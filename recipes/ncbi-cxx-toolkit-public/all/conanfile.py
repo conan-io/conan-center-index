@@ -28,17 +28,21 @@ class NcbiCxxToolkit(ConanFile):
         "shared":     [True, False],
         "fPIC":       [True, False],
         "with_targets":  ["ANY"],
-        "with_components": ["ANY"]
+        "with_components": ["ANY"],
+        "without_req": ["ANY"]
     }
     default_options = {
         "shared":     False,
         "fPIC":       True,
         "with_targets":   "",
-        "with_components": ""
+        "with_components": "",
+	"without_req": ""
     }
     short_paths = True
     _dependencies = None
     _requirements = None
+    _targets = set()
+    _components = set()
     _componenttargets = set()
 
     @property
@@ -85,9 +89,16 @@ class NcbiCxxToolkit(ConanFile):
                 self._requirements = yaml.safe_load(f)
         return self._requirements
 
+    def _version_less(self, major):
+        ver = Version(self.version).major
+        return ver < major and ver > 1
+
     def _translate_req(self, key):
         if "Boost" in key:
             key = "Boost"
+        _disabled_req = self._parse_option(self.options.without_req)
+        if key in _disabled_req:
+            return None
         if key == "BerkeleyDB" and conan_version.major > "1":
             return None
         if key in self._tk_requirements["disabled"].keys():
@@ -130,43 +141,51 @@ class NcbiCxxToolkit(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def _collect_dependencies(self, components):
+        if len(components) > 0:
+            _todo = components.copy()
+            components.clear()
+            _next = set()
+            while len(_todo) > 0:
+                for _component in _todo:
+                    if not _component in components:
+                        components.add(_component)
+                        if _component in self._tk_dependencies["dependencies"].keys():
+                            for _n in self._tk_dependencies["dependencies"][_component]:
+                                if not _n in components:
+                                    _next.add(_n)
+                _todo = _next.copy()
+                _next.clear()
+
     def requirements(self):
-        _alltargets = self._parse_option(self.options.with_targets)
-        _required_components = set()
-        for _t in _alltargets:
+        self._targets = self._parse_option(self.options.with_targets)
+        self._components = set()
+        for _t in self._targets:
             _re = re.compile(_t)
             for _component in self._tk_dependencies["components"]:
                 _libraries = self._tk_dependencies["libraries"][_component]
                 for _lib in _libraries:
                     if _re.match(_lib) != None:
-                        _required_components.add(_component)
+                        self._components.add(_component)
                         break
 
-        _allcomponents = self._parse_option(self.options.with_components)
-        _required_components.update(_allcomponents)
+        _requested_components = self._parse_option(self.options.with_components)
+        self._collect_dependencies(_requested_components)
 
-        if len(_required_components) > 0:
-            _todo = _required_components.copy()
-            _required_components.clear()
-            _next = set()
-            while len(_todo) > 0:
-                for _component in _todo:
-                    if not _component in _required_components:
-                        _required_components.add(_component)
-                        if _component in self._tk_dependencies["dependencies"].keys():
-                            for _n in self._tk_dependencies["dependencies"][_component]:
-                                if not _n in _required_components:
-                                    _next.add(_n)
-                _todo = _next.copy()
-                _next.clear()
+        if len(self._components) == 0 and len(_requested_components) == 0:
+            _requested_components.update( self._tk_dependencies["components"])
 
-        if len(_required_components) == 0:
-            _required_components.update( self._tk_dependencies["components"])
-        for component in _required_components:
-            self._componenttargets.update(self._tk_dependencies["libraries"][component])
+        if len(_requested_components) > 0:
+            for component in _requested_components:
+                self._componenttargets.update(self._tk_dependencies["libraries"][component])
+            if len(self._targets) > 0:
+                self._componenttargets.update(self._targets)
+                self._targets.clear()
+            self._components.update(_requested_components)
 
+        self._collect_dependencies(self._components)
         requirements = set()
-        for component in _required_components:
+        for component in self._components:
             libraries = self._tk_dependencies["libraries"][component]
             for lib in libraries:
                 if lib in self._tk_dependencies["requirements"].keys():
@@ -185,7 +204,9 @@ class NcbiCxxToolkit(ConanFile):
             raise ConanInvalidConfiguration("This operating system is not supported")
         if is_msvc(self):
             check_min_vs(self, 192)
-            if self.options.shared and is_msvc_static_runtime(self) and Version(self.version) < "28":
+            if self._version_less(28) and self.options.shared and is_msvc_static_runtime(self):
+                raise ConanInvalidConfiguration("This configuration is not supported")
+            if self._version_less(29) and int(str(self.settings.compiler.version)) > 193:
                 raise ConanInvalidConfiguration("This configuration is not supported")
         else:
             minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
@@ -203,32 +224,39 @@ class NcbiCxxToolkit(ConanFile):
         if self.options.shared:
             tc.variables["NCBI_PTBCFG_ALLOW_COMPOSITE"] = True
         tc.variables["NCBI_PTBCFG_PROJECT_LIST"] = "-app/netcache"
-        if self.options.with_targets != "":
-            tc.variables["NCBI_PTBCFG_PROJECT_TARGETS"] = self.options.with_targets
-        if len(self._componenttargets) != 0:
+        if len(self._targets) > 0:
+            tc.variables["NCBI_PTBCFG_PROJECT_TARGETS"] = ";".join(self._targets)
+        else:
             tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTTARGETS"] = ";".join(self._componenttargets)
         if is_msvc(self):
             tc.variables["NCBI_PTBCFG_CONFIGURATION_TYPES"] = self.settings.build_type
         tc.variables["NCBI_PTBCFG_PROJECT_TAGS"] = "-demo;-sample"
+        _disabled_req = self._parse_option(self.options.without_req)
+        if len(_disabled_req) > 0:
+            tc.variables["NCBI_PTBCFG_PROJECT_COMPONENTS"] = "-" + ";-".join(_disabled_req)
         tc.generate()
         CMakeDeps(self).generate()
         VirtualBuildEnv(self).generate()
         if can_run(self):
-            VirtualRunEnv(self).generate(scope="build")
+            VirtualRunEnv(self).generate(scope = "build" if self._version_less(29) else "run")
 
     def _patch_sources(self):
         apply_conandata_patches(self)
         rmdir(self, os.path.join(self.source_folder, "src", "build-system", "cmake", "unused"))
         rmdir(self, os.path.join(self.source_folder, "src", "build-system", "cmake", "modules"))
-        grpc = os.path.join(self.source_folder, "src", "build-system", "cmake", "CMake.NCBIptb.grpc.cmake")
-        if self.settings.os == "Macos":
-            replace_in_file(self, grpc,
-                "COMMAND ${_cmd}",
-                "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}\" ${_cmd}")
-        elif self.settings.os == "Linux":
-            replace_in_file(self, grpc,
-                "COMMAND ${_cmd}",
-                "COMMAND ${CMAKE_COMMAND} -E env \"LD_LIBRARY_PATH=$<JOIN:${CMAKE_LIBRARY_PATH},:>:$ENV{LD_LIBRARY_PATH}\" ${_cmd}")
+        if self._version_less(29):
+            grpc = os.path.join(self.source_folder, "src", "build-system", "cmake", "CMake.NCBIptb.grpc.cmake")
+            if self.settings.os == "Macos":
+                replace_in_file(self, grpc,
+                    "COMMAND ${_cmd}",
+                    "COMMAND ${CMAKE_COMMAND} -E env \"DYLD_LIBRARY_PATH=$ENV{DYLD_LIBRARY_PATH}\" ${_cmd}", strict=False)
+                pkg = os.path.join(self.source_folder, "src", "build-system", "cmake", "CMake.NCBIComponentsPackage.cmake")
+                replace_in_file(self, pkg,"NCBI_util_disable_find_use_path()","#NCBI_util_disable_find_use_path()", strict=False)
+                replace_in_file(self, pkg,"NCBI_util_enable_find_use_path()","#NCBI_util_enable_find_use_path()", strict=False)
+            elif self.settings.os == "Linux":
+                replace_in_file(self, grpc,
+                    "COMMAND ${_cmd}",
+                    "COMMAND ${CMAKE_COMMAND} -E env \"LD_LIBRARY_PATH=$<JOIN:${CMAKE_LIBRARY_PATH},:>:$ENV{LD_LIBRARY_PATH}\" ${_cmd}")
         root = os.path.join(self.source_folder, "CMakeLists.txt")
         with open(root, "w", encoding="utf-8") as f:
             f.write("cmake_minimum_required(VERSION 3.15)\n")
@@ -256,31 +284,18 @@ class NcbiCxxToolkit(ConanFile):
     def package_info(self):
         impfile = os.path.join(self.package_folder, "res", "ncbi-cpp-toolkit.imports")
         with open(impfile, "r", encoding="utf-8") as f:
-            allexports = set(f.read().split()).intersection(self._componenttargets)
-        absent = []
-        for component in self._tk_dependencies["components"]:
-            c_libs = []
-            libraries = self._tk_dependencies["libraries"][component]
-            for lib in libraries:
-                if lib in allexports:
-                    c_libs.append(lib)
-            if len(c_libs) == 0 and len(libraries) != 0:
-                absent.append(component)
-        for component in self._tk_dependencies["components"]:
+            allexports = set(f.read().split())
+        for component in self._components:
             c_libs = []
             c_reqs = []
             n_reqs = set()
-            c_deps = self._tk_dependencies["dependencies"][component]
-            for c in c_deps:
-                if c in absent:
-                    c_deps.remove(c)
-            c_reqs.extend(c_deps)
             libraries = self._tk_dependencies["libraries"][component]
             for lib in libraries:
                 if lib in allexports:
                     c_libs.append(lib)
                 if lib in self._tk_dependencies["requirements"].keys():
                     n_reqs.update(self._tk_dependencies["requirements"][lib])
+            c_reqs.extend(self._tk_dependencies["dependencies"][component])
             for req in n_reqs:
                 pkgs = self._translate_req(req)
                 if pkgs != None:
@@ -288,9 +303,8 @@ class NcbiCxxToolkit(ConanFile):
                         pkg = pkg[:pkg.find("/")]
                         ref = pkg + "::" + pkg
                         c_reqs.append(ref)
-            if len(c_libs) != 0 or (len(libraries) == 0 and len(c_reqs) != 0):
-                self.cpp_info.components[component].libs = c_libs
-                self.cpp_info.components[component].requires = c_reqs
+            self.cpp_info.components[component].libs = c_libs
+            self.cpp_info.components[component].requires = c_reqs
 
         if self.settings.os == "Windows":
             self.cpp_info.components["core"].defines.append("_UNICODE")
@@ -315,6 +329,7 @@ class NcbiCxxToolkit(ConanFile):
             self.cpp_info.components["core"].frameworks = ["ApplicationServices"]
         self.cpp_info.components["core"].builddirs.append("res")
         build_modules = [self._module_file_rel_path]
+        self.cpp_info.components["core"].build_modules["cmake"] = build_modules
         self.cpp_info.components["core"].build_modules["cmake_find_package"] = build_modules
         self.cpp_info.components["core"].build_modules["cmake_find_package_multi"] = build_modules
         self.cpp_info.set_property("cmake_build_modules", build_modules)
