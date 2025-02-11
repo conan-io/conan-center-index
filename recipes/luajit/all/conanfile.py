@@ -4,7 +4,7 @@ from conan.tools.files import get, chdir, replace_in_file, copy, rmdir, export_c
 from conan.tools.microsoft import is_msvc, MSBuildToolchain, VCVars, unix_path
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import XCRun, to_apple_arch
 from conan.tools.build import cross_building
 from conan.errors import ConanInvalidConfiguration
 import os
@@ -59,7 +59,11 @@ class LuajitConan(ConanFile):
             tc.generate()
         else:
             tc = AutotoolsToolchain(self)
-            tc.generate()
+            env = tc.environment()
+            if self.settings.os == "iOS":
+                env.define("CFLAGS", "")
+                env.define("LDFLAGS", "")
+            tc.generate(env)
 
     def _patch_sources(self):
         if not is_msvc(self):
@@ -84,9 +88,8 @@ class LuajitConan(ConanFile):
                                       'TARGET_O= $(LUAJIT_A)',
                                       'TARGET_O= $(LUAJIT_SO)')
 
-    @property
-    def _macosx_deployment_target(self):
-        return self.settings.get_safe("os.version")
+    def _apple_deployment_target(self, default=None):
+        return self.settings.get_safe("os.version", default=default)
 
     @property
     def _make_arguments(self):
@@ -94,8 +97,16 @@ class LuajitConan(ConanFile):
         if "clang" in str(self.settings.compiler):
             args.append("DEFAULT_CC=clang")
 
-        if is_apple_os(self) and self._macosx_deployment_target:
-            args.append(f"MACOSX_DEPLOYMENT_TARGET={self._macosx_deployment_target}")
+        if self.settings.os == "Macos" and self._apple_deployment_target():
+            args.append(f"MACOSX_DEPLOYMENT_TARGET={self._apple_deployment_target()}")
+        elif self.settings.os == "iOS":
+            xcrun = XCRun(self)
+            target_flag = f"{to_apple_arch(self)}-apple-ios{self._apple_deployment_target(default='')}"
+            args.extend([
+                f"CROSS={os.path.dirname(xcrun.cxx)}/",
+                f"""TARGET_FLAGS='-isysroot "{xcrun.sdk_path}" -target {target_flag}'""",
+                "TARGET_SYS=iOS",
+            ])
         return args
 
     @property
