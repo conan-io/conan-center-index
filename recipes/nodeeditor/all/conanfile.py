@@ -30,9 +30,7 @@ class NodeEditorConan(ConanFile):
 
     def requirements(self):
         # INFO: Qt headers are exposed largely in public headers. e.g QtCore/QObject consumed by NodaData.hpp
-        # INFO: NodeEditor exposes Qt methods directly.
-        #       e.g Windows-shared error LNK2001: unresolved external symbol __imp_qt_version_tag_6_7
-        self.requires("qt/[>=6.7 <7]", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/[>=6.7 <7]", transitive_headers=True)
 
     def build_requirements(self):
         # INFO: Uses Qt rcc tool to generate resources.cpp file via resources.qrc

@@ -13,6 +13,7 @@ class TestPackageConan(ConanFile):
 
     def requirements(self):
         self.requires(self.tested_reference_str)
+        self.requires("qt/[*]")
 
     def build(self):
         cm = CMake(self)
