@@ -1248,8 +1248,6 @@ Examples = bin/datadir/examples""")
         _create_module("Network", networkReqs)
         _create_module("Sql")
         _create_module("Test")
-        if self.options.get_safe("opengl", "no") != "no" and self.options.gui:
-            _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
             _create_module("OpenGLExtensions", ["Gui"])
         _create_module("Concurrent")
