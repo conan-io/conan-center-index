@@ -182,7 +182,7 @@ class OpenCVConan(ConanFile):
         "with_flatbuffers": True,
         "with_protobuf": True,
         "with_vulkan": False,
-        "with_openvino": True,
+        "with_openvino": False,
         "dnn_cuda": False,
         # highgui module options
         "with_gtk": False,
