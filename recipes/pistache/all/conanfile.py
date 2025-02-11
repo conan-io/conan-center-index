@@ -53,7 +53,7 @@ class PistacheConan(ConanFile):
         if self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.get_safe("with_libevent", True):
-            self.requires("libevent/2.1.11")
+            self.requires("libevent/2.1.12")
 
     def validate(self):
         if self.settings.os != "Linux" and Version(self.version) < "0.4.25":
@@ -64,7 +64,7 @@ class PistacheConan(ConanFile):
         check_min_cppstd(self, 17)
 
     def build_requirements(self):
-        self.tool_requires("meson/[>=1.2.3 <2]")
+        self.tool_requires("meson/[>=1.3.1 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
 
