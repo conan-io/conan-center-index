@@ -1,8 +1,7 @@
 sources:
-  "1.24.11":
-    url: "https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-1.24.11.tar.xz"
-    sha256: "9126c2b7053a5f059db958f43c6a5230d2e843ff9adff8c8c2477ea2457e3315"
+  "1.24.12":
+    url: "https://gstreamer.freedesktop.org/src/gst-plugins-bad/gst-plugins-bad-1.24.12.tar.xz"
+    sha256: "3d386af3d1dbd1a06c74a6251250c269b481e703f0e3255ba89ef6c1e063afea"
 patches:
-  "1.24.11":
+  "1.24.12":
     - patch_file: "patches/001-use-conan-deps.patch"
-    - patch_file: "patches/002-fix-hlsl-dxc-error.patch"

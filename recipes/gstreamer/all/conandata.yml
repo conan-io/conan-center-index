@@ -1,7 +1,7 @@
 sources:
-  "1.24.11":
-    url: "https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.24.11.tar.xz"
-    sha256: "093a379602a250d5cd33b88e723757c80198317efde33893edf3c87b6e53b907"
+  "1.24.12":
+    url: "https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.24.12.tar.xz"
+    sha256: "b3522d1b4fe174fff3b3c7f0603493e2367bd1c43f5804df15b634bd22b1036f"
   "1.22.6":
     url: "https://gstreamer.freedesktop.org/src/gstreamer/gstreamer-1.22.6.tar.xz"
     sha256: "f500e6cfddff55908f937711fc26a0840de28a1e9ec49621c0b6f1adbd8f818e"
