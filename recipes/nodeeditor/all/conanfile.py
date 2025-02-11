@@ -2,6 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.files import get, copy, rmdir
 from conan.tools.cmake import cmake_layout, CMake, CMakeDeps, CMakeToolchain
+from conan.tools.build import check_min_cppstd
 
 required_conan_version = ">=2.0.9"
 
@@ -55,6 +56,9 @@ class NodeEditorConan(ConanFile):
         tc.cache_variables["CMAKE_AUTOMOC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "moc.exe" if self.settings_build.os == "Windows" else "moc")
         tc.cache_variables["CMAKE_AUTORCC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "rcc.exe" if self.settings_build.os == "Windows" else "rcc")
         tc.generate()
+
+    def validate(self):
+        check_min_cppstd(self, "14")
 
     def build(self):
         cm = CMake(self)
