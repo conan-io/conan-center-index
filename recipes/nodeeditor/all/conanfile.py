@@ -19,6 +19,10 @@ class NodeEditorConan(ConanFile):
     package_type = "library"
     implements = ["auto_shared_fpic"]
 
+    @property
+    def _qt_version_major(self):
+        return int(self.dependencies["qt"].ref.version.major)
+
     def export_sources(self):
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
 
@@ -47,7 +51,7 @@ class NodeEditorConan(ConanFile):
         tc.cache_variables["BUILD_EXAMPLES"] = False
         tc.cache_variables["BUILD_TESTING"] = False
         # INFO: replcate requires could be used to replace the Qt version by 5.x
-        tc.cache_variables["USE_QT6"] = self.dependencies["qt"].ref.version.major == "6"
+        tc.cache_variables["USE_QT6"] = self._qt_version_major == 6
         # INFO: In order to execute the moc tool and avoid failing to find its dependencies
         qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
         tc.cache_variables["CMAKE_PROJECT_QtNodesLibrary_INCLUDE"] = os.path.join(self.source_folder, "conan_cmake_project_include.cmake")
@@ -56,7 +60,8 @@ class NodeEditorConan(ConanFile):
         tc.generate()
 
     def validate(self):
-        check_min_cppstd(self, "14")
+        required_cppstd = "17" if self._qt_version_major == 6 else "14"
+        check_min_cppstd(self, required_cppstd)
 
     def build(self):
         cm = CMake(self)
