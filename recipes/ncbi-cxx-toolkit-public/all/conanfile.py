@@ -1,7 +1,7 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, replace_in_file, rmdir
+from conan.tools.files import get, copy, replace_in_file, rmdir
 from conan.tools.build import check_min_cppstd, cross_building, can_run
 from conan.tools.scm import Version
 from conan.tools.cmake import CMakeDeps, CMakeToolchain, CMake, cmake_layout
@@ -127,9 +127,6 @@ class NcbiCxxToolkit(ConanFile):
             os.path.join(self.recipe_folder, self._dependencies_folder),
             os.path.join(self.export_folder, self._dependencies_folder))
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -241,7 +238,6 @@ class NcbiCxxToolkit(ConanFile):
             VirtualRunEnv(self).generate(scope = "build" if self._version_less(29) else "run")
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         rmdir(self, os.path.join(self.source_folder, "src", "build-system", "cmake", "unused"))
         rmdir(self, os.path.join(self.source_folder, "src", "build-system", "cmake", "modules"))
         if self._version_less(29):
