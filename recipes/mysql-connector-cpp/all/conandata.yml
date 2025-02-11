@@ -1,0 +1,35 @@
+sources:
+  "9.2.0":
+    url: "https://github.com/mysql/mysql-connector-cpp/archive/refs/tags/9.2.0.tar.gz"
+    sha256: "0b811559e57868487cfa7fa04af7f71d9df16cf6f7200bce83c5ddbeeedfb97c"
+
+  "9.0.0":
+    url: "https://github.com/mysql/mysql-connector-cpp/archive/refs/tags/9.0.0.zip"
+    sha256: "9d4b90a4efe8861e821136fb3024074d14875749d8b69d1821361b2f2b8bfe55"
+patches:
+  "9.2.0":
+    - patch_file: "patches/9.0.0/0002-rename-find_dependency.patch"
+      patch_description: "Rename find_dependency() to avoid conflicts with the official CMake function"
+      patch_type: "conan"
+    - patch_file: "patches/9.0.0/0003-inject-conan-dependencies.patch"
+      patch_description: "Inject Conan dependencies"
+      patch_type: "conan"
+    - patch_file: "patches/9.0.0/0005-simplify-install-directories.patch"
+      patch_description: "Do not install libraries into subdirectories"
+      patch_type: "conan"
+    - patch_file: "patches/9.0.0/0006-replace-merge_libraries-with-object-libs.patch"
+      patch_description: "Replace fragile merge_libraries() call with object libraries"
+      patch_type: "conan"
+  "9.0.0":
+    - patch_file: "patches/9.0.0/0002-rename-find_dependency.patch"
+      patch_description: "Rename find_dependency() to avoid conflicts with the official CMake function"
+      patch_type: "conan"
+    - patch_file: "patches/9.0.0/0003-inject-conan-dependencies.patch"
+      patch_description: "Inject Conan dependencies"
+      patch_type: "conan"
+    - patch_file: "patches/9.0.0/0005-simplify-install-directories.patch"
+      patch_description: "Do not install libraries into subdirectories"
+      patch_type: "conan"
+    - patch_file: "patches/9.0.0/0006-replace-merge_libraries-with-object-libs.patch"
+      patch_description: "Replace fragile merge_libraries() call with object libraries"
+      patch_type: "conan"

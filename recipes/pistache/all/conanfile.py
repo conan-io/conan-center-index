@@ -3,11 +3,10 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rm, rmdir, replace_in_file, collect_libs
 from conan.tools.build import check_min_cppstd
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.scm import Version
 
 import os
 
@@ -26,11 +25,13 @@ class PistacheConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_ssl": [True, False],
+        "with_libevent": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_ssl": False,
+        "with_libevent": True
     }
     implements = ["auto_shared_fpic"]
 
@@ -38,84 +39,62 @@ class PistacheConan(ConanFile):
         export_conandata_patches(self)
 
     def layout(self):
-        if self.version == "cci.20201127":
-            cmake_layout(self, src_folder="src")
-        else:
-            basic_layout(self, src_folder="src")
+        basic_layout(self, src_folder="src")
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+        if self.settings.os != "Linux" or Version(self.version) < "0.4.25":
+            del self.options.with_libevent
 
     def requirements(self):
         self.requires("rapidjson/cci.20230929")
+        self.requires("date/3.0.1")
         if self.options.with_ssl:
             self.requires("openssl/[>=1.1 <4]")
-        if self.version != "cci.20201127":
-            self.requires("date/3.0.1")
+        if self.options.get_safe("with_libevent", True):
+            self.requires("libevent/2.1.11")
 
     def validate(self):
-        if self.settings.os != "Linux" and self.version in ["cci.20201127", "cci.20240107", "0.0.5"]:
+        if self.settings.os != "Linux" and Version(self.version) < "0.4.25":
             raise ConanInvalidConfiguration(f"{self.ref} is only support on Linux.")
-        if self.settings.compiler == "clang" and self.version in ["cci.20201127", "0.0.5"]:
+        if self.settings.compiler == "clang" and Version(self.version) < "0.4.25":
             raise ConanInvalidConfiguration(f"{self.ref}'s clang support is broken. See pistacheio/pistache#835.")
 
         check_min_cppstd(self, 17)
 
     def build_requirements(self):
-        if self.version != "cci.20201127":
-            self.tool_requires("meson/1.3.1")
-            if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-                self.tool_requires("pkgconf/2.1.0")
+        self.tool_requires("meson/[>=1.2.3 <2]")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
-        if self.version == "cci.20201127":
-            tc = CMakeToolchain(self)
-            tc.variables["PISTACHE_ENABLE_NETWORK_TESTS"] = False
-            tc.variables["PISTACHE_USE_SSL"] = self.options.with_ssl
-            # pistache requires explicit value for fPIC
-            tc.variables["CMAKE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
-            tc.generate()
-
-            tc = CMakeDeps(self)
-            tc.generate()
-        else:
-            tc = MesonToolchain(self)
-            tc.project_options["PISTACHE_USE_SSL"] = self.options.with_ssl
-            tc.project_options["PISTACHE_BUILD_EXAMPLES"] = False
-            tc.project_options["PISTACHE_BUILD_TESTS"] = False
-            tc.project_options["PISTACHE_BUILD_DOCS"] = False
-            tc.generate()
-
-            tc = PkgConfigDeps(self)
-            tc.generate()
-
-            env = VirtualBuildEnv(self)
-            env.generate(scope="build")
+        tc = MesonToolchain(self)
+        tc.project_options["PISTACHE_USE_SSL"] = self.options.with_ssl
+        tc.project_options["PISTACHE_BUILD_EXAMPLES"] = False
+        tc.project_options["PISTACHE_BUILD_TESTS"] = False
+        tc.project_options["PISTACHE_BUILD_DOCS"] = False
+        tc.project_options["PISTACHE_FORCE_LIBEVENT"] = self.options.get_safe("with_libevent", True)
+        tc.generate()
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
-        if self.version != "cci.20201127":
-            replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
-                                    "dependency('RapidJSON', fallback: ['rapidjson', 'rapidjson_dep'])",
-                                    "dependency('rapidjson', fallback: ['rapidjson', 'rapidjson_dep'])")
-
-        if self.version == "cci.20201127":
-            cmake = CMake(self)
-            cmake.configure()
-            cmake.build()
-        else:
-            meson = Meson(self)
-            meson.configure()
-            meson.build()
+        replace_in_file(self, os.path.join(self.source_folder, "meson.build"),
+                                "dependency('RapidJSON', fallback: ['rapidjson', 'rapidjson_dep'])",
+                                "dependency('rapidjson', fallback: ['rapidjson', 'rapidjson_dep'])")
+        meson = Meson(self)
+        meson.configure()
+        meson.build()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        if self.version == "cci.20201127":
-            cmake = CMake(self)
-            cmake.install()
-        else:
-            meson = Meson(self)
-            meson.install()
+        meson = Meson(self)
+        meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         if self.options.shared:
@@ -132,12 +111,11 @@ class PistacheConan(ConanFile):
 
         self.cpp_info.components["libpistache"].libs = collect_libs(self)
         self.cpp_info.components["libpistache"].requires = ["rapidjson::rapidjson"]
-        if self.version != "cci.20201127":
-            self.cpp_info.components["libpistache"].requires.append("date::date")
+        if self.options.get_safe("with_libevent", True):
+            self.cpp_info.components["libpistache"].requires.append("libevent::libevent")
+        self.cpp_info.components["libpistache"].requires.append("date::date")
         if self.options.with_ssl:
             self.cpp_info.components["libpistache"].requires.append("openssl::openssl")
             self.cpp_info.components["libpistache"].defines = ["PISTACHE_USE_SSL=1"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["libpistache"].system_libs = ["pthread"]
-            if self.version != "cci.20201127":
-                self.cpp_info.components["libpistache"].system_libs.append("m")
+            self.cpp_info.components["libpistache"].system_libs = ["pthread", "m"]

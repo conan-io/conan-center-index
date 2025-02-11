@@ -1,3 +1,11 @@
 versions:
+<<<<<<< Updated upstream:recipes/manif/config.yml
   "0.0.5":
+||||||| Stash base:recipes/mysql-connector-cpp/config.yml
+  "9.0.0":
+=======
+  "9.2.0":
+    folder: all
+  "9.0.0":
+>>>>>>> Stashed changes:recipes/mysql-connector-cpp/config.yml
     folder: all
