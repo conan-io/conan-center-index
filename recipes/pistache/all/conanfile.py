@@ -41,10 +41,14 @@ class PistacheConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    @property
+    def _supports_libevent(self):
+        return Version(self.version) >= "0.4.25"
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if self.settings.os != "Linux" or Version(self.version) < "0.4.25":
+        if self.settings.os != "Linux" or not self._supports_libevent:
             del self.options.with_libevent
 
     def requirements(self):
@@ -63,6 +67,7 @@ class PistacheConan(ConanFile):
 
         check_min_cppstd(self, 17)
 
+
     def build_requirements(self):
         self.tool_requires("meson/[>=1.3.1 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
@@ -78,7 +83,8 @@ class PistacheConan(ConanFile):
         tc.project_options["PISTACHE_BUILD_EXAMPLES"] = False
         tc.project_options["PISTACHE_BUILD_TESTS"] = False
         tc.project_options["PISTACHE_BUILD_DOCS"] = False
-        tc.project_options["PISTACHE_FORCE_LIBEVENT"] = self.options.get_safe("with_libevent", True)
+        if self._supports_libevent:
+            tc.project_options["PISTACHE_FORCE_LIBEVENT"] = self.options.get_safe("with_libevent", True)
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
