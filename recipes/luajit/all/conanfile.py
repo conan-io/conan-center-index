@@ -6,6 +6,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.apple import XCRun, to_apple_arch
 from conan.tools.build import cross_building
+from conan.tools.env import VirtualBuildEnv
 from conan.errors import ConanInvalidConfiguration
 import os
 
@@ -69,7 +70,7 @@ class LuajitConan(ConanFile):
         else:
             tc = AutotoolsToolchain(self)
             env = tc.environment()
-            if self.settings.os == "iOS":
+            if self.settings.os == "iOS" or self.settings.os == "Android":
                 env.define("CFLAGS", "")
                 env.define("LDFLAGS", "")
             tc.generate(env)
@@ -116,6 +117,28 @@ class LuajitConan(ConanFile):
                 f"""TARGET_FLAGS='-isysroot "{xcrun.sdk_path}" -target {target_flag}'""",
                 "TARGET_SYS=iOS",
             ])
+        elif self.settings.os == "Android":
+            buildenv_vars = VirtualBuildEnv(self).vars()
+            compiler_path = buildenv_vars.get("CC")
+            triplet_prefix = f"{buildenv_vars.get('CHOST')}-"
+            args.extend([
+                f"CROSS={os.path.join(buildenv_vars.get('NDK_ROOT'), 'bin', triplet_prefix)}",
+                f"DYNAMIC_CC='{compiler_path} -fPIC'",
+                f"STATIC_CC={compiler_path}",
+                f"TARGET_AR='{buildenv_vars.get('AR')} rcus'",
+                f"TARGET_LD={compiler_path}",
+                f"TARGET_STRIP={buildenv_vars.get('STRIP')}",
+            ])
+            if self.settings_build.os != "Linux":
+                args.append("TARGET_SYS=Linux")
+            if self.settings_build.os == "Macos":
+                # must look for headers in macOS SDK, having NDK clang in PATH breaks this default behavior
+                xcrun_build = XCRun(self, sdk='macosx')
+                isysroot_flag = f"""'-isysroot "{xcrun_build.sdk_path}"'"""
+                args.extend([
+                    f"HOST_CFLAGS={isysroot_flag}",
+                    f"HOST_LDFLAGS={isysroot_flag}",
+                ])
         return args
 
     @property
