@@ -83,8 +83,6 @@ class LuajitConan(ConanFile):
                 replace_in_file(self, makefile,
                                       'TARGET_O= $(LUAJIT_A)',
                                       'TARGET_O= $(LUAJIT_SO)')
-            if "clang" in str(self.settings.compiler):
-                replace_in_file(self, makefile, 'CC= $(DEFAULT_CC)', 'CC= clang')
 
     @property
     def _macosx_deployment_target(self):
@@ -93,6 +91,9 @@ class LuajitConan(ConanFile):
     @property
     def _make_arguments(self):
         args = [f"PREFIX={unix_path(self, self.package_folder)}"]
+        if "clang" in str(self.settings.compiler):
+            args.append("DEFAULT_CC=clang")
+
         if is_apple_os(self) and self._macosx_deployment_target:
             args.append(f"MACOSX_DEPLOYMENT_TARGET={self._macosx_deployment_target}")
         return args
