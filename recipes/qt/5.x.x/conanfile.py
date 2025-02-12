@@ -868,6 +868,14 @@ class QtConan(ConanFile):
     def _cmake_qt5_private_file(self, module):
         return os.path.join("lib", "cmake", f"Qt5{module}", f"conan_qt_qt5_{module.lower()}private.cmake")
 
+    @property
+    def _event_dispatcher_reqs(self):
+        reqs = ["Core", "Gui"]
+        if self.options.with_glib:
+            reqs.append("glib::glib")
+
+        return reqs
+
     def package(self):
         with chdir(self, "build_folder"):
             self.run(f"{self._make_program()} install")
@@ -989,12 +997,15 @@ Examples = bin/datadir/examples""")
 
         if self.options.gui:
             _create_private_module("Gui", ["CorePrivate", "Gui"])
+            _create_private_module("FontDatabaseSupport", ["Core", "Gui"])
+            _create_private_module("EventDispatcherSupport", self._event_dispatcher_reqs)
 
         if self.options.widgets:
             _create_private_module("Widgets", ["CorePrivate", "Gui", "GuiPrivate"])
 
         if self.options.qtdeclarative:
             _create_private_module("Qml", ["CorePrivate", "Qml"])
+
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Qt5")
@@ -1136,11 +1147,10 @@ Examples = bin/datadir/examples""")
             _add_build_module("qtGui", self._cmake_qt5_private_file("Gui"))
             _create_plugin("QOffscreenIntegrationPlugin", "qoffscreen", "platforms", ["Core", "Gui"])
 
-            event_dispatcher_reqs = ["Core", "Gui"]
-            if self.options.with_glib:
-                event_dispatcher_reqs.append("glib::glib")
-            _create_module("EventDispatcherSupport", event_dispatcher_reqs)
+            _create_module("EventDispatcherSupport", self._event_dispatcher_reqs)
+            _add_build_module("qtEventDispatcherSupport", self._cmake_qt5_private_file("EventDispatcherSupport"))
             _create_module("FontDatabaseSupport", ["Core", "Gui"])
+            _add_build_module("qtFontDatabaseSupport", self._cmake_qt5_private_file("FontDatabaseSupport"))
             if self.settings.os == "Windows":
                 self.cpp_info.components["qtFontDatabaseSupport"].system_libs.extend(["advapi32", "ole32", "user32", "gdi32"])
             elif is_apple_os(self):
@@ -1248,8 +1258,6 @@ Examples = bin/datadir/examples""")
         _create_module("Network", networkReqs)
         _create_module("Sql")
         _create_module("Test")
-        if self.options.get_safe("opengl", "no") != "no" and self.options.gui:
-            _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
             _create_module("OpenGLExtensions", ["Gui"])
         _create_module("Concurrent")
