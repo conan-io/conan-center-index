@@ -16,7 +16,7 @@ required_conan_version = ">=2.0.0"
 class PactFFIConan(ConanFile):
     name = "pact_ffi"
     description = "Pact/Rust FFI bindings"
-    url = "https://gitlab.prod.entos.sky/immerse-ui/libs/Pact"
+    url = "https://gitlab.prod.entos.sky/entos-xe/libs/Pact"
     homepage = "https://github.com/pact-foundation/pact-reference"
     license = "MIT"
     settings = "os", "arch", "compiler", "build_type"
