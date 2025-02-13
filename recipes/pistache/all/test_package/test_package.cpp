@@ -13,6 +13,7 @@ public:
 };
 
 int main() {
+    // Conan: This code never access network layer
     Pistache::Address addr(Pistache::Ipv4::any(), Pistache::Port(9080));
     auto opts = Pistache::Http::Endpoint::options()
         .threads(1);
