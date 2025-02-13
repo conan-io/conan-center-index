@@ -41,6 +41,15 @@ class LuajitConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    @property
+    def _is_host_32bit(self):
+        return self.settings.arch in ["armv7", "x86"]
+
+    def validate_build(self):
+        if self._is_host_32bit and self.settings_build.os == "Macos":
+            # well, technically it should work on macOS <= 10.14
+            raise ConanInvalidConfiguration(f"{self.ref} cannot be cross-built to a 32-bit platform on macOS, see https://github.com/LuaJIT/LuaJIT/issues/664")
+
     def validate(self):
         if self.settings.os == "Macos" and self.settings.arch == "armv8" and cross_building(self):
             raise ConanInvalidConfiguration(f"{self.ref} can not be cross-built to Mac M1. Please, try any version >=2.1")
