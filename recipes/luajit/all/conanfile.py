@@ -129,6 +129,8 @@ class LuajitConan(ConanFile):
                 f"TARGET_LD={compiler_path}",
                 f"TARGET_STRIP={buildenv_vars.get('STRIP')}",
             ])
+            if self._is_host_32bit:
+                args.append("HOST_CC='gcc -m32'")
             if self.settings_build.os != "Linux":
                 args.append("TARGET_SYS=Linux")
             if self.settings_build.os == "Macos":
