@@ -107,6 +107,10 @@ class LuajitConan(ConanFile):
         if "clang" in str(self.settings.compiler):
             args.append("DEFAULT_CC=clang")
 
+        # upstream doesn't read CPPFLAGS, inject them manually
+        cppflags = AutotoolsToolchain(self).environment().vars(self).get("CPPFLAGS")
+        args.append(f"TARGET_CFLAGS='{cppflags}'")
+
         if self.settings.os == "Macos" and self._apple_deployment_target():
             args.append(f"MACOSX_DEPLOYMENT_TARGET={self._apple_deployment_target()}")
         elif self.settings.os == "iOS":
