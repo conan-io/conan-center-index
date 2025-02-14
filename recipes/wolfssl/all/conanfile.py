@@ -169,6 +169,7 @@ class WolfSSLConan(ConanFile):
             if self.settings.arch in self._32bitarchs:
                 tc.extra_defines.append("TIME_T_NOT_64BIT")
         tc.generate(env)
+        tc.generate()
 
     def build(self):
         autotools = Autotools(self)
