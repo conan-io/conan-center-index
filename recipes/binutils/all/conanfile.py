@@ -172,7 +172,7 @@ class BinutilsConan(ConanFile):
         autotools.install()
 
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
         copy(
             self,
             pattern="COPYING*",
