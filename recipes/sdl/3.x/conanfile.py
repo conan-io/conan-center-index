@@ -42,10 +42,13 @@ class SDLConan(ConanFile):
             "shared": [True, False],
             "fPIC": [True, False],
         },
-        **{subsystem: [None, True, False] for subsystem, _ in _subsystems},
+        **{subsystem: [True, False] for subsystem, _ in _subsystems},
         **{
-            "alsa": [None, True, False],
-            "pulseaudio": [None, True, False],
+            "alsa": [True, False],
+            "pulseaudio": [True, False],
+            "sndio": [True, False],
+            "opengl": [True, False],
+            "opengles": [True, False],
         }
     }
 
@@ -54,10 +57,18 @@ class SDLConan(ConanFile):
             "shared": False,
             "fPIC": False,
         },
-        **{subsystem: None for subsystem, _ in _subsystems},
+        **{subsystem: True for subsystem, _ in _subsystems},
         **{
-            "alsa": None,
-            "pulseaudio": None,
+            ## Audio
+            # Linux only
+            "alsa": False,
+            "pulseaudio": False,
+            "sndio": False,
+            ## Video
+            "opengl": True,  # TODO: Off by default in apple_os
+            "opengles": True,
+            ## Other
+            "libudev": True,
         }
     }
 
@@ -65,30 +76,25 @@ class SDLConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
+        if self.settings.os != "Linux":
+            del self.options.pulseaudio
+            del self.options.alsa
+            del self.options.sndio
+
+            del self.options.libudev
+
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-        # If the user has not explicitly set value to any of the subsystems, we should
-        # - If they have deps, its default value is False
-        # - Otherwise, they are True
-        # See CMakeLists.txt#L220, but we #L1167 seems to indicate otherwise, so set them all to True
-        for subsystem, dependencies in _subsystems:
-            # Don't use is with get_safe, it does not return None, but a _PackageOption with a None value
-            # Let the overridden equality check if the option is None
-            if self.options.get_safe(subsystem) == None:
-                default_subsystem_value = True
-                if subsystem == "hidapi" and self.settings.os == "visionOS":
-                    # CMakeLists.txt#L378
-                    default_subsystem_value = False
-                setattr(self.options, subsystem, default_subsystem_value)
+        if not self.options.get_safe("audio"):
+            self.options.rm_safe("alsa")
+            self.options.rm_safe("pulseaudio")
+            self.options.rm_safe("sndio")
 
-        if self.options.get_safe("alsa") == None:
-            # CMakeLists.txt#L298
-            setattr(self.options, "alsa", self._is_unix_sys and self.options.get_safe("audio"))
-
-        if self.options.get_safe("pulseaudio") == None:
-            setattr(self.options, "pulseaudio", self._supports_pulseaudio)
+        if not self.options.get_safe("video"):
+            self.options.rm_safe("opengl")
+            self.options.rm_safe("opengles")
 
     def validate(self):
         # If any of the subsystems is enabled, then the corresponding dependencies must be enabled
@@ -121,21 +127,20 @@ class SDLConan(ConanFile):
     @property
     def _supports_opengl(self):
         # CMakeLists.txt#L297
-        # TODO: Add option for opengl
-        return (self.options.get_safe("video")
+        return (self.options.get_safe("opengl")
+                and self.settings.os not in ("iOS", "tvOS", "watchOS"))
+
+    @property
+    def _supports_opengles(self):
+        # CMakeLists.txt#L297
+        return (self.options.get_safe("opengles")
                 and self.settings.os not in ("iOS", "tvOS", "watchOS"))
 
     @property
     def _supports_libudev(self):
         # CMakeLists.txt#L351&L1618
-        # TODO: Add option for libudev
-        return self.settings.os in ("Linux", "FreeBSD")
-
-    @property
-    def _supports_pulseaudio(self):
-        # CMakeLists.txt#L372
-        # TODO: Add option for pulseaudio
-        return self._is_unix_sys and self.options.get_safe("audio")
+        return (self.options.get_safe("libudev")
+                and self.settings.os in ("Linux", "FreeBSD"))
 
     @property
     def _supports_dbus(self):
@@ -144,6 +149,8 @@ class SDLConan(ConanFile):
         return self._is_unix_sys
 
     def requirements(self):
+        # TODO: understand if we want to make this an option
+        self.requires("libiconv/1.17")
         if self._needs_libusb:
             self.requires("libusb/1.0.26")
         if self._supports_opengl:
@@ -156,6 +163,8 @@ class SDLConan(ConanFile):
             self.requires("pulseaudio/17.0")
         if self.options.get_safe("alsa"):
             self.requires("libalsa/1.2.12")
+        if self.options.get_safe("sndio"):
+            self.requires("sndio/1.9.0")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -171,15 +180,25 @@ class SDLConan(ConanFile):
         tc.cache_variables["SDL_TESTS"] = True
         tc.cache_variables["SDL_EXAMPLES"] = True
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+        tc.cache_variables["SDL_SYSTEM_ICONV_DEFAULT"] = True
+        tc.cache_variables["SDL_LIBICONV"] = True
+        if self._supports_opengl:
+            tc.cache_variables["SDL_OPENGL"] = True
+        if self._supports_opengles:
+            tc.cache_variables["SDL_OPENGLES"] = True
         if self._needs_libusb:
             tc.cache_variables["SDL_HIDAPI_LIBUSB"] = True
             tc.cache_variables["SDL_HIDAPI_LIBUSB_SHARED"] = self.dependencies["libusb"].options.get_safe("shared", False)
-        if self.options.get("pulseaudio"):
+        if self.options.get_safe("pulseaudio"):
             tc.cache_variables["SDL_PULSEAUDIO"] = True
             tc.cache_variables["SDL_PULSEAUDIO_SHARED"] = self.dependencies["pulseaudio"].options.get_safe("shared", True)
         if self.options.get_safe("alsa"):
             tc.cache_variables["SDL_ALSA"] = True
             tc.cache_variables["SDL_ALSA_SHARED"] = self.dependencies["libalsa"].options.shared
+        if self.options.get_safe("sndio"):
+            tc.cache_variables["SDL_SNDIO"] = True
+            tc.cache_variables["SDL_SNDIO_SHARED"] = True  # sndio is always shared
+        tc.cache_variables["SDL_LIBUDEV"] = self._supports_libudev
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("libusb", "cmake_target_name", "LibUSB::LibUSB")
@@ -218,6 +237,11 @@ class SDLConan(ConanFile):
 
         # TODO: dl support in Unix/Macos, CMakeLists.txt#L1209
         # TODO: Android support of opengles if video is enabled, CMakeLists.txt#L1349
+
+        # TODO: Link opengles
+        #             if self.options.opengles:
+        #                 self.cpp_info.components["libsdl2"].system_libs.extend(["GLESv1_CM", "GLESv2"])
+        #                 self.cpp_info.components["libsdl2"].system_libs.append("OpenSLES")
 
         # CMakeLists.txt#L327
         if self.settings.os == "Macos" and self.options.get_safe("video"):
