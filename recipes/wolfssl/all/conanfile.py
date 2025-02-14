@@ -43,6 +43,8 @@ class WolfSSLConan(ConanFile):
         "with_quic": [True, False],
         "with_experimental": [True, False],
         "with_rpk": [True, False],
+        "with_filesystem": [True, False],
+        "with_fastmath": [True, False],
     }
     default_options = {
         "shared": False,
@@ -63,6 +65,8 @@ class WolfSSLConan(ConanFile):
         "with_quic": False,
         "with_experimental": False,
         "with_rpk": False,
+        "with_filesystem": True,
+        "with_fastmath": False,
     }
 
     @property
@@ -93,6 +97,10 @@ class WolfSSLConan(ConanFile):
     def validate(self):
         if self.options.opensslall and not self.options.opensslextra:
             raise ConanInvalidConfiguration("The option 'opensslall' requires 'opensslextra=True'")
+        if self.settings.os == "baremetal" and self.options.with_filesystem:
+            raise ConanInvalidConfiguration("The settings.os 'baremetal' requires 'with_filesystem=False'")
+        if self.settings.os == "baremetal" and not self.options.with_fastmath:
+            raise ConanInvalidConfiguration("The settings.os 'baremetal' requires 'with_fastmath=True'")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
@@ -139,6 +147,10 @@ class WolfSSLConan(ConanFile):
             tc.configure_args.append("--enable-experimental")
         if self.options.get_safe("with_rpk"):
             tc.configure_args.append("--enable-rpk")
+        if not self.options.get_safe("with_filesystem"):
+            tc.configure_args.append("--disable-filesystem")
+        if self.options.get_safe("with_fastmath"):
+            tc.configure_args.append("--enable-fastmath")
         if is_msvc(self):
             tc.extra_ldflags.append("-ladvapi32")
             if check_min_vs(self, "180", raise_invalid=False):
@@ -152,6 +164,10 @@ class WolfSSLConan(ConanFile):
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
             env.define("AR", f"{ar_wrapper} lib")
+        if self.settings.os == "baremetal":
+            tc.extra_defines.extend(["HAVE_PK_CALLBACKS", "WOLFSSL_USER_IO", "NO_WRITEV"])
+            if self.settings.arch in self._32bitarchs:
+                tc.extra_defines.append("TIME_T_NOT_64BIT")
         tc.generate(env)
 
     def build(self):
@@ -187,3 +203,20 @@ class WolfSSLConan(ConanFile):
                     self.cpp_info.system_libs.append("crypt32")
             elif is_apple_os(self) and Version(self.version) >= "5.6.0":
                 self.cpp_info.frameworks.extend(["CoreFoundation", "Security"])
+
+    @property
+    def _32bitarchs(self):
+        return [
+            "x86",
+            "ppc32",
+            "armv5el",
+            "armv5hf",
+            "armv6",
+            "armv7",
+            "armv7hf",
+            "armv7s",
+            "armv7k",
+            "armv8_32",
+            "mips",
+            "s390",
+        ]
