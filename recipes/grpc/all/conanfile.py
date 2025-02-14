@@ -152,6 +152,8 @@ class GrpcConan(ConanFile):
         if cross_building(self):
             # when cross compiling we need pre compiled grpc plugins for protoc
             self.tool_requires(f"grpc/{self.version}")
+        if Version(self.version) >= "1.69":
+            self.tool_requires("cmake/[>3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
