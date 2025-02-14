@@ -61,8 +61,10 @@ class OneTBBConan(ConanFile):
 
     @property
     def _tbb_apple_frameworks_supported(self):
-        # if the version is 2021.13.0 or later, the build_apple_frameworks option is supported on macOS
-        return self.settings.os == "Macos" and Version(self.version) >= "2021.13.0"
+        if is_apple_os(self):
+            # if the version is 2021.13.0 or later, the build_apple_frameworks option is supported on macOS
+            return Version(self.version) >= "2021.13.0"
+        return False
 
     @property
     def _tbbbind_build(self):
