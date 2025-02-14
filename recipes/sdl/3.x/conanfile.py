@@ -183,6 +183,10 @@ class SDLConan(ConanFile):
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.cache_variables["SDL_SYSTEM_ICONV_DEFAULT"] = True
         tc.cache_variables["SDL_LIBICONV"] = True
+
+        for subsystem in _subsystems:
+            tc.cache_variables[f"SDL_{subsystem[0].upper()}"] = self.options.get_safe(subsystem[0])
+
         if self._supports_opengl:
             tc.cache_variables["SDL_OPENGL"] = True
         if self._supports_opengles:
