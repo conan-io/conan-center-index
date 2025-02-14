@@ -1,7 +1,7 @@
 sources:
   "5.29.3":
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v5.29.3.tar.gz"
-    sha256: "7fce939b9b7181bd0bd157360e0cc88a8cabf01ac4efe4662494f56dd955d4c1"
+    sha256: "fe35f190d7a63533b06558915d6ee469cbee143de70891e1dd54d197b05f362a"
   "5.28.3":
     url: "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v5.28.3.tar.gz"
     sha256: "7fce939b9b7181bd0bd157360e0cc88a8cabf01ac4efe4662494f56dd955d4c1"
