@@ -73,7 +73,7 @@ absl_deps:
     - absl_utility
     - absl_variant
   "5.28.3":
-      - absl_absl_check
+    - absl_absl_check
     - absl_absl_log
     - absl_algorithm
     - absl_base
