@@ -49,6 +49,7 @@ class SDLConan(ConanFile):
             "sndio": [True, False],
             "opengl": [True, False],
             "opengles": [True, False],
+            "libudev": [True, False],
         }
     }
 
