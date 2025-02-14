@@ -227,4 +227,8 @@ class WolfSSLConan(ConanFile):
             defines.extend(["HAVE_PK_CALLBACKS", "WOLFSSL_USER_IO", "NO_WRITEV"])
             if self.settings.arch in self._32bitarchs:
                 defines.append("TIME_T_NOT_64BIT")
+        if not self.options.with_filesystem:
+            defines.append("NO_FILESYSTEM")
+        if self.options.with_fastmath:
+            defines.append("USE_FAST_MATH")
         return defines
