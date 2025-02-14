@@ -164,10 +164,7 @@ class WolfSSLConan(ConanFile):
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
             env.define("AR", f"{ar_wrapper} lib")
-        if self.settings.os == "baremetal":
-            tc.extra_defines.extend(["HAVE_PK_CALLBACKS", "WOLFSSL_USER_IO", "NO_WRITEV"])
-            if self.settings.arch in self._32bitarchs:
-                tc.extra_defines.append("TIME_T_NOT_64BIT")
+        tc.extra_defines.extend(self._defines)
         tc.generate(env)
         tc.generate()
 
@@ -193,6 +190,7 @@ class WolfSSLConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "wolfssl")
         self.cpp_info.libs = ["wolfssl"]
+        self.cpp_info.defines = self._defines
         if self.options.shared:
             self.cpp_info.defines.append("WOLFSSL_DLL")
         if not self.options.shared:
@@ -221,3 +219,12 @@ class WolfSSLConan(ConanFile):
             "mips",
             "s390",
         ]
+
+    @property
+    def _defines(self):
+        defines = []
+        if self.settings.os == "baremetal":
+            defines.extend(["HAVE_PK_CALLBACKS", "WOLFSSL_USER_IO", "NO_WRITEV"])
+            if self.settings.arch in self._32bitarchs:
+                defines.append("TIME_T_NOT_64BIT")
+        return defines
