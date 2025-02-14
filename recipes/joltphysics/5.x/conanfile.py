@@ -96,5 +96,13 @@ class JoltPhysicsConan(ConanFile):
             # https://github.com/jrouwe/JoltPhysics/blob/v5.2.0/Jolt/Jolt.cmake#L529
             self.cpp_info.defines.append("JPH_FLOATING_POINT_EXCEPTIONS_ENABLED")
 
+        if self.options.shared:
+            # https://github.com/jrouwe/JoltPhysics/blob/v5.2.0/Jolt/Jolt.cmake#L495
+            self.cpp_info.defines.append("JPH_SHARED_LIBRARY")
+
+        # https://github.com/jrouwe/JoltPhysics/blob/v5.2.0/Build/CMakeLists.txt#L48
+        # https://github.com/jrouwe/JoltPhysics/blob/v5.2.0/Jolt/Jolt.cmake#L554
+        self.cpp_info.defines.append("JPH_OBJECT_LAYER_BITS=16")
+
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("pthread")
