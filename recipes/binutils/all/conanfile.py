@@ -22,7 +22,7 @@ class BinutilsConan(ConanFile):
     description = "The GNU Binutils are a collection of binary tools."
     package_type = "library"
     license = "GPL-2.0-or-later"
-    url = "https://github.com/conan-io/conan-center-index/"
+    url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://www.gnu.org/software/binutils"
     topics = ("gnu", "ld", "linker", "as", "assembler", "objcopy", "objdump")
     settings = "os", "arch", "compiler", "build_type"
@@ -67,6 +67,8 @@ class BinutilsConan(ConanFile):
     def configure(self):
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
+        if self.options.shared:
+            self.options.rm_safe("fPIC")
 
         if not self.options.target_triplet:
             if not self.options.target_arch:

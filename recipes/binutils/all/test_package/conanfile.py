@@ -14,9 +14,6 @@ class TestPackageConan(ConanFile):
     def requirements(self):
         self.requires(self.tested_reference_str)
 
-    def build_requirements(self):
-        self.tool_requires(self.tested_reference_str)
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
@@ -39,7 +36,7 @@ class TestPackageConan(ConanFile):
                 binaries.append("ld")
 
             for binary in binaries:
-                self.run(f"{binary} --version", env="conanbuild")
+                self.run(f"{binary} --version", env="conanrun")
 
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
             self.run(bin_path, env="conanrun")
