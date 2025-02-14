@@ -189,7 +189,21 @@ class BinutilsConan(ConanFile):
 
         absolute_target_bindir = os.path.join(self.package_folder, target_bindir)
 
-        self.cpp_info.libs = ["bfd", "ctf", "ctf-nobfd", "gprofng", "opcodes", "sframe"]
+        self.cpp_info.components["sframe"].libs = ["sframe"]
+
+        self.cpp_info.components["ctf-nobfd"].libs = ["ctf-nobfd"]
+
+        self.cpp_info.components["bfd"].libs = ["bfd"]
+        self.cpp_info.components["bfd"].requires = ["sframe"]
+
+        self.cpp_info.components["gprofng"].libs = ["gprofng"]
+        self.cpp_info.components["gprofng"].requires = ["opcodes", "bfd"]
+
+        self.cpp_info.components["opcodes"].libs = ["opcodes"]
+        self.cpp_info.components["opcodes"].requires = ["bfd"]
+
+        self.cpp_info.components["ctf"].libs = ["ctf"]
+        self.cpp_info.components["ctf"].requires = ["bfd"]
 
         # v1 exports
         bindir = os.path.join(self.package_folder, "bin")
