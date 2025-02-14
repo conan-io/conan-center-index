@@ -11,7 +11,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0.9"
 
 # This recipe includes a selftest to test conversion of os/arch to triplets (and vice verse)
 # Run it using `python -m unittest conanfile.py`
@@ -20,7 +20,7 @@ required_conan_version = ">=1.54.0"
 class BinutilsConan(ConanFile):
     name = "binutils"
     description = "The GNU Binutils are a collection of binary tools."
-    package_type = "application"
+    package_type = "library"
     license = "GPL-2.0-or-later"
     url = "https://github.com/conan-io/conan-center-index/"
     homepage = "https://www.gnu.org/software/binutils"
@@ -28,6 +28,8 @@ class BinutilsConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
 
     options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
         "multilib": [True, False],
         "with_libquadmath": [True, False],
         "target_arch": [None, "ANY"],
@@ -37,6 +39,8 @@ class BinutilsConan(ConanFile):
     }
 
     default_options = {
+        "shared": False,
+        "fPIC": True,
         "multilib": True,
         "with_libquadmath": True,
         "target_arch": None,  # Initialized in configure, checked in validate
@@ -44,6 +48,7 @@ class BinutilsConan(ConanFile):
         "target_triplet": None,  # Initialized in configure, checked in validate
         "prefix": None,  # Initialized in configure (NOT config_options, because it depends on target_{arch,os})
     }
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -121,9 +126,6 @@ class BinutilsConan(ConanFile):
             if self.options.target_os != settings_target.os:
                 raise ConanInvalidConfiguration(f"binutils:target_os={self.options.target_os} does not match target os={settings_target.os}")
 
-    def package_id(self):
-        del self.info.settings.compiler
-
     def _raise_unsupported_configuration(self, key, value):
         raise ConanInvalidConfiguration(f"This configuration is unsupported by this conan recip. Please consider adding support. ({key}={value})")
 
@@ -170,7 +172,7 @@ class BinutilsConan(ConanFile):
         autotools.install()
 
         rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"), recursive=True)
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         copy(
             self,
             pattern="COPYING*",
@@ -184,6 +186,8 @@ class BinutilsConan(ConanFile):
         self.cpp_info.bindirs = ["bin", target_bindir]
 
         absolute_target_bindir = os.path.join(self.package_folder, target_bindir)
+
+        self.cpp_info.libs = ["bfd", "ctf", "ctf-nobfd", "gprofng", "opcodes", "sframe"]
 
         # v1 exports
         bindir = os.path.join(self.package_folder, "bin")
