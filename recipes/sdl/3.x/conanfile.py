@@ -88,6 +88,9 @@ class SDLConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
+        self.settings.rm_safe("compiler.libcxx")
+        self.settings.rm_safe("compiler.cppstd")
+
         if not self.options.get_safe("audio"):
             self.options.rm_safe("alsa")
             self.options.rm_safe("pulseaudio")
@@ -96,6 +99,8 @@ class SDLConan(ConanFile):
         if not self.options.get_safe("video"):
             self.options.rm_safe("opengl")
             self.options.rm_safe("opengles")
+
+
 
     def validate(self):
         # If any of the subsystems is enabled, then the corresponding dependencies must be enabled
