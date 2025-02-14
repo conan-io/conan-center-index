@@ -143,12 +143,6 @@ class SDLConan(ConanFile):
                 and self.settings.os not in ("iOS", "tvOS", "watchOS"))
 
     @property
-    def _supports_libudev(self):
-        # CMakeLists.txt#L351&L1618
-        return (self.options.get_safe("libudev")
-                and self.settings.os in ("Linux", "FreeBSD"))
-
-    @property
     def _supports_dbus(self):
         # CMakeLists.txt#292
         # TODO: Add option for dbus
@@ -161,7 +155,7 @@ class SDLConan(ConanFile):
             self.requires("libusb/1.0.26")
         if self._supports_opengl:
             self.requires("opengl/system")
-        if self._supports_libudev:
+        if self.options.get_safe("libudev"):
             self.requires("libudev/system")
         if self._supports_dbus:
             self.requires("dbus/1.15.8")
@@ -185,6 +179,7 @@ class SDLConan(ConanFile):
         tc.cache_variables["SDL_TEST_LIBRARY"] = True
         tc.cache_variables["SDL_TESTS"] = True
         tc.cache_variables["SDL_EXAMPLES"] = True
+        tc.cache_variables["SDL_INSTALL_EXAMPLES"] = True
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.cache_variables["SDL_SYSTEM_ICONV_DEFAULT"] = True
         tc.cache_variables["SDL_LIBICONV"] = True
@@ -208,7 +203,7 @@ class SDLConan(ConanFile):
         if self.options.get_safe("sndio"):
             tc.cache_variables["SDL_SNDIO"] = True
             tc.cache_variables["SDL_SNDIO_SHARED"] = True  # sndio is always shared
-        tc.cache_variables["SDL_LIBUDEV"] = self._supports_libudev
+        tc.cache_variables["SDL_LIBUDEV"] = self.options.get_safe("libudev")
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("libusb", "cmake_target_name", "LibUSB::LibUSB")
