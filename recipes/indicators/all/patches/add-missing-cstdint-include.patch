@@ -1,0 +1,38 @@
+From 525ce444f41e2002756241bde345d53a68986347 Mon Sep 17 00:00:00 2001
+From: tocic <tocic@protonmail.ch>
+Date: Sun, 7 May 2023 12:36:15 +0300
+Subject: [PATCH] Add missing <cstdint> header
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Fixes the "‘uint8_t’ has not been declared" error with gcc 13.1.1.
+---
+ include/indicators/termcolor.hpp         | 1 +
+ single_include/indicators/indicators.hpp | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/include/indicators/termcolor.hpp b/include/indicators/termcolor.hpp
+index 3e82bdc..1a5a813 100644
+--- a/include/indicators/termcolor.hpp
++++ b/include/indicators/termcolor.hpp
+@@ -14,6 +14,7 @@
+ 
+ #include <iostream>
+ #include <cstdio>
++#include <cstdint>
+ 
+ // Detect target's platform and set some macros in order to wrap platform
+ // specific code this library depends on.
+diff --git a/single_include/indicators/indicators.hpp b/single_include/indicators/indicators.hpp
+index 6123158..234e158 100644
+--- a/single_include/indicators/indicators.hpp
++++ b/single_include/indicators/indicators.hpp
+@@ -46,6 +46,7 @@ enum class ProgressType { incremental, decremental };
+ 
+ #include <iostream>
+ #include <cstdio>
++#include <cstdint>
+ 
+ // Detect target's platform and set some macros in order to wrap platform
+ // specific code this library depends on.
