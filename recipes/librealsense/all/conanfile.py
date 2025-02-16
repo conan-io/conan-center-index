@@ -1,12 +1,15 @@
+import os
+import urllib
+
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, rm, rmdir
+from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
-import os
-import urllib
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class LibrealsenseConan(ConanFile):
@@ -51,10 +54,16 @@ class LibrealsenseConan(ConanFile):
 
     def requirements(self):
         self.requires("libusb/1.0.26")
+        if Version(self.version) >= "2.50.0":
+            self.requires("libudev/system")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 14)
+        check_min_cppstd(self, 14)
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.16 <4]")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         sources = self.conan_data["sources"][self.version]
@@ -62,6 +71,7 @@ class LibrealsenseConan(ConanFile):
         for firmware in sources["firmware"]:
             filename = os.path.basename(urllib.parse.urlparse(firmware["url"]).path)
             download(self, filename=filename, **firmware)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -98,8 +108,10 @@ class LibrealsenseConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
 
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -128,11 +140,13 @@ class LibrealsenseConan(ConanFile):
         self.cpp_info.components["realsense2"].set_property("cmake_target_name", "realsense2::realsense2")
         self.cpp_info.components["realsense2"].set_property("pkg_config_name", "realsense2")
         self.cpp_info.components["realsense2"].libs = [f"realsense2{postfix}"]
-        self.cpp_info.components["realsense2"].requires = ["libusb::libusb"]
         if not self.options.shared:
             self.cpp_info.components["realsense2"].requires.extend(["realsense-file", "fw"])
+        self.cpp_info.components["realsense2"].requires = ["libusb::libusb"]
+        if Version(self.version) >= "2.50.0":
+            self.cpp_info.components["realsense2"].requires.append("libudev::libudev")
         if self.settings.os == "Linux":
-            self.cpp_info.components["realsense2"].system_libs.extend(["m", "pthread", "udev"])
+            self.cpp_info.components["realsense2"].system_libs.extend(["m", "pthread"])
         elif self.settings.os == "Windows":
             self.cpp_info.components["realsense2"].system_libs.extend([
                 "cfgmgr32", "setupapi",
@@ -140,7 +154,3 @@ class LibrealsenseConan(ConanFile):
                 "winusb",
                 "shlwapi", "mf", "mfplat", "mfreadwrite", "mfuuid"
             ])
-
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "realsense2"
-        self.cpp_info.names["cmake_find_package_multi"] = "realsense2"
