@@ -7,7 +7,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.0"
 
 
 class IndicatorsConan(ConanFile):
@@ -31,8 +31,7 @@ class IndicatorsConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
         if Version(self.version) < "2.0":
             if is_msvc(self) or (self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5"):
