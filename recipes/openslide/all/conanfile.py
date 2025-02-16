@@ -10,7 +10,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class OpenSlideConan(ConanFile):
@@ -35,19 +35,11 @@ class OpenSlideConan(ConanFile):
         "fPIC": True,
         "jpeg": "libjpeg",
     }
+    languages = ["C"]
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -58,10 +50,10 @@ class OpenSlideConan(ConanFile):
         self.requires("glib/2.78.3")
         self.requires("libdicom/1.0.5")
         self.requires("libpng/[>=1.6 <2]")
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/[>=4.5 <5]")
         self.requires("libxml2/[>=2.12.5 <3]")
         self.requires("openjpeg/2.5.2")
-        self.requires("sqlite3/3.45.3")
+        self.requires("sqlite3/[>=3.45.0 <4]")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.jpeg == "libjpeg":
             self.requires("libjpeg/9e")
@@ -82,6 +74,7 @@ class OpenSlideConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = MesonToolchain(self)
@@ -95,7 +88,6 @@ class OpenSlideConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         meson = Meson(self)
         meson.configure()
         meson.build()
