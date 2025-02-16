@@ -1,11 +1,11 @@
+import os
+
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get
-import os
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, save
 
-
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.0.9"
 
 
 class MockNetworkAccessManagerConan(ConanFile):
@@ -19,19 +19,19 @@ class MockNetworkAccessManagerConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "fPIC": [True, False],
-        "with_qt": [5, 6],
+        "with_qt": [5, 6, "deprecated"],
     }
     default_options = {
         "fPIC": True,
-        "with_qt": 5,
+        "with_qt": "deprecated",
     }
+    implements = ["auto_shared_fpic"]
 
     def export_sources(self):
         export_conandata_patches(self)
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
+    def package_id(self):
+        del self.info.options.with_qt
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -40,28 +40,35 @@ class MockNetworkAccessManagerConan(ConanFile):
         if self.options.with_qt == 5:
             self.requires("qt/[~5.15]", transitive_headers=True)
         else:
-            self.requires("qt/[>=6.6 <7]", transitive_headers=True)
+            self.requires("qt/[>=5.15 <7]", transitive_headers=True)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "11")
+        check_min_cppstd(self, 11)
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.27 <4]")
+        self.tool_requires("qt/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        replace_in_file(self, "CMakeLists.txt", "set( CMAKE_CXX_STANDARD 11 )", "")
+        save(self, os.path.join(self.source_folder, "tests", "CMakeLists.txt"), "")
+        save(self, os.path.join(self.source_folder, "doc", "CMakeLists.txt"), "")
 
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
-        tc.variables["FORCE_QT5"] = self.options.with_qt == 5
+        tc.variables["FORCE_QT5"] = self.dependencies["qt"].ref.version.major == 5
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
-        cmake.build()
+        # cmake.install() fails without the explicit target
+        cmake.build(target="MockNetworkAccessManager")
 
     def package(self):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
@@ -70,3 +77,7 @@ class MockNetworkAccessManagerConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = ["MockNetworkAccessManager"]
+        self.cpp_info.requires = ["qt::qtCore", "qt::qtNetwork"]
+        qt = self.dependencies["qt"]
+        if qt.ref.version.major == 6 and qt.options.qt5compat:
+            self.cpp_info.requires.append("qt::qtCore5Compat")
