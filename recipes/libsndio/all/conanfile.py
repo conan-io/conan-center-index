@@ -140,8 +140,3 @@ class LibsndioConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "sndio")
         self.cpp_info.libs = ["sndio"]
         self.cpp_info.system_libs = ["dl", "m", "rt"]
-
-        # TODO: to remove in conan v2?
-        self.cpp_info.names["cmake_find_package"] = "sndio"
-        self.cpp_info.names["cmake_find_package_multi"] = "sndio"
-        self.cpp_info.names["pkg_config"] = "sndio"
