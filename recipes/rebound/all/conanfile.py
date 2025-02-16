@@ -29,7 +29,8 @@ class ReboundConan(ConanFile):
 
     def package_id(self):
         # Always compiled with optimizations enabled
-        del self.info.settings.build_type
+        if self.info.settings.build_type == "Debug":
+            self.info.settings.build_type = "RelWithDebInfo"
 
     def layout(self):
         basic_layout(self, src_folder="src")
