@@ -68,19 +68,12 @@ class EigenConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Eigen3")
         self.cpp_info.set_property("cmake_target_name", "Eigen3::Eigen")
         self.cpp_info.set_property("pkg_config_name", "eigen3")
-        # TODO: back to global scope once cmake_find_package* generators removed
+
         self.cpp_info.components["eigen3"].bindirs = []
         self.cpp_info.components["eigen3"].libdirs = []
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["eigen3"].system_libs = ["m"]
         if self.options.MPL2_only:
             self.cpp_info.components["eigen3"].defines = ["EIGEN_MPL2_ONLY"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "Eigen3"
-        self.cpp_info.names["cmake_find_package_multi"] = "Eigen3"
-        self.cpp_info.names["pkg_config"] = "eigen3"
-        self.cpp_info.components["eigen3"].names["cmake_find_package"] = "Eigen"
-        self.cpp_info.components["eigen3"].names["cmake_find_package_multi"] = "Eigen"
         self.cpp_info.components["eigen3"].set_property("cmake_target_name", "Eigen3::Eigen")
         self.cpp_info.components["eigen3"].includedirs = [os.path.join("include", "eigen3")]
