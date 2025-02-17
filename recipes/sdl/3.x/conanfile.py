@@ -243,11 +243,38 @@ class SDLConan(ConanFile):
         # TODO: dl support in Unix/Macos, CMakeLists.txt#L1209
         # TODO: Android support of opengles if video is enabled, CMakeLists.txt#L1349
 
+        if self.options.get_safe("opengl"):
+            self.cpp_info.requires.append("opengl::opengl")
         # TODO: Link opengles
-        #             if self.options.opengles:
-        #                 self.cpp_info.components["libsdl2"].system_libs.extend(["GLESv1_CM", "GLESv2"])
-        #                 self.cpp_info.components["libsdl2"].system_libs.append("OpenSLES")
+        if self._supports_opengles:
+            breakpoint()
+            self.cpp_info.system_libs.extend(["GLESv1_CM", "GLESv2", "OpenSLES"])
 
         # CMakeLists.txt#L327
-        if self.settings.os == "Macos" and self.options.get_safe("video"):
-            self.cpp_info.frameworks.append("Cocoa")
+        self.cpp_info.requires.append("libiconv::libiconv")
+
+        if is_apple_os(self) and not self.options.shared:
+            self.cpp_info.frameworks = [
+                "CoreVideo", "CoreAudio", "AudioToolbox",
+                "AVFoundation", "Foundation", "QuartzCore",
+            ]
+            if self.settings.os == "Macos":
+                self.cpp_info.frameworks.extend([
+                    "Cocoa",
+                    "Carbon",
+                    "IOKit",
+                    "ForceFeedback",
+                    "CoreFoundation",
+                    "CoreServices",
+                    "AppKit"
+                ])
+                self.cpp_info.frameworks.append("GameController")
+            elif self.settings.os in ["iOS", "tvOS", "watchOS"]:
+                self.cpp_info.frameworks.extend([
+                    "UIKit", "OpenGLES", "GameController", "CoreMotion",
+                    "CoreGraphics", "CoreBluetooth",
+                ])
+
+            self.cpp_info.frameworks.append("Metal")
+            self.cpp_info.sharedlinkflags.append("-Wl,-weak_framework,CoreHaptics")
+            self.cpp_info.exelinkflags.append("-Wl,-weak_framework,CoreHaptics")
