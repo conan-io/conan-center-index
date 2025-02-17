@@ -18,6 +18,10 @@ sources:
     url: "https://www.apache.org/dyn/closer.lua/arrow/arrow-14.0.2/apache-arrow-14.0.2.tar.gz?action=download"
     sha256: "1304dedb41896008b89fe0738c71a95d9b81752efc77fa70f264cb1da15d9bc2"
 patches:
+  "19.0.1":
+    - patch_file: "patches/19.0.1-0001-fix-cmake.patch"
+      patch_description: "use cci package"
+      patch_type: "conan"
   "18.1.0":
     - patch_file: "patches/18.0.0-0001-fix-cmake.patch"
       patch_description: "use cci package"
