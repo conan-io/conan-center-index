@@ -49,7 +49,10 @@ class SDLConan(ConanFile):
             "sndio": [True, False],
             "opengl": [True, False],
             "opengles": [True, False],
+            "x11": [True, False],
+            "wayland": [True, False],
             "libudev": [True, False],
+            "dbus": [True, False],
         }
     }
 
@@ -68,8 +71,11 @@ class SDLConan(ConanFile):
             ## Video
             "opengl": True,  # TODO: Off by default in apple_os
             "opengles": True,
+            "x11": True,
+            "wayland": False,  # TODO: testing, its true
             ## Other
             "libudev": True,
+            "dbus": True,
         }
     }
 
@@ -83,13 +89,18 @@ class SDLConan(ConanFile):
             del self.options.sndio
 
             del self.options.libudev
+            del self.options.dbus # TODO: maybe use _is_unix_sys
+            del self.options.x11
+            del self.options.wayland
+
 
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
+        if not (self.settings.os == "Android" and self.options.get_safe("hidapi")):
+            self.settings.rm_safe("compiler.libcxx")
+            self.settings.rm_safe("compiler.cppstd")
 
         if not self.options.get_safe("audio"):
             self.options.rm_safe("alsa")
@@ -99,6 +110,8 @@ class SDLConan(ConanFile):
         if not self.options.get_safe("video"):
             self.options.rm_safe("opengl")
             self.options.rm_safe("opengles")
+            self.options.rm_safe("x11")
+            self.options.rm_safe("wayland")
 
 
 
@@ -132,21 +145,22 @@ class SDLConan(ConanFile):
 
     @property
     def _supports_opengl(self):
-        # CMakeLists.txt#L297
+        # CMakeLists.txt#L331
         return (self.options.get_safe("opengl")
-                and self.settings.os not in ("iOS", "tvOS", "watchOS"))
+                and self.settings.os not in ("iOS", "visionOS", "tvOS", "watchOS"))
 
     @property
     def _supports_opengles(self):
-        # CMakeLists.txt#L297
+        # CMakeLists.txt#L332
         return (self.options.get_safe("opengles")
-                and self.settings.os not in ("iOS", "tvOS", "watchOS"))
+                # and self.settings.os not in ("visionOS", "tvOS", "watchOS"))
+                and self.settings.os == "Android")
 
     @property
     def _supports_dbus(self):
         # CMakeLists.txt#292
         # TODO: Add option for dbus
-        return self._is_unix_sys
+        return self.options.get_safe("dbus") and self._is_unix_sys
 
     def requirements(self):
         # TODO: understand if we want to make this an option
@@ -165,11 +179,17 @@ class SDLConan(ConanFile):
             self.requires("libalsa/1.2.12")
         if self.options.get_safe("sndio"):
             self.requires("sndio/1.9.0")
+        if self.options.get_safe("wayland"):
+            self.requires("wayland/1.22.0")
+            self.requires("xkbcommon/1.6.0")
+            self.requires("egl/system")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
         if self.settings.os == "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
+        if self.options.get_safe("wayland"):
+            self.tool_requires("wayland/<host_version>")  # Provides wayland-scanner
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -204,10 +224,23 @@ class SDLConan(ConanFile):
             tc.cache_variables["SDL_SNDIO"] = True
             tc.cache_variables["SDL_SNDIO_SHARED"] = True  # sndio is always shared
         tc.cache_variables["SDL_LIBUDEV"] = self.options.get_safe("libudev")
+
+
+        # True by default
+        tc.cache_variables["SDL_X11"] = self.options.get_safe("x11")
+        if self.options.get_safe("x11"):
+            # See https://github.com/bincrafters/community/issues/696
+            tc.variables["SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS"] = 1
+
+        tc.cache_variables["SDL_WAYLAND"] = self.options.get_safe("wayland")
+        if self.options.get_safe("wayland"):
+            tc.cache_variables["SDL_WAYLAND_SHARED"] = self.dependencies["wayland"].options.shared
+
+
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("libusb", "cmake_target_name", "LibUSB::LibUSB")
-        deps.set_property("libusb", "cmake_additional_variables_prefixes", ["LibUSB"])
+        deps.set_property("libusb", "cmake_file_name", "LibUSB")
         deps.generate()
         pcdeps = PkgConfigDeps(self)
         pcdeps.generate()
@@ -243,11 +276,20 @@ class SDLConan(ConanFile):
         # TODO: dl support in Unix/Macos, CMakeLists.txt#L1209
         # TODO: Android support of opengles if video is enabled, CMakeLists.txt#L1349
 
+        # TODO: check conditions
+        # if self.options.get_safe("libudev"):
+        # self.cpp_info.requires.append("libudev::libudev")
+
+        if self._needs_libusb:
+            self.cpp_info.requires.append("libusb::libusb")
+
+        if self.options.get_safe("dbus"):
+            self.cpp_info.requires.append("dbus::dbus")
+
         if self.options.get_safe("opengl"):
             self.cpp_info.requires.append("opengl::opengl")
         # TODO: Link opengles
         if self._supports_opengles:
-            breakpoint()
             self.cpp_info.system_libs.extend(["GLESv1_CM", "GLESv2", "OpenSLES"])
 
         # CMakeLists.txt#L327
@@ -266,14 +308,19 @@ class SDLConan(ConanFile):
                     "ForceFeedback",
                     "CoreFoundation",
                     "CoreServices",
-                    "AppKit"
+                    "AppKit",
                 ])
+                # TODO: Add option
                 self.cpp_info.frameworks.append("GameController")
+                if self.options.get_safe("video"):
+                    self.cpp_info.frameworks.append("UniformTypeIdentifiers")
             elif self.settings.os in ["iOS", "tvOS", "watchOS"]:
                 self.cpp_info.frameworks.extend([
                     "UIKit", "OpenGLES", "GameController", "CoreMotion",
                     "CoreGraphics", "CoreBluetooth",
                 ])
+            if self.options.get_safe("camera") and self.settings.os in ("Macos", "iOS"):
+                self.cpp_info.frameworks.append("CoreMedia")
 
             self.cpp_info.frameworks.append("Metal")
             self.cpp_info.sharedlinkflags.append("-Wl,-weak_framework,CoreHaptics")
