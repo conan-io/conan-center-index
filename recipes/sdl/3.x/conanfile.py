@@ -53,6 +53,7 @@ class SDLConan(ConanFile):
             "wayland": [True, False],
             "libudev": [True, False],
             "dbus": [True, False],
+            "libusb": [True, False],
         }
     }
 
@@ -73,6 +74,8 @@ class SDLConan(ConanFile):
             "opengles": True,
             "x11": True,
             "wayland": False,  # TODO: testing, its true
+            ## Hidapi
+            "libusb": True,
             ## Other
             "libudev": True,
             "dbus": True,
@@ -93,7 +96,6 @@ class SDLConan(ConanFile):
             del self.options.x11
             del self.options.wayland
 
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -113,7 +115,8 @@ class SDLConan(ConanFile):
             self.options.rm_safe("x11")
             self.options.rm_safe("wayland")
 
-
+        if not self.options.get_safe("hidapi"):
+            self.options.rm_safe("libusb")
 
     def validate(self):
         # If any of the subsystems is enabled, then the corresponding dependencies must be enabled
@@ -122,6 +125,11 @@ class SDLConan(ConanFile):
                 for dependency in dependencies:
                     if not self.options.get_safe(dependency):
                         raise ConanInvalidConfiguration(f'-o="&:{subsystem}=True" subsystem requires -o="&:{dependency}=True"')
+
+    def validate_build(self):
+        if self._needs_libusb and self.dependencies["libusb"].options.get_safe("shared", True)\
+                and not self.conf.get("tools.cmake.cmakedeps:new"):
+            raise ConanInvalidConfiguration("SDL with shared libusb requires new CMakeDeps generator")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -139,7 +147,7 @@ class SDLConan(ConanFile):
     def _needs_libusb(self):
         # CMakeLists.txt#L134
         # TODO: Add option for libusb
-        return (self.options.get_safe("hidapi") and
+        return (self.options.get_safe("libusb") and
                 (not is_apple_os(self) or self.settings.os == "Macos") and
                 self.settings.os != "Android")
 
@@ -213,7 +221,9 @@ class SDLConan(ConanFile):
             tc.cache_variables["SDL_OPENGLES"] = True
         if self._needs_libusb:
             tc.cache_variables["SDL_HIDAPI_LIBUSB"] = True
-            tc.cache_variables["SDL_HIDAPI_LIBUSB_SHARED"] = self.dependencies["libusb"].options.get_safe("shared", False)
+            # TODO: This is a supported configuration in upstream
+            tc.cache_variables["SDL_HIDAPI_LIBUSB_SHARED"] = self.dependencies["libusb"].options.get_safe("shared", True)
+
         if self.options.get_safe("pulseaudio"):
             tc.cache_variables["SDL_PULSEAUDIO"] = True
             tc.cache_variables["SDL_PULSEAUDIO_SHARED"] = self.dependencies["pulseaudio"].options.get_safe("shared", True)
@@ -224,7 +234,6 @@ class SDLConan(ConanFile):
             tc.cache_variables["SDL_SNDIO"] = True
             tc.cache_variables["SDL_SNDIO_SHARED"] = True  # sndio is always shared
         tc.cache_variables["SDL_LIBUDEV"] = self.options.get_safe("libudev")
-
 
         # True by default
         tc.cache_variables["SDL_X11"] = self.options.get_safe("x11")
@@ -245,8 +254,15 @@ class SDLConan(ConanFile):
         pcdeps = PkgConfigDeps(self)
         pcdeps.generate()
 
+    def _patch_sources(self):
+        # TODO: Once new CMakeDeps is default, remove this
+        if not self.conf.get("tools.cmake.cmakedeps:new"):
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "sdlchecks.cmake"),
+                            "target_get_dynamic_library(dynamic_libusb LibUSB::LibUSB)",
+                            "")
 
     def build(self):
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
