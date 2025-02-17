@@ -91,8 +91,6 @@ class Mpg123Conan(ConanFile):
 
 
     def build_requirements(self):
-        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
         if self.settings.arch in ["x86", "x86_64"]:
             self.tool_requires("yasm/1.3.0")
         if self.settings_build.os == "Windows" and not is_msvc(self):
@@ -102,6 +100,7 @@ class Mpg123Conan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         env = VirtualBuildEnv(self)
@@ -157,7 +156,6 @@ class Mpg123Conan(ConanFile):
             tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         if is_msvc(self):
             cmake = CMake(self)
             cmake.configure(build_script_folder=os.path.join(self.source_folder, "ports", "cmake"))
@@ -185,7 +183,7 @@ class Mpg123Conan(ConanFile):
             rm(self, "*.la", os.path.join(self.package_folder, "lib"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
-        
+
         fix_apple_shared_install_name(self)
 
     def package_info(self):
