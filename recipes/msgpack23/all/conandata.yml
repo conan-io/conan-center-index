@@ -1,0 +1,7 @@
+sources:
+  "1.0":
+    url:
+    - "https://github.com/rwindegger/msgpack23/archive/refs/tags/v1.0.tar.gz"
+    sha256: "0E3296B3162DE73CA866E973B7E447BB8C3233A854A5F94F1AE0CAA8B0E60D4C"
+requirements:
+  - "gtest/1.15.0"
