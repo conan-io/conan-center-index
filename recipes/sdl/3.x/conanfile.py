@@ -72,7 +72,7 @@ class SDLConan(ConanFile):
             ## Video
             "opengl": True,  # TODO: Off by default in apple_os
             "opengles": True,
-            "x11": True,
+            "x11": False,
             "wayland": False,  # TODO: testing, its true
             ## Hidapi
             "libusb": True,
@@ -235,7 +235,7 @@ class SDLConan(ConanFile):
             tc.cache_variables["SDL_SNDIO_SHARED"] = True  # sndio is always shared
         tc.cache_variables["SDL_LIBUDEV"] = self.options.get_safe("libudev")
 
-        # True by default
+        # x11 and wayland are True by default so updating the value is necessary according to conan options
         tc.cache_variables["SDL_X11"] = self.options.get_safe("x11")
         if self.options.get_safe("x11"):
             # See https://github.com/bincrafters/community/issues/696
@@ -244,6 +244,11 @@ class SDLConan(ConanFile):
         tc.cache_variables["SDL_WAYLAND"] = self.options.get_safe("wayland")
         if self.options.get_safe("wayland"):
             tc.cache_variables["SDL_WAYLAND_SHARED"] = self.dependencies["wayland"].options.shared
+
+        if self.options.get_safe("x11") == False and self.options.get_safe("wayland") == False:
+            # Disable windowing support:
+            # https://github.com/libsdl-org/SDL/blob/main/docs/README-cmake.md#cmake-fails-to-build-without-x11-or-wayland-support
+            tc.cache_variables["SDL_UNIX_CONSOLE_BUILD=ON"] = True
 
 
         tc.generate()
@@ -293,8 +298,8 @@ class SDLConan(ConanFile):
         # TODO: Android support of opengles if video is enabled, CMakeLists.txt#L1349
 
         # TODO: check conditions
-        # if self.options.get_safe("libudev"):
-        # self.cpp_info.requires.append("libudev::libudev")
+        if self.options.get_safe("libudev"):
+            self.cpp_info.requires.append("libudev::libudev")
 
         if self._needs_libusb:
             self.cpp_info.requires.append("libusb::libusb")
