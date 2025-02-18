@@ -1,12 +1,12 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import get, copy
+from conan.tools.files import get, copy, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 import os
 
 from conan.tools.microsoft import is_msvc
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class PackageConan(ConanFile):
@@ -27,9 +27,8 @@ class PackageConan(ConanFile):
         "with_zlib": True,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 11
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -42,11 +41,11 @@ class PackageConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
@@ -67,9 +66,3 @@ class PackageConan(ConanFile):
         # The library uses __cplusplus for feature detection, ensure vs returns the proper one
         if is_msvc(self):
             self.cpp_info.cxxflags.append("/Zc:__cplusplus")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "vtu11"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "vtu11"
-        self.cpp_info.names["cmake_find_package"] = "vtu11"
-        self.cpp_info.names["cmake_find_package_multi"] = "vtu11"
