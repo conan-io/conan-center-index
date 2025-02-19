@@ -27,6 +27,7 @@ class MimallocConan(ConanFile):
         "override": [True, False],
         "inject": [True, False],
         "single_object": [True, False],
+        "win_redirect": [True, False],
     }
     default_options = {
         "shared": False,
@@ -35,6 +36,7 @@ class MimallocConan(ConanFile):
         "override": False,
         "inject": False,
         "single_object": False,
+        "win_redirect": False,
     }
 
     def export_sources(self):
@@ -108,7 +110,7 @@ class MimallocConan(ConanFile):
         tc.variables["MI_BUILD_OBJECT"] = self.options.get_safe("single_object", False)
         tc.variables["MI_OVERRIDE"] = "ON" if self.options.override else "OFF"
         tc.variables["MI_SECURE"] = "ON" if self.options.secure else "OFF"
-        tc.variables["MI_WIN_REDIRECT"] = "OFF"
+        tc.variables["MI_WIN_REDIRECT"] = "ON" if self.options.win_redirect else "OFF"
         tc.variables["MI_INSTALL_TOPLEVEL"] = "ON"
         tc.generate()
         venv = VirtualBuildEnv(self)
