@@ -1,0 +1,13 @@
+sources:
+  "6.6.0":
+    url: "https://github.com/aerospike/aerospike-client-c"
+    sha256: 87ead474715af6fb4ae273ab9d14226e3f63c5fb
+patches:
+  "6.6.0":
+    - patch_file: "patches/0001_remove_internal_lua.patch"
+      patch_description: "prevent build and linking with lua submodule for base project"
+      patch_type: conan
+    - patch_file: "patches/0002_remove_internal_lua_from_submodules.patch"
+      patch_description: "prevent build and linking with lua submodule for mod_lua submodule"
+      base_path: modules/mod-lua
+      patch_type: conan
