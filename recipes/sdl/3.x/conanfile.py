@@ -51,6 +51,9 @@ class SDLConan(ConanFile):
             "opengles": [True, False],
             "x11": [True, False],
             "wayland": [True, False],
+            "vulkan": [True, False],
+            "metal": [True, False],
+            "directx": [True, False],
             "libudev": [True, False],
             "dbus": [True, False],
             "libusb": [True, False],
@@ -66,14 +69,17 @@ class SDLConan(ConanFile):
         **{
             ## Audio
             # Linux only
-            "alsa": False,
-            "pulseaudio": False,
-            "sndio": False,
+            "alsa": True,
+            "pulseaudio": True,
+            "sndio": True,
             ## Video
             "opengl": True,  # TODO: Off by default in apple_os
             "opengles": True,
-            "x11": False,
-            "wayland": False,  # TODO: testing, its true
+            "x11": True,
+            "wayland": True,
+            "vulkan": True,
+            "metal": True,
+            "directx": True,
             ## Hidapi
             "libusb": True,
             ## Other
@@ -90,11 +96,16 @@ class SDLConan(ConanFile):
             del self.options.pulseaudio
             del self.options.alsa
             del self.options.sndio
-
             del self.options.libudev
             del self.options.dbus # TODO: maybe use _is_unix_sys
             del self.options.x11
             del self.options.wayland
+
+        if not is_apple_os(self):
+            del self.options.metal
+
+        if self.settings.os != "Windows":
+            del self.options.directx
 
     def configure(self):
         if self.options.shared:
@@ -114,6 +125,8 @@ class SDLConan(ConanFile):
             self.options.rm_safe("opengles")
             self.options.rm_safe("x11")
             self.options.rm_safe("wayland")
+            self.options.rm_safe("vulkan")
+            self.options.rm_safe("metal")
 
         if not self.options.get_safe("hidapi"):
             self.options.rm_safe("libusb")
@@ -167,7 +180,6 @@ class SDLConan(ConanFile):
     @property
     def _supports_dbus(self):
         # CMakeLists.txt#292
-        # TODO: Add option for dbus
         return self.options.get_safe("dbus") and self._is_unix_sys
 
     def requirements(self):
@@ -224,6 +236,10 @@ class SDLConan(ConanFile):
             # TODO: This is a supported configuration in upstream
             tc.cache_variables["SDL_HIDAPI_LIBUSB_SHARED"] = self.dependencies["libusb"].options.get_safe("shared", True)
 
+        tc.variables["SDL_VULKAN"] = self.options.get_safe("vulkan")
+        tc.variables["SDL_METAL"] = self.options.get_safe("metal")
+        tc.variables["SDL_DIRECTX"] = self.options.get_safe("directx")
+
         if self.options.get_safe("pulseaudio"):
             tc.cache_variables["SDL_PULSEAUDIO"] = True
             tc.cache_variables["SDL_PULSEAUDIO_SHARED"] = self.dependencies["pulseaudio"].options.get_safe("shared", True)
@@ -233,19 +249,20 @@ class SDLConan(ConanFile):
         if self.options.get_safe("sndio"):
             tc.cache_variables["SDL_SNDIO"] = True
             tc.cache_variables["SDL_SNDIO_SHARED"] = True  # sndio is always shared
-        tc.cache_variables["SDL_LIBUDEV"] = self.options.get_safe("libudev")
+        tc.cache_variables["SDL_LIBUDEV"] = self.options.get_safe("libudev", False)
 
-        # x11 and wayland are True by default so updating the value is necessary according to conan options
-        tc.cache_variables["SDL_X11"] = self.options.get_safe("x11")
-        if self.options.get_safe("x11"):
+
+        # X11 and wayland configuration
+        with_x11 = self.options.get_safe("x11", False)
+        tc.cache_variables["SDL_X11"] = with_x11
+        if with_x11:
             # See https://github.com/bincrafters/community/issues/696
             tc.variables["SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS"] = 1
-
-        tc.cache_variables["SDL_WAYLAND"] = self.options.get_safe("wayland")
-        if self.options.get_safe("wayland"):
+        with_wayland = self.options.get_safe("wayland", False)
+        tc.cache_variables["SDL_WAYLAND"] = with_wayland
+        if with_wayland:
             tc.cache_variables["SDL_WAYLAND_SHARED"] = self.dependencies["wayland"].options.shared
-
-        if self.options.get_safe("x11") == False and self.options.get_safe("wayland") == False:
+        if not with_x11 and not with_wayland:
             # Disable windowing support:
             # https://github.com/libsdl-org/SDL/blob/main/docs/README-cmake.md#cmake-fails-to-build-without-x11-or-wayland-support
             tc.cache_variables["SDL_UNIX_CONSOLE_BUILD=ON"] = True
@@ -297,6 +314,9 @@ class SDLConan(ConanFile):
         # TODO: dl support in Unix/Macos, CMakeLists.txt#L1209
         # TODO: Android support of opengles if video is enabled, CMakeLists.txt#L1349
 
+        # CMakeLists.txt#L327
+        self.cpp_info.requires.append("libiconv::libiconv")
+
         # TODO: check conditions
         if self.options.get_safe("libudev"):
             self.cpp_info.requires.append("libudev::libudev")
@@ -309,40 +329,67 @@ class SDLConan(ConanFile):
 
         if self.options.get_safe("opengl"):
             self.cpp_info.requires.append("opengl::opengl")
+
         # TODO: Link opengles
         if self._supports_opengles:
             self.cpp_info.system_libs.extend(["GLESv1_CM", "GLESv2", "OpenSLES"])
 
-        # CMakeLists.txt#L327
-        self.cpp_info.requires.append("libiconv::libiconv")
-
+        # TODO: could it work with shared?
         if is_apple_os(self) and not self.options.shared:
-            self.cpp_info.frameworks = [
-                "CoreVideo", "CoreAudio", "AudioToolbox",
-                "AVFoundation", "Foundation", "QuartzCore",
-            ]
+            self.cpp_info.frameworks = ["CoreVideo", "Foundation"]
+
             if self.settings.os == "Macos":
-                self.cpp_info.frameworks.extend([
-                    "Cocoa",
-                    "Carbon",
-                    "IOKit",
-                    "ForceFeedback",
-                    "CoreFoundation",
-                    "CoreServices",
-                    "AppKit",
-                ])
-                # TODO: Add option
-                self.cpp_info.frameworks.append("GameController")
-                if self.options.get_safe("video"):
+                self.cpp_info.frameworks.extend(["Cocoa", "Carbon"])
+
+            if self.options.get_safe("audio"):
+                self.cpp_info.frameworks.extend(["CoreAudio", "AudioToolbox", "AVFoundation"])
+
+            if self.options.get_safe("video"):
+                if self.settings.os in ("iOS", "tvOS", "visionOS", "watchOS"):
+                    self.cpp_info.frameworks.extend(["CoreGraphics", "QuartzCore", "UIKit"])
+                else:
                     self.cpp_info.frameworks.append("UniformTypeIdentifiers")
-            elif self.settings.os in ["iOS", "tvOS", "watchOS"]:
-                self.cpp_info.frameworks.extend([
-                    "UIKit", "OpenGLES", "GameController", "CoreMotion",
-                    "CoreGraphics", "CoreBluetooth",
-                ])
+
             if self.options.get_safe("camera") and self.settings.os in ("Macos", "iOS"):
                 self.cpp_info.frameworks.append("CoreMedia")
 
-            self.cpp_info.frameworks.append("Metal")
-            self.cpp_info.sharedlinkflags.append("-Wl,-weak_framework,CoreHaptics")
-            self.cpp_info.exelinkflags.append("-Wl,-weak_framework,CoreHaptics")
+            if self.options.get_safe("joystick"):
+                self.cpp_info.frameworks.append("GameController")
+                self.cpp_info.sharedlinkflags.append("-Wl,-weak_framework,CoreHaptics")
+                self.cpp_info.exelinkflags.append("-Wl,-weak_framework,CoreHaptics")
+                if self.settings.os == "Macos":
+                    # Mind that ForceFeedback is also added in haptic system, but haptic depends on joystick
+                    self.cpp_info.frameworks.extend(["ForceFeedback", "IOKit"])
+                elif self.settings.os in ("iOS", "visionOS", "watchOS"):
+                    self.cpp_info.frameworks.append("CoreMotion")
+
+            if self.options.get_safe("hidapi") and self.settings.os in ("iOS", "tvOS"):
+                self.cpp_info.frameworks.append("CoreBluetooth")
+
+            if self.options.get_safe("power") and self.settings.os == "Macos":
+                self.cpp_info.frameworks.append("IOKit")
+
+            if self.options.get_safe("opengles") and self.settings.os in ("iOS", "tvOS", "visionOS", "watchOS"):
+                self.cpp_info.frameworks.append("OpenGLES")
+
+            if self.options.get_safe("metal"):
+                self.cpp_info.frameworks.extend(["Metal", "QuartzCore"])
+
+        # Windows links with all libs by default
+        if self.settings.os == "Windows":
+            self.cpp_info.system_libs.extend(
+                [
+                    "kernel32",
+                    "user32",
+                    "gdi32",
+                    "winmm",
+                    "imm32",
+                    "ole32",
+                    "oleaut32",
+                    "version",
+                    "uuid",
+                    "advapi32",
+                    "setupapi",
+                    "shell32",
+                ]
+            )
