@@ -39,24 +39,6 @@ index 98a706d..edf195e 100644
  endif()
  
  function(extract_thrift_version)
-diff --git a/cpp/src/parquet/CMakeLists.txt b/cpp/src/parquet/CMakeLists.txt
-index 83eb52248..d165fd4d2 100644
---- a/cpp/src/parquet/CMakeLists.txt
-+++ b/cpp/src/parquet/CMakeLists.txt
-@@ -261,11 +261,11 @@ if(NOT PARQUET_MINIMAL_DEPENDENCY)
-
-   # These are libraries that we will link privately with parquet_shared (as they
-   # do not need to be linked transitively by other linkers)
--  list(APPEND PARQUET_SHARED_PRIVATE_LINK_LIBS thrift::thrift)
-+  list(APPEND PARQUET_SHARED_PRIVATE_LINK_LIBS Boost::headers thrift::thrift)
-
-   # Link publicly with parquet_static (because internal users need to
-   # transitively link all dependencies)
--  list(APPEND PARQUET_STATIC_LINK_LIBS thrift::thrift)
-+  list(APPEND PARQUET_STATIC_LINK_LIBS Boost::headers thrift::thrift)
-   if(NOT THRIFT_VENDORED)
-     list(APPEND PARQUET_STATIC_INSTALL_INTERFACE_LIBS thrift::thrift)
-   endif()
 diff --git a/cpp/src/parquet/size_statistics.cc b/cpp/src/parquet/size_statistics.cc
 index 1ce6c937a..e45eef3f0 100644
 --- a/cpp/src/parquet/size_statistics.cc
