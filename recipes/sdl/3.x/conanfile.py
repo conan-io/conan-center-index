@@ -50,6 +50,13 @@ class SDLConan(ConanFile):
             "opengl": [True, False],
             "opengles": [True, False],
             "x11": [True, False],
+            "xcursor": [True, False],
+            "xinerama": [True, False],
+            "xinput": [True, False],
+            "xrandr": [True, False],
+            "xscrnsaver": [True, False],
+            "xshape": [True, False],
+            "xvm": [True, False],
             "wayland": [True, False],
             "vulkan": [True, False],
             "metal": [True, False],
@@ -76,6 +83,13 @@ class SDLConan(ConanFile):
             "opengl": True,  # TODO: Off by default in apple_os
             "opengles": True,
             "x11": True,
+            "xcursor": True,
+            "xinerama": True,
+            "xinput": True,
+            "xrandr": True,
+            "xscrnsaver": True,
+            "xshape": True,
+            "xvm": True,
             "wayland": True,
             "vulkan": True,
             "metal": True,
@@ -99,6 +113,13 @@ class SDLConan(ConanFile):
             del self.options.libudev
             del self.options.dbus # TODO: maybe use _is_unix_sys
             del self.options.x11
+            del self.options.xcursor
+            del self.options.xinerama
+            del self.options.xinput
+            del self.options.xrandr
+            del self.options.xscrnsaver
+            del self.options.xshape
+            del self.options.xvm
             del self.options.wayland
 
         if not is_apple_os(self):
@@ -124,9 +145,24 @@ class SDLConan(ConanFile):
             self.options.rm_safe("opengl")
             self.options.rm_safe("opengles")
             self.options.rm_safe("x11")
+            self.options.rm_safe("xcursor")
+            self.options.rm_safe("xinerama")
+            self.options.rm_safe("xinput")
+            self.options.rm_safe("xrandr")
+            self.options.rm_safe("xscrnsaver")
+            self.options.rm_safe("xshape")
+            self.options.rm_safe("xvm")
             self.options.rm_safe("wayland")
             self.options.rm_safe("vulkan")
             self.options.rm_safe("metal")
+        elif not self.options.get_safe("x11"):
+            self.options.rm_safe("xcursor")
+            self.options.rm_safe("xinerama")
+            self.options.rm_safe("xinput")
+            self.options.rm_safe("xrandr")
+            self.options.rm_safe("xscrnsaver")
+            self.options.rm_safe("xshape")
+            self.options.rm_safe("xvm")
 
         if not self.options.get_safe("hidapi"):
             self.options.rm_safe("libusb")
@@ -159,7 +195,6 @@ class SDLConan(ConanFile):
     @property
     def _needs_libusb(self):
         # CMakeLists.txt#L134
-        # TODO: Add option for libusb
         return (self.options.get_safe("libusb") and
                 (not is_apple_os(self) or self.settings.os == "Macos") and
                 self.settings.os != "Android")
@@ -198,7 +233,7 @@ class SDLConan(ConanFile):
         if self.options.get_safe("alsa"):
             self.requires("libalsa/1.2.12")
         if self.options.get_safe("sndio"):
-            self.requires("sndio/1.9.0")
+            self.requires("libsndio/1.9.0")
         if self.options.get_safe("wayland"):
             self.requires("wayland/1.22.0")
             self.requires("xkbcommon/1.6.0")
@@ -257,7 +292,15 @@ class SDLConan(ConanFile):
         tc.cache_variables["SDL_X11"] = with_x11
         if with_x11:
             # See https://github.com/bincrafters/community/issues/696
-            tc.variables["SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS"] = 1
+            tc.cache_variables["SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS"] = 1
+            tc.cache_variables["SDL_X11_XCURSOR"] = self.options.get_safe("xcursor")
+            tc.cache_variables["SDL_X11_XINERAMA"] = self.options.get_safe("xinerama")
+            tc.cache_variables["SDL_X11_XINPUT"] = self.options.get_safe("xinput")
+            tc.cache_variables["SDL_X11_XRANDR"] = self.options.get_safe("xrandr")
+            tc.cache_variables["SDL_X11_XSCRNSAVER"] = self.options.get_safe("xscrnsaver")
+            tc.cache_variables["SDL_X11_XSHAPE"] = self.options.get_safe("xshape")
+            tc.cache_variables["SDL_X11_XVM"] = self.options.get_safe("xvm")
+
         with_wayland = self.options.get_safe("wayland", False)
         tc.cache_variables["SDL_WAYLAND"] = with_wayland
         if with_wayland:
@@ -266,7 +309,6 @@ class SDLConan(ConanFile):
             # Disable windowing support:
             # https://github.com/libsdl-org/SDL/blob/main/docs/README-cmake.md#cmake-fails-to-build-without-x11-or-wayland-support
             tc.cache_variables["SDL_UNIX_CONSOLE_BUILD=ON"] = True
-
 
         tc.generate()
         deps = CMakeDeps(self)
@@ -333,6 +375,14 @@ class SDLConan(ConanFile):
         # TODO: Link opengles
         if self._supports_opengles:
             self.cpp_info.system_libs.extend(["GLESv1_CM", "GLESv2", "OpenSLES"])
+
+        if self.options.get_safe("audio"):
+            if self.options.get_safe("alsa"):
+                self.cpp_info.requires.append("libalsa::libalsa")
+            if self.options.get_safe("pulseaudio"):
+                self.cpp_info.requires.append("pulseaudio::pulseaudio")
+            if self.options.get_safe("sndio"):
+                self.cpp_info.requires.append("libsndio::libsndio")
 
         # TODO: could it work with shared?
         if is_apple_os(self) and not self.options.shared:
