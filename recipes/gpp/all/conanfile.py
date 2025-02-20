@@ -20,6 +20,7 @@ class GppConan(ConanFile):
     description = "A generic preprocessor"
     # Binary configuration
     settings = "os", "compiler", "build_type", "arch"
+    win_bash = True
 
     def build_requirements(self):
         self.tool_requires("automake/1.16.5")
