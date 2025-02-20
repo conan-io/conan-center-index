@@ -70,7 +70,7 @@ class SDLConan(ConanFile):
     default_options = {
         **{
             "shared": False,
-            "fPIC": False,
+            "fPIC": True,
         },
         **{subsystem: True for subsystem, _ in _subsystems},
         **{
