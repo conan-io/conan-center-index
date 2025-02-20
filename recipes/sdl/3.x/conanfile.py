@@ -116,12 +116,13 @@ class SDLConan(ConanFile):
             del self.options.dbus # TODO: maybe use _is_unix_sys
             del self.options.x11
             del self.options.xcursor
-            del self.options.xinerama
+            del self.options.xdbe
             del self.options.xinput
+            del self.options.xfixes
             del self.options.xrandr
             del self.options.xscrnsaver
             del self.options.xshape
-            del self.options.xvm
+            del self.options.xsync
             del self.options.wayland
 
         if not is_apple_os(self):
