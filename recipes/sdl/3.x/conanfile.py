@@ -372,6 +372,9 @@ class SDLConan(ConanFile):
         if self.options.get_safe("opengl"):
             self.cpp_info.requires.append("opengl::opengl")
 
+        if self.options.get_safe("wayland"):
+            self.cpp_info.requires.extend(["wayland::wayland", "xkbcommon::xkbcommon", "egl::egl"])
+
         # TODO: Link opengles
         if self._supports_opengles:
             self.cpp_info.system_libs.extend(["GLESv1_CM", "GLESv2", "OpenSLES"])
