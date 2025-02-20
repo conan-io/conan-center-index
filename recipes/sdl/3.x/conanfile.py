@@ -310,7 +310,7 @@ class SDLConan(ConanFile):
         if not with_x11 and not with_wayland:
             # Disable windowing support:
             # https://github.com/libsdl-org/SDL/blob/main/docs/README-cmake.md#cmake-fails-to-build-without-x11-or-wayland-support
-            tc.cache_variables["SDL_UNIX_CONSOLE_BUILD=ON"] = True
+            tc.cache_variables["SDL_UNIX_CONSOLE_BUILD"] = True
 
         tc.generate()
         deps = CMakeDeps(self)
