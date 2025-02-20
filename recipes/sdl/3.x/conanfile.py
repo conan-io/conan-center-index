@@ -51,12 +51,13 @@ class SDLConan(ConanFile):
             "opengles": [True, False],
             "x11": [True, False],
             "xcursor": [True, False],
-            "xinerama": [True, False],
+            "xdbe": [True, False],
             "xinput": [True, False],
+            "xfixes": [True, False],
             "xrandr": [True, False],
             "xscrnsaver": [True, False],
             "xshape": [True, False],
-            "xvm": [True, False],
+            "xsync": [True, False],
             "wayland": [True, False],
             "vulkan": [True, False],
             "metal": [True, False],
@@ -84,12 +85,13 @@ class SDLConan(ConanFile):
             "opengles": True,
             "x11": True,
             "xcursor": True,
-            "xinerama": True,
+            "xdbe": True,
             "xinput": True,
+            "xfixes": True,
             "xrandr": True,
             "xscrnsaver": True,
             "xshape": True,
-            "xvm": True,
+            "xsync": True,
             "wayland": True,
             "vulkan": True,
             "metal": True,
@@ -145,24 +147,19 @@ class SDLConan(ConanFile):
             self.options.rm_safe("opengl")
             self.options.rm_safe("opengles")
             self.options.rm_safe("x11")
-            self.options.rm_safe("xcursor")
-            self.options.rm_safe("xinerama")
-            self.options.rm_safe("xinput")
-            self.options.rm_safe("xrandr")
-            self.options.rm_safe("xscrnsaver")
-            self.options.rm_safe("xshape")
-            self.options.rm_safe("xvm")
             self.options.rm_safe("wayland")
             self.options.rm_safe("vulkan")
             self.options.rm_safe("metal")
-        elif not self.options.get_safe("x11"):
+
+        if not self.options.get_safe("x11"):
             self.options.rm_safe("xcursor")
-            self.options.rm_safe("xinerama")
+            self.options.rm_safe("xdbe")
             self.options.rm_safe("xinput")
+            self.options.rm_safe("xfixes")
             self.options.rm_safe("xrandr")
             self.options.rm_safe("xscrnsaver")
             self.options.rm_safe("xshape")
-            self.options.rm_safe("xvm")
+            self.options.rm_safe("xsync")
 
         if not self.options.get_safe("hidapi"):
             self.options.rm_safe("libusb")
@@ -238,6 +235,8 @@ class SDLConan(ConanFile):
             self.requires("wayland/1.22.0")
             self.requires("xkbcommon/1.6.0")
             self.requires("egl/system")
+        if self.options.get_safe("x11"):
+            self.requires("xorg/system")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.24 <4]")
@@ -292,16 +291,18 @@ class SDLConan(ConanFile):
         # X11 and wayland configuration
         with_x11 = self.options.get_safe("x11", False)
         tc.cache_variables["SDL_X11"] = with_x11
+        tc.cache_variables["SDL_X11_SHARED"] = True
         if with_x11:
             # See https://github.com/bincrafters/community/issues/696
             tc.cache_variables["SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS"] = 1
-            tc.cache_variables["SDL_X11_XCURSOR"] = self.options.get_safe("xcursor")
-            tc.cache_variables["SDL_X11_XINERAMA"] = self.options.get_safe("xinerama")
-            tc.cache_variables["SDL_X11_XINPUT"] = self.options.get_safe("xinput")
-            tc.cache_variables["SDL_X11_XRANDR"] = self.options.get_safe("xrandr")
-            tc.cache_variables["SDL_X11_XSCRNSAVER"] = self.options.get_safe("xscrnsaver")
-            tc.cache_variables["SDL_X11_XSHAPE"] = self.options.get_safe("xshape")
-            tc.cache_variables["SDL_X11_XVM"] = self.options.get_safe("xvm")
+            tc.cache_variables["SDL_X11_XCURSOR"] = self.options.xcursor
+            tc.cache_variables["SDL_X11_XDBE"] = self.options.xdbe
+            tc.cache_variables["SDL_X11_XINPUT"] = self.options.xinput
+            tc.cache_variables["SDL_X11_XFIXES"] = self.options.xfixes
+            tc.cache_variables["SDL_X11_XRANDR"] = self.options.xrandr
+            tc.cache_variables["SDL_X11_XSCRNSAVER"] = self.options.xscrnsaver
+            tc.cache_variables["SDL_X11_XSHAPE"] = self.options.xshape
+            tc.cache_variables["SDL_X11_XSYNC"] = self.options.xsync
 
         with_wayland = self.options.get_safe("wayland", False)
         tc.cache_variables["SDL_WAYLAND"] = with_wayland
@@ -376,6 +377,20 @@ class SDLConan(ConanFile):
 
         if self.options.get_safe("wayland"):
             self.cpp_info.requires.extend(["wayland::wayland", "xkbcommon::xkbcommon", "egl::egl"])
+
+        if self.options.get_safe("x11"):
+            self.cpp_info.requires.extend(["xorg::x11", "xorg::xext"])
+            # xdbe, xshape and xsync are covered by x11 and xext
+            if self.options.xcursor:
+                self.cpp_info.requires.append("xorg::xcursor")
+            if self.options.xinput:
+                self.cpp_info.requires.append("xorg::xi")
+            if self.options.xfixes:
+                self.cpp_info.requires.append("xorg::xfixes")
+            if self.options.xrandr:
+                self.cpp_info.requires.append("xorg::xrandr")
+            if self.options.xscrnsaver:
+                self.cpp_info.requires.append("xorg::xscrnsaver")
 
         # TODO: Link opengles
         if self._supports_opengles:
