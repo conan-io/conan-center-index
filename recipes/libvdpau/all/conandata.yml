@@ -7,3 +7,4 @@ patches:
     - patch_file: "patches/add-missing-x11-dep.patch"
       patch_description: "Add a missing X11 dependency to vdpau_trace"
       patch_type: "bugfix"
+      patch_source: "https://gitlab.freedesktop.org/vdpau/libvdpau/-/issues/6"
