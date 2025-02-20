@@ -45,6 +45,8 @@ class MimallocConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        else:
+            del self.options.win_redirect
 
         # single_object and inject are options
         # only when overriding on Unix-like platforms:
@@ -70,6 +72,7 @@ class MimallocConan(ConanFile):
             self.options.rm_safe("single_object")
             self.options.rm_safe("inject")
 
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -90,6 +93,14 @@ class MimallocConan(ConanFile):
            is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration(
                 "Dynamic runtime (MD/MDd) is required when using mimalloc as a shared library for override")
+        
+        if self.options.get_safe("win_redirect") and not (
+            self.options.override and \
+            self.options.shared and \
+            is_msvc(self) and \
+            not is_msvc_static_runtime(self)):
+            raise ConanInvalidConfiguration(
+                "Windows redirect requires 'override', 'shared' and building against a dynamic runtime (MD/MDd)")
 
         if self.options.override and \
            self.options.get_safe("single_object") and \
@@ -110,7 +121,7 @@ class MimallocConan(ConanFile):
         tc.variables["MI_BUILD_OBJECT"] = self.options.get_safe("single_object", False)
         tc.variables["MI_OVERRIDE"] = "ON" if self.options.override else "OFF"
         tc.variables["MI_SECURE"] = "ON" if self.options.secure else "OFF"
-        tc.variables["MI_WIN_REDIRECT"] = "ON" if self.options.win_redirect else "OFF"
+        tc.variables["MI_WIN_REDIRECT"] = "ON" if self.options.get_safe("win_redirect") else "OFF"
         tc.variables["MI_INSTALL_TOPLEVEL"] = "ON"
         tc.generate()
         venv = VirtualBuildEnv(self)
