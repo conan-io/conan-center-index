@@ -79,3 +79,9 @@ class PackageConan(ConanFile):
         self.cpp_info.libs = ["vdpau"]
         self.cpp_info.set_property("pkg_config_name", "vdpau")
         self.cpp_info.system_libs.extend(["pthread", "dl"])
+        self.cpp_info.requires = ["xorg::x11"]
+        if self.options.with_dri2:
+            self.cpp_info.requires.extend([
+                "xorg-proto::xorg-proto",
+                "xorg::xext",
+            ])
