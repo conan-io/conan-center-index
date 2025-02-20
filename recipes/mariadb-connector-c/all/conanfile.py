@@ -85,8 +85,6 @@ class MariadbConnectorcConan(ConanFile):
         else:
             tc.variables["WITH_MYSQLCOMPAT"] = False
             tc.variables["WITH_ICONV"] = self.options.with_iconv
-            if not self.options.get_safe("with_krb5"):
-                tc.variables["KRB5_CONFIG"] = ""
         tc.variables["WITH_UNIT_TESTS"] = False
         tc.variables["WITH_DYNCOL"] = self.options.dyncol
         tc.variables["WITH_EXTERNAL_ZLIB"] = True
@@ -98,6 +96,7 @@ class MariadbConnectorcConan(ConanFile):
         tc.variables["ZLIB_LIBRARY"] = "ZLIB::ZLIB"
         # To install relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_GSSAPI"] = True  # TODO: add as an option
         tc.generate()
         deps = CMakeDeps(self)
         if Version(self.version) >= "3.3":
