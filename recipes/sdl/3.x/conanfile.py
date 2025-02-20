@@ -173,7 +173,8 @@ class SDLConan(ConanFile):
                         raise ConanInvalidConfiguration(f'-o="&:{subsystem}=True" subsystem requires -o="&:{dependency}=True"')
 
     def validate_build(self):
-        if conan_version > "2.10" and self._needs_libusb and self.dependencies["libusb"].options.get_safe("shared", True)\
+        # TODO: Remove this, but only after recipe develop is finished
+        if conan_version >= "2.12" and self._needs_libusb and self.dependencies["libusb"].options.get_safe("shared", True)\
                 and not self.conf.get("tools.cmake.cmakedeps:new"):
             raise ConanInvalidConfiguration("SDL with shared libusb requires new CMakeDeps generator")
 
