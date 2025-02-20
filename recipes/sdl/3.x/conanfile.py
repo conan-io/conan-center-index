@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, replace_in_file, rm, rmdir, copy
@@ -176,7 +176,7 @@ class SDLConan(ConanFile):
                         raise ConanInvalidConfiguration(f'-o="&:{subsystem}=True" subsystem requires -o="&:{dependency}=True"')
 
     def validate_build(self):
-        if self._needs_libusb and self.dependencies["libusb"].options.get_safe("shared", True)\
+        if conan_version > "2.10" and self._needs_libusb and self.dependencies["libusb"].options.get_safe("shared", True)\
                 and not self.conf.get("tools.cmake.cmakedeps:new"):
             raise ConanInvalidConfiguration("SDL with shared libusb requires new CMakeDeps generator")
 
@@ -258,6 +258,8 @@ class SDLConan(ConanFile):
         tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         tc.cache_variables["SDL_SYSTEM_ICONV_DEFAULT"] = True
         tc.cache_variables["SDL_LIBICONV"] = True
+
+        tc.cache_variables["SDL_JACK"] = False # Jack is not available in CCI
 
         for subsystem in _subsystems:
             tc.cache_variables[f"SDL_{subsystem[0].upper()}"] = self.options.get_safe(subsystem[0])
