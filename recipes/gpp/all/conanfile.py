@@ -30,6 +30,9 @@ class GppConan(ConanFile):
             self.tool_requires("msys2/cci.latest")
             self.tool_requires("mingw-builds/14.2.0")
 
+    def requirements(self):
+        self.requires("msys2/cci.latest")
+
     def configure(self):
         # The library is C only
         self.settings.rm_safe("compiler.libcxx")
