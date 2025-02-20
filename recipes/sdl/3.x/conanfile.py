@@ -175,8 +175,8 @@ class SDLConan(ConanFile):
 
     def validate_build(self):
         # TODO: Remove this, but only after recipe develop is finished
-        if conan_version >= "2.12" and self._needs_libusb and self.dependencies["libusb"].options.get_safe("shared", True):
-            # and not self.conf.get("tools.cmake.cmakedeps:new"):
+        if conan_version >= "2.12" and self._needs_libusb and self.dependencies["libusb"].options.get_safe("shared", True)\
+            and not self.conf.get("tools.cmake.cmakedeps:new"):
             raise ConanInvalidConfiguration("SDL with shared libusb requires new CMakeDeps generator")
 
     def layout(self):
@@ -325,7 +325,7 @@ class SDLConan(ConanFile):
 
     def _patch_sources(self):
         # TODO: Once new CMakeDeps is default, remove this
-        if not self.conf.get("tools.cmake.cmakedeps:new"):
+        if conan_version >= "2.12" and not self.conf.get("tools.cmake.cmakedeps:new"):
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "sdlchecks.cmake"),
                             "target_get_dynamic_library(dynamic_libusb LibUSB::LibUSB)",
                             "")
