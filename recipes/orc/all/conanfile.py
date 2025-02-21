@@ -60,9 +60,11 @@ class OrcRecipe(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch != "x86_64":
+            del self.options.build_avx512
         if self.settings.compiler == "apple-clang":
             # AVX support is not enabled by default, might need to add -mavx512f to CXXFLAGS
-            del self.options.build_avx512
+            self.options.rm_safe("build_avx512")
 
     def configure(self):
         if self.options.shared:
