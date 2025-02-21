@@ -1,0 +1,4 @@
+sources:
+  "1.5.0":
+    url: "https://github.com/AcademySoftwareFoundation/openfx/archive/refs/tags/OFX_Release_1.5s.tar.gz"
+    sha256: "09edcd56f1dad4d07514a247bf1cd7e8459b99df8206f434be018dabb32b367c"
