@@ -1,5 +1,4 @@
 import os
-
 from conan import ConanFile
 from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
@@ -11,8 +10,11 @@ class CachesConan(ConanFile):
     name = "caches"
     description = "Extensible cache templates."
     license = "MIT"
+
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/JoelLefkowitz/caches"
+    author = "Joel Lefkowitz (joellefkowitz@hotmail.com)"
+
     topics = (
         "cache",
         "fifo",
@@ -20,8 +22,15 @@ class CachesConan(ConanFile):
         "lru",
         "header-only",
     )
+
+    settings = (
+        "os",
+        "arch",
+        "compiler",
+        "build_type",
+    )
+
     package_type = "header-library"
-    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     def layout(self):
@@ -31,7 +40,11 @@ class CachesConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        get(
+            self,
+            **self.conan_data["sources"][self.version],
+            strip_root=True,
+        )
 
     def build(self):
         pass
@@ -47,7 +60,7 @@ class CachesConan(ConanFile):
             self,
             "*.[ht]pp",
             os.path.join(self.source_folder, "src"),
-            os.path.join(self.package_folder, "include", "caches"),
+            os.path.join(self.package_folder, "include", self.name),
         )
 
     def package_info(self):
