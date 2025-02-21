@@ -54,6 +54,10 @@ patches:
     - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
       patch_description: "Optional flag to specify iconv from either libc of libiconv"
       patch_type: "conan"
+    - patch_file: "patches/1.87.0-boost-fiber-fix-property-numa.patch"
+      patch_description: "Fix b2 numa=on property for Boost.Fiber"
+      patch_type: "official"
+      patch_source: https://github.com/boostorg/fiber/commit/238487b543e8863c647d31a82ccfc3fa11a960d9"
   "1.86.0":
     - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
       patch_description: "Optional flag to specify iconv from either libc of libiconv"
