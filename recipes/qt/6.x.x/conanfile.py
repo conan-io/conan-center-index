@@ -67,6 +67,7 @@ class QtConan(ConanFile):
         "with_md4c": [True, False],
         "with_x11": [True, False],
         "with_egl": [True, False],
+        "with_wmf": [True, False],
 
         "gui": [True, False],
         "widgets": [True, False],
@@ -112,6 +113,7 @@ class QtConan(ConanFile):
         "with_md4c": True,
         "with_x11": True,
         "with_egl": False,
+        "with_wmf": False,
 
         "gui": True,
         "widgets": True,
@@ -175,6 +177,10 @@ class QtConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.opengl = "dynamic"
             del self.options.with_gssapi
+            del self.options.with_gstreamer
+        else:
+            del self.options.with_wmf
+
         if self.settings.os != "Linux":
             self.options.qtwayland = False
 
@@ -248,6 +254,7 @@ class QtConan(ConanFile):
             del self.options.with_openal
             del self.options.with_gstreamer
             del self.options.with_pulseaudio
+            del self.options.with_wmf
 
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.get_safe("qtwebengine"):
@@ -651,6 +658,11 @@ class QtConan(ConanFile):
 
         tc.variables["QT_USE_VCPKG"] = False
         tc.cache_variables["QT_USE_VCPKG"] = False
+
+        if self.settings.get_safe("with_gstreamer", False):
+            tc.variables["QT_DEFAULT_MEDIA_BACKEND"] = "gstreamer"
+        elif self.settings.get_safe("with_wmf", False):
+            tc.variables["QT_DEFAULT_MEDIA_BACKEND"] = "windows"
 
         tc.generate()
 
@@ -1140,6 +1152,16 @@ class QtConan(ConanFile):
                     "advapi32", "dwmapi", "gdi32", "imm32", "ole32", "oleaut32", "setupapi", "shell32", "shlwapi",
                     "user32", "winmm", "winspool", "wtsapi32", "shcore", "comdlg32", "d3d9", "runtimeobject"
                 ]
+                # https://github.com/qt/qtbase/blob/v6.8.2/src/plugins/platforms/windows/CMakeLists.txt#L202
+                if Version(self.version) >= "6.8.2":
+                    self.cpp_info.components["qtQWindowsIntegrationPlugin"].system_libs += ["uiautomationcore"]
+                # https://github.com/qt/qtmultimedia/blob/v6.8.2/src/plugins/multimedia/windows/CMakeLists.txt#L48
+                # https://github.com/qt/qtmultimedia/blob/v6.8.2/cmake/FindWMF.cmake#L21
+                self.cpp_info.components["QWindowsMediaPlugin"].system_libs += [
+                    "amstrmid", "d3d9", "dmoguids", "dxva2", "evr", "gdi32", "ksuser", "mf", "mfcore", "mfplat",
+                    "mfreadwrite", "mfuuid", "msdmo", "ole32", "oleaut32", "propsys", "shlwapi", "strmiids",
+                    "user32", "uuid", "winmm", "wmcodecdspuuid"
+                ]
             elif self.settings.os == "Android":
                 _create_plugin("QAndroidIntegrationPlugin", "qtforandroid", "platforms", ["Core", "Gui"])
                 # https://github.com/qt/qtbase/blob/v6.6.1/src/plugins/platforms/android/CMakeLists.txt#L68-L70
@@ -1356,10 +1378,12 @@ class QtConan(ConanFile):
             _create_module("MultimediaWidgets", ["Multimedia", "Widgets", "Gui"])
             if self.options.qtdeclarative and qt_quick_enabled:
                 _create_module("MultimediaQuick", ["Multimedia", "Quick"])
-            if self.options.with_gstreamer:
+            if self.options.get_safe("with_gstreamer", False):
                 _create_plugin("QGstreamerMediaPlugin", "gstreamermediaplugin", "multimedia", [
                     "gstreamer::gstreamer",
                     "gst-plugins-base::gst-plugins-base"])
+            elif self.options.get_safe("with_wmf", False):
+                _create_plugin("QWindowsMediaPlugin", "windowsmediaplugin", "multimedia", [])
 
         if self.options.get_safe("qtpositioning"):
             _create_module("Positioning", [])
