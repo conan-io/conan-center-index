@@ -95,7 +95,7 @@ class AbseilConan(ConanFile):
         if is_msvc(self):
             # see https://github.com/abseil/abseil-cpp/issues/649
             tc.preprocessor_definitions["_HAS_DEPRECATED_RESULT_OF"] = 1
-            tc.cache_variables["ABSL_MSVC_STATIC_RUNTIME"] = "ON" if is_msvc_static_runtime(self) else "OFF"
+            tc.cache_variables["ABSL_MSVC_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
         tc.generate()
 
     def _patch_sources(self):
