@@ -1,0 +1,4 @@
+sources:
+  "3.0.0":
+    url: "https://github.com/JoelLefkowitz/detect/archive/refs/tags/v3.0.0.tar.gz"
+    sha256: "34b4473bc90d5817925dba4096aa8de00da5fd817da77dab028b57797f2753f2"
