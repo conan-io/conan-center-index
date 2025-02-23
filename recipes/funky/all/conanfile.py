@@ -30,7 +30,7 @@ class FunkyConan(ConanFile):
         "build_type",
     )
 
-    package_type = "library"
+    package_type = "static-library"
 
     def layout(self):
         basic_layout(self)
