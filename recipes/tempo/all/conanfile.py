@@ -31,7 +31,7 @@ class TempoConan(ConanFile):
         "build_type",
     )
 
-    package_type = "library"
+    package_type = "static-library"
 
     exports_sources = (
         "src/*.[cht]pp",
@@ -40,7 +40,7 @@ class TempoConan(ConanFile):
         "LICENSE.md",
     )
 
-    requires = ("funky/0.2.1",)
+    requires = ("funky/0.3.0",)
 
     def layout(self):
         basic_layout(self)

@@ -1,4 +1,4 @@
 sources:
-  "0.1.0":
-    url: "https://github.com/JoelLefkowitz/tempo/archive/refs/tags/v0.1.0.tar.gz"
-    sha256: "f740c1323ebbc0387bcdad3829ac03d8302464a0fa9f203afb96d71b974a9080"
+  "0.2.0":
+    url: "https://github.com/JoelLefkowitz/tempo/archive/refs/tags/v0.2.0.tar.gz"
+    sha256: "63363e7bf4e576da33d0f9fcd9e8c2ea4f960fd635509eece61c8b3bfbcb3d40"
