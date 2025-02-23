@@ -252,9 +252,9 @@ class QtConan(ConanFile):
         if not self.options.get_safe("qtmultimedia"):
             self.options.rm_safe("with_libalsa")
             del self.options.with_openal
-            del self.options.with_gstreamer
             del self.options.with_pulseaudio
-            del self.options.with_wmf
+            self.options.rm_safe("with_gstreamer")
+            self.options.rm_safe("with_wmf")
 
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.get_safe("qtwebengine"):
