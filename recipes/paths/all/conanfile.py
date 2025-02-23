@@ -31,7 +31,7 @@ class PathsConan(ConanFile):
         "build_type",
     )
 
-    package_type = "library"
+    package_type = "static-library"
 
     exports_sources = (
         "src/*.[cht]pp",
