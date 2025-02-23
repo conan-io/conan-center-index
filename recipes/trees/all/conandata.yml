@@ -1,4 +1,4 @@
 sources:
-  "0.1.0":
-    url: "https://github.com/JoelLefkowitz/trees/archive/refs/tags/v0.1.0.tar.gz"
-    sha256: "c13e40fe183cb018a448e13974bccdd681196b74bc734cef40ed259b9a55001b"
+  "0.2.0":
+    url: "https://github.com/JoelLefkowitz/trees/archive/refs/tags/v0.2.0.tar.gz"
+    sha256: "47a9c1e8d6d7a34c0f07dcfe455c1b057a62c90f0717af1c0dd718ef058abb99"

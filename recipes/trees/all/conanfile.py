@@ -33,7 +33,7 @@ class TreesConan(ConanFile):
     package_type = "header-library"
     no_copy_source = True
 
-    requires = ("funky/0.2.1",)
+    requires = ("funky/0.3.0",)
 
     def layout(self):
         basic_layout(self, src_folder="src")
