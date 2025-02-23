@@ -31,8 +31,6 @@ class PlanarConan(ConanFile):
         "build_type",
     )
 
-    package_type = "library"
-
     exports_sources = (
         "src/*.[cht]pp",
         "conanfile.py",
@@ -42,7 +40,7 @@ class PlanarConan(ConanFile):
 
     requires = (
         "fmt/11.1.3",
-        "funky/0.2.1",
+        "funky/0.3.0",
     )
 
     def layout(self):
