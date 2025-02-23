@@ -1,17 +1,17 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, mkdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import glob
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
-
-class Openmvgconan(ConanFile):
+class OpenmvgConan(ConanFile):
     name = "openmvg"
     description = (
         "OpenMVG provides an end-to-end 3D reconstruction from images framework "
@@ -27,29 +27,47 @@ class Openmvgconan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
-        "with_openmp": [True, False],
-        "with_avx": [False, "avx", "avx2"],
+        "enable_ligt": [True, False],
         "programs": [True, False],
-        "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"]
+        "with_jpeg": ["libjpeg", "libjpeg-turbo", "mozjpeg"],
+        "with_openmp": [True, False],
+        "cpu_architecture": [
+            "auto", "generic", "none",
+            # Intel
+            "core", "merom", "penryn", "nehalem", "westmere", "sandy-bridge", "ivy-bridge", "haswell",
+            "broadwell", "skylake", "skylake-xeon", "kaby-lake", "cannonlake", "silvermont", "goldmont",
+            "knl", "atom",
+            # AMD
+            "k8", "k8-sse3", "barcelona", "istanbul", "magny-cours", "bulldozer", "interlagos",
+            "piledriver", "AMD 14h", "AMD 16h", "zen"
+        ],
+        "with_avx": [False, "avx", "avx2"],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_openmp": False,
-        "with_avx": False,
+        "enable_ligt": False, # patent-protected and CC-BY-SA-licensed
         "programs": True,
-        "with_jpeg": "libjpeg"
+        "with_jpeg": "libjpeg",
+        "with_openmp": False, # TODO: can be enabled after #22353
+        "cpu_architecture": "sandy-bridge",  # sse sse2 sse3 ssse3 sse4.1 sse4.2 avx
+        "with_avx": "avx",
     }
-
     short_paths = True
 
     def export_sources(self):
         export_conandata_patches(self)
+        copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src", "src"))
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if is_apple_os(self):
+            # sse sse2 sse3 ssse3 sse4.1 sse4.2, no avx
+            self.options.cpu_architecture = "westmere"
+            self.options.with_avx = False
         if self.settings.arch not in ["x86", "x86_64"]:
+            del self.options.cpu_architecture
             del self.options.with_avx
 
     def configure(self):
@@ -61,25 +79,31 @@ class Openmvgconan(ConanFile):
 
     def requirements(self):
         self.requires("cereal/1.3.2", transitive_headers=True)
-        self.requires("ceres-solver/2.1.0")
-        self.requires("coin-clp/1.17.7")
-        self.requires("coin-lemon/1.3.1")
-        self.requires("coin-osi/0.108.7")
-        self.requires("coin-utils/2.11.9")
+        if Version(self.version) >= "2.1":
+            self.requires("ceres-solver/2.2.0")
+        else:
+            self.requires("ceres-solver/2.1.0")
+        self.requires("coin-clp/1.17.9")
+        self.requires("coin-lemon/1.3.1", transitive_headers=True, transitive_libs=True)
+        self.requires("coin-osi/0.108.10")
+        self.requires("coin-utils/2.11.11")
         self.requires("eigen/3.4.0", transitive_headers=True)
         self.requires("flann/1.9.2", transitive_headers=True, transitive_libs=True)
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.0")
+            self.requires("libjpeg-turbo/3.0.2")
         elif self.options.with_jpeg == "mozjpeg":
-            self.requires("mozjpeg/4.1.1")
-        self.requires("libpng/1.6.40")
-        self.requires("libtiff/4.5.1")
+            self.requires("mozjpeg/4.1.5")
+        self.requires("libpng/[>=1.6 <2]")
+        self.requires("libtiff/[>=4.5 <5]")
+        if self.options.with_openmp:
+            # '#pragma omp' is used in public headers
+            self.requires("llvm-openmp/18.1.8", transitive_headers=True, transitive_libs=True)
+        # TODO: unvendor vlfeat
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "11")
+        check_min_cppstd(self, "11")
 
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "7":
             raise ConanInvalidConfiguration(
@@ -89,9 +113,11 @@ class Openmvgconan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.variables["CMAKE_PROJECT_openMVG_INCLUDE"] = "conan_deps.cmake"
         tc.variables["OpenMVG_BUILD_SHARED"] = self.options.shared
         tc.variables["OpenMVG_BUILD_TESTS"] = False
         tc.variables["OpenMVG_BUILD_DOC"] = False
@@ -100,16 +126,16 @@ class Openmvgconan(ConanFile):
         tc.variables["OpenMVG_BUILD_SOFTWARES"] = self.options.programs
         tc.variables["OpenMVG_BUILD_GUI_SOFTWARES"] = False
         tc.variables["OpenMVG_BUILD_COVERAGE"] = False
+        tc.variables["OpenMVG_USE_LIGT"] = self.options.enable_ligt
         tc.variables["OpenMVG_USE_OPENMP"] = self.options.with_openmp
         tc.variables["OpenMVG_USE_OPENCV"] = False
         tc.variables["OpenMVG_USE_OCVSIFT"] = False
-        # OpenMVG expects these CMake variables to be set automatically by a custom OptimizeForArchitecture macro
-        # but this macro is fragile and broken in case of cross-build. Moreover it may lead to non-portable binaries.
-        # Therefore macro is disabled through patch and we allow users to decide whether they want specific avx
-        # optimization.
-        tc.variables["USE_SSE2"] = self.settings.arch in ["x86", "x86_64"]
-        tc.variables["USE_AVX"] = self.options.get_safe("with_avx") in ["avx", "avx2"]
-        tc.variables["USE_AVX2"] = self.options.get_safe("with_avx") == "avx2"
+
+        # https://github.com/openMVG/openMVG/blob/v2.1/src/cmakeFindModules/OptimizeForArchitecture.cmake
+        tc.variables["TARGET_ARCHITECTURE"] = self.options.get_safe("cpu_architecture", "none")
+        tc.variables["USE_AVX"] = self.options.get_safe("with_avx", False) in ["avx", "avx2"]
+        tc.variables["USE_AVX2"] = self.options.get_safe("with_avx", False) == "avx2"
+
         # Even though openmvg requires C++11, recent versions of cereal require C++14
         # and targets generated by CMakeDeps don't propagate compile features (yet?)
         # see https://github.com/conan-io/conan/issues/10281
@@ -121,13 +147,42 @@ class Openmvgconan(ConanFile):
             libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
             tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
 
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+
+        if self.settings.os == "Windows":
+            # Fix a missing /bigobj flag for 'matching' and 'multiview' components
+            # and add the equivalent for MinGW as well
+            if is_msvc(self):
+                tc.extra_cflags.append("/bigobj")
+                tc.extra_cxxflags.append("/bigobj")
+            elif self.settings.compiler == "gcc":
+                tc.extra_cflags.append("-Wa,-mbig-obj")
+                tc.extra_cxxflags.append("-Wa,-mbig-obj")
+
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("cereal", "cmake_file_name", "cereal")
+        deps.set_property("ceres-solver", "cmake_file_name", "Ceres")
+        deps.set_property("coin-clp", "cmake_file_name", "Clp")
+        deps.set_property("coin-lemon", "cmake_file_name", "Lemon")
+        deps.set_property("coin-osi", "cmake_file_name", "Osi")
+        deps.set_property("coin-utils", "cmake_file_name", "CoinUtils")
+        deps.set_property("flann", "cmake_file_name", "Flann")
+        deps.set_property("flann::flann_c", "cmake_target_name", "flann::flann")
+        deps.set_property("flann::flann_cpp", "cmake_target_name", "flann::flann_cpp")
         deps.generate()
 
+    def _patch_sources(self):
+        # bypass a check for submodules
+        mkdir(self, os.path.join(self.source_folder, "src", "dependencies", "cereal", "include"))
+        # ensure internal dependencies are not used by accident
+        cmakelists = os.path.join(self.source_folder, "src", "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "set(OpenMVG_USE_INTERNAL_", "# set(OpenMVG_USE_INTERNAL_")
+        replace_in_file(self, cmakelists, "find_package(OpenMP)", "find_package(OpenMP REQUIRED)")
+
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         cmake = CMake(self)
         cmake.configure(build_script_folder=os.path.join(self.source_folder, "src"))
         cmake.build()
@@ -136,11 +191,36 @@ class Openmvgconan(ConanFile):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        rm(self, "*.cmake", os.path.join(self.package_folder, "lib"))
-        rmdir(self, os.path.join(self.package_folder, "share", "openMVG", "cmake"))
-        rename(self, src=os.path.join(self.package_folder, "share"), dst=os.path.join(self.package_folder, "res"))
+        # remove empty third-party include dirs
+        rmdir(self, os.path.join(self.package_folder, "include", "openMVG_dependencies", "cereal"))
+        rmdir(self, os.path.join(self.package_folder, "include", "openMVG_dependencies", "glfw"))
+        rmdir(self, os.path.join(self.package_folder, "include", "openMVG_dependencies", "osi_clp"))
         for dll_file in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
             rename(self, src=dll_file, dst=os.path.join(self.package_folder, "bin", os.path.basename(dll_file)))
+        rm(self, "*.cmake", os.path.join(self.package_folder, "lib"))
+        if Version(self.version) >= "2.1":
+            share_dir = os.path.join(self.package_folder, "lib", "openMVG")
+        else:
+            share_dir = os.path.join(self.package_folder, "share", "openMVG")
+        rmdir(self, os.path.join(share_dir, "cmake"))
+        mkdir(self, os.path.join(self.package_folder, "res"))
+        rename(self, share_dir, os.path.join(self.package_folder, "res", "openMVG"))
+
+    @property
+    def _openmp_flags(self):
+        if self.settings.compiler == "clang":
+            return ["-fopenmp=libomp"]
+        elif self.settings.compiler == "apple-clang":
+            return ["-Xclang", "-fopenmp"]
+        elif self.settings.compiler == "gcc":
+            return ["-fopenmp"]
+        elif self.settings.compiler == "intel-cc":
+            return ["-Qopenmp"]
+        elif self.settings.compiler == "sun-cc":
+            return ["-xopenmp"]
+        elif is_msvc(self):
+            return ["-openmp"]
+        return None
 
     @property
     def _openmvg_components(self):
@@ -151,6 +231,11 @@ class Openmvgconan(ConanFile):
                 return ["libjpeg-turbo::jpeg"]
             elif self.options.with_jpeg == "mozjpeg":
                 return ["mozjpeg::libjpeg"]
+
+        def pthread():
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                return ["pthread"]
+            return []
 
         return {
             "openmvg_camera": {
@@ -199,7 +284,7 @@ class Openmvgconan(ConanFile):
                 "target": "openMVG_matching",
                 "libs": ["openMVG_matching"],
                 "requires": ["openmvg_features", "openmvg_stlplus", "cereal::cereal", "flann::flann"],
-                "system_libs": [(self.settings.os in ["Linux", "FreeBSD"], ["pthread"])],
+                "system_libs": pthread(),
             },
             "openmvg_kvld": {
                 "target": "openMVG_kvld",
@@ -254,6 +339,9 @@ class Openmvgconan(ConanFile):
                 "target": "openMVG_stlplus",
                 "libs": ["openMVG_stlplus"],
             },
+            "openmvg_svg": {
+                "target": "openMVG_svg",
+            },
             "openmvg_vlsift": {
                 "target": "vlsift",
                 "libs": ["vlsift"],
@@ -270,25 +358,19 @@ class Openmvgconan(ConanFile):
             for _condition, _defines in values.get("defines", []):
                 if _condition:
                     defines.extend(_defines)
-            system_libs = []
-            for _condition, _system_libs in values.get("system_libs", []):
-                if _condition:
-                    system_libs.extend(_system_libs)
 
             self.cpp_info.components[component].set_property("cmake_target_name", f"OpenMVG::{target}")
             if libs:
                 self.cpp_info.components[component].libs = libs
             self.cpp_info.components[component].defines = defines
             self.cpp_info.components[component].requires = values.get("requires", [])
-            self.cpp_info.components[component].system_libs = system_libs
+            self.cpp_info.components[component].system_libs = values.get("system_libs", [])
             self.cpp_info.components[component].resdirs = ["res"]
 
-            # TODO: to remove in conan v2
-            self.cpp_info.components[component].names["cmake_find_package"] = target
-            self.cpp_info.components[component].names["cmake_find_package_multi"] = target
+        if self.options.with_openmp:
+            for component_name in ["cameras", "features", "image", "matching", "matching_image_collection", "robust_estimation", "sfm", "vlsift"]:
+                component = self.cpp_info.components[f"openmvg_{component_name}"]
+                component.requires.append("llvm-openmp::llvm-openmp")
+                component.cflags += self._openmp_flags
+                component.cxxflags += self._openmp_flags
 
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "OpenMVG"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenMVG"
-        if self.options.programs:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
