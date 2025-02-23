@@ -65,6 +65,7 @@ class FFMpegConan(ConanFile):
         "with_vdpau": [True, False],
         "with_vulkan": [True, False],
         "with_xcb": [True, False],
+        "with_soxr": [True, False],
         "with_appkit": [True, False],
         "with_avfoundation": [True, False],
         "with_coreimage": [True, False],
@@ -149,6 +150,7 @@ class FFMpegConan(ConanFile):
         "with_vdpau": True,
         "with_vulkan": False,
         "with_xcb": True,
+        "with_soxr": False,
         "with_appkit": True,
         "with_avfoundation": True,
         "with_coreimage": True,
@@ -228,6 +230,7 @@ class FFMpegConan(ConanFile):
             "with_zeromq": ["avfilter", "avformat"],
             "with_libalsa": ["avdevice"],
             "with_xcb": ["avdevice"],
+            "with_soxr": ["swresample"],
             "with_pulse": ["avdevice"],
             "with_sdl": ["with_programs"],
             "with_libsvtav1": ["avcodec"],
@@ -322,6 +325,8 @@ class FFMpegConan(ConanFile):
             self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_xcb") or self.options.get_safe("with_xlib"):
             self.requires("xorg/system")
+        if self.options.get_safe("with_soxr"):
+            self.requires("soxr/0.1.3")
         if self.options.get_safe("with_pulse"):
             self.requires("pulseaudio/14.2")
         if self.options.get_safe("with_vaapi"):
@@ -521,6 +526,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("libxcb-shm", self.options.get_safe("with_xcb")),
             opt_enable_disable("libxcb-shape", self.options.get_safe("with_xcb")),
             opt_enable_disable("libxcb-xfixes", self.options.get_safe("with_xcb")),
+            opt_enable_disable("libsoxr", self.options.get_safe("with_soxr")),
             opt_enable_disable("appkit", self.options.get_safe("with_appkit")),
             opt_enable_disable("avfoundation", self.options.get_safe("with_avfoundation")),
             opt_enable_disable("coreimage", self.options.get_safe("with_coreimage")),
@@ -808,7 +814,9 @@ class FFMpegConan(ConanFile):
         if self.options.swscale:
             _add_component("swscale", [])
         if self.options.swresample:
-            _add_component("swresample", [])
+            swresample = _add_component("swresample", [])
+            if self.options.get_safe("with_soxr"):
+                swresample.requires.append("soxr::soxr")
         if self.options.postproc:
             _add_component("postproc", [])
 
