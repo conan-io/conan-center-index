@@ -1,0 +1,10 @@
+sources:
+  "2.0.4":
+    url: "https://github.com/apache/santuario-cpp/archive/refs/tags/2.0.4.zip"
+    sha256: "621582489cecf4d96c92cd5483f48a5e1ae9da2dbd92829c3d63e754d777d410"
+patches:
+  "2.0.4":
+    - patch_file: "patches/001-cmake-support.patch"
+      patch_description: "adds cmake based build system"
+      patch_type: "conan"
+      patch_source: "https://github.com/sivachandran/santuario-cpp/tree/cmake/2.0.4-1"
