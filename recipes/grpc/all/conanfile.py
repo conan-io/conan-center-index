@@ -142,13 +142,13 @@ class GrpcConan(ConanFile):
             )
 
     def build_requirements(self):
+        # cmake >=3.25 required to use `cmake -E env --modify` below
+        # note: grpc 1.69.0 requires cmake >=3.16 
         self.tool_requires("cmake/[>=3.25 <4]")
         self.tool_requires("protobuf/<host_version>")
         if cross_building(self):
             # when cross compiling we need pre compiled grpc plugins for protoc
             self.tool_requires(f"grpc/{self.version}")
-        if Version(self.version) >= "1.69":
-            self.tool_requires("cmake/[>3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
