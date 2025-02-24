@@ -71,6 +71,7 @@ class SparrowRecipe(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["USE_DATE_POLYFILL"] = self.options.use_date_polyfill
+        tc.variables["SPARROW_BUILD_SHARED"] = self.options.shared
         if is_msvc(self):
             tc.variables["USE_LARGE_INT_PLACEHOLDERS"] = True
         tc.generate()
