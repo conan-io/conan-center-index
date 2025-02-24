@@ -27,9 +27,6 @@ class PackageConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -47,13 +44,11 @@ class PackageConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) >= "0.4.1":
-            tc.variables["AU_ENABLE_TESTING"] = False
-            tc.variables["AU_EXCLUDE_GTEST_DEPENDENCY"] = True
+        tc.variables["AU_ENABLE_TESTING"] = False
+        tc.variables["AU_EXCLUDE_GTEST_DEPENDENCY"] = True
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
