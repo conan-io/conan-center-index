@@ -32,15 +32,6 @@ class ReadstatConan(ConanFile):
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
-    @property
-    def _is_clang_cl(self):
-        return self.settings.compiler == "clang" and self.settings.os == "Windows" and \
-               self.settings.compiler.get_safe("runtime")
-
-    @property
-    def _msvc_tools(self):
-        return ("clang-cl", "llvm-lib", "lld-link") if self._is_clang_cl else ("cl", "lib", "link")
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -67,25 +58,14 @@ class ReadstatConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
             self.win_bash = True
-        if self._settings_build.os == "Macos":
-            self.tool_requires("libtool/2.4.7")
+        self.tool_requires("libtool/2.4.7")
 
     def _sys_compiler(self):
         return self.info.settings.compiler
     
-    @property
-    def _is_windows_msvc(self):
-        try:
-            return self.settings.os == "Windows"
-        except:
-            return self.info.settings.os == "Windows"
-    
     def source(self):
-        get(self, **self.conan_data["sources"][self.version][1], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-    def _msbuild_configuration(self):
-        return "Debug" if self.settings.build_type == "Debug" else "Release"
-    
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -124,6 +104,7 @@ class ReadstatConan(ConanFile):
     def build(self):
         apply_conandata_patches(self)
         autotools = Autotools(self)
+        autotools.autoreconf()
         autotools.configure()
         autotools.make()
 
@@ -134,7 +115,6 @@ class ReadstatConan(ConanFile):
             copy(self, "readstat.h", src=os.path.join(self.source_folder, "headers"), dst=os.path.join(self.package_folder, "include"))
             copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
             copy(self, "*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-            copy(self, "*.dylib", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
             copy(self, "*.lib", src=self.source_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
             copy(self, "*.dll", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
         else:
