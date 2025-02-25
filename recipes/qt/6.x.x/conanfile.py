@@ -871,6 +871,10 @@ class QtConan(ConanFile):
         return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_executables_variables.cmake")
 
     @property
+    def _cmake_cross_compile_targets(self):
+        return os.path.join("lib", "cmake", "Qt6Core", "conan_cross_compile_targets.cmake")
+
+    @property
     def _cmake_entry_point_file(self):
         return os.path.join("lib", "cmake", "Qt6Core", "conan_qt_entry_point.cmake")
 
@@ -1575,6 +1579,7 @@ class QtConan(ConanFile):
 
         self.cpp_info.components["qtCore"].builddirs.append(os.path.join("bin"))
         _add_build_module("qtCore", self._cmake_executables_file)
+        _add_build_module("qtCore", self._cmake_cross_compile_targets)
         _add_build_module("qtCore", self._cmake_qt6_private_file("Core"))
         if self.settings.os in ["Windows", "iOS"]:
             _add_build_module("qtCore", self._cmake_entry_point_file)
