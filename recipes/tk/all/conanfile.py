@@ -58,7 +58,7 @@ class TkConan(ConanFile):
             f"tcl/{self.version}", transitive_headers=True, transitive_libs=True
         )
         if self.settings.os == "Linux":
-            self.requires("fontconfig/2.13.93")
+            self.requires("fontconfig/2.14.2")
             self.requires("xorg/system")
 
     @property
@@ -66,6 +66,7 @@ class TkConan(ConanFile):
         return getattr(self, "settings_build", self.settings)
 
     def build_requirements(self):
+        self.tool_requires("automake/1.16.5")
         if not is_msvc(self):
             if (
                 self._settings_build.os == "Windows"
@@ -86,12 +87,7 @@ class TkConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def source(self):
-        get(
-            self,
-            **self.conan_data["sources"][self.version],
-            strip_root=True,
-            destination=self.source_folder,
-        )
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         buildenv = VirtualBuildEnv(self)
@@ -146,7 +142,7 @@ class TkConan(ConanFile):
 
     def _get_default_build_system(self):
         if is_apple_os(self):
-            return "macosx"
+            return "unix"
         elif self.settings.os in ("Linux", "FreeBSD"):
             return "unix"
         elif self.settings.os == "Windows":
@@ -201,13 +197,21 @@ class TkConan(ConanFile):
         }
         config_dir = self._get_configure_folder("win")
         with chdir(self, config_dir):
-            self.run(
-                f"""nmake -nologo -f makefile.vc {' '.join([f'{k}="{v}"' for k, v in flags.items()])} {target}""",
-                env="conanbuild",
-            )
+            args = " ".join(f'{k}="{v}"' for k, v in flags.items())
+            self.run(f"nmake -nologo -f makefile.vc {args} {target}")
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        makefile = os.path.join(self.source_folder, "unix", "Makefile.in")
+        replace_in_file(self, makefile, "LDFLAGS			= @LDFLAGS_DEFAULT@ @LDFLAGS@", "")
+        replace_in_file(self, makefile, " ${CFLAGS}", " ${CFLAGS} ${CPPFLAGS}")
+        configure = os.path.join(self.source_folder, "unix", "configure")
+        replace_in_file(self, configure,
+                        "case 1: case (sizeof(${tcl_type_64bit})==sizeof(long)): ;",
+                        "case 1: case (sizeof(${tcl_type_64bit})!=sizeof(long)): ;")
 
     def build(self):
-        apply_conandata_patches(self)
+        self._patch_sources()
         if is_msvc(self):
             self._build_nmake()
         else:
@@ -260,6 +264,10 @@ class TkConan(ConanFile):
         self.cpp_info.libs = [f"tk{lib_infix}{tk_suffix}", f"tkstub{lib_infix}"]
         if self.settings.os == "Macos":
             self.cpp_info.frameworks = ["CoreFoundation", "Cocoa", "Carbon", "IOKit"]
+            if Version(self.version) >= "8.6.13":
+                self.cpp_info.frameworks += ["QuartzCore", "UniformTypeIdentifiers"]
+                self.cpp_info.exelinkflags = ["-ObjC"]
+                self.cpp_info.sharedlinkflags = ["-ObjC"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = [
                 "netapi32",
