@@ -259,7 +259,7 @@ class ProtobufConan(ConanFile):
         self.cpp_info.components["libprotobuf"].libs = [lib_prefix + "protobuf" + lib_suffix]
         if self.options.with_zlib:
             self.cpp_info.components["libprotobuf"].requires = ["zlib::zlib"]
-        if self._protobuf_release >= "22.0":    
+        if self._protobuf_release >= "22.0":     
             self.cpp_info.components["libprotobuf"].requires.extend(absl_deps)
             if not self.options.shared:
                 self.cpp_info.components["libprotobuf"].requires.extend(["utf8_validity"])
