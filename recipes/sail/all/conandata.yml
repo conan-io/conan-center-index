@@ -1,4 +1,7 @@
 sources:
+  "0.9.8":
+    url: "https://github.com/HappySeaFox/sail/archive/v0.9.8.tar.gz"
+    sha256: "ba2160f0825171ab3c41cbc5bb0834bf56439d2986e5aae5f586d5e2009dd9cd"
   "0.9.6":
     url: "https://github.com/HappySeaFox/sail/archive/v0.9.6.tar.gz"
     sha256: "4e46b1a5cd0e23f78fbeef085340779c9d4a7d5dd731ffd1df8fdfb343befbc4"
