@@ -1,14 +1,15 @@
+import glob
+import os
+
 from conan import ConanFile
-from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.build import cross_building
-from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
+from conan.tools.build import cross_building, can_run
+from conan.tools.env import Environment, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, VCVars
 from conan.tools.scm import Version
-import glob
-import os
 
 required_conan_version = ">=1.54.0"
 
@@ -27,12 +28,16 @@ class LibpqConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_openssl": [True, False],
+        "with_icu": [True, False],
+        "with_zlib": [True, False],
         "disable_rpath": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_openssl": False,
+        "with_openssl": True,
+        "with_icu": True,
+        "with_zlib": True,
         "disable_rpath": False,
     }
 
@@ -52,8 +57,14 @@ class LibpqConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-            self.options.rm_safe("disable_rpath")
+            del self.options.fPIC
+            del self.options.disable_rpath
+            # TODO: add Windows support for these
+            del self.options.with_icu
+            del self.options.with_zlib
+        if is_apple_os(self):
+            # FIXME: not sure why this one fails to link on macOS
+            del self.options.with_zlib
 
     def configure(self):
         if self.options.shared:
@@ -67,21 +78,26 @@ class LibpqConan(ConanFile):
     def requirements(self):
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
+        if self.options.get_safe("with_icu"):
+            self.requires("icu/74.2")
+        if self.options.with_zlib:
+            self.requires("zlib/[>=1.2.11 <2]")
 
     def build_requirements(self):
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         if is_msvc(self):
             self.tool_requires("strawberryperl/5.32.1.1")
-        elif self._settings_build.os == "Windows":
+        elif self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
         if is_msvc(self):
             vcvars = VCVars(self)
             vcvars.generate()
@@ -93,23 +109,30 @@ class LibpqConan(ConanFile):
             if not cross_building(self):
                 env = VirtualRunEnv(self)
                 env.generate(scope="build")
+
             tc = AutotoolsToolchain(self)
-            tc.configure_args.append('--without-readline')
-            tc.configure_args.append('--without-zlib')
-            tc.configure_args.append('--with-openssl' if self.options.with_openssl else '--without-openssl')
+            tc.configure_args.append("--without-readline")
+            tc.configure_args.append("--with-openssl" if self.options.with_openssl else "--without-openssl")
+            tc.configure_args.append("--with-icu" if self.options.get_safe("with_icu") else "--without-icu")
+            tc.configure_args.append("--with-zlib" if self.options.with_zlib else "--without-zlib")
             if cross_building(self) and not self.options.with_openssl:
                 tc.configure_args.append("--disable-strong-random")
-            if cross_building(self, skip_x64_x86=True):
+            if not can_run(self):
                 tc.configure_args.append("USE_DEV_URANDOM=1")
             if self.settings.os != "Windows" and self.options.disable_rpath:
-                tc.configure_args.append('--disable-rpath')
+                tc.configure_args.append("--disable-rpath")
             if self._is_clang8_x86:
                 tc.extra_cflags.append("-msse2")
             tc.make_args.append(f"DESTDIR={unix_path(self, self.package_folder)}")
             if self.settings.os == "Windows":
-                tc.make_args.append("MAKE_DLL={}".format(str(self.options.shared).lower()))
+                tc.make_args.append(f"MAKE_DLL={str(self.options.shared).lower()}")
             tc.generate()
-            AutotoolsDeps(self).generate()
+
+            deps = AutotoolsDeps(self)
+            deps.generate()
+
+            deps = PkgConfigDeps(self)
+            deps.generate()
 
     def _patch_sources(self):
         if is_msvc(self):
@@ -169,9 +192,14 @@ class LibpqConan(ConanFile):
             replace_in_file(self, os.path.join(self.source_folder, "src", "interfaces", "libpq", "Makefile"),
                 "-v __cxa_atexit",
                 "-v __cxa_atexit -e pthread_exit")
+        if Version(self.version) >= "15":
+            # Disable a check that gives false positives for statically linked builds
+            # https://github.com/postgres/postgres/commit/e9bc0441f1446f6614fa6712841acec91890e089
+            replace_in_file(self, os.path.join(self.source_folder, "src", "interfaces", "libpq", "Makefile"),
+                            "echo 'libpq must not be calling any function which invokes exit'",
+                            "echo #")
 
     def build(self):
-        apply_conandata_patches(self)
         self._patch_sources()
         if is_msvc(self):
             with chdir(self, os.path.join(self.source_folder, "src", "tools", "msvc")):
@@ -263,6 +291,10 @@ class LibpqConan(ConanFile):
 
         if self.options.with_openssl:
             self.cpp_info.components["pq"].requires.append("openssl::openssl")
+        if self.options.get_safe("with_icu"):
+            self.cpp_info.components["pq"].requires.append("icu::icu")
+        if self.options.with_zlib:
+            self.cpp_info.components["pq"].requires.append("zlib::zlib")
 
         if not self.options.shared:
             if is_msvc(self):
@@ -277,6 +309,8 @@ class LibpqConan(ConanFile):
                 self.cpp_info.components["pgport"].libs = ["pgport", "pgport_shlib"]
                 if self.settings.os == "Windows":
                     self.cpp_info.components["pgport"].system_libs = ["ws2_32"]
+                elif self.settings.os in ["Linux", "FreeBSD"]:
+                    self.cpp_info.components["pgport"].system_libs = ["m"]
                 self.cpp_info.components["pgcommon"].requires.append("pgport")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -284,5 +318,3 @@ class LibpqConan(ConanFile):
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
 
-        self.cpp_info.names["cmake_find_package"] = "PostgreSQL"
-        self.cpp_info.names["cmake_find_package_multi"] = "PostgreSQL"
