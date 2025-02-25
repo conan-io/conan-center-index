@@ -29,7 +29,7 @@ class YojimboConan(ConanFile):
             del self.options.fPIC
 
     def requirements(self):
-        self.requires("libsodium/1.0.20")
+        self.requires("libsodium/1.0.18")
         self.requires("mbedtls/2.25.0")
  
     def source(self):
