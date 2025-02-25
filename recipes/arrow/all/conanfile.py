@@ -385,6 +385,7 @@ class ArrowConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("mimalloc", "cmake_target_name", "mimalloc::mimalloc")
         deps.generate()
 
     def _patch_sources(self):
