@@ -6,5 +6,5 @@ patches:
   "0.2.0.cci.20241122":
     - patch_file: "patches/0001-enable-cmake-install.patch"
     - patch_file: "patches/0002-fix-missing-include-vector-in-nfir_lib.h.patch"
-    - patch_file: "patches/0003-fix-finding-opencv-provided-by-PkgConfigDeps.patch"
-  
+    - patch_file: "patches/0003-fix-finding-opencv.patch"
+    - patch_file: "patches/0004-fix-build-issues-in-conan-CI.patch"

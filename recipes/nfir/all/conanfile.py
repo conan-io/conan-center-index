@@ -2,7 +2,6 @@ from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 from conan.tools.files import get
 from conan.tools.files import apply_conandata_patches, export_conandata_patches
-from conan.tools.gnu import PkgConfigDeps
 from os import path
 
 class NFIRConan(ConanFile):
@@ -15,6 +14,7 @@ class NFIRConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     options = { "shared": [True, False], "fPIC": [True, False] }
     default_options = { "shared": False, "fPIC": True }
+    generators = "CMakeDeps"
     package_type = "library"
     implements = ["auto_shared_fpic"]
 
@@ -33,11 +33,8 @@ class NFIRConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["USE_NFIMM"] = False
-        if self.settings.os == "Windows":
-            tc.preprocessor_definitions["_WIN32_64"] = 1
+        tc.variables["_WIN32_64"] = self.settings.os == "Windows"
         tc.generate()
-        deps = PkgConfigDeps(self)
-        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
