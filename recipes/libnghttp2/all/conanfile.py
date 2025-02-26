@@ -84,8 +84,10 @@ class Nghttp2Conan(ConanFile):
             tc.cache_variables["LIBXML2_FOUND"] = True
         if self.options.with_hpack:
             tc.cache_variables["JANSSON_FOUND"] = True
+        if self.options.with_jemalloc:
+            tc.cache_variables["JEMALLOC_FOUND"] = True
 
-            # Disable Python finding so we don't build docs
+        # Disable Python finding so we don't build docs
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Python3"] = True
         if not self.options.with_app:
             # Disable find_package to not scare the user with system libs being picked
@@ -144,6 +146,9 @@ class Nghttp2Conan(ConanFile):
         if self.options.with_hpack:
             tc.set_property("jansson", "cmake_file_name", "Jansson")
             tc.set_property("jansson", "cmake_additional_variables_prefixes", ["JANSSON"])
+        if self.options.with_jemalloc:
+            tc.set_property("jemalloc", "cmake_file_name", "Jemalloc")
+            tc.set_property("jemalloc", "cmake_additional_variables_prefixes", ["JEMALLOC"])
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
