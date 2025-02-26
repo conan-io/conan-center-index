@@ -28,12 +28,14 @@ class CapnprotoConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "lite_mode": [True, False],
         "with_openssl": [True, False],
         "with_zlib": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "lite_mode": False,
         "with_openssl": True,
         "with_zlib": True,
     }
@@ -100,7 +102,7 @@ class CapnprotoConan(ConanFile):
 
     def build_requirements(self):
         if self.settings.os != "Windows":
-            self.tool_requires("libtool/2.4.7")
+            self.tool_requires("libtool/[>=2 <3]")
             if self._settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
@@ -114,7 +116,7 @@ class CapnprotoConan(ConanFile):
             tc = CMakeToolchain(self)
             tc.variables["BUILD_TESTING"] = False
             tc.variables["EXTERNAL_CAPNP"] = False
-            tc.variables["CAPNP_LITE"] = False
+            tc.variables["CAPNP_LITE"] = self.options.lite_mode
             tc.variables["WITH_OPENSSL"] = self.options.with_openssl
             tc.generate()
             deps = CMakeDeps(self)
@@ -129,10 +131,12 @@ class CapnprotoConan(ConanFile):
             yes_no = lambda v: "yes" if v else "no"
             tc.configure_args.extend([
                 f"--with-openssl={yes_no(self.options.with_openssl)}",
-                "--enable-reflection",
+                f"--enable-reflection={yes_no(not self.options.lite_mode)}",
             ])
             if Version(self.version) >= "0.8.0":
                 tc.configure_args.append(f"--with-zlib={yes_no(self.options.with_zlib)}")
+            if self.options.lite_mode:
+                tc.configure_args.append("--with-external-capnp")
             # Fix rpath on macOS
             if self.settings.os == "Macos":
                 tc.extra_ldflags.append("-Wl,-rpath,@loader_path/../lib")
@@ -204,15 +208,22 @@ class CapnprotoConan(ConanFile):
         def ws2_32():
             return ["ws2_32"] if self.settings.os == "Windows" else []
 
-        components = {
+        components_lite = {
             "capnp": {"requires": ["kj"]},
+            "kj": {"system_libs": libm() + pthread()},
+            "kj-test": {"requires": ["kj"]},
+        }
+
+        if self.options.lite_mode:
+            return components_lite
+
+        components = {
+            **components_lite,
             "capnp-json": {"requires": ["capnp", "kj"]},
             "capnp-rpc": {"requires": ["capnp", "kj", "kj-async"]},
             "capnpc": {"requires": ["capnp", "kj"], "system_libs": libm() + pthread()},
-            "kj": {"system_libs": libm() + pthread()},
             "kj-async": {"requires": ["kj"], "system_libs": libm() + pthread() + ws2_32()},
             "kj-http": {"requires": ["kj", "kj-async"]},
-            "kj-test": {"requires": ["kj"]},
         }
 
         if self.options.get_safe("with_zlib"):
