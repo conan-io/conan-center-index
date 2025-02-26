@@ -1,0 +1,24 @@
+From 6b5c15a98860b61bdf6545ece0e087f6f8c802ef Mon Sep 17 00:00:00 2001
+From: Tomas Krupa <tomas.krupa@innovatrics.com>
+Date: Wed, 26 Feb 2025 15:36:13 +0100
+Subject: [PATCH] fix missing include <vector> in nfir_lib.h
+
+---
+ src/include/nfir_lib.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/include/nfir_lib.h b/src/include/nfir_lib.h
+index 9c2d6f5..39ca31d 100644
+--- a/src/include/nfir_lib.h
++++ b/src/include/nfir_lib.h
+@@ -31,6 +31,7 @@ identified are necessarily the best available for the purpose.
+ #include "exceptions.h"
+ 
+ #include <string>
++#include <vector>
+ 
+ #define NFIR_VERSION "0.2.0"
+ 
+-- 
+2.34.1
+
