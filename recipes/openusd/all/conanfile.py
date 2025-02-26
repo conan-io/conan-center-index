@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, load, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, load, replace_in_file, get, rm, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -54,7 +54,7 @@ class OpenUSDConan(ConanFile):
         "build_embree_plugin": False,
         "enable_materialx_support": True,
         "enable_vulkan_support": False,
-        "enable_gl_support": False,
+        "enable_gl_support": True,
         "enable_ptex_support": True,
         "enable_openvdb_support": False,
         "build_alembic_plugin": False,
@@ -116,10 +116,10 @@ class OpenUSDConan(ConanFile):
             self.options.rm_safe("fPIC")
         # Set same options as in https://github.com/PixarAnimationStudios/OpenUSD/blob/release/build_scripts/build_usd.py#L1397
         # self.options["opensubdiv/*"].with_tbb = True
-        if self.options.enable_gl_support:
-            self.options["opensubdiv/*"].with_opengl = self.options.enable_gl_support
-            # FIXME: provokes a missing binary error on conan center
-            self.options["opensubdiv/*"].with_metal = is_apple_os(self)
+        # if self.options.enable_gl_support:
+        self.options["opensubdiv/*"].with_opengl = self.options.enable_gl_support
+        #     # FIXME: provokes a missing binary error on conan center
+        #     self.options["opensubdiv/*"].with_metal = is_apple_os(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -128,15 +128,15 @@ class OpenUSDConan(ConanFile):
         if self.options.enable_python_support:
             self.requires("boost/1.86.0")
         # openusd doesn't support yet recent release of onetbb, see https://github.com/PixarAnimationStudios/OpenUSD/issues/1471
-        self.requires("onetbb/2021.10.0", transitive_headers=True)
+        self.requires("onetbb/2021.12.0", transitive_headers=True)
 
         if self.options.build_imaging:
             if self.options.build_openimageio_plugin and self.options.build_gpu_support:
                 self.requires("openimageio/2.5.14.0")
             if not self.options.build_openimageio_plugin and self.options.build_opencolorio_plugin and self.options.build_gpu_support and self.options.enable_gl_support:
                 self.requires("opencolorio/2.3.2")
-            if self.options.enable_gl_support:
-                self.requires("opensubdiv/3.6.0")
+            # if self.options.enable_gl_support:
+            self.requires("opensubdiv/3.6.0")
             if self.options.enable_vulkan_support:
                 self.requires("vulkan-headers/1.3.290.0")
             if self.options.enable_gl_support:
@@ -200,12 +200,14 @@ class OpenUSDConan(ConanFile):
 
         if self.options.enable_gl_support:
             # tc.variables["OPENSUBDIV_ROOT_DIR"] = self.dependencies['opensubdiv'].cpp_info.
-            tc.variables["OPENSUBDIV_LIBRARIES"] = self.dependencies['opensubdiv'].cpp_info.libdirs[0].replace("\\", "/")
+            # tc.variables["OPENSUBDIV_LIBRARIES"] = self.dependencies['opensubdiv'].cpp_info.libdirs[0].replace("\\", "/")
+            tc.variables["OPENSUBDIV_LIBRARIES"] = "OpenSubdiv::osdcpu"
             # Provokes cmake parsing error
             # See https://c3i.jfrog.io/c3i/misc/logs/pr/24506/75-windows-visual_studio/openusd/24.08//a47d3be1b4a4ee7c129fc15ba3f28e471624adfb-build.txt
             # See https://github.com/conan-io/conan/issues/10539 
             tc.variables["OPENSUBDIV_INCLUDE_DIR"] = self.dependencies['opensubdiv'].cpp_info.includedirs[0].replace("\\", "/")
-            # tc.variables["OPENSUBDIV_OSDCPU_LIBRARY"] = "OpenSubdiv::osdcpu"
+        target_suffix = "" if self.dependencies["opensubdiv"].options.shared else "_static"
+        tc.variables["OPENSUBDIV_OSDCPU_LIBRARY"] = "OpenSubdiv::osdcpu"+target_suffix
 
         tc.variables["TBB_tbb_LIBRARY"] = "TBB::tbb"
 
@@ -282,7 +284,9 @@ class OpenUSDConan(ConanFile):
 
     def _patch_sources(self):
         rmdir(self, os.path.join(self.source_folder, "cmake", "modules"))
-        apply_conandata_patches(self)
+        
+        replace_in_file(self, os.path.join(self.source_folder, "cmake", "defaults", "Packages.cmake"), "find_package(OpenSubdiv 3 REQUIRED)", "find_package(OpenSubdiv REQUIRED)")
+        # apply_conandata_patches(self)
 
     def build(self):
         self._patch_sources()
