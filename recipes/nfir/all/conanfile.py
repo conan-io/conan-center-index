@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
-from conan.tools.files import copy, get, collect_libs
-from conan.tools.files import apply_conandata_patches
+from conan.tools.files import get
+from conan.tools.files import apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from os import path
 
@@ -9,8 +9,8 @@ class NFIRConan(ConanFile):
     name = "nfir"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/usnistgov/NFIR"
-    topics = ("NIST, NFIR")
-    license = "NIST"
+    topics = ("NIST", "NFIR")
+    license = "NIST-PD"
     description = "The NIST Fingerprint Image Resampler NFIR is a library capable of upsampling or downsampling fingerprint images."
     settings = "os", "compiler", "build_type", "arch"
     options = { "shared": [True, False], "fPIC": [True, False] }
@@ -18,14 +18,17 @@ class NFIRConan(ConanFile):
     package_type = "library"
     implements = ["auto_shared_fpic"]
 
-    def layout(self):
-        cmake_layout(self)
+    def export_sources(self):
+        export_conandata_patches(self)
 
-    def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("opencv/4.10.0")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = CMakeToolchain(self)
