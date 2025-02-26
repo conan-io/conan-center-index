@@ -33,9 +33,9 @@ class OpenSubdivConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_tbb": True,
+        "with_tbb": False,
         "with_opengl": True,
-        "with_omp": True,
+        "with_omp": False,
         "with_cuda": False,
         "with_clew": False,
         "with_opencl": False,
@@ -71,8 +71,6 @@ class OpenSubdivConan(ConanFile):
             del self.options.with_dx
         if self.settings.os != "Macos":
             del self.options.with_metal
-        if self.settings.os != "Linux":
-            del self.options.with_opengl
 
     def configure(self):
         if self.options.shared:
@@ -116,7 +114,7 @@ class OpenSubdivConan(ConanFile):
     def _osd_gpu_enabled(self):
         return any(
             [
-                self.options.get_safe("with_opengl"),
+                self.options.with_opengl,
                 self.options.with_opencl,
                 self.options.with_cuda,
                 self.options.get_safe("with_dx"),
@@ -129,7 +127,7 @@ class OpenSubdivConan(ConanFile):
         if not valid_min_cppstd(self, self._min_cppstd):
             tc.variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
         tc.variables["NO_TBB"] = not self.options.with_tbb
-        tc.variables["NO_OPENGL"] = not self.options.get_safe("with_opengl")
+        tc.variables["NO_OPENGL"] = not self.options.with_opengl
         tc.variables["BUILD_SHARED_LIBS"] = self.options.get_safe("shared")
         tc.variables["NO_OMP"] = not self.options.with_omp
         tc.variables["NO_CUDA"] = not self.options.with_cuda
@@ -185,13 +183,13 @@ class OpenSubdivConan(ConanFile):
             self.cpp_info.components["osdgpu"].set_property("cmake_target_name", f"OpenSubdiv::osdgpu{target_suffix}")
             self.cpp_info.components["osdgpu"].libs = ["osdGPU"]
             self.cpp_info.components["osdgpu"].requires = ["osdcpu"]
-            if self.options.get_safe("with_opengl"):
+            if self.options.with_opengl:
                 self.cpp_info.components["osdgpu"].requires.extend(["opengl::opengl", "glfw::glfw"])
             if self.options.get_safe("with_metal"):
                 self.cpp_info.components["osdgpu"].requires.append("metal-cpp::metal-cpp")
             if self.options.get_safe("with_dx"):
                 self.cpp_info.components["osdgpu"].requires.append("directx-headers::directx-headers")
-            dl_required = self.options.get_safe("with_opengl") or self.options.with_opencl
+            dl_required = self.options.with_opengl or self.options.with_opencl
             if self.settings.os in ["Linux", "FreeBSD"] and dl_required:
                 self.cpp_info.components["osdgpu"].system_libs = ["dl"]
 
