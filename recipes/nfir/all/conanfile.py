@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
 from conan.tools.files import copy, get, collect_libs
 from conan.tools.files import apply_conandata_patches
+from conan.tools.gnu import PkgConfigDeps
 from os import path
 
 class NFIRConan(ConanFile):
@@ -12,11 +13,10 @@ class NFIRConan(ConanFile):
     license = "NIST"
     description = "The NIST Fingerprint Image Resampler NFIR is a library capable of upsampling or downsampling fingerprint images."
     settings = "os", "compiler", "build_type", "arch"
-    options = { "shared": [True, False] }
-    default_options = { "shared": False }
-    generators = "CMakeDeps"
+    options = { "shared": [True, False], "fPIC": [True, False] }
+    default_options = { "shared": False, "fPIC": True }
     package_type = "library"
-    exports_sources = "CMakeLists.txt", "patches/*"
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self)
@@ -29,10 +29,12 @@ class NFIRConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_SHARED"] = self.options.shared
         tc.variables["USE_NFIMM"] = False
-        tc.variables["_WIN32_64"] = self.settings.os == "Windows"
+        if self.settings.os == "Windows":
+            tc.preprocessor_definitions["_WIN32_64"] = 1
         tc.generate()
+        deps = PkgConfigDeps(self)
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -41,16 +43,11 @@ class NFIRConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "*.h", src=path.join(self.source_folder, "src", "include"),  dst=path.join(self.package_folder, "include", "NFIR"), keep_path=False)
-        copy(self, "*.lib", src=self.build_folder, dst=path.join(self.package_folder, "lib"), keep_path=False)
-        copy(self, "NFIR*", src=path.join(self.build_folder, "bin"), dst=path.join(self.package_folder, "bin"), keep_path=False)
-        copy(self, "libNFIR*", src=path.join(self.build_folder, "lib"), dst=path.join(self.package_folder, "lib"), keep_path=False)
+        cmake = CMake(self)
+        cmake.install()
 
     def package_info(self):
         self.cpp_info.libs = ["NFIR_ITL"]
         self.cpp_info.set_property("cmake_file_name", "NFIR")
-        self.cpp_info.set_property("cmake_target_name", f"NFIR::NFIR")
-        bindir = path.join(self.package_folder, "bin")
-        self.runenv_info.append_path("PATH", bindir)
-        self.buildenv_info.append_path("PATH", bindir)
-        self.env_info.PATH.append(bindir)
+        self.cpp_info.set_property("cmake_target_name", "NFIR::NFIR")
+        self.runenv_info.append_path("PATH", path.join(self.package_folder, "bin"))

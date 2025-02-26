@@ -1,11 +1,10 @@
 sources:
-  "0.2.0":
-    url: "https://codeload.github.com/tomas-krupa/NFIR/zip/refs/tags/0.2.0"
-    sha256: "836ad87ae6a25c9a7f361a854d30c25560e7af833a5daeb906e4867f93b16276"
+  "0.2.0.cci.20241122":
+    url: "https://github.com/usnistgov/NFIR/archive/b670b673f8c397f37b231d16bc8b41f934d05841.tar.gz"
+    sha256: "0bce5cd844560f82968540b0ae27248973bc1f3bfccadfc80e687f129a5588e8"
 patches:
-  "0.2.0":
-    - patch_file: "patches/0001-find-OpenCV-provided-by-conan_toolchain.cmake.patch"
-    - patch_file: "patches/0002-enable-choose-between-shared-and-static-library.patch"
-    - patch_file: "patches/0003-add-NFIR-resample-overload.patch"
-    - patch_file: "patches/0004-set-NFIR-executable-name-to-NFIR_bin-tool.patch"
+  "0.2.0.cci.20241122":
+    - patch_file: "patches/0001-enable-cmake-install.patch"
+    - patch_file: "patches/0002-fix-missing-include-vector-in-nfir_lib.h.patch"
+    - patch_file: "patches/0003-fix-finding-opencv-provided-by-PkgConfigDeps.patch"
   

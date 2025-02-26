@@ -1,0 +1,25 @@
+From 29914f8838146eae3ae610ac88144ded6ac81a85 Mon Sep 17 00:00:00 2001
+From: Tomas Krupa <tomas.krupa@innovatrics.com>
+Date: Wed, 26 Feb 2025 15:45:07 +0100
+Subject: [PATCH] fix finding opencv provided by PkgConfigDeps
+
+---
+ src/lib/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/lib/CMakeLists.txt b/src/lib/CMakeLists.txt
+index 12b3047..d6c290a 100644
+--- a/src/lib/CMakeLists.txt
++++ b/src/lib/CMakeLists.txt
+@@ -43,7 +43,7 @@ if(_WIN32_64)
+ else()
+   message(STATUS "LIB: CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
+ 	find_package(PkgConfig REQUIRED)
+-	pkg_check_modules(OPENCV REQUIRED opencv4)
++	pkg_check_modules(OPENCV REQUIRED opencv)
+ 	target_link_libraries(${PROJECT_NAME} ${OPENCV_LINK_LIBRARIES})
+ 	target_include_directories(${PROJECT_NAME} PUBLIC ${OPENCV_INCLUDE_DIRS})
+ 	target_compile_options(${PROJECT_NAME} PUBLIC ${OPENCV_CFLAGS_OTHER})
+-- 
+2.34.1
+
