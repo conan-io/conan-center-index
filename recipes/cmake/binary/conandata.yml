@@ -56,6 +56,25 @@ sources:
       x86_64:
         url: "https://cmake.org/files/v3.31/cmake-3.31.0-windows-x86_64.zip"
         sha256: "f4b499f71cf44115a1d711d4867da3c6bd2f3f4d7121c213ace979757640385c"
+  "3.30.8":
+    Linux:
+      armv8:
+        url: "https://cmake.org/files/v3.30/cmake-3.30.8-linux-aarch64.tar.gz"
+        sha256: "5e3829827ee01b5bfca4fa3a0bc370ed84feb31a0a265a9ee6d0e6cee1376584"
+      x86_64:
+        url: "https://cmake.org/files/v3.30/cmake-3.30.8-linux-x86_64.tar.gz"
+        sha256: "adc81f2944e6f86b44e86acea3abea1651ed7890206933484b8b74ac1280314f"
+    Macos:
+      universal:
+        url: "https://cmake.org/files/v3.30/cmake-3.30.8-macos10.10-universal.tar.gz"
+        sha256: "701d6d97ecbf724aa5c34be2366ac3b3b0d9271ad0647d58a2a7446673e1e0bb"
+    Windows:
+      armv8:
+        url: "https://cmake.org/files/v3.30/cmake-3.30.8-windows-arm64.zip"
+        sha256: "2e9f4730ed2d73dd1cb632c85a4ccdfa4674d83ab8f82f2bb74105a5a885c4ed"
+      x86_64:
+        url: "https://cmake.org/files/v3.30/cmake-3.30.8-windows-x86_64.zip"
+        sha256: "ec0de3ecbc1e02ed0304d42dccdbf8f36b705af74f1783b07d612b4a02ae2808"
   "3.30.5":
     Linux:
       armv8:
