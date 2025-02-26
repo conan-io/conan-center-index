@@ -33,9 +33,9 @@ class OpenSubdivConan(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "with_tbb": True,
+        "with_tbb": False,
         "with_opengl": True,
-        "with_omp": True,
+        "with_omp": False,
         "with_cuda": False,
         "with_clew": False,
         "with_opencl": False,
@@ -71,8 +71,6 @@ class OpenSubdivConan(ConanFile):
             del self.options.with_dx
         if self.settings.os != "Macos":
             del self.options.with_metal
-        if self.settings.os != "Linux":
-            del self.options.with_opengl
 
     def configure(self):
         if self.options.shared:
