@@ -221,9 +221,6 @@ class bgfxConan(ConanFile):
                 conf += arch_to_make_config_suffix[str(self.settings.arch)]
             if self.settings.os == "Windows":
                 if "mingw-builds" in self.dependencies.build:
-                    # self.run("if [ ! -d /mingw64 ]; then mkdir /mingw64; fi")
-                    # self.run("pacman -Sy mingw-w64-x86_64-gcc --needed --noconfirm")
-                    # mingw = "MINGW=$MSYS_ROOT/mingw64"
                     mingw = f"MINGW={self.dependencies.build['mingw-builds'].package_folder}"
                 else:
                     mingw = "MINGW=$MINGW" # user is expected to have an env var pointing to mingw; x86_64-w64-mingw32-g++ is expected in $MINGW/bin/

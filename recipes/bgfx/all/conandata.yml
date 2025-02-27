@@ -1,11 +1,11 @@
 sources:
-  "1.128.8832":
+  "1.129.8878":
     "bgfx":
-      url: "https://github.com/bkaradzic/bgfx/archive/cc789e83a69fddfb13f6cbeb89f43aa56dcfff9d.tar.gz"
-      sha256: "2A0A19DE443563036DB0C7E381EE61882783D400E942658EBAB0F7466AD89B19"
+      url: "https://github.com/bkaradzic/bgfx/archive/ee8664e068bee23c144dcb2bd323dab5321e035a.tar.gz"
+      sha256: "433CEAB2F6AA35CDB3DD647B6A30429401CBBC982ABA20AADC7CD204A5F76A71"
     "bimg":
-      url: "https://github.com/bkaradzic/bimg/archive/0d1c78e77982f18a9174620bfa5762ffcca9d38c.tar.gz"
-      sha256: "A8623F7B6878049345FE46179D5CFD33AB73951FB745FEC7E953FEA52C497B3A"
+      url: "https://github.com/bkaradzic/bimg/archive/c5c7b6e1874cf60caa18b643391f5122f89a4ca8.tar.gz"
+      sha256: "3D282061AB57FA779079E00E779600D364B7DC3E84B855AFDB48C9C84B61EDCE"
     "bx":
-      url: "https://github.com/bkaradzic/bx/archive/2cebc558eb314e324f01ef05735551f234f5ea13.tar.gz"
-      sha256: "0305DC28FA48CEC0F6B628226373475DECFE21719749B3BEDB6D7D7D1CC9F050"
+      url: "https://github.com/bkaradzic/bx/archive/8e9a9983574171b80ae96150f32a3eef2093bb39.tar.gz"
+      sha256: "709A0FE99AEDFA9B723B83FE6E74CE2685F6134DE05E45B0539546C24F799000"
