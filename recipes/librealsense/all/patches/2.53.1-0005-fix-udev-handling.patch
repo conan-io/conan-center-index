@@ -1,0 +1,23 @@
+--- a/src/linux/find_udev.cmake
++++ b/src/linux/find_udev.cmake
+@@ -6,18 +6,9 @@
+ #  UDEV_LIBRARIES - the UDEV library
+ find_package(PkgConfig)
+ 
+-pkg_check_modules(UDEV_PKGCONF libudev)
++pkg_check_modules(UDEV_PKGCONF libudev IMPORTED_TARGET)
+ 
+-find_path(UDEV_INCLUDE_DIRS
+-  NAMES libudev.h
+-  PATHS ${UDEV_PKGCONF_INCLUDE_DIRS}
+-)
+-
+-
+-find_library(UDEV_LIBRARIES
+-  NAMES udev
+-  PATHS ${UDEV_PKGCONF_LIBRARY_DIRS}
+-)
++add_library(udev ALIAS PkgConfig::UDEV_PKGCONF)
+ 
+ include(FindPackageHandleStandardArgs)
+ find_package_handle_standard_args(Udev DEFAULT_MSG UDEV_INCLUDE_DIRS UDEV_LIBRARIES)
