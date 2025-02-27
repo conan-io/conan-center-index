@@ -670,6 +670,9 @@ class LibcurlConan(ConanFile):
             tc.variables["HAVE_OPENSSL_SRP"] = True
             tc.variables["HAVE_SSL_CTX_SET_QUIC_METHOD"] = True
 
+        if is_msvc(self):
+            tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+
         tc.generate()
 
         deps = CMakeDeps(self)
