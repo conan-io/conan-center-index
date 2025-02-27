@@ -11,6 +11,12 @@ sources:
   "3.3.7":
     url: "https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.bz2"
     sha256: "685adf14bd8e9c015b78097c1dc22f2f01343756f196acdc76a678e1ae352e11"
+# Backport latest DisableStupidWarnings.h to disable warnings from newer compiler versions
+disable_stupid_warnings_h:
+  # 2024-10-29 version of
+  # https://gitlab.com/libeigen/eigen/-/blob/master/Eigen/src/Core/util/DisableStupidWarnings.h
+  url: "https://gitlab.com/libeigen/eigen/-/raw/1d8b82b0740839c0de7f1242a3585e3390ff5f33/Eigen/src/Core/util/DisableStupidWarnings.h"
+  sha256: "12ac7e06cfbcc65bf3217de6131f154e742082596bee210962a217af8bbea0c4"
 patches:
   "3.4.0":
     - patch_file: "patches/3.4.0-0001-vec-reduce-half.patch"
