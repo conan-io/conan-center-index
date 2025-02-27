@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
+from conan.tools.build import can_run
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
@@ -29,10 +30,6 @@ class LibopingConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -62,13 +59,14 @@ class LibopingConan(ConanFile):
             raise ConanInvalidConfiguration("Liboping cannot be built on a Mac/M1 at this time")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
@@ -76,10 +74,13 @@ class LibopingConan(ConanFile):
             "--without-ncurses",
             "--without-perl-bindings",
         ]
+        if not can_run(self):
+            # Add a guess for a try_run check.
+            # All modern compilers return non-NULL for malloc(0).
+            tc.configure_args.append("ac_cv_func_malloc_0_nonnull=yes")
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         autotools = Autotools(self)
         autotools.configure()
         autotools.make()
@@ -99,8 +100,3 @@ class LibopingConan(ConanFile):
             self.cpp_info.system_libs.append("m")
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        bindir = os.path.join(self.package_folder, "bin")
-        self.output.info("Appending PATH environment variable: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
