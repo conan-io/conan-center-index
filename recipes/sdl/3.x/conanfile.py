@@ -1,18 +1,15 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, replace_in_file, rm, rmdir, copy
+from conan.tools.files import get, replace_in_file, copy
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout, CMakeDeps
-from conan.tools.env import Environment
 
 import os
 
-required_conan_version = ">=1.55.0"
+required_conan_version = ">=2"
 
-# Subsystems, CMakeLists.txt#L234
 _subsystems = [
     ("audio", []),
     ("video", []),
@@ -351,7 +348,11 @@ class SDLConan(ConanFile):
         self.cpp_info.libs = [sdl_lib_name]
         self.cpp_info.set_property("cmake_file_name", "SDL3")
         self.cpp_info.set_property("cmake_target_name", "SDL3::SDL3")
-        self.cpp_info.set_property("cmake_target_aliases", ["SDL3::SDL3-shared" if self.options.shared else "SDL3::SDL3-static"])
+        self.cpp_info.set_property("cmake_target_aliases", [
+            "SDL3::SDL3-shared" if self.options.shared else "SDL3::SDL3-static",
+            # Modelling the headers as a target is not quite feasible, so use an alias instead
+            "SDL3::Headers"
+        ])
 
         if self.settings.os in ("Linux", "FreeBSD", "Macos"):
             self.cpp_info.system_libs.append("pthread")
