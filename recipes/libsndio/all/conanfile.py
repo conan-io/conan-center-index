@@ -24,7 +24,7 @@ class LibsndioConan(ConanFile):
         "with_alsa": [True, False]
     }
     default_options = {
-        "with_alsa": True,
+        "with_alsa": False,
     }
 
     def configure(self):
@@ -91,7 +91,7 @@ class LibsndioConan(ConanFile):
         # The original project source has a hand-written `configure` script that does not expose
         # many hooks for specifying additional build flags and library dependencies. Because the script is
         # not auto-generated with Autotools, the standard Conan workflow of using AutoolsDeps is not possible.
-        # The one hook the script does provide is a command line arg: `CC=*|CFLAGS=*|LDFLAGS=*|AR=*)`. 
+        # The one hook the script does provide is a command line arg: `CC=*|CFLAGS=*|LDFLAGS=*|AR=*)`.
         # We use this to inject the various flags, paths, and libraries that the Conan dependency tree specifies.
         dep_cflags = []
         dep_ldflags = []
@@ -122,23 +122,13 @@ class LibsndioConan(ConanFile):
 
     def build(self):
         autotools = Autotools(self)
-        if Version(self.version) > "1.2.4":
-            autotools.configure()
-            autotools.make()
-        else:
-            with chdir(self, self.source_folder):
-                autotools.configure()
-                autotools.make()
+        autotools.configure()
+        autotools.make()
 
     def package(self):
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
-        if Version(self.version) > "1.2.4":
-            autotools = Autotools(self)
-            autotools.install()
-        else:
-            with chdir(self, self.source_folder):
-                autotools = Autotools(self)
-                autotools.install()
+        autotools = Autotools(self)
+        autotools.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rmdir(self, os.path.join(self.package_folder, "bin"))

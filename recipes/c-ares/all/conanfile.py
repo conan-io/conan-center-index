@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import collect_libs, copy, get, rm, rmdir
+from conan.tools.files import collect_libs, copy, get, rm, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.scm import Version
 import os
 
@@ -27,6 +27,9 @@ class CAresConan(ConanFile):
         "fPIC": True,
         "tools": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -54,6 +57,7 @@ class CAresConan(ConanFile):
         tc.generate()
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()

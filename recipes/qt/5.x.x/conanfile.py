@@ -1,4 +1,4 @@
-from conan import ConanFile
+from conan import ConanFile, conan_version
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.android import android_abi
 from conan.tools.apple import is_apple_os
@@ -123,9 +123,10 @@ class QtConan(ConanFile):
         "sysroot": None,
         "config": None,
         "multiconfiguration": False,
-        "essential_modules": not os.getenv('CONAN_CENTER_BUILD_SERVICE')
     }
-    default_options.update({f"{status}_modules": False for status in _module_statuses if status != "essential"})
+    # essential_modules, addon_modules, deprecated_modules, preview_modules:
+    #    these are only provided for convenience, set to False by default
+    default_options.update({f"{status}_modules": False for status in _module_statuses})
 
     no_copy_source = True
     short_paths = True
@@ -207,6 +208,10 @@ class QtConan(ConanFile):
         if self.settings.os != "Android":
             del self.options.android_sdk
 
+    def _debug_output(self, message):
+        if Version(conan_version) >= "2":
+            self.output.debug(message)
+
     def configure(self):
         # if self.settings.os != "Linux":
         #         self.options.with_libiconv = False # QTBUG-84708
@@ -249,25 +254,50 @@ class QtConan(ConanFile):
         for m in submodules_tree:
             assert m in ["qtbase", "qtqa", "qtrepotools"] or m in self._submodules, "module %s is not present in recipe options : (%s)" % (m, ",".join(self._submodules))
 
-        for m in self._submodules:
-            if m not in submodules_tree:
-                delattr(self.options, m)
-
-        def _enablemodule(mod):
-            if mod != "qtbase":
-                setattr(self.options, mod, True)
-            for req in submodules_tree[mod]["depends"]:
-                _enablemodule(req)
-
         for module in self._submodules:
-            if self.options.get_safe(module):
-                _enablemodule(module)
-            else:
-                if module in submodules_tree:
-                    for status in self._module_statuses:
-                        if getattr(self.options, f"{status}_modules") and submodules_tree[module]['status'] == status:
-                            _enablemodule(module)
-                            break
+            if module not in submodules_tree:
+                self._debug_output(f"qt5: removing {module} from options as it is not an option for this version, or it is ignored or obsolete")
+                self.options.rm_safe(module)
+
+        # Requested modules:
+        # - any module for non-removed options that have 'True' value
+        # - any enabled via `xxx_modules` that does not have a 'False' value
+        # Note that at this point, the submodule options dont have a value unless one is given externally
+        # to the recipe (e.g. via the command line, a profile, or a consumer)
+        requested_modules = set([module for module in self._submodules if self.options.get_safe(module)])
+        for module in [m for m in self._submodules if m in submodules_tree]:
+            status = submodules_tree[module]['status']
+            is_disabled = self.options.get_safe(module) == False
+            if self.options.get_safe(f"{status}_modules"):
+                if not is_disabled:
+                    requested_modules.add(module)
+                else:
+                    self.output.warning(f"qt5: {module} requested because {status}_modules=True"
+                                        f" but it has been explicitly disabled with {module}=False")
+
+        self.output.info(f"qt5: requested modules {list(requested_modules)}")
+
+        required_modules = {}
+        for module in requested_modules:
+            deps = submodules_tree[module]["depends"]
+            for dep in deps:
+                required_modules.setdefault(dep,[]).append(module)
+
+        required_but_disabled = [m for m in required_modules.keys() if self.options.get_safe(m) == False]
+        if required_modules:
+            self._debug_output(f"qt5: required_modules modules {list(required_modules.keys())}")
+        if required_but_disabled:
+            required_by = set()
+            for m in required_but_disabled:
+                required_by.update(required_modules[m])
+                raise ConanInvalidConfiguration(f"Modules {required_but_disabled} are explicitly disabled, "
+                                    f"but are required by {list(required_by)}, enabled by other options")
+
+        enabled_modules = requested_modules.union(set(required_modules.keys()))
+        enabled_modules.discard("qtbase")
+
+        for module in list(enabled_modules):
+            setattr(self.options, module, True)
 
         for module in self._submodules:
             if module in self.options and not self.options.get_safe(module):
@@ -282,6 +312,16 @@ class QtConan(ConanFile):
         if self.settings.os in ("FreeBSD", "Linux"):
             if self.options.qtwebengine:
                 self.options.with_fontconfig = True
+
+        for status in self._module_statuses:
+            # These are convenience only, should not affect package_id
+            option_name = f"{status}_modules"
+            self._debug_output(f"qt5 removing convenience option: {option_name},"
+                              f" see individual module options")
+            self.options.rm_safe(option_name)
+
+        for option in self.options.items():
+            self._debug_output(f"qt5 option {option[0]}={option[1]}")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -438,8 +478,6 @@ class QtConan(ConanFile):
                 self.info.settings.compiler.runtime_type = "Release/Debug"
         if self.info.settings.os == "Android":
             del self.info.options.android_sdk
-        for status in self._module_statuses:
-            delattr(self.info.options, f"{status}_modules")
 
     def build_requirements(self):
         if self._settings_build.os == "Windows" and is_msvc(self):
@@ -820,6 +858,13 @@ class QtConan(ConanFile):
                 for libpath in VirtualRunEnv(self).vars().get("DYLD_LIBRARY_PATH", "").split(":"):
                     # see https://doc.qt.io/qt-5/qmake-variable-reference.html#qmake-rpathdir
                     args += [f"QMAKE_RPATHDIR+=\"{libpath}\""]
+
+        if self.settings.compiler == "apple-clang" and self.options.qtmultimedia:
+            # XCode 14.3 finally removes std::unary_function, so compilation fails
+            # when using newer SDKs when using C++17 or higher.
+            # This macro re-enables them. Should be safe to pass this macro even 
+            # in earlier versions, as it would have no effect.
+            args += ['QMAKE_CXXFLAGS+="-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION=1"']
 
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             args += ["-qt-webengine-ffmpeg",

@@ -1,4 +1,10 @@
 sources:
+  "11.1.3":
+    url: "https://github.com/fmtlib/fmt/releases/download/11.1.3/fmt-11.1.3.zip"
+    sha256: "7df2fd3426b18d552840c071c977dc891efe274051d2e7c47e2c83c3918ba6df"
+  "11.1.1":
+    url: "https://github.com/fmtlib/fmt/releases/download/11.1.1/fmt-11.1.1.zip"
+    sha256: "a25124e41c15c290b214c4dec588385153c91b47198dbacda6babce27edc4b45"
   "11.0.2":
     url: "https://github.com/fmtlib/fmt/releases/download/11.0.2/fmt-11.0.2.zip"
     sha256: "40fc58bebcf38c759e11a7bd8fdc163507d2423ef5058bba7f26280c5b9c5465"

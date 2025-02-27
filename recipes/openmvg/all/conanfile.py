@@ -65,7 +65,7 @@ class Openmvgconan(ConanFile):
         self.requires("coin-clp/1.17.7")
         self.requires("coin-lemon/1.3.1")
         self.requires("coin-osi/0.108.7")
-        self.requires("coin-utils/2.11.6")
+        self.requires("coin-utils/2.11.9")
         self.requires("eigen/3.4.0", transitive_headers=True)
         self.requires("flann/1.9.2", transitive_headers=True, transitive_libs=True)
         if self.options.with_jpeg == "libjpeg":
@@ -120,7 +120,7 @@ class Openmvgconan(ConanFile):
             # Workaround for: https://github.com/conan-io/conan/issues/13560
             libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
             tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
-        
+
         tc.generate()
 
         deps = CMakeDeps(self)
