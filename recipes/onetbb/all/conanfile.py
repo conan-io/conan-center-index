@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -52,7 +53,9 @@ class OneTBBConan(ConanFile):
 
     @property
     def _tbbbind_supported(self):
-        return self.settings.os != "Macos" or Version(self.version) >= "2021.11.0"
+        if is_apple_os(self):
+            return self.settings.os == "Macos" and Version(self.version) >= "2021.11.0"
+        return True
 
     @property
     def _tbbbind_build(self):
@@ -113,7 +116,7 @@ class OneTBBConan(ConanFile):
         toolchain.variables["TBB_STRICT"] = False
         if Version(self.version) >= "2021.5.0":
             toolchain.variables["TBBMALLOC_BUILD"] = self.options.tbbmalloc
-        if self.options.get_safe("interprocedural_optimization"):
+        if self.options.get_safe("interprocedural_optimization") is not None:
             toolchain.variables["TBB_ENABLE_IPO"] = self.options.interprocedural_optimization
         if Version(self.version) >= "2021.6.0" and self.options.get_safe("tbbmalloc"):
             toolchain.variables["TBBMALLOC_PROXY_BUILD"] = self.options.tbbproxy

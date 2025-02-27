@@ -1,0 +1,4 @@
+sources:
+  "0.1.0":
+    url: "https://github.com/crhowell3/libsersi/archive/refs/tags/v0.1.0.tar.gz"
+    sha256: "b3ce8c73a5b69b963e3c5090e2e237fe142f9aff69a1b6b477b52e2a6a55abb4"

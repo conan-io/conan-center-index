@@ -41,19 +41,5 @@ int main()
   LOG_INFO(logger, "Positional arguments {1} {2} {0} ", "too", "are", "supported");
   LOG_INFO(logger, "Support for precision {:.4f}", 1.23456);
 
-  // To log with a different format to the same sink, just create another logger
-  auto console_sink_2 = quill::Frontend::get_sink("sink_id_1"); // get the created sink
-  quill::Logger* logger_2 = quill::Frontend::create_or_get_logger(
-    "logger_2", std::move(console_sink_2), "%(time) %(log_level:<9) %(logger:<12) %(message)");
-
-  logger_2->set_log_level(quill::LogLevel::TraceL3);
-
-  LOG_TRACE_L3(logger_2, "This is a log trace l3 example {}", 1);
-  LOG_TRACE_L2(logger_2, "This is a log trace l2 example {} {}", 2, 2.3);
-  LOG_TRACE_L1(logger_2, "This is a log trace l1 {} example", "string");
-  LOG_DEBUG(logger_2, "This is a log debug example {}", 4);
-  LOG_INFO(logger_2, "This is a log info example {}", sizeof(std::string));
-  LOG_WARNING(logger_2, "This is a log warning example {}", sizeof(std::string));
-  LOG_ERROR(logger_2, "This is a log error example {}", sizeof(std::string));
-  LOG_CRITICAL(logger_2, "This is a log critical example {}", sizeof(std::string));
+  return 0;
 }

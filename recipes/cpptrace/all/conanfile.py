@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.microsoft import check_min_vs, is_msvc_static_runtime, is_msvc
-from conan.tools.files import get, copy, rm, rmdir
+from conan.tools.files import get, copy, rmdir, replace_in_file
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches
@@ -59,6 +59,13 @@ class CpptraceConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
+
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+        if Version(self.version) >= "0.7.5":
+            replace_in_file(self, os.path.join(self.source_folder, "cmake", "Autoconfig.cmake"),
+                            "set(CMAKE_CXX_STANDARD 11)", "")
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -76,12 +83,12 @@ class CpptraceConan(ConanFile):
             tc.variables["CPPTRACE_USE_SYSTEM_LIBDWARF"] = True
         if self.options.unwind == "libunwind":
             tc.variables["CPPTRACE_UNWIND_WITH_LIBUNWIND"] = True
+        tc.cache_variables["CPPTRACE_POSITION_INDEPENDENT_CODE"] = self.options.get_safe("fPIC", True)
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -94,12 +101,7 @@ class CpptraceConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             copy(self, "*.dll", src=self.build_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
 
-        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
-        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         self.cpp_info.libs = ["cpptrace"]

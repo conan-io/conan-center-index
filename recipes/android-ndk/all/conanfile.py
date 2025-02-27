@@ -300,8 +300,6 @@ class AndroidNDKConan(ConanFile):
         self.conf_info.update("tools.build:compiler_executables", compiler_executables)
         self.buildenv_info.define_path("CC", compiler_executables["c"])
         self.buildenv_info.define_path("CXX", compiler_executables["cpp"])
-        self.buildenv_info.define_path("AS", compiler_executables["c"])
-        self.buildenv_info.define_path("LD", compiler_executables["cpp"])
 
         # Versions greater than 23 had the naming convention
         # changed to no longer include the triplet.

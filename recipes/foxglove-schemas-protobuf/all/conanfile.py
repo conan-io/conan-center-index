@@ -14,7 +14,7 @@ required_conan_version = ">=1.60.0"
 class FoxgloveSchemasProtobufConan(ConanFile):
     name = "foxglove-schemas-protobuf"
     url = "https://github.com/conan-io/conan-center-index"
-    homepage = "https://github.com/foxglove/schemas"
+    homepage = "https://github.com/foxglove/foxglove-sdk"
     description = "Protobuf schemas for Foxglove"
     license = "MIT"
     topics = ("foxglove", "protobuf", "schemas")

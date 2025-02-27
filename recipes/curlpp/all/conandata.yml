@@ -1,0 +1,15 @@
+sources:
+  "0.8.1.cci.20240530":
+    url: "https://github.com/jpbarrette/curlpp/archive/8840ec806a75a6def9ed07845a620f6d170e5821.tar.gz"
+    sha256: "1260326d966ec75a50feccb5411268f9aeca667d97f8132973bdb0783ecceb3c"
+patches:
+  "0.8.1.cci.20240530":
+    - patch_file: "patches/0001-disable-static-on-shared.patch"
+      patch_description: "disable building static library on shared=True"
+      patch_type: "conan"
+    - patch_file: "patches/0002-disable-cpp11.patch"
+      patch_description: "disable specifying C++11"
+      patch_type: "conan"
+    - patch_file: "patches/0003-replace-project-declaration.patch"
+      patch_description: "switch positions between project() and cmake_minimum_required()"
+      patch_type: "conan"

@@ -1,0 +1,4 @@
+sources:
+  "1.5.7":
+    url: "https://github.com/paullouisageneau/libjuice/archive/refs/tags/v1.5.7.tar.gz"
+    sha256: "6385c574f3c33f766ed25cddf919625b0ae8ca0d76871f70301e5a0cf2c93dc8"

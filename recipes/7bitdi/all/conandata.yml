@@ -1,4 +1,7 @@
 sources:
+  "3.4.0":
+    url: "https://github.com/7bitcoder/7bitDI/archive/refs/tags/v3.4.0.tar.gz"
+    sha256: "8381102f5966a5d83cf590b8fa45904d055d74ec90822628240786ab100fb929"
   "3.3.0":
     url: "https://github.com/7bitcoder/7bitDI/archive/refs/tags/v3.3.0.tar.gz"
     sha256: "b9ddb2fc263c79cb414544e97d44dcc8cd1e1a91b38129d96b7051728a4583b9"

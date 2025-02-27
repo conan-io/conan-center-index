@@ -55,18 +55,32 @@ class CppDumpConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        copy(
-            self,
-            pattern="dump.hpp",
-            dst=os.path.join(self.package_folder, "include"),
-            src=self.source_folder,
-        )
-        copy(
-            self,
-            pattern="*.hpp",
-            dst=os.path.join(self.package_folder, "include", "hpp"),
-            src=os.path.join(self.source_folder, "hpp"),
-        )
+        if Version(self.version) < "0.7.0":
+            copy(
+                self,
+                pattern="dump.hpp",
+                dst=os.path.join(self.package_folder, "include"),
+                src=self.source_folder,
+            )
+            copy(
+                self,
+                pattern="*.hpp",
+                dst=os.path.join(self.package_folder, "include", "hpp"),
+                src=os.path.join(self.source_folder, "hpp"),
+            )
+        else:
+            copy(
+                self,
+                pattern="*dump.hpp",
+                dst=os.path.join(self.package_folder, "include"),
+                src=self.source_folder,
+            )
+            copy(
+                self,
+                pattern="*.hpp",
+                dst=os.path.join(self.package_folder, "include", "cpp-dump"),
+                src=os.path.join(self.source_folder, "cpp-dump"),
+            )
 
     def package_info(self):
         self.cpp_info.bindirs = []

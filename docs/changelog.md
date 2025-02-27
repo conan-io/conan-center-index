@@ -1,5 +1,15 @@
 # Changelog
 
+### 04-Nov-2024 - 09:15 CET
+
+- [feature] Conan 1.x end of support and Conan 2.x as default version in the CI
+- [feature] New CI infrastructure for Conan 2.x only
+
+### 12-Sep-2024 - 09:23 CEST
+
+- [feature] Add support for Conan 2.7.1 in the CI
+- [feature] Add support for Conan 1.65.0 in the CI
+
 ### 10-Jul-2024 - 13:22 CEST
 
 - [feature] Add support for Conan 2.5.0 in the CI
