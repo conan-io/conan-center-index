@@ -87,7 +87,11 @@ class OusterSdkConan(ConanFile):
         self.requires("optional-lite/3.6.0", transitive_headers=True)
 
         if self.options.build_pcap:
-            self.requires("libtins/4.5")
+            # transitive-libs: when building the shared library, the `libtins` runtime dependency
+            # is not encoded in the binaries (as it is a private dependency of the static library that
+            # is linked into a shared library). This is a workaround to ensure that the shared library
+            # has the necessary runtime dependencies.
+            self.requires("libtins/4.5", transitive_libs=Version(self.version) >= "1.14.0")
 
         if self.options.build_osf:
             # Used in fb_generated/*.h
