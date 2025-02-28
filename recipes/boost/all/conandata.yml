@@ -1,7 +1,7 @@
 sources:
   "1.87.0":
     url:
-      - "https://boostorg.jfrog.io/artifactory/main/release/1.87.0/source/boost_1_87_0.tar.bz2"
+      - "https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.bz2"
       - "https://sourceforge.net/projects/boost/files/boost/1.87.0/boost_1_87_0.tar.bz2"
     sha256: "af57be25cb4c4f4b413ed692fe378affb4352ea50fbe294a11ef548f4d527d89"
   "1.86.0":
