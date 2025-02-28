@@ -68,7 +68,7 @@ class SymengineConan(ConanFile):
         else:
             self.requires("gmp/6.3.0", transitive_headers=True, transitive_libs=True)
         if self._needs_fast_float:
-            self.requires("fast_float/6.1.5")
+            self.requires("fast_float/7.0.0")
 
     def source(self):
         get(
