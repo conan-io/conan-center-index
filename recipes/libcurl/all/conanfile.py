@@ -338,15 +338,16 @@ class LibcurlConan(ConanFile):
         if Version(self.version) >= "8.12.0":
             cmakemacros = os.path.join(self.source_folder, "CMake", "Macros.cmake")
             replace_in_file(self, cmakemacros, "macro(curl_dependency_option _option_name _find_name _desc_name)", "macro(curl_dependency_option _option_name _find_name _desc_name _cmake_args)")
-            replace_in_file(self, cmakemacros, "find_package(${_find_name} REQUIRED)", "find_package(${_find_name} REQUIRED ${_cmake_args})")
+            replace_in_file(self, cmakemacros, "find_package(${_find_name} REQUIRED)", "find_package(${_find_name} ${_cmake_args})")
 
         # brotli
         if Version(self.version) < "8.2.0":
             replace_in_file(self, cmakelists, "find_package(Brotli QUIET)", "find_package(brotli REQUIRED CONFIG)")
-        if Version(self.version) < "8.12.0":
-            replace_in_file(self, cmakelists, "find_package(Brotli REQUIRED)", "find_package(brotli REQUIRED CONFIG)")
         else:
-            replace_in_file(self, cmakelists, 'curl_dependency_option(CURL_BROTLI Brotli "brotli")', 'curl_dependency_option(CURL_BROTLI brotli "brotli" "REQUIRED CONFIG")')
+            if Version(self.version) < "8.12.0":
+                replace_in_file(self, cmakelists, "find_package(Brotli REQUIRED)", "find_package(brotli REQUIRED CONFIG)")
+            else:
+                replace_in_file(self, cmakelists, 'curl_dependency_option(CURL_BROTLI Brotli "brotli")', 'curl_dependency_option(CURL_BROTLI brotli "brotli" "REQUIRED CONFIG")')
         replace_in_file(self, cmakelists, "if(BROTLI_FOUND)", "if(brotli_FOUND)")
         replace_in_file(self, cmakelists, "${BROTLI_LIBRARIES}", "brotli::brotli")
         replace_in_file(self, cmakelists, "${BROTLI_INCLUDE_DIRS}", "${brotli_INCLUDE_DIRS}")
