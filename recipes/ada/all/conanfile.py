@@ -44,9 +44,14 @@ class AdaConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires <charconv>, please use libc++ or upgrade compiler."
             )
-        if Version(self.version) >= "3.0.0" and self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14.3":
+        if Version(self.version) >= "3.0.0" and \
+            ( \
+                (self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "14.3") \
+                or (self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "12") \
+                or (self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "14") \
+            ):
             raise ConanInvalidConfiguration(
-                f"{self.ref} requires <ranges>, which has been provided since apple-clang 14.3 or later."
+                f"{self.ref} doesn't support ${self.settings.compiler} ${self.settings.compiler.version}"
             )
 
     def build_requirements(self):
