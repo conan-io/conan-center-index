@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 class AdaConan(ConanFile):
     name = "ada"
@@ -26,20 +26,6 @@ class AdaConan(ConanFile):
         "shared": False,
     }
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "9",
-            "clang": "10",
-            "apple-clang": "12",
-            "Visual Studio": "16",
-            "msvc": "192",
-        }
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -52,13 +38,7 @@ class AdaConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 20 if Version(self.version) >= "3.0.0" else 17)
 
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "12.0.0" and self.settings.compiler.libcxx != "libc++":
             raise ConanInvalidConfiguration(
