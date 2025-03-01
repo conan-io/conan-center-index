@@ -91,7 +91,8 @@ class OusterSdkConan(ConanFile):
             # is not encoded in the binaries (as it is a private dependency of the static library that
             # is linked into a shared library). This is a workaround to ensure that the shared library
             # has the necessary runtime dependencies.
-            self.requires("libtins/4.5", transitive_libs=Version(self.version) >= "0.13.1")
+            transitive_libtins = None if Version(self.version) < "0.13.1" else True
+            self.requires("libtins/4.5", transitive_libs=transitive_libtins)
 
         if self.options.build_osf:
             # Used in fb_generated/*.h
