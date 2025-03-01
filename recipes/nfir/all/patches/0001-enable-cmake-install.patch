@@ -1,0 +1,34 @@
+From 971888942ec4ac37406ab7c17ba9daf5620c3b41 Mon Sep 17 00:00:00 2001
+From: Tomas Krupa <tomas.krupa@innovatrics.com>
+Date: Wed, 26 Feb 2025 15:13:14 +0100
+Subject: [PATCH] enable cmake install
+
+---
+ CMakeLists.txt | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 2fb3e93..a89934d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -27,3 +27,16 @@ message(STATUS "PROJECT_NAME: ${PROJECT_NAME}")
+ # Pick up the library and binary
+ add_subdirectory(src/lib)
+ add_subdirectory(src/bin)
++
++install(DIRECTORY src/include/
++        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/NFIR
++        FILES_MATCHING PATTERN "*.h*")
++
++install(TARGETS ${PROJECT_NAME}
++        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
++
++install(PROGRAMS ${CMAKE_BINARY_DIR}/src/bin/NFIR_bin
++        DESTINATION ${CMAKE_INSTALL_BINDIR}
++        RENAME NFIR)
+\ No newline at end of file
+-- 
+2.34.1
+
