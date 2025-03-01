@@ -38,7 +38,7 @@ class RestinioConan(ConanFile):
         self.requires("llhttp/9.1.3")
 
         if Version(self.version) >= "0.7.3":
-            self.requires("fmt/11.0.2")
+            self.requires("fmt/[>=11.0.2]")
             self.requires("expected-lite/0.8.0")
         else:
             self.requires("fmt/10.2.1")
