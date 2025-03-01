@@ -11,3 +11,7 @@ patches:
     - patch_file: "patches/2.1.0-beta3-0001-remove-mac-deploy.patch"
       patch_type: "conan"
       patch_description: "Do not enforce default value for MACOSX_DEPLOYMENT_TARGET"
+    - patch_file: "patches/2.1.0-beta3-fix-so-symlinks-with-missing-ldconfig.diff"
+      patch_description: "Fix POSIX install with missing or incompatible ldconfig"
+      patch_source: "https://github.com/LuaJIT/LuaJIT/commit/18c9cf7d3788a8f7408df45df92fc4ae3bcc0d80"
+      patch_type: "bugfix"
