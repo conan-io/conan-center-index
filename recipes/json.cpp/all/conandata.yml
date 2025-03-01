@@ -1,0 +1,12 @@
+sources:
+  "0.0.0.cci.20241207":
+    url: "https://github.com/jart/json.cpp/archive/93d4d76181a0d181ee3b6b0305f81e8bd93b90be.tar.gz"
+    sha256: "644c58df16bd1eacb3db3c1a613eaa3ec72435f911a19e3f3ecd9024a292f1c3"
+patches:
+  "0.0.0.cci.20241207":
+    - patch_file: "patches/0001-fix-cmake.patch"
+      patch_description: "use cci's package"
+      patch_type: "conan"
+    - patch_file: "patches/0002-include-cstdbool.patch"
+      patch_description: "include cstdbool for portability"
+      patch_type: "portability"
