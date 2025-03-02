@@ -222,7 +222,7 @@ class WolfSSLConan(ConanFile):
 
     @property
     def _defines(self):
-        defines = []
+        defines = ["TFM_TIMING_RESISTANT", "ECC_TIMING_RESISTANT", "WC_RSA_BLINDING"]
         if self.settings.os == "baremetal":
             defines.extend(["HAVE_PK_CALLBACKS", "WOLFSSL_USER_IO", "NO_WRITEV"])
             if self.settings.arch in self._32bitarchs:
