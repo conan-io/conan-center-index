@@ -1197,9 +1197,9 @@ class QtConan(ConanFile):
         if self.options.with_odbc:
             _create_plugin("QODBCDriverPlugin", "qsqlodbc", "sqldrivers", [])
             if self.settings.os != "Windows":
-                self.cpp_info.components["QODBCDriverPlugin"].requires.append("odbc::odbc")
+                self.cpp_info.components["qtQODBCDriverPlugin"].requires.append("odbc::odbc")
             else:
-                self.cpp_info.components["QODBCDriverPlugin"].system_libs.append("odbc32")
+                self.cpp_info.components["qtQODBCDriverPlugin"].system_libs.append("odbc32")
         networkReqs = []
         if self.options.openssl:
             networkReqs.append("openssl::openssl")
