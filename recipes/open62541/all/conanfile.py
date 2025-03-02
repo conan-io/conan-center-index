@@ -7,7 +7,7 @@ import glob
 import os
 import yaml
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class Open62541Conan(ConanFile):
@@ -279,7 +279,7 @@ class Open62541Conan(ConanFile):
         tc.variables["UA_ENABLE_SUBSCRIPTIONS"] = self.options.subscription != False
 
         if self.settings.os == "Neutrino":
-          tc.cache_variables["UA_ARCHITECTURE"] = "posix"
+            tc.cache_variables["UA_ARCHITECTURE"] = "posix"
 
         if self.options.subscription != False:
             if "events" in str(self.options.subscription):
@@ -415,18 +415,12 @@ class Open62541Conan(ConanFile):
             os.chmod(filename, os.stat(filename).st_mode | 0o111)
 
     def package_info(self):
-        self.cpp_info.names["cmake_find_package"] = "open62541"
-        self.cpp_info.names["cmake_find_package_multi"] = "open62541"
-        self.cpp_info.names["pkg_config"] = "open62541"
         self.cpp_info.libs = collect_libs(self)
         self.cpp_info.includedirs = ["include"]
 
         # required for creating custom servers from ua-nodeset
         self.conf_info.define("user.open62541:tools_dir", os.path.join(
             self.package_folder, "res", "tools").replace("\\", "/"))
-        # v1 legacy support for tools_dir definition
-        self.user_info.tools_dir = os.path.join(
-            self.package_folder, "res", "tools").replace("\\", "/")
         self._chmod_plus_x(os.path.join(self.package_folder,
                            "res", "tools", "generate_nodeid_header.py"))
 
@@ -453,10 +447,5 @@ class Open62541Conan(ConanFile):
             self.cpp_info.system_libs.extend(["m", "rt", "socket"])
 
         self.cpp_info.builddirs.append(self._module_subfolder)
-        # v1 legacy support for open62541Macros.cmake auto-include
-        self.cpp_info.build_modules["cmake_find_package"] = [
-            self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [
-            self._module_file_rel_path]
         self.cpp_info.set_property("cmake_build_modules", [
                                    self._module_file_rel_path])
