@@ -1,6 +1,5 @@
 from conan import ConanFile
 from conan.tools.build import stdcpp_library
-from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import copy, get, rmdir, rm, rename, replace_in_file
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc
@@ -46,9 +45,7 @@ class OpenH264Conan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.4.1")
-        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/[>=2.2 <3]")
+        self.tool_requires("meson/[>=1.2.3 <2]")
         if self.settings.arch in ["x86", "x86_64"]:
             self.tool_requires("nasm/2.16.01")
 
@@ -59,12 +56,9 @@ class OpenH264Conan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} does not support {self.settings.os}. Try a newer version.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
         tc = MesonToolchain(self)
         tc.project_options["tests"] = "disabled"
         tc.generate()
