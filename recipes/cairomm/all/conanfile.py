@@ -1,6 +1,4 @@
-import glob
 import os
-import shutil
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
@@ -58,7 +56,6 @@ class CairommConan(ConanFile):
 
     def requirements(self):
         self.requires("cairo/1.18.0", transitive_headers=True, transitive_libs=True)
-        self.requires("fontconfig/2.15.0", transitive_headers=True, transitive_libs=True)
         if self._abi_version == "1.16":
             self.requires("libsigcpp/3.0.7", transitive_headers=True, transitive_libs=True)
         else:
@@ -119,36 +116,47 @@ class CairommConan(ConanFile):
         meson.build()
 
     def package(self):
-        copy(self, "COPYING", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
+        copy(self, "COPYING", self.source_folder, os.path.join(self.package_folder, "licenses"))
         meson = Meson(self)
         meson.install()
-        if is_msvc(self):
-            rm(self, "*.pdb", os.path.join(self.package_folder, "bin"), recursive=True)
-            if not self.options.shared:
-                rename(self,
-                    os.path.join(self.package_folder, "lib", f"libcairomm-{self._abi_version}.a"),
-                    os.path.join(self.package_folder, "lib", f"cairomm-{self._abi_version}.lib"))
-
-        for header_file in glob.glob(
-            os.path.join(self.package_folder, "lib", f"cairomm-{self._abi_version}", "include", "*.h")
-        ):
-            shutil.move(
-                header_file,
-                os.path.join(self.package_folder, "include", f"cairomm-{self._abi_version}", os.path.basename(header_file)),
-            )
-
-        for dir_to_remove in ["pkgconfig", f"cairomm-{self._abi_version}"]:
-            rmdir(self, os.path.join(self.package_folder, "lib", dir_to_remove))
-
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rm(self, "*.pdb", os.path.join(self.package_folder, "bin"), recursive=True)
         fix_apple_shared_install_name(self)
+        if is_msvc(self) and not self.options.shared:
+            rename(self, os.path.join(self.package_folder, "lib", f"libcairomm-{self._abi_version}.a"),
+                         os.path.join(self.package_folder, "lib", f"cairomm-{self._abi_version}.lib"))
 
     def package_info(self):
         name = f"cairomm-{self._abi_version}"
         self.cpp_info.components[name].set_property("pkg_config_name", name)
-        self.cpp_info.components[name].includedirs = [os.path.join("include", name)]
+        self.cpp_info.components[name].includedirs += [
+            os.path.join("include", name),
+            os.path.join("lib", name, "include"),
+        ]
         self.cpp_info.components[name].libs = [name]
-        self.cpp_info.components[name].requires = ["libsigcpp::libsigcpp", "cairo::cairo", "fontconfig::fontconfig"]
+        self.cpp_info.components[name].requires = ["cairo::cairo_", "libsigcpp::libsigcpp"]
         if not self.options.shared:
             self.cpp_info.components[name].defines = ["CAIROMM_STATIC_LIB"]
         if is_apple_os(self):
             self.cpp_info.components[name].frameworks = ["CoreFoundation"]
+
+        # https://gitlab.freedesktop.org/cairo/cairomm/-/blob/1.18.0/data/meson.build?ref_type=tags#L30-31
+        cairo_components = self.dependencies["cairo"].cpp_info.components
+        for cairomm_mod in [
+            "ft",
+            "pdf",
+            "png",
+            "ps",
+            "quartz",
+            "quartz-font",
+            "quartz-image",
+            "svg",
+            "win32",
+            "win32-font",
+            "xlib",
+            "xlib-xrender",
+        ]:
+            if f"cairo-{cairomm_mod}" in cairo_components:
+                component = f"cairomm-{cairomm_mod}-{self._abi_version}"
+                self.cpp_info.components[component].set_property("pkg_config_name", component)
+                self.cpp_info.components[component].requires = [name, f"cairo::cairo-{cairomm_mod}"]
