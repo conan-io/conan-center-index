@@ -330,7 +330,7 @@ class OpenCVConan(ConanFile):
         elif Version(self.version) < "4.3.0":
             self.options.with_jpeg2000 = "jasper"
 
-        if "arm" not in self.settings.arch:
+        if "arm" not in self.settings.arch or Version(self.version) >= "4.11.0":
             del self.options.neon
         if not self._has_with_tiff_option:
             del self.options.with_tiff
@@ -1485,8 +1485,6 @@ class OpenCVConan(ConanFile):
         if self.options.cpu_dispatch or self.options.cpu_dispatch == "":
             tc.variables["CPU_DISPATCH"] = self.options.cpu_dispatch
 
-        tc.variables["ENABLE_NEON"] = self.options.get_safe("neon", False)
-
         tc.variables["OPENCV_DNN_CUDA"] = self.options.get_safe("dnn_cuda", False)
 
         if Version(self.version) >= "4.6.0":
@@ -1514,6 +1512,11 @@ class OpenCVConan(ConanFile):
                 # default behavior for 4.9.0
                 tc.variables["WITH_OBSENSOR"] = False
             tc.variables["WITH_ZLIB_NG"] = False
+
+        if Version(self.version) >= "4.11.0":
+            tc.variables["WITH_HAL_RVV"] = False
+        else:
+            tc.variables["ENABLE_NEON"] = self.options.get_safe("neon", False)
 
         # Special world option merging all enabled modules into one big library file
         tc.variables["BUILD_opencv_world"] = self.options.world
