@@ -178,6 +178,10 @@ class SDLConan(ConanFile):
             and not self.conf.get("tools.cmake.cmakedeps:new"):
             raise ConanInvalidConfiguration("SDL with shared libusb requires new CMakeDeps generator")
 
+        if self.settings.os == "Android" and not self.conf.get("user.sdl:android", False):
+            raise ConanInvalidConfiguration("SDL builds on android require extra configuration on the user's side. "
+                                            "Set -c user.sdl:android=True if you understand it and want to build it")
+
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -342,113 +346,118 @@ class SDLConan(ConanFile):
             self.settings.compiler.get_safe("runtime")
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "SDL3")
+
         sdl_lib_name = "SDL3"
         if (is_msvc(self) or self._is_clang_cl) and not self.options.shared:
             sdl_lib_name = f"{sdl_lib_name}-static"
-        self.cpp_info.libs = [sdl_lib_name]
-        self.cpp_info.set_property("cmake_file_name", "SDL3")
-        self.cpp_info.set_property("cmake_target_name", "SDL3::SDL3")
-        self.cpp_info.set_property("cmake_target_aliases", [
+        self.cpp_info.components["sdl3"].libs = [sdl_lib_name]
+        self.cpp_info.components["sdl3"].set_property("cmake_target_name", "SDL3::SDL3")
+        self.cpp_info.components["sdl3"].set_property("cmake_target_aliases", [
             "SDL3::SDL3-shared" if self.options.shared else "SDL3::SDL3-static",
-            # Modelling the headers as a target is not quite feasible, so use an alias instead
-            "SDL3::Headers"
         ])
 
+        # Target that only contains the include directories
+        self.cpp_info.components["headers"].set_property("cmake_target_name", "SDL3::Headers")
+        self.cpp_info.components["headers"].libdirs = []
+
+        self.cpp_info.components["sdl3"].requires.append("headers")
+
         if self.settings.os in ("Linux", "FreeBSD", "Macos"):
-            self.cpp_info.system_libs.append("pthread")
+            self.cpp_info.components["sdl3"].system_libs.append("pthread")
 
         if self.options.get_safe("libiconv"):
-            self.cpp_info.requires.append("libiconv::libiconv")
+            self.cpp_info.components["sdl3"].requires.append("libiconv::libiconv")
 
         if self.options.get_safe("libudev"):
-            self.cpp_info.requires.append("libudev::libudev")
+            self.cpp_info.components["sdl3"].requires.append("libudev::libudev")
 
         if self._needs_libusb:
-            self.cpp_info.requires.append("libusb::libusb")
+            self.cpp_info.components["sdl3"].requires.append("libusb::libusb")
 
         if self.options.get_safe("dbus"):
-            self.cpp_info.requires.append("dbus::dbus")
+            self.cpp_info.components["sdl3"].requires.append("dbus::dbus")
 
         if self.options.get_safe("opengl"):
-            self.cpp_info.requires.append("opengl::opengl")
+            self.cpp_info.components["sdl3"].requires.append("opengl::opengl")
 
         if self.options.get_safe("wayland"):
-            self.cpp_info.requires.extend(["wayland::wayland", "xkbcommon::xkbcommon", "egl::egl"])
+            self.cpp_info.components["sdl3"].requires.extend(["wayland::wayland", "xkbcommon::xkbcommon", "egl::egl"])
 
         if self.options.get_safe("x11"):
-            self.cpp_info.requires.extend(["xorg::x11", "xorg::xext"])
+            self.cpp_info.components["sdl3"].requires.extend(["xorg::x11", "xorg::xext"])
             # xdbe, xshape and xsync are covered by x11 and xext
             if self.options.xcursor:
-                self.cpp_info.requires.append("xorg::xcursor")
+                self.cpp_info.components["sdl3"].requires.append("xorg::xcursor")
             if self.options.xinput:
-                self.cpp_info.requires.append("xorg::xi")
+                self.cpp_info.components["sdl3"].requires.append("xorg::xi")
             if self.options.xfixes:
-                self.cpp_info.requires.append("xorg::xfixes")
+                self.cpp_info.components["sdl3"].requires.append("xorg::xfixes")
             if self.options.xrandr:
-                self.cpp_info.requires.append("xorg::xrandr")
+                self.cpp_info.components["sdl3"].requires.append("xorg::xrandr")
             if self.options.xscrnsaver:
-                self.cpp_info.requires.append("xorg::xscrnsaver")
+                self.cpp_info.components["sdl3"].requires.append("xorg::xscrnsaver")
 
         if self.options.get_safe("audio"):
             if self.options.get_safe("alsa"):
-                self.cpp_info.requires.append("libalsa::libalsa")
+                self.cpp_info.components["sdl3"].requires.append("libalsa::libalsa")
             if self.options.get_safe("pulseaudio"):
-                self.cpp_info.requires.append("pulseaudio::pulseaudio")
+                self.cpp_info.components["sdl3"].requires.append("pulseaudio::pulseaudio")
             if self.options.get_safe("sndio"):
-                self.cpp_info.requires.append("libsndio::libsndio")
+                self.cpp_info.components["sdl3"].requires.append("libsndio::libsndio")
 
         if self.settings.os == "Android":
             if self.options.get_safe("video"):
-                self.cpp_info.system_libs.extend(["dl", "log", "android"])
+                self.cpp_info.components["sdl3"].system_libs.extend(["dl", "log", "android"])
             if self.options.get_safe("opengles"):
-                self.cpp_info.system_libs.extend(["GLESv1_CM", "GLESv2"])
+                self.cpp_info.components["sdl3"].system_libs.extend(["GLESv1_CM", "GLESv2"])
             if self.options.get_safe("audio"):
-                self.cpp_info.system_libs.append("OpenSLES")
+                self.cpp_info.components["sdl3"].system_libs.append("OpenSLES")
 
         # TODO(conan client): when shared, SDL do not need to link against its dependencies but conan will complain about it
         if is_apple_os(self) and not self.options.shared:
-            self.cpp_info.frameworks = ["CoreVideo", "Foundation"]
+            self.cpp_info.components["sdl3"].frameworks = ["CoreVideo", "Foundation"]
 
             if self.settings.os == "Macos":
-                self.cpp_info.frameworks.extend(["Cocoa", "Carbon"])
+                self.cpp_info.components["sdl3"].frameworks.extend(["Cocoa", "Carbon"])
 
             if self.options.get_safe("audio"):
-                self.cpp_info.frameworks.extend(["CoreAudio", "AudioToolbox", "AVFoundation"])
+                self.cpp_info.components["sdl3"].frameworks.extend(["CoreAudio", "AudioToolbox", "AVFoundation"])
 
             if self.options.get_safe("video"):
                 if self.settings.os in ("iOS", "tvOS", "visionOS", "watchOS"):
-                    self.cpp_info.frameworks.extend(["CoreGraphics", "QuartzCore", "UIKit"])
+                    self.cpp_info.components["sdl3"].frameworks.extend(["CoreGraphics", "QuartzCore", "UIKit"])
                 else:
-                    self.cpp_info.frameworks.append("UniformTypeIdentifiers")
+                    self.cpp_info.components["sdl3"].frameworks.append("UniformTypeIdentifiers")
 
             if self.options.get_safe("camera") and self.settings.os in ("Macos", "iOS"):
-                self.cpp_info.frameworks.append("CoreMedia")
+                self.cpp_info.components["sdl3"].frameworks.append("CoreMedia")
 
             if self.options.get_safe("joystick"):
-                self.cpp_info.frameworks.append("GameController")
-                self.cpp_info.sharedlinkflags.append("-Wl,-weak_framework,CoreHaptics")
-                self.cpp_info.exelinkflags.append("-Wl,-weak_framework,CoreHaptics")
+                self.cpp_info.components["sdl3"].frameworks.append("GameController")
+                self.cpp_info.components["sdl3"].sharedlinkflags.append("-Wl,-weak_framework,CoreHaptics")
+                self.cpp_info.components["sdl3"].exelinkflags.append("-Wl,-weak_framework,CoreHaptics")
                 if self.settings.os == "Macos":
                     # Mind that ForceFeedback is also added in haptic system, but haptic depends on joystick
-                    self.cpp_info.frameworks.extend(["ForceFeedback", "IOKit"])
+                    self.cpp_info.components["sdl3"].frameworks.extend(["ForceFeedback", "IOKit"])
                 elif self.settings.os in ("iOS", "visionOS", "watchOS"):
-                    self.cpp_info.frameworks.append("CoreMotion")
+                    self.cpp_info.components["sdl3"].frameworks.append("CoreMotion")
 
             if self.options.get_safe("hidapi") and self.settings.os in ("iOS", "tvOS"):
-                self.cpp_info.frameworks.append("CoreBluetooth")
+                self.cpp_info.components["sdl3"].frameworks.append("CoreBluetooth")
 
             if self.options.get_safe("power") and self.settings.os == "Macos":
-                self.cpp_info.frameworks.append("IOKit")
+                self.cpp_info.components["sdl3"].frameworks.append("IOKit")
 
             if self.options.get_safe("opengles") and self.settings.os in ("iOS", "tvOS", "visionOS", "watchOS"):
-                self.cpp_info.frameworks.append("OpenGLES")
+                self.cpp_info.components["sdl3"].frameworks.append("OpenGLES")
 
             if self.options.get_safe("metal"):
-                self.cpp_info.frameworks.extend(["Metal", "QuartzCore"])
+                self.cpp_info.components["sdl3"].frameworks.extend(["Metal", "QuartzCore"])
 
         # Windows links with all libs by default
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs.extend(
+            self.cpp_info.components["sdl3"].system_libs.extend(
                 [
                     "kernel32",
                     "user32",
