@@ -166,6 +166,7 @@ class Openmvgconan(ConanFile):
                 "target": "openMVG_features",
                 "libs": ["openMVG_features"],
                 "requires": ["openmvg_fast", "openmvg_stlplus", "eigen::eigen", "cereal::cereal"],
+                "add_library_name_prefix_to_include_dirs": True,
             },
             "openmvg_geodesy": {
                 "target": "openMVG_geodesy",
@@ -200,6 +201,7 @@ class Openmvgconan(ConanFile):
                 "libs": ["openMVG_matching"],
                 "requires": ["openmvg_features", "openmvg_stlplus", "cereal::cereal", "flann::flann"],
                 "system_libs": [(self.settings.os in ["Linux", "FreeBSD"], ["pthread"])],
+                "add_library_name_prefix_to_include_dirs": True,
             },
             "openmvg_kvld": {
                 "target": "openMVG_kvld",
@@ -210,6 +212,7 @@ class Openmvgconan(ConanFile):
                 "target": "openMVG_matching_image_collection",
                 "libs": ["openMVG_matching_image_collection"],
                 "requires": ["openmvg_matching", "openmvg_multiview"],
+                "add_library_name_prefix_to_include_dirs": True,
             },
             "openmvg_multiview": {
                 "target": "openMVG_multiview",
@@ -226,6 +229,7 @@ class Openmvgconan(ConanFile):
                 "target": "openMVG_robust_estimation",
                 "libs": ["openMVG_robust_estimation"],
                 "requires": ["openmvg_numeric"],
+                "add_library_name_prefix_to_include_dirs": True,
             },
             "openmvg_sfm": {
                 "target": "openMVG_sfm",
@@ -235,6 +239,7 @@ class Openmvgconan(ConanFile):
                     "openmvg_multiview", "openmvg_image", "openmvg_linftycomputervision",
                     "openmvg_system", "openmvg_stlplus", "cereal::cereal", "ceres-solver::ceres-solver",
                 ],
+                "add_library_name_prefix_to_include_dirs": True,
             },
             "openmvg_system": {
                 "target": "openMVG_system",
@@ -282,6 +287,9 @@ class Openmvgconan(ConanFile):
             self.cpp_info.components[component].requires = values.get("requires", [])
             self.cpp_info.components[component].system_libs = system_libs
             self.cpp_info.components[component].resdirs = ["res"]
+
+            if values.get("add_library_name_prefix_to_include_dirs", False):
+                self.cpp_info.components[component].includedirs.append(os.path.join("include", "openMVG"))
 
             # TODO: to remove in conan v2
             self.cpp_info.components[component].names["cmake_find_package"] = target
