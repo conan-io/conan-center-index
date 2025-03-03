@@ -293,7 +293,7 @@ class LibcurlConan(ConanFile):
             replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", "SUBDIRS = lib")
 
         # `Makefile.inc` has been removed from 8.12.0 onwards
-        if self.version < Version("8.12.0"):
+        if Version(self.version) < "8.12.0":
             replace_in_file(self, top_makefile, "include src/Makefile.inc", "")
 
         # zlib naming is not always very consistent
