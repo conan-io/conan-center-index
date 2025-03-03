@@ -129,7 +129,6 @@ class MariadbConnectorCppRecipe (ConanFile):
                 self.cpp_info.defines.append("MARIADB_EXPORTED=__declspec(dllimport)")
         else:
             if self.settings.os == "Windows":
-                # On Windows, mariadbcpp.lib is not created as a link to mariadbcpp-static.lib :(
                 self.cpp_info.libs = ["mariadbcpp-static"]
                 self.cpp_info.defines.append("MARIADB_STATIC_LINK")
             else:
