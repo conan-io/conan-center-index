@@ -1,14 +1,17 @@
+import json
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.microsoft import msvc_runtime_flag
-from conan.tools.scm import Version
-from conan.tools.files import apply_conandata_patches, get, chdir, rename, rm
-from conan.tools.build import cross_building
-from conans import tools
-import os
-import glob
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.build import can_run
+from conan.tools.env import VirtualBuildEnv, Environment, VirtualRunEnv
+from conan.tools.files import copy, get, replace_in_file, export_conandata_patches, apply_conandata_patches, rmdir, save, load, collect_libs
+from conan.tools.layout import basic_layout
+from conan.tools.microsoft import is_msvc, VCVars, unix_path
 
-required_conan_version = ">=1.51.3"
+required_conan_version = ">=1.60.0 <2.0 || >=2.0.6"
+
 
 class NSSConan(ConanFile):
     name = "nss"
@@ -17,208 +20,337 @@ class NSSConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     description = "Network Security Services"
     topics = ("network", "security", "crypto", "ssl")
-    settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False], "fPIC": [True, False]}
-    default_options = {"shared": True, "fPIC": True}
 
+    # FIXME: NSS_Init() fails in test_package for static builds
+    package_type = "shared-library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "enable_legacy_db": [True, False],
+    }
+    default_options = {
+        "enable_legacy_db": False,
+    }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def build_requirements(self):
-        if self.settings.compiler == "Visual Studio" and not tools.get_env("CONAN_BASH_PATH"):
-            self.build_requires("msys2/cci.latest")
-        if self.settings.os == "Windows":
-            self.build_requires("mozilla-build/3.3")
-        if hasattr(self, "settings_build"):
-            self.build_requires("sqlite3/<host_version>")
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def configure(self):
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
         self.options["nspr"].shared = True
-        self.options["sqlite3"].shared = True
 
-        if self.options.shared:
-            del self.options.fPIC
-        del self.settings.compiler.libcxx
-        del self.settings.compiler.cppstd
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("nspr/4.35")
-        self.requires("sqlite3/[>=3.41 <4]")
-        self.requires("zlib/1.2.13")
+        self.requires("nspr/4.35", transitive_headers=True, transitive_libs=True)
+        self.requires("sqlite3/[>=3.41.0 <4]")
+        self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if not self.options.shared:
-            raise ConanInvalidConfiguration("NSS recipe cannot yet build static library. Contributions are welcome.")
-        if not self.options["nspr"].shared:
+        if not self.dependencies["nspr"].options.shared:
             raise ConanInvalidConfiguration("NSS cannot link to static NSPR. Please use option nspr:shared=True")
-        if msvc_runtime_flag(self) == "MTd":
-            raise ConanInvalidConfiguration("NSS recipes does not support MTd runtime. Contributions are welcome.")
-        if not self.options["sqlite3"].shared:
-            raise ConanInvalidConfiguration("NSS cannot link to static sqlite. Please use option sqlite3:shared=True")
-        if self.settings.arch in ["armv8", "armv8.3"] and self.settings.os in ["Macos"]:
-            raise ConanInvalidConfiguration("Macos ARM64 builds not yet supported. Contributions are welcome.")
-        if Version(self.version) < "3.74":
-            if self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= 13:
-                raise ConanInvalidConfiguration("nss < 3.74 requires clang < 13 .")
 
+    def build_requirements(self):
+        if self.settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
+        if self.settings.os == "Windows":
+            self.tool_requires("mozilla-build/4.0.2")
+        self.tool_requires("cpython/3.12.2")
+        self.tool_requires("ninja/[>=1.10.2 <2]")
+        self.tool_requires("sqlite3/<host_version>")
+        if not can_run(self):
+            # Needed for shlibsign executable
+            self.tool_requires(f"nss/{self.version}")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version], strip_root=True, destination=self._source_subfolder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        # Remove vendored sources
+        rmdir(self, os.path.join("nss", "lib", "sqlite"))
+        rmdir(self, os.path.join("nss", "lib", "zlib"))
 
     @property
-    def _make_args(self):
-        args = []
-        if self.settings.arch in ["x86_64"]:
-            args.append("USE_64=1")
-            if self.settings.os == "Macos":
-                args.append("CPU_ARCH=i386")
-            else:
-                args.append("CPU_ARCH=x86_64")
-        if self.settings.arch in ["armv8", "armv8.3"]:
-            args.append("USE_64=1")
-            args.append("CPU_ARCH=aarch64")
-        if self.settings.compiler == "gcc":
-            args.append("XCFLAGS=-Wno-array-parameter")
-        args.append("NSPR_INCLUDE_DIR=%s" % self.deps_cpp_info["nspr"].include_paths[1])
-        args.append("NSPR_LIB_DIR=%s" % self.deps_cpp_info["nspr"].lib_paths[0])
+    def _vs_year(self):
+        compiler_version = str(self.settings.compiler.version)
+        return {
+            "180": "2013",
+            "190": "2015",
+            "191": "2017",
+            "192": "2019",
+            "193": "2022",
+            "194": "2022",
+        }.get(compiler_version)
 
-        os_map = {
-            "Linux": "Linux",
-            "Macos": "Darwin",
-            "Windows": "WINNT",
-            "FreeBSD": "FreeBSD"
-        }
+    @property
+    def _dist_dir(self):
+        return os.path.join(self.build_folder, "dist")
 
-        args.append("OS_TARGET=%s" % os_map.get(str(self.settings.os), "UNSUPPORTED_OS"))
-        args.append("OS_ARCH=%s" % os_map.get(str(self.settings.os), "UNSUPPORTED_OS"))
-        if self.settings.build_type != "Debug":
-            args.append("BUILD_OPT=1")
-        if self.settings.compiler == "Visual Studio":
-            args.append("NSPR31_LIB_PREFIX=$(NULL)")
+    @property
+    def _target_build_dir(self):
+        return os.path.join(self.build_folder, "out", "Debug" if self.settings.build_type == "Debug" else "Release")
 
-        args.append("USE_SYSTEM_ZLIB=1")
-        args.append("ZLIB_INCLUDE_DIR=%s" % self.deps_cpp_info["zlib"].include_paths[0])
+    @property
+    def _arch(self):
+        if self.settings.arch == "x86_64":
+            return "x64"
+        elif self.settings.arch == "x86":
+            return "ia32"
+        elif self.settings.arch in ["armv8", "armv8.3"]:
+            return "aarch64"
+        return str(self.settings.arch)
 
+    def generate(self):
+        env = VirtualBuildEnv(self)
+        env.generate()
 
-        def adjust_path(path, settings):
-            """
-            adjusts path to be safely passed to the compiler command line
-            for Windows bash, ensures path is in format according to the subsystem
-            for path with spaces, places double quotes around it
-            converts slashes to backslashes, or vice versa
-            """
-            compiler = _base_compiler(settings)
-            if str(compiler) == 'Visual Studio':
-                path = path.replace('/', '\\')
-            else:
-                path = path.replace('\\', '/')
-            return '"%s"' % path if ' ' in path else path
+        if can_run(self):
+            # The built shlibsign executable needs to find shared libs
+            env = VirtualRunEnv(self)
+            env.generate(scope="build")
 
-        def _base_compiler(settings):
-            return settings.get_safe("compiler.base") or settings.get_safe("compiler")
-
-        def _format_library_paths(library_paths, settings):
-            compiler = _base_compiler(settings)
-            pattern = "-LIBPATH:%s" if str(compiler) == 'Visual Studio' else "-L%s"
-            return [pattern % adjust_path(library_path, settings)
-                    for library_path in library_paths if library_path]
+        vc = VCVars(self)
+        vc.generate()
 
 
-        def _format_libraries(libraries, settings):
+        nspr_root = self.dependencies["nspr"].package_folder
+        nspr_includedir = unix_path(self, os.path.join(nspr_root, "include", "nspr"))
+        nspr_libdir = unix_path(self, os.path.join(nspr_root, "lib"))
+
+        gyp_args = {}
+        gyp_args["nss_dist_dir"] = unix_path(self, self._dist_dir)
+        gyp_args["nss_dist_obj_dir"] = unix_path(self, self._dist_dir)
+        gyp_args["opt_build"] = 1 if self.settings.build_type != "Debug" else 0
+        gyp_args["static_libs"] = 1 if not self.options.get_safe("shared", True) else 0
+        gyp_args["target_arch"] = self._arch
+        gyp_args["disable_tests"] = 1
+        gyp_args["no_local_nspr"] = 1
+        gyp_args["nspr_include_dir"] = nspr_includedir
+        gyp_args["nspr_lib_dir"] = nspr_libdir
+        gyp_args["use_system_sqlite"] = 1
+        gyp_args["use_system_zlib"] = 1
+        gyp_args["disable_dbm"] = 0 if self.options.enable_legacy_db else 1
+        gyp_args["enable_sslkeylogfile"] = 1  # default in build.sh
+        save(self, "gyp_args.txt", "\n".join(f"-D{k}={v}" for k, v in gyp_args.items()))
+
+        env = Environment()
+
+        compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
+        buildenv_vars = VirtualBuildEnv(self).vars()
+        cc = compilers_from_conf.get("c", buildenv_vars.get("CC"))
+        if cc:
+            env.define("CC", unix_path(self, cc))
+        strip = compilers_from_conf.get("strip", buildenv_vars.get("STRIP"))
+        if strip:
+            env.define("STRIP", unix_path(self, strip))
+        cxx = compilers_from_conf.get("cpp", buildenv_vars.get("CXX"))
+        if cc:
+            env.define("CXX", unix_path(self, cxx))
+            env.define("CCC", unix_path(self, cxx))
+
+        if is_msvc(self):
+            env.define("GYP_MSVS_VERSION", self._vs_year)
+
+        # For 'shlibsign -v -i <dist_dir>/lib/libfreebl3.so' etc to work during build
+        env.prepend_path("LD_LIBRARY_PATH", os.path.join(self._dist_dir, "lib"))
+
+        # Add temporary site-packages to PYTHONPATH for gyp-next
+        env.prepend_path("PYTHONPATH", self._site_packages_dir)
+        if self.settings.os == "Windows":
+            # An additional forward-slash path is needed for MSYS2 bash
+            env.prepend_path("PYTHONPATH", self._site_packages_dir.replace("\\", "/"))
+        env.prepend_path("PATH", os.path.join(self._site_packages_dir, "bin"))
+
+        env.vars(self, scope="build").save_script("conan_paths")
+
+    @property
+    def _site_packages_dir(self):
+        return os.path.join(self.build_folder, "site-packages")
+
+    def _pip_install(self, packages):
+        site_packages_dir = self._site_packages_dir.replace("\\", "/")
+        self.run(f"python -m pip install {' '.join(packages)} --no-cache-dir --target={site_packages_dir} --index-url https://pypi.org/simple",)
+
+    def _write_conan_gyp_target(self, conan_dep, target_name, file_name):
+        def _format_libs(libraries, libdir=None):
             result = []
-            compiler = settings.get_safe("compiler")
-            compiler_base = settings.get_safe("compiler.base")
             for library in libraries:
-                if str(compiler) == 'Visual Studio' or str(compiler_base) == 'Visual Studio':
+                if is_msvc(self):
                     if not library.endswith(".lib"):
                         library += ".lib"
+                    if libdir is not None:
+                        library = os.path.join(libdir, library).replace("\\", "/")
                     result.append(library)
                 else:
                     result.append(f"-l{library}")
             return result
 
+        lib_dir = os.path.join(self.source_folder, "nss", "lib", file_name)
+        cpp_info = self.dependencies[conan_dep].cpp_info.aggregated_components()
+        build_gyp = {
+            "includes": ["../../coreconf/config.gypi"],
+            "targets": [{
+                "target_name": target_name,
+                "type": "none",
+                "direct_dependent_settings": {
+                    "defines": cpp_info.defines,
+                    "include_dirs": [cpp_info.includedir.replace("\\", "/")],
+                    "link_settings": {
+                        "libraries": _format_libs(cpp_info.libs, cpp_info.libdir.replace("\\", "/")) + _format_libs(cpp_info.system_libs),
+                        "library_dirs": [libdir.replace("\\", "/") for libdir in cpp_info.libdirs],
+                    },
+                }
+            }],
+        }
+        save(self, os.path.join(lib_dir, f"{file_name}.gyp"), json.dumps(build_gyp, indent=2))
 
-        args.append("\"ZLIB_LIBS=%s\"" % " ".join(
-            _format_libraries(self.deps_cpp_info["zlib"].libs, self.settings) +
-            _format_library_paths(self.deps_cpp_info["zlib"].lib_paths, self.settings)))
-        args.append("NSS_DISABLE_GTESTS=1")
-        args.append("NSS_USE_SYSTEM_SQLITE=1")
-        args.append("SQLITE_INCLUDE_DIR=%s" % self.deps_cpp_info["sqlite3"].include_paths[0])
-        args.append("SQLITE_LIB_DIR=%s" % self.deps_cpp_info["sqlite3"].lib_paths[0])
-        args.append("NSDISTMODE=copy")
-        if cross_building(self):
-            args.append("CROSS_COMPILE=1")
-        return args
+        exports_gyp = {
+            "includes": ["../../coreconf/config.gypi"],
+            "targets": [{
+                "target_name": f"lib_{file_name}_exports",
+                "type": "none",
+            }],
+        }
+        save(self, os.path.join(lib_dir, "exports.gyp"), json.dumps(exports_gyp, indent=2))
 
+    def _patch_sources(self):
+        self._write_conan_gyp_target("sqlite3", "sqlite3", "sqlite")
+        self._write_conan_gyp_target("zlib", "nss_zlib", "zlib")
+
+        # NSPR Windows libs on CCI don't include a lib prefix
+        replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "config.gypi"),
+                        "'nspr_libs%': ['libnspr4.lib', 'libplc4.lib', 'libplds4.lib'],",
+                        "'nspr_libs%': ['nspr4.lib', 'plc4.lib', 'plds4.lib'],")
+
+        # Don't let shlibsign.py set LD_LIBRARY_PATH to an incorrect value.
+        replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "shlibsign.py"),
+                        "env['LD_LIBRARY_PATH']", "pass # env['LD_LIBRARY_PATH']")
+        if not can_run(self):
+            shlibsign = os.path.join(self.dependencies.build["nss"].package_folder, "bin", "shlibsign").replace("\\", "/")
+            replace_in_file(self, os.path.join(self.source_folder, "nss", "coreconf", "shlibsign.py"),
+                            "os.path.join(bin_path, 'shlibsign')", f"'{shlibsign}'")
 
     def build(self):
-        apply_conandata_patches(self)
-        with chdir(self, os.path.join(self._source_subfolder, "nss")):
-            with tools.vcvars(self) if self.settings.compiler == "Visual Studio" else tools.no_op():
-                self.run("make %s" % " ".join(self._make_args), run_environment=True)
+        self._patch_sources()
+        self._pip_install(["gyp-next"])
+        args = load(self, os.path.join(self.generators_folder, "gyp_args.txt")).replace("\n", " ")
+        cmd = f'gyp -f ninja nss.gyp --depth=. --generator-output="{unix_path(self, self.build_folder)}" ' + args
+        if is_msvc(self):
+            cmd = f"bash -c 'target_arch={self._arch} source coreconf/msvc.sh; {cmd}'"
+        self.run(cmd, cwd=os.path.join(self.source_folder, "nss"))
+        self.run("ninja", cwd=self._target_build_dir)
 
     def package(self):
-        self.copy("COPYING", src = os.path.join(self._source_subfolder, "nss"), dst = "licenses")
-        with chdir(self, os.path.join(self._source_subfolder, "nss")):
-            self.run("make install %s" % " ".join(self._make_args))
-        self.copy("*",
-                  src=os.path.join(self._source_subfolder, "dist", "public", "nss"),
-                  dst="include")
-        for d in os.listdir(os.path.join(self._source_subfolder, "dist")):
-            if d in ["private","public"]:
-                continue
-            f = os.path.join(self._source_subfolder, "dist", d)
-            if not os.path.isdir(f):
-                continue
-            self.copy("*", src = f)
+        copy(self, "COPYING", src=os.path.join(self.source_folder, "nss"), dst=os.path.join(self.package_folder, "licenses"))
 
-        for dll_file in glob.glob(os.path.join(self.package_folder, "lib", "*.dll")):
-            rename(self, dll_file, os.path.join(self.package_folder, "bin", os.path.basename(dll_file)))
+        copy(self, "*",
+             src=os.path.join(self._dist_dir, "public"),
+             dst=os.path.join(self.package_folder, "include"))
+        copy(self, "*",
+             src=os.path.join(self._dist_dir, "private", "nss"),
+             dst=os.path.join(self.package_folder, "include", "nss", "private"))
 
-        if self.options.shared:
-            rm(self, "*.a", os.path.join(self.package_folder, "lib"))
+        # Tools are always linked against shared libs only
+        if self.options.get_safe("shared", True):
+            exe_pattern = "*.exe" if self.settings.os == "Windows" else "*"
+            copy(self, exe_pattern, os.path.join(self._dist_dir, "bin"), os.path.join(self.package_folder, "bin"))
+
+        lib_dir = os.path.join(self._dist_dir, "lib")
+        if self.options.get_safe("shared", True):
+            for pattern in ["*.so", "*.chk", "*.dylib", "*.dll.lib"]:
+                copy(self, pattern, lib_dir, os.path.join(self.package_folder, "lib"))
+            copy(self, "*.dll", lib_dir, os.path.join(self.package_folder, "bin"))
         else:
-            rm(self, "*.so", os.path.join(self.package_folder, "lib"))
-            rm(self, "*.dll", os.path.join(self.package_folder, "bin"))
-
-
+            copy(self, "*.a", lib_dir, os.path.join(self.package_folder, "lib"))
+            copy(self, "*.lib", lib_dir, os.path.join(self.package_folder, "lib"), excludes="*.dll.lib")
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
+        # Since the project does not export any .pc files,
+        # we will rely on the .pc files created by Fedora
+        # https://src.fedoraproject.org/rpms/nss/tree/rawhide
+        # and Debian
+        # https://salsa.debian.org/mozilla-team/nss/-/tree/master/debian
+        # instead.
 
-        def _library_name(lib,vers):
-            return f"{lib}{vers}" if self.options.shared else lib
-        self.cpp_info.components["libnss"].libs.append(_library_name("nss", 3))
-        self.cpp_info.components["libnss"].requires = ["nssutil", "nspr::nspr"]
+        # Do not use
+        self.cpp_info.set_property("pkg_config_name", "_nss")
 
-        self.cpp_info.components["nssutil"].libs = [_library_name("nssutil", 3)]
-        self.cpp_info.components["nssutil"].requires = ["nspr::nspr"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["nssutil"].system_libs = ["pthread"]
+        # https://src.fedoraproject.org/rpms/nss/blob/rawhide/f/nss.pc.in
+        self.cpp_info.components["nss_pc"].set_property("pkg_config_name", "nss")
+        self.cpp_info.components["nss_pc"].requires = ["libnss", "ssl", "smime"]
 
-        self.cpp_info.components["softokn"].libs = [_library_name("softokn", 3)]
-        self.cpp_info.components["softokn"].requires = ["sqlite3::sqlite3", "nssutil", "nspr::nspr"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["softokn"].system_libs = ["pthread"]
+        self.cpp_info.components["libnss"].libs = ["nss3"]
+        self.cpp_info.components["libnss"].includedirs.append(os.path.join("include", "nss"))
+        self.cpp_info.components["libnss"].requires = ["util", "nspr::nspr"]
 
-        self.cpp_info.components["nssdbm"].libs = [_library_name("nssdbm", 3)]
-        self.cpp_info.components["nssdbm"].requires = ["nspr::nspr", "nssutil"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["nssdbm"].system_libs = ["pthread"]
+        # https://src.fedoraproject.org/rpms/nss/blob/rawhide/f/nss-util.pc.in
+        self.cpp_info.components["util"].set_property("pkg_config_name", "nss-util")
+        self.cpp_info.components["util"].libs = ["nssutil3"]
+        self.cpp_info.components["util"].includedirs.append(os.path.join("include", "nss"))
+        self.cpp_info.components["util"].requires = ["nspr::nspr"]
 
-        self.cpp_info.components["smime"].libs = [_library_name("smime", 3)]
-        self.cpp_info.components["smime"].requires = ["nspr::nspr", "libnss", "nssutil"]
+        # https://src.fedoraproject.org/rpms/nss/blob/rawhide/f/nss-softokn.pc.in
+        self.cpp_info.components["softokn"].set_property("pkg_config_name", "nss-softokn")
+        self.cpp_info.components["softokn"].libs = ["softokn3"]
+        self.cpp_info.components["softokn"].requires = ["libnss", "freebl", "sqlite3::sqlite3"]
+        if self.options.enable_legacy_db:
+            self.cpp_info.components["softokn"].requires.append("dbm")
 
-        self.cpp_info.components["ssl"].libs = [_library_name("ssl", 3)]
-        self.cpp_info.components["ssl"].requires = ["nspr::nspr", "libnss", "nssutil"]
-        if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.components["ssl"].system_libs = ["pthread"]
+        self.cpp_info.components["ssl"].libs = ["ssl3"]
+        self.cpp_info.components["ssl"].requires = ["libnss", "util", "nspr::nspr"]
 
-        self.cpp_info.components["nss_executables"].requires = ["zlib::zlib"]
+        self.cpp_info.components["smime"].libs = ["smime3"]
+        self.cpp_info.components["smime"].requires = ["libnss", "util", "nspr::nspr"]
 
-        self.cpp_info.set_property("pkg_config_name", "nss")
+        self.cpp_info.components["freebl"].libs = ["freebl3"]
+        self.cpp_info.components["freebl"].includedirs.append(os.path.join("include", "nss"))
+
+        if self.options.enable_legacy_db:
+            self.cpp_info.components["dbm"].libs = ["nssdbm3"]
+            self.cpp_info.components["dbm"].requires = ["util", "nspr::nspr"]
+
+        # There are also nssckbi and nsssysinit shared libs, but these are meant to be loaded dynamically
+
+        if not self.options.get_safe("shared", True):
+            static_libs = collect_libs(self)
+
+            self.cpp_info.components["libnss"].libs = ["nss_static"]
+            self.cpp_info.components["libnss"].requires += [
+                "base", "certdb", "certhi", "cryptohi", "dev", "pk11wrap", "pki",
+            ]
+
+            freebl_private = [name for name in static_libs if
+                              name.startswith("freebl") or "c_lib" in name or "gcm-" in name or "hw-acc-crypto-" in name]
+            self.cpp_info.components["freebl"].libs = ["freebl", "freebl_static"] + freebl_private
+
+            self.cpp_info.components["smime"].libs = ["smime"]
+            self.cpp_info.components["softokn"].libs = ["softokn", "softokn_static"]
+            self.cpp_info.components["ssl"].libs = ["ssl"]
+            self.cpp_info.components["util"].libs = ["nssutil"]
+
+            if self.options.enable_legacy_db:
+                self.cpp_info.components["dbm"].libs = ["nssdbm"]
+
+            # Static-only libs
+            self.cpp_info.components["base"].libs = ["nssb"]
+            self.cpp_info.components["certdb"].libs = ["certdb"]
+            self.cpp_info.components["certhi"].libs = ["certhi"]
+            self.cpp_info.components["ckfw"].libs = ["nssckfw"]
+            self.cpp_info.components["crmf"].libs = ["crmf"]
+            self.cpp_info.components["cryptohi"].libs = ["cryptohi"]
+            self.cpp_info.components["dev"].libs = ["nssdev"]
+            self.cpp_info.components["jar"].libs = ["jar"]
+            self.cpp_info.components["mozpkix"].libs = ["mozpkix"]
+            self.cpp_info.components["mozpkix-testlib"].libs = ["mozpkix-testlib"]
+            self.cpp_info.components["pk11wrap"].libs = ["pk11wrap", "pk11wrap_static"]
+            self.cpp_info.components["pkcs7"].libs = ["pkcs7"]
+            self.cpp_info.components["pkcs12"].libs = ["pkcs12"]
+            self.cpp_info.components["pki"].libs = ["nsspki"]
+
+            # Not built by default
+            # self.cpp_info.components["sysinit"].libs = ["nsssysinit_static"]
+
+        self.cpp_info.components["tools"].requires = ["zlib::zlib", "nspr::nspr", "sqlite3::sqlite3"]
