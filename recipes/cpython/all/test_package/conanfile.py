@@ -66,6 +66,7 @@ class TestPackageConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_MODULE"] = self._supports_modules
+        tc.cache_variables["CAN_RUN"] = can_run(self)
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -80,6 +81,7 @@ class TestPackageConan(ConanFile):
 
         # The build also needs access to the run environment to run the python executable
         VirtualRunEnv(self).generate(scope="run")
+        # Required for find_package() work with shared=True
         VirtualRunEnv(self).generate(scope="build")
 
         if self._test_setuptools:
