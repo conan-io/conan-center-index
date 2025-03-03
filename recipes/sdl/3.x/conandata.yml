@@ -1,4 +1,4 @@
 sources:
-  "3.2.4":
-    url: "https://github.com/libsdl-org/SDL/releases/download/release-3.2.4/SDL3-3.2.4.tar.gz"
-    sha256: "2938328317301dfbe30176d79c251733aa5e7ec5c436c800b99ed4da7adcb0f0"
+  "3.2.6":
+    url: "https://github.com/libsdl-org/SDL/releases/download/release-3.2.6/SDL3-3.2.6.tar.gz"
+    sha256: "096a0b843dd1124afda41c24bd05034af75af37e9a1b9d205cc0a70193b27e1a"
