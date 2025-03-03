@@ -1,0 +1,21 @@
+From a6a98721bf12c3fcbe78fb4ecd059fe8ad22d13d Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Tue, 10 Dec 2024 18:56:17 +0200
+Subject: [PATCH] alias.hpp: add missing #include <cstdint>
+
+---
+ vtu11/inc/alias.hpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/vtu11/inc/alias.hpp b/vtu11/inc/alias.hpp
+index 8eaeb4c..33c0c48 100644
+--- a/vtu11/inc/alias.hpp
++++ b/vtu11/inc/alias.hpp
+@@ -10,6 +10,7 @@
+ #ifndef VTU11_ALIAS_HPP
+ #define VTU11_ALIAS_HPP
+ 
++#include <cstdint>
+ #include <string>
+ #include <map>
+ #include <utility>
