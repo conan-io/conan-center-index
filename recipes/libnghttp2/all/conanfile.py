@@ -82,10 +82,10 @@ class Nghttp2Conan(ConanFile):
             tc.cache_variables["LIBBROTLIENC_FOUND"] = True
             tc.cache_variables["LIBBROTLIDEC_FOUND"] = True
             tc.cache_variables["LIBXML2_FOUND"] = True
+            if self.options.with_jemalloc:
+                tc.cache_variables["JEMALLOC_FOUND"] = True
         if self.options.with_hpack:
             tc.cache_variables["JANSSON_FOUND"] = True
-        if self.options.with_jemalloc:
-            tc.cache_variables["JEMALLOC_FOUND"] = True
 
         # Disable Python finding so we don't build docs
         tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Python3"] = True
@@ -103,7 +103,7 @@ class Nghttp2Conan(ConanFile):
             tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Libev"] = True  # Examples only
             tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Libcares"] = True  # Examples only
             tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Libbrotli"] = True  # Examples only
-        elif not self.options.with_jemalloc:
+        elif not self.options.get_safe("with_jemalloc"):
             tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_Jemalloc"] = True
 
         if not self.options.with_hpack:
@@ -143,12 +143,12 @@ class Nghttp2Conan(ConanFile):
             tc.set_property("brotli", "cmake_additional_variables_prefixes", ["LIBBROTLIENC", "LIBBROTLIDEC"])
             tc.set_property("libxml2", "cmake_file_name", "LibXml2")
             tc.set_property("libxml2", "cmake_additional_variables_prefixes", ["LIBXML2"])
+            if self.options.with_jemalloc:
+                tc.set_property("jemalloc", "cmake_file_name", "Jemalloc")
+                tc.set_property("jemalloc", "cmake_additional_variables_prefixes", ["JEMALLOC"])
         if self.options.with_hpack:
             tc.set_property("jansson", "cmake_file_name", "Jansson")
             tc.set_property("jansson", "cmake_additional_variables_prefixes", ["JANSSON"])
-        if self.options.with_jemalloc:
-            tc.set_property("jemalloc", "cmake_file_name", "Jemalloc")
-            tc.set_property("jemalloc", "cmake_additional_variables_prefixes", ["JEMALLOC"])
         tc.generate()
         tc = PkgConfigDeps(self)
         tc.generate()
