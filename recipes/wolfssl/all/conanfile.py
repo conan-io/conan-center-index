@@ -43,8 +43,6 @@ class WolfSSLConan(ConanFile):
         "with_quic": [True, False],
         "with_experimental": [True, False],
         "with_rpk": [True, False],
-        "with_filesystem": [True, False],
-        "with_fastmath": [True, False],
     }
     default_options = {
         "shared": False,
@@ -65,8 +63,6 @@ class WolfSSLConan(ConanFile):
         "with_quic": False,
         "with_experimental": False,
         "with_rpk": False,
-        "with_filesystem": True,
-        "with_fastmath": False,
     }
 
     @property
@@ -97,10 +93,6 @@ class WolfSSLConan(ConanFile):
     def validate(self):
         if self.options.opensslall and not self.options.opensslextra:
             raise ConanInvalidConfiguration("The option 'opensslall' requires 'opensslextra=True'")
-        if self.settings.os == "baremetal" and self.options.with_filesystem:
-            raise ConanInvalidConfiguration("The settings.os 'baremetal' requires 'with_filesystem=False'")
-        if self.settings.os == "baremetal" and not self.options.with_fastmath:
-            raise ConanInvalidConfiguration("The settings.os 'baremetal' requires 'with_fastmath=True'")
 
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
@@ -147,9 +139,8 @@ class WolfSSLConan(ConanFile):
             tc.configure_args.append("--enable-experimental")
         if self.options.get_safe("with_rpk"):
             tc.configure_args.append("--enable-rpk")
-        if not self.options.get_safe("with_filesystem"):
+        if self.settings.os == "baremetal":
             tc.configure_args.append("--disable-filesystem")
-        if self.options.get_safe("with_fastmath"):
             tc.configure_args.append("--enable-fastmath")
         if is_msvc(self):
             tc.extra_ldflags.append("-ladvapi32")
@@ -224,11 +215,13 @@ class WolfSSLConan(ConanFile):
     def _defines(self):
         defines = ["TFM_TIMING_RESISTANT", "ECC_TIMING_RESISTANT", "WC_RSA_BLINDING"]
         if self.settings.os == "baremetal":
-            defines.extend(["HAVE_PK_CALLBACKS", "WOLFSSL_USER_IO", "NO_WRITEV"])
+            defines.extend([
+                "NO_FILESYSTEM",
+                "USE_FAST_MATH",
+                "HAVE_PK_CALLBACKS",
+                "WOLFSSL_USER_IO",
+                "NO_WRITEV"
+            ])
             if self.settings.arch in self._32bitarchs:
                 defines.append("TIME_T_NOT_64BIT")
-        if not self.options.with_filesystem:
-            defines.append("NO_FILESYSTEM")
-        if self.options.with_fastmath:
-            defines.append("USE_FAST_MATH")
         return defines
