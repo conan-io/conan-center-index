@@ -1,7 +1,10 @@
 import os
 from conan import ConanFile
-from conan.tools import  files, scm, build
-from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
+from conan.tools.layout import basic_layout
+
+required_conan_version = ">=2.0"
 
 
 class PackioConan(ConanFile):
@@ -11,7 +14,8 @@ class PackioConan(ConanFile):
     homepage = "https://github.com/qchateau/packio"
     description = "An asynchronous msgpack-RPC and JSON-RPC library built on top of Boost.Asio."
     topics = ("rpc", "msgpack", "json", "asio", "async", "cpp17", "cpp20", "coroutines")
-    settings = "compiler"
+    package_type = "header-library"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
     options = {
         "standalone_asio": [True, False],
@@ -26,82 +30,53 @@ class PackioConan(ConanFile):
         "boost_json": "default",
     }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
+    def export_sources(self):
+        export_conandata_patches(self)
 
-    @property
-    def _compilers_minimum_version(self):
-        if scm.Version(self.version) < "2.4.0":
-            return {
-                "apple-clang": 10,
-                "clang": 6,
-                "gcc": 7,
-                "Visual Studio": 16,
-            }
-        return {
-            "apple-clang": 13,
-            "clang": 11,
-            "gcc": 9,
-            "Visual Studio": 16,
-        }
-
-    def config_options(self):
-        if scm.Version(self.version) < "1.2.0":
-            del self.options.standalone_asio
-        if scm.Version(self.version) < "2.0.0":
-            del self.options.msgpack
-            del self.options.nlohmann_json
-        if scm.Version(self.version) < "2.1.0":
-            del self.options.boost_json
-
-    def requirements(self):
-        if self.options.get_safe("msgpack") or scm.Version(self.version) < "2.0.0":
-            self.requires("msgpack/3.2.1")
-
-        if self.options.get_safe("nlohmann_json"):
-            self.requires("nlohmann_json/3.9.1")
-
-         # defaults to True if using boost.asio, False if using asio
-        if self.options.get_safe("boost_json") == "default":
-            self.options.boost_json = not self.options.standalone_asio
-
-        if self.options.get_safe("boost_json") or not self.options.get_safe("standalone_asio"):
-            self.requires("boost/1.75.0")
-
-        if self.options.get_safe("standalone_asio"):
-            self.requires("asio/1.18.1")
-
-    def source(self):
-        files.get(conanfile=self, **self.conan_data["sources"][self.version])
-        extracted_dir = "packio-" + self.version
-        os.rename(extracted_dir, self._source_subfolder)
-
-    def configure(self):
-        if self.settings.compiler.cppstd:
-            build.check_min_cppstd(self, "17")
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version:
-            if scm.Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration("packio requires C++17, which your compiler does not support.")
-        else:
-            self.output.warn("packio requires C++17. Your compiler is unknown. Assuming it supports C++17.")
-
-    def package(self):
-        self.copy("LICENSE.md", dst="licenses", src=self._source_subfolder)
-        self.copy("*.h", dst="include", src=os.path.join(self._source_subfolder, "include"))
+    def layout(self):
+        basic_layout(self, src_folder="src")
 
     def package_id(self):
-        self.info.header_only()
+        self.info.clear()
+
+    @property
+    def _use_boost_json(self):
+        # defaults to True if using boost.asio, False if using asio
+        if self.options.boost_json == "default":
+            return not self.options.standalone_asio
+        return self.options.boost_json
+
+    def requirements(self):
+        if self.options.msgpack:
+            self.requires("msgpack-cxx/6.1.1")
+        if self.options.nlohmann_json:
+            self.requires("nlohmann_json/3.11.3")
+        if self._use_boost_json or not self.options.standalone_asio:
+            self.requires("boost/1.83.0")
+        if self.options.standalone_asio:
+            self.requires("asio/1.31.0")
+
+    def validate(self):
+        check_min_cppstd(self, 17)
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+
+    def build(self):
+        pass
+
+    def package(self):
+        copy(self, "LICENSE.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
 
     def package_info(self):
-        if scm.Version(self.version) < "2.1.0":
-            if self.options.get_safe("standalone_asio"):
-                self.cpp_info.defines.append("PACKIO_STANDALONE_ASIO")
-        else:
-            # Starting from 2.1.0, preprocessor defines can be defined to 0 to force-disable
-            self.cpp_info.defines.append(f"PACKIO_STANDALONE_ASIO={1 if self.options.get_safe('standalone_asio') else 0}")
-            self.cpp_info.defines.append(f"PACKIO_HAS_MSGPACK={1 if self.options.get_safe('msgpack') else 0}")
-            self.cpp_info.defines.append(f"PACKIO_HAS_NLOHMANN_JSON={1 if self.options.get_safe('nlohmann_json') else 0}")
-            self.cpp_info.defines.append(f"PACKIO_HAS_BOOST_JSON={1 if self.options.get_safe('boost_json') else 0}")
+        self.cpp_info.bindirs = []
+        self.cpp_info.libdirs = []
+        # Preprocessor defines can be defined to 0 to force-disable
+        self.cpp_info.defines = [
+            f"PACKIO_STANDALONE_ASIO={1 if self.options.standalone_asio else 0}",
+            f"PACKIO_HAS_MSGPACK={1 if self.options.msgpack else 0}",
+            f"PACKIO_HAS_NLOHMANN_JSON={1 if self.options.nlohmann_json else 0}",
+            f"PACKIO_HAS_BOOST_JSON={1 if self._use_boost_json else 0}",
+        ]
