@@ -3,12 +3,10 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import get, copy, rm, export_conandata_patches, apply_conandata_patches, replace_in_file
 from conan.tools.microsoft import is_msvc_static_runtime
 
 required_conan_version = ">=2.0.9"
-
 
 class MysqlConnectorCppConan(ConanFile):
     name = "mysql-connector-cpp"
@@ -31,6 +29,7 @@ class MysqlConnectorCppConan(ConanFile):
     implements = ["auto_shared_fpic"]
 
     def export_sources(self):
+        copy(self, "conan_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
         export_conandata_patches(self)
 
     def layout(self):
@@ -57,11 +56,8 @@ class MysqlConnectorCppConan(ConanFile):
         self._patch_sources()
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
-        if self.dependencies["protobuf"].options.shared:
-            VirtualRunEnv(self).generate(scope="build")
-
         tc = CMakeToolchain(self)
+        tc.cache_variables["CMAKE_PROJECT_MySQL_CONCPP_INCLUDE"] = os.path.join(self.source_folder, "conan_project_include.cmake")
         tc.cache_variables["BUNDLE_DEPENDENCIES"] = False
         tc.cache_variables["BUILD_STATIC"] = not self.options.shared
         tc.cache_variables["STATIC_MSVCRT"] = is_msvc_static_runtime(self)
@@ -70,7 +66,7 @@ class MysqlConnectorCppConan(ConanFile):
         tc.cache_variables["WITH_SSL"] = self.dependencies["openssl"].package_folder.replace("\\", "/")
         tc.cache_variables["CMAKE_PREFIX_PATH"] = self.generators_folder.replace("\\", "/")
         tc.cache_variables["IS64BIT"] = True
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.cache_variables["use_full_protobuf"] = not self.dependencies["protobuf"].options.lite
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -124,6 +120,8 @@ class MysqlConnectorCppConan(ConanFile):
         self.cpp_info.libs = [lib]
 
         if self.settings.os == "Windows":
+            self.cpp_info.libdirs = [os.path.join("lib", "vs14")]
+            self.cpp_info.bindirs = ["lib"]
             self.cpp_info.system_libs.extend(["dnsapi", "ws2_32"])
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["m", "pthread", "dl"])
