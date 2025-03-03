@@ -87,13 +87,11 @@ class OpenSubdivConan(ConanFile):
                 self.requires("onetbb/2020.3.3", transitive_headers=True)
             else:
                 self.requires("onetbb/2021.12.0", transitive_headers=True)
-        if self.options.get_safe("with_opengl"):
+        if self.options.with_opengl:
             self.requires("opengl/system")
             self.requires("glfw/3.4")
         if self.options.get_safe("with_metal"):
             self.requires("metal-cpp/14.2")
-        if self.options.get_safe("with_dx"):
-            self.requires("directx-headers/1.614.0")
 
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
@@ -155,7 +153,7 @@ class OpenSubdivConan(ConanFile):
             replace_in_file(self, path, "$<TARGET_OBJECTS:osd_gpu_obj>", "")
         # No warnings as errors
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "/WX", "")
-        
+
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
@@ -187,8 +185,6 @@ class OpenSubdivConan(ConanFile):
                 self.cpp_info.components["osdgpu"].requires.extend(["opengl::opengl", "glfw::glfw"])
             if self.options.get_safe("with_metal"):
                 self.cpp_info.components["osdgpu"].requires.append("metal-cpp::metal-cpp")
-            if self.options.get_safe("with_dx"):
-                self.cpp_info.components["osdgpu"].requires.append("directx-headers::directx-headers")
             dl_required = self.options.with_opengl or self.options.with_opencl
             if self.settings.os in ["Linux", "FreeBSD"] and dl_required:
                 self.cpp_info.components["osdgpu"].system_libs = ["dl"]
