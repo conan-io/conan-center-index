@@ -19,7 +19,7 @@ int main()
     clock.getElapsedTime().asSeconds();
 
 #ifdef SFML_WITH_WINDOW
-    sf::VideoMode videoMode({720, 480});
+    sf::VideoMode videoMode(720, 480);
 #endif
 
 #ifdef SFML_WITH_GRAPHICS
@@ -34,7 +34,8 @@ int main()
 
 #ifdef SFML_WITH_AUDIO
     sf::SoundBuffer buffer;
-    sf::Sound sound(buffer);
+    sf::Sound sound;
+    sound.setBuffer(buffer);
 #endif
 
     return 0;

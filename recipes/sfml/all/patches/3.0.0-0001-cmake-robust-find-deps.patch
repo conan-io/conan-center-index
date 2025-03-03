@@ -1,0 +1,42 @@
+diff --git a/src/SFML/Audio/CMakeLists.txt b/src/SFML/Audio/CMakeLists.txt
+index 7567205c..88decb84 100644
+--- a/src/SFML/Audio/CMakeLists.txt
++++ b/src/SFML/Audio/CMakeLists.txt
+@@ -187,10 +187,12 @@ if(SFML_OS_IOS)
+ endif()
+ 
+ # miniaudio sources
+-target_include_directories(sfml-audio SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/extlibs/headers/miniaudio")
++find_package(miniaudio REQUIRED CONFIG)
++target_include_directories(sfml-audio SYSTEM PRIVATE ${miniaudio_INCLUDE_DIRS})
+ 
+ # minimp3 sources
+-target_include_directories(sfml-audio SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/extlibs/headers/minimp3")
++find_package(minimp3 REQUIRED CONFIG)
++target_include_directories(sfml-audio SYSTEM PRIVATE ${minimp3_INCLUDE_DIRS})
+ 
+ if(SFML_OS_ANDROID)
+     target_link_libraries(sfml-audio PRIVATE android OpenSLES)
+diff --git a/src/SFML/Graphics/CMakeLists.txt b/src/SFML/Graphics/CMakeLists.txt
+index 4886ac71..2f851a7c 100644
+--- a/src/SFML/Graphics/CMakeLists.txt
++++ b/src/SFML/Graphics/CMakeLists.txt
+@@ -93,7 +93,8 @@ sfml_add_library(Graphics
+ target_link_libraries(sfml-graphics PUBLIC SFML::Window)
+ 
+ # stb_image sources
+-target_include_directories(sfml-graphics SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/extlibs/headers/stb_image")
++find_package(stb REQUIRED CONFIG)
++target_link_libraries(sfml-graphics PRIVATE stb::stb)
+ 
+ # glad sources
+ target_include_directories(sfml-graphics SYSTEM PRIVATE "${PROJECT_SOURCE_DIR}/extlibs/headers/glad/include")
+@@ -153,7 +154,7 @@ else()
+     sfml_add_graphics_dependencies()
+ endif()
+ 
+-target_link_libraries(sfml-graphics PRIVATE Freetype::Freetype)
++target_link_libraries(sfml-graphics PRIVATE freetype)
+ 
+ # add preprocessor symbols
+ target_compile_definitions(sfml-graphics PRIVATE "STBI_FAILURE_USERMSG")
