@@ -5,7 +5,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rmdir, replace_in_file, mkdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file, mkdir
 from conan.tools.scm import Version
 
 required_conan_version = ">=2.1"
@@ -52,6 +52,7 @@ class OrcRecipe(ConanFile):
         return Version(self.version) < "2.0.0"
 
     def export_sources(self):
+        export_conandata_patches(self)
         if self._should_patch_thirdparty_toolchain:
             copy(self, "ConanThirdpartyToolchain.cmake",
                  self.recipe_folder, os.path.join(self.export_sources_folder, "src", "cmake_modules"))
@@ -59,9 +60,11 @@ class OrcRecipe(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if self.settings.arch != "x86_64":
+            del self.options.build_avx512
         if self.settings.compiler == "apple-clang":
             # AVX support is not enabled by default, might need to add -mavx512f to CXXFLAGS
-            del self.options.build_avx512
+            self.options.rm_safe("build_avx512")
 
     def configure(self):
         if self.options.shared:
@@ -127,6 +130,7 @@ class OrcRecipe(ConanFile):
                         "add_library (orc STATIC ${SOURCE_FILES})", "add_library (orc ${SOURCE_FILES})")
 
     def build(self):
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -139,8 +143,10 @@ class OrcRecipe(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "share"))
         if self.settings.os == "Windows" and self.options.shared:
             mkdir(self, os.path.join(self.package_folder, "bin"))
-            os.rename(os.path.join(self.package_folder, "lib", "orc.dll"),
-                      os.path.join(self.package_folder, "bin", "orc.dll"))
+            if os.path.exists(os.path.join(self.package_folder, "lib", "orc.dll")) and \
+               not os.path.exists(os.path.join(self.package_folder, "bin", "orc.dll")):
+                os.rename(os.path.join(self.package_folder, "lib", "orc.dll"),
+                          os.path.join(self.package_folder, "bin", "orc.dll"))
 
     def package_info(self):
         self.cpp_info.libs = ["orc"]
