@@ -1,0 +1,4 @@
+sources:
+  "4.4":
+    url: "https://github.com/godotengine/godot-cpp/archive/godot-4.4-stable.tar.gz"
+    sha256: "472c6e7f3f7a9d576f21e2c57d16390b46d238f98e69a47d84730e943f5c5506"
