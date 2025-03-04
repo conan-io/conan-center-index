@@ -3,8 +3,6 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
-from conan.tools.files import save, load
-from conan.tools.apple import is_apple_os
 
 
 class TestPackageConan(ConanFile):
@@ -12,19 +10,19 @@ class TestPackageConan(ConanFile):
     generators = "CMakeDeps"
 
     def requirements(self):
-        self.requires(self.tested_reference_str, run=True)
+        self.requires(self.tested_reference_str, headers=True, libs=True, run=can_run(self))
 
     def layout(self):
         cmake_layout(self)
 
+    def build_requirements(self):
+        if not can_run(self):
+            self.tool_requires("gobject-introspection/<host_version>")
+
     def generate(self):
-        introspection_data = self.dependencies["glib"].options.shared and not is_apple_os(self)
         tc = CMakeToolchain(self)
-        tc.variables["GLIB_INTROSPECTION_DATA_AVAILABLE"] = introspection_data
+        tc.variables["GLIB_INTROSPECTION_DATA_AVAILABLE"] = self.dependencies["gobject-introspection"].options.build_introspection_data
         tc.generate()
-        save(self, os.path.join(self.build_folder, "gobject_introspection_data"), str(introspection_data))
-        save(self, os.path.join(self.build_folder, "gobject_introspection_bin"),
-              self.dependencies["gobject-introspection"].cpp_info.bindirs[0])
 
     def build(self):
         cmake = CMake(self)
@@ -34,8 +32,8 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             if self.settings.os != "Windows":
-                gobject_introspection_bin = load(self, os.path.join(self.build_folder, "gobject_introspection_bin"))
-                gobject_introspection_data = load(self, os.path.join(self.build_folder, "gobject_introspection_data")) == "True"
+                gobject_introspection_bin = self.dependencies["gobject-introspection"].cpp_info.bindir
+                gobject_introspection_data = self.dependencies["gobject-introspection"].options.build_introspection_data
                 for tool in ["g-ir-compiler", "g-ir-generate", "g-ir-scanner", "g-ir-annotation-tool"]:
                     if not gobject_introspection_data and tool in ["g-ir-scanner", "g-ir-annotation-tool"]:
                         continue

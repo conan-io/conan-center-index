@@ -3,7 +3,7 @@ import os
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
+from conan.tools.env import VirtualRunEnv
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -11,7 +11,7 @@ from conan.tools.meson import MesonToolchain, Meson
 from conan.tools.env import Environment
 from conan.tools.apple import fix_apple_shared_install_name
 
-required_conan_version = ">=2.0.5"
+required_conan_version = ">=2.4"
 
 
 class GobjectIntrospectionConan(ConanFile):
@@ -23,31 +23,33 @@ class GobjectIntrospectionConan(ConanFile):
     homepage = "https://gitlab.gnome.org/GNOME/gobject-introspection"
     topics = ("gobject-instrospection",)
 
-    package_type = "shared-library"
+    package_type = "application"
     settings = "os", "arch", "compiler", "build_type"
     options = {
-        "fPIC": [True, False],
         "build_introspection_data": [True, False],
     }
     default_options = {
-        "fPIC": True,
         "build_introspection_data": True,
     }
     short_paths = True
+    languages = ["C"]
 
     def export_sources(self):
         export_conandata_patches(self)
 
     def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-        if self.settings.os in ["Windows", "Macos"] or cross_building(self):
+        if self.settings_target is not None:
+            # Building gobject-introspection as a tool_requires.
+            # Build only the tools by default.
+            self.options.build_introspection_data = False
+        if cross_building(self):
+            # Cross-compilation of introspection data requires an exe_wrapper like QEMU.
+            self.options.build_introspection_data = False
+        if self.settings.os in ["Windows", "Macos"]:
             # FIXME: tools/g-ir-scanner fails to load glib
             self.options.build_introspection_data = False
 
     def configure(self):
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
         if self.options.get_safe("build_introspection_data"):
             # INFO: g-ir-scanner looks for dynamic glib and gobject libraries when running
             self.options["glib"].shared = True
@@ -61,23 +63,13 @@ class GobjectIntrospectionConan(ConanFile):
         # ffi.h is exposed by public header gobject-introspection-1.0/girffi.h
         self.requires("libffi/3.4.4", transitive_headers=True)
 
-    def validate_build(self):
-        if cross_building(self):
-            # Requires QEMU or similar as an exe_wrapper for Meson to run the built executables during cross-compilation.
-            # Disabling even if 'can_run' is True, since the introspection data generation when using the package still tries to
-            # link against libgirepository-1.0.so of the executable and fails when cross-compiling.
-            raise ConanInvalidConfiguration("Cross-compilation is not supported.")
-
     def validate(self):
         if self.settings.os == "Windows" and self.settings.build_type == "Debug":
             # fatal error LNK1104: cannot open file 'python37_d.lib'
             raise ConanInvalidConfiguration(
                 f"{self.ref} debug build on Windows is disabled due to debug version of Python libs likely not being available. Contributions to fix this are welcome.")
         if self.options.build_introspection_data and not self.dependencies["glib"].options.shared:
-            # FIXME: tools/g-ir-scanner fails to load glib
-            # tools/g-ir-scanner --output=gir/GLib-2.0.gir ...
-            # ERROR: can't resolve libraries to shared libraries: glib-2.0, gobject-2.0
-            raise ConanInvalidConfiguration(f"{self.ref} requires shared glib to be built as shared. Use -o 'glib/*:shared=True'.")
+            raise ConanInvalidConfiguration("Built introspection data requires shared GLib. Use -o 'glib/*:shared=True'.")
         if self.options.build_introspection_data and self.settings.os in ["Windows", "Macos"]:
             # FIXME: tools/g-ir-scanner', '--output=gir/GLib-2.0.gir' ... ERROR: can't resolve libraries to shared libraries: glib-2.0, gobject-2.0
             # FIXME: g-ir-scanner fails to find libgnuintl
@@ -96,14 +88,13 @@ class GobjectIntrospectionConan(ConanFile):
             self.tool_requires("flex/2.6.4")
             self.tool_requires("bison/3.8.2")
         self.tool_requires("glib/<host_version>")
+        self.requires("cpython/[~3.12]", build=True, visible=True, run=True)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
@@ -112,6 +103,7 @@ class GobjectIntrospectionConan(ConanFile):
             tc.project_options["gi_cross_use_prebuilt_gi"] = "false"
         tc.project_options["build_introspection_data"] = self.options.build_introspection_data
         tc.project_options["datadir"] = "res"
+        tc.project_options["cairo"] = "disabled"  # only used for tests
         tc.generate()
         deps = PkgConfigDeps(self)
         deps.generate()
@@ -152,12 +144,18 @@ class GobjectIntrospectionConan(ConanFile):
         fix_apple_shared_install_name(self)
 
     def package_info(self):
-        self.cpp_info.set_property("pkg_config_name", "gobject-introspection-1.0")
-        self.cpp_info.libs = ["girepository-1.0"]
-        self.cpp_info.includedirs.append(os.path.join("include", "gobject-introspection-1.0"))
+        component = self.cpp_info.components["gobject-introspection-1.0"]
+        component.set_property("pkg_config_name", "gobject-introspection-1.0")
+        component.libs = ["girepository-1.0"]
+        component.includedirs = [os.path.join("include", "gobject-introspection-1.0")]
+        component.requires = [
+            "glib::glib-2.0",
+            "glib::gobject-2.0",
+            "glib::gio-2.0",
+            "libffi::libffi",
+        ]
 
         exe_ext = ".exe" if self.settings.os == "Windows" else ""
-
         pkgconfig_variables = {
             "datadir": "${prefix}/res",
             "bindir": "${prefix}/bin",
@@ -169,9 +167,11 @@ class GobjectIntrospectionConan(ConanFile):
             "girdir": "${datadir}/gir-1.0",
             "typelibdir": "${libdir}/girepository-1.0",
         }
-        self.cpp_info.set_property(
+        component.set_property(
             "pkg_config_custom_content",
             "\n".join(f"{key}={value}" for key, value in pkgconfig_variables.items()),
         )
-        self.buildenv_info.define_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "gir-1.0"))
-        self.buildenv_info.define_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
+
+        if self.options.build_introspection_data:
+            self.buildenv_info.define_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "gir-1.0"))
+            self.runenv_info.define_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
