@@ -400,6 +400,7 @@ class LibcurlConan(ConanFile):
             replace_in_file(self, cmakelists, "find_package(NGHTTP2 REQUIRED)", "find_package(libnghttp2 REQUIRED CONFIG)")
         else:
             replace_in_file(self, cmakelists, "find_package(NGHTTP2)", "find_package(libnghttp2 REQUIRED CONFIG)")
+            replace_in_file(self, cmakelists, "NGHTTP2_FOUND", "libnghttp2_FOUND")
         replace_in_file(self, cmakelists, "${NGHTTP2_INCLUDE_DIRS}", "${libnghttp2_INCLUDE_DIRS}")
         replace_in_file(self, cmakelists, "${NGHTTP2_LIBRARIES}", "libnghttp2::nghttp2")
 
