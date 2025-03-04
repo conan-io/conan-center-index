@@ -2,14 +2,13 @@ import os
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
-from conan.tools.env import VirtualRunEnv
+from conan.tools.env import VirtualRunEnv, Environment
 from conan.tools.files import copy, get, replace_in_file, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import MesonToolchain, Meson
-from conan.tools.env import Environment
-from conan.tools.apple import fix_apple_shared_install_name
 
 required_conan_version = ">=2.4"
 
@@ -21,9 +20,9 @@ class GobjectIntrospectionConan(ConanFile):
     license = "LGPL-2.1-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.gnome.org/GNOME/gobject-introspection"
-    topics = ("gobject-instrospection",)
+    topics = ("gobject", "introspection",)
 
-    package_type = "application"
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "build_introspection_data": [True, False],
@@ -47,7 +46,7 @@ class GobjectIntrospectionConan(ConanFile):
             self.options.build_introspection_data = False
 
     def configure(self):
-        if self.options.get_safe("build_introspection_data"):
+        if self.options.build_introspection_data:
             # INFO: g-ir-scanner looks for dynamic glib and gobject libraries when running
             self.options["glib"].shared = True
 

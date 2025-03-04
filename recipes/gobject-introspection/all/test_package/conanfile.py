@@ -10,7 +10,7 @@ class TestPackageConan(ConanFile):
     generators = "CMakeDeps"
 
     def requirements(self):
-        self.requires(self.tested_reference_str, headers=True, libs=True, run=can_run(self))
+        self.requires(self.tested_reference_str, run=can_run(self))
 
     def layout(self):
         cmake_layout(self)
