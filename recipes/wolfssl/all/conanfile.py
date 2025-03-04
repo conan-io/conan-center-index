@@ -139,6 +139,9 @@ class WolfSSLConan(ConanFile):
             tc.configure_args.append("--enable-experimental")
         if self.options.get_safe("with_rpk"):
             tc.configure_args.append("--enable-rpk")
+        if self.settings.os == "baremetal":
+            tc.configure_args.append("--disable-filesystem")
+            tc.configure_args.append("--enable-fastmath")
         if is_msvc(self):
             tc.extra_ldflags.append("-ladvapi32")
             if check_min_vs(self, "180", raise_invalid=False):
@@ -152,7 +155,9 @@ class WolfSSLConan(ConanFile):
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
             env.define("AR", f"{ar_wrapper} lib")
+        tc.extra_defines.extend(self._defines)
         tc.generate(env)
+        tc.generate()
 
     def build(self):
         autotools = Autotools(self)
@@ -176,6 +181,7 @@ class WolfSSLConan(ConanFile):
     def package_info(self):
         self.cpp_info.set_property("pkg_config_name", "wolfssl")
         self.cpp_info.libs = ["wolfssl"]
+        self.cpp_info.defines = self._defines
         if self.options.shared:
             self.cpp_info.defines.append("WOLFSSL_DLL")
         if not self.options.shared:
@@ -187,3 +193,35 @@ class WolfSSLConan(ConanFile):
                     self.cpp_info.system_libs.append("crypt32")
             elif is_apple_os(self) and Version(self.version) >= "5.6.0":
                 self.cpp_info.frameworks.extend(["CoreFoundation", "Security"])
+
+    @property
+    def _32bitarchs(self):
+        return [
+            "x86",
+            "ppc32",
+            "armv5el",
+            "armv5hf",
+            "armv6",
+            "armv7",
+            "armv7hf",
+            "armv7s",
+            "armv7k",
+            "armv8_32",
+            "mips",
+            "s390",
+        ]
+
+    @property
+    def _defines(self):
+        defines = ["TFM_TIMING_RESISTANT", "ECC_TIMING_RESISTANT", "WC_RSA_BLINDING"]
+        if self.settings.os == "baremetal":
+            defines.extend([
+                "NO_FILESYSTEM",
+                "USE_FAST_MATH",
+                "HAVE_PK_CALLBACKS",
+                "WOLFSSL_USER_IO",
+                "NO_WRITEV"
+            ])
+            if self.settings.arch in self._32bitarchs:
+                defines.append("TIME_T_NOT_64BIT")
+        return defines
