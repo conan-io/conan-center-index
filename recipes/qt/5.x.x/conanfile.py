@@ -975,6 +975,9 @@ Examples = bin/datadir/examples""")
         def _create_private_module(module, dependencies=[]):
             if "Core" not in dependencies:
                 dependencies.append("Core")
+            if module not in dependencies:
+                dependencies.append(module)
+
             dependencies_string = ';'.join(f'Qt5::{dependency}' for dependency in dependencies)
             contents = textwrap.dedent("""\
             if(NOT TARGET Qt5::{0}Private)
