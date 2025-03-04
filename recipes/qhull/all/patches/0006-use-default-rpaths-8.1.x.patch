@@ -1,0 +1,25 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -364,22 +364,6 @@
+ # Define shared library for reentrant qhull (installed)
+ # ---------------------------------------
+ 
+-if (NOT DEFINED CMAKE_INSTALL_NAME_DIR)
+-    set(CMAKE_INSTALL_NAME_DIR "${LIB_INSTALL_DIR}")
+-endif ()
+-
+-if (NOT DEFINED CMAKE_INSTALL_RPATH)
+-    set(CMAKE_INSTALL_RPATH "${LIB_INSTALL_DIR}")
+-endif ()
+-
+-if (NOT DEFINED CMAKE_INSTALL_RPATH_USE_LINK_PATH)
+-    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+-endif ()
+-
+-if (NOT DEFINED CMAKE_BUILD_WITH_INSTALL_RPATH)
+-    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+-endif ()
+-
+ add_library(${qhull_SHAREDR} SHARED 
+         ${libqhullr_SOURCES}
+         src/libqhull_r/qhull_r-exports.def)
