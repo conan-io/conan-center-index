@@ -38,6 +38,7 @@ class QtConan(ConanFile):
     license = "LGPL-3.0-only"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+    user = "sky"
     options = {
         "shared": [True, False],
         "commercial": [True, False],
@@ -394,7 +395,7 @@ class QtConan(ConanFile):
         if self.options.openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_pcre2:
-            self.requires("pcre2/10.42")
+            self.requires("pcre2/[>=10.42 <11]")
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.268.0")
             if is_apple_os(self):
@@ -425,12 +426,12 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_mysql", False):
             self.requires("libmysqlclient/8.1.0")
         if self.options.with_pq:
-            self.requires("libpq/15.4")
+            self.requires("libpq/[>=15.4 <16]")
         if self.options.with_odbc:
             if self.settings.os != "Windows":
                 self.requires("odbc/2.3.11")
         if self.options.get_safe("with_openal", False):
-            self.requires("openal-soft/1.22.2")
+            self.requires("openal-soft/[>=1.22.2 <2]")
         if self.options.get_safe("with_libalsa", False):
             self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_x11"):
@@ -440,7 +441,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("opengl", "no") != "no":
             self.requires("opengl/system")
         if self.options.with_zstd:
-            self.requires("zstd/1.5.5")
+            self.requires("zstd/[>=1.5.5 <2]")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
             self.requires("expat/[>=2.6.2 <3]")
             self.requires("opus/1.4")
@@ -448,12 +449,12 @@ class QtConan(ConanFile):
                 self.requires("xorg-proto/2022.2")
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.93")
-            self.requires("libdrm/2.4.119")
+            self.requires("libdrm/[>=2.4.119 <3]")
             self.requires("egl/system")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
         if self.options.get_safe("with_pulseaudio", False):
-            self.requires("pulseaudio/14.2")
+            self.requires("pulseaudio/[>=14.2 <20]")
         if self.options.with_dbus:
             self.requires("dbus/1.15.8")
         if self.options.qtwayland:
@@ -463,7 +464,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_atspi"):
             self.requires("at-spi2-core/2.51.0")
         if self.options.get_safe("with_md4c", False):
-            self.requires("md4c/0.4.8")
+            self.requires("md4c/[>=0.4.8 <1]")
 
     def package_id(self):
         del self.info.options.cross_compile
@@ -891,6 +892,14 @@ class QtConan(ConanFile):
     def _cmake_qt5_private_file(self, module):
         return os.path.join("lib", "cmake", f"Qt5{module}", f"conan_qt_qt5_{module.lower()}private.cmake")
 
+    @property
+    def _event_dispatcher_reqs(self):
+        reqs = ["Core", "Gui"]
+        if self.options.with_glib:
+            reqs.append("glib::glib")
+
+        return reqs
+
     def package(self):
         with chdir(self, "build_folder"):
             self.run(f"{self._make_program()} install")
@@ -1005,6 +1014,8 @@ Prefix = ..""")
 
         if self.options.gui:
             _create_private_module("Gui", ["CorePrivate", "Gui"])
+            _create_private_module("FontDatabaseSupport", ["Core", "Gui"])
+            _create_private_module("EventDispatcherSupport", self._event_dispatcher_reqs)
 
         if self.options.widgets:
             _create_private_module("Widgets", ["CorePrivate", "Gui", "GuiPrivate"])
@@ -1083,8 +1094,7 @@ Prefix = ..""")
             self.cpp_info.components[componentname].set_property("cmake_target_name", f"Qt5::{pluginname}")
             self.cpp_info.components[componentname].names["cmake_find_package"] = pluginname
             self.cpp_info.components[componentname].names["cmake_find_package_multi"] = pluginname
-            if not self.options.shared:
-                self.cpp_info.components[componentname].libs = [libname + libsuffix]
+            self.cpp_info.components[componentname].libs = [libname + libsuffix]
             self.cpp_info.components[componentname].libdirs = [os.path.join("plugins", plugintype)]
             self.cpp_info.components[componentname].includedirs = []
             if "Core" not in requires:
@@ -1153,12 +1163,12 @@ Prefix = ..""")
                 gui_reqs.append("md4c::md4c")
             _create_module("Gui", gui_reqs)
             _add_build_module("qtGui", self._cmake_qt5_private_file("Gui"))
+            _create_plugin("QOffscreenIntegrationPlugin", "qoffscreen", "platforms", ["Core", "Gui"])
 
-            event_dispatcher_reqs = ["Core", "Gui"]
-            if self.options.with_glib:
-                event_dispatcher_reqs.append("glib::glib")
-            _create_module("EventDispatcherSupport", event_dispatcher_reqs)
+            _create_module("EventDispatcherSupport", self._event_dispatcher_reqs)
+            _add_build_module("qtEventDispatcherSupport", self._cmake_qt5_private_file("EventDispatcherSupport"))
             _create_module("FontDatabaseSupport", ["Core", "Gui"])
+            _add_build_module("qtFontDatabaseSupport", self._cmake_qt5_private_file("FontDatabaseSupport"))
             if self.settings.os == "Windows":
                 self.cpp_info.components["qtFontDatabaseSupport"].system_libs.extend(["advapi32", "ole32", "user32", "gdi32"])
             elif is_apple_os(self):
@@ -1249,6 +1259,7 @@ Prefix = ..""")
                                     "EdidSupport", "xorg::xorg"]
                     _create_module("XcbQpa", xcb_qpa_reqs, has_include_dir=False)
                     _create_plugin("QXcbIntegrationPlugin", "qxcb", "platforms", ["Core", "Gui", "XcbQpa"])
+                    _create_plugin("QXcbGlxIntegrationPlugin", "qxcb-glx-integration", "xcbglintegrations", ["Core", "Gui"])
 
         if self.options.with_sqlite3:
             _create_plugin("QSQLiteDriverPlugin", "qsqlite", "sqldrivers", ["sqlite3::sqlite3"])
@@ -1267,8 +1278,6 @@ Prefix = ..""")
         _create_module("Network", networkReqs)
         _create_module("Sql")
         _create_module("Test")
-        if self.options.get_safe("opengl", "no") != "no" and self.options.gui:
-            _create_module("OpenGL", ["Gui"])
         if self.options.widgets and self.options.get_safe("opengl", "no") != "no":
             _create_module("OpenGLExtensions", ["Gui"])
         _create_module("Concurrent")
@@ -1303,25 +1312,40 @@ Prefix = ..""")
                 _create_module("Designer", ["Gui", "UiPlugin", "Widgets", "Xml"])
             _create_module("Help", ["Gui", "Sql", "Widgets"])
 
-        if self.options.qtquick3d and self.options.gui:
-            _create_module("Quick3DUtils", ["Gui"])
-            _create_module("Quick3DRender", ["Quick3DUtils", "Quick"])
-            _create_module("Quick3DAssetImport", ["Gui", "Qml", "Quick3DRender", "Quick3DUtils"])
-            _create_module("Quick3DRuntimeRender", ["Quick3DRender", "Quick3DAssetImport", "Quick3DUtils"])
-            _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
+        if self.options.gui:
+            if self.options.get_safe("qtquick3d"):
+                _create_module("Quick3DUtils", ["Gui"])
+                _create_module("Quick3DRender", ["Quick3DUtils", "Quick"])
+                _create_module("Quick3DAssetImport", ["Gui", "Qml", "Quick3DRender", "Quick3DUtils"])
+                _create_module("Quick3DRuntimeRender", ["Quick3DRender", "Quick3DAssetImport", "Quick3DUtils"])
+                _create_module("Quick3D", ["Gui", "Qml", "Quick", "Quick3DRuntimeRender"])
 
-        if self.options.qtquickcontrols2 and self.options.gui:
-            _create_module("QuickControls2", ["Gui", "Quick"])
-            _create_module("QuickTemplates2", ["Gui", "Quick"])
+            if self.options.qtquickcontrols2:
+                _create_module("QuickControls2", ["Gui", "Quick"])
+                _create_module("QuickTemplates2", ["Gui", "Quick"])
 
-        if self.options.qtsvg and self.options.gui:
-            _create_module("Svg", ["Gui"])
-            _create_plugin("QSvgIconPlugin", "qsvgicon", "iconengines", [])
-            _create_plugin("QSvgPlugin", "qsvg", "imageformats", [])
+            if self.options.qtsvg:
+                _create_module("Svg", ["Gui"])
+                _create_plugin("QSvgIconPlugin", "qsvgicon", "iconengines", [])
+                _create_plugin("QSvgPlugin", "qsvg", "imageformats", [])
 
-        if self.options.qtwayland and self.options.gui:
-            _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
-            _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
+            if self.options.with_libjpeg:
+                jpeg_lib = str(self.options.with_libjpeg)
+                _create_plugin("QJpegPlugin", "qjpeg", "imageformats", [f"{jpeg_lib}::{jpeg_lib}"])
+
+            if self.options.qtwayland:
+                _create_module("WaylandClient", ["Gui", "wayland::wayland-client"])
+                _create_module("WaylandCompositor", ["Gui", "wayland::wayland-server"])
+                _create_plugin("QWaylandIntegrationPlugin","qwayland-generic", "platforms", ["Gui"])
+                _create_plugin("QWaylandEglPlatformIntegrationPlugin","qwayland-egl", "platforms", ["Gui"])
+                _create_plugin("QWaylandXCompositeGlxPlatformIntegrationPlugin","qwayland-xcomposite-glx", "platforms", ["Gui"])
+                _create_plugin("QWaylandWlShellIntegrationPlugin","wl-shell", "wayland-shell-integration", ["WaylandClient"])
+                _create_plugin("QWaylandFullScreenShellV1IntegrationPlugin","fullscreen-shell-v1", "wayland-shell-integration", ["WaylandClient"])
+                _create_plugin("QWaylandXdgShellIntegrationPlugin","xdg-shell", "wayland-shell-integration", ["WaylandClient"])
+                _create_plugin("QWaylandIviShellIntegrationPlugin","ivi-shell", "wayland-shell-integration", ["WaylandClient"])
+                _create_plugin("QWaylandEglClientBufferPlugin", "qt-plugin-wayland-egl", "wayland-graphics-integration-client", ["WaylandClient"])
+                _create_plugin("QWaylandXCompositeGlxClientBufferPlugin", "xcomposite-glx", "wayland-graphics-integration-client", ["WaylandClient"])
+                _create_plugin("QWaylandBradientDecorationPlugin", "bradient", "wayland-decoration-client", ["WaylandClient"])
 
         if self.options.qtlocation:
             _create_module("Positioning")
