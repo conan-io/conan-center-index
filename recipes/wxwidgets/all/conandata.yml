@@ -5,3 +5,12 @@ sources:
   "3.2.5":
     url: "https://github.com/wxWidgets/wxWidgets/archive/v3.2.5.tar.gz"
     sha256: "c3a54d1c5dc3feefc2893c28923fd722c990c572253d5ad353eec99386ba11eb"
+patches:
+  "3.2.6":
+    - patch_file: "patches/3.2.6-fix-qt-linking.patch"
+      patch_description: "Fix linking against Qt5"
+      patch_type: "conan"
+  "3.2.5":
+    - patch_file: "patches/3.2.6-fix-qt-linking.patch"
+      patch_description: "Fix linking against Qt5"
+      patch_type: "conan"
