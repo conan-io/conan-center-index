@@ -1,0 +1,1 @@
+option('libpipewire-api-version', type : 'string')
