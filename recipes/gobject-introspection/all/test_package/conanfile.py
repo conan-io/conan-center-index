@@ -19,9 +19,13 @@ class TestPackageConan(ConanFile):
         if not can_run(self):
             self.tool_requires("gobject-introspection/<host_version>")
 
+    @property
+    def _have_introspection_data(self):
+        return self.dependencies["gobject-introspection"].options.build_introspection_data
+
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["GLIB_INTROSPECTION_DATA_AVAILABLE"] = self.dependencies["gobject-introspection"].options.build_introspection_data
+        tc.variables["GLIB_INTROSPECTION_DATA_AVAILABLE"] = self._have_introspection_data
         tc.generate()
 
     def build(self):
@@ -33,9 +37,8 @@ class TestPackageConan(ConanFile):
         if can_run(self):
             if self.settings.os != "Windows":
                 gobject_introspection_bin = self.dependencies["gobject-introspection"].cpp_info.bindir
-                gobject_introspection_data = self.dependencies["gobject-introspection"].options.build_introspection_data
                 for tool in ["g-ir-compiler", "g-ir-generate", "g-ir-scanner", "g-ir-annotation-tool"]:
-                    if not gobject_introspection_data and tool in ["g-ir-scanner", "g-ir-annotation-tool"]:
+                    if not self._have_introspection_data and tool in ["g-ir-scanner", "g-ir-annotation-tool"]:
                         continue
                     tool_path = os.path.join(gobject_introspection_bin, tool)
                     if os.path.exists(tool_path):
