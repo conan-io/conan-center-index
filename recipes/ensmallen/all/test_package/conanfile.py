@@ -14,7 +14,7 @@ class ensmallenTestConan(ConanFile):
         # and armadillo/*:use_hdf5=True by default.
         # See https://github.com/conan-io/conan-center-index/pull/17320 for more
         # information.
-        self.requires("hdf5/1.14.1")
+        self.requires("hdf5/1.14.5")
 
     def build(self):
         cmake = CMake(self)
