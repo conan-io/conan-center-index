@@ -1,6 +1,6 @@
 import os
 
-from conan import ConanFile, conan_version
+from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import can_run
@@ -56,18 +56,19 @@ class GdkPixbufConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         self.settings.rm_safe("compiler.cppstd")
         if self.options.shared:
-            wildcard = "" if Version(conan_version) < "2.0.0" else "/*"
-            self.options[f"glib{wildcard}"].shared = True
+            self.options["glib"].shared = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
+        if self.options.with_introspection:
+            self.requires("gobject-introspection/1.78.1")
         if self.options.with_libpng:
             self.requires("libpng/[>=1.6 <2]")
         if self.options.with_libtiff:
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.5 <5]")
         if self.options.with_libjpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.2")
         elif self.options.with_libjpeg == "libjpeg":
@@ -94,10 +95,11 @@ class GdkPixbufConan(ConanFile):
             self.tool_requires("pkgconf/[>=2.2 <3]")
         self.tool_requires("glib/<host_version>")
         if self.options.with_introspection:
-            self.tool_requires("gobject-introspection/1.72.0")
+            self.tool_requires("gobject-introspection/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _requires_compiler_rt(self):
@@ -112,6 +114,7 @@ class GdkPixbufConan(ConanFile):
 
         deps = PkgConfigDeps(self)
         deps.generate()
+
         tc = MesonToolchain(self)
         enabled_disabled = lambda v: "enabled" if v else "disabled"
         true_false = lambda v: "true" if v else "false"
@@ -144,7 +147,6 @@ class GdkPixbufConan(ConanFile):
         tc.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         meson_build = os.path.join(self.source_folder, "meson.build")
         gdk_meson_build = os.path.join(self.source_folder, "gdk-pixbuf", "meson.build")
 
@@ -193,7 +195,8 @@ class GdkPixbufConan(ConanFile):
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        rmdir(self, os.path.join(self.package_folder, "share"))
+        os.rename(os.path.join(self.package_folder, "share"),
+                  os.path.join(self.package_folder, "res"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
         fix_apple_shared_install_name(self)
         fix_msvc_libname(self)
@@ -202,6 +205,7 @@ class GdkPixbufConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "gdk-pixbuf-2.0")
         self.cpp_info.libs = ["gdk_pixbuf-2.0"]
         self.cpp_info.includedirs = [os.path.join("include", "gdk-pixbuf-2.0")]
+        self.cpp_info.resdirs = ["res"]
         if not self.options.shared:
             self.cpp_info.defines.append("GDK_PIXBUF_STATIC_COMPILATION")
         if self.settings.os in ["Linux", "FreeBSD"]:
@@ -211,9 +215,26 @@ class GdkPixbufConan(ConanFile):
             self.cpp_info.exelinkflags = ldflags
             self.cpp_info.sharedlinkflags = ldflags
 
+        self.cpp_info.requires = [
+            "glib::gobject-2.0",
+            "glib::glib-2.0",
+            "glib::gmodule-no-export-2.0",
+            "glib::gio-2.0"
+        ]
+        if self.options.with_libpng:
+            self.cpp_info.requires.append("libpng::libpng")
+        if self.options.with_libtiff:
+            self.cpp_info.requires.append("libtiff::tiff")
+        if self.options.with_libjpeg == "libjpeg-turbo":
+            self.cpp_info.requires.append("libjpeg-turbo::jpeg")
+        elif self.options.with_libjpeg == "libjpeg":
+            self.cpp_info.requires.append("libjpeg::libjpeg")
+        elif self.options.with_libjpeg == "mozjpeg":
+            self.cpp_info.requires.append("mozjpeg::mozjpeg")
+
         # Breaking change since Conan >= 2.0.8
         # Related to https://github.com/conan-io/conan/pull/14233
-        libdir_variable = "libdir1" if Version(conan_version) < "2.0" else "libdir"
+        libdir_variable = "libdir"
         pkgconfig_variables = {
             "bindir": "${prefix}/bin",
             "gdk_pixbuf_binary_version": "2.10.0",
@@ -232,6 +253,10 @@ class GdkPixbufConan(ConanFile):
         self.runenv_info.define_path("GDK_PIXBUF_PIXDATA", gdk_pixbuf_pixdata)
         self.env_info.GDK_PIXBUF_PIXDATA = gdk_pixbuf_pixdata # remove in conan v2?
 
+        if self.options.with_introspection:
+            self.cpp_info.requires.append("gobject-introspection::gobject-introspection")
+            self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "gir-1.0"))
+            self.runenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
