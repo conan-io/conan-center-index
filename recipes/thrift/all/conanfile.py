@@ -1,13 +1,12 @@
+import os
+
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.scm import Version
-import os
-import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.0.9"
 
 
 class ThriftConan(ConanFile):
@@ -45,23 +44,11 @@ class ThriftConan(ConanFile):
         "with_qt5": False,
         "with_haskell": False,
     }
-
+    implements = ["auto_shared_fpic"]
     short_paths = True
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -75,17 +62,22 @@ class ThriftConan(ConanFile):
         if self.options.with_libevent:
             self.requires("libevent/2.1.12")
         if self.options.with_qt5:
-            self.requires("qt/5.15.13")
+            self.requires("qt/[~5.15]")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("flex/2.6.4")
             self.tool_requires("bison/3.8.2")
+        if self.options.with_qt5:
+            self.tool_requires("qt/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        # No static code analysis (seems to trigger CMake warnings due to weird custom Find module file)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(StaticCodeAnalysis)", "")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -96,29 +88,16 @@ class ThriftConan(ConanFile):
         tc.variables["BUILD_COMPILER"] = True
         tc.variables["BUILD_LIBRARIES"] = True
         tc.variables["BUILD_TUTORIALS"] = False
+        tc.variables["WITH_QT5"] = self.options.with_qt5
         if is_msvc(self):
             tc.variables["WITH_MT"] = is_msvc_static_runtime(self)
-        # This policy doesn't matter for us, but avoids a warning
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0074"] = "NEW"
         tc.generate()
 
         cd = CMakeDeps(self)
         cd.generate()
 
-        env = VirtualBuildEnv(self)
-        env.generate(scope="build")
-
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # No static code analysis (seems to trigger CMake warnings due to weird custom Find module file)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(StaticCodeAnalysis)", "")
-        # TODO: To remove in conan v2, but it's still needed if building with 1 profile.
-        #       May also be removed if flex & bison recipes define cmake_find_mode property to "none" in their package_info()
-        for f in ["Findflex.cmake", "flex-config.cmake", "Findbison.cmake", "bison-config.cmake"]:
-            rm(self, f, self.generators_folder)
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -131,34 +110,6 @@ class ThriftConan(ConanFile):
         copy(self, "*.h", src=self.build_folder, dst=os.path.join(self.package_folder, "include"), keep_path=True)
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        targets = {}
-        if self.options.with_zlib:
-            targets.update({"thriftz::thriftz": "thrift::thriftz"})
-        if self.options.with_libevent:
-            targets.update({"thriftnb::thriftnb": "thrift::thriftnb"})
-        if self.options.with_qt5:
-            targets.update({"thriftqt5::thriftqt5": "thrift::thriftqt5"})
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            targets
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "Thrift")
@@ -201,31 +152,3 @@ class ThriftConan(ConanFile):
             self.cpp_info.components["libthrift_qt5"].set_property("pkg_config_name", "thrift-qt5")
             self.cpp_info.components["libthrift_qt5"].libs = [f"thriftqt5{libsuffix}"]
             self.cpp_info.components["libthrift_qt5"].requires = ["libthrift", "qt::qtCore"]
-
-        bin_path = os.path.join(self.package_folder, "bin")
-        self.output.info(f"Appending PATH env var with : {bin_path}")
-        self.env_info.PATH.append(bin_path)
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "Thrift"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Thrift"
-        self.cpp_info.names["cmake_find_package"] = "thrift"
-        self.cpp_info.names["cmake_find_package_multi"] = "thrift"
-        self.cpp_info.names["pkg_config"] = "thrift_conan_do_not_use"
-        self.cpp_info.components["libthrift"].names["cmake_find_package"] = "thrift"
-        self.cpp_info.components["libthrift"].names["cmake_find_package_multi"] = "thrift"
-        if self.options.with_zlib:
-            self.cpp_info.components["libthrift_z"].names["cmake_find_package"] = "thriftz"
-            self.cpp_info.components["libthrift_z"].names["cmake_find_package_multi"] = "thriftz"
-            self.cpp_info.components["libthrift_z"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["libthrift_z"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.with_libevent:
-            self.cpp_info.components["libthrift_nb"].names["cmake_find_package"] = "thriftnb"
-            self.cpp_info.components["libthrift_nb"].names["cmake_find_package_multi"] = "thriftnb"
-            self.cpp_info.components["libthrift_nb"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["libthrift_nb"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
-        if self.options.with_qt5:
-            self.cpp_info.components["libthrift_qt5"].names["cmake_find_package"] = "thriftqt5"
-            self.cpp_info.components["libthrift_qt5"].names["cmake_find_package_multi"] = "thriftqt5"
-            self.cpp_info.components["libthrift_qt5"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["libthrift_qt5"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
