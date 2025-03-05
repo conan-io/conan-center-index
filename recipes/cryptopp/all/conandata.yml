@@ -40,6 +40,12 @@ patches:
       patch_description: "Validate PolynomialMod2 coefficients (CVE-2023-50980)"
       patch_type: "vulnerability"
       patch_source: "https://github.com/weidai11/cryptopp/issues/1248"
+    - patch_file: "patches/8.9.0-0002-fix-cmake-msvc-arm64-detection.patch"
+      patch_source: "https://github.com/abdes/cryptopp-cmake/commit/1940cc0400de2e8161821558e73e3d8d0ddb13d3"
+    - patch_file: "patches/8.9.0-0003-fix-acle-header-usage-msvc-arm.patch"
+      patch_description: "Fix ACLE header detection on Windows ARM"
+      patch_type: "backport"
+      patch_source: "https://github.com/abdes/cryptopp-cmake/pull/127"
   "8.7.0":
     - patch_file: "patches/8.7.0-0001-fix-msvc-arm64.patch"
   "8.6.0":
