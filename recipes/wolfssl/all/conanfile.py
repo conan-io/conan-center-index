@@ -142,12 +142,12 @@ class WolfSSLConan(ConanFile):
         if self.settings.os == "baremetal":
             tc.configure_args.append("--disable-filesystem")
             tc.configure_args.append("--enable-fastmath")
+        tc.extra_defines.extend(self._defines)
+        env = tc.environment()
         if is_msvc(self):
             tc.extra_ldflags.append("-ladvapi32")
             if check_min_vs(self, "180", raise_invalid=False):
                 tc.extra_cflags.append("-FS")
-        env = tc.environment()
-        if is_msvc(self):
             automake_conf = self.dependencies.build["automake"].conf_info
             compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
             ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
@@ -155,9 +155,7 @@ class WolfSSLConan(ConanFile):
             env.define("CXX", f"{compile_wrapper} cl -nologo")
             env.define("LD", "link -nologo")
             env.define("AR", f"{ar_wrapper} lib")
-        tc.extra_defines.extend(self._defines)
         tc.generate(env)
-        tc.generate()
 
     def build(self):
         autotools = Autotools(self)
