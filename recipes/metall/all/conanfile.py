@@ -5,6 +5,7 @@ from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
+import platform
 
 required_conan_version = ">=1.50.0"
 
@@ -36,13 +37,18 @@ class MetallConan(ConanFile):
     def package_id(self):
         self.info.clear()
 
+    @property
+    def _is_glibc_older_than_2_27(self):
+        libver = platform.libc_ver()
+        return self.settings.os == 'Linux' and libver[0] == 'glibc' and Version(libver[1]) < "2.27"
+
     def validate(self):
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 17)
 
         if self.settings.os not in ["Linux", "Macos"]:
             raise ConanInvalidConfiguration(
-                "Metall requires some POSIX functionalities like mmap.")
+                f"{self.ref} requires some POSIX functionalities like mmap.")
 
         def lazy_lt_semver(v1, v2):
             lv1 = [int(v) for v in v1.split(".")]
@@ -55,6 +61,11 @@ class MetallConan(ConanFile):
         if minimum_version and lazy_lt_semver(str(self.settings.compiler.version), minimum_version):
             raise ConanInvalidConfiguration(
                 "{} {} requires C++17, which your compiler does not support.".format(self.name, self.version))
+
+    def validate_build(self):
+        if Version(self.version) >= "0.28" and self._is_glibc_older_than_2_27:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires copy_file_range() which is available since glibc 2.27.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

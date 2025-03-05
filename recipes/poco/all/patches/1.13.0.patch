@@ -1,0 +1,39 @@
+diff --git a/Foundation/CMakeLists.txt b/Foundation/CMakeLists.txt
+index 41ba999..f4a1fe9 100644
+--- a/Foundation/CMakeLists.txt
++++ b/Foundation/CMakeLists.txt
+@@ -99,7 +99,7 @@ set_target_properties(Foundation
+ )
+ 
+ if(POCO_UNBUNDLED)
+-	target_link_libraries(Foundation PUBLIC Pcre2::Pcre2 ZLIB::ZLIB)
++	target_link_libraries(Foundation PUBLIC PCRE2::8BIT ZLIB::ZLIB)
+ 	target_compile_definitions(Foundation PUBLIC POCO_UNBUNDLED)
+ endif(POCO_UNBUNDLED)
+ 
+diff --git a/NetSSL_Win/CMakeLists.txt b/NetSSL_Win/CMakeLists.txt
+index c0e1768..32a1187 100644
+--- a/NetSSL_Win/CMakeLists.txt
++++ b/NetSSL_Win/CMakeLists.txt
+@@ -21,7 +21,7 @@ set_target_properties(NetSSLWin
+ 	DEFINE_SYMBOL NetSSL_Win_EXPORTS
+ )
+ 
+-target_link_libraries(NetSSLWin PUBLIC Poco::Net Poco::Util Crypt32.lib)
++target_link_libraries(NetSSLWin PUBLIC Poco::Net Poco::Util crypt32 ws2_32)
+ target_include_directories(NetSSLWin
+ 	PUBLIC
+ 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+diff --git a/cmake/PocoMacros.cmake b/cmake/PocoMacros.cmake
+index 2ef58c5..5d7d7fa 100644
+--- a/cmake/PocoMacros.cmake
++++ b/cmake/PocoMacros.cmake
+@@ -40,7 +40,7 @@ if(WIN32)
+ 			endforeach()
+ 		endif(X64)
+ 	endif()
+-	find_program(CMAKE_MC_COMPILER mc.exe HINTS "${sdk_bindir}" "${kit_bindir}" "${kit81_bindir}" ${kit10_bindir}
++	find_program(CMAKE_MC_COMPILER NAMES mc.exe windmc.exe HINTS "${sdk_bindir}" "${kit_bindir}" "${kit81_bindir}" ${kit10_bindir}
+ 		DOC "path to message compiler")
+ 	if(NOT CMAKE_MC_COMPILER)
+ 		message(FATAL_ERROR "message compiler not found: required to build")

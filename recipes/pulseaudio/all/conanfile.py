@@ -1,3 +1,5 @@
+import os
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import cross_building
@@ -5,7 +7,6 @@ from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import copy, get, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
-import os
 
 required_conan_version = ">=1.53.0"
 
@@ -64,7 +65,7 @@ class PulseAudioConan(ConanFile):
         if self.options.with_alsa:
             self.requires("libalsa/1.2.10")
         if self.options.with_glib:
-            self.requires("glib/2.78.1")
+            self.requires("glib/2.78.3")
         if self.options.get_safe("with_fftw"):
             self.requires("fftw/3.3.10")
         if self.options.with_x11:
@@ -89,7 +90,7 @@ class PulseAudioConan(ConanFile):
         self.tool_requires("gettext/0.21")
         self.tool_requires("libtool/2.4.7")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.0.3")
+            self.tool_requires("pkgconf/2.1.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -111,6 +112,10 @@ class PulseAudioConan(ConanFile):
             "--with-udev-rules-dir=${prefix}/bin/udev/rules.d",
             f"--with-systemduserunitdir={os.path.join(self.build_folder, 'ignore')}",
         ])
+        # Workaround for https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=268250
+        # clang-15 works, but we need to skip the gnu11 flag check
+        if self.settings.compiler == "clang" and self.settings.compiler.version == 15:
+            tc.configure_args.append("ax_cv_check_cflags__pedantic__Werror__std_gnu11=yes")
         for lib in ["alsa", "x11", "openssl", "dbus"]:
             tc.configure_args.append(f"--enable-{lib}={yes_no(getattr(self.options, f'with_{lib}'))}")
         # TODO: to remove when automatically handled by AutotoolsToolchain
@@ -146,7 +151,7 @@ class PulseAudioConan(ConanFile):
         if self.options.get_safe("with_fftw"):
             self.cpp_info.components["pulse"].requires.append("fftw::fftw")
         if self.options.with_x11:
-            self.cpp_info.components["pulse"].requires.append("xorg::xorg")
+            self.cpp_info.components["pulse"].requires.extend(["xorg::x11", "xorg::x11-xcb"])
         if self.options.with_openssl:
             self.cpp_info.components["pulse"].requires.append("openssl::openssl")
         if self.options.with_dbus:

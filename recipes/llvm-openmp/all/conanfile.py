@@ -8,6 +8,7 @@ from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, save, move_folder_contents, rmdir
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
@@ -15,12 +16,9 @@ required_conan_version = ">=1.53.0"
 
 class LLVMOpenMpConan(ConanFile):
     name = "llvm-openmp"
-    description = ("The OpenMP (Open Multi-Processing) specification "
-                   "is a standard for a set of compiler directives, "
-                   "library routines, and environment variables that "
-                   "can be used to specify shared memory parallelism "
-                   "in Fortran and C/C++ programs. This is the LLVM "
-                   "implementation.")
+    description = ("The OpenMP (Open Multi-Processing) specification is a standard for a set of compiler directives, "
+                   "library routines, and environment variables that can be used to specify shared memory parallelism "
+                   "in Fortran and C/C++ programs. This is the LLVM implementation.")
     license = "Apache-2.0 WITH LLVM-exception"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/llvm/llvm-project/blob/main/openmp"
@@ -44,15 +42,6 @@ class LLVMOpenMpConan(ConanFile):
             "in addition to the OpenMP Runtime Library (libomp)."
         )
     }
-
-    def _supports_compiler(self):
-        supported_compilers_by_os = {
-            "Linux": ["clang", "gcc", "intel-cc"],
-            "Macos": ["apple-clang", "clang", "gcc", "intel-cc"],
-            "Windows": ["intel-cc"],
-        }
-        the_compiler, the_os = self.settings.compiler.value, self.settings.os.value
-        return the_compiler in supported_compilers_by_os.get(the_os, [])
 
     @property
     def _compilers_minimum_version(self):
@@ -85,9 +74,12 @@ class LLVMOpenMpConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if not self._supports_compiler():
-            raise ConanInvalidConfiguration("llvm-openmp doesn't support compiler: "
-                                            f"{self.settings.compiler} on OS: {self.settings.os}.")
+        if is_msvc(self):
+            raise ConanInvalidConfiguration("llvm-openmp is not compatible with MSVC")
+        if self.settings.compiler not in ["apple-clang", "clang", "gcc", "intel-cc"]:
+            raise ConanInvalidConfiguration(
+                f"{self.settings.compiler} is not supported by this recipe. Contributions are welcome!"
+            )
         if self._version_major >= 17:
             if self.settings.compiler.cppstd:
                 check_min_cppstd(self, 17)

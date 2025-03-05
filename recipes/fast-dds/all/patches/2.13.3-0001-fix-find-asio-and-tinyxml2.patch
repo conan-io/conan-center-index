@@ -1,0 +1,31 @@
+From 7d4f8a198ce34570c3c5b678f74240a8c5b9eae8 Mon Sep 17 00:00:00 2001
+From: Wade Hunkapiller <wade.hunk@gmail.com>
+Date: Mon, 18 Mar 2024 15:57:02 -0500
+Subject: [PATCH] fix find asio and tinyxml2
+
+---
+ CMakeLists.txt | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5ccb97a1b..ac6630c44 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -234,9 +234,11 @@ if(NOT BUILD_SHARED_LIBS)
+     set(FASTDDS_STATIC ON)
+ endif()
+ 
+-eprosima_find_package(fastcdr REQUIRED)
+-eprosima_find_thirdparty(Asio asio VERSION 1.10.8)
+-eprosima_find_thirdparty(TinyXML2 tinyxml2)
++eprosima_find_thirdparty(fastcdr REQUIRED)
++eprosima_find_thirdparty(asio REQUIRED)
++eprosima_find_thirdparty(tinyxml2 REQUIRED)
++set(TINYXML2_LIBRARY tinyxml2::tinyxml2)
++set(Asio_INCLUDE_DIR ${asio_INCLUDE_DIR})
+ 
+ find_package(foonathan_memory REQUIRED)
+ message(STATUS "Found foonathan_memory: ${foonathan_memory_DIR}")
+-- 
+2.39.3
+

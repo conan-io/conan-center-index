@@ -1,4 +1,7 @@
 sources:
+  "cci.20231129":
+    url: "https://github.com/Maratyszcza/pthreadpool/archive/4fe0e1e183925bf8cfa6aae24237e724a96479b8.zip"
+    sha256: "a4cf06de57bfdf8d7b537c61f1c3071bce74e57524fe053e0bbd2332feca7f95"
   "cci.20210218":
     url: "https://github.com/Maratyszcza/pthreadpool/archive/b4589998be9a0f794236cf46f1b5b232b2b15ca3.zip"
     sha256: "b09f79d1b609239861bce5ed4ba4fbcf04f36e2c31471276158c44e5e15fde95"

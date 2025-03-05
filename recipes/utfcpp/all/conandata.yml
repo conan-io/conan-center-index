@@ -1,4 +1,7 @@
 sources:
+  "4.0.5":
+    url: "https://github.com/nemtrif/utfcpp/archive/v4.0.5.tar.gz"
+    sha256: "ffc668a310e77607d393f3c18b32715f223da1eac4c4d6e0579a11df8e6b59cf"
   "4.0.4":
     url: "https://github.com/nemtrif/utfcpp/archive/v4.0.4.tar.gz"
     sha256: "7c8a403d0c575d52473c8644cd9eb46c6ba028d2549bc3e0cdc2d45f5cfd78a0"
@@ -11,27 +14,9 @@ sources:
   "3.2.5":
     url: "https://github.com/nemtrif/utfcpp/archive/v3.2.5.tar.gz"
     sha256: "14fd1b3c466814cb4c40771b7f207b61d2c7a0aa6a5e620ca05c00df27f25afd"
-  "3.2.4":
-    url: "https://github.com/nemtrif/utfcpp/archive/refs/tags/v3.2.4.tar.gz"
-    sha256: "fde21a4c519eed25f095a1cd8490167409cc70d7b5e9c38756142e588ccb7c7e"
   "3.2.3":
     url: "https://github.com/nemtrif/utfcpp/archive/v3.2.3.tar.gz"
     sha256: "3ba9b0dbbff08767bdffe8f03b10e596ca351228862722e4c9d4d126d2865250"
-  "3.2.2":
-    url: "https://github.com/nemtrif/utfcpp/archive/v3.2.2.tar.gz"
-    sha256: "6f81e7cb2be2a6a9109a8a0cb7dc39ec947f1bcdb5dfa4a660e11a23face19f5"
-  "3.2.1":
-    url: "https://github.com/nemtrif/utfcpp/archive/refs/tags/v3.2.1.tar.gz"
-    sha256: "8d6aa7d77ad0abb35bb6139cb9a33597ac4c5b33da6a004ae42429b8598c9605"
-  "3.2":
-    url: "https://github.com/nemtrif/utfcpp/archive/v3.2.tar.gz"
-    sha256: "cd4f9a66d23dc385bd7ea11bc0abfda8ea1ad1dcf5cd6d3a27bc551e86436364"
   "3.1.2":
     url: "https://github.com/nemtrif/utfcpp/archive/v3.1.2.tar.gz"
     sha256: "fea3bfa39fb8bd7368077ea5e1e0db9a8951f7e6fb6d9400b00ab3d92b807c6d"
-  "3.1.1":
-    url: "https://github.com/nemtrif/utfcpp/archive/v3.1.1.tar.gz"
-    sha256: "33496a4c3cc2de80e9809c4997052331af5fb32079f43ab4d667cd48c3a36e88"
-  "3.1":
-    url: "https://github.com/nemtrif/utfcpp/archive/v3.1.tar.gz"
-    sha256: "ab531c3fd5d275150430bfaca01d7d15e017a188183be932322f2f651506b096"

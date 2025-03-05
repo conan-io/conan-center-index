@@ -37,7 +37,7 @@ class SspConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("fast_float/6.0.0")
+        self.requires("fast_float/6.1.0")
 
     def package_id(self):
         self.info.clear()

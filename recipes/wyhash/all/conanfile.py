@@ -16,6 +16,7 @@ class WyhashConan(ConanFile):
     package_type = "header-library"
     settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
+    deprecated = "rapidhash"
 
     def layout(self):
         basic_layout(self, src_folder="src")

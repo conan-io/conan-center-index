@@ -1,0 +1,10 @@
+sources:
+  "2.0.3":
+    url: "https://archive.apache.org/dist/orc/orc-2.0.3/orc-2.0.3.tar.gz"
+    sha256: "082cba862b5a8a0d14c225404d0b51cd8d1b64ca81b8f1e500322ce8922cb86d"
+  "2.0.0":
+    url: "https://archive.apache.org/dist/orc/orc-2.0.0/orc-2.0.0.tar.gz"
+    sha256: "9107730919c29eb39efaff1b9e36166634d1d4d9477e5fee76bfd6a8fec317df"
+  "1.9.5":
+    url: "https://archive.apache.org/dist/orc/orc-1.9.5/orc-1.9.5.tar.gz"
+    sha256: "6900b4e8a2e4e49275f4067bd0f838ad68330204305fd3f13a5ec519e9d71547"

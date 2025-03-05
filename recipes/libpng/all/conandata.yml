@@ -1,4 +1,25 @@
 sources:
+  "1.6.47":
+    url: "https://sourceforge.net/projects/libpng/files/libpng16/1.6.47/libpng-1.6.47.tar.xz"
+    sha256: "b213cb381fbb1175327bd708a77aab708a05adde7b471bc267bd15ac99893631"
+  "1.6.46":
+    url: "https://sourceforge.net/projects/libpng/files/libpng16/1.6.46/libpng-1.6.46.tar.xz"
+    sha256: "f3aa8b7003998ab92a4e9906c18d19853e999f9d3bca9bd1668f54fa81707cb1"
+  "1.6.45":
+    url: "https://sourceforge.net/projects/libpng/files/libpng16/1.6.45/libpng-1.6.45.tar.xz"
+    sha256: "926485350139ffb51ef69760db35f78846c805fef3d59bfdcb2fba704663f370"
+  "1.6.44":
+    url: "https://sourceforge.net/projects/libpng/files/libpng16/1.6.44/libpng-1.6.44.tar.xz"
+    sha256: "60c4da1d5b7f0aa8d158da48e8f8afa9773c1c8baa5d21974df61f1886b8ce8e"
+  "1.6.43":
+    url: "https://sourceforge.net/projects/libpng/files/libpng16/1.6.43/libpng-1.6.43.tar.xz"
+    sha256: "6a5ca0652392a2d7c9db2ae5b40210843c0bbc081cbd410825ab00cc59f14a6c"
+  "1.6.42":
+    url: "https://sourceforge.net/projects/libpng/files/libpng16/1.6.42/libpng-1.6.42.tar.xz"
+    sha256: "c919dbc11f4c03b05aba3f8884d8eb7adfe3572ad228af972bb60057bdb48450"
+  "1.6.41":
+    url: "https://sourceforge.net/projects/libpng/files/libpng16/1.6.41/libpng-1.6.41.tar.xz"
+    sha256: "d6a49a7a4abca7e44f72542030e53319c081fea508daccf4ecc7c6d9958d190f"
   "1.6.40":
     url: "https://sourceforge.net/projects/libpng/files/libpng16/1.6.40/libpng-1.6.40.tar.xz"
     sha256: "535b479b2467ff231a3ec6d92a525906fb8ef27978be4f66dbe05d3f3a01b3a1"

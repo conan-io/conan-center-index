@@ -1,19 +1,26 @@
-from conans import CMake, ConanFile, tools
-from conans.errors import ConanInvalidConfiguration
+import os
 
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get
+from conan.tools.scm import Version
 
-required_conan_version = ">=1.33.0"
+required_conan_version = ">=1.53.0"
 
 
 class MsixConan(ConanFile):
     name = "msix"
+    description = "An SDK for creating MSIX packages"
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/microsoft/msix-packaging"
-    description = "An SDK for creating MSIX packages"
-    topics = ("msix", "sdk", "packaging", "conan-recipe")
+    topics = ("sdk", "packaging", "conan-recipe")
 
-    settings = "os", "compiler", "build_type", "arch"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -22,7 +29,7 @@ class MsixConan(ConanFile):
         "skip_bundles": [True, False],
         "use_external_zlib": [True, False],
         "use_validation_parser": [True, False],
-        "xml_parser": ["applexml", "javaxml", "msxml6", "xerces"]
+        "with_xerces": [True, False],
     }
     default_options = {
         "shared": False,
@@ -32,126 +39,134 @@ class MsixConan(ConanFile):
         "skip_bundles": False,
         "use_external_zlib": True,
         "use_validation_parser": False,
-        "xml_parser": "msxml6"
+        "with_xerces": False,
     }
 
-    generators = "cmake"
-    exports_sources = "CMakeLists.txt", "patches/**"
-
-    _cmake = None
+    @property
+    def _min_cppstd(self):
+        return 14
 
     @property
-    def _minimum_compilers_version(self):
+    def _compilers_minimum_version(self):
         return {
-            "Visual Studio": "15"
+            "apple-clang": "10",
+            "clang": "7",
+            "msvc": "191",
+            "Visual Studio": "15",
         }
 
-    @property
-    def _source_subfolder(self):
-        return "source_subfolder"
-
-    def _configure_cmake(self):
-        if self._cmake:
-            return self._cmake
-        self._cmake = CMake(self)
-        if self.settings.os == "Android":
-            self._cmake.definitions["AOSP"] = True
-        if self.settings.os == "Linux":
-            self._cmake.definitions["LINUX"] = True
-        if self.settings.os == "Macos":
-            self._cmake.definitions["MACOS"] = True
-        self._cmake.definitions["CRYPTO_LIB"] = self.options.crypto_lib
-        self._cmake.definitions["MSIX_PACK"] = self.options.pack
-        self._cmake.definitions["MSIX_SAMPLES"] = False
-        self._cmake.definitions["MSIX_TESTS"] = False
-        self._cmake.definitions["SKIP_BUNDLES"] = self.options.skip_bundles
-        self._cmake.definitions["USE_MSIX_SDK_ZLIB"] = self.options.use_external_zlib
-        self._cmake.definitions["USE_SHARED_ZLIB"] = self.options["zlib"].shared
-        self._cmake.definitions["USE_VALIDATION_PARSER"] = self.options.use_validation_parser
-        self._cmake.definitions["XML_PARSER"] = self.options.xml_parser
-        self._cmake.definitions["CALCULATE_VERSION"] = False
-        self._cmake.definitions["ENABLE_NUGET_PACKAGING"] = False
-        self._cmake.configure()
-        return self._cmake
-
-    def _validate_compiler_settings(self):
-        compiler = self.settings.compiler
-        if compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, "17")
-
-        min_version = self._minimum_compilers_version.get(str(self.settings.compiler))
-        if not min_version:
-            self.output.warn("{} recipe lacks information about the {} compiler support.".format(
-                self.name, self.settings.compiler))
-        elif tools.Version(self.settings.compiler.version) < min_version:
-                raise ConanInvalidConfiguration("{} requires C++17 support. The current compiler {} {} does not support it.".format(
-                    self.name, self.settings.compiler, self.settings.compiler.version))
+    def export_sources(self):
+        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-            self.options.crypto_lib = "crypt32"
+        if self.settings.os != "Windows":
+            del self.options.crypto_lib
+        if not is_apple_os(self) and self.settings.os not in ["Windows", "Android"]:
+            # with_xerces is required
+            del self.options.with_xerces
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.settings.os == "Linux" and not self.options.skip_bundles:
-            self.requires("icu/71.1")
-        if self.options.crypto_lib == "openssl":
-            self.requires("openssl/1.1.1q")
+        if self.settings.os in ["Linux", "FreeBSD"] and not self.options.skip_bundles:
+            self.requires("icu/74.2")
+        if self.options.get_safe("crypto_lib", "openssl") == "openssl":
+            self.requires("openssl/[>=1.1 <4]")
         if self.options.use_external_zlib:
-            self.requires("zlib/1.2.12")
-        if self.options.xml_parser == "xerces":
-            self.requires("xerces-c/3.2.3")
+            self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.get_safe("with_xerces", True):
+            self.requires("xerces-c/3.2.5")
+
+    def _validate_compiler_settings(self):
+        compiler = self.settings.compiler
+        if compiler.get_safe("cppstd"):
+            check_min_cppstd(self, 14)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def validate(self):
-        if self.settings.os != "Android" and self.options.xml_parser == "javaxml":
-            raise ConanInvalidConfiguration("javaxml is supported only for Android")
-        if self.settings.os == "Linux" and self.settings.compiler != "clang":
-            raise ConanInvalidConfiguration("Only clang is supported on Linux")
-        if self.settings.os != "Macos" and self.options.xml_parser == "applexml":
-            raise ConanInvalidConfiguration("applexml is supported only for MacOS")
-        if self.settings.os != "Windows" and self.options.crypto_lib == "crypt32":
-            raise ConanInvalidConfiguration("crypt32 is supported only for Windows")
-        if self.settings.os != "Windows" and self.options.xml_parser == "msxml6":
-            raise ConanInvalidConfiguration("msxml6 is supported only for Windows")
+        if self.settings.os in ["Linux", "FreeBSD"] and self.settings.compiler != "clang":
+            raise ConanInvalidConfiguration(f"Only clang is supported on {self.settings.os}")
+        if self.settings.compiler == "clang" and Version(self.settings.compiler.version) >= "12" and self.version == "1.7":
+            # AppxPackaging.hpp:706:5: error: templates must have C++ linkage
+            raise ConanInvalidConfiguration("Clang 12 and newer are not supported")
         if self.options.pack:
-            if self.settings.os == "Macos":
+            if is_apple_os(self):
                 if not self.options.use_external_zlib:
                     raise ConanInvalidConfiguration("Using libCompression APIs and packaging features is not supported")
-                if self.options.xml_parser != "xerces":
+                if not self.options.get_safe("with_xerces", True):
                     raise ConanInvalidConfiguration("Xerces is the only supported parser for MacOS pack")
             if not self.options.use_validation_parser:
                 raise ConanInvalidConfiguration("Packaging requires validation parser")
-        if (self.options.xml_parser == "xerces" and
-            self.options["xerces-c"].char_type != "char16_t"):
-                raise ConanInvalidConfiguration("Only char16_t is supported for xerces-c")
-        
+        if self.options.get_safe("with_xerces", True) and self.dependencies["xerces-c"].options.char_type != "char16_t":
+            raise ConanInvalidConfiguration("Only char16_t is supported for xerces-c")
+
         self._validate_compiler_settings()
 
     def source(self):
-        tools.get(**self.conan_data["sources"][self.version], destination=self._source_subfolder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        if self.settings.os == "Android":
+            tc.variables["AOSP"] = True
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            tc.variables["LINUX"] = True
+        if is_apple_os(self):
+            tc.variables["MACOS"] = True
+        tc.variables["CRYPTO_LIB"] = self.options.get_safe("crypto_lib", "openssl")
+        tc.variables["MSIX_PACK"] = self.options.pack
+        tc.variables["MSIX_SAMPLES"] = False
+        tc.variables["MSIX_TESTS"] = False
+        tc.variables["SKIP_BUNDLES"] = self.options.skip_bundles
+        tc.variables["USE_MSIX_SDK_ZLIB"] = self.options.use_external_zlib
+        tc.variables["USE_VALIDATION_PARSER"] = self.options.use_validation_parser
+        if self.options.get_safe("with_xerces", True):
+            tc.variables["XML_PARSER"] = "xerces"
+        elif self.settings.os == "Android":
+            tc.variables["XML_PARSER"] = "javaxml"
+        elif is_apple_os(self):
+            tc.variables["XML_PARSER"] = "applexml"
+        elif self.settings.os == "Windows":
+            tc.variables["XML_PARSER"] = "msxml6"
+        tc.variables["CALCULATE_VERSION"] = False
+        tc.variables["ENABLE_NUGET_PACKAGING"] = False
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
+        tc.generate()
+        tc = CMakeDeps(self)
+        tc.generate()
 
     def build(self):
-        for patch in self.conan_data.get("patches", {}).get(self.version, []):
-            tools.patch(**patch)
-        cmake = self._configure_cmake()
+        apply_conandata_patches(self)
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
     def package(self):
-        cmake = self._configure_cmake()
+        cmake = CMake(self)
         cmake.install()
-        self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
+        copy(self, "LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         if self.settings.os == "Windows":
-            self.cpp_info.system_libs = ["runtimeobject"]
-            if self.settings.compiler == "Visual Studio":
-                self.cpp_info.system_libs.append("delayimp")
-            if self.options.crypto_lib == "crypt32":
-                self.cpp_info.system_libs.extend(["bcrypt", "crypt32", "wintrust"])
-            if self.options.xml_parser == "msxml6":
+            # https://github.com/microsoft/msix-packaging/blob/v1.7/src/msix/CMakeLists.txt#L271
+            self.cpp_info.system_libs.extend(["bcrypt", "crypt32", "wintrust", "runtimeobject", "delayimp"])
+            if not self.options.with_xerces:
                 self.cpp_info.system_libs.append("msxml6")
+        if is_apple_os(self):
+            # https://github.com/microsoft/msix-packaging/blob/v1.7/src/msix/CMakeLists.txt#L364
+            self.cpp_info.frameworks.extend(["CoreFoundation", "Foundation"])
+            if not self.options.use_external_zlib:
+                # https://github.com/microsoft/msix-packaging/blob/v1.7/src/msix/CMakeLists.txt#L285
+                self.cpp_info.frameworks.append("Compression")

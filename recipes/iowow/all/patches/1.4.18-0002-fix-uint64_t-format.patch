@@ -1,0 +1,13 @@
+diff --git a/src/fs/iwfsmfile.c b/src/fs/iwfsmfile.c
+index 2d1452a..121e989 100644
+--- a/src/fs/iwfsmfile.c
++++ b/src/fs/iwfsmfile.c
+@@ -1339,7 +1339,7 @@ static iwrc _fsm_read_meta_lr(struct fsm *fsm) {
+   fsm->bmlen = llv;
+   if (llv & (64 - 1)) {
+     rc = IWFS_ERROR_INVALID_FILEMETA;
+-    iwlog_ecode_error(rc, "Free-space bitmap length is not 64bit aligned: %" PRIuMAX "", fsm->bmlen);
++    iwlog_ecode_error(rc, "Free-space bitmap length is not 64bit aligned: %" PRIx64 "", fsm->bmlen);
+   }
+   rp += sizeof(llv);
+ 

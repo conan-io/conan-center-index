@@ -1,21 +1,23 @@
 versions:
+  "1.9.9":
+    folder: "all"
+  "1.9.8":
+    folder: "all"
+  "1.9.7":
+    folder: "all"
+  "1.9.6":
+    folder: "all"
+  "1.9.5":
+    folder: "all"
+  "1.9.4":
+    folder: "all"
+  "1.9.3":
+    folder: "all"
+  "1.9.2":
+    folder: "all"
   "1.9.1":
     folder: "all"
   "1.9.0":
     folder: "all"
   "1.8.7":
-    folder: "all"
-  "1.8.6":
-    folder: "all"
-  "1.8.5":
-    folder: "all"
-  "1.8.4":
-    folder: "all"
-  "1.8.3":
-    folder: "all"
-  "1.8.2":
-    folder: "all"
-  "1.8.0":
-    folder: "all"
-  "1.7.5":
     folder: "all"

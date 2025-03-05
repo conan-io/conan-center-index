@@ -12,13 +12,13 @@ required_conan_version = ">=1.52.0"
 
 class JsonDtoConan(ConanFile):
     name = "json_dto"
-    license = "BSD-3-Clause"
-    homepage = "https://github.com/Stiffstream/json_dto"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "A small header-only helper for converting data between json representation and c++ structs"
-    topics = ("json", "dto", "serialization")
+    license = "BSD-3-Clause"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/Stiffstream/json_dto"
+    topics = ("json", "dto", "serialization", "header-only")
     package_type = "header-library"
-    settings = "os", "compiler", "build_type", "arch"
+    settings = "os", "arch", "compiler", "build_type"
     no_copy_source = True
 
     @property
@@ -52,6 +52,11 @@ class JsonDtoConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
+        # several gcc doesn't allow "this" in noexcept clauses due to bug. https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100752
+        if Version(self.version) >= "0.3.2" and \
+            self.settings.compiler == "gcc" and \
+            (Version(self.settings.compiler.version) < "9.0" or Version(self.settings.compiler.version).major == 11):
+            raise ConanInvalidConfiguration(f"{self.ref} requires gcc 9, 10 or 12 later")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

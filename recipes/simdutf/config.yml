@@ -1,23 +1,23 @@
 versions:
+  "6.2.0":
+    folder: all
+  "5.6.3":
+    folder: all
+  "5.6.2":
+    folder: all
+  "5.6.0":
+    folder: all
+  "5.5.0":
+    folder: all
+  "5.4.15":
+    folder: all
+  "5.3.7":
+    folder: all
+  "5.3.5":
+    folder: all
+  "5.3.2":
+    folder: all
+  "5.3.1":
+    folder: all
   "4.0.5":
-    folder: all
-  "4.0.4":
-    folder: all
-  "4.0.3":
-    folder: all
-  "3.2.17":
-    folder: all
-  "3.2.15":
-    folder: all
-  "3.2.14":
-    folder: all
-  "3.2.2":
-    folder: all
-  "3.2.0":
-    folder: all
-  "3.1.0":
-    folder: all
-  "3.0.0":
-    folder: all
-  "2.2.0":
     folder: all

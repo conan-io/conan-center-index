@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv
+from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, rename, rm, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -11,7 +12,7 @@ from conan.tools.scm import Version
 import glob
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=1.60.0 <2 || >=2.0.5"
 
 class GStreamerConan(ConanFile):
     name = "gstreamer"
@@ -33,6 +34,14 @@ class GStreamerConan(ConanFile):
         "with_introspection": False,
     }
 
+    @property
+    def _settings_build(self):
+        return getattr(self, "settings_build", self.settings)
+
+    @property
+    def _is_legacy_one_profile(self):
+        return not hasattr(self, "settings_build")
+
     def config_options(self):
         if self.settings.os == 'Windows':
             del self.options.fPIC
@@ -47,24 +56,25 @@ class GStreamerConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.76.3", transitive_headers=True, transitive_libs=True)
+        self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if not self.dependencies.direct_host["glib"].options.shared and self.info.options.shared:
+        if not self.dependencies.direct_host["glib"].options.shared and self.options.shared:
             # https://gitlab.freedesktop.org/gstreamer/gst-build/-/issues/133
             raise ConanInvalidConfiguration("shared GStreamer cannot link to static GLib")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.1.1")
+        self.tool_requires("meson/[>=1.2.3 <2]")
         # There used to be an issue with glib being shared by default but its dependencies being static
         # No longer the case, but see: https://github.com/conan-io/conan-center-index/pull/13400#issuecomment-1551565573 for context
-        self.tool_requires("glib/2.76.3")
-        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/1.9.3")
+        if not self._is_legacy_one_profile:
+            self.tool_requires("glib/<host_version>")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         if self.options.with_introspection:
             self.tool_requires("gobject-introspection/1.72.0")
-        if self.settings.os == 'Windows':
-            self.tool_requires("winflexbison/2.5.24")
+        if self._settings_build.os == 'Windows':
+            self.tool_requires("winflexbison/2.5.25")
         else:
             self.tool_requires("bison/3.8.2")
             self.tool_requires("flex/2.6.4")
@@ -75,6 +85,8 @@ class GStreamerConan(ConanFile):
     def generate(self):
         virtual_build_env = VirtualBuildEnv(self)
         virtual_build_env.generate()
+        if self._is_legacy_one_profile:
+            VirtualRunEnv(self).generate(scope="build")
         pkg_config_deps = PkgConfigDeps(self)
         pkg_config_deps.generate()
         tc = MesonToolchain(self)
@@ -112,6 +124,7 @@ class GStreamerConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "gstreamer-1.0", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
+        fix_apple_shared_install_name(self)
 
     def package_info(self):
         gst_plugin_path = os.path.join(self.package_folder, "lib", "gstreamer-1.0")
@@ -139,7 +152,7 @@ class GStreamerConan(ConanFile):
         self.cpp_info.components["gstreamer-1.0"].libs = ["gstreamer-1.0"]
         self.cpp_info.components["gstreamer-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
         if self.settings.os == "Linux":
-            self.cpp_info.components["gstreamer-1.0"].system_libs = ["m"]
+            self.cpp_info.components["gstreamer-1.0"].system_libs = ["m", "dl", "nsl"]
         self.cpp_info.components["gstreamer-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
         self.cpp_info.components["gstreamer-base-1.0"].set_property("pkg_config_name", "gstreamer-base-1.0")
@@ -161,6 +174,8 @@ class GStreamerConan(ConanFile):
         self.cpp_info.components["gstreamer-net-1.0"].set_property("pkg_config_name", "gstreamer-net-1.0")
         self.cpp_info.components["gstreamer-net-1.0"].names["pkg_config"] = "gstreamer-net-1.0"
         self.cpp_info.components["gstreamer-net-1.0"].requires = ["gstreamer-1.0", "glib::gio-2.0"]
+        if Version(self.version) >= "1.21.1" and self.settings.os != "Windows":
+            self.cpp_info.components["gstreamer-net-1.0"].requires.append("glib::gio-unix-2.0")
         self.cpp_info.components["gstreamer-net-1.0"].libs = ["gstnet-1.0"]
         self.cpp_info.components["gstreamer-net-1.0"].includedirs = [os.path.join("include", "gstreamer-1.0")]
         self.cpp_info.components["gstreamer-net-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
@@ -174,7 +189,7 @@ class GStreamerConan(ConanFile):
             self.cpp_info.components["gstreamer-check-1.0"].system_libs = ["rt", "m"]
         self.cpp_info.components["gstreamer-check-1.0"].set_property("pkg_config_custom_content", pkgconfig_custom_content)
 
-        # gstcoreelements and gstcoretracers are plugins which should be loaded dynamicaly, and not linked to directly
+        # gstcoreelements and gstcoretracers are plugins which should be loaded dynamically, and not linked to directly
         if not self.options.shared:
             self.cpp_info.components["gstcoreelements"].set_property("pkg_config_name", "gstcoreelements")
             self.cpp_info.components["gstcoreelements"].names["pkg_config"] = "gstcoreelements"

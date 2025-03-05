@@ -1,0 +1,24 @@
+diff --git a/src/lib/rng/system_rng/system_rng.cpp b/src/lib/rng/system_rng/system_rng.cpp
+index b42ea5543..dcff78931 100644
+--- a/src/lib/rng/system_rng/system_rng.cpp
++++ b/src/lib/rng/system_rng/system_rng.cpp
+@@ -26,6 +26,7 @@
+ #elif defined(BOTAN_TARGET_OS_HAS_GETRANDOM)
+    #include <errno.h>
+    #include <sys/random.h>
++   #include <sys/syscall.h>
+ #elif defined(BOTAN_TARGET_OS_HAS_DEV_RANDOM)
+    #include <errno.h>
+    #include <fcntl.h>
+@@ -211,7 +212,11 @@ class System_RNG_Impl final : public RandomNumberGenerator {
+          uint8_t* buf = output.data();
+          size_t len = output.size();
+          while(len > 0) {
++   #if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ < 25
++            const ssize_t got = ::syscall(SYS_getrandom, buf, len, flags);
++   #else
+             const ssize_t got = ::getrandom(buf, len, flags);
++   #endif
+ 
+             if(got < 0) {
+                if(errno == EINTR) {

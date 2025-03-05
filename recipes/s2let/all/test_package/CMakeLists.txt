@@ -1,10 +1,7 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.15)
 project(test_package C)
 
-include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-conan_basic_setup(TARGETS)
-
-find_package(s2let REQUIRED NO_MODULE)
+find_package(s2let REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} example.c)
 target_compile_features(${PROJECT_NAME} PUBLIC c_std_99)

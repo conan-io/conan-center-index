@@ -1,0 +1,4 @@
+sources:
+  "6.2.0":
+    url: "https://github.com/GiovanniDicanio/WinReg/archive/refs/tags/v6.2.0.tar.gz"
+    sha256: "9dc1b287fb8c765a35791bf0deea0da81e52a969827bc2d8777f54f26ade588d"
