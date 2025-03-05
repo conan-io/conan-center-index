@@ -80,9 +80,12 @@ class WolfSSLConan(ConanFile):
             del self.options.with_experimental
         if Version(self.version) < "5.7.2":
             del self.options.with_rpk
+        if self.settings.os == "baremetal":
+            del self.options.shared
+            self.package_type = "static-library"
 
     def configure(self):
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
@@ -128,8 +131,8 @@ class WolfSSLConan(ConanFile):
             "--enable-sessioncerts={}".format(yes_no(self.options.sessioncerts)),
             "--enable-sni={}".format(yes_no(self.options.sni)),
             "--enable-testcert={}".format(yes_no(self.options.testcert)),
-            "--enable-shared={}".format(yes_no(self.options.shared)),
-            "--enable-static={}".format(yes_no(not self.options.shared)),
+            "--enable-shared={}".format(yes_no(self.options.get_safe("shared"))),
+            "--enable-static={}".format(yes_no(not self.options.get_safe("shared"))),
         ])
         if self.options.get_safe("with_curl"):
             tc.configure_args.append("--enable-curl")
@@ -140,8 +143,13 @@ class WolfSSLConan(ConanFile):
         if self.options.get_safe("with_rpk"):
             tc.configure_args.append("--enable-rpk")
         if self.settings.os == "baremetal":
+            # INFO: Disable filesystem to avoid error: #error "<dirent.h> not supported"
             tc.configure_args.append("--disable-filesystem")
+            # INFO: Recommended for faster cryptographic operations, predictable memory usage, and enhanced security
+            # See https://www.wolfssl.com/documentation/manuals/wolfssl/chapter02.html#building-with-configure-with-cross-compile
             tc.configure_args.append("--enable-fastmath")
+            # INFO: Inject HAVE_PK_CALLBACKS, WOLFSSL_USER_IO, NO_WRITEV and TIME_T_NOT_64BIT
+            tc.extra_defines.extend(self._defines)
         env = tc.environment()
         if is_msvc(self):
             tc.extra_ldflags.append("-ladvapi32")
@@ -171,7 +179,7 @@ class WolfSSLConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
-        if is_msvc(self) and self.options.shared:
+        if is_msvc(self) and self.options.get_safe("shared"):
             rename(self, os.path.join(self.package_folder, "lib", "wolfssl.dll.lib"),
                          os.path.join(self.package_folder, "lib", "wolfssl.lib"))
 
@@ -179,9 +187,9 @@ class WolfSSLConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "wolfssl")
         self.cpp_info.libs = ["wolfssl"]
         self.cpp_info.defines = self._defines
-        if self.options.shared:
+        if self.options.get_safe("shared"):
             self.cpp_info.defines.append("WOLFSSL_DLL")
-        if not self.options.shared:
+        if not self.options.get_safe("shared"):
             if self.settings.os in ["Linux", "FreeBSD"]:
                 self.cpp_info.system_libs.extend(["m", "pthread"])
             elif self.settings.os == "Windows":
@@ -210,6 +218,9 @@ class WolfSSLConan(ConanFile):
 
     @property
     def _defines(self):
+        # INFO: These defines are defined by autotools already when building,
+        #       but they need to be forwarded to the consumers
+        # See https://www.wolfssl.com/documentation/manuals/wolfssl/chapter02.html#building-with-configure-with-cross-compile
         defines = ["TFM_TIMING_RESISTANT", "ECC_TIMING_RESISTANT", "WC_RSA_BLINDING"]
         if self.settings.os == "baremetal":
             defines.extend([
