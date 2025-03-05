@@ -40,9 +40,6 @@ patches:
     - patch_file: "patches/1.9.7-0002-find-cci-packages.patch"
       patch_description: "Fix jsoncpp cmake target name"
       patch_type: "conan"
-    - patch_file: "patches/1.9.9-0001-find-cci-packages.patch"
-      patch_description: "Fix mariadb-connector-c cmake target name"
-      patch_type: "conan"
   "1.9.8":
     - patch_file: "patches/1.8.5-0001-remove-shared-libs.patch"
       patch_description: "remove shared libs option"

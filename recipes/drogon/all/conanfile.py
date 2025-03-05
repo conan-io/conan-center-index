@@ -162,8 +162,11 @@ class DrogonConan(ConanFile):
         if Version(self.version) >= "1.8.4":
             tc.variables["USE_SUBMODULE"] = False
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        if self.options.get_safe("with_mysql"):
+            deps.set_property("mariadb-connector-c", "cmake_file_name", "MySQL")
+            deps.set_property("mariadb-connector-c", "cmake_target_name", "MySQL_lib")
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
