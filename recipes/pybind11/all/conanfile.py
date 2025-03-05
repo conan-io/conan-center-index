@@ -64,13 +64,10 @@ class PyBind11Conan(ConanFile):
         self.cpp_info.components["headers"].includedirs = ["include"]
         self.cpp_info.components["pybind11_"].set_property("cmake_target_name", "pybind11::pybind11")
         self.cpp_info.components["pybind11_"].set_property("cmake_module_file_name", "pybind11")
-        self.cpp_info.components["pybind11_"].names["cmake_find_package"] = "pybind11"
         self.cpp_info.components["pybind11_"].builddirs = [cmake_base_path]
         self.cpp_info.components["pybind11_"].requires = ["headers"]
         cmake_file = os.path.join(cmake_base_path, "pybind11Common.cmake")
         self.cpp_info.set_property("cmake_build_modules", [cmake_file])
-        for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-            self.cpp_info.components["pybind11_"].build_modules[generator].append(cmake_file)
         self.cpp_info.components["embed"].requires = ["pybind11_"]
         self.cpp_info.components["module"].requires = ["pybind11_"]
         self.cpp_info.components["python_link_helper"].requires = ["pybind11_"]
