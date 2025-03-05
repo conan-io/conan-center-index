@@ -1,0 +1,4 @@
+sources:
+  "0.14.0-alpha.1":
+    url: "https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs/-/archive/d4e76dfdc8e46a3aa622281271310db14dd0037d/gst-plugins-rs-d4e76dfdc8e46a3aa622281271310db14dd0037d.tar.bz2"
+    sha256: "556fef400423c6b39940977e00d54f0be8f873d9c8d52553e20fe2f80d8d5958"

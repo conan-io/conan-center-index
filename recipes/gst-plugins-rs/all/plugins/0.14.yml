@@ -1,0 +1,173 @@
+aws:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+    - openssl::openssl
+cdg:
+  requires:
+    - gstreamer-video-1.0
+claxon:
+  requires:
+    - gstreamer-audio-1.0
+dav1d:
+  requires:
+    - gstreamer-video-1.0
+    - dav1d::dav1d
+fallbackswitch:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+ffv1:
+  requires:
+    - gstreamer-video-1.0
+fmp4:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+    - gstreamer-pbutils-1.0
+gif:
+  requires:
+    - gstreamer-video-1.0
+gopbuffer:
+  requires: [ ]
+gtk4:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-allocators-1.0
+    - gstreamer-gl-1.0
+    - gtk::gtk4
+hlssink3:
+  requires:
+    - gstreamer-app-1.0
+hsv:
+  requires:
+    - gstreamer-video-1.0
+json:
+  requires: [ ]
+lewton:
+  requires:
+    - gstreamer-audio-1.0
+livesync:
+  requires:
+    - gstreamer-audio-1.0
+mp4:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+    - gstreamer-pbutils-1.0
+mpegtslive:
+  requires: [ ]
+ndi:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+originalbuffer:
+  requires:
+    - gstreamer-video-1.0
+quinn:
+  requires: [ ]
+raptorq:
+  requires:
+    - gstreamer-rtp-1.0
+rav1e:
+  requires:
+    - gstreamer-video-1.0
+regex:
+  requires: [ ]
+reqwest:
+  requires:
+    - openssl::openssl
+rsaudiofx:
+  requires:
+    - gstreamer-audio-1.0
+rsclosedcaption:
+  requires:
+    - gstreamer-video-1.0
+    - pango::pango-1.0
+    - pango::pangocairo-1.0
+    - cairo::cairo-gobject
+rsfile:
+  requires: [ ]
+rsflv:
+  options:
+    - flavors
+  requires:
+    - gstreamer-audio-1.0
+rsinter:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-app-1.0
+rsonvif:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-rtp-1.0
+    - pango::pango-1.0
+    - pango::pangocairo-1.0
+rspng:
+  requires:
+    - gstreamer-video-1.0
+rsrelationmeta:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-analytics-1.0
+rsrtp:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-rtp-1.0
+    - gstreamer-net-1.0
+rsrtsp:
+  requires:
+    - gstreamer-app-1.0
+    - gstreamer-pbutils-1.0
+    - gstreamer-net-1.0
+rstracers:
+  requires: [ ]
+rsvideofx:
+  requires:
+    - gstreamer-video-1.0
+    - cairo::cairo-gobject
+rswebp:
+  requires:
+    - gstreamer-video-1.0
+    - libwebp::webpdemux
+rswebrtc:
+  options:
+    - webrtc
+    - rtp
+  requires:
+    - gstreamer-webrtc-1.0
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+    - gstreamer-app-1.0
+    - gstreamer-rtp-1.0
+    - gstreamer-sdp-1.0
+    - gstreamer-net-1.0
+sodium:
+  requires:
+    - libsodium::libsodium
+speechmatics:
+  requires:
+    - gstreamer-audio-1.0
+    - openssl::openssl
+spotify:
+  requires: [ ]
+streamgrouper:
+  requires: [ ]
+textahead:
+  requires: [ ]
+textwrap:
+  requires: [ ]
+threadshare:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-rtp-1.0
+    - gstreamer-net-1.0
+togglerecord:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+uriplaylistbin:
+  requires: [ ]
+webrtchttp:
+  requires:
+    - gstreamer-webrtc-1.0
