@@ -1,0 +1,9 @@
+--- a/src/software/SfM/CMakeLists.txt
++++ b/src/software/SfM/CMakeLists.txt
+@@ -198,5 +198,6 @@
+ target_link_libraries(openMVG_main_ComputeStructureFromKnownPoses
+   PRIVATE
++    Ceres::ceres
+     openMVG_system
+     openMVG_features
+     openMVG_sfm
