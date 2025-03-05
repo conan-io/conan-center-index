@@ -8,7 +8,6 @@ from conan.tools.build import cross_building
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "CMakeToolchain"
-    test_type = "explicit"
 
     def requirements(self):
         self.requires(self.tested_reference_str)
@@ -23,5 +22,5 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if not cross_building(self):
-            bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            self.run(bin_path, run_environment=True)
+            bin_path = os.path.join(self.cpp.build.bindir, "test_package")
+            self.run(bin_path, env="conanrun")
