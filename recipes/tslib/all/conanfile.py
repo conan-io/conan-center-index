@@ -1,7 +1,7 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
-from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
@@ -14,7 +14,7 @@ class TslibConan(ConanFile):
     description = "C library for filtering touchscreen events"
     license = ("LGPL-2.0", "GPL")
     topics = ("touchscreen")
-    homepage = "https://github.com/kergoth/tslib.git"
+    homepage = "https://github.com/kergoth/tslib"
     url = "https://github.com/conan-io/conan-center-index"
 
     package_type = "library"
@@ -29,10 +29,6 @@ class TslibConan(ConanFile):
         "fPIC": True,
         "enable_tools": True
     }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
@@ -52,8 +48,6 @@ class TslibConan(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["ENABLE_TOOLS"] = self.options.enable_tools
         tc.generate()
-        deps = CMakeDeps(self)
-        deps.generate()
 
     def build(self):
         cmake = CMake(self)
@@ -61,7 +55,7 @@ class TslibConan(ConanFile):
         cmake.build()
 
     def package(self):
-        copy(self, "CONTRIBUTING.md", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
+        copy(self, "COPYING", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
