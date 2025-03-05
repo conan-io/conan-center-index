@@ -1,8 +1,7 @@
 import os
-import textwrap
 
 from conan import ConanFile
-from conan.tools.files import copy, get, save, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import copy, get, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 
 required_conan_version = ">=1.50.0"
@@ -30,42 +29,17 @@ class CppTomlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def build(self):
         pass
 
     def package(self):
-        apply_conandata_patches(self)
         copy(self, "LICENSE", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         copy(self, "*.h", src=os.path.join(self.source_folder, "include"), dst=os.path.join(self.package_folder, "include"))
-
-        # TODO: to remove in conan v2
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {"cpptoml": "cpptoml::cpptoml"},
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "cpptoml")
         self.cpp_info.set_property("cmake_target_name", "cpptoml")
         self.cpp_info.bindirs = []
         self.cpp_info.libdirs = []
-
-        # TODO: to remove in conan v2
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
