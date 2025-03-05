@@ -1,4 +1,7 @@
 sources:
+  "1.4.6":
+    url: "https://github.com/libbpf/libbpf/archive/v1.4.6.tar.gz"
+    sha256: "d4cf3ee697d9bd959ad3c0f5c6757370a2559e54448761271e15a23c31c1082e"
   "1.3.0":
     url: "https://github.com/libbpf/libbpf/archive/v1.3.0.tar.gz"
     sha256: "11db86acd627e468bc48b7258c1130aba41a12c4d364f78e184fd2f5a913d861"
