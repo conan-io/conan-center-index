@@ -11,6 +11,7 @@ class hello_conanRecipe(ConanFile):
     package_type = "library"
 
     # Optional metadata: foobar
+    # new rrev
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Dummy recipe for internal testing"
