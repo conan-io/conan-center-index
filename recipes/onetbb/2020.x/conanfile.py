@@ -44,19 +44,11 @@ class OneTBBConan(ConanFile):
     }
 
     @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
-    @property
     def _base_compiler(self):
         base = self.settings.get_safe("compiler.base")
         if base:
             return self.settings.compiler.base
         return self.settings.compiler
-
-    @property
-    def _is_msvc(self):
-        return str(self._base_compiler) in ["Visual Studio", "msvc"]
 
     @property
     def _is_clang_cl(self):
@@ -78,8 +70,7 @@ class OneTBBConan(ConanFile):
         del self.info.options.tbbproxy
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
         if is_apple_os(self):
             if self.settings.compiler == "apple-clang" and Version(self.settings.compiler.version) < "8.0":
                 raise ConanInvalidConfiguration(f"{self.name} {self.version} couldn't be built by apple-clang < 8.0")
@@ -89,16 +80,16 @@ class OneTBBConan(ConanFile):
             raise ConanInvalidConfiguration("tbbproxy needs tbbmaloc and shared options")
 
     def build_requirements(self):
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             if not self.conf_info.get("tools.gnu:make_program", check_type=str):
-                self.tool_requires("make/4.3")
+                self.tool_requires("make/4.4.1")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
         tc = AutotoolsToolchain(self)
-        if self._is_msvc:
+        if is_msvc(self):
             link_cmd = "xilib" if self.settings.compiler == "intel-cc" else "lib"
             save(
                 self,
@@ -201,15 +192,23 @@ class OneTBBConan(ConanFile):
             vcvars.generate()
 
     def _patch_sources(self):
-        # Fix LDFLAGS getting incorrectly applied to ar command
-        linux_include = os.path.join(self.source_folder, "build", "common_rules.inc")
-        replace_in_file(self, linux_include, "LIB_LINK_FLAGS += $(LDFLAGS)", "")
+        if not self.options.shared:
+            # Fix LDFLAGS getting incorrectly applied to ar command
+            for makefile in ["Makefile.tbb", "Makefile.tbbmalloc", "Makefile.rml"]:
+                replace_in_file(self, os.path.join(self.source_folder, "build", makefile),
+                                "$(LIB_LINK_FLAGS)", "")
         # Get the version of the current compiler instead of gcc
         linux_include = os.path.join(self.source_folder, "build", "linux.inc")
         replace_in_file(self, linux_include, "shell gcc", "shell $(CC)")
         replace_in_file(self, linux_include, "= gcc", "= $(CC)")
         if self.version != "2019_u9" and self.settings.build_type == "Debug":
             replace_in_file(self, os.path.join(self.source_folder, "Makefile"), "release", "debug")
+        # Remove -Werror and /WX from
+        #   WARNING_AS_ERROR_KEY = -Werror
+        for compiler in ["cl", "clang", "gcc", "icc", "icl"]:
+            for inc_file in self.source_path.joinpath("build").glob(f"*.{compiler}.inc"):
+                if inc_file.stem not in ["ios.clang", "OpenBSD.clang", "FreeBSD.clang"]:
+                    replace_in_file(self, inc_file, "WARNING_AS_ERROR_KEY = ", "WARNING_AS_ERROR_KEY = #", strict=False)
 
     def build(self):
         self._patch_sources()
@@ -283,9 +282,3 @@ class OneTBBConan(ConanFile):
                 self.cpp_info.components["tbbmalloc_proxy"].requires = ["tbbmalloc"]
                 if self.settings.os in ["Linux", "FreeBSD"]:
                     self.cpp_info.components["tbbmalloc_proxy"].system_libs = ["m"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "TBB"
-        self.cpp_info.names["cmake_find_package_multi"] = "TBB"
-        self.cpp_info.components["libtbb"].names["cmake_find_package"] = "tbb"
-        self.cpp_info.components["libtbb"].names["cmake_find_package_multi"] = "tbb"
