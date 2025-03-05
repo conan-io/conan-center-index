@@ -1,9 +1,7 @@
 import os
 
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import XCRun, to_apple_arch
-from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
@@ -37,10 +35,6 @@ class MpirConan(ConanFile):
         "enable_gmpcompat": True,
     }
 
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -62,22 +56,19 @@ class MpirConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
-    def validate(self):
-        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross-building doesn't work (yet)")
-
     def build_requirements(self):
         self.tool_requires("libtool/2.4.7")
         self.tool_requires("yasm/1.3.0")
         if not is_msvc(self):
             self.tool_requires("m4/1.4.19")
-            if self._settings_build.os == "Windows":
+            if self.settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True, keep_permissions=True)
+        apply_conandata_patches(self)
 
     def _generate_msvc(self):
         env = VirtualBuildEnv(self)
@@ -98,14 +89,13 @@ class MpirConan(ConanFile):
         tc.extra_cxxflags.append("-Wno-implicit-function-declaration")
 
         if self.settings.compiler == "apple-clang":
-            if hasattr(self, "settings_build"):
-                # there is no CFLAGS_FOR_BUILD/CXXFLAGS_FOR_BUILD
-                sdk_path = XCRun(self).sdk_path
-                tc.extra_cxxflags += [
-                    "-Wno-implicit-function-declaration",
-                    "-isysroot", sdk_path,
-                    "-arch", to_apple_arch(self),
-                ]
+            # there is no CFLAGS_FOR_BUILD/CXXFLAGS_FOR_BUILD
+            sdk_path = XCRun(self).sdk_path
+            tc.extra_cxxflags += [
+                "-Wno-implicit-function-declaration",
+                "-isysroot", sdk_path,
+                "-arch", to_apple_arch(self),
+            ]
         # Disable docs
         tc.make_args.append("MAKEINFO=true")
         tc.generate()
@@ -126,9 +116,15 @@ class MpirConan(ConanFile):
 
     @property
     def _vs_ide_version(self):
-        if str(self.settings.compiler) == "Visual Studio":
-            return self.settings.compiler.version
-        msvc_to_ide = {"170": "11", "180": "12", "190": "14", "191": "15", "192": "16", "193": "17"}
+        msvc_to_ide = {
+            "170": "11",
+            "180": "12",
+            "190": "14",
+            "191": "15",
+            "192": "16",
+            "193": "17",
+            "194": "17",
+        }
         return msvc_to_ide.get(str(self.settings.compiler.version), "17")
 
     @property
@@ -174,7 +170,6 @@ class MpirConan(ConanFile):
                 replace_in_file(self, full_file, 'check_config $(Platform) $(Configuration) 15', f'check_config $(Platform) $(Configuration) {ver}', strict=False)
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         if is_msvc(self):
             self._patch_new_msvc_version(16, "v142")
             self._patch_new_msvc_version(17, "v143")
