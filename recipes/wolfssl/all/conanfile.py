@@ -150,11 +150,12 @@ class WolfSSLConan(ConanFile):
             tc.configure_args.append("--enable-fastmath")
             # INFO: Inject HAVE_PK_CALLBACKS, WOLFSSL_USER_IO, NO_WRITEV and TIME_T_NOT_64BIT
             tc.extra_defines.extend(self._defines)
-        env = tc.environment()
+        env = None
         if is_msvc(self):
             tc.extra_ldflags.append("-ladvapi32")
             if check_min_vs(self, "180", raise_invalid=False):
                 tc.extra_cflags.append("-FS")
+            env = tc.environment()
             automake_conf = self.dependencies.build["automake"].conf_info
             compile_wrapper = unix_path(self, automake_conf.get("user.automake:compile-wrapper", check_type=str))
             ar_wrapper = unix_path(self, automake_conf.get("user.automake:lib-wrapper", check_type=str))
