@@ -10,7 +10,7 @@ class hello_conanRecipe(ConanFile):
     name = "hello-conan"
     package_type = "library"
 
-    # Optional metadata !_!!!!
+    # Optional metadata: foobar
     license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     description = "Dummy recipe for internal testing"
