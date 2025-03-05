@@ -89,14 +89,8 @@ class SConsConan(ConanFile):
         self._chmod_x(self._scons_sh)
         bindir = os.path.join(self.package_folder, "bin")
 
-        # For Conan 1.x downstream consumers, can be removed once recipe is Conan 2.x only:
-        self.output.info("Appending PATH environment var: {}".format(bindir))
-        self.env_info.PATH.append(bindir)
-
         if self.settings.os == "Windows":
             scons_bin = os.path.join(bindir, "scons.cmd")
         else:
             scons_bin = os.path.join(bindir, "scons")
-        self.user_info.scons = scons_bin
-        self.output.info("Setting SCONS environment variable: {}".format(scons_bin))
-        self.env_info.SCONS = scons_bin
+        self.buildenv_info.define_path("SCONS", scons_bin)
