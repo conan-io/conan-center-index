@@ -49,8 +49,10 @@ class XkbcommonConan(ConanFile):
     def config_options(self):
         if not self._has_xkbregistry_option:
             del self.options.xkbregistry
-        if self.settings.os != "Linux":
+        if self.settings.os not in ("Linux", "Android"):
             del self.options.with_wayland
+        if self.settings.os == "Android":
+            del self.options.with_x11
 
     def configure(self):
         if self.options.shared:
@@ -63,7 +65,7 @@ class XkbcommonConan(ConanFile):
 
     def requirements(self):
         self.requires("xkeyboard-config/system")
-        if self.options.with_x11:
+        if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
         if self.options.get_safe("xkbregistry"):
             self.requires("libxml2/[>=2.12.5 <3]")
@@ -71,7 +73,7 @@ class XkbcommonConan(ConanFile):
             self.requires("wayland/1.22.0")
 
     def validate(self):
-        if self.settings.os not in ["Linux", "FreeBSD"]:
+        if self.settings.os not in ["Linux", "FreeBSD", "Android"]:
             raise ConanInvalidConfiguration(f"{self.ref} is only compatible with Linux and FreeBSD")
 
     def build_requirements(self):
@@ -99,10 +101,12 @@ class XkbcommonConan(ConanFile):
             tc.project_options["enable-bash-completion"] = False
         tc.project_options["enable-docs"] = False
         tc.project_options["enable-wayland"] = self.options.get_safe("with_wayland", False)
-        tc.project_options["enable-x11"] = self.options.with_x11
+        tc.project_options["enable-x11"] = self.options.get_safe("with_x11", False)
         if self._has_xkbregistry_option:
             tc.project_options["enable-xkbregistry"] = self.options.xkbregistry
         tc.project_options["build.pkg_config_path"] = self.generators_folder
+        if self.settings.os == "Android":
+            tc.project_options["enable-tools"] = False
         tc.generate()
 
         pkg_config_deps = PkgConfigDeps(self)
@@ -158,7 +162,7 @@ class XkbcommonConan(ConanFile):
         self.cpp_info.components["libxkbcommon"].requires = ["xkeyboard-config::xkeyboard-config"]
         self.cpp_info.components["libxkbcommon"].resdirs = ["res"]
 
-        if self.options.with_x11:
+        if self.options.get_safe("with_x11"):
             self.cpp_info.components["libxkbcommon-x11"].set_property("pkg_config_name", "xkbcommon-x11")
             self.cpp_info.components["libxkbcommon-x11"].libs = ["xkbcommon-x11"]
             self.cpp_info.components["libxkbcommon-x11"].requires = ["libxkbcommon", "xorg::xcb", "xorg::xcb-xkb"]
