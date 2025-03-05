@@ -8,7 +8,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, MSBuild, MSBuildDeps, MSBuildToolchain
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.4"
 
 
 class OpusFileConan(ConanFile):
@@ -20,6 +20,7 @@ class OpusFileConan(ConanFile):
     license = "BSD-3-Clause"
     package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
+    languages = "C"
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
@@ -49,8 +50,6 @@ class OpusFileConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -75,10 +74,17 @@ class OpusFileConan(ConanFile):
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
 
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
+        if self.settings.os == "Android":
+            replace_in_file(self, os.path.join(self.source_folder, "configure.ac"), "c89", "c99")
+
         if is_msvc(self):
             tc = MSBuildToolchain(self)
             tc.configuration = self._msbuild_configuration
@@ -99,7 +105,6 @@ class OpusFileConan(ConanFile):
             PkgConfigDeps(self).generate()
 
     def build(self):
-        apply_conandata_patches(self)
         if is_msvc(self):
             sln_folder = os.path.join(self.source_folder, "win32", "VS2015")
             vcxproj = os.path.join(sln_folder, "opusfile.vcxproj")
