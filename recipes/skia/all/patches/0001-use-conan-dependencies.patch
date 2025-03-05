@@ -1,0 +1,64 @@
+--- a/WORKSPACE.bazel
++++ b/WORKSPACE.bazel
+@@ -1,4 +1,7 @@
+ workspace(name = "skia")
++
++load("@//conan:dependencies.bzl", "load_conan_dependencies")
++load_conan_dependencies()
+ 
+ load("//bazel:deps.bzl", "bazel_deps", "c_plus_plus_deps")
+ 
+@@ -488,7 +491,7 @@
+ # @wuffs - //bazel/external/wuffs:BUILD.bazel
+ # @zlib_skia - //bazel/external/zlib_skia:BUILD.bazel
+ #### END GENERATED LIST OF THIRD_PARTY DEPS
+-c_plus_plus_deps()
++# c_plus_plus_deps()
+ 
+ # In order to copy the Freetype configurations into the checked out Freetype folder,
+ # it is easiest to treat them as a third-party dependency from the perspective of Freetype.
+
+--- a/src/ports/BUILD.bazel
++++ b/src/ports/BUILD.bazel
+@@ -355,7 +355,7 @@
+         ":freetype_support",
+         ":typeface_proxy",
+         "//:core",
+-        "//bazel/external/fontconfig",
++        "@fontconfig",
+         "//src/base",
+         "//src/core:core_priv",
+     ],
+
+--- a/src/sksl/codegen/BUILD.bazel
++++ b/src/sksl/codegen/BUILD.bazel
+@@ -103,7 +103,7 @@
+         "//:core",
+         "//src/base",
+         "//src/core:core_priv",
+-        "@spirv_cross",
++        "@spirv-cross",
+     ],
+ )
+ 
+@@ -168,7 +168,7 @@
+     deps = [
+         "//:core",
+         "//src/core:core_priv",
+-        "@spirv_tools",
++        "@spirv-tools",
+     ],
+ )
+ 
+@@ -208,8 +208,6 @@
+     deps = [
+         "//:core",
+         "//src/core:core_priv",
+-        "@dawn//:tint",
+-        "@dawn//src/tint/lang/wgsl",
+-        "@dawn//src/tint/lang/wgsl/reader",
+-    ],
+-)
++        "@dawn",
++    ],
++)
