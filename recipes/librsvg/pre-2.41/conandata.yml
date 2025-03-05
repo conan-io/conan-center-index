@@ -1,0 +1,9 @@
+sources:
+  "2.40.21":
+    url: "https://download.gnome.org/sources/librsvg/2.40/librsvg-2.40.21.tar.xz"
+    sha256: "f7628905f1cada84e87e2b14883ed57d8094dca3281d5bcb24ece4279e9a92ba"
+patches:
+  "2.40.21":
+    - patch_file: "patches/fix-libxml-compatibility.patch"
+      patch_description: "Fix a minor incompatibility with newer libxml2 versions"
+      patch_type: "portability"
