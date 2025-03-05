@@ -1,0 +1,68 @@
+From 5cde128082359138360b0d362854c36ee8d324d5 Mon Sep 17 00:00:00 2001
+From: Markus Vieth <mavi.bielefeld@t-online.de>
+Date: Mon, 20 Jan 2025 16:04:43 +0000
+Subject: [PATCH 1/1] Change Eigen::aligned_allocator to not inherit from
+ std::allocator
+
+---
+ Eigen/src/Core/util/Memory.h | 23 +++++++++++++++--------
+ 1 file changed, 15 insertions(+), 8 deletions(-)
+
+diff --git a/Eigen/src/Core/util/Memory.h b/Eigen/src/Core/util/Memory.h
+index 875318cdb..4dcc3f6d8 100644
+--- a/Eigen/src/Core/util/Memory.h
++++ b/Eigen/src/Core/util/Memory.h
+@@ -103,7 +103,7 @@ EIGEN_DEVICE_FUNC inline void* handmade_aligned_malloc(std::size_t size, std::si
+ 
+   EIGEN_USING_STD(malloc)
+   void *original = malloc(size+alignment);
+-  
++
+   if (original == 0) return 0;
+   void *aligned = reinterpret_cast<void*>((reinterpret_cast<std::size_t>(original) & ~(std::size_t(alignment-1))) + alignment);
+   *(reinterpret_cast<void**>(aligned) - 1) = original;
+@@ -875,7 +875,7 @@ template<typename T> void swap(scoped_array<T> &a,scoped_array<T> &b)
+ * \sa \blank \ref TopicStlContainers.
+ */
+ template<class T>
+-class aligned_allocator : public std::allocator<T>
++class aligned_allocator
+ {
+ public:
+   typedef std::size_t     size_type;
+@@ -892,14 +892,21 @@ public:
+     typedef aligned_allocator<U> other;
+   };
+ 
+-  aligned_allocator() : std::allocator<T>() {}
++  aligned_allocator() = default;
+ 
+-  aligned_allocator(const aligned_allocator& other) : std::allocator<T>(other) {}
++  aligned_allocator(const aligned_allocator&) = default;
+ 
+-  template<class U>
+-  aligned_allocator(const aligned_allocator<U>& other) : std::allocator<T>(other) {}
++  template <class U>
++  aligned_allocator(const aligned_allocator<U>&) {}
+ 
+-  ~aligned_allocator() {}
++  template <class U>
++  constexpr bool operator==(const aligned_allocator<U>&) const noexcept {
++    return true;
++  }
++  template <class U>
++  constexpr bool operator!=(const aligned_allocator<U>&) const noexcept {
++    return false;
++  }
+ 
+   #if EIGEN_COMP_GNUC_STRICT && EIGEN_GNUC_AT_LEAST(7,0)
+   // In gcc std::allocator::max_size() is bugged making gcc triggers a warning:
+@@ -1082,7 +1089,7 @@ inline void queryCacheSizes_amd(int& l1, int& l2, int& l3)
+ {
+   int abcd[4];
+   abcd[0] = abcd[1] = abcd[2] = abcd[3] = 0;
+-  
++
+   // First query the max supported function.
+   EIGEN_CPUID(abcd,0x80000000,0);
+   if(static_cast<numext::uint32_t>(abcd[0]) >= static_cast<numext::uint32_t>(0x80000006))
