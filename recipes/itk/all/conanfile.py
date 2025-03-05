@@ -82,7 +82,7 @@ class ITKConan(ConanFile):
         self.requires("onetbb/2021.9.0")
         self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_opencv:
-            self.requires("opencv/4.8.1")
+            self.requires("opencv/4.10.0")
 
     def build_requirements(self):
         if Version(self.version) >= "5.3.0":
@@ -474,8 +474,10 @@ class ITKConan(ConanFile):
         }
         
         if self.options.with_opencv:
-            components["ITKVideoIO"] = {"requires": ["ITKVideoCore", "ITKIOImageBase"]},
-            components["ITKVideoBridgeOpenCV"] = {"requires": ["ITKVideoIO", "opencv::opencv_core"]}
+            components.update({
+                "ITKVideoIO": {"requires": ["ITKVideoCore", "ITKIOImageBase"]},
+                "ITKVideoBridgeOpenCV": {"requires": ["ITKVideoIO", "opencv::opencv_core"]},
+            })
         
         return components
 
