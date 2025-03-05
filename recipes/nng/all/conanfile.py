@@ -100,6 +100,7 @@ class NngConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -122,7 +123,6 @@ class NngConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -141,13 +141,9 @@ class NngConan(ConanFile):
         if self.settings.os == "Windows" and not self.options.shared:
             self.cpp_info.system_libs.extend(["mswsock", "ws2_32"])
         elif self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs.extend(["pthread", "rt", "nsl"])
+            self.cpp_info.system_libs.extend(["pthread", "rt"])
 
         if self.options.shared:
             self.cpp_info.defines.append("NNG_SHARED_LIB")
         else:
             self.cpp_info.defines.append("NNG_STATIC_LIB")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.names["cmake_find_package"] = "nng"
-        self.cpp_info.names["cmake_find_package_multi"] = "nng"
