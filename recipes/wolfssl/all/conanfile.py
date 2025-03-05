@@ -142,7 +142,6 @@ class WolfSSLConan(ConanFile):
         if self.settings.os == "baremetal":
             tc.configure_args.append("--disable-filesystem")
             tc.configure_args.append("--enable-fastmath")
-        tc.extra_defines.extend(self._defines)
         env = tc.environment()
         if is_msvc(self):
             tc.extra_ldflags.append("-ladvapi32")
