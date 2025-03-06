@@ -34,6 +34,7 @@ class DrogonConan(ConanFile):
         "with_mysql": [True, False],
         "with_sqlite": [True, False],
         "with_redis": [True, False],
+        "with_mysql_optioncv": [True, False]
     }
     default_options = {
         "shared": False,
@@ -49,6 +50,7 @@ class DrogonConan(ConanFile):
         "with_mysql": False,
         "with_sqlite": False,
         "with_redis": False,
+        "with_mysql_optioncv": True
     }
 
     def export_sources(self):
@@ -68,10 +70,14 @@ class DrogonConan(ConanFile):
             del self.options.with_postgres
             del self.options.with_postgres_batch
             del self.options.with_mysql
+            del self.options.with_mysql_optioncv
             del self.options.with_sqlite
             del self.options.with_redis
         elif not self.options.with_postgres:
             del self.options.with_postgres_batch
+        
+        if not self.options.with_mysql:
+            del self.options.with_mysql_optioncv
 
     @property
     def _min_cppstd(self):
@@ -157,6 +163,7 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)
         tc.variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
         tc.variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
+        tc.variables["HAS_MYSQL_OPTIONSV"] = self.options.get_safe("with_mysql_optioncv", False)
         if is_msvc(self):
             tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
         if Version(self.version) >= "1.8.4":
