@@ -69,5 +69,4 @@ class TslibConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "tslib::tslib")
         self.cpp_info.set_property("pkg_config_name", "tslib")
         self.cpp_info.libs = ["ts"]
-        if self.options.shared:
-            self.cpp_info.system_libs.append("dl")
+        self.cpp_info.system_libs.append("dl")
