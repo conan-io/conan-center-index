@@ -33,6 +33,8 @@ class TslibConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
+        self.settings.rm_safe("compiler.cppstd")
+        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -67,3 +69,5 @@ class TslibConan(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "tslib::tslib")
         self.cpp_info.set_property("pkg_config_name", "tslib")
         self.cpp_info.libs = ["ts"]
+        if self.options.shared:
+            self.cpp_info.system_libs.append("dl")
