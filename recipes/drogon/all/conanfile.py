@@ -75,9 +75,6 @@ class DrogonConan(ConanFile):
             del self.options.with_redis
         elif not self.options.with_postgres:
             del self.options.with_postgres_batch
-        
-        if not self.options.with_mysql:
-            del self.options.with_mysql_optioncv
 
     @property
     def _min_cppstd(self):
