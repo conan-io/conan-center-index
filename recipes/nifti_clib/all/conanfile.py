@@ -94,7 +94,6 @@ class NiftiClibConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             sys_libs += ["m"]
 
-        self.cpp_info.requires = ["zlib::zlib"]
         if self.options.use_cifti:
             self.cpp_info.requires += ["expat::expat"]
 
@@ -103,6 +102,8 @@ class NiftiClibConan(ConanFile):
         self.cpp_info.components["znz"].set_property("cmake_target_name", "NIFTI::znz")
         self.cpp_info.components["znz"].includedirs += [os.path.join("include", "nifti")]
         self.cpp_info.components["znz"].system_libs += sys_libs
+        self.cpp_info.components["znz"].requires = ["zlib::zlib"]
+        self.cpp_info.components["znz"].defines = ["HAVE_ZLIB"]
 
         # inside the niftilib folder
         self.cpp_info.components["niftiio"].libs = ["niftiio"]
