@@ -82,7 +82,7 @@ class ScnlibConan(ConanFile):
         # TODO: This should probably be a del self.options.header_only in config_options once the CI supports it
         if self.options.header_only:
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support header only mode.")
-        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "11":
+        if Version(self.version) < "3.0.2" and self.settings.compiler == "gcc" and Version(self.settings.compiler.version).major == "11":
             raise ConanInvalidConfiguration(f"{self.ref} doesn't support gcc 11.x due to std::regex_constants::multiline is not defined.")
 
     def build_requirements(self):

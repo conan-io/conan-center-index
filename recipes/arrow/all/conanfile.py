@@ -133,6 +133,8 @@ class ArrowConan(ConanFile):
             del self.options.substrait
         if is_msvc(self):
             self.options.with_boost = True
+        if Version(self.version) >= "19.0.0":
+            self.options.with_mimalloc = True
 
     def configure(self):
         if self.options.shared:
@@ -383,6 +385,7 @@ class ArrowConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("mimalloc", "cmake_target_name", "mimalloc::mimalloc")
         deps.generate()
 
     def _patch_sources(self):
@@ -514,6 +517,8 @@ class ArrowConan(ConanFile):
             self.cpp_info.components["dataset"].libs = ["arrow_dataset"]
             if self.options.parquet:
                 self.cpp_info.components["dataset"].requires = ["libparquet"]
+            if self.options.acero and Version(self.version) >= "19.0.0":
+                self.cpp_info.components["dataset"].requires = ["libacero"]
 
         if self.options.cli and (self.options.with_cuda or self.options.with_flight_rpc or self.options.parquet):
             binpath = os.path.join(self.package_folder, "bin")
