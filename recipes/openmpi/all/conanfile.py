@@ -9,7 +9,7 @@ from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class OpenMPIConan(ConanFile):
@@ -62,6 +62,7 @@ class OpenMPIConan(ConanFile):
         # transitive_headers=True is not needed for any dependencies.
         self.requires("hwloc/2.10.0")
         self.requires("zlib/[>=1.2.11 <2]")
+        self.requires("libevent/2.1.12")
         if self.settings.os == "Linux":
             self.requires("libnl/3.8.0")
         if self.options.get_safe("with_verbs"):
@@ -92,6 +93,7 @@ class OpenMPIConan(ConanFile):
             f"--enable-mpi-cxx={yes_no(self.options.enable_cxx)}",
             f"--enable-cxx-exceptions={yes_no(self.options.get_safe('enable_cxx_exceptions'))}",
             f"--with-hwloc={root('hwloc')}",
+            f"--with-libevent={root('libevent')}",
             f"--with-libnl={root('libnl') if not is_apple_os(self) else 'no'}",
             f"--with-verbs={root('rdma-core') if self.options.get_safe('with_verbs') else 'no'}",
             f"--with-zlib={root('zlib')}",
@@ -180,6 +182,7 @@ class OpenMPIConan(ConanFile):
 
         requires = [
             "hwloc::hwloc",
+            "libevent::libevent",
             "zlib::zlib",
         ]
         if self.settings.os == "Linux":
@@ -239,21 +242,3 @@ class OpenMPIConan(ConanFile):
         self.runenv_info.define_path("OPAL_LIBDIR", os.path.join(self.package_folder, "lib"))
         self.runenv_info.define_path("OPAL_DATADIR", os.path.join(self.package_folder, "res"))
         self.runenv_info.define_path("OPAL_DATAROOTDIR", os.path.join(self.package_folder, "res"))
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        self.env_info.PATH.append(bin_folder)
-        self.env_info.MPI_BIN = bin_folder
-        self.env_info.MPI_HOME = self.package_folder
-        self.env_info.OPAL_PREFIX = self.package_folder
-        self.env_info.OPAL_EXEC_PREFIX = self.package_folder
-        self.env_info.OPAL_LIBDIR = os.path.join(self.package_folder, "lib")
-        self.env_info.OPAL_DATADIR = os.path.join(self.package_folder, "res")
-        self.env_info.OPAL_DATAROOTDIR = os.path.join(self.package_folder, "res")
-
-        self.cpp_info.names["cmake_find_package"] = "MPI"
-        self.cpp_info.names["cmake_find_package_multi"] = "MPI"
-        self.cpp_info.components["ompi-c"].names["cmake_find_package"] = "MPI_C"
-        if self.options.enable_cxx:
-            self.cpp_info.components["ompi-cxx"].names["cmake_find_package"] = "MPI_CXX"
-        if self.options.fortran != "no":
-            self.cpp_info.components["ompi-fort"].names["cmake_find_package"] = "MPI_Fortran"
