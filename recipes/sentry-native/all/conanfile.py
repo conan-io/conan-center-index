@@ -83,7 +83,7 @@ class SentryNativeConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
-        if self.settings.os != "Windows" or Version(self.version) < "0.6.0":
+        if self.settings.os != "Windows":
             del self.options.wer
 
         # Configure default transport

@@ -1,4 +1,9 @@
 sources:
+  "1.87.0":
+    url:
+      - "https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.bz2"
+      - "https://sourceforge.net/projects/boost/files/boost/1.87.0/boost_1_87_0.tar.bz2"
+    sha256: "af57be25cb4c4f4b413ed692fe378affb4352ea50fbe294a11ef548f4d527d89"
   "1.86.0":
     url:
       - "https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.bz2"
@@ -45,6 +50,14 @@ sources:
       - "https://sourceforge.net/projects/boost/files/boost/1.78.0/boost_1_78_0.tar.bz2"
     sha256: "8681f175d4bdb26c52222665793eef08490d7758529330f98d3b29dd0735bccc"
 patches:
+  "1.87.0":
+    - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
+      patch_description: "Optional flag to specify iconv from either libc of libiconv"
+      patch_type: "conan"
+    - patch_file: "patches/1.87.0-boost-fiber-fix-property-numa.patch"
+      patch_description: "Fix b2 numa=on property for Boost.Fiber"
+      patch_type: "official"
+      patch_source: https://github.com/boostorg/fiber/commit/238487b543e8863c647d31a82ccfc3fa11a960d9"
   "1.86.0":
     - patch_file: "patches/1.82.0-locale-iconv-library-option.patch"
       patch_description: "Optional flag to specify iconv from either libc of libiconv"

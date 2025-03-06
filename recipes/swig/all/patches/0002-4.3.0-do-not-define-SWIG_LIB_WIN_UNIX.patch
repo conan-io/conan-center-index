@@ -1,0 +1,13 @@
+diff --git a/configure.ac b/configure.ac
+index 88cc4e4cd..e8902d755 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -2823,7 +2823,7 @@ case $build in
+   *-*-cygwin*) SWIG_LIB_WIN_UNIX=`cygpath --mixed "$SWIG_LIB"`;;
+   *) SWIG_LIB_WIN_UNIX="";;
+ esac
+-AC_DEFINE_UNQUOTED(SWIG_LIB_WIN_UNIX, ["$SWIG_LIB_WIN_UNIX"], [Directory for SWIG system-independent libraries (Unix install on native Windows)])
++AC_DEFINE_UNQUOTED(SWIG_LIB_WIN_UNIX, [""], [Directory for SWIG system-independent libraries (Unix install on native Windows)])
+ 
+ SWIG_LIB_PREINST=$ABS_SRCDIR/Lib
+ AC_SUBST(SWIG_LIB_PREINST)

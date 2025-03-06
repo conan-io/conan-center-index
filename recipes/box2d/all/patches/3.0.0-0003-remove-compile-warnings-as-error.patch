@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d6590d7..2323e7c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -46,7 +46,6 @@ endif()
+ 
+ # C++17 needed for imgui
+ set(CMAKE_CXX_STANDARD 17)
+-set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
+ 
+ # set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+ set_property(GLOBAL PROPERTY USE_FOLDERS ON)

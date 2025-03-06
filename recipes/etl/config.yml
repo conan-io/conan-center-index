@@ -1,19 +1,7 @@
 versions:
+  "20.40.0":
+    folder: all
   "20.39.4":
     folder: all
-  "20.39.3":
-    folder: all
   "20.38.17":
-    folder: all
-  "20.38.16":
-    folder: all
-  "20.38.15":
-    folder: all
-  "20.38.14":
-    folder: all
-  "20.38.13":
-    folder: all
-  "20.38.11":
-    folder: all
-  "20.38.10":
     folder: all
