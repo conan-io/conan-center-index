@@ -1,16 +1,26 @@
-diff --git a/Foundation/CMakeLists.txt b/Foundation/CMakeLists.txt
-index 41ba99936..1062f196d 100644
---- a/Foundation/CMakeLists.txt
-+++ b/Foundation/CMakeLists.txt
-@@ -17,8 +17,11 @@ POCO_SOURCES_AUTO_PLAT(SRCS WIN32
+diff --git a/cmake/PocoMacros.cmake b/cmake/PocoMacros.cmake
+index 2ef58c5a4..9d9855251 100644
+--- a/cmake/PocoMacros.cmake
++++ b/cmake/PocoMacros.cmake
+@@ -168,8 +168,10 @@ macro(POCO_MESSAGES out name)
+ 			get_filename_component(msg_path ${msg} ABSOLUTE)
+ 			string(REPLACE ".mc" ".h" hdr ${msg_name})
+ 			set_source_files_properties(${hdr} PROPERTIES GENERATED TRUE)
++			string(REPLACE ".mc" ".rc" rc ${msg_name})
++			set_source_files_properties(${rc} PROPERTIES GENERATED TRUE)
+ 			add_custom_command(
+-				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${hdr}
++				OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${hdr} ${CMAKE_CURRENT_BINARY_DIR}/${rc}
+ 				DEPENDS ${msg}
+ 				COMMAND ${CMAKE_MC_COMPILER}
+ 				ARGS
+@@ -185,6 +187,9 @@ macro(POCO_MESSAGES out name)
+ 			# Add the generated headers to POCO_HEADERS of the component
+ 			POCO_HEADERS( ${out} ${name} ${CMAKE_CURRENT_BINARY_DIR}/${hdr})
  
- # Version Resource
- if(MSVC AND BUILD_SHARED_LIBS)
-+	# Empty File needed otherwise cmake does not find it.
-+	file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/pocomsg.rc CONTENT "")
- 	source_group("Resources" FILES ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
- 	list(APPEND SRCS ${PROJECT_SOURCE_DIR}/DLLVersion.rc)
-+	list(APPEND SRCS ${CMAKE_CURRENT_BINARY_DIR}/pocomsg.rc)
- endif()
++			# Add the generated .rc
++			source_group("${name}\\Resource Files" FILES ${CMAKE_CURRENT_BINARY_DIR}/${rc})
++			list(APPEND ${out} ${CMAKE_CURRENT_BINARY_DIR}/${rc})
+ 		endforeach()
  
- # Messages
+ 		set_source_files_properties(${ARGN} PROPERTIES HEADER_FILE_ONLY TRUE)

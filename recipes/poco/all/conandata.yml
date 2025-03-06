@@ -83,7 +83,7 @@ patches:
     - patch_file: patches/1.12.5-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
       patch_type: "portability"
-    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+    - patch_file: patches/1.12.0-0003-pocomsg-resource.patch
       patch_description: "include pocomsg.rc in dll"
       patch_type: "portability"
   "1.12.5p1":
@@ -93,7 +93,7 @@ patches:
     - patch_file: patches/1.12.5-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
       patch_type: "portability"
-    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+    - patch_file: patches/1.12.0-0003-pocomsg-resource.patch
       patch_description: "include pocomsg.rc in dll"
       patch_type: "portability"
   "1.12.4":
@@ -103,7 +103,7 @@ patches:
     - patch_file: patches/1.11.0-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
       patch_type: "portability"
-    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+    - patch_file: patches/1.12.0-0003-pocomsg-resource.patch
       patch_description: "include pocomsg.rc in dll"
       patch_type: "portability"
   "1.12.3":
@@ -113,7 +113,7 @@ patches:
     - patch_file: patches/1.11.0-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
       patch_type: "portability"
-    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+    - patch_file: patches/1.12.0-0003-pocomsg-resource.patch
       patch_description: "include pocomsg.rc in dll"
       patch_type: "portability"
   "1.12.2":
@@ -123,7 +123,7 @@ patches:
     - patch_file: patches/1.11.0-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
       patch_type: "portability"
-    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+    - patch_file: patches/1.12.0-0003-pocomsg-resource.patch
       patch_description: "include pocomsg.rc in dll"
       patch_type: "portability"
   "1.12.1":
@@ -133,7 +133,7 @@ patches:
     - patch_file: patches/1.11.0-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
       patch_type: "portability"
-    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+    - patch_file: patches/1.12.0-0003-pocomsg-resource.patch
       patch_description: "include pocomsg.rc in dll"
       patch_type: "portability"
   "1.12.0":
@@ -143,7 +143,7 @@ patches:
     - patch_file: patches/1.11.0-0002-mysql-include.patch
       patch_description: "include mysql.h instead of mysql/mysql.h"
       patch_type: "portability"
-    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+    - patch_file: patches/1.12.0-0003-pocomsg-resource.patch
       patch_description: "include pocomsg.rc in dll"
       patch_type: "portability"
   "1.11.3":
@@ -153,6 +153,6 @@ patches:
     - patch_file: "patches/1.11.0-0002-mysql-include.patch"
       patch_description: "include mysql.h instead of mysql/mysql.h"
       patch_type: "portability"
-    - patch_file: patches/1.11.0-0003-pocomsg-resource.patch
+    - patch_file: patches/1.12.0-0003-pocomsg-resource.patch
       patch_description: "include pocomsg.rc in dll"
       patch_type: "portability"
