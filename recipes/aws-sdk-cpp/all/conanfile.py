@@ -516,8 +516,6 @@ class AwsSdkCppConan(ConanFile):
             self.requires("aws-c-sdkutils/0.1.15")  # No mention of this in the code
             self.requires("aws-checksums/0.1.18")
             # missing aws-lc, but only needed as openssl replacement if USE_OPENSSL is OFF
-            if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-                self.requires("s2n/1.4.16")  # No mention of this in the code, we might be overlinking
         if self.version == "1.9.234":
             self.requires("aws-crt-cpp/0.17.1a", transitive_headers=True)
             self.requires("aws-c-auth/0.6.4")
@@ -531,8 +529,6 @@ class AwsSdkCppConan(ConanFile):
             if self.options.get_safe("s3-crt"):
                 self.requires("aws-c-s3/0.1.26")
             self.requires("aws-checksums/0.1.12")
-            if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-                self.requires("s2n/1.3.15")  # No mention of this in the code, we might be overlinking
         if self.settings.os != "Windows":
             # Used transitively in core/utils/crypto/openssl/CryptoImpl.h public header
             self.requires("openssl/[>=1.1 <4]", transitive_headers=True)
