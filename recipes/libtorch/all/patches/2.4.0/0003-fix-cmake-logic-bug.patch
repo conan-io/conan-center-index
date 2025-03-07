@@ -1,0 +1,27 @@
+From 5b49aeb0a2e70cffae601f4105aeb6ee01281cb2 Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Mon, 29 Jul 2024 20:57:59 +0300
+Subject: [PATCH 2/2] fix a cmake logic bug
+
+Otherwise adds torch/csrc/jit/mobile/profiler_edge.cpp, which depends on kineto.
+
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c4cd4b2c2a..3bd5cd0e93 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -298,7 +298,7 @@ endif()
+ 
+ option(USE_SLEEF_FOR_ARM_VEC256 "Use sleef for arm" OFF)
+ option(USE_SOURCE_DEBUG_ON_MOBILE "Enable" ON)
+-option(USE_LITE_INTERPRETER_PROFILER "Enable" ON)
++option(USE_LITE_INTERPRETER_PROFILER "Enable" "${USE_KINETO}")
+ cmake_dependent_option(
+   USE_LITE_AOTI "Include AOTI sources" OFF
+   "BUILD_LITE_INTERPRETER" OFF)
+-- 
+2.43.0
+

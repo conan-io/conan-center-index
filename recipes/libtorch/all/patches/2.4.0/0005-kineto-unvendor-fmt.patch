@@ -1,0 +1,43 @@
+From 6c64ee0c5d73b6686fd7d5ee0225510066ee5543 Mon Sep 17 00:00:00 2001
+From: Martin Valgur <martin.valgur@gmail.com>
+Date: Tue, 30 Jul 2024 18:18:57 +0300
+Subject: [PATCH] kineto: unvendor fmt
+
+---
+ libkineto/CMakeLists.txt | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/libkineto/CMakeLists.txt b/libkineto/CMakeLists.txt
+index aff278b..2c460b9 100644
+--- a/libkineto/CMakeLists.txt
++++ b/libkineto/CMakeLists.txt
+@@ -159,7 +159,7 @@ set_target_properties(kineto_base kineto_api PROPERTIES
+       CXX_EXTENSIONS NO)
+ 
+ set(KINETO_COMPILE_OPTIONS "-DKINETO_NAMESPACE=libkineto")
+-list(APPEND KINETO_COMPILE_OPTIONS "-DFMT_HEADER_ONLY")
++list(APPEND KINETO_COMPILE_OPTIONS "${fmt_DEFINITIONS}")
+ list(APPEND KINETO_COMPILE_OPTIONS "-DENABLE_IPC_FABRIC")
+ if(NOT MSVC)
+   list(APPEND KINETO_COMPILE_OPTIONS "-std=c++17")
+@@ -183,7 +183,7 @@ endif()
+ target_compile_options(kineto_base PRIVATE "${KINETO_COMPILE_OPTIONS}")
+ target_compile_options(kineto_api PRIVATE "${KINETO_COMPILE_OPTIONS}")
+ 
+-if(NOT TARGET fmt)
++if(FALSE)
+   if(NOT FMT_SOURCE_DIR)
+     set(FMT_SOURCE_DIR "${LIBKINETO_THIRDPARTY_DIR}/fmt"
+       CACHE STRING "fmt source directory from submodules")
+@@ -201,7 +201,7 @@ if(NOT TARGET fmt)
+   set(BUILD_SHARED_LIBS ${TEMP_BUILD_SHARED_LIBS} CACHE BOOL "Build shared libs" FORCE)
+ endif()
+ 
+-set(FMT_INCLUDE_DIR "${FMT_SOURCE_DIR}/include")
++set(FMT_INCLUDE_DIR "${fmt_INCLUDE_DIR}")
+ message(STATUS "Kineto: FMT_SOURCE_DIR = ${FMT_SOURCE_DIR}")
+ message(STATUS "Kineto: FMT_INCLUDE_DIR = ${FMT_INCLUDE_DIR}")
+ if (NOT CUPTI_INCLUDE_DIR)
+-- 
+2.43.0
+
