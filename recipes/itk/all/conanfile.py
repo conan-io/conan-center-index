@@ -1,16 +1,16 @@
+import glob
+import os
+
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
-from conan.tools.microsoft import check_min_vs, is_msvc
 from conan.tools.scm import Version
-from conan.errors import ConanInvalidConfiguration
-import glob
-import os
-import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.9"
 
 
 class ITKConan(ConanFile):
@@ -30,33 +30,12 @@ class ITKConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
+    implements = ["auto_shared_fpic"]
     short_paths = True
-
-    @property
-    def _min_cppstd(self):
-        return 11
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "14",
-            "gcc": "4.8.1",
-            "clang": "3.3",
-            "apple-clang": "9",
-        }
 
     def export_sources(self):
         export_conandata_patches(self)
         copy(self, "conan_cmake_project_include.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -66,17 +45,16 @@ class ITKConan(ConanFile):
         # - mkl
         # - vtk
         # - opencv
-        #todo: enable after fixing dcmtk compatibility with openssl on Windows
-        #self.requires("dcmtk/3.6.7")
+        self.requires("dcmtk/3.6.8")
         self.requires("double-conversion/3.3.0")
         self.requires("eigen/3.4.0")
         self.requires("expat/[>=2.6.2 <3]")
         self.requires("fftw/3.3.10")
         self.requires("gdcm/3.0.23")
-        self.requires("hdf5/1.14.3")
+        self.requires("hdf5/1.14.5")
         self.requires("libjpeg/9e")
         self.requires("libpng/[>=1.6 <2]")
-        self.requires("libtiff/4.6.0")
+        self.requires("libtiff/[>=4.5 <5]")
         self.requires("openjpeg/2.5.2")
         self.requires("onetbb/2021.9.0")
         self.requires("zlib/[>=1.2.11 <2]")
@@ -86,24 +64,17 @@ class ITKConan(ConanFile):
             self.tool_requires("cmake/[>=3.16.3 <4]")
 
     def validate(self):
-        if self.options.shared and not self.dependencies["hdf5"].options.shared:
-            raise ConanInvalidConfiguration("When building a shared itk, hdf5 needs to be shared too (or not linked to by the consumer).\n"
-                                            "This is because H5::DataSpace::ALL might get initialized twice, which will cause a H5::DataSpaceIException to be thrown).")
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        check_min_vs(self, 190)
-        if not is_msvc(self):
-            minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-            if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-                raise ConanInvalidConfiguration(
-                    f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-                )
+        if Version(self.version) < "5.2" and is_apple_os(self) and self.settings.arch == "armv8":
+            # https://discourse.itk.org/t/error-building-v5-1-1-for-mac-big-sur-11-2-3/3959
+            raise ConanInvalidConfiguration(f"{self.ref} is not supported on on Apple armv8 architecture.")
+        check_min_cppstd(self, 11)
         if Version(self.version) < "5.2" and self.settings.os == "Macos":
             raise ConanInvalidConfiguration(f"{self.ref} fails to compile in {self.settings.os}, fixed in 5.2.0")
 
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -117,38 +88,33 @@ class ITKConan(ConanFile):
         tc.variables["DISABLE_MODULE_TESTS"] = True
         tc.variables["ITK_SKIP_PATH_LENGTH_CHECKS"] = True
 
-        tc.variables["ITK_USE_SYSTEM_LIBRARIES"] = True
         tc.variables["ITK_USE_SYSTEM_DCMTK"] = True
         tc.variables["ITK_USE_SYSTEM_DOUBLECONVERSION"] = True
         tc.variables["ITK_USE_SYSTEM_EIGEN"] = True
         tc.variables["ITK_USE_SYSTEM_FFTW"] = True
         tc.variables["ITK_USE_SYSTEM_GDCM"] = True
         tc.variables["ITK_USE_SYSTEM_HDF5"] = True
-        tc.variables["ITK_USE_SYSTEM_ICU"] = True
         tc.variables["ITK_USE_SYSTEM_JPEG"] = True
+        tc.variables["ITK_USE_SYSTEM_KWIML"] = False # FIXME: Missing Kwiml recipe
+        tc.variables["ITK_USE_SYSTEM_LIBRARIES"] = True
         tc.variables["ITK_USE_SYSTEM_PNG"] = True
         tc.variables["ITK_USE_SYSTEM_TIFF"] = True
+        tc.variables["ITK_USE_SYSTEM_VXL"] = False # FIXME: Missing VXL recipe
         tc.variables["ITK_USE_SYSTEM_ZLIB"] = True
-
-        # FIXME: Missing Kwiml recipe
-        tc.variables["ITK_USE_SYSTEM_KWIML"] = False
-        # FIXME: Missing VXL recipe
-        tc.variables["ITK_USE_SYSTEM_VXL"] = False
         tc.variables["GDCM_USE_SYSTEM_OPENJPEG"] = True
 
         tc.variables["ITK_BUILD_DEFAULT_MODULES"] = False
         tc.variables["Module_ITKDeprecated"] = False
-        tc.variables["Module_ITKMINC"] = False
         tc.variables["Module_ITKIOMINC"] = False
-
-        tc.variables["Module_ITKVideoBridgeOpenCV"] = False
-
-        #todo: enable after fixing dcmtk compatibility with openssl on Windows
-        tc.variables["Module_ITKDCMTK"] = False
-        tc.variables["Module_ITKIODCMTK"] = False
-
-        tc.variables["Module_ITKIOHDF5"] = True
         tc.variables["Module_ITKIOTransformHDF5"] = False
+        tc.variables["Module_ITKLevelSetsv4Visualization"] = False # Disabled on Linux (link errors)
+        tc.variables["Module_ITKMINC"] = False
+        tc.variables["Module_ITKVTK"] = False
+        tc.variables["Module_ITKVideoBridgeOpenCV"] = False
+        tc.variables["Module_ITKVideoBridgeVXL"] = False # Disabled because Vxl vidl is not built anymore
+        tc.variables["Module_ITKVideoIO"] = False
+        tc.variables["Module_ITKVtkGlue"] = False
+
         tc.variables["Module_ITKAnisotropicSmoothing"] = True
         tc.variables["Module_ITKAntiAlias"] = True
         tc.variables["Module_ITKBiasCorrection"] = True
@@ -159,6 +125,8 @@ class ITKConan(ConanFile):
         tc.variables["Module_ITKConnectedComponents"] = True
         tc.variables["Module_ITKConvolution"] = True
         tc.variables["Module_ITKCurvatureFlow"] = True
+        tc.variables["Module_ITKDCMTK"] = True
+        tc.variables["Module_ITKDICOMParser"] = True
         tc.variables["Module_ITKDeconvolution"] = True
         tc.variables["Module_ITKDeformableMesh"] = True
         tc.variables["Module_ITKDenoising"] = True
@@ -178,7 +146,9 @@ class ITKConan(ConanFile):
         tc.variables["Module_ITKGPUSmoothing"] = True
         tc.variables["Module_ITKGPUThresholding"] = True
         tc.variables["Module_ITKIOCSV"] = True
+        tc.variables["Module_ITKIODCMTK"] = True
         tc.variables["Module_ITKIOGE"] = True
+        tc.variables["Module_ITKIOHDF5"] = True
         tc.variables["Module_ITKIOIPL"] = True
         tc.variables["Module_ITKIOMesh"] = True
         tc.variables["Module_ITKIOPhilipsREC"] = True
@@ -227,35 +197,49 @@ class ITKConan(ConanFile):
         tc.variables["Module_ITKThresholding"] = True
         tc.variables["Module_ITKVideoCore"] = True
         tc.variables["Module_ITKVideoFiltering"] = True
-        tc.variables["Module_ITKVideoIO"] = False
         tc.variables["Module_ITKVoronoi"] = True
         tc.variables["Module_ITKWatersheds"] = True
-        tc.variables["Module_ITKDICOMParser"] = True
-
-        tc.variables["Module_ITKVTK"] = False
-        tc.variables["Module_ITKVtkGlue"] = False
-
-        # Disabled on Linux (link errors)
-        tc.variables["Module_ITKLevelSetsv4Visualization"] = False
-
-        # Disabled because Vxl vidl is not built anymore
-        tc.variables["Module_ITKVideoBridgeVXL"] = False
-
         tc.generate()
 
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("fftw", "cmake_file_name", "FFTW")
+        # Use namespaced targets to avoid linking against plain library targets
+        deps.set_property("gdcm::gdcmMSFF", "cmake_target_name", "GDCM::gdcmMSFF")
+        deps.set_property("gdcm::gdcmDICT", "cmake_target_name", "GDCM::gdcmDICT")
+        deps.generate()
 
         venv = VirtualBuildEnv(self)
         venv.generate()
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         #The CMake policy CMP0091 must be NEW, but is ''
         replace_in_file(self,
                         os.path.join(self.source_folder, "Modules", "ThirdParty", "VNL", "src", "vxl", "config", "cmake", "config", "VXLIntrospectionConfig.cmake"),
                         "-DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}",
                         "-DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_CXX_FLAGS:STRING=${CMAKE_CXX_FLAGS}")
+        # Ensure that new versions don't introduce any vendored libs by accident
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "include(ExternalProject)", "")
+        # Unvendor ZLIB
+        for path in [
+            os.path.join(self.source_folder, "Modules", "IO", "GIPL", "src", "itkGiplImageIO.cxx"),
+            os.path.join(self.source_folder, "Modules", "IO", "PhilipsREC", "src", "itkPhilipsRECImageIO.cxx"),
+            os.path.join(self.source_folder, "Modules", "Nonunit", "Review", "src", "itkVoxBoCUBImageIO.cxx"),
+            os.path.join(self.source_folder, "Modules", "ThirdParty", "GDCM", "src", "gdcm", "Utilities", "gdcm_zlib.h"),
+            os.path.join(self.source_folder, "Modules", "ThirdParty", "GIFTI", "src", "gifticlib", "gifti_io.h"),
+            os.path.join(self.source_folder, "Modules", "ThirdParty", "NIFTI", "src", "nifti", "znzlib", "znzlib.h"),
+            os.path.join(self.source_folder, "Modules", "ThirdParty", "MetaIO", "src", "MetaIO", "src", "localMetaConfiguration.h"),
+            os.path.join(self.source_folder, "Modules", "ThirdParty", "MINC", "src", "libminc", "nifti", "znzlib.h"),
+            os.path.join(self.source_folder, "Modules", "ThirdParty", "NrrdIO", "src", "NrrdIO", "unteem.pl"),
+            os.path.join(self.source_folder, "Modules", "ThirdParty", "NrrdIO", "src", "NrrdIO", "privateNrrd.h"),
+        ]:
+            replace_in_file(self, path, "itk_zlib.h", "zlib.h")
+        # Truncate some third-party modules that are provided by conan_cmake_project_include.cmake
+        for pkg in ["DCMTK", "DoubleConversion", "GDCM", "Expat", "HDF5", "JPEG", "PNG", "TIFF", "ZLIB"]:
+            save(self, os.path.join(self.source_folder, "Modules", "ThirdParty", pkg, "CMakeLists.txt"),
+                 f"project(ITK{pkg})\n"
+                 f"set(ITK{pkg}_THIRD_PARTY 1)\n"
+                 f"set(ITK{pkg}_NO_SRC 1)\n"
+                 "itk_module_impl()\n")
 
     def build(self):
         self._patch_sources()
@@ -275,10 +259,6 @@ class ITKConan(ConanFile):
     @property
     def _module_variables_file_rel_path(self):
         return os.path.join(self._cmake_module_dir, f"conan-official-{self.name}-variables.cmake")
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join(self._cmake_module_dir, f"conan-official-{self.name}-targets.cmake")
 
     @property
     def _itk_components(self):
@@ -378,8 +358,7 @@ class ITKConan(ConanFile):
             "ITKIOBMP": {"requires": ["ITKIOImageBase"]},
             "ITKIOBioRad": {"requires": ["ITKIOImageBase"]},
             "ITKIOCSV": {"requires": ["ITKIOImageBase"]},
-            #todo: enable after fixing dcmtk compatibility with openssl on Windows
-            #"ITKIODCMTK": {"requires": ["ITKIOImageBase", "dcmtk::dcmtk"]},
+            "ITKIODCMTK": {"requires": ["ITKIOImageBase", "dcmtk::dcmtk"]},
             "ITKIOGDCM": {"requires": ["ITKCommon", "ITKIOImageBase", "gdcm::gdcmDICT", "gdcm::gdcmMSFF"]},
             "ITKIOIPL": {"requires": ["ITKIOImageBase"]},
             "ITKIOGE": {"requires": ["ITKIOIPL", "ITKIOImageBase"]},
@@ -474,18 +453,6 @@ class ITKConan(ConanFile):
         content = 'set(ITK_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}")'
         save(self, os.path.join(self.package_folder, self._module_variables_file_rel_path), content)
 
-    def _create_cmake_module_alias_targets(self):
-        targets = {target:f"ITK::{target}" for target in self._itk_components.keys()}
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, os.path.join(self.package_folder, self._module_file_rel_path), content)
-
     @property
     def _itk_modules_files(self):
         cmake_files = []
@@ -510,7 +477,6 @@ class ITKConan(ConanFile):
                 os.remove(cmake_file)
 
         self._create_cmake_module_variables()
-        self._create_cmake_module_alias_targets()
 
     def package_info(self):
         itk_version = Version(self.version)
@@ -532,14 +498,3 @@ class ITKConan(ConanFile):
                 self.cpp_info.components[name].libs = [f"{name}{lib_suffix}"]
             self.cpp_info.components[name].system_libs = system_libs
             self.cpp_info.components[name].requires = requires
-
-            # TODO: to remove in conan v2 once cmake_find_package* generators removed
-            for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-                self.cpp_info.components[name].names[generator] = name
-                self.cpp_info.components[name].build_modules[generator].extend([self._module_file_rel_path, self._module_variables_file_rel_path])
-                self.cpp_info.components[name].build_modules[generator].extend(
-                    [os.path.join(self._cmake_module_dir, f) for f in self._itk_modules_files])
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        for generator in ["cmake_find_package", "cmake_find_package_multi"]:
-            self.cpp_info.names[generator] = "ITK"
