@@ -54,8 +54,8 @@ class WaylandConan(ConanFile):
         self.requires("expat/[>=2.6.2 <3]")
 
     def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux")
+      if self.settings.os not in ("Linux", "Android"):
+            raise ConanInvalidConfiguration(f"{self.ref} only supports Linux or Android")
 
     def build_requirements(self):
         self.tool_requires("meson/[>=1.4.0 <2]")
