@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
 required_conan_version = ">=2"
@@ -81,9 +81,6 @@ class SDLImageConan(ConanFile):
             self.options.rm_safe("fPIC")
         self.settings.rm_safe("compiler.cppstd")
         self.settings.rm_safe("compiler.libcxx")
-        if self.options.shared:
-            # sdl static into sdl_image shared is not allowed
-            self.options["sdl"].shared = True
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -100,20 +97,24 @@ class SDLImageConan(ConanFile):
         if self.options.with_libwebp:
             self.requires("libwebp/1.3.2")
         if self.options.get_safe("with_avif"):
-            self.requires("libavif/1.1.1")
-        if self.options.with_jxl:
-            self.requires("libjxl/0.11.1")
+            self.requires("libavif/1.0.1")
 
     def validate(self):
         if self.options.shared and not self.dependencies["sdl"].options.shared:
             raise ConanInvalidConfiguration(f"{self.ref} shared requires sdl shared")
+        # TODO: libjxl doesn't support conan v2(yet)
+        if self.options.get_safe("with_jxl"):
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support with_jxl (yet)")
 
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
 
+    def _patch_sources(self):
+        apply_conandata_patches(self)
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        apply_conandata_patches(self)
+        self._patch_sources()
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -124,7 +125,7 @@ class SDLImageConan(ConanFile):
         tc.variables["SDL2IMAGE_BMP"] = self.options.bmp
         tc.variables["SDL2IMAGE_GIF"] = self.options.gif
         tc.variables["SDL2IMAGE_JPG"] = self.options.with_libjpeg
-        tc.variables["SDL2IMAGE_JXL"] = self.options.with_jxl
+        tc.variables["SDL2IMAGE_JXL"] = self.options.get_safe("with_jxl")
         tc.variables["SDL2IMAGE_LBM"] = self.options.lbm
         tc.variables["SDL2IMAGE_PCX"] = self.options.pcx
         tc.variables["SDL2IMAGE_PNG"] = self.options.with_libpng
@@ -149,6 +150,10 @@ class SDLImageConan(ConanFile):
         cmake.configure()
         cmake.build()
 
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
+
     def package(self):
         copy(self, "LICENSE.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
@@ -167,38 +172,41 @@ class SDLImageConan(ConanFile):
         if self.settings.build_type == "Debug":
             lib_postfix += "d"
 
-        self.cpp_info.libs = [f"SDL2_image{lib_postfix}"]
-        self.cpp_info.requires = ["sdl::sdl"]
-        self.cpp_info.includedirs.append(os.path.join("include", "SDL2"))
-        self.cpp_info.set_property("pkg_config_name", "SDL2_image")
         self.cpp_info.set_property("cmake_file_name", "SDL2_image")
         self.cpp_info.set_property("cmake_target_name", "SDL2_image::SDL2_image")
         if not self.options.shared:
             self.cpp_info.set_property("cmake_target_aliases", ["SDL2_image::SDL2_image-static"])
+        self.cpp_info.set_property("pkg_config_name", "SDL2_image")
+        # TODO: back to global scope in conan v2 once legacy generators removed
+        self.cpp_info.components["_sdl_image"].libs = [f"SDL2_image{lib_postfix}"]
+        self.cpp_info.components["_sdl_image"].includedirs.append(os.path.join("include", "SDL2"))
 
+        # TODO: to remove in conan v2 once legacy generators removed
+        target_name = "SDL2_image" if self.options.shared else "SDL2_image-static"
+        self.cpp_info.components["_sdl_image"].set_property("cmake_target_name", "SDL2_image::SDL2_image")
+        self.cpp_info.components["_sdl_image"].set_property("pkg_config_name", "SDL2_image")
+        self.cpp_info.components["_sdl_image"].requires = ["sdl::sdl"]
         if self.options.with_libtiff:
-            self.cpp_info.requires.append("libtiff::libtiff")
+            self.cpp_info.components["_sdl_image"].requires.append("libtiff::libtiff")
         if self.options.with_libjpeg:
-            self.cpp_info.requires.append("libjpeg::libjpeg")
+            self.cpp_info.components["_sdl_image"].requires.append("libjpeg::libjpeg")
         if self.options.with_libpng:
-            self.cpp_info.requires.append("libpng::libpng")
+            self.cpp_info.components["_sdl_image"].requires.append("libpng::libpng")
         if self.options.with_libwebp:
-            self.cpp_info.requires.append("libwebp::libwebp")
+            self.cpp_info.components["_sdl_image"].requires.append("libwebp::libwebp")
         if self.options.get_safe("with_avif"):
-            self.cpp_info.requires.append("libavif::libavif")
-        if self.options.with_jxl:
-            self.cpp_info.requires.append("libjxl::libjxl")
+            self.cpp_info.components["_sdl_image"].requires.append("libavif::libavif")
         if self.options.get_safe("imageio") and not self.options.shared:
-            self.cpp_info.frameworks = [
+            self.cpp_info.components["_sdl_image"].frameworks = [
                 "CoreFoundation",
                 "CoreGraphics",
                 "Foundation",
                 "ImageIO",
             ]
             if self.settings.os == "Macos":
-                self.cpp_info.frameworks.append("ApplicationServices")
+                self.cpp_info.components["_sdl_image"].frameworks.append("ApplicationServices")
             else:
-                self.cpp_info.frameworks.extend([
+                self.cpp_info.components["_sdl_image"].frameworks.extend([
                     "MobileCoreServices",
                     "UIKit",
                 ])
