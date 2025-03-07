@@ -128,7 +128,7 @@ class DrogonConan(ConanFile):
         if self.options.get_safe("with_postgres"):
             self.requires("libpq/15.4")
         if self.options.get_safe("with_mysql"):
-            self.requires("libmysqlclient/8.1.0")
+            self.requires("mariadb-connector-c/3.4.3")
         if self.options.get_safe("with_sqlite"):
             self.requires("sqlite3/3.45.0")
         if self.options.get_safe("with_redis"):
@@ -157,13 +157,17 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)
         tc.variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
         tc.variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         if is_msvc(self):
             tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
         if Version(self.version) >= "1.8.4":
             tc.variables["USE_SUBMODULE"] = False
         tc.generate()
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        if self.options.get_safe("with_mysql"):
+            deps.set_property("mariadb-connector-c", "cmake_file_name", "MySQL")
+            deps.set_property("mariadb-connector-c", "cmake_target_name", "MySQL_lib")
+        deps.generate()
 
     def build(self):
         apply_conandata_patches(self)
@@ -191,9 +195,3 @@ class DrogonConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "Drogon")
         self.cpp_info.set_property("cmake_target_name", "Drogon::Drogon")
-
-        # TODO: Remove after Conan 2.0
-        self.cpp_info.filenames["cmake_find_package"] = "Drogon"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Drogon"
-        self.cpp_info.names["cmake_find_package"] = "Drogon"
-        self.cpp_info.names["cmake_find_package_multi"] = "Drogon"
