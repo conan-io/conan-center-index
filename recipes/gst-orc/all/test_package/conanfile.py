@@ -1,29 +1,22 @@
 from conan import ConanFile
 from conan.tools.build import can_run
-from conan.tools.cmake import CMake, cmake_layout
-from conan.tools.env import Environment
+from conan.tools.cmake import cmake_layout, CMake
 import os
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    generators = "CMakeToolchain", "CMakeDeps", "PkgConfigDeps"
+    generators = "CMakeToolchain", "PkgConfigDeps"
+
+    def requirements(self):
+        self.requires(self.tested_reference_str, run=can_run(self))
 
     def layout(self):
         cmake_layout(self)
 
-    def requirements(self):
-        self.requires(self.tested_reference_str)
-
     def build_requirements(self):
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
-
-    def generate(self):
-        # Print debug information from gstreamer at runtime
-        env = Environment()
-        env.define("GST_DEBUG", "1")
-        env.vars(self, scope="run").save_script("conanrun_gstdebug")
 
     def build(self):
         cmake = CMake(self)
@@ -32,5 +25,7 @@ class TestPackageConan(ConanFile):
 
     def test(self):
         if can_run(self):
+            if self.dependencies["gst-orc"].options.tools:
+                self.run("orcc --version", env="conanrun")
             bin_path = os.path.join(self.cpp.build.bindir, "test_package")
             self.run(bin_path, env="conanrun")

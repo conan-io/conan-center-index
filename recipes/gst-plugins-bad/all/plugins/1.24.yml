@@ -1,0 +1,685 @@
+accurip:
+  requires:
+    - gstreamer-audio-1.0
+adpcmdec:
+  requires:
+    - gstreamer-audio-1.0
+adpcmenc:
+  requires:
+    - gstreamer-audio-1.0
+aes:
+  requires:
+    - gstreamer-pbutils-1.0
+    - gstreamer-video-1.0
+    - openssl::openssl
+aiff:
+  requires:
+    - gstreamer-tag-1.0
+    - gstreamer-audio-1.0
+    - gstreamer-pbutils-1.0
+amfcodec:
+  options:
+    - amfcodec
+    - d3d11
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-pbutils-1.0
+    - gstreamer-codecparsers-1.0
+    - gstreamer-d3d11-1.0
+analyticsoverlay:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-analytics-1.0
+    - pango::pangocairo
+androidmedia:
+  requires:
+    - gstreamer-gl-1.0
+    - gstreamer-pbutils-1.0
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+    - gstreamer-photography-1.0
+    - glib::gmodule-2.0
+    - gst-orc::gst-orc
+    - opengl::opengl
+aom:
+  requires:
+    - gstreamer-video-1.0
+    - libaom-av1::libaom-av1
+applemedia:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-audio-1.0
+    - gstreamer-pbutils-1.0
+    - gstreamer-gl-1.0
+    - gstreamer-gl-prototypes-1.0
+    - gstreamer-codecparsers-1.0
+    - opengl::opengl
+asfmux:
+  requires:
+    - gstreamer-rtp-1.0
+audiobuffersplit:
+  requires:
+    - gstreamer-audio-1.0
+audiofxbad:
+  requires:
+    - gstreamer-audio-1.0
+audiolatency:
+  requires: [ ]
+audiomixmatrix:
+  requires:
+    - gstreamer-audio-1.0
+audiovisualizers:
+  requires:
+    - gstreamer-pbutils-1.0
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+    - gstreamer-fft-1.0
+autoconvert:
+  requires:
+    - gstreamer-pbutils-1.0
+    - gstreamer-video-1.0
+bayer:
+  requires:
+    - gstreamer-video-1.0
+    - gst-orc::gst-orc
+bz2:
+  requires:
+    - bzip2::bzip2
+camerabin:
+  options:
+    - camerabin2
+  requires:
+    - gstreamer-pbutils-1.0
+    - gstreamer-photography-1.0
+closedcaption:
+  requires:
+    - gstreamer-video-1.0
+    - pango::pangocairo
+codec2json:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-codecparsers-1.0
+    - json-glib::json-glib
+codecalpha:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-pbutils-1.0
+codectimestamper:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-codecparsers-1.0
+coloreffects:
+  requires:
+    - gstreamer-video-1.0
+colormanagement:
+  requires:
+    - gstreamer-video-1.0
+    - lcms::lcms
+curl:
+  requires:
+    - libcurl::libcurl
+    - openssl::openssl
+d3d:
+  options:
+    - d3dvideosink
+  requires:
+    - gstreamer-video-1.0
+d3d11:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-controller-1.0
+    - gstreamer-d3d11-1.0
+    - gstreamer-dxva-1.0
+d3d12:
+  requires:
+    - gstreamer-video-1.0
+    - directx-headers::directx-headers
+    - gstreamer-codecs-1.0
+    - gstreamer-dxva-1.0
+dash:
+  requires:
+    - gstreamer-adaptivedemux-1.0
+    - gstreamer-isoff-1.0
+    - gstreamer-net-1.0
+    - gstreamer-tag-1.0
+    - gstreamer-pbutils-1.0
+    - libxml2::libxml2
+    - glib::gio-2.0
+dc1394:
+  requires:
+    - gstreamer-video-1.0
+    - libdc1394::libdc1394
+de265:
+  options:
+    - libde265
+  requires:
+    - gstreamer-video-1.0
+    - libde265::libde265
+debugutilsbad:
+  options:
+    - debugutils
+  requires:
+    - gstreamer-net-1.0
+    - gstreamer-video-1.0
+    - gstreamer-audio-1.0
+    - glib::gio-2.0
+decklink:
+  cpp: true
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+directshow:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-audio-1.0
+directsoundsrc:
+  options:
+    - directsound
+  requires:
+    - gstreamer-audio-1.0
+dtls:
+  requires:
+    - openssl::openssl
+dvb:
+  requires:
+    - gstreamer-mpegts-1.0
+dvbsubenc:
+  requires:
+    - gstreamer-video-1.0
+dvbsuboverlay:
+  requires:
+    - gstreamer-video-1.0
+dvdspu:
+  requires:
+    - gstreamer-video-1.0
+dwrite:
+  options:
+    - dwrite
+    - d3d11
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-d3d11-1.0
+faac:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-pbutils-1.0
+    - gstreamer-tag-1.0
+    - faac::faac
+faceoverlay:
+  requires:
+    - gstreamer-video-1.0
+fbdevsink:
+  options:
+    - fbdev
+  requires:
+    - gstreamer-video-1.0
+fdkaac:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-pbutils-1.0
+    - libfdk_aac::libfdk_aac
+festival:
+  requires:
+    - gstreamer-audio-1.0
+fieldanalysis:
+  requires:
+    - gstreamer-video-1.0
+    - gst-orc::gst-orc
+freeverb:
+  requires:
+    - gstreamer-audio-1.0
+frei0r:
+  requires:
+    - gstreamer-video-1.0
+    - glib::gmodule-2.0
+gaudieffects:
+  requires:
+    - gstreamer-video-1.0
+    - gst-orc::gst-orc
+gdp:
+  requires: [ ]
+geometrictransform:
+  requires:
+    - gstreamer-video-1.0
+gs:
+  cpp: true
+  requires:
+    - google-cloud-cpp::storage
+gtkwayland:
+  options:
+    - gtk3
+    - with_wayland
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-allocators-1.0
+    - gstreamer-wayland-1.0
+    - gtk::gtk+-3.0
+    - wayland::wayland-client
+hls:
+  requires:
+    - gstreamer-pbutils-1.0
+    - gstreamer-tag-1.0
+    - gstreamer-video-1.0
+    - gstreamer-adaptivedemux-1.0
+    - openssl::openssl
+    - glib::gio-2.0
+id3tag:
+  requires:
+    - gstreamer-tag-1.0
+insertbin:
+  requires:
+    - gstreamer-insertbin-1.0
+inter:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+interlace:
+  requires:
+    - gstreamer-video-1.0
+ipcpipeline:
+  requires: [ ]
+ivfparse:
+  requires: [ ]
+ivtc:
+  requires:
+    - gstreamer-video-1.0
+jp2kdecimator:
+  requires: [ ]
+jpegformat:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-tag-1.0
+    - gstreamer-codecparsers-1.0
+kms:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-allocators-1.0
+legacyrawparse:
+  options:
+    - rawparse
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+mediafoundation:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-audio-1.0
+    - gstreamer-pbutils-1.0
+midi:
+  requires:
+    - gstreamer-tag-1.0
+modplug:
+  cpp: true
+  requires:
+    - gstreamer-audio-1.0
+    - libmodplug::libmodplug
+mpegpsdemux:
+  options:
+    - mpegdemux
+  requires:
+    - gstreamer-tag-1.0
+    - gstreamer-pbutils-1.0
+mpegpsmux:
+  requires:
+    - gstreamer-pbutils-1.0
+mpegtsdemux:
+  requires:
+    - gstreamer-tag-1.0
+    - gstreamer-pbutils-1.0
+    - gstreamer-audio-1.0
+    - gstreamer-codecparsers-1.0
+    - gstreamer-mpegts-1.0
+mpegtsmux:
+  requires:
+    - gstreamer-tag-1.0
+    - gstreamer-pbutils-1.0
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+    - gstreamer-mpegts-1.0
+mse:
+  requires:
+    - gstreamer-mse-1.0
+mxf:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+netsim:
+  requires: [ ]
+nvcodec:
+  cpp: true
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-pbutils-1.0
+    - gstreamer-gl-1.0
+    - gstreamer-gl-prototypes-1.0
+    - gstreamer-codecs-1.0
+    - gstreamer-cuda-1.0
+    - glib::gmodule-2.0
+    - glib::gio-2.0
+    - opengl::opengl
+onnx:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-analytics-1.0
+    - onnxruntime::onnxruntime
+    - opengl::opengl
+openal:
+  requires:
+    - gstreamer-audio-1.0
+    - openal-soft::openal-soft
+opencv:
+  cpp: true
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-opencv-1.0
+    - opencv::opencv_bgsegm
+    - opencv::opencv_calib3d
+    - opencv::opencv_core
+    - opencv::opencv_features2d
+    - opencv::opencv_imgcodecs
+    - opencv::opencv_imgproc
+    - opencv::opencv_objdetect
+    - opencv::opencv_tracking
+    - opencv::opencv_video
+openexr:
+  cpp: true
+  requires:
+    - gstreamer-video-1.0
+    - openexr::openexr
+openh264:
+  cpp: true
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-pbutils-1.0
+    - openh264::openh264
+openjpeg:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-codecparsers-1.0
+    - openjpeg::openjpeg
+openni2:
+  cpp: true
+  requires:
+    - gstreamer-video-1.0
+    - openni2::openni2
+opusparse:
+  options:
+    - opus
+  requires:
+    - gstreamer-rtp-1.0
+    - gstreamer-pbutils-1.0
+    - gstreamer-audio-1.0
+    - gstreamer-tag-1.0
+    - opus::opus
+pcapparse:
+  requires: [ ]
+pnm:
+  requires:
+    - gstreamer-video-1.0
+proxy:
+  requires: [ ]
+qroverlay:
+  requires:
+    - gstreamer-video-1.0
+    - libqrencode::libqrencode
+    - json-glib::json-glib
+qsv:
+  cpp: true
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-allocators-1.0
+    - gstreamer-codecparsers-1.0
+qt6d3d11:
+  cpp: true
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-d3d11-1.0
+    - qt::qtCore
+    - qt::qtGui
+    - qt::qtQml
+    - qt::qtQuick
+removesilence:
+  requires:
+    - gstreamer-audio-1.0
+rfbsrc:
+  options:
+    - librfb
+  requires:
+    - gstreamer-video-1.0
+    - glib::gio-2.0
+rist:
+  requires:
+    - gstreamer-rtp-1.0
+    - gstreamer-net-1.0
+    - glib::gio-2.0
+rsvg:
+  requires:
+    - gstreamer-video-1.0
+    - librsvg::librsvg
+rtmp2:
+  requires:
+    - glib::gio-2.0
+rtpmanagerbad:
+  options:
+    - rtp
+  requires:
+    - gstreamer-net-1.0
+    - gstreamer-rtp-1.0
+    - glib::gio-2.0
+rtponvif:
+  options:
+    - onvif
+  requires:
+    - gstreamer-rtp-1.0
+sctp:
+  requires:
+    - gstreamer-sctp-1.0
+    - usrsctp::usrsctp
+sdpelem:
+  options:
+    - sdp
+  requires:
+    - gstreamer-app-1.0
+    - gstreamer-sdp-1.0
+    - glib::gio-2.0
+segmentclip:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+shm:
+  requires: [ ]
+siren:
+  requires:
+    - gstreamer-audio-1.0
+smooth:
+  requires:
+    - gstreamer-video-1.0
+smoothstreaming:
+  requires:
+    - gstreamer-adaptivedemux-1.0
+    - gstreamer-codecparsers-1.0
+    - gstreamer-isoff-1.0
+    - libxml2::libxml2
+sndfile:
+  requires:
+    - gstreamer-audio-1.0
+    - libsndfile::libsndfile
+soundtouch:
+  cpp: true
+  requires:
+    - gstreamer-audio-1.0
+    - soundtouch::soundtouch
+speed:
+  requires:
+    - gstreamer-audio-1.0
+srt:
+  requires:
+    - srt::srt
+    - glib::gio-2.0
+srtp:
+  requires:
+    - gstreamer-rtp-1.0
+    - gstreamer-video-1.0
+    - libsrtp::libsrtp
+subenc:
+  requires: [ ]
+svtav1:
+  requires:
+    - gstreamer-video-1.0
+    - libsvtav1::encoder
+switchbin:
+  requires: [ ]
+timecode:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+tinyalsa:
+  requires:
+    - gstreamer-audio-1.0
+    - tinyalsa::tinyalsa
+transcode:
+  requires:
+    - gstreamer-pbutils-1.0
+ttmlsubs:
+  options:
+    - ttml
+  requires:
+    - gstreamer-video-1.0
+    - libxml2::libxml2
+    - pango::pangocairo
+unixfd:
+  requires:
+    - gstreamer-allocators-1.0
+    - glib::gio-2.0
+uvcgadget:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-allocators-1.0
+    - gstreamer-pbutils-1.0
+    - libgudev::libgudev
+    - libv4l::libv4l2
+uvch264:
+  requires:
+    - gstreamer-app-1.0
+    - gstreamer-video-1.0
+    - gstreamer-allocators-1.0
+    - libgudev::libgudev
+    - libusb::libusb
+v4l2codecs:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-allocators-1.0
+    - gstreamer-pbutils-1.0
+    - gstreamer-codecparsers-1.0
+    - gstreamer-codecs-1.0
+    - libgudev::libgudev
+    - libv4l::libv4l2
+va:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-allocators-1.0
+    - gstreamer-codecparsers-1.0
+    - gstreamer-codecs-1.0
+    - gstreamer-va-1.0
+videofiltersbad:
+  options:
+    - videofilters
+  requires:
+    - gstreamer-video-1.0
+    - gst-orc::gst-orc
+videoframe_audiolevel:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+videoparsersbad:
+  options:
+    - videoparsers
+  requires:
+    - gstreamer-pbutils-1.0
+    - gstreamer-video-1.0
+    - gstreamer-codecparsers-1.0
+videosignal:
+  requires:
+    - gstreamer-video-1.0
+vmnc:
+  requires:
+    - gstreamer-video-1.0
+voamrwbenc:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-pbutils-1.0
+    - gstreamer-tag-1.0
+    - vo-amrwbenc::vo-amrwbenc
+vulkan:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-vulkan-1.0
+    - gstreamer-codecparsers-1.0
+    - gstreamer-codecs-1.0
+    - vulkan-loader::vulkan-loader
+    - glib::gio-2.0
+wasapi:
+  requires:
+    - gstreamer-audio-1.0
+wasapi2:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-winrt-1.0
+waylandsink:
+  options:
+    - with_wayland
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-allocators-1.0
+    - gstreamer-wayland-1.0
+webp:
+  requires:
+    - gstreamer-video-1.0
+    - libwebp::libwebp
+webrtc:
+  options:
+    - webrtc
+    - dtls
+  requires:
+    - gstreamer-app-1.0
+    - gstreamer-rtp-1.0
+    - gstreamer-sdp-1.0
+    - gstreamer-webrtc-nice-1.0
+    - gstreamer-webrtc-1.0
+    - gstreamer-sctp-1.0
+wic:
+  requires:
+    - gstreamer-video-1.0
+wildmidi:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-bad-audio-1.0
+    - wildmidi::wildmidi
+win32ipc:
+  requires:
+    - gstreamer-video-1.0
+winks:
+  requires: [ ]
+winscreencap:
+  requires:
+    - gstreamer-video-1.0
+x265:
+  requires:
+    - gstreamer-pbutils-1.0
+    - gstreamer-video-1.0
+    - libx265::libx265
+y4mdec:
+  options:
+    - y4m
+  requires:
+    - gstreamer-video-1.0
+zbar:
+  requires:
+    - gstreamer-video-1.0
+    - zbar::zbar
+zxing:
+  cpp: true
+  requires:
+    - gstreamer-video-1.0
+    - zxing-cpp::zxing-cpp
+
