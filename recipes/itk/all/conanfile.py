@@ -25,10 +25,12 @@ class ITKConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_opencv": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_opencv": False,
     }
 
     short_paths = True
@@ -65,7 +67,6 @@ class ITKConan(ConanFile):
         # TODO: Some packages can be added as optional, but they are not in CCI:
         # - mkl
         # - vtk
-        # - opencv
         #todo: enable after fixing dcmtk compatibility with openssl on Windows
         #self.requires("dcmtk/3.6.7")
         self.requires("double-conversion/3.3.0")
@@ -80,6 +81,8 @@ class ITKConan(ConanFile):
         self.requires("openjpeg/2.5.2")
         self.requires("onetbb/2021.9.0")
         self.requires("zlib/[>=1.2.11 <2]")
+        if self.options.with_opencv:
+            self.requires("opencv/4.10.0")
 
     def build_requirements(self):
         if Version(self.version) >= "5.3.0":
@@ -141,7 +144,7 @@ class ITKConan(ConanFile):
         tc.variables["Module_ITKMINC"] = False
         tc.variables["Module_ITKIOMINC"] = False
 
-        tc.variables["Module_ITKVideoBridgeOpenCV"] = False
+        tc.variables["Module_ITKVideoBridgeOpenCV"] = self.options.with_opencv
 
         #todo: enable after fixing dcmtk compatibility with openssl on Windows
         tc.variables["Module_ITKDCMTK"] = False
@@ -287,7 +290,7 @@ class ITKConan(ConanFile):
         def libdl():
             return ["dl"] if self.settings.os in ["Linux", "FreeBSD"] else []
 
-        return {
+        components = {
             "itksys": {"system_libs": libdl()},
             "itkvcl": {"system_libs": libm()},
             "itkv3p_netlib": {"system_libs": libm()},
@@ -469,6 +472,14 @@ class ITKConan(ConanFile):
             },
             "ITKVideoCore": {"requires": ["ITKCommon"]},
         }
+        
+        if self.options.with_opencv:
+            components.update({
+                "ITKVideoIO": {"requires": ["ITKVideoCore", "ITKIOImageBase"]},
+                "ITKVideoBridgeOpenCV": {"requires": ["ITKVideoIO", "opencv::opencv_core"]},
+            })
+        
+        return components
 
     def _create_cmake_module_variables(self):
         content = 'set(ITK_CMAKE_DIR "${CMAKE_CURRENT_LIST_DIR}")'
