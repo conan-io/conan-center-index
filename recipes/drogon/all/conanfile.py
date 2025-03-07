@@ -34,7 +34,6 @@ class DrogonConan(ConanFile):
         "with_mysql": [True, False],
         "with_sqlite": [True, False],
         "with_redis": [True, False],
-        "with_mysql_optioncv": [True, False]
     }
     default_options = {
         "shared": False,
@@ -50,7 +49,6 @@ class DrogonConan(ConanFile):
         "with_mysql": False,
         "with_sqlite": False,
         "with_redis": False,
-        "with_mysql_optioncv": True
     }
 
     def export_sources(self):
@@ -70,7 +68,6 @@ class DrogonConan(ConanFile):
             del self.options.with_postgres
             del self.options.with_postgres_batch
             del self.options.with_mysql
-            del self.options.with_mysql_optioncv
             del self.options.with_sqlite
             del self.options.with_redis
         elif not self.options.with_postgres:
@@ -160,7 +157,7 @@ class DrogonConan(ConanFile):
         tc.variables["BUILD_MYSQL"] = self.options.get_safe("with_mysql", False)
         tc.variables["BUILD_SQLITE"] = self.options.get_safe("with_sqlite", False)
         tc.variables["BUILD_REDIS"] = self.options.get_safe("with_redis", False)
-        tc.variables["HAS_MYSQL_OPTIONSV"] = self.options.get_safe("with_mysql_optioncv", False)
+        tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
         if is_msvc(self):
             tc.variables["CMAKE_CXX_FLAGS"] = "/Zc:__cplusplus /EHsc"
         if Version(self.version) >= "1.8.4":
@@ -198,9 +195,3 @@ class DrogonConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "Drogon")
         self.cpp_info.set_property("cmake_target_name", "Drogon::Drogon")
-
-        # TODO: Remove after Conan 2.0
-        self.cpp_info.filenames["cmake_find_package"] = "Drogon"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "Drogon"
-        self.cpp_info.names["cmake_find_package"] = "Drogon"
-        self.cpp_info.names["cmake_find_package_multi"] = "Drogon"
