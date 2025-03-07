@@ -1,0 +1,113 @@
+import os
+
+from conan import ConanFile
+from conan.errors import ConanException, ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.files import copy, export_conandata_patches, get, apply_conandata_patches, rmdir, replace_in_file, rm
+from conan.tools.microsoft import is_msvc
+
+required_conan_version = ">=2.0.9"
+
+
+class FbgemmConan(ConanFile):
+    name = "fbgemm"
+    description = ("FBGEMM (Facebook GEneral Matrix Multiplication) is a "
+                   "low-precision, high-performance matrix-matrix multiplications "
+                   "and convolution library for server-side inference.")
+    license = "BSD-3-Clause"
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://github.com/pytorch/FBGEMM"
+    topics = ("matrix", "convolution", "linear-algebra", "machine-learning")
+
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+    }
+    default_options = {
+        "shared": False,
+        "fPIC": True,
+    }
+    implements = ["auto_shared_fpic"]
+
+    def export_sources(self):
+        export_conandata_patches(self)
+        copy(self, "conan_deps.cmake", self.recipe_folder, os.path.join(self.export_sources_folder, "src"))
+
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
+    def requirements(self):
+        self.requires("asmjit/cci.20240531", transitive_headers=True, transitive_libs=True)
+        self.requires("cpuinfo/cci.20231129", transitive_headers=True, transitive_libs=True)
+        # TODO: #22360
+        # Not used in any public headers
+        # self.requires("openmp/system")
+
+    def validate(self):
+        # https://github.com/pytorch/FBGEMM/issues/2074
+        if str(self.settings.arch).startswith("arm"):
+            raise ConanInvalidConfiguration("FBGEMM does not yet support ARM architectures")
+        check_min_cppstd(self, 17)
+
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.25 <4]")
+
+    def source(self):
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        rmdir(self, os.path.join(self.source_folder, "third_party"))
+        cmakelists = os.path.join(self.source_folder, "CMakeLists.txt")
+        replace_in_file(self, cmakelists, "-Werror", "")
+        # asmjit has been unvendored
+        replace_in_file(self, cmakelists, "$<TARGET_PDB_FILE:asmjit>", "")
+        replace_in_file(self, cmakelists, "install(TARGETS asmjit", "# install(TARGETS asmjit")
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.variables["CMAKE_PROJECT_fbgemm_INCLUDE"] = "conan_deps.cmake"
+        tc.variables["FBGEMM_LIBRARY_TYPE"] = "shared" if self.options.shared else "static"
+        tc.variables["FBGEMM_BUILD_FBGEMM_GPU"] = False
+        tc.variables["FBGEMM_BUILD_TESTS"] = False
+        tc.variables["FBGEMM_BUILD_BENCHMARKS"] = False
+        tc.variables["FBGEMM_BUILD_DOCS"] = False
+        tc.cache_variables["CMAKE_DISABLE_FIND_PACKAGE_OpenMP"] = True
+        tc.variables["CMAKE_C_STANDARD"] = 99
+        if is_msvc(self) and self.settings.build_type == "Debug":
+            # Avoid "fatal error C1128: number of sections exceeded object file format limit: compile with /bigobj"
+            tc.blocks["cmake_flags_init"].template += (
+                'string(APPEND CMAKE_CXX_FLAGS_INIT " /bigobj")\n'
+                'string(APPEND CMAKE_C_FLAGS_INIT " /bigobj")\n'
+            )
+        tc.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.configure()
+        if os.getenv("CONAN_CENTER_BUILD_SERVICE", False):
+            # Workaround for C3I running out of memory during build
+            self.conf.define("tools.build:jobs", 1)
+        try:
+            cmake.build()
+        except ConanException:
+            self.conf.define("tools.build:jobs", 1)
+            cmake.build()
+
+    def package(self):
+        copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
+        cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share"))
+        rm(self, "*.pdb", self.package_folder, recursive=True)
+
+    def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "fbgemmLibrary")
+        self.cpp_info.set_property("cmake_target_name", "fbgemm")
+        self.cpp_info.libs = ["fbgemm"]
+        if not self.options.shared:
+            self.cpp_info.defines = ["FBGEMM_STATIC"]
