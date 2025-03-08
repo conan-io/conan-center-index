@@ -28,8 +28,7 @@ class PackageConan(ConanFile):
         if not is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.ref} can be built only by Visual Studio and msvc.")
 
-        if not check_min_vs(self, "192"):
-            raise ConanInvalidConfiguration("Visual Studio 2019 (version 192) or higher is required.")
+        check_min_vs(self, "192")
 
         if not self.settings.arch in ["x86", "x86_64"]:
             raise ConanInvalidConfiguration(f"{self.ref} can be built only for x86 or x64.")
