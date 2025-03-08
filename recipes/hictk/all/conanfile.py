@@ -57,14 +57,14 @@ class HictkConan(ConanFile):
         self.requires("fast_float/8.0.0")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
-        self.requires("fmt/11.1.3")
+        self.requires("fmt/11.0.2")
         self.requires("hdf5/1.14.5")
         self.requires("highfive/2.10.0")
         self.requires("libdeflate/1.23")
         self.requires("parallel-hashmap/2.0.0")
         self.requires("readerwriterqueue/1.0.6")
         self.requires("span-lite/0.11.0")
-        self.requires("spdlog/1.15.1")
+        self.requires("spdlog/1.15.0")
         self.requires("zstd/[>=1.5 <1.6]")
 
     def package_id(self):
