@@ -702,9 +702,6 @@ class AwsSdkCppConan(ConanFile):
             "zlib::zlib"
         ]
 
-        if self.settings.os in ["Linux", "FreeBSD", "Android"]:
-            self.cpp_info.components["core"].requires.append("s2n::s2n")
-
         if Version(self.version) >= "1.11.352":
             self.cpp_info.components["core"].requires.extend([
                 "aws-c-sdkutils::aws-c-sdkutils",
