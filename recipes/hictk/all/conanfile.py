@@ -80,6 +80,11 @@ class HictkConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
+        if self.info.options.get_safe("with_arrow"):
+            arrow = self.dependencies["arrow"]
+            if not arrow.options.compute:
+                raise ConanInvalidConfiguration(f"{self.ref} requires the dependency option arrow/*:compute=True")
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.25 <4]")
 
