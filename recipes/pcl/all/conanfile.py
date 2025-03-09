@@ -1,10 +1,11 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
-from conan.tools.build import check_min_cppstd
+from conan.tools.build import check_min_cppstd, can_run
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, rm
 from conan.tools.gnu import PkgConfigDeps
+from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 from conan.tools.system import package_manager
 import os
@@ -315,20 +316,6 @@ class PclConan(ConanFile):
             all_deps.update(self._external_optional_deps.get(component, []))
         return all_deps
 
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "clang": "7",
-            "apple-clang": "10",
-            "msvc": "191",
-            "Visual Studio": "15",
-        }
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -373,9 +360,9 @@ class PclConan(ConanFile):
         if self._is_enabled("png"):
             self.requires("libpng/[>=1.6 <2]")
         if self._is_enabled("qhull"):
-            self.requires("qhull/8.0.1", transitive_headers=True)
+            self.requires("qhull/cci.20231130", transitive_headers=True)
         if self._is_enabled("qt"):
-            self.requires("qt/6.6.1")
+            self.requires("qt/[>=6.7 <7]")
         if self._is_enabled("libusb"):
             self.requires("libusb/1.0.26", transitive_headers=True)
         if self._is_enabled("pcap"):
@@ -428,16 +415,37 @@ class PclConan(ConanFile):
                         f"'{dep}=True' is required when '{component}' is enabled."
                     )
 
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
-            )
+        check_min_cppstd(self, 17)
+
+    def build_requirements(self):
+        if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        find_modules_to_remove = [
+            "ClangFormat",
+            "DSSDK",
+            "Ensenso",
+            "FLANN",
+            "GLEW",
+            "GTestSource",
+            "OpenMP",
+            "OpenNI",
+            "OpenNI2",
+            "Pcap",
+            "Qhull",
+            "RSSDK",
+            "RSSDK2",
+            "Sphinx",
+            "davidSDK",
+            "libusb",
+        ]
+        if Version(self.version) < "1.14.0":
+            find_modules_to_remove.append("Eigen")
+        for mod in find_modules_to_remove:
+            os.remove(os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake"))
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -461,7 +469,7 @@ class PclConan(ConanFile):
         tc.cache_variables["PCL_ONLY_CORE_POINT_TYPES"] = self.options.precompile_only_core_point_types
         # The default False setting breaks OpenGL detection in CMake
         tc.cache_variables["PCL_ALLOW_BOTH_SHARED_AND_STATIC_DEPENDENCIES"] = True
-        tc.variables["OpenGL_GL_PREFERENCE"] = "GLVND"
+        tc.cache_variables["OpenGL_GL_PREFERENCE"] = "GLVND"
 
         if not self.options.add_build_type_postfix:
             tc.cache_variables["CMAKE_DEBUG_POSTFIX"] = ""
@@ -483,10 +491,13 @@ class PclConan(ConanFile):
 
         tc.cache_variables["PCL_ENABLE_SSE"] = self.options.get_safe("use_sse", False)
 
+        # Do not overwrite CMakeToolchain variables with cache variables
+        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("eigen", "cmake_file_name", "EIGEN")
+        if Version(self.version) < "1.14.0":
+            deps.set_property("eigen", "cmake_file_name", "EIGEN")
         deps.set_property("flann", "cmake_file_name", "FLANN")
         deps.set_property("flann", "cmake_target_name", "FLANN::FLANN")
         deps.set_property("libpcap", "cmake_file_name", "PCAP")
@@ -497,13 +508,7 @@ class PclConan(ConanFile):
         deps = PkgConfigDeps(self)
         deps.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        for mod in ["Eigen", "FLANN", "GLEW", "Pcap", "Qhull", "libusb"]:
-            os.remove(os.path.join(self.source_folder, "cmake", "Modules", f"Find{mod}.cmake"))
-
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -537,8 +542,6 @@ class PclConan(ConanFile):
 
         for name in sorted(self._enabled_components()):
             component = self.cpp_info.components[name]
-            component.names["cmake_find_package"] = name
-            component.names["cmake_find_package_multi"] = name
             component.set_property("cmake_file_name", name)
             component.set_property("cmake_module_file_name", name)
             component.set_property("cmake_target_name", f"PCL::{name}")
@@ -574,19 +577,22 @@ class PclConan(ConanFile):
         if not self.options.shared:
             if self.settings.os in ["Linux", "FreeBSD"]:
                 common.system_libs.append("pthread")
-            if self.options.with_openmp:
-                if self.settings.os == "Linux":
-                    if self.settings.compiler == "gcc":
-                        common.sharedlinkflags.append("-fopenmp")
-                        common.exelinkflags.append("-fopenmp")
-                elif self.settings.os == "Windows":
-                    if self.settings.compiler == "msvc":
-                        common.system_libs.append("delayimp")
-                    elif self.settings.compiler == "gcc":
-                        common.system_libs.append("gomp")
         if self.settings.os == "Windows":
             common.system_libs.append("ws2_32")
 
-        # TODO: Legacy, to be removed on Conan 2.0
-        self.cpp_info.names["cmake_find_package"] = "PCL"
-        self.cpp_info.names["cmake_find_package_multi"] = "PCL"
+        if self.options.with_openmp:
+            openmp_flags = []
+            if is_msvc(self):
+                openmp_flags = ["-openmp"]
+            elif self.settings.compiler == "gcc":
+                openmp_flags = ["-fopenmp"]
+            elif self.settings.compiler == "clang":
+                return ["-fopenmp"]
+            elif self.settings.compiler == "apple-clang":
+                return ["-Xclang", "-fopenmp"]
+            elif self.settings.compiler == "intel-cc":
+                openmp_flags = ["/Qopenmp"] if self.settings.os == "Windows" else ["-Qopenmp"]
+            self.cpp_info.cflags += openmp_flags
+            self.cpp_info.cxxflags += openmp_flags
+            self.cpp_info.sharedlinkflags += openmp_flags
+            self.cpp_info.exelinkflags += openmp_flags
