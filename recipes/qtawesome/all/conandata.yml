@@ -1,4 +1,7 @@
 sources:
+  "6.5.1":
+    url: "https://github.com/gamecreature/QtAwesome/archive/font-awesome-6.5.1.tar.gz"
+    sha256: "679ffa184d4b17b0ba62ea4ee94c4ab3dc5fa0373222b1d8b485341588696979"
   "6.4.0":
     url: "https://github.com/gamecreature/QtAwesome/archive/font-awesome-6.4.0.tar.gz"
     sha256: "4310aba189e0bba4090997ecfefe27c2c7595aa499b790389dabdce5b4e54f5a"
