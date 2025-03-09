@@ -1,0 +1,28 @@
+--- a/config/meson.build
++++ b/config/meson.build
+@@ -232,12 +232,10 @@
+     find_libnuma = false
+ endif
+ if find_libnuma
+-    numa_dep = cc.find_library('numa', required: false)
+-    if numa_dep.found() and cc.has_header('numaif.h')
++    numa_dep = dependency('numa', method: 'pkg-config')
++    if numa_dep.found()
+         dpdk_conf.set10('RTE_HAS_LIBNUMA', true)
+         has_libnuma = true
+-        add_project_link_arguments('-lnuma', language: 'c')
+-        dpdk_extra_ldflags += '-lnuma'
+     endif
+ endif
+ 
+--- a/lib/meson.build
++++ b/lib/meson.build
+@@ -132,7 +132,7 @@
+ 
+     # use "deps" for internal DPDK dependencies, and "ext_deps" for
+     # external package/library requirements
+-    ext_deps = []
++    ext_deps = [numa_dep]
+     deps = []
+     # eal is standard dependency once built
+     if dpdk_conf.has('RTE_LIB_EAL')
