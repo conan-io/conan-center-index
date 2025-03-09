@@ -79,7 +79,7 @@ class LibsndioConan(ConanFile):
         tc.configure_args.append("--datadir=${prefix}/res")
 
         # Bundled `configure` script does not support these options, so remove
-        exclusions = ["--enable-shared", "--disable-shared", "--disable-static", "--enable-static", "--sbindir", "--oldincludedir"]
+        exclusions = ["--enable-shared", "--disable-shared", "--disable-static", "--enable-static", "--sbindir", "--oldincludedir", "--host", "--build"]
         tc.configure_args = [arg for arg in tc.configure_args if not any(exclusion in arg for exclusion in exclusions)]
 
         # Add alsa support
@@ -140,8 +140,3 @@ class LibsndioConan(ConanFile):
         self.cpp_info.set_property("pkg_config_name", "sndio")
         self.cpp_info.libs = ["sndio"]
         self.cpp_info.system_libs = ["dl", "m", "rt"]
-
-        # TODO: to remove in conan v2?
-        self.cpp_info.names["cmake_find_package"] = "sndio"
-        self.cpp_info.names["cmake_find_package_multi"] = "sndio"
-        self.cpp_info.names["pkg_config"] = "sndio"
