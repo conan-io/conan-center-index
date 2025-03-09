@@ -3,7 +3,6 @@ from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, collect_libs, copy, export_conandata_patches, get, rename, replace_in_file, rmdir, save
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag
@@ -12,7 +11,7 @@ import os
 import re
 import textwrap
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
+required_conan_version = ">=2.0.5"
 
 
 OPENCV_MAIN_MODULES_OPTIONS = (
@@ -151,11 +150,6 @@ class OpenCVConan(ConanFile):
         "with_v4l": [True, False],
         # text module options
         "with_tesseract": [True, False],
-        # TODO: deprecated options to remove in few months
-        "contrib": [True, False, "deprecated"],
-        "contrib_freetype": [True, False, "deprecated"],
-        "contrib_sfm": [True, False, "deprecated"],
-        "with_ade": [True, False, "deprecated"],
     }
     options.update({_name: [True, False] for _name in OPENCV_MAIN_MODULES_OPTIONS})
     options.update({_name: [True, False] for _name in OPENCV_EXTRA_MODULES_OPTIONS})
@@ -211,11 +205,6 @@ class OpenCVConan(ConanFile):
         "with_v4l": False,
         # text module options
         "with_tesseract": True,
-        # TODO: deprecated options to remove in few months
-        "contrib": "deprecated",
-        "contrib_freetype": "deprecated",
-        "contrib_sfm": "deprecated",
-        "with_ade": "deprecated",
     }
     default_options.update({_name: True for _name in OPENCV_MAIN_MODULES_OPTIONS})
     default_options.update({_name: False for _name in OPENCV_EXTRA_MODULES_OPTIONS})
@@ -233,10 +222,6 @@ class OpenCVConan(ConanFile):
     @property
     def _is_mingw(self):
         return self.settings.os == "Windows" and self.settings.compiler == "gcc"
-
-    @property
-    def _is_legacy_one_profile(self):
-        return not hasattr(self, "settings_build")
 
     @property
     def _contrib_folder(self):
@@ -284,7 +269,7 @@ class OpenCVConan(ConanFile):
 
     @property
     def _has_barcode_option(self):
-        return Version(self.version) >= "4.5.3" and Version(self.version) < "4.8.0"
+        return "4.5.3" <= Version(self.version) < "4.8.0"
 
     @property
     def _has_openvino_option(self):
@@ -1006,47 +991,6 @@ class OpenCVConan(ConanFile):
         if self.options.shared:
             self.options.rm_safe("fPIC")
 
-        # TODO: remove contrib option in few months
-        if self.options.contrib != "deprecated":
-            self.output.warning("contrib option is deprecated")
-            if self.options.contrib:
-                # During deprecation period, keep old behavior of contrib=True, which was to enable
-                # all available contribs.
-                ## Filter main module options
-                filtered_options = list(OPENCV_MAIN_MODULES_OPTIONS)
-                ## Filter extra modules not built previously with contrib=True
-                filtered_options.extend(["cvv", "freetype", "hdf", "ovis", "sfm", "viz"])
-                ## Filter extra modules not built previously when some option was disabled
-                if not self.options.with_eigen:
-                    filtered_options.append("alphamat")
-                if not self.options.with_cuda:
-                    filtered_options.extend([
-                        "cudaarithm", "cudabgsegm", "cudacodec", "cudafeatures2d", "cudafilters", "cudaimgproc",
-                        "cudalegacy", "cudaobjdetect", "cudaoptflow", "cudastereo", "cudawarping",
-                    ])
-                for option, values in self._opencv_modules.items():
-                    if option not in filtered_options and not values.get("no_option"):
-                        try:
-                            if hasattr(self.options, option):
-                                setattr(self.options, option, True)
-                        except ConanException:
-                            continue
-
-        # TODO: remove contrib_freetype option in few months
-        if self.options.contrib_freetype != "deprecated":
-            self.output.warning("contrib_freetype option is deprecated, use freetype option instead")
-            self.options.freetype = self.options.contrib_freetype
-
-        # TODO: remove contrib_sfm option in few months
-        if self.options.contrib_sfm != "deprecated":
-            self.output.warning("contrib_sfm option is deprecated, use sfm option instead")
-            self.options.sfm = self.options.contrib_sfm
-
-        # TODO: remove with_ade option in few months
-        if self.options.with_ade != "deprecated":
-            self.output.warning("with_ade option is deprecated, use gapi option instead")
-            self.options.gapi = self.options.with_ade
-
         # Call this first before any further manipulation of options based on other options
         self._solve_internal_dependency_graph(self._opencv_modules)
 
@@ -1126,7 +1070,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_gtk"):
             self.requires("gtk/system")
         if self.options.get_safe("with_qt"):
-            self.requires("qt/5.15.12")
+            self.requires("qt/[>=5.15 <7]")
         if self.options.get_safe("with_wayland"):
             self.requires("xkbcommon/1.6.0")
             self.requires("wayland/1.22.0")
@@ -1148,7 +1092,7 @@ class OpenCVConan(ConanFile):
         if self.options.get_safe("with_openexr"):
             self.requires("openexr/3.2.3")
         if self.options.get_safe("with_tiff"):
-            self.requires("libtiff/4.6.0")
+            self.requires("libtiff/[>=4.5 <5]")
         if self.options.get_safe("with_webp"):
             self.requires("libwebp/1.3.2")
         if self.options.get_safe("with_gdal"):
@@ -1179,13 +1123,6 @@ class OpenCVConan(ConanFile):
         # text module dependencies
         if self.options.get_safe("with_tesseract"):
             self.requires("tesseract/5.3.3")
-
-    def package_id(self):
-        # deprecated options
-        del self.info.options.contrib
-        del self.info.options.contrib_freetype
-        del self.info.options.contrib_sfm
-        del self.info.options.with_ade
 
     def _check_mandatory_options(self, opencv_modules):
         disabled_options = self._get_mandatory_disabled_options(opencv_modules)
@@ -1235,24 +1172,23 @@ class OpenCVConan(ConanFile):
 
     def build_requirements(self):
         if self.options.get_safe("with_protobuf"):
-            if not self._is_legacy_one_profile:
-                self.tool_requires("protobuf/<host_version>")
+            self.tool_requires("protobuf/<host_version>")
         if self.options.get_safe("with_wayland"):
             self.tool_requires("wayland-protocols/1.33")
-            if not self._is_legacy_one_profile:
-                self.tool_requires("wayland/<host_version>")
+            self.tool_requires("wayland/<host_version>")
             if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/2.1.0")
+                self.tool_requires("pkgconf/[>=2.2 <3]")
+        if self.options.get_safe("with_qt"):
+            self.tool_requires("cmake/[>=3.27 <4]")
+            self.tool_requires("qt/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version][0], strip_root=True)
-
         get(self, **self.conan_data["sources"][self.version][1],
             destination=self._contrib_folder, strip_root=True)
-
-    def _patch_sources(self):
         apply_conandata_patches(self)
 
+    def _patch_sources(self):
         # Patches in opencv
         # -----------------
 
@@ -1346,12 +1282,13 @@ class OpenCVConan(ConanFile):
             replace_in_file(self, freetype_cmake, "ocv_check_modules(HARFBUZZ harfbuzz)", "find_package(harfbuzz REQUIRED CONFIG)")
             replace_in_file(self, freetype_cmake, "HARFBUZZ_", "harfbuzz_")
 
-    def generate(self):
-        VirtualBuildEnv(self).generate()
-        if self._is_legacy_one_profile:
-            if self.options.get_safe("with_protobuf") or self.options.get_safe("with_wayland"):
-                VirtualRunEnv(self).generate(scope="build")
+        if self.options.get_safe("with_qt"):
+            # Use proper CMake targets for Qt. Fails due to headers not being found otherwise.
+            replace_in_file(self, os.path.join(self.source_folder, "modules", "highgui", "CMakeLists.txt"),
+                            "${Qt${QT_VERSION_MAJOR}${dt_dep}_LIBRARIES}",
+                            "Qt${QT_VERSION_MAJOR}::${dt_dep}")
 
+    def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["OPENCV_CONFIG_INSTALL_PATH"] = "cmake"
         tc.variables["OPENCV_BIN_INSTALL_PATH"] = "bin"
@@ -1528,7 +1465,7 @@ class OpenCVConan(ConanFile):
         tc.variables["WITH_ADE"] = self.options.gapi
 
         # Extra modules
-        if any([self.options.get_safe(module) for module in OPENCV_EXTRA_MODULES_OPTIONS]) or self.options.with_cuda:
+        if any(self.options.get_safe(module) for module in OPENCV_EXTRA_MODULES_OPTIONS) or self.options.with_cuda:
             tc.variables["OPENCV_EXTRA_MODULES_PATH"] = self._extra_modules_folder.replace("\\", "/")
         tc.variables["BUILD_opencv_cudev"] = self.options.with_cuda
         for module in OPENCV_EXTRA_MODULES_OPTIONS:
@@ -1571,22 +1508,7 @@ class OpenCVConan(ConanFile):
 
         if self.options.get_safe("with_wayland"):
             deps = PkgConfigDeps(self)
-            if self._is_legacy_one_profile:
-                # Manually generate pkgconfig file of wayland-protocols since
-                # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
-                wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
-                wp_version = self.dependencies.build["wayland-protocols"].ref.version
-                wp_pkg_content = textwrap.dedent(f"""\
-                    prefix={wp_prefix}
-                    datarootdir=${{prefix}}/res
-                    pkgdatadir=${{datarootdir}}/wayland-protocols
-                    Name: Wayland Protocols
-                    Description: Wayland protocol files
-                    Version: {wp_version}
-                """)
-                save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
-            else:
-                deps.build_context_activated = ["wayland-protocols"]
+            deps.build_context_activated.append("wayland-protocols")
             deps.generate()
 
     def build(self):
@@ -1603,17 +1525,7 @@ class OpenCVConan(ConanFile):
         if os.path.isfile(os.path.join(self.package_folder, "setup_vars_opencv4.cmd")):
             rename(self, os.path.join(self.package_folder, "setup_vars_opencv4.cmd"),
                          os.path.join(self.package_folder, "res", "setup_vars_opencv4.cmd"))
-
         self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_vars_rel_path))
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        targets_mapping = {self._cmake_target(k): f"opencv::{self._cmake_target(k)}" for k in self._opencv_modules.keys()}
-        if self.options.world:
-            targets_mapping.update({"opencv_world": "opencv::opencv_world"})
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_target_rel_path),
-            targets_mapping,
-        )
 
     def _create_cmake_module_variables(self, module_file):
         """
@@ -1637,24 +1549,9 @@ class OpenCVConan(ConanFile):
         """)
         save(self, module_file, content)
 
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
     @property
     def _module_vars_rel_path(self):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
-
-    @property
-    def _module_target_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     # returns true if GTK2 is selected. To do this, the version option
     # of the gtk/system package is checked or the conan package version
@@ -1676,6 +1573,9 @@ class OpenCVConan(ConanFile):
         return f"opencv_{module}"
 
     def package_info(self):
+        self.cpp_info.set_property("cmake_file_name", "OpenCV")
+        self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
+
         version = self.version.split(".")
         version = "".join(version) if self.settings.os == "Windows" else ""
         debug = "d" if self.settings.build_type == "Debug" and self.settings.os == "Windows" else ""
@@ -1741,34 +1641,9 @@ class OpenCVConan(ConanFile):
                     self.cpp_info.components[conan_component].system_libs = module_system_libs
                     self.cpp_info.components[conan_component].frameworks = module_frameworks
 
-                # TODO: to remove in conan v2 once cmake_find_package* generators removed
-                self.cpp_info.components[conan_component].names["cmake_find_package"] = cmake_target
-                self.cpp_info.components[conan_component].names["cmake_find_package_multi"] = cmake_target
-                self.cpp_info.components[conan_component].build_modules["cmake_find_package"] = [self._module_vars_rel_path, self._module_target_rel_path]
-                self.cpp_info.components[conan_component].build_modules["cmake_find_package_multi"] = [self._module_vars_rel_path, self._module_target_rel_path]
-                if module != cmake_target:
-                    conan_component_alias = conan_component + "_alias"
-                    self.cpp_info.components[conan_component_alias].names["cmake_find_package"] = module
-                    self.cpp_info.components[conan_component_alias].names["cmake_find_package_multi"] = module
-                    self.cpp_info.components[conan_component_alias].requires = [conan_component]
-                    self.cpp_info.components[conan_component_alias].bindirs = []
-                    self.cpp_info.components[conan_component_alias].includedirs = []
-                    self.cpp_info.components[conan_component_alias].libdirs = []
-
             if self.options.world:
                 self.cpp_info.components["opencv_world"].requires = list(world_requires - world_requires_exclude)
                 self.cpp_info.components["opencv_world"].system_libs = list(world_system_libs)
                 self.cpp_info.components["opencv_world"].frameworks = list(world_frameworks)
 
-                # TODO: to remove in conan v2 once cmake_find_package* generators removed
-                self.cpp_info.components["opencv_world"].build_modules["cmake_find_package"] = [self._module_vars_rel_path, self._module_target_rel_path]
-                self.cpp_info.components["opencv_world"].build_modules["cmake_find_package_multi"] = [self._module_vars_rel_path, self._module_target_rel_path]
-
-        self.cpp_info.set_property("cmake_file_name", "OpenCV")
-        self.cpp_info.set_property("cmake_build_modules", [self._module_vars_rel_path])
-
         add_components(self._opencv_modules)
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "OpenCV"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCV"
