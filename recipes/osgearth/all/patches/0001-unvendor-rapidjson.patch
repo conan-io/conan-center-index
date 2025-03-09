@@ -1,0 +1,41 @@
+diff --git a/src/osgEarthDrivers/gltf/CMakeLists.txt b/src/osgEarthDrivers/gltf/CMakeLists.txt
+--- a/src/osgEarthDrivers/gltf/CMakeLists.txt
++++ b/src/osgEarthDrivers/gltf/CMakeLists.txt
+@@ -14,9 +14,10 @@
+     HEADERS ${TARGET_H}
+     SOURCES ${TARGET_SRC} )
+     
+-include_directories(
+-    ${OSGEARTH_EMBEDDED_THIRD_PARTY_DIR}/tinygltf 
+-    ${OSGEARTH_EMBEDDED_THIRD_PARTY_DIR}/rapidjson/include/rapidjson )
++include_directories(${OSGEARTH_EMBEDDED_THIRD_PARTY_DIR}/tinygltf)
++
++find_package(RapidJSON REQUIRED CONFIG)
++target_link_libraries(osgdb_gltf PRIVATE rapidjson)
+ 
+ if (draco_FOUND)
+     #include_directories(${draco_INCLUDE_DIRS})
+diff --git a/src/third_party/tinygltf/tiny_gltf.h b/src/third_party/tinygltf/tiny_gltf.h
+index 9bf35a594..37aba341f 100644
+--- a/src/third_party/tinygltf/tiny_gltf.h
++++ b/src/third_party/tinygltf/tiny_gltf.h
+@@ -1498,13 +1498,13 @@ class TinyGLTF {
+ 
+ #ifndef TINYGLTF_NO_INCLUDE_JSON
+ #ifndef TINYGLTF_USE_RAPIDJSON
+-#include "json.hpp"
++#include "nlohmann/json.hpp"
+ #else
+-#include "rapidjson.h"
+-#include "document.h"
+-#include "prettywriter.h"
+-#include "stringbuffer.h"
+-#include "writer.h"
++#include "rapidjson/rapidjson.h"
++#include "rapidjson/document.h"
++#include "rapidjson/prettywriter.h"
++#include "rapidjson/stringbuffer.h"
++#include "rapidjson/writer.h"
+ #endif
+ #endif
+ 
