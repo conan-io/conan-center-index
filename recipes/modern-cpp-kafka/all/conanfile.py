@@ -37,7 +37,7 @@ class ModernCppKafkaConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("librdkafka/2.3.0")
+        self.requires("librdkafka/2.4.0")
 
     def package_id(self):
         self.info.clear()
