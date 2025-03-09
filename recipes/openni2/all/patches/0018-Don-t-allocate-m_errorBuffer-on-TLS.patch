@@ -1,0 +1,102 @@
+From: Jochen Sprickerhof <git@jochen.sprickerhof.de>
+Date: Sun, 1 Dec 2019 12:07:52 +0100
+Subject: Don't allocate m_errorBuffer on TLS
+
+As done for WIN32 already.
+
+As explained in: https://bugzilla.redhat.com/show_bug.cgi?id=1722181
+---
+ ThirdParty/PSCommon/XnLib/Include/XnErrorLogger.h         |  6 ------
+ ThirdParty/PSCommon/XnLib/Source/Linux/XnLinuxThreads.cpp |  5 +++++
+ ThirdParty/PSCommon/XnLib/Source/XnErrorLogger.cpp        | 14 --------------
+ 3 files changed, 5 insertions(+), 20 deletions(-)
+
+diff --git a/ThirdParty/PSCommon/XnLib/Include/XnErrorLogger.h b/ThirdParty/PSCommon/XnLib/Include/XnErrorLogger.h
+index d0bca08..dbba5bd 100644
+--- a/ThirdParty/PSCommon/XnLib/Include/XnErrorLogger.h
++++ b/ThirdParty/PSCommon/XnLib/Include/XnErrorLogger.h
+@@ -44,7 +44,6 @@ public:
+ protected:
+ 	static const int ms_bufferSize = 1024;
+ 
+-#if XN_PLATFORM == XN_PLATFORM_WIN32
+ 	struct SingleBuffer
+ 	{
+ 		SingleBuffer() : m_currentEnd(0)
+@@ -57,11 +56,6 @@ protected:
+ 
+ 	xnl::Hash<XN_THREAD_ID, SingleBuffer*> m_buffers;
+ 	xnl::CriticalSection m_bufferLock;
+-#else
+-	typedef ErrorLogger SingleBuffer;
+-	static XN_THREAD_STATIC char m_errorBuffer[ms_bufferSize];
+-	static XN_THREAD_STATIC int m_currentEnd;
+-#endif
+ 	SingleBuffer* getBuffer();
+ private:
+ 	ErrorLogger();
+diff --git a/ThirdParty/PSCommon/XnLib/Source/Linux/XnLinuxThreads.cpp b/ThirdParty/PSCommon/XnLib/Source/Linux/XnLinuxThreads.cpp
+index f4d2e8b..752543b 100644
+--- a/ThirdParty/PSCommon/XnLib/Source/Linux/XnLinuxThreads.cpp
++++ b/ThirdParty/PSCommon/XnLib/Source/Linux/XnLinuxThreads.cpp
+@@ -26,6 +26,7 @@
+ #include <sys/time.h>
+ #include <sys/resource.h>
+ #include <XnLog.h>
++#include <signal.h>
+ 
+ //---------------------------------------------------------------------------
+ // Code
+@@ -202,3 +203,7 @@ XN_C_API XnStatus xnOSGetCurrentThreadID(XN_THREAD_ID* pThreadID)
+ 	return (XN_STATUS_OK);
+ }
+ 
++XN_C_API XnBool xnOSDoesThreadExistByID(XN_THREAD_ID threadId)
++{
++  return pthread_kill(threadId, 0) != ESRCH;
++}
+diff --git a/ThirdParty/PSCommon/XnLib/Source/XnErrorLogger.cpp b/ThirdParty/PSCommon/XnLib/Source/XnErrorLogger.cpp
+index 81c6b22..0badca4 100644
+--- a/ThirdParty/PSCommon/XnLib/Source/XnErrorLogger.cpp
++++ b/ThirdParty/PSCommon/XnLib/Source/XnErrorLogger.cpp
+@@ -22,11 +22,6 @@
+ 
+ namespace xnl
+ {
+-#if XN_PLATFORM != XN_PLATFORM_WIN32
+-	XN_THREAD_STATIC char ErrorLogger::m_errorBuffer[ms_bufferSize] = "";
+-	XN_THREAD_STATIC int ErrorLogger::m_currentEnd = 0;
+-#endif
+-
+ 	ErrorLogger& ErrorLogger::GetInstance()
+ 	{
+ 		static ErrorLogger el;
+@@ -88,17 +83,14 @@ namespace xnl
+ 
+ 	ErrorLogger::~ErrorLogger()
+ 	{
+-#if XN_PLATFORM == XN_PLATFORM_WIN32
+ 		while (!m_buffers.IsEmpty())
+ 		{
+ 			SingleBuffer* pBuffer = m_buffers.Begin()->Value();
+ 			XN_DELETE(pBuffer);
+ 			m_buffers.Remove(m_buffers.Begin());
+ 		}
+-#endif
+ 	}
+ 
+-#if XN_PLATFORM == XN_PLATFORM_WIN32
+ 	ErrorLogger::SingleBuffer* ErrorLogger::getBuffer()
+ 	{
+ 		m_bufferLock.Lock();
+@@ -139,10 +131,4 @@ namespace xnl
+ 		m_bufferLock.Unlock();
+ 		return pNewBuffer;
+ 	}
+-#else
+-	ErrorLogger::SingleBuffer* ErrorLogger::getBuffer()
+-	{
+-		return this;
+-	}
+-#endif
+ }
