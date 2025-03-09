@@ -1,0 +1,153 @@
+adder:
+  requires:
+    - gstreamer-audio-1.0
+    - gst-orc::gst-orc
+alsa:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-tag-1.0
+    - libalsa::libalsa
+app:
+  requires:
+    - gstreamer-app-1.0
+    - gstreamer-tag-1.0
+audioconvert:
+  requires:
+    - gstreamer-audio-1.0
+audiomixer:
+  requires:
+    - gstreamer-audio-1.0
+    - gst-orc::gst-orc
+audiorate:
+  requires:
+    - gstreamer-audio-1.0
+audioresample:
+  requires:
+    - gstreamer-audio-1.0
+audiotestsrc:
+  requires:
+    - gstreamer-audio-1.0
+basedebug:
+  options:
+    - debugutils
+  requires:
+    - gstreamer-video-1.0
+#cdparanoia:
+#  requires:
+#    - gstreamer-audio-1.0
+#    - cdparanoia::cdparanoia
+compositor:
+  requires:
+    - gstreamer-video-1.0
+    - gst-orc::gst-orc
+dsd:
+  requires:
+    - gstreamer-audio-1.0
+encoding:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-pbutils-1.0
+gio:
+  requires:
+    - glib::gio-2.0
+#ivorbisdec:
+#  options:
+#    - tremor
+#  requires:
+#    - gstreamer-audio-1.0
+#    - gstreamer-tag-1.0
+#    - tremor::tremor
+#libvisual:
+#  requires:
+#    - gstreamer-audio-1.0
+#    - gstreamer-video-1.0
+#    - gstreamer-pbutils-1.0
+#    - libvisual::libvisual
+ogg:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-pbutils-1.0
+    - gstreamer-tag-1.0
+    - gstreamer-riff-1.0
+    - ogg::ogg
+opus:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-pbutils-1.0
+    - gstreamer-tag-1.0
+    - opus::opus
+overlaycomposition:
+  requires:
+    - gstreamer-video-1.0
+pango:
+  requires:
+    - gstreamer-video-1.0
+    - pango::pangocairo
+pbtypes:
+  requires:
+    - gstreamer-video-1.0
+playback:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+    - gstreamer-pbutils-1.0
+    - gstreamer-tag-1.0
+rawparse:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-video-1.0
+subparse:
+  requires: [ ]
+tcp:
+  requires:
+    - gstreamer-net-1.0
+    - glib::gio-2.0
+theora:
+  requires:
+    - gstreamer-video-1.0
+    - gstreamer-tag-1.0
+    - theora::theoraenc
+    - theora::theoradec
+typefindfunctions:
+  options:
+    - gio-typefinder
+  requires:
+    - gstreamer-pbutils-1.0
+    - glib::gio-2.0
+videoconvertscale:
+  requires:
+    - gstreamer-video-1.0
+videorate:
+  requires:
+    - gstreamer-video-1.0
+videotestsrc:
+  requires:
+    - gstreamer-video-1.0
+    - gst-orc::gst-orc
+volume:
+  requires:
+    - gstreamer-audio-1.0
+    - gst-orc::gst-orc
+vorbis:
+  requires:
+    - gstreamer-audio-1.0
+    - gstreamer-tag-1.0
+    - vorbis::vorbismain
+    - vorbis::vorbisenc
+ximagesink:
+  options:
+    - with_xorg
+  requires:
+    - gstreamer-video-1.0
+    - xorg::x11
+    - xorg::xext
+    - xorg::xi
+xvimagesink:
+  options:
+    - with_xorg
+  requires:
+    - gstreamer-video-1.0
+    - xorg::x11
+    - xorg::xext
+    - xorg::xv
+    - xorg::xi
