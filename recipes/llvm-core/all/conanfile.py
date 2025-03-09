@@ -3,6 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import Environment
 from conan.tools.files import (
     apply_conandata_patches,
     collect_libs,
@@ -15,17 +16,17 @@ from conan.tools.files import (
     rename,
     replace_in_file
 )
+from conan.tools.gnu import GnuToolchain
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag
 from conan.tools.scm import Version
 
 import json
 import os
-from pathlib import Path
 import re
 import textwrap
+from pathlib import Path
 
-
-required_conan_version = ">=1.62.0"
+required_conan_version = ">=2.4"
 
 # LLVM's default config is to enable all targets, but end users can significantly reduce
 # build times for the package by specifying only the targets they need as a
@@ -183,14 +184,6 @@ class LLVMCoreConan(ConanFile):
         if self.options.exceptions and not self.options.rtti:
             raise ConanInvalidConfiguration("Cannot enable exceptions without rtti support")
 
-        if cross_building(self):
-            # FIXME support cross compilation
-            #  For Cross Building, LLVM builds a "native" toolchain in a subdirectory of the main build directory.
-            #  This subdirectory would need to have the conan cmake configuration files for the build platform
-            #  installed into it for a cross build to be successful.
-            #  see also https://llvm.org/docs/HowToCrossCompileLLVM.html
-            raise ConanInvalidConfiguration("Cross compilation is not supported. Contributions are welcome!")
-
     def validate_build(self):
         if os.getenv("CONAN_CENTER_BUILD_SERVICE") and self.settings.build_type == "Debug":
             if self.settings.os == "Linux":
@@ -287,6 +280,25 @@ class LLVMCoreConan(ConanFile):
             # Workaround for: https://github.com/conan-io/conan/issues/13560
             libdirs_host = [l for dependency in self.dependencies.host.values() for l in dependency.cpp_info.aggregated_components().libdirs]
             tc.variables["CMAKE_BUILD_RPATH"] = ";".join(libdirs_host)
+
+        if cross_building(self):
+            gtc = GnuToolchain(self)
+            gtc_vars = gtc.extra_env.vars(self)
+            tc.variables["LLVM_HOST_TRIPLE"] = gtc.triplets_info["host"]["triplet"]
+            # The native build utilities don't need any external dependencies.
+            tc.variables["CROSS_TOOLCHAIN_FLAGS_NATIVE"] = ";".join([
+                "-DLLVM_ENABLE_LIBEDIT=FALSE",
+                "-DLLVM_ENABLE_Z3_SOLVER=FALSE",
+                "-DLLVM_ENABLE_FFI=FALSE",
+                "-DLLVM_ENABLE_ZLIB=FALSE",
+                "-DLLVM_ENABLE_LIBXML2=FALSE",
+                "-DLLVM_ENABLE_TERMINFO=FALSE",
+            ])
+            # CC/CXX env vars are used by LLVM to build native build tools
+            env = Environment()
+            env.define_path("CC", gtc_vars["CC_FOR_BUILD"])
+            env.define_path("CXX", gtc_vars["CXX_FOR_BUILD"])
+            env.vars(self).save_script("native_compiler_env")
 
         tc.cache_variables.update(cmake_variables)
         tc.generate()
