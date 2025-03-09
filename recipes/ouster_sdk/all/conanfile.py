@@ -80,14 +80,19 @@ class OusterSdkConan(ConanFile):
         self.requires("eigen/3.4.0", transitive_headers=True)
         # Used in ouster/sensor_http.h
         self.requires("jsoncpp/1.9.5", transitive_headers=True, transitive_libs=True)
-        self.requires("spdlog/1.13.0")
+        self.requires("spdlog/[>=1.12.0 <1.15]")
         self.requires("fmt/10.2.1")
         self.requires("libcurl/[>=7.78 <9]")
         # Replaces vendored optional-lite
         self.requires("optional-lite/3.6.0", transitive_headers=True)
 
         if self.options.build_pcap:
-            self.requires("libtins/4.5")
+            # transitive-libs: when building the shared library, the `libtins` runtime dependency
+            # is not encoded in the binaries (as it is a private dependency of the static library that
+            # is linked into a shared library). This is a workaround to ensure that the shared library
+            # has the necessary runtime dependencies.
+            transitive_libtins = None if Version(self.version) < "0.13.1" else True
+            self.requires("libtins/4.5", transitive_libs=transitive_libtins)
 
         if self.options.build_osf:
             # Used in fb_generated/*.h
