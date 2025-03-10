@@ -1,10 +1,14 @@
-import configparser
 import glob
 import os
 import platform
 import textwrap
+from collections import defaultdict
+from functools import lru_cache
+from pathlib import Path
 
+import yaml
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, check_min_cppstd, default_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -13,7 +17,6 @@ from conan.tools.files import copy, get, replace_in_file, apply_conandata_patche
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.microsoft import msvc_runtime_flag, is_msvc
 from conan.tools.scm import Version
-from conan.errors import ConanException, ConanInvalidConfiguration
 
 required_conan_version = ">=2.0"
 
@@ -80,9 +83,6 @@ class QtConan(ConanFile):
     options.update({module: [True, False] for module in _submodules})
     options.update({f"{status}_modules": [True, False] for status in _module_statuses})
 
-    # this significantly speeds up windows builds
-    no_copy_source = True
-
     default_options = {
         "shared": False,
         "opengl": "desktop",
@@ -128,40 +128,43 @@ class QtConan(ConanFile):
 
     short_paths = True
 
-    _submodules_tree = None
+    @staticmethod
+    def _parse_gitmodules_file(qtmodules_path):
+        """Parse a .gitmodules file as a dict."""
+        submodules = defaultdict(dict)
+        current_module = None
+        for line in Path(qtmodules_path).read_text().splitlines():
+            if line.startswith("[submodule"):
+                current_module = line.split('"')[1]
+            elif "=" in line:
+                key, value = line.split("=", 1)
+                submodules[current_module][key.strip()] = value.strip()
+        return dict(submodules)
 
     @property
-    def _get_module_tree(self):
-        if self._submodules_tree:
-            return self._submodules_tree
-        config = configparser.ConfigParser()
-        config.read(os.path.join(self.recipe_folder, f"qtmodules{self.version}.conf"))
-        self._submodules_tree = {}
-        assert config.sections(), f"no qtmodules.conf file for version {self.version}"
-        for s in config.sections():
-            section = str(s)
-            assert section.startswith("submodule ")
-            assert section.count('"') == 2
-            modulename = section[section.find('"') + 1: section.rfind('"')]
-            if modulename in ["qtbase", "qtqa", "qtrepotools"]:
+    @lru_cache()
+    def _qtmodules(self):
+        """
+        Returns the contents of qtmodules/<version>.conf file as a dict.
+        Modules that are always required or marked as 'ignored' are excluded.
+        """
+        modules = self._parse_gitmodules_file(Path(self.recipe_folder, "qtmodules", f"{self.version}.conf"))
+        for module, info in list(modules.items()):
+            if info["status"] == "ignore" or module in ["qtbase", "qtqa", "qtrepotools"]:
+                del modules[module]
                 continue
-            status = str(config.get(section, "status"))
-            if status not in ["obsolete", "ignore", "additionalLibrary"]:
-                if status not in self._module_statuses:
-                    raise ConanException(f"module {modulename} has status {status} which is not in self._module_statuses {self._module_statuses}")
-                assert modulename in self._submodules, f"module {modulename} not in self._submodules"
-                self._submodules_tree[modulename] = {"status": status,
-                                "path": str(config.get(section, "path")), "depends": []}
-                if config.has_option(section, "depends"):
-                    self._submodules_tree[modulename]["depends"] = [str(i) for i in config.get(section, "depends").split()]
+            assert info["status"] in self._module_statuses, f"module {module} has status {info['status']} which is not in self._module_statuses {self._module_statuses}"
+            assert module in self._submodules, f"module {module} not in self._submodules"
+            info["depends"] = info.get("depends", "").split()
+        return modules
 
-        return self._submodules_tree
+    def export(self):
+        copy(self, f"{self.version}.conf", os.path.join(self.recipe_folder, "qtmodules"), os.path.join(self.export_folder, "qtmodules"))
+        copy(self, f"{self.version}.yml", os.path.join(self.recipe_folder, "sources"), os.path.join(self.export_folder, "sources"))
+        copy(self, "mirrors.txt", self.recipe_folder, self.export_folder)
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def export(self):
-        copy(self, f"qtmodules{self.version}.conf", self.recipe_folder, self.export_folder)
 
     def config_options(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
@@ -179,7 +182,7 @@ class QtConan(ConanFile):
             self.options.qtwayland = False
 
         for submodule in self._submodules:
-            if submodule not in self._get_module_tree:
+            if submodule not in self._qtmodules:
                 self.output.debug(f"Qt6: Removing {submodule} option as it is not in the module tree for this version, or is marked as obsolete or ignore")
                 self.options.rm_safe(submodule)
 
@@ -205,8 +208,8 @@ class QtConan(ConanFile):
         # Note that at this point, the submodule options dont have a value unless one is given externally
         # to the recipe (e.g. via the command line, a profile, or a consumer)
         requested_modules = set([module for module in self._submodules if self.options.get_safe(module)])
-        for module in [m for m in self._submodules if m in self._get_module_tree]:
-            status = self._get_module_tree[module]['status']
+        for module in [m for m in self._submodules if m in self._qtmodules]:
+            status = self._qtmodules[module]['status']
             is_disabled = self.options.get_safe(module) == False
             if self.options.get_safe(f"{status}_modules"):
                 if not is_disabled:
@@ -219,7 +222,7 @@ class QtConan(ConanFile):
 
         required_modules =  {}
         for module in requested_modules:
-            deps = self._get_module_tree[module]["depends"]
+            deps = self._qtmodules[module]["depends"]
             for dep in deps:
                 required_modules.setdefault(dep,[]).append(module)
 
@@ -503,7 +506,7 @@ class QtConan(ConanFile):
             tc.variables["CMAKE_CONFIGURATION_TYPES"] = "Release;Debug"
         tc.variables["FEATURE_optimize_size"] = ("ON" if self.settings.build_type == "MinSizeRel" else "OFF")
 
-        for module in self._get_module_tree:
+        for module in self._qtmodules:
             tc.variables[f"BUILD_{module}"] = ("ON" if getattr(self.options, module) else "OFF")
         tc.variables["BUILD_qtqa"] = "OFF"
         tc.variables["BUILD_qtrepotools"] = "OFF"
@@ -666,21 +669,79 @@ class QtConan(ConanFile):
             elif self.info.settings.compiler == "msvc":
                 self.info.settings.compiler.runtime_type = "Release/Debug"
 
+
     def source(self):
+        pass
+
+    def _get_download_info(self):
+        """
+        Generate the equivalent of self.conan_data["sources"][self.version] for each enabled module,
+        based on sources/<version>.yml and mirrors.txt.
+        """
+        mirrors = Path(self.recipe_folder, "mirrors.txt").read_text().strip().split()
+        archive_info = yaml.safe_load(Path(self.recipe_folder, "sources", f"{self.version}.yml").read_text())
+        hashes = archive_info["hashes"]
+        # Modules that are not available as source archives and must be downloaded from git instead.
+        git_only = archive_info["git_only"]
+        # Modules that are no longer stand-alone.
+        merged_modules = {"qtquickcontrols2": "qtdeclarative"}
+
+        def _get_module_urls(component):
+            version = Version(self.version)
+            if component in git_only:
+                return [f"https://github.com/qt/{component}/archive/refs/tags/v{version}.tar.gz"]
+            return [f"{base_url}qt/{version.major}.{version.minor}/{version}/submodules/{component}-everywhere-src-{version}.tar.xz" for base_url in mirrors]
+
+        def _get_info(component):
+            return {
+                "url": _get_module_urls(component),
+                "sha256": hashes[component],
+            }
+
+        download_info = {
+            "root": _get_info("qt5"),
+            "qtbase": _get_info("qtbase"),
+        }
+        for module in self._qtmodules:
+            if getattr(self.options, module):
+                module = merged_modules.get(module, module)
+                download_info[module] = _get_info(module)
+        return download_info
+
+    def _get_sources(self):
+        """
+        Equivalent to source(), but downloads only the relevant source archives based on the configuration.
+        """
         destination = self.source_folder
         if platform.system() == "Windows":
             # Don't use os.path.join, or it removes the \\?\ prefix, which enables long paths
             destination = rf"\\?\{self.source_folder}"
-        get(self, **self.conan_data["sources"][self.version],
-                  strip_root=True, destination=destination)
+        download_info = self._get_download_info()
+        get(self, **download_info.pop("root"), strip_root=True, destination=destination)
+        for component, info in download_info.items():
+            self.output.info(f"Fetching {component}...")
+            get(self, **info, strip_root=True, destination=os.path.join(destination, component))
+        # Remove empty subdirs
+        for path in Path(self.source_folder).iterdir():
+            if path.is_dir() and not list(path.iterdir()):
+                path.rmdir()
 
-        # patching in source method because of no_copy_source attribute
+    def _patch_sources(self):
+        # Exclude patches that are for modules that are not enabled
+        patches = []
+        for patch in self.conan_data["patches"][self.version]:
+            base_path = patch.get("base_path")
+            if base_path is None or Path(self.source_folder, patch["base_path"]).is_dir():
+                patches.append(patch)
+        self.conan_data["patches"][self.version] = patches
         apply_conandata_patches(self)
-        for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
-            replace_in_file(self, os.path.join(self.source_folder, "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
-                                  "  if (enable_precompiled_headers) {\n    if (is_win) {",
-                                  "  if (enable_precompiled_headers) {\n    if (false) {"
-                                  )
+
+        if self.options.get_safe("qtwebengine"):
+            for f in ["renderer", os.path.join("renderer", "core"), os.path.join("renderer", "platform")]:
+                replace_in_file(self, os.path.join(self.source_folder, "qtwebengine", "src", "3rdparty", "chromium", "third_party", "blink", f, "BUILD.gn"),
+                                      "  if (enable_precompiled_headers) {\n    if (is_win) {",
+                                      "  if (enable_precompiled_headers) {\n    if (false) {"
+                                      )
 
         for f in ["FindPostgreSQL.cmake"]:
             file = os.path.join(self.source_folder, "qtbase", "cmake", f)
@@ -804,6 +865,8 @@ class QtConan(ConanFile):
         return None
 
     def build(self):
+        self._get_sources()
+        self._patch_sources()
         if self.settings.os == "Macos":
             save(self, ".qmake.stash", "")
             save(self, ".qmake.super", "")
@@ -830,7 +893,7 @@ class QtConan(ConanFile):
         cmake.install()
         copy(self, "*LICENSE*", self.source_folder, os.path.join(self.package_folder, "licenses"),
              excludes="qtbase/examples/*")
-        for module in self._get_module_tree:
+        for module in self._qtmodules:
             if not getattr(self.options, module):
                 rmdir(self, os.path.join(self.package_folder, "licenses", module))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
