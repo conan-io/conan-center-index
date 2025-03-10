@@ -1,0 +1,122 @@
+diff --git a/core/lib/FileHandling/Binex/BinexFilterOperators.hpp b/core/lib/FileHandling/Binex/BinexFilterOperators.hpp
+--- a/core/lib/FileHandling/Binex/BinexFilterOperators.hpp	(revision c4b1b21124a093a1ee8f19c09b9d258d4a6d12aa)
++++ b/core/lib/FileHandling/Binex/BinexFilterOperators.hpp	(revision 4d5109c4b0be93be0ca906e25e9a0275d308f73e)
+@@ -47,7 +47,7 @@
+ #include "FileFilter.hpp"
+ #include "BinexData.hpp"
+ 
+-#include <set>
++#include <functional>
+ 
+ namespace gnsstk
+ {
+diff --git a/core/lib/FileHandling/RINEX/RinexMetFilterOperators.hpp b/core/lib/FileHandling/RINEX/RinexMetFilterOperators.hpp
+--- a/core/lib/FileHandling/RINEX/RinexMetFilterOperators.hpp	(revision c4b1b21124a093a1ee8f19c09b9d258d4a6d12aa)
++++ b/core/lib/FileHandling/RINEX/RinexMetFilterOperators.hpp	(revision 4d5109c4b0be93be0ca906e25e9a0275d308f73e)
+@@ -44,6 +44,7 @@
+ #ifndef GNSSTK_RINEXMETFILTEROPERATORS_HPP
+ #define GNSSTK_RINEXMETFILTEROPERATORS_HPP
+ 
++#include <functional>
+ #include <set>
+ 
+ #include "CivilTime.hpp"
+diff --git a/core/lib/FileHandling/RINEX/RinexNavFilterOperators.hpp b/core/lib/FileHandling/RINEX/RinexNavFilterOperators.hpp
+--- a/core/lib/FileHandling/RINEX/RinexNavFilterOperators.hpp	(revision c4b1b21124a093a1ee8f19c09b9d258d4a6d12aa)
++++ b/core/lib/FileHandling/RINEX/RinexNavFilterOperators.hpp	(revision 4d5109c4b0be93be0ca906e25e9a0275d308f73e)
+@@ -51,6 +51,7 @@
+ #include "RinexNavHeader.hpp"
+ #include "GPSWeekSecond.hpp"
+ 
++#include <functional>
+ #include <set>
+ 
+ namespace gnsstk
+diff --git a/core/lib/FileHandling/RINEX/RinexObsFilterOperators.hpp b/core/lib/FileHandling/RINEX/RinexObsFilterOperators.hpp
+--- a/core/lib/FileHandling/RINEX/RinexObsFilterOperators.hpp	(revision c4b1b21124a093a1ee8f19c09b9d258d4a6d12aa)
++++ b/core/lib/FileHandling/RINEX/RinexObsFilterOperators.hpp	(revision 4d5109c4b0be93be0ca906e25e9a0275d308f73e)
+@@ -50,6 +50,7 @@
+ 
+ #include <set>
+ #include <algorithm>
++#include <functional>
+ 
+ namespace gnsstk
+ {
+diff --git a/core/lib/FileHandling/RINEX3/Rinex3NavFilterOperators.hpp b/core/lib/FileHandling/RINEX3/Rinex3NavFilterOperators.hpp
+--- a/core/lib/FileHandling/RINEX3/Rinex3NavFilterOperators.hpp	(revision c4b1b21124a093a1ee8f19c09b9d258d4a6d12aa)
++++ b/core/lib/FileHandling/RINEX3/Rinex3NavFilterOperators.hpp	(revision 4d5109c4b0be93be0ca906e25e9a0275d308f73e)
+@@ -47,6 +47,7 @@
+ #include <set>
+ #include <list>
+ #include <string>
++#include <functional>
+ 
+ #include "FileFilter.hpp"
+ #include "Rinex3NavData.hpp"
+diff --git a/core/lib/FileHandling/RINEX3/Rinex3ObsFilterOperators.hpp b/core/lib/FileHandling/RINEX3/Rinex3ObsFilterOperators.hpp
+--- a/core/lib/FileHandling/RINEX3/Rinex3ObsFilterOperators.hpp	(revision c4b1b21124a093a1ee8f19c09b9d258d4a6d12aa)
++++ b/core/lib/FileHandling/RINEX3/Rinex3ObsFilterOperators.hpp	(revision 4d5109c4b0be93be0ca906e25e9a0275d308f73e)
+@@ -46,6 +46,7 @@
+ 
+ #include <set>
+ #include <algorithm>
++#include <functional>
+ 
+ #include "FileFilter.hpp"
+ #include "Rinex3ObsData.hpp"
+diff --git a/core/lib/NavFilter/CNavFilterData.hpp b/core/lib/NavFilter/CNavFilterData.hpp
+--- a/core/lib/NavFilter/CNavFilterData.hpp	(revision c4b1b21124a093a1ee8f19c09b9d258d4a6d12aa)
++++ b/core/lib/NavFilter/CNavFilterData.hpp	(revision 4d5109c4b0be93be0ca906e25e9a0275d308f73e)
+@@ -40,6 +40,7 @@
+ #define CNAVFILTERDATA_HPP
+ 
+ #include <stdint.h>
++#include <functional>
+ #include "NavFilterKey.hpp"
+ #include "PackedNavBits.hpp"
+ 
+diff --git a/core/lib/NavFilter/LNavEphMaker.hpp b/core/lib/NavFilter/LNavEphMaker.hpp
+--- a/core/lib/NavFilter/LNavEphMaker.hpp	(revision c4b1b21124a093a1ee8f19c09b9d258d4a6d12aa)
++++ b/core/lib/NavFilter/LNavEphMaker.hpp	(revision 4d5109c4b0be93be0ca906e25e9a0275d308f73e)
+@@ -39,6 +39,7 @@
+ #ifndef LNAVEPHMAKER_HPP
+ #define LNAVEPHMAKER_HPP
+ 
++#include <functional>
+ #include "NavFilter.hpp"
+ #include "LNavFilterData.hpp"
+ 
+diff --git a/core/lib/NavFilter/LNavFilterData.hpp b/core/lib/NavFilter/LNavFilterData.hpp
+--- a/core/lib/NavFilter/LNavFilterData.hpp	(revision c4b1b21124a093a1ee8f19c09b9d258d4a6d12aa)
++++ b/core/lib/NavFilter/LNavFilterData.hpp	(revision 4d5109c4b0be93be0ca906e25e9a0275d308f73e)
+@@ -40,6 +40,7 @@
+ #define LNAVFILTERDATA_HPP
+ 
+ #include <stdint.h>
++#include <functional>
+ #include "NavFilterKey.hpp"
+ 
+ namespace gnsstk
+diff --git a/core/lib/NavFilter/LNavOrderFilter.hpp b/core/lib/NavFilter/LNavOrderFilter.hpp
+--- a/core/lib/NavFilter/LNavOrderFilter.hpp	(revision c4b1b21124a093a1ee8f19c09b9d258d4a6d12aa)
++++ b/core/lib/NavFilter/LNavOrderFilter.hpp	(revision 4d5109c4b0be93be0ca906e25e9a0275d308f73e)
+@@ -39,6 +39,7 @@
+ #ifndef LNAVORDERFILTER_HPP
+ #define LNAVORDERFILTER_HPP
+ 
++#include <functional>
+ #include "NavFilterMgr.hpp"
+ #include "NavFilter.hpp"
+ #include "LNavFilterData.hpp"
+diff --git a/core/lib/NavFilter/NavOrderFilter.hpp b/core/lib/NavFilter/NavOrderFilter.hpp
+--- a/core/lib/NavFilter/NavOrderFilter.hpp	(revision c4b1b21124a093a1ee8f19c09b9d258d4a6d12aa)
++++ b/core/lib/NavFilter/NavOrderFilter.hpp	(revision 4d5109c4b0be93be0ca906e25e9a0275d308f73e)
+@@ -39,6 +39,7 @@
+ #ifndef NAVORDERFILTER_HPP
+ #define NAVORDERFILTER_HPP
+ 
++#include <functional>
+ #include "NavFilterMgr.hpp"
+ #include "NavFilter.hpp"
+ #include "NavFilterKey.hpp"
