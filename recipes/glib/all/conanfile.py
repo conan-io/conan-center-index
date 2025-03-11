@@ -51,6 +51,7 @@ class GLibConan(ConanFile):
         if self.settings.os != "Linux":
             del self.options.with_mount
             del self.options.with_selinux
+        self.options.with_elf = self.settings.os == "Linux"
         if is_msvc(self):
             del self.options.with_elf
 
@@ -71,7 +72,7 @@ class GLibConan(ConanFile):
         self.requires("libffi/3.4.4")
         self.requires("pcre2/10.42")
         if self.options.get_safe("with_elf"):
-            self.requires("libelf/0.8.13")
+            self.requires("elfutils/0.190")
         if self.options.get_safe("with_mount"):
             self.requires("libmount/2.39.2")
         if self.options.get_safe("with_selinux"):
