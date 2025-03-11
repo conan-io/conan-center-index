@@ -32,7 +32,7 @@ class BackwardCppConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "stack_walking": "unwind",
-        "stack_details": "dwarf",
+        "stack_details": "dw",
     }
 
     @property
@@ -80,9 +80,6 @@ class BackwardCppConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             if self._has_stack_walking("libunwind"):
                 self.requires("libunwind/1.7.2", transitive_headers=True)
-            if self._has_stack_details("dwarf"):
-                self.requires("libdwarf/20191104", transitive_headers=True, transitive_libs=True)
-                self.requires("libelf/0.8.13")
             if self._has_stack_details("dw"):
                 self.requires("elfutils/0.190", transitive_headers=True)
             if self._has_stack_details("bfd"):
@@ -103,6 +100,10 @@ class BackwardCppConan(ConanFile):
                 raise ConanInvalidConfiguration("Support for Apple Silicon is only available as of 1.6.")
             if not self._has_stack_details("backtrace_symbol"):
                 raise ConanInvalidConfiguration("Stack details other than backtrace_symbol are not supported on macOS.")
+        if self.options.stack_details == "dwarf":
+            # INFO: Old libdwarf version is no longer in CCI. The libdwarf/20191104 in ConanCenter is linked to libelf (deprecated).
+            # See https://github.com/bombela/backward-cpp/issues/232 for more information.
+            raise ConanInvalidConfiguration(f"{self.ref} requires libdwarf <20210528. The ConanCenterIndex does not support such old versions.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -118,7 +119,7 @@ class BackwardCppConan(ConanFile):
         tc.variables["STACK_DETAILS_BACKTRACE_SYMBOL"] = self._has_stack_details("backtrace_symbol")
         tc.variables["STACK_DETAILS_DW"] = self._has_stack_details("dw")
         tc.variables["STACK_DETAILS_BFD"] = self._has_stack_details("bfd")
-        tc.variables["STACK_DETAILS_DWARF"] = self._has_stack_details("dwarf")
+        tc.variables["STACK_DETAILS_DWARF"] = False
         tc.variables["BACKWARD_SHARED"] = self.options.shared
         tc.variables["BACKWARD_TESTS"] = False
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
@@ -156,7 +157,7 @@ class BackwardCppConan(ConanFile):
         self.cpp_info.defines.append(f"BACKWARD_HAS_BACKTRACE_SYMBOL={int(self._has_stack_details('backtrace_symbol'))}")
         self.cpp_info.defines.append(f"BACKWARD_HAS_DW={int(self._has_stack_details('dw'))}")
         self.cpp_info.defines.append(f"BACKWARD_HAS_BFD={int(self._has_stack_details('bfd'))}")
-        self.cpp_info.defines.append(f"BACKWARD_HAS_DWARF={int(self._has_stack_details('dwarf'))}")
+        self.cpp_info.defines.append(f"BACKWARD_HAS_DWARF=0")
         self.cpp_info.defines.append(f"BACKWARD_HAS_PDB_SYMBOL={int(self.settings.os == 'Windows')}")
 
         if self.options.header_only:
