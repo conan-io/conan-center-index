@@ -1,7 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import can_run
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.microsoft import is_msvc
 import os
 
 
