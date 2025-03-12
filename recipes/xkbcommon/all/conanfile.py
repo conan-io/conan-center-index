@@ -1,17 +1,15 @@
 import os
-import textwrap
 
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, replace_in_file, rmdir, save
+from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=1.60.0 <2 || >=2.0.5"
+required_conan_version = ">=2.0.5"
 
 
 class XkbcommonConan(ConanFile):
@@ -37,10 +35,8 @@ class XkbcommonConan(ConanFile):
         "with_wayland": True,
         "xkbregistry": True,
     }
-
-    @property
-    def _has_build_profile(self):
-        return hasattr(self, "settings_build")
+    implements = ["auto_shared_fpic"]
+    languages = ["C"]
 
     @property
     def _has_xkbregistry_option(self):
@@ -53,12 +49,6 @@ class XkbcommonConan(ConanFile):
             del self.options.with_wayland
         if self.settings.os == "Android":
             del self.options.with_x11
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -74,7 +64,7 @@ class XkbcommonConan(ConanFile):
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD", "Android"]:
-            raise ConanInvalidConfiguration(f"{self.ref} is only compatible with Linux and FreeBSD")
+            raise ConanInvalidConfiguration(f"{self.ref} is only compatible with Linux, FreeBSD and Android")
 
     def build_requirements(self):
         self.tool_requires("meson/1.3.2")
@@ -82,20 +72,13 @@ class XkbcommonConan(ConanFile):
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
             self.tool_requires("pkgconf/2.1.0")
         if self.options.get_safe("with_wayland"):
-            if self._has_build_profile:
-                self.tool_requires("wayland/<host_version>")
+            self.tool_requires("wayland/<host_version>")
             self.tool_requires("wayland-protocols/1.33")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-        if self.options.get_safe("with_wayland") and not self._has_build_profile:
-            env = VirtualRunEnv(self)
-            env.generate(scope="build")
-
         tc = MesonToolchain(self)
         if Version(self.version) >= "1.6":
             tc.project_options["enable-bash-completion"] = False
@@ -111,36 +94,20 @@ class XkbcommonConan(ConanFile):
 
         pkg_config_deps = PkgConfigDeps(self)
         if self.options.get_safe("with_wayland"):
-            if self._has_build_profile:
-                pkg_config_deps.build_context_activated = ["wayland", "wayland-protocols"]
-                pkg_config_deps.build_context_suffix = {"wayland": "_BUILD"}
-            else:
-                # Manually generate pkgconfig file of wayland-protocols since
-                # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
-                wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
-                wp_version = self.dependencies.build["wayland-protocols"].ref.version
-                wp_pkg_content = textwrap.dedent(f"""\
-                    prefix={wp_prefix}
-                    datarootdir=${{prefix}}/res
-                    pkgdatadir=${{datarootdir}}/wayland-protocols
-                    Name: Wayland Protocols
-                    Description: Wayland protocol files
-                    Version: {wp_version}
-                """)
-                save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
+            pkg_config_deps.build_context_activated = ["wayland", "wayland-protocols"]
+            pkg_config_deps.build_context_suffix = {"wayland": "_BUILD"}
         pkg_config_deps.generate()
 
     def _patch_sources(self):
         if self.options.get_safe("with_wayland"):
-            if self._has_build_profile:
-                # Patch the build system to use the pkg-config files generated for the build context.
-                meson_build_file = os.path.join(self.source_folder, "meson.build")
-                replace_in_file(
-                    self,
-                    meson_build_file,
-                    "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
-                    "wayland_scanner_dep = dependency('wayland-scanner_BUILD', required: false, native: true)",
-                )
+            # Patch the build system to use the pkg-config files generated for the build context.
+            meson_build_file = os.path.join(self.source_folder, "meson.build")
+            replace_in_file(
+                self,
+                meson_build_file,
+                "wayland_scanner_dep = dependency('wayland-scanner', required: false, native: true)",
+                "wayland_scanner_dep = dependency('wayland-scanner_BUILD', required: false, native: true)",
+            )
 
     def build(self):
         self._patch_sources()
@@ -175,10 +142,6 @@ class XkbcommonConan(ConanFile):
             self.cpp_info.components["xkbcli-interactive-wayland"].includedirs = []
             self.cpp_info.components["xkbcli-interactive-wayland"].requires = ["wayland::wayland-client"]
 
-        if Version(self.version) >= "1.0.0":
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-
         # unofficial, but required to avoid side effects (libxkbcommon component
         # "steals" the default global pkg_config name)
         self.cpp_info.set_property("pkg_config_name", "xkbcommon_all_do_not_use")
-        self.cpp_info.names["pkg_config"] = "xkbcommon_all_do_not_use"
