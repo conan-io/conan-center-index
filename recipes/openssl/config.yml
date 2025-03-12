@@ -12,6 +12,8 @@ versions:
   "3.0.16":
     folder: "3.x.x"
   # Validated FIPS versions
+  "3.1.2":
+    folder: "3.x.x"
   "3.0.9":
     folder: "3.x.x"
   "3.0.8":
