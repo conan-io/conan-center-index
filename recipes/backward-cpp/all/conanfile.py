@@ -7,7 +7,7 @@ from conan.tools.layout import basic_layout
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class BackwardCppConan(ConanFile):
@@ -55,6 +55,7 @@ class BackwardCppConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.stack_details
+            del self.options.shared
         # default option
         if self.settings.os == "Macos":
             self.options.stack_details = "backtrace_symbol"
@@ -81,11 +82,15 @@ class BackwardCppConan(ConanFile):
     def requirements(self):
         if self.settings.os in ["Linux", "FreeBSD", "Android"]:
             if self._has_stack_walking("libunwind"):
+                # transitive_headers: backward.hpp:301 Requires unwind.h
                 self.requires("libunwind/1.7.2", transitive_headers=True)
             if self._has_stack_details("dw"):
-                self.requires("elfutils/0.190", transitive_headers=True)
+                # transitive_headers: backward.hpp:215 Requires elfuleils/libdw.h elfutils/libdwfl.h and dwarf.h
+                # transitive_libs: backward.hpp:1547 consumes dwarf_ranges() from libdw directly
+                self.requires("elfutils/0.190", transitive_headers=True, transitive_libs=True)
             if self._has_stack_details("bfd"):
-                self.requires("binutils/2.41", transitive_headers=True)
+                # transitive_headers: backward.hpp:205 Requires bfd.h
+                self.requires("binutils/2.42", transitive_headers=True)
 
     def validate(self):
         if self.settings.os not in self._supported_os:
@@ -110,16 +115,21 @@ class BackwardCppConan(ConanFile):
         if self.options.header_only:
             return
         tc = CMakeToolchain(self)
-        tc.variables["STACK_WALKING_UNWIND"] = self._has_stack_walking("unwind")
-        tc.variables["STACK_WALKING_LIBUNWIND"] = self._has_stack_walking("libunwind")
-        tc.variables["STACK_WALKING_BACKTRACE"] = self._has_stack_walking("backtrace")
-        tc.variables["STACK_DETAILS_AUTO_DETECT"] = False
-        tc.variables["STACK_DETAILS_BACKTRACE_SYMBOL"] = self._has_stack_details("backtrace_symbol")
-        tc.variables["STACK_DETAILS_DW"] = self._has_stack_details("dw")
-        tc.variables["STACK_DETAILS_BFD"] = self._has_stack_details("bfd")
-        tc.variables["STACK_DETAILS_DWARF"] = False
-        tc.variables["BACKWARD_SHARED"] = self.options.shared
-        tc.variables["BACKWARD_TESTS"] = False
+        tc.cache_variables["STACK_WALKING_UNWIND"] = self._has_stack_walking("unwind")
+        tc.cache_variables["STACK_WALKING_LIBUNWIND"] = self._has_stack_walking("libunwind")
+        tc.cache_variables["STACK_WALKING_BACKTRACE"] = self._has_stack_walking("backtrace")
+        tc.cache_variables["STACK_DETAILS_AUTO_DETECT"] = False
+        tc.cache_variables["STACK_DETAILS_BACKTRACE_SYMBOL"] = self._has_stack_details("backtrace_symbol")
+        tc.cache_variables["STACK_DETAILS_DW"] = self._has_stack_details("dw")
+        tc.cache_variables["STACK_DETAILS_BFD"] = self._has_stack_details("bfd")
+        tc.cache_variables["STACK_DETAILS_DWARF"] = False
+        tc.cache_variables["BACKWARD_SHARED"] = self.options.get_safe("shared")
+        tc.cache_variables["BACKWARD_TESTS"] = False
+        if self._has_stack_details("bfd"):
+            # INFO: The package binutils has the bfd library and headers, but they are not exposed via cpp_info
+            # See https://github.com/conan-io/conan-center-index/issues/26568
+            tc.cache_variables["BFD_INCLUDE_DIR"] = os.path.join(self.dependencies["binutils"].package_folder, "include")
+            tc.cache_variables["BFD_LIBRARY_DIR"] = os.path.join(self.dependencies["binutils"].package_folder, "lib")
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
