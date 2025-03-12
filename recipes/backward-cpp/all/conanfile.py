@@ -122,7 +122,6 @@ class BackwardCppConan(ConanFile):
         tc.variables["STACK_DETAILS_DWARF"] = False
         tc.variables["BACKWARD_SHARED"] = self.options.shared
         tc.variables["BACKWARD_TESTS"] = False
-        tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
