@@ -127,11 +127,6 @@ class BackwardCppConan(ConanFile):
         tc.cache_variables["BACKWARD_SHARED"] = self.options.get_safe("shared", False)
         tc.cache_variables["BACKWARD_TESTS"] = False
         tc.cache_variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        if self._has_stack_details("bfd"):
-            # INFO: The package binutils has the bfd library and headers, but they are not exposed via cpp_info
-            # See https://github.com/conan-io/conan-center-index/issues/26568
-            tc.cache_variables["BFD_INCLUDE_DIR"] = os.path.join(self.dependencies["binutils"].package_folder, "include")
-            tc.cache_variables["BFD_LIBRARY_DIR"] = os.path.join(self.dependencies["binutils"].package_folder, "lib")
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
