@@ -5,10 +5,10 @@ from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.files import copy, rm, rmdir, get
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.microsoft import is_msvc
-from conan.tools.scm import Git
 from conan.tools.layout import basic_layout
+from conan.errors import ConanInvalidConfiguration
 
-required_conan_version = ">=2.0.0"
+required_conan_version = ">=2.0.9"
 
 class Libreadstat(ConanFile):
     name = "librdata"
@@ -27,17 +27,24 @@ class Libreadstat(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         basic_layout(self, src_folder="src")
+
+    def validate(self):
+        # INFO: rdata is not prepared for Visual Studio, but mingw and msys2 only
+        # It fails with configure:4072: error: C compiler cannot create executables
+        # The upstream uses mingw in the CI, not MSVC
+        if is_msvc(self):
+            raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio. Please use MinGW or MSYS2.")
+
+    def build_requirements(self):
+        self.tool_requires("libtool/2.4.7")
+        if self.settings_build.os == "Windows":
+            self.win_bash = True
+            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
+                self.tool_requires("msys2/cci.latest")
 
     def requirements(self):
         self.requires("bzip2/1.0.8")
@@ -46,7 +53,6 @@ class Libreadstat(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-
 
     def generate(self):
         tc = AutotoolsToolchain(self)
@@ -62,17 +68,11 @@ class Libreadstat(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        if is_msvc(self):
-            copy(self, "rdata.h", src=os.path.join(self.source_folder, "headers"), dst=os.path.join(self.package_folder, "include"))
-            copy(self, "*.a", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-            copy(self, "*.so", src=self.build_folder, dst=os.path.join(self.package_folder, "lib"), keep_path=False)
-            copy(self, "*.dll", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
-        else:
-            autotools = Autotools(self)
-            autotools.install()
-            rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-            rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-            rmdir(self, os.path.join(self.package_folder, "share"))
+        autotools = Autotools(self)
+        autotools.install()
+        rm(self, "*.la", os.path.join(self.package_folder, "lib"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        rmdir(self, os.path.join(self.package_folder, "share"))
         fix_apple_shared_install_name(self)
 
     def package_info(self):
