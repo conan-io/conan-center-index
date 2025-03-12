@@ -6,7 +6,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class AwsCMQTT(ConanFile):
@@ -27,20 +27,16 @@ class AwsCMQTT(ConanFile):
         "fPIC": True,
     }
 
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
+    implements = ["auto_shared_fpic"]
+    languages = "C"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
+        if self.version == "0.12.1":
+            self.requires("aws-c-common/0.11.0", transitive_headers=True, transitive_libs=True)
+            self.requires("aws-c-http/0.9.3")
         if self.version == "0.10.3":
             self.requires("aws-c-common/0.9.15", transitive_headers=True, transitive_libs=True)
             self.requires("aws-c-cal/0.6.14")
@@ -74,34 +70,9 @@ class AwsCMQTT(ConanFile):
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "aws-c-mqtt"))
 
-        # TODO: to remove in conan v2 once legacy generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_file_rel_path),
-            {"AWS::aws-c-mqtt": "aws-c-mqtt::aws-c-mqtt"}
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-c-mqtt")
         self.cpp_info.set_property("cmake_target_name", "AWS::aws-c-mqtt")
         self.cpp_info.libs = ["aws-c-mqtt"]
         if self.options.shared:
             self.cpp_info.defines.append("AWS_MQTT_USE_IMPORT_EXPORT")
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.build_modules["cmake_find_package"] = [self._module_file_rel_path]
-        self.cpp_info.build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
