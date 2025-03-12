@@ -166,7 +166,3 @@ class BackwardCppConan(ConanFile):
             self.cpp_info.system_libs.extend(["dl", "m"])
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.extend(["psapi", "dbghelp"])
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "Backward"
-        self.cpp_info.names["cmake_find_package_multi"] = "Backward"
