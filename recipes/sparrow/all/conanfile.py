@@ -29,7 +29,7 @@ class SparrowRecipe(ConanFile):
     default_options = {
         "shared": False,
         "fPIC": True,
-        "use_date_polyfill": False
+        "use_date_polyfill": True
     }
 
     implements = ["auto_shared_fpic"]
