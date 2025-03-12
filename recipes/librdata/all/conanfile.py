@@ -39,13 +39,6 @@ class Libreadstat(ConanFile):
         if is_msvc(self):
             raise ConanInvalidConfiguration(f"{self.ref} does not support Visual Studio. Please use MinGW or MSYS2.")
 
-    def build_requirements(self):
-        self.tool_requires("libtool/2.4.7")
-        if self.settings_build.os == "Windows":
-            self.win_bash = True
-            if not self.conf.get("tools.microsoft.bash:path", check_type=str):
-                self.tool_requires("msys2/cci.latest")
-
     def requirements(self):
         self.requires("bzip2/1.0.8")
         self.requires("zlib/[>=1.2.11 <2]")
