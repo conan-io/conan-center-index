@@ -118,7 +118,7 @@ class OpenSSLConan(ConanFile):
         if self.options.use_validated_fips:
             # As of version 3.3.1, the FIPS module is validated for the following versions
             # see https://openssl-library.org/source/ (excluding ancient 3.0.0)
-            versions = ['3.0.8', '3.0.9']
+            versions = ['3.0.8', '3.0.9', '3.1.2']
             versions = sorted([Version(v) for v in versions], reverse=True)
 
             # Find the closest version that is less than or equal to the current version
