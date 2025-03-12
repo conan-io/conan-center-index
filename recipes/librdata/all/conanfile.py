@@ -44,6 +44,11 @@ class Libreadstat(ConanFile):
         self.requires("zlib/[>=1.2.11 <2]")
         self.requires("xz_utils/[>=5.4.5 <6]")
 
+    def build_requirements(self):
+        self.tool_requires("libtool/2.4.7")
+        # INFO: gettext is required by libtool due macro: AM_ICONV
+        self.tool_requires("gettext/0.22.5")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
