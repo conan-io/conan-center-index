@@ -64,10 +64,10 @@ class BackwardCppConan(ConanFile):
         if self.options.header_only:
             self.options.rm_safe("fPIC")
             self.options.rm_safe("shared")
+        elif self.settings.os == "Windows":
+            self.package_type = "static-library"
         if self.options.get_safe("shared"):
             self.options.rm_safe("fPIC")
-        if self.settings.os == "Windows":
-            self.package_type = "static-library"
 
     def layout(self):
         if self.options.header_only:
@@ -123,7 +123,7 @@ class BackwardCppConan(ConanFile):
         tc.cache_variables["STACK_DETAILS_DW"] = self._has_stack_details("dw")
         tc.cache_variables["STACK_DETAILS_BFD"] = self._has_stack_details("bfd")
         tc.cache_variables["STACK_DETAILS_DWARF"] = False
-        tc.cache_variables["BACKWARD_SHARED"] = self.options.get_safe("shared")
+        tc.cache_variables["BACKWARD_SHARED"] = self.options.get_safe("shared", False)
         tc.cache_variables["BACKWARD_TESTS"] = False
         if self._has_stack_details("bfd"):
             # INFO: The package binutils has the bfd library and headers, but they are not exposed via cpp_info
