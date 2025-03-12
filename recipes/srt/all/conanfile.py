@@ -4,6 +4,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, replace_in_file, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.build import stdcpp_library
 
 required_conan_version = ">=1.53.0"
 
@@ -89,6 +90,6 @@ class SrtConan(ConanFile):
         if self.options.shared:
             self.cpp_info.defines = ["SRT_DYNAMIC"]
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["pthread"]
+            self.cpp_info.system_libs = ["pthread", "m", stdcpp_library(self)]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32"]
