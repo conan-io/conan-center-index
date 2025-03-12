@@ -24,6 +24,9 @@ sources:
     url: "https://github.com/openssl/openssl/releases/download/openssl-3.0.16/openssl-3.0.16.tar.gz"
     sha256: 57e03c50feab5d31b152af2b764f10379aecd8ee92f16c985983ce4a99f7ef86
   # Validated FIPS versions
+  3.1.2:
+    url: "https://github.com/openssl/openssl/releases/download/openssl-3.1.2/openssl-3.1.2.tar.gz"
+    sha256: a0ce69b8b97ea6a35b96875235aa453b966ba3cba8af2de23657d8b6767d6539
   3.0.9:
     url: "https://github.com/openssl/openssl/releases/download/openssl-3.0.9/openssl-3.0.9.tar.gz"
     sha256: eb1ab04781474360f77c318ab89d8c5a03abc38e63d65a603cabbf1b00a1dc90
