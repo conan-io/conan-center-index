@@ -25,7 +25,7 @@ class BackwardCppConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "stack_walking": ["unwind", "libunwind", "backtrace"],
-        "stack_details": ["dw", "bfd", "backtrace_symbol"],
+        "stack_details": ["dw", "bfd", "backtrace_symbol", "dwarf"],
     }
     default_options = {
         "header_only": False,
@@ -104,6 +104,10 @@ class BackwardCppConan(ConanFile):
                 raise ConanInvalidConfiguration("Support for Apple Silicon is only available as of 1.6.")
             if not self._has_stack_details("backtrace_symbol"):
                 raise ConanInvalidConfiguration("Stack details other than backtrace_symbol are not supported on macOS.")
+        if self._has_stack_details("dwarf"):
+            # INFO: backward-cpp consumes an old version of libdwarf which is API incompatible.
+            # See https://github.com/bombela/backward-cpp/issues/232
+            raise ConanInvalidConfiguration("Stack details dwarf requires libdwarf <20191104 which is not available in Conan Center Index.")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
