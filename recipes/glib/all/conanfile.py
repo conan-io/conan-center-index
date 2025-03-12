@@ -249,7 +249,7 @@ class GLibConan(ConanFile):
             self.cpp_info.components["gio-2.0"].requires.append("libselinux::libselinux")
 
         if self.options.get_safe("with_elf"):
-            self.cpp_info.components["gresource"].requires.append("libelf::libelf")  # this is actually an executable
+            self.cpp_info.components["gresource"].requires.append("elfutils::libelf")  # this is actually an executable
 
         self.env_info.GLIB_COMPILE_SCHEMAS = os.path.join(self.package_folder, "bin", "glib-compile-schemas")
         self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
