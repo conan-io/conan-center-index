@@ -1,0 +1,4 @@
+sources:
+  "0.99.beta20":
+    url: "https://github.com/cacalabs/libcaca/releases/download/v0.99.beta20/libcaca-0.99.beta20.tar.gz"
+    sha256: "8ad74babc63bf665b0b2378d95b4da65b7493c11bd9f3ac600517085b0c4acf2"
