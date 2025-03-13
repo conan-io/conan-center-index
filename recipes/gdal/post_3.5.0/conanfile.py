@@ -277,7 +277,7 @@ class GdalConan(ConanFile):
         if self.options.with_poppler:
             self.requires("poppler/21.07.0")
         if self.options.with_qhull:
-            self.requires("qhull/8.0.1")
+            self.requires("qhull/cci.20231130")
         if self.options.with_rasterlite2:
             self.requires("librasterlite2/1.1.0-beta1")
         if self.options.with_spatialite:
@@ -673,7 +673,7 @@ class GdalConan(ConanFile):
 
         self.cpp_info.requires.extend(["json-c::json-c"])
         self.cpp_info.requires.extend(["libgeotiff::libgeotiff"])
-        self.cpp_info.requires.extend(["libtiff::libtiff"])
+        self.cpp_info.requires.extend(["libtiff::tiff"])
         self.cpp_info.requires.extend(["proj::projlib"])
         self.cpp_info.requires.extend(["zlib::zlib"])
         if self.options.with_armadillo:
