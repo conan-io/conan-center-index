@@ -41,12 +41,14 @@ class BearConan(ConanFile):
 
     def requirements(self):
         self.requires("grpc/1.50.1")
-        self.requires("fmt/9.1.0")
-        self.requires("spdlog/1.11.0")
-        self.requires("nlohmann_json/3.11.2")
+        self.requires("fmt/11.0.2")
+        self.requires("spdlog/1.15.0")
+        self.requires("nlohmann_json/3.11.3")
 
     def build_requirements(self):
         self.tool_requires("grpc/1.50.1")
+        self.tool_requires("pkgconf/2.2.0")
+        self.tool_requires("protobuf/3.21.12")
 
     def package_id(self):
         del self.info.settings.compiler
