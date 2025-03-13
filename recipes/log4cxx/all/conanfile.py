@@ -3,9 +3,9 @@ import os
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-from conan.tools.files import copy, get, rmdir
+from conan.tools.files import replace_in_file, copy, get, rmdir
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0"
 
 
 class Log4cxxConan(ConanFile):
@@ -71,7 +71,7 @@ class Log4cxxConan(ConanFile):
     def requirements(self):
         self.requires("apr/1.7.4")
         self.requires("apr-util/1.6.1")
-        self.requires("expat/2.6.4")
+        self.requires("expat/[>=2.6.2 <3]")
         if self.options.get_safe("with_odbc_appender") and self.settings.os != "Windows":
             self.requires("odbc/2.3.11")
         if self.options.get_safe("with_smtp_appender"):
@@ -79,18 +79,13 @@ class Log4cxxConan(ConanFile):
         if self.options.get_safe("with_fmt_layout"):
             self.requires("fmt/10.2.1")
         if self.options.get_safe("with_qt"):
-            self.requires("qt/[~5.15]")
+            self.requires("qt/[>=5.15 <7]")
 
     def validate(self):
         if self.options.get_safe("with_multiprocess_rolling_file_appender"):
             # TODO: if compiler doesn't support C++17, boost can be used instead
             self.output.info("multiprocess rolling file appender requires C++17.")
             check_min_cppstd(self, "17")
-
-    def build_requirements(self):
-        if self.settings.os != "Windows":
-            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -122,6 +117,8 @@ class Log4cxxConan(ConanFile):
         deps.generate()
 
     def build(self):
+        if self.options.with_qt and self.dependencies["qt"].ref.version.major == 6:
+            replace_in_file(self, os.path.join(self.source_folder, "src", "main", "cpp-qt", "CMakeLists.txt"), "Qt5", "Qt6")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
