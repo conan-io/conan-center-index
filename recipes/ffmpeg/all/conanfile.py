@@ -1,5 +1,6 @@
-from conan import ConanFile, conan_version
-from conan.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration, ConanException
+from conan.tools import CppInfo
 from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
@@ -11,12 +12,13 @@ from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgCon
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
 from conan.tools.scm import Version
-import os
 import glob
-import shutil
+import io
+import os
 import re
+import shutil
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2.0"
 
 
 class FFMpegConan(ConanFile):
@@ -61,6 +63,7 @@ class FFMpegConan(ConanFile):
         "with_ssl": [False, "openssl", "securetransport"],
         "with_libalsa": [True, False],
         "with_pulse": [True, False],
+        "with_sndio": [True, False],
         "with_vaapi": [True, False],
         "with_vdpau": [True, False],
         "with_vulkan": [True, False],
@@ -146,6 +149,7 @@ class FFMpegConan(ConanFile):
         "with_ssl": "openssl",
         "with_libalsa": True,
         "with_pulse": True,
+        "with_sndio": False,
         "with_vaapi": True,
         "with_vdpau": True,
         "with_vulkan": False,
@@ -232,6 +236,7 @@ class FFMpegConan(ConanFile):
             "with_xcb": ["avdevice"],
             "with_soxr": ["swresample"],
             "with_pulse": ["avdevice"],
+            "with_sndio": ["avdevice"],
             "with_sdl": ["with_programs"],
             "with_libsvtav1": ["avcodec"],
             "with_libaom": ["avcodec"],
@@ -330,9 +335,9 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_pulse"):
             self.requires("pulseaudio/14.2")
         if self.options.get_safe("with_vaapi"):
-            self.requires("vaapi/system")
+            self.requires("libva/2.21.0")
         if self.options.get_safe("with_vdpau"):
-            self.requires("vdpau/system")
+            self.requires("libvdpau/1.5")
         if self.options.get_safe("with_vulkan"):
             self.requires("vulkan-loader/1.3.243.0")
         if self.options.get_safe("with_libsvtav1"):
@@ -359,10 +364,6 @@ class FFMpegConan(ConanFile):
                 raise ConanInvalidConfiguration("FFmpeg '{}' option requires '{}' option to be enabled".format(
                     dependency, "' or '".join(features)))
 
-        if Version(self.version) >= "6.1" and conan_version.major == 1 and is_msvc(self) and self.options.shared:
-            # Linking fails with "Argument list too long" for some reason on Conan v1
-            raise ConanInvalidConfiguration("MSVC shared build is not supported for Conan v1")
-
         if Version(self.version) == "7.0.1" and self.settings.build_type == "Debug":
             # FIXME: FFMpeg fails to build in Debug mode with the following error:
             # ld: libavcodec/libavcodec.a(vvcdsp_init.o): in function `ff_vvc_put_pixels2_8_sse4':
@@ -378,8 +379,7 @@ class FFMpegConan(ConanFile):
                 self.tool_requires("nasm/2.16.01")
             else:
                 self.tool_requires("yasm/1.3.0")
-        if self.settings.os != "Linux" and not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            # See https://github.com/conan-io/conan-center-index/pull/26447#discussion_r1926682155
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.1 <3]")
         if self._settings_build.os == "Windows":
             self.win_bash = True
@@ -388,6 +388,7 @@ class FFMpegConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     @property
     def _target_arch(self):
@@ -417,7 +418,6 @@ class FFMpegConan(ConanFile):
         }.get(str(self.settings.os), "none")
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         if Version(self.version) < "5.1":
             # suppress MSVC linker warnings: https://trac.ffmpeg.org/ticket/7396
             # warning LNK4049: locally defined symbol x264_levels imported
@@ -464,6 +464,17 @@ class FFMpegConan(ConanFile):
         })
         return tc
 
+    def _get_system_pkg_config_paths(self):
+        # Global PKG_CONFIG_PATH is generally not filled by default, so ask for the default paths from pkg-config instead.
+        # Assumes that pkg-config is installed system-wide.
+        pkg_config = self.conf.get("tools.gnu:pkg_config", default="pkg-config", check_type=str)
+        output = io.StringIO()
+        try:
+            self.run(f"{pkg_config} --variable pc_path pkg-config", output, scope=None)
+            return output.getvalue().strip()
+        except ConanException:
+            return None
+
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -481,6 +492,7 @@ class FFMpegConan(ConanFile):
         tc = self._create_toolchain()
 
         args = [
+            "--disable-autodetect",
             "--pkg-config-flags=--static",
             "--disable-doc",
             opt_enable_disable("cross-compile", cross_building(self)),
@@ -519,6 +531,7 @@ class FFMpegConan(ConanFile):
             opt_enable_disable("openssl", self.options.with_ssl == "openssl"),
             opt_enable_disable("alsa", self.options.get_safe("with_libalsa")),
             opt_enable_disable("libpulse", self.options.get_safe("with_pulse")),
+            opt_enable_disable("sndio", self.options.get_safe("with_sndio")),
             opt_enable_disable("vaapi", self.options.get_safe("with_vaapi")),
             opt_enable_disable("libdrm", self.options.get_safe("with_libdrm")),
             opt_enable_disable("vdpau", self.options.get_safe("with_vdpau")),
@@ -624,17 +637,17 @@ class FFMpegConan(ConanFile):
         # since ffmpeg"s build system ignores CC and CXX
         compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
         buildenv_vars = VirtualBuildEnv(self).vars()
-        nm = buildenv_vars.get("NM")
+        nm = compilers_from_conf.get("nm", buildenv_vars.get("NM"))
         if nm:
             args.append(f"--nm={unix_path(self, nm)}")
-        ar = buildenv_vars.get("AR")
+        ar = compilers_from_conf.get("ar", buildenv_vars.get("AR"))
         if ar:
             args.append(f"--ar={unix_path(self, ar)}")
         if self.options.with_asm:
             asm = compilers_from_conf.get("asm", buildenv_vars.get("AS"))
             if asm:
                 args.append(f"--as={unix_path(self, asm)}")
-        strip = buildenv_vars.get("STRIP")
+        strip = compilers_from_conf.get("strip", buildenv_vars.get("STRIP"))
         if strip:
             args.append(f"--strip={unix_path(self, strip)}")
         cc = compilers_from_conf.get("c", buildenv_vars.get("CC", self._default_compilers.get("cc")))
@@ -646,14 +659,14 @@ class FFMpegConan(ConanFile):
         ld = buildenv_vars.get("LD")
         if ld:
             args.append(f"--ld={unix_path(self, ld)}")
-        ranlib = buildenv_vars.get("RANLIB")
+        ranlib = compilers_from_conf.get("ranlib", buildenv_vars.get("RANLIB"))
         if ranlib:
             args.append(f"--ranlib={unix_path(self, ranlib)}")
-        pkg_config = self.conf.get("tools.gnu:pkg_config", default=buildenv_vars.get("PKG_CONFIG"), check_type=str)
+        if cross_building(self):
+            build_cc = AutotoolsToolchain(self).vars()["CC_FOR_BUILD"]
+            args.append(f"--host-cc={unix_path(self, build_cc)}")
+        pkg_config = self.conf.get("tools.gnu:pkg_config", default=buildenv_vars.get("PKG_CONFIG", "pkgconf"), check_type=str)
         if pkg_config:
-            # the ffmpeg configure script hardcodes the name of the executable,
-            # unlike other tools that use the PKG_CONFIG environment variable
-            # if we are aware the user has requested a specific pkg-config, we pass it to the configure script
             args.append(f"--pkg-config={unix_path(self, pkg_config)}")
         if is_msvc(self):
             args.append("--toolchain=msvc")
@@ -678,33 +691,28 @@ class FFMpegConan(ConanFile):
         if is_msvc(self):
             # Custom AutotoolsDeps for cl like compilers
             # workaround for https://github.com/conan-io/conan/issues/12784
-            includedirs = []
-            defines = []
-            libs = []
-            libdirs = []
-            linkflags = []
-            cxxflags = []
-            cflags = []
+            cpp_info = CppInfo(self)
             for dependency in self.dependencies.values():
-                deps_cpp_info = dependency.cpp_info.aggregated_components()
-                includedirs.extend(deps_cpp_info.includedirs)
-                defines.extend(deps_cpp_info.defines)
-                libs.extend(deps_cpp_info.libs + deps_cpp_info.system_libs)
-                libdirs.extend(deps_cpp_info.libdirs)
-                linkflags.extend(deps_cpp_info.sharedlinkflags + deps_cpp_info.exelinkflags)
-                cxxflags.extend(deps_cpp_info.cxxflags)
-                cflags.extend(deps_cpp_info.cflags)
-
+                cpp_info.merge(dependency.cpp_info.aggregated_components())
             env = Environment()
-            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in includedirs] + [f"-D{d}" for d in defines])
-            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in libs])
-            env.append("LDFLAGS", [f"-LIBPATH:{unix_path(self, p)}" for p in libdirs] + linkflags)
-            env.append("CXXFLAGS", cxxflags)
-            env.append("CFLAGS", cflags)
+            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in cpp_info.includedirs] + [f"-D{d}" for d in cpp_info.defines])
+            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in cpp_info.libs])
+            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in cpp_info.libdirs] + cpp_info.sharedlinkflags + cpp_info.exelinkflags)
+            env.append("CXXFLAGS", cpp_info.cxxflags)
+            env.append("CFLAGS", cpp_info.cflags)
             env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
         else:
             deps = AutotoolsDeps(self)
             deps.generate()
+
+        using_system_deps = any(dep.ref.version == "system" for dep, _ in self.dependencies.items())
+        if using_system_deps:
+            system_pkg_config_path = self._get_system_pkg_config_paths()
+            if system_pkg_config_path:
+                env = Environment()
+                env.prepend_path("PKG_CONFIG_PATH", self.generators_folder)
+                env.append_path("PKG_CONFIG_PATH", system_pkg_config_path)
+                env.vars(self).save("system_pkg_config_path")
 
         deps = PkgConfigDeps(self)
         deps.generate()
@@ -778,8 +786,6 @@ class FFMpegConan(ConanFile):
         version = self._read_component_version(component_name)
         if version is not None:
             self.cpp_info.components[component_name].set_property("component_version", version)
-            # TODO: to remove once support of conan v1 dropped
-            self.cpp_info.components[component_name].version = version
         else:
             self.output.warning(f"cannot determine version of lib{component_name} packaged with ffmpeg!")
 
@@ -860,6 +866,8 @@ class FFMpegConan(ConanFile):
                 avdevice.requires.extend(["xorg::x11", "xorg::xext", "xorg::xv"])
             if self.options.get_safe("with_pulse"):
                 avdevice.requires.append("pulseaudio::pulseaudio")
+            if self.options.get_safe("with_sndio"):
+                avdevice.requires.append("libsndio::libsndio")
             if self.options.get_safe("with_appkit"):
                 avdevice.frameworks.append("AppKit")
             if self.options.get_safe("with_avfoundation"):
@@ -932,12 +940,12 @@ class FFMpegConan(ConanFile):
         if self.options.get_safe("with_libdrm"):
             avutil.requires.append("libdrm::libdrm_libdrm")
         if self.options.get_safe("with_vaapi"):
-            avutil.requires.append("vaapi::vaapi")
+            avutil.requires.append("libva::libva")
         if self.options.get_safe("with_xcb"):
             avutil.requires.append("xorg::x11")
 
         if self.options.get_safe("with_vdpau"):
-            avutil.requires.append("vdpau::vdpau")
+            avutil.requires.append("libvdpau::libvdpau")
 
         if self.options.with_ssl == "openssl":
             avutil.requires.append("openssl::ssl")
