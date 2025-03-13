@@ -4,10 +4,9 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rm, rmdir, replace_in_file
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import is_msvc
 import os
 
 required_conan_version = ">=1.54.0"
@@ -83,12 +82,14 @@ class AprUtilConan(ConanFile):
             # transitive_libs needs to be set because some sys-frameworks on the old mac images for c3i
             # are pulling it in - discovered in https://github.com/conan-io/conan-center-index/pull/16266
             self.requires("libiconv/1.17", transitive_libs=True)
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.requires("libxcrypt/4.4.36", transitive_headers=True, transitive_libs=True)
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
         if self.options.with_mysql:
             self.requires("libmysqlclient/8.1.0")
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.45.0")
+            self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.with_expat:
             self.requires("expat/[>=2.6.2 <3]")
         if self.options.with_postgresql:
@@ -116,6 +117,8 @@ class AprUtilConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), " SHARED ", " ")
 
     @property
     def _with_crypto(self):
@@ -127,8 +130,13 @@ class AprUtilConan(ConanFile):
             tc.variables["INSTALL_PDB"] = False
             tc.variables["APU_HAVE_CRYPTO"] = self._with_crypto
             tc.variables["APR_HAS_LDAP"] = self.options.with_ldap
+            apr_info = self.dependencies["apr"].cpp_info.aggregated_components()
+            tc.variables["APR_INCLUDE_DIR"] = apr_info.includedir.replace("\\", "/")
+            libdir = apr_info.libdir.replace("\\", "/")
+            tc.variables["APR_LIBRARIES"] = ";".join(f"{libdir}/{lib}.lib" for lib in apr_info.libs)
             tc.generate()
             deps = CMakeDeps(self)
+            deps.set_property("expat", "cmake_find_mode", "module")
             deps.generate()
         else:
             if not cross_building(self):
@@ -151,6 +159,8 @@ class AprUtilConan(ConanFile):
                 f"--with-berkeley-db={rootpath_no(self.options.dbm == 'db', 'libdb')}",
                 f"--with-gdbm={rootpath_no(self.options.dbm == 'gdbm', 'gdbm')}",
                 f"--with-ndbm={rootpath_no(self.options.dbm == 'ndbm', 'ndbm')}",
+                f"--with-odbc={yes_no(self.settings.os == 'Windows')}",
+                "--with-sqlite2=no",
             ])
             if self.options.dbm:
                 tc.configure_args.append(f"--with-dbm={self.options.dbm}")
@@ -165,7 +175,6 @@ class AprUtilConan(ConanFile):
             deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         if self.settings.os == "Windows":
             cmake = CMake(self)
             cmake.configure()
@@ -203,7 +212,7 @@ class AprUtilConan(ConanFile):
         if not self.options.shared:
             self.cpp_info.defines = ["APU_DECLARE_STATIC"]
             if self.settings.os in ["Linux", "FreeBSD"]:
-                self.cpp_info.system_libs = ["crypt", "dl", "pthread", "rt"]
+                self.cpp_info.system_libs = ["dl", "pthread", "rt"]
             elif self.settings.os == "Windows":
                 self.cpp_info.system_libs = ["mswsock", "odbc32", "rpcrt4", "ws2_32"]
 
@@ -213,9 +222,3 @@ class AprUtilConan(ConanFile):
         libdirs = [p for dep in deps for p in dep.cpp_info.aggregated_components().libdirs]
         aprutil_ldflags = " ".join([f"-L{p}" for p in libdirs])
         self.runenv_info.define("APRUTIL_LDFLAGS", aprutil_ldflags)
-
-        # TODO: to remove in conan v2
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
-        self.env_info.APR_UTIL_ROOT = self.package_folder
-        if not is_msvc(self):
-            self.env_info.APRUTIL_LDFLAGS = aprutil_ldflags
