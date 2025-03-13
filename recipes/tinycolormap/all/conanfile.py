@@ -38,12 +38,11 @@ class TinycolormapConan(ConanFile):
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
         if self.options.with_qt:
-            # Only Qt5 is supported
-            self.requires("qt/5.15.13")
+            # Fails with qInitResources_gui_shaders() if transitive_libs=False
+            self.requires("qt/[>=5.15 <7]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+        check_min_cppstd(self, 11)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
