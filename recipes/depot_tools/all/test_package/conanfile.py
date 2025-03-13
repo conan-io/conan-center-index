@@ -15,7 +15,7 @@ class TestPackageConan(ConanFile):
         self.tool_requires(self.tested_reference_str)
 
     def test(self):
-        if Version(self.dependencies.build[self.tested_reference_str].ref.version) != "0.0.0.cci.20241206":
+        if Version(self.dependencies.build[self.tested_reference_str].ref.version) != "cci.20241206":
             # INFO: cit was deprecated on 2023-07-28
             # See the commit d062c2eb80f09740268101be72db13167c898a5d
             self.run("cit --help")
