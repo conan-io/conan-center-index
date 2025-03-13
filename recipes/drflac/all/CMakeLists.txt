@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(dr_flac LANGUAGES C)
 
 include(GNUInstallDirs)
@@ -14,7 +14,7 @@ add_library(${CMAKE_PROJECT_NAME} dr_flac.c)
 
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${DRFLAC_SRC_DIR})
 
-set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES 
+set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
     PUBLIC_HEADER ${DRFLAC_SRC_DIR}/dr_flac.h
     C_STANDARD 99
 )
