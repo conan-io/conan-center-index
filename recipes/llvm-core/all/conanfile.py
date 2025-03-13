@@ -211,7 +211,8 @@ class LLVMCoreConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.with_libedit  # not supported on windows
-        if Version(self.version) < 18:
+        if Version(self.version) < 15:
+            # Added by https://reviews.llvm.org/D128465
             del self.options.with_zstd
         if Version(self.version) >= 19:
             # removed in https://github.com/llvm/llvm-project/commit/852aaf54071ad072335dcac57f544d4da34c875a
@@ -385,7 +386,7 @@ class LLVMCoreConan(ConanFile):
         deps = CMakeDeps(self)
         deps.set_property("editline", "cmake_file_name", "LibEdit")
         deps.set_property("editline", "cmake_target_name", "LibEdit::LibEdit")
-        deps.set_property("editline", "cmake_additional_variables_prefixes", "LibEdit")
+        deps.set_property("editline", "cmake_additional_variables_prefixes", ["LibEdit"])
         deps.generate()
 
     @property
