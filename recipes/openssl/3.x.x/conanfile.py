@@ -116,11 +116,6 @@ class OpenSSLConan(ConanFile):
         else:
             self.options.rm_safe("fPIC")
 
-        if self.settings.os == "Emscripten":
-            self.options.no_asm = True
-            self.options.no_threads = True
-            self.options.no_stdio = True
-
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
@@ -135,10 +130,6 @@ class OpenSSLConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
     def validate(self):
-        if self.settings.os == "Emscripten":
-            if not all((self.options.no_asm, self.options.no_threads, self.options.no_stdio)):
-                raise ConanInvalidConfiguration("os=Emscripten requires openssl:{no_asm,no_threads,no_stdio}=True")
-
         if self.settings.os == "iOS" and self.options.shared:
             raise ConanInvalidConfiguration("OpenSSL 3 does not support building shared libraries for iOS")
 
@@ -367,8 +358,6 @@ class OpenSSLConan(ConanFile):
 
         if self.settings.os == "Android":
             args.append(f" -D__ANDROID_API__={str(self.settings.os.api_level)}")  # see NOTES.ANDROID
-        if self.settings.os == "Emscripten":
-            args.append("-D__STDC_NO_ATOMICS__=1")
         if self.settings.os == "Windows":
             if self.options.enable_capieng:
                 args.append("enable-capieng")
