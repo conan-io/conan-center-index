@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build.cppstd import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import copy, get
+from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -34,8 +34,20 @@ class SparrowRecipe(ConanFile):
 
     implements = ["auto_shared_fpic"]
 
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+        if self.settings.os == "Macos":
+            del self.options.use_date_polyfill
+
+    @property
+    def _uses_date_polyfill(self):
+        # Not an option not to use it on Macos
+        return self.options.get_safe("use_date_polyfill", True)
+
     def requirements(self):
-        if self.options.use_date_polyfill:
+        if self._uses_date_polyfill:
             self.requires("date/3.0.3", transitive_headers=True)
 
     @property
@@ -63,7 +75,7 @@ class SparrowRecipe(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["USE_DATE_POLYFILL"] = self.options.use_date_polyfill
+        tc.variables["USE_DATE_POLYFILL"] = self._uses_date_polyfill
         tc.variables["SPARROW_BUILD_SHARED"] = self.options.shared
         if is_msvc(self):
             tc.variables["USE_LARGE_INT_PLACEHOLDERS"] = True
@@ -85,6 +97,7 @@ class SparrowRecipe(ConanFile):
         )
         cmake = CMake(self)
         cmake.install()
+        rmdir(self, os.path.join(self.package_folder, "share", "cmake"))
 
     def package_info(self):
         self.cpp_info.libs = ["sparrow"]
@@ -92,7 +105,7 @@ class SparrowRecipe(ConanFile):
         self.cpp_info.set_property("cmake_target_name", "sparrow::sparrow")
         if not self.options.shared:
             self.cpp_info.defines.append("SPARROW_STATIC_LIB")
-        if self.options.use_date_polyfill:
+        if self._uses_date_polyfill:
             self.cpp_info.defines.append("SPARROW_USE_DATE_POLYFILL")
         if is_msvc(self):
             self.cpp_info.defines.append("SPARROW_USE_LARGE_INT_PLACEHOLDERS")
