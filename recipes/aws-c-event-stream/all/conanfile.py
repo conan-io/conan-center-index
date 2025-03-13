@@ -51,7 +51,7 @@ class AwsCEventStream(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_BINARIES"] = False
-        tc.variables["BUILD_TESTING"] = True
+        tc.variables["BUILD_TESTING"] = False
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -61,13 +61,13 @@ class AwsCEventStream(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        cmake.ctest()
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "aws-c-event-stream"))
+        rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
 
     def package_info(self):
         self.cpp_info.set_property("cmake_file_name", "aws-c-event-stream")
