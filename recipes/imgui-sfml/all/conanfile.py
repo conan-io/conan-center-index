@@ -34,8 +34,7 @@ class ImGuiSFMLConan(ConanFile):
 
     def requirements(self):
         self.requires("sfml/2.6.2", transitive_headers=True)
-        # Current ImGui-SFML uses functions removed in later patch releases of ImGui
-        self.requires("imgui/1.91.0", transitive_headers=True, transitive_libs=True)
+        self.requires("imgui/1.91.8", transitive_headers=True, transitive_libs=True)
         self.requires("opengl/system")
 
     def validate(self):
@@ -43,16 +42,16 @@ class ImGuiSFMLConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_source()
-
-    def _patch_source(self):
         apply_conandata_patches(self)
-        # This is a workaround to avoid installing vendorized imgui headers as well to the package folder
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), 'list(APPEND IMGUI_SFML_PUBLIC_HEADERS "${IMGUI_PUBLIC_HEADERS}")', "")
 
     def generate(self):
         tc = CMakeToolchain(self)
+        tc.cache_variables["IMGUI_SFML_FIND_SFML"] = True
         tc.cache_variables["IMGUI_DIR"] = "UNUSED"
+        tc.cache_variables["IMGUI_SFML_IMGUI_DEMO"] = False
+
+        tc.cache_variables["IMGUI_SFML_BUILD_TESTING"] = False
+        tc.cache_variables["IMGUI_SFML_BUILD_EXAMPLES"] = False
         tc.generate()
 
         tc = CMakeDeps(self)
@@ -79,7 +78,7 @@ class ImGuiSFMLConan(ConanFile):
 
     def package_info(self):
         postfix = ""
-        if self.settings.build_type == "Debug":
+        if self.options.shared and self.settings.build_type == "Debug":
             postfix = "_d"
         self.cpp_info.libs = ["ImGui-SFML" + postfix]
 
@@ -88,3 +87,5 @@ class ImGuiSFMLConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "ImGui-SFML")
         self.cpp_info.set_property("cmake_target_name", "ImGui-SFML::ImGui-SFML")
+
+        self.cpp_info.defines = ["IMGUI_USER_CONFIG=imconfig-SFML.h"]
