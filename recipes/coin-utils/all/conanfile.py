@@ -1,15 +1,17 @@
+import os
+import shutil
+
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.tools import CppInfo
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rename, rm, rmdir, save
+from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
-import os
 
-required_conan_version = ">=1.57.0"
+required_conan_version = ">=2.0.5"
 
 
 class CoinUtilsConan(ConanFile):
@@ -28,15 +30,13 @@ class CoinUtilsConan(ConanFile):
     options = {
         "shared": [True, False],
         "fPIC": [True, False],
+        "with_glpk": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
+        "with_glpk": True,
     }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -55,40 +55,63 @@ class CoinUtilsConan(ConanFile):
     def requirements(self):
         self.requires("bzip2/1.0.8")
         self.requires("zlib/[>=1.2.11 <2]")
-        # TODO: add blas and lapack support
-
-    def validate(self):
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("coin-utils does not provide a shared library on Windows")
-        # FIXME: This issue likely comes from very old autotools versions used to produce configure.
-        #        It might be fixed by calling autoreconf, but https://github.com/coin-or-tools/BuildTools
-        #        should be packaged and added to build requirements.
-        if hasattr(self, "settings_build") and cross_building(self) and self.options.shared:
-            raise ConanInvalidConfiguration("coin-utils shared not supported yet when cross-building")
+        self.requires("openblas/0.3.28")
+        if self.options.with_glpk:
+            self.requires("glpk/4.48")  # v4.49+ are not supported due to dropped lpx_* functions
 
     def build_requirements(self):
-        if is_msvc(self):
-            self.tool_requires("automake/1.16.5")
-        else:
-            self.tool_requires("gnu-config/cci.20210814")
-        if self._settings_build.os == "Windows":
+        self.tool_requires("coin-buildtools/0.8.11")
+        self.tool_requires("gnu-config/cci.20210814")
+        if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+            self.tool_requires("pkgconf/[>=2.2 <3]")
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
+
         if not cross_building(self):
             env = VirtualRunEnv(self)
             env.generate(scope="build")
 
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
+        def _add_pkg_config_alias(src_name, dst_name):
+            shutil.copy(os.path.join(self.generators_folder, f"{src_name}.pc"),
+                        os.path.join(self.generators_folder, f"{dst_name}.pc"))
+
+        _add_pkg_config_alias("openblas", "coinblas")
+        _add_pkg_config_alias("openblas", "coinlapack")
+        if self.options.with_glpk:
+            _add_pkg_config_alias("glpk", "coinglpk")
+
         tc = AutotoolsToolchain(self)
-        tc.configure_args.append("--without-blas")
-        tc.configure_args.append("--without-lapack")
+        tc.configure_args.extend([
+            # the coin*.pc pkg-config files are only used when set to BUILD
+            "--with-blas=BUILD",
+            "--with-lapack=BUILD",
+            "--with-glpk=BUILD" if self.options.with_glpk else "--without-glpk",
+            # These are only used for sample datasets
+            "--without-netlib",
+            "--without-sample",
+            "--disable-dependency-linking",
+            "F77=unavailable",
+        ])
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            # enables compilation of thread aware CoinUtils
+            # requires pthreads and rt
+            tc.configure_args.append("--enable-coinutils-threads")
+        # TODO: maybe add as options
+        # tc.configure_args.append("--enable-coinutils-mempool-override-new")
+        # tc.configure_args.append("--enable-coinutils-mempool-maxpooled=value")
         if is_msvc(self):
             tc.configure_args.append(f"--enable-msvc={self.settings.compiler.runtime}")
             tc.extra_cxxflags.append("-EHsc")
@@ -112,45 +135,39 @@ class CoinUtilsConan(ConanFile):
         if is_msvc(self):
             # Custom AutotoolsDeps for cl like compilers
             # workaround for https://github.com/conan-io/conan/issues/12784
-            includedirs = []
-            defines = []
-            libs = []
-            libdirs = []
-            linkflags = []
-            cxxflags = []
-            cflags = []
+            cpp_info = CppInfo(self)
             for dependency in self.dependencies.values():
-                deps_cpp_info = dependency.cpp_info.aggregated_components()
-                includedirs.extend(deps_cpp_info.includedirs)
-                defines.extend(deps_cpp_info.defines)
-                libs.extend(deps_cpp_info.libs + deps_cpp_info.system_libs)
-                libdirs.extend(deps_cpp_info.libdirs)
-                linkflags.extend(deps_cpp_info.sharedlinkflags + deps_cpp_info.exelinkflags)
-                cxxflags.extend(deps_cpp_info.cxxflags)
-                cflags.extend(deps_cpp_info.cflags)
-
+                cpp_info.merge(dependency.cpp_info.aggregated_components())
             env = Environment()
-            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in includedirs] + [f"-D{d}" for d in defines])
-            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in libs])
-            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in libdirs] + linkflags)
-            env.append("CXXFLAGS", cxxflags)
-            env.append("CFLAGS", cflags)
+            env.append("CPPFLAGS", [f"-I{unix_path(self, p)}" for p in cpp_info.includedirs] + [f"-D{d}" for d in cpp_info.defines])
+            env.append("_LINK_", [lib if lib.endswith(".lib") else f"{lib}.lib" for lib in cpp_info.libs])
+            env.append("LDFLAGS", [f"-L{unix_path(self, p)}" for p in cpp_info.libdirs] + cpp_info.sharedlinkflags + cpp_info.exelinkflags)
+            env.append("CXXFLAGS", cpp_info.cxxflags)
+            env.append("CFLAGS", cpp_info.cflags)
             env.vars(self).save_script("conanautotoolsdeps_cl_workaround")
         else:
             deps = AutotoolsDeps(self)
             deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
-        if not is_msvc(self):
-            for gnu_config in [
-                self.conf.get("user.gnu-config:config_guess", check_type=str),
-                self.conf.get("user.gnu-config:config_sub", check_type=str),
-            ]:
-                if gnu_config:
-                    copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
+        copy(self, "*", os.path.join(self.dependencies.build["coin-buildtools"].package_folder, "res"),
+             os.path.join(self.source_folder, "BuildTools"))
+        copy(self, "*", os.path.join(self.dependencies.build["coin-buildtools"].package_folder, "res"),
+             os.path.join(self.source_folder, "CoinUtils", "BuildTools"))
+        for gnu_config in [
+            self.conf.get("user.gnu-config:config_guess", check_type=str),
+            self.conf.get("user.gnu-config:config_sub", check_type=str),
+        ]:
+            copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
         autotools = Autotools(self)
+        autotools.autoreconf()
         autotools.configure()
+        # Manually specify OpenBLAS name mangling since F77 is not available to autodetect it.
+        save(self, os.path.join(self.build_folder, "CoinUtils/src/config.h"),
+             ("\n"
+              "#define F77_FUNC(name,NAME) name ## _\n"
+              "#define F77_FUNC_(name,NAME) name ## _\n"),
+             append=True)
         autotools.make()
 
     def package(self):
@@ -171,6 +188,6 @@ class CoinUtilsConan(ConanFile):
         self.cpp_info.includedirs.append(os.path.join("include", "coin"))
         if not self.options.shared:
             if self.settings.os in ("FreeBSD", "Linux"):
-                self.cpp_info.system_libs = ["m"]
+                self.cpp_info.system_libs = ["m", "pthread", "rt"]
             if is_apple_os(self):
                 self.cpp_info.frameworks.append("Accelerate")
