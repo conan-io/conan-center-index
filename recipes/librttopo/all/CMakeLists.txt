@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(rttopo LANGUAGES C)
 
 set(RTTOPO_HDR_DIR ${LIBRTTOPO_SRC_DIR}/headers)
