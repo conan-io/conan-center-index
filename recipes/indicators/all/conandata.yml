@@ -11,3 +11,12 @@ sources:
   "1.9":
     url: "https://github.com/p-ranav/indicators/archive/v1.9.tar.gz"
     sha256: "842e11fa542ac392a2a2ddee48620a06c3005ec38ca25cf352471e46e18f389d"
+patches:
+  "2.3":
+    - patch_file: "patches/add-missing-cstdint-include.patch"
+      patch_type: "backport"
+      patch_source: "https://github.com/p-ranav/indicators/pull/124"
+  "2.2":
+    - patch_file: "patches/add-missing-cstdint-include.patch"
+      patch_type: "backport"
+      patch_source: "https://github.com/p-ranav/indicators/pull/124"
