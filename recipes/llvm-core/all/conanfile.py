@@ -382,8 +382,11 @@ class LLVMCoreConan(ConanFile):
         tc.cache_variables.update(cmake_variables)
         tc.generate()
 
-        tc = CMakeDeps(self)
-        tc.generate()
+        deps = CMakeDeps(self)
+        deps.set_property("editline", "cmake_file_name", "LibEdit")
+        deps.set_property("editline", "cmake_target_name", "LibEdit::LibEdit")
+        deps.set_property("editline", "cmake_additional_variables_prefixes", "LibEdit")
+        deps.generate()
 
     @property
     def _graphviz_file(self):

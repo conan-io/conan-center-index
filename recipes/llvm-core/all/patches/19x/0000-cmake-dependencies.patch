@@ -11,32 +11,6 @@ index 0aae13e30f2a..c87f22d28dc6 100644
      check_symbol_exists(compress2 zlib.h HAVE_ZLIB)
      cmake_pop_check_state()
      if(LLVM_ENABLE_ZLIB STREQUAL FORCE_ON AND NOT HAVE_ZLIB)
-@@ -232,11 +232,11 @@ if(NOT LLVM_USE_SANITIZER MATCHES "Memory.*")
-     # Skip libedit if using ASan as it contains memory leaks.
-     if (LLVM_ENABLE_LIBEDIT AND NOT LLVM_USE_SANITIZER MATCHES ".*Address.*")
-       if(LLVM_ENABLE_LIBEDIT STREQUAL FORCE_ON)
--        find_package(LibEdit REQUIRED)
-+        find_package(editline REQUIRED)
-       else()
--        find_package(LibEdit)
-+        find_package(editline)
-       endif()
--      set(HAVE_LIBEDIT "${LibEdit_FOUND}")
-+      set(HAVE_LIBEDIT "${editline_FOUND}")
-     else()
-       set(HAVE_LIBEDIT 0)
-     endif()
-diff --git a/lib/LineEditor/CMakeLists.txt b/lib/LineEditor/CMakeLists.txt
-index c4cd91cbb0cd..b95d073d9725 100644
---- a/lib/LineEditor/CMakeLists.txt
-+++ b/lib/LineEditor/CMakeLists.txt
-@@ -1,5 +1,5 @@
- if(HAVE_LIBEDIT)
--  set(link_libs LibEdit::LibEdit)
-+  set(link_libs editline::editline)
- endif()
- 
- add_llvm_component_library(LLVMLineEditor
 diff --git a/lib/Support/CMakeLists.txt b/lib/Support/CMakeLists.txt
 index f653379e3033..4cb691de3027 100644
 --- a/lib/Support/CMakeLists.txt
