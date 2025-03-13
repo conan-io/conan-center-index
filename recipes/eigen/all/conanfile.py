@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain
-from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir
+from conan.tools.files import apply_conandata_patches, export_conandata_patches, copy, get, rmdir, download
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=1.52.0"
@@ -14,7 +15,7 @@ class EigenConan(ConanFile):
                   " numerical solvers, and related algorithms."
     topics = ("algebra", "linear-algebra", "matrix", "vector", "numerical", "header-only")
     package_type = "header-library"
-    license = ("MPL-2.0", "LGPL-3.0-or-later")  # Taking into account the default value of MPL2_only option
+    license = "MPL-2.0 AND LGPL-3.0-or-later"  # Taking into account the default value of MPL2_only option
 
     settings = "os", "arch", "compiler", "build_type"
     options = {
@@ -28,7 +29,7 @@ class EigenConan(ConanFile):
         export_conandata_patches(self)
 
     def configure(self):
-        self.license = "MPL-2.0" if self.options.MPL2_only else ("MPL-2.0", "LGPL-3.0-or-later")
+        self.license = "MPL-2.0" if self.options.MPL2_only else "MPL-2.0 AND LGPL-3.0-or-later"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -37,8 +38,13 @@ class EigenConan(ConanFile):
         self.info.clear()
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-            destination=self.source_folder, strip_root=True)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        if Version(self.version) <= "3.4.0":
+            self.output.info("Patching DisableStupidWarnings.h to the latest version to avoid warnings from newer compiler versions")
+            path = os.path.join("Eigen", "src", "Core", "util", "DisableStupidWarnings.h")
+            assert os.path.isfile(path)
+            download(self, **self.conan_data["disable_stupid_warnings_h"], filename=path)
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -47,7 +53,6 @@ class EigenConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -63,19 +68,12 @@ class EigenConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "Eigen3")
         self.cpp_info.set_property("cmake_target_name", "Eigen3::Eigen")
         self.cpp_info.set_property("pkg_config_name", "eigen3")
-        # TODO: back to global scope once cmake_find_package* generators removed
+
         self.cpp_info.components["eigen3"].bindirs = []
         self.cpp_info.components["eigen3"].libdirs = []
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["eigen3"].system_libs = ["m"]
         if self.options.MPL2_only:
             self.cpp_info.components["eigen3"].defines = ["EIGEN_MPL2_ONLY"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "Eigen3"
-        self.cpp_info.names["cmake_find_package_multi"] = "Eigen3"
-        self.cpp_info.names["pkg_config"] = "eigen3"
-        self.cpp_info.components["eigen3"].names["cmake_find_package"] = "Eigen"
-        self.cpp_info.components["eigen3"].names["cmake_find_package_multi"] = "Eigen"
         self.cpp_info.components["eigen3"].set_property("cmake_target_name", "Eigen3::Eigen")
         self.cpp_info.components["eigen3"].includedirs = [os.path.join("include", "eigen3")]
