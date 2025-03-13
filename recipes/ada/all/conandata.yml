@@ -1,7 +1,7 @@
 sources:
-  "3.1.3":
-    url: "https://github.com/ada-url/ada/archive/v3.1.3.tar.gz"
-    sha256: "8bd8df0413d57b56b32e6a5216a1c7f402a52edf33172a39e80484ccce0bb627"
+  "3.2.1":
+    url: "https://github.com/ada-url/ada/archive/v3.2.1.tar.gz"
+    sha256: "2530b601224d96554333ef2e1504cebf040e86b79a4166616044f5f79c47eaa5"
   "2.9.2":
     url: "https://github.com/ada-url/ada/archive/v2.9.2.tar.gz"
     sha256: "f41575ad7eec833afd9f6a0d6101ee7dc2f947fdf19ae8f1b54a71d59f4ba5ec"
