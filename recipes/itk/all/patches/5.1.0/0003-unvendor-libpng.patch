@@ -1,0 +1,18 @@
+--- a/Modules/IO/PNG/src/CMakeLists.txt
++++ b/Modules/IO/PNG/src/CMakeLists.txt
+@@ -4,3 +4,4 @@
+   )
+ 
+ itk_module_add_library(ITKIOPNG ${ITKIOPNG_SRCS})
++target_link_libraries(ITKIOPNG PRIVATE PNG::PNG)
+--- a/Modules/IO/PNG/src/itkPNGImageIO.cxx
++++ b/Modules/IO/PNG/src/itkPNGImageIO.cxx
+@@ -16,7 +16,7 @@
+  *
+  *=========================================================================*/
+ #include "itkPNGImageIO.h"
+-#include "itk_png.h"
++#include "png.h"
+ #include "itksys/SystemTools.hxx"
+ #include <string>
+ #include <csetjmp>
