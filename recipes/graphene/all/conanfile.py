@@ -4,14 +4,14 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, rm, rmdir, replace_in_file
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file, load
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.microsoft import is_msvc_static_runtime
+from conan.tools.microsoft import is_msvc_static_runtime, is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.0.6"
 
 
 class GrapheneConan(ConanFile):
@@ -27,11 +27,13 @@ class GrapheneConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_glib": [True, False],
-        }
+        "with_introspection": [True, False],
+    }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_glib": True,
+        "with_introspection": False,
     }
 
     def config_options(self):
@@ -45,6 +47,8 @@ class GrapheneConan(ConanFile):
         self.settings.rm_safe("compiler.libcxx")
         if self.options.shared and self.options.with_glib:
             self.options["glib"].shared = True
+        if not self.options.with_glib:
+            del self.options.with_introspection
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -52,6 +56,8 @@ class GrapheneConan(ConanFile):
     def requirements(self):
         if self.options.with_glib:
             self.requires("glib/2.78.3")
+        if self.options.get_safe("with_introspection"):
+            self.requires("gobject-introspection/1.78.1")
 
     def validate(self):
         if self.settings.compiler == "gcc":
@@ -70,9 +76,11 @@ class GrapheneConan(ConanFile):
                 )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.1")
+        self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
+        if self.options.get_safe("with_introspection"):
+            self.tool_requires("gobject-introspection/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -92,9 +100,9 @@ class GrapheneConan(ConanFile):
         })
         meson.project_options["gobject_types"] = "true" if self.options.with_glib else "false"
         if Version(self.version) < "1.10.4":
-            meson.project_options["introspection"] = "false"
+            meson.project_options["introspection"] = "true" if self.options.get_safe("with_introspection") else "false"
         else:
-            meson.project_options["introspection"] = "disabled"
+            meson.project_options["introspection"] = "enabled" if self.options.get_safe("with_introspection") else "disabled"
         meson.generate()
 
     def _patch_sources(self):
@@ -115,9 +123,21 @@ class GrapheneConan(ConanFile):
         meson = Meson(self)
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.options.get_safe("with_introspection"):
+            os.rename(os.path.join(self.package_folder, "share"),
+                      os.path.join(self.package_folder, "res"))
         rm(self, "*.pdb", self.package_folder, recursive=True)
         fix_apple_shared_install_name(self)
         fix_msvc_libname(self)
+
+    def _get_simd_config(self):
+        config = load(self, os.path.join(self.package_folder, "lib", "graphene-1.0", "include", "graphene-config.h"))
+        return {
+            "sse2": "GRAPHENE_HAS_SSE 1" in config,
+            "gcc": "GRAPHENE_HAS_GCC 1" in config,
+            "neon": "GRAPHENE_HAS_ARM_NEON 1" in config,
+            "scalar": "GRAPHENE_HAS_SCALAR 1" in config,
+        }
 
     def package_info(self):
         self.cpp_info.components["graphene-1.0"].set_property("pkg_config_name", "graphene-1.0")
@@ -128,10 +148,30 @@ class GrapheneConan(ConanFile):
         if self.options.with_glib:
             self.cpp_info.components["graphene-1.0"].requires = ["glib::gobject-2.0"]
 
+        if self.options.get_safe("with_introspection"):
+            self.cpp_info.components["graphene-1.0"].resdirs = ["res"]
+            self.cpp_info.components["graphene-1.0"].requires.append("gobject-introspection::gobject-introspection")
+            self.buildenv_info.append_path("GI_GIR_PATH", os.path.join(self.package_folder, "res", "gir-1.0"))
+            self.runenv_info.append_path("GI_TYPELIB_PATH", os.path.join(self.package_folder, "lib", "girepository-1.0"))
+
+        simd = self._get_simd_config()
+        if simd["sse2"]:
+            # https://salsa.debian.org/gnome-team/graphene/-/blob/1.10.0/meson.build?ref_type=tags#L274
+            if not is_msvc(self):
+                self.cpp_info.components["graphene-1.0"].cflags = ["-mfpmath=sse", "-msse", "-msse2"]
+        elif simd["neon"]:
+            # https://salsa.debian.org/gnome-team/graphene/-/blob/1.10.0/meson.build?ref_type=tags#L339-343
+            if not is_msvc(self):
+                if self.settings.os == "Android":
+                    self.cpp_info.components["graphene-1.0"].cflags.append("-mfloat-abi=softfp")
+
         if self.options.with_glib:
             self.cpp_info.components["graphene-gobject-1.0"].set_property("pkg_config_name","graphene-gobject-1.0")
             self.cpp_info.components["graphene-gobject-1.0"].includedirs = [os.path.join("include", "graphene-1.0")]
             self.cpp_info.components["graphene-gobject-1.0"].requires = ["graphene-1.0", "glib::gobject-2.0"]
+            # https://salsa.debian.org/gnome-team/graphene/-/blob/1.10.0/src/meson.build?ref_type=tags#L79-93
+            simd_info = "\n".join(f"graphene_has_{k}={int(v)}" for k, v in simd.items())
+            self.cpp_info.components["graphene-gobject-1.0"].set_property("pkg_config_custom_content", simd_info)
 
 def fix_msvc_libname(conanfile, remove_lib_prefix=True):
     """remove lib prefix & change extension to .lib in case of cl like compiler"""
