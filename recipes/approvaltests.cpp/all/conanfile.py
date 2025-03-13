@@ -76,7 +76,8 @@ class ApprovalTestsCppConan(ConanFile):
 
     def source(self):
         for source in self.conan_data["sources"][self.version]:
-            url = source["url"]
+            urls = source["url"]
+            url = urls[0] if isinstance(urls, (list, tuple)) else urls
             filename = url[url.rfind("/") + 1:]
             download(self, url, filename, sha256=source["sha256"])
         rename(self, src=os.path.join(self.source_folder, f"ApprovalTests.v.{self.version}.hpp"),
