@@ -285,7 +285,6 @@ class LLVMCoreConan(ConanFile):
         else:
             get(self, **sources["llvm"], destination='llvm-main', strip_root=True)
             get(self, **sources["cmake"], destination='cmake', strip_root=True)
-            get(self, **sources["third-party"], destination='third-party', strip_root=True)
 
     def _apply_resource_limits(self, cmake_definitions):
         if os.getenv("CONAN_CENTER_BUILD_SERVICE"):
@@ -330,6 +329,7 @@ class LLVMCoreConan(ConanFile):
             "LLVM_LINK_LLVM_DYLIB": self.options.shared,
             "LLVM_DYLIB_COMPONENTS": self.options.components,
             "LLVM_ABI_BREAKING_CHECKS": "WITH_ASSERTS",
+            "LLVM_INCLUDE_BENCHMARKS": False,
             "LLVM_INCLUDE_TOOLS": True,
             "LLVM_INCLUDE_EXAMPLES": False,
             "LLVM_INCLUDE_TESTS": False,

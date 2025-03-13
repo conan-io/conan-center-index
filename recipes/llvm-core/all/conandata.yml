@@ -6,9 +6,6 @@ sources:
     "cmake":
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/cmake-19.1.7.src.tar.xz
       sha256: 11c5a28f90053b0c43d0dec3d0ad579347fc277199c005206b963c19aae514e3
-    "third-party":
-      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/third-party-19.1.7.src.tar.xz
-      sha256: b96deca1d3097c7ffd4ff2bb904a50bdd56bec7ed1413ffb0d1d01af87b72c12
   "13.0.0":
     url: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/llvm-13.0.0.src.tar.xz
     sha256: 408d11708643ea826f519ff79761fcdfc12d641a2510229eec459e72f8163020
