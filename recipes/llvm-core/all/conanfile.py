@@ -357,10 +357,6 @@ class LLVMCoreConan(ConanFile):
         if self.options.targets != "all":
             cmake_variables["LLVM_TARGETS_TO_BUILD"] = self.options.targets
 
-        if is_msvc(self):
-            # https://discourse.llvm.org/t/failing-to-compile-llvm-on-windows-with-clang
-            cmake_variables["MSVC"] = True
-
         self._apply_resource_limits(cmake_variables)
 
         if is_msvc(self):
