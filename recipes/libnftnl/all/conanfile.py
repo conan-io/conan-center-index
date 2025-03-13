@@ -33,7 +33,7 @@ class LibnftnlConan(ConanFile):
 
     def validate(self):
         if self.settings.os not in ["Linux", "FreeBSD"]:
-            raise ConanInvalidConfiguration("libnftnl is only supported on Linux")
+            raise ConanInvalidConfiguration("libnftnl is only supported on Linux/FreeBSD")
     
     def generate(self):
         tc = AutotoolsToolchain(self)
