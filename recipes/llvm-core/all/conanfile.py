@@ -56,6 +56,7 @@ LLVM_TARGETS = {
 def components_from_dotfile(dotfile):
     def node_labels(dot):
         label_replacements = {
+            "LibEdit::LibEdit": "editline::editline",
             "LibXml2::LibXml2": "libxml2::libxml2",
             "ZLIB::ZLIB": "zlib::zlib",
             "zstd::libzstd_static": "zstd::zstdlib",
