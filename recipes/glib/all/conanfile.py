@@ -1,14 +1,14 @@
+import os
+import textwrap
+
 from conan import ConanFile
 from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir, rename
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.microsoft import is_msvc
-import os
-import shutil
-
+from conan.tools.scm import Version
 
 required_conan_version = ">=2.0"
 
@@ -54,7 +54,6 @@ class GLibConan(ConanFile):
         self.options.with_elf = self.settings.os == "Linux"
         if is_msvc(self):
             del self.options.with_elf
-
         if self.settings.os == "Neutrino":
             del self.options.with_elf
 
@@ -80,7 +79,6 @@ class GLibConan(ConanFile):
         if self.settings.os != "Linux":
             # for Linux, gettext is provided by libc
             self.requires("libgettext/0.22", transitive_headers=True, transitive_libs=True)
-
         if is_apple_os(self):
             self.requires("libiconv/1.17")
 
@@ -88,23 +86,24 @@ class GLibConan(ConanFile):
         self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
             self.tool_requires("pkgconf/[>=2.2 <3]")
+        self.tool_requires("gettext/0.22.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def generate(self):
-        virtual_build_env = VirtualBuildEnv(self)
-        virtual_build_env.generate()
-        tc = PkgConfigDeps(self)
-        tc.generate()
         tc = MesonToolchain(self)
 
-        tc.project_options["selinux"] = "enabled" if self.options.get_safe("with_selinux") else "disabled"
-        tc.project_options["libmount"] = "enabled" if self.options.get_safe("with_mount") else "disabled"
+        def feature(value):
+            return "enabled" if value else "disabled"
+
+        tc.project_options["selinux"] = feature(self.options.get_safe("with_selinux"))
+        tc.project_options["libmount"] = feature(self.options.get_safe("with_mount"))
         if self.settings.os == "FreeBSD" or self.settings.os == "Neutrino":
             tc.project_options["xattr"] = "false"
         tc.project_options["tests"] = "false"
-        tc.project_options["libelf"] = "enabled" if self.options.get_safe("with_elf") else "disabled"
+        tc.project_options["libelf"] = feature(self.options.get_safe("with_elf"))
 
         if self.settings.os == "Neutrino":
             tc.cross_build["host"]["system"] = "qnx"
@@ -113,8 +112,10 @@ class GLibConan(ConanFile):
 
         tc.generate()
 
+        deps = PkgConfigDeps(self)
+        deps.generate()
+
     def _patch_sources(self):
-        apply_conandata_patches(self)
         replace_in_file(self,
             os.path.join(self.source_folder, "meson.build"),
             "subdir('fuzzing')",
@@ -152,10 +153,7 @@ class GLibConan(ConanFile):
         meson.install()
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
         rmdir(self, os.path.join(self.package_folder, "libexec"))
-        shutil.move(
-            os.path.join(self.package_folder, "share"),
-            os.path.join(self.package_folder, "res"),
-        )
+        rename(self, os.path.join(self.package_folder, "share"), os.path.join(self.package_folder, "res"))
         rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
         fix_apple_shared_install_name(self)
         fix_msvc_libname(self)
@@ -168,6 +166,9 @@ class GLibConan(ConanFile):
             os.path.join("lib", "glib-2.0", "include")
         ]
         self.cpp_info.components["glib-2.0"].resdirs = ["res"]
+        if Version(self.version) >= "2.81.0":
+            if not self.options.shared and self.settings.compiler in ["gcc", "clang"]:
+                self.cpp_info.components["glib-2.0"].system_libs.append("atomic")
 
         self.cpp_info.components["gmodule-no-export-2.0"].set_property("pkg_config_name", "gmodule-no-export-2.0")
         self.cpp_info.components["gmodule-no-export-2.0"].libs = ["gmodule-2.0"]
@@ -176,9 +177,13 @@ class GLibConan(ConanFile):
 
         self.cpp_info.components["gmodule-export-2.0"].set_property("pkg_config_name", "gmodule-export-2.0")
         self.cpp_info.components["gmodule-export-2.0"].requires += ["gmodule-no-export-2.0", "glib-2.0"]
+        if self.settings.os in ["Linux", "FreeBSD"] or self.settings.get_safe("os.subsystem") == "cygwin":
+            # https://gitlab.gnome.org/GNOME/glib/-/blob/2.82.4/meson.build?ref_type=tags#L2488-2501
+            self.cpp_info.components["gmodule-export-2.0"].sharedlinkflags.append("-Wl,--export-dynamic")
+            self.cpp_info.components["gmodule-export-2.0"].exelinkflags.append("-Wl,--export-dynamic")
 
         self.cpp_info.components["gmodule-2.0"].set_property("pkg_config_name", "gmodule-2.0")
-        self.cpp_info.components["gmodule-2.0"].requires += ["gmodule-no-export-2.0", "glib-2.0"]
+        self.cpp_info.components["gmodule-2.0"].requires = ["gmodule-export-2.0"]
 
         self.cpp_info.components["gobject-2.0"].set_property("pkg_config_name", "gobject-2.0")
         self.cpp_info.components["gobject-2.0"].libs = ["gobject-2.0"]
@@ -193,10 +198,23 @@ class GLibConan(ConanFile):
         self.cpp_info.components["gio-2.0"].set_property("pkg_config_name", "gio-2.0")
         self.cpp_info.components["gio-2.0"].libs = ["gio-2.0"]
         self.cpp_info.components["gio-2.0"].resdirs = ["res"]
-        self.cpp_info.components["gio-2.0"].requires += ["glib-2.0", "gobject-2.0", "gmodule-2.0", "zlib::zlib"]
+        self.cpp_info.components["gio-2.0"].requires += ["glib-2.0", "gobject-2.0", "gmodule-no-export-2.0", "zlib::zlib"]
 
         self.cpp_info.components["gresource"].set_property("pkg_config_name", "gresource")
         self.cpp_info.components["gresource"].libs = []  # this is actually an executable
+
+        if Version(self.version) >= "2.79.0":
+            self.cpp_info.components["girepository-2.0"].set_property("pkg_config_name", "girepository-2.0")
+            self.cpp_info.components["girepository-2.0"].set_property("pkg_config_custom_content", textwrap.dedent("""\
+                gidatadir=${datadir}/gobject-introspection-1.0
+                girdir=${datadir}/gir-1.0
+                typelibdir=${libdir}/girepository-1.0
+            """))
+            self.cpp_info.components["girepository-2.0"].libs = ["girepository-2.0"]
+            self.cpp_info.components["girepository-2.0"].resdirs = ["res"]
+            self.cpp_info.components["girepository-2.0"].requires += ["glib-2.0", "gobject-2.0", "gmodule-no-export-2.0", "gio-2.0", "libffi::libffi"]
+            if self.settings.os in ["Linux", "FreeBSD"]:
+                self.cpp_info.components["girepository-2.0"].system_libs.append("m")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["glib-2.0"].system_libs.append("pthread")
@@ -251,8 +269,7 @@ class GLibConan(ConanFile):
         if self.options.get_safe("with_elf"):
             self.cpp_info.components["gresource"].requires.append("elfutils::libelf")  # this is actually an executable
 
-        self.env_info.GLIB_COMPILE_SCHEMAS = os.path.join(self.package_folder, "bin", "glib-compile-schemas")
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
+        self.buildenv_info.define_path("GLIB_COMPILE_SCHEMAS", os.path.join(self.package_folder, "bin", "glib-compile-schemas"))
 
         pkgconfig_variables = {
             'datadir': '${prefix}/res',
