@@ -1,0 +1,24 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 944c80d..ebd75fc 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -83,6 +83,7 @@ option(LD_DYNAMIC_LINK_OPENSSL
+ )
+ 
+ option(LD_BUILD_EXAMPLES "Build hello-world examples." ON)
++option(LD_BUILD_SERVER_SDK "Build the server sdk" ON)
+ 
+ option(LD_BUILD_REDIS_SUPPORT "Build redis support." OFF)
+ 
+@@ -187,7 +188,10 @@ endif ()
+ # Built as static or shared depending on LD_BUILD_SHARED_LIBS variable.
+ # This target "links" in common, internal, and sse as object libraries.
+ add_subdirectory(libs/client-sdk)
+-add_subdirectory(libs/server-sdk)
++
++if (LD_BUILD_SERVER_SDK)
++    add_subdirectory(libs/server-sdk)
++endif ()
+ 
+ if (LD_BUILD_CONTRACT_TESTS)
+     message(STATUS "LaunchDarkly: building contract tests")

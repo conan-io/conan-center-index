@@ -1,0 +1,69 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 5a89997..944c80d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -24,6 +24,7 @@ endif ()
+ option(BUILD_TESTING "Top-level switch for testing. Turn off to disable unit and contract tests." ON)
+ 
+ option(LD_BUILD_SHARED_LIBS "Build the SDKs as shared libraries" OFF)
++option(LD_USE_FETCH_CONTENT "Use FetchContent to satisfy dependencies" ON)
+ 
+ cmake_dependent_option(LD_BUILD_EXPORT_ALL_SYMBOLS
+         "Export all symbols when building shared libs. This is disabled by default because C++ ABI stability is not guaranteed. Use only if you have a specific requirement and understand the risks."
+@@ -140,6 +141,13 @@ endif ()
+ find_package(OpenSSL REQUIRED)
+ message(STATUS "LaunchDarkly: using OpenSSL v${OPENSSL_VERSION}")
+ 
++if(LD_USE_FETCH_CONTENT)
++    include(FetchContent)
++    include(${CMAKE_FILES}/expected.cmake)
++else()
++    find_package(tl-expected REQUIRED)
++endif()
++
+ 
+ if (LD_DYNAMIC_LINK_BOOST)
+     message(STATUS "LaunchDarkly: searching for shared Boost libraries")
+@@ -159,9 +167,6 @@ if (LD_BUILD_SHARED_LIBS)
+     endif ()
+ endif ()
+ 
+-set(Boost_USE_MULTITHREADED ON)
+-set(Boost_USE_STATIC_RUNTIME OFF)
+-
+ find_package(Boost 1.81 REQUIRED COMPONENTS json url coroutine)
+ message(STATUS "LaunchDarkly: using Boost v${Boost_VERSION}")
+ 
+diff --git a/libs/common/CMakeLists.txt b/libs/common/CMakeLists.txt
+index d03a4ab..f6ddc66 100644
+--- a/libs/common/CMakeLists.txt
++++ b/libs/common/CMakeLists.txt
+@@ -21,11 +21,6 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+ endif ()
+ 
+-# Needed to fetch external dependencies.
+-include(FetchContent)
+-
+-include(${CMAKE_FILES}/expected.cmake)
+-
+ # Add main SDK sources.
+ add_subdirectory(src)
+ 
+diff --git a/vendor/foxy/CMakeLists.txt b/vendor/foxy/CMakeLists.txt
+index a64f767..dc6cff3 100644
+--- a/vendor/foxy/CMakeLists.txt
++++ b/vendor/foxy/CMakeLists.txt
+@@ -25,7 +25,11 @@ project(
+ )
+ 
+ set(CMAKE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+-include(${CMAKE_FILES}/certify.cmake)
++if(LD_USE_FETCH_CONTENT)
++    include(${CMAKE_FILES}/certify.cmake)
++else()
++    find_package(certify REQUIRED)
++endif()
+ 
+ find_package(
+         Boost ${foxy_minimum_boost_version}

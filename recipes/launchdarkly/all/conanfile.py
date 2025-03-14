@@ -84,7 +84,8 @@ class LaunchDarklyConan(ConanFile):
             "LD_USE_FETCH_CONTENT": False,
             "LD_BUILD_SHARED_LIBS": self.options.shared,
             "LD_BUILD_SERVER_SDK": False,
-            "LD_DYNAMIC_LINK_OPENSSL": self.dependencies["openssl"].options.shared
+            "LD_DYNAMIC_LINK_OPENSSL": self.dependencies["openssl"].options.shared,
+            "LD_DYNAMIC_LINK_BOOST": self.dependencies["boost"].options.shared
         })
         tc.generate()
 
