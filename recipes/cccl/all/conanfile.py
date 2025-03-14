@@ -6,6 +6,9 @@ from conan.tools.microsoft import is_msvc
 import os
 
 
+required_conan_version = ">=2.1.0"
+
+
 class CcclConan(ConanFile):
     name = "cccl"
     description = "Unix cc compiler to Microsoft's cl compiler wrapper"
@@ -14,6 +17,7 @@ class CcclConan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     license = "GPL-3.0-or-later"
     settings = "os", "arch", "compiler", "build_type"
+    package_type = "application"
     options = {
         "muffle": [True, False],
         "verbose": [True, False],
@@ -80,13 +84,3 @@ class CcclConan(ConanFile):
         self.buildenv_info.define("CC", cccl)
         self.buildenv_info.define("CXX", cccl)
         self.buildenv_info.define("LD", cccl)
-
-        # TODO: Legacy, to be removed on Conan 2.0
-        self.env_info.PATH.append(self._cccl_dir)
-
-        self.output.info(f"Setting CC to '{cccl}'")
-        self.env_info.CC = cccl
-        self.output.info(f"Setting CXX to '{cccl}'")
-        self.env_info.CXX = cccl
-        self.output.info(f"Setting LD to '{cccl}'")
-        self.env_info.LD = cccl
