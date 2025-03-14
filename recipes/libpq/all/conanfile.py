@@ -58,7 +58,7 @@ class LibpqConan(ConanFile):
             del self.options.disable_rpath
             del self.options.with_icu
         if Version(self.version) < "16.0":
-            del self.options.with_icu
+            self.options.rm_safe("with_icu")
 
     def configure(self):
         if self.options.shared:
