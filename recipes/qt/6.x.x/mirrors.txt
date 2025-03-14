@@ -1,0 +1,15 @@
+https://download.qt.io/archive/
+https://mirrors.ukfast.co.uk/sites/qt.io/archive/
+https://mirrors.20i.com/pub/qt.io/archive/
+https://ftp.nluug.nl/languages/qt/archive/
+https://mirror.netcologne.de/qtproject/archive/
+https://qt-mirror.dannhauer.de/archive/
+https://ftp.fau.de/qtproject/archive/
+https://mirrors.dotsrc.org/qtproject/archive/
+https://ftp.icm.edu.pl/packages/qt/archive/
+https://ftp.acc.umu.se/mirror/qt.io/qtproject/archive/
+https://www.nic.funet.fi/pub/mirrors/download.qt-project.org/archive/
+https://qt.mirror.constant.com/archive/
+https://mirrors.cloud.tencent.com/qt/archive/
+https://mirror.bjtu.edu.cn/qt/archive/
+https://ftp.yz.yamagata-u.ac.jp/pub/qtproject/archive/
