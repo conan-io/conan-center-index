@@ -51,20 +51,23 @@ class HictkConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("with_arrow"):
-            self.requires("arrow/19.0.1")
-        self.requires("bshoshany-thread-pool/5.0.0")
+            self.requires("arrow/16.1.0")
+        if Version(self.version) < "2.0.0":
+            self.requires("bshoshany-thread-pool/4.1.0")
+        else:
+            self.requires("bshoshany-thread-pool/5.0.0")
         self.requires("concurrentqueue/1.0.4")
-        self.requires("fast_float/8.0.0")
+        self.requires("fast_float/6.1.1")
         if self.options.with_eigen:
             self.requires("eigen/3.4.0")
-        self.requires("fmt/11.0.2")
+        self.requires("fmt/10.2.1")
         self.requires("hdf5/1.14.3")
-        self.requires("highfive/2.10.0")
-        self.requires("libdeflate/1.23")
-        self.requires("parallel-hashmap/2.0.0")
+        self.requires("highfive/2.9.0")
+        self.requires("libdeflate/1.22")
+        self.requires("parallel-hashmap/1.3.12") # Note: v1.3.12 is more recent than v1.37
         self.requires("readerwriterqueue/1.0.6")
         self.requires("span-lite/0.11.0")
-        self.requires("spdlog/1.15.0")
+        self.requires("spdlog/1.14.1")
         self.requires("zstd/[>=1.5 <1.6]")
 
     def package_id(self):
