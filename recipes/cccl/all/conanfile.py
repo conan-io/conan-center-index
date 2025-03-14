@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.tools.files import get, replace_in_file, copy
+from conan.tools.files import get, replace_in_file, copy, export_conandata_patches, apply_conandata_patches
 from conan.tools.layout import basic_layout
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.microsoft import is_msvc
@@ -31,6 +31,9 @@ class CcclConan(ConanFile):
     def _cccl_dir(self):
         return os.path.join(self.package_folder, "bin")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
@@ -42,8 +45,8 @@ class CcclConan(ConanFile):
             raise ConanInvalidConfiguration("This recipe only supports msvc/Visual Studio.")
 
     def source(self):
-        get(self, **self.conan_data["sources"][self.version],
-                  strip_root=True, destination=self.source_folder)
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def build(self):
         cccl_path = os.path.join(self.source_folder, self.source_folder, "cccl")
