@@ -1,8 +1,8 @@
-#include "qtkeychain/keychain.h"
+#include "qt6keychain/keychain.h"
 #include <vector>
 #include <string>
 
 int main()
 {
-    QtKeychain::isAvailable();
+    QKeychain::isAvailable();
 }
