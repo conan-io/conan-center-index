@@ -1,4 +1,7 @@
 sources:
+  "1.2.1":
+    url: "https://github.com/jmcnamara/libxlsxwriter/archive/v1.2.1.tar.gz"
+    sha256: "f3a43fb6b4dab2d65bcbce56088f58c94a8ae7fb5746106c069d77ef87794a24"
   "1.1.9":
     url: "https://github.com/jmcnamara/libxlsxwriter/archive/v1.1.9.tar.gz"
     sha256: "03ae330d50f74c8a70be0b06b52bd50868f7cd1251ed040fe3b68d1ad6fd11dc"
@@ -21,6 +24,10 @@ sources:
     url: "https://github.com/jmcnamara/libxlsxwriter/archive/RELEASE_1.0.0.tar.gz"
     sha256: "8b353379333c323d14a9d265cd2491d3a6c0032c8d6ec2141f10b82ab66a087c"
 patches:
+  "1.2.1":
+    - patch_file: "patches/1.2.1-0001-fix-cmake.patch"
+      patch_description: "Fix CMake: disable pkgconfig & avoid some hardcoded flags"
+      patch_type: "conan"
   "1.1.9":
     - patch_file: "patches/1.1.9-0001-fix-cmake.patch"
       patch_description: "Fix CMake: disable pkgconfig & avoid some hardcoded flags"
