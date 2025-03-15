@@ -31,9 +31,9 @@ index 90e5d327c75..c8bcb1afb76 100644
  check_include_file(mach/mach.h HAVE_MACH_MACH_H)
 -check_include_file(histedit.h HAVE_HISTEDIT_H)
 +if(LLVM_ENABLE_LIBEDIT)
-+    find_package(editline REQUIRED)
++    find_package(LibEdit REQUIRED)
 +    cmake_push_check_state()
-+    list(APPEND CMAKE_REQUIRED_INCLUDES ${editline_INCLUDE_DIRS})
++    list(APPEND CMAKE_REQUIRED_INCLUDES ${LibEdit_INCLUDE_DIRS})
 +    check_include_file(histedit.h HAVE_HISTEDIT_H)
 +    cmake_pop_check_state()
 +endif()
@@ -67,8 +67,8 @@ index 90e5d327c75..c8bcb1afb76 100644
      # Skip libedit if using ASan as it contains memory leaks.
      if (LLVM_ENABLE_LIBEDIT AND HAVE_HISTEDIT_H AND NOT LLVM_USE_SANITIZER MATCHES ".*Address.*")
 +      cmake_push_check_state()
-+      list(APPEND CMAKE_REQUIRED_INCLUDES ${editline_INCLUDE_DIRS})
-+      list(APPEND CMAKE_REQUIRED_LIBRARIES ${editline_LIBRARIES})
++      list(APPEND CMAKE_REQUIRED_INCLUDES ${LibEdit_INCLUDE_DIRS})
++      list(APPEND CMAKE_REQUIRED_LIBRARIES ${LibEdit_LIBRARIES})
        check_library_exists(edit el_init "" HAVE_LIBEDIT)
 +      cmake_pop_check_state()
      else()
@@ -112,7 +112,7 @@ index 59190379406..3952bf0144f 100644
 @@ -1,5 +1,5 @@
  if(HAVE_LIBEDIT)
 -  set(link_libs edit)
-+  set(link_libs editline::editline)
++  set(link_libs LibEdit::LibEdit)
  endif()
  
  add_llvm_component_library(LLVMLineEditor
