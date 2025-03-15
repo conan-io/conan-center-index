@@ -19,9 +19,6 @@ sources:
     sha256: "2eaf6fb89d071d1be280bf995c63360b3729860c0da64948123b5d7e4cfb6cb7"
 patches:
   "4.3.0":
-    - patch_file: "patches/0001-4.3.0-swig-linux-library-path.patch"
-      patch_type: "portability"
-      patch_description: "swig -swiglib should return the correct path next to the binary even when relocated"
     - patch_file: "patches/0002-4.3.0-do-not-define-SWIG_LIB_WIN_UNIX.patch"
       patch_type: "portability"
       patch_description: "swig -swiglib should return the correct path next to the binary even when relocated"
