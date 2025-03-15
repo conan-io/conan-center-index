@@ -15,3 +15,7 @@ patches:
       patch_description: "Fix POSIX install with missing or incompatible ldconfig"
       patch_source: "https://github.com/LuaJIT/LuaJIT/commit/18c9cf7d3788a8f7408df45df92fc4ae3bcc0d80"
       patch_type: "bugfix"
+    - patch_file: "patches/2.1.0-beta3-ios-dylib-extension.diff"
+      patch_description: "Use dylib extension for iOS installs"
+      patch_source: "https://github.com/LuaJIT/LuaJIT/commit/b1179ea5f708c62aacc60235d28230112f419a69"
+      patch_type: "bugfix"
