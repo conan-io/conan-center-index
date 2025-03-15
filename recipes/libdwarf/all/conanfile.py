@@ -53,8 +53,6 @@ class LibdwarfConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        if self.options.with_dwarfgen:
-            self.requires("libelf/0.8.13")
         self.requires("zlib/[>=1.2.11 <2]")
         if  Version(self.version) >= Version("0.9.0"):
             self.requires("zstd/[~1.5]")
