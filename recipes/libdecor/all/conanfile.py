@@ -1,26 +1,25 @@
 import os
-import textwrap
 
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir, save
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rmdir
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4"
 
 
 class libdecorConan(ConanFile):
     name = "libdecor"
-    package_type = "shared-library"
     description = "libdecor is a library that can help Wayland clients draw window decorations for them."
     topics = ("decoration", "wayland", "window")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://gitlab.freedesktop.org/libdecor/libdecor"
     license = "MIT"
+
+    package_type = "shared-library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "with_dbus": [True, False],
@@ -32,17 +31,11 @@ class libdecorConan(ConanFile):
         "with_gtk": False,
     }
 
-    @property
-    def _has_build_profile(self):
-        return hasattr(self, "settings_build")
+    implements = ["auto_shared_fpic"]
+    languages = "C"
 
     def export_sources(self):
         export_conandata_patches(self)
-
-    def configure(self):
-        self.settings.rm_safe("compiler.cppstd")
-        self.settings.rm_safe("compiler.libcxx")
-        self.options["pango"].with_cairo = True
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -68,14 +61,15 @@ class libdecorConan(ConanFile):
             raise ConanInvalidConfiguration(f"{self.ref} requires at least version 3 of GTK when the with_gtk option is enabled")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.4.0")
+        self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", default=False, check_type=str):
-            self.tool_requires("pkgconf/2.2.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         self.tool_requires("wayland/<host_version>")
         self.tool_requires("wayland-protocols/1.33")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def _patch_sources(self):
         apply_conandata_patches(self)
@@ -96,30 +90,10 @@ class libdecorConan(ConanFile):
         tc.project_options["gtk"] = feature("with_gtk")
         tc.generate()
         pkg_config_deps = PkgConfigDeps(self)
-        if self._has_build_profile:
-            pkg_config_deps.build_context_activated = ["wayland-protocols"]
-        else:
-            # Manually generate pkgconfig file of wayland-protocols since
-            # PkgConfigDeps.build_context_activated can't work with legacy 1 profile
-            # We must use legacy conan v1 deps_cpp_info because self.dependencies doesn't
-            # contain build requirements when using 1 profile.
-            wp_prefix = self.dependencies.build["wayland-protocols"].package_folder
-            wp_version = self.dependencies.build["wayland-protocols"].ref.version
-            wp_pkg_content = textwrap.dedent(f"""\
-                prefix={wp_prefix}
-                datarootdir=${{prefix}}/res
-                pkgdatadir=${{datarootdir}}/wayland-protocols
-                Name: Wayland Protocols
-                Description: Wayland protocol files
-                Version: {wp_version}
-            """)
-            save(self, os.path.join(self.generators_folder, "wayland-protocols.pc"), wp_pkg_content)
+        pkg_config_deps.build_context_activated = ["wayland-protocols"]
         pkg_config_deps.generate()
-        virtual_build_env = VirtualBuildEnv(self)
-        virtual_build_env.generate()
 
     def build(self):
-        self._patch_sources()
         meson = Meson(self)
         meson.configure()
         meson.build()
@@ -135,7 +109,7 @@ class libdecorConan(ConanFile):
         self.cpp_info.libs = [f"decor-{libdecor_soversion}"]
         self.cpp_info.set_property("pkg_config_name", f"libdecor-{libdecor_soversion}")
 
-        self.cpp_info.includedirs = [os.path.join(self.package_folder, "include", f"libdecor-{libdecor_soversion}")]
+        self.cpp_info.includedirs = [os.path.join("include", f"libdecor-{libdecor_soversion}")]
 
         plugins_soversion = "1"
         self.runenv_info.define("LIBDECOR_PLUGIN_DIR", os.path.join(self.package_folder, "lib", "libdecor", f"plugins-{plugins_soversion}"))
