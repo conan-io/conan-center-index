@@ -1,17 +1,11 @@
 versions:
+  "15.12":
+    folder: all
+  "15.5":
+    folder: all
   "15.4":
     folder: all
   "15.3":
     folder: all
   "14.9":
-    folder: all
-  "13.12":
-    folder: all
-  "12.16":
-    folder: all
-  "11.21":
-    folder: all
-  "10.23":
-    folder: all
-  "9.6.24":
     folder: all

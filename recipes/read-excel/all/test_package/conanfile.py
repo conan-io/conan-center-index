@@ -23,5 +23,4 @@ class TestPackageConan(ConanFile):
     def test(self):
         if can_run(self):
             bin_path = os.path.join(self.cpp.build.bindirs[0], "test_package")
-            xls_path = os.path.join(self.source_folder, "sample.xls")
-            self.run("{} \"{}\"".format(bin_path, xls_path), env="conanrun")
+            self.run(bin_path, env="conanrun")

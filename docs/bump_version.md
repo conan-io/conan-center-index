@@ -44,5 +44,4 @@ In case a patch should be re-used, it should be present in `conandata.yml` to th
 
 ## Reviewing and merging
 
-Bumping version PRs follow the same regular [review process](review_process.md), except for being merged automatically
-as listed on [Labels](labels.md#bump-version) section.
+Bumping version PRs follow the same regular [review process](review_process.md).

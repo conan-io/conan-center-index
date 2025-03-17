@@ -1,6 +1,5 @@
-cmake_minimum_required(VERSION 3.8)
-
-project(test_package CXX) # if the project uses c++
+cmake_minimum_required(VERSION 3.15)
+project(test_package LANGUAGES CXX)
 
 find_package(primesieve REQUIRED CONFIG)
 

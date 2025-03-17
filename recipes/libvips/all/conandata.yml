@@ -1,6 +1,12 @@
 sources:
+  "8.16.0":
+    url: "https://github.com/libvips/libvips/releases/download/v8.16.0/vips-8.16.0.tar.xz"
+    sha256: "6eca46c6ba5fac86224fd69007741012b0ea1f9aa1fcb9256b0cbc2faf768563"
+  "8.15.3":
+    url: "https://github.com/libvips/libvips/releases/download/v8.15.3/vips-8.15.3.tar.xz"
+    sha256: "3e27d9f536eafad64013958fe9e8a1964c90b564c731d49db7c1a1c11b1052a0"
   "8.15.2":
-    url: "https://github.com/libvips/libvips/releases/download/v8.15.2a/vips-8.15.2.tar.xz"
+    url: "https://github.com/libvips/libvips/releases/download/v8.15.2/vips-8.15.2.tar.xz"
     sha256: "a2ab15946776ca7721d11cae3215f20f1f097b370ff580cd44fc0f19387aee84"
   "8.15.1":
     url: "https://github.com/libvips/libvips/releases/download/v8.15.1/vips-8.15.1.tar.xz"
@@ -8,3 +14,14 @@ sources:
   "8.14.2":
     url: "https://github.com/libvips/libvips/releases/download/v8.14.2/vips-8.14.2.tar.xz"
     sha256: "27dad021f0835a5ab14e541d02abd41e4c3bd012d2196438df5a9e754984f7ce"
+patches:
+  "8.15.3":
+    - patch_file: "patches/0001-fix-8-15-3-msvc-build.patch"
+      patch_description: "Fix broken msvc build due to ssize_t"
+      patch_type: "portability"
+      patch_source: "https://github.com/libvips/libvips/pull/4153"
+  "8.16.0":
+    - patch_file: "patches/0002-fix-8-16-0-msvc-build.patch"
+      patch_description: "Fix broken msvc build due to division by zero"
+      patch_type: "portability"
+      patch_source: "https://github.com/libvips/libvips/pull/4332"

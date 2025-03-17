@@ -1,4 +1,16 @@
 sources:
+  "1.29.2":
+    url: "https://github.com/google/nsync/archive/1.29.2.tar.gz"
+    sha256: "1d63e967973733d2c97e841e3c05fac4d3fa299f01d14c86f2695594c7a4a2ec"
+  "1.29.1":
+    url: "https://github.com/google/nsync/archive/1.29.1.tar.gz"
+    sha256: "3045a8922171430426b695edf794053182d245f6a382ddcc59ef4a6190848e98"
+  "1.28.0":
+    url: "https://github.com/google/nsync/archive/1.28.0.tar.gz"
+    sha256: "1e6a7193bd85d480faaf992cef204c5cf09f9da72766c9987e25b4f88508eed1"
+  "1.27.0":
+    url: "https://github.com/google/nsync/archive/1.27.0.tar.gz"
+    sha256: "e8e552a358f4a28e844207a7c5cb51767e4aeb0b29e22d23ac2a09924130f761"
   "1.26.0":
     url: "https://github.com/google/nsync/archive/1.26.0.tar.gz"
     sha256: "80fc1e605bb3cf5f272811ece39c4fb6761ffcb9b30563301845cc9ff381eb8b"
@@ -12,6 +24,14 @@ sources:
     sha256: "b7e75b17957c62bd02dd73890bde22da3a564903fcaad651b395453d41d3325b"
     url: "https://github.com/google/nsync/archive/refs/tags/1.23.0.tar.gz"
 patches:
+  "1.29.2":
+    - patch_file: "patches/0001-1.27.0-darwin-exclude_semaphore_mutex_c_from_nsync_cpp_lib.patch"
+  "1.29.1":
+    - patch_file: "patches/0001-1.27.0-darwin-exclude_semaphore_mutex_c_from_nsync_cpp_lib.patch"
+  "1.28.0":
+    - patch_file: "patches/0001-1.27.0-darwin-exclude_semaphore_mutex_c_from_nsync_cpp_lib.patch"
+  "1.27.0":
+    - patch_file: "patches/0001-1.27.0-darwin-exclude_semaphore_mutex_c_from_nsync_cpp_lib.patch"
   "1.26.0":
     - patch_file: "patches/0001-darwin-exclude_semaphore_mutex_c_from_nsync_cpp_lib.patch"
   "1.25.0":

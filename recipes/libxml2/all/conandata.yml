@@ -1,22 +1,22 @@
 sources:
-  "2.12.5":
-    url: "https://download.gnome.org/sources/libxml2/2.12/libxml2-2.12.5.tar.xz"
-    sha256: "a972796696afd38073e0f59c283c3a2f5a560b5268b4babc391b286166526b21"
+  "2.13.6":
+    url: "https://download.gnome.org/sources/libxml2/2.13/libxml2-2.13.6.tar.xz"
+    sha256: "f453480307524968f7a04ec65e64f2a83a825973bcd260a2e7691be82ae70c96"
+  "2.13.4":
+    url: "https://download.gnome.org/sources/libxml2/2.13/libxml2-2.13.4.tar.xz"
+    sha256: "65d042e1c8010243e617efb02afda20b85c2160acdbfbcb5b26b80cec6515650"
+  "2.12.9":
+    url: "https://download.gnome.org/sources/libxml2/2.12/libxml2-2.12.9.tar.xz"
+    sha256: "59912db536ab56a3996489ea0299768c7bcffe57169f0235e7f962a91f483590"
   "2.12.4":
     url: "https://download.gnome.org/sources/libxml2/2.12/libxml2-2.12.4.tar.xz"
     sha256: "497360e423cf0bd99eacdb7c6215dea92e6d6e89ee940393c2bae0e77cb9b7d0"
   "2.12.3":
     url: "https://download.gnome.org/sources/libxml2/2.12/libxml2-2.12.3.tar.xz"
     sha256: "8c8f1092340a89ff32bc44ad5c9693aff9bc8a7a3e161bb239666e5d15ac9aaa"
-  "2.12.2":
-    url: "https://download.gnome.org/sources/libxml2/2.12/libxml2-2.12.2.tar.xz"
-    sha256: "3f2e6464fa15073eb8f3d18602d54fafc489b7715171064615a40490c6be9f4f"
-  "2.12.1":
-    url: "https://download.gnome.org/sources/libxml2/2.12/libxml2-2.12.1.tar.xz"
-    sha256: "8982b9ccdf7f456e30d8f7012d50858c6623e495333b6191def455c7e95427eb"
-  "2.11.7":
-    url: "https://download.gnome.org/sources/libxml2/2.11/libxml2-2.11.7.tar.xz"
-    sha256: "fb27720e25eaf457f94fd3d7189bcf2626c6dccf4201553bc8874d50e3560162"
+  "2.11.9":
+    url: "https://download.gnome.org/sources/libxml2/2.11/libxml2-2.11.9.tar.xz"
+    sha256: "780157a1efdb57188ec474dca87acaee67a3a839c2525b2214d318228451809f"
   "2.11.6":
     url: "https://download.gnome.org/sources/libxml2/2.11/libxml2-2.11.6.tar.xz"
     sha256: "c90eee7506764abbe07bb616b82da452529609815aefef423d66ef080eb0c300"
@@ -32,9 +32,6 @@ sources:
   "2.9.14":
     url: "https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.14.tar.xz"
     sha256: "60d74a257d1ccec0475e749cba2f21559e48139efba6ff28224357c7c798dfee"
-  "2.9.13":
-    url: "https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.13.tar.xz"
-    sha256: "276130602d12fe484ecc03447ee5e759d0465558fbc9d6bd144e3745306ebf0e"
   "2.9.12":
     url: "https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.12.tar.xz"
     sha256: "28a92f6ab1f311acf5e478564c49088ef0ac77090d9c719bbc5d518f1fe62eb9"

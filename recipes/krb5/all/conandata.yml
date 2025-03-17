@@ -1,0 +1,16 @@
+sources:
+  "1.21.2":
+    url: "https://kerberos.org/dist/krb5/1.21/krb5-1.21.2.tar.gz"
+    sha256: "9560941a9d843c0243a71b17a7ac6fe31c7cebb5bce3983db79e52ae7e850491"
+patches:
+  "1.21.2":
+    - patch_file: "patches/0001-no-tests.patch"
+      patch_type: "conan"
+      patch_description: "Disable building tests"
+    - patch_file: "patches/0002-disable_ksu_root.patch"
+      patch_description: "No ksu install as root user"
+      patch_type: "conan"
+    - patch_file: "patches/0003-find-openssl-module.patch"
+      patch_description: "Use OpenSSL .pc module to find libraries"
+      patch_source: "https://github.com/krb5/krb5/pull/1351"
+      patch_type: "portability"

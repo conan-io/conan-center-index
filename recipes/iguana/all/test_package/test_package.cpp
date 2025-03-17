@@ -1,3 +1,4 @@
+#include <iostream>
 #include <iguana/json_reader.hpp>
 #include <iguana/json_writer.hpp>
 
@@ -7,20 +8,26 @@ struct person {
   int64_t age;
 };
 
-REFLECTION(person, name, age);
+#if __cplusplus < 202002L
+YLT_REFL(person, name, age);
+#endif
 } // namespace client
 
 struct MyStruct {
   uint64_t a;
 };
-REFLECTION(MyStruct, a);
+#if __cplusplus < 202002L
+YLT_REFL(MyStruct, a);
+#endif
 
 struct student {
   int id;
   std::string name;
   int age;
 };
-REFLECTION(student, id, name, age);
+#if __cplusplus < 202002L
+YLT_REFL(student, id, name, age);
+#endif
 
 void test() {
   MyStruct p = {5566777755311};

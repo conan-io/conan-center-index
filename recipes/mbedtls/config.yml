@@ -1,25 +1,24 @@
 versions:
+  "3.6.2":
+    folder: all
+  "3.6.1":
+    folder: all
+  "3.6.0":
+    folder: all
   "3.5.2":
     folder: all
-  "3.5.1":
-    folder: all
+  # keep 3.5.0 for libcurl, libssh2, libwebsockets, libzip
   "3.5.0":
     folder: all
-  "3.4.1":
-    folder: all
+  # keep 3.2.1 for libcoap, libgit2, lief
   "3.2.1":
     folder: all
-  "3.1.0":
-    folder: all
-  "3.0.0":
-    folder: all
+  # keep 2.28.4 for libssh2
   "2.28.4":
     folder: all
+  # keep 2.25.0 for ixwebsocket, nng, open62541, yojimbo, mdnsresponder
   "2.25.0":
     folder: all
-  "2.24.0":
-    folder: all
-  "2.23.0":
-    folder: all
+  # keep 2.6.12 for cose-c
   "2.16.12":
     folder: all

@@ -45,8 +45,8 @@ class AvahiConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("glib/2.78.1")
-        self.requires("expat/2.5.0")
+        self.requires("glib/2.78.3")
+        self.requires("expat/[>=2.6.2 <3]")
         self.requires("libdaemon/0.14")
         self.requires("dbus/1.15.8")
         self.requires("gdbm/1.23")
@@ -113,7 +113,8 @@ class AvahiConan(ConanFile):
             self.cpp_info.components[lib].names["cmake_find_package"] = lib
             self.cpp_info.components[lib].names["cmake_find_package_multi"] = lib
             self.cpp_info.components[lib].libs = [avahi_lib]
-            self.cpp_info.components[lib].includedirs = ["include", os.path.join("include", avahi_lib)]
+            if lib != "common":
+                self.cpp_info.components[lib].includedirs = ["include", os.path.join("include", avahi_lib)]
         self.cpp_info.components["compat-libdns_sd"].libs = ["dns_sd"]
 
         self.cpp_info.components["client"].requires = ["common", "dbus::dbus"]

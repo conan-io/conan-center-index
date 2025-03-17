@@ -1,0 +1,118 @@
+diff --git a/cmake/config-ix.cmake b/cmake/config-ix.cmake
+index 90e5d327c75..c8bcb1afb76 100644
+--- a/cmake/config-ix.cmake
++++ b/cmake/config-ix.cmake
+@@ -5,6 +5,7 @@ endif()
+ 
+ include(CheckIncludeFile)
+ include(CheckLibraryExists)
++include(CMakePushCheckState)
+ include(CheckSymbolExists)
+ include(CheckFunctionExists)
+ include(CheckStructHasMember)
+@@ -56,13 +57,27 @@ check_include_file(sys/types.h HAVE_SYS_TYPES_H)
+ check_include_file(termios.h HAVE_TERMIOS_H)
+ check_include_file(unistd.h HAVE_UNISTD_H)
+ check_include_file(valgrind/valgrind.h HAVE_VALGRIND_VALGRIND_H)
+-check_include_file(zlib.h HAVE_ZLIB_H)
++
++if(LLVM_ENABLE_ZLIB)
++    find_package(ZLIB REQUIRED)
++    cmake_push_check_state()
++    list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
++    check_include_file(zlib.h HAVE_ZLIB_H)
++    cmake_pop_check_state()
++endif()
++
+ check_include_file(fenv.h HAVE_FENV_H)
+ check_symbol_exists(FE_ALL_EXCEPT "fenv.h" HAVE_DECL_FE_ALL_EXCEPT)
+ check_symbol_exists(FE_INEXACT "fenv.h" HAVE_DECL_FE_INEXACT)
+ 
+ check_include_file(mach/mach.h HAVE_MACH_MACH_H)
+-check_include_file(histedit.h HAVE_HISTEDIT_H)
++if(LLVM_ENABLE_LIBEDIT)
++    find_package(editline REQUIRED)
++    cmake_push_check_state()
++    list(APPEND CMAKE_REQUIRED_INCLUDES ${editline_INCLUDE_DIRS})
++    check_include_file(histedit.h HAVE_HISTEDIT_H)
++    cmake_pop_check_state()
++endif()
+ check_include_file(CrashReporterClient.h HAVE_CRASHREPORTERCLIENT_H)
+ if(APPLE)
+   include(CheckCSourceCompiles)
+@@ -118,24 +133,21 @@ endif()
+ # Don't look for these libraries if we're using MSan, since uninstrumented third
+ # party code may call MSan interceptors like strlen, leading to false positives.
+ if(NOT LLVM_USE_SANITIZER MATCHES "Memory.*")
+-  set(HAVE_LIBZ 0)
+   if(LLVM_ENABLE_ZLIB)
+-    foreach(library z zlib_static zlib)
+-      string(TOUPPER ${library} library_suffix)
+-      check_library_exists(${library} compress2 "" HAVE_LIBZ_${library_suffix})
+-      if(HAVE_LIBZ_${library_suffix})
+-        set(HAVE_LIBZ 1)
+-        set(ZLIB_LIBRARIES "${library}")
+-        break()
+-      endif()
+-    endforeach()
++    cmake_push_check_state()
++    list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
++    list(APPEND CMAKE_REQUIRED_LIBRARIES ${ZLIB_LIBRARIES})
++    check_symbol_exists(compress2 zlib.h HAVE_LIBZ)
++    cmake_pop_check_state()
+   endif()
+ 
+-  # Don't look for these libraries on Windows.
+-  if (NOT PURE_WINDOWS)
+     # Skip libedit if using ASan as it contains memory leaks.
+     if (LLVM_ENABLE_LIBEDIT AND HAVE_HISTEDIT_H AND NOT LLVM_USE_SANITIZER MATCHES ".*Address.*")
++      cmake_push_check_state()
++      list(APPEND CMAKE_REQUIRED_INCLUDES ${editline_INCLUDE_DIRS})
++      list(APPEND CMAKE_REQUIRED_LIBRARIES ${editline_LIBRARIES})
+       check_library_exists(edit el_init "" HAVE_LIBEDIT)
++      cmake_pop_check_state()
+     else()
+       set(HAVE_LIBEDIT 0)
+     endif()
+@@ -157,19 +169,11 @@ if(NOT LLVM_USE_SANITIZER MATCHES "Memory.*")
+     find_library(ICONV_LIBRARY_PATH NAMES iconv libiconv libiconv-2 c)
+     set(LLVM_LIBXML2_ENABLED 0)
+     set(LIBXML2_FOUND 0)
+-    if((LLVM_ENABLE_LIBXML2) AND ((CMAKE_SYSTEM_NAME MATCHES "Linux") AND (ICONV_LIBRARY_PATH) OR APPLE))
+-      find_package(LibXml2)
+-      if (LIBXML2_FOUND)
++    if(LLVM_ENABLE_LIBXML2)
++	find_package(LibXml2 REQUIRED)
+         set(LLVM_LIBXML2_ENABLED 1)
+-        if ((CMAKE_OSX_SYSROOT) AND (EXISTS ${CMAKE_OSX_SYSROOT}/${LIBXML2_INCLUDE_DIR}))
+-          include_directories(${CMAKE_OSX_SYSROOT}/${LIBXML2_INCLUDE_DIR})
+-        else()
+-          include_directories(${LIBXML2_INCLUDE_DIR})
+-        endif()
+-      endif()
+     endif()
+   endif()
+-endif()
+ 
+ if (LLVM_ENABLE_LIBXML2 STREQUAL "FORCE_ON" AND NOT LLVM_LIBXML2_ENABLED)
+   message(FATAL_ERROR "Failed to congifure libxml2")
+@@ -517,7 +521,7 @@ else( LLVM_ENABLE_THREADS )
+   message(STATUS "Threads disabled.")
+ endif()
+ 
+-if (LLVM_ENABLE_ZLIB )
++if (LLVM_ENABLE_ZLIB STREQUAL "FORCE_ON")
+   # Check if zlib is available in the system.
+   if ( NOT HAVE_ZLIB_H OR NOT HAVE_LIBZ )
+     set(LLVM_ENABLE_ZLIB 0)
+diff --git a/lib/LineEditor/CMakeLists.txt b/lib/LineEditor/CMakeLists.txt
+index 59190379406..3952bf0144f 100644
+--- a/lib/LineEditor/CMakeLists.txt
++++ b/lib/LineEditor/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ if(HAVE_LIBEDIT)
+-  set(link_libs edit)
++  set(link_libs editline::editline)
+ endif()
+ 
+ add_llvm_component_library(LLVMLineEditor

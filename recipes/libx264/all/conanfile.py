@@ -5,7 +5,7 @@ from conan.tools.env import Environment, VirtualBuildEnv
 from conan.tools.files import copy, rename, get, rmdir
 from conan.tools.gnu import Autotools, AutotoolsToolchain
 from conan.tools.layout import basic_layout
-from conan.tools.microsoft import check_min_vs, is_msvc, unix_path
+from conan.tools.microsoft import is_msvc, unix_path
 import os
 
 required_conan_version = ">=1.57.0"
@@ -25,19 +25,17 @@ class LibX264Conan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "bit_depth": [8, 10, "all"],
+        "with_opencl": [True, False],
+        "with_asm": [True, False]
     }
+    # The project by default enables opencl and asm, it can be opted-out
     default_options = {
         "shared": False,
         "fPIC": True,
         "bit_depth": "all",
+        "with_opencl": True,
+        "with_asm": True
     }
-
-    # otherwise build fails with: ln: failed to create symbolic link './Makefile' -> '../../../../../../../../../../../../../j/w/prod/buildsinglereference@2/.conan/data/libx264/cci.20220602/_/_/build/622692a7dbc145becf87f01b017e2a0d93cc644e/src/Makefile': File name too long
-    short_paths = True
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -59,7 +57,7 @@ class LibX264Conan(ConanFile):
     def build_requirements(self):
         if self._with_nasm:
             self.tool_requires("nasm/2.15.05")
-        if self._settings_build.os == "Windows":
+        if self.settings_build.os == "Windows":
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
@@ -68,9 +66,6 @@ class LibX264Conan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        env = VirtualBuildEnv(self)
-        env.generate()
-
         tc = AutotoolsToolchain(self)
 
         extra_asflags = []
@@ -87,6 +82,10 @@ class LibX264Conan(ConanFile):
             args["--enable-shared"] = ""
         else:
             args["--enable-static"] = ""
+        if not self.options.with_opencl:
+            args["--disable-opencl"] = ""
+        if not self.options.with_asm:
+            args["--disable-asm"] = ""
         if self.options.get_safe("fPIC", self.settings.os != "Windows"):
             args["--enable-pic"] = ""
         if self.settings.build_type == "Debug":
@@ -109,37 +108,13 @@ class LibX264Conan(ConanFile):
 
         if self._with_nasm:
             env = Environment()
-            # FIXME: get using user_build_info
             env.define("AS", unix_path(self, os.path.join(self.dependencies.build["nasm"].package_folder, "bin", "nasm{}".format(".exe" if self.settings.os == "Windows" else ""))))
             env.vars(self).save_script("conanbuild_nasm")
 
-        if cross_building(self):
-            if self.settings.os == "Android":
-                # the as of ndk does not work well for building libx264
-                env = Environment()
-
-                compilers_from_conf = self.conf.get("tools.build:compiler_executables", default={}, check_type=dict)
-                buildenv_vars = VirtualBuildEnv(self).vars()
-                cc = compilers_from_conf.get("c", buildenv_vars.get("CC", "clang-cl"))
-                env.define("AS", cc)
-
-                ndk_root = self.conf.get("tools.android:ndk_path")
-
-                arch = {
-                    "armv7": "arm",
-                    "armv8": "aarch64",
-                    "x86": "i686",
-                    "x86_64": "x86_64",
-                }.get(str(self.settings.arch))
-                abi = "androideabi" if self.settings.arch == "armv7" else "android"
-                args["--cross-prefix"] = f"{ndk_root}/bin/{arch}-linux-{abi}-"
-                env.vars(self).save_script("conanbuild_android")
 
         if is_msvc(self):
             env = Environment()
             env.define("CC", "cl -nologo")
-            if check_min_vs(self, 180, False):
-                extra_cflags.append("-FS")
             env.vars(self).save_script("conanbuild_msvc")
 
         if is_msvc(self) or self.settings.os in ["iOS", "watchOS", "tvOS"]:
@@ -185,6 +160,3 @@ class LibX264Conan(ConanFile):
             self.cpp_info.system_libs.extend(["dl", "pthread", "m"])
         elif self.settings.os == "Android":
             self.cpp_info.system_libs.extend(["dl", "m"])
-
-        # TODO: to remove in conan v2 once pkg_config generator removed
-        self.cpp_info.names["pkg_config"] = "x264"

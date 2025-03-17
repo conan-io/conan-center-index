@@ -1,6 +1,5 @@
 import os
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.scm import Version
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, rmdir, copy
@@ -24,6 +23,7 @@ class RotorConan(ConanFile):
         "enable_thread": [True, False],
         "multithreading": [True, False],  # enables multithreading support
         "enable_ev": [True, False],
+        "enable_fltk": [True, False],
     }
     default_options = {
         "fPIC": True,
@@ -32,21 +32,8 @@ class RotorConan(ConanFile):
         "enable_thread": False,
         "multithreading": True,
         "enable_ev": False,
+        "enable_fltk": False,
     }
-
-    @property
-    def _min_cppstd(self):
-        return 17
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "192",
-            "gcc": "8",
-            "clang": "7",
-            "apple-clang": "12",
-        }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -54,8 +41,8 @@ class RotorConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        if Version(self.version) < "0.26":
-            del self.options.enable_ev
+        if Version(self.version) < "0.30":
+            del self.options.enable_fltk
 
     def configure(self):
         if self.options.shared:
@@ -65,32 +52,27 @@ class RotorConan(ConanFile):
         self.requires("boost/1.84.0", transitive_headers=True)
         if self.options.get_safe("enable_ev", False):
             self.requires("libev/4.33")
+        if self.options.get_safe("enable_fltk", False):
+            self.requires("fltk/1.3.9")
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["BUILD_BOOST_ASIO"] = self.options.enable_asio
-        tc.variables["BUILD_THREAD"] = self.options.enable_thread
-        tc.variables["BUILD_THREAD_UNSAFE"] = not self.options.multithreading
-        tc.variables["BUILD_TESTING"] = False
-        if Version(self.version) >= "0.26":
-            tc.variables["BUILD_EV"] = self.options.enable_ev
+        tc.cache_variables["BUILD_BOOST_ASIO"] = self.options.enable_asio
+        tc.cache_variables["BUILD_THREAD"] = self.options.enable_thread
+        tc.cache_variables["BUILD_THREAD_UNSAFE"] = not self.options.multithreading
+        tc.cache_variables["BUILD_TESTING"] = False
+        tc.cache_variables["BUILD_EV"] = self.options.enable_ev
+        if Version(self.version) >= "0.30":
+            tc.cache_variables["BUILD_FLTK"] = self.options.enable_fltk
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
-            raise ConanInvalidConfiguration(f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.")
-
-        if self.options.shared and Version(self.version) < "0.23":
-            raise ConanInvalidConfiguration("shared option is available from v0.23")
-
+        check_min_cppstd(self, 17)
 
     def build(self):
         apply_conandata_patches(self)
@@ -118,6 +100,8 @@ class RotorConan(ConanFile):
         if self.options.enable_asio:
             self.cpp_info.components["asio"].libs = ["rotor_asio"]
             self.cpp_info.components["asio"].requires = ["core"]
+            if self.settings.os == "Windows":
+                self.cpp_info.components["asio"].system_libs = ["ws2_32"]
 
         if self.options.enable_thread:
             self.cpp_info.components["thread"].libs = ["rotor_thread"]
@@ -126,3 +110,10 @@ class RotorConan(ConanFile):
         if self.options.get_safe("enable_ev", False):
             self.cpp_info.components["ev"].libs = ["rotor_ev"]
             self.cpp_info.components["ev"].requires = ["core", "libev::libev"]
+
+        if self.options.get_safe("enable_fltk", False):
+            self.cpp_info.components["fltk"].libs = ["rotor_fltk"]
+            self.cpp_info.components["fltk"].requires = ["core", "fltk::fltk"]
+
+        if self.settings.os in ["Linux", "FreeBSD"]:
+            self.cpp_info.components["core"].system_libs.append("m")

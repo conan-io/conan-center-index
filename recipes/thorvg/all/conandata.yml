@@ -1,0 +1,22 @@
+sources:
+  "0.15.9":
+    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.15.9.tar.gz"
+    sha256: "05c5424d5065f38db832c87785e3cc0e135443797a4431bdcda6807abf75d8cc"
+  "0.15.4":
+    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.15.4.tar.gz"
+    sha256: "3031a3e070322194fc5368419e996420f05f26ec2ec8137beca17eba5e5e8a58"
+  "0.15.3":
+    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.15.3.tar.gz"
+    sha256: "c3d57167a54f0ecc3ead8bb33340593acc00bcd8477e784287307bc4e2c82b38"
+  "0.14.10":
+    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.14.10.tar.gz"
+    sha256: "e11e2e27ef26ed018807e828cce3bca1fb9a7f25683a152c9cd1f7aac9f3b67a"
+  "0.14.6":
+    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.14.6.tar.gz"
+    sha256: "13d7778968ce10f4f7dd1ea1f66861d4ee8ff22f669566992b4ac00e050496cf"
+  "0.13.8":
+    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.13.8.tar.gz"
+    sha256: "ce49929a94d1686d4f1436da6ef5fa7a8439901c22b5fa0879d7d5879b8ba2bd"
+  "0.13.7":
+    url: "https://github.com/thorvg/thorvg/archive/refs/tags/v0.13.7.tar.gz"
+    sha256: "972c84e5670a7138eec24062d4ccc243d161158ecd9c53788300a8ca6aaf3426"

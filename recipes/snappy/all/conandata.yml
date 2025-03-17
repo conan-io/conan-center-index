@@ -1,4 +1,10 @@
 sources:
+  "1.2.1":
+    url: "https://github.com/google/snappy/archive/1.2.1.tar.gz"
+    sha256: "736aeb64d86566d2236ddffa2865ee5d7a82d26c9016b36218fcc27ea4f09f86"
+  "1.2.0":
+    url: "https://github.com/google/snappy/archive/1.2.0.tar.gz"
+    sha256: "9b8f10fbb5e3bc112f2e5e64f813cb73faea42ec9c533a5023b5ae08aedef42e"
   "1.1.10":
     url: "https://github.com/google/snappy/archive/1.1.10.tar.gz"
     sha256: "49d831bffcc5f3d01482340fe5af59852ca2fe76c3e05df0e67203ebbe0f1d90"
@@ -12,6 +18,32 @@ sources:
     url: "https://github.com/google/snappy/archive/1.1.7.tar.gz"
     sha256: "3dfa02e873ff51a11ee02b9ca391807f0c8ea0529a4924afa645fbf97163f9d4"
 patches:
+  "1.2.1":
+    - patch_file: "patches/1.1.10-0001-fix-inlining-failure.patch"
+      patch_description: "disable inlining for compilation error"
+      patch_type: "portability"
+    - patch_file: "patches/1.1.9-0002-no-Werror.patch"
+      patch_description: "disable 'warning as error' options"
+      patch_type: "portability"
+    - patch_file: "patches/1.2.0-0003-fix-clobber-list-older-llvm.patch"
+      patch_description: "disable inline asm on apple-clang"
+      patch_type: "portability"
+    - patch_file: "patches/1.2.0-0004-rtti-by-default.patch"
+      patch_description: "remove 'disable rtti'"
+      patch_type: "conan"
+  "1.2.0":
+    - patch_file: "patches/1.1.10-0001-fix-inlining-failure.patch"
+      patch_description: "disable inlining for compilation error"
+      patch_type: "portability"
+    - patch_file: "patches/1.1.9-0002-no-Werror.patch"
+      patch_description: "disable 'warning as error' options"
+      patch_type: "portability"
+    - patch_file: "patches/1.2.0-0003-fix-clobber-list-older-llvm.patch"
+      patch_description: "disable inline asm on apple-clang"
+      patch_type: "portability"
+    - patch_file: "patches/1.2.0-0004-rtti-by-default.patch"
+      patch_description: "remove 'disable rtti'"
+      patch_type: "conan"
   "1.1.10":
     - patch_file: "patches/1.1.10-0001-fix-inlining-failure.patch"
       patch_description: "disable inlining for compilation error"

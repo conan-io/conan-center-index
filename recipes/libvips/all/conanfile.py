@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import copy, get, replace_in_file, rm, rmdir
+from conan.tools.files import copy, get, replace_in_file, rm, rmdir, apply_conandata_patches, export_conandata_patches
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.meson import Meson, MesonToolchain
@@ -122,11 +122,14 @@ class LibvipsConan(ConanFile):
             self.settings.rm_safe("compiler.cppstd")
             self.settings.rm_safe("compiler.libcxx")
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     def layout(self):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("expat/2.5.0")
+        self.requires("expat/[>=2.6.2 <3]")
         self.requires("glib/2.78.3", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_archive"):
             self.requires("libarchive/3.7.2")
@@ -139,7 +142,7 @@ class LibvipsConan(ConanFile):
         if self.options.with_fftw:
             self.requires("fftw/3.3.10")
         if self.options.with_fontconfig:
-            self.requires("fontconfig/2.14.2")
+            self.requires("fontconfig/2.15.0")
         if self.options.with_heif:
             self.requires("libheif/1.16.2")
         if self.options.get_safe("with_highway"):
@@ -147,27 +150,27 @@ class LibvipsConan(ConanFile):
         if self.options.with_jpeg == "libjpeg":
             self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.1")
+            self.requires("libjpeg-turbo/3.0.2")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.5")
         if self.options.with_jpeg_xl:
-            self.requires("libjxl/0.6.1")
+            self.requires("libjxl/0.11.1")
         if self.options.with_lcms:
-            self.requires("lcms/2.14")
+            self.requires("lcms/2.16")
         if self.options.with_magick:
             self.requires("imagemagick/7.0.11-14")
         if self.options.with_matio:
             self.requires("matio/1.5.24")
         if self.options.with_openexr:
-            self.requires("openexr/3.2.1")
+            self.requires("openexr/3.2.3")
         if self.options.with_openjpeg:
-            self.requires("openjpeg/2.5.0")
+            self.requires("openjpeg/2.5.2")
         if self.options.with_pangocairo:
             self.requires("pango/1.50.10")
         if self.options.with_pdfium:
             self.requires("pdfium/95.0.4629")
         if self.options.with_png == "libpng":
-            self.requires("libpng/1.6.40")
+            self.requires("libpng/[>=1.6 <2]")
         elif self.options.with_png == "libspng":
             self.requires("libspng/0.7.4")
         if self.options.with_poppler:
@@ -215,9 +218,9 @@ class LibvipsConan(ConanFile):
             raise ConanInvalidConfiguration("librsvg recipe not available in conancenter yet")
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.0")
+        self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
         if self.options.introspection:
             self.tool_requires("gobject-introspection/1.72.0")
         self.tool_requires("glib/<host_version>")
@@ -227,7 +230,7 @@ class LibvipsConan(ConanFile):
             # a different/incompatible libiconv than the one being exposed
             # in the runtime environment (DYLD_LIBRARY_PATH)
             # See https://github.com/conan-io/conan-center-index/pull/17502#issuecomment-1542492466
-            self.tool_requires("gettext/0.21")
+            self.tool_requires("gettext/0.22.5")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -299,6 +302,8 @@ class LibvipsConan(ConanFile):
         deps.generate()
 
     def _patch_sources(self):
+        apply_conandata_patches(self)
+
         # Disable tests
         meson_build = os.path.join(self.source_folder, "meson.build")
         replace_in_file(self, meson_build, "subdir('test')", "")
