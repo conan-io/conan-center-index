@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rm, rmdir, replace_in_file
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path, is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild
@@ -61,6 +61,9 @@ class CyrusSaslConan(ConanFile):
         "with_saslauthd": True,
     }
 
+    def export_sources(self):
+        export_conandata_patches(self)
+
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
@@ -112,6 +115,7 @@ class CyrusSaslConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def _generate_autotools(self):
         env = VirtualBuildEnv(self)
@@ -201,10 +205,6 @@ class CyrusSaslConan(ConanFile):
                                 f'{import_conan_generators}<Import Project="$(VCTargetsPath)\\Microsoft.Cpp.targets" />')
         replace_in_file(self, os.path.join(self.source_folder, "win32", "openssl.props"),
                         "libeay32.lib;", "")
-        # https://github.com/cyrusimap/cyrus-sasl/issues/831
-        for attr in ["(format(printf, 2, 3))", "(format(printf, 3, 4))"]:
-            replace_in_file(self, os.path.join(self.source_folder, "include", "saslplug.h"),
-                            f"__attribute__({attr})", "")
         # https://github.com/cyrusimap/cyrus-sasl/issues/730
         copy(self, "md5global.h",
              src=os.path.join(self.source_folder, "win32", "include"),
