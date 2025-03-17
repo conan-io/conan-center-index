@@ -3,7 +3,7 @@ from conan.tools.files import apply_conandata_patches, export_conandata_patches,
 from conan.tools.build import check_min_cppstd
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
-
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2"
@@ -86,6 +86,8 @@ class AwsCrtCpp(ConanFile):
             tc.variables["AWS_STATIC_MSVC_RUNTIME_LIBRARY"] = is_msvc_static_runtime(self)
         tc.variables["BUILD_TESTING"] = False
         tc.cache_variables["BUILD_DEPS"] = False
+        if Version(self.version) < "0.31.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
 
         deps = CMakeDeps(self)

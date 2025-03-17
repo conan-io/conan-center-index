@@ -49,6 +49,8 @@ class AwsCCommon(ConanFile):
         tc.variables["AWS_WARNINGS_ARE_ERRORS"] = False
         if is_msvc(self):
             tc.variables["STATIC_CRT"] = is_msvc_static_runtime(self)
+        if Version(self.version) < "0.11.0":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.variables["USE_CPU_EXTENSIONS"] = self.options.get_safe("cpu_extensions", False)
         tc.generate()
 

@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import get, copy, rmdir
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.4"
@@ -51,6 +52,8 @@ class AwsCEventStream(ConanFile):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_BINARIES"] = False
         tc.variables["BUILD_TESTING"] = False
+        if Version(self.version) < "0.5.1":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
 
         deps = CMakeDeps(self)
