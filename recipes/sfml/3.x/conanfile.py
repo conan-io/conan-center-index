@@ -9,7 +9,7 @@ from conan.tools.microsoft import is_msvc_static_runtime
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2"
 
 
 class SfmlConan(ConanFile):
@@ -54,10 +54,6 @@ class SfmlConan(ConanFile):
         return {
             "gcc": 9
         }
-
-    @property
-    def _min_cppstd(self):
-        return 17
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -119,12 +115,11 @@ class SfmlConan(ConanFile):
         self.tool_requires("cmake/[>=3.24 <4]")
 
     def validate(self):
-        if self.settings.compiler.cppstd:
-            check_min_cppstd(self, self._min_cppstd)
+        check_min_cppstd(self, 17)
 
         compiler_version = self._min_compiler_versions.get(str(self.settings.compiler))
         if compiler_version and (Version(self.settings.compiler.version) < compiler_version):
-            raise ConanInvalidConfiguration(f"{self.name} requires C++{self._min_cppstd} with {self.settings.compiler} {compiler_version} or newer")
+            raise ConanInvalidConfiguration(f"{self.name} requires {self.settings.compiler} {compiler_version} or newer")
 
         if self.options.graphics and not self.options.window:
             raise ConanInvalidConfiguration(f"-o={self.ref}:graphics=True requires -o={self.ref}:window=True")
@@ -145,10 +140,9 @@ class SfmlConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        self._patch_sources()
 
     def generate(self):
-        venv = VirtualBuildEnv(self)
-        venv.generate()
         tc = CMakeToolchain(self)
 
         tc.variables["SFML_BUILD_WINDOW"] = self.options.window
@@ -180,13 +174,11 @@ class SfmlConan(ConanFile):
         # tc.variables["SFML_CONFIGURE_EXTRAS"] = True
         # tc.variables["SFML_BUILD_EXAMPLES"] = True
 
-        # TODO: Remove in Conan 2
-        if not self.settings.compiler.cppstd:
-            tc.cache_variables["CMAKE_CXX_STANDARD"] = self._min_cppstd
-
         tc.generate()
         deps = CMakeDeps(self)
         deps.set_property("flac", "cmake_file_name", "FLAC")
+        deps.set_property("freetype", "cmake_file_name", "Freetype")
+        deps.set_property("freetype", "cmake_target_name", "Freetype::Freetype")
         deps.generate()
 
     def _patch_sources(self):
@@ -197,7 +189,6 @@ class SfmlConan(ConanFile):
                         "add_subdirectory(cocoa)", "")
 
     def build(self):
-        self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -210,7 +201,7 @@ class SfmlConan(ConanFile):
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "share"))
 
-    def _default_module(self, name):
+    def _basic_module_definition(self, name):
         self.cpp_info.components[name].set_property("cmake_target_name", f"SFML::{name.capitalize()}")
 
         libname = f"sfml-{name}"
@@ -251,16 +242,9 @@ class SfmlConan(ConanFile):
         modules.extend(module for module in ["window", "graphics", "network", "audio"] if self.options.get_safe(module))
 
         for module in modules:
-            self._default_module(module)
-            if hasattr(self, f"_{module}_module"):
-                getattr(self, f"_{module}_module")()
+            self._basic_module_definition(module)
 
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
-        self.cpp_info.names["cmake_find_package"] = "SFML"
-        self.cpp_info.names["cmake_find_package_multi"] = "SFML"
-        self.cpp_info.names["pkgconfig"] = "sfml-all"
-
-    def _system_module(self):
+        # System module is always required
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["system"].system_libs = ["pthread", "rt"]
         elif self.settings.os == "Windows":
@@ -268,7 +252,6 @@ class SfmlConan(ConanFile):
         elif self.settings.os == "Android":
             self.cpp_info.components["system"].system_libs = ["log", "android"]
 
-    def _window_module(self):
         if self.options.window:
             self.cpp_info.components["window"].requires = ["system"]
             if self.settings.os in ["Linux", "FreeBSD"]:
@@ -301,7 +284,6 @@ class SfmlConan(ConanFile):
             elif self.settings.os == "Android":
                 self.cpp_info.components["window"].system_libs = ["android"]
 
-    def _graphics_module(self):
         if self.options.graphics:
             self.cpp_info.components["graphics"].requires = ["window"]
             if self.settings.os == "Android" or self.settings.os == "iOS":
@@ -311,14 +293,12 @@ class SfmlConan(ConanFile):
             self.cpp_info.components["graphics"].requires.append("freetype::freetype")
             # TODO: Atomic
 
-    def _network_module(self):
         if self.options.network:
             self.cpp_info.components["network"].requires = ["system"]
 
             if self.settings.os == "Windows":
                 self.cpp_info.components["network"].system_libs = ["ws2_32"]
 
-    def _audio_module(self):
         if self.options.audio:
             self.cpp_info.components["audio"].requires = ["vorbis::vorbis", "flac::flac", "system"]
             if self.settings.os == "iOS":

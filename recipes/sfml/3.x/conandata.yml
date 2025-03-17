@@ -1,17 +1,9 @@
 sources:
-  "3.0.0-rc.1":
-    url: "https://github.com/SFML/SFML/archive/refs/tags/3.0.0-rc.1.tar.gz"
-    sha256: "680da7f4398a5766787ea9ca69dd1c9a4871cf3c4834ddfad922425c6f792dc8"
+  "3.0.0":
+    url: "https://github.com/SFML/SFML/archive/refs/tags/3.0.0.tar.gz"
+    sha256: "37506fafbd618b1f8e153bbca8811e62203a70b32a1183279fb9612fd0501d2b"
 patches:
-  "3.0.0-rc.1":
-    - patch_file: "patches/3.0.0-0001-use-zlib-bzip-freetype-conan.patch"
-      patch_description: "use zlib bzip2 and freetype from conan"
-      patch_type: "conan"
-    # TODO: Delete this one when this gets released in a future rc or final version
-    - patch_file: "patches/3.0.0-0002-windows-arm-build.patch"
-      patch_description: "fix windows arm build"
-      patch_type: "backport"
-      patch_source: "https://github.com/SFML/SFML/pull/3229"
+  "3.0.0":
     - patch_file: "patches/3.0.0-0003-conan-choose-osx-deplyment-target.patch"
       patch_description: "let conan choose osx deployment target"
       patch_type: "conan"

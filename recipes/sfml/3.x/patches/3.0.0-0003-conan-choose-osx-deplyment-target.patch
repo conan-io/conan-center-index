@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 64f663f..d0e24da 100644
+index 8a11523..b63a090 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -26,7 +26,7 @@ endif()
@@ -10,4 +10,4 @@ index 64f663f..d0e24da 100644
 +# sfml_set_option(CMAKE_OSX_DEPLOYMENT_TARGET "13.0" STRING "The minimal iOS version that will be able to run the built binaries. Cannot be lower than 13.0")
  
  # project name
- project(SFML VERSION 3.0.0 LANGUAGES CXX)
+ project(SFML VERSION 3.0.0)
