@@ -27,8 +27,6 @@ patches:
     - patch_file: "patches/no-fetch-content-3.8.2.patch"
       patch_type: portability
       patch_description: "allows disabling internal usage of fetch content"
-      patch_source: "https://gitlab.dev.entos.sky/entos-xe/libs/launchdarkly/-/commit/f14e48a74c08b42344764d4180222a47459f244f"
     - patch_file: "patches/optional-server-sdk-3.8.2.patch"
       patch_type: portability
       patch_description: "disable the server sdk which does not build with latest boost"
-      patch_source: "https://gitlab.dev.entos.sky/entos-xe/libs/launchdarkly/-/commit/"
