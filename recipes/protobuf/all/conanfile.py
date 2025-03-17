@@ -119,6 +119,10 @@ class ProtobufConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def build_requirements(self):
+        if Version(self.version) > 6:
+            self.tool_requires("cmake/[>=3.16 <4]")
+
     @property
     def _cmake_install_base_path(self):
         return os.path.join("lib", "cmake", "protobuf")
