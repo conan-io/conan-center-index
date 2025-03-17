@@ -1,4 +1,7 @@
 sources:
+  "cci.20240620":
+    sha256: 363613c9ea6b4d4b290527bc1fcd626b09accd985a40f14442e86d1df16ec487
+    url: https://github.com/juliettef/IconFontCppHeaders/archive/62d27fa93d8f1f881dac18f13881dd97af66fa74/main.zip
   "cci.20240128":
     sha256: de946a4471dca969426b2e7863d79136a91f2e4e4cc7a766df31bbb8412571f9
     url: https://github.com/juliettef/IconFontCppHeaders/archive/8886c5657bac22b8fee34354871e3ade2a596433/main.zip

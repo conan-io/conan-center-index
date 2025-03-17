@@ -160,7 +160,7 @@ class bgfxConan(ConanFile):
         if is_msvc(self):
             # Conan to Genie translation maps
             vs_ver_to_genie = {"17": "2022", "16": "2019", "15": "2017",
-                            "193": "2022", "192": "2019", "191": "2017"}
+                            "194": "2022", "193": "2022", "192": "2019", "191": "2017"}
 
             # Use genie directly, then msbuild on specific projects based on requirements
             genie_VS = f"vs{vs_ver_to_genie[str(self.settings.compiler.version)]}"

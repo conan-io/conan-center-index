@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import export_conandata_patches, apply_conandata_patches, get, copy, rm, rmdir
+from conan.tools.files import get, copy, rm, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
@@ -68,7 +68,7 @@ class CBlosc2Conan(ConanFile):
         if self.options.with_lz4:
             self.requires("lz4/1.9.4")
         if self.options.with_zlib in ["zlib-ng", "zlib-ng-compat"]:
-            self.requires("zlib-ng/2.1.6")
+            self.requires("zlib-ng/2.2.0")
         elif self.options.with_zlib == "zlib":
             self.requires("zlib/[>=1.2.11 <2]")
         if self.options.with_zstd:
@@ -111,9 +111,18 @@ class CBlosc2Conan(ConanFile):
         tc.cache_variables["BUILD_PLUGINS"] = bool(self.options.with_plugins)
         if self.options.with_zlib == "zlib-ng-compat":
             tc.preprocessor_definitions["ZLIB_COMPAT"] = "1"
+        if Version(self.version) >= "2.15.2":
+            tc.cache_variables["WITH_ZLIB_OPTIM"] = self.settings.arch != "wasm"
         tc.generate()
 
         deps = CMakeDeps(self)
+        if self.options.with_lz4:
+            deps.set_property("lz4", "cmake_file_name", "LZ4")
+        if self.options.with_zlib =="zlib-ng":
+            deps.set_property("zlib-ng", "cmake_file_name", "ZLIB_NG")
+            deps.set_property("zlib-ng", "cmake_target_name", "ZLIB_NG::ZLIB_NG")
+        if self.options.with_zstd:
+            deps.set_property("zstd", "cmake_file_name", "ZSTD")
         deps.generate()
 
     def _patch_sources(self):

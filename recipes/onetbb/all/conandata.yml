@@ -1,4 +1,13 @@
 sources:
+  "2022.0.0":
+    url: "https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2022.0.0.tar.gz"
+    sha256: "e8e89c9c345415b17b30a2db3095ba9d47647611662073f7fbf54ad48b7f3c2a"
+  "2021.13.0":
+    url: "https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2021.13.0.tar.gz"
+    sha256: "3ad5dd08954b39d113dc5b3f8a8dc6dc1fd5250032b7c491eb07aed5c94133e1"
+  "2021.12.0":
+    url: "https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2021.12.0.tar.gz"
+    sha256: "c7bb7aa69c254d91b8f0041a71c5bcc3936acb64408a1719aec0b2b7639dd84f"
   "2021.10.0":
     url: "https://github.com/oneapi-src/oneTBB/archive/refs/tags/v2021.10.0.tar.gz"
     sha256: "487023a955e5a3cc6d3a0d5f89179f9b6c0ae7222613a7185b0227ba0c83700b"
@@ -18,6 +27,11 @@ sources:
     url: "https://github.com/oneapi-src/oneTBB/archive/v2021.3.0.tar.gz"
     sha256: "8f616561603695bbb83871875d2c6051ea28f8187dbe59299961369904d1d49e"
 patches:
+  "2022.0.0":
+    - patch_description: "Fix flow_graph tests build when compiling with GCC 13.3 or older"
+      patch_type: "official"
+      patch_source: "https://github.com/uxlfoundation/oneTBB/commit/9c9ace26863cf50853f39b2d0b78146d20a981a6"
+      patch_file: "patches/onetbb-wait-namespace.patch"
   "2021.8.0":
     - patch_description: "fix building for android with NDK >= 25"
       patch_type: "portability"

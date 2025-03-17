@@ -1,9 +1,9 @@
 versions:
   "1.18.0":
-    folder: meson
+    folder: all
   "1.17.8":
-    folder: meson
+    folder: all
   "1.17.6":
-    folder: meson
+    folder: all
   "1.17.4":
-    folder: meson
+    folder: all

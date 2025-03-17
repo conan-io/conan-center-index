@@ -1,10 +1,25 @@
 sources:
+  "2.17.1":
+    url: "https://github.com/danmar/cppcheck/archive/2.17.1.tar.gz"
+    sha256: "bfd681868248ec03855ca7c2aea7bcb1f39b8b18860d76aec805a92a967b966c"
+  "2.17.0":
+    url: "https://github.com/danmar/cppcheck/archive/2.17.0.tar.gz"
+    sha256: "5a639adf8d5f2520a280eb0f0fc25605cd8a3d4336a27f4a3e3e0f0c0c9789da"
+  "2.16.2":
+    url: "https://github.com/danmar/cppcheck/archive/2.16.2.tar.gz"
+    sha256: "521b996cb56b0c30f89e022abcb50aef85d7219cb7a7162fa81fe40fe6394206"
+  "2.16.0":
+    url: "https://github.com/danmar/cppcheck/archive/2.16.0.tar.gz"
+    sha256: "f1a97c8cef5ee9d0abb57e9244549d4fe18d4ecac80cf82e250d1fc5f38b1501"
+  "2.15.0":
+    url: "https://github.com/danmar/cppcheck/archive/2.15.0.tar.gz"
+    sha256: "98bcc40ac8062635b492fb096d7815376a176ae26749d6c708083f4637f7c0bb"
+  "2.14.2":
+    url: "https://github.com/danmar/cppcheck/archive/2.14.2.tar.gz"
+    sha256: "9c3acea5f489336bd83a8ea33917a9a04a80c56d874bf270287e7de27acf2d00"
   "2.13.4":
     url: "https://github.com/danmar/cppcheck/archive/2.13.4.tar.gz"
     sha256: "d6ea064ebab76c6aa000795440479767d8d814dd29405918df4c1bbfcd6cb86c"
-  "2.13.3":
-    url: "https://github.com/danmar/cppcheck/archive/2.13.3.tar.gz"
-    sha256: "ac8c526d19496038c09bf4781bd804ab1f7aaadee4c3b699629830d24742dd81"
   "2.12.1":
     url: "https://github.com/danmar/cppcheck/archive/2.12.1.tar.gz"
     sha256: "2a3d4ba1179419612183ab3d6aed6d3b18be75e98cd6f138ea8e2020905dced2"
