@@ -1,4 +1,6 @@
 #include <cstdio>
+#include <cstdint>
+#include <string>
 #include "tweeny/tweeny.h"
 
 
