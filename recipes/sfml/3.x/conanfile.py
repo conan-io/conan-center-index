@@ -46,6 +46,7 @@ class SfmlConan(ConanFile):
         "use_drm": False,
         # "use_mesa3d": False,
     }
+    implements = ["auto_shared_fpic"]
 
     # TODO: Fill as needed, can't find an official source,
     #  going by compilation failures right now
@@ -65,22 +66,16 @@ class SfmlConan(ConanFile):
             pass
             # TODO: Handle mesa3d
             # del self.options.use_mesa3d
-
-        # As per CMakeLists.txt#L44, Android is always shared
-        if self.settings.os == "Android":
-            del self.options.shared
-            del self.options.fPIC
-            self.package_type = "shared-library"
-
-    def configure(self):
-        if self.options.get_safe("shared"):
-            self.options.rm_safe("fPIC")
-
         if not self.options.window:
             del self.options.opengl
             del self.options.use_drm
         elif self.settings.os != "Linux":
             del self.options.use_drm  # For Window module but only available on Linux
+        # As per CMakeLists.txt#L44, Android is always shared
+        if self.settings.os == "Android":
+            del self.options.shared
+            del self.options.fPIC
+            self.package_type = "shared-library"
 
     def layout(self):
         cmake_layout(self, src_folder="src")
