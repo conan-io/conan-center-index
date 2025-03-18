@@ -248,13 +248,14 @@ class ProtobufConan(ConanFile):
             # it's a private dependency and unconditionally built as a static library, should only
             # be exposed when protobuf itself is static (or if upb is being built)
             self.cpp_info.components["utf8_range"].set_property("cmake_target_name", "utf8_range::utf8_range")
+            self.cpp_info.components["utf8_validity"].set_property("cmake_target_name", "utf8_range::utf8_validity")
             # https://github.com/protocolbuffers/protobuf/blob/0d815c5b74281f081c1ee4b431a4d5bbb1615c97/third_party/utf8_range/CMakeLists.txt#L24
             if self._protobuf_release >= "30.1" and self.settings.os == "Windows":
                 self.cpp_info.components["utf8_range"].libs = ["libutf8_range"]
+                self.cpp_info.components["utf8_validity"].libs = ["libutf8_validity"]
             else:
                 self.cpp_info.components["utf8_range"].libs = ["utf8_range"]
-            self.cpp_info.components["utf8_validity"].set_property("cmake_target_name", "utf8_range::utf8_validity")
-            self.cpp_info.components["utf8_validity"].libs = ["utf8_validity"]
+                self.cpp_info.components["utf8_validity"].libs = ["utf8_validity"]
             self.cpp_info.components["utf8_validity"].requires = ["abseil::absl_strings"]
 
         if self.options.get_safe("upb"):
