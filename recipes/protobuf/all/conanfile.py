@@ -121,7 +121,7 @@ class ProtobufConan(ConanFile):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build_requirements(self):
-        if Version(self.version) > 6:
+        if self._protobuf_release >= "30.1":
             self.tool_requires("cmake/[>=3.16 <4]")
 
     @property
@@ -130,7 +130,7 @@ class ProtobufConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) > 6:
+        if self._protobuf_release >= "30.1":
             tc.cache_variables["protobuf_LOCAL_DEPENDENCIES_ONLY"] = True
         tc.cache_variables["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
         tc.cache_variables["protobuf_WITH_ZLIB"] = self.options.with_zlib
@@ -248,7 +248,11 @@ class ProtobufConan(ConanFile):
             # it's a private dependency and unconditionally built as a static library, should only
             # be exposed when protobuf itself is static (or if upb is being built)
             self.cpp_info.components["utf8_range"].set_property("cmake_target_name", "utf8_range::utf8_range")
-            self.cpp_info.components["utf8_range"].libs = ["utf8_range"]
+            # https://github.com/protocolbuffers/protobuf/blob/0d815c5b74281f081c1ee4b431a4d5bbb1615c97/third_party/utf8_range/CMakeLists.txt#L24
+            if self._protobuf_release >= "30.1" and self.settings.os == "Windows":
+                self.cpp_info.components["utf8_range"].libs = ["libutf8_range"]
+            else:
+                self.cpp_info.components["utf8_range"].libs = ["utf8_range"]
             self.cpp_info.components["utf8_validity"].set_property("cmake_target_name", "utf8_range::utf8_validity")
             self.cpp_info.components["utf8_validity"].libs = ["utf8_validity"]
             self.cpp_info.components["utf8_validity"].requires = ["abseil::absl_strings"]
