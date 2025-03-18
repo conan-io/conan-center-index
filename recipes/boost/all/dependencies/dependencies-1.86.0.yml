@@ -20,6 +20,7 @@ configure_options:
 - math
 - mpi
 - nowide
+- process
 - program_options
 - python
 - random
@@ -40,6 +41,7 @@ dependencies:
   - system
   cobalt:
   - container
+  - context
   - system
   container: []
   context: []
@@ -115,6 +117,9 @@ dependencies:
   - python
   prg_exec_monitor:
   - test
+  process:
+  - filesystem
+  - system
   program_options: []
   python: []
   random:
@@ -128,13 +133,13 @@ dependencies:
   - stacktrace
   stacktrace_basic:
   - stacktrace
+  stacktrace_from_exception:
+  - stacktrace
   stacktrace_noop:
   - stacktrace
   stacktrace_windbg:
   - stacktrace
   stacktrace_windbg_cached:
-  - stacktrace
-  stacktrace_from_exception:
   - stacktrace
   system: []
   test:
@@ -226,6 +231,8 @@ libs:
   - boost_numpy{py_major}{py_minor}
   prg_exec_monitor:
   - boost_prg_exec_monitor
+  process:
+  - boost_process
   program_options:
   - boost_program_options
   python:

@@ -1,4 +1,10 @@
 sources:
+  "4.11":
+    url: "https://github.com/ccache/ccache/releases/download/v4.11/ccache-4.11.tar.gz"
+    sha256: "7dba208540dc61cedd5c93df8c960055a35f06e29a0a3cf766962251d4a5c766"
+  "4.10.2":
+    url: "https://github.com/ccache/ccache/releases/download/v4.10.2/ccache-4.10.2.tar.gz"
+    sha256: "108100960bb7e64573ea925af2ee7611701241abb36ce0aae3354528403a7d87"
   "4.10":
     url: "https://github.com/ccache/ccache/releases/download/v4.10/ccache-4.10.tar.gz"
     sha256: "16972ba62c8499045edc3ae7d7b8a0b419a961567f5ff0f01bf5a44194204775"

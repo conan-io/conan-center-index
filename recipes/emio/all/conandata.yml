@@ -1,4 +1,10 @@
 sources:
+  "0.9.0":
+    url: "https://github.com/Viatorus/emio/archive/0.9.0.tar.gz"
+    sha256: "63b1eca2ac9a66d443352717302305998300f259216b20f686c02db594b1d87b"
+  "0.8.0":
+    url: "https://github.com/Viatorus/emio/archive/0.8.0.tar.gz"
+    sha256: "86436eeb16cac7c7c74a7c1af9fe7bbbc1aa18d3d96e7bba9791c15ebe9ebdc7"
   "0.7.0":
     url: "https://github.com/viatorus/emio/archive/0.7.0.tar.gz"
     sha256: "1ef5304964eee109c13477f2d84822ee474612475049a377b59e33a5fe05d7eb"
