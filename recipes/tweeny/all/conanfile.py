@@ -6,6 +6,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 import os
 
+from conans.model.version import Version
 
 required_conan_version = ">=2.0.9"
 
@@ -31,7 +32,9 @@ class TweenyConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
+        if Version(self.version) == "3.2.0":
+            # already fixed in master, assuming it is fixed in upcoming release
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"  # CMake 4 support
         tc.generate()
 
     def build(self):
