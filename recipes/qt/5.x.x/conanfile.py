@@ -1014,9 +1014,6 @@ Prefix = ..""")
             if self.options.gui:
                 _create_private_module("Quick", ["CorePrivate", "GuiPrivate", "QmlPrivate", "Quick"])
 
-            if self.options.gui:
-                _create_private_module("Quick", ["CorePrivate", "GuiPrivate", "QmlPrivate", "Quick"])
-
         if self.options.qtscxml:
             _create_private_module("Scxml", ["Scxml", "Qml"])
 
