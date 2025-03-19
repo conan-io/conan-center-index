@@ -34,7 +34,7 @@ class PackageConan(ConanFile):
     def validate(self):
         #check_min_cppstd(self, 23)
         pass
-        
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.28 <4]")
 
@@ -45,6 +45,7 @@ class PackageConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
+        tc.variables["BUILD_TESTING"] = False
         tc.generate()
 
     def build(self):
