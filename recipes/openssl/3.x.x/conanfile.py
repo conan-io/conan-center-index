@@ -439,6 +439,15 @@ class OpenSSLConan(ConanFile):
         defines = 'defines => add("%s"),' % defines if defines else ""
         targets = "my %targets"
 
+        # OpenSSL 3's use of assembly is incompatible with Control Flow Guard
+        if is_msvc(self) and not self.options.no_asm:
+            def not_guard_cf(flag):
+                return re.match(r'[-/](?i)(guard:cf)$', flag) is None
+
+            cflags = list(filter(not_guard_cf, cflags))
+            cxxflags = list(filter(not_guard_cf, cxxflags))
+            ldflags = list(filter(not_guard_cf, ldflags))
+
         if self._asm_target:
             ancestor = f'[ "{self._ancestor_target}", asm("{self._asm_target}") ]'
         else:
