@@ -27,9 +27,7 @@ class PackageConan(ConanFile):
         cmake_layout(self)
 
     def requirements(self):
-        requirements = self.conan_data.get('requirements', [])
-        for requirement in requirements:
-            self.requires(requirement)
+        self.requires("gtest/1.15.0")
 
     def validate(self):
         #check_min_cppstd(self, 23)
