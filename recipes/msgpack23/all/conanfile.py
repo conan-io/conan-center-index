@@ -9,8 +9,6 @@ import os
 
 required_conan_version = ">=2.0.9"
 
-
-
 class PackageConan(ConanFile):
     name = "msgpack23"
     description = "A modern, header-only C++ library for MessagePack serialization and deserialization."
@@ -26,15 +24,9 @@ class PackageConan(ConanFile):
     def layout(self):
         cmake_layout(self)
 
-    def requirements(self):
-        requirements = self.conan_data.get('requirements', [])
-        for requirement in requirements:
-            self.requires(requirement)
-
     def validate(self):
-        #check_min_cppstd(self, 23)
-        pass
-        
+        check_min_cppstd(self, 23)
+
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.28 <4]")
 
