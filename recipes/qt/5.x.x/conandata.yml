@@ -29,8 +29,6 @@ patches:
       "patch_file": "patches/fix-macdeployqt.diff"
     - "base_path": "qt5/qtwebengine/src/3rdparty"
       "patch_file": "patches/0001-Find-fontconfig-using-pkg-config.patch"
-    - "base_path": "qt5/qtwebengine/src/3rdparty"
-      "patch_file": "patches/Fix-errors-and-warnings-for-perfetto.patch"
     - "base_path": "qt5/qtbase"
       "patch_file": "patches/android-openssl.diff"
     - "base_path": "qt5/qtwebengine"
