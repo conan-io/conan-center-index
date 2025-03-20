@@ -87,5 +87,3 @@ class ImGuiSFMLConan(ConanFile):
 
         self.cpp_info.set_property("cmake_file_name", "ImGui-SFML")
         self.cpp_info.set_property("cmake_target_name", "ImGui-SFML::ImGui-SFML")
-
-        self.cpp_info.defines = ["IMGUI_USER_CONFIG=imconfig-SFML.h"]
