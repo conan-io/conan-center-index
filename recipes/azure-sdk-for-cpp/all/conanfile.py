@@ -55,13 +55,13 @@ class AzureSDKForCppConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} Conan recipe in ConanCenter still does not support {self.settings.os}, contributions to the recipe welcome.")
 
-        if self.settings.compiler != "gcc" and self.settings.compiler != "clang":
+        if self.settings.compiler != "gcc" and self.settings.compiler != "clang" and self.settings.compiler != "apple-clang":
             raise ConanInvalidConfiguration(
                 f"{self.ref} Conan recipe in ConanCenter still does not support {self.settings.compiler}, contributions to the recipe welcome.")
 
         if self.settings.compiler == 'gcc' and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("Building requires GCC >= 6")
-        if self.settings.compiler == 'clang' and Version(self.settings.compiler.version) < "10":
+        if (self.settings.compiler == 'clang' or self.settings.compiler == "apple-clang") and Version(self.settings.compiler.version) < "10":
             raise ConanInvalidConfiguration("Building requires Clang >= 10")
 
     def generate(self):
