@@ -51,16 +51,18 @@ class AzureSDKForCppConan(ConanFile):
             check_min_cppstd(self, 14)
 
         # Open to contributions for windows and apple
-        if self.settings.os != "Linux":
+        if self.settings.os != "Linux" and self.settings.os != "Macos":
             raise ConanInvalidConfiguration(
                 f"{self.ref} Conan recipe in ConanCenter still does not support {self.settings.os}, contributions to the recipe welcome.")
 
-        if self.settings.compiler != "gcc":
+        if self.settings.compiler != "gcc" and self.settings.compiler != "clang":
             raise ConanInvalidConfiguration(
                 f"{self.ref} Conan recipe in ConanCenter still does not support {self.settings.compiler}, contributions to the recipe welcome.")
 
         if self.settings.compiler == 'gcc' and Version(self.settings.compiler.version) < "6":
             raise ConanInvalidConfiguration("Building requires GCC >= 6")
+        if self.settings.compiler == 'clang' and Version(self.settings.compiler.version) < "10":
+            raise ConanInvalidConfiguration("Building requires Clang >= 10")
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -77,6 +79,7 @@ class AzureSDKForCppConan(ConanFile):
         tc.cache_variables["BUILD_WINDOWS_UWP"] = "ON"
         tc.cache_variables["DISABLE_AZURE_CORE_OPENTELEMETRY"] = "ON"
         tc.cache_variables["BUILD_TRANSPORT_CURL"] = "ON"
+        tc.cache_variables["WARNINGS_AS_ERRORS"] = "OFF"
         tc.generate()
 
         deps = CMakeDeps(self)
