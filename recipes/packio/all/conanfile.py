@@ -55,16 +55,16 @@ class PackioConan(ConanFile):
         if scm.Version(self.version) < "2.1.0":
             del self.options.boost_json
 
+        # defaults to True if using boost.asio, False if using asio
+        if self.options.get_safe("boost_json") == "default":
+            self.options.boost_json = not self.options.standalone_asio
+
     def requirements(self):
         if self.options.get_safe("msgpack") or scm.Version(self.version) < "2.0.0":
             self.requires("msgpack/3.2.1")
 
         if self.options.get_safe("nlohmann_json"):
             self.requires("nlohmann_json/3.9.1")
-
-         # defaults to True if using boost.asio, False if using asio
-        if self.options.get_safe("boost_json") == "default":
-            self.options.boost_json = not self.options.standalone_asio
 
         if self.options.get_safe("boost_json") or not self.options.get_safe("standalone_asio"):
             self.requires("boost/1.75.0")
