@@ -78,6 +78,8 @@ class IttApiConan(ConanFile):
         copy(self, "GPL-2.0-only.txt", src=os.path.join(self.source_folder, "LICENSES"), dst=os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):
+        # https://github.com/intel/ittapi/blob/03f7260c96d4b437d12dceee7955ebb1e30e85ad/CMakeLists.txt#L176
+        self.cpp_info.set_property("cmake_target_name", "ittapi::ittnotify")
         if self.settings.os == "Windows":
             self.cpp_info.libs = ['libittnotify']
         else:
