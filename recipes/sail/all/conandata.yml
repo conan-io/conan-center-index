@@ -17,3 +17,24 @@ sources:
   "0.9.0":
     url: "https://github.com/HappySeaFox/sail/archive/v0.9.0.tar.gz"
     sha256: "892738e0f56fed8c6387e1045bba2bfbf1b095024a495845d4879edb310cd1a7"
+patches:
+  "0.9.6":
+    - patch_file: "patches/0.9.1-fix-libjxl-find.patch"
+      patch_description: "Fix find_package on libjxl dependency"
+      patch_type: "conan"
+  "0.9.5":
+    - patch_file: "patches/0.9.1-fix-libjxl-find.patch"
+      patch_description: "Fix find_package on libjxl dependency"
+      patch_type: "conan"
+  "0.9.4":
+    - patch_file: "patches/0.9.1-fix-libjxl-find.patch"
+      patch_description: "Fix find_package on libjxl dependency"
+      patch_type: "conan"
+  "0.9.1":
+    - patch_file: "patches/0.9.1-fix-libjxl-find.patch"
+      patch_description: "Fix find_package on libjxl dependency"
+      patch_type: "conan"
+  "0.9.0":
+    - patch_file: "patches/0.9.0-fix-libjxl-find.patch"
+      patch_description: "Fix find_package on libjxl dependency"
+      patch_type: "conan"
