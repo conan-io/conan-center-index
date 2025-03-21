@@ -207,7 +207,7 @@ class LibwebsocketsConan(ConanFile):
 
     def requirements(self):
         if self.options.with_libuv:
-            self.requires("libuv/1.47.0")
+            self.requires("libuv/1.49.2")
 
         if self.options.with_libevent == "libevent":
             self.requires("libevent/2.1.12")
@@ -215,22 +215,22 @@ class LibwebsocketsConan(ConanFile):
             self.requires("libev/4.33")
 
         if self.options.with_zlib == "zlib":
-            self.requires("zlib/[>=1.2.11 <2]")
+            self.requires("zlib/[>=1.3.1 <2]")
         elif self.options.with_zlib == "miniz":
             self.requires("miniz/3.0.2")
 
         if self.options.with_libmount:
-            self.requires("libmount/2.39.2")
+            self.requires("libmount/2.40.2")
 
         if self.options.with_sqlite3:
-            self.requires("sqlite3/3.44.2")
+            self.requires("sqlite3/3.49.1")
 
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/[>=1.1.1w <4]", transitive_headers=True)
+            self.requires("openssl/[>=3.4.1 <4]", transitive_headers=True)
         elif self.options.with_ssl == "mbedtls":
-            self.requires("mbedtls/3.5.0")
+            self.requires("mbedtls/3.6.2")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/5.6.3")
+            self.requires("wolfssl/5.7.2")
 
     def validate(self):
         if self.options.shared and self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "5":
