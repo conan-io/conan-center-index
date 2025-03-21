@@ -1,0 +1,41 @@
+From 9bb18c5586920e4d6bb5381dfc7a8b90dfe59ddf Mon Sep 17 00:00:00 2001
+From: Ahajha <ahajha@gmail.com>
+Date: Sun, 19 May 2024 03:39:44 -0400
+Subject: [PATCH] Fix handling of MacOS in CMake
+
+The CMake file does not fully work with MacOS, this provides two key changes:
+1. Compile a set of files that originally were only compiled on Linux. This fixes missing symbol linker errors.
+2. Remove the nonexistent `rt` library from being linked, and replace with the necessary Apple frameworks.
+---
+ contrib/buildsystems/CMakeLists.txt | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/contrib/buildsystems/CMakeLists.txt b/contrib/buildsystems/CMakeLists.txt
+index d499a1d1a3..d4ca16797a 100644
+--- a/contrib/buildsystems/CMakeLists.txt
++++ b/contrib/buildsystems/CMakeLists.txt
+@@ -282,7 +282,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+ 		compat/strdup.c)
+ 	set(NO_UNIX_SOCKETS 1)
+ 
+-elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
++else()
+ 	add_compile_definitions(PROCFS_EXECUTABLE_PATH="/proc/self/exe" HAVE_DEV_TTY )
+ 	list(APPEND compat_SOURCES unix-socket.c unix-stream-server.c compat/linux/procinfo.c)
+ endif()
+@@ -745,7 +745,11 @@ if(WIN32)
+ 		message(FATAL_ERROR "Unhandled compiler: ${CMAKE_C_COMPILER_ID}")
+ 	endif()
+ elseif(UNIX)
+-	target_link_libraries(common-main pthread rt)
++    if (APPLE)
++        target_link_libraries(common-main pthread "-framework CoreFoundation" "-framework CoreServices")
++    else()
++    	target_link_libraries(common-main pthread rt)
++    endif()
+ endif()
+ 
+ #git
+-- 
+2.34.1
+
