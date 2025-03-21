@@ -435,10 +435,12 @@ class QtConan(ConanFile):
             self.requires("libalsa/1.2.10")
         if self.options.get_safe("with_x11"):
             self.requires("xorg/system")
+            if self.options.get_safe("opengl", "no") == "desktop":
+                self.requires("opengl/system")
+            elif self.options.get_safe("opengl", "no")  == "es2":
+                self.requires("egl/system")
         if self.options.get_safe("with_x11") or self.options.qtwayland:
             self.requires("xkbcommon/1.5.0")
-        if self.options.get_safe("opengl", "no") != "no":
-            self.requires("opengl/system")
         if self.options.with_zstd:
             self.requires("zstd/1.5.5")
         if self.options.qtwebengine and self.settings.os in ["Linux", "FreeBSD"]:
@@ -449,7 +451,6 @@ class QtConan(ConanFile):
             self.requires("libxshmfence/1.3")
             self.requires("nss/3.93")
             self.requires("libdrm/2.4.119")
-            self.requires("egl/system")
         if self.options.get_safe("with_gstreamer", False):
             self.requires("gst-plugins-base/1.19.2")
         if self.options.get_safe("with_pulseaudio", False):
@@ -862,7 +863,7 @@ class QtConan(ConanFile):
         if self.settings.compiler == "apple-clang" and self.options.qtmultimedia:
             # XCode 14.3 finally removes std::unary_function, so compilation fails
             # when using newer SDKs when using C++17 or higher.
-            # This macro re-enables them. Should be safe to pass this macro even 
+            # This macro re-enables them. Should be safe to pass this macro even
             # in earlier versions, as it would have no effect.
             args += ['QMAKE_CXXFLAGS+="-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION=1"']
 
@@ -1133,8 +1134,10 @@ Prefix = ..""")
                     gui_reqs.append("xkbcommon::xkbcommon")
                 if self.options.get_safe("with_x11", False):
                     gui_reqs.append("xorg::xorg")
-            if self.options.get_safe("opengl", "no") != "no":
-                gui_reqs.append("opengl::opengl")
+                    if self.options.get_safe("opengl", "no") == "desktop":
+                        gui_reqs.append("opengl::opengl")
+                    elif self.options.get_safe("opengl", "no") == "es2":
+                        gui_reqs.append("egl::egl")
             if self.options.get_safe("with_vulkan", False):
                 gui_reqs.append("vulkan-loader::vulkan-loader")
                 if is_apple_os(self):
