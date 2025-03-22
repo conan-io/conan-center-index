@@ -6,7 +6,7 @@
 #define LOG_LEVEL AWS_LOG_LEVEL_TRACE
 
 
-static int fill(uint8_t *buffer, size_t size) {
+static void fill(uint8_t *buffer, size_t size) {
     size_t i;
     for(i = 0; i < size; ++i) {
         buffer[i] = i;
