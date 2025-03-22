@@ -63,6 +63,9 @@ def components_from_dotfile(dotfile):
     by the LLVM build system
     """
     def node_labels(dot):
+        """
+        match each node in the dotfile with a label property, and map the label to a conan component
+        """
         label_replacements = {
             "LibXml2::LibXml2": "libxml2::libxml2",
             "ZLIB::ZLIB": "zlib::zlib",
@@ -77,6 +80,9 @@ def components_from_dotfile(dotfile):
                 yield node, label_replacements.get(label, label)
 
     def node_dependencies(dot):
+        """
+        Using the nodes with labels, extract the component dependencies of each node
+        """
         ignore_deps = [
             "diaguids.lib" # https://github.com/llvm/llvm-project/issues/86250
         ]
@@ -393,9 +399,6 @@ class LLVMCoreConan(ConanFile):
         tc.generate()
 
         deps = CMakeDeps(self)
-        deps.set_property("editline", "cmake_file_name", "LibEdit")
-        deps.set_property("editline", "cmake_target_name", "LibEdit::LibEdit")
-        deps.set_property("editline", "cmake_additional_variables_prefixes", ["LibEdit"])
         deps.generate()
 
     @property
