@@ -1,4 +1,6 @@
 versions:
+  "v15":
+    folder: all
   "v14":
     folder: all
   "v13":

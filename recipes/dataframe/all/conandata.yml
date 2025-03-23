@@ -1,4 +1,16 @@
 sources:
+  "3.4.0":
+    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.4.0.tar.gz"
+    sha256: "84aafa6bd1bf2000232e380f12eea0de01b2d0da88930aa4416aee524a8736aa"
+  "3.3.0":
+    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.3.0.tar.gz"
+    sha256: "57a722592a29ee8fca902983411c78e7f4179c402a8b0b905f96916c9694672a"
+  "3.2.0":
+    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.2.0.tar.gz"
+    sha256: "44c513ef7956976738c2ca37384a220c5383e95fc363ad933541c6f3eef9d294"
+  "3.1.0":
+    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.1.0.tar.gz"
+    sha256: "09280a81f17d87d171062210c904c1acd94b1cdcf4c040eaa16cc9d224d526d4"
   "3.0.0":
     url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/3.0.0.tar.gz"
     sha256: "9266fb85c518a251a5440e490c81615601791f2de2fad8755aa09f13a0c541f9"
@@ -14,21 +26,6 @@ sources:
   "2.0.0":
     url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/2.0.0.tar.gz"
     sha256: "df46ab60153f75ef0a1ab269e6b107ec34fdc467993c3984029d7deb5e0fab6c"
-  "1.22.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/1.22.0.tar.gz"
-    sha256: "4b244241cd56893fccb22f7c874588f0d86b444912382ed6e9a4cf95e55ffda2"
-  "1.21.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/1.21.0.tar.gz"
-    sha256: "a6b07eaaf628225a34e4402c1a6e311430e8431455669ac03691d92f44081172"
-  "1.20.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/refs/tags/1.20.0.tar.gz"
-    sha256: "5c241c71823c6975251f49316e03724f06cd3a288892f5a76dd504fe08700b6d"
-  "1.19.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/1.19.0.tar.gz"
-    sha256: "81382e9c68df7c52f69f645b1830fcd3634eedc07fa3d2024ee6c57cf2cdb7ff"
-  "1.18.0":
-    url: "https://github.com/hosseinmoein/DataFrame/archive/1.18.0.tar.gz"
-    sha256: "8cdb8b246263fbd8fcef07b6300f6aefb58b3a54cd67e5cbe5383bc948305844"
 patches:
   "2.0.0":
     - patch_file: "patches/2.0.0-0001-use-abs.patch"

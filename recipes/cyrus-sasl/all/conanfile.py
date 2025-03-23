@@ -3,7 +3,7 @@ from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import copy, get, rm, rmdir, replace_in_file
+from conan.tools.files import copy, get, rm, rmdir, replace_in_file, export_conandata_patches, apply_conandata_patches
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import unix_path, is_msvc, MSBuildDeps, MSBuildToolchain, MSBuild
@@ -41,6 +41,7 @@ class CyrusSaslConan(ConanFile):
         "with_postgresql": [True, False],
         "with_mysql": [True, False],
         "with_sqlite3": [True, False],
+        "with_saslauthd": [True, False],
     }
     default_options = {
         "shared": False,
@@ -57,7 +58,11 @@ class CyrusSaslConan(ConanFile):
         "with_postgresql": False,
         "with_mysql": False,
         "with_sqlite3": False,
+        "with_saslauthd": True,
     }
+
+    def export_sources(self):
+        export_conandata_patches(self)
 
     @property
     def _settings_build(self):
@@ -66,6 +71,9 @@ class CyrusSaslConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+            # saslauthd doesn't compile on Windows
+            # https://www.cyrusimap.org/sasl/sasl/windows.html#install-windows
+            del self.options.with_saslauthd
         if is_msvc(self):
             # always required
             del self.options.with_openssl
@@ -107,6 +115,7 @@ class CyrusSaslConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
 
     def _generate_autotools(self):
         env = VirtualBuildEnv(self)
@@ -137,6 +146,7 @@ class CyrusSaslConan(ConanFile):
             "--with-mysql={}".format(rootpath_no(self.options.with_mysql, "libmysqlclient")),
             "--without-sqlite",
             "--with-sqlite3={}".format(rootpath_no(self.options.with_sqlite3, "sqlite3")),
+            "--with-saslauthd={}".format(yes_no(self.options.with_saslauthd)),
         ])
         if self.options.with_gssapi:
             tc.configure_args.append("--with-gss_impl=mit")
@@ -242,7 +252,9 @@ class CyrusSaslConan(ConanFile):
         self.cpp_info.libs = ["sasl2"]
 
         if self.settings.os in ["Linux", "FreeBSD"]:
-            self.cpp_info.system_libs = ["resolv", "crypt"]
+            self.cpp_info.system_libs = ["resolv"]
+            if self.options.with_saslauthd:
+                self.cpp_info.system_libs.append("crypt")
         elif is_msvc(self):
             self.cpp_info.system_libs = ["ws2_32"]
 

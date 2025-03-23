@@ -1,16 +1,13 @@
 sources:
+  "1.18.1":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.18.1.tar.gz"
+    sha256: "480ff5d2450ff18d02db48908c9c0c6a602993942cb47866b8effe32d0469a2c"
+  "1.17.3":
+    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.17.3.tar.gz"
+    sha256: "4112f6552c17216311be013b9a2621a3c1a17ed9e1268a1142599b6a494517c2"
   "1.16.3":
     url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.16.3.tar.gz"
     sha256: "d26b8a7eed1df4440aa3d8eac5049980cbe585514ccedfda809712051a4b1721"
-  "1.16.2":
-    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.16.2.tar.gz"
-    sha256: "609a9d31fd9445eb2e737cbb6420100fa7d4e1180b594c1a62505b26f730bfd5"
-  "1.16.1":
-    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.16.1.tar.gz"
-    sha256: "197c6ce4f2de9176402fb8a634c390e757b729ff48a30e8038a0f7d71ff1f1ae"
-  "1.16.0":
-    url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.16.0.tar.gz"
-    sha256: "3a4e57d454bce4349e11e2262fc47728a78b86ef1e0754514bbbc7d709e0a80d"
   "1.15.1":
     url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.15.1.tar.gz"
     sha256: "93a9b6f148639938ccbaa48d0f641d8f33312fdfcc69ee9466e11362b43917c4"
@@ -18,48 +15,45 @@ sources:
     url: "https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.14.1.tar.gz"
     sha256: "f998352b131bb89fa7dd1f1d87ddbafe647dfaddd11929b6b5168b3f4ef857de"
 patches:
+  "1.18.1":
+    - patch_file: "patches/1.17.3-0002-missing-include.patch"
+      patch_description: "add missing '<optional>' include when abseil is built without c++17 support"
+      patch_type: "portability"
+    - patch_file: "patches/1.18.0-0004-abseil-no-string-view.patch"
+      patch_description: "allow to build with abseil built without c++17 support"
+      patch_type: "portability"
+    - patch_file: "patches/1.18.1-0005-fix-cutlass-cuda-provider.patch"
+      patch_description: "use cutlass from Conan"
+      patch_type: "portability"
+  "1.17.3":
+    - patch_file: "patches/1.17.3-0001-patch-macos-cpp20-date-compat.patch"
+      patch_description: "allow to build with macos c++20 support"
+      patch_type: "portability"
+      patch_source: "https://github.com/microsoft/onnxruntime/commit/7303a90f4916dcf6f66236d40b8917344c27420a.patch"
+    - patch_file: "patches/1.17.3-0002-missing-include.patch"
+      patch_description: "add missing '<optional>' include when abseil is built without c++17 support"
+      patch_type: "portability"
+    - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
+      patch_description: "allow to build with abseil built without c++17 support"
+      patch_type: "portability"
+    - patch_file: "patches/1.17.3-0003-fix-cutlass-cuda-provider.patch"
+      patch_description: "use cutlass from Conan"
+      patch_type: "portability"
   "1.16.3":
-    - patch_file: "patches/1.16.0-0001-cmake-dependencies.patch"
-      patch_description: "CMake: ensure conan dependencies are used"
-      patch_type: "conan"
-    - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
-      patch_description: "allow to build with abseil built without c++17 support"
-      patch_type: "portability"
-  "1.16.2":
-    - patch_file: "patches/1.16.0-0001-cmake-dependencies.patch"
-      patch_description: "CMake: ensure conan dependencies are used"
-      patch_type: "conan"
-    - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
-      patch_description: "allow to build with abseil built without c++17 support"
-      patch_type: "portability"
-  "1.16.1":
-    - patch_file: "patches/1.16.0-0001-cmake-dependencies.patch"
-      patch_description: "CMake: ensure conan dependencies are used"
-      patch_type: "conan"
-    - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
-      patch_description: "allow to build with abseil built without c++17 support"
-      patch_type: "portability"
-  "1.16.0":
-    - patch_file: "patches/1.16.0-0001-cmake-dependencies.patch"
-      patch_description: "CMake: ensure conan dependencies are used"
-      patch_type: "conan"
     - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
       patch_description: "allow to build with abseil built without c++17 support"
       patch_type: "portability"
   "1.15.1":
-    - patch_file: "patches/1.15.1-0001-cmake-dependencies.patch"
-      patch_description: "CMake: ensure conan dependencies are used"
-      patch_type: "conan"
     - patch_file: "patches/1.14.1-0004-abseil-no-string-view.patch"
       patch_description: "allow to build with abseil built without c++17 support"
       patch_type: "portability"
+    - patch_file: "patches/1.15.1-0002-fix-attention-15983.patch"
+      patch_description: "Fix attention.cc"
+      patch_source: "https://github.com/microsoft/onnxruntime/pull/15983"
+      patch_type: "backport"
   "1.14.1":
     - patch_file: "patches/1.14.1-0001-cmake-dependencies.patch"
       patch_description: "CMake: ensure conan dependencies are used (upstreamed future versions)"
-      patch_type: "conan"
-      patch_source: "https://github.com/microsoft/onnxruntime/pull/15323"
-    - patch_file: "patches/1.14.1-0002-cmake-dependencies.patch"
-      patch_description: "CMake: ensure conan dependencies are used"
       patch_type: "conan"
     - patch_file: "patches/1.14.1-0003-amx-gas-version.patch"
       patch_description: "Check GNU AS supports AMX before enabling it"
@@ -72,3 +66,12 @@ patches:
       patch_description: "Ensures the forward compatibility with the newest versions of re2 library."
       patch_type: "portability"
       patch_source: "https://github.com/microsoft/onnxruntime/commit/126e7bf15fa4af8621814b82a3f7bd0d786f0239.patch"
+      
+# ONNX versions are based on the minor version used at
+# https://github.com/microsoft/onnxruntime/tree/main/cmake/external
+onnx_version_map:
+  "1.18.1": "1.16.2"
+  "1.17.3": "1.15.0"
+  "1.16.3": "1.14.1"
+  "1.15.1": "1.14.1"
+  "1.14.1": "1.13.1"

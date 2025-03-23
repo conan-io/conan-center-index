@@ -1,4 +1,7 @@
 sources:
+  "1.2.0":
+    url: "https://github.com/google/highway/archive/1.2.0.tar.gz"
+    sha256: "7e0be78b8318e8bdbf6fa545d2ecb4c90f947df03f7aadc42c1967f019e63343"
   "1.1.0":
     url: "https://github.com/google/highway/archive/1.1.0.tar.gz"
     sha256: "354a8b4539b588e70b98ec70844273e3f2741302c4c377bcc4e81b3d1866f7c9"
@@ -32,3 +35,9 @@ sources:
   "0.12.2":
     url: "https://github.com/google/highway/archive/0.12.2.tar.gz"
     sha256: "e1d47ce510429fdcf31f41697ca74fb0dcd59d933196e531a86d51751a56f4cc"
+patches:
+  "1.2.0":
+    - patch_file: "patches/1.2.0-0001-fix-dllexport.patch"
+      patch_description: "fix incorrect DLLEXPORT"
+      patch_type: "backport"
+      patch_source: "https://github.com/google/highway/pull/2229"

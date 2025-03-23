@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.15)
 project(test_package LANGUAGES C)
 
 find_package(JPEG REQUIRED CONFIG)
@@ -10,11 +10,3 @@ if (MSVC)
     target_compile_definitions(${PROJECT_NAME} PRIVATE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_WARNINGS)
 endif()
 
-if(BUILD_TRANSUPP)
-    add_executable(test_transupp test_transupp.c ${LIBJPEG_RES_DIR}/transupp.c)
-    target_link_libraries(test_transupp PRIVATE JPEG::JPEG)
-    target_compile_features(test_transupp PRIVATE c_std_99)
-    if (MSVC)
-        target_compile_definitions(test_transupp PRIVATE _CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_WARNINGS)
-    endif()
-endif()

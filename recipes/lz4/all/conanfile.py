@@ -16,7 +16,7 @@ class LZ4Conan(ConanFile):
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/lz4/lz4"
     topics = ("compression")
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -50,7 +50,8 @@ class LZ4Conan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["LZ4_BUILD_CLI"] = False
-        tc.variables["LZ4_BUILD_LEGACY_LZ4C"] = False
+        if Version(self.version) < "1.10.0":
+            tc.variables["LZ4_BUILD_LEGACY_LZ4C"] = False
         tc.variables["LZ4_BUNDLED_MODE"] = False
         tc.variables["LZ4_POSITION_INDEPENDENT_LIB"] = self.options.get_safe("fPIC", True)
         # Generate a relocatable shared lib on Macos
@@ -61,10 +62,7 @@ class LZ4Conan(ConanFile):
 
     @property
     def _cmakelists_folder(self):
-        if Version(self.version) < "1.9.3":
-            subfolder = os.path.join("contrib", "cmake_unofficial")
-        else:
-            subfolder = os.path.join("build", "cmake")
+        subfolder = os.path.join("build", "cmake")
         return os.path.join(self.source_folder, subfolder)
 
     def build(self):

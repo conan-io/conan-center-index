@@ -39,8 +39,8 @@ class PackageConan(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("boost/1.80.0", transitive_headers=True)
-        self.requires("eigen/3.3.7", transitive_headers=True)
+        self.requires("boost/1.85.0", transitive_headers=True)
+        self.requires("eigen/3.4.0", transitive_headers=True)
 
     def package_id(self):
         self.info.clear()
@@ -48,7 +48,7 @@ class PackageConan(ConanFile):
     def validate(self):
         if Version(self.version) < "2.6.4" and self.settings.os != "Linux":
             raise ConanInvalidConfiguration(f"{self.ref} is not supported by {self.settings.os}; Try the version >= 2.6.4")
-        if Version(self.version) >= "2.6.4" and self.settings.os not in ["Linux", "Windows"]:
+        if Version(self.version) >= "2.6.4" and self.settings.os not in ["Linux", "Windows", "Macos"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported by {self.settings.os}.")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)

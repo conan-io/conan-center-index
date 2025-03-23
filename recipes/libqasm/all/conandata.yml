@@ -1,0 +1,22 @@
+sources:
+  "1.1.0":
+    url: "https://github.com/QuTech-Delft/libqasm/releases/download/1.1.0/libqasm-1.1.0.tar.gz"
+    sha256: "cf317c465e741360ae147e46346c57294c23882269e3b3dabb3c5d5ac703414a"
+  "1.0.0":
+    url: "https://github.com/QuTech-Delft/libqasm/releases/download/1.0.0/libqasm-1.0.0.tar.gz"
+    sha256: "22968e2892194e69ca3cea9f4655c2f51470aae60d9e7dbd662136eb4088c984"
+  "0.6.9":
+    url: "https://github.com/QuTech-Delft/libqasm/releases/download/0.6.9/libqasm-0.6.9.tar.gz"
+    sha256: "23c5d0e4e506e1974668408f8018034d1b1303e65c6d2d28639eae9499759c4d"
+  "0.6.8":
+    url: "https://github.com/QuTech-Delft/libqasm/releases/download/0.6.8/libqasm-0.6.8.tar.gz"
+    sha256: "b98ff44f0c569a0cc20b3728ba7d4711299aaac07d4dadfe52e638b366b91251"
+  "0.6.7":
+    url: "https://github.com/QuTech-Delft/libqasm/releases/download/0.6.7/libqasm-0.6.7.tar.gz"
+    sha256: "3e85be4f433b178b89e32bc738bd4f69266cd1c4ad0ed12b5367381ac6e44eb2"
+  "0.6.6":
+    url: "https://github.com/QuTech-Delft/libqasm/releases/download/0.6.6/libqasm-0.6.6.tar.gz"
+    sha256: "b3a2d1670f8865ce22bcc62c6a696ee7e0764a7b76901a4f082efa2287e0cbad"
+  "0.6.5":
+    url: "https://github.com/QuTech-Delft/libqasm/releases/download/0.6.5/libqasm-0.6.5.tar.gz"
+    sha256: "0577622a512d1f64892949af02abe3d0b53195ad454045715a0ebf837ecde0d6"

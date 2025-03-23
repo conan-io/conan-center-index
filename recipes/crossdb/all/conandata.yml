@@ -1,0 +1,10 @@
+sources:
+  "0.11.0":
+    url: "https://github.com/crossdb-org/crossdb/archive/refs/tags/0.11.0.tar.gz"
+    sha256: "ca72397cfe14317b3774988fe1747bfd3daa8b6dfa8e151fa84d2e58987ab5c2"
+  "0.10.0":
+    url: "https://github.com/crossdb-org/crossdb/archive/refs/tags/0.10.0.tar.gz"
+    sha256: "8b4ed2063f508bc3353d6346a7d9bf78bb04fe05ddfe6e86f1f33cc44f71b2d4"
+  "0.9.0":
+    url: "https://github.com/crossdb-org/crossdb/archive/refs/tags/0.9.0.tar.gz"
+    sha256: "04defc43f0b5102cc6a341ba9e328302416982c04cc4c59bc16aef19cc1b020c"
