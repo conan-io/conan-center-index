@@ -94,7 +94,9 @@ class FollyConan(ConanFile):
         self.requires("fmt/10.2.1", transitive_headers=True, transitive_libs=True)
         if self.options.get_safe("with_libaio"):
             self.requires("libaio/0.3.113")
-        if Version(self.version) >= "2024.11.04":
+        if self.version >= "2025.03.14":
+            self.requires("fast_float/8.0.0")
+        elif Version(self.version) >= "2024.11.04":
             self.requires("fast_float/6.1.5")
 
     def build_requirements(self):
