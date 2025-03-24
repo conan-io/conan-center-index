@@ -109,37 +109,34 @@ class SDLImageConan(ConanFile):
     def build_requirements(self):
         self.tool_requires("cmake/[>=3.16 <4]")
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
-        self._patch_sources()
+        apply_conandata_patches(self)
 
     def generate(self):
         tc = CMakeToolchain(self)
-        tc.variables["SDL2IMAGE_VENDORED"] = False
-        tc.variables["SDL2IMAGE_DEPS_SHARED"] = False
-        tc.variables["SDL2IMAGE_SAMPLES"] = False
-        tc.variables["SDL2IMAGE_AVIF"] = self.options.get_safe("with_avif")
-        tc.variables["SDL2IMAGE_BMP"] = self.options.bmp
-        tc.variables["SDL2IMAGE_GIF"] = self.options.gif
-        tc.variables["SDL2IMAGE_JPG"] = self.options.with_libjpeg
-        tc.variables["SDL2IMAGE_JXL"] = self.options.get_safe("with_jxl")
-        tc.variables["SDL2IMAGE_LBM"] = self.options.lbm
-        tc.variables["SDL2IMAGE_PCX"] = self.options.pcx
-        tc.variables["SDL2IMAGE_PNG"] = self.options.with_libpng
-        tc.variables["SDL2IMAGE_PNM"] = self.options.pnm
-        tc.variables["SDL2IMAGE_QOI"] = self.options.get_safe("qoi")
-        tc.variables["SDL2IMAGE_SVG"] = self.options.svg
-        tc.variables["SDL2IMAGE_TGA"] = self.options.tga
-        tc.variables["SDL2IMAGE_TIF"] = self.options.with_libtiff
-        tc.variables["SDL2IMAGE_WEBP"] = self.options.with_libwebp
-        tc.variables["SDL2IMAGE_XCF"] = self.options.xcf
-        tc.variables["SDL2IMAGE_XPM"] = self.options.xpm
-        tc.variables["SDL2IMAGE_XV"] = self.options.xv
-        tc.variables["SDL2IMAGE_BACKEND_WIC"] = self.options.get_safe("wic")
-        tc.variables["SDL2IMAGE_BACKEND_IMAGEIO"] = self.options.get_safe("imageio")
+        tc.cache_variables["SDL2IMAGE_VENDORED"] = False
+        tc.cache_variables["SDL2IMAGE_DEPS_SHARED"] = False
+        tc.cache_variables["SDL2IMAGE_SAMPLES"] = False
+        tc.cache_variables["SDL2IMAGE_AVIF"] = self.options.get_safe("with_avif")
+        tc.cache_variables["SDL2IMAGE_BMP"] = self.options.bmp
+        tc.cache_variables["SDL2IMAGE_GIF"] = self.options.gif
+        tc.cache_variables["SDL2IMAGE_JPG"] = self.options.with_libjpeg
+        tc.cache_variables["SDL2IMAGE_JXL"] = self.options.get_safe("with_jxl")
+        tc.cache_variables["SDL2IMAGE_LBM"] = self.options.lbm
+        tc.cache_variables["SDL2IMAGE_PCX"] = self.options.pcx
+        tc.cache_variables["SDL2IMAGE_PNG"] = self.options.with_libpng
+        tc.cache_variables["SDL2IMAGE_PNM"] = self.options.pnm
+        tc.cache_variables["SDL2IMAGE_QOI"] = self.options.get_safe("qoi")
+        tc.cache_variables["SDL2IMAGE_SVG"] = self.options.svg
+        tc.cache_variables["SDL2IMAGE_TGA"] = self.options.tga
+        tc.cache_variables["SDL2IMAGE_TIF"] = self.options.with_libtiff
+        tc.cache_variables["SDL2IMAGE_WEBP"] = self.options.with_libwebp
+        tc.cache_variables["SDL2IMAGE_XCF"] = self.options.xcf
+        tc.cache_variables["SDL2IMAGE_XPM"] = self.options.xpm
+        tc.cache_variables["SDL2IMAGE_XV"] = self.options.xv
+        tc.cache_variables["SDL2IMAGE_BACKEND_WIC"] = self.options.get_safe("wic")
+        tc.cache_variables["SDL2IMAGE_BACKEND_IMAGEIO"] = self.options.get_safe("imageio")
         tc.generate()
         cd = CMakeDeps(self)
         cd.generate()
