@@ -1,4 +1,6 @@
 versions:
+  "2.1.9":
+    folder: all
   "2.1.7":
     folder: all
   # mold requires 2.1.2
