@@ -18,11 +18,6 @@ sources:
     sha256: 39f34e2f6835f4b992cafe8625073a88e5a28ba78f83e8099610a7b3af4676d4
     url: https://github.com/libssh2/libssh2/releases/download/libssh2-1.8.0/libssh2-1.8.0.tar.gz
 patches:
-  "1.10.0":
-    - patch_file: "patches/libssh2-1.9.0-CVE2020-22218.patch"
-      patch_description: "Fix CVE2020-22218"
-      patch_type: "vulnerability"
-      patch_source: "https://github.com/libssh2/libssh2/pull/476"
   "1.9.0":
     - patch_file: "patches/libssh2-1.9.0-CVE2020-22218.patch"
       patch_description: "Fix CVE2020-22218"
