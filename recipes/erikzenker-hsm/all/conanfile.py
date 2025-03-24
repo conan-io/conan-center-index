@@ -6,7 +6,7 @@ from conan.tools.files import copy, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.50.0"
+required_conan_version = ">=2.0"
 
 
 class HsmConan(ConanFile):
@@ -35,10 +35,7 @@ class HsmConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        # FIXME: should use self.info.settings instead of self.settings for conan v2
-        # https://github.com/erikzenker/hsm#dependencies
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 17)
+        check_min_cppstd(self, 17)
         if self.settings.compiler == "clang" and Version(self.settings.compiler.version) < "8":
             raise ConanInvalidConfiguration("clang 8+ is required")
         if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "8":
