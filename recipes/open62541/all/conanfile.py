@@ -366,9 +366,7 @@ class Open62541Conan(ConanFile):
 
     def _patch_sources(self):
         apply_conandata_patches(self)
-        py_path = os.path.join(self.source_folder, "tools", "cmake", "FindPython3.cmake")
-        if os.path.exists(py_path):
-            os.unlink(py_path)
+        rm(self, "FindPython3.cmake", os.path.join(self.source_folder, "tools", "cmake"))
 
     def build(self):
         self._patch_sources()
