@@ -362,7 +362,7 @@ class OpenCVConan(ConanFile):
             self.requires("onetbb/2020.3.3")
         # highgui module options
         if self.options.get_safe("with_jpeg") == "libjpeg":
-            self.requires("libjpeg/[>=9e]")
+            self.requires("libjpeg/9e")
         elif self.options.get_safe("with_jpeg") == "libjpeg-turbo":
             self.requires("libjpeg-turbo/[>=3.0.3 <4]")
         elif self.options.get_safe("with_jpeg") == "mozjpeg":
