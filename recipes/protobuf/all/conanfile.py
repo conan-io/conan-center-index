@@ -78,7 +78,7 @@ class ProtobufConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
         if self._protobuf_release >= "22.0":
-            self.requires("abseil/20240116.2", transitive_headers=True)
+            self.requires("abseil/[>=20230802.1 <=20240722.0]", transitive_headers=True)
 
     @property
     def _compilers_minimum_version(self):
@@ -299,6 +299,8 @@ class ProtobufConan(ConanFile):
                 self.cpp_info.components["libprotobuf-lite"].system_libs.append("log")
             if self._protobuf_release >= "22.0":
                 self.cpp_info.components["libprotobuf-lite"].requires.extend(absl_deps)
+                if not self.options.shared:
+                    self.cpp_info.components["libprotobuf-lite"].requires.extend(["utf8_validity"])
 
         # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed
         self.cpp_info.filenames["cmake_find_package"] = "Protobuf"

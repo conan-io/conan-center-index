@@ -1,4 +1,7 @@
 sources:
+  "1.4.6":
+    url: "https://github.com/open62541/open62541/archive/v1.4.6.tar.gz"
+    sha256: "bc4ad185fec5c257e15fcb813b7fef9607b7aaa5d355de7b665e1f210556d38e"
   "1.3.9":
     url: "https://github.com/open62541/open62541/archive/v1.3.9.tar.gz"
     sha256: "71764d4a060cfa07eae7aaabd176da38b155ef01c63103513339699fd8026e2f"
@@ -15,6 +18,16 @@ sources:
     url: "https://github.com/open62541/open62541/archive/v1.0.6.tar.gz"
     sha256: "299940025c14929533064abe0044d5805ea50d52b32d05ad9bc0e6996569c2a6"
 patches:
+  "1.4.6":
+    - patch_file: "patches/0001-disable-sanitizers-1_4_x.patch"
+      patch_description: "Disable static code analysis"
+      patch_type: "conan"
+    - patch_file: "patches/1.4.6-0001-use-external-mdnsd.patch"
+      patch_description: "Consume mdnsd as external dependency provided by Conan"
+      patch_type: "conan"
+    - patch_file: "patches/0004-include-iphlpapi.patch"
+      patch_description: "Include iphlpapi.h for SecureZeroMemory"
+      patch_type: "conan"
   "1.3.9":
     - patch_file: "patches/0001-disable-sanitizers-1_3_x.patch"
       patch_description: "Disable static code analysis"
