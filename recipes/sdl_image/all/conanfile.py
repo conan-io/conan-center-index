@@ -179,7 +179,6 @@ class SDLImageConan(ConanFile):
         self.cpp_info.components["_sdl_image"].includedirs.append(os.path.join("include", "SDL2"))
 
         # TODO: to remove in conan v2 once legacy generators removed
-        target_name = "SDL2_image" if self.options.shared else "SDL2_image-static"
         self.cpp_info.components["_sdl_image"].set_property("cmake_target_name", "SDL2_image::SDL2_image")
         self.cpp_info.components["_sdl_image"].set_property("pkg_config_name", "SDL2_image")
         self.cpp_info.components["_sdl_image"].requires = ["sdl::sdl"]
