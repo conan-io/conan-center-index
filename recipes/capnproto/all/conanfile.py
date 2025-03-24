@@ -1,5 +1,5 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
@@ -13,7 +13,7 @@ import glob
 import os
 import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class CapnprotoConan(ConanFile):
@@ -51,10 +51,6 @@ class CapnprotoConan(ConanFile):
             "clang": "5",
             "apple-clang": "5.1",
         }
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -101,7 +97,7 @@ class CapnprotoConan(ConanFile):
     def build_requirements(self):
         if self.settings.os != "Windows":
             self.tool_requires("libtool/2.4.7")
-            if self._settings_build.os == "Windows":
+            if self.settings_build.os == "Windows":
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
@@ -116,6 +112,9 @@ class CapnprotoConan(ConanFile):
             tc.variables["EXTERNAL_CAPNP"] = False
             tc.variables["CAPNP_LITE"] = False
             tc.variables["WITH_OPENSSL"] = self.options.with_openssl
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support (v2 branch does not need this)
+            if Version(self.version) > "1.1.0": # pylint: disable=conan-unreachable-upper-version
+                raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
             tc.generate()
             deps = CMakeDeps(self)
             deps.generate()
@@ -238,9 +237,3 @@ class CapnprotoConan(ConanFile):
             self.cpp_info.components[name].libs = [name]
             self.cpp_info.components[name].requires = comp_info.get("requires", [])
             self.cpp_info.components[name].system_libs = comp_info.get("system_libs", [])
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "CapnProto"
-        self.cpp_info.names["cmake_find_package_multi"] = "CapnProto"
-        self.cpp_info.components["kj"].build_modules = [capnprotomacros]
-        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
