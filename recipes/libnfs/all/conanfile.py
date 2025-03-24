@@ -69,8 +69,6 @@ class LibnfsConan(ConanFile):
         copy(self, "LICENCE*.txt", src=self.source_folder, dst=os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-        if Version(self.version) >= "6.0.2" and self.settings.os == "Windows" and self.options.shared:
-            rename(self, os.path.join(self.package_folder, "bin", "nfs.dll"), os.path.join(self.package_folder, "bin", "libnfs.dll"))
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
 
