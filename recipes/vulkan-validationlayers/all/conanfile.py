@@ -55,7 +55,8 @@ class VulkanValidationLayersConan(ConanFile):
 
     @property
     def _needs_wayland_for_build(self):
-        return self.options.get_safe("with_wsi_wayland") and Version(self.version) < "1.3.231"
+        return (self.options.get_safe("with_wsi_wayland") and
+                (Version(self.version) < "1.3.231" or Version(self.version) >= "1.3.243.0"))
 
     @property
     def _needs_pkg_config(self):
