@@ -69,9 +69,9 @@ class Openmvgconan(ConanFile):
         self.requires("eigen/3.4.0", transitive_headers=True)
         self.requires("flann/1.9.2", transitive_headers=True, transitive_libs=True)
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/9e")
+            self.requires("libjpeg/[>=9e]")
         elif self.options.with_jpeg == "libjpeg-turbo":
-            self.requires("libjpeg-turbo/3.0.2")
+            self.requires("libjpeg-turbo/[>=3.0 <3.1]")
         elif self.options.with_jpeg == "mozjpeg":
             self.requires("mozjpeg/4.1.1")
         self.requires("libpng/[>=1.6 <2]")
@@ -290,13 +290,3 @@ class Openmvgconan(ConanFile):
 
             if values.get("add_library_name_prefix_to_include_dirs", False):
                 self.cpp_info.components[component].includedirs.append(os.path.join("include", "openMVG"))
-
-            # TODO: to remove in conan v2
-            self.cpp_info.components[component].names["cmake_find_package"] = target
-            self.cpp_info.components[component].names["cmake_find_package_multi"] = target
-
-        # TODO: to remove in conan v2
-        self.cpp_info.names["cmake_find_package"] = "OpenMVG"
-        self.cpp_info.names["cmake_find_package_multi"] = "OpenMVG"
-        if self.options.programs:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
