@@ -69,7 +69,7 @@ class Openmvgconan(ConanFile):
         self.requires("eigen/3.4.0", transitive_headers=True)
         self.requires("flann/1.9.2", transitive_headers=True, transitive_libs=True)
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/[>=9e]")
+            self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/[>=3.0 <3.1]")
         elif self.options.with_jpeg == "mozjpeg":
