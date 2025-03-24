@@ -3,9 +3,11 @@ from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import check_min_vs
+from conan.tools.scm import Version
+from conan.errors import ConanException
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class CCTZConan(ConanFile):
@@ -56,8 +58,9 @@ class CCTZConan(ConanFile):
         tc.variables["BUILD_BENCHMARK"] = False
         # For shared msvc
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        # Relocatable shared lib on Macos
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support (master branch already has 3.16)
+        if Version(self.version) > "2.4": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
     def build(self):
@@ -80,7 +83,3 @@ class CCTZConan(ConanFile):
             self.cpp_info.system_libs.append("m")
         elif is_apple_os(self):
             self.cpp_info.frameworks.append("CoreFoundation")
-
-        # TODO: to remove in conan v2
-        if self.options.build_tools:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
