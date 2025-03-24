@@ -1,13 +1,12 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.build import cross_building
+from conan.tools.build import check_min_cppstd, cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.60.0 <2.0 || >=2.0.5"
+required_conan_version = ">=2.0.5"
 
 
 class QwtConan(ConanFile):
@@ -44,10 +43,6 @@ class QwtConan(ConanFile):
         "polar": True,
     }
 
-    @property
-    def _is_legacy_one_profile(self):
-        return not hasattr(self, "settings_build")
-
     def export_sources(self):
         export_conandata_patches(self)
 
@@ -63,14 +58,19 @@ class QwtConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("qt/[~5.15]", transitive_headers=True, transitive_libs=True)
+        self.requires("qt/[>=5.15 <7]", transitive_headers=True, transitive_libs=True)
 
     def validate(self):
         qt_version = Version(self.dependencies["qt"].ref.version)
-        if not 5 <= qt_version.major <= 6:
-            raise ConanInvalidConfiguration(f"{self.name} doesn't support Qt/{qt_version}. Allowed Qt version are 5 or 6")
-        if hasattr(self, "settings_build") and cross_building(self):
-            raise ConanInvalidConfiguration("Qwt recipe does not support cross-compilation yet")
+        
+        if qt_version.major == 5:
+            check_min_cppstd(self, 11)
+        elif qt_version.major == 6:
+            check_min_cppstd(self, 17)
+        
+        if cross_building(self) and qt_version.major == 5:
+            raise ConanInvalidConfiguration("Cross-building with Qt5 is not supported")
+
         qt_options = self.dependencies["qt"].options
         if self.options.widgets and not qt_options.widgets:
             raise ConanInvalidConfiguration("qwt:widgets=True requires qt:widgets=True")
@@ -82,18 +82,15 @@ class QwtConan(ConanFile):
             raise ConanInvalidConfiguration("qwt:designer=True requires qt:qttools=True, qt::gui=True and qt::widgets=True")
 
     def build_requirements(self):
-        if not self._is_legacy_one_profile:
-            self.tool_requires("qt/<host_version>")
+        self.tool_requires("qt/<host_version>")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def generate(self):
-        VirtualBuildEnv(self).generate()
-        VirtualRunEnv(self).generate(scope="build")
-
         tc = CMakeToolchain(self)
-        tc.variables["QWT_QT_VERSION_MAJOR"] = Version(self.dependencies["qt"].ref.version).major
+        qt_version = Version(self.dependencies["qt"].ref.version)
+        tc.variables["QWT_QT_VERSION_MAJOR"] = qt_version.major
         tc.variables["QWT_DLL"] = self.options.shared
         tc.variables["QWT_STATIC"] = not self.options.shared
         tc.variables["QWT_PLOT"] = self.options.plot
@@ -107,6 +104,11 @@ class QwtConan(ConanFile):
         tc.variables["QWT_BUILD_TESTS"] = False
         tc.variables["QWT_FRAMEWORK"] = False
         tc.variables["CMAKE_INSTALL_DATADIR"] = "res"
+
+        if qt_version >= "6.0.0":
+            qt_tools_rootdir = self.conf.get("user.qt:tools_directory", None)
+            tc.cache_variables["CMAKE_AUTOMOC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "moc.exe" if self.settings_build.os == "Windows" else "moc")
+            tc.cache_variables["CMAKE_AUTORCC_EXECUTABLE"] = os.path.join(qt_tools_rootdir, "rcc.exe" if self.settings_build.os == "Windows" else "rcc")
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -155,6 +157,3 @@ class QwtConan(ConanFile):
                 f"qt{Version(self.dependencies['qt'].ref.version).major}", "plugins",
             )
             self.runenv_info.prepend_path("QT_PLUGIN_PATH", qt_plugin_path)
-
-            # TODO: to remove in conan v2
-            self.env_info.QT_PLUGIN_PATH.append(qt_plugin_path)
