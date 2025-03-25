@@ -76,6 +76,9 @@ class LibnfsConan(ConanFile):
         self.cpp_info.set_property("cmake_file_name", "libnfs")
         self.cpp_info.set_property("cmake_target_name", "libnfs::libnfs")
         self.cpp_info.set_property("pkg_config_name", "libnfs")
-        self.cpp_info.libs = ["nfs"]
+        if self.settings.os == "Windows" and self.options.shared:
+            self.cpp_info.libs = ["libnfs"]
+        else:
+            self.cpp_info.libs = ["nfs"]
         if self.settings.os == "Windows":
             self.cpp_info.system_libs.append("ws2_32")
