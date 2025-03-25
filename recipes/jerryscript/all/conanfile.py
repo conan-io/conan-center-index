@@ -8,7 +8,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class JerryScriptStackConan(ConanFile):
@@ -154,7 +154,7 @@ class JerryScriptStackConan(ConanFile):
             for check_res, txt in checks:
                 if not check_res:
                     raise ConanInvalidConfiguration(txt)
-        except ValueError as e:
+        except ValueError:
             raise ConanInvalidConfiguration(
                 "jerryscript heap size, gc mark limit, stack limit, "
                 "gc limit should be a positive integer"
@@ -212,6 +212,8 @@ class JerryScriptStackConan(ConanFile):
         tc.variables["JERRY_VALGRIND"] = self.options.valgrind
         tc.variables["JERRY_MEM_GC_BEFORE_EACH_ALLOC"] = self.options.gc_before_each_alloc
         tc.variables["JERRY_VM_EXEC_STOP"] = self.options.vm_exec_stop
+        if Version(self.version) < "3.0.0": # pylint: disable=conan-condition-evals-to-constant
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         tc = CMakeDeps(self)
