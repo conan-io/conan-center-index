@@ -1,4 +1,9 @@
 submodules:
+  "1.4.11.1":
+    deps/ua-nodeset:
+      url: "https://github.com/OPCFoundation/UA-Nodeset/archive/Machinery-1.03.0-2023-08-01.zip"
+      sha256: "b1677e7114004f44103159ae7a2fb220958e6f645177c9d140f6acfe469b8eb8"
+      archive_pattern: "UA-Nodeset-{version}"
   "1.4.8":
     deps/ua-nodeset:
       url: "https://github.com/OPCFoundation/UA-Nodeset/archive/Machinery-1.03.0-2023-08-01.zip"
