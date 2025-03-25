@@ -252,12 +252,7 @@ class GrpcConan(ConanFile):
     def build(self):
         self._patch_sources()
         cmake = CMake(self)
-
-        # The CMake configure step can fail spuriously, but succeed on a retry
-        try:
-            cmake.configure()
-        except ConanException:
-            cmake.configure()
+        cmake.configure()
 
         cmake.build()
 
