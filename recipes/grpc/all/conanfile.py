@@ -253,7 +253,6 @@ class GrpcConan(ConanFile):
         self._patch_sources()
         cmake = CMake(self)
         cmake.configure()
-
         cmake.build()
 
     @property
