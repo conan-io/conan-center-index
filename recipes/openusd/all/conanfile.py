@@ -422,7 +422,7 @@ class OpenUSDConan(ConanFile):
             # plugins
 
             self.cpp_info.components["hioAvif"].libdirs = ["plugin/usd/"]
-            self.cpp_info.components["hioAvif"].libs = ["hioAvif"]
+            self.cpp_info.components["hioAvif"].libs = ["hioAvif.so"] if self.settings.os == "Linux" and self.options.shared else ["hioAvif"]
             self.cpp_info.components["hioAvif"].requires = ["usd_ar", "usd_arch", "usd_gf", "usd_hio", "usd_tf"]
 
             if self.options.build_openimageio_plugin and self.options.build_gpu_support:
