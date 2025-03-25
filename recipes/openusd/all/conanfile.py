@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, load, replace_in_file, get, rm, rmdir
+from conan.tools.files import copy, replace_in_file, get, rm, rmdir
 from conan.tools.scm import Version
 import os
 
@@ -86,9 +86,6 @@ class OpenUSDConan(ConanFile):
     def _enable_ptex(self):
         return self.options.enable_ptex_support and self.options.enable_gl_support and self.options.build_gpu_support
 
-    def export_sources(self):
-        export_conandata_patches(self)
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -114,31 +111,27 @@ class OpenUSDConan(ConanFile):
     def configure(self):
         if self.options.shared:
             self.options.rm_safe("fPIC")
-        # Set same options as in https://github.com/PixarAnimationStudios/OpenUSD/blob/release/build_scripts/build_usd.py#L1397
-        # self.options["opensubdiv/*"].with_tbb = True
+        # Set same options as in https://github.com/PixarAnimationStudios/OpenUSD/blob/release/build_scripts/build_usd.py#L1476
+        self.options["opensubdiv/*"].with_tbb = True
         # if self.options.enable_gl_support:
         self.options["opensubdiv/*"].with_opengl = self.options.enable_gl_support
-        #     # FIXME: provokes a missing binary error on conan center
-        #     self.options["opensubdiv/*"].with_metal = is_apple_os(self)
 
     def layout(self):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
         if self.options.enable_python_support:
-            self.requires("boost/1.86.0")
+            self.requires("boost/1.87.0")
         # openusd doesn't support yet recent release of onetbb, see https://github.com/PixarAnimationStudios/OpenUSD/issues/1471
         self.requires("onetbb/2021.12.0", transitive_headers=True)
-
         if self.options.build_imaging:
             if self.options.build_openimageio_plugin and self.options.build_gpu_support:
-                self.requires("openimageio/2.5.14.0")
+                self.requires("openimageio/2.5.18.0")
             if not self.options.build_openimageio_plugin and self.options.build_opencolorio_plugin and self.options.build_gpu_support and self.options.enable_gl_support:
-                self.requires("opencolorio/2.3.2")
-            # if self.options.enable_gl_support:
+                self.requires("opencolorio/2.4.2")
             self.requires("opensubdiv/3.6.0")
             if self.options.enable_vulkan_support:
-                self.requires("vulkan-headers/1.3.290.0")
+                self.requires("vulkan-headers/1.4.309.0")
             if self.options.enable_gl_support:
                 self.requires("opengl/system")
             if self._enable_ptex:
@@ -150,7 +143,7 @@ class OpenUSDConan(ConanFile):
         if self.options.build_alembic_plugin:
             self.requires("alembic/1.8.6")
             if self.options.enable_hdf5_support:
-                self.requires("hdf5/1.14.4.3")
+                self.requires("hdf5/1.14.5")
         if self.options.build_draco_plugin:
             self.requires("draco/1.5.6")
         if self.options.enable_materialx_support:
@@ -162,8 +155,7 @@ class OpenUSDConan(ConanFile):
            # TODO: add animx to conan center (https://github.com/Autodesk/animx/)
             # self.requires("animx/x.y.z")
         if self.options.build_imaging and (self.options.build_openimageio_plugin and self.options.build_gpu_support or self.options.enable_openvdb_support):
-            # or self.options.build_alembic_plugin or self.options.enable_osl_support:
-            self.requires("imath/3.1.9")
+            self.requires("imath/3.1.12")
 
     def validate(self):
         if not self.options.shared:
@@ -175,7 +167,6 @@ class OpenUSDConan(ConanFile):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
-        # if is_apple_os(self) and not self.dependencies["opensubdiv"].options["with_metal"]:
         if self.options.enable_gl_support and is_apple_os(self):
             raise ConanInvalidConfiguration(f'{self.ref} needs -o="opensubdiv/*:with_metal=True"')
         if self.options.build_animx_tests:
@@ -199,12 +190,7 @@ class OpenUSDConan(ConanFile):
         tc.variables["PXR_BUILD_USD_TOOLS"] = self.options.build_usd_tools
 
         if self.options.enable_gl_support:
-            # tc.variables["OPENSUBDIV_ROOT_DIR"] = self.dependencies['opensubdiv'].cpp_info.
-            # tc.variables["OPENSUBDIV_LIBRARIES"] = self.dependencies['opensubdiv'].cpp_info.libdirs[0].replace("\\", "/")
             tc.variables["OPENSUBDIV_LIBRARIES"] = "OpenSubdiv::osdcpu"
-            # Provokes cmake parsing error
-            # See https://c3i.jfrog.io/c3i/misc/logs/pr/24506/75-windows-visual_studio/openusd/24.08//a47d3be1b4a4ee7c129fc15ba3f28e471624adfb-build.txt
-            # See https://github.com/conan-io/conan/issues/10539 
             tc.variables["OPENSUBDIV_INCLUDE_DIR"] = self.dependencies['opensubdiv'].cpp_info.includedirs[0].replace("\\", "/")
         target_suffix = "" if self.dependencies["opensubdiv"].options.shared else "_static"
         tc.variables["OPENSUBDIV_OSDCPU_LIBRARY"] = "OpenSubdiv::osdcpu"+target_suffix
@@ -264,12 +250,6 @@ class OpenUSDConan(ConanFile):
 
         tc.generate()
 
-        self.output.info("Content of conan_toolchain.cmake")
-        self.output.info(str(self.build_folder))
-        conan_toolchain = load(self, os.path.join(self.build_folder, "generators", "conan_toolchain.cmake"))
-        self.output.info(str(conan_toolchain))
-        self.output.info("End of conan_toolchain.cmake")
-
         tc = CMakeDeps(self)
         if self.options.enable_materialx_support:
             tc.set_property("materialx::MaterialXCore", "cmake_target_name", "MaterialXCore")
@@ -286,7 +266,6 @@ class OpenUSDConan(ConanFile):
         rmdir(self, os.path.join(self.source_folder, "cmake", "modules"))
         
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "defaults", "Packages.cmake"), "find_package(OpenSubdiv 3 REQUIRED)", "find_package(OpenSubdiv REQUIRED)")
-        # apply_conandata_patches(self)
 
     def build(self):
         self._patch_sources()
@@ -422,7 +401,7 @@ class OpenUSDConan(ConanFile):
             # plugins
 
             self.cpp_info.components["hioAvif"].libdirs = ["plugin/usd/"]
-            self.cpp_info.components["hioAvif"].libs = ["hioAvif"]
+            self.cpp_info.components["hioAvif"].libs = ["hioAvif.so"] if self.settings.os == "Linux" and self.options.shared else ["hioAvif"]
             self.cpp_info.components["hioAvif"].requires = ["usd_ar", "usd_arch", "usd_gf", "usd_hio", "usd_tf"]
 
             if self.options.build_openimageio_plugin and self.options.build_gpu_support:
