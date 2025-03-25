@@ -2,9 +2,11 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 import os
+
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -61,7 +63,7 @@ class SystemcConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if is_apple_os(self):
+        if is_apple_os(self) and Version(self.version) < "3.0.1":
             raise ConanInvalidConfiguration("Macos build not supported")
 
         if self.settings.os == "Windows" and self.options.shared:
@@ -71,6 +73,17 @@ class SystemcConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "if(PROJECT_IS_TOP_LEVEL AND NOT WIN32)",
+                        "if(0)")
+        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
+                        "if(DEFINED SYSTEMC_SANITIZER_CONFIGURATION_TYPES)",
+                        "if(0)")
+        replace_in_file(self, os.path.join(self.source_folder, "src/CMakeLists.txt"),
+                        "if (QT_ARCH)",
+                        "if (0)")
+
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -85,7 +98,6 @@ class SystemcConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
