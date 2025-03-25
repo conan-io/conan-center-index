@@ -10,7 +10,7 @@ required_conan_version = ">=1.53.0"
 class BrotliConan(ConanFile):
     name = "brotli"
     description = "Brotli compression format"
-    license = "MIT",
+    license = "MIT"
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "https://github.com/google/brotli"
     topics = ("brotli", "compression")
@@ -79,8 +79,7 @@ class BrotliConan(ConanFile):
         if self.options.enable_log:
             tc.preprocessor_definitions["BROTLI_ENABLE_LOG"] = 1
         if Version(self.version) < "1.1.0":
-            # To install relocatable shared libs on Macos
-            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
@@ -115,14 +114,6 @@ class BrotliConan(ConanFile):
         self.cpp_info.components["brotlienc"].requires = ["brotlicommon"]
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["brotlienc"].system_libs = ["m"]
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed.
-        #       do not set this target in CMakeDeps, it was a mistake, there is no official brotil config file, nor Find module file
-        self.cpp_info.names["cmake_find_package"] = "Brotli"
-        self.cpp_info.names["cmake_find_package_multi"] = "Brotli"
-        self.cpp_info.components["brotlicommon"].names["pkg_config"] = "libbrotlicommon"
-        self.cpp_info.components["brotlidec"].names["pkg_config"] = "libbrotlidec"
-        self.cpp_info.components["brotlienc"].names["pkg_config"] = "libbrotlienc"
 
     def _get_decorated_lib(self, name):
         libname = name
