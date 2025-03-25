@@ -22,6 +22,12 @@ sources:
     sha256: "299940025c14929533064abe0044d5805ea50d52b32d05ad9bc0e6996569c2a6"
 patches:
   "1.4.8":
+    - patch_file: "patches/0001-disable-sanitizers-1_4_8.patch"
+      patch_description: "Disable static code analysis"
+      patch_type: "conan"
+    - patch_file: "patches/0004-include-iphlpapi.patch"
+      patch_description: "Include iphlpapi.h for SecureZeroMemory"
+      patch_type: "conan"
     - patch_file: "patches/0005-fix-config-in-qnx.patch"
       patch_description: "Add proper qnx flags"
       patch_type: "conan"
@@ -33,6 +39,9 @@ patches:
       patch_type: "conan"
     - patch_file: "patches/0008-fix-posix-qnx.patch"
       patch_description: "Ensure posix is default architecture"
+      patch_type: "conan"
+    - patch_file: "patches/1.4.8-0001-use-external-mdnsd.patch"
+      patch_description: "Consume mdnsd as external dependency provided by Conan"
       patch_type: "conan"
   "1.4.6":
     - patch_file: "patches/0001-disable-sanitizers-1_4_x.patch"
