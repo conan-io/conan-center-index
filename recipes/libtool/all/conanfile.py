@@ -42,6 +42,9 @@ class LibtoolConan(ConanFile):
     def layout(self):
         basic_layout(self, src_folder="src")
 
+    def requirements(self):
+        self.requires("automake/1.16.5")
+
     def build_requirements(self):
         self.tool_requires("automake/1.16.5")
         self.tool_requires("m4/1.4.19")               # Needed by configure
