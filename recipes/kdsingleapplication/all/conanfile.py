@@ -38,6 +38,9 @@ class KDSingleApplicationConan(ConanFile):
     def requirements(self):
         self.requires("qt/[>=6.7 <7]", transitive_headers=True, transitive_libs=True)
 
+    def build_requirements(self):
+        self.tool_requires("qt/<host_version>")
+
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "set(CMAKE_CXX_STANDARD 14)", "")
