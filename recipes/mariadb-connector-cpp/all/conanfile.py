@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.files import get, copy, apply_conandata_patches, export_conandata_patches
 from conan.errors import ConanInvalidConfiguration
-from conan.tools.apple import fix_apple_shared_install_name
+from conan.tools.apple import fix_apple_shared_install_name, is_apple_os
 from conan.tools.build import check_min_cppstd
 import os
 
@@ -90,6 +90,8 @@ class MariadbConnectorCppRecipe (ConanFile):
 
         # To install relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        if not is_apple_os(self):
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.23"
 
         tc.generate()
 
