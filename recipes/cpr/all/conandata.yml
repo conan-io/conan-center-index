@@ -28,6 +28,8 @@ patches:
     - patch_file: "patches/008-1.11.2-remove-warning-flags.patch"
       patch_description: "disable warning flags and warning as error"
       patch_type: "portability"
+    - patch_file: "patches/009-1.11.2-windows-msvc-runtime.patch"
+      patch_description: "dont hardcode value of CMAKE_MSVC_RUNTIME_LIBRARY and use from conan toolchain instead"
   "1.11.1":
     - patch_file: "patches/008-1.11.0-remove-warning-flags.patch"
       patch_description: "disable warning flags and warning as error"
