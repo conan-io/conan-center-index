@@ -79,6 +79,8 @@ class BrotliConan(ConanFile):
         if self.options.enable_log:
             tc.preprocessor_definitions["BROTLI_ENABLE_LOG"] = 1
         if Version(self.version) < "1.1.0":
+            # To install relocatable shared libs on Macos
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
