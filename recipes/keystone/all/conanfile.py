@@ -1,8 +1,10 @@
 from conan import ConanFile
+from conan.errors import ConanException
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.build import check_max_cppstd
+from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.0"
@@ -54,11 +56,14 @@ class KeystoneConan(ConanFile):
         # INFO: include/llvm/ADT/STLExtras.h:54:34: error: no template named 'binary_function' in namespace 'std'
         # The std::binary_function was removed in C++17
         check_max_cppstd(self, 14)
-        
+
     def generate(self):
         tc = CMakeToolchain(self)
         tc.cache_variables["BUILD_LIBS_ONLY"] = True
         tc.cache_variables["KEYSTONE_BUILD_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "0.9.2": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
 
     def build(self):
