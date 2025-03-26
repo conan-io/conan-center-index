@@ -1,3 +1,5 @@
+import textwrap
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
@@ -74,15 +76,20 @@ class SystemcConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "if(PROJECT_IS_TOP_LEVEL AND NOT WIN32)",
-                        "if(0)")
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"),
-                        "if(DEFINED SYSTEMC_SANITIZER_CONFIGURATION_TYPES)",
-                        "if(0)")
-        replace_in_file(self, os.path.join(self.source_folder, "src/CMakeLists.txt"),
-                        "if (QT_ARCH)",
-                        "if (0)")
+        if Version(self.version) >= "3.0.1":
+            replace_in_file(self, os.path.join(self.source_folder, "src/sysc/kernel/sc_cor_qt.cpp"),
+                textwrap.dedent("""
+                static void sanitizer_start_switch_fiber_weak( void** fake, void const* stack, size_t size)
+                    __attribute__((__weakref__("__sanitizer_start_switch_fiber")));
+                static void sanitizer_finish_switch_fiber_weak(void* fake, void const** old_stack, size_t* old_size)
+                    __attribute__((__weakref__("__sanitizer_finish_switch_fiber")));
+                """),
+                textwrap.dedent("""
+                static void sanitizer_start_switch_fiber_weak( void** fake, void const* stack, size_t size)
+                    {*fake = NULL;};
+                static void sanitizer_finish_switch_fiber_weak(void* fake, void const** old_stack, size_t* old_size)
+                    {fake = NULL; *old_stack = NULL;*old_size = 0;};
+                """))
 
 
     def generate(self):
