@@ -84,6 +84,7 @@ class PlutoSVGConan(ConanFile):
         fix_apple_shared_install_name(self)
     def package_info(self):
         self.cpp_info.libs = ["plutosvg"]
+        self.cpp_info.includedirs = [os.path.join("include", "plutosvg")]
         if self.settings.os in ("FreeBSD", "Linux"):
             self.cpp_info.system_libs = ["m"]
         if self.options.with_freetype:
