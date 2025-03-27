@@ -4,6 +4,7 @@ if(NOT onnxruntime_DISABLE_ABSEIL)
   find_package(absl REQUIRED CONFIG)
   list(APPEND onnxruntime_EXTERNAL_LIBRARIES abseil::abseil)
   include_directories(${absl_INCLUDE_DIRS})
+  set(ABSEIL_LIBS abseil::abseil)
 endif()
 
 find_package(re2 REQUIRED CONFIG)

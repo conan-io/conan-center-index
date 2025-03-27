@@ -1,7 +1,7 @@
 from conan import ConanFile, conan_version
 from conan.errors import ConanException, ConanInvalidConfiguration
 from conan.tools.android import android_abi
-from conan.tools.apple import is_apple_os
+from conan.tools.apple import is_apple_os, to_apple_arch
 from conan.tools.build import build_jobs, check_min_cppstd, cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import chdir, copy, get, load, replace_in_file, rm, rmdir, save, export_conandata_patches, apply_conandata_patches
@@ -791,8 +791,8 @@ class QtConan(ConanFile):
             args.append("-psql_config \"%s\"" % os.path.join(self.dependencies["libpq"].package_folder, "bin", "pg_config"))
         if self.settings.os == "Macos":
             args += ["-no-framework"]
-            if self.settings.arch == "armv8":
-                args.append('QMAKE_APPLE_DEVICE_ARCHS="arm64"')
+            if cross_building(self):
+                args.append(f"QMAKE_APPLE_DEVICE_ARCHS={to_apple_arch(self)}")
         elif self.settings.os == "Android":
             args += [f"-android-ndk-platform android-{self.settings.os.api_level}"]
             args += [f"-android-abis {android_abi(self)}"]
