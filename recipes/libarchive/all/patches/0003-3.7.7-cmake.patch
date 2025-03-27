@@ -2,6 +2,15 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
 index bfe68ac..85e6de9 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
+@@ -16,7 +16,7 @@ endif()
+ #
+ PROJECT(libarchive C)
+ #
+-SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake")
++LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/build/cmake")
+ if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${libarchive_BINARY_DIR}/bin)
+ endif()
 @@ -470,7 +470,7 @@ IF(ZLIB_FOUND)
    SET(HAVE_LIBZ 1)
    SET(HAVE_ZLIB_H 1)
