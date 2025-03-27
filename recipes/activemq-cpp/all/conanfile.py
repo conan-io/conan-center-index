@@ -42,9 +42,6 @@ class PackageConan(ConanFile):
         self.requires("openssl/[>=1.0.0]")
 
     def validate(self):
-        # validate the minimum cpp standard supported. Only for C++ projects
-        check_min_cppstd(self, 14)
-
         # Always comment the reason including the upstream issue.
         # INFO: Upstream only support Unix systems. See <URL>
         if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
@@ -69,6 +66,12 @@ class PackageConan(ConanFile):
         tc.autoreconf_args.extend(["-I", "config", "-I", "m4"])
         if self.options.shared:
             tc.configure_args.extend(["--enable-shared"])
+
+        # Handle the fact that the library uses deprecated throws() declarations
+        compiler_std = self.settings.get_safe('self.settings.compiler.cppstd')
+        if compiler_std is None or compiler_std > 14:
+            tc.extra_cxxflags.append('-std=c++14')
+
         tc.generate()
         # generate pkg-config files of dependencies (useless if upstream configure.ac doesn't rely on PKG_CHECK_MODULES macro)
         tc = PkgConfigDeps(self)
@@ -88,7 +91,7 @@ class PackageConan(ConanFile):
                 mkdir(self, "config")
                 command = "autoreconf --force --install -I config -I m4"
                 self.run(command)
-            
+        
         autotools.configure(build_script_folder=script_folder)
         autotools.make()
 
