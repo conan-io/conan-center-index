@@ -246,11 +246,7 @@ class ArmadilloConan(ConanFile):
         deps.generate()
 
     def source(self):
-        get(self,
-            **self.conan_data["sources"][self.version],
-            strip_root=True,
-            filename=f"{self.name}-{self.version}.tar.xz"
-        )
+        get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
     def build(self):
         apply_conandata_patches(self)
