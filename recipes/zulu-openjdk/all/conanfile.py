@@ -13,15 +13,12 @@ class ZuluOpenJDK(ConanFile):
     homepage = "https://www.azul.com"
     topics = ("java", "jdk", "openjdk")
     package_type = "application"
-    settings = "os", "arch", "compiler", "build_type"
-
-    @property
-    def _settings_build(self):
-        return getattr(self, "settings_build", self.settings)
+    settings = "os", "arch"
 
     @property
     def _jni_folder(self):
-        folder = {"Linux": "linux", "Macos": "darwin", "Windows": "win32"}.get(str(self._settings_build.os))
+        folder = {"Linux": "linux", "Macos": "darwin",
+                  "Windows": "win32", "SunOS": "solaris"}.get(str(self.settings.os))
         return os.path.join("include", folder)
 
     def package_id(self):
@@ -29,17 +26,19 @@ class ZuluOpenJDK(ConanFile):
         del self.info.settings.build_type
 
     def validate(self):
-        supported_archs = ["x86_64", "armv8"]
-        if self._settings_build.arch not in supported_archs:
-            raise ConanInvalidConfiguration(f"Unsupported Architecture ({self._settings_build.arch}). "
-                                            f"This version {self.version} currently only supports {supported_archs}.")
-        supported_os = ["Windows", "Macos", "Linux"]
-        if self._settings_build.os not in supported_os:
-            raise ConanInvalidConfiguration(f"Unsupported os ({self._settings_build.os}). "
-                                            f"This package currently only support {supported_os}.")
+        srcs = self.conan_data["sources"].get(self.version, {}).get(str(self.settings.os))
+        if srcs is None:
+            raise ConanInvalidConfiguration(f"Unsupported os ({self.settings.os}). "
+                                            f"This version {self.version} currently does not support"
+                                            f" {self.settings.arch} on {self.settings.os})")
+        if srcs.get(str(self.settings.arch)) is None:
+            raise ConanInvalidConfiguration(f"Unsupported Architecture ({self.settings.arch}). "
+                                            f"This version {self.version} currently does not support"
+                                            f" {self.settings.arch} on {self.settings.os})")
 
     def build(self):
-        get(self, **self.conan_data["sources"][self.version][str(self._settings_build.os)][str(self._settings_build.arch)], strip_root=True)
+        get(self, **self.conan_data["sources"][self.version][str(self.settings.os)]
+            [str(self.settings.arch)], strip_root=True, keep_permissions=True)
 
     def package(self):
         copy(self, pattern="*", dst=os.path.join(self.package_folder, "bin"),
