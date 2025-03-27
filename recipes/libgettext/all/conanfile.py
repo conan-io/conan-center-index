@@ -124,6 +124,15 @@ class GetTextConan(ConanFile):
             if (str(self.settings.compiler) == "Visual Studio" and Version(self.settings.compiler.version) >= "12") or \
                (str(self.settings.compiler) == "msvc" and Version(self.settings.compiler.version) >= "180"):
                 tc.extra_cflags += ["-FS"]
+
+            if self.settings.build_type == "Debug":
+                # Skip checking for the 'n' printf format directly
+                # in msvc, as it is known to not be available due to security concerns.
+                # Skipping it avoids a GUI prompt during ./configure for a debug build
+                # See https://github.com/conan-io/conan-center-index/issues/23698
+                tc.configure_args.extend([
+                    'gl_cv_func_printf_directive_n=no'
+                ])
         tc.make_args += ["-C", "intl"]
         env = tc.environment()
         if is_msvc(self) or self._is_clang_cl:

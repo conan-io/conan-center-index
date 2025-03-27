@@ -1,4 +1,7 @@
 sources:
+  "0.2.25":
+    url: "https://github.com/Dobiasd/FunctionalPlus/archive/v0.2.25.tar.gz"
+    sha256: "9b5e24bbc92f43b977dc83efbc173bcf07dbe07f8718fc2670093655b56fcee3"
   "0.2.24":
     url: "https://github.com/Dobiasd/FunctionalPlus/archive/v0.2.24.tar.gz"
     sha256: "446c63ac3f2045e7587f694501882a3d7c7b962b70bcc08deacf5777bdaaff8c"

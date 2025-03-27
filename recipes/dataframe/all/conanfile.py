@@ -15,7 +15,7 @@ class DataFrameConan(ConanFile):
     name = "dataframe"
     description = (
         "C++ DataFrame for statistical, Financial, and ML analysis -- in modern C++ "
-        "using native types, continuous memory storage, and no pointers are involved"
+        "using native types and contiguous memory storage"
     )
     license = "BSD-3-Clause"
     url = "https://github.com/conan-io/conan-center-index"
@@ -98,9 +98,6 @@ class DataFrameConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if is_msvc(self) and self.options.shared and Version(self.version) < "1.20.0":
-            raise ConanInvalidConfiguration(f"{self.ref} doesn't support shared lib with Visual Studio")
-
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, self._min_cppstd)
         minimum_version = self._minimum_compilers_version.get(str(self.settings.compiler), False)
@@ -122,33 +119,13 @@ class DataFrameConan(ConanFile):
 
     def generate(self):
         tc = CMakeToolchain(self)
-        if Version(self.version) >= "1.20.0":
-            tc.variables["HMDF_TESTING"] = False
-            tc.variables["HMDF_EXAMPLES"] = False
-            tc.variables["HMDF_BENCHMARKS"] = False
-        elif Version(self.version) >= "1.14.0":
-            tc.variables["ENABLE_TESTING"] = False
+        tc.variables["HMDF_TESTING"] = False
+        tc.variables["HMDF_EXAMPLES"] = False
+        tc.variables["HMDF_BENCHMARKS"] = False
         tc.generate()
 
-    def _patch_sources(self):
-        apply_conandata_patches(self)
-        # Don't pollute RPATH
-        if Version(self.version) < "1.20.0":
-            replace_in_file(
-                self,
-                os.path.join(self.source_folder, "CMakeLists.txt"),
-                textwrap.dedent("""\
-                    include(AddInstallRPATHSupport)
-                    add_install_rpath_support(BIN_DIRS "${CMAKE_INSTALL_FULL_LIBDIR}"
-                                              LIB_DIRS "${CMAKE_INSTALL_FULL_BINDIR}"
-                                              INSTALL_NAME_DIR "${CMAKE_INSTALL_FULL_LIBDIR}"
-                                              USE_LINK_PATH)
-                """),
-                "",
-            )
-
     def build(self):
-        self._patch_sources()
+        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
@@ -176,10 +153,7 @@ class DataFrameConan(ConanFile):
             self.cpp_info.system_libs.extend(["pthread", "rt", "m"])
         if is_msvc(self):
             self.cpp_info.defines.append("_USE_MATH_DEFINES")
-            if Version(self.version) < "1.20.0" and not self.options.shared:
-                # weird but required in those versions of dataframe
-                self.cpp_info.defines.append("LIBRARY_EXPORTS")
-        if Version(self.version) >= "1.20.0" and self.options.shared:
+        if self.options.shared:
             self.cpp_info.defines.append("HMDF_SHARED")
 
         # TODO: to remove in conan v2 once cmake_find_package_* generators removed

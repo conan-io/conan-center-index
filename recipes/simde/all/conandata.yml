@@ -1,4 +1,7 @@
 sources:
+  "0.8.2":
+    url: "https://github.com/simd-everywhere/simde/archive/refs/tags/v0.8.2.tar.gz"
+    sha256: "ed2a3268658f2f2a9b5367628a85ccd4cf9516460ed8604eed369653d49b25fb"
   "0.8.0":
     # same as 0.7.6
     url: "https://github.com/simd-everywhere/simde/archive/refs/tags/v0.8.0.tar.gz"

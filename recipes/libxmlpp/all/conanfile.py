@@ -35,8 +35,24 @@ class LibXMLPlusPlus(ConanFile):
     }
 
     @property
+    def _min_cppstd(self):
+        return "17" if Version(self.version) >= "5.4.0" else "11"
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "17": {
+                "gcc": "8",
+                "clang": "7",
+                "apple-clang": "12",
+                "Visual Studio": "16",
+                "msvc": "192",
+            },
+        }.get(self._min_cppstd, {})
+
+    @property
     def _lib_version(self):
-        return "2.6" if Version(self.version) <= "2.42.1" else "5.0"
+        return "5.0"
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -53,31 +69,24 @@ class LibXMLPlusPlus(ConanFile):
         basic_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("libxml2/2.12.4")
-        if Version(self.version) <= "2.42.1":
-            self.requires("glibmm/2.66.4", transitive_headers=True, transitive_libs=True)
-        else:
-            self.requires("glibmm/2.75.0")
+        self.requires("libxml2/[>=2.12.5 <3]")
+        self.requires("glibmm/2.75.0")
 
     def validate(self):
         if hasattr(self, "settings_build") and cross_building(self):
             raise ConanInvalidConfiguration("Cross-building not implemented")
-        if Version(self.version) < "2.91.1":
-            from conan import conan_version
-            import sys
-            if conan_version.major == 2:
-                # FIXME: linter complains, but function is there
-                # https://docs.conan.io/2.0/reference/tools/build.html?highlight=check_min_cppstd#conan-tools-build-check-max-cppstd
-                check_max_cppstd = getattr(sys.modules['conan.tools.build'], 'check_max_cppstd')
-                # INFO: error: no template named 'auto_ptr' in namespace 'std'. Removed in C++17.
-                check_max_cppstd(self, 14)
         if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, 11)
+            check_min_cppstd(self, self._min_cppstd)
+        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
+        if minimum_version and Version(self.settings.compiler.version) < minimum_version:
+            raise ConanInvalidConfiguration(
+                f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
+            )
 
     def build_requirements(self):
-        self.tool_requires("meson/1.3.1")
+        self.tool_requires("meson/[>=1.2.3 <2]")
         if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-            self.tool_requires("pkgconf/2.1.0")
+            self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)

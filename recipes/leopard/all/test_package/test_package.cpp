@@ -1,4 +1,8 @@
+#ifdef THREADPOOL_LESS_2_1_0
 #include <ThreadPool/ThreadPool.h>
+#else
+#include <Leopard/ThreadPool.h>
+#endif
 
 #include <cassert>
 #include <cstdio>

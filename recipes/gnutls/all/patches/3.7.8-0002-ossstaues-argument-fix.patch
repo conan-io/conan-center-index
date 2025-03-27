@@ -1,0 +1,13 @@
+diff --git a/lib/system/certs.c b/lib/system/certs.c
+index 611c645..b1eb414 100644
+--- a/lib/system/certs.c
++++ b/lib/system/certs.c
+@@ -278,7 +278,7 @@ int add_system_trust(gnutls_x509_trust_list_t list, unsigned int tl_flags,
+ }
+ #elif defined(__APPLE__) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 1070
+ static
+-int osstatus_error(status)
++int osstatus_error(OSStatus status)
+ {
+ 	CFStringRef err_str = SecCopyErrorMessageString(status, NULL);
+ 	_gnutls_debug_log("Error loading system root certificates: %s\n",

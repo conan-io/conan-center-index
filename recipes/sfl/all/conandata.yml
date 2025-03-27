@@ -1,4 +1,22 @@
 sources:
+  "1.9.0":
+    url: "https://github.com/slavenf/sfl-library/archive/refs/tags/1.9.0.tar.gz"
+    sha256: "89b21506026faba84c42e24256eb41f990f76fc7b9d7db8c983dc585a41594d3"
+  "1.8.2":
+    url: "https://github.com/slavenf/sfl-library/archive/refs/tags/1.8.2.tar.gz"
+    sha256: "06dc215f73ebfbbcbb4ef39cd556bffe0da16918f542045407f51c4b9effcabb"
+  "1.8.0":
+    url: "https://github.com/slavenf/sfl-library/archive/refs/tags/1.8.0.tar.gz"
+    sha256: "bb473a8e0b46ecff957c06112593b9a4104e0d1ec8e9d5840ff33c20ad3a243e"
+  "1.7.0":
+    url: "https://github.com/slavenf/sfl-library/archive/refs/tags/1.7.0.tar.gz"
+    sha256: "9e09bacc51cfb085c4a6030f90cbea45685de608900d6b7b3c0a9f4971682652"
+  "1.6.0":
+    url: "https://github.com/slavenf/sfl-library/archive/refs/tags/1.6.0.tar.gz"
+    sha256: "f5121d95c2f3922da4f1cec9bb6045d8733892ddc55ee3c47c99e761e5df5ec4"
+  "1.5.0":
+    url: "https://github.com/slavenf/sfl-library/archive/refs/tags/1.5.0.tar.gz"
+    sha256: "767d9b3627540071d2a80f18f034d80d6e9eaffc027876c7898c51aeebd3bf37"
   "1.4.0":
     url: "https://github.com/slavenf/sfl-library/archive/refs/tags/1.4.0.tar.gz"
     sha256: "dcdc6c40a60116075910e3321fe12065142d78f4947826aac263ade1d84d449a"

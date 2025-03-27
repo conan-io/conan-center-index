@@ -36,15 +36,10 @@ class UwebsocketsConan(ConanFile):
         return {
             "Visual Studio": "15",
             "msvc": "191",
-            "gcc": "7" if Version(self.version) < "20.11.0" else "8",
-            "clang": "5" if Version(self.version) < "20.11.0" else "7",
+            "gcc": "8",
+            "clang": "7",
             "apple-clang": "10",
         }
-
-    def config_options(self):
-        # libdeflate is not supported before 19.0.0
-        if Version(self.version) < "19.0.0":
-            del self.options.with_libdeflate
 
     def layout(self):
         basic_layout(self, src_folder="src")
@@ -52,15 +47,9 @@ class UwebsocketsConan(ConanFile):
     def requirements(self):
         if self.options.with_zlib:
             self.requires("zlib/[>=1.2.11 <2]")
-        if self.options.get_safe("with_libdeflate"):
-            self.requires("libdeflate/1.19")
-
-        if Version(self.version) > "20.17.0":
-            self.requires("usockets/0.8.8")
-        elif Version(self.version) >= "19.0.0":
-            self.requires("usockets/0.8.1")
-        else:
-            self.requires("usockets/0.4.0")
+        if self.options.with_libdeflate:
+            self.requires("libdeflate/1.22")
+        self.requires("usockets/0.8.8")
 
     def package_id(self):
         self.info.clear()
@@ -74,7 +63,7 @@ class UwebsocketsConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-        if Version(self.version) >= "20.14.0" and self.settings.compiler == "clang" and str(self.settings.compiler.libcxx) == "libstdc++":
+        if self.settings.compiler == "clang" and str(self.settings.compiler.libcxx) == "libstdc++":
             raise ConanInvalidConfiguration(f"{self.ref} needs recent libstdc++ with charconv.")
 
     def source(self):
@@ -101,7 +90,7 @@ class UwebsocketsConan(ConanFile):
 
         if not self.options.with_zlib:
             self.cpp_info.defines.append("UWS_NO_ZLIB")
-        if self.options.get_safe("with_libdeflate"):
+        if self.options.with_libdeflate:
             self.cpp_info.defines.append("UWS_USE_LIBDEFLATE")
 
         self.cpp_info.includedirs.append(os.path.join("include", "uWebSockets"))
