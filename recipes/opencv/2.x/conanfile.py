@@ -10,7 +10,7 @@ import sys
 import os
 import textwrap
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 OPENCV_MAIN_MODULES_OPTIONS = (
@@ -515,6 +515,7 @@ class OpenCVConan(ConanFile):
         tc.variables["ENABLE_CCACHE"] = False
         if is_msvc(self):
             tc.variables["BUILD_WITH_STATIC_CRT"] = is_msvc_static_runtime(self)
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         CMakeDeps(self).generate()
@@ -535,15 +536,6 @@ class OpenCVConan(ConanFile):
         rm(self, "*.cmake", self.package_folder, recursive=True)
 
         self._create_cmake_module_variables(os.path.join(self.package_folder, self._module_vars_rel_path))
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        targets_mapping = {self._cmake_target(k): f"opencv::{self._cmake_target(k)}" for k in self._opencv_modules.keys()}
-        if self.options.world:
-            targets_mapping.update({"opencv_world": "opencv::opencv_world"})
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._module_target_rel_path),
-            targets_mapping,
-        )
 
     def _create_cmake_module_variables(self, module_file):
         """
@@ -567,24 +559,9 @@ class OpenCVConan(ConanFile):
         """)
         save(self, module_file, content)
 
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
     @property
     def _module_vars_rel_path(self):
         return os.path.join("lib", "cmake", f"conan-official-{self.name}-variables.cmake")
-
-    @property
-    def _module_target_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
 
     @staticmethod
     def _cmake_target(module):
