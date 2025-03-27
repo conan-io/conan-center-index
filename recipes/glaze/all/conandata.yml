@@ -1,4 +1,13 @@
 sources:
+  "5.0.0":
+    url: "https://github.com/stephenberry/glaze/archive/v5.0.0.tar.gz"
+    sha256: "37e4ab809f18c5497a35481f347c1ed63761324644e358d92a7a11fe647fd44a"
+  "4.4.3":
+    url: "https://github.com/stephenberry/glaze/archive/v4.4.3.tar.gz"
+    sha256: "d0dd03f156f95860bf9c2957da0704ee0f7651e21089ff34e3d26fa0190e8684"
+  "4.3.1":
+    url: "https://github.com/stephenberry/glaze/archive/v4.3.1.tar.gz"
+    sha256: "934b16d0a00dfc2b06bc2920a6444b8a6a34edb4f0fe872f8ad7a044518a37e3"
   "4.0.1":
     url: "https://github.com/stephenberry/glaze/archive/v4.0.1.tar.gz"
     sha256: "0026aca33201ee6d3a820fb5926f36ba8c838bfd3120e2e179b0eee62b5bd231"

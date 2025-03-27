@@ -89,8 +89,7 @@ class AnyRPCConan(ConanFile):
         tc.variables["BUILD_PROTOCOL_JSON"] = self.options.with_protocol_json
         tc.variables["BUILD_PROTOCOL_XML"] = self.options.with_protocol_xml
         tc.variables["BUILD_PROTOCOL_MESSAGEPACK"] = self.options.with_protocol_messagepack
-        # Relocatable shared lib on Macos
-        tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)

@@ -1,0 +1,48 @@
+From 76ac8864f189e600814015cf419afc162e2ef0e1 Mon Sep 17 00:00:00 2001
+From: Mal <vingine.dev@gmail.com>
+Date: Thu, 6 Feb 2025 09:02:14 +0100
+Subject: [PATCH 1/2] Add missing include in gislandmodel.hpp
+
+---
+ modules/gapi/src/compiler/gislandmodel.hpp | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/modules/gapi/src/compiler/gislandmodel.hpp b/modules/gapi/src/compiler/gislandmodel.hpp
+index ade13a6f3338..c2efb3eba7aa 100644
+--- a/modules/gapi/src/compiler/gislandmodel.hpp
++++ b/modules/gapi/src/compiler/gislandmodel.hpp
+@@ -10,6 +10,7 @@
+ 
+ #include <unordered_set>
+ #include <memory>        // shared_ptr
++#include <exception>     // exception_ptr
+ 
+ #include <ade/graph.hpp>
+ #include <ade/typed_graph.hpp>
+
+From 86c327a90a37ef01a4bc820b76199f4e0d095ff0 Mon Sep 17 00:00:00 2001
+From: Mal <vingine.dev@gmail.com>
+Date: Thu, 6 Feb 2025 09:05:09 +0100
+Subject: [PATCH 2/2] Add two more missing includes
+
+---
+ modules/gapi/src/compiler/gislandmodel.hpp | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/modules/gapi/src/compiler/gislandmodel.hpp b/modules/gapi/src/compiler/gislandmodel.hpp
+index c2efb3eba7aa..ebc6a68753b3 100644
+--- a/modules/gapi/src/compiler/gislandmodel.hpp
++++ b/modules/gapi/src/compiler/gislandmodel.hpp
+@@ -8,9 +8,11 @@
+ #ifndef OPENCV_GAPI_GISLANDMODEL_HPP
+ #define OPENCV_GAPI_GISLANDMODEL_HPP
+ 
+-#include <unordered_set>
++#include <unordered_set> // unordered_map
+ #include <memory>        // shared_ptr
+ #include <exception>     // exception_ptr
++#include <string>        // string
++#include <cstddef>       // size_t
+ 
+ #include <ade/graph.hpp>
+ #include <ade/typed_graph.hpp>
