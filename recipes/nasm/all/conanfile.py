@@ -21,18 +21,22 @@ class NASMConan(ConanFile):
 
     settings = "os", "arch", "compiler", "build_type"
 
+    def _is_clang_cl(self):
+        return self.settings.compiler == "clang" and self.settings.os == "Windows" and \
+               self.settings.compiler.get_safe("runtime")
+
     @property
     def _settings_build(self):
         return getattr(self, "settings_build", self.settings)
 
     @property
     def _nasm(self):
-        suffix = "w.exe" if is_msvc(self) else ""
+        suffix = "w.exe" if (is_msvc(self) or self._is_clang_cl) else ""
         return os.path.join(self.package_folder, "bin", f"nasm{suffix}")
 
     @property
     def _ndisasm(self):
-        suffix = "w.exe" if is_msvc(self) else ""
+        suffix = "w.exe" if (is_msvc(self) or self._is_clang_cl) else ""
         return os.path.join(self.package_folder, "bin", f"ndisasm{suffix}")
 
     def _chmod_plus_x(self, filename):
@@ -55,7 +59,7 @@ class NASMConan(ConanFile):
     def build_requirements(self):
         if self._settings_build.os == "Windows":
             self.tool_requires("strawberryperl/5.32.1.1")
-            if not is_msvc(self):
+            if not is_msvc(self) and not self._is_clang_cl:
                 self.win_bash = True
                 if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                     self.tool_requires("msys2/cci.latest")
@@ -66,7 +70,7 @@ class NASMConan(ConanFile):
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
-        if is_msvc(self):
+        if is_msvc(self) or self._is_clang_cl:
             tc = NMakeToolchain(self)
             tc.generate()
         else:
@@ -79,7 +83,7 @@ class NASMConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        if is_msvc(self):
+        if is_msvc(self) or self._is_clang_cl:
             with chdir(self, self.source_folder):
                 self.run(f'nmake /f {os.path.join("Mkfiles", "msvc.mak")}')
         else:
@@ -100,7 +104,7 @@ class NASMConan(ConanFile):
 
     def package(self):
         copy(self, pattern="LICENSE", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
-        if is_msvc(self):
+        if is_msvc(self) or self._is_clang_cl:
             copy(self, pattern="*.exe", src=self.source_folder, dst=os.path.join(self.package_folder, "bin"), keep_path=False)
             with chdir(self, os.path.join(self.package_folder, "bin")):
                 shutil.copy2("nasm.exe", "nasmw.exe")
