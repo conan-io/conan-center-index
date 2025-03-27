@@ -2,11 +2,3 @@ sources:
   "0.4.1":
     url: "https://github.com/aurora-opensource/au/archive/refs/tags/0.4.1.tar.gz"
     sha256: "5e88a0ffcb0a0843f4bd4d4ea4429c793f85dfcb8c1e7f7978de6fecab739b84"
-  "0.3.5":
-    url: "https://github.com/aurora-opensource/au/archive/refs/tags/0.3.5.tar.gz"
-    sha256: "7ec826dc42968dc1633de56e4f9d06e70de73e820d2ac4788e8453343a622c9b"
-patches:
-  "0.3.5":
-    - patch_file: "patches/0001-v0.3.5-disable-gtest.patch"
-      patch_description: "Remove GTest dependency and disable tests build"
-      patch_type: "conan"
