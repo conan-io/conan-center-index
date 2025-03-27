@@ -249,7 +249,7 @@ class ArmadilloConan(ConanFile):
         get(self,
             **self.conan_data["sources"][self.version],
             strip_root=True,
-            filename="f{self.name}-{self.version}.tar.xz"
+            filename=f"{self.name}-{self.version}.tar.xz"
         )
 
     def build(self):
