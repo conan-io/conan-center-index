@@ -12,6 +12,7 @@ class PackioConan(ConanFile):
     description = "An asynchronous msgpack-RPC and JSON-RPC library built on top of Boost.Asio."
     topics = ("rpc", "msgpack", "json", "asio", "async", "cpp17", "cpp20", "coroutines")
     settings = "compiler"
+    package_type = "header-library"
     no_copy_source = True
     options = {
         "standalone_asio": [True, False],
