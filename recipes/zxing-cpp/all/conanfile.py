@@ -72,6 +72,13 @@ class ZXingCppConan(ConanFile):
     def validate(self):
         cpp_version = 17 if Version(self.version) >= "1.2.0" else 14
 
+        cppstd = self.settings.get_safe("compiler.cppstd", str(cpp_version))
+        if cppstd and cppstd.startswith("gnu"):
+            cppstd = cppstd[3:]
+
+        if Version(self.version) >= "2.3.0" and int(cppstd) <= 17:
+            self.output.warning("Using C++17 lacks support for DataBarLimited and multi-symbol and position independent detection for DataMatrix")
+
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, cpp_version)
         min_version = self._compiler_cpp_support.get(str(cpp_version)).get(str(self.settings.compiler))
