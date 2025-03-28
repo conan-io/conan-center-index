@@ -44,7 +44,7 @@ class PackageConan(ConanFile):
     def validate(self):
         # Always comment the reason including the upstream issue.
         # INFO: Upstream only support Unix systems. See <URL>
-        if self.settings.os not in ["Linux", "FreeBSD", "Macos"]:
+        if self.settings.os not in ["Linux", "FreeBSD"]:
             raise ConanInvalidConfiguration(f"{self.ref} is not supported on {self.settings.os}.")
 
     # if a tool other than the compiler or autotools is required to build the project (pkgconf, bison, flex etc)
