@@ -14,15 +14,6 @@ sources:
   "1.3.8":
     url: "https://github.com/open62541/open62541/archive/v1.3.8.tar.gz"
     sha256: "b6943b564787c4953b77ca8d7f987c4b896b3f3e91f45d9f13e9056b6148bc1d"
-  "1.2.6":
-    url: "https://github.com/open62541/open62541/archive/v1.2.6.tar.gz"
-    sha256: "7470c1e2f97d0e7dad9632ced7b62f0add66a3c689532204ef85b0556d129106"
-  "1.1.6":
-    url: "https://github.com/open62541/open62541/archive/v1.1.6.tar.gz"
-    sha256: "005bb336ba52f2c0add479bb46de8aa4216efa7f2bfd8b1c24a0271494edbd3f"
-  "1.0.6":
-    url: "https://github.com/open62541/open62541/archive/v1.0.6.tar.gz"
-    sha256: "299940025c14929533064abe0044d5805ea50d52b32d05ad9bc0e6996569c2a6"
 patches:
   "1.4.11.1":
     - patch_file: "patches/0001-disable-sanitizers-1_4_8.patch"
@@ -85,25 +76,4 @@ patches:
   "1.3.8":
     - patch_file: "patches/0001-disable-sanitizers-1_3_x.patch"
       patch_description: "Disable static code analysis"
-      patch_type: "conan"
-  "1.2.6":
-    - patch_file: "patches/0001-fix-cmake-find-deps-1_2_x.patch"
-      patch_description: "Use Cmake find_package(*) to resolve external dependencies"
-      patch_type: "portability"
-    - patch_file: "patches/0003-disable-sanitizers-1_2_x.patch"
-      patch_description: "Disable static code analysis"
-      patch_type: "conan"
-    - patch_file: "patches/0003-fix-use-usr-bin-env-python3.patch"
-      patch_description: "Use python3 instead of default python interpreter"
-      patch_type: "conan"
-  "1.1.6":
-    - patch_file: "patches/0001-fix-cmake-find-deps-1_1_x.patch"
-      patch_description: "Use Cmake find_package(*) to resolve external dependencies"
-      patch_type: "portability"
-    - patch_file: "patches/0003-disable-sanitizers-1_1_6.patch"
-      patch_description: "Disable static code analysis"
-      patch_type: "conan"
-  "1.0.6":
-    - patch_file: "patches/1_0_x.patch"
-      patch_description: "Fix CMAKE_MODULE_PATH and PROJECT_VERSION variables, remove -Werror flag, disable static code analysis, use Cmake find_package(*) to resolve external dependencies, fix include paths"
       patch_type: "conan"
