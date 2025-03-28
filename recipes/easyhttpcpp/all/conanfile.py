@@ -1,11 +1,12 @@
 from conan import ConanFile
-from conan.errors import ConanInvalidConfiguration
+from conan.errors import ConanInvalidConfiguration, ConanException
 from conan.tools.build import check_min_cppstd, valid_min_cppstd
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.scm import Version
 import os
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class EasyhttpcppConan(ConanFile):
@@ -60,7 +61,7 @@ class EasyhttpcppConan(ConanFile):
         return comps
 
     def validate(self):
-        if any([not self.dependencies["poco"].options.get_safe(comp, False) for comp in self._required_poco_components]):
+        if any(not self.dependencies["poco"].options.get_safe(comp, False) for comp in self._required_poco_components):
             raise ConanInvalidConfiguration(
                 f"{self.ref} requires the following poco options enabled: {', '.join(self._required_poco_components)}"
             )
@@ -78,6 +79,9 @@ class EasyhttpcppConan(ConanFile):
         if self.settings.os == "Windows" and self.options.shared:
             tc.preprocessor_definitions["EASYHTTPCPP_DLL"] = "1"
             tc.preprocessor_definitions["EASYHTTPCPP_API_EXPORTS"] = "1"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
+        if Version(self.version) > "2.1.0": # pylint: disable=conan-unreachable-upper-version
+            raise ConanException("CMAKE_POLICY_VERSION_MINIMUM hardcoded to 3.5, check if new version supports CMake 4")
         tc.generate()
         deps = CMakeDeps(self)
         deps.generate()
@@ -115,11 +119,4 @@ class EasyhttpcppConan(ConanFile):
         else:
             self.cpp_info.components["easyhttp"].requires.append("poco::poco_netssl")
 
-        # TODO: to remove in conan v2
-        self.cpp_info.filenames["cmake_find_package"] = "easyhttpcppeasyhttp"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "easyhttpcppeasyhttp"
-        self.cpp_info.names["cmake_find_package"] = "easyhttpcpp"
-        self.cpp_info.names["cmake_find_package_multi"] = "easyhttpcpp"
-        self.cpp_info.components["easyhttp"].names["cmake_find_package"] = "easyhttp"
-        self.cpp_info.components["easyhttp"].names["cmake_find_package_multi"] = "easyhttp"
         self.cpp_info.components["easyhttp"].set_property("cmake_target_name", "easyhttpcpp::easyhttp")
