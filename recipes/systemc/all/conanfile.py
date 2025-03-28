@@ -1,10 +1,14 @@
+import textwrap
+
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
 from conan.tools.microsoft import is_msvc
 import os
+
+from conan.tools.scm import Version
 
 required_conan_version = ">=1.53.0"
 
@@ -61,7 +65,7 @@ class SystemcConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def validate(self):
-        if is_apple_os(self):
+        if is_apple_os(self) and Version(self.version) < "3.0.1":
             raise ConanInvalidConfiguration("Macos build not supported")
 
         if self.settings.os == "Windows" and self.options.shared:
@@ -71,6 +75,22 @@ class SystemcConan(ConanFile):
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
+        apply_conandata_patches(self)
+        if Version(self.version) >= "3.0.1":
+            replace_in_file(self, os.path.join(self.source_folder, "src/sysc/kernel/sc_cor_qt.cpp"),
+                textwrap.dedent("""
+                static void sanitizer_start_switch_fiber_weak( void** fake, void const* stack, size_t size)
+                    __attribute__((__weakref__("__sanitizer_start_switch_fiber")));
+                static void sanitizer_finish_switch_fiber_weak(void* fake, void const** old_stack, size_t* old_size)
+                    __attribute__((__weakref__("__sanitizer_finish_switch_fiber")));
+                """),
+                textwrap.dedent("""
+                static void sanitizer_start_switch_fiber_weak( void** fake, void const* stack, size_t size)
+                    {*fake = NULL;};
+                static void sanitizer_finish_switch_fiber_weak(void* fake, void const** old_stack, size_t* old_size)
+                    {fake = NULL; *old_stack = NULL;*old_size = 0;};
+                """))
+
 
     def generate(self):
         tc = CMakeToolchain(self)
@@ -85,7 +105,6 @@ class SystemcConan(ConanFile):
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
