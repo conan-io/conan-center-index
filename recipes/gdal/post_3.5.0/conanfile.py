@@ -7,7 +7,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=2.0"
+required_conan_version = ">=1.66.0 <2 || >=2.0.5"
 
 
 class GdalConan(ConanFile):
@@ -174,7 +174,7 @@ class GdalConan(ConanFile):
         cmake_layout(self, src_folder="src")
 
     def requirements(self):
-        self.requires("json-c/0.17")
+        self.requires("json-c/0.18")
         self.requires("libgeotiff/1.7.1")
         self.requires("libtiff/4.6.0")
         self.requires("proj/9.3.1")
@@ -184,7 +184,8 @@ class GdalConan(ConanFile):
         if self.options.with_armadillo:
             self.requires("armadillo/12.6.4")
         if self.options.with_arrow:
-            self.requires("arrow/14.0.2")
+            self.requires("arrow/16.1.0")
+            self.options["arrow"].filesystem_layer = True
         if self.options.with_basisu:
             self.requires("libbasisu/1.15.0")
         if self.options.with_blosc:
@@ -221,7 +222,7 @@ class GdalConan(ConanFile):
         if self.options.with_heif:
             self.requires("libheif/1.16.2")
         if self.options.with_jpeg == "libjpeg":
-            self.requires("libjpeg/[>=9e]")
+            self.requires("libjpeg/9e")
         elif self.options.with_jpeg == "libjpeg-turbo":
             self.requires("libjpeg-turbo/3.0.1")
         if self.options.with_jxl:
@@ -634,10 +635,10 @@ class GdalConan(ConanFile):
                         "JXL_THREADS", "JXL", strict=False)
         # Workaround for Parquet and ArrowDataset being provided by Arrow on CCI.
         replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
-                        "gdal_check_package(Parquet", "# gdal_check_package(Parquet")
+                        "gdal_check_package(Parquet", "# gdal_check_package(Parquet", strict=False)
         if Version(self.version) >= "3.6.0":
             replace_in_file(self, os.path.join(self.source_folder, "cmake", "helpers", "CheckDependentLibraries.cmake"),
-                            "gdal_check_package(ArrowDataset", "# gdal_check_package(ArrowDataset")
+                            "gdal_check_package(ArrowDataset", "# gdal_check_package(ArrowDataset", strict=False)
 
     def build(self):
         self._patch_sources()
