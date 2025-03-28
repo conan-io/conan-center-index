@@ -7,7 +7,8 @@ int digest_legacy();
 int main()
 {
 	int legacy_result = 0;
-	OPENSSL_init_ssl(0, NULL);
+	int init_result = OPENSSL_init_ssl(0, NULL);
+	printf("OpenSSL OPENSSL_init_ssl result: %d\n", init_result);
 	printf("OpenSSL version: %s\n", OpenSSL_version(OPENSSL_VERSION));
 	
 	digest();
