@@ -3,7 +3,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, VCVars
 from conan.tools.scm import Version
@@ -27,12 +27,14 @@ class LibpqConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_openssl": [True, False],
+        "with_icu": [True, False],
         "disable_rpath": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_openssl": False,
+        "with_icu": False,
         "disable_rpath": False,
     }
 
@@ -52,8 +54,11 @@ class LibpqConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            self.options.rm_safe("fPIC")
-            self.options.rm_safe("disable_rpath")
+            del self.options.fPIC
+            del self.options.disable_rpath
+            del self.options.with_icu
+        if Version(self.version) < "16.0":
+            self.options.rm_safe("with_icu")
 
     def configure(self):
         if self.options.shared:
@@ -67,6 +72,8 @@ class LibpqConan(ConanFile):
     def requirements(self):
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
+        if self.options.get_safe("with_icu"):
+            self.requires("icu/75.1")
 
     def build_requirements(self):
         if is_msvc(self):
@@ -96,6 +103,7 @@ class LibpqConan(ConanFile):
             tc = AutotoolsToolchain(self)
             tc.configure_args.append('--without-readline')
             tc.configure_args.append('--without-zlib')
+            tc.configure_args.append('--with-icu' if self.options.get_safe("with_icu") else '--without-icu')
             tc.configure_args.append('--with-openssl' if self.options.with_openssl else '--without-openssl')
             if cross_building(self) and not self.options.with_openssl:
                 tc.configure_args.append("--disable-strong-random")
@@ -110,6 +118,7 @@ class LibpqConan(ConanFile):
                 tc.make_args.append("MAKE_DLL={}".format(str(self.options.shared).lower()))
             tc.generate()
             AutotoolsDeps(self).generate()
+            PkgConfigDeps(self).generate()
 
     def _patch_sources(self):
         if is_msvc(self):
@@ -125,9 +134,10 @@ class LibpqConan(ConanFile):
                 system_libs.extend(dep.cpp_info.aggregated_components().system_libs)
 
             linked_system_libs = ", ".join(["'{}.lib'".format(lib) for lib in system_libs])
+            libraries_pattern = f"libraries {'            ' if Version(self.version) < '16.0' else ''}=> [],"
             replace_in_file(self,os.path.join(self.source_folder, "src", "tools", "msvc", "Project.pm"),
-                                  "libraries             => [],",
-                                  "libraries             => [{}],".format(linked_system_libs))
+                                  libraries_pattern,
+                                  "libraries => [{}],".format(linked_system_libs))
             runtime = {
                 "MT": "MultiThreaded",
                 "MTd": "MultiThreadedDebug",
@@ -264,6 +274,8 @@ class LibpqConan(ConanFile):
 
         if self.options.with_openssl:
             self.cpp_info.components["pq"].requires.append("openssl::openssl")
+        if self.options.get_safe("with_icu"):
+            self.cpp_info.components["pq"].requires.append("icu::icu")
 
         if not self.options.shared:
             if is_msvc(self):
@@ -282,6 +294,7 @@ class LibpqConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.components["pq"].system_libs = ["pthread"]
+            self.cpp_info.components["pgcommon"].system_libs = ["m"]
         elif self.settings.os == "Windows":
             self.cpp_info.components["pq"].system_libs = ["ws2_32", "secur32", "advapi32", "shell32", "crypt32", "wldap32"]
 
