@@ -1,6 +1,3 @@
-#include <fmt/format.h>
-#include <spdlog/spdlog.h>
-
 #include <stdexcept>
 
 #include "hictk/balancing/ice.hpp"  // test bshoshany-thread-pool
