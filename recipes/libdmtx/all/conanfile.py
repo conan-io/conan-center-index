@@ -1,15 +1,10 @@
 from conan import ConanFile
-from conan.tools.files import (
-    apply_conandata_patches,
-    export_conandata_patches,
-    get,
-    copy,
-)
+from conan.tools.files import copy, get
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 import os
 
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.4.0" # for attribute languages
 
 
 class libdmtxConan(ConanFile):
@@ -31,19 +26,8 @@ class libdmtxConan(ConanFile):
         "shared": False,
         "fPIC": True,
     }
-
-    def export_sources(self):
-        export_conandata_patches(self)
-
-    def config_options(self):
-        if self.settings.os == "Windows":
-            del self.options.fPIC
-
-    def configure(self):
-        if self.options.shared:
-            self.options.rm_safe("fPIC")
-        self.settings.rm_safe("compiler.libcxx")
-        self.settings.rm_safe("compiler.cppstd")
+    languages = ["C"]
+    implements = ["auto_shared_fpic"]
 
     def layout(self):
         cmake_layout(self, src_folder="src")
@@ -59,10 +43,11 @@ class libdmtxConan(ConanFile):
     def generate(self):
         tc = CMakeToolchain(self)
         tc.variables["BUILD_TESTING"] = False
+        tc.variables["DMTX_SHARED"] = bool(self.options.shared)
+        tc.variables["DMTX_STATIC"] = not bool(self.options.shared)
         tc.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
