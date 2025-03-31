@@ -64,6 +64,8 @@ class LexborConan(ConanFile):
         tc.variables["LEXBOR_BUILD_SEPARATELY"] = self.options.build_separately
         tc.variables["LEXBOR_INSTALL_HEADERS"] = True
         if Version(self.version) < "2.3.0":
+            # To install relocatable shared lib on Macos by default
+            tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
             tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
