@@ -1,10 +1,8 @@
 from conan import ConanFile
-from conan.errors import ConanException
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import copy, get, rmdir, export_conandata_patches, apply_conandata_patches
 from conan.tools.microsoft import is_msvc, is_msvc_static_runtime
 from conan.tools.build import check_max_cppstd
-from conan.tools.scm import Version
 import os
 
 required_conan_version = ">=2.1"
