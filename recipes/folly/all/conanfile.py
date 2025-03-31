@@ -131,13 +131,6 @@ class FollyConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=False)
 
-    def _cppstd_flag_value(self, cppstd):
-        prefix = "c"
-        year = str(cppstd)
-        if year > "17":
-            year = "latest"
-        return f"{prefix}++{year}"
-
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -168,7 +161,7 @@ class FollyConan(ConanFile):
 
         # 2019.10.21.00 -> either MSVC_ flags or CXX_STD
         if is_msvc(self):
-            cxx_std_value = self._cppstd_flag_value(self.settings.get_safe("compiler.cppstd", self._min_cppstd))
+            cxx_std_value = "c++latest" if str(self.settings.compiler.cppstd) > "17" else f"c++{str(self.settings.compiler.cppstd)}"
             tc.cache_variables["MSVC_LANGUAGE_VERSION"] = cxx_std_value
             tc.cache_variables["MSVC_ENABLE_ALL_WARNINGS"] = False
             tc.cache_variables["MSVC_USE_STATIC_RUNTIME"] = is_msvc_static_runtime(self)
