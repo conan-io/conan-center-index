@@ -14,5 +14,6 @@ int main()
    auto input = s2textformat::MakePolygonOrDie("0:0, 0:5, 5:5, 5:0; 1:1, 1:4, 4:4, 4:1");
    builder.AddShape(*input->index().shape(0));
    S2Error error;
-   std::cout << "Builder: " << (builder.Build(&error) ? "OK" : error.text()) << std::endl;
+   std::cout << "Builder: ";
+   (builder.Build(&error) ? std::cout << "OK" : std::cout << error) << std::endl;
 }
