@@ -1,6 +1,5 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.5)
 project(test_package LANGUAGES C)
-set(CMAKE_C_STANDARD 23)
 
 find_package(resultlib REQUIRED CONFIG)
 
