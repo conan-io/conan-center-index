@@ -2,7 +2,7 @@ from conan import ConanFile, conan_version
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import check_min_cppstd, cross_building
-from conan.tools.env import Environment, VirtualRunEnv
+from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, mkdir, rm, rmdir
 from conan.tools.gnu import Autotools, AutotoolsDeps, AutotoolsToolchain, PkgConfigDeps
 from conan.tools.layout import basic_layout
@@ -71,6 +71,11 @@ class PackageConan(ConanFile):
         compiler_std = self.settings.get_safe('self.settings.compiler.cppstd')
         if compiler_std is None or compiler_std > 14:
             tc.extra_cxxflags.append('-std=c++14')
+
+        apr_package_folder = self.dependencies.direct_host["apr"].package_folder
+        tc.configure_args.extend([
+                f"--with-apr={apr_package_folder}"
+            ])
 
         tc.generate()
         # generate pkg-config files of dependencies (useless if upstream configure.ac doesn't rely on PKG_CHECK_MODULES macro)
