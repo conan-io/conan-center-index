@@ -120,6 +120,7 @@ class SystemcConan(ConanFile):
             self.cpp_info.components["_systemc"].system_libs = ["pthread", "m"]
         if is_msvc(self):
             self.cpp_info.components["_systemc"].cxxflags.append("/vmg")
+            if Version(self.version) >= 3 and self.options.shared:
                 # https://github.com/accellera-official/systemc/blob/main/INSTALL.md#33-building-against-a-systemc-dll
                 self.cpp_info.components["_systemc"].defines = ["SC_WIN_DLL"]
                 self.cpp_info.components["_systemc"].libs = [f"systemc-{self.version}"]
