@@ -72,7 +72,7 @@ class SystemcConan(ConanFile):
             # https://github.com/accellera-official/systemc/blob/3.0.0/src/CMakeLists.txt#L65
             check_min_cppstd(self, "17")
 
-        if self.settings.os == "Windows" and self.options.shared:
+        if self.settings.os == "Windows" and self.options.shared and Version(self.version) < 3:
             raise ConanInvalidConfiguration(
                 "Building SystemC as a shared library on Windows is currently not supported"
             )
@@ -120,6 +120,9 @@ class SystemcConan(ConanFile):
             self.cpp_info.components["_systemc"].system_libs = ["pthread", "m"]
         if is_msvc(self):
             self.cpp_info.components["_systemc"].cxxflags.append("/vmg")
+                # https://github.com/accellera-official/systemc/blob/main/INSTALL.md#33-building-against-a-systemc-dll
+                self.cpp_info.components["_systemc"].defines = ["SC_WIN_DLL"]
+                self.cpp_info.components["_systemc"].libs = [f"systemc-{self.version}"]
 
         # TODO: to remove in conan v2 once cmake_find_package* generators removed
         self.cpp_info.filenames["cmake_find_package"] = "SystemCLanguage"
