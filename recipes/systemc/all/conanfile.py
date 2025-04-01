@@ -140,3 +140,7 @@ class SystemcConan(ConanFile):
         self.cpp_info.components["_systemc"].names["cmake_find_package"] = "systemc"
         self.cpp_info.components["_systemc"].names["cmake_find_package_multi"] = "systemc"
         self.cpp_info.components["_systemc"].set_property("cmake_target_name", "SystemC::systemc")
+        if Version(self.version) >= "3" and self.settings.os == "Macos":
+            # INFO: sanitizer methods are undefined on Mac, need to force linker to ignore them
+            # https://github.com/accellera-official/systemc/blob/3.0.1/src/CMakeLists.txt#L103
+            self.cpp_info.components["_systemc"].exelinkflags = ["LINKER:-U,___sanitizer_start_switch_fiber", "LINKER:-U,___sanitizer_finish_switch_fiber"]
