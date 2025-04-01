@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm
+from conan.tools.files import copy, get, rm
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 import os
@@ -42,9 +42,6 @@ class VkBootstrapConan(ConanFile):
             "clang": "3.7" if stdcpp_library(self) == "stdc++" else "6",
             "apple-clang": "10",
         }
-
-    def export_sources(self):
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -104,7 +101,6 @@ class VkBootstrapConan(ConanFile):
         deps.generate()
 
     def build(self):
-        apply_conandata_patches(self)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
