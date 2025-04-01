@@ -31,7 +31,7 @@ class VkBootstrapConan(ConanFile):
 
     @property
     def _min_cppstd(self):
-        return "14"
+        return "17" if Version(self.version) >= "1.3.270" else "14"
 
     @property
     def _compilers_minimum_version(self):
