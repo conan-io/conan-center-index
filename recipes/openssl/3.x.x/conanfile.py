@@ -89,12 +89,14 @@ class OpenSSLConan(ConanFile):
         "no_zlib": [True, False],
         "openssldir": [None, "ANY"],
         "tls_security_level": [None, 0, 1, 2, 3, 4, 5],
+        "extra_flags": [None, "ANY"],
     }
     default_options = {key: False for key in options.keys()}
     default_options["fPIC"] = True
     default_options["no_md2"] = True
     default_options["openssldir"] = None
     default_options["tls_security_level"] = None
+    default_options["extra_flags"] = None
 
     @property
     def _is_clang_cl(self):
@@ -409,6 +411,9 @@ class OpenSSLConan(ConanFile):
             if self.options.get_safe(option_name, False) and option_name not in ("shared", "fPIC", "openssldir", "tls_security_level", "capieng_dialog", "enable_capieng", "zlib", "no_fips", "no_md2"):
                 self.output.info(f"Activated option: {option_name}")
                 args.append(option_name.replace("_", "-"))
+
+        if str(self.options.extra_flags) != "None":
+            args.append(self.options.extra_flags)
         return args
 
     def generate(self):
