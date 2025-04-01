@@ -1,11 +1,10 @@
-import textwrap
-
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.apple import is_apple_os
 from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
-from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir, replace_in_file
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 from conan.tools.microsoft import is_msvc
+from conan.tools.build import check_min_cppstd
 import os
 
 from conan.tools.scm import Version
@@ -67,6 +66,11 @@ class SystemcConan(ConanFile):
     def validate(self):
         if is_apple_os(self) and Version(self.version) < "3.0.1":
             raise ConanInvalidConfiguration("Macos build not supported")
+
+        if Version(self.version) >= "3.0.0":
+            # INFO: Starting from SystemC 3.0.0, C++17 is required
+            # https://github.com/accellera-official/systemc/blob/3.0.0/src/CMakeLists.txt#L65
+            check_min_cppstd(self, "17")
 
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration(
