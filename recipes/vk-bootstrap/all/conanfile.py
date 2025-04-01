@@ -102,7 +102,6 @@ class VkBootstrapConan(ConanFile):
 
     def build(self):
         apply_conandata_patches(self)
-        replace_in_file(self, os.path.join(self.source_folder, "CMakeLists.txt"), "add_library(vk-bootstrap STATIC", "add_library(vk-bootstrap", strict=False)
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
