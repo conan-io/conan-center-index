@@ -3,7 +3,7 @@ from conan.tools.files import copy, get
 from conan.tools.layout import basic_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.meson import Meson, MesonToolchain
-from conan.tools.system.package_manager import Apt, Yum, PacMan, Zypper
+from conan.errors import ConanInvalidConfiguration
 
 import os
 
@@ -14,7 +14,7 @@ class SharedMimeInfoConan(ConanFile):
     name = "shared-mime-info"
     url = "https://github.com/conan-io/conan-center-index"
     description = "The freedesktop.org shared MIME database"
-    license = ("GPL-2")
+    license = ("GPL-2.0")
     homepage = "https://gitlab.freedesktop.org/xdg/shared-mime-info"
     topics = ("ferrdesktop", "mime")
     package_type = "library"
@@ -43,7 +43,6 @@ class SharedMimeInfoConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
-
     def generate(self):
         env = VirtualBuildEnv(self)
         env.generate()
@@ -52,9 +51,6 @@ class SharedMimeInfoConan(ConanFile):
         tc.generate()
 
     def build(self):
-        if self.settings.os == "Linux":
-            Apt(self).install(["libxml2-utils"])
-
         meson = Meson(self)
         meson.configure()
         meson.build()
