@@ -32,11 +32,27 @@ class NetSnmpConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "with_ipv6": [True, False],
+        "with_applications": [True, False],
+        "with_manuals": [True, False],
+        "with_scripts": [True, False],
+        "with_mibs": [True, False],
+        "with_agent": [True, False],
+        "with_embedded_perl": [True, False],
+        "include_mib_modules": [None, "ANY"],  # comma separated list of mib modules to include
+        "exclude_mib_modules": [None, "ANY"]   # comma separated list of mib modules to exclude
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "with_ipv6": True,
+        "with_applications": False,
+        "with_manuals": False,
+        "with_scripts": False,
+        "with_mibs": False,
+        "with_agent": False,
+        "with_embedded_perl": False,
+        "include_mib_modules": None,
+        "exclude_mib_modules": None
     }
 
     def export_sources(self):
@@ -98,23 +114,33 @@ class NetSnmpConan(ConanFile):
             tc = AutotoolsToolchain(self)
             debug_flag = "enable" if self._is_debug else "disable"
             ipv6_flag = "enable" if self.options.with_ipv6 else "disable"
+            applications_flag = "enable" if self.options.with_applications else "disable"
+            manuals_flag = "enable" if self.options.with_manuals else "disable"
+            scripts_flag = "enable" if self.options.with_scripts else "disable"
+            mibs_flag = "enable" if self.options.with_mibs else "disable"
+            agent_flag = "enable" if self.options.with_agent else "disable"
+            embedded_perl_flag = "enable" if self.options.with_embedded_perl else "disable"
             openssl_path = self.dependencies["openssl"].package_folder
             zlib_path = self.dependencies["zlib"].package_folder
             tc.configure_args += [
+                "--with-defaults",
+                "--without-rpm",
+                "--without-pcre",
                 f"--with-openssl={openssl_path}",
                 f"--with-zlib={zlib_path}",
                 f"--{debug_flag}-debugging",
                 f"--{ipv6_flag}-ipv6",
-                "--with-defaults",
-                "--without-rpm",
-                "--without-pcre",
-                "--disable-agent",
-                "--disable-applications",
-                "--disable-manuals",
-                "--disable-scripts",
-                "--disable-mibs",
-                "--disable-embedded-perl",
+                f"--{applications_flag}-applications",
+                f"--{manuals_flag}-manuals",
+                f"--{scripts_flag}-scripts",
+                f"--{mibs_flag}-mibs",
+                f"--{agent_flag}-agent",
+                f"--{embedded_perl_flag}-embedded-perl"
             ]
+            if self.options.include_mib_modules:
+                tc.configure_args.append(f"--with-mib-modules={self.options.include_mib_modules}")
+            if self.options.exclude_mib_modules:
+                tc.configure_args.append(f"--with-out-mib-modules={self.options.exclude_mib_modules}")
             if self.settings.os in ["Linux"]:
                 tc.extra_ldflags.append("-ldl")
                 tc.extra_ldflags.append("-lpthread")
@@ -212,7 +238,8 @@ class NetSnmpConan(ConanFile):
             #install specific targets instead of just everything as it will try to do perl stuff on you host machine
             autotools.install(args=["-j1"], target="installsubdirs installlibs installprogs installheaders")
             rm(self, "README", self.package_folder, recursive=True)
-            rmdir(self, os.path.join(self.package_folder, "bin"))
+            if not self.options.with_applications:
+                rmdir(self, os.path.join(self.package_folder, "bin"))
             rm(self, "*.la", self.package_folder, recursive=True)
             fix_apple_shared_install_name(self)
 
@@ -221,6 +248,6 @@ class NetSnmpConan(ConanFile):
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.extend(["rt", "pthread", "m"])
         elif self.settings.os == "Neutrino":
-            self.cpp_info.system_libs.extend(["rt", "m", "regex"])
+            self.cpp_info.system_libs.extend(["m", "regex"])
         if is_apple_os(self):
             self.cpp_info.frameworks.extend(["CoreFoundation", "DiskArbitration", "IOKit"])
