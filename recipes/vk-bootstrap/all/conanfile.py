@@ -49,6 +49,9 @@ class VkBootstrapConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
+        if Version(self.version) >= "1.0":
+            del self.options.shared
+            self.package_type = "static-library"
 
     def configure(self):
         if self.options.shared:
