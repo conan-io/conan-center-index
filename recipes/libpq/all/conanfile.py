@@ -163,8 +163,9 @@ class LibpqConan(ConanFile):
                     replace_in_file(self,solution_pm,
                                           "%s.lib" % crypto,
                                           "%s.lib" % openssl.cpp_info.components["crypto"].libs[0])
+                openssl_entry = "openssl => undef" if Version(self.version) >= "16.0" else "openssl   => undef"
                 replace_in_file(self,config_default_pl,
-                                      "openssl   => undef",
+                                      openssl_entry,
                                       "openssl   => '%s'" % openssl.package_folder.replace("\\", "/"))
         elif self.settings.os == "Windows":
             if self.settings.get_safe("compiler.threads") == "posix":
