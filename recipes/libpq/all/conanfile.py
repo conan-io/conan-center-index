@@ -54,8 +54,12 @@ class LibpqConan(ConanFile):
 
     def config_options(self):
         if self.settings.os == "Windows":
-            del self.options.fPIC
-            del self.options.disable_rpath
+            self.options.rm_safe("fPIC")
+            self.options.rm_safe("disable_rpath")
+        if Version(self.version) < "16":
+            # ICU is enabled by default since 16.0
+            # https://git.postgresql.org/gitweb/?p=postgresql.git;a=commitdiff;h=fcb21b3ac
+            self.options.with_icu = False
 
     def configure(self):
         if self.options.shared:
@@ -131,7 +135,7 @@ class LibpqConan(ConanFile):
                 system_libs.extend(dep.cpp_info.aggregated_components().system_libs)
 
             linked_system_libs = ", ".join(["'{}.lib'".format(lib) for lib in system_libs])
-            libraries_pattern = f"libraries {'            ' if Version(self.version) < '16.0' else ''}=> [],"
+            libraries_pattern = "libraries             => []," if Version(self.version) < '16' else "'ibraries => [],"
             replace_in_file(self,os.path.join(self.source_folder, "src", "tools", "msvc", "Project.pm"),
                                   libraries_pattern,
                                   "libraries => [{}],".format(linked_system_libs))
@@ -280,7 +284,7 @@ class LibpqConan(ConanFile):
 
         if self.options.with_openssl:
             self.cpp_info.components["pq"].requires.append("openssl::openssl")
-        if self.options.get_safe("with_icu"):
+        if self.options.with_icu:
             self.cpp_info.components["pq"].requires.append("icu::icu")
 
         if not self.options.shared:
