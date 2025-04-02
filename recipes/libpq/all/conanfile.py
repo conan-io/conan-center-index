@@ -3,7 +3,7 @@ from conan.tools.apple import fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.env import Environment, VirtualBuildEnv, VirtualRunEnv
 from conan.tools.files import apply_conandata_patches, chdir, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
-from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
+from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, msvc_runtime_flag, unix_path, VCVars
 from conan.tools.scm import Version
@@ -73,7 +73,7 @@ class LibpqConan(ConanFile):
     def requirements(self):
         if self.options.with_openssl:
             self.requires("openssl/[>=1.1 <4]")
-        if self.options.get_safe("with_icu"):
+        if self.options.with_icu:
             self.requires("icu/75.1")
 
     def build_requirements(self):
@@ -119,7 +119,6 @@ class LibpqConan(ConanFile):
                 tc.make_args.append("MAKE_DLL={}".format(str(self.options.shared).lower()))
             tc.generate()
             AutotoolsDeps(self).generate()
-            PkgConfigDeps(self).generate()
 
     def _patch_sources(self):
         if is_msvc(self):
@@ -138,7 +137,7 @@ class LibpqConan(ConanFile):
             libraries_pattern = "libraries             => []," if Version(self.version) < '16' else "'ibraries => [],"
             replace_in_file(self,os.path.join(self.source_folder, "src", "tools", "msvc", "Project.pm"),
                                   libraries_pattern,
-                                  "libraries => [{}],".format(linked_system_libs))
+                                  "libraries             => [{}],".format(linked_system_libs))
             runtime = {
                 "MT": "MultiThreaded",
                 "MTd": "MultiThreadedDebug",
