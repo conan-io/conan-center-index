@@ -79,7 +79,7 @@ class VkBootstrapConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support.",
             )
 
-        if is_msvc(self) and self.options.shared:
+        if is_msvc(self) and self.options.get_safe("shared"):
             raise ConanInvalidConfiguration(f"{self.ref} shared not supported with Visual Studio")
 
     def source(self):
