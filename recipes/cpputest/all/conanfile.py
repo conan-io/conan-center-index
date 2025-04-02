@@ -4,7 +4,7 @@ from conan.tools.files import apply_conandata_patches, copy, export_conandata_pa
 import os
 import textwrap
 
-required_conan_version = ">=1.52.0"
+required_conan_version = ">=2.1"
 
 
 class CppUTestConan(ConanFile):
@@ -56,6 +56,7 @@ class CppUTestConan(ConanFile):
         tc.variables["LONGLONG"] = True
         tc.variables["COVERAGE"] = False
         tc.variables["TESTS"] = False
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
