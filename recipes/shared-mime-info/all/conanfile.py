@@ -36,9 +36,8 @@ class SharedMimeInfoConan(ConanFile):
         if self.settings.os not in ("Linux", "FreeBSD"):
             raise ConanInvalidConfiguration("OS is not supported")
 
-    def package_id(self):
-        del self.info.settings.build_type
-        del self.info.settings.compiler
+    def build_requirements(self):
+        self.tool_requires("meson/1.4.0")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
