@@ -34,7 +34,7 @@ class LibpqConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_openssl": False,
-        "with_icu": False,
+        "with_icu": True,
         "disable_rpath": False,
     }
 
@@ -56,9 +56,6 @@ class LibpqConan(ConanFile):
         if self.settings.os == "Windows":
             del self.options.fPIC
             del self.options.disable_rpath
-            del self.options.with_icu
-        if Version(self.version) < "16.0":
-            self.options.rm_safe("with_icu")
 
     def configure(self):
         if self.options.shared:
@@ -167,6 +164,14 @@ class LibpqConan(ConanFile):
                 replace_in_file(self,config_default_pl,
                                       openssl_entry,
                                       "openssl   => '%s'" % openssl.package_folder.replace("\\", "/"))
+            if self.options.with_icu:
+                libicu = self.dependencies["icu"]
+                iculibdir = libicu.cpp_info.components["icu"].libdirs[0]
+                replace_in_file(self, solution_pm, "\\lib64\\icu", f"\\{iculibdir}\\icu")
+                icu_undef = "icu => undef" if Version(self.version) >= "16.0" else "icu       => undef"
+                replace_in_file(self,config_default_pl,
+                                        icu_undef,
+                                       "icu => '%s'" % libicu.package_folder.replace("\\", "/"))
         elif self.settings.os == "Windows":
             if self.settings.get_safe("compiler.threads") == "posix":
                 # Use MinGW pthread library
