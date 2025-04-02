@@ -65,6 +65,9 @@ class LibpqxxConan(ConanFile):
     def layout(self):
         cmake_layout(self, src_folder="src")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/[>=3.0.0 <3.30]")
+
     def requirements(self):
         self.requires("libpq/15.4")
 
