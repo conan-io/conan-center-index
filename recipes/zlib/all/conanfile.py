@@ -57,6 +57,8 @@ class ZlibConan(ConanFile):
         tc.variables["INSTALL_LIB_DIR"] = "lib"
         tc.variables["INSTALL_INC_DIR"] = "include"
         tc.variables["ZLIB_BUILD_EXAMPLES"] = False
+        if Version(self.version) < "1.3":
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5"
         tc.generate()
 
     def _patch_sources(self):
