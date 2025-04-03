@@ -34,7 +34,7 @@ class LibpqConan(ConanFile):
         "shared": False,
         "fPIC": True,
         "with_openssl": False,
-        "with_icu": True,
+        "with_icu": False,
         "disable_rpath": False,
     }
 
@@ -56,10 +56,6 @@ class LibpqConan(ConanFile):
         if self.settings.os == "Windows":
             self.options.rm_safe("fPIC")
             self.options.rm_safe("disable_rpath")
-        if Version(self.version) < "16":
-            # ICU is enabled by default since 16.0
-            # https://git.postgresql.org/gitweb/?p=postgresql.git;a=commitdiff;h=fcb21b3ac
-            self.options.with_icu = False
 
     def configure(self):
         if self.options.shared:
@@ -84,9 +80,9 @@ class LibpqConan(ConanFile):
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
         else:
-            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
-                # INFO: pkg-config is used to find ICU and OpenSSL on Unix
-                self.tool_requires("pkgconf/[>=2.2 <3]")
+            if self.options.with_openssl or self.options.with_icu:
+                if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                    self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
