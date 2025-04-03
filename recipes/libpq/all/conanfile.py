@@ -135,7 +135,7 @@ class LibpqConan(ConanFile):
                 system_libs.extend(dep.cpp_info.aggregated_components().system_libs)
 
             linked_system_libs = ", ".join(["'{}.lib'".format(lib) for lib in system_libs])
-            libraries_pattern = "libraries             => []," if Version(self.version) < '16' else "'ibraries => [],"
+            libraries_pattern = "libraries             => []," if Version(self.version) < '16' else "libraries => [],"
             replace_in_file(self,os.path.join(self.source_folder, "src", "tools", "msvc", "Project.pm"),
                                   libraries_pattern,
                                   "libraries             => [{}],".format(linked_system_libs))
