@@ -3,7 +3,7 @@ from conan.tools.cmake import CMake, CMakeToolchain, cmake_layout
 from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, rmdir
 import os
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1"
 
 
 class ClipperConan(ConanFile):
@@ -13,6 +13,7 @@ class ClipperConan(ConanFile):
     topics = ("clipping", "polygon")
     url = "https://github.com/conan-io/conan-center-index"
     homepage = "http://www.angusj.com/delphi/clipper.php"
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -44,8 +45,9 @@ class ClipperConan(ConanFile):
         tc = CMakeToolchain(self)
         # Export symbols for msvc shared
         tc.variables["CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS"] = True
-        # To install relocatable shared libs on Macos
+        # Relocatable shared lib on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
+        tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
     def build(self):
@@ -66,9 +68,3 @@ class ClipperConan(ConanFile):
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs.append("m")
-
-        # TODO: to remove in conan v2 once cmake_find_package* & pkg_config generators removed.
-        #       Do not use these CMake names in CMakeDeps, it was a mistake,
-        #       clipper doesn't provide CMake config file
-        self.cpp_info.names["cmake_find_package"] = "polyclipping"
-        self.cpp_info.names["cmake_find_package_multi"] = "polyclipping"

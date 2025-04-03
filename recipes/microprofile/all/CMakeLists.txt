@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.15)
 project(microprofile)
 
 option(MICROPROFILE_USE_CONFIG_FILE "Use user provided configuration in microprofile.config.h file." ON)

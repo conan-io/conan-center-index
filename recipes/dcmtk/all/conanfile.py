@@ -121,7 +121,7 @@ class DCMTKConan(ConanFile):
                 raise ConanInvalidConfiguration("MacOS crossbuilding is only supported to target x86_64")
             else:
                 # Note: other cross-building scenarios have not been tested and may also need to be marked as invalid
-                self.output.warning("Crossbuilding has not been tested and may not work")
+                self.output.warning("Crossbuilding has not been tested and may not work. Please report to Conan Center Index if you find any issues.")
 
     def validate(self):
         check_min_cppstd(self, 11)

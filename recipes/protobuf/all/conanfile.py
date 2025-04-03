@@ -49,7 +49,7 @@ class ProtobufConan(ConanFile):
     @property
     def _is_clang_x86(self):
         return self.settings.compiler == "clang" and self.settings.arch == "x86"
-    
+
     @property
     def _protobuf_release(self):
         current_ver = Version(self.version)
@@ -78,7 +78,7 @@ class ProtobufConan(ConanFile):
             self.requires("zlib/[>=1.2.11 <2]")
 
         if self._protobuf_release >= "22.0":
-            self.requires("abseil/20240116.2", transitive_headers=True)
+            self.requires("abseil/[>=20230802.1 <=20250127.0]", transitive_headers=True)
 
     @property
     def _compilers_minimum_version(self):
@@ -93,13 +93,14 @@ class ProtobufConan(ConanFile):
     def validate(self):
         if self.options.shared and is_msvc_static_runtime(self):
             raise ConanInvalidConfiguration("Protobuf can't be built with shared + MT(d) runtimes")
-        
+
         if is_msvc(self) and self._protobuf_release >= "22" and self.options.shared and \
             not self.dependencies["abseil"].options.shared:
             raise ConanInvalidConfiguration("When building protobuf as a shared library on Windows, "
                                             "abseil needs to be a shared library too")
-
-        if self._protobuf_release >= "22.0":
+        if self._protobuf_release >= "30.1":
+            check_min_cppstd(self, 17)
+        elif self._protobuf_release >= "22.0":
             if self.settings.compiler.get_safe("cppstd"):
                 check_min_cppstd(self, 14)
             else:
@@ -109,7 +110,7 @@ class ProtobufConan(ConanFile):
                     raise ConanInvalidConfiguration(
                         f"{self.ref} requires C++14, which your compiler does not support.",
                     )
-        
+
         check_min_vs(self, "190")
 
         if self.settings.compiler == "clang":
@@ -119,12 +120,18 @@ class ProtobufConan(ConanFile):
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
 
+    def build_requirements(self):
+        if self._protobuf_release >= "30.1":
+            self.tool_requires("cmake/[>=3.16 <4]")
+
     @property
     def _cmake_install_base_path(self):
         return os.path.join("lib", "cmake", "protobuf")
 
     def generate(self):
         tc = CMakeToolchain(self)
+        if self._protobuf_release >= "30.1":
+            tc.cache_variables["protobuf_LOCAL_DEPENDENCIES_ONLY"] = True
         tc.cache_variables["CMAKE_INSTALL_CMAKEDIR"] = self._cmake_install_base_path.replace("\\", "/")
         tc.cache_variables["protobuf_WITH_ZLIB"] = self.options.with_zlib
         tc.cache_variables["protobuf_BUILD_TESTS"] = False
@@ -139,10 +146,9 @@ class ProtobufConan(ConanFile):
             if not self.settings.compiler.get_safe("cppstd") and self._protobuf_release >= "22.0":
                 tc.variables["CMAKE_CXX_STANDARD"] = 14
         if is_msvc(self) or self._is_clang_cl:
-            runtime = msvc_runtime_flag(self)
-            if not runtime:
-                runtime = self.settings.get_safe("compiler.runtime")
-            tc.cache_variables["protobuf_MSVC_STATIC_RUNTIME"] = "MT" in runtime
+            runtime = self.settings.get_safe("compiler.runtime")
+            if runtime:
+                tc.cache_variables["protobuf_MSVC_STATIC_RUNTIME"] = runtime == "static"
         if is_apple_os(self) and self.options.shared:
             # Workaround against SIP on macOS for consumers while invoking protoc when protobuf lib is shared
             tc.variables["CMAKE_INSTALL_RPATH"] = "@loader_path/../lib"
@@ -241,9 +247,14 @@ class ProtobufConan(ConanFile):
             # it's a private dependency and unconditionally built as a static library, should only
             # be exposed when protobuf itself is static (or if upb is being built)
             self.cpp_info.components["utf8_range"].set_property("cmake_target_name", "utf8_range::utf8_range")
-            self.cpp_info.components["utf8_range"].libs = ["utf8_range"]
             self.cpp_info.components["utf8_validity"].set_property("cmake_target_name", "utf8_range::utf8_validity")
-            self.cpp_info.components["utf8_validity"].libs = ["utf8_validity"]
+            # https://github.com/protocolbuffers/protobuf/blob/0d815c5b74281f081c1ee4b431a4d5bbb1615c97/third_party/utf8_range/CMakeLists.txt#L24
+            if self._protobuf_release >= "30.1" and self.settings.os == "Windows":
+                self.cpp_info.components["utf8_range"].libs = ["libutf8_range"]
+                self.cpp_info.components["utf8_validity"].libs = ["libutf8_validity"]
+            else:
+                self.cpp_info.components["utf8_range"].libs = ["utf8_range"]
+                self.cpp_info.components["utf8_validity"].libs = ["utf8_validity"]
             self.cpp_info.components["utf8_validity"].requires = ["abseil::absl_strings"]
 
         if self.options.get_safe("upb"):
@@ -259,7 +270,7 @@ class ProtobufConan(ConanFile):
         self.cpp_info.components["libprotobuf"].libs = [lib_prefix + "protobuf" + lib_suffix]
         if self.options.with_zlib:
             self.cpp_info.components["libprotobuf"].requires = ["zlib::zlib"]
-        if self._protobuf_release >= "22.0":     
+        if self._protobuf_release >= "22.0":
             self.cpp_info.components["libprotobuf"].requires.extend(absl_deps)
             if not self.options.shared:
                 self.cpp_info.components["libprotobuf"].requires.extend(["utf8_validity"])

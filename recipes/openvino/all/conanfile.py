@@ -11,6 +11,7 @@ import yaml
 
 required_conan_version = ">=1.60.0 <2.0 || >=2.0.8"
 
+
 class OpenvinoConan(ConanFile):
     name = "openvino"
 
@@ -110,16 +111,6 @@ class OpenvinoConan(ConanFile):
     @property
     def _preprocessing_available(self):
         return "ade" in self._dependencies_versions
-
-    @property
-    def _compilers_minimum_version(self):
-        return {
-            "gcc": "7",
-            "clang": "9",
-            "apple-clang": "11",
-            "Visual Studio": "16",
-            "msvc": "192",
-        }
 
     @property
     def _is_legacy_one_profile(self):
@@ -226,6 +217,8 @@ class OpenvinoConan(ConanFile):
         toolchain.cache_variables["ENABLE_OV_TF_LITE_FRONTEND"] = self.options.enable_tf_lite_frontend
         toolchain.cache_variables["ENABLE_OV_ONNX_FRONTEND"] = self.options.enable_onnx_frontend
         toolchain.cache_variables["ENABLE_OV_PYTORCH_FRONTEND"] = self.options.enable_pytorch_frontend
+        if Version(self.version) >= "2024.3.0":
+            toolchain.cache_variables["ENABLE_OV_JAX_FRONTEND"] = False
         # Dependencies
         toolchain.cache_variables["ENABLE_SYSTEM_TBB"] = True
         toolchain.cache_variables["ENABLE_TBBBIND_2_5"] = False
@@ -254,15 +247,8 @@ class OpenvinoConan(ConanFile):
         toolchain.generate()
 
     def validate_build(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            check_min_cppstd(self, "11")
-
-        minimum_version = self._compilers_minimum_version.get(str(self.settings.compiler), False)
-        compiler_version = Version(self.settings.compiler.version)
-        if minimum_version and compiler_version < minimum_version:
-            raise ConanInvalidConfiguration(
-                f"{self.ref} requires {self.settings.compiler} ver. {minimum_version}, provided ver. {compiler_version}.",
-            )
+        min_cppstd = "17" if Version(self.version) >= "2025.0.0" else "11"
+        check_min_cppstd(self, min_cppstd)
 
         # OpenVINO has unresolved symbols, when clang is used with libc++
         if self.settings.compiler == "clang" and self.settings.compiler.libcxx == "libc++":
@@ -418,3 +404,4 @@ class OpenvinoConan(ConanFile):
             openvino_tensorflow_lite.set_property("cmake_target_name", "openvino::frontend::tensorflow_lite")
             openvino_tensorflow_lite.libs = ["openvino_tensorflow_lite_frontend"]
             openvino_tensorflow_lite.requires = ["Runtime", "flatbuffers::flatbuffers"]
+

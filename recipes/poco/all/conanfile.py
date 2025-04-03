@@ -159,7 +159,7 @@ class PocoConan(ConanFile):
         if self.options.enable_xml:
             self.requires("expat/[>=2.6.2 <3]", transitive_headers=True)
         if self.options.enable_data_sqlite:
-            self.requires("sqlite3/3.45.0")
+            self.requires("sqlite3/[>=3.45.0 <4]")
         if self.options.enable_apacheconnector:
             self.requires("apr/1.7.4")
             self.requires("apr-util/1.6.1")

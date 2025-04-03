@@ -4,7 +4,7 @@ from conan.tools.apple import is_apple_os, fix_apple_shared_install_name
 from conan.tools.build import cross_building
 from conan.tools.cmake import CMake, CMakeToolchain, CMakeDeps, cmake_layout
 from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
-from conan.tools.files import apply_conandata_patches, copy, download, export_conandata_patches, get, load, replace_in_file, rm, rmdir, save
+from conan.tools.files import copy, download, get, load, replace_in_file, rm, rmdir, save
 from conan.tools.gnu import Autotools, AutotoolsToolchain, AutotoolsDeps, PkgConfigDeps
 from conan.tools.layout import basic_layout
 from conan.tools.microsoft import is_msvc, unix_path
@@ -13,7 +13,7 @@ from conan.tools.scm import Version
 import os
 import re
 
-required_conan_version = ">=1.54.0"
+required_conan_version = ">=2.1.0"
 
 
 class LibcurlConan(ConanFile):
@@ -72,6 +72,8 @@ class LibcurlConan(ConanFile):
         "with_ca_bundle": [False, "auto", "ANY"],
         "with_ca_path": [False, "auto", "ANY"],
         "with_ca_fallback": [True, False],
+        "with_form_api": [True, False],
+        "with_websockets": [True, False],
     }
     default_options = {
         "shared": False,
@@ -118,6 +120,8 @@ class LibcurlConan(ConanFile):
         "with_ca_bundle": "auto",
         "with_ca_path": "auto",
         "with_ca_fallback": False,
+        "with_form_api": True,
+        "with_websockets": True,
     }
 
     @property
@@ -138,7 +142,6 @@ class LibcurlConan(ConanFile):
 
     def export_sources(self):
         copy(self, "lib_Makefile_add.am", self.recipe_folder, self.export_sources_folder)
-        export_conandata_patches(self)
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -146,8 +149,12 @@ class LibcurlConan(ConanFile):
         if self._is_using_cmake_build:
             del self.options.with_libgsasl
 
+        if Version(self.version) < "8.3.0":
+            del self.options.with_form_api
         if Version(self.version) < "8.7.0":
             del self.options.with_misc_docs
+        if Version(self.version) < "8.11.0":
+            del self.options.with_websockets
 
         # Default options
         self.options.with_ssl = "darwinssl" if is_apple_os(self) else "openssl"
@@ -194,9 +201,9 @@ class LibcurlConan(ConanFile):
         if self.options.with_ssl == "openssl":
             openssl = self.dependencies["openssl"]
             if self.options.with_ntlm and openssl.options.no_des:
-                raise ConanInvalidConfiguration("option with_ntlm=True requires openssl:no_des=False")
+                raise ConanInvalidConfiguration("option with_ntlm=True requires openssl/*:no_des=False")
         if self.options.with_ssl == "wolfssl" and not self.dependencies["wolfssl"].options.with_curl:
-            raise ConanInvalidConfiguration("option with_ssl=wolfssl requires wolfssl:with_curl=True")
+            raise ConanInvalidConfiguration("option with_ssl=wolfssl requires wolfssl/*:with_curl=True")
 
     def build_requirements(self):
         if self._is_using_cmake_build:
@@ -254,7 +261,6 @@ class LibcurlConan(ConanFile):
                     copy(self, os.path.basename(gnu_config), src=os.path.dirname(gnu_config), dst=self.source_folder)
 
     def _patch_sources(self):
-        apply_conandata_patches(self)
         self._patch_misc_files()
         self._patch_autotools()
         self._patch_cmake()
@@ -285,7 +291,10 @@ class LibcurlConan(ConanFile):
             replace_in_file(self, top_makefile, "SUBDIRS = lib src", "SUBDIRS = lib")
         else:
             replace_in_file(self, top_makefile, "SUBDIRS = lib docs src scripts", "SUBDIRS = lib")
-        replace_in_file(self, top_makefile, "include src/Makefile.inc", "")
+
+        # `Makefile.inc` has been removed from 8.12.0 onwards
+        if Version(self.version) < "8.12.0":
+            replace_in_file(self, top_makefile, "include src/Makefile.inc", "")
 
         # zlib naming is not always very consistent
         if self.options.with_zlib:
@@ -326,11 +335,19 @@ class LibcurlConan(ConanFile):
             replace_in_file(self, cmakelists,
                                 "include(CurlSymbolHiding)", "")
 
+        if Version(self.version) >= "8.12.0":
+            cmakemacros = os.path.join(self.source_folder, "CMake", "Macros.cmake")
+            replace_in_file(self, cmakemacros, "macro(curl_dependency_option _option_name _find_name _desc_name)", "macro(curl_dependency_option _option_name _find_name _desc_name _cmake_args)")
+            replace_in_file(self, cmakemacros, "find_package(${_find_name} REQUIRED)", "find_package(${_find_name} ${_cmake_args})")
+
         # brotli
         if Version(self.version) < "8.2.0":
             replace_in_file(self, cmakelists, "find_package(Brotli QUIET)", "find_package(brotli REQUIRED CONFIG)")
         else:
-            replace_in_file(self, cmakelists, "find_package(Brotli REQUIRED)", "find_package(brotli REQUIRED CONFIG)")
+            if Version(self.version) < "8.12.0":
+                replace_in_file(self, cmakelists, "find_package(Brotli REQUIRED)", "find_package(brotli REQUIRED CONFIG)")
+            else:
+                replace_in_file(self, cmakelists, 'curl_dependency_option(CURL_BROTLI Brotli "brotli")', 'curl_dependency_option(CURL_BROTLI brotli "brotli" "REQUIRED CONFIG")')
         replace_in_file(self, cmakelists, "if(BROTLI_FOUND)", "if(brotli_FOUND)")
         replace_in_file(self, cmakelists, "${BROTLI_LIBRARIES}", "brotli::brotli")
         replace_in_file(self, cmakelists, "${BROTLI_INCLUDE_DIRS}", "${brotli_INCLUDE_DIRS}")
@@ -338,9 +355,16 @@ class LibcurlConan(ConanFile):
         # zstd
         # Use upstream FindZstd.cmake because check_symbol_exists() is called
         # afterwards and it would fail with zstd_LIBRARIES generated by CMakeDeps
-        replace_in_file(self, cmakelists, "find_package(Zstd REQUIRED)", "find_package(Zstd REQUIRED MODULE)")
+        if Version(self.version) < "8.12.0":
+            replace_in_file(self, cmakelists, "find_package(Zstd REQUIRED)", "find_package(Zstd REQUIRED MODULE)")
+        else:
+            replace_in_file(self, cmakelists, 'curl_dependency_option(CURL_ZSTD Zstd "zstd")', 'curl_dependency_option(CURL_ZSTD Zstd "zstd" "REQUIRED MODULE")')
         if Version(self.version) < "8.10.0":
             replace_in_file(self, os.path.join(self.source_folder, "CMake", "FindZstd.cmake"), "if(UNIX)", "if(0)")
+
+        # zlib
+        if Version(self.version) >= "8.12.0":
+            replace_in_file(self, cmakelists, 'curl_dependency_option(CURL_ZLIB ZLIB "ZLIB")', 'curl_dependency_option(CURL_ZLIB ZLIB "ZLIB" "")')
 
         # c-ares
         if Version(self.version) < "8.10.0":
@@ -358,7 +382,8 @@ class LibcurlConan(ConanFile):
         else:
             replace_in_file(self, cmakelists, "${LIBPSL_LIBRARIES}", "libpsl::libpsl")
             replace_in_file(self, cmakelists, "${LIBPSL_INCLUDE_DIRS}", "${libpsl_INCLUDE_DIRS}")
-        replace_in_file(self, cmakelists, "if(LIBPSL_FOUND)", "if(libpsl_FOUND)")
+        if Version(self.version) < "8.12.0":
+            replace_in_file(self, cmakelists, "if(LIBPSL_FOUND)", "if(libpsl_FOUND)")
 
         # libssh2
         if Version(self.version) < "8.10.0":
@@ -375,6 +400,7 @@ class LibcurlConan(ConanFile):
             replace_in_file(self, cmakelists, "find_package(NGHTTP2 REQUIRED)", "find_package(libnghttp2 REQUIRED CONFIG)")
         else:
             replace_in_file(self, cmakelists, "find_package(NGHTTP2)", "find_package(libnghttp2 REQUIRED CONFIG)")
+            replace_in_file(self, cmakelists, "NGHTTP2_FOUND", "libnghttp2_FOUND")
         replace_in_file(self, cmakelists, "${NGHTTP2_INCLUDE_DIRS}", "${libnghttp2_INCLUDE_DIRS}")
         replace_in_file(self, cmakelists, "${NGHTTP2_LIBRARIES}", "libnghttp2::nghttp2")
 
@@ -519,6 +545,16 @@ class LibcurlConan(ConanFile):
                 tc.configure_args.append("--enable-docs")
             else:
                 tc.configure_args.append("--disable-docs")
+        if "with_form_api" in self.options:
+            if self.options.with_form_api:
+                tc.configure_args.append("--enable-form-api")
+            else:
+                tc.configure_args.append("--disable-form-api")
+        if "with_websockets" in self.options:
+            if self.options.with_websockets:
+                tc.configure_args.append("--enable-websockets")
+            else:
+                tc.configure_args.append("--disable-websockets")
 
         # Cross building flags
         if cross_building(self):
@@ -607,6 +643,10 @@ class LibcurlConan(ConanFile):
         tc.variables["CURL_DISABLE_RTSP"] = not self.options.with_rtsp
         tc.variables["CURL_DISABLE_CRYPTO_AUTH"] = not self.options.with_crypto_auth
         tc.variables["CURL_DISABLE_VERBOSE_STRINGS"] = not self.options.with_verbose_strings
+        if "with_form_api" in self.options:
+            tc.variables["CURL_DISABLE_FORM_API"] = not self.options.with_form_api
+        if "with_websockets" in self.options:
+            tc.variables["CURL_DISABLE_WEBSOCKETS"] = not self.options.with_websockets
 
         # Also disables NTLM_WB if set to false
         if not self.options.with_ntlm:
@@ -632,9 +672,14 @@ class LibcurlConan(ConanFile):
             tc.variables["HAVE_OPENSSL_SRP"] = True
             tc.variables["HAVE_SSL_CTX_SET_QUIC_METHOD"] = True
 
+        if is_msvc(self):
+            tc.cache_variables["CMAKE_TRY_COMPILE_CONFIGURATION"] = str(self.settings.build_type)
+
         tc.generate()
 
         deps = CMakeDeps(self)
+        deps.set_property("wolfssl", "cmake_additional_variables_prefixes", ["WolfSSL", "WOLFSSL"])
+        deps.set_property("wolfssl", "cmake_file_name", "WolfSSL")
         deps.generate()
 
     def package(self):
@@ -722,10 +767,5 @@ class LibcurlConan(ConanFile):
         if self.options.get_safe("with_libpsl"):
             self.cpp_info.components["curl"].requires.append("libpsl::libpsl")
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.names["cmake_find_package"] = "CURL"
-        self.cpp_info.names["cmake_find_package_multi"] = "CURL"
-        self.cpp_info.components["curl"].names["cmake_find_package"] = "libcurl"
-        self.cpp_info.components["curl"].names["cmake_find_package_multi"] = "libcurl"
         self.cpp_info.components["curl"].set_property("cmake_target_name", "CURL::libcurl")
         self.cpp_info.components["curl"].set_property("pkg_config_name", "libcurl")
