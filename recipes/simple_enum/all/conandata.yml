@@ -1,7 +1,7 @@
 sources:
-  "0.8.9":
-    url: "https://github.com/arturbac/simple_enum/archive/refs/tags/v0.8.9.tar.gz"
-    sha256: "bffb9beae24516a5b37b97fbc3836908f799d63ab880961a4bb77c16028e281c"
+  "0.8.11":
+    url: "https://github.com/arturbac/simple_enum/archive/refs/tags/v0.8.11.tar.gz"
+    sha256: "dae600d9baf3698ec2b9efe9a7ed2f8a417a7b665a841881fcf97e536c68dfac"
   "0.8.0":
     url: "https://github.com/arturbac/simple_enum/archive/refs/tags/v0.8.0.tar.gz"
     sha256: "b32e723ddb29b6cb2ab93f2376157ee6fd7a4f3c170edddb6a3fb7186068e6ee"
