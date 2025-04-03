@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.apple import is_apple_os
-from conan.tools.build import stdcpp_library
+from conan.tools.build import check_min_cppstd, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.files import apply_conandata_patches, export_conandata_patches, get, copy, rmdir, replace_in_file, collect_libs, rm, rename
@@ -63,6 +63,10 @@ class ProjConan(ConanFile):
             self.tool_requires("cmake/[>=3.16 <4]")
 
         self.tool_requires("sqlite3/<host_version>")
+
+    def validate(self):
+        # validate the minimum cpp standard supported. For C++ projects only.
+        check_min_cppstd(self, 14)
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
