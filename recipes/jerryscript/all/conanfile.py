@@ -132,9 +132,6 @@ class JerryScriptStackConan(ConanFile):
         if not self.options.debugger:
             del self.options.keep_line_info
 
-        if self.settings.os == "Windows" and self.options.shared:
-            raise ConanInvalidConfiguration("jerryscript shared lib is not yet supported under windows")
-
     def layout(self):
         cmake_layout(self, src_folder="src")
 
@@ -170,6 +167,8 @@ class JerryScriptStackConan(ConanFile):
             raise ConanInvalidConfiguration("jerryscript system allocator not available on 64bit systems")
         if self.options.system_allocator and not self.options.cpointer_32_bit:
             raise ConanInvalidConfiguration("jerryscript system allocator must be used with 32 bit pointers")
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration("jerryscript shared lib is not yet supported under windows")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
