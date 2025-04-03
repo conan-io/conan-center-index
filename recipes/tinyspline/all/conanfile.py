@@ -7,7 +7,7 @@ from conan.tools.scm import Version
 import os
 import textwrap
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 class TinysplineConan(ConanFile):
     name = "tinyspline"
@@ -17,7 +17,7 @@ class TinysplineConan(ConanFile):
     topics = ("tinyspline ", "nurbs", "b-splines", "bezier")
     homepage = "https://github.com/msteinbeck/tinyspline"
     url = "https://github.com/conan-io/conan-center-index"
-
+    package_type = "library"
     settings = "os", "arch", "compiler", "build_type"
     options = {
         "shared": [True, False],
@@ -162,9 +162,3 @@ class TinysplineConan(ConanFile):
             # Workaround to always provide a global target or pkg-config file with all components
             self.cpp_info.set_property("cmake_target_name", "tinyspline-do-not-use")
             self.cpp_info.set_property("pkg_config_name", "tinyspline-do-not-use")
-
-        # TODO: to remove in conan v2 once cmake_find_package_* generators removed
-        self.cpp_info.components["libtinyspline"].names["cmake_find_package"] = "tinyspline"
-        if self.options.cxx:
-            self.cpp_info.components["libtinysplinecxx"].build_modules["cmake_find_package"] = [self._module_file_rel_path]
-            self.cpp_info.components["libtinysplinecxx"].build_modules["cmake_find_package_multi"] = [self._module_file_rel_path]
