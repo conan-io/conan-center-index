@@ -14,7 +14,7 @@ from conan.tools.files import (
 from conan.tools.microsoft import is_msvc
 from conan.tools.scm import Version
 
-required_conan_version = ">=1.53.0"
+required_conan_version = ">=2.1"
 
 
 class OpenCascadeConan(ConanFile):
@@ -180,7 +180,8 @@ class OpenCascadeConan(ConanFile):
 
         # Relocatable shared libs on Macos
         tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0042"] = "NEW"
-
+        if Version(self.version) < "7.9.0": # pylint: disable=conan-condition-evals-to-constant
+            tc.cache_variables["CMAKE_POLICY_VERSION_MINIMUM"] = "3.5" # CMake 4 support
         tc.generate()
 
         deps = CMakeDeps(self)
@@ -464,27 +465,6 @@ class OpenCascadeConan(ConanFile):
         occt_modules = self._get_modules_from_source_code()
         self._create_modules_json_file(occt_modules)
 
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self._create_cmake_module_alias_targets(
-            os.path.join(self.package_folder, self._cmake_module_file_rel_path),
-            {target: f"opencascade::{target}" for module in occt_modules.values() for target in module},
-        )
-
-    def _create_cmake_module_alias_targets(self, module_file, targets):
-        content = ""
-        for alias, aliased in targets.items():
-            content += textwrap.dedent(f"""\
-                if(TARGET {aliased} AND NOT TARGET {alias})
-                    add_library({alias} INTERFACE IMPORTED)
-                    set_property(TARGET {alias} PROPERTY INTERFACE_LINK_LIBRARIES {aliased})
-                endif()
-            """)
-        save(self, module_file, content)
-
-    @property
-    def _cmake_module_file_rel_path(self):
-        return os.path.join("lib", "cmake", f"conan-official-{self.name}-targets.cmake")
-
     def _get_modules_from_source_code(self):
         csf_to_conan_dependencies = {
             # Mandatory dependencies
@@ -589,22 +569,6 @@ class OpenCascadeConan(ConanFile):
 
                     self.cpp_info.components[conan_component_module_name].requires.append(conan_component_target_name)
 
-                    # TODO: to remove in conan v2 once cmake_find_package* generators removed
-                    self.cpp_info.components[conan_component_target_name].names["cmake_find_package"] = target_lib
-                    self.cpp_info.components[conan_component_target_name].names["cmake_find_package_multi"] = target_lib
-                    self.cpp_info.components[conan_component_target_name].build_modules["cmake_find_package"] = [self._cmake_module_file_rel_path]
-                    self.cpp_info.components[conan_component_target_name].build_modules["cmake_find_package_multi"] = [self._cmake_module_file_rel_path]
-
-                # TODO: to remove in conan v2 once cmake_find_package* generators removed
-                self.cpp_info.components[conan_component_module_name].names["cmake_find_package"] = module
-                self.cpp_info.components[conan_component_module_name].names["cmake_find_package_multi"] = module
-
         occt_modules_json_content = load(self, self._modules_helper_filepath)
         occt_modules = json.loads(occt_modules_json_content)
         _register_components(occt_modules)
-
-        # TODO: to remove in conan v2 once cmake_find_package* generators removed
-        self.cpp_info.filenames["cmake_find_package"] = "OpenCASCADE"
-        self.cpp_info.filenames["cmake_find_package_multi"] = "OpenCASCADE"
-        if self.options.shared:
-            self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))

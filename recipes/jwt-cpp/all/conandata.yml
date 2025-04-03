@@ -1,4 +1,7 @@
 sources:
+  "0.7.1":
+    url: "https://github.com/Thalhammer/jwt-cpp/archive/v0.7.1.tar.gz"
+    sha256: "e52f247d5e62fac5da6191170998271a70ce27f747f2ce8fde9b09f96a5375a4"
   "0.7.0":
     url: "https://github.com/Thalhammer/jwt-cpp/archive/v0.7.0.tar.gz"
     sha256: "b9eb270e3ba8221e4b2bc38723c9a1cb4fa6c241a42908b9a334daff31137406"
@@ -18,6 +21,10 @@ sources:
     url: "https://github.com/Thalhammer/jwt-cpp/archive/v0.3.1.tar.gz"
     sha256: "399345e81883f2959df658cd945de39548ddfefdab2acf7b23ee07b9e9a02938"
 patches:
+  "0.7.1":
+    - patch_file: "patches/0005-fix-picojson-header-location-for-conan.patch"
+      patch_description: "Remove picojson namespace from its include"
+      patch_type: "conan"
   "0.7.0":
     - patch_file: "patches/0005-fix-picojson-header-location-for-conan.patch"
       patch_description: "Remove picojson namespace from its include"
