@@ -464,7 +464,7 @@ class QtConan(ConanFile):
         if self.options.get_safe("with_atspi"):
             self.requires("at-spi2-core/2.51.0")
         if self.options.get_safe("with_md4c", False):
-            self.requires("md4c/0.4.8")
+            self.requires("md4c/0.5.2")
 
     def package_id(self):
         del self.info.options.cross_compile
