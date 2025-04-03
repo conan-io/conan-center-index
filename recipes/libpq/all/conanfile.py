@@ -42,7 +42,7 @@ class LibpqConan(ConanFile):
     def _is_clang8_x86(self):
         return self.settings.os == "Linux" and \
                self.settings.compiler == "clang" and \
-               self.settings.compiler.version == "8" and \
+               Version(self.settings.compiler.version) == "8" and \
                self.settings.arch == "x86"
 
     @property
@@ -83,6 +83,10 @@ class LibpqConan(ConanFile):
             self.win_bash = True
             if not self.conf.get("tools.microsoft.bash:path", check_type=str):
                 self.tool_requires("msys2/cci.latest")
+        else:
+            if not self.conf.get("tools.gnu:pkg_config", check_type=str):
+                # INFO: pkg-config is used to find ICU and OpenSSL on Unix
+                self.tool_requires("pkgconf/[>=2.2 <3]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
