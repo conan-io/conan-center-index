@@ -75,7 +75,6 @@ class WasmtimeConan(ConanFile):
                 f"{self.ref} requires C++{self._min_cppstd}, which your compiler does not support."
             )
 
-    def validate_build(self):
         if Version(self.version) >= "31.0.0" and self._is_glibc_older_than_2_25:
             raise ConanInvalidConfiguration(f"{self.ref} requires glibc 2.25 or later.")
 
