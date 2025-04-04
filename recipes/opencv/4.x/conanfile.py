@@ -368,6 +368,46 @@ class OpenCVConan(ConanFile):
             if not self._has_with_wayland_option:
                 self.options.with_gtk = True
 
+        if Version(self.version) < "4.3.0":
+            self.options.with_jpeg2000 = "jasper"
+
+        if self.settings.os == "Emscripten":
+            # options taken from `platforms/js/build_js.py`
+            self.options.shared = False
+            self.options.fPIC = False
+            self.options.parallel = False
+            self.options.with_ipp = False
+            self.options.with_eigen = False
+            self.options.with_opencl = False
+            self.options.with_cuda = False
+            self.options.with_cublas = False
+            self.options.with_cufft = False
+            self.options.with_cudnn = False
+            self.options.cuda_arch_bin = False
+            self.options.cpu_baseline = ""
+            self.options.cpu_dispatch = ""
+            self.options.with_vulkan = False
+            self.options.dnn_cuda = False
+            self.options.with_qt = False
+            self.options.with_jpeg = False
+            self.options.with_png = False
+            self.options.with_tiff = False
+            self.options.with_jpeg2000 = False
+            self.options.with_openexr = False
+            self.options.with_webp = False
+            self.options.with_imgcodec_hdr = False
+            self.options.with_imgcodec_pfm = False
+            self.options.with_imgcodec_pxm = False
+            self.options.with_imgcodec_sunraster = False
+            self.options.with_quirc = False
+            self.options.with_ffmpeg = False
+            self.options.gapi = False
+            self.options.calib3d = True
+            self.options.dnn = True
+            self.options.flann = True
+            self.options.imgcodecs = False
+            self.options.videoio = False
+
     @property
     def _opencv_modules(self):
         def imageformats_deps():
@@ -1381,7 +1421,7 @@ class OpenCVConan(ConanFile):
         tc.variables["BUILD_opencv_apps"] = False
         tc.variables["BUILD_opencv_java"] = False
         tc.variables["BUILD_opencv_java_bindings_gen"] = False
-        tc.variables["BUILD_opencv_js"] = False
+        tc.variables["BUILD_opencv_js"] = self.settings.os == "Emscripten"
         tc.variables["BUILD_ZLIB"] = False
         tc.variables["BUILD_PNG"] = False
         tc.variables["BUILD_TIFF"] = False
@@ -1567,6 +1607,14 @@ class OpenCVConan(ConanFile):
 
         if self.settings.os == "Android":
             tc.variables["BUILD_ANDROID_EXAMPLES"] = False
+
+        if self.settings.os == "Emscripten":
+            # assume --simd and --build_wasm
+            flags = (
+                "-s WASM=1 -msimd128 -s EXPORTED_FUNCTIONS=\\\"['_malloc', '_free']\\\""
+            )
+            tc.variables["CV_ENABLE_INTRINSICS"] = True
+            tc.variables["CMAKE_CXX_FLAGS"] = flags
 
         tc.generate()
 
