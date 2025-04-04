@@ -4,7 +4,7 @@ from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.build import check_min_cppstd
 from conan.tools.cmake import cmake_layout, CMake, CMakeToolchain
-from conan.tools.files import get, replace_in_file, rmdir
+from conan.tools.files import get, replace_in_file, rmdir, copy
 from conan.tools.gnu import PkgConfigDeps
 from conan.tools.cmake import CMakeDeps
 from conan.tools.scm import Version
@@ -35,12 +35,10 @@ class DbusCXX(ConanFile):
     }
 
     def validate(self):
-        if self.settings.os != "Linux":
-            raise ConanInvalidConfiguration("This recipe only works on Linux.")
         if self.settings.compiler.get_safe("cppstd"):
             check_min_cppstd(self, 17)
         # FIXME: Next release will likely be able to use static/shared mode.
-        if not self.dependencies["libuv"].options.shared:
+        if self.options.get_safe("with_uv") and not self.dependencies["libuv"].options.shared:
             raise ConanInvalidConfiguration(f"libuv needs to be shared for "
                                             f"{self.name}/{self.version}: \"libuv/*:shared=True\"")
 
@@ -96,6 +94,8 @@ class DbusCXX(ConanFile):
         # remove useless folders
         rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
         rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
+        if self.settings.os == "Windows":
+            copy(self, "*.dll", src=os.path.join(self.build_folder, self.build_type), dst=os.path.join(self.package_folder, "bin"), keep_path=False)
 
     def package_info(self):
         # dbus-cxx

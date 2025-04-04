@@ -4,4 +4,4 @@ project (test_package CXX)
 find_package (dbus-cxx REQUIRED CONFIG)
 
 add_executable (${PROJECT_NAME} test_package.cpp)
-target_link_libraries (${PROJECT_NAME} dbus-cxx)
+target_link_libraries (${PROJECT_NAME} dbus-cxx::dbus-cxx)
