@@ -108,7 +108,7 @@ class DbusCXX(ConanFile):
         self.cpp_info.components["dbus-cxx"].set_property("cmake_target_name", "dbus-cxx")
         self.cpp_info.components["dbus-cxx"].set_property("pkg_config_name", "dbus-cxx-2.0")
         if is_msvc(self):
-            self.cpp_info.cxxflags.extend(["/Zc:__cplusplus"])
+            self.cpp_info.components["dbus-cxx"].cxxflags.extend(["/Zc:__cplusplus"])
         # dbus-cxx-glib
         if self.options.with_glib:
             self.cpp_info.components["dbus-cxx-glib"].libs = ["dbus-cxx-glib"]
