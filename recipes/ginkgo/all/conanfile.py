@@ -33,28 +33,43 @@ class GinkgoConan(ConanFile):
         "fPIC": [True, False],
         "openmp": [True, False],
         "cuda": [True, False],
+        "half": [True, False],
     }
     default_options = {
         "shared": False,
         "fPIC": False,
         "openmp": False,
         "cuda": False,
+        "half": False,
     }
 
     @property
     def _min_cppstd(self):
-        return "14"
+        if Version(self.version) >= "1.9.0":
+            return "17"
+        else:
+            return "14"
 
     @property
     def _minimum_compilers_version(self):
-        return {
-            "Visual Studio": "16",
-            "msvc": "193",
-            "gcc": "5.4",
-            "clang": "3.9",
-            "apple-clang": "10.0",
-            "intel": "18",
-        }
+        if Version(self.version) >= "1.9.0":
+            return {
+                "Visual Studio": "16",
+                "msvc": "193",
+                "gcc": "7.0",
+                "clang": "5",
+                "apple-clang": "15.0",
+                "intel": "19",
+            }
+        else: 
+            return {
+                "Visual Studio": "16",
+                "msvc": "193",
+                "gcc": "5.4",
+                "clang": "3.9",
+                "apple-clang": "10.0",
+                "intel": "18",
+            }
 
     def export_sources(self):
         export_conandata_patches(self)
@@ -102,7 +117,10 @@ class GinkgoConan(ConanFile):
 
     def build_requirements(self):
         if Version(self.version) >= "1.7.0":
-            self.tool_requires("cmake/[>=3.16 <4]")
+            if self.options.cuda:
+                self.tool_requires("cmake/[>=3.18 <4]")
+            else:
+                self.tool_requires("cmake/[>=3.16 <4]")
 
     def source(self):
         get(self, **self.conan_data["sources"][self.version], strip_root=True)
@@ -123,6 +141,8 @@ class GinkgoConan(ConanFile):
             tc.variables["GINKGO_BUILD_DPCPP"] = False
         tc.variables["GINKGO_BUILD_HWLOC"] = False
         tc.variables["GINKGO_BUILD_MPI"] = False
+        if Version(self.version) >= "1.9.0":
+            tc.variables["GINKGO_ENABLE_HALF"] = self.options.half
         tc.generate()
 
     def build(self):
