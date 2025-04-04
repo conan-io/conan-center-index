@@ -1,5 +1,6 @@
 from conan import ConanFile
 from conan.errors import ConanInvalidConfiguration
+from conan.tools.apple import is_apple_os
 from conan.tools.build import cross_building, stdcpp_library
 from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
 from conan.tools.env import VirtualBuildEnv
@@ -65,14 +66,18 @@ class Libx265Conan(ConanFile):
             self.requires("libnuma/2.0.14")
 
     def validate_build(self):
-        if cross_building(self) and self.settings.os == "Android" and self.options.assembly:
-            # FIXME: x265 uses custom command to invoke clang to compile assembly files.
-            #   clang++ -fPIC -c src/source/common/aarch64/mc-a.S -o mc-a.S.o
-            #   FAILED: mc-a.S.o libx2f309356bd8526/b/build/Release/mc-a.S.o
-            #   clang++ -fPIC -c src/source/common/aarch64/mc-a.S -o mc-a.S.o
-            #   <instantiation>:11:9: error: unknown directive
-            #           .func x265_pixel_avg_pp_4x4_neon
-            raise ConanInvalidConfiguration(f"{self.ref} fails to build with '&:assembly=True' for Android. Contributions are welcome.")
+        if cross_building(self):
+            if self.settings.os == "Android" and self.options.assembly:
+                # FIXME: x265 uses custom command to invoke clang to compile assembly files.
+                #   clang++ -fPIC -c src/source/common/aarch64/mc-a.S -o mc-a.S.o
+                #   FAILED: mc-a.S.o libx2f309356bd8526/b/build/Release/mc-a.S.o
+                #   clang++ -fPIC -c src/source/common/aarch64/mc-a.S -o mc-a.S.o
+                #   <instantiation>:11:9: error: unknown directive
+                #           .func x265_pixel_avg_pp_4x4_neon
+                raise ConanInvalidConfiguration(f"{self.ref} fails to build with '&:assembly=True' for Android. Contributions are welcome.")
+            if is_apple_os(self) and self.settings.arch == "x86_64":
+                raise ConanInvalidConfiguration(f"Cross-building is not supported for {self.ref} from {self.settings_build.arch} to {self.settings.arch}.")
+
 
     def validate(self):
         if self.options.shared and is_msvc(self) and is_msvc_static_runtime(self):
